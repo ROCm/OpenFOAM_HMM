@@ -351,7 +351,7 @@ label otherEdge
 
     return -1;
 }
-    
+
 
 // Starting from startPoint on startEdge on startFace walk along border
 // and insert faces along the way. Walk keeps always one point or one edge
@@ -461,18 +461,8 @@ label sharedFace
 
     label startIndex = findIndex(f, e.start());
 
-    bool edgeOrder;
-
-    if (f[(startIndex + 1) % f.size()] == e.end())
-    {
-        // points in face in same order as edge
-        edgeOrder = true;
-    }
-    else
-    {
-        // points in face in reverse order as edge
-        edgeOrder = false;
-    }
+    // points in face in same order as edge
+    bool edgeOrder = (f[f.fcIndex(startIndex)] == e.end());
 
     // Get faces using edge in sorted order. (sorted such that walking
     // around them in anti-clockwise order corresponds to edge vector
@@ -485,25 +475,18 @@ label sharedFace
     if (edgeOrder)
     {
         // Get face before firstFaceI
-        if (faceIndex == 0)
-        {
-            return eFaces[eFaces.size() - 1];
-        }
-        else
-        {
-            return eFaces[faceIndex - 1];
-        }
+        return eFaces[eFaces.rcIndex(faceIndex)];
     }
     else
     {
         // Get face after firstFaceI
-        return eFaces[(faceIndex+1) % eFaces.size()];
+        return eFaces[eFaces.fcIndex(faceIndex)];
     }
 }
 
 
 // Calculate (inward pointing) normals on edges shared by faces in faceToEdge and
-// averages them to pointNormals. 
+// averages them to pointNormals.
 void calcPointVecs
 (
     const triSurface& surf,
@@ -602,7 +585,7 @@ void calcPointVecs
             }
 
             scalar magMidVec = mag(midVec);
-    
+
             if (magMidVec > SMALL)
             {
                 midVec /= magMidVec;
@@ -925,7 +908,7 @@ int main(int argc, char *argv[])
                 newPoints[newPointI] = newPoints[pointI] + 0.1 * minLen * n;
             }
         }
-        
+
 
         //
         // Renumber all faces in connectedFaces

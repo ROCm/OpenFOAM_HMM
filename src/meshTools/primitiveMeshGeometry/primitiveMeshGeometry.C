@@ -808,7 +808,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
         forAll(f, fp0)
         {
             // Get vertex after fp
-            label fp1 = (fp0 + 1) % f.size();
+            label fp1 = f.fcIndex(fp0);
 
             // Normalized vector between two consecutive points
             vector e10(p[f[fp1]] - p[f[fp0]]);

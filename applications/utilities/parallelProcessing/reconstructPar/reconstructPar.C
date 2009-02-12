@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
     // determine the processor count directly
     label nProcs = 0;
-    while (dir(args.path()/(word("processor") + name(nProcs))))
+    while (isDir(args.path()/(word("processor") + name(nProcs))))
     {
         ++nProcs;
     }
@@ -383,7 +383,7 @@ int main(int argc, char *argv[])
         // the master processor.
 
         fileName uniformDir0 = databases[0].timePath()/"uniform";
-        if (dir(uniformDir0))
+        if (isDir(uniformDir0))
         {
             cp(uniformDir0, runTime.timePath());
         }

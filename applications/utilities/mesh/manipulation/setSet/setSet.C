@@ -746,7 +746,8 @@ int main(int argc, char *argv[])
 
         Pout<< "Reading commands from file " << batchFile << endl;
 
-        if (!exists(batchFile))
+        // we also cannot handle .gz files
+        if (!isFile(batchFile, false))
         {
             FatalErrorIn(args.executable())
                 << "Cannot open file " << batchFile << exit(FatalError);

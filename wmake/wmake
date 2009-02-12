@@ -163,8 +163,9 @@ then
         exit $?
     elif [ ! -d $MakeDir ]
     then
-        #FOAM_APPS=`find . -maxdepth 1 \( -type d -a ! -name "." -a ! -name "Optional" -a ! -name "Make" \)  -printf "%f "`
-        FOAM_APPS=`for d in *; do if [ -d "$d" -a "$d" != "Optional" -a "$d" != "Make" ]; then echo "$d"; fi; done | xargs`
+        # FOAM_APPS=$(find . -maxdepth 1 \( -type d -a ! -name "." -a ! -name Optional -a ! -name Make \)  -printf "%f ")
+        # avoid 'find' with '-printf' ... not entirely portable
+        FOAM_APPS=$(for d in *; do [ -d "$d" -a "$d" != Optional -a "$d" != Make ] && echo "$d"; done | xargs)
         $make -k -f $WM_DIR/MakefileApps FOAM_APPS="$FOAM_APPS"
         exit $?
     fi

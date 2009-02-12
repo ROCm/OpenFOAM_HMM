@@ -65,14 +65,14 @@ Foam::JobInfo::JobInfo()
                 << Foam::exit(FatalError);
         }
 
-        if (!dir(runningDir) && !mkDir(runningDir))
+        if (!isDir(runningDir) && !mkDir(runningDir))
         {
             FatalErrorIn("JobInfo::JobInfo()")
                 << "Cannot make JobInfo directory " << runningDir
                 << Foam::exit(FatalError);
         }
 
-        if (!dir(finishedDir) && !mkDir(finishedDir))
+        if (!isDir(finishedDir) && !mkDir(finishedDir))
         {
             FatalErrorIn("JobInfo::JobInfo()")
                 << "Cannot make JobInfo directory " << finishedDir

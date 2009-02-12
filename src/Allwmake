@@ -17,10 +17,11 @@ wmake libso lagrangian/basic
 wmake libso triSurface
 wmake libso edgeMesh
 wmake libso surfMesh
-wmake libso meshTools
-wmake libso finiteVolume
 
 decompositionAgglomeration/Allwmake
+
+wmake libso meshTools
+wmake libso finiteVolume
 
 wmake libso sampling
 

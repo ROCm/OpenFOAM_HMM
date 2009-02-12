@@ -63,7 +63,7 @@ void Foam::foamFileSurfaceWriter<Type>::write
 {
     fileName surfaceDir(samplePath/timeDir/surfaceName);
 
-    if (!exists(surfaceDir))
+    if (!isDir(surfaceDir))
     {
         mkDir(surfaceDir);
     }
@@ -84,7 +84,7 @@ void Foam::foamFileSurfaceWriter<Type>::write
     fileName foamName(pTraits<Type>::typeName);
     fileName valuesDir(surfaceDir  / (foamName + Field<Type>::typeName));
 
-    if (!exists(valuesDir))
+    if (!isDir(valuesDir))
     {
         mkDir(valuesDir);
     }

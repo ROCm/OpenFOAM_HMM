@@ -1103,7 +1103,7 @@ void Foam::polyMesh::removeFiles(const fileName& instanceDir) const
     rm(meshFilesPath/"parallelData");
 
     // remove subdirectories
-    if (dir(meshFilesPath/"sets"))
+    if (isDir(meshFilesPath/"sets"))
     {
         rmDir(meshFilesPath/"sets");
     }

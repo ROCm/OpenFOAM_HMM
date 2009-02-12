@@ -34,7 +34,7 @@ void Foam::fileFormats::OFFsurfaceFormatCore::writeHeader
     Ostream& os,
     const pointField& pointLst,
     const label nFaces,
-    const UList<surfRegion>& regionLst
+    const UList<surfZone>& zoneLst
 )
 {
     // Write header
@@ -43,13 +43,13 @@ void Foam::fileFormats::OFFsurfaceFormatCore::writeHeader
         << nl
         << "# points : " << pointLst.size() << nl
         << "# faces  : " << nFaces << nl
-        << "# regions: " << regionLst.size() << nl;
+        << "# zones  : " << zoneLst.size() << nl;
 
-    // Print region names as comment
-    forAll(regionLst, regionI)
+    // Print zone names as comment
+    forAll(zoneLst, zoneI)
     {
-        os  << "#   " << regionI << "  " << regionLst[regionI].name()
-            << "  (nFaces: " << regionLst[regionI].size() << ")" << nl;
+        os  << "#   " << zoneI << "  " << zoneLst[zoneI].name()
+            << "  (nFaces: " << zoneLst[zoneI].size() << ")" << nl;
     }
 
     os  << nl

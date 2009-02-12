@@ -44,9 +44,9 @@ Note
     Using the iteratorBase as a proxy allows assignment of values
     between list elements. Thus the following bit of code works as expected:
     @code
-        blist[1] = blist[5];     // value assignment, not iterator position
-        blist[2] = blist[5] = 4; // propagates value
-        blist[1] = blist[5] = blist[6];  // propagates value
+        list[1] = list[5];      // value assignment, not iterator position
+        list[2] = list[5] = 4;  // propagates value
+        list[1] = list[5] = list[6];  // propagates value
     @endcode
 
     Using get() or the '[]' operator are similarly fast. Looping and reading
@@ -58,9 +58,19 @@ Note
     useful for branching on changed values.
 
     @code
-        blist[5] = 4;
-        changed = blist.set(5, 8);
+        list[5] = 4;
+        changed = list.set(5, 8);
         if (changed) ...
+    @endcode
+
+    The lazy evaluation used means that reading an out-of-range element
+    returns zero, but does not affect the list size.  Even in a non-const
+    context, only the assigment causes the element to be created.
+    For example,
+    @code
+        list.resize(4);
+        Info<< list[10] << "\n";  // print zero, but doesn't adjust list
+        list[8] = 1;
     @endcode
 
 SeeAlso
@@ -120,9 +130,6 @@ class PackedList
         //- Calculate the list length when packed
         inline static label packedLength(const label);
 
-        //- Check index I is within valid range [ 0 .. max_value() ]
-        inline void checkIndex(const label) const;
-
 public:
 
     // Public data
@@ -172,22 +179,23 @@ public:
 
         // Access
 
-        //- The number of elements that can be stored before resizing
+        //- The number of elements that can be stored before reallocating
         inline label capacity() const;
 
         //- Number of entries.
         inline label size() const;
 
-        //- Return true if the list is empty (i.e., if size() == 0).
+        //- Return true if the list is empty (ie, size() is zero).
         inline bool empty() const;
 
         //- Get value at index I.
-        //  Does not auto-vivify entries.
+        //  Never auto-vivify entries.
         inline unsigned int get(const label) const;
 
         //- Set value at index I. Return true if value changed.
-        //  Does not auto-vivify entries.
-        inline bool set(const label, const unsigned int val);
+        //  Does auto-vivify for non-existent entries.
+        //  Default value set is the max_value.
+        inline bool set(const label, const unsigned int val = ~0u);
 
         //- Return the underlying packed storage
         inline List<unsigned int>& storage();
@@ -200,9 +208,6 @@ public:
         //  http://en.wikipedia.org/wiki/Hamming_weight
         unsigned int count() const;
 
-        //- Trim any trailing zero elements
-        bool trim();
-
         //- Return the values as a labelList
         labelList values() const;
 
@@ -210,6 +215,12 @@ public:
         Ostream& print(Ostream&) const;
 
         // Edit
+
+        //- Trim any trailing zero elements
+        bool trim();
+
+        //- Invert the bits in the addressable region.
+        void flip();
 
         //- Alter the size of the underlying storage.
         //  The addressed size will be truncated if needed to fit, but will
@@ -255,12 +266,12 @@ public:
         inline unsigned int remove();
 
         //- Get value at index I
-        //  Does not auto-vivify entries.
+        //  Never auto-vivify entries.
         inline unsigned int operator[](const label) const;
 
         //- Set value at index I.
         //  Returns iterator to perform the actual operation.
-        //  Does not auto-vivify entries.
+        //  Does not auto-vivify entries, but will when assigned to.
         inline iteratorBase operator[](const label);
 
         //- Assignment of all entries to the given value. Takes linear time.
@@ -294,51 +305,26 @@ public:
                 //  This also lets us use the default bitwise copy/assignment
                 PackedList* list_;
 
-                //- Element index within storage
-                unsigned index_;
-
-                //- Offset within storage element
-                unsigned offset_;
+                //- Element index
+                label index_;
 
             // Protected Member Functions
 
-                //- Get value as unsigned
+                //- Get value as unsigned, no range-checking
                 inline unsigned int get() const;
 
-                //- Set value, returning true if changed
+                //- Set value, returning true if changed, no range-checking
                 inline bool set(unsigned int);
-
-                //- Increment to new position
-                inline void incr();
-
-                //- Decrement to new position
-                inline void decr();
-
-                //- Move to new position, but not beyond end()
-                inline void seek(const iteratorBase&);
-
 
             // Constructors
 
                 //- Construct null
                 inline iteratorBase();
 
-                //- Copy construct
-                inline iteratorBase(const iteratorBase&);
-
                 //- Construct from base list and position index
                 inline iteratorBase(const PackedList*, const label);
 
         public:
-
-            // Member Functions
-
-                //- Return true if the element is within addressable range
-                inline bool valid() const;
-
-                //- Move iterator to end() if it would otherwise be out-of-range
-                //  Returns true if the element was already ok
-                inline bool validate();
 
             // Member Operators
 
@@ -350,10 +336,12 @@ public:
                 //  This allows packed[0] = packed[3] for assigning values
                 inline unsigned int operator=(const iteratorBase&);
 
-                //- Assign value
+                //- Assign value.
+                //  A non-existent entry will be auto-vivified.
                 inline unsigned int operator=(const unsigned int val);
 
                 //- Conversion operator
+                //  Never auto-vivify entries.
                 inline operator unsigned int () const;
 
             //- Print value and information
@@ -378,6 +366,8 @@ public:
                 inline iterator();
 
                 //- Construct from iterator base, eg iter(packedlist[i])
+                //  but also  "iterator iter = packedlist[i];"
+                //  An out-of-range iterator is assigned end()
                 inline iterator(const iteratorBase&);
 
                 //- Construct from base list and position index
@@ -386,6 +376,7 @@ public:
             // Member Operators
 
                 //- Assign from iteratorBase, eg iter = packedlist[i]
+                //  An out-of-range iterator is assigned end()
                 inline iterator& operator=(const iteratorBase&);
 
                 //- Return value
@@ -427,7 +418,9 @@ public:
                 //- Construct null
                 inline const_iterator();
 
-                //- Construct from iterator base
+                //- Construct from iterator base, eg iter(packedlist[i])
+                //  but also  "const_iterator iter = packedlist[i];"
+                //  An out-of-range iterator is assigned end()
                 inline const_iterator(const iteratorBase&);
 
                 //- Construct from base list and position index
@@ -439,7 +432,7 @@ public:
             // Member operators
 
                 //- Assign from iteratorBase or derived
-                //  eg, iter = packedlist[i] or iter = [non-const]list.begin()
+                //  eg, iter = packedlist[i] or even iter = list.begin()
                 inline const_iterator& operator=(const iteratorBase&);
 
                 //- Return referenced value directly

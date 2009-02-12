@@ -38,14 +38,14 @@ inline Foam::STLtriangle::STLtriangle
     const STLpoint& a,
     const STLpoint& b,
     const STLpoint& c,
-    unsigned short region
+    unsigned short attrib
 )
 :
     normal_(normal),
     a_(a),
     b_(b),
     c_(c),
-    region_(region)
+    attrib_(attrib)
 {}
 
 
@@ -77,23 +77,23 @@ inline const Foam::STLpoint& Foam::STLtriangle::c() const
     return c_;
 }
 
-inline unsigned short Foam::STLtriangle::region() const
+inline unsigned short Foam::STLtriangle::attrib() const
 {
-    return region_;
+    return attrib_;
 }
 
 
 inline void Foam::STLtriangle::read(istream& is)
 {
     is.read(reinterpret_cast<char*>(this), 4*sizeof(STLpoint));
-    is.read(reinterpret_cast<char*>(&region_), sizeof(STLregion));
+    is.read(reinterpret_cast<char*>(&attrib_), sizeof(STLattrib));
 }
 
 
 inline void Foam::STLtriangle::write(ostream& os)
 {
     os.write(reinterpret_cast<char*>(this), 4*sizeof(STLpoint));
-    os.write(reinterpret_cast<char*>(&region_), sizeof(STLregion));
+    os.write(reinterpret_cast<char*>(&attrib_), sizeof(STLattrib));
 }
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
@@ -104,7 +104,7 @@ inline Foam::Ostream& Foam::operator<<(Ostream& os, const STLtriangle& t)
         << t.a_ << token::SPACE
         << t.b_ << token::SPACE
         << t.c_ << token::SPACE
-        << t.region_;
+        << t.attrib_;
 
     return os;
 }

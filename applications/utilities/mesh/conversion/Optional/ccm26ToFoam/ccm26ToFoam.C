@@ -615,7 +615,7 @@ int main(int argc, char *argv[])
     {
         fileName ccmFile(args.additionalArgs()[0]);
 
-        if (!exists(ccmFile))
+        if (!isFile(ccmFile))
         {
             FatalErrorIn(args.executable())
                 << "Cannot read file " << ccmFile

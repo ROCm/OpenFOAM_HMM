@@ -466,12 +466,13 @@ Foam::sampledIsoSurface::sampledIsoSurface
 {
     if (!sampledSurface::interpolate())
     {
-        FatalErrorIn
+        FatalIOErrorIn
         (
             "sampledIsoSurface::sampledIsoSurface"
-            "(const word&, const polyMesh&, const dictionary&)"
+            "(const word&, const polyMesh&, const dictionary&)",
+            dict
         )   << "Non-interpolated iso surface not supported since triangles"
-            << " span across cells." << exit(FatalError);
+            << " span across cells." << exit(FatalIOError);
     }
 
     if (zoneID_.index() != -1)
@@ -480,14 +481,15 @@ Foam::sampledIsoSurface::sampledIsoSurface
 
         if (mesh.boundaryMesh().findPatchID(exposedPatchName_) == -1)
         {
-            FatalErrorIn
+            FatalIOErrorIn
             (
                 "sampledIsoSurface::sampledIsoSurface"
-                "(const word&, const polyMesh&, const dictionary&)"
+                "(const word&, const polyMesh&, const dictionary&)",
+                dict
             )   << "Cannot find patch " << exposedPatchName_
                 << " in which to put exposed faces." << endl
                 << "Valid patches are " << mesh.boundaryMesh().names()
-                << exit(FatalError);
+                << exit(FatalIOError);
         }
 
         if (debug && zoneID_.index() != -1)

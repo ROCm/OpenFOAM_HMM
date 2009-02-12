@@ -36,7 +36,7 @@ See Also
 
 Note
     When reading, the optional @a colorspec is ignored.
-    When writing, it is set to the region number (integer).
+    When writing, it is set to the zone number (integer).
 
 SourceFiles
     OFFsurfaceFormat.C
@@ -60,7 +60,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class OFFsurfaceFormat Declaration
+                      Class OFFsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -104,6 +104,15 @@ public:
         //- Read from file
         virtual bool read(const fileName&);
 
+        //- Write surface mesh components
+        static void write
+        (
+            Ostream&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
+
         //- Write MeshedSurface
         static void write
         (
@@ -122,7 +131,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             Ostream&,
@@ -130,7 +139,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is sorted by region.
+        //  The output is sorted by zone.
         static void write
         (
             const fileName& name,

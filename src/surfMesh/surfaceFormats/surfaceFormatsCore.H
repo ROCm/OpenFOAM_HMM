@@ -39,8 +39,8 @@ SourceFiles
 #include "Map.H"
 #include "HashSet.H"
 #include "labelList.H"
-#include "surfRegionList.H"
-#include "surfRegionIdentifierList.H"
+#include "surfZoneList.H"
+#include "surfZoneIdentifierList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class surfaceFormatsCore Declaration
+                     Class surfaceFormatsCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceFormatsCore
@@ -64,9 +64,6 @@ class surfaceFormatsCore
 public:
 
     // Static Data
-
-    //- Return the mesh sub-directory name (usually "meshedSurface")
-    static word meshSubDir;
 
     //- The file extension corresponding to 'native' surface format
     //  Normally "ofs" (mnemonic: OF = OpenFOAM, S = Surface)
@@ -80,24 +77,21 @@ public:
         //- Read non-comment line
         static string getLineNoComment(IFstream&);
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshInstance(const Time&, const word& subdirName);
+        //- Return the local file name (within time directory)
+        static fileName localMeshFileName(const word& surfName="");
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshName(const Time&, const word& subdirName);
+        //- Find instance with surfName
+        static fileName findMeshInstance(const Time&, const word& surfName="");
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshInstance(const Time&);
+        //- Find mesh file with surfName
+        static fileName findMeshFile(const Time&, const word& surfName="");
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshName(const Time&);
-
-        //- Determine the sort order from the region ids.
-        //  Returns region list and sets faceMap to indices within faceLst
-        static surfRegionList sortedRegionsById
+        //- Determine the sort order from the zone ids.
+        //  Returns zone list and sets faceMap to indices within faceLst
+        static surfZoneList sortedZonesById
         (
-            const UList<label>& regionIds,
-            const Map<word>& regionNames,
+            const UList<label>& zoneIds,
+            const Map<word>& zoneNames,
             labelList& faceMap
         );
 

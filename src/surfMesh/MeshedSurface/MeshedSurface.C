@@ -32,7 +32,7 @@ License
 #include "ListOps.H"
 #include "polyBoundaryMesh.H"
 #include "polyMesh.H"
-// #include "surfMesh.H"
+#include "surfMesh.H"
 #include "primitivePatch.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -166,11 +166,11 @@ Foam::MeshedSurface<Face>::MeshedSurface
 (
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face> >& faceLst,
-    const Xfer<surfRegionList>& regionLst
+    const Xfer<surfZoneList>& zoneLst
 )
 :
     ParentType(pointLst, faceLst),
-    regions_(regionLst)
+    zones_(zoneLst)
 {}
 
 
@@ -179,26 +179,26 @@ Foam::MeshedSurface<Face>::MeshedSurface
 (
     const Xfer<pointField>& pointLst,
     const Xfer<List<Face> >& faceLst,
-    const UList<label>& regionSizes,
-    const UList<word>& regionNames
+    const UList<label>& zoneSizes,
+    const UList<word>& zoneNames
 )
 :
     ParentType(pointLst, faceLst)
 {
-    if (&regionSizes)
+    if (&zoneSizes)
     {
-        if (&regionNames)
+        if (&zoneNames)
         {
-            addRegions(regionSizes, regionNames);
+            addZones(zoneSizes, zoneNames);
         }
         else
         {
-            addRegions(regionSizes);
+            addZones(zoneSizes);
         }
     }
     else
     {
-        oneRegion();
+        oneZone();
     }
 }
 
@@ -225,108 +225,70 @@ Foam::MeshedSurface<Face>::MeshedSurface
         mesh.points()
     );
 
-    // use global/local points
+    // use global/local points:
     const pointField& bPoints =
     (
         useGlobalPoints ? mesh.points() : allBoundary.localPoints()
     );
 
-    // global or local face addressing
+    // global/local face addressing:
     const List<Face>& bFaces =
     (
         useGlobalPoints ? allBoundary : allBoundary.localFaces()
     );
 
 
-    // create region list
-    surfRegionList newRegions(bPatches.size());
+    // create zone list
+    surfZoneList newZones(bPatches.size());
 
     label startFaceI = 0;
+    label nZone = 0;
     forAll(bPatches, patchI)
     {
         const polyPatch& p = bPatches[patchI];
 
-        newRegions[patchI] = surfRegion
-        (
-            p.name(),
-            p.size(),
-            startFaceI,
-            patchI
-        );
+        if (p.size())
+        {
+            newZones[nZone] = surfZone
+            (
+                p.name(),
+                p.size(),
+                startFaceI,
+                nZone
+            );
 
-        startFaceI += p.size();
+            nZone++;
+            startFaceI += p.size();
+        }
     }
 
-    // must create with the same face type as the polyBoundaryMesh
+    newZones.setSize(nZone);
+
+    // same face type as the polyBoundaryMesh
     MeshedSurface<face> surf
     (
         xferCopy(bPoints),
         xferCopy(bFaces),
-        xferMove(newRegions)
+        xferMove(newZones)
     );
 
-
-    // must triangulate?
-    if (this->isTri())
-    {
-        surf.triangulate();
-        this->storedPoints().transfer(surf.storedPoints());
-
-        // transcribe from face -> triFace
-        List<face>&    origFaces = surf.storedFaces();
-        List<triFace>  newFaces(origFaces.size());
-        forAll(origFaces, faceI)
-        {
-            newFaces[faceI] = Face
-            (
-                static_cast<const UList<label>&>(origFaces[faceI])
-            );
-        }
-        origFaces.clear();
-
-        this->storedFaces().transfer(newFaces);
-        regions_.transfer(surf.regions_);
-    }
-    else
-    {
-        this->transfer(surf);
-    }
+    this->transcribe(surf);
 }
 
 
-#if 0
-// in preparation
-Foam::MeshedSurface<Face>::MeshedSurface
-(
-    const surfMesh& sMesh
-)
-:
-    ParentType(xferCopy(sMesh.points()), xferCopy(sMesh.faces()))
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface(const surfMesh& mesh)
 {
-    const surfPatchList& sPatches = sMesh.boundaryMesh();
+    // same face type as surfMesh
+    MeshedSurface<face> surf
+    (
+        xferCopy(mesh.points()),
+        xferCopy(mesh.faces()),
+        xferCopy(mesh.surfZones())
+    );
 
-    // create regions list
-    List<surfRegion> newRegions(sPatches.size());
-
-    label startFaceI = 0;
-    forAll(sPatches, patchI)
-    {
-        const surfPatch& p = sPatches[patchI];
-
-        newRegions[patchI] = surfRegion
-        (
-            p.name(),
-            p.size(),
-            startFaceI,
-            patchI
-        );
-
-        startFaceI += p.size();
-    }
-
-    regions_.transfer(newRegions);
+    this->transcribe(surf);
 }
-#endif
 
 
 template<class Face>
@@ -336,8 +298,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
 )
 {
     labelList faceMap;
-    surfRegionList regionLst = surf.sortedRegions(faceMap);
-    regions_.transfer(regionLst);
+    surfZoneList zoneLst = surf.sortedZones(faceMap);
+    zones_.transfer(zoneLst);
 
     const List<Face>& origFaces = surf.faces();
     List<Face> newFaces(origFaces.size());
@@ -378,9 +340,9 @@ Foam::MeshedSurface<Face>::MeshedSurface(Istream& is)
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const Time& d)
+Foam::MeshedSurface<Face>::MeshedSurface(const Time& d, const word& surfName)
 {
-    read(IFstream(findMeshName(d))());
+    read(IFstream(findMeshFile(d, surfName))());
 }
 
 
@@ -388,7 +350,7 @@ template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface(const MeshedSurface& surf)
 :
     ParentType(surf),
-    regions_(surf.regions_)
+    zones_(surf.zones_)
 {}
 
 
@@ -419,71 +381,74 @@ Foam::MeshedSurface<Face>::~MeshedSurface()
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
 template<class Face>
-void Foam::MeshedSurface<Face>::oneRegion(const word& name)
+void Foam::MeshedSurface<Face>::oneZone(const word& name)
 {
-    word regionName(name);
-    if (regionName.empty())
+    word zoneName(name);
+    if (zoneName.empty())
     {
-        if (regions_.size())
+        if (zones_.size())
         {
-            regionName = regions_[0].name();
+            zoneName = zones_[0].name();
         }
-        if (regionName.empty())
+        if (zoneName.empty())
         {
-            regionName = "region0";
+            zoneName = "zone0";
         }
     }
 
-    // set single default region
-    regions_.setSize(1);
-    regions_[0] = surfRegion
+    // set single default zone
+    zones_.setSize(1);
+    zones_[0] = surfZone
     (
-        regionName,
-        size(),         // region size
-        0,              // region start
-        0               // region index
+        zoneName,
+        this->size(),   // zone size
+        0,              // zone start
+        0               // zone index
     );
 }
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::checkRegions()
+void Foam::MeshedSurface<Face>::checkZones()
 {
-    // extra safety, ensure we have at some regions
+    // extra safety, ensure we have at some zones
     // and they cover all the faces - fix start silently
-    if (regions_.size() <= 1)
+    if (zones_.size() <= 1)
     {
-        oneRegion();
+        oneZone();
     }
     else
     {
         label count = 0;
-        forAll(regions_, regionI)
+        forAll(zones_, zoneI)
         {
-            regions_[regionI].start() = count;
-            count += regions_[regionI].size();
+            zones_[zoneI].start() = count;
+            count += zones_[zoneI].size();
         }
 
         if (count < size())
         {
             WarningIn
             (
-                "MeshedSurface::checkRegions()\n"
+                "MeshedSurface::checkZones()\n"
             )
-                << "more face " << size() << " than regions " << count
-                << " ... extending final region"
+                << "more faces " << size() << " than zones " << count
+                << " ... extending final zone"
                 << endl;
 
-            regions_[regions_.size()-1].size() += count - size();
+            zones_[zones_.size()-1].size() += count - size();
         }
         else if (count > size())
         {
             FatalErrorIn
             (
-                "MeshedSurface::checkRegions()\n"
+                "MeshedSurface::checkZones()\n"
             )
-                << "more regions " << count << " than faces " << size()
+                << "more zones " << count << " than faces " << size()
                 << exit(FatalError);
         }
     }
@@ -494,12 +459,12 @@ template<class Face>
 void Foam::MeshedSurface<Face>::sortFacesAndStore
 (
     const Xfer<List<Face> >& unsortedFaces,
-    const Xfer<List<label> >& regionIds,
+    const Xfer<List<label> >& zoneIds,
     const bool sorted
 )
 {
     List<Face>  oldFaces(unsortedFaces);
-    List<label> regions(regionIds);
+    List<label> zones(zoneIds);
 
     if (sorted)
     {
@@ -511,8 +476,8 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
         // unsorted - determine the sorted order:
         // avoid SortableList since we discard the main list anyhow
         List<label> faceMap;
-        sortedOrder(regions, faceMap);
-        regions.clear();
+        sortedOrder(zones, faceMap);
+        zones.clear();
 
         // sorted faces
         List<Face> newFaces(faceMap.size());
@@ -524,7 +489,7 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
         this->storedFaces().transfer(newFaces);
 
     }
-    regions.clear();
+    zones.clear();
 }
 
 
@@ -534,29 +499,29 @@ void Foam::MeshedSurface<Face>::remapFaces
     const UList<label>& faceMap
 )
 {
-    // recalculate the region start/size
+    // recalculate the zone start/size
     if (&faceMap && faceMap.size())
     {
-        if (regions_.empty())
+        if (zones_.empty())
         {
-            oneRegion();
+            oneZone();
         }
-        else if (regions_.size() == 1)
+        else if (zones_.size() == 1)
         {
-            // optimized for single region case
-            regions_[0].size() = faceMap.size();
+            // optimized for single zone case
+            zones_[0].size() = faceMap.size();
         }
         else
         {
             label newFaceI = 0;
             label origEndI = 0;
-            forAll(regions_, regionI)
+            forAll(zones_, zoneI)
             {
-                surfRegion& reg = regions_[regionI];
+                surfZone& zone = zones_[zoneI];
 
-                // adjust region start
-                reg.start() = newFaceI;
-                origEndI += reg.size();
+                // adjust zone start
+                zone.start() = newFaceI;
+                origEndI += zone.size();
 
                 for (label faceI = newFaceI; faceI < faceMap.size(); ++faceI)
                 {
@@ -570,14 +535,12 @@ void Foam::MeshedSurface<Face>::remapFaces
                     }
                 }
 
-                // adjust region size
-                reg.size() = newFaceI - reg.start();
+                // adjust zone size
+                zone.size() = newFaceI - zone.start();
             }
         }
     }
 }
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -586,7 +549,7 @@ template<class Face>
 void Foam::MeshedSurface<Face>::clear()
 {
     ParentType::clear();
-    regions_.clear();
+    zones_.clear();
 }
 
 
@@ -614,11 +577,11 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
         oldToNew[pointMap[pointI]] = pointI;
     }
 
-    // create/copy a new region list, each region with zero size
-    surfRegionList newRegions(regions_);
-    forAll(newRegions, regionI)
+    // create/copy a new zones list, each zone with zero size
+    surfZoneList newZones(zones_);
+    forAll(newZones, zoneI)
     {
-        newRegions[regionI].size() = 0;
+        newZones[zoneI].size() = 0;
     }
 
     // Renumber face node labels
@@ -637,18 +600,18 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
     }
     oldToNew.clear();
 
-    // recalculate the region start/size
+    // recalculate the zones start/size
     label newFaceI = 0;
     label origEndI = 0;
 
-    // adjust region sizes
-    forAll(newRegions, regionI)
+    // adjust zone sizes
+    forAll(newZones, zoneI)
     {
-        surfRegion& reg = newRegions[regionI];
+        surfZone& zone = newZones[zoneI];
 
-        // adjust region start
-        reg.start() = newFaceI;
-        origEndI += reg.size();
+        // adjust zone start
+        zone.start() = newFaceI;
+        origEndI += zone.size();
 
         for (label faceI = newFaceI; faceI < faceMap.size(); ++faceI)
         {
@@ -662,8 +625,8 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
             }
         }
 
-        // adjust region size
-        reg.size() = newFaceI - reg.start();
+        // adjust zone size
+        zone.size() = newFaceI - zone.start();
     }
 
 
@@ -672,7 +635,7 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
     (
         xferMove(newPoints),
         xferMove(newFaces),
-        xferMove(newRegions)
+        xferMove(newZones)
     );
 }
 
@@ -690,29 +653,29 @@ Foam::MeshedSurface<Face>::subsetMesh
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::addRegions
+void Foam::MeshedSurface<Face>::addZones
 (
-    const UList<surfRegion>& regions,
+    const UList<surfZone>& zones,
     const bool cullEmpty
 )
 {
-    label nRegion = 0;
+    label nZone = 0;
 
-    regions_.setSize(regions.size());
-    forAll(regions_, regionI)
+    zones_.setSize(zones.size());
+    forAll(zones_, zoneI)
     {
-        if (regions[regionI].size() || !cullEmpty)
+        if (zones[zoneI].size() || !cullEmpty)
         {
-            regions_[nRegion] = surfRegion(regions[regionI], nRegion);
-            nRegion++;
+            zones_[nZone] = surfZone(zones[zoneI], nZone);
+            nZone++;
         }
     }
-    regions_.setSize(nRegion);
+    zones_.setSize(nZone);
 }
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::addRegions
+void Foam::MeshedSurface<Face>::addZones
 (
     const UList<label>& sizes,
     const UList<word>& names,
@@ -720,55 +683,55 @@ void Foam::MeshedSurface<Face>::addRegions
 )
 {
     label start   = 0;
-    label nRegion = 0;
+    label nZone = 0;
 
-    regions_.setSize(sizes.size());
-    forAll(regions_, regionI)
+    zones_.setSize(sizes.size());
+    forAll(zones_, zoneI)
     {
-        if (sizes[regionI] || !cullEmpty)
+        if (sizes[zoneI] || !cullEmpty)
         {
-            regions_[nRegion] = surfRegion
+            zones_[nZone] = surfZone
             (
-                names[regionI],
-                sizes[regionI],
+                names[zoneI],
+                sizes[zoneI],
                 start,
-                nRegion
+                nZone
             );
-            start += sizes[regionI];
-            nRegion++;
+            start += sizes[zoneI];
+            nZone++;
         }
     }
-    regions_.setSize(nRegion);
+    zones_.setSize(nZone);
 }
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::addRegions
+void Foam::MeshedSurface<Face>::addZones
 (
     const UList<label>& sizes,
     const bool cullEmpty
 )
 {
     label start   = 0;
-    label nRegion = 0;
+    label nZone = 0;
 
-    regions_.setSize(sizes.size());
-    forAll(regions_, regionI)
+    zones_.setSize(sizes.size());
+    forAll(zones_, zoneI)
     {
-        if (sizes[regionI] || !cullEmpty)
+        if (sizes[zoneI] || !cullEmpty)
         {
-            regions_[nRegion] = surfRegion
+            zones_[nZone] = surfZone
             (
-                word("region") + ::Foam::name(nRegion),
-                sizes[regionI],
+                word("zone") + ::Foam::name(nZone),
+                sizes[zoneI],
                 start,
-                nRegion
+                nZone
             );
-            start += sizes[regionI];
-            nRegion++;
+            start += sizes[zoneI];
+            nZone++;
         }
     }
-    regions_.setSize(nRegion);
+    zones_.setSize(nZone);
 }
 
 
@@ -779,7 +742,7 @@ void Foam::MeshedSurface<Face>::transfer
 )
 {
     reset(xferMove(surf.storedPoints()), xferMove(surf.storedFaces()));
-    regions_.transfer(surf.regions_);
+    zones_.transfer(surf.zones_);
 
     surf.clear();
 }
@@ -794,7 +757,7 @@ void Foam::MeshedSurface<Face>::transfer
     clear();
 
     labelList faceMap;
-    surfRegionList regionLst = surf.sortedRegions(faceMap);
+    surfZoneList zoneLst = surf.sortedZones(faceMap);
     List<Face>& oldFaces = surf.storedFaces();
 
     List<Face> newFaces(faceMap.size());
@@ -805,9 +768,17 @@ void Foam::MeshedSurface<Face>::transfer
     faceMap.clear();
 
     reset(xferMove(surf.storedPoints()), xferMove(newFaces));
-    regions_.transfer(regionLst);
+    zones_.transfer(zoneLst);
 
     surf.clear();
+}
+
+
+template<class Face>
+Foam::Xfer< Foam::MeshedSurface<Face> >
+Foam::MeshedSurface<Face>::xfer()
+{
+    return xferMove(*this);
 }
 
 
@@ -851,9 +822,9 @@ bool Foam::MeshedSurface<Face>::read
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::write(const Time& d) const
+void Foam::MeshedSurface<Face>::write(const Time& d, const word& surfName) const
 {
-    write(OFstream(findMeshName(d))());
+    write(OFstream(findMeshFile(d, surfName))());
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -865,7 +836,7 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
 
     this->storedPoints() = surf.points();
     this->storedFaces()  = surf.faces();
-    regions_ = surf.regions_;
+    zones_ = surf.zones_;
 }
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //

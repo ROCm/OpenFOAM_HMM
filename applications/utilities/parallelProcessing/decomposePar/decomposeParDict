@@ -59,7 +59,7 @@ manualCoeffs
 }
 
 
-//// Is the case distributred
+//// Is the case distributed
 //distributed     yes;
 //// Per slave (so nProcs-1 entries) the directory above the case.
 //roots           

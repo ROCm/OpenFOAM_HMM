@@ -69,6 +69,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 class regExp;
 class dictionary;
+class SHA1Digest;
+
 Istream& operator>>(Istream&, dictionary&);
 Ostream& operator<<(Ostream&, const dictionary&);
 
@@ -209,6 +211,9 @@ public:
 
         //- Return line number of last token in dictionary
         label endLineNumber() const;
+
+        //- Return the SHA1 digest of the dictionary contents
+        SHA1Digest digest() const;
 
 
         // Search and lookup

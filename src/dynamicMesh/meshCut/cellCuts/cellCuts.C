@@ -374,7 +374,7 @@ void Foam::cellCuts::calcFaceCuts() const
         label cutI = 0;
 
         // Do point-edge-point walk over face and collect all cuts.
-        // Problem is that we want to start from one of the endpoints of a 
+        // Problem is that we want to start from one of the endpoints of a
         // string of connected cuts; we don't want to start somewhere in the
         // middle.
 
@@ -387,17 +387,16 @@ void Foam::cellCuts::calcFaceCuts() const
 
             if (pointIsCut_[v0])
             {
-                label fpMin1 = (fp == 0 ? f.size()-1 : fp-1);
-                label vMin1 = f[fpMin1];
+                label vMin1 = f[f.rcIndex(fp)];
 
-                if 
+                if
                 (
                     !pointIsCut_[vMin1]
                  && !edgeIsCut_[findEdge(faceI, v0, vMin1)]
                 )
                 {
                     cuts[cutI++] = vertToEVert(v0);
-                    startFp = (fp+1) % f.size();
+                    startFp = f.fcIndex(fp);
                     break;
                 }
             }
@@ -408,7 +407,7 @@ void Foam::cellCuts::calcFaceCuts() const
         {
             forAll(f, fp)
             {
-                label fp1 = (fp+1) % f.size();
+                label fp1 = f.fcIndex(fp);
 
                 label v0 = f[fp];
                 label v1 = f[fp1];
@@ -438,7 +437,7 @@ void Foam::cellCuts::calcFaceCuts() const
 
         forAll(f, i)
         {
-            label fp1 = (fp+1) % f.size();
+            label fp1 = f.fcIndex(fp);
 
             // Get the three items: current vertex, next vertex and edge
             // inbetween
@@ -659,7 +658,7 @@ bool Foam::cellCuts::crossEdge
         return true;
     }
     else
-    {    
+    {
         // No success. Restore state (i.e. backtrack)
         nVisited = oldNVisited;
 
@@ -794,7 +793,7 @@ bool Foam::cellCuts::walkFace
 
 
 
-// Walk across cuts (cut edges or cut vertices) of cell. Stops when hit cut 
+// Walk across cuts (cut edges or cut vertices) of cell. Stops when hit cut
 // already visited. Returns true when loop of 3 or more vertices found.
 bool Foam::cellCuts::walkCell
 (
@@ -1202,7 +1201,7 @@ Foam::labelList Foam::cellCuts::nonAnchorPoints
 
         if
         (
-            findIndex(anchorPoints, pointI) == -1 
+            findIndex(anchorPoints, pointI) == -1
          && findIndex(loop, vertToEVert(pointI)) == -1
         )
         {
@@ -1556,7 +1555,7 @@ bool Foam::cellCuts::calcAnchors
                 }
                 prevStat = eStat;
             }
-        }        
+        }
     }
 
 
@@ -2135,7 +2134,7 @@ bool Foam::cellCuts::setFromCellLoop
         // Storage for points on one side of cell
         labelList anchorPoints;
 
-        okLoop = 
+        okLoop =
             validLoop(cellI, loop, loopWeights, faceSplitCuts, anchorPoints);
 
         if (okLoop)
@@ -3007,7 +3006,7 @@ void Foam::cellCuts::flip(const label cellI)
             mesh().cellPoints()[cellI],
             cellAnchorPoints_[cellI],
             loop
-        );  
+        );
 }
 
 

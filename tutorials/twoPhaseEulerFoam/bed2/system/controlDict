@@ -14,7 +14,6 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-applicationClass twoPhaseEulerFoam;
 
 startFrom       latestTime;
 
@@ -58,7 +57,7 @@ functions
         type fieldAverage;
 
         // Where to load it from (if not already in solver)
-        functionObjectLibs ("libfieldAverage.so");
+        functionObjectLibs ("libfieldFunctionObjects.so");
 
         outputControl outputTime;
 

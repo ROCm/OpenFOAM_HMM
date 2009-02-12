@@ -48,7 +48,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class SMESHsurfaceFormatCore Declaration
+                   Class SMESHsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class SMESHsurfaceFormatCore
