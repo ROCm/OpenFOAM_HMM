@@ -43,30 +43,16 @@
     Info<< "Creating turbulence model\n" << endl;
     autoPtr<compressible::turbulenceModel> turbulence
     (
-        compressible::turbulenceModel::New(rho, U, phi, thermo())
+        compressible::turbulenceModel::New
+        (
+            rho,
+            U,
+            phi,
+            thermo()
+        )
     );
+
 
     Info<< "Creating field DpDt\n" << endl;
     volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
-
-    Info<< "Constructing thermoCloud1" << endl;
-    basicThermoCloud thermoCloud1
-    (
-        "thermoCloud1",
-        rho,
-        U,
-        g,
-        thermo()
-    );
-
-    Info<< "Constructing kinematicCloud1" << endl;
-    basicKinematicCloud kinematicCloud1
-    (
-        "kinematicCloud1",
-        rho,
-        U,
-        thermo().mu(),
-        g
-    );
-

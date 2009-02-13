@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    rhoTurbFoam
+    rhoPisoTwinParcelFoam
 
 Description
     Transient solver for compressible, turbulent flow with two thermo-clouds.
@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
 #   include "readEnvironmentalProperties.H"
 #   include "createFields.H"
+#   include "createClouds.H"
 #   include "readPISOControls.H"
 #   include "initContinuityErrs.H"
 #   include "readTimeControls.H"
