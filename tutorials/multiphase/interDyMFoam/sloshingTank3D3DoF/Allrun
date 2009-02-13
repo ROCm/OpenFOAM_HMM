@@ -4,6 +4,6 @@
 
 m4 constant/polyMesh/blockMeshDict.m4 > constant/polyMesh/blockMeshDict
 runApplication blockMesh
-cp 0/gamma.org 0/gamma
+cp 0/alpha1.org 0/alpha1
 runApplication setFields
 runApplication interDyMFoam

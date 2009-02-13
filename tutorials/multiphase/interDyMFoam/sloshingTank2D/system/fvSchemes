@@ -24,14 +24,14 @@ gradSchemes
 {
     default         Gauss linear;
     grad(U)         Gauss linear;
-    grad(gamma)     Gauss linear;
+    grad(alpha1)     Gauss linear;
 }
 
 divSchemes
 {
     div(rho*phi,U)  Gauss vanLeerV;
-    div(phi,gamma)  Gauss vanLeer;
-    div(phirb,gamma) Gauss vanLeer;
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss vanLeer;
 }
 
 laplacianSchemes
@@ -54,7 +54,7 @@ fluxRequired
     default         no;
     pd              ;
     pcorr           ;
-    gamma           ;
+    alpha           ;
 }
 
 

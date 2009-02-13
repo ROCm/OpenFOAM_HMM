@@ -94,14 +94,20 @@ PISO
     momentumPredictor no;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
-    nGammaCorr      1;
-    nGammaSubCycles 3;
-    cGamma          1.5;
+    nAlphaCorr      1;
+    nAlphaSubCycles 3;
+    cAlpha          1.5;
     correctPhi      no;
     pRefProbe
     {
-        fields          ( p );
-        probeLocations  ( ( 0 0 0.15 ) );
+        fields
+        (
+            p
+        );
+        probeLocations
+        (
+            ( 0 0 0.15 )
+        );
     }
 
     pRefValue       100000;
