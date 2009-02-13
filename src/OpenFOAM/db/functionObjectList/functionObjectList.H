@@ -40,10 +40,10 @@ SourceFiles
 #ifndef functionObjectList_H
 #define functionObjectList_H
 
-#include "functionObject.H"
-#include "HashTable.H"
 #include "PtrList.H"
+#include "functionObject.H"
 #include "SHA1Digest.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -137,20 +137,32 @@ public:
         virtual void clear();
 
 
-        //- Start is called at the start of the time-loop
-        virtual bool start();
-
-        //- Execute is called at each ++ or += of the time-loop
-        virtual bool execute();
-
         //- Switch the function objects on
         virtual void on();
 
         //- Switch the function objects off
         virtual void off();
 
+        //- Return the execution status (on/off) of the function objects
+        virtual bool status() const;
+
+
+        //- Start is called at the start of the time-loop
+        virtual bool start();
+
+        //- Execute is called at each ++ or += of the time-loop
+        virtual bool execute();
+
         //- Read and set the function objects if their data have changed
         virtual bool read();
+
+
+        //- Call start() manually regardless of the execution status
+        virtual bool manualStart();
+
+        //- Call execute() manually regardless of the execution status
+        virtual bool manualExecute();
+
 };
 
 

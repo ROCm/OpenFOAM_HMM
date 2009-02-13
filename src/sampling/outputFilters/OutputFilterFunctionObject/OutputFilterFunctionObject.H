@@ -126,8 +126,8 @@ public:
         //- Switch the function object off
         virtual void off();
 
-        //- Read and set the function object if its data has changed
-        virtual bool read(const dictionary& dict);
+        //- Read and set the function object if its data have changed
+        virtual bool read(const dictionary&);
 };
 
 

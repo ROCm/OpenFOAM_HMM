@@ -144,7 +144,7 @@ public:
         virtual bool execute() = 0;
 
         //- Read and set the function object if its data have changed
-        virtual bool read(const dictionary& dict) = 0;
+        virtual bool read(const dictionary&) = 0;
 };
 
 

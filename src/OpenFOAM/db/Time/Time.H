@@ -349,9 +349,15 @@ public:
         // Check
 
             //- Return true if run should continue
+            //  @sa end()
+            //  @note
+            //      the rounding heuristics near endTime mean that
+            //      @code run() @endcode and @code !end() @endcode may
+            //      not yield the same result
             virtual bool run() const;
 
             //- Return true if end of run
+            //  @sa run()
             virtual bool end() const;
 
 

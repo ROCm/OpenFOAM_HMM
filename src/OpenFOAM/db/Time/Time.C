@@ -373,7 +373,6 @@ Foam::word Foam::Time::timeName(const scalar t)
 Foam::word Foam::Time::timeName() const
 {
     return dimensionedScalar::name();
-    //return timeName(timeOutputValue());
 }
 
 
@@ -435,7 +434,7 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
     return times[nearestIndex];
 }
 
-//
+
 // This should work too,
 // if we don't worry about checking "constant" explicitly
 //
@@ -493,11 +492,13 @@ bool Foam::Time::run() const
 {
     bool running = value() < (endTime_ - 0.5*deltaT_);
 
-    if (!running && !subCycling_)
+    if (!subCycling_)
     {
-        // Note, the execute() also calls an indirect start() if required
-        if (timeIndex_ != startTimeIndex_)
+        // only execute when the condition is no longer true
+        // ie, when exiting the control loop
+        if (!running && timeIndex_ != startTimeIndex_)
         {
+            // Note, the execute() also calls an indirect start() if required
             functionObjects_.execute();
         }
     }
@@ -508,7 +509,8 @@ bool Foam::Time::run() const
 
 bool Foam::Time::end() const
 {
-    return (value() > (endTime_ + 0.5*deltaT_));
+    bool done = value() > (endTime_ + 0.5*deltaT_);
+    return done;
 }
 
 
@@ -701,8 +703,9 @@ Foam::Time& Foam::Time::operator++()
             }
         }
         break;
-    };
+    }
 
+    // see if endTime needs adjustment to stop at the next run()/end() check
     if (!end())
     {
         if (stopAt_ == saNoWriteNow)

@@ -106,6 +106,25 @@ void Foam::functionObjectList::clear()
 }
 
 
+void Foam::functionObjectList::on()
+{
+    execution_ = true;
+}
+
+
+void Foam::functionObjectList::off()
+{
+    // for safety, also force a read() when execution is turned back on
+    updated_ = execution_ = false;
+}
+
+
+bool Foam::functionObjectList::status() const
+{
+    return execution_;
+}
+
+
 bool Foam::functionObjectList::start()
 {
     return read();
@@ -130,19 +149,6 @@ bool Foam::functionObjectList::execute()
     }
 
     return ok;
-}
-
-
-void Foam::functionObjectList::on()
-{
-    execution_ = true;
-}
-
-
-void Foam::functionObjectList::off()
-{
-    // for safety, also force a read() when execution is turned back on
-    updated_ = execution_ = false;
 }
 
 
@@ -270,6 +276,30 @@ bool Foam::functionObjectList::read()
     }
 
     return ok;
+}
+
+
+bool Foam::functionObjectList::manualStart()
+{
+    bool state = execution_;
+    execution_ = true;
+
+    bool ret = start();
+
+    execution_ = state;
+    return ret;
+}
+
+
+bool Foam::functionObjectList::manualExecute()
+{
+    bool state = execution_;
+    execution_ = true;
+
+    bool ret = execute();
+
+    execution_ = state;
+    return ret;
 }
 
 
