@@ -135,8 +135,19 @@ public:
             inline label fcIndex(const label i) const;
 
             //- Return the reverse circular index, i.e. the previous index
-            //  which returns to the last at the begining of the list
+            //  which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
+
+
+            //- Return a const pointer to the first data element,
+            //  similar to the STL front() method and the string::data() method
+            //  This can be used (with caution) when interfacing with C code.
+            inline const T* cdata() const;
+
+            //- Return a pointer to the first data element,
+            //  similar to the STL front() method and the string::data() method
+            //  This can be used (with caution) when interfacing with C code.
+            inline T* data();
 
 
         // Check
@@ -174,10 +185,10 @@ public:
 
     // Member operators
 
-        //- Return subscript-checked element of FixedList.
+        //- Return element of FixedList.
         inline T& operator[](const label);
 
-        //- Return subscript-checked element of constant FixedList.
+        //- Return element of constant FixedList.
         inline const T& operator[](const label) const;
 
         //- Assignment from array operator. Takes linear time.
@@ -282,7 +293,7 @@ public:
         //- Return size of the largest possible FixedList.
         inline label max_size() const;
 
-        //- Return true if the FixedList is empty (i.e., if size() == 0).
+        //- Return true if the FixedList is empty (ie, size() is zero).
         inline bool empty() const;
 
         //- Swap two FixedLists of the same type in constant time.

@@ -26,13 +26,13 @@ Class
     Foam::MeshedSurface
 
 Description
-    A surface geometry mesh with region information, not to be confused
+    A surface geometry mesh with zone information, not to be confused
     with a similarily named surfaceMesh, which actually refers to
     the cell faces of a volume mesh.
 
-   The MeshedSurface is intended to surfaces from a variety of sources.
-   - A set of points and faces without any region information.
-   - A set of points and faces with randomly sorted region information.
+   The MeshedSurface is intended for surfaces from a variety of sources.
+   - A set of points and faces without any surface zone information.
+   - A set of points and faces with randomly ordered zone information.
      This could arise, for example, from reading external file formats
      such as STL, etc.
 
@@ -45,7 +45,7 @@ SourceFiles
 #define MeshedSurface_H
 
 #include "BasicMeshedSurface.H"
-#include "surfRegionList.H"
+#include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -59,6 +59,7 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class Time;
+class surfMesh;
 template<class Face> class MeshedSurface;
 template<class Face> class UnsortedMeshedSurface;
 
@@ -66,7 +67,7 @@ class polyBoundaryMesh;
 class surfMesh;
 
 template<class Face>
-    Ostream& operator<<(Ostream&, const MeshedSurface<Face>&);
+Ostream& operator<<(Ostream&, const MeshedSurface<Face>&);
 
 /*---------------------------------------------------------------------------*\
                       Class MeshedSurface Declaration
@@ -78,7 +79,15 @@ class MeshedSurface
     public BasicMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
-    friend class UnsortedMeshedSurface<Face>;
+    // friends despite different faces
+    template<class Face2>
+    friend class MeshedSurface;
+
+    // friends despite different faces
+    template<class Face2>
+    friend class UnsortedMeshedSurface;
+
+    friend class surfMesh;
 
 private:
 
@@ -88,31 +97,40 @@ private:
 
     // Private Member Data
 
-        //- Region information
+        //- Zone information
         // (face ordering nFaces/startFace only used during reading/writing)
-        List<surfRegion> regions_;
+        List<surfZone> zones_;
 
     // Private member functions
 
         //- Read OpenFOAM Surface format
         bool read(Istream&);
 
+        //- Transfer points/zones and transcribe face -> triFace
+        void transcribe(MeshedSurface<face>&);
+
 protected:
 
     // Protected Member functions
 
-        //- basic sanity check on regions
-        void checkRegions();
+        //- basic sanity check on zones
+        void checkZones();
 
-        //- sort faces by regions and store sorted faces
+        //- Non-const access to the zones
+        surfZoneList& storedZones()
+        {
+            return zones_;
+        }
+
+        //- sort faces by zones and store sorted faces
         void sortFacesAndStore
         (
             const Xfer<List<Face> >& unsortedFaces,
-            const Xfer<List<label> >& regionIds,
+            const Xfer<List<label> >& zoneIds,
             const bool sorted
         );
 
-        //- Set new regions from faceMap
+        //- Set new zones from faceMap
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:
@@ -139,22 +157,22 @@ public:
         //- Construct null
         MeshedSurface();
 
-        //- Construct by transferring components (points, faces, regions).
+        //- Construct by transferring components (points, faces, zones).
         MeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const Xfer<surfRegionList>&
+            const Xfer<surfZoneList>&
         );
 
         //- Construct by transferring points, faces.
-        //  Use region information, or set single default region.
+        //  Use zone information, or set single default zone.
         MeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& regionSizes = UList<label>::null(),
-            const UList<word>& regionNames = UList<word>::null()
+            const UList<label>& zoneSizes = UList<label>::null(),
+            const UList<word>& zoneNames = UList<word>::null()
         );
 
         //- Construct from a boundary mesh with local points/faces
@@ -186,7 +204,7 @@ public:
         MeshedSurface(Istream&);
 
         //- Construct from objectRegistry
-        MeshedSurface(const Time&);
+        MeshedSurface(const Time&, const word& surfName="");
 
         //- Construct as copy
         MeshedSurface(const MeshedSurface&);
@@ -250,31 +268,31 @@ public:
             return ParentType::size();
         }
 
-        const List<surfRegion>& regions() const
+        const List<surfZone>& zones() const
         {
-            return regions_;
+            return zones_;
         }
 
-        //- set a single region, optionally with a specific name
-        void oneRegion(const word& name = word::null);
+        //- set a single zone, optionally with a specific name
+        void oneZone(const word& name = word::null);
 
-        //- Add regions
-        void addRegions
+        //- Add zones
+        void addZones
         (
-            const UList<surfRegion>&,
+            const UList<surfZone>&,
             const bool cullEmpty=false
         );
 
-        //- Add regions
-        void addRegions
+        //- Add zones
+        void addZones
         (
             const UList<label>& sizes,
             const UList<word>& names,
             const bool cullEmpty=false
         );
 
-        //- Add regions
-        void addRegions
+        //- Add zones
+        void addZones
         (
             const UList<label>& sizes,
             const bool cullEmpty=false
@@ -306,6 +324,8 @@ public:
         //- Transfer the contents of the argument and annull the argument
         void transfer(UnsortedMeshedSurface<Face>&);
 
+        //- Transfer contents to the Xfer container
+        Xfer< MeshedSurface<Face> > xfer();
 
     // Read
 
@@ -328,7 +348,7 @@ public:
         }
 
         //- Write to database
-        void write(const Time&) const;
+        void write(const Time&, const word& surfName="") const;
 
 
     // Member operators

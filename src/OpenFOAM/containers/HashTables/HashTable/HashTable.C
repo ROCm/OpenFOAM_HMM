@@ -226,7 +226,7 @@ bool Foam::HashTable<T, Key, Hash>::set
     const bool protect
 )
 {
-    if (tableSize_ == 0)
+    if (!tableSize_)
     {
         resize(2);
     }
@@ -556,7 +556,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
     }
 
     // could be zero-sized from a previous transfer()
-    if (tableSize_ == 0)
+    if (!tableSize_)
     {
         resize(rhs.tableSize_);
     }

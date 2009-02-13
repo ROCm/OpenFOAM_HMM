@@ -49,8 +49,8 @@ Foam::BasicMeshedSurface<Face>::BasicMeshedSurface()
 template<class Face>
 Foam::BasicMeshedSurface<Face>::BasicMeshedSurface
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst
+    const Xfer< pointField >& pointLst,
+    const Xfer< List<Face> >& faceLst
 )
 :
     ParentType(List<Face>(), pointField())
@@ -112,8 +112,8 @@ void Foam::BasicMeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::reset
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst
+    const Xfer< pointField >& pointLst,
+    const Xfer< List<Face> >& faceLst
 )
 {
     ParentType::clearOut();
@@ -135,8 +135,8 @@ void Foam::BasicMeshedSurface<Face>::reset
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::reset
 (
-    const Xfer<List<point> >& pointLst,
-    const Xfer<List<Face> >& faceLst
+    const Xfer< List<point> >& pointLst,
+    const Xfer< List<Face> >& faceLst
 )
 {
     ParentType::clearOut();
@@ -473,7 +473,7 @@ Foam::label Foam::BasicMeshedSurface<Face>::triangulate
 
             for (label fp = 1; fp < f.size() - 1; ++fp)
             {
-                label fp1 = (fp + 1) % f.size();
+                label fp1 = f.fcIndex(fp);
 
                 newFaces[newFaceI] = triFace(f[0], f[fp], f[fp1]);
                 faceMap[newFaceI] = faceI;
@@ -532,10 +532,35 @@ void Foam::BasicMeshedSurface<Face>::remapFaces(const UList<label>&)
 template<class Face>
 void Foam::BasicMeshedSurface<Face>::writeStats(Ostream& os) const
 {
-    os  << "points      : " << this->points().size() << nl
-        << (this->isTri() ? "triangles   : " : "faces       : ")
-        << this->size() << nl
-        << "boundingBox : " << boundBox(this->points()) << endl;
+    os  << "points      : " << this->points().size() << nl;
+    if (this->isTri())
+    {
+        os << "triangles   : " << this->size() << nl;
+    }
+    else
+    {
+        label nTri = 0;
+        label nQuad = 0;
+        forAll(*this, i)
+        {
+            const label n = this->operator[](i).size();
+
+            if (n == 3)
+            {
+                nTri++;
+            }
+            else if (n == 4)
+            {
+                nQuad++;
+            }
+        }
+
+        os  << "faces       : " << this->size()
+            << "  (tri:" << nTri << " quad:" << nQuad
+            << " poly:" << (this->size() - nTri - nQuad ) << ")" << nl;
+    }
+
+    os  << "boundingBox : " << boundBox(this->points()) << endl;
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

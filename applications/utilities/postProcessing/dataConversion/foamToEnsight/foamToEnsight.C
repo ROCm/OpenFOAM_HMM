@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 
     if (Pstream::master())
     {
-        if (dir(postProcPath))
+        if (isDir(postProcPath))
         {
             rmDir(postProcPath);
         }

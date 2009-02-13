@@ -119,7 +119,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
     }
     else
     {
-        is.read(reinterpret_cast<char*>(L.begin()), Size*sizeof(T));
+        is.read(reinterpret_cast<char*>(L.data()), Size*sizeof(T));
 
         is.fatalCheck
         (
@@ -231,7 +231,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
     }
     else
     {
-        os.write(reinterpret_cast<const char*>(L.v_), Size*sizeof(T));
+        os.write(reinterpret_cast<const char*>(L.cdata()), Size*sizeof(T));
     }
 
     // Check state of IOstream

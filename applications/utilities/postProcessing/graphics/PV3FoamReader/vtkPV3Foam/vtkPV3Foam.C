@@ -228,7 +228,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
     // avoid argList and get rootPath/caseName directly from the file
     fileName fullCasePath(fileName(FileName).path());
 
-    if (!dir(fullCasePath))
+    if (!isDir(fullCasePath))
     {
         return;
     }
@@ -518,7 +518,7 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
 
             if
             (
-                file(runTime.path()/timeName/meshDir_/"points")
+                isFile(runTime.path()/timeName/meshDir_/"points")
              && IOobject("points", timeName, meshDir_, runTime).headerOk()
             )
             {

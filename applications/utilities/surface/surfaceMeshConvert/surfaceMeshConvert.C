@@ -26,25 +26,30 @@ Application
     surfaceMeshConvert
 
 Description
-    Converts from one surface mesh format to another
+
+    Convert between surface formats with optional scaling or
+    transformations (rotate/translate) on a coordinateSystem.
 
 Usage
     - surfaceMeshConvert inputFile outputFile [OPTION]
 
     @param -clean \n
-    Perform some surface checking/cleanup on the input surface
+    Perform some surface checking/cleanup on the input surface.
 
-    @param -orient \n
-    Check face orientation on the input surface
+    @param -scaleIn \<scale\> \n
+    Specify a scaling factor when reading files.
 
-    @param -scale \<scale\> \n
-    Specify a scaling factor for writing the files
+    @param -scaleOut \<scale\> \n
+    Specify a scaling factor when writing files.
 
-    @param -triSurface \n
-    Use triSurface library for input/output
+    @param -dict \<dictionary\> \n
+    Specify an alternative dictionary for constant/coordinateSystems.
 
-    @param -keyed \n
-    Use keyedSurface for input/output
+    @param -from \<coordinateSystem\> \n
+    Specify a coordinate System when reading files.
+
+    @param -to \<coordinateSystem\> \n
+    Specify a coordinate System when writing files.
 
 Note
     The filename extensions are used to determine the file format type.
@@ -54,12 +59,9 @@ Note
 #include "argList.H"
 #include "timeSelector.H"
 #include "Time.H"
-#include "polyMesh.H"
-#include "triSurface.H"
-#include "PackedBoolList.H"
 
 #include "MeshedSurfaces.H"
-#include "UnsortedMeshedSurfaces.H"
+#include "coordinateSystems.H"
 
 using namespace Foam;
 
@@ -71,24 +73,21 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("inputFile");
     argList::validArgs.append("outputFile");
-    argList::validOptions.insert("clean", "");
-    argList::validOptions.insert("orient", "");
-    argList::validOptions.insert("scale", "scale");
-    argList::validOptions.insert("triSurface", "");
-    argList::validOptions.insert("unsorted", "");
-    argList::validOptions.insert("triFace", "");
-#   include "setRootCase.H"
-    const stringList& params = args.additionalArgs();
+    argList::validOptions.insert("clean",  "scale");
+    argList::validOptions.insert("scaleIn",  "scale");
+    argList::validOptions.insert("scaleOut", "scale");
+    argList::validOptions.insert("dict", "coordinateSystemsDict");
+    argList::validOptions.insert("from", "sourceCoordinateSystem");
+    argList::validOptions.insert("to",   "targetCoordinateSystem");
 
-    scalar scaleFactor = 0;
-    if (args.options().found("scale"))
-    {
-        IStringStream(args.options()["scale"])() >> scaleFactor;
-    }
+    argList args(argc, argv);
+    Time runTime(args.rootPath(), args.caseName());
+    const stringList& params = args.additionalArgs();
 
     fileName importName(params[0]);
     fileName exportName(params[1]);
 
+    // disable inplace editing
     if (importName == exportName)
     {
         FatalErrorIn(args.executable())
@@ -96,165 +95,161 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
+    // check that reading/writing is supported
     if
     (
-        !meshedSurface::canRead(importName, true)
-     || !meshedSurface::canWriteType(exportName.ext(), true)
+        !MeshedSurface<face>::canRead(importName, true)
+     || !MeshedSurface<face>::canWriteType(exportName.ext(), true)
     )
     {
         return 1;
     }
 
-    if (args.options().found("triSurface"))
+
+    // get the coordinate transformations
+    autoPtr<coordinateSystem> fromCsys;
+    autoPtr<coordinateSystem> toCsys;
+
+    if (args.options().found("from") || args.options().found("to"))
     {
-        triSurface surf(importName);
+        autoPtr<IOobject> csDictIoPtr;
 
-        Info<< "Read surface:" << endl;
-        surf.writeStats(Info);
-        Info<< endl;
-
-        if (args.options().found("orient"))
+        if (args.options().found("dict"))
         {
-            Info<< "Checking surface orientation" << endl;
-            PatchTools::checkOrientation(surf, true);
-            Info<< endl;
-        }
+            fileName dictPath(args.options()["dict"]);
 
-        if (args.options().found("clean"))
-        {
-            Info<< "Cleaning up surface" << endl;
-            surf.cleanup(true);
-            surf.writeStats(Info);
-            Info<< endl;
-        }
-
-        Info<< "writing " << exportName;
-        if (scaleFactor <= 0)
-        {
-            Info<< " without scaling" << endl;
+            csDictIoPtr.set
+            (
+                new IOobject
+                (
+                    (
+                        isDir(dictPath)
+                      ? dictPath/coordinateSystems::typeName
+                      : dictPath
+                    ),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
         }
         else
         {
-            Info<< " with scaling " << scaleFactor << endl;
-            surf.scalePoints(scaleFactor);
-            surf.writeStats(Info);
-            Info<< endl;
+            csDictIoPtr.set
+            (
+                new IOobject
+                (
+                    coordinateSystems::typeName,
+                    runTime.constant(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE,
+                    false
+                )
+            );
         }
 
-        // write sorted by region
-        surf.write(exportName, true);
+
+        if (!csDictIoPtr->headerOk())
+        {
+            FatalErrorIn(args.executable())
+                << "Cannot open coordinateSystems file\n    "
+                << csDictIoPtr->objectPath() << nl
+                << exit(FatalError);
+        }
+
+        coordinateSystems csLst(csDictIoPtr());
+
+        if (args.options().found("from"))
+        {
+            const word csName(args.options()["from"]);
+
+            label csId = csLst.find(csName);
+            if (csId < 0)
+            {
+                FatalErrorIn(args.executable())
+                    << "Cannot find -from " << csName << nl
+                    << "available coordinateSystems: " << csLst.toc() << nl
+                    << exit(FatalError);
+            }
+
+            fromCsys.reset(new coordinateSystem(csLst[csId]));
+        }
+
+        if (args.options().found("to"))
+        {
+            const word csName(args.options()["to"]);
+
+            label csId = csLst.find(csName);
+            if (csId < 0)
+            {
+                FatalErrorIn(args.executable())
+                    << "Cannot find -to " << csName << nl
+                    << "available coordinateSystems: " << csLst.toc() << nl
+                    << exit(FatalError);
+            }
+
+            toCsys.reset(new coordinateSystem(csLst[csId]));
+        }
+
+
+        // maybe fix this later
+        if (fromCsys.valid() && toCsys.valid())
+        {
+            FatalErrorIn(args.executable())
+                << "Only allowed  '-from' or '-to' option at the moment."
+                << exit(FatalError);
+        }
     }
-    else if (args.options().found("unsorted"))
+
+    scalar scaleIn = 0;
+    scalar scaleOut = 0;
+    if (args.options().found("scaleIn"))
     {
-        UnsortedMeshedSurface<face> surf(importName);
-
-        Info<< "Read surface:" << endl;
-        surf.writeStats(Info);
-        Info<< endl;
-
-        if (args.options().found("orient"))
-        {
-            Info<< "Checking surface orientation" << endl;
-            PatchTools::checkOrientation(surf, true);
-            Info<< endl;
-        }
-
-        if (args.options().found("clean"))
-        {
-            Info<< "Cleaning up surface" << endl;
-            surf.cleanup(true);
-            surf.writeStats(Info);
-            Info<< endl;
-        }
-
-        Info<< "writing " << exportName;
-        if (scaleFactor <= 0)
-        {
-            Info<< " without scaling" << endl;
-        }
-        else
-        {
-            Info<< " with scaling " << scaleFactor << endl;
-            surf.scalePoints(scaleFactor);
-            surf.writeStats(Info);
-            Info<< endl;
-        }
-        surf.write(exportName);
+        IStringStream(args.options()["scaleIn"])() >> scaleIn;
     }
-#if 1
-    else if (args.options().found("triFace"))
+    if (args.options().found("scaleOut"))
     {
-        MeshedSurface<triFace> surf(importName);
-
-        Info<< "Read surface:" << endl;
-        surf.writeStats(Info);
-        Info<< endl;
-
-        if (args.options().found("orient"))
-        {
-            Info<< "Checking surface orientation" << endl;
-            PatchTools::checkOrientation(surf, true);
-            Info<< endl;
-        }
-
-        if (args.options().found("clean"))
-        {
-            Info<< "Cleaning up surface" << endl;
-            surf.cleanup(true);
-            surf.writeStats(Info);
-            Info<< endl;
-        }
-
-        Info<< "writing " << exportName;
-        if (scaleFactor <= 0)
-        {
-            Info<< " without scaling" << endl;
-        }
-        else
-        {
-            Info<< " with scaling " << scaleFactor << endl;
-            surf.scalePoints(scaleFactor);
-            surf.writeStats(Info);
-            Info<< endl;
-        }
-        surf.write(exportName);
+        IStringStream(args.options()["scaleOut"])() >> scaleOut;
     }
-#endif
-    else
+
+
     {
         MeshedSurface<face> surf(importName);
 
-        Info<< "Read surface:" << endl;
-        surf.writeStats(Info);
-        Info<< endl;
-
-        if (args.options().found("orient"))
-        {
-            Info<< "Checking surface orientation" << endl;
-            PatchTools::checkOrientation(surf, true);
-            Info<< endl;
-        }
-
         if (args.options().found("clean"))
         {
-            Info<< "Cleaning up surface" << endl;
             surf.cleanup(true);
-            surf.writeStats(Info);
-            Info<< endl;
+        }
+
+        if (scaleIn > 0)
+        {
+            Info<< " -scaleIn " << scaleIn << endl;
+            surf.scalePoints(scaleIn);
+        }
+
+        if (fromCsys.valid())
+        {
+            Info<< " -from " << fromCsys().name() << endl;
+            tmp<pointField> tpf = fromCsys().localPosition(surf.points());
+            surf.movePoints(tpf());
+        }
+
+        if (toCsys.valid())
+        {
+            Info<< " -to " << toCsys().name() << endl;
+            tmp<pointField> tpf = toCsys().globalPosition(surf.points());
+            surf.movePoints(tpf());
+        }
+
+        if (scaleOut > 0)
+        {
+            Info<< " -scaleOut " << scaleOut << endl;
+            surf.scalePoints(scaleOut);
         }
 
         Info<< "writing " << exportName;
-        if (scaleFactor <= 0)
-        {
-            Info<< " without scaling" << endl;
-        }
-        else
-        {
-            Info<< " with scaling " << scaleFactor << endl;
-            surf.scalePoints(scaleFactor);
-            surf.writeStats(Info);
-            Info<< endl;
-        }
         surf.write(exportName);
     }
 

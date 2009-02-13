@@ -42,18 +42,17 @@ template<class Face>
 void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    const List<Face>& faceLst = surf.faces();
-    const List<surfRegion>& regionLst = surf.regions();
-
-    writeHeader(os, surf.points(), faceLst.size());
+    writeHeader(os, pointLst, faceLst.size());
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -62,11 +61,22 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
             {
                 os << ' ' << f[fp];
             }
-            os << ' ' << regionI << endl;
+            os << ' ' << zoneI << endl;
         }
     }
 
     writeTail(os);
+}
+
+
+template<class Face>
+void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 
@@ -82,12 +92,12 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
     writeHeader(os, surf.points(), faceLst.size());
 
     labelList faceMap;
-    List<surfRegion> regionLst = surf.sortedRegions(faceMap);
+    List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
     label faceIndex = 0;
-    forAll(regionLst, regionI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(regionLst[regionI], localFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
@@ -96,7 +106,7 @@ void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
             {
                 os << ' ' << f[fp];
             }
-            os << ' ' << regionI << endl;
+            os << ' ' << zoneI << endl;
         }
     }
 

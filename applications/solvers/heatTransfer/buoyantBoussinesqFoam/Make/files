@@ -1,0 +1,3 @@
+buoyantBoussinesqFoam.C
+
+EXE = $(FOAM_APPBIN)/buoyantBoussinesqFoam

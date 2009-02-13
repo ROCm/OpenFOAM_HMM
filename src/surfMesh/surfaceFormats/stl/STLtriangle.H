@@ -46,18 +46,24 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class STLtriangle Declaration
+                         Class STLtriangle Declaration
 \*---------------------------------------------------------------------------*/
 
 class STLtriangle
 {
     // Private data
 
-        typedef unsigned short STLregion;
+        //- Attribute is 16-bit
+        typedef unsigned short STLattrib;
 
-        STLpoint normal_, a_, b_, c_;
+        //- The face normal, many programs write zore or other junk
+        STLpoint normal_;
 
-        STLregion region_;
+        //- The three points defining the triangle
+        STLpoint a_, b_, c_;
+
+        //- The attribute information could for colour or solid id, etc
+        STLattrib attrib_;
 
 public:
 
@@ -73,7 +79,7 @@ public:
             const STLpoint& a,
             const STLpoint& b,
             const STLpoint& c,
-            unsigned short region
+            unsigned short attrib
         );
 
         //- Construct from istream (read binary)
@@ -88,7 +94,7 @@ public:
             inline const STLpoint& a() const;
             inline const STLpoint& b() const;
             inline const STLpoint& c() const;
-            inline unsigned short region() const;
+            inline unsigned short attrib() const;
 
         // Read
 

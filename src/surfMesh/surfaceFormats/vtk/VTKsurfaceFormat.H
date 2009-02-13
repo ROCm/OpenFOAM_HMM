@@ -27,7 +27,7 @@ Class
 
 Description
     Provide a means of writing VTK legacy format.
-    The output is never sorted by region.
+    The output is never sorted by zone.
 
 SourceFiles
     VTKsurfaceFormat.C
@@ -88,6 +88,15 @@ public:
     // Member Functions
 
         // Write
+
+        //- Write surface mesh components
+        static void write
+        (
+            Ostream&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
 
         //- Write MeshedSurface
         static void write

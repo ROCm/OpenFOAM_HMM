@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class OBJsurfaceFormatCore Declaration
+                    Class OBJsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class OBJsurfaceFormatCore
@@ -63,7 +63,7 @@ protected:
         Ostream&,
         const pointField&,
         const label nFaces,
-        const UList<surfRegion>&
+        const UList<surfZone>&
     );
 
 };

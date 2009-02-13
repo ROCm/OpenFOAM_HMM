@@ -149,7 +149,6 @@ private:
         //- IOobject state
         objectState objState_;
 
-
 protected:
 
     // Protected member functions
@@ -166,6 +165,18 @@ public:
 
     //- Runtime type information
     TypeName("IOobject");
+
+
+    // Static Member Functions
+
+        //- Split path into instance, local, name components
+        static bool fileNameComponents
+        (
+            const fileName& path,
+            fileName& instance,
+            fileName& local,
+            word& name
+        );
 
 
     // Constructors
@@ -194,6 +205,7 @@ public:
         );
 
         //- Construct from path, registry, io options
+        //  Uses fileNameComponents() to split path into components.
         IOobject
         (
             const fileName& path,
@@ -215,7 +227,7 @@ public:
         virtual ~IOobject();
 
 
-    // Member functions
+    // Member Functions
 
         // General access
 

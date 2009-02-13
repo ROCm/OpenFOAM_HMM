@@ -156,7 +156,7 @@ class vtkPV3Foam
 
             bool empty() const
             {
-                return (size_ == 0);
+                return !size_;
             }
 
             void reset()
