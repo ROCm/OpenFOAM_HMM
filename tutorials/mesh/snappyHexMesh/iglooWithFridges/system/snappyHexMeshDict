@@ -1,0 +1,147 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      snappyHexMeshDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+castellatedMesh true;
+
+snap            true;
+
+addLayers       true;
+
+geometry
+{
+    fridgeA
+    {
+        type            searchableBox;
+        min             ( 2 2 0 );
+        max             ( 3 3 2 );
+    }
+
+    fridgeB
+    {
+        type            searchableBox;
+        min             ( 3.5 3 0 );
+        max             ( 4.3 3.8 1.8 );
+    }
+
+    igloo
+    {
+        type            searchableSphere;
+        centre          ( 3 3 0 );
+        radius          4;
+    }
+}
+
+castellatedMeshControls
+{
+    maxLocalCells   1000000;
+    maxGlobalCells  2000000;
+    minRefinementCells 0;
+    nCellsBetweenLevels 1;
+    features        ( );
+    refinementSurfaces
+    {
+        fridgeA
+        {
+            level           ( 2 2 );
+        }
+
+        fridgeB
+        {
+            level           ( 2 2 );
+        }
+
+        igloo
+        {
+            level           ( 1 1 );
+        }
+    }
+
+    resolveFeatureAngle 60;
+    refinementRegions
+    {
+    }
+
+    locationInMesh  ( 3 0.28 0.43 );
+}
+
+snapControls
+{
+    nSmoothPatch    3;
+    tolerance       4;
+    nSolveIter      30;
+    nRelaxIter      5;
+}
+
+addLayersControls
+{
+    layers
+    {
+        fridgeA_region0
+        {
+            nSurfaceLayers  1;
+        }
+
+        fridgeB_region0
+        {
+            nSurfaceLayers  1;
+        }
+
+        igloo_region0
+        {
+            nSurfaceLayers  1;
+        }
+    }
+
+    expansionRatio  1;
+    finalLayerRatio 0.5;
+    minThickness    0.25;
+    nGrow           0;
+    featureAngle    60;
+    nRelaxIter      5;
+    nSmoothSurfaceNormals 1;
+    nSmoothNormals  3;
+    nSmoothThickness 10;
+    maxFaceThicknessRatio 0.5;
+    maxThicknessToMedialRatio 0.3;
+    minMedianAxisAngle 130;
+    nBufferCellsNoExtrude 0;
+}
+
+meshQualityControls
+{
+    maxNonOrtho     65;
+    maxBoundarySkewness 20;
+    maxInternalSkewness 4;
+    maxConcave      80;
+    minFlatness     0.5;
+    minVol          1e-13;
+    minArea         -1;
+    minTwist        0.05;
+    minDeterminant  0.001;
+    minFaceWeight   0.05;
+    minVolRatio     0.01;
+    minTriangleTwist -1;
+    nSmoothScale    4;
+    errorReduction  0.75;
+}
+
+debug           0;
+
+mergeTolerance  1e-06;
+
+
+// ************************************************************************* //
