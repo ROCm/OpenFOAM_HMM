@@ -75,7 +75,6 @@ Description
 SourceFiles
     fieldAverage.C
     fieldAverageTemplates.C
-    IOfieldAverage.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -122,7 +121,7 @@ protected:
         //- Clean restart flag
         Switch cleanRestart_;
 
-        //- List of field average items, describing waht averages to be
+        //- List of field average items, describing what averages to be
         //  calculated and output
         List<fieldAverageItem> faItems_;
 
@@ -138,15 +137,15 @@ protected:
         // Lists of averages
 
             // Arithmetic mean fields
-            PtrList<volScalarField> meanScalarFields_;
-            PtrList<volVectorField> meanVectorFields_;
-            PtrList<volSphericalTensorField> meanSphericalTensorFields_;
-            PtrList<volSymmTensorField> meanSymmTensorFields_;
-            PtrList<volTensorField> meanTensorFields_;
+            wordList meanScalarFields_;
+            wordList meanVectorFields_;
+            wordList meanSphericalTensorFields_;
+            wordList meanSymmTensorFields_;
+            wordList meanTensorFields_;
 
             // Prime-squared fields - applicable to volVectorFields only
-            PtrList<volScalarField> prime2MeanScalarFields_;
-            PtrList<volSymmTensorField> prime2MeanSymmTensorFields_;
+            wordList prime2MeanScalarFields_;
+            wordList prime2MeanSymmTensorFields_;
 
 
         // Counters
@@ -162,6 +161,9 @@ protected:
 
         // Initialisation routines
 
+            //- Checkout fields (causes deletion) from the database
+            void checkoutFields(const wordList&) const;
+
             //- Reset size of lists (clear existing values)
             void resetLists(const label nItems);
 
@@ -171,20 +173,16 @@ protected:
 
             //- Add mean average field to PtrList
             template<class Type>
-            void addMeanField
-            (
-                const label,
-                PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-            );
+            void addMeanField(const label, wordList&) const;
 
             //- Add prime-squared average field to PtrList
             template<class Type1, class Type2>
             void addPrime2MeanField
             (
                 const label,
-                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
-                PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-            );
+                const wordList&,
+                wordList&
+            ) const;
 
 
         // Calculation functions
@@ -194,26 +192,23 @@ protected:
 
             //- Calculate mean average fields
             template<class Type>
-            void calculateMeanFields
-            (
-                PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-            );
+            void calculateMeanFields(const wordList&) const;
 
             //- Add mean-squared field value to prime-squared mean field
             template<class Type1, class Type2>
             void addMeanSqrToPrime2Mean
             (
-                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
-                PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-            );
+                const wordList&,
+                const wordList&
+            ) const;
 
             //- Calculate prime-squared average fields
             template<class Type1, class Type2>
             void calculatePrime2MeanFields
             (
-                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
-                PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-            );
+                const wordList&,
+                const wordList&
+            ) const;
 
 
         // I-O
@@ -223,11 +218,7 @@ protected:
 
             //- Write fields
             template<class Type>
-            void writeFieldList
-            (
-                const PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-                    fieldList
-            ) const;
+            void writeFieldList(const wordList&) const;
 
             //- Write averaging properties - steps and time
             void writeAveragingProperties() const;
