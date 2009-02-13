@@ -10,35 +10,31 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
-    object      epsilon;
+    location    "-180";
+    object      mut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [1 -1 -1 0 0 0 0];
 
-internalField   uniform 1e-08;
+internalField   uniform 0;
 
 boundaryField
 {
-    lowerWall
+    piston
     {
-        type            epsilonWallFunction;
-        value           uniform 1e-08;
+        type            mutWallFunction;
+        value           uniform 0;
     }
-    upperWall
+    liner
     {
-        type            epsilonWallFunction;
-        value           uniform 1e-08;
+        type            mutWallFunction;
+        value           uniform 0;
     }
-    frontBack
+    cylinderHead
     {
-        type            cyclic;
-        value           uniform 1e-08;
-    }
-    defaultFaces
-    {
-        type            empty;
+        type            mutWallFunction;
+        value           uniform 0;
     }
 }
 

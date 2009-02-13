@@ -43,6 +43,10 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
+adjustTimeStep  yes;
+
+maxCo           0.5;
+
 functions
 (
     fieldAverage1
