@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,102 +10,107 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    pcorr PCG
+    pcorr
     {
-        preconditioner   GAMG
+        solver          PCG;
+        preconditioner
         {
-            tolerance        1e-3;
-            relTol           0;
-
-            smoother         GaussSeidel;
-            nPreSweeps       0;
-            nPostSweeps      2;
-            nBottomSweeps    2;
-
+            preconditioner  GAMG;
+            tolerance       0.001;
+            relTol          0;
+            smoother        GaussSeidel;
+            nPreSweeps      0;
+            nPostSweeps     2;
+            nBottomSweeps   2;
             cacheAgglomeration false;
             nCellsInCoarsestLevel 10;
-            agglomerator     faceAreaPair;
-            mergeLevels      1;
-        };
+            agglomerator    faceAreaPair;
+            mergeLevels     1;
+        }
 
-        tolerance        1e-4;
-        relTol           0;
-        maxIter          100;
-    };
+        tolerance       0.0001;
+        relTol          0;
+        maxIter         100;
+    }
 
-    pd GAMG
+    pd
     {
-        tolerance        1e-8;
-        relTol           0.05;
-
-        smoother         GaussSeidel;
-        nPreSweeps       0;
-        nPostSweeps      2;
-        nFinestSweeps    2;
-
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0.05;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
         cacheAgglomeration false;
         nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-    };
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
 
-    pdFinal PCG
+    pdFinal
     {
-        preconditioner GAMG
+        solver          PCG;
+        preconditioner
         {
-            tolerance        1e-8;
-            relTol           0;
-
-            nVcycles         2;
-
-            smoother         GaussSeidel;
-            nPreSweeps       0;
-            nPostSweeps      2;
-            nFinestSweeps    2;
-
+            preconditioner  GAMG;
+            tolerance       1e-08;
+            relTol          0;
+            nVcycles        2;
+            smoother        GaussSeidel;
+            nPreSweeps      0;
+            nPostSweeps     2;
+            nFinestSweeps   2;
             cacheAgglomeration false;
             nCellsInCoarsestLevel 10;
-            agglomerator     faceAreaPair;
-            mergeLevels      1;
-        };
+            agglomerator    faceAreaPair;
+            mergeLevels     1;
+        }
 
-        tolerance        1e-8;
-        relTol           0;
-        maxIter          20;
-    };
+        tolerance       1e-08;
+        relTol          0;
+        maxIter         20;
+    }
 
-    U smoothSolver
+    U
     {
-        smoother         GaussSeidel;
-        tolerance        1e-6;
-        relTol           0;
-        nSweeps          1;
-    };
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        tolerance       1e-06;
+        relTol          0;
+        nSweeps         1;
+    }
 
-    k PBiCG
+    k
     {
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
-    B PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
+
+    B
     {
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
-    nuTilda PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
+
+    nuTilda
     {
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
 }
 
 PISO
@@ -120,9 +125,10 @@ PISO
     pdRefValue      0;
     pRefProbe
     {
-        fields  (pd);
-        probeLocations ((0.51 0.51 0.51));
-    };
+        fields          ( pd );
+        probeLocations  ( ( 0.51 0.51 0.51 ) );
+    }
 }
+
 
 // ************************************************************************* //

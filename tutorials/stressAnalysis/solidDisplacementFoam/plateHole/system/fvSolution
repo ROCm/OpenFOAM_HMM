@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,41 +10,36 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    D GAMG
+    D
     {
-        tolerance        1e-06;
-        relTol           0.9;
-
-        smoother         GaussSeidel;
-
+        solver          GAMG;
+        tolerance       1e-06;
+        relTol          0.9;
+        smoother        GaussSeidel;
         cacheAgglomeration true;
-
         nCellsInCoarsestLevel 20;
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
 
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-    };
-
-    T GAMG
+    T
     {
-        tolerance        1e-06;
-        relTol           0.9;
-
-        smoother         GaussSeidel;
-
+        solver          GAMG;
+        tolerance       1e-06;
+        relTol          0.9;
+        smoother        GaussSeidel;
         cacheAgglomeration true;
-
         nCellsInCoarsestLevel 20;
-
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-    };
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
 }
 
 stressAnalysis
@@ -53,5 +48,6 @@ stressAnalysis
     nCorrectors     1;
     D               1e-06;
 }
+
 
 // ************************************************************************* //

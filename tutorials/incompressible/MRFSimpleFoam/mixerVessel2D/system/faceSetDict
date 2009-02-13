@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,24 +10,16 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      faceSetDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Name of set to operate on
-name rotor;
+name            rotor;
 
-// One of clear/new/invert/add/delete|subset/list
-action delete;
+action          delete;
 
-// Actions to apply to pointSet. These are all the topoSetSource's ending
-// in ..ToFace (see the meshTools library).
-topoSetSources
-(
-    // Select boundary faces
-    boundaryToFace
-    {
-    }
-);
+topoSetSources  ( boundaryToFace { } );
+
 
 // ************************************************************************* //

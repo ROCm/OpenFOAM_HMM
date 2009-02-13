@@ -1,8 +1,8 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,50 +10,51 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    p GAMG
+    p
     {
-        tolerance        1e-6;
-        relTol           0.1;
-
-        smoother         GaussSeidel;
-        nPreSweeps       0;
-        nPostSweeps      2;
-
+        solver          GAMG;
+        tolerance       1e-06;
+        relTol          0.1;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
         cacheAgglomeration true;
-
         nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-    };
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
 
-    U smoothSolver
+    U
     {
-        smoother         GaussSeidel;
-        nSweeps          2;
-        tolerance        1e-8;
-        relTol           0.1;
-    };
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         2;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
 
-    nuTilda smoothSolver
+    nuTilda
     {
-        smoother         GaussSeidel;
-        nSweeps          2;
-        tolerance        1e-8;
-        relTol           0.1;
-    };
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         2;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
 }
 
 SIMPLE
 {
     nNonOrthogonalCorrectors 0;
-    pRefCell 0;
-    pRefValue 0;
+    pRefCell        0;
+    pRefValue       0;
 }
 
 relaxationFactors
@@ -62,5 +63,6 @@ relaxationFactors
     U               0.7;
     nuTilda         0.7;
 }
+
 
 // ************************************************************************* //

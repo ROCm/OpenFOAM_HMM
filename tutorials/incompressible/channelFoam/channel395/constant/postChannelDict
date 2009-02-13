@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,19 +10,16 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "constant";
     object      postChannelDict;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Seed patches to start layering from
-patches (bottomWall);
+patches         ( bottomWall );
 
-// Direction in which the layers are
-component y;
+component       y;
 
-// Is the mesh symmetric? If so average(symmetric fields) or
-// subtract(asymmetric) contributions from both halves
-symmetric true;
+symmetric       true;
+
 
 // ************************************************************************* //

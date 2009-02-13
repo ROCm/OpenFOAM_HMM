@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,46 +10,45 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
 {
-    default              Euler;
+    default         Euler;
 }
 
 interpolationSchemes
 {
-    default              linear;
+    default         linear;
 }
 
 divSchemes
 {
-    default              none;
-    div(phiv,rho)        Gauss limitedLinear 0.2;
-    div(phi,U)           Gauss limitedLinearV 0.2;
-    div(phiv,omega)      Gauss limitedLinear 0.2;
-    div(phiv,k)          Gauss limitedLinear 0.2;
+    default         none;
+    div(phiv,rho)   Gauss limitedLinear 0.2;
+    div(phi,U)      Gauss limitedLinearV 0.2;
+    div(phiv,omega) Gauss limitedLinear 0.2;
+    div(phiv,k)     Gauss limitedLinear 0.2;
 }
 
 gradSchemes
 {
-    default              Gauss linear;
+    default         Gauss linear;
 }
 
 laplacianSchemes
 {
-    default none;
-
-    laplacian(nuf,rhoU)  Gauss linear corrected;
-    laplacian(muEff,U)  Gauss linear corrected;
+    default         none;
+    laplacian(nuf,rhoU) Gauss linear corrected;
+    laplacian(muEff,U) Gauss linear corrected;
     laplacian(rrhoUAf,p) Gauss linear corrected;
-    laplacian(rUAf,p)    Gauss linear corrected;
+    laplacian(rUAf,p) Gauss linear corrected;
     laplacian(DomegaEff,omega) Gauss linear corrected;
-    laplacian(DkEff,k)   Gauss linear corrected;
-
-    laplacian(1,p)       Gauss linear corrected;
+    laplacian(DkEff,k) Gauss linear corrected;
+    laplacian(1,p)  Gauss linear corrected;
 }
 
 snGradSchemes
@@ -60,9 +59,10 @@ snGradSchemes
 
 fluxRequired
 {
-    default        none;
-    p;
-    rho;
+    default         none;
+    p               ;
+    rho             ;
 }
+
 
 // ************************************************************************* //

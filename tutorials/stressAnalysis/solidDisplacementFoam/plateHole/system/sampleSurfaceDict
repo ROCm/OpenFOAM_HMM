@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,27 +10,18 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      sampleDict;
+    location    "system";
+    object      sampleSurfaceDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 interpolationScheme cellPoint;
 
-surfaceFormat     dx;
+surfaceFormat   dx;
 
-surfaces      
-(
-    constantPlane 
-    {
-        name      plate;
-        basePoint (0 0 0.25);
-        normalVector (0 0 1);
-    }
-);
+surfaces        ( constantPlane { name plate ; basePoint ( 0 0 0.25 ) ; normalVector ( 0 0 1 ) ; } );
 
-fields          
-(
-    sigmaxx
-);
+fields          ( sigmaxx );
+
 
 // ************************************************************************* //

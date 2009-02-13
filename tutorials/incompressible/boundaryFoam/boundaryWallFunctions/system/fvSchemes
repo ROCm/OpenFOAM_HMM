@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,28 +10,23 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Time derivative discretisation schemes
 ddtSchemes
 {
-    // Default scheme
     default         steadyState;
 }
 
-// Gradient discretisation schemes
 gradSchemes
 {
-    // Default gradient scheme
     default         Gauss linear;
 }
 
-// Convection discretisation schemes
 divSchemes
 {
-    // Default scheme
     default         none;
     div(phi,k)      Gauss linear;
     div(phi,epsilon) Gauss linear;
@@ -40,10 +35,8 @@ divSchemes
     div((nuEff*dev(grad(U).T()))) Gauss linear;
 }
 
-// Laplacian discretisation schemes
 laplacianSchemes
 {
-    // Default scheme
     default         none;
     laplacian(nuEff,U) Gauss linear corrected;
     laplacian(DkEff,k) Gauss linear corrected;
@@ -52,18 +45,15 @@ laplacianSchemes
     laplacian(DnuTildaEff,nuTilda) Gauss linear corrected;
 }
 
-// Interpolation schemes
 interpolationSchemes
 {
-    // Default scheme
     default         linear;
 }
 
-// Surface normal gradient schemes
 snGradSchemes
 {
-    // Default scheme
     default         corrected;
 }
+
 
 // ************************************************************************* //

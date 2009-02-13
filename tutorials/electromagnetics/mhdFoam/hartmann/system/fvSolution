@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,36 +10,44 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    p PCG
+    p
     {
-        preconditioner   DIC;
-        tolerance        1e-06;
-        relTol           0;
-    };
-    U PBiCG
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    U
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0;
-    };
-    B PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    B
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0;
-    };
-    pB PCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    pB
     {
-        preconditioner   DIC;
-        tolerance        1e-05;
-        relTol           0;
-    };
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-05;
+        relTol          0;
+    }
 }
 
 PISO
@@ -52,5 +60,6 @@ BPISO
 {
     nCorrectors     3;
 }
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,6 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      decomposeParDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -17,18 +18,16 @@ FoamFile
 numberOfSubdomains 6;
 
 method          hierarchical;
-//method          metis;
-//method          parMetis;
 
 simpleCoeffs
 {
-    n               (4 1 1);
+    n               ( 4 1 1 );
     delta           0.001;
 }
 
 hierarchicalCoeffs
 {
-    n               (3 2 1);
+    n               ( 3 2 1 );
     delta           0.001;
     order           xyz;
 }
@@ -40,8 +39,6 @@ manualCoeffs
 
 metisCoeffs
 {
-    //n                   (5 1 1);
-    //cellWeightsFile     "constant/cellWeightsFile";
 }
 
 

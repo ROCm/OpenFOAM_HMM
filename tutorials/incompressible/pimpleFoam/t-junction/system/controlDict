@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,10 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 startFrom       startTime;
 
@@ -44,38 +44,10 @@ timePrecision   6;
 runTimeModifiable yes;
 
 adjustTimeStep  yes;
+
 maxCo           5;
 
-functions
-(
-    probes
-    {
-        // Type of functionObject
-        type probes;
-
-        // Where to load it from (if not already in solver)
-        functionObjectLibs ("libsampling.so");
-
-        // Name of the directory for the probe data
-        name probes;
-
-        // Locations to be probed. runTime modifiable!
-        probeLocations
-        (
-            (1E-6 0 0.01)           // at inlet
-            (0.21 -0.20999 0.01)    // at outlet1
-            (0.21  0.20999 0.01)    // at outlet2
-            (0.21 0 0.01)           // at central block
-        );
-
-        // Fields to be probed. runTime modifiable!
-        fields
-        (
-            p
-            U
-        );
-    }
-);
+functions       ( probes { type probes ; functionObjectLibs ( "libsampling.so" ) ; name probes ; probeLocations ( ( 1e-06 0 0.01 ) ( 0.21 -0.20999 0.01 ) ( 0.21 0.20999 0.01 ) ( 0.21 0 0.01 ) ) ; fields ( p U ) ; } );
 
 
 // ************************************************************************* //

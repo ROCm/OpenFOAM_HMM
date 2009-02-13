@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,10 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 startFrom       startTime;
 
@@ -47,33 +47,28 @@ functions
 (
     fieldAverage1
     {
-        // Type of functionObject
         type fieldAverage;
-
-        // Where to load it from (if not already in solver)
-        functionObjectLibs ("libfieldFunctionObjects.so");
-
+        functionObjectLibs ( "libfieldFunctionObjects.so" );
         enabled true;
-
         outputControl outputTime;
-
-        // Fields to be  averaged - runTime modifiable
         fields
         (
             U
             {
-                mean            on;
-                prime2Mean      on;
-                base            time;
+                mean on;
+                prime2Mean on;
+                base time;
             }
+
             p
             {
-                mean            on;
-                prime2Mean      on;
-                base            time;
+                mean on;
+                prime2Mean on;
+                base time;
             }
         );
     }
 );
+
 
 // ************************************************************************* //

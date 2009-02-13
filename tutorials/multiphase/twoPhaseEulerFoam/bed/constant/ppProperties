@@ -2,26 +2,28 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       dictionary;
+    location    "constant";
     object      ppProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-preAlphaExp         500;
+preAlphaExp     500;
 
-expMax              1.0e+3;
+expMax          1000;
 
-alphaMax            0.6;
+alphaMax        0.6;
 
-g0                  g0 [1 -1 -2 0 0 0 0 ] 1000 ;
+g0              g0 [ 1 -1 -2 0 0 0 0 ] 1000;
 
-packingLimiter      no;
+packingLimiter  no;
+
 
 // ************************************************************************* //

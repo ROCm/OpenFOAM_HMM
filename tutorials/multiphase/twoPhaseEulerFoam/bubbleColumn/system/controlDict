@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,10 +10,10 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 
 startFrom       startTime;
 
@@ -43,52 +43,13 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
-adjustTimeStep no;
+adjustTimeStep  no;
 
-maxCo          0.5;
+maxCo           0.5;
 
-maxDeltaT      1;
+maxDeltaT       1;
 
-functions
-(
-    fieldAverage1
-    {
-        // Type of functionObject
-        type fieldAverage;
-
-        // Where to load it from (if not already in solver)
-        functionObjectLibs ("libfieldFunctionObjects.so");
-
-        // Fields to be  averaged - runTime modifiable
-        fields
-        (
-            Ua
-            {
-                mean            on;
-                prime2Mean      off;
-                base            time;
-            }
-            Ub
-            {
-                mean            on;
-                prime2Mean      off;
-                base            time;
-            }
-            alpha
-            {
-                mean            on;
-                prime2Mean      off;
-                base            time;
-            }
-            p
-            {
-                mean            on;
-                prime2Mean      off;
-                base            time;
-            }
-        );
-    }
-);
+functions       ( fieldAverage1 { type fieldAverage ; functionObjectLibs ( "libfieldFunctionObjects.so" ) ; fields ( Ua { mean on ; prime2Mean off ; base time ; } Ub { mean on ; prime2Mean off ; base time ; } alpha { mean on ; prime2Mean off ; base time ; } p { mean on ; prime2Mean off ; base time ; } ) ; } );
 
 
 // ************************************************************************* //

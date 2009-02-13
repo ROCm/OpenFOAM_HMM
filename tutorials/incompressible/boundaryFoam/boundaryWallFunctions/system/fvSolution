@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,73 +10,70 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    // Solver for the U equation
-    U PCG
+    U
     {
-        preconditioner   DIC;
-        tolerance        1e-06;
-        relTol           0;
-    };
-    // Solver for the k equation
-    k PBiCG
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    k
     {
-        preconditioner   DILU;
-        tolerance        1e-06;
-        relTol           0;
-    };
-    // Solver for the epsilon equation
-    epsilon PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    epsilon
     {
-        preconditioner   DILU;
-        tolerance        1e-06;
-        relTol           0;
-    };
-    // Solver for the R equation
-    R PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    R
     {
-        preconditioner   DILU;
-        tolerance        1e-06;
-        relTol           0;
-    };
-    // Solver for the nuTilda equation
-    nuTilda PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    nuTilda
     {
-        preconditioner   DILU;
-        tolerance        1e-06;
-        relTol           0;
-    };
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
 }
 
 PISO
 {
-    // Number of PISO correctors
     nCorrectors     2;
-    // Number of non-orthogonal correctors
     nNonOrthogonalCorrectors 0;
-    // momentumPredictor?
     momentumPredictor yes;
-    // fluxGradp?
     fluxGradp       no;
 }
 
 relaxationFactors
 {
-    // U
     U               0.5;
-    // k
     k               0.7;
-    // epsilon
     epsilon         0.7;
-    // R
     R               0.7;
-    // nuTilda
     nuTilda         0.7;
 }
+
 
 // ************************************************************************* //

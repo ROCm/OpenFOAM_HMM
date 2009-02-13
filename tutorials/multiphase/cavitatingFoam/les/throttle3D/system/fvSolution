@@ -1,77 +1,78 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    omega PBiCG
+    omega
     {
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
 
-    k PBiCG
+    k
     {
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
 
-    rho PBiCG
+    rho
     {
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
 
-    U PBiCG
+    U
     {
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-08;
+        relTol          0;
+    }
 
-    p GAMG
+    p
     {
-        tolerance        1e-8;
-        relTol           0;
-
-        smoother         GaussSeidel;
-        nPreSweeps       0;
-        nPostSweeps      2;
-
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0;
+        smoother        GaussSeidel;
+        nPreSweeps      0;
+        nPostSweeps     2;
         cacheAgglomeration true;
-
         nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-    };
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
 }
 
 PISO
 {
-    nCorrectors                3;
-    nNonOrthogonalCorrectors   0;
-
-//    removeSwirl                2;
+    nCorrectors     3;
+    nNonOrthogonalCorrectors 0;
 }
 
 SIMPLE
 {
-
 }
+
 
 // ************************************************************************* //

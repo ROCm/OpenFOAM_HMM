@@ -2,49 +2,51 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       dictionary;
+    location    "constant";
     object      kineticTheoryProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-kineticTheory               off;
+kineticTheory   off;
 
-equilibrium                 on;
+equilibrium     on;
 
-e                           e               [ 0 0 0 0 0 0 0 ] 0.9 ;
+e               e [ 0 0 0 0 0 0 0 ] 0.9;
 
-alphaMax                    alphaMax        [ 0 0 0 0 0 0 0 ] 0.6 ;
+alphaMax        alphaMax [ 0 0 0 0 0 0 0 ] 0.6;
 
-alphaMinFriction            alphaMinFriction [ 0 0 0 0 0 0 0 ] 0.5 ;
+alphaMinFriction alphaMinFriction [ 0 0 0 0 0 0 0 ] 0.5;
 
-Fr                          Fr              [ 1 -1 -2 0 0 0 0 ] 0.05 ;
+Fr              Fr [ 1 -1 -2 0 0 0 0 ] 0.05;
 
-eta                         eta             [ 0 0 0 0 0 0 0 ] 2.0 ;
+eta             eta [ 0 0 0 0 0 0 0 ] 2;
 
-p                           p               [ 0 0 0 0 0 0 0 ] 5.0 ;
+p               p [ 0 0 0 0 0 0 0 ] 5;
 
-phi                         phi             [ 0 0 0 0 0 0 0 ] 25.0 ;
+phi             phi [ 0 0 0 0 0 0 0 ] 25;
 
-viscosityModel              Syamlal;
+viscosityModel  Syamlal;
 
-conductivityModel           HrenyaSinclair;
+conductivityModel HrenyaSinclair;
 
-granularPressureModel       Lun;
+granularPressureModel Lun;
 
-frictionalStressModel       JohnsonJackson;
+frictionalStressModel JohnsonJackson;
 
-radialModel                 Gidaspow;
+radialModel     Gidaspow;
 
 HrenyaSinclairCoeffs
 {
-        L                   L               [ 0 1 0 0 0 0 0 ] 5.0e-4 ;
+    L               L [ 0 1 0 0 0 0 0 ] 0.0005;
 }
+
 
 // ************************************************************************* //

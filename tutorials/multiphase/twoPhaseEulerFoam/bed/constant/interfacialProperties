@@ -2,21 +2,24 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       dictionary;
+    location    "constant";
     object      interfacialProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dragModela  GidaspowSchillerNaumann;
-dragModelb  GidaspowSchillerNaumann;
+dragModela      GidaspowSchillerNaumann;
 
-dragPhase	a;
+dragModelb      GidaspowSchillerNaumann;
+
+dragPhase       a;
+
 
 // ************************************************************************* //

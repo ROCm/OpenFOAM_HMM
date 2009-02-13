@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,29 +10,24 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Time derivative discretisation schemes
 ddtSchemes
 {
-    // Default scheme
     default         Euler;
 }
 
-// Gradient discretisation schemes
 gradSchemes
 {
-    // Default gradient scheme
     default         Gauss linear;
     grad(p)         Gauss linear;
 }
 
-// Convection discretisation schemes
 divSchemes
 {
-    // Default scheme
     default         none;
     div(phi,U)      Gauss upwind;
     div(phid,p)     Gauss upwind;
@@ -42,14 +37,12 @@ divSchemes
     div(phi,epsilon) Gauss upwind;
     div(U)          Gauss linear;
     div((muEff*dev2(grad(U).T()))) Gauss linear;
-    div(phi,Yi_h)   Gauss  upwind;
+    div(phi,Yi_h)   Gauss upwind;
 }
 
-// Laplacian discretisation schemes
 laplacianSchemes
 {
-    // Default scheme
-    default                 Gauss linear corrected;
+    default         Gauss linear corrected;
     laplacian(muEff,U) Gauss linear corrected;
     laplacian(mut,U) Gauss linear corrected;
     laplacian(DkEff,k) Gauss linear corrected;
@@ -59,26 +52,21 @@ laplacianSchemes
     laplacian(alphaEff,h) Gauss linear corrected;
 }
 
-// Interpolation schemes
 interpolationSchemes
 {
-    // Default scheme
     default         linear;
 }
 
-// Surface normal gradient schemes
 snGradSchemes
 {
-    // Default scheme
     default         corrected;
 }
 
-// Calculation of flux
 fluxRequired
 {
-    // Create storage for flux for all solved variables?
     default         no;
-    p;
+    p               ;
 }
+
 
 // ************************************************************************* //

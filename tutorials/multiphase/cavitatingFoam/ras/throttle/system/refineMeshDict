@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,30 +10,28 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      refineMeshDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-set c0;
+set             c0;
 
 coordinateSystem global;
 
 globalCoeffs
 {
-    tan1 (1 0 0);
-    tan2 (0 1 0);
+    tan1            ( 1 0 0 );
+    tan2            ( 0 1 0 );
 }
 
-directions
-(
-    tan1
-    tan2
-);
+directions      ( tan1 tan2 );
 
-useHexTopology yes;
+useHexTopology  yes;
 
-geometricCut no;
+geometricCut    no;
 
-writeMesh no;
+writeMesh       no;
+
 
 // ************************************************************************* //

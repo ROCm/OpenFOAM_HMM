@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,69 +10,83 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    p GAMG
+    p
     {
-        tolerance        1e-8;
-        relTol           0;
-
-        smoother         DIC;
-        nPreSweeps       0;
-        nPostSweeps      2;
-        nFinestSweeps    2;
-
+        solver          GAMG;
+        tolerance       1e-08;
+        relTol          0;
+        smoother        DIC;
+        nPreSweeps      0;
+        nPostSweeps     2;
+        nFinestSweeps   2;
         cacheAgglomeration true;
         nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-    };
-    Ua PBiCG
+        agglomerator    faceAreaPair;
+        mergeLevels     1;
+    }
+
+    Ua
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0;
-    };
-    Ub PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    Ub
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0;
-    };
-    alpha PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    alpha
     {
-        preconditioner   DILU;
-        tolerance        1e-10;
-        relTol           0;
-    };
-    beta PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-10;
+        relTol          0;
+    }
+
+    beta
     {
-        preconditioner   DILU;
-        tolerance        1e-10;
-        relTol           0;
-    };
-    Theta PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-10;
+        relTol          0;
+    }
+
+    Theta
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0;
-    };
-    k PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    k
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0;
-    };
-    epsilon PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    epsilon
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0;
-    };
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
 }
 
 PISO
@@ -95,5 +109,6 @@ relaxationFactors
     k               1;
     epsilon         1;
 }
+
 
 // ************************************************************************* //

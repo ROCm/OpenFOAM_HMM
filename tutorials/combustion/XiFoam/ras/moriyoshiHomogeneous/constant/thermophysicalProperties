@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,13 +10,14 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "constant";
     object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 thermoType      hhuMixtureThermo<homogeneousMixture<sutherlandTransport<specieThermo<janafThermo<perfectGas>>>>>;
 
-stoichiometricAirFuelMassRatio stoichiometricAirFuelMassRatio [0 0 0 0 0 0 0] 15.675;
+stoichiometricAirFuelMassRatio stoichiometricAirFuelMassRatio [ 0 0 0 0 0 0 0 ] 15.675;
 
 fuel            fuel 1 44.0962 200 5000 1000 7.53414 0.0188722 -6.27185e-06 9.14756e-10 -4.78381e-14 -16467.5 -17.8923 0.933554 0.0264246 6.10597e-06 -2.19775e-08 9.51493e-12 -13958.5 19.2017 1.67212e-06 170.672;
 
@@ -27,5 +28,6 @@ reactants       reactants 24.8095 29.4649 200 5000 1000 3.28069 0.00195035 -6.53
 products        products 1 28.3233 200 5000 1000 3.106 0.00179682 -5.94382e-07 9.04998e-11 -5.08033e-15 -11003.7 5.11872 3.49612 0.000650364 -2.08029e-07 1.2291e-09 -7.73697e-13 -11080.3 3.18978 1.67212e-06 170.672;
 
 burntProducts   burntProducts 25.8095 28.3233 200 6000 1000 3.106 0.00179682 -5.94382e-07 9.04998e-11 -5.08033e-15 -11003.7 5.11872 3.49612 0.000650364 -2.08029e-07 1.2291e-09 -7.73697e-13 -11080.3 3.18978 1.67212e-06 170.672;
+
 
 // ************************************************************************* //

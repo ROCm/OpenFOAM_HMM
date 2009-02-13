@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,15 +10,16 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "constant";
     object      LESProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-LESModel            oneEqEddy;
+LESModel        oneEqEddy;
 
-printCoeffs         on;
+printCoeffs     on;
 
-delta               cubeRootVol;
+delta           cubeRootVol;
 
 laminarCoeffs
 {
@@ -26,34 +27,34 @@ laminarCoeffs
 
 oneEqEddyCoeffs
 {
-    ce               1.048;
-    ck               0.094;
+    ce              1.048;
+    ck              0.094;
 }
 
 dynOneEqEddyCoeffs
 {
-    ce               1.05;
+    ce              1.05;
     filter          simple;
 }
 
 lowReOneEqEddyCoeffs
 {
-    ck               0.07;
-    ce               1.05;
-    beta             0.01;
+    ck              0.07;
+    ce              1.05;
+    beta            0.01;
 }
 
 SmagorinskyCoeffs
 {
-    ck               0.02;
-    ce               0.202;
+    ck              0.02;
+    ce              0.202;
 }
 
 DeardorffDiffStressCoeffs
 {
-    ce               1.048;
-    ck               0.094;
-    cm               4.13;
+    ce              1.048;
+    ck              0.094;
+    cm              4.13;
 }
 
 cubeRootVolCoeffs
@@ -68,6 +69,7 @@ PrandtlCoeffs
     {
         deltaCoeff      1;
     }
+
     smoothCoeffs
     {
         delta           cubeRootVol;
@@ -75,9 +77,11 @@ PrandtlCoeffs
         {
             deltaCoeff      1;
         }
+
         maxDeltaRatio   1.1;
     }
-    Cdelta           0.158;
+
+    Cdelta          0.158;
 }
 
 vanDriestCoeffs
@@ -87,6 +91,7 @@ vanDriestCoeffs
     {
         deltaCoeff      1;
     }
+
     smoothCoeffs
     {
         delta           cubeRootVol;
@@ -94,10 +99,12 @@ vanDriestCoeffs
         {
             deltaCoeff      1;
         }
+
         maxDeltaRatio   1.1;
     }
-    Aplus            26;
-    Cdelta           0.158;
+
+    Aplus           26;
+    Cdelta          0.158;
 }
 
 smoothCoeffs
@@ -107,14 +114,16 @@ smoothCoeffs
     {
         deltaCoeff      1;
     }
+
     maxDeltaRatio   1.1;
 }
 
-kappa            0.4187;
+kappa           0.4187;
 
 wallFunctionCoeffs
 {
-    E                9;
+    E               9;
 }
+
 
 // ************************************************************************* //

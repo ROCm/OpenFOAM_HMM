@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,23 +10,16 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "constant";
     object      regionProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-fluidRegionNames
-(
-    bottomAir
-    topAir
-);
+fluidRegionNames ( bottomAir topAir );
 
-solidRegionNames
-(
-    heater
-    leftSolid
-    rightSolid
-);
+solidRegionNames ( heater leftSolid rightSolid );
 
-pRef 100000;
+pRef            100000;
+
 
 // ************************************************************************* //

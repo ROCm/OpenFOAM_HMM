@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,20 +10,22 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "constant";
     object      thermodynamicProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-barotropicCompressibilityModel    linear; //Chung;
+barotropicCompressibilityModel linear;
 
-psiv                              psiv       [0 -2 2 0 0]     2.5e-06;
+psiv            psiv [ 0 -2 2 0 0 ] 2.5e-06;
 
-rholSat                           rholSat    [1 -3 0 0 0]     830;
+rholSat         rholSat [ 1 -3 0 0 0 ] 830;
 
-psil                              psil       [0 -2 2 0 0]     5e-07;
+psil            psil [ 0 -2 2 0 0 ] 5e-07;
 
-pSat                              pSat       [1 -1 -2 0 0]    4500;
+pSat            pSat [ 1 -1 -2 0 0 ] 4500;
 
-rhoMin                           rhoMin     [1 -3 0 0 0]     0.001;
+rhoMin          rhoMin [ 1 -3 0 0 0 ] 0.001;
+
 
 // ************************************************************************* //

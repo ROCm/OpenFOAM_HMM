@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,13 +10,14 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSchemes;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 ddtSchemes
 {
-    default backward;
+    default         backward;
 }
 
 gradSchemes
@@ -35,7 +36,6 @@ divSchemes
     div(phi,k)      Gauss limitedLinear 1;
     div(phi,B)      Gauss limitedLinear 1;
     div(phi,muTilda) Gauss limitedLinear 1;
-
     div(B)          Gauss linear;
     div((muEff*dev2(grad(U).T()))) Gauss linear;
 }
@@ -65,7 +65,8 @@ snGradSchemes
 fluxRequired
 {
     default         no;
-    p;
+    p               ;
 }
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,60 +10,72 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
+    location    "system";
     object      fvSolution;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
 {
-    pd PCG
+    pd
     {
-        preconditioner   DIC;
-        tolerance        1e-06;
-        relTol           0.01;
-    };
-    U PBiCG
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-06;
+        relTol          0.01;
+    }
+
+    U
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0.1;
-    };
-    h PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    h
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0.1;
-    };
-    k PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    k
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0.1;
-    };
-    epsilon PBiCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    epsilon
     {
-        preconditioner   DILU;
-        tolerance        1e-05;
-        relTol           0.1;
-    };
-    G PCG
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
+
+    G
     {
-        preconditioner   DIC;
-        tolerance        1e-05;
-        relTol           0.1;
-    };
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-05;
+        relTol          0.1;
+    }
 }
 
 SIMPLE
 {
     nNonOrthogonalCorrectors 0;
-    pdRefCell        0;
-    pdRefValue       0;
+    pdRefCell       0;
+    pdRefValue      0;
 }
 
 relaxationFactors
 {
-    rho             1.0;
+    rho             1;
     pd              0.3;
     U               0.7;
     h               0.7;
@@ -71,5 +83,6 @@ relaxationFactors
     epsilon         0.7;
     G               0.7;
 }
+
 
 // ************************************************************************* //

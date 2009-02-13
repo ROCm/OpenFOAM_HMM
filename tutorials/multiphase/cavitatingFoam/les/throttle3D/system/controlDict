@@ -1,88 +1,85 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       dictionary;
+    location    "system";
     object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-startFrom                  latestTime;
+startFrom       latestTime;
 
-startTime                  0;
+startTime       0;
 
-stopAt                     endTime;
+stopAt          endTime;
 
-endTime                    1e-4;
+endTime         0.0001;
 
-deltaT                     1e-8;
+deltaT          1e-08;
 
-writeControl               adjustableRunTime;
+writeControl    adjustableRunTime;
 
-writeInterval              5e-6;
+writeInterval   5e-06;
 
-purgeWrite                 0;
+purgeWrite      0;
 
-writeFormat                binary;
+writeFormat     binary;
 
-writePrecision             6;
+writePrecision  6;
 
-writeCompression           compressed;
+writeCompression compressed;
 
-timeFormat                 general;
+timeFormat      general;
 
-runTimeModifiable          yes;
+runTimeModifiable yes;
 
-adjustTimeStep             on;
+adjustTimeStep  on;
 
-maxCo                      0.5;
+maxCo           0.5;
 
-maxAcousticCo              50.0;
+maxAcousticCo   50;
 
 functions
 (
     fieldAverage1
     {
-        // Type of functionObject
         type fieldAverage;
-
-        // Where to load it from (if not already in solver)
-        functionObjectLibs ("libfieldFunctionObjects.so");
-
+        functionObjectLibs ( "libfieldFunctionObjects.so" );
         enabled false;
-
         outputControl outputTime;
-
-        // Fields to be probed. runTime modifiable!
         fields
         (
             U
             {
-                mean            on;
-                prime2Mean      off;
-                base            time;
+                mean on;
+                prime2Mean off;
+                base time;
             }
+
             p
             {
-                mean            on;
-                prime2Mean      off;
-                base            time;
+                mean on;
+                prime2Mean off;
+                base time ;
             }
+
             gamma
             {
-                mean            on;
-                prime2Mean      off;
-                base            time;
+                mean on;
+                prime2Mean off;
+                base time;
             }
         );
     }
 );
+
 
 // ************************************************************************* //
