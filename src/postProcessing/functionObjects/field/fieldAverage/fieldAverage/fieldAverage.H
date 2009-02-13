@@ -75,7 +75,6 @@ Description
 SourceFiles
     fieldAverage.C
     fieldAverageTemplates.C
-    IOfieldAverage.H
 
 \*---------------------------------------------------------------------------*/
 
