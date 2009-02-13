@@ -32,8 +32,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASModel/RASModel.H"
+#include "singlePhaseTransportModel.H"
+#include "RASModel.H"
 #include "SRFModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,7 +42,6 @@ int main(int argc, char *argv[])
 {
 
 #   include "setRootCase.H"
-
 #   include "createTime.H"
 #   include "createMesh.H"
 #   include "createFields.H"
@@ -59,55 +58,14 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
 #       include "readSIMPLEControls.H"
+#       include "initConvergenceCheck.H"
 
         p.storePrevIter();
 
         // Pressure-velocity SIMPLE corrector
         {
-            // Momentum predictor
-            tmp<fvVectorMatrix> UrelEqn
-            (
-                fvm::div(phi, Urel)
-              + turbulence->divDevReff(Urel)
-              + SRF->Su()
-            );
-
-            UrelEqn().relax();
-
-            solve(UrelEqn() == -fvc::grad(p));
-
-            p.boundaryField().updateCoeffs();
-            volScalarField AUrel = UrelEqn().A();
-            Urel = UrelEqn().H()/AUrel;
-            UrelEqn.clear();
-            phi = fvc::interpolate(Urel) & mesh.Sf();
-            adjustPhi(phi, Urel, p);
-
-            // Non-orthogonal pressure corrector loop
-            for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
-            {
-                fvScalarMatrix pEqn
-                (
-                    fvm::laplacian(1.0/AUrel, p) == fvc::div(phi)
-                );
-
-                pEqn.setReference(pRefCell, pRefValue);
-                pEqn.solve();
-
-                if (nonOrth == nNonOrthCorr)
-                {
-                    phi -= pEqn.flux();
-                }
-            }
-
-#           include "continuityErrs.H"
-
-            // Explicitly relax pressure for momentum corrector
-            p.relax();
-
-            // Momentum corrector
-            Urel -= fvc::grad(p)/AUrel;
-            Urel.correctBoundaryConditions();
+#           include "UEqn.H"
+#           include "pEqn.H"
         }
 
         turbulence->correct();
@@ -134,6 +92,8 @@ int main(int argc, char *argv[])
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
+
+#       include "convergenceCheck.H"
     }
 
     Info<< "End\n" << endl;
