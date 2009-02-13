@@ -92,8 +92,15 @@ class spray
         IOdictionary sprayProperties_;
 
 
+        //- Ambient Pressure
+            scalar ambientPressure_;
+
+        //- Ambient Temperature
+            scalar ambientTemperature_;
+
+
         //- The injectors
-        IOPtrList<injector> injectors_;
+            IOPtrList<injector> injectors_;
 
 
         // References to the spray sub-models
@@ -163,12 +170,6 @@ class spray
 
             //- The (total added) injected kinetic energy of the liquid
             scalar injectedLiquidKE_;
-
-            //- Ambient Pressure
-            scalar ambientPressure_;
-
-            //- Ambient Temperature
-            scalar ambientTemperature_;
 
 
     // Private Member Functions

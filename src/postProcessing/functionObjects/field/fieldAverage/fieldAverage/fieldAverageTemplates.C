@@ -34,22 +34,36 @@ template<class Type>
 void Foam::fieldAverage::addMeanField
 (
     const label fieldi,
-    PtrList<GeometricField<Type, fvPatchField, volMesh> >& meanFieldList
-)
+    wordList& meanFieldList
+) const
 {
     if (faItems_[fieldi].mean())
     {
         typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
         const word& fieldName = faItems_[fieldi].fieldName();
-        const fieldType& baseField = obr_.lookupObject<fieldType>(fieldName);
 
         const word meanFieldName = fieldName + EXT_MEAN;
+
         Info<< "Reading/calculating field " << meanFieldName << nl << endl;
-        meanFieldList.set
-        (
-            fieldi,
-            new fieldType
+
+        if (obr_.foundObject<fieldType>(meanFieldName))
+        {
+            meanFieldList[fieldi] = meanFieldName;
+        }
+        else if (obr_.found(meanFieldName))
+        {
+            Info<< "Cannot allocate average field " << meanFieldName
+                << " since an object with that name already exists."
+                << " Disabling averaging." << nl << endl;
+            meanFieldList[fieldi] = word::null;
+        }
+        else
+        {
+            const fieldType& baseField =
+                obr_.lookupObject<fieldType>(fieldName);
+
+            fieldType* fPtr = new fieldType
             (
                 IOobject
                 (
@@ -60,8 +74,13 @@ void Foam::fieldAverage::addMeanField
                     IOobject::NO_WRITE
                 ),
                 baseField
-            )
-        );
+            );
+
+            // Store on registry
+            fPtr->store();
+
+            meanFieldList[fieldi] = meanFieldName;
+        }
     }
 }
 
@@ -70,25 +89,39 @@ template<class Type1, class Type2>
 void Foam::fieldAverage::addPrime2MeanField
 (
     const label fieldi,
-    PtrList<GeometricField<Type1, fvPatchField, volMesh> >& meanFieldList,
-    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& prime2MeanFieldList
-)
+    const wordList& meanFieldList,
+    wordList& prime2MeanFieldList
+) const
 {
-    if (faItems_[fieldi].mean() && meanFieldList.set(fieldi))
+    if (faItems_[fieldi].mean() && meanFieldList[fieldi] != word::null)
     {
         typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
         typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
 
         const word& fieldName = faItems_[fieldi].fieldName();
-        const fieldType1& baseField = obr_.lookupObject<fieldType1>(fieldName);
-        const fieldType1& meanField = meanFieldList[fieldi];
 
         const word meanFieldName = fieldName + EXT_PRIME2MEAN;
         Info<< "Reading/calculating field " << meanFieldName << nl << endl;
-        prime2MeanFieldList.set
-        (
-            fieldi,
-            new fieldType2
+
+        if (obr_.foundObject<fieldType2>(meanFieldName))
+        {
+            prime2MeanFieldList[fieldi] = meanFieldName;
+        }
+        else if (obr_.found(meanFieldName))
+        {
+            Info<< "Cannot allocate average field " << meanFieldName
+                << " since an object with that name already exists."
+                << " Disabling averaging." << nl << endl;
+            prime2MeanFieldList[fieldi] = word::null;
+        }
+        else
+        {
+            const fieldType1& baseField =
+                obr_.lookupObject<fieldType1>(fieldName);
+            const fieldType1& meanField =
+                obr_.lookupObject<fieldType1>(meanFieldList[fieldi]);
+
+            fieldType2* fPtr = new fieldType2
             (
                 IOobject
                 (
@@ -99,17 +132,20 @@ void Foam::fieldAverage::addPrime2MeanField
                     IOobject::NO_WRITE
                 ),
                 sqr(baseField) - sqr(meanField)
-            )
-        );
+            );
+
+            // Store on registry
+            fPtr->store();
+
+            prime2MeanFieldList[fieldi] = meanFieldName;
+        }
     }
 }
 
 
 template<class Type>
-void Foam::fieldAverage::calculateMeanFields
-(
-    PtrList<GeometricField<Type, fvPatchField, volMesh> >& meanFieldList
-)
+void Foam::fieldAverage::calculateMeanFields(const wordList& meanFieldList)
+const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
@@ -117,12 +153,15 @@ void Foam::fieldAverage::calculateMeanFields
 
     forAll(faItems_, i)
     {
-        if (faItems_[i].mean() && meanFieldList.set(i))
+        if (faItems_[i].mean() && meanFieldList[i] != word::null)
         {
             const word& fieldName = faItems_[i].fieldName();
             const fieldType& baseField =
                 obr_.lookupObject<fieldType>(fieldName);
-            fieldType& meanField = meanFieldList[i];
+            fieldType& meanField = const_cast<fieldType&>
+            (
+                obr_.lookupObject<fieldType>(meanFieldList[i])
+            );
 
             scalar alpha = 0.0;
             scalar beta = 0.0;
@@ -146,9 +185,9 @@ void Foam::fieldAverage::calculateMeanFields
 template<class Type1, class Type2>
 void Foam::fieldAverage::calculatePrime2MeanFields
 (
-    PtrList<GeometricField<Type1, fvPatchField, volMesh> >& meanFieldList,
-    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& prime2MeanFieldList
-)
+    const wordList& meanFieldList,
+    const wordList& prime2MeanFieldList
+) const
 {
     typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
     typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
@@ -160,15 +199,19 @@ void Foam::fieldAverage::calculatePrime2MeanFields
         if
         (
             faItems_[i].prime2Mean()
-         && meanFieldList.set(i)
-         && prime2MeanFieldList.set(i)
+         && meanFieldList[i] != word::null
+         && prime2MeanFieldList[i] != word::null
         )
         {
             const word& fieldName = faItems_[i].fieldName();
             const fieldType1& baseField =
                 obr_.lookupObject<fieldType1>(fieldName);
-            const fieldType1& meanField = meanFieldList[i];
-            fieldType2& prime2MeanField = prime2MeanFieldList[i];
+            const fieldType1& meanField =
+                obr_.lookupObject<fieldType1>(meanFieldList[i]);
+            fieldType2& prime2MeanField = const_cast<fieldType2&>
+            (
+                obr_.lookupObject<fieldType2>(prime2MeanFieldList[i])
+            );
 
             scalar alpha = 0.0;
             scalar beta = 0.0;
@@ -195,9 +238,9 @@ void Foam::fieldAverage::calculatePrime2MeanFields
 template<class Type1, class Type2>
 void Foam::fieldAverage::addMeanSqrToPrime2Mean
 (
-    PtrList<GeometricField<Type1, fvPatchField, volMesh> >& meanFieldList,
-    PtrList<GeometricField<Type2, fvPatchField, volMesh> >& prime2MeanFieldList
-)
+    const wordList& meanFieldList,
+    const wordList& prime2MeanFieldList
+) const
 {
     typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
     typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
@@ -207,12 +250,16 @@ void Foam::fieldAverage::addMeanSqrToPrime2Mean
         if
         (
             faItems_[i].prime2Mean()
-         && meanFieldList.set(i)
-         && prime2MeanFieldList.set(i)
+         && meanFieldList[i] != word::null
+         && prime2MeanFieldList[i] != word::null
         )
         {
-            const fieldType1& meanField = meanFieldList[i];
-            fieldType2& prime2MeanField = prime2MeanFieldList[i];
+            const fieldType1& meanField =
+                obr_.lookupObject<fieldType1>(meanFieldList[i]);
+            fieldType2& prime2MeanField = const_cast<fieldType2&>
+            (
+                obr_.lookupObject<fieldType2>(prime2MeanFieldList[i])
+            );
 
             prime2MeanField += sqr(meanField);
         }
@@ -221,16 +268,16 @@ void Foam::fieldAverage::addMeanSqrToPrime2Mean
 
 
 template<class Type>
-void Foam::fieldAverage::writeFieldList
-(
-    const PtrList<GeometricField<Type, fvPatchField, volMesh> >& fieldList
-) const
+void Foam::fieldAverage::writeFieldList(const wordList& fieldList) const
 {
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
     forAll(fieldList, i)
     {
-        if (fieldList.set(i))
+        if (fieldList[i] != word::null)
         {
-            fieldList[i].write();
+            const fieldType& f = obr_.lookupObject<fieldType>(fieldList[i]);
+            f.write();
         }
     }
 }

@@ -102,7 +102,9 @@ void Foam::cyclicPolyPatch::calcTransforms()
             ),
             points
         );
+
         pointField half0Ctrs(calcFaceCentres(half0, half0.points()));
+
         scalarField half0Tols(calcFaceTol(half0, half0.points(), half0Ctrs));
 
         primitivePatch half1
@@ -740,9 +742,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationAxis_(vector::zero),
     rotationCentre_(point::zero),
     separationVector_(vector::zero)
-{
-    calcTransforms();
-}
+{}
 
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -786,8 +786,6 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
             }
         }
     }
-
-    calcTransforms();
 }
 
 
@@ -805,9 +803,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_)
-{
-    calcTransforms();
-}
+{}
 
 
 Foam::cyclicPolyPatch::cyclicPolyPatch
@@ -827,9 +823,7 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
     rotationAxis_(pp.rotationAxis_),
     rotationCentre_(pp.rotationCentre_),
     separationVector_(pp.separationVector_)
-{
-    calcTransforms();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -852,6 +846,7 @@ void Foam::cyclicPolyPatch::initGeometry()
 void Foam::cyclicPolyPatch::calcGeometry()
 {
     polyPatch::calcGeometry();
+    calcTransforms();
 }
 
 void Foam::cyclicPolyPatch::initMovePoints(const pointField& p)
