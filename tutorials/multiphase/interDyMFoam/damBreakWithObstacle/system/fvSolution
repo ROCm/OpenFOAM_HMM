@@ -118,9 +118,9 @@ PISO
     momentumPredictor no;
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
-    nGammaCorr      1;
-    nGammaSubCycles 3;
-    cGamma          1;
+    nAlphaCorr      1;
+    nAlphaSubCycles 3;
+    cAlpha          1;
     pdRefCell       0;
     pdRefValue      0;
     pRefProbe

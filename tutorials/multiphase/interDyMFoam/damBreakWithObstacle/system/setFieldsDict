@@ -15,9 +15,23 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defaultFieldValues ( volScalarFieldValue gamma 0 volVectorFieldValue U ( 0 0 0 ) );
+defaultFieldValues
+(
+    volScalarFieldValue alpha1 0
+    volVectorFieldValue U ( 0 0 0 )
+);
 
-regions         ( boxToCell { box ( 0 0 0 ) ( 0.6 0.1875 0.75 ) ; fieldValues ( volScalarFieldValue gamma 1 ) ; } );
+regions
+(
+    boxToCell
+    {
+        box ( 0 0 0 ) ( 0.6 0.1875 0.75 );
+        fieldValues 
+        (
+            volScalarFieldValue gamma 1
+        );
+    }
+ );
 
 
 // ************************************************************************* //

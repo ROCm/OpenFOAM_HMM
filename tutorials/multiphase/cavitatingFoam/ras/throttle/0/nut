@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -9,32 +9,37 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      dynamicMeshDict;
+    class       volScalarField;
+    location    "0";
+    object      nut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dynamicFvMesh   dynamicRefineFvMesh;
+dimensions      [0 2 -1 0 0 0 0];
 
-dynamicRefineFvMeshCoeffs
+internalField   uniform 0;
+
+boundaryField
 {
-    refineInterval  1;
-    field           alpha1;
-    lowerRefineLevel 0.001;
-    upperRefineLevel 0.999;
-    unrefineLevel   10;
-    nBufferLayers   1;
-    maxRefinement   2;
-    maxCells        200000;
-    correctFluxes
-    (
-        (
-            phi
-            U
-        )
-    );
-    dumpLevel       true;
+    inlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    outlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    walls
+    {
+        type            nutWallFunction;
+        value           uniform 0;
+    }
+    frontBack
+    {
+        type            empty;
+    }
 }
 
 

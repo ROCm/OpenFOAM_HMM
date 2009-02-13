@@ -30,8 +30,8 @@ gradSchemes
 divSchemes
 {
     div(rho*phi,U)  Gauss upwind;
-    div(phi,gamma)  Gauss vanLeer;
-    div(phirb,gamma) Gauss interfaceCompression;
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss interfaceCompression;
 }
 
 laplacianSchemes
@@ -54,7 +54,7 @@ fluxRequired
     default         no;
     pd              ;
     pcorr           ;
-    gamma           ;
+    alpha           ;
 }
 
 
