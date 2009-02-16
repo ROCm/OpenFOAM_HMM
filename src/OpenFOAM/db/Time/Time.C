@@ -610,20 +610,6 @@ Foam::Time& Foam::Time::operator+=(const dimensionedScalar& deltaT)
 
 Foam::Time& Foam::Time::operator+=(const scalar deltaT)
 {
-    readModifiedObjects();
-
-    if (!subCycling_)
-    {
-        if (timeIndex_ == startTimeIndex_)
-        {
-            functionObjects_.start();
-        }
-        else
-        {
-            functionObjects_.execute();
-        }
-    }
-
     setDeltaT(deltaT);
     operator++();
 
