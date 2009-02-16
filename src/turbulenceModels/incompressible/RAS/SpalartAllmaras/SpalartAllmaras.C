@@ -249,7 +249,7 @@ tmp<volScalarField> SpalartAllmaras::epsilon() const
         (
             IOobject
             (
-                "epslion",
+                "epsilon",
                 runTime_.timeName(),
                 mesh_
             ),

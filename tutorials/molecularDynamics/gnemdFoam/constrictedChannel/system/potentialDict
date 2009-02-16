@@ -1,0 +1,104 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      potentialDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+removalOrder    2 ( Ne Ar );
+
+pair
+{
+    Ar-Ar
+    {
+        pairPotential   maitlandSmith;
+        rCut            1e-09;
+        rMin            1.5e-10;
+        dr              5e-14;
+        maitlandSmithCoeffs
+        {
+            m               13;
+            gamma           7.5;
+            rm              3.756e-10;
+            epsilon         1.990108438e-21;
+        }
+
+        energyScalingFunction doubleSigmoid;
+        doubleSigmoidCoeffs
+        {
+            shift1          9e-10;
+            scale1          -64771072;
+            shift2          9.7e-10;
+            scale2          -259084288;
+        }
+
+        writeTables     yes;
+    }
+
+    Ar-Ne
+    {
+        pairPotential   maitlandSmith;
+        rCut            9e-10;
+        rMin            1e-10;
+        dr              5e-14;
+        maitlandSmithCoeffs
+        {
+            m               13;
+            gamma           4;
+            rm              3.48e-10;
+            epsilon         8.765026657e-22;
+        }
+
+        energyScalingFunction shiftedForce;
+        writeTables     yes;
+    }
+
+    Ne-Ne
+    {
+        pairPotential   maitlandSmith;
+        rCut            8e-10;
+        rMin            1e-10;
+        dr              5e-14;
+        maitlandSmithCoeffs
+        {
+            m               13;
+            gamma           5;
+            rm              3.0739e-10;
+            epsilon         5.813260729e-22;
+        }
+
+        energyScalingFunction shiftedForce;
+        writeTables     yes;
+    }
+}
+
+tether
+{
+    Ar
+    {
+        tetherPotential restrainedHarmonicSpring;
+        restrainedHarmonicSpringCoeffs
+        {
+            springConstant  0.1;
+            rR              1.2e-09;
+        }
+    }
+}
+
+external
+{
+    gravity         ( 0 0 0 );
+}
+
+
+// ************************************************************************* //
