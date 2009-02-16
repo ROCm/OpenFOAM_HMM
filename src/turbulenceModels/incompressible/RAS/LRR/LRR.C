@@ -297,7 +297,7 @@ void LRR::correct()
     }
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
-    volScalarField G("G", 0.5*tr(P));
+    volScalarField G("G", 0.5*mag(tr(P)));
 
     // Update espsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
@@ -307,6 +307,7 @@ void LRR::correct()
     (
         fvm::ddt(epsilon_)
       + fvm::div(phi_, epsilon_)
+      - fvm::Sp(fvc::div(phi_), epsilon_)
     //- fvm::laplacian(Ceps*(K/epsilon_)*R, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
       ==
@@ -336,7 +337,7 @@ void LRR::correct()
             {
                 label faceCelli = curPatch.faceCells()[facei];
                 P[faceCelli]
-                    *= min(G[faceCelli]/(0.5*tr(P[faceCelli]) + SMALL), 1.0);
+                    *= min(G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL), 1.0);
             }
         }
     }
@@ -346,6 +347,7 @@ void LRR::correct()
     (
         fvm::ddt(R_)
       + fvm::div(phi_, R_)
+      - fvm::Sp(fvc::div(phi_), R_)
     //- fvm::laplacian(Cs*(k_/epsilon_)*R_, R_)
       - fvm::laplacian(DREff(), R_)
       + fvm::Sp(Clrr1_*epsilon_/k_, R_)
