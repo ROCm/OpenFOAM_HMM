@@ -26,10 +26,7 @@ License
 
 #include "fieldAverage.H"
 #include "volFields.H"
-#include "dictionary.H"
 #include "Time.H"
-#include "IFstream.H"
-#include "OFstream.H"
 
 #include "fieldAverageItem.H"
 
@@ -354,20 +351,25 @@ void Foam::fieldAverage::readAveragingProperties()
     }
     else
     {
-        IFstream propsFile
+        IOobject propsDictHeader
         (
-            obr_.time().path()/obr_.time().timeName()
-            /"uniform"/"fieldAveragingProperties"
+            "fieldAveragingProperties",
+            obr_.time().timeName(),
+            "uniform",
+            obr_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
         );
 
-        if (!propsFile.good())
+        if (!propsDictHeader.headerOk())
         {
             Info<< "fieldAverage: starting averaging at time "
                 << obr_.time().timeName() << nl << endl;
             return;
         }
 
-        dictionary propsDict(dictionary::null, propsFile);
+        IOdictionary propsDict(propsDictHeader);
 
         Info<< "fieldAverage: restarting averaging for fields:" << endl;
         forAll(faItems_, i)
