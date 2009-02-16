@@ -369,8 +369,7 @@ void Foam::CV3D::insertPoints
         }
         else
         {
-            Warning
-                << "Rejecting point " << p << " outside surface" << endl;
+            Warning<< "Rejecting point " << p << " outside surface" << endl;
         }
     }
 
@@ -771,7 +770,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     //         *faceAreaWeight(faceArea)*rAB;
 
     //         vector dT = transverseStiffness*faceAreaWeight(faceArea)
-    //         *(dualFaceCentre - 0.5*(dVA - dVB));
+    //         *(dualFaceCentre - 0.5*(dVA + dVB));
 
     //         if (vA->internalPoint())
     //         {
@@ -805,6 +804,8 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     globalAlignmentDirs[2] = R & vector(0,0,1);
 
     Info<< "globalAlignmentDirs " << globalAlignmentDirs << endl;
+
+    DynamicList<point> insertionPoints;
 
     for
     (
@@ -1017,9 +1018,6 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                         // Use the least similar of globalAlignmentDirs as the
                         // 2nd alignment and then generate the third.
 
-                        Warning<< "Using supplementary global alignments!"
-                            << endl;
-
                         scalar minDotProduct = 1+SMALL;
 
                         alignmentDirs.setSize(3);
@@ -1049,8 +1047,6 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
             }
             else
             {
-                Warning<< "Using full global alignments!" << endl;
-
                 alignmentDirs = globalAlignmentDirs;
             }
 
@@ -1074,10 +1070,16 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                 //scalar cosAcceptanceAngle = 0.743;
                 scalar cosAcceptanceAngle = 0.67;
 
-                if (((rAB/rABMag) & alignmentDir) > cosAcceptanceAngle)
+                scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
+
+                scalar targetCellSize = controls_.minCellSize;
+
+                scalar targetFaceArea = targetCellSize*targetCellSize;
+
+                if (alignmentDotProd > cosAcceptanceAngle)
                 {
                     // alignmentDir *= 0.5*rABMag;
-                    alignmentDir *= 0.5*controls_.minCellSize;
+                    alignmentDir *= 0.5*targetCellSize;
 
                     vector delta = alignmentDir - 0.5*rAB;
 
@@ -1093,6 +1095,42 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                     {
                         displacementAccumulator[vB->index()] += -delta;
                     }
+
+                    // Point insertion criteria
+                    if
+                    (
+                        rABMag > 1.55*targetCellSize
+                     && vA->internalPoint()
+                     && vB->internalPoint()
+                     && faceArea > 0.0025*targetFaceArea
+                     && alignmentDotProd > 0.93
+                    )
+                    {
+                        // Info<< nl<< "Long edge match = "
+                        //     << rABMag
+                        //     << nl << dVA
+                        //     << nl << dVB
+                        //     << endl;
+
+                        insertionPoints.append(0.5*(dVA + dVB));
+                    }
+
+                    // Point removal criteria
+                    if
+                    (
+                        rABMag < 0.7*targetCellSize
+                        && vA->internalPoint()
+                        && vB->internalPoint()
+                        // && faceArea > 0.0025*targetFaceArea
+                        // && alignmentDotProd > 0.93
+                    )
+                    {
+                        Info<< nl<< "Short edge match = "
+                            << rABMag
+                            << nl << dVA
+                            << nl << dVB
+                            << endl;
+                    }
                 }
             }
 
@@ -1106,7 +1144,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
             // vector deltaB = dualFaceCentre - dVB;
 
-            // scalar weight = mag(deltaA)*magSqr(deltaA & dualFaceNormal);
+            // scalar weight = mag(deltaA & dualFaceNormal);
 
             // scalar cosAcceptanceAngle = 0.67;
 
@@ -1118,22 +1156,22 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
             //     scalar alignDotDeltaB = alignmentDir & deltaB/mag(deltaB);
 
-            //     if (mag(alignDotDeltaA) > cosAcceptanceAngle)
+            //     if (vA->internalPoint())
             //     {
-            //         if (vA->internalPoint())
+            //         if (mag(alignDotDeltaA) > cosAcceptanceAngle)
             //         {
             //             displacementAccumulator[vA->index()] +=
-            //                 weight*alignDotDeltaA*alignmentDir;
+            //                 weight*mag(deltaA)*alignDotDeltaA*alignmentDir;
 
             //             weightAccumulator[vA->index()] += weight;
             //         }
             //     }
-            //     if (mag(alignDotDeltaB) > cosAcceptanceAngle)
+            //     if (vB->internalPoint())
             //     {
-            //         if (vB->internalPoint())
+            //         if (mag(alignDotDeltaB) > cosAcceptanceAngle)
             //         {
             //             displacementAccumulator[vB->index()] +=
-            //                 weight*alignDotDeltaB*alignmentDir;
+            //                 weight*mag(deltaB)*alignDotDeltaB*alignmentDir;
 
             //             weightAccumulator[vB->index()] += weight;
             //         }
@@ -1160,7 +1198,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     //     if
     //     (
     //         eit->first->vertex(eit->second)->internalOrBoundaryPoint()
-    //      && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
+    //         && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
     //     )
     //     {
     //         Cell_circulator ccStart = incident_cells(*eit);
@@ -1175,7 +1213,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     //                 if (cc->cellIndex() < 0)
     //                 {
     //                     FatalErrorIn("Foam::CV3D::relaxPoints")
-    //                         << "Dual face uses circumcenter defined by a "
+    //                     << "Dual face uses circumcenter defined by a "
     //                         << " Delaunay tetrahedron with no internal "
     //                         << "or boundary points."
     //                         << exit(FatalError);
@@ -1197,16 +1235,21 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     //         point dVB = topoint(vB->point());
 
     //         scalar faceArea = dualFace.mag(dualVertices);
-    //         scalar weight = sqrt(faceArea);
+    //         vector dualFaceNormal(dualFace.normal(dualVertices));
 
     //         // point dualFaceCentre(dualFace.centre(dualVertices));
     //         point dEMid = 0.5*(dVA + dVB);
+
+    //         vector deltaA = dEMid - dVA;
+
+    //         scalar weight = mag(deltaA & dualFaceNormal);
+    //         // scalar weight = sqrt(faceArea);
 
     //         if (vA->internalPoint())
     //         {
     //             displacementAccumulator[vA->index()] +=
     //             weight*(dEMid - dVA);
-    //             //faceArea*(dualFaceCentre - dVA);
+    //             //weight*(dualFaceCentre - dVA);
 
     //             weightAccumulator[vA->index()] += weight;
     //         }
@@ -1214,7 +1257,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     //         {
     //             displacementAccumulator[vB->index()] +=
     //             weight*(dEMid - dVB);
-    //             //faceArea*(dualFaceCentre - dVB);
+    //             //weight*(dualFaceCentre - dVB);
 
     //             weightAccumulator[vB->index()] += weight;
     //         }
@@ -1301,7 +1344,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    //displacementAccumulator /= weightAccumulator;
+    // displacementAccumulator /= weightAccumulator;
 
     vector totalDisp = sum(displacementAccumulator);
     scalar totalDist = sum(mag(displacementAccumulator));
@@ -1358,6 +1401,19 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     reinsertFeaturePoints();
 
     reinsertPoints(internalDelaunayVertices);
+
+    Info<< nl << "Inserting " << insertionPoints.size()
+        << " new points. "<< endl;
+
+    label nVert = number_of_vertices();
+
+    // Add the points and index them
+    forAll(insertionPoints, i)
+    {
+        const point& p = insertionPoints[i];
+
+        insert(toPoint(p))->index() = nVert++;
+    }
 }
 
 

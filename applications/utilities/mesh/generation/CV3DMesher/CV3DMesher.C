@@ -98,19 +98,13 @@ int main(int argc, char *argv[])
     {
         runTime++;
 
-        // scalar t = (runTime.timeOutputValue() + 5);
-        // scalar relaxation = 0.00018*t*t*Foam::exp(-0.0007*t*t);
-
-        Info<< nl
-            << "Time = " << runTime.timeName()
+        Info<< nl << "Time = " << runTime.timeName()
             << nl << "relaxation = " << relaxation
             << endl;
 
         mesh.relaxPoints(relaxation);
 
-        mesh.removeSurfacePointPairs();
         mesh.insertSurfacePointPairs();
-        mesh.boundaryConform();
 
         relaxation -= (relaxation - mesh.meshingControls().relaxationFactorEnd)
         /max
