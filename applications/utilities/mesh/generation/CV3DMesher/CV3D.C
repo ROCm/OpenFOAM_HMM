@@ -51,6 +51,7 @@ void Foam::CV3D::reinsertPoints(const pointField& points)
     Info<< nl << "Reinserting points after motion. ";
 
     startOfInternalPoints_ = number_of_vertices();
+
     label nVert = startOfInternalPoints_;
 
     // Add the points and index them
@@ -660,6 +661,8 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
     scalarField weightAccumulator(startOfSurfacePointPairs_, 0);
 
+    List<bool> pointToBeRetained(startOfSurfacePointPairs_, true);
+
     label dualVerti = 0;
 
     // Find the dual point of each tetrahedron and assign it an index.
@@ -1087,16 +1090,6 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
                     delta *= faceAreaWeight(faceArea);
 
-                    if (vA->internalPoint())
-                    {
-                        displacementAccumulator[vA->index()] += delta;
-                    }
-                    if (vB->internalPoint())
-                    {
-                        displacementAccumulator[vB->index()] += -delta;
-                    }
-
-                    // Point insertion criteria
                     if
                     (
                         rABMag > 1.55*targetCellSize
@@ -1106,6 +1099,8 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                      && alignmentDotProd > 0.93
                     )
                     {
+                        // Point insertion criteria
+
                         // Info<< nl<< "Long edge match = "
                         //     << rABMag
                         //     << nl << dVA
@@ -1114,22 +1109,44 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
                         insertionPoints.append(0.5*(dVA + dVB));
                     }
-
-                    // Point removal criteria
-                    if
+                    else if
                     (
-                        rABMag < 0.7*targetCellSize
-                        && vA->internalPoint()
-                        && vB->internalPoint()
+                        rABMag < 0.65*targetCellSize
+                     && (vA->internalPoint() || vB->internalPoint())
                         // && faceArea > 0.0025*targetFaceArea
                         // && alignmentDotProd > 0.93
                     )
                     {
-                        Info<< nl<< "Short edge match = "
-                            << rABMag
-                            << nl << dVA
-                            << nl << dVB
-                            << endl;
+                        // Point removal criteria
+
+                        // Info<< nl<< "Short edge match = "
+                        //     << rABMag
+                        //     << nl << dVA
+                        //     << nl << dVB
+                        //     << endl;
+
+                        //insertionPoints.append(0.5*(dVA + dVB));
+
+                        if (vA->internalPoint())
+                        {
+                            pointToBeRetained[vA->index()] = false;
+                        }
+
+                        if (vB->internalPoint())
+                        {
+                            pointToBeRetained[vB->index()] = false;
+                        }
+                    }
+                    else
+                    {
+                        if (vA->internalPoint())
+                        {
+                            displacementAccumulator[vA->index()] += delta;
+                        }
+                        if (vB->internalPoint())
+                        {
+                            displacementAccumulator[vB->index()] += -delta;
+                        }
                     }
                 }
             }
@@ -1344,6 +1361,101 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Scan dual cells for those with SMALL volumes or lots of faces
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit =
+    //     finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     vit++
+    // )
+    // {
+    //     if (vit->internalPoint())
+    //     {
+    //         std::list<Edge> incidentEdges;
+
+    //         incident_edges(vit, std::back_inserter(incidentEdges));
+
+    //         if (incidentEdges.size() > 47)
+    //         {
+    //             Info<< "Highly connected cell removed "
+    //                 << nl << "incidentEdges = " << incidentEdges.size()
+    //                 << ", position = " << topoint(vit->point())
+    //                 << endl;
+
+    //             pointToBeRetained[vit->index()] = false;
+    //         }
+    //         else
+    //         {
+    //             faceList faces(incidentEdges.size());
+
+    //             label faceI = 0;
+
+    //             labelList faceLabels(incidentEdges.size(), -1);
+
+    //             for
+    //             (
+    //                 std::list<Edge>::iterator eit = incidentEdges.begin();
+    //                 eit != incidentEdges.end();
+    //                 ++eit
+    //             )
+    //             {
+    //                 Cell_circulator ccStart = incident_cells(*eit);
+    //                 Cell_circulator cc = ccStart;
+
+    //                 DynamicList<label> verticesOnFace;
+
+    //                 do
+    //                 {
+    //                     if (!is_infinite(cc))
+    //                     {
+    //                         if (cc->cellIndex() < 0)
+    //                         {
+    //                             FatalErrorIn("Foam::CV3D::relaxPoints")
+    //                             << "Dual face uses circumcenter defined"
+    //                                 << " by a Delaunay tetrahedron with no"
+    //                                 << " internal or boundary points."
+    //                                 << exit(FatalError);
+    //                         }
+
+    //                         verticesOnFace.append(cc->cellIndex());
+    //                     }
+    //                 } while (++cc != ccStart);
+
+    //                 verticesOnFace.shrink();
+
+    //                 faces[faceI] = face(verticesOnFace);
+
+    //                 faceLabels[faceI] = faceI;
+
+    //                 faceI++;
+    //             }
+
+    //             cell dualCell(faceLabels);
+
+    //             scalar dualCellVolume = dualCell.mag(dualVertices, faces);
+
+    //             scalar targetCellSize = controls_.minCellSize;
+
+    //             scalar targetCellVolume = pow(targetCellSize, 3);
+
+    //             if (dualCellVolume < 0.025*targetCellVolume)
+    //             {
+    //                 Info<< "Small dual cell removed "
+    //                     << nl << "Volume = " << dualCellVolume
+    //                     << ", position = " << topoint(vit->point())
+    //                     << endl;
+
+    //                 pointToBeRetained[vit->index()] = false;
+    //             }
+    //         }
+    //     }
+    // }
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     // displacementAccumulator /= weightAccumulator;
 
     vector totalDisp = sum(displacementAccumulator);
@@ -1374,6 +1486,13 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
         startOfInternalPoints_
     );
 
+    List<bool> internalPointToBeRetained = SubList<bool>
+    (
+        pointToBeRetained,
+        pointToBeRetained.size() - startOfInternalPoints_,
+        startOfInternalPoints_
+    );
+
     // Write the mesh before clearing it
     if (runTime_.outputTime())
     {
@@ -1400,19 +1519,47 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
     reinsertFeaturePoints();
 
-    reinsertPoints(internalDelaunayVertices);
-
-    Info<< nl << "Inserting " << insertionPoints.size()
-        << " new points. "<< endl;
-
-    label nVert = number_of_vertices();
-
-    // Add the points and index them
-    forAll(insertionPoints, i)
+    if(runTime_.timeOutputValue() > 80)
     {
-        const point& p = insertionPoints[i];
+        reinsertPoints(internalDelaunayVertices);
+    }
+    else
+    {
+        // INCLUDED FROM reinsertPoints TEMPORARILY -->
+        Info<< nl << "Reinserting points after motion. ";
 
-        insert(toPoint(p))->index() = nVert++;
+        startOfInternalPoints_ = number_of_vertices();
+
+        label nVert = startOfInternalPoints_;
+
+        // Add the points and index them
+        forAll(internalDelaunayVertices, i)
+        {
+            if (internalPointToBeRetained[i])
+            {
+                const point& p = internalDelaunayVertices[i];
+
+                insert(toPoint(p))->index() = nVert++;
+            }
+        }
+
+        Info<< nVert << " vertices reinserted." << nl
+            << internalDelaunayVertices.size() - nVert + startOfInternalPoints_
+            << " deleted." << endl;
+        // <-- INCLUDED FROM reinsertPoints TEMPORARILY
+
+        Info<< nl << "Inserting " << insertionPoints.size()
+            << " new points. "<< endl;
+
+        // label nVert = number_of_vertices();
+
+        // Add the points and index them
+        forAll(insertionPoints, i)
+        {
+            const point& p = insertionPoints[i];
+
+            insertPoint(p, Vb::INTERNAL_POINT);
+        }
     }
 }
 
