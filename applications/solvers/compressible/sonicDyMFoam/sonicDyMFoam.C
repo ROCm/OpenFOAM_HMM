@@ -52,8 +52,9 @@ int main(int argc, char *argv[])
 
     autoPtr<Foam::motionSolver> motionPtr = motionSolver::New(mesh);
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.run())
     {
+        runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         #include "readPISOControls.H"
