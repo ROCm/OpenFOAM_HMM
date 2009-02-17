@@ -23,10 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    buoyantBoussinesqSimpleFoam
+    buoyantBoussinesqPisoFoam
 
 Description
-    Steady-state solver for buoyant, turbulent flow of incompressible fluids
+    Transient solver for buoyant, turbulent flow of incompressible fluids
 
     Uses the Boussinesq approximation:
     \f[
