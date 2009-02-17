@@ -1,0 +1,65 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      potentialDict;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+removalOrder    1 ( Ar );
+
+pair
+{
+    Ar-Ar
+    {
+        pairPotential   azizChen;
+        rCut            1.2e-09;
+        rMin            1.5e-10;
+        dr              2e-14;
+        azizChenCoeffs
+        {
+            epsilon         1.97742255e-21;
+            rm              3.759e-10;
+            A               9502720;
+            alpha           16.345655;
+            C6              1.0914254;
+            C8              0.6002595;
+            C10             0.3700113;
+            D               1.4;
+            gamma           2;
+        }
+
+        energyScalingFunction noScaling;
+        writeTables     yes;
+    }
+}
+
+tether
+{
+    Ar
+    {
+        tetherPotential restrainedHarmonicSpring;
+        restrainedHarmonicSpringCoeffs
+        {
+            springConstant  0.0277;
+            rR              1.2e-09;
+        }
+    }
+}
+
+external
+{
+    gravity         ( 0 0 0 );
+}
+
+
+// ************************************************************************* //
