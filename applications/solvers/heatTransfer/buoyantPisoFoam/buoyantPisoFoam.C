@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    buoyantFoam
+    buoyantPisoFoam
 
 Description
     Transient Solver for buoyant, turbulent flow of compressible fluids for
