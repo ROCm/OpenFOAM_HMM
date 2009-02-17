@@ -348,16 +348,28 @@ public:
 
         // Check
 
-            //- Return true if run should continue
-            //  @sa end()
+            //- Return true if run should continue,
+            //  also invokes the functionObjectList::end() method
+            //  when the time goes out of range
             //  @note
-            //      the rounding heuristics near endTime mean that
-            //      @code run() @endcode and @code !end() @endcode may
-            //      not yield the same result
+            //  For correct baheviour, the following style of time-loop
+            //  is recommended:
+            //  @code
+            //      while (runTime.run())
+            //      {
+            //          runTime++;
+            //          solve;
+            //          runTime.write();
+            //      }
+            //  @endcode
             virtual bool run() const;
 
-            //- Return true if end of run
-            //  @sa run()
+            //- Return true if end of run,
+            //  does not invoke any functionObject methods
+            //  @note
+            //      The rounding heuristics near endTime mean that
+            //      @code run() @endcode and @code !end() @endcode may
+            //      not yield the same result
             virtual bool end() const;
 
 
@@ -406,13 +418,15 @@ public:
 
     // Member operators
 
-        //- Set deltaT to that specified and increment time
+        //- Set deltaT to that specified and increment time via operator++()
         virtual Time& operator+=(const dimensionedScalar&);
 
-        //- Set deltaT to that specified and increment time
+        //- Set deltaT to that specified and increment time via operator++()
         virtual Time& operator+=(const scalar);
 
-        //- Prefix increment
+        //- Prefix increment,
+        //  also invokes the functionObjectList::start() or
+        //  functionObjectList::execute() method, depending on the time-index
         virtual Time& operator++();
 
         //- Postfix increment, this is identical to the prefix increment

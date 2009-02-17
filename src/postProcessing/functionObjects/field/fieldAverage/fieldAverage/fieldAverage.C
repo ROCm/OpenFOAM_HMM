@@ -255,6 +255,15 @@ void Foam::fieldAverage::execute()
 }
 
 
+void Foam::fieldAverage::end()
+{
+    if (active_)
+    {
+        calcAverages();
+    }
+}
+
+
 void Foam::fieldAverage::write()
 {
     if (active_)

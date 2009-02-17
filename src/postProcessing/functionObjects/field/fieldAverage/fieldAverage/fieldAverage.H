@@ -41,7 +41,7 @@ Description
         // averaging info if available
         cleanRestart true;
 
-        // Fields to be probed. runTime modifiable!
+        // Fields to be averaged. runTime modifiable!
         fields
         (
             U
@@ -280,6 +280,9 @@ public:
 
         //- Execute the averaging
         virtual void execute();
+
+        //- Execute the averaging at the final time-loop
+        virtual void end();
 
         //- Calculate the field average data and write
         virtual void write();

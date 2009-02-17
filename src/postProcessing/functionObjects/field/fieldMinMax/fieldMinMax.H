@@ -80,8 +80,8 @@ protected:
 
     // Protected data
 
-        //- Name of this set of forces,
-        //  Also used as the name of the probes directory.
+        //- Name of this set of field min/max.
+        //  Also used as the name of the output directory.
         word name_;
 
         const objectRegistry& obr_;
@@ -108,7 +108,7 @@ protected:
 
     // Private Member Functions
 
-        //- If the forces file has not been created create it
+        //- If the output file has not been created create it
         void makeFile();
 
         //- Disallow default bitwise copy construct
@@ -147,17 +147,20 @@ public:
 
     // Member Functions
 
-        //- Return name of the set of forces
+        //- Return name of the set of field min/max
         virtual const word& name() const
         {
             return name_;
         }
 
-        //- Read the forces data
+        //- Read the field min/max data
         virtual void read(const dictionary&);
 
-        //- Execute
+        //- Execute, currently does nothing
         virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
 
         //- Calculate the field min/max
         template<class Type>

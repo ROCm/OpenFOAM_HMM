@@ -26,8 +26,8 @@ Class
     Foam::functionObjectList
 
 Description
-    List of function objects with execute() function that is called for each
-    object.
+    List of function objects with start(), execute() and end() functions
+    that is called for each object.
 
 See Also
     Foam::functionObject and Foam::OutputFilterFunctionObject
@@ -147,21 +147,17 @@ public:
         virtual bool status() const;
 
 
-        //- Start is called at the start of the time-loop
+        //- Called at the start of the time-loop
         virtual bool start();
 
-        //- Execute is called at each ++ or += of the time-loop
+        //- Called at each ++ or += of the time-loop
         virtual bool execute();
+
+        //- Called when Time::run() determines that the time-loop exits
+        virtual bool end();
 
         //- Read and set the function objects if their data have changed
         virtual bool read();
-
-
-        //- Call start() manually regardless of the execution status
-        virtual bool manualStart();
-
-        //- Call execute() manually regardless of the execution status
-        virtual bool manualExecute();
 
 };
 

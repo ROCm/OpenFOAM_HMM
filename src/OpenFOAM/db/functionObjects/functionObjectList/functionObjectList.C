@@ -142,9 +142,40 @@ bool Foam::functionObjectList::execute()
             read();
         }
 
-        forAllIter(PtrList<functionObject>, *this, iter)
+        forAllIter
+        (
+            PtrList<functionObject>,
+            static_cast<PtrList<functionObject>&>(*this),
+            iter
+        )
         {
             ok = iter().execute() && ok;
+        }
+    }
+
+    return ok;
+}
+
+
+bool Foam::functionObjectList::end()
+{
+    bool ok = true;
+
+    if (execution_)
+    {
+        if (!updated_)
+        {
+            read();
+        }
+
+        forAllIter
+        (
+            PtrList<functionObject>,
+            static_cast<PtrList<functionObject>&>(*this),
+            iter
+        )
+        {
+            ok = iter().end() && ok;
         }
     }
 
@@ -276,30 +307,6 @@ bool Foam::functionObjectList::read()
     }
 
     return ok;
-}
-
-
-bool Foam::functionObjectList::manualStart()
-{
-    bool state = execution_;
-    execution_ = true;
-
-    bool ret = start();
-
-    execution_ = state;
-    return ret;
-}
-
-
-bool Foam::functionObjectList::manualExecute()
-{
-    bool state = execution_;
-    execution_ = true;
-
-    bool ret = execute();
-
-    execution_ = state;
-    return ret;
 }
 
 

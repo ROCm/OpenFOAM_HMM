@@ -498,8 +498,8 @@ bool Foam::Time::run() const
         // ie, when exiting the control loop
         if (!running && timeIndex_ != startTimeIndex_)
         {
-            // Note, the execute() also calls an indirect start() if required
-            functionObjects_.execute();
+            // Note, end() also calls an indirect start() as required
+            functionObjects_.end();
         }
     }
 
@@ -509,8 +509,7 @@ bool Foam::Time::run() const
 
 bool Foam::Time::end() const
 {
-    bool done = value() > (endTime_ + 0.5*deltaT_);
-    return done;
+    return value() > (endTime_ + 0.5*deltaT_);
 }
 
 

@@ -104,6 +104,12 @@ void Foam::forceCoeffs::execute()
 }
 
 
+void Foam::forceCoeffs::end()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::forceCoeffs::write()
 {
     if (active_)

@@ -203,7 +203,6 @@ Foam::sampledSurfaces::~sampledSurfaces()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 void Foam::sampledSurfaces::verbose(const bool verbosity)
 {
     verbose_ = verbosity;
@@ -211,6 +210,12 @@ void Foam::sampledSurfaces::verbose(const bool verbosity)
 
 
 void Foam::sampledSurfaces::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::sampledSurfaces::end()
 {
     // Do nothing - only valid on write
 }

@@ -103,6 +103,12 @@ Foam::functionObject::~functionObject()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+bool Foam::functionObject::end()
+{
+    return execute();
+}
+
+
 Foam::autoPtr<Foam::functionObject> Foam::functionObject::iNew::operator()
 (
     const word& name,

@@ -58,7 +58,7 @@ Foam::dynamicPressure::dynamicPressure
     name_(name),
     obr_(obr),
     active_(true),
-    pName_(dict.lookup("p")),
+    pName_(dict.lookupOrDefault<word>("p", "p")),
     rho_(readScalar(dict.lookup("rho")))
 {
     // Check if the available mesh is an fvMesh, otherwise deactivate
@@ -68,7 +68,7 @@ Foam::dynamicPressure::dynamicPressure
         WarningIn
         (
             "dynamicPressure::dynamicPressure"
-            "(const objectRegistry& obr, const dictionary& dict)"
+            "(const objectRegistry&, const dictionary&)"
         )   << "No fvMesh available, deactivating." << nl
             << endl;
     }
@@ -81,7 +81,7 @@ Foam::dynamicPressure::dynamicPressure
             WarningIn
             (
                 "dynamicPressure::dynamicPressure"
-                "(const objectRegistry& obr, const dictionary& dict)"
+                "(const objectRegistry&, const dictionary&)"
             )   << "Pressure is not kinematic pressure, deactivating." << nl
                 << endl;
         }
@@ -103,13 +103,19 @@ void Foam::dynamicPressure::read(const dictionary& dict)
 {
     if (active_)
     {
-        dict.lookup("p") >> pName_;
+        dict.readIfPresent("p", pName_);
         dict.lookup("rho") >> rho_;
     }
 }
 
 
 void Foam::dynamicPressure::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::dynamicPressure::end()
 {
     // Do nothing - only valid on write
 }
