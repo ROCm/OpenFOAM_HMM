@@ -507,6 +507,19 @@ bool Foam::Time::run() const
 }
 
 
+bool Foam::Time::loop()
+{
+    bool running = run();
+
+    if (running)
+    {
+        operator++();
+    }
+
+    return running;
+}
+
+
 bool Foam::Time::end() const
 {
     return value() > (endTime_ + 0.5*deltaT_);

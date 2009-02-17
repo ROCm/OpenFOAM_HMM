@@ -352,7 +352,7 @@ public:
             //  also invokes the functionObjectList::end() method
             //  when the time goes out of range
             //  @note
-            //  For correct baheviour, the following style of time-loop
+            //  For correct behaviour, the following style of time-loop
             //  is recommended:
             //  @code
             //      while (runTime.run())
@@ -363,6 +363,21 @@ public:
             //      }
             //  @endcode
             virtual bool run() const;
+
+            //- Return true if run should continue and if so increment time
+            //  also invokes the functionObjectList::end() method
+            //  when the time goes out of range
+            //  @note
+            //  For correct behaviour, the following style of time-loop
+            //  is recommended:
+            //  @code
+            //      while (runTime.loop())
+            //      {
+            //          solve;
+            //          runTime.write();
+            //      }
+            //  @endcode
+            virtual bool loop();
 
             //- Return true if end of run,
             //  does not invoke any functionObject methods
