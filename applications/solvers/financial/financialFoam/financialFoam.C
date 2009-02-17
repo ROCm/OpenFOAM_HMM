@@ -55,8 +55,9 @@ int main(int argc, char *argv[])
 
     Info<< "Starting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.run())
     {
+        runTime++;
         delta == fvc::grad(V)().component(Foam::vector::X);
 
         solve

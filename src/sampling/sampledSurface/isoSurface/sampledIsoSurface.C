@@ -335,7 +335,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
 
         subMeshPtr_.reset
         (
-            new fvMeshSubset(static_cast<const fvMesh&>(mesh()))
+            new fvMeshSubset(fvm)
         );
         subMeshPtr_().setLargeCellSubset
         (

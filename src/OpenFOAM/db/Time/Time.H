@@ -26,7 +26,7 @@ Class
     Foam::Time
 
 Description
-    Class to control time during FOAM simulations which is also the
+    Class to control time during OpenFOAM simulations that is also the
     top-level objectRegistry.
 
 SourceFiles
@@ -109,7 +109,7 @@ protected:
 
     // Protected data
 
-        label startTimeIndex_;
+        label  startTimeIndex_;
         scalar startTime_;
         scalar endTime_;
 
@@ -121,10 +121,10 @@ protected:
 
         scalar writeInterval_;
 
-        label purgeWrite_;
+        label  purgeWrite_;
         mutable FIFOStack<word> previousOutputTimes_;
 
-        //- Is the time currently being sub-cycled
+        //- Is the time currently being sub-cycled?
         bool subCycling_;
 
         //- Time directory name format
@@ -157,21 +157,21 @@ private:
         //- Default graph format
         word graphFormat_;
 
-        //- Is runtim modification of dictionaries allowed
+        //- Is runtime modification of dictionaries allowed?
         Switch runTimeModifiable_;
 
         //- Instantiate a dummy class to cause the reading of dynamic libraries
         dlLibraryTable::readDlLibrary readLibs_;
 
         //- Function objects executed at start and on ++, +=
-        functionObjectList functionObjects_;
+        mutable functionObjectList functionObjects_;
 
 
 public:
 
     TypeName("time");
 
-    //- The default control dictionary name
+    //- The default control dictionary name (normally "controlDict")
     static word controlDictName;
 
 
@@ -282,8 +282,8 @@ public:
             void readModifiedObjects();
 
             //- Return the location of "dir" containing the file "name".
-            //  (Used in reading mesh data)
-            //  If name is null search for the directory "dir" only
+            //  (eg, used in reading mesh data)
+            //  If name is null, search for the directory "dir" only
             word findInstance
             (
                 const fileName& dir,
@@ -291,7 +291,7 @@ public:
                 const IOobject::readOption rOpt = IOobject::MUST_READ
             ) const;
 
-            //- Search tha case for valid time directories
+            //- Search the case for valid time directories
             instantList times() const;
 
             //- Search the case for the time directory path
@@ -307,9 +307,9 @@ public:
             //- Write using given format, version and compression
             virtual bool writeObject
             (
-                IOstream::streamFormat fmt,
-                IOstream::versionNumber ver,
-                IOstream::compressionType cmp
+                IOstream::streamFormat,
+                IOstream::versionNumber,
+                IOstream::compressionType
             ) const;
 
             //- Write the objects now and continue the run
@@ -348,10 +348,28 @@ public:
 
         // Check
 
-            //- Return true if run should continue
+            //- Return true if run should continue,
+            //  also invokes the functionObjectList::end() method
+            //  when the time goes out of range
+            //  @note
+            //  For correct baheviour, the following style of time-loop
+            //  is recommended:
+            //  @code
+            //      while (runTime.run())
+            //      {
+            //          runTime++;
+            //          solve;
+            //          runTime.write();
+            //      }
+            //  @endcode
             virtual bool run() const;
 
-            //- Return true if end of run
+            //- Return true if end of run,
+            //  does not invoke any functionObject methods
+            //  @note
+            //      The rounding heuristics near endTime mean that
+            //      @code run() @endcode and @code !end() @endcode may
+            //      not yield the same result
             virtual bool end() const;
 
 
@@ -400,16 +418,18 @@ public:
 
     // Member operators
 
-        //- Set deltaT to that specified and increment time
+        //- Set deltaT to that specified and increment time via operator++()
         virtual Time& operator+=(const dimensionedScalar&);
 
-        //- Set deltaT to that specified and increment time
+        //- Set deltaT to that specified and increment time via operator++()
         virtual Time& operator+=(const scalar);
 
-        //- Prefix increment
+        //- Prefix increment,
+        //  also invokes the functionObjectList::start() or
+        //  functionObjectList::execute() method, depending on the time-index
         virtual Time& operator++();
 
-        //- Postfix increment
+        //- Postfix increment, this is identical to the prefix increment
         virtual Time& operator++(int);
 };
 

@@ -53,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class OutputFilterFunctionObject Declaration
+                 Class OutputFilterFunctionObject Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class OutputFilter>
@@ -69,7 +69,7 @@ class OutputFilterFunctionObject
         word regionName_;
         word dictName_;
 
-        //- Switch for the execution of the functionObjects
+        //- Switch for the execution of the functionObject
         bool enabled_;
 
         outputFilterOutputControl outputControl_;
@@ -114,20 +114,25 @@ public:
             return name_;
         }
 
-        //- start is called at the start of the time-loop
-        virtual bool start();
-
-        //- execute is called at each ++ or += of the time-loop
-        virtual bool execute();
-
         //- Switch the function object on
         virtual void on();
 
         //- Switch the function object off
         virtual void off();
 
-        //- Read and set the function object if its data has changed
-        virtual bool read(const dictionary& dict);
+
+        //- Called at the start of the time-loop
+        virtual bool start();
+
+        //- Called at each ++ or += of the time-loop
+        virtual bool execute();
+
+        //- Called when Time::run() determines that the time-loop exits
+        virtual bool end();
+
+
+        //- Read and set the function object if its data have changed
+        virtual bool read(const dictionary&);
 };
 
 

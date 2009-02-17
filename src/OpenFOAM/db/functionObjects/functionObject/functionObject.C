@@ -30,11 +30,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineRunTimeSelectionTable(functionObject, dictionary);
-    int functionObject::debug(::Foam::debug::debugSwitch("functionObject", 0));
-}
+defineRunTimeSelectionTable(Foam::functionObject, dictionary);
+int Foam::functionObject::debug(Foam::debug::debugSwitch("functionObject", 0));
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -71,10 +68,10 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         FatalErrorIn
         (
             "functionObject::New"
-            "(const word& functionType, const Time&, const dictionary&)"
+            "(const word& name, const Time&, const dictionary&)"
         )   << "Unknown function type "
-            << functionType << endl << endl
-            << "Table of functionObjects is empty"
+            << functionType << nl << nl
+            << "Table of functionObjects is empty" << endl
             << exit(FatalError);
     }
 
@@ -86,11 +83,11 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         FatalErrorIn
         (
             "functionObject::New"
-            "(const word& functionType, const Time&, const dictionary&)"
+            "(const word& name, const Time&, const dictionary&)"
         )   << "Unknown function type "
-            << functionType << endl << endl
-            << "Valid functions are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << functionType << nl << nl
+            << "Valid functions are : " << nl
+            << dictionaryConstructorTablePtr_->toc() << endl
             << exit(FatalError);
     }
 
@@ -105,6 +102,12 @@ Foam::functionObject::~functionObject()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+bool Foam::functionObject::end()
+{
+    return execute();
+}
+
 
 Foam::autoPtr<Foam::functionObject> Foam::functionObject::iNew::operator()
 (

@@ -66,10 +66,10 @@ class dynamicPressure
         //- on/off switch
         bool active_;
 
-        //- Name of pressure field
+        //- Name of pressure field, default is "p"
         word pName_;
 
-        //- Density
+        //- Density value
         scalar rho_;
 
 
@@ -120,8 +120,11 @@ public:
         //- Read the dynamicPressure data
         virtual void read(const dictionary&);
 
-        //- Execute
+        //- Execute, currently does nothing
         virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
 
         //- Calculate the dynamicPressure and write
         virtual void write();

@@ -47,8 +47,9 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting iteration loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.run())
     {
+        runTime++;
         Info<< "Iteration = " << runTime.timeName() << nl << endl;
 
         solve

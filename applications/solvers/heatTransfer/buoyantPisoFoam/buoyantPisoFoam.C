@@ -23,76 +23,64 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    buoyantBoussinesqSimpleFoam
+    buoyantPisoFoam
 
 Description
-    Steady-state solver for buoyant, turbulent flow of incompressible fluids
-
-    Uses the Boussinesq approximation:
-    \f[
-        rho_{eff} = 1 - beta(T - T_{ref})
-    \f]
-
-    where:
-        \f$ rho_{eff} \f$ = the effective (driving) density
-        beta = thermal expansion coefficient [1/K]
-        T = temperature [K]
-        \f$ T_{ref} \f$ = reference temperature [K]
-
-    Valid when:
-    \f[
-        rho_{eff} << 1
-    \f]
+    Transient Solver for buoyant, turbulent flow of compressible fluids for
+    ventilation and heat-transfer.  Turbulence is modelled using a run-time
+    selectable compressible RAS model.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "RASModel.H"
+#include "basicThermo.H"
+#include "turbulenceModel.H"
+#include "fixedGradientFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "CourantNo.H"
-#   include "setInitialDeltaT.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.run())
     {
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
+        #include "rhoEqn.H"
 
-#       include "UEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
+
         for (int corr=0; corr<nCorr; corr++)
         {
-#           include "TEqn.H"
-#           include "pdEqn.H"
+            #include "hEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
 
-        if (runTime.write())
-        {
-#           include "writeAdditionalFields.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

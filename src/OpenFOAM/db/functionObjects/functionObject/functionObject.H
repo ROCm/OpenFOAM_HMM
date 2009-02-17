@@ -121,7 +121,7 @@ public:
 
     // Selectors
 
-        //- Select from Time and Istream
+        //- Select from dictionary, based on its "type" entry
         static autoPtr<functionObject> New
         (
             const word& name,
@@ -137,14 +137,18 @@ public:
 
     // Member Functions
 
-        //- start is called at the start of the time-loop
+        //- Called at the start of the time-loop
         virtual bool start() = 0;
 
-        //- execute is called at each ++ or += of the time-loop
+        //- Called at each ++ or += of the time-loop
         virtual bool execute() = 0;
 
-        //- Read and set the function object if its data has changed
-        virtual bool read(const dictionary& dict) = 0;
+        //- Called when Time::run() determines that the time-loop exits.
+        //  By default it simply calls execute().
+        virtual bool end();
+
+        //- Read and set the function object if its data have changed
+        virtual bool read(const dictionary&) = 0;
 };
 
 

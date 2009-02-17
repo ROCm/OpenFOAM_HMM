@@ -257,8 +257,11 @@ public:
         //- set verbosity level
         void verbose(const bool verbosity = true);
 
-        //- Execute
+        //- Execute, currently does nothing
         virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
 
         //- Sample and write
         virtual void write();

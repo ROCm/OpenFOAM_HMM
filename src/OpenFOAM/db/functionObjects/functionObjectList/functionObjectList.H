@@ -26,8 +26,8 @@ Class
     Foam::functionObjectList
 
 Description
-    List of function objects with execute() function that is called for each
-    object.
+    List of function objects with start(), execute() and end() functions
+    that is called for each object.
 
 See Also
     Foam::functionObject and Foam::OutputFilterFunctionObject
@@ -40,9 +40,10 @@ SourceFiles
 #ifndef functionObjectList_H
 #define functionObjectList_H
 
-#include "functionObject.H"
-#include "HashTable.H"
 #include "PtrList.H"
+#include "functionObject.H"
+#include "SHA1Digest.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,20 +55,20 @@ namespace Foam
 \*---------------------------------------------------------------------------*/
 
 class functionObjectList
+:
+    private PtrList<functionObject>
 {
     // Private data
 
-        //- A list of function objects
-        //  Avoid 'is-a' relationship for protection
-        PtrList<functionObject> functions_;
+        //- A list of SHA1 digests for the function object dictionaries
+        List<SHA1Digest> digests_;
 
-        //- Quick lookup of the index into the PtrList<functionObject>
-        //  Currently only used to manage rereading/deletion
-        HashTable<label>  indices_;
+        //- Quick lookup of the index into functions/digests
+        HashTable<label> indices_;
 
         const Time& time_;
 
-        //- Dictionary containing the "functions" entry
+        //- The parent dictionary containing a "functions" entry
         //  This entry can either be a list or a dictionary of
         //  functionObject specifications.
         const dictionary& parentDict_;
@@ -75,15 +76,16 @@ class functionObjectList
         //- Switch for the execution of the functionObjects
         bool execution_;
 
-        //- Tracks if read() was called while execution was turned off
+        //- Tracks if read() was called while execution is on
         bool updated_;
 
 
     // Private Member Functions
 
-        //- Remove and return the function object pointer by name.
-        //  Return NULL if it didn't exist.
-        functionObject* remove(const word&);
+        //- Remove and return the function object pointer by name,
+        //  and returns the old index via the parameter.
+        //  Returns a NULL pointer (and index -1) if it didn't exist.
+        functionObject* remove(const word&, label& oldIndex);
 
         //- Disallow default bitwise copy construct
         functionObjectList(const functionObjectList&);
@@ -105,8 +107,11 @@ public:
         );
 
 
-        //- Construct from Time, dictionary with "functions" entry
-        //  and the execution setting
+        //- Construct from Time, a dictionary with "functions" entry
+        //  and the execution setting.
+        //  @param[in]  parentDict - the parent dictionary containing
+        //    a "functions" entry, which can either be a list or a dictionary
+        //    of functionObject specifications.
         functionObjectList
         (
             const Time&,
@@ -122,11 +127,15 @@ public:
 
     // Member Functions
 
-        //- Start is called at the start of the time-loop
-        virtual bool start();
+        //- Return the number of elements in the List.
+        using PtrList<functionObject>::size;
 
-        //- Execute is called at each ++ or += of the time-loop
-        virtual bool execute();
+        //- Return true if the List is empty (ie, size() is zero).
+        using PtrList<functionObject>::empty;
+
+        //- Clear the list of function objects
+        virtual void clear();
+
 
         //- Switch the function objects on
         virtual void on();
@@ -134,8 +143,22 @@ public:
         //- Switch the function objects off
         virtual void off();
 
+        //- Return the execution status (on/off) of the function objects
+        virtual bool status() const;
+
+
+        //- Called at the start of the time-loop
+        virtual bool start();
+
+        //- Called at each ++ or += of the time-loop
+        virtual bool execute();
+
+        //- Called when Time::run() determines that the time-loop exits
+        virtual bool end();
+
         //- Read and set the function objects if their data have changed
         virtual bool read();
+
 };
 
 

@@ -66,6 +66,20 @@ Foam::OutputFilterFunctionObject<OutputFilter>::OutputFilterFunctionObject
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class OutputFilter>
+void Foam::OutputFilterFunctionObject<OutputFilter>::on()
+{
+    enabled_ = true;
+}
+
+
+template<class OutputFilter>
+void Foam::OutputFilterFunctionObject<OutputFilter>::off()
+{
+    enabled_ = false;
+}
+
+
+template<class OutputFilter>
 bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
 {
     readDict();
@@ -120,16 +134,19 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::execute()
 
 
 template<class OutputFilter>
-void Foam::OutputFilterFunctionObject<OutputFilter>::on()
+bool Foam::OutputFilterFunctionObject<OutputFilter>::end()
 {
-    enabled_ = true;
-}
+    if (enabled_)
+    {
+        ptr_->end();
 
+        if (enabled_ && outputControl_.output())
+        {
+            ptr_->write();
+        }
+    }
 
-template<class OutputFilter>
-void Foam::OutputFilterFunctionObject<OutputFilter>::off()
-{
-    enabled_ = false;
+    return true;
 }
 
 

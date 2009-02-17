@@ -47,11 +47,11 @@ const Foam::NamedEnum<Foam::outputFilterOutputControl::outputControls, 2>
 
 Foam::outputFilterOutputControl::outputFilterOutputControl
 (
-    const Time& time,
+    const Time& t,
     const dictionary& dict
 )
 :
-    time_(time),
+    time_(t),
     outputControl_(ocTimeStep),
     outputInterval_(0)
 {
@@ -93,8 +93,8 @@ bool Foam::outputFilterOutputControl::output() const
         {
             return
             (
-                !(time_.timeIndex() % outputInterval_)
-             || (outputInterval_ <= 1)
+                (outputInterval_ <= 1)
+             || !(time_.timeIndex() % outputInterval_)
             );
             break;
         }

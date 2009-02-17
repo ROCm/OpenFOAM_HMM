@@ -352,25 +352,27 @@ Foam::Time::Time
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::Time::~Time()
-{}
+{
+    // destroy function objects first
+    functionObjects_.clear();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::word Foam::Time::timeName(const scalar t)
 {
-    std::ostringstream osBuffer;
-    osBuffer.setf(ios_base::fmtflags(format_), ios_base::floatfield);
-    osBuffer.precision(precision_);
-    osBuffer << t;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf.setf(ios_base::fmtflags(format_), ios_base::floatfield);
+    buf.precision(precision_);
+    buf << t;
+    return buf.str();
 }
 
 
 Foam::word Foam::Time::timeName() const
 {
     return dimensionedScalar::name();
-    //return timeName(timeOutputValue());
 }
 
 
@@ -432,7 +434,7 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
     return times[nearestIndex];
 }
 
-//
+
 // This should work too,
 // if we don't worry about checking "constant" explicitly
 //
@@ -490,9 +492,15 @@ bool Foam::Time::run() const
 {
     bool running = value() < (endTime_ - 0.5*deltaT_);
 
-    if (!subCycling_ && !running && timeIndex_ != startTimeIndex_)
+    if (!subCycling_)
     {
-        const_cast<functionObjectList&>(functionObjects_).execute();
+        // only execute when the condition is no longer true
+        // ie, when exiting the control loop
+        if (!running && timeIndex_ != startTimeIndex_)
+        {
+            // Note, end() also calls an indirect start() as required
+            functionObjects_.end();
+        }
     }
 
     return running;
@@ -501,7 +509,7 @@ bool Foam::Time::run() const
 
 bool Foam::Time::end() const
 {
-    return (value() > (endTime_ + 0.5*deltaT_));
+    return value() > (endTime_ + 0.5*deltaT_);
 }
 
 
@@ -611,9 +619,7 @@ Foam::Time& Foam::Time::operator+=(const dimensionedScalar& deltaT)
 Foam::Time& Foam::Time::operator+=(const scalar deltaT)
 {
     setDeltaT(deltaT);
-    operator++();
-
-    return *this;
+    return operator++();
 }
 
 
@@ -643,22 +649,22 @@ Foam::Time& Foam::Time::operator++()
         setTime(0.0, timeIndex_);
     }
 
-    switch(writeControl_)
+    switch (writeControl_)
     {
         case wcTimeStep:
-            outputTime_ = !(timeIndex_%label(writeInterval_));
+            outputTime_ = !(timeIndex_ % label(writeInterval_));
         break;
 
         case wcRunTime:
         case wcAdjustableRunTime:
         {
-            label outputTimeIndex =
+            label outputIndex =
                 label(((value() - startTime_) + 0.5*deltaT_)/writeInterval_);
 
-            if (outputTimeIndex > outputTimeIndex_)
+            if (outputIndex > outputTimeIndex_)
             {
                 outputTime_ = true;
-                outputTimeIndex_ = outputTimeIndex;
+                outputTimeIndex_ = outputIndex;
             }
             else
             {
@@ -669,13 +675,11 @@ Foam::Time& Foam::Time::operator++()
 
         case wcCpuTime:
         {
-            label outputTimeIndex =
-                label(elapsedCpuTime()/writeInterval_);
-
-            if (outputTimeIndex > outputTimeIndex_)
+            label outputIndex = label(elapsedCpuTime()/writeInterval_);
+            if (outputIndex > outputTimeIndex_)
             {
                 outputTime_ = true;
-                outputTimeIndex_ = outputTimeIndex;
+                outputTimeIndex_ = outputIndex;
             }
             else
             {
@@ -686,11 +690,11 @@ Foam::Time& Foam::Time::operator++()
 
         case wcClockTime:
         {
-            label outputTimeIndex = label(elapsedClockTime()/writeInterval_);
-            if (outputTimeIndex > outputTimeIndex_)
+            label outputIndex = label(elapsedClockTime()/writeInterval_);
+            if (outputIndex > outputTimeIndex_)
             {
                 outputTime_ = true;
-                outputTimeIndex_ = outputTimeIndex;
+                outputTimeIndex_ = outputIndex;
             }
             else
             {
@@ -698,8 +702,9 @@ Foam::Time& Foam::Time::operator++()
             }
         }
         break;
-    };
+    }
 
+    // see if endTime needs adjustment to stop at the next run()/end() check
     if (!end())
     {
         if (stopAt_ == saNoWriteNow)
