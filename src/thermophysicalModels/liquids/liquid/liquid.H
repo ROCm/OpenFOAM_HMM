@@ -41,7 +41,6 @@ SourceFiles
 #include "typeInfo.H"
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
-//#include "eos.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,8 +50,6 @@ namespace Foam
 /*---------------------------------------------------------------------------*\
                            Class liquid Declaration
 \*---------------------------------------------------------------------------*/
-
-    //class eos;
 
 class liquid
 {
@@ -75,23 +72,22 @@ class liquid
 
         //- Triple point temperature [K]
         scalar Tt_;
-    
+
         //- Triple point pressure [Pa]
         scalar Pt_;
 
         //- Normal boiling temperature [K]
         scalar Tb_;
- 
+
         //- Dipole moment []
         scalar dipm_;
 
-        //- Pitzer's acentric factor []
+        //- Pitzer's accentric factor []
         scalar omega_;
 
         //- Solubility parameter [(J/m^3)^0.5]
         scalar delta_;
 
-    //eos state_;
 
 public:
 
@@ -174,7 +170,7 @@ public:
 
     // Member Functions
 
-        // Phisical constants which define the specie
+        // Physical constants which define the specie
 
             //- Molecular weight [kg/kmol]
             scalar W() const
