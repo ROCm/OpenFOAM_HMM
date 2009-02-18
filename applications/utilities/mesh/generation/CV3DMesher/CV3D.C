@@ -267,21 +267,19 @@ Foam::scalar Foam::CV3D::alignmentDistanceWeight(scalar dist) const
 }
 
 
-Foam::scalar Foam::CV3D::faceAreaWeight(scalar faceArea) const
+Foam::scalar Foam::CV3D::faceAreaWeight(scalar faceAreaFraction) const
 {
     scalar fl2 = 0.5;
 
     scalar fu2 = 1.0;
 
-    scalar m2 = controls_.minCellSize2;
-
-    if (faceArea < fl2*m2)
+    if (faceAreaFraction < fl2)
     {
         return 0;
     }
-    else if (faceArea < fu2*m2)
+    else if (faceAreaFraction < fu2)
     {
-        return faceArea/((fu2 - fl2)*m2) - 1/((fu2/fl2) - 1);
+        return faceAreaFraction/((fu2 - fl2)) - 1/((fu2/fl2) - 1);
     }
     else
     {
@@ -357,7 +355,6 @@ void Foam::CV3D::insertPoints
     Info<< "insertInitialPoints(const pointField& points): ";
 
     startOfInternalPoints_ = number_of_vertices();
-    label nVert = startOfInternalPoints_;
 
     // Add the points and index them
     forAll(points, i)
@@ -366,7 +363,7 @@ void Foam::CV3D::insertPoints
 
         if (qSurf_.wellInside(p, nearness))
         {
-            insert(toPoint(p))->index() = nVert++;
+            insertPoint(p, Vb::INTERNAL_POINT);
         }
         else
         {
@@ -374,7 +371,8 @@ void Foam::CV3D::insertPoints
         }
     }
 
-    Info<< nVert << " vertices inserted" << endl;
+    Info<< number_of_vertices() - startOfInternalPoints_
+        << " vertices inserted" << endl;
 
     if (controls_.writeInitialTriangulation)
     {
@@ -1077,6 +1075,15 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
                 scalar targetCellSize = controls_.minCellSize;
 
+                // if (0.5*(dVA.y() + dVB.y()) < -0.1525)
+                // {
+                //     targetCellSize *= 0.5;
+                // }
+
+                // scalar midEdgeY = 0.5*(dVA.y() + dVB.y());
+
+                // targetCellSize *= 0.56222 - 0.413*midEdgeY;
+
                 scalar targetFaceArea = targetCellSize*targetCellSize;
 
                 if (alignmentDotProd > cosAcceptanceAngle)
@@ -1088,11 +1095,11 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
                     scalar faceArea = dualFace.mag(dualVertices);
 
-                    delta *= faceAreaWeight(faceArea);
+                    delta *= faceAreaWeight(faceArea/targetFaceArea);
 
                     if
                     (
-                        rABMag > 1.55*targetCellSize
+                        rABMag > 1.75*targetCellSize
                      && vA->internalPoint()
                      && vB->internalPoint()
                      && faceArea > 0.0025*targetFaceArea
@@ -1125,7 +1132,17 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                         //     << nl << dVB
                         //     << endl;
 
-                        //insertionPoints.append(0.5*(dVA + dVB));
+                        // Only insert a point at the midpoint of the short edge
+                        // if neither attached point has already been identified
+                        // to be removed.
+                        if
+                        (
+                            pointToBeRetained[vA->index()]
+                         && pointToBeRetained[vB->index()]
+                        )
+                        {
+                            insertionPoints.append(0.5*(dVA + dVB));
+                        }
 
                         if (vA->internalPoint())
                         {
@@ -1498,6 +1515,11 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
     {
         writeMesh(true);
 
+        if (controls_.writeFinalTriangulation)
+        {
+            writePoints("points.obj", true);
+        }
+
         pointIOField internalDVs
         (
             IOobject
@@ -1519,47 +1541,42 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
     reinsertFeaturePoints();
 
-    if(runTime_.timeOutputValue() > 80)
+    //reinsertPoints(internalDelaunayVertices);
+
+    // INCLUDED FROM reinsertPoints TEMPORARILY -->
+    Info<< nl << "Reinserting points after motion. ";
+
+    startOfInternalPoints_ = number_of_vertices();
+
+    label nVert = startOfInternalPoints_;
+
+    // Add the points and index them
+    forAll(internalDelaunayVertices, i)
     {
-        reinsertPoints(internalDelaunayVertices);
+        if (internalPointToBeRetained[i])
+        {
+            const point& p = internalDelaunayVertices[i];
+
+            insert(toPoint(p))->index() = nVert++;
+        }
     }
-    else
+
+    Info<< nVert << " vertices reinserted." << nl
+        << internalDelaunayVertices.size() - nVert + startOfInternalPoints_
+        << " deleted." << endl;
+    // <-- INCLUDED FROM reinsertPoints TEMPORARILY
+
+    Info<< nl << "Inserting " << insertionPoints.size()
+        << " new points. "<< endl;
+
+    // label nVert = number_of_vertices();
+
+    // Add the points and index them
+    forAll(insertionPoints, i)
     {
-        // INCLUDED FROM reinsertPoints TEMPORARILY -->
-        Info<< nl << "Reinserting points after motion. ";
+        const point& p = insertionPoints[i];
 
-        startOfInternalPoints_ = number_of_vertices();
-
-        label nVert = startOfInternalPoints_;
-
-        // Add the points and index them
-        forAll(internalDelaunayVertices, i)
-        {
-            if (internalPointToBeRetained[i])
-            {
-                const point& p = internalDelaunayVertices[i];
-
-                insert(toPoint(p))->index() = nVert++;
-            }
-        }
-
-        Info<< nVert << " vertices reinserted." << nl
-            << internalDelaunayVertices.size() - nVert + startOfInternalPoints_
-            << " deleted." << endl;
-        // <-- INCLUDED FROM reinsertPoints TEMPORARILY
-
-        Info<< nl << "Inserting " << insertionPoints.size()
-            << " new points. "<< endl;
-
-        // label nVert = number_of_vertices();
-
-        // Add the points and index them
-        forAll(insertionPoints, i)
-        {
-            const point& p = insertionPoints[i];
-
-            insertPoint(p, Vb::INTERNAL_POINT);
-        }
+        insertPoint(p, Vb::INTERNAL_POINT);
     }
 }
 

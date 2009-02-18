@@ -106,9 +106,11 @@ inline void Foam::CV3D::insertVb(const Vb& v)
         << "Failed to reinsert Vb at " << topoint(Pt)
             << endl;
     }
-
-    vh->index() = v.index();
-    vh->type() = v.type();
+    else
+    {
+        vh->index() = v.index();
+        vh->type() = v.type();
+    }
 }
 
 
