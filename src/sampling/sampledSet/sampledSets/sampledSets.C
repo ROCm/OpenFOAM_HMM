@@ -275,6 +275,12 @@ void Foam::sampledSets::execute()
 }
 
 
+void Foam::sampledSets::end()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::sampledSets::write()
 {
     if (size() && checkFieldTypes())

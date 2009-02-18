@@ -29,7 +29,8 @@ License
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-Foam::functionObject* Foam::functionObjectList::remove(const word& key)
+Foam::functionObject*
+Foam::functionObjectList::remove(const word& key, label& oldIndex)
 {
     functionObject* ptr = 0;
 
@@ -38,9 +39,15 @@ Foam::functionObject* Foam::functionObjectList::remove(const word& key)
 
     if (fnd != indices_.end())
     {
-        // remove the pointer from the old list
-        ptr = functions_.set(fnd(), 0).ptr();
+        oldIndex = fnd();
+
+        // retrieve the pointer and remove it from the old list
+        ptr = this->set(oldIndex, 0).ptr();
         indices_.erase(fnd);
+    }
+    else
+    {
+        oldIndex = -1;
     }
 
     return ptr;
@@ -55,7 +62,8 @@ Foam::functionObjectList::functionObjectList
     const bool execution
 )
 :
-    functions_(),
+    PtrList<functionObject>(),
+    digests_(),
     indices_(),
     time_(t),
     parentDict_(t.controlDict()),
@@ -71,7 +79,8 @@ Foam::functionObjectList::functionObjectList
     const bool execution
 )
 :
-    functions_(),
+    PtrList<functionObject>(),
+    digests_(),
     indices_(),
     time_(t),
     parentDict_(parentDict),
@@ -87,6 +96,34 @@ Foam::functionObjectList::~functionObjectList()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::functionObjectList::clear()
+{
+    PtrList<functionObject>::clear();
+    digests_.clear();
+    indices_.clear();
+    updated_ = false;
+}
+
+
+void Foam::functionObjectList::on()
+{
+    execution_ = true;
+}
+
+
+void Foam::functionObjectList::off()
+{
+    // for safety, also force a read() when execution is turned back on
+    updated_ = execution_ = false;
+}
+
+
+bool Foam::functionObjectList::status() const
+{
+    return execution_;
+}
+
 
 bool Foam::functionObjectList::start()
 {
@@ -105,7 +142,12 @@ bool Foam::functionObjectList::execute()
             read();
         }
 
-        forAllIter(PtrList<functionObject>, functions_, iter)
+        forAllIter
+        (
+            PtrList<functionObject>,
+            static_cast<PtrList<functionObject>&>(*this),
+            iter
+        )
         {
             ok = iter().execute() && ok;
         }
@@ -115,15 +157,29 @@ bool Foam::functionObjectList::execute()
 }
 
 
-void Foam::functionObjectList::on()
+bool Foam::functionObjectList::end()
 {
-    execution_ = true;
-}
+    bool ok = true;
 
+    if (execution_)
+    {
+        if (!updated_)
+        {
+            read();
+        }
 
-void Foam::functionObjectList::off()
-{
-    execution_ = false;
+        forAllIter
+        (
+            PtrList<functionObject>,
+            static_cast<PtrList<functionObject>&>(*this),
+            iter
+        )
+        {
+            ok = iter().end() && ok;
+        }
+    }
+
+    return ok;
 }
 
 
@@ -143,6 +199,7 @@ bool Foam::functionObjectList::read()
     if (entryPtr)
     {
         PtrList<functionObject> newPtrs;
+        List<SHA1Digest> newDigs;
         HashTable<label> newIndices;
 
         label nFunc = 0;
@@ -151,7 +208,9 @@ bool Foam::functionObjectList::read()
         {
             // a dictionary of functionObjects
             const dictionary& functionDicts = entryPtr->dict();
+
             newPtrs.setSize(functionDicts.size());
+            newDigs.setSize(functionDicts.size());
 
             forAllConstIter(dictionary, functionDicts, iter)
             {
@@ -163,11 +222,17 @@ bool Foam::functionObjectList::read()
                 const word& key = iter().keyword();
                 const dictionary& dict = iter().dict();
 
-                functionObject* objPtr = remove(key);
+                newDigs[nFunc] = dict.digest();
+
+                label oldIndex;
+                functionObject* objPtr = remove(key, oldIndex);
                 if (objPtr)
                 {
-                    // existing functionObject
-                    ok = objPtr->read(dict) && ok;
+                    // an existing functionObject, and dictionary changed
+                    if (newDigs[nFunc] != digests_[oldIndex])
+                    {
+                        ok = objPtr->read(dict) && ok;
+                    }
                 }
                 else
                 {
@@ -185,7 +250,9 @@ bool Foam::functionObjectList::read()
         {
             // a list of functionObjects
             PtrList<entry> functionDicts(entryPtr->stream());
+
             newPtrs.setSize(functionDicts.size());
+            newDigs.setSize(functionDicts.size());
 
             forAllIter(PtrList<entry>, functionDicts, iter)
             {
@@ -197,11 +264,17 @@ bool Foam::functionObjectList::read()
                 const word& key = iter().keyword();
                 const dictionary& dict = iter().dict();
 
-                functionObject* objPtr = remove(key);
+                newDigs[nFunc] = dict.digest();
+
+                label oldIndex;
+                functionObject* objPtr = remove(key, oldIndex);
                 if (objPtr)
                 {
-                    // existing functionObject
-                    ok = objPtr->read(dict) && ok;
+                    // an existing functionObject, and dictionary changed
+                    if (newDigs[nFunc] != digests_[oldIndex])
+                    {
+                        ok = objPtr->read(dict) && ok;
+                    }
                 }
                 else
                 {
@@ -218,15 +291,18 @@ bool Foam::functionObjectList::read()
 
         // safety:
         newPtrs.setSize(nFunc);
+        newDigs.setSize(nFunc);
 
-        // update PtrList of functionObjects
-        // also deletes existing, unused functionObjects
-        functions_.transfer(newPtrs);
+        // updating the PtrList of functionObjects also deletes any existing,
+        // but unused functionObjects
+        PtrList<functionObject>::transfer(newPtrs);
+        digests_.transfer(newDigs);
         indices_.transfer(newIndices);
     }
     else
     {
-        functions_.clear();
+        PtrList<functionObject>::clear();
+        digests_.clear();
         indices_.clear();
     }
 

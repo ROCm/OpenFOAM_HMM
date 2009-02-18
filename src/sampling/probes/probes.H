@@ -194,14 +194,17 @@ public:
             return cellList_;
         }
 
+        //- Execute, currently does nothing
+        virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
+
         //- Sample and write
         virtual void write();
 
         //- Read the probes
         virtual void read(const dictionary&);
-
-        //- Execute
-        virtual void execute();
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&)

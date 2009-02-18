@@ -163,6 +163,13 @@ void Foam::fieldMinMax::execute()
     // Do nothing - only valid on write
 }
 
+
+void Foam::fieldMinMax::end()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::fieldMinMax::write()
 {
     if (active_)

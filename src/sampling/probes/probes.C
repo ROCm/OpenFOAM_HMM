@@ -304,6 +304,12 @@ void Foam::probes::execute()
 }
 
 
+void Foam::probes::end()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::probes::write()
 {
     if (probeLocations_.size() && checkFieldTypes())
