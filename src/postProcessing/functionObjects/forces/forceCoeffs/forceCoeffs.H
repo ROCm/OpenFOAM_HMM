@@ -126,8 +126,11 @@ public:
         //- Read the forces data
         virtual void read(const dictionary&);
 
-        //- Execute
+        //- Execute, currently does nothing
         virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
 
         //- Write the forces
         virtual void write();

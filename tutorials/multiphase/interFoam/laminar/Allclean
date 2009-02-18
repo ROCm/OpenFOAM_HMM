@@ -20,7 +20,3 @@ for case in $loseCases
 do
     removeCase $case
 done
-
-cd nozzleFlow2D
-    ./Allclean
-cd ..

@@ -20,17 +20,17 @@ internalField   uniform (0 0 0 0 0 0);
 
 boundaryField
 {
-    movingWall      
+    movingWall
     {
-        type            zeroGradient;
+        type            kQRWallFunction;
     }
 
-    fixedWalls      
+    fixedWalls
     {
-        type            zeroGradient;
+        type            kQRWallFunction;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            empty;
     }

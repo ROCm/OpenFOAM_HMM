@@ -273,6 +273,13 @@ void Foam::forces::execute()
     // Do nothing - only valid on write
 }
 
+
+void Foam::forces::end()
+{
+    // Do nothing - only valid on write
+}
+
+
 void Foam::forces::write()
 {
     if (active_)

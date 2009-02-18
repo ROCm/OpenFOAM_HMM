@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [ 0 2 -2 0 0 0 0 ];
 
 internalField   uniform 0.00325;
 
@@ -24,13 +24,15 @@ boundaryField
     movingWall
     {
         type            kQRWallFunction;
-        value           uniform 0.00325;
+        value           uniform 0;
     }
+
     fixedWalls
     {
         type            kQRWallFunction;
-        value           uniform 0.00325;
+        value           uniform 0;
     }
+
     frontAndBack
     {
         type            empty;

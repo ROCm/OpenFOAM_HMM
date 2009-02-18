@@ -5,6 +5,6 @@ set -x
 wmake libo postCalc
 wmake libso foamCalcFunctions
 
-(cd functionObjects && ./Allwmake)
+functionObjects/Allwmake
 
 # ----------------------------------------------------------------- end-of-file

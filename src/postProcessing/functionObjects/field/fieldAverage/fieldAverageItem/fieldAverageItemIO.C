@@ -76,14 +76,12 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const fieldAverageItem& faItem)
         "(Foam::Ostream&, const Foam::fieldAverageItem&)"
     );
 
-    os<< faItem.fieldName_ << nl;
-    os<< token::BEGIN_BLOCK << nl;
+    os  << faItem.fieldName_ << nl << token::BEGIN_BLOCK << nl;
     os.writeKeyword("mean") << faItem.mean_ << token::END_STATEMENT << nl;
     os.writeKeyword("prime2Mean") << faItem.mean_
         << token::END_STATEMENT << nl;
     os.writeKeyword("base") << faItem.baseTypeNames_[faItem.base_]
-        << token::END_STATEMENT << nl;
-    os<< token::END_BLOCK << nl;
+        << token::END_STATEMENT << nl << token::END_BLOCK << nl;
 
     os.check
     (

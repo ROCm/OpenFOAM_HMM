@@ -71,8 +71,9 @@ int main(int argc, char *argv[])
 
     Info<< nl << "Starting time loop" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.run())
     {
+        runTime++;
 #       include "readPISOControls.H"
 #       include "readBPISOControls.H"
 

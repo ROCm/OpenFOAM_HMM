@@ -46,7 +46,3 @@ cd damBreakFine
     runParallel $application 4 system/machines
     runApplication reconstructPar
 cd ..
-
-cd nozzleFlow2D
-    ./Allrun
-cd ..

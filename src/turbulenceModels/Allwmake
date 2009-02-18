@@ -2,8 +2,8 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-(cd LES && ./Allwmake )
-(cd incompressible && ./Allwmake )
-(cd compressible && ./Allwmake )
+LES/Allwmake
+incompressible/Allwmake
+compressible/Allwmake
 
 # ----------------------------------------------------------------- end-of-file

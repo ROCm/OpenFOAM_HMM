@@ -47,8 +47,9 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.run())
     {
+        runTime++;
         Info<< "Time = " << runTime.theta() << " CA-deg\n" << endl;
 
         mesh.move();

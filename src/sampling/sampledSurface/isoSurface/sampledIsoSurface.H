@@ -87,7 +87,7 @@ class sampledIsoSurface
 
         // Recreated for every isoSurface
 
-            //- Time at last call, also track it surface needs an update
+            //- Time at last call, also track if surface needs an update
             mutable label prevTimeIndex_;
 
             //- Cached volfield
