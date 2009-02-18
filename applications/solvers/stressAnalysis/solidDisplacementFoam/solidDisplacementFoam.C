@@ -57,9 +57,8 @@ int main(int argc, char *argv[])
 
     Info<< "\nCalculating displacement field\n" << endl;
 
-    while (runTime.run())
+    while (runTime.loop())
     {
-        runTime++;
         Info<< "Iteration: " << runTime.value() << nl << endl;
 
 #       include "readSolidDisplacementFoamControls.H"
@@ -133,7 +132,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 
