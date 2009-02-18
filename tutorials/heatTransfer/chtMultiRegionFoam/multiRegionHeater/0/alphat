@@ -10,38 +10,55 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
-    object      k;
+    location    "0.001";
+    object      alphat;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
+dimensions      [1 -1 -1 0 0 0 0];
 
-internalField   uniform 0.1;
+internalField   uniform 0;
 
 boundaryField
 {
-    floor
+    maxY
     {
-        type            kQRWallFunction;
+        type            alphatWallFunction;
         value           uniform 0;
     }
-
-    ceiling
+    minX
     {
-        type            kQRWallFunction;
+        type            calculated;
         value           uniform 0;
     }
-
-    fixedWalls
+    maxX
     {
-        type            kQRWallFunction;
+        type            calculated;
         value           uniform 0;
     }
-
-    box
+    minZ
     {
-        type            kQRWallFunction;
+        type            alphatWallFunction;
+        value           uniform 0;
+    }
+    maxZ
+    {
+        type            alphatWallFunction;
+        value           uniform 0;
+    }
+    topAir_to_leftSolid
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    topAir_to_heater
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+    topAir_to_rightSolid
+    {
+        type            calculated;
         value           uniform 0;
     }
 }
