@@ -25,34 +25,34 @@ boundaryField
         type            empty;
     }
 
-    inlet           
+    inlet
     {
         type            zeroGradient;
     }
 
-    wall            
+    wall
     {
         type            zeroGradient;
     }
 
-    atmosphere      
+    atmosphere
     {
         type            totalPressure;
         p0              uniform 0;
         U               U;
         phi             phi;
-        rho             none;
+        rho             rho;
         psi             none;
         gamma           1;
         value           uniform 0;
     }
 
-    front         
+    front
     {
         type            wedge;
     }
 
-    back         
+    back
     {
         type            wedge;
     }

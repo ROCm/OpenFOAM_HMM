@@ -20,36 +20,26 @@ internalField   uniform 0;
 
 boundaryField
 {
-    leftWall        
+    walls
     {
         type            zeroGradient;
     }
 
-    rightWall       
+    obstacle
     {
         type            zeroGradient;
     }
 
-    lowerWall       
-    {
-        type            zeroGradient;
-    }
-
-    atmosphere      
+    atmosphere
     {
         type            totalPressure;
         p0              uniform 0;
         U               U;
         phi             phi;
-        rho             none;
+        rho             rho;
         psi             none;
         gamma           1;
         value           uniform 0;
-    }
-
-    defaultFaces    
-    {
-        type            empty;
     }
 }
 
