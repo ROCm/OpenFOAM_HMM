@@ -20,23 +20,23 @@ internalField   uniform 0;
 
 boundaryField
 {
-    walls        
+    walls
     {
         type            zeroGradient;
     }
 
-    obstacle       
+    obstacle
     {
         type            zeroGradient;
     }
 
-    atmosphere      
+    atmosphere
     {
         type            totalPressure;
         p0              uniform 0;
         U               U;
         phi             phi;
-        rho             none;
+        rho             rho;
         psi             none;
         gamma           1;
         value           uniform 0;
