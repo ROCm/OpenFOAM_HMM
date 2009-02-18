@@ -3,7 +3,7 @@
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application name from directory
-application=${PWD##*/}
+application="XiFoam"
 
 setControlDict () {
     controlDict="system/controlDict"
@@ -20,6 +20,7 @@ setControlDict () {
 
 # Clone case
 cloneCase moriyoshiHomogeneous moriyoshiHomogeneousPart2
+
 # Modify and execute
 cd moriyoshiHomogeneousPart2
     cp -r ../moriyoshiHomogeneous/0.005 .

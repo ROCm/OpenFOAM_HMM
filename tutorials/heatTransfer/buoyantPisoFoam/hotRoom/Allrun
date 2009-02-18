@@ -3,7 +3,7 @@
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application name from directory
-application="buoyantFoam"
+application="buoyantPisoFoam"
 
 compileApplication setHotRoom
 runApplication blockMesh
