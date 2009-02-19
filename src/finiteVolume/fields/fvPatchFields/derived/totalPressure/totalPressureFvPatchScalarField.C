@@ -30,7 +30,27 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+bool Foam::totalPressureFvPatchScalarField::calcBuoyancy() const
+{
+    if (buoyancy_)
+    {
+        return true;
+    }
+
+    if (db().foundObject<volScalarField>("pd"))
+    {
+        const volScalarField& pd = db().lookupObject<volScalarField>("pd");
+        if (pd.dimensions() == dimPressure)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -46,6 +66,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     rhoName_("none"),
     psiName_("none"),
     gamma_(0.0),
+    buoyancy_(false),
     p0_(p.size(), 0.0)
 {}
 
@@ -63,6 +84,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     rhoName_(dict.lookupOrDefault<word>("rho", "none")),
     psiName_(dict.lookupOrDefault<word>("psi", "none")),
     gamma_(readScalar(dict.lookup("gamma"))),
+    buoyancy_(dict.lookupOrDefault<Switch>("buoyancy", false)),
     p0_("p0", dict, p.size())
 {
     if (dict.found("value"))
@@ -93,6 +115,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     rhoName_(ptf.rhoName_),
     psiName_(ptf.psiName_),
     gamma_(ptf.gamma_),
+    buoyancy_(ptf.buoyancy_),
     p0_(ptf.p0_, mapper)
 {}
 
@@ -108,6 +131,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     rhoName_(tppsf.rhoName_),
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
+    buoyancy_(tppsf.buoyancy_),
     p0_(tppsf.p0_)
 {}
 
@@ -124,6 +148,7 @@ Foam::totalPressureFvPatchScalarField::totalPressureFvPatchScalarField
     rhoName_(tppsf.rhoName_),
     psiName_(tppsf.psiName_),
     gamma_(tppsf.gamma_),
+    buoyancy_(tppsf.buoyancy_),
     p0_(tppsf.p0_)
 {}
 
@@ -165,9 +190,18 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
     const fvsPatchField<scalar>& phip =
         patch().lookupPatchField<surfaceScalarField, scalar>(phiName_);
 
+    scalarField gh(patch().size(), 0.0);
+    if (calcBuoyancy())
+    {
+        const dictionary& environmentalProperties =
+            db().lookupObject<IOdictionary>("environmentalProperties");
+        const dimensionedVector g = environmentalProperties.lookup("g");
+        gh = g.value() & patch().Cf();
+    }
+
     if (psiName_ == "none" && rhoName_ == "none")
     {
-        operator==(p0_ - 0.5*(1.0 - pos(phip))*magSqr(Up));
+        operator==(p0_ - 0.5*(1.0 - pos(phip))*magSqr(Up) - gh);
     }
     else if (rhoName_ == "none")
     {
@@ -183,7 +217,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
                 p0_
                /pow
                 (
-                    (1.0 + 0.5*psip*gM1ByG*(1.0 - pos(phip))*magSqr(Up)),
+                    (1.0 + psip*gM1ByG*0.5*(1.0 - pos(phip))*magSqr(Up)),
                     1.0/gM1ByG
                 )
             );
@@ -198,7 +232,7 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs(const vectorField& Up)
         const fvPatchField<scalar>& rho =
             patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
-        operator==(p0_ - 0.5*rho*(1.0 - pos(phip))*magSqr(Up));
+        operator==(p0_ - rho*(0.5*(1.0 - pos(phip))*magSqr(Up) + gh));
     }
     else
     {
@@ -229,17 +263,12 @@ void Foam::totalPressureFvPatchScalarField::updateCoeffs()
 void Foam::totalPressureFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchScalarField::write(os);
-    if (UName_ != "U")
-    {
-        os.writeKeyword("U") << UName_ << token::END_STATEMENT << nl;
-    }
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "phi", "phi", UName_);
     os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     os.writeKeyword("psi") << psiName_ << token::END_STATEMENT << nl;
     os.writeKeyword("gamma") << gamma_ << token::END_STATEMENT << nl;
+    os.writeKeyword("buoyancy") << buoyancy_ << token::END_STATEMENT << nl;
     p0_.writeEntry("p0", os);
     writeEntry("value", os);
 }

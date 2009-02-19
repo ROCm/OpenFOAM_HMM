@@ -37,6 +37,7 @@ SourceFiles
 #define totalPressureFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,8 +70,17 @@ class totalPressureFvPatchScalarField
         //- Heat capacity ratio
         scalar gamma_;
 
+        //- Flag to include buoyancy effects (applying BC to pd)
+        Switch buoyancy_;
+
         //- Total pressure
         scalarField p0_;
+
+
+    //- Private member functions
+
+        //- Helper function to determine whether to include buoyancy effects
+        bool calcBuoyancy() const;
 
 
 public:
