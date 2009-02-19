@@ -98,6 +98,10 @@ void Foam::CV3D::setVertexAlignmentDirections()
 
                 vector d = pHit.hitPoint() - vert;
 
+                vit->distanceToClosestSurface() = mag(d);
+
+                vit->indexOfClosestPatch() = qSurf_[pHit.index()].region();
+
                 tensor R = rotationTensor(vector(0,0,1), np);
 
                 label s = 36;
@@ -1019,6 +1023,9 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                         // Use the least similar of globalAlignmentDirs as the
                         // 2nd alignment and then generate the third.
 
+                        Warning<< "Using supplementary globalAlignmentDirs."
+                            << endl;
+
                         scalar minDotProduct = 1+SMALL;
 
                         alignmentDirs.setSize(3);
@@ -1048,6 +1055,8 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
             }
             else
             {
+                Warning<< "Using all globalAlignmentDirs." << endl;
+
                 alignmentDirs = globalAlignmentDirs;
             }
 
@@ -1083,6 +1092,38 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                 // scalar midEdgeY = 0.5*(dVA.y() + dVB.y());
 
                 // targetCellSize *= 0.56222 - 0.413*midEdgeY;
+
+                scalar targetCellSizeA = targetCellSize;
+
+                scalar targetCellSizeB = targetCellSize;
+
+                if
+                (
+                    vA->indexOfClosestPatch() == 1
+                 && vA->distanceToClosestSurface() < 0.03
+                )
+                {
+                    targetCellSizeA *= 0.5;
+                }
+                else if (vA->indexOfClosestPatch() == 0)
+                {
+                    targetCellSizeA *= 2;
+                }
+
+                if
+                (
+                    vB->indexOfClosestPatch() == 1
+                 && vB->distanceToClosestSurface() < 0.03
+                )
+                {
+                    targetCellSizeB *= 0.5;
+                }
+                else if (vB->indexOfClosestPatch() == 0)
+                {
+                    targetCellSizeB *= 2;
+                }
+
+                targetCellSize = sqrt(targetCellSizeA * targetCellSizeB);
 
                 scalar targetFaceArea = targetCellSize*targetCellSize;
 
