@@ -132,8 +132,8 @@ void Foam::vtkPV3Foam::convertVolFields
                 isType<emptyFvPatchField<Type> >(ptf)
              ||
                 (
-                    typeid(patches[patchId]) == typeid(wallPolyPatch)
-                 && reader_->GetExtrapolateWalls()
+                    reader_->GetExtrapolatePatches()
+                && !polyPatch::constraintType(patches[patchId].type())
                 )
             )
             {
