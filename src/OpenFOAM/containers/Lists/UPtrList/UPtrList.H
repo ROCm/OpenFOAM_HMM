@@ -124,6 +124,9 @@ public:
             //- Return the number of elements in the UPtrList
             inline label size() const;
 
+            //- Return true if the UPtrList is empty (ie, size() is zero).
+            inline bool empty() const;
+
 
         // Edit
 
@@ -131,6 +134,11 @@ public:
             //  of an empty UPtrList, extend a UPtrList, remove entries from
             //  the end of a UPtrList.
             void setSize(const label);
+
+            //- Reset size of UPtrList.  This can only be used to set the size
+            //  of an empty UPtrList, extend a UPtrList, remove entries from
+            //  the end of a UPtrList.
+            inline void resize(const label);
 
             //- Clear the UPtrList, i.e. set size to zero
             void clear();

@@ -57,6 +57,17 @@ class mutWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
+    // Private data
+
+        //- Name of density field
+        word rhoName_;
+
+        //- Name of laminar viscosity field
+        word muName_;
+
+        //- Name of turbulence kinetic energy field
+        word kName_;
+
 
 public:
 
@@ -138,7 +149,7 @@ public:
         // I-O
 
             //- Write
-            void write(Ostream&) const;
+            virtual void write(Ostream&) const;
 };
 
 

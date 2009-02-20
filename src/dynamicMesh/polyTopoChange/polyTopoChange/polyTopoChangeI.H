@@ -40,7 +40,7 @@ inline bool Foam::polyTopoChange::pointRemoved(const label pointI) const
 
 inline bool Foam::polyTopoChange::faceRemoved(const label faceI) const
 {
-    return faces_[faceI].size() == 0;
+    return faces_[faceI].empty();
 }
 
 

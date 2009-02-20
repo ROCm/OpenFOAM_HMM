@@ -26,18 +26,18 @@ Class
     Foam::UnsortedMeshedSurface
 
 Description
-    A surface geometry mesh, in which the patch information is conveyed by
-    the 'region' associated with each face.
+    A surface geometry mesh, in which the surface zone information is
+    conveyed by the 'zoneId' associated with each face.
 
     This form of surface description is particularly useful for reading in
     surface meshes from third-party formats (eg, obj, stl, gts, etc.). It
     can also be particularly useful for situations in which the surface
     many be adjusted in an arbitrary manner without worrying about needed
-    to adjust the patch information (eg, surface refinement).
+    to adjust the zone information (eg, surface refinement).
 
 See Also
-    The Foam::meshedSurface - which is organized as a surface mesh, but
-    with independent patch information.
+    The Foam::MeshedSurface - which is organized as a surface mesh, but
+    with independent zone information.
 
 SourceFiles
     UnsortedMeshedSurface.C
@@ -48,8 +48,8 @@ SourceFiles
 #define UnsortedMeshedSurface_H
 
 #include "BasicMeshedSurface.H"
-#include "surfPatchIdentifierList.H"
-#include "surfGroupList.H"
+#include "surfZoneIdentifierList.H"
+#include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -70,7 +70,7 @@ template<class Face> class MeshedSurface;
 class polyBoundaryMesh;
 
 template<class Face>
-    Ostream& operator<<(Ostream&, const UnsortedMeshedSurface<Face>&);
+Ostream& operator<<(Ostream&, const UnsortedMeshedSurface<Face>&);
 
 
 /*---------------------------------------------------------------------------*\
@@ -83,6 +83,14 @@ class UnsortedMeshedSurface
     public BasicMeshedSurface<Face>,
     public fileFormats::surfaceFormatsCore
 {
+    // friends despite different faces
+    template<class Face2>
+    friend class MeshedSurface;
+
+    // friends despite different faces
+    template<class Face2>
+    friend class UnsortedMeshedSurface;
+
     friend class MeshedSurface<Face>;
 
 private:
@@ -93,14 +101,17 @@ private:
 
     // Private Member Data
 
-        //- The regions associated with the faces
-        labelList regions_;
+        //- The zone Id associated with each face
+        labelList zoneIds_;
 
-        //- Patch information (face ordering nFaces/startFace only used
+        //- Zone information (face ordering nFaces/startFace only used
         //  during reading and writing)
-        List<surfPatchIdentifier> patches_;
+        List<surfZoneIdentifier> zoneToc_;
 
     // Private member functions
+
+        //- Disable resize with value
+        void resize(const label, const Face&);
 
         //- Disable setSize with value
         void setSize(const label, const Face&);
@@ -112,19 +123,19 @@ protected:
 
     // Protected Member functions
 
-        //- Return non-const access to the faces
-        List<label>& storedRegions()
+        //- Return non-const access to the zone Ids
+        List<label>& storedZoneIds()
         {
-            return regions_;
+            return zoneIds_;
         }
 
-        //- Return non-const access to the patches
-        List<surfPatchIdentifier>& storedPatches()
+        //- Return non-const access to the zone table-of-contents
+        List<surfZoneIdentifier>& storedZoneToc()
         {
-            return patches_;
+            return zoneToc_;
         }
 
-        //- Set new regions from faceMap
+        //- Set new zones from faceMap
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:
@@ -152,23 +163,23 @@ public:
         UnsortedMeshedSurface();
 
         //- Construct by transferring components
-        //  (points, faces, region ids, patches).
+        //  (points, faces, zone ids, zone info).
         UnsortedMeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const Xfer<List<label> >& regionIds,
-            const Xfer<surfPatchIdentifierList>&
+            const Xfer<List<label> >& zoneIds,
+            const Xfer<surfZoneIdentifierList>&
         );
 
         //- Construct by transferring points, faces.
-        //  Use patch information, or set single default patch
+        //  Use zone information, or set single default zone
         UnsortedMeshedSurface
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& patchSizes = UList<label>::null(),
-            const UList<word>& patchNames = UList<word>::null()
+            const UList<label>& zoneSizes = UList<label>::null(),
+            const UList<word>& zoneNames = UList<word>::null()
         );
 
         //- Construct from a boundary mesh with local points/faces
@@ -197,7 +208,7 @@ public:
         UnsortedMeshedSurface(Istream&);
 
         //- Construct from objectRegistry
-        UnsortedMeshedSurface(const Time&);
+        UnsortedMeshedSurface(const Time&, const word& surfName="");
 
         //- Construct as copy
         UnsortedMeshedSurface(const UnsortedMeshedSurface<Face>&);
@@ -261,37 +272,37 @@ public:
             return ParentType::size();
         }
 
-        //- Reset size of face and region list
+        //- Reset size of face and zone list
         void setSize(const label);
 
-        //- Return const access to the regions
-        const List<label>& regions() const
+        //- Return const access to the zone ids
+        const List<label>& zoneIds() const
         {
-            return regions_;
+            return zoneIds_;
         }
 
-        //- Return const access to the patches
-        const List<surfPatchIdentifier>& patches() const
+        //- Return const access to the zone table-of-contents
+        const List<surfZoneIdentifier>& zoneToc() const
         {
-            return patches_;
+            return zoneToc_;
         }
 
-        //- Sort faces according to region.
-        //  Returns patch list and sets faceMap to index within faces()
-        List<surfGroup> sortedRegions(labelList& faceMap) const;
+        //- Sort faces according to zone.
+        //  Returns a surfZoneList and sets faceMap to index within faces()
+        surfZoneList sortedZones(labelList& faceMap) const;
 
-        //- Set regions to 0 and set a single patch
+        //- Set zones to 0 and set a single zone
         //  Optionally with a specific name
-        void onePatch(const word& name = word::null);
+        void oneZone(const word& name = word::null);
 
-        //- Set regions and patches
-        void setPatches(const surfGroupList&);
+        //- Set zone ids and zones
+        void setZones(const surfZoneList&);
 
-        //- Set regions and patches
-        void setPatches(const UList<label>& sizes, const UList<word>& names);
+        //- Set zone ids and zones
+        void setZones(const UList<label>& sizes, const UList<word>& names);
 
-        //- Set regions and patches with default names
-        void setPatches(const UList<label>& sizes);
+        //- Set zone ids and zones with default names
+        void setZones(const UList<label>& sizes);
 
 
     // Edit
@@ -303,7 +314,7 @@ public:
         //  Returns return pointMap, faceMap from subsetMeshMap
         UnsortedMeshedSurface subsetMesh
         (
-            const UList<bool>& include,
+            const labelHashSet& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
@@ -311,15 +322,15 @@ public:
         //- Return new surface.
         UnsortedMeshedSurface subsetMesh
         (
-            const UList<bool>& include
+            const labelHashSet& include
         ) const;
 
-        //- Transfer components (points, faces, region ids).
+        //- Transfer components (points, faces, zone ids).
         virtual void reset
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const Xfer<List<label> >& regionIds = Xfer<List<label> >::null()
+            const Xfer<List<label> >& zoneIds = Xfer<List<label> >::null()
         );
 
         //- Transfer the contents of the argument and annull the argument
@@ -327,6 +338,9 @@ public:
 
         //- Transfer the contents of the argument and annull the argument
         void transfer(MeshedSurface<Face>&);
+
+        //- Transfer contents to the Xfer container
+        Xfer< UnsortedMeshedSurface<Face> > xfer();
 
 
     // Read
@@ -350,7 +364,7 @@ public:
         }
 
         //- Write to database
-        void write(const Time&) const;
+        void write(const Time&, const word& surfName="") const;
 
 
     // Member operators

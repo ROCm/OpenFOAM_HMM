@@ -1,0 +1,147 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "dynamicPressure.H"
+#include "volFields.H"
+#include "dictionary.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(dynamicPressure, 0);
+}
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::dynamicPressure::isKinematicPressure()
+{
+    const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
+
+    return p.dimensions() == sqr(dimLength)/sqr(dimTime);
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::dynamicPressure::dynamicPressure
+(
+    const word& name,
+    const objectRegistry& obr,
+    const dictionary& dict,
+    const bool loadFromFiles
+)
+:
+    name_(name),
+    obr_(obr),
+    active_(true),
+    pName_(dict.lookupOrDefault<word>("p", "p")),
+    rho_(readScalar(dict.lookup("rho")))
+{
+    // Check if the available mesh is an fvMesh, otherwise deactivate
+    if (!isA<fvMesh>(obr_))
+    {
+        active_ = false;
+        WarningIn
+        (
+            "dynamicPressure::dynamicPressure"
+            "(const objectRegistry&, const dictionary&)"
+        )   << "No fvMesh available, deactivating." << nl
+            << endl;
+    }
+    else
+    {
+        // Check if the pressure is kinematic pressure, otherwise deactivate
+        if (!isKinematicPressure())
+        {
+            active_ = false;
+            WarningIn
+            (
+                "dynamicPressure::dynamicPressure"
+                "(const objectRegistry&, const dictionary&)"
+            )   << "Pressure is not kinematic pressure, deactivating." << nl
+                << endl;
+        }
+    }
+
+    read(dict);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::dynamicPressure::~dynamicPressure()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::dynamicPressure::read(const dictionary& dict)
+{
+    if (active_)
+    {
+        dict.readIfPresent("p", pName_);
+        dict.lookup("rho") >> rho_;
+    }
+}
+
+
+void Foam::dynamicPressure::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::dynamicPressure::end()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::dynamicPressure::write()
+{
+    if (active_)
+    {
+        const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
+
+        volScalarField pDyn
+        (
+            IOobject
+            (
+                "pDyn",
+                obr_.time().timeName(),
+                obr_,
+                IOobject::NO_READ
+            ),
+            dimensionedScalar("rho", dimDensity, rho_)*p
+        );
+
+        pDyn.write();
+    }
+}
+
+
+// ************************************************************************* //

@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class OFFsurfaceFormatCore Declaration
+                    Class OFFsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class OFFsurfaceFormatCore
@@ -63,7 +63,7 @@ protected:
         Ostream&,
         const pointField&,
         const label nFaces,
-        const List<surfGroup>&
+        const UList<surfZone>&
     );
 
 };

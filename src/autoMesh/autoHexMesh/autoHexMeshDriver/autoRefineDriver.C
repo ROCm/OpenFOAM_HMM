@@ -77,10 +77,11 @@ Foam::label Foam::autoRefineDriver::readFeatureEdges
             (
                 IOobject
                 (
-                    featFileName,           // name
-                    mesh.time().constant(), // directory
-                    "triSurface",           // instance
-                    mesh.db(),              // registry
+                    featFileName,                       // name
+                    mesh.time().findInstance("triSurface", featFileName),
+                                                        // instance
+                    "triSurface",                       // local
+                    mesh.time(),                        // registry
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
                     false
@@ -143,7 +144,7 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
 
     label iter = 0;
 
-    if (featureMeshes.size() > 0 && maxIter > 0)
+    if (featureMeshes.size() && maxIter > 0)
     {
         for (; iter < maxIter; iter++)
         {
@@ -541,7 +542,7 @@ void Foam::autoRefineDriver::zonify
     // into that surface's faceZone. All cells inside faceZone get given the
     // same cellZone.
 
-    if (meshRefiner_.surfaces().getNamedSurfaces().size() > 0)
+    if (meshRefiner_.surfaces().getNamedSurfaces().size())
     {
         Info<< nl
             << "Introducing zones for interfaces" << nl

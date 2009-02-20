@@ -130,10 +130,10 @@ void Foam::motionSmoother::makePatchPatchAddressing()
     {
         if (patchPatchPointConstraints[i].first() != 0)
         {
-            patchPatchPointConstraintPoints_[nConstraints] = 
+            patchPatchPointConstraintPoints_[nConstraints] =
                 patchPatchPoints[i];
 
-            patchPatchPointConstraintTensors_[nConstraints] = 
+            patchPatchPointConstraintTensors_[nConstraints] =
                 patchPatchPointConstraints[i].constraintTransformation();
 
             nConstraints++;
@@ -206,7 +206,7 @@ Foam::labelHashSet Foam::motionSmoother::getPoints
 // Smooth on selected points (usually patch points)
 void Foam::motionSmoother::minSmooth
 (
-    const PackedList<1>& isAffectedPoint,
+    const PackedBoolList& isAffectedPoint,
     const labelList& meshPoints,
     const pointScalarField& fld,
     pointScalarField& newFld
@@ -241,7 +241,7 @@ void Foam::motionSmoother::minSmooth
 // Smooth on all internal points
 void Foam::motionSmoother::minSmooth
 (
-    const PackedList<1>& isAffectedPoint,
+    const PackedBoolList& isAffectedPoint,
     const pointScalarField& fld,
     pointScalarField& newFld
 ) const
@@ -324,7 +324,7 @@ void Foam::motionSmoother::getAffectedFacesAndPoints
     const faceSet& wrongFaces,
 
     labelList& affectedFaces,
-    PackedList<1>& isAffectedPoint
+    PackedBoolList& isAffectedPoint
 ) const
 {
     isAffectedPoint.setSize(mesh_.nPoints());
@@ -763,7 +763,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
         // Correct tangentially
         twoDCorrector_.correctPoints(newPoints);
         Info<< " ...done" << endl;
-    }    
+    }
 
     if (debug)
     {
@@ -826,7 +826,7 @@ bool Foam::motionSmoother::scaleMesh
     const label nAllowableErrors
 )
 {
-    if (!smoothMesh && adaptPatchIDs_.size() == 0)
+    if (!smoothMesh && adaptPatchIDs_.empty())
     {
         FatalErrorIn("motionSmoother::scaleMesh(const bool")
             << "You specified both no movement on the internal mesh points"
@@ -846,7 +846,7 @@ bool Foam::motionSmoother::scaleMesh
         {
             if (patches[patchI].coupled())
             {
-                const coupledPolyPatch& pp = 
+                const coupledPolyPatch& pp =
                     refCast<const coupledPolyPatch>(patches[patchI]);
 
                 Pout<< '\t' << patchI << '\t' << pp.name()
@@ -976,7 +976,7 @@ bool Foam::motionSmoother::scaleMesh
         // Grow a few layers to determine
         // - points to be smoothed
         // - faces to be checked in next iteration
-        PackedList<1> isAffectedPoint(mesh_.nPoints(), 0);
+        PackedBoolList isAffectedPoint(mesh_.nPoints());
         getAffectedFacesAndPoints
         (
             nSmoothScale,       // smoothing iterations
@@ -992,7 +992,7 @@ bool Foam::motionSmoother::scaleMesh
                 << endl;
         }
 
-        if (adaptPatchIDs_.size() != 0)
+        if (adaptPatchIDs_.size())
         {
             // Scale conflicting patch points
             scaleField(pp_.meshPoints(), usedPoints, errorReduction, scale_);
@@ -1005,7 +1005,7 @@ bool Foam::motionSmoother::scaleMesh
 
         for (label i = 0; i < nSmoothScale; i++)
         {
-            if (adaptPatchIDs_.size() != 0)
+            if (adaptPatchIDs_.size())
             {
                 // Smooth patch values
                 pointScalarField oldScale(scale_);
@@ -1035,7 +1035,7 @@ bool Foam::motionSmoother::scaleMesh
             -GREAT,             // null value
             false               // no separation
         );
-        
+
 
         if (debug)
         {

@@ -29,7 +29,7 @@ Description
     Provide a means of reading/writing .tri format.
 
 Note
-    For efficiency, the regions are sorted before creating the faces.
+    For efficiency, the zones are sorted before creating the faces.
     The class is thus derived from MeshedSurface.
 
 SourceFiles
@@ -54,7 +54,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class TRIsurfaceFormat Declaration
+                      Class TRIsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -69,7 +69,7 @@ class TRIsurfaceFormat
             Ostream&,
             const pointField&,
             const Face&,
-            const label patchI
+            const label zoneI
         );
 
         //- Disallow default bitwise copy construct
@@ -105,6 +105,15 @@ public:
         //- Read from file
         virtual bool read(const fileName&);
 
+        //- Write surface mesh components
+        static void write
+        (
+            Ostream&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
+
         //- Write MeshedSurface
         static void write
         (
@@ -123,7 +132,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions
+        //  By default, the output is not sorted by zones
         static void write
         (
             Ostream&,
@@ -131,7 +140,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions
+        //  By default, the output is not sorted by zones
         static void write
         (
             const fileName& name,

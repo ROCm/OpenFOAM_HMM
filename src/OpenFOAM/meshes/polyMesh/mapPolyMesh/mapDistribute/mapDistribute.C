@@ -48,12 +48,12 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
         {
             if (procI != Pstream::myProcNo())
             {
-                if (subMap[procI].size() > 0)
+                if (subMap[procI].size())
                 {
                     // I need to send to procI
                     commsSet.insert(labelPair(Pstream::myProcNo(), procI));
                 }
-                if (constructMap[procI].size() > 0)
+                if (constructMap[procI].size())
                 {
                     // I need to receive from procI
                     commsSet.insert(labelPair(procI, Pstream::myProcNo()));
@@ -152,7 +152,7 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
 
 const Foam::List<Foam::labelPair>& Foam::mapDistribute::schedule() const
 {
-    if (!schedulePtr_.valid())
+    if (schedulePtr_.empty())
     {
         schedulePtr_.reset
         (
@@ -288,7 +288,7 @@ void Foam::mapDistribute::compact(const boolList& elemIsUsed)
         {
             const labelList& map = constructMap_[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 boolList& subField = sendFields[domain];
                 subField.setSize(map.size());
@@ -315,7 +315,7 @@ void Foam::mapDistribute::compact(const boolList& elemIsUsed)
         {
             const labelList& map = subMap_[domain];
 
-            if (domain != Pstream::myProcNo() && map.size() > 0)
+            if (domain != Pstream::myProcNo() && map.size())
             {
                 recvFields[domain].setSize(map.size());
                 IPstream::read

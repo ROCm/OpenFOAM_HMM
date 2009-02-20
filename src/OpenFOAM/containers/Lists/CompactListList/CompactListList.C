@@ -119,14 +119,6 @@ Foam::CompactListList<T>::CompactListList
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const Foam::CompactListList<T>& Foam::CompactListList<T>::null()
-{
-    CompactListList<T>* nullPtr = reinterpret_cast<CompactListList<T>*>(NULL);
-    return *nullPtr;
-}
-
-
-template<class T>
 void Foam::CompactListList<T>::setSize(const label nRows)
 {
     if (nRows == 0)
@@ -150,11 +142,16 @@ void Foam::CompactListList<T>::setSize(const label nRows)
 
 
 template<class T>
-void Foam::CompactListList<T>::setSize(const label nRows, const label nData)
+void Foam::CompactListList<T>::setSize
+(
+    const label nRows,
+    const label nData
+)
 {
     offsets_.setSize(nRows);
     m_.setSize(nData);
 }
+
 
 template<class T>
 void Foam::CompactListList<T>::setSize
@@ -168,19 +165,6 @@ void Foam::CompactListList<T>::setSize
     m_.setSize(nData, t);
 }
 
-template<class T>
-Foam::labelList Foam::CompactListList<T>::sizes() const
-{
-    labelList rowSizes(offsets_.size());
-
-    label prevOffset = 0;
-    forAll(offsets_, i)
-    {
-        rowSizes[i] = offsets_[i]-prevOffset;
-        prevOffset = offsets_[i];
-    }
-    return rowSizes;
-}
 
 template<class T>
 void Foam::CompactListList<T>::setSize(const UList<label>& rowSizes)
@@ -196,6 +180,22 @@ void Foam::CompactListList<T>::setSize(const UList<label>& rowSizes)
 
     m_.setSize(sumSize);
 }
+
+
+template<class T>
+Foam::labelList Foam::CompactListList<T>::sizes() const
+{
+    labelList rowSizes(offsets_.size());
+
+    label prevOffset = 0;
+    forAll(offsets_, i)
+    {
+        rowSizes[i] = offsets_[i]-prevOffset;
+        prevOffset = offsets_[i];
+    }
+    return rowSizes;
+}
+
 
 template<class T>
 void Foam::CompactListList<T>::clear()

@@ -28,19 +28,15 @@ Description
     avoid the use of unconstructed data in the global namespace.
 
     This file has the extension .Cver to trigger a Makefile rule that converts
-    WM_PROJECT_VERSION into the appropriate version string.
+    'VERSION\_STRING' and 'BUILD\_STRING' into the appropriate strings.
 
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #include "foamVersion.H"
 
-const char* const Foam::FOAMversion = "WM_PROJECT_VERSION";
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Static initializers for string::null, word::null and fileName::null
-
-#include "stringsGlobals.C"
+const char* const Foam::FOAMversion = "VERSION_STRING";
+const char* const Foam::FOAMbuild = "BUILD_STRING";
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Setup an error handler for the global new operator

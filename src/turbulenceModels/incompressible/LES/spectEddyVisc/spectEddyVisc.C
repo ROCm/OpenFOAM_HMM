@@ -41,6 +41,25 @@ namespace LESModels
 defineTypeNameAndDebug(spectEddyVisc, 0);
 addToRunTimeSelectionTable(LESModel, spectEddyVisc, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void spectEddyVisc::updateSubGridScaleFields(const volTensorField& gradU)
+{
+    volScalarField Re = sqr(delta())*mag(symm(gradU))/nu();
+    for (label i=0; i<5; i++)
+    {
+        nuSgs_ =
+            nu()
+           /(
+                 scalar(1)
+               - exp(-cB_*pow(nu()/(nuSgs_ + nu()), 1.0/3.0)*pow(Re, -2.0/3.0))
+            );
+    }
+
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 spectEddyVisc::spectEddyVisc
@@ -101,6 +120,8 @@ spectEddyVisc::spectEddyVisc
     )
 {
     printCoeffs();
+
+    updateSubGridScaleFields(fvc::grad(U));
 }
 
 
@@ -108,33 +129,20 @@ spectEddyVisc::spectEddyVisc
 
 tmp<volScalarField> spectEddyVisc::k() const
 {
-    volScalarField Eps = 2*nuEff()*magSqr(symm(fvc::grad(U())));
+    volScalarField eps = 2*nuEff()*magSqr(symm(fvc::grad(U())));
 
     return
-        cK1_*pow(delta(), 2.0/3.0)*pow(Eps, 2.0/3.0)
-        *exp(-cK2_*pow(delta(), -4.0/3.0)*nu()/pow(Eps, 1.0/3.0))
-      - cK3_*pow(Eps*nu(), 1.0/2.0)
-       *erfc(cK4_*pow(delta(), -2.0/3.0)*pow(Eps, -1.0/6.0));
+        cK1_*pow(delta()*eps, 2.0/3.0)
+       *exp(-cK2_*pow(delta(), -4.0/3.0)*nu()/pow(eps, 1.0/3.0))
+      - cK3_*sqrt(eps*nu())
+       *erfc(cK4_*pow(delta(), -2.0/3.0)*sqrt(nu())*pow(eps, -1.0/6.0));
 }
 
 
 void spectEddyVisc::correct(const tmp<volTensorField>& gradU)
 {
     GenEddyVisc::correct(gradU);
-
-    volScalarField Re = sqr(delta())*mag(symm(gradU))/nu();
-
-    for (label i=0; i<5; i++)
-    {
-        nuSgs_ =
-            nu()
-           /(
-               scalar(1)
-               - exp(-cB_*pow(nu()/(nuSgs_ + nu()), 1.0/3.0)*pow(Re, -2.0/3.0))
-            );
-    }
-
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(gradU());
 }
 
 

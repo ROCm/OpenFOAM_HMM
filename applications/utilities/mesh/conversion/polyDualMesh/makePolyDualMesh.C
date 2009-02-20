@@ -49,7 +49,7 @@ Description
 #include "mathematicalConstants.H"
 #include "polyTopoChange.H"
 #include "mapPolyMesh.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "meshTools.H"
 #include "OFstream.H"
 #include "meshDualiser.H"
@@ -67,7 +67,7 @@ using namespace Foam;
 void simpleMarkFeatures
 (
     const polyMesh& mesh,
-    const PackedList<1>& isBoundaryEdge,
+    const PackedBoolList& isBoundaryEdge,
     const scalar featureAngle,
     const bool doNotPreserveFaceZones,
 
@@ -229,7 +229,7 @@ void simpleMarkFeatures
 
     if (doNotPreserveFaceZones)
     {
-        if (faceZones.size() > 0)
+        if (faceZones.size())
         {
             WarningIn("simpleMarkFeatures(..)")
                 << "Detected " << faceZones.size()
@@ -239,7 +239,7 @@ void simpleMarkFeatures
     }
     else
     {
-        if (faceZones.size() > 0)
+        if (faceZones.size())
         {
             Info<< "Detected " << faceZones.size()
                 << " faceZones. Preserving these by marking their"
@@ -354,11 +354,12 @@ int main(int argc, char *argv[])
     runTime.setTime(Times[startTime], startTime);
 
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     // Mark boundary edges and points.
     // (Note: in 1.4.2 we can use the built-in mesh point ordering
     //  facility instead)
-    PackedList<1> isBoundaryEdge(mesh.nEdges());
+    PackedBoolList isBoundaryEdge(mesh.nEdges());
     for (label faceI = mesh.nInternalFaces(); faceI < mesh.nFaces(); faceI++)
     {
         const labelList& fEdges = mesh.faceEdges()[faceI];
@@ -499,7 +500,10 @@ int main(int argc, char *argv[])
     if (!overwrite)
     {
         runTime++;
-        mesh.setInstance(runTime.timeName());
+    }
+    else
+    {
+        mesh.setInstance(oldInstance);
     }
 
     Info<< "Writing dual mesh to " << runTime.timeName() << endl;

@@ -39,7 +39,7 @@ int main(int argc, char *argv[])
     wordHashSet setA(0);
     HashTable<label, word> tableA;
 
-    HashTable<empty> tableB;
+    HashTable<nil> tableB;
     Map<label> mapA;
 
     setA.insert("kjhk");
@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
     tableA.insert("value2", 2);
     tableA.insert("value3", 3);
 
-    tableB.insert("value4", empty());
-    tableB.insert("value5", empty());
-    tableB.insert("value6", empty());
+    tableB.insert("value4", nil());
+    tableB.insert("value5", nil());
+    tableB.insert("value6", nil());
 
     mapA.set(1, 1);
     mapA.set(2, 2);
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     Info<< wordHashSet(setA) << endl;
     Info<< "create from HashTable<T>: ";
     Info<< wordHashSet(tableA) << endl;
-    Info<< "create from HashTable<empty>: ";
+    Info<< "create from HashTable<nil>: ";
     Info<< wordHashSet(tableB) << endl;
 
     Info<< "create from Map<label>: ";
@@ -110,6 +110,33 @@ int main(int argc, char *argv[])
     Info<< "setC : " << setC << endl;
     Info<< "setD : " << setD << endl;
     Info<< "setB ^ setC ^ setD : " << (setB ^ setC ^ setD) << endl;
+
+    // test operator[]
+
+    Info<< "setD : " << setD << endl;
+    if (setD[0])
+    {
+        Info<< "setD has 0" << endl;
+    }
+    else
+    {
+        Info<< "setD has no 0" << endl;
+    }
+
+
+    if (setD[11])
+    {
+        Info<< "setD has 11" << endl;
+    }
+    else
+    {
+        Info<< "setD has no 0" << endl;
+    }
+
+    Info<< "setD : " << setD << endl;
+
+    // this doesn't work (yet?)
+    // setD[12] = true;
 
     return 0;
 }

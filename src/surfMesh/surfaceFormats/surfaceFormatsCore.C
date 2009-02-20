@@ -29,15 +29,14 @@ License
 #include "OFstream.H"
 #include "Time.H"
 #include "SortableList.H"
+#include "surfMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::word Foam::fileFormats::surfaceFormatsCore::meshSubDir("meshedSurface");
 Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-//- Check if file extension corresponds to 'native' surface format
 bool
 Foam::fileFormats::surfaceFormatsCore::isNative(const word& ext)
 {
@@ -56,9 +55,24 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
     {
         is.getLine(line);
     }
-    while ((line.size() == 0 || line[0] == '#') && is.good());
+    while ((line.empty() || line[0] == '#') && is.good());
 
     return line;
+}
+
+
+Foam::fileName
+Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
+{
+    const word name(surfName.size() ? surfName : surfaceRegistry::defaultName);
+
+    return fileName
+    (
+        surfaceRegistry::subInstance
+      / name
+      / surfMesh::meshSubDir
+      / name + "." + nativeExt
+    );
 }
 
 
@@ -66,20 +80,20 @@ Foam::fileName
 Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 (
     const Time& d,
-    const word& subdirName
+    const word& surfName
 )
 {
-    fileName foamName(d.caseName() + "." + nativeExt);
+    fileName localName = localMeshFileName(surfName);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
 
     instantList ts = d.times();
-    label i;
+    label instanceI;
 
-    for (i=ts.size()-1; i>=0; i--)
+    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[i].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= d.timeOutputValue())
         {
             break;
         }
@@ -88,13 +102,13 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     // Noting that the current directory has already been searched
     // for mesh data, start searching from the previously stored time directory
 
-    if (i>=0)
+    if (instanceI >= 0)
     {
-        for (label j=i; j>=0; j--)
+        for (label i = instanceI; i >= 0; --i)
         {
-            if (file(d.path()/ts[j].name()/subdirName/foamName))
+            if (isFile(d.path()/ts[i].name()/localName))
             {
-                return ts[j].name();
+                return ts[i].name();
             }
         }
     }
@@ -104,23 +118,23 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 
 
 Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshName
+Foam::fileFormats::surfaceFormatsCore::findMeshFile
 (
     const Time& d,
-    const word& subdirName
+    const word& surfName
 )
 {
-    fileName foamName(d.caseName() + "." + nativeExt);
+    fileName localName = localMeshFileName(surfName);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
 
     instantList ts = d.times();
-    label i;
+    label instanceI;
 
-    for (i=ts.size()-1; i>=0; i--)
+    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[i].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= d.timeOutputValue())
         {
             break;
         }
@@ -129,125 +143,107 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
     // Noting that the current directory has already been searched
     // for mesh data, start searching from the previously stored time directory
 
-    if (i>=0)
+    if (instanceI >= 0)
     {
-        for (label j=i; j>=0; j--)
+        for (label i = instanceI; i >= 0; --i)
         {
-            fileName testName(d.path()/ts[j].name()/subdirName/foamName);
+            fileName testName(d.path()/ts[i].name()/localName);
 
-            if (file(testName))
+            if (isFile(testName))
             {
                 return testName;
             }
         }
     }
 
-    return d.path()/"constant"/subdirName/foamName;
+    // fallback to "constant"
+    return d.path()/"constant"/localName;
 }
 
 
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshInstance
+// Returns zone info.
+// Sets faceMap to the indexing according to zone numbers.
+// Zone numbers start at 0.
+Foam::surfZoneList
+Foam::fileFormats::surfaceFormatsCore::sortedZonesById
 (
-    const Time& d
-)
-{
-    return findMeshInstance(d, meshSubDir);
-}
-
-
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshName
-(
-    const Time& d
-)
-{
-    return findMeshName(d, meshSubDir);
-}
-
-
-// Returns patch info.
-// Sets faceMap to the indexing according to patch numbers.
-// Patch numbers start at 0.
-Foam::surfGroupList
-Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
-(
-    const UList<label>& regionLst,
-    const Map<word>& patchNames,
+    const UList<label>& zoneIds,
+    const Map<word>& zoneNames,
     labelList& faceMap
 )
 {
-    // determine sort order according to region numbers
+    // determine sort order according to zone numbers
 
     // std::sort() really seems to mix up the order.
     // and std::stable_sort() might take too long / too much memory
 
-    // Assuming that we have relatively fewer regions compared to the
+    // Assuming that we have relatively fewer zones compared to the
     // number of items, just do it ourselves
 
-    // step 1: get region sizes and store (regionId => patchI)
+    // step 1: get zone sizes and store (origId => zoneI)
     Map<label> lookup;
-    forAll(regionLst, faceI)
+    forAll(zoneIds, faceI)
     {
-        const label regId = regionLst[faceI];
+        const label origId = zoneIds[faceI];
 
-        Map<label>::iterator fnd = lookup.find(regId);
+        Map<label>::iterator fnd = lookup.find(origId);
         if (fnd != lookup.end())
         {
             fnd()++;
         }
         else
         {
-            lookup.insert(regId, 1);
+            lookup.insert(origId, 1);
         }
     }
 
-    // step 2: assign start/size (and name) to the newPatches
-    // re-use the lookup to map (regionId => patchI)
-    surfGroupList patchLst(lookup.size());
+    // step 2: assign start/size (and name) to the newZones
+    // re-use the lookup to map (zoneId => zoneI)
+    surfZoneList zoneLst(lookup.size());
     label start = 0;
-    label patchI = 0;
+    label zoneI = 0;
     forAllIter(Map<label>, lookup, iter)
     {
-        label regId = iter.key();
+        label origId = iter.key();
 
         word name;
-        Map<word>::const_iterator fnd = patchNames.find(regId);
-        if (fnd != patchNames.end())
+        Map<word>::const_iterator fnd = zoneNames.find(origId);
+        if (fnd != zoneNames.end())
         {
             name = fnd();
         }
         else
         {
-            name = word("patch") + ::Foam::name(patchI);
+            name = word("zone") + ::Foam::name(zoneI);
         }
 
-        patchLst[patchI] = surfGroup
+        zoneLst[zoneI] = surfZone
         (
             name,
             0,           // initialize with zero size
             start,
-            patchI
+            zoneI
         );
 
-        // increment the start for the next patch
-        // and save the (regionId => patchI) mapping
+        // increment the start for the next zone
+        // and save the (zoneId => zoneI) mapping
         start += iter();
-        iter() = patchI++;
+        iter() = zoneI++;
     }
 
 
     // step 3: build the re-ordering
-    faceMap.setSize(regionLst.size());
+    faceMap.setSize(zoneIds.size());
 
-    forAll(regionLst, faceI)
+    forAll(zoneIds, faceI)
     {
-        label patchI = lookup[regionLst[faceI]];
-        faceMap[faceI] = patchLst[patchI].start() + patchLst[patchI].size()++;
+        label zoneI = lookup[zoneIds[faceI]];
+        faceMap[faceI] =
+            zoneLst[zoneI].start() + zoneLst[zoneI].size()++;
     }
 
     // with reordered faces registered in faceMap
-    return patchLst;
+    return zoneLst;
 }
 
 
@@ -267,7 +263,7 @@ Foam::fileFormats::surfaceFormatsCore::checkSupport
     else if (verbose)
     {
         wordList toc = available.toc();
-        SortableList<word> known(xferMove(toc));
+        SortableList<word> known(toc.xfer());
 
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl

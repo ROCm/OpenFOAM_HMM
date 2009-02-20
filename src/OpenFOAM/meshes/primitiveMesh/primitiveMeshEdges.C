@@ -670,7 +670,7 @@ const Foam::labelList& Foam::primitiveMesh::cellEdges
 
 const Foam::labelList& Foam::primitiveMesh::cellEdges(const label cellI) const
 {
-    return cellEdges(cellI, labels_);;
+    return cellEdges(cellI, labels_);
 }
 
 

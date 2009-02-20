@@ -129,6 +129,11 @@ public:
         inline static bool valid(char);
 
 
+        // Interogation
+
+            //- Return the file type: FILE, DIRECTORY or UNDEFINED
+            Type type() const;
+
         // Decomposition
 
             //- Return file name (part beyond last /)
@@ -146,15 +151,8 @@ public:
             //- Return path components as wordList
             wordList components(const char delimiter='/') const;
 
-            //- Return a component of the path
+            //- Return a single component of the path
             word component(const size_type, const char delimiter='/') const;
-
-
-        // Interogation
-
-            //- Return file type
-            Type type() const;
-
 
     // Member operators
 

@@ -38,6 +38,7 @@ SourceFiles
 
 #include "LESModel.H"
 #include "volFields.H"
+#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,6 +58,9 @@ class SpalartAllmaras
     public LESModel
 {
     // Private member functions
+
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields();
 
         // Disallow default bitwise copy construct and assignment
         SpalartAllmaras(const SpalartAllmaras&);
@@ -86,30 +90,39 @@ protected:
 
         // Fields
 
+            wallDist y_;
             volScalarField nuTilda_;
-            volScalarField dTilda_;
             volScalarField nuSgs_;
 
 
     // Protected member functions
 
-        // Helper functions
+        virtual tmp<volScalarField> fv1() const;
+        virtual tmp<volScalarField> fv2() const;
+        virtual tmp<volScalarField> fv3() const;
+        virtual tmp<volScalarField> S(const volTensorField& gradU) const;
 
-            virtual tmp<volScalarField> fv1() const;
-            virtual tmp<volScalarField> fv2() const;
-            virtual tmp<volScalarField> fv3() const;
-            //-
-            virtual tmp<volScalarField> calcS(const volTensorField& gradU);
-            virtual tmp<volScalarField> calcSTilda(const volTensorField& gradU);
-            virtual tmp<volScalarField> r
-            (
-                const volScalarField& visc,
-                const volScalarField& S
-            ) const;
-            virtual tmp<volScalarField> fw(const volScalarField& S) const;
+        virtual tmp<volScalarField> STilda
+        (
+            const volScalarField& S,
+            const volScalarField& dTilda
+        ) const;
 
-        //- Length scale calculation
-        virtual void dTildaUpdate(const volScalarField& S);
+        virtual tmp<volScalarField> r
+        (
+            const volScalarField& visc,
+            const volScalarField& S,
+            const volScalarField& dTilda
+        ) const;
+
+        virtual tmp<volScalarField> fw
+        (
+            const volScalarField& S,
+            const volScalarField& dTilda
+        ) const;
+
+        //- Length scale
+        virtual tmp<volScalarField> dTilda(const volScalarField& S) const;
 
 
 public:
@@ -138,10 +151,7 @@ public:
     // Member Functions
 
         //- Return SGS kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return sqr(nuSgs()/ck_/dTilda_);
-        }
+        virtual tmp<volScalarField> k() const;
 
         //- Return sub-grid disipation rate
         virtual tmp<volScalarField> epsilon() const;

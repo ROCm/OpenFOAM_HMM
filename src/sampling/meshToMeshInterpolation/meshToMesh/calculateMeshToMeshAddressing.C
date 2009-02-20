@@ -160,7 +160,7 @@ void meshToMesh::calcAddressing()
                 fromMeshPatches_.find(patchMap_.find(toPatch.name())())()
             ];
 
-            if (fromPatch.size() == 0)
+            if (fromPatch.empty())
             {
                 WarningIn("meshToMesh::calcAddressing()")
                     << "Source patch " << fromPatch.name()

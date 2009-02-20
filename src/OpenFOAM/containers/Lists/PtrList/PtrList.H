@@ -158,6 +158,9 @@ public:
             //- Return the number of elements in the PtrList
             inline label size() const;
 
+            //- Return true if the PtrList is empty (ie, size() is zero).
+            inline bool empty() const;
+
 
         // Edit
 
@@ -166,6 +169,12 @@ public:
             //  the end of a PtrList. If the entries are non-empty they are
             //  deleted.
             void setSize(const label);
+
+            //- Reset size of PtrList.  This can only be used to set the size
+            //  of an empty PtrList, extend a PtrList, remove entries from
+            //  the end of a PtrList. If the entries are non-empty they are
+            //  deleted.
+            inline void resize(const label);
 
             //- Clear the PtrList, i.e. set size to zero deleting all the
             //  allocated entries.

@@ -58,6 +58,8 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
+
     pointMesh pMesh(mesh);
 
     word cellSetName(args.args()[1]);
@@ -177,6 +179,10 @@ int main(int argc, char *argv[])
     Pout<< "Refined from " << returnReduce(map().nOldCells(), sumOp<label>())
         << " to " << mesh.globalData().nTotalCells() << " cells." << nl << endl;
 
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     Info<< "Writing mesh to " << runTime.timeName() << endl;
 
     mesh.write();

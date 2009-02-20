@@ -151,7 +151,7 @@ unset MPI_ARCH_PATH
 
 case "$WM_MPLIB" in
 OPENMPI)
-    mpi_version=openmpi-1.2.8
+    mpi_version=openmpi-1.3
     export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
     export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
 
@@ -247,6 +247,16 @@ GAMMA)
 MPI)
     export MPI_ARCH_PATH=/opt/mpi
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
+    ;;
+
+FJMPI)
+    export MPI_ARCH_PATH=/opt/FJSVmpi2
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpi
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+    _foamAddLib  $MPI_ARCH_PATH/lib/sparcv9
+    _foamAddLib  /opt/FSUNf90/lib/sparcv9
+    _foamAddLib  /opt/FJSVpnidt/lib
     ;;
 
 *)

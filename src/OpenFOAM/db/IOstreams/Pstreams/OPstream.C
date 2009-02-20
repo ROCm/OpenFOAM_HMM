@@ -136,17 +136,17 @@ Foam::Ostream& Foam::OPstream::write(const char* str)
 {
     word nonWhiteChars(string::validate<word>(str));
 
-    if (nonWhiteChars.size() == 0)
-    {
-        return *this;
-    }
-    else if (nonWhiteChars.size() == 1)
+    if (nonWhiteChars.size() == 1)
     {
         return write(nonWhiteChars.c_str()[1]);
     }
-    else
+    else if (nonWhiteChars.size())
     {
         return write(nonWhiteChars);
+    }
+    else
+    {
+        return *this;
     }
 }
 
@@ -164,6 +164,18 @@ Foam::Ostream& Foam::OPstream::write(const word& str)
 
 
 Foam::Ostream& Foam::OPstream::write(const string& str)
+{
+    write(char(token::STRING));
+
+    size_t len = str.size();
+    writeToBuffer(len);
+    writeToBuffer(str.c_str(), len + 1, 1);
+
+    return *this;
+}
+
+
+Foam::Ostream& Foam::OPstream::writeQuoted(const std::string& str, const bool)
 {
     write(char(token::STRING));
 

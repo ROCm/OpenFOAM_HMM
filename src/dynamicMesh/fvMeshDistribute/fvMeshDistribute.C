@@ -196,7 +196,7 @@ void Foam::fvMeshDistribute::printMeshInfo(const fvMesh& mesh)
             << endl;
     }
 
-    if (mesh.pointZones().size() > 0)
+    if (mesh.pointZones().size())
     {
         Pout<< "PointZones:" << endl;
         forAll(mesh.pointZones(), zoneI)
@@ -207,7 +207,7 @@ void Foam::fvMeshDistribute::printMeshInfo(const fvMesh& mesh)
                 << endl;
         }
     }
-    if (mesh.faceZones().size() > 0)
+    if (mesh.faceZones().size())
     {
         Pout<< "FaceZones:" << endl;
         forAll(mesh.faceZones(), zoneI)
@@ -218,7 +218,7 @@ void Foam::fvMeshDistribute::printMeshInfo(const fvMesh& mesh)
                 << endl;
         }
     }
-    if (mesh.cellZones().size() > 0)
+    if (mesh.cellZones().size())
     {
         Pout<< "CellZones:" << endl;
         forAll(mesh.cellZones(), zoneI)
@@ -392,7 +392,7 @@ void Foam::fvMeshDistribute::deleteTrailingPatch()
         const_cast<polyBoundaryMesh&>(mesh_.boundaryMesh());
     fvBoundaryMesh& fvPatches = const_cast<fvBoundaryMesh&>(mesh_.boundary());
 
-    if (polyPatches.size() == 0)
+    if (polyPatches.empty())
     {
         FatalErrorIn("fvMeshDistribute::deleteTrailingPatch(fvMesh&)")
             << "No patches in mesh"
@@ -410,7 +410,7 @@ void Foam::fvMeshDistribute::deleteTrailingPatch()
             << " : " << polyPatches[sz-1].name() << " size:" << nFaces << endl;
     }
 
-    if (nFaces != 0)
+    if (nFaces)
     {
         FatalErrorIn("fvMeshDistribute::deleteTrailingPatch()")
             << "There are still " << nFaces << " faces in patch to be deleted "
@@ -1185,7 +1185,7 @@ void Foam::fvMeshDistribute::sendMesh
     //labelList cellZoneID;
     //if (hasCellZones)
     //{
-    //    cellZoneID.setSize(mesh.nCells());;
+    //    cellZoneID.setSize(mesh.nCells());
     //    cellZoneID = -1;
     //
     //    const cellZoneMesh& cellZones = mesh.cellZones();
@@ -2035,7 +2035,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
 
             forAll(constructPatchMap, procI)
             {
-                if (procI != sendProc && constructPatchMap[procI].size() > 0)
+                if (procI != sendProc && constructPatchMap[procI].size())
                 {
                     // Processor already in mesh (either myProcNo or received)
                     inplaceRenumber(oldCellMap, constructCellMap[procI]);

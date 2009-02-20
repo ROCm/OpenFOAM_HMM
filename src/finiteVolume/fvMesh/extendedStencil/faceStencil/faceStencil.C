@@ -245,9 +245,9 @@ void Foam::faceStencil::unionEqOp::operator()
     const labelList& y
 ) const
 {
-    if (y.size() > 0)
+    if (y.size())
     {
-        if (x.size() == 0)
+        if (x.empty())
         {
             x = y;
         }

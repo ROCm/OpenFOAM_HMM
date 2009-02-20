@@ -80,13 +80,13 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
 
 
     // write directly into the lists:
-    pointField& pointLst = this->storedPoints();
-    List<Face>& faceLst  = this->storedFaces();
-    List<label>& regionLst = this->storedRegions();
+    pointField&  pointLst  = this->storedPoints();
+    List<Face>&  faceLst   = this->storedFaces();
+    List<label>& zoneIds = this->storedZoneIds();
 
     pointLst.setSize(nPoints);
     faceLst.setSize(nElems);
-    regionLst.setSize(nElems);
+    zoneIds.setSize(nElems);
 
     // Read points
     forAll(pointLst, pointI)
@@ -118,11 +118,11 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
 
 
     // Read triangles. Convert references to edges into pointlabels
-    label maxPatch = 0;
+    label maxZone = 0;
     forAll(faceLst, faceI)
     {
         label e0Label, e1Label, e2Label;
-        label regionI = 0;
+        label zoneI = 0;
 
         line = this->getLineNoComment(is);
         {
@@ -130,17 +130,17 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
             lineStream
                 >> e0Label >> e1Label >> e2Label;
 
-            // Optional region number: read first, then check state on stream
+            // Optional zone number: read first, then check state on stream
             if (lineStream)
             {
                 label num;
                 lineStream >> num;
                 if (!lineStream.bad())
                 {
-                    regionI = num;
-                    if (maxPatch < regionI)
+                    zoneI = num;
+                    if (maxZone < zoneI)
                     {
-                        maxPatch = regionI;
+                        maxZone = zoneI;
                     }
                 }
             }
@@ -202,21 +202,21 @@ bool Foam::fileFormats::GTSsurfaceFormat<Face>::read
         }
 
         faceLst[faceI] = triFace(e0Far, common01, e1Far);
-        regionLst[faceI] = regionI;
+        zoneIds[faceI] = zoneI;
     }
 
 
-    List<surfPatchIdentifier> newPatches(maxPatch+1);
-    forAll(newPatches, patchI)
+    List<surfZoneIdentifier> newZones(maxZone+1);
+    forAll(newZones, zoneI)
     {
-        newPatches[patchI] = surfPatchIdentifier
+        newZones[zoneI] = surfZoneIdentifier
         (
-            "patch" + ::Foam::name(patchI),
-            patchI
+            "zone" + ::Foam::name(zoneI),
+            zoneI
         );
     }
 
-    this->storedPatches().transfer(newPatches);
+    this->storedZoneToc().transfer(newZones);
     return true;
 }
 
@@ -230,13 +230,12 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 {
     const pointField& pointLst = surf.points();
     const List<Face>& faceLst  = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<surfZone>& zoneLst = surf.zones();
 
 
     // check if output triangulation would be required
     // It is too annoying to triangulate on-the-fly
     // just issue a warning and get out
-    //
     if (!surf.isTri())
     {
         label nNonTris = 0;
@@ -261,14 +260,14 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
         }
     }
 
-    // Write header, print patch names as comment
+    // Write header, print zone names as comment
     os  << "# GTS file" << nl
-        << "# Regions:" << nl;
+        << "# Zones:" << nl;
 
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        os  << "#     " << patchI << "    "
-            << patchLst[patchI].name() << nl;
+        os  << "#     " << zoneI << "    "
+            << zoneLst[zoneI].name() << nl;
     }
     os  << "#" << endl;
 
@@ -301,18 +300,18 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
     const labelListList& faceEs = surf.faceEdges();
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        const surfGroup& patch = patchLst[patchI];
+        const surfZone& zone = zoneLst[zoneI];
 
-        forAll(patch, patchFaceI)
+        forAll(zone, localFaceI)
         {
             const labelList& fEdges = faceEs[faceIndex++];
 
             os  << fEdges[0] + 1 << ' '
                 << fEdges[1] + 1 << ' '
                 << fEdges[2] + 1 << ' '
-                << patchI << endl;
+                << zoneI << endl;
         }
     }
 }
@@ -327,8 +326,8 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
 {
     const pointField& pointLst   = surf.points();
     const List<Face>& faceLst    = surf.faces();
-    const List<label>& regionLst = surf.regions();
-    const List<surfPatchIdentifier>& patchInfo = surf.patches();
+    const List<label>& zoneIds = surf.zoneIds();
+    const List<surfZoneIdentifier>& zoneToc = surf.zoneToc();
 
     // check if output triangulation would be required
     // It is too annoying to triangulate on-the-fly
@@ -357,18 +356,14 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
         }
     }
 
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-
-    // Write header, print patch names as comment
+    // Write header, print zone names as comment
     os  << "# GTS file" << nl
-        << "# Regions:" << nl;
+        << "# Zones:" << nl;
 
-    forAll(patchInfo, patchI)
+    forAll(zoneToc, zoneI)
     {
-        os  << "#     " << patchI << "    "
-            << patchInfo[patchI].name() << nl;
+        os  << "#     " << zoneI << "    "
+            << zoneToc[zoneI].name() << nl;
     }
     os  << "#" << endl;
 
@@ -409,7 +404,7 @@ void Foam::fileFormats::GTSsurfaceFormat<Face>::write
         os  << fEdges[0] + 1 << ' '
             << fEdges[1] + 1 << ' '
             << fEdges[2] + 1 << ' '
-            << regionLst[faceI] << endl;
+            << zoneIds[faceI] << endl;
     }
 }
 

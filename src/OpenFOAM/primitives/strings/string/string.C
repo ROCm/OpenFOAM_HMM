@@ -25,13 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "string.H"
-#include "debug.H"
 #include "OSspecific.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
 const char* const Foam::string::typeName = "string";
 int Foam::string::debug(debug::debugSwitch(string::typeName, 0));
+const Foam::string Foam::string::null;
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

@@ -58,27 +58,21 @@ class IFstream;
 
 class triSurface
 :
-    public PrimitivePatch<labelledTri, List, pointField, point>
+    public PrimitivePatch<labelledTri, ::Foam::List, pointField, point>
 {
-protected:
-
-    // Protected Member Data
-
-        //- Typedef for similar code in keyedSurface and meshedSurface
-        typedef labelledTri FaceType;
-
-private:
-
     // Private typedefs
 
+    //- Typedefs for convenience
+        typedef labelledTri Face;
         typedef PrimitivePatch
         <
-            FaceType,
+            labelledTri,
             ::Foam::List,
             pointField,
             point
         >
-        MeshStorage;
+        ParentType;
+
 
     // Private data
 
@@ -201,16 +195,38 @@ private:
         //- helper function to print triangle info
         static void printTriangle
         (
-            Ostream& os,
+            Ostream&,
             const Foam::string& pre,
-            const labelledTri& f,
-            const pointField& points
+            const labelledTri&,
+            const pointField&
         );
 
         //- read non-comment line
         static string getLineNoComment(IFstream&);
 
+protected:
+
+    // Protected Member Functions
+
+        //- Non-const access to global points
+        pointField& storedPoints()
+        {
+            return const_cast<pointField&>(ParentType::points());
+        }
+
+        //- Non-const access to the faces
+        List<Face>& storedFaces()
+        {
+            return static_cast<List<Face>&>(*this);
+        }
+
 public:
+
+    // Public typedefs
+
+        //- Placeholder only, but do not remove - it is needed for GeoMesh
+        typedef bool BoundaryMesh;
+
 
         //- Runtime type information
         ClassName("triSurface");

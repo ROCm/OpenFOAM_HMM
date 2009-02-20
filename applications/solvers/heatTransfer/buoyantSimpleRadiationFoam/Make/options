@@ -1,4 +1,5 @@
 EXE_INC = \
+    -I../buoyantSimpleFoam \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/radiation/lnInclude \
     -I$(LIB_SRC)/turbulenceModels \

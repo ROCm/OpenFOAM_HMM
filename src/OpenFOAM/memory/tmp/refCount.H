@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class refCount Declaration
+                          Class refCount Declaration
 \*---------------------------------------------------------------------------*/
 
 class refCount
@@ -63,6 +63,7 @@ public:
 
     // Constructors
 
+        //- Construct null with zero count
         refCount()
         :
             count_(0)
@@ -71,18 +72,21 @@ public:
 
     // Member Functions
 
+        //- Return the reference count
         int count() const
         {
             return count_;
         }
 
 
+        //- Return true if the reference count is zero
         bool okToDelete() const
         {
-            return(count_ == 0);
+            return !count_;
         }
 
 
+        //- Reset the reference count to zero
         void resetRefCount()
         {
             count_ = 0;
@@ -91,22 +95,25 @@ public:
 
     // Member Operators
 
+        //- Increment the reference count
         void operator++()
         {
             count_++;
         }
 
+        //- Increment the reference count
         void operator++(int)
         {
             count_++;
         }
 
-
+        //- Decrement the reference count
         void operator--()
         {
             count_--;
         }
 
+        //- Decrement the reference count
         void operator--(int)
         {
             count_--;

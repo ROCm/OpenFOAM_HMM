@@ -39,6 +39,13 @@ inline Foam::label Foam::StaticHashTable<T, Key, Hash>::size() const
 
 
 template<class T, class Key, class Hash>
+inline bool Foam::StaticHashTable<T, Key, Hash>::empty() const
+{
+    return !nElmts_;
+}
+
+
+template<class T, class Key, class Hash>
 inline bool Foam::StaticHashTable<T, Key, Hash>::insert
 (
     const Key& key,
@@ -321,7 +328,7 @@ Foam::StaticHashTable<T, Key, Hash>::begin()
     // Find first non-empty entry
     forAll(keys_, hashIdx)
     {
-        if (keys_[hashIdx].size() > 0)
+        if (keys_[hashIdx].size())
         {
             return iterator(*this, hashIdx, 0);
         }
@@ -348,12 +355,12 @@ Foam::StaticHashTable<T, Key, Hash>::end()
 
 template<class T, class Key, class Hash>
 inline typename Foam::StaticHashTable<T, Key, Hash>::const_iterator
-Foam::StaticHashTable<T, Key, Hash>::begin() const
+Foam::StaticHashTable<T, Key, Hash>::cbegin() const
 {
     // Find first non-empty entry
     forAll(keys_, hashIdx)
     {
-        if (keys_[hashIdx].size() > 0)
+        if (keys_[hashIdx].size())
         {
             return const_iterator(*this, hashIdx, 0);
         }
@@ -367,6 +374,22 @@ Foam::StaticHashTable<T, Key, Hash>::begin() const
 #   endif
 
     return StaticHashTable<T, Key, Hash>::endConstIter_;
+}
+
+
+template<class T, class Key, class Hash>
+inline const typename Foam::StaticHashTable<T, Key, Hash>::const_iterator&
+Foam::StaticHashTable<T, Key, Hash>::cend() const
+{
+    return StaticHashTable<T, Key, Hash>::endConstIter_;
+}
+
+
+template<class T, class Key, class Hash>
+inline typename Foam::StaticHashTable<T, Key, Hash>::const_iterator
+Foam::StaticHashTable<T, Key, Hash>::begin() const
+{
+    return this->cbegin();
 }
 
 

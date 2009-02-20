@@ -100,12 +100,12 @@ int main()
         << "\ntable2" << table1 << nl
         << "\ntable3" << table3 << nl;
 
-    Info<< "\ndelete table2" << nl;
+    Info<< "\nerase table2 by iterator" << nl;
     forAllIter(HASHTABLE_CLASS<double>, table2, iter)
     {
-        Info<< "deleting " << iter.key() << " => " << iter() << " ... ";
+        Info<< "erasing " << iter.key() << " => " << iter() << " ... ";
         table2.erase(iter);
-        Info<< "deleted" << endl;
+        Info<< "erased" << endl;
     }
 
     Info<< "\ntable1" << table1 << nl
@@ -134,6 +134,24 @@ int main()
     table1.erase(table1.begin());
     Info<< "removed an element - test table1 != table3 : "
         << (table1 != table3) << nl;
+    
+    // insert a few things into table2
+    table2.set("ada", 14.0);
+    table2.set("aeq", 15.0);
+    table2.set("aaw", 16.0);
+    table2.set("abs", 17.0);
+    table2.set("adx", 20.0);
+    
+    Info<< "\ntable1" << table1 << nl
+        << "\ntable2" << table2 << nl;
+
+    label nErased = table1.erase(table2);
+    
+    Info<< "\nerase table2 keys from table1 (removed "
+        << nErased << " elements)" << nl
+        << "\ntable1" << table1 << nl
+        << "\ntable2" << table2 << nl;
+
 
     Info<< "\nclearStorage table3 ... ";
     table3.clearStorage();

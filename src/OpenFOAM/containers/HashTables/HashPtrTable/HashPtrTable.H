@@ -51,21 +51,15 @@ class Ostream;
 
 template<class T, class Key, class Hash> class HashPtrTable;
 
-template<class T, class Key, class Hash> Istream& operator>>
-(
-    Istream&,
-    HashPtrTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Istream& operator>>(Istream&, HashPtrTable<T, Key, Hash>&);
 
-template<class T, class Key, class Hash> Ostream& operator<<
-(
-    Ostream&,
-    const HashPtrTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Ostream& operator<<(Ostream&, const HashPtrTable<T, Key, Hash>&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class HashPtrTable Declaration
+                        Class HashPtrTable Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class Key=word, class Hash=string::hash>
@@ -89,7 +83,7 @@ public:
     // Constructors
 
         //- Construct given initial table size
-        HashPtrTable(label size = 100);
+        HashPtrTable(const label size = 100);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>

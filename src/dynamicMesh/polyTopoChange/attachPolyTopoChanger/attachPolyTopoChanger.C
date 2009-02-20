@@ -85,16 +85,15 @@ void Foam::attachPolyTopoChanger::attach(const bool removeEmptyPatches)
 
         forAll (oldPatches, patchI)
         {
-            if (oldPatches[patchI].size() > 0)
+            if (oldPatches[patchI].size())
             {
-                newPatches[nNewPatches] =
-                    oldPatches[patchI].clone
-                    (
-                        mesh_.boundaryMesh(),
-                        nNewPatches,
-                        oldPatches[patchI].size(),
-                        oldPatches[patchI].start()
-                    ).ptr();
+                newPatches[nNewPatches] = oldPatches[patchI].clone
+                (
+                    mesh_.boundaryMesh(),
+                    nNewPatches,
+                    oldPatches[patchI].size(),
+                    oldPatches[patchI].start()
+                ).ptr();
 
                 nNewPatches++;
             }

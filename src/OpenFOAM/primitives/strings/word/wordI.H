@@ -119,12 +119,13 @@ inline bool Foam::word::valid(char c)
 {
     return
     (
-          !isspace(c)
-     && c != '"'
-     && c != '/'
-     && c != ';'
-     && c != '{'
-     && c != '}'
+        !isspace(c)
+     && c != '"'   // string quote
+     && c != '\''  // string quote
+     && c != '/'   // path separator
+     && c != ';'   // end statement
+     && c != '{'   // beg subdict
+     && c != '}'   // end subdict
     );
 }
 
@@ -162,16 +163,16 @@ inline void Foam::word::operator=(const char* q)
 
 inline Foam::word Foam::operator&(const word& a, const word& b)
 {
-    if (!b.size())
-    {
-        return a;
-    }
-    else
+    if (b.size())
     {
         string ub = b;
         ub.string::operator[](0) = char(toupper(ub.string::operator[](0)));
 
         return a + ub;
+    }
+    else
+    {
+        return a;
     }
 }
 

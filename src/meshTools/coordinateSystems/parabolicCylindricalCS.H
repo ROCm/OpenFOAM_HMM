@@ -30,6 +30,9 @@ Description
 
     Notation: u = a.x() v = a.y() z = a.z();
 
+Note
+    The maintenance of this class may lag that of the main types.
+
 SourceFiles
     parabolicCylindricalCS.C
 
@@ -46,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class parabolicCylindricalCS Declaration
+                   Class parabolicCylindricalCS Declaration
 \*---------------------------------------------------------------------------*/
 
 class parabolicCylindricalCS
@@ -93,16 +96,7 @@ public:
         //- Construct null
         parabolicCylindricalCS();
 
-        //- Construct from components
-        parabolicCylindricalCS
-        (
-            const word& name,
-            const point& origin,
-            const vector& axis,
-            const vector& direction
-        );
-
-        //- Construct from origin and rotation angles
+        //- Construct from origin and rotation
         parabolicCylindricalCS
         (
             const word& name,

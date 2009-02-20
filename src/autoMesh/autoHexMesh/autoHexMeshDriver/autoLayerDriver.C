@@ -2420,7 +2420,7 @@ void Foam::autoLayerDriver::getLayerCellsFaces
     {
         const labelList& layer = layerFaces[oldPatchFaceI];
 
-        if (layer.size() > 0)
+        if (layer.size())
         {
             for (label i = 1; i < layer.size()-1; i++)
             {
@@ -2889,12 +2889,12 @@ void Foam::autoLayerDriver::addLayers
                 //mesh.name()+"_layer",
                 mesh.name(),
                 static_cast<polyMesh&>(mesh).instance(),
-                mesh.db(),
+                mesh.time(),  // register with runTime
                 static_cast<polyMesh&>(mesh).readOpt(),
                 static_cast<polyMesh&>(mesh).writeOpt()
-            ),          // io params from original mesh but new name
-            mesh,      // original mesh
-            true        // parallel sync
+            ),              // io params from original mesh but new name
+            mesh,           // original mesh
+            true            // parallel sync
         );
         fvMesh& newMesh = newMeshPtr();
 

@@ -68,9 +68,23 @@ Foam::CompactListList<T>::clone() const
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline const Foam::CompactListList<T>& Foam::CompactListList<T>::null()
+{
+    return *reinterpret_cast< CompactListList<T>* >(0);
+}
+
+
+template<class T>
 inline Foam::label Foam::CompactListList<T>::size() const
 {
     return offsets_.size();
+}
+
+
+template<class T>
+inline bool Foam::CompactListList<T>::empty() const
+{
+    return offsets_.empty();
 }
 
 
@@ -159,6 +173,43 @@ template<class T>
 inline Foam::Xfer<Foam::CompactListList<T> > Foam::CompactListList<T>::xfer()
 {
     return xferMove(*this);
+}
+
+
+template<class T>
+inline void Foam::CompactListList<T>::resize(const label nRows)
+{
+    this->setSize(nRows);
+}
+
+
+template<class T>
+inline void Foam::CompactListList<T>::resize
+(
+    const label nRows,
+    const label nData
+)
+{
+    this->setSize(nRows, nData);
+}
+
+
+template<class T>
+inline void Foam::CompactListList<T>::resize
+(
+    const label nRows,
+    const label nData,
+    const T& t
+)
+{
+    this->setSize(nRows, nData, t);
+}
+
+
+template<class T>
+inline void Foam::CompactListList<T>::resize(const UList<label>& rowSizes)
+{
+    this->setSize(rowSizes);
 }
 
 

@@ -44,7 +44,7 @@ void Foam::interpolationTable<Type>::readTable()
     // Check that the data are okay
     check();
 
-    if (this->size() == 0)
+    if (this->empty())
     {
         FatalErrorIn
         (

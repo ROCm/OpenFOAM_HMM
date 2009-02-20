@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-# update Foam::FOAMversion string if required
+# update OpenFOAM version strings if required
 wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
 
 wmakeLnInclude -f OpenFOAM
@@ -17,10 +17,11 @@ wmake libso lagrangian/basic
 wmake libso triSurface
 wmake libso edgeMesh
 wmake libso surfMesh
-wmake libso meshTools
-wmake libso finiteVolume
 
 decompositionAgglomeration/Allwmake
+
+wmake libso meshTools
+wmake libso finiteVolume
 
 wmake libso sampling
 

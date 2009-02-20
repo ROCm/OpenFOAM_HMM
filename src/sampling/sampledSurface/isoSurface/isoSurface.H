@@ -31,6 +31,9 @@ Description
     G.M. Treece, R.W. Prager and A.H. Gee.
 
     Note:
+    - not possible on patches of type 'empty'. There are no values on
+    'empty' patch fields so even the api would have to change
+     (no volScalarField as argument). Too messy.
     - in parallel the regularisation (coarsening) always takes place
     and slightly different surfaces will be created compared to non-parallel.
     The surface will still be continuous though!
@@ -53,7 +56,7 @@ SourceFiles
 #include "triSurface.H"
 #include "labelPair.H"
 #include "pointIndexHit.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -123,6 +126,15 @@ class isoSurface
             const scalar s1
         ) const;
 
+        //- Check if any edge of a face is cut
+        bool isEdgeOfFaceCut
+        (
+            const scalarField& pVals,
+            const face& f,
+            const bool ownLower,
+            const bool neiLower
+        ) const;
+
         //- Set faceCutType,cellCutType.
         void calcCutTypes
         (
@@ -169,7 +181,7 @@ class isoSurface
         //  point.
         void calcSnappedPoint
         (
-            const PackedList<1>& isBoundaryPoint,
+            const PackedBoolList& isBoundaryPoint,
             const labelList& boundaryRegion,
             const volScalarField& cVals,
             const scalarField& pVals,
@@ -217,7 +229,7 @@ class isoSurface
         ) const;
 
         template<class Type>
-        label generateTriPoints
+        label generateFaceTriPoints
         (
             const volScalarField& cVals,
             const scalarField& pVals,

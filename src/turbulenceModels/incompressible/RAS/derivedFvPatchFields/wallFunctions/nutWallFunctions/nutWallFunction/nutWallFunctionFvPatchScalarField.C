@@ -48,7 +48,9 @@ nutWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    kName_("k"),
+    nuName_("nu")
 {}
 
 
@@ -61,7 +63,9 @@ nutWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    kName_(ptf.kName_),
+    nuName_(ptf.nuName_)
 {}
 
 
@@ -73,28 +77,34 @@ nutWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    kName_(dict.lookupOrDefault<word>("k", "k")),
+    nuName_(dict.lookupOrDefault<word>("nu", "nu"))
 {}
 
 
 nutWallFunctionFvPatchScalarField::
 nutWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& tppsf
+    const nutWallFunctionFvPatchScalarField& nwfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(nwfpsf),
+    kName_(nwfpsf.kName_),
+    nuName_(nwfpsf.nuName_)
 {}
 
 
 nutWallFunctionFvPatchScalarField::
 nutWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& tppsf,
+    const nutWallFunctionFvPatchScalarField& nwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(nwfpsf, iF),
+    kName_(nwfpsf.kName_),
+    nuName_(nwfpsf.nuName_)
 {}
 
 
@@ -112,10 +122,10 @@ void nutWallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField& y = ras.y()[patch().index()];
 
-    const volScalarField& k = db().lookupObject<volScalarField>("k");
+    const volScalarField& k = db().lookupObject<volScalarField>(kName_);
 
     const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+        patch().lookupPatchField<volScalarField, scalar>(nuName_);
 
     scalarField& nutw = *this;
 
@@ -140,6 +150,8 @@ void nutWallFunctionFvPatchScalarField::updateCoeffs()
 void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "k", "k", kName_);
+    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     writeEntry("value", os);
 }
 

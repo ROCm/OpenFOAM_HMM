@@ -80,13 +80,13 @@ void Foam::layerAdditionRemoval::checkDefinition()
             << abort(FatalError);
     }
 
-    if (topoChanger().mesh().faceZones()[faceZoneID_.index()].size() == 0)
+    if (topoChanger().mesh().faceZones()[faceZoneID_.index()].empty())
     {
         FatalErrorIn
         (
             "void Foam::layerAdditionRemoval::checkDefinition()"
-        )   << "Face extrusion zone contains no faces.  Please check your "
-            << "mesh definition."
+        )   << "Face extrusion zone contains no faces. "
+            << " Please check your mesh definition."
             << abort(FatalError);
     }
 

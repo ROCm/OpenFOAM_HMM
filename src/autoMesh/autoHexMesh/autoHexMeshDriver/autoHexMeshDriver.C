@@ -223,10 +223,10 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
             (
                 IOobject
                 (
-                    "abc",                      // dummy name
-                    mesh_.time().timeName(),    // directory
-                    "triSurface",               // instance
-                    mesh_.time(),               // registry
+                    "abc",                                      // dummy name
+                    mesh_.time().findInstance("triSurface", word::null),// inst
+                    "triSurface",                               // local
+                    mesh_.time(),                               // registry
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
@@ -317,25 +317,18 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 
             Info<< surfaces().names()[surfI] << ':' << nl << nl;
 
-            //const triSurfaceMesh& s = surfaces()[surfI];
-            //const geometricSurfacePatchList& regions = s.patches();
-            //labelList nTrisPerRegion(surfaces().countRegions(s));
-
             forAll(regNames, i)
             {
-                //if (nTrisPerRegion[i] > 0)
-                //{
-                    label patchI = meshRefinement::addPatch
-                    (
-                        mesh,
-                        regNames[i],
-                        wallPolyPatch::typeName
-                    );
+                label patchI = meshRefinement::addPatch
+                (
+                    mesh,
+                    regNames[i],
+                    wallPolyPatch::typeName
+                );
 
-                    Info<< patchI << '\t' << regNames[i] << nl;
+                Info<< patchI << '\t' << regNames[i] << nl;
 
-                    globalToPatch_[surfaces().globalRegion(surfI, i)] = patchI;
-                //}
+                globalToPatch_[surfaces().globalRegion(surfI, i)] = patchI;
             }
 
             Info<< nl;
@@ -351,7 +344,7 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     ////  in when snapping)
     //
     //labelList namedSurfaces(surfaces().getNamedSurfaces());
-    //if (namedSurfaces.size() > 0)
+    //if (namedSurfaces.size())
     //{
     //    Info<< nl
     //        << "Introducing cyclics for faceZones" << nl

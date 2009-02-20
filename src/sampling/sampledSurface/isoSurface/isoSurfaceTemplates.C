@@ -200,7 +200,7 @@ void Foam::isoSurface::generateTriPoints
 
 
 template<class Type>
-Foam::label Foam::isoSurface::generateTriPoints
+Foam::label Foam::isoSurface::generateFaceTriPoints
 (
     const volScalarField& cVals,
     const scalarField& pVals,
@@ -288,6 +288,28 @@ void Foam::isoSurface::generateTriPoints
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
 
+    if
+    (
+        (cVals.size() != mesh_.nCells())
+     || (pVals.size() != mesh_.nPoints())
+     || (cCoords.size() != mesh_.nCells())
+     || (pCoords.size() != mesh_.nPoints())
+     || (snappedCc.size() != mesh_.nCells())
+     || (snappedPoint.size() != mesh_.nPoints())
+    )
+    {
+        FatalErrorIn("isoSurface::generateTriPoints(..)")
+            << "Incorrect size." << endl
+            << "mesh: nCells:" << mesh_.nCells()
+            << " points:" << mesh_.nPoints() << endl
+            << "cVals:" << cVals.size() << endl
+            << "cCoords:" << cCoords.size() << endl
+            << "snappedCc:" << snappedCc.size() << endl
+            << "pVals:" << pVals.size() << endl
+            << "pCoords:" << pCoords.size() << endl
+            << "snappedPoint:" << snappedPoint.size() << endl
+            << abort(FatalError);
+    }
 
     // Determine neighbouring snap status
     labelList neiSnappedCc(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
@@ -319,7 +341,7 @@ void Foam::isoSurface::generateTriPoints
     {
         if (faceCutType_[faceI] != NOTCUT)
         {
-            generateTriPoints
+            generateFaceTriPoints
             (
                 cVals,
                 pVals,
@@ -347,51 +369,53 @@ void Foam::isoSurface::generateTriPoints
     {
         const polyPatch& pp = patches[patchI];
 
-        if (pp.coupled())
+        if
+        (
+            isA<processorPolyPatch>(pp)
+         && refCast<const processorPolyPatch>(pp).owner()
+         && !refCast<const processorPolyPatch>(pp).separated()
+        )
         {
-            if (refCast<const processorPolyPatch>(pp).owner())
-            {
-                label faceI = pp.start();
-
-                forAll(pp, i)
-                {
-                    if (faceCutType_[faceI] != NOTCUT)
-                    {
-                        generateTriPoints
-                        (
-                            cVals,
-                            pVals,
-
-                            cCoords,
-                            pCoords,
-
-                            snappedPoints,
-                            snappedCc,
-                            snappedPoint,
-                            faceI,
-
-                            cVals.boundaryField()[patchI][i],
-                            cCoords.boundaryField()[patchI][i],
-                            neiSnappedCc[faceI-mesh_.nInternalFaces()],
-
-                            triPoints,
-                            triMeshCells
-                        );
-                    }
-                    faceI++;
-                }
-            }
-        }
-        else if (isA<emptyPolyPatch>(pp))
-        {
-            // Assume zero-gradient.
             label faceI = pp.start();
 
             forAll(pp, i)
             {
                 if (faceCutType_[faceI] != NOTCUT)
                 {
-                    generateTriPoints
+                    generateFaceTriPoints
+                    (
+                        cVals,
+                        pVals,
+
+                        cCoords,
+                        pCoords,
+
+                        snappedPoints,
+                        snappedCc,
+                        snappedPoint,
+                        faceI,
+
+                        cVals.boundaryField()[patchI][i],
+                        cCoords.boundaryField()[patchI][i],
+                        neiSnappedCc[faceI-mesh_.nInternalFaces()],
+
+                        triPoints,
+                        triMeshCells
+                    );
+                }
+                faceI++;
+            }
+        }
+        else if (isA<emptyPolyPatch>(pp))
+        {
+            // Assume zero-gradient. But what about coordinates?
+            label faceI = pp.start();
+
+            forAll(pp, i)
+            {
+                if (faceCutType_[faceI] != NOTCUT)
+                {
+                    generateFaceTriPoints
                     (
                         cVals,
                         pVals,
@@ -423,7 +447,7 @@ void Foam::isoSurface::generateTriPoints
             {
                 if (faceCutType_[faceI] != NOTCUT)
                 {
-                    generateTriPoints
+                    generateFaceTriPoints
                     (
                         cVals,
                         pVals,
@@ -460,8 +484,8 @@ void Foam::isoSurface::generateTriPoints
 //{
 //    return tmp<Field<Type> >(new Field<Type>(vField, meshCells()));
 //}
-//
-//
+
+
 template <class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurface::interpolate

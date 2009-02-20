@@ -64,6 +64,15 @@ class mutRoughWallFunctionFvPatchScalarField
 {
     // Private data
 
+        //- Name of density field
+        word rhoName_;
+
+        //- Name of laminar viscosity field
+        word muName_;
+
+        //- Name of turbulence kinetic energy field
+        word kName_;
+
         //- Roughness height
         scalarField Ks_;
 

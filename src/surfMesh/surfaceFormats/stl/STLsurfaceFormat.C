@@ -26,6 +26,7 @@ License
 
 #include "STLsurfaceFormat.H"
 #include "ListOps.H"
+#include "triPointRef.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -36,16 +37,24 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
 (
     Ostream& os,
     const pointField& pointLst,
-    const Face& f,
-    const vector& norm
+    const Face& f
 )
 {
+    // calculate the normal ourselves, for flexibility and speed
+    vector norm = triPointRef
+    (
+        pointLst[f[0]],
+        pointLst[f[1]],
+        pointLst[f[2]]
+    ).normal();
+    norm /= mag(norm) + VSMALL;
+
     // simple triangulation about f[0].
     // better triangulation should have been done before
     const point& p0 = pointLst[f[0]];
     for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
     {
-        label fp2 = (fp1 + 1) % f.size();
+        label fp2 = f.fcIndex(fp1);
 
         const point& p1 = pointLst[f[fp1]];
         const point& p2 = pointLst[f[fp2]];
@@ -69,16 +78,24 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
     ostream& os,
     const pointField& pointLst,
     const Face& f,
-    const vector& norm,
-    const label patchI
+    const label zoneI
 )
 {
+    // calculate the normal ourselves, for flexibility and speed
+    vector norm = triPointRef
+    (
+        pointLst[f[0]],
+        pointLst[f[1]],
+        pointLst[f[2]]
+    ).normal();
+    norm /= mag(norm) + VSMALL;
+
     // simple triangulation about f[0].
     // better triangulation should have been done before
     const point& p0 = pointLst[f[0]];
     for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
     {
-        label fp2 = (fp1 + 1) % f.size();
+        label fp2 = f.fcIndex(fp1);
 
         STLtriangle stlTri
         (
@@ -86,7 +103,7 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
             p0,
             pointLst[f[fp1]],
             pointLst[f[fp2]],
-            patchI
+            zoneI
         );
 
         stlTri.write(os);
@@ -94,96 +111,17 @@ inline void Foam::fileFormats::STLsurfaceFormat<Face>::writeShell
 }
 
 
-// write sorted:
-template<class Face>
-void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-    const vectorField& normLst = surf.faceNormals();
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        // Print all faces belonging to this region
-        const surfGroup& patch = patchLst[patchI];
-
-        os << "solid " << patch.name() << endl;
-        forAll(patch, patchFaceI)
-        {
-            const label faceI = faceIndex++;
-            writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
-        }
-        os << "endsolid " << patch.name() << endl;
-    }
-}
-
-
-// write sorted:
-template<class Face>
-void Foam::fileFormats::STLsurfaceFormat<Face>::writeASCII
-(
-    Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.faces();
-    const vectorField& normLst = surf.faceNormals();
-
-    if (surf.patches().size() == 1)
-    {
-        // a single region - we can skip sorting
-        os << "solid " << surf.patches()[0].name() << endl;
-        forAll(faceLst, faceI)
-        {
-            writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
-        }
-        os << "endsolid " << surf.patches()[0].name() << endl;
-    }
-   else
-   {
-        labelList faceMap;
-        List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-        label faceIndex = 0;
-        forAll(patchLst, patchI)
-        {
-            // Print all faces belonging to this region
-            const surfGroup& patch = patchLst[patchI];
-
-            os << "solid " << patch.name() << endl;
-            forAll(patch, patchFaceI)
-            {
-                const label faceI = faceMap[faceIndex++];
-                writeShell(os, pointLst, faceLst[faceI], normLst[faceI]);
-            }
-            os << "endsolid " << patch.name() << endl;
-        }
-   }
-}
-
-
-
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
 (
     ostream& os,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    const pointField& pointLst = surf.points();
-    const List<Face>& faceLst  = surf.faces();
-    const vectorField& normLst = surf.faceNormals();
-    const List<surfGroup>& patchLst = surf.patches();
-
     unsigned int nTris = 0;
-    if (surf.isTri())
+    if (BasicMeshedSurface<Face>::isTri())
     {
         nTris = faceLst.size();
     }
@@ -200,26 +138,22 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
     STLsurfaceFormatCore::writeHeaderBINARY(os, nTris);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             writeShell
             (
                 os,
                 pointLst,
-                faceLst[faceIndex],
-                normLst[faceIndex],
-                patchI
+                faceLst[faceIndex++],
+                zoneI
             );
-
-            ++faceIndex;
         }
     }
 }
 
 
-// write unsorted:
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
 (
@@ -227,10 +161,9 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    const pointField& pointLst = surf.points();
+    const pointField&  pointLst = surf.points();
     const List<Face>&  faceLst = surf.faces();
-    const List<label>& regionLst = surf.regions();
-    const vectorField& normLst = surf.faceNormals();
+    const List<label>& zoneIds = surf.zoneIds();
 
     unsigned int nTris = 0;
     if (surf.isTri())
@@ -257,8 +190,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBINARY
             os,
             pointLst,
             faceLst[faceI],
-            normLst[faceI],
-            regionLst[faceI]
+            zoneIds[faceI]
         );
     }
 }
@@ -292,13 +224,13 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
     // transfer points
     this->storedPoints().transfer(reader.points());
 
-    // retrieve the original region information
-    List<word>  names(xferMove(reader.names()));
-    List<label> sizes(xferMove(reader.sizes()));
-    List<label> regions(xferMove(reader.regions()));
+    // retrieve the original zone information
+    List<word>  names(reader.names().xfer());
+    List<label> sizes(reader.sizes().xfer());
+    List<label> zoneIds(reader.zoneIds().xfer());
 
     // generate the (sorted) faces
-    List<Face> faceLst(regions.size());
+    List<Face> faceLst(zoneIds.size());
 
     if (reader.sorted())
     {
@@ -314,7 +246,7 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
         // unsorted - determine the sorted order:
         // avoid SortableList since we discard the main list anyhow
         List<label> faceMap;
-        sortedOrder(regions, faceMap);
+        sortedOrder(zoneIds, faceMap);
 
         // generate sorted faces
         forAll(faceMap, faceI)
@@ -323,18 +255,18 @@ bool Foam::fileFormats::STLsurfaceFormat<Face>::read
             faceLst[faceI] = triFace(startPt, startPt+1, startPt+2);
         }
     }
-    regions.clear();
+    zoneIds.clear();
 
     // transfer:
     this->storedFaces().transfer(faceLst);
 
     if (names.size())
     {
-        this->addPatches(sizes, names);
+        this->addZones(sizes, names);
     }
     else
     {
-        this->addPatches(sizes);
+        this->addZones(sizes);
     }
 
     this->stitchFaces(SMALL);
@@ -346,10 +278,24 @@ template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    writeASCII(os, surf);
+    label faceIndex = 0;
+    forAll(zoneLst, zoneI)
+    {
+        // Print all faces belonging to this zone
+        const surfZone& zone = zoneLst[zoneI];
+
+        os << "solid " << zone.name() << endl;
+        forAll(zone, localFaceI)
+        {
+            writeShell(os, pointLst, faceLst[faceIndex++]);
+        }
+        os << "endsolid " << zone.name() << endl;
+    }
 }
 
 
@@ -360,29 +306,50 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     const MeshedSurface<Face>& surf
 )
 {
-    writeASCII(os, surf);
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::write
 (
-    const fileName& filename,
+    Ostream& os,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
-    word ext = filename.ext();
+    const pointField& pointLst = surf.points();
+    const List<Face>& faceLst  = surf.faces();
 
-    // handle 'stlb' as binary directly
-    if (ext == "stlb")
+    if (surf.zoneToc().size() == 1)
     {
-        std::ofstream ofs(filename.c_str(), std::ios::binary);
-        writeBINARY(ofs, surf);
+        // a single zone - we can skip sorting
+        os << "solid " << surf.zoneToc()[0].name() << endl;
+        forAll(faceLst, faceI)
+        {
+            writeShell(os, pointLst, faceLst[faceI]);
+        }
+        os << "endsolid " << surf.zoneToc()[0].name() << endl;
     }
-    else
-    {
-        writeASCII(OFstream(filename)(), surf);
-    }
+   else
+   {
+        labelList faceMap;
+        List<surfZone> zoneLst = surf.sortedZones(faceMap);
+
+        label faceIndex = 0;
+        forAll(zoneLst, zoneI)
+        {
+            // Print all faces belonging to this zone
+            const surfZone& zone = zoneLst[zoneI];
+
+            os << "solid " << zone.name() << endl;
+            forAll(zone, localFaceI)
+            {
+                const label faceI = faceMap[faceIndex++];
+                writeShell(os, pointLst, faceLst[faceI]);
+            }
+            os << "endsolid " << zone.name() << endl;
+        }
+   }
 }
 
 
@@ -403,8 +370,37 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::write
     }
     else
     {
-        writeASCII(OFstream(filename)(), surf);
+        write
+        (
+            OFstream(filename)(),
+            surf.points(),
+            surf.faces(),
+            surf.zones()
+        );
     }
 }
+
+
+template<class Face>
+void Foam::fileFormats::STLsurfaceFormat<Face>::write
+(
+    const fileName& filename,
+    const UnsortedMeshedSurface<Face>& surf
+)
+{
+    word ext = filename.ext();
+
+    // handle 'stlb' as binary directly
+    if (ext == "stlb")
+    {
+        std::ofstream ofs(filename.c_str(), std::ios::binary);
+        writeBINARY(ofs, surf);
+    }
+    else
+    {
+        write(OFstream(filename)(), surf);
+    }
+}
+
 
 // ************************************************************************* //

@@ -101,7 +101,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
         pointLst[pointI] = point(x, y, z);
     }
 
-    // Read faces - ignore optional region information
+    // Read faces - ignore optional zone information
     // use a DynamicList for possible on-the-fly triangulation
     DynamicList<Face>  dynFaces(nElems);
 
@@ -130,7 +130,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
                 // cannot use face::triangulation (points may be incomplete)
                 for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
                 {
-                    label fp2 = (fp1 + 1) % f.size();
+                    label fp2 = f.fcIndex(fp1);
 
                     dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
                 }
@@ -143,15 +143,57 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     }
 
     // transfer to normal lists
-    reset
-    (
-        xferMove(pointLst),
-        xferMoveTo<List<Face> >(dynFaces)
-    );
+    reset(pointLst.xfer(), dynFaces.xfer());
 
-    // no region information
-    this->onePatch();
+    // no zone information
+    this->oneZone();
     return true;
+}
+
+
+template<class Face>
+void Foam::fileFormats::OFFsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
+)
+{
+    writeHeader(os, pointLst, faceLst.size(), zoneLst);
+
+    label faceIndex = 0;
+    forAll(zoneLst, zoneI)
+    {
+        os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
+
+        forAll(zoneLst[zoneI], localFaceI)
+        {
+            const Face& f = faceLst[faceIndex++];
+
+            os << f.size();
+            forAll(f, fp)
+            {
+                os << ' ' << f[fp];
+            }
+
+            // add optional zone information
+            os << ' ' << zoneI << endl;
+        }
+        os << "# </zone>" << endl;
+    }
+    os << "# </faces>" << endl;
+}
+
+
+template<class Face>
+void Foam::fileFormats::OFFsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 
@@ -165,16 +207,16 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     const List<Face>& faceLst = surf.faces();
 
     labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+    List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
+    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        os << "# <patch name=\"" << patchLst[patchI].name() << "\">" << endl;
+        os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
 
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceMap[faceIndex++]];
 
@@ -184,48 +226,13 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
                 os << ' ' << f[fp];
             }
 
-            // add optional region information
-            os << ' ' << patchI << endl;
+            // add optional zone information
+            os << ' ' << zoneI << endl;
         }
-        os << "# </patch>" << endl;
+        os << "# </zone>" << endl;
     }
     os << "# </faces>" << endl;
 }
 
-
-template<class Face>
-void Foam::fileFormats::OFFsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        os << "# <patch name=\"" << patchLst[patchI].name() << "\">" << endl;
-
-        forAll(patchLst[patchI], patchFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
-
-            os << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-
-            // add optional region information
-            os << ' ' << patchI << endl;
-        }
-        os << "# </patch>" << endl;
-    }
-    os << "# </faces>" << endl;
-}
 
 // ************************************************************************* //

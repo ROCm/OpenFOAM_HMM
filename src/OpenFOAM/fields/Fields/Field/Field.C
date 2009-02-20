@@ -156,6 +156,13 @@ Field<Type>::Field(Field<Type>& f, bool reUse)
 
 
 template<class Type>
+Field<Type>::Field(const Xfer<List<Type> >& f)
+:
+    List<Type>(f)
+{}
+
+
+template<class Type>
 Field<Type>::Field(const Xfer<Field<Type> >& f)
 :
     List<Type>(f)
@@ -290,14 +297,6 @@ tmp<Field<Type> > Field<Type>::clone() const
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-const Field<Type>& Field<Type>::null()
-{
-    Field<Type>* nullPtr = reinterpret_cast<Field<Type>*>(NULL);
-    return *nullPtr;
-}
-
 
 template<class Type>
 void Field<Type>::map

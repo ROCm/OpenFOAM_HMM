@@ -39,7 +39,6 @@ SourceFiles
 
 #include "STLtriangle.H"
 #include "triFace.H"
-#include "gzstream.h"
 #include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"
@@ -64,8 +63,8 @@ class STLsurfaceFormatCore
         //- The points supporting the facets
         pointField points_;
 
-        //- The regions associated with the faces
-        List<label> regions_;
+        //- The zones associated with the faces
+        List<label> zoneIds_;
 
         //- The solid names, in the order of their first appearance
         List<word> names_;
@@ -124,7 +123,7 @@ public:
         {
             sorted_ = true;
             points_.clear();
-            regions_.clear();
+            zoneIds_.clear();
             names_.clear();
             sizes_.clear();
         }
@@ -135,10 +134,10 @@ public:
             return points_;
         }
 
-        //- Return full access to the regions
-        List<label>& regions()
+        //- Return full access to the zoneIds
+        List<label>& zoneIds()
         {
-            return regions_;
+            return zoneIds_;
         }
 
         //- The list of solid names in the order of their first appearance

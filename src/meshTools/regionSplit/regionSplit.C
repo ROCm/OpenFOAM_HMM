@@ -131,7 +131,7 @@ void Foam::regionSplit::fillSeedMask
 
     // Loop over changed faces. MeshWave in small.
 
-    while (changedFaces.size() > 0)
+    while (changedFaces.size())
     {
         //if (debug)
         //{
@@ -265,7 +265,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
 {
     if (debug)
     {
-        if (blockedFace.size() > 0)
+        if (blockedFace.size())
         {
             // Check that blockedFace is synced.
             boolList syncBlockedFace(blockedFace);
@@ -292,7 +292,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
     // -2 blocked
     labelList faceRegion(mesh_.nFaces(), -1);
 
-    if (blockedFace.size() > 0)
+    if (blockedFace.size())
     {
         forAll(blockedFace, faceI)
         {

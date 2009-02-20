@@ -36,15 +36,9 @@ Description
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "regionProperties.H"
+#include "compressibleCourantNo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "solveContinuityEquation.C"
-#include "solveMomentumEquation.C"
-#include "compressibleContinuityErrors.C"
-#include "solvePressureDifferenceEquation.C"
-#include "solveEnthalpyEquation.C"
-#include "compressibleCourantNo.C"
 
 int main(int argc, char *argv[])
 {
@@ -58,7 +52,6 @@ int main(int argc, char *argv[])
 #   include "createSolidMeshes.H"
 
 #   include "createFluidFields.H"
-
 #   include "createSolidFields.H"
 
 #   include "initContinuityErrs.H"
@@ -71,7 +64,7 @@ int main(int argc, char *argv[])
 #       include "setInitialDeltaT.H"
     }
 
-    while(runTime.run())
+    while (runTime.run())
     {
 #       include "readTimeControls.H"
 
@@ -89,6 +82,7 @@ int main(int argc, char *argv[])
         {
             Info<< "\nSolving for fluid region "
                 << fluidRegions[i].name() << endl;
+#           include "setRegionFluidFields.H"
 #           include "readFluidMultiRegionPISOControls.H"
 #           include "solveFluid.H"
         }
@@ -97,6 +91,7 @@ int main(int argc, char *argv[])
         {
             Info<< "\nSolving for solid region "
                 << solidRegions[i].name() << endl;
+#           include "setRegionSolidFields.H"
 #           include "readSolidMultiRegionPISOControls.H"
 #           include "solveSolid.H"
         }

@@ -190,16 +190,15 @@ void Foam::vtkPV3Foam::convertPointField
     }
 
     vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples( nPoints + addPointCellLabels.size() );
-    pointData->SetNumberOfComponents( nComp );
-    pointData->Allocate( nComp*(nPoints + addPointCellLabels.size()) );
-    pointData->SetName( tf.name().c_str() );
-
+    pointData->SetNumberOfTuples(nPoints + addPointCellLabels.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*(nPoints + addPointCellLabels.size()));
+    pointData->SetName(ptf.name().c_str());
 
     if (debug)
     {
         Info<< "convert convertPointField: "
-            << tf.name()
+            << ptf.name()
             << " size = " << nPoints
             << " nComp=" << nComp
             << " nTuples = " << (nPoints + addPointCellLabels.size())

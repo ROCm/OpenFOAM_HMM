@@ -164,6 +164,9 @@ public:
             //- Return number of elements in table.
             inline label size() const;
 
+            //- Return true if the hash table is empty
+            inline bool empty() const;
+
             //- Return true if hashed entry is found in table
             bool found(const Key& key) const;
 
@@ -195,6 +198,10 @@ public:
 
             //- Resize the hash table for efficiency
             void resize(const label newSize);
+
+            //- Remove entries in the given hash table from this hash table
+            //  Return the number of elements removed
+            label erase(const StaticHashTable<T, Key, Hash>&);
 
             //- Clear all entries from table
             void clear();
@@ -310,18 +317,23 @@ public:
         };
 
 
-        //- iterator set to the begining of the StaticHashTable
+        //- iterator set to the beginning of the StaticHashTable
         inline iterator begin();
 
         //- iterator set to beyond the end of the StaticHashTable
         inline const iterator& end();
 
-        //- const_iterator set to the begining of the StaticHashTable
+        //- const_iterator set to the beginning of the StaticHashTable
+        inline const_iterator cbegin() const;
+
+        //- const_iterator set to beyond the end of the StaticHashTable
+        inline const const_iterator& cend() const;
+
+        //- const_iterator set to the beginning of the StaticHashTable
         inline const_iterator begin() const;
 
         //- const_iterator set to beyond the end of the StaticHashTable
         inline const const_iterator& end() const;
-
 
     // IOstream Operator
 

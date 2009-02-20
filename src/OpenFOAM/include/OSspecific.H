@@ -26,7 +26,7 @@ InNamespace
     Foam
 
 Description
-    Functions used by OpenFOAM which are specific to the UNIX operating system
+    Functions used by OpenFOAM that are specific to the UNIX operating system
     and need to be replaced or emulated on other systems.
 
 SourceFiles
@@ -62,8 +62,8 @@ pid_t pgid();
 bool env(const word&);
 
 //- Return environment variable of given name
-//  Return string::null if the environment is undefined
-string getEnv(const word& name);
+//  Return string() if the environment is undefined
+string getEnv(const word&);
 
 //- Set an environment variable
 bool setEnv(const word& name, const string& value, const bool overwrite);
@@ -101,34 +101,35 @@ bool chDir(const fileName& dir);
 //  -# shipped settings:
 //    - $WM_PROJECT_DIR/etc/
 //
-//  @return the full path name or fileName::null if the name cannot be found
+//  @return the full path name or fileName() if the name cannot be found
 //  Optionally abort if the file cannot be found
-fileName findEtcFile(const fileName& name, bool mandatory=false);
+fileName findEtcFile(const fileName&, bool mandatory=false);
 
 //- Make a directory and return an error if it could not be created
 //  and does not already exist
 bool mkDir(const fileName&, mode_t=0777);
 
 //- Set the file mode
-bool chmod(const fileName&, const mode_t);
+bool chMod(const fileName&, const mode_t);
 
 //- Return the file mode
 mode_t mode(const fileName&);
 
-//- Return the file type: FILE or DIRECTORY
+//- Return the file type: DIRECTORY or FILE
 fileName::Type type(const fileName&);
 
-//- Does the name exist in the filing system?
-bool exists(const fileName& name);
+//- Does the name exist (as DIRECTORY or FILE) in the file system?
+bool exists(const fileName&);
 
-//- Does the file exist?
-bool file(const fileName&);
+//- Does the name exist as a DIRECTORY in the file system?
+bool isDir(const fileName&);
 
-//- Does the directory exist?
-bool dir(const fileName&);
+//- Does the name exist as a FILE in the file system?
+//  Optionally enable/disable check for gzip file.
+bool isFile(const fileName&, const bool checkGzip=true);
 
 //- Return size of file
-off_t size(const fileName&);
+off_t fileSize(const fileName&);
 
 //- Return time of last file modification
 time_t lastModified(const fileName&);
@@ -165,10 +166,10 @@ void fdClose(const int);
 //- Check if machine is up by pinging given port
 bool ping(const word&, const label port, const label timeOut);
 
-//- Check if machine is up by ping port 22 = ssh and 222 = rsh
+//- Check if machine is up by pinging port 22 (ssh) and 222 (rsh)
 bool ping(const word&, const label timeOut=10);
 
-//- Executes a command specified in command
+//- Execute the specified command
 int system(const string& command);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

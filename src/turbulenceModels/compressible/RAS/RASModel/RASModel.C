@@ -88,7 +88,7 @@ RASModel::RASModel
         dimensioned<scalar>::lookupOrAddToDict
         (
             "kappa",
-            subDict("wallFunctionCoeffs"),
+            wallFunctionDict_,
             0.4187
         )
     ),
@@ -97,7 +97,7 @@ RASModel::RASModel
         dimensioned<scalar>::lookupOrAddToDict
         (
             "E",
-            subDict("wallFunctionCoeffs"),
+            wallFunctionDict_,
             9.0
         )
     ),
@@ -125,6 +125,8 @@ RASModel::RASModel
     k0_("k0", dimVelocity*dimVelocity, SMALL),
     epsilon0_("epsilon", k0_.dimensions()/dimTime, SMALL),
     epsilonSmall_("epsilonSmall", epsilon0_.dimensions(), SMALL),
+    omega0_("omega", dimless/dimTime, SMALL),
+    omegaSmall_("omegaSmall", omega0_.dimensions(), SMALL),
 
     y_(mesh_)
 {}
@@ -204,6 +206,8 @@ bool RASModel::read()
         k0_.readIfPresent(*this);
         epsilon0_.readIfPresent(*this);
         epsilonSmall_.readIfPresent(*this);
+        omega0_.readIfPresent(*this);
+        omegaSmall_.readIfPresent(*this);
 
         return true;
     }

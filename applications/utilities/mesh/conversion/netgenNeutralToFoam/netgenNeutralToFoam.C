@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if (vertsToBoundary.size() > 0)
+    if (vertsToBoundary.size())
     {
         // Didn't find cells connected to boundary faces.
         WarningIn(args.executable())

@@ -69,7 +69,7 @@ class phaseModel
         volVectorField U_;
 
         //- Fluxes
-        surfaceScalarField* phiPtr_;
+        autoPtr<surfaceScalarField> phiPtr_;
 
 
 public:
@@ -133,12 +133,12 @@ public:
 
         const surfaceScalarField& phi() const
         {
-            return *phiPtr_;
+            return phiPtr_();
         }
 
         surfaceScalarField& phi()
         {
-            return *phiPtr_;
+            return phiPtr_();
         }
 };
 

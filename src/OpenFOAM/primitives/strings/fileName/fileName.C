@@ -26,6 +26,7 @@ License
 
 #include "fileName.H"
 #include "wordList.H"
+#include "DynamicList.H"
 #include "debug.H"
 #include "OSspecific.H"
 
@@ -33,6 +34,7 @@ License
 
 const char* const Foam::fileName::typeName = "fileName";
 int Foam::fileName::debug(debug::debugSwitch(fileName::typeName, 0));
+const Foam::fileName Foam::fileName::null;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -46,6 +48,12 @@ Foam::fileName::fileName(const wordList& lst)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::fileName::Type Foam::fileName::type() const
+{
+    return ::Foam::type(*this);
+}
+
 
 //  Return file name (part beyond last /)
 //
@@ -92,13 +100,13 @@ Foam::fileName Foam::fileName::path() const
     {
         return ".";
     }
-    else if (i == 0)
+    else if (i)
     {
-        return "/";
+        return substr(0, i);
     }
     else
     {
-        return substr(0, i);
+        return "/";
     }
 }
 
@@ -144,28 +152,22 @@ Foam::word Foam::fileName::ext() const
 //    -----           ------
 //    "foo"           1("foo")
 //    "/foo"          1("foo")
-//    "foo/bar"       2("foo", "foo")
-//    "/foo/bar"      2("foo", "foo")
+//    "foo/bar"       2("foo", "bar")
+//    "/foo/bar"      2("foo", "bar")
 //    "/foo/bar/"     2("foo", "bar")
 //
 Foam::wordList Foam::fileName::components(const char delimiter) const
 {
-    wordList wrdList(20);
+    DynamicList<word> wrdList(20);
 
     size_type start=0, end=0;
-    label nWords=0;
 
     while ((end = find(delimiter, start)) != npos)
     {
         // avoid empty element (caused by doubled slashes)
         if (start < end)
         {
-            wrdList[nWords++] = substr(start, end-start);
-
-            if (nWords == wrdList.size())
-            {
-                wrdList.setSize(2*wrdList.size());
-            }
+            wrdList.append(substr(start, end-start));
         }
         start = end + 1;
     }
@@ -173,12 +175,11 @@ Foam::wordList Foam::fileName::components(const char delimiter) const
     // avoid empty trailing element
     if (start < size())
     {
-        wrdList[nWords++] = substr(start, npos);
+        wrdList.append(substr(start, npos));
     }
 
-    wrdList.setSize(nWords);
-
-    return wrdList;
+    // transfer to wordList
+    return wordList(wrdList.xfer());
 }
 
 
@@ -190,12 +191,6 @@ Foam::word Foam::fileName::component
 ) const
 {
     return components(delimiter)[cmpt];
-}
-
-
-Foam::fileName::Type Foam::fileName::type() const
-{
-    return ::Foam::type(*this);
 }
 
 
@@ -238,9 +233,9 @@ void Foam::fileName::operator=(const char* str)
 
 Foam::fileName Foam::operator/(const string& a, const string& b)
 {
-    if (a.size() > 0)       // First string non-null
+    if (a.size())           // First string non-null
     {
-        if (b.size() > 0)   // Second string non-null
+        if (b.size())       // Second string non-null
         {
             return fileName(a + '/' + b);
         }
@@ -251,7 +246,7 @@ Foam::fileName Foam::operator/(const string& a, const string& b)
     }
     else                    // First string null
     {
-        if (b.size() > 0)   // Second string non-null
+        if (b.size())       // Second string non-null
         {
             return b;
         }

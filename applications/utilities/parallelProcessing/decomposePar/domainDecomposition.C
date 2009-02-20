@@ -299,7 +299,7 @@ bool domainDecomposition::writeDecomposition()
         (
             curPatchSizes.size()
           + curProcessorPatchSizes.size(),
-            reinterpret_cast<polyPatch*>(NULL)
+            reinterpret_cast<polyPatch*>(0)
         );
 
         label nPatches = 0;

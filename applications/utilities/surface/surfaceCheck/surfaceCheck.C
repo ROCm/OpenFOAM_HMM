@@ -242,9 +242,7 @@ int main(int argc, char *argv[])
             }
         }
 
-        illegalFaces.shrink();
-
-        if (illegalFaces.size() > 0)
+        if (illegalFaces.size())
         {
             Pout<< "Surface has " << illegalFaces.size()
                 << " illegal triangles." << endl;
@@ -628,7 +626,7 @@ int main(int argc, char *argv[])
         triSurfaceSearch querySurf(surf);
         surfaceIntersection inter(querySurf);
 
-        if ((inter.cutEdges().size() == 0) && (inter.cutPoints().size() == 0))
+        if (inter.cutEdges().empty() && inter.cutPoints().empty())
         {
             Pout<< "Surface is not self-intersecting" << endl;
         }

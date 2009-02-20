@@ -103,7 +103,7 @@ Foam::List<Foam::instant> Foam::timeSelector::select
     const List<instant>& Times
 ) const
 {
-    return subset(selected(Times), true, Times);
+    return subset(selected(Times), Times);
 }
 
 
@@ -112,7 +112,7 @@ void Foam::timeSelector::inplaceSelect
     List<instant>& Times
 ) const
 {
-    inplaceSubset(selected(Times), true, Times);
+    inplaceSubset(selected(Times), Times);
 }
 
 
@@ -219,7 +219,7 @@ Foam::List<Foam::instant> Foam::timeSelector::select
             }
         }
 
-        return subset(selectTimes, true, timeDirs);
+        return subset(selectTimes, timeDirs);
     }
     else
     {
@@ -236,7 +236,7 @@ Foam::List<Foam::instant> Foam::timeSelector::select0
 {
     instantList timeDirs = timeSelector::select(runTime.times(), args);
 
-    if (!timeDirs.size())
+    if (timeDirs.empty())
     {
         FatalErrorIn(args.executable())
             << "No times selected"

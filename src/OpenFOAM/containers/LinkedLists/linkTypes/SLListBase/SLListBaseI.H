@@ -71,6 +71,12 @@ inline Foam::label Foam::SLListBase::size() const
 }
 
 
+inline bool Foam::SLListBase::empty() const
+{
+    return !nElmts_;
+}
+
+
 inline Foam::SLListBase::link*
 Foam::SLListBase::first()
 {
@@ -225,7 +231,7 @@ Foam::SLListBase::begin()
     }
     else
     {
-        return endIter;
+        return endIter_;
     }
 }
 
@@ -233,7 +239,7 @@ Foam::SLListBase::begin()
 inline const Foam::SLListBase::iterator&
 Foam::SLListBase::end()
 {
-    return endIter;
+    return endIter_;
 }
 
 
@@ -317,7 +323,7 @@ Foam::SLListBase::const_iterator::operator++(int)
 
 
 inline Foam::SLListBase::const_iterator
-Foam::SLListBase::begin() const
+Foam::SLListBase::cbegin() const
 {
     if (size())
     {
@@ -325,15 +331,29 @@ Foam::SLListBase::begin() const
     }
     else
     {
-        return endConstIter;
+        return endConstIter_;
     }
+}
+
+
+inline const Foam::SLListBase::const_iterator&
+Foam::SLListBase::cend() const
+{
+    return endConstIter_;
+}
+
+
+inline Foam::SLListBase::const_iterator
+Foam::SLListBase::begin() const
+{
+    return this->cbegin();
 }
 
 
 inline const Foam::SLListBase::const_iterator&
 Foam::SLListBase::end() const
 {
-    return endConstIter;
+    return endConstIter_;
 }
 
 

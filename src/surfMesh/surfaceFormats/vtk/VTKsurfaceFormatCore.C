@@ -58,38 +58,38 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
 void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 (
     Ostream& os,
-    const List<surfGroup>& patchLst
+    const UList<surfZone>& zoneLst
 )
 {
     label nFaces = 0;
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        nFaces += patchLst[patchI].size();
+        nFaces += zoneLst[zoneI].size();
     }
 
-    // Print region numbers
+    // Print zone numbers
     os  << nl
         << "CELL_DATA " << nFaces << nl
         << "FIELD attributes 1" << nl
-        << "region 1 " << nFaces << " float" << nl;
+        << "zone 1 " << nFaces << " float" << nl;
 
 
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
-            if (patchFaceI)
+            if (localFaceI)
             {
-                if ((patchFaceI % 20) == 0)
-                {
-                    os << nl;
-                }
-                else
+                if (localFaceI % 20)
                 {
                     os << ' ';
                 }
+                else
+                {
+                    os << nl;
+                }
             }
-            os  << patchI + 1;
+            os  << zoneI + 1;
         }
         os  << nl;
     }
@@ -99,30 +99,29 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
 (
     Ostream& os,
-    const List<label>& regionLst
+    const UList<label>& zoneIds
 )
 {
-    // Print region numbers
+    // Print zone numbers
     os  << nl
-        << "CELL_DATA " << regionLst.size() << nl
+        << "CELL_DATA " << zoneIds.size() << nl
         << "FIELD attributes 1" << nl
-        << "region 1 " << regionLst.size() << " float" << nl;
+        << "zone 1 " << zoneIds.size() << " float" << nl;
 
-
-    forAll(regionLst, faceI)
+    forAll(zoneIds, faceI)
     {
         if (faceI)
         {
-            if ((faceI % 20) == 0)
-            {
-                os << nl;
-            }
-            else
+            if (faceI % 20)
             {
                 os << ' ';
             }
+            else
+            {
+                os << nl;
+            }
         }
-        os  << regionLst[faceI] + 1;
+        os  << zoneIds[faceI] + 1;
     }
     os  << nl;
 }

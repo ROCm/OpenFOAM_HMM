@@ -1,1 +1,1 @@
-    solveContinuityEquation(rhof[i], phif[i]);
+    solve(fvm::ddt(rho) + fvc::div(phi));

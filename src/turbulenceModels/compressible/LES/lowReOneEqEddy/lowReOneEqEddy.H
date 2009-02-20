@@ -77,6 +77,9 @@ class lowReOneEqEddy
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields();
+
         // Disallow default bitwise copy construct and assignment
         lowReOneEqEddy(const lowReOneEqEddy&);
         lowReOneEqEddy& operator=(const lowReOneEqEddy&);

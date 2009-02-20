@@ -40,7 +40,7 @@ Description
 
 Foam::polyTopoChange& Foam::repatchPolyTopoChanger::meshMod()
 {
-    if (!meshModPtr_.valid())
+    if (meshModPtr_.empty())
     {
         meshModPtr_.reset(new polyTopoChange(mesh_));
     }

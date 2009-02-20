@@ -59,7 +59,7 @@ vector eigenValues(const symmTensor& t);
 vector eigenVector(const symmTensor& t, const scalar lambda);
 tensor eigenVectors(const symmTensor& t);
 
-//- Specify data associated with tensor type is contiguous
+//- Data associated with tensor type are contiguous
 template<>
 inline bool contiguous<tensor>() {return true;}
 

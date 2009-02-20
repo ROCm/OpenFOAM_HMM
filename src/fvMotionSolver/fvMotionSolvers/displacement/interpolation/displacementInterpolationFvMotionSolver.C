@@ -362,7 +362,7 @@ Foam::displacementInterpolationFvMotionSolver::curPoints() const
     vectorField zoneDisp(displacements_.size(), vector::zero);
     forAll(zoneDisp, zoneI)
     {
-        if (times_[zoneI].size() > 0)
+        if (times_[zoneI].size())
         {
             zoneDisp[zoneI] = interpolateXY
             (

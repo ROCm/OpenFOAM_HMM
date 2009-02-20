@@ -49,7 +49,7 @@ namespace Foam
 
 typedef SymmTensor<scalar> symmTensor;
 
-//- Specify data associated with symmTensor type is contiguous
+//- Data associated with symmTensor type are contiguous
 template<>
 inline bool contiguous<symmTensor>() {return true;}
 

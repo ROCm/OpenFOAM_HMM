@@ -195,7 +195,7 @@ void Foam::sampledSets::combineSampledSets
         // Get reference point (note: only master has all points)
         point refPt;
 
-        if (allPts.size() > 0)
+        if (allPts.size())
         {
             refPt = samplePts.getRefPoint(allPts);
         }
@@ -270,6 +270,12 @@ void Foam::sampledSets::verbose(const bool verbosity)
 
 
 void Foam::sampledSets::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::sampledSets::end()
 {
     // Do nothing - only valid on write
 }

@@ -251,7 +251,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
             }
         }
 
-        if (pointsToEdge.size() > 0)
+        if (pointsToEdge.size())
         {
             FatalErrorIn("polyBoundaryMesh::neighbourEdges() const")
                 << "Not all boundary edges of patches match up." << nl
@@ -425,7 +425,7 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
         // of all patch names for matches
         labelList patchIDs = findStrings(patchNames[i], allPatchNames);
 
-        if (patchIDs.size() == 0)
+        if (patchIDs.empty())
         {
             WarningIn("polyBoundaryMesh::patchSet(const wordList&)")
                 << "Cannot find any patch names matching " << patchNames[i]
@@ -538,7 +538,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     forAll (bm, patchI)
     {
-        if (bm[patchI].start() != nextPatchStart)
+        if (bm[patchI].start() != nextPatchStart && !boundaryError)
         {
             boundaryError = true;
 
@@ -547,7 +547,9 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
                 << " of type " <<  bm[patchI].type()
                 << ". The patch should start on face no " << nextPatchStart
                 << " and the patch specifies " << bm[patchI].start()
-                << "." << endl;
+                << "." << endl
+                << "Possibly consecutive patches have this same problem."
+                << " Suppressing future warnings." << endl;
         }
 
         nextPatchStart += bm[patchI].size();

@@ -760,7 +760,7 @@ bool primitiveMesh::checkPoints
 
     forAll (pf, pointI)
     {
-        if (pf[pointI].size() == 0)
+        if (pf[pointI].empty())
         {
             if (setPtr)
             {
@@ -776,7 +776,7 @@ bool primitiveMesh::checkPoints
     {
         const labelList& pc = pointCells(pointI);
 
-        if (pc.size() == 0)
+        if (pc.empty())
         {
             if (setPtr)
             {
@@ -867,7 +867,7 @@ bool primitiveMesh::checkFaceAngles
         forAll(f, fp0)
         {
             // Get vertex after fp
-            label fp1 = (fp0 + 1) % f.size();
+            label fp1 = f.fcIndex(fp0);
 
             // Normalized vector between two consecutive points
             vector e10(p[f[fp1]] - p[f[fp0]]);
@@ -1636,12 +1636,12 @@ bool primitiveMesh::checkCommonOrder
 
 
                     // Vertices before and after on curFace
-                    label fpPlus1 = (fp+1) % curFace.size();
-                    label fpMin1 = (fp == 0 ? curFace.size()-1 : fp-1);
+                    label fpPlus1 = curFace.fcIndex(fp);
+                    label fpMin1  = curFace.rcIndex(fp);
 
                     // Vertices before and after on nbFace
-                    label nbPlus1 = (nb+1) % nbFace.size();
-                    label nbMin1 = (nb == 0 ? nbFace.size()-1 : nb-1);
+                    label nbPlus1 = nbFace.fcIndex(nb);
+                    label nbMin1  = nbFace.rcIndex(nb);
 
                     // Find order of walking by comparing next points on both
                     // faces.

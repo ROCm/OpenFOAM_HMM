@@ -140,7 +140,7 @@ public:
         enum
         {
             dim = 3,         // Dimensionality of space
-            rank = 0,        // Rank od label is 0
+            rank = 0,        // Rank of label is 0
             nComponents = 1  // Number of components in label is 1
         };
 
@@ -150,11 +150,13 @@ public:
         static const char* componentNames[];
         static const label zero;
         static const label one;
+        static const label max;
+        static const label min;
 
     // Constructors
 
         //- Construct from Istream
-        pTraits(Istream& is);
+        pTraits(Istream&);
 
     // Member Functions
 

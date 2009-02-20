@@ -38,10 +38,7 @@ Class
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(meshDualiser, 0);
-}
+defineTypeNameAndDebug(Foam::meshDualiser, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -158,7 +155,7 @@ Foam::label Foam::meshDualiser::findDualCell
 // from (boundary & feature) point
 void Foam::meshDualiser::generateDualBoundaryEdges
 (
-    const PackedList<1>& isBoundaryEdge,
+    const PackedBoolList& isBoundaryEdge,
     const label pointI,
     polyTopoChange& meshMod
 )
@@ -391,7 +388,7 @@ Foam::label Foam::meshDualiser::addBoundaryFace
 void Foam::meshDualiser::createFacesAroundEdge
 (
     const bool splitFace,
-    const PackedList<1>& isBoundaryEdge,
+    const PackedBoolList& isBoundaryEdge,
     const label edgeI,
     const label startFaceI,
     polyTopoChange& meshMod,
@@ -735,7 +732,7 @@ void Foam::meshDualiser::createFacesAroundBoundaryPoint
                 )   << "Walked from face on patch:" << patchI
                     << " to face:" << faceI
                     << " fc:" << mesh_.faceCentres()[faceI]
-                    << " on patch:" << patches.whichPatch(faceI) 
+                    << " on patch:" << patches.whichPatch(faceI)
                     << abort(FatalError);
             }
 
@@ -886,7 +883,7 @@ Foam::meshDualiser::meshDualiser(const polyMesh& mesh)
     faceToDualPoint_(mesh_.nFaces(), -1),
     edgeToDualPoint_(mesh_.nEdges(), -1)
 {}
-  
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -910,7 +907,7 @@ void Foam::meshDualiser::setRefinement
     // Mark boundary edges and points.
     // (Note: in 1.4.2 we can use the built-in mesh point ordering
     //  facility instead)
-    PackedList<1> isBoundaryEdge(mesh_.nEdges());
+    PackedBoolList isBoundaryEdge(mesh_.nEdges());
     for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
     {
         const labelList& fEdges = mesh_.faceEdges()[faceI];
@@ -1083,7 +1080,7 @@ void Foam::meshDualiser::setRefinement
     {
         label pointI = multiCellFeaturePoints[i];
 
-        if (pointToDualCells_[pointI].size() > 0)
+        if (pointToDualCells_[pointI].size())
         {
             FatalErrorIn
             (
@@ -1133,7 +1130,7 @@ void Foam::meshDualiser::setRefinement
     // Normal points
     forAll(mesh_.points(), pointI)
     {
-        if (pointToDualCells_[pointI].size() == 0)
+        if (pointToDualCells_[pointI].empty())
         {
             pointToDualCells_[pointI].setSize(1);
             pointToDualCells_[pointI][0] = meshMod.addCell
@@ -1241,7 +1238,7 @@ void Foam::meshDualiser::setRefinement
             const edge& e = mesh_.edges()[edgeI];
 
             // We need a point on the edge if not all cells on both sides
-            // are the same. 
+            // are the same.
 
             const labelList& eCells = mesh_.edgeCells()[edgeI];
 

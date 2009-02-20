@@ -84,11 +84,7 @@ void twoDPointCorrector::calcAddressing() const
     {
         forAll (patches, patchI)
         {
-            if
-            (
-                isA<emptyPolyPatch>(patches[patchI])
-             && patches[patchI].size() > 0
-            )
+            if (isA<emptyPolyPatch>(patches[patchI]) && patches[patchI].size())
             {
                 pn = patches[patchI].faceAreas()[0];
 

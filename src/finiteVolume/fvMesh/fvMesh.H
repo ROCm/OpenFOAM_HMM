@@ -221,10 +221,10 @@ public:
                 return polyMesh::time();
             }
 
-            //- Return the object registry
-            virtual const objectRegistry& db() const
+            //- Return the object registry - resolve conflict polyMesh/lduMesh
+            virtual const objectRegistry& thisDb() const
             {
-                return *this;
+                return polyMesh::thisDb();
             }
 
             //- Return reference to name

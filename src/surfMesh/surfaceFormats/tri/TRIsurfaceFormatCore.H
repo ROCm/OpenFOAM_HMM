@@ -50,7 +50,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class TRIsurfaceFormatCore Declaration
+                    Class TRIsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class TRIsurfaceFormatCore
@@ -64,8 +64,8 @@ class TRIsurfaceFormatCore
         //- The points supporting the facets
         pointField points_;
 
-        //- The regions associated with the faces
-        List<label> regions_;
+        //- The zones associated with the faces
+        List<label> zoneIds_;
 
         //- The solid count, in the order of their first appearance
         List<label> sizes_;
@@ -104,7 +104,7 @@ public:
         {
             sorted_ = true;
             points_.clear();
-            regions_.clear();
+            zoneIds_.clear();
             sizes_.clear();
         }
 
@@ -114,13 +114,13 @@ public:
             return points_;
         }
 
-        //- Return full access to the regions
-        List<label>& regions()
+        //- Return full access to the zones
+        List<label>& zoneIds()
         {
-            return regions_;
+            return zoneIds_;
         }
 
-        //- The list of region sizes in the order of their first appearance
+        //- The list of zone sizes in the order of their first appearance
         List<label>& sizes()
         {
             return sizes_;

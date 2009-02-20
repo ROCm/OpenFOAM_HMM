@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    UNIX versions of the functions declated in OSspecific.H.
+    UNIX versions of the functions declared in OSspecific.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -91,7 +91,9 @@ Foam::string Foam::getEnv(const word& envName)
     }
     else
     {
-        return string::null;
+        // Return null-constructed string rather than string::null
+        // to avoid cyclic dependencies in the construction of globals
+        return string();
     }
 }
 
@@ -216,7 +218,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     // Search user files:
     // ~~~~~~~~~~~~~~~~~~
     fileName searchDir = home()/".OpenFOAM";
-    if (dir(searchDir))
+    if (isDir(searchDir))
     {
         // Check for user file in ~/.OpenFOAM/VERSION
         fileName fullName = searchDir/FOAMversion/name;
@@ -237,7 +239,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     // Search site files:
     // ~~~~~~~~~~~~~~~~~~
     searchDir = getEnv("WM_PROJECT_INST_DIR");
-    if (dir(searchDir))
+    if (isDir(searchDir))
     {
         // Check for site file in $WM_PROJECT_INST_DIR/site/VERSION
         fileName fullName = searchDir/"site"/FOAMversion/name;
@@ -257,7 +259,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     // Search installation files:
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     searchDir = getEnv("WM_PROJECT_DIR");
-    if (dir(searchDir))
+    if (isDir(searchDir))
     {
         // Check for shipped OpenFOAM file in $WM_PROJECT_DIR/etc
         fileName fullName = searchDir/"etc"/name;
@@ -277,14 +279,16 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
         ::exit(1);
     }
 
-    return fileName::null;
+    // Return null-constructed fileName rather than fileName::null
+    // to avoid cyclic dependencies in the construction of globals
+    return fileName();
 }
 
 
 bool Foam::mkDir(const fileName& pathName, mode_t mode)
 {
     // empty names are meaningless
-    if (!pathName.size())
+    if (pathName.empty())
     {
         return false;
     }
@@ -428,7 +432,7 @@ bool Foam::mkDir(const fileName& pathName, mode_t mode)
 
 
 // Set the file mode
-bool Foam::chmod(const fileName& name, const mode_t m)
+bool Foam::chMod(const fileName& name, const mode_t m)
 {
     return ::chmod(name.c_str(), m) == 0;
 }
@@ -472,26 +476,26 @@ Foam::fileName::Type Foam::type(const fileName& name)
 // Does the name exist in the filing system?
 bool Foam::exists(const fileName& name)
 {
-    return mode(name) || file(name);
-}
-
-
-// Does the file exist
-bool Foam::file(const fileName& name)
-{
-    return S_ISREG(mode(name)) || S_ISREG(mode(name + ".gz"));
+    return mode(name) || isFile(name);
 }
 
 
 // Does the directory exist
-bool Foam::dir(const fileName& name)
+bool Foam::isDir(const fileName& name)
 {
     return S_ISDIR(mode(name));
 }
 
 
+// Does the file exist
+bool Foam::isFile(const fileName& name, const bool checkGzip)
+{
+    return S_ISREG(mode(name)) || (checkGzip && S_ISREG(mode(name + ".gz")));
+}
+
+
 // Return size of file
-off_t Foam::size(const fileName& name)
+off_t Foam::fileSize(const fileName& name)
 {
     fileStat fileStatus(name);
     if (fileStatus.isValid())
@@ -541,7 +545,7 @@ Foam::fileNameList Foam::readDir
     // Setup empty string list MAXTVALUES long
     fileNameList dirEntries(maxNnames);
 
-    // Pointers to the Unix director system
+    // Pointers to the directory entries
     DIR *source;
     struct dirent *list;
 
@@ -567,10 +571,10 @@ Foam::fileNameList Foam::readDir
         {
             fileName fName(list->d_name);
 
-            // ignore files begining with ., i.e. ., .. and .??*
-            if (fName.size() > 0 && fName[size_t(0)] != '.')
+            // ignore files begining with ., i.e. '.', '..' and '.*'
+            if (fName.size() && fName[0] != '.')
             {
-                word fileNameExt = fName.ext();
+                word fExt = fName.ext();
 
                 if
                 (
@@ -578,11 +582,11 @@ Foam::fileNameList Foam::readDir
                  ||
                     (
                         type == fileName::FILE
-                        && fName[fName.size()-1] != '~'
-                        && fileNameExt != "bak"
-                        && fileNameExt != "BAK"
-                        && fileNameExt != "old"
-                        && fileNameExt != "save"
+                     && fName[fName.size()-1] != '~'
+                     && fExt != "bak"
+                     && fExt != "BAK"
+                     && fExt != "old"
+                     && fExt != "save"
                     )
                 )
                 {
@@ -593,7 +597,7 @@ Foam::fileNameList Foam::readDir
                             dirEntries.setSize(dirEntries.size() + maxNnames);
                         }
 
-                        if (filtergz && fileNameExt == "gz")
+                        if (filtergz && fExt == "gz")
                         {
                             dirEntries[nEntries++] = fName.lessExt();
                         }
@@ -616,16 +620,16 @@ Foam::fileNameList Foam::readDir
 }
 
 
-// Copy, recursively if necessary, the source top the destination
+// Copy, recursively if necessary, the source to the destination
 bool Foam::cp(const fileName& src, const fileName& dest)
 {
-    fileName destFile(dest);
-
     // Make sure source exists.
     if (!exists(src))
     {
         return false;
     }
+
+    fileName destFile(dest);
 
     // Check type of source file.
     if (src.type() == fileName::FILE)
@@ -637,7 +641,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         }
 
         // Make sure the destination directory exists.
-        if (!dir(destFile.path()) && !mkDir(destFile.path()))
+        if (!isDir(destFile.path()) && !mkDir(destFile.path()))
         {
             return false;
         }
@@ -676,8 +680,8 @@ bool Foam::cp(const fileName& src, const fileName& dest)
             destFile = destFile/src.component(src.components().size() -1);
         }
 
-        // Make sure the destination directory extists.
-        if (!dir(destFile) && !mkDir(destFile))
+        // Make sure the destination directory exists.
+        if (!isDir(destFile) && !mkDir(destFile))
         {
             return false;
         }
@@ -715,19 +719,19 @@ bool Foam::cp(const fileName& src, const fileName& dest)
 }
 
 
-// Create a softlink. destFile should not exist. Returns true if successful.
-bool Foam::ln(const fileName& src, const fileName& dest)
+// Create a softlink. dst should not exist. Returns true if successful.
+bool Foam::ln(const fileName& src, const fileName& dst)
 {
     if (Unix::debug)
     {
-        Info<< "Create softlink from : " << src << " to " << dest
+        Info<< "Create softlink from : " << src << " to " << dst
             << endl;
     }
 
-    if (exists(dest))
+    if (exists(dst))
     {
         WarningIn("ln(const fileName&, const fileName&)")
-            << "destination " << dest << " already exists. Not linking."
+            << "destination " << dst << " already exists. Not linking."
             << endl;
         return false;
     }
@@ -739,40 +743,40 @@ bool Foam::ln(const fileName& src, const fileName& dest)
         return false;
     }
 
-    if (symlink(src.c_str(), dest.c_str()) == 0)
+    if (symlink(src.c_str(), dst.c_str()) == 0)
     {
         return true;
     }
     else
     {
         WarningIn("ln(const fileName&, const fileName&)")
-            << "symlink from " << src << " to " << dest << " failed." << endl;
+            << "symlink from " << src << " to " << dst << " failed." << endl;
         return false;
     }
 }
 
 
-// Rename srcFile destFile
-bool Foam::mv(const fileName& srcFile, const fileName& destFile)
+// Rename srcFile dstFile
+bool Foam::mv(const fileName& srcFile, const fileName& dstFile)
 {
     if (Unix::debug)
     {
-        Info<< "Move : " << srcFile << " to " << destFile << endl;
+        Info<< "Move : " << srcFile << " to " << dstFile << endl;
     }
 
     if
     (
-        (destFile.type() == fileName::DIRECTORY)
-     && (srcFile.type() != fileName::DIRECTORY)
+        dstFile.type() == fileName::DIRECTORY
+     && srcFile.type() != fileName::DIRECTORY
     )
     {
-        const fileName destName(destFile/srcFile.name());
+        const fileName dstName(dstFile/srcFile.name());
 
-        return rename(srcFile.c_str(), destName.c_str()) == 0;
+        return rename(srcFile.c_str(), dstName.c_str()) == 0;
     }
     else
     {
-        return rename(srcFile.c_str(), destFile.c_str()) == 0;
+        return rename(srcFile.c_str(), dstFile.c_str()) == 0;
     }
 }
 
@@ -802,18 +806,18 @@ bool Foam::rmDir(const fileName& directory)
 {
     if (Unix::debug)
     {
-        Info<< "rmdir(const fileName&) : "
+        Info<< "rmDir(const fileName&) : "
             << "removing directory " << directory << endl;
     }
 
-    // Pointers to the Unix director system
+    // Pointers to the directory entries
     DIR *source;
     struct dirent *list;
 
     // Attempt to open directory and set the structure pointer
     if ((source = opendir(directory.c_str())) == NULL)
     {
-        WarningIn("rmdir(const fileName&)")
+        WarningIn("rmDir(const fileName&)")
             << "cannot open directory " << directory << endl;
 
         return false;
@@ -833,7 +837,7 @@ bool Foam::rmDir(const fileName& directory)
                 {
                     if (!rmDir(path))
                     {
-                        WarningIn("rmdir(const fileName&)")
+                        WarningIn("rmDir(const fileName&)")
                             << "failed to remove directory " << fName
                             << " while removing directory " << directory
                             << endl;
@@ -847,7 +851,7 @@ bool Foam::rmDir(const fileName& directory)
                 {
                     if (!rm(path))
                     {
-                        WarningIn("rmdir(const fileName&)")
+                        WarningIn("rmDir(const fileName&)")
                             << "failed to remove file " << fName
                             << " while removing directory " << directory
                             << endl;
@@ -863,7 +867,7 @@ bool Foam::rmDir(const fileName& directory)
 
         if (!rm(directory))
         {
-            WarningIn("rmdir(const fileName&)")
+            WarningIn("rmDir(const fileName&)")
                 << "failed to remove directory " << directory << endl;
 
             closedir(source);

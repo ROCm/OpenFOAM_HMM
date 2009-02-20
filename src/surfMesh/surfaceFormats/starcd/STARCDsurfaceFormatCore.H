@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class STARCDsurfaceFormatCore Declaration
+                   Class STARCDsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class STARCDsurfaceFormatCore
@@ -70,7 +70,7 @@ protected:
         Ostream&,
         const pointField&,
         const label nFaces,
-        const List<surfGroup>&
+        const UList<surfZone>&
     );
 
 };

@@ -271,16 +271,6 @@ DimensionedField<Type, GeoMesh>::~DimensionedField()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Return a null Field
-template<class Type, class GeoMesh>
-const DimensionedField<Type, GeoMesh>& DimensionedField<Type, GeoMesh>::null()
-{
-    DimensionedField<Type, GeoMesh>* nullPtr =
-        reinterpret_cast<DimensionedField<Type, GeoMesh>*>(NULL);
-    return *nullPtr;
-}
-
-
 template<class Type, class GeoMesh>
 tmp
 <

@@ -80,22 +80,47 @@ protected:
 
     // Protected data
 
+        //- Turbulence on/off flag
         Switch turbulence_;
+
+        //- Flag to print the model coeffs at run-time
         Switch printCoeffs_;
+
+        //- Model coefficients dictionary
         dictionary coeffDict_;
 
-        dictionary wallFunctionDict_;
-        dimensionedScalar kappa_;
-        dimensionedScalar E_;
-        dimensionedScalar Cmu_;
-        dimensionedScalar Prt_;
+        // Wall function properties
 
+            //- Wall function dictionary
+            dictionary wallFunctionDict_;
+
+            dimensionedScalar kappa_;
+
+            dimensionedScalar E_;
+
+            dimensionedScalar Cmu_;
+
+            dimensionedScalar Prt_;
+
+        //- Value of y+ at the edge of the laminar sublayer
         scalar yPlusLam_;
 
+        //- Lower limit of k
         dimensionedScalar k0_;
+
+        //- Lower limit of epsilon
         dimensionedScalar epsilon0_;
+
+        //- Small epsilon value used to avoid divide by zero
         dimensionedScalar epsilonSmall_;
 
+        //- Lower limit for omega
+        dimensionedScalar omega0_;
+
+        //- Small omega value used to avoid divide by zero
+        dimensionedScalar omegaSmall_;
+
+        //- Near wall distance boundary field
         nearWallDist y_;
 
 
@@ -193,6 +218,19 @@ public:
                 return epsilonSmall_;
             }
 
+            //- Return the value of omega0 which epsilon is not allowed to be
+            //  less than
+            const dimensionedScalar& omega0() const
+            {
+                return omega0_;
+            }
+
+            //- Return the value of omegaSmall which is added to epsilon when
+            //  calculating nut
+            const dimensionedScalar& omegaSmall() const
+            {
+                return omegaSmall_;
+            }
 
             //- Allow k0 to be changed
             dimensionedScalar& k0()
@@ -212,6 +250,17 @@ public:
                 return epsilonSmall_;
             }
 
+            //- Allow omega0 to be changed
+            dimensionedScalar& omega0()
+            {
+                return omega0_;
+            }
+
+            //- Allow omegaSmall to be changed
+            dimensionedScalar& omegaSmall()
+            {
+                return omegaSmall_;
+            }
 
             //- Return kappa for use in wall-functions
             dimensionedScalar kappa() const

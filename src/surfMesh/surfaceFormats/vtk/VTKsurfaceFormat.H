@@ -27,7 +27,7 @@ Class
 
 Description
     Provide a means of writing VTK legacy format.
-    The output is never sorted by patch.
+    The output is never sorted by zone.
 
 SourceFiles
     VTKsurfaceFormat.C
@@ -63,7 +63,7 @@ class VTKsurfaceFormat
     // Private Member Functions
 
         //- Write header information about number of polygon points
-        static void writeHeaderPolygons(Ostream&, const List<Face>&);
+        static void writeHeaderPolygons(Ostream&, const UList<Face>&);
 
         //- Disallow default bitwise copy construct
         VTKsurfaceFormat(const VTKsurfaceFormat<Face>&);
@@ -88,6 +88,15 @@ public:
     // Member Functions
 
         // Write
+
+        //- Write surface mesh components
+        static void write
+        (
+            Ostream&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
 
         //- Write MeshedSurface
         static void write

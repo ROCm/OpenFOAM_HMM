@@ -36,11 +36,24 @@ inline Foam::label Foam::UPtrList<T>::size() const
 
 
 template<class T>
+inline bool Foam::UPtrList<T>::empty() const
+{
+    return ptrs_.empty();
+}
+
+
+template<class T>
+inline void Foam::UPtrList<T>::resize(const label newSize)
+{
+    this->setSize(newSize);
+}
+
+
+template<class T>
 inline bool Foam::UPtrList<T>::set(const label i) const
 {
     return ptrs_[i] != NULL;
 }
-
 
 template<class T>
 inline T* Foam::UPtrList<T>::set(const label i, T* ptr)

@@ -63,7 +63,7 @@ class geometricSurfacePatch
         word name_;
 
         //- Index of patch in boundary
-        label boundaryIndex_;
+        label index_;
 
 public:
 
@@ -125,7 +125,7 @@ public:
         //- Return the index of this patch in the boundaryMesh
         label index() const
         {
-            return boundaryIndex_;
+            return index_;
         }
 
         //- Write

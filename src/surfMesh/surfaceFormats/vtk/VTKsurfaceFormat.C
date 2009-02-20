@@ -33,7 +33,7 @@ template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::writeHeaderPolygons
 (
     Ostream& os,
-    const List<Face>& faceLst
+    const UList<Face>& faceLst
 )
 {
     label nNodes = 0;
@@ -62,19 +62,18 @@ template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
     Ostream& os,
-    const MeshedSurface<Face>& surf
+    const pointField& pointLst,
+    const List<Face>& faceLst,
+    const List<surfZone>& zoneLst
 )
 {
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
-    writeHeader(os, surf.points());
+    writeHeader(os, pointLst);
     writeHeaderPolygons(os, faceLst);
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        forAll(patchLst[patchI], patchFaceI)
+        forAll(zoneLst[zoneI], localFaceI)
         {
             const Face& f = faceLst[faceIndex++];
 
@@ -87,8 +86,18 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
         }
     }
 
-    // Print region numbers
-    writeTail(os, patchLst);
+    writeTail(os, zoneLst);
+}
+
+
+template<class Face>
+void Foam::fileFormats::VTKsurfaceFormat<Face>::write
+(
+    Ostream& os,
+    const MeshedSurface<Face>& surf
+)
+{
+    write(os, surf.points(), surf.faces(), surf.zones());
 }
 
 
@@ -116,8 +125,7 @@ void Foam::fileFormats::VTKsurfaceFormat<Face>::write
         os << ' ' << nl;
     }
 
-    // Print region numbers
-    writeTail(os, surf.regions());
+    writeTail(os, surf.zoneIds());
 }
 
 

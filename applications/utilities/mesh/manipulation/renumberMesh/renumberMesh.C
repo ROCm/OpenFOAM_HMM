@@ -383,9 +383,8 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-
 #   include "createMesh.H"
-
+    const word oldInstance = mesh.pointsInstance();
 
     const bool blockOrder = args.options().found("blockOrder");
 
@@ -631,6 +630,11 @@ int main(int argc, char *argv[])
             << endl;
     }
 
+
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     Info<< "Writing mesh to " << runTime.timeName() << endl;
 
     mesh.write();

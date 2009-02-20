@@ -96,6 +96,9 @@ class dynSmagorinsky
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volSymmTensorField& D);
+
         //- Calculate coefficients cD, cI from filtering velocity field
         dimensionedScalar cD(const volSymmTensorField& D) const;
         dimensionedScalar cI(const volSymmTensorField& D) const;

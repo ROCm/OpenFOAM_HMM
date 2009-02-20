@@ -34,27 +34,15 @@ Description
 template<class T>
 void Foam::surfaceIntersection::transfer
 (
-    DynamicList<T>& dList,
-    List<T>& lList
+    List<DynamicList<T> >& srcLst,
+    List<List<T> >& dstLst
 )
 {
-    lList.transfer(dList);
-}
+    dstLst.setSize(srcLst.size());
 
-
-// Transfer contents of DynamicList to List
-template<class T>
-void Foam::surfaceIntersection::transfer
-(
-    List<DynamicList<T> >& dList,
-    List<List<T> >& lList
-)
-{
-    lList.setSize(dList.size());
-
-    forAll(dList, elemI)
+    forAll(srcLst, elemI)
     {
-        transfer(dList[elemI], lList[elemI]);
+        dstLst[elemI].transfer(srcLst[elemI]);
     }
 }
 

@@ -160,6 +160,19 @@ int main(int argc, char *argv[])
         << " " << lstB.size() << endl;
     Info<< "<dlD>" << dlD << "</dlD>" << nl << "sizes: "
         << " " << dlD.size() << "/" << dlD.capacity() << endl;
+    
+    DynamicList<label,10> dlE1(10);
+    DynamicList<label> dlE2(dlE1);
+
+    Info<< "<dlE1>" << dlE1 << "</dlE1>" << nl << "sizes: "
+        << " " << dlE1.size() << "/" << dlE1.capacity() << endl;
+    Info<< "<dlE2>" << dlE2 << "</dlE2>" << nl << "sizes: "
+        << " " << dlE2.size() << "/" << dlE2.capacity() << endl;
+
+    dlE2.append(100);
+    Info<< "<dlE2>" << dlE2 << "</dlE2>" << endl;
+    
+    Info<< "\nEnd\n";
 
     return 0;
 }

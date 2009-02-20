@@ -61,6 +61,22 @@ const tensor tensor::one
     1, 1, 1
 );
 
+template<>
+const tensor tensor::max
+(
+    VGREAT, VGREAT, VGREAT,
+    VGREAT, VGREAT, VGREAT,
+    VGREAT, VGREAT, VGREAT
+);
+
+template<>
+const tensor tensor::min
+(
+    -VGREAT, -VGREAT, -VGREAT,
+    -VGREAT, -VGREAT, -VGREAT,
+    -VGREAT, -VGREAT, -VGREAT
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

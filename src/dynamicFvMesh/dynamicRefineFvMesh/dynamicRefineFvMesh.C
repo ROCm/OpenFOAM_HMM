@@ -47,7 +47,7 @@ addToRunTimeSelectionTable(dynamicFvMesh, dynamicRefineFvMesh, IOobject);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-label dynamicRefineFvMesh::count(const PackedList<1>& l, const unsigned int val)
+label dynamicRefineFvMesh::count(const PackedBoolList& l, const unsigned int val)
 {
     label n = 0;
     forAll(l, i)
@@ -63,10 +63,10 @@ label dynamicRefineFvMesh::count(const PackedList<1>& l, const unsigned int val)
 
 void dynamicRefineFvMesh::calculateProtectedCells
 (
-    PackedList<1>& unrefineableCell
+    PackedBoolList& unrefineableCell
 ) const
 {
-    if (protectedCell_.size() == 0)
+    if (protectedCell_.empty())
     {
         unrefineableCell.clear();
         return;
@@ -375,7 +375,7 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::refine
                 }
             }
         }
-    }            
+    }
 
 
 
@@ -383,9 +383,9 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::refine
     meshCutter_.updateMesh(map);
 
     // Update numbering of protectedCell_
-    if (protectedCell_.size() > 0)
+    if (protectedCell_.size())
     {
-        PackedList<1> newProtectedCell(nCells(), 0);
+        PackedBoolList newProtectedCell(nCells());
 
         forAll(newProtectedCell, cellI)
         {
@@ -536,9 +536,9 @@ autoPtr<mapPolyMesh> dynamicRefineFvMesh::unrefine
     meshCutter_.updateMesh(map);
 
     // Update numbering of protectedCell_
-    if (protectedCell_.size() > 0)
+    if (protectedCell_.size())
     {
-        PackedList<1> newProtectedCell(nCells(), 0);
+        PackedBoolList newProtectedCell(nCells());
 
         forAll(newProtectedCell, cellI)
         {
@@ -642,7 +642,7 @@ void dynamicRefineFvMesh::selectRefineCandidates
     const scalar lowerRefineLevel,
     const scalar upperRefineLevel,
     const scalarField& vFld,
-    PackedList<1>& candidateCell
+    PackedBoolList& candidateCell
 ) const
 {
     // Get error per cell. Is -1 (not to be refined) to >0 (to be refined,
@@ -675,7 +675,7 @@ labelList dynamicRefineFvMesh::selectRefineCells
 (
     const label maxCells,
     const label maxRefinement,
-    const PackedList<1>& candidateCell
+    const PackedBoolList& candidateCell
 ) const
 {
     // Every refined cell causes 7 extra cells
@@ -685,7 +685,7 @@ labelList dynamicRefineFvMesh::selectRefineCells
 
     // Mark cells that cannot be refined since they would trigger refinement
     // of protected cells (since 2:1 cascade)
-    PackedList<1> unrefineableCell;
+    PackedBoolList unrefineableCell;
     calculateProtectedCells(unrefineableCell);
 
     // Count current selection
@@ -703,7 +703,7 @@ labelList dynamicRefineFvMesh::selectRefineCells
                 cellLevel[cellI] < maxRefinement
              && candidateCell.get(cellI) == 1
              && (
-                    unrefineableCell.size() == 0
+                    unrefineableCell.empty()
                  || unrefineableCell.get(cellI) == 0
                 )
             )
@@ -724,7 +724,7 @@ labelList dynamicRefineFvMesh::selectRefineCells
                     cellLevel[cellI] == level
                  && candidateCell.get(cellI) == 1
                  && (
-                        unrefineableCell.size() == 0
+                        unrefineableCell.empty()
                      || unrefineableCell.get(cellI) == 0
                     )
                 )
@@ -761,7 +761,7 @@ labelList dynamicRefineFvMesh::selectRefineCells
 labelList dynamicRefineFvMesh::selectUnrefinePoints
 (
     const scalar unrefineLevel,
-    const PackedList<1>& markedCell,
+    const PackedBoolList& markedCell,
     const scalarField& pFld
 ) const
 {
@@ -818,7 +818,7 @@ labelList dynamicRefineFvMesh::selectUnrefinePoints
 }
 
 
-void dynamicRefineFvMesh::extendMarkedCells(PackedList<1>& markedCell) const
+void dynamicRefineFvMesh::extendMarkedCells(PackedBoolList& markedCell) const
 {
     // Mark faces using any marked cell
     boolList markedFace(nFaces(), false);
@@ -1078,7 +1078,7 @@ bool dynamicRefineFvMesh::update()
             readLabel(refineDict.lookup("nBufferLayers"));
 
         // Cells marked for refinement or otherwise protected from unrefinement.
-        PackedList<1> refineCell(nCells(), 0);
+        PackedBoolList refineCell(nCells());
 
         if (globalData().nTotalCells() < maxCells)
         {
@@ -1119,7 +1119,7 @@ bool dynamicRefineFvMesh::update()
                     const labelList& cellMap = map().cellMap();
                     const labelList& reverseCellMap = map().reverseCellMap();
 
-                    PackedList<1> newRefineCell(cellMap.size());
+                    PackedBoolList newRefineCell(cellMap.size());
 
                     forAll(cellMap, cellI)
                     {

@@ -26,7 +26,6 @@ License
 
 #include "SpalartAllmaras.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,6 +41,15 @@ namespace LESModels
 defineTypeNameAndDebug(SpalartAllmaras, 0);
 addToRunTimeSelectionTable(LESModel, SpalartAllmaras, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void SpalartAllmaras::updateSubGridScaleFields()
+{
+    nuSgs_.internalField() = fv1()*nuTilda_.internalField();
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<volScalarField> SpalartAllmaras::fv1() const
@@ -53,8 +61,7 @@ tmp<volScalarField> SpalartAllmaras::fv1() const
 
 tmp<volScalarField> SpalartAllmaras::fv2() const
 {
-    volScalarField chi = nuTilda_/nu();
-    return 1.0/pow3(scalar(1) + chi/Cv2_);
+    return 1/pow3(scalar(1) + nuTilda_/(Cv2_*nu()));
 }
 
 
@@ -71,70 +78,68 @@ tmp<volScalarField> SpalartAllmaras::fv3() const
 }
 
 
-tmp<volScalarField> SpalartAllmaras::calcS(const volTensorField& gradU)
+tmp<volScalarField> SpalartAllmaras::S(const volTensorField& gradU) const
 {
-    return ::sqrt(2.0)*mag(skew(gradU));
+    return sqrt(2.0)*mag(skew(gradU));
 }
 
 
-tmp<volScalarField> SpalartAllmaras::calcSTilda(const volTensorField& gradU)
+tmp<volScalarField> SpalartAllmaras::STilda
+(
+    const volScalarField& S,
+    const volScalarField& dTilda
+) const
 {
-    return fv3()*calcS(gradU) + fv2()*nuTilda_/sqr(kappa_*dTilda_);
+    return fv3()*S + fv2()*nuTilda_/sqr(kappa_*dTilda);
 }
 
 
 tmp<volScalarField> SpalartAllmaras::r
 (
     const volScalarField& visc,
-    const volScalarField& S
+    const volScalarField& S,
+    const volScalarField& dTilda
 ) const
 {
-    tmp<volScalarField> tr
+    return min
     (
-        new volScalarField
-        (
-            min
-            (
-                visc
-               /(
-                    max
-                    (
-                        S,
-                        dimensionedScalar("SMALL", S.dimensions(), SMALL)
-                    )
-                   *sqr(kappa_*dTilda_)
-                  + dimensionedScalar
-                    (
-                        "ROOTVSMALL",
-                        dimensionSet(0, 2 , -1, 0, 0),
-                        ROOTVSMALL
-                    )
-                ),
-                scalar(10.0)
-            )
-        )
+        visc
+       /(
+           max
+           (
+               S,
+               dimensionedScalar("SMALL", S.dimensions(), SMALL)
+           )
+          *sqr(kappa_*dTilda)
+         + dimensionedScalar
+           (
+               "ROOTVSMALL",
+               dimensionSet(0, 2 , -1, 0, 0),
+               ROOTVSMALL
+           )
+        ),
+        scalar(10)
     );
-
-    return tr;
 }
 
 
-tmp<volScalarField> SpalartAllmaras::fw(const volScalarField& S) const
+tmp<volScalarField> SpalartAllmaras::fw
+(
+    const volScalarField& S,
+    const volScalarField& dTilda
+) const
 {
-    volScalarField r = this->r(nuTilda_, S);
+    volScalarField r = this->r(nuTilda_, S, dTilda);
 
     volScalarField g = r + Cw2_*(pow6(r) - r);
 
-    return g*pow((1.0 + pow6(Cw3_))/(pow6(g) + pow6(Cw3_)), 1.0/6.0);
+    return g*pow((1 + pow6(Cw3_))/(pow6(g) + pow6(Cw3_)), 1.0/6.0);
 }
 
 
-void SpalartAllmaras::dTildaUpdate(const volScalarField&)
+tmp<volScalarField> SpalartAllmaras::dTilda(const volScalarField&) const
 {
-    if (mesh_.changing())
-    {
-        dTilda_ = min(CDES_*delta(), wallDist(mesh_).y());
-    }
+    return min(CDES_*delta(), y_);
 }
 
 
@@ -242,6 +247,8 @@ SpalartAllmaras::SpalartAllmaras
         )
     ),
 
+    y_(mesh_),
+
     nuTilda_
     (
         IOobject
@@ -255,8 +262,6 @@ SpalartAllmaras::SpalartAllmaras
         mesh_
     ),
 
-    dTilda_(min(CDES_*delta(), wallDist(mesh_).y())),
-
     nuSgs_
     (
         IOobject
@@ -269,7 +274,10 @@ SpalartAllmaras::SpalartAllmaras
         ),
         mesh_
     )
-{}
+{
+    updateSubGridScaleFields();
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -277,11 +285,15 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
 {
     LESModel::correct(gradU);
 
-    const volScalarField STilda = calcSTilda(gradU);
+    if (mesh_.changing())
+    {
+        y_.correct();
+        y_.boundaryField() = max(y_.boundaryField(), VSMALL);
+    }
 
-    const volScalarField S = calcS(gradU);
-
-    dTildaUpdate(S);
+    const volScalarField S = this->S(gradU);
+    const volScalarField dTilda = this->dTilda(S);
+    const volScalarField STilda = this->STilda(S, dTilda);
 
     fvScalarMatrix nuTildaEqn
     (
@@ -296,7 +308,7 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
       - alphaNut_*Cb2_*magSqr(fvc::grad(nuTilda_))
      ==
         Cb1_*STilda*nuTilda_
-      - fvm::Sp(Cw1_*fw(STilda)*nuTilda_/sqr(dTilda_), nuTilda_)
+      - fvm::Sp(Cw1_*fw(STilda, dTilda)*nuTilda_/sqr(dTilda), nuTilda_)
     );
 
     nuTildaEqn.relax();
@@ -305,14 +317,19 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
     bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();
 
-    nuSgs_.internalField() = fv1()*nuTilda_.internalField();
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields();
+}
+
+
+tmp<volScalarField> SpalartAllmaras::k() const
+{
+    return sqr(nuSgs()/ck_/dTilda(S(fvc::grad(U()))));
 }
 
 
 tmp<volScalarField> SpalartAllmaras::epsilon() const
 {
-    return 2.0*nuEff()*magSqr(symm(fvc::grad(U())));
+    return 2*nuEff()*magSqr(symm(fvc::grad(U())));
 }
 
 

@@ -82,7 +82,7 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
             << exit(FatalError);
     }
 
-    if (bMesh[patchI].size() == 0)
+    if (bMesh[patchI].empty())
     {
         FatalErrorIn("checkPatch(const polyBoundaryMesh&, const word&)")
             << "Patch " << name << " is present but zero size"
@@ -137,6 +137,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
 
     word masterPatchName(args.additionalArgs()[0]);
@@ -391,6 +392,10 @@ int main(int argc, char *argv[])
     mesh.movePoints(morphMap->preMotionPoints());
 
     // Write mesh
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     Info << nl << "Writing polyMesh to time " << runTime.timeName() << endl;
 
     IOstream::defaultPrecision(10);

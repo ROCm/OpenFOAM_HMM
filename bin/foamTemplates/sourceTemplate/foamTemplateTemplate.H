@@ -112,9 +112,8 @@ public:
         static autoPtr<ClassName<TemplateArgument> > New();
 
 
-    // Destructor
-
-        ~ClassName();
+    //- Destructor
+    ~ClassName();
 
 
     // Member Functions

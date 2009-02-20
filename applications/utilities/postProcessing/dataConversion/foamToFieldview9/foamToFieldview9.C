@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
 #   include "getFieldNames.H"
 
     bool hasLagrangian = false;
-    if ((sprayScalarNames.size() > 0) || (sprayVectorNames.size() > 0))
+    if (sprayScalarNames.size() || sprayVectorNames.size())
     {
         hasLagrangian = true;
     }
@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
     // make a directory called FieldView in the case
     fileName fvPath(runTime.path()/"Fieldview");
 
-    if (dir(fvPath))
+    if (isDir(fvPath))
     {
         rmDir(fvPath);
     }
@@ -346,7 +346,7 @@ int main(int argc, char *argv[])
 
         // Output the magic number.
         writeInt(fvFile, FV_MAGIC);
-        
+
         // Output file header and version number.
         writeStr80(fvFile, "FIELDVIEW");
 
@@ -417,7 +417,7 @@ int main(int argc, char *argv[])
         {
             if (volFieldPtrs[fieldI] == NULL)
             {
-                Info<< "    dummy field for "   
+                Info<< "    dummy field for "
                     << volFieldNames[fieldI].c_str() << endl;
             }
 

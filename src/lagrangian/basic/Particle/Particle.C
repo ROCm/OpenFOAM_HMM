@@ -231,7 +231,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     facei_ = -1;
     scalar trackFraction = 0.0;
 
-    if (faces.size() == 0) // inside cell
+    if (faces.empty())  // inside cell
     {
         trackFraction = 1.0;
         position_ = endPosition;

@@ -71,7 +71,7 @@ Foam::label Foam::faceCollapser::findEdge
         label edgeI = edgeLabels[i];
 
         const edge& e = edges[edgeI];
-    
+
         if
         (
             (e[0] == v0 && e[1] == v1)
@@ -113,7 +113,7 @@ void Foam::faceCollapser::filterFace
         newFace.append(v0);
 
         // Look ahead one to get edge.
-        label fp1 = (fp + 1) % f.size();
+        label fp1 = f.fcIndex(fp);
 
         label v1 = f[fp1];
 
@@ -410,7 +410,7 @@ void Foam::faceCollapser::setRefinement
 
         forAll(f, fp)
         {
-            label fp1 = (fp + 1) % f.size();
+            label fp1 = f.fcIndex(fp);
 
             // Get index in sorted list
             label sorted0 = sortedFp[fp];
@@ -441,7 +441,7 @@ void Foam::faceCollapser::setRefinement
                 }
             }
 
-            if (edgePoints.size() > 0)
+            if (edgePoints.size())
             {
                 edgePoints.shrink();
 

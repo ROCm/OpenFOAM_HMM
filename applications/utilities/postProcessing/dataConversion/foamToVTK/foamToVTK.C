@@ -333,13 +333,13 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
-    if (dir(fvPath))
+    if (isDir(fvPath))
     {
         if
         (
             args.options().found("time")
          || args.options().found("latestTime")
-         || cellSetName.size() > 0
+         || cellSetName.size()
          || regionName != polyMesh::defaultRegion
         )
         {

@@ -22,13 +22,12 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Calculates and outputs the mean and maximum Courant Numbers for the fluid
-    regions
-
 \*---------------------------------------------------------------------------*/
 
-scalar compressibleCourantNo
+#include "compressibleCourantNo.H"
+#include "fvc.H"
+
+Foam::scalar Foam::compressibleCourantNo
 (
     const fvMesh& mesh,
     const Time& runTime,

@@ -48,6 +48,13 @@ inline Foam::label Foam::IndirectList<T>::size() const
 
 
 template<class T>
+inline bool Foam::IndirectList<T>::empty() const
+{
+    return addressing_.empty();
+}
+
+
+template<class T>
 inline const Foam::UList<T>& Foam::IndirectList<T>::completeList() const
 {
     return completeList_;

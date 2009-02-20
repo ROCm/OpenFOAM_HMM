@@ -31,8 +31,8 @@ Description
     http://www.inivis.com/ac3d/man/ac3dfileformat.html
 
 Note
-   The faces are already organized as patches.
-   The output is always sorted by regions.
+   The faces are already organized as zones.
+   The output is always sorted by zones.
 
 SourceFiles
     AC3DsurfaceFormat.C
@@ -56,7 +56,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class AC3DfileFormat Declaration
+                      Class AC3DsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -102,6 +102,15 @@ public:
         //- Read from file
         virtual bool read(const fileName&);
 
+        //- Write surface mesh components
+        static void write
+        (
+            Ostream&,
+            const pointField&,
+            const List<Face>&,
+            const List<surfZone>&
+        );
+
         //- Write MeshedSurface
         static void write
         (
@@ -120,7 +129,7 @@ public:
         }
 
         //- Write UnsortedMeshedSurface
-        //  The output is always sorted by regions.
+        //  The output is always sorted by zones.
         static void write
         (
             Ostream&,
@@ -128,7 +137,7 @@ public:
         );
 
         //- Write UnsortedMeshedSurface
-        //  The output is always sorted by regions.
+        //  The output is always sorted by zones.
         static void write
         (
             const fileName& name,

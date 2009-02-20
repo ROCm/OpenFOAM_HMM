@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     Info<< "Mesh read in = "
         << runTime.cpuTimeIncrement()
@@ -243,6 +244,10 @@ int main(int argc, char *argv[])
     polyMeshRepatcher.repatch();
 
     // Write resulting mesh
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     mesh.write();
 
 

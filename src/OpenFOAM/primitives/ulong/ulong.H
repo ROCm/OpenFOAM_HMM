@@ -49,11 +49,11 @@ class Ostream;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return a string representation of an ulong
-word name(const unsigned long i);
+word name(const unsigned long);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-unsigned long readUlong(Istream& is);
+unsigned long readUlong(Istream&);
 Istream& operator>>(Istream&, unsigned long&);
 Ostream& operator<<(Ostream&, const unsigned long);
 

@@ -24,6 +24,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+
+template<class T>
+inline const Foam::Xfer<T>& Foam::Xfer<T>::null()
+{
+    return *reinterpret_cast< Xfer<T>* >(0);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
@@ -78,13 +87,6 @@ inline Foam::Xfer<T>::~Xfer()
 
 
 // * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * * * //
-
-template<class T>
-inline const Foam::Xfer<T>& Foam::Xfer<T>::null()
-{
-    Xfer<T>* nullPtr = reinterpret_cast<Xfer<T>*>(0);
-    return *nullPtr;
-}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //

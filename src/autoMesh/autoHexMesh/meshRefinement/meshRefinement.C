@@ -126,7 +126,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     const pointField& cellCentres = mesh_.cellCentres();
 
     // Stats on edges to test. Count proc faces only once.
-    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
     {
         label nMasterFaces = 0;
@@ -865,7 +865,7 @@ Foam::meshRefinement::meshRefinement
 Foam::label Foam::meshRefinement::countHits() const
 {
     // Stats on edges to test. Count proc faces only once.
-    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
     label nHits = 0;
 
@@ -1060,7 +1060,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                 forAll(fzNames, surfI)
                 {
-                    if (fzNames[surfI].size() > 0)
+                    if (fzNames[surfI].size())
                     {
                         // Get zone
                         label zoneI = fZones.findZoneID(fzNames[surfI]);
@@ -1201,7 +1201,7 @@ Foam::labelList Foam::meshRefinement::intersectedPoints
     const faceList& faces = mesh_.faces();
 
     // Mark all points on faces that will become baffles
-    PackedList<1> isBoundaryPoint(mesh_.nPoints(), 0u);
+    PackedBoolList isBoundaryPoint(mesh_.nPoints(), 0u);
     label nBoundaryPoints = 0;
 
     forAll(surfaceIndex_, faceI)
@@ -1713,7 +1713,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     labelList exposedFaces(cellRemover.getExposedFaces(cellsToRemove));
 
-    if (exposedFaces.size() > 0)
+    if (exposedFaces.size())
     {
         FatalErrorIn
         (
@@ -2148,7 +2148,7 @@ void Foam::meshRefinement::write
     {
         dumpRefinementLevel();
     }
-    if (flag&OBJINTERSECTIONS && prefix.size()>0)
+    if (flag & OBJINTERSECTIONS && prefix.size())
     {
         dumpIntersections(prefix);
     }

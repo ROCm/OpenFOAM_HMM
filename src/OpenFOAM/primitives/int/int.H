@@ -50,11 +50,11 @@ class Ostream;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Return a word representation of an int
-word name(const int i);
+word name(const int);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-int readInt(Istream& is);
+int readInt(Istream&);
 Istream& operator>>(Istream&, int&);
 Ostream& operator<<(Ostream&, const int);
 

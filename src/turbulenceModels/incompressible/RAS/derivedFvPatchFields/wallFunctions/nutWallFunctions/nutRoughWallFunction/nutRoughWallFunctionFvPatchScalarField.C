@@ -77,6 +77,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
+    kName_("k"),
+    nuName_("nu"),
     Ks_(p.size(), 0.0),
     Cs_(p.size(), 0.0)
 {}
@@ -92,6 +94,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    kName_(ptf.kName_),
+    nuName_(ptf.nuName_),
     Ks_(ptf.Ks_, mapper),
     Cs_(ptf.Cs_, mapper)
 {}
@@ -106,6 +110,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
+    kName_(dict.lookupOrDefault<word>("k", "k")),
+    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     Ks_("Ks", dict, p.size()),
     Cs_("Cs", dict, p.size())
 {}
@@ -118,6 +124,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(nrwfpsf),
+    kName_(nrwfpsf.kName_),
+    nuName_(nrwfpsf.nuName_),
     Ks_(nrwfpsf.Ks_),
     Cs_(nrwfpsf.Cs_)
 {}
@@ -131,6 +139,8 @@ nutRoughWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(nrwfpsf, iF),
+    kName_(nrwfpsf.kName_),
+    nuName_(nrwfpsf.nuName_),
     Ks_(nrwfpsf.Ks_),
     Cs_(nrwfpsf.Cs_)
 {}
@@ -177,10 +187,10 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField& y = ras.y()[patch().index()];
 
-    const scalarField& k = db().lookupObject<volScalarField>("k");
+    const scalarField& k = db().lookupObject<volScalarField>(kName_);
 
     const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+        patch().lookupPatchField<volScalarField, scalar>(nuName_);
 
     scalarField& nutw = *this;
 
@@ -226,6 +236,8 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "k", "k", kName_);
+    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     Cs_.writeEntry("Cs", os);
     Ks_.writeEntry("Ks", os);
     writeEntry("value", os);

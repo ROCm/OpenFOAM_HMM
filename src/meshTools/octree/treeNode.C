@@ -1381,11 +1381,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const treeNode<Type>& tn)
     {
         if (tn.subNodes_[octant])
         {
-            if
-            (
-                tn.isNode(octant)
-             || (tn.getLeafPtr(octant)->indices().size() != 0)
-            )
+            if (tn.isNode(octant) || tn.getLeafPtr(octant)->indices().size())
             {
                 nPtrs++;
             }
@@ -1409,7 +1405,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const treeNode<Type>& tn)
                 os  << token::SPACE << octant << token::SPACE << *subNodePtr
                     << token::NL;
             }
-            else if (tn.getLeafPtr(octant)->indices().size() != 0)
+            else if (tn.getLeafPtr(octant)->indices().size())
             {
                 // treeLeaf: mark by putting index invalid
                 const treeLeaf<Type>* subLeafPtr = tn.getLeafPtr(octant);

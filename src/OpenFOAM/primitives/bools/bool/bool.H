@@ -26,8 +26,7 @@ Primitive
     bool
 
 Description
-    C++ 4.0 supports a builtin type bool but older compilers do not.
-    This is a simple typedef to emulate the standard bool type.
+    System bool
 
 SourceFiles
     boolIO.C
@@ -78,7 +77,7 @@ public:
         enum
         {
             dim = 3,         // Dimensionality of space
-            rank = 0,        // Rank od bool is 0
+            rank = 0,        // Rank of bool is 0
             nComponents = 1  // Number of components in bool is 1
         };
 
@@ -92,7 +91,7 @@ public:
     // Constructors
 
         //- Construct from Istream
-        pTraits(Istream& is);
+        pTraits(Istream&);
 
     // Member Functions
 

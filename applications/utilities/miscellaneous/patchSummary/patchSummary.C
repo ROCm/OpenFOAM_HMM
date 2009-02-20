@@ -42,6 +42,7 @@ int main(int argc, char *argv[])
 {
 
 #   include "addTimeOptions.H"
+#   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
 
@@ -53,7 +54,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createMesh.H"
+#   include "createNamedMesh.H"
 
     for (label i=startTime; i<endTime; i++)
     {
@@ -62,7 +63,6 @@ int main(int argc, char *argv[])
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
         const IOobjectList fieldObjs(mesh, runTime.timeName());
-
         const wordList objNames = fieldObjs.names();
 
         PtrList<volScalarField> vsf(objNames.size());
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
         const polyBoundaryMesh& bm = mesh.boundaryMesh();
         forAll(bm, patchI)
         {
-            Info<< "Patch: " << bm[patchI].name() << nl;
+            Info<< bm[patchI].type() << ": " << bm[patchI].name() << nl;
             outputFieldList<scalar>(vsf, patchI);
             outputFieldList<vector>(vvf, patchI);
             outputFieldList<sphericalTensor>(vsptf, patchI);

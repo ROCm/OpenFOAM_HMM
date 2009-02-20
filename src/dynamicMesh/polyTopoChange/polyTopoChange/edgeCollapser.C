@@ -304,7 +304,7 @@ bool Foam::edgeCollapser::collapseEdge(const label edgeI, const label master)
 
             label freeRegion = -1;
 
-            if (freeRegions_.size() > 0)
+            if (freeRegions_.size())
             {
                 freeRegion = freeRegions_.removeHead();
 

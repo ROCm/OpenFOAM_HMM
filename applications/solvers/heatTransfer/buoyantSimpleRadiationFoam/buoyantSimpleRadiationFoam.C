@@ -47,14 +47,16 @@ int main(int argc, char *argv[])
 #   include "createMesh.H"
 #   include "readEnvironmentalProperties.H"
 #   include "createFields.H"
+#   include "createRadiationModel.H"
 #   include "initContinuityErrs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.run())
     {
+        runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
 #       include "readSIMPLEControls.H"

@@ -211,7 +211,6 @@ Foam::refinementSurfaces::refinementSurfaces
 
             minLevel_[globalRegionI] = iter();
             maxLevel_[globalRegionI] = regionMaxLevel[surfI][iter.key()];
-            perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
 
             // Check validity
             if
@@ -231,6 +230,13 @@ Foam::refinementSurfaces::refinementSurfaces
                     << exit(FatalError);
             }
         }
+        forAllConstIter(Map<scalar>, regionAngle[surfI], iter)
+        {
+            label globalRegionI = regionOffset_[surfI] + iter.key();
+
+            perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
+        }
+
 
         //// Optional patch names and patch types
         //forAllConstIter(HashTable<word>, regionPatchName[surfI], iter)
@@ -387,7 +393,6 @@ Foam::refinementSurfaces::refinementSurfaces
 
             minLevel_[globalRegionI] = iter();
             maxLevel_[globalRegionI] = regionMaxLevel[surfI][iter.key()];
-            perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
 
             // Check validity
             if
@@ -407,6 +412,12 @@ Foam::refinementSurfaces::refinementSurfaces
                     << exit(FatalError);
             }
         }
+        forAllConstIter(Map<scalar>, regionAngle[surfI], iter)
+        {
+            label globalRegionI = regionOffset_[surfI] + iter.key();
+
+            perpendicularAngle_[globalRegionI] = regionAngle[surfI][iter.key()];
+        }
     }
 }
 
@@ -416,12 +427,12 @@ Foam::refinementSurfaces::refinementSurfaces
 // Get indices of unnamed surfaces (surfaces without faceZoneName)
 Foam::labelList Foam::refinementSurfaces::getUnnamedSurfaces() const
 {
-   labelList anonymousSurfaces(faceZoneNames_.size());
+    labelList anonymousSurfaces(faceZoneNames_.size());
 
     label i = 0;
     forAll(faceZoneNames_, surfI)
     {
-        if (faceZoneNames_[surfI].size() == 0)
+        if (faceZoneNames_[surfI].empty())
         {
             anonymousSurfaces[i++] = surfI;
         }
@@ -440,7 +451,7 @@ Foam::labelList Foam::refinementSurfaces::getNamedSurfaces() const
     label namedI = 0;
     forAll(faceZoneNames_, surfI)
     {
-        if (faceZoneNames_[surfI].size() > 0)
+        if (faceZoneNames_[surfI].size())
         {
             namedSurfaces[namedI++] = surfI;
         }
@@ -511,8 +522,8 @@ void Foam::refinementSurfaces::setMinLevelFields
                     IOobject
                     (
                         "minLevel",
-                        triMesh.objectRegistry::time().constant(),// directory
-                        "triSurface",               // instance
+                        triMesh.objectRegistry::time().timeName(),  // instance
+                        "triSurface",                               // local
                         triMesh,
                         IOobject::NO_READ,
                         IOobject::AUTO_WRITE
@@ -574,7 +585,7 @@ void Foam::refinementSurfaces::findHigherIntersection
     surfaceLevel.setSize(start.size());
     surfaceLevel = -1;
 
-    if (surfaces_.size() == 0)
+    if (surfaces_.empty())
     {
         return;
     }
@@ -614,14 +625,14 @@ void Foam::refinementSurfaces::findHigherIntersection
             if (hitInfo[hitI].hit())
             {
                 // Check if minLevelField for this surface.
-                if (minLevelField.size() > 0)
+                if (minLevelField.size())
                 {
                     minLocalLevel = minLevelField[hitI];
                 }
                 else
                 {
                     // Use the min level for the surface instead. Assume
-                    // single region 0. 
+                    // single region 0.
                     minLocalLevel = minLevel(surfI, 0);
                 }
             }
@@ -673,7 +684,7 @@ void Foam::refinementSurfaces::findAllHigherIntersections
     surfaceLevel.setSize(start.size());
     surfaceNormal.setSize(start.size());
 
-    if (surfaces_.size() == 0)
+    if (surfaces_.empty())
     {
         return;
     }
@@ -969,7 +980,7 @@ void Foam::refinementSurfaces::findNearestRegion
 
         List<pointIndexHit> localHits
         (
-            IndirectList<pointIndexHit> 
+            IndirectList<pointIndexHit>
             (
                 hitInfo,
                 localIndices

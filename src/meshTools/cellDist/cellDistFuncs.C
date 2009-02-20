@@ -263,7 +263,7 @@ Foam::label Foam::cellDistFuncs::getPointNeighbours
             nbs.erase(nb);
         }
 
-        if (nbs.size() != 0)
+        if (nbs.size())
         {
             FatalErrorIn("getPointNeighbours")
                 << "Problem: fast pointNeighbours routine did not find "

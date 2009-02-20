@@ -47,7 +47,7 @@ int USERD_set_filenames
     }
     caseDir = tmp;
 
-    if (!dir(rootDir/caseDir))
+    if (!isDir(rootDir/caseDir))
     {
        Info<< rootDir/caseDir << " is not a valid directory."
            << endl;
@@ -144,17 +144,17 @@ int USERD_set_filenames
         }
         isTensor[n] = isitTensor;
     }
-    
+
     bool lagrangianNamesFound = false;
     label n = 0;
-    while ((!lagrangianNamesFound) && (n<Num_time_steps))
+    while (!lagrangianNamesFound && n < Num_time_steps)
     {
         runTime.setTime(TimeList[n+1], n+1);
 
         Cloud<passiveParticle> lagrangian(*meshPtr);
 
         n++;
-        if (lagrangian.size()>0)
+        if (lagrangian.size())
         {
             lagrangianNamesFound = true;
         }
@@ -176,7 +176,7 @@ int USERD_set_filenames
         Info << "[Found lagrangian]" << endl;
 
         delete sprayPtr;
-        
+
         sprayPtr = new Cloud<passiveParticle>(*meshPtr);
 
         IOobjectList objects(*meshPtr, runTime.timeName(), "lagrangian");

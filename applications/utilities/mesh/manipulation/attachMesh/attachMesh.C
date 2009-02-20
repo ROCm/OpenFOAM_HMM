@@ -48,6 +48,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     bool overwrite = args.options().found("overwrite");
 
@@ -61,6 +62,10 @@ int main(int argc, char *argv[])
 
     attachPolyTopoChanger(mesh).attach();
 
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     mesh.write();
 
     Info<< "End\n" << endl;

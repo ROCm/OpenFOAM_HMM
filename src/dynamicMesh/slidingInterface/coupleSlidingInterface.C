@@ -1277,7 +1277,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                             // Get points on current edge
                             const labelList& curPime = pime[curEdges[curEdgeI]];
 
-                            if (curPime.size() > 0)
+                            if (curPime.size())
                             {
                                 changed = true;
                                 // Pout << "curPime: " << curPime << endl;
@@ -1562,7 +1562,7 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
                             // Get points on current edge
                             const labelList& curPise = pise[curEdges[curEdgeI]];
 
-                            if (curPise.size() > 0)
+                            if (curPise.size())
                             {
                                 changed = true;
 //                                 Pout << "curPise: " << curPise << endl;

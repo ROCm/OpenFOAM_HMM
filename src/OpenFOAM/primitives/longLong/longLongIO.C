@@ -38,22 +38,16 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::word Foam::name(long long val)
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//- Return a string representation of a long long
-word name(long long l)
-{
-    std::ostringstream osBuffer;
-    osBuffer << l;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf << val;
+    return buf.str();
 }
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Istream& operator>>(Istream& is, long long& l)
+Foam::Istream& Foam::operator>>(Istream& is, long long& l)
 {
     l = readLongLong(is);
 
@@ -64,7 +58,7 @@ Istream& operator>>(Istream& is, long long& l)
 }
 
 
-long long readLongLong(Istream& is)
+long long Foam::readLongLong(Istream& is)
 {
     register long long result = 0;
 
@@ -94,7 +88,7 @@ long long readLongLong(Istream& is)
 }
 
 
-Ostream& operator<<(Ostream& os, const long long l)
+Foam::Ostream& Foam::operator<<(Ostream& os, const long long l)
 {
     long long val = l;
 
@@ -119,16 +113,12 @@ Ostream& operator<<(Ostream& os, const long long l)
             os.write(char(d+'0'));
         }
 
-        val = val%mask;
+        val = val % mask;
         mask /= 10;
     }
     os.check("Ostream& operator<<(Ostream&, const long long)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

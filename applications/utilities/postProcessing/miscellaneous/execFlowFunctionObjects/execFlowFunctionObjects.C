@@ -74,7 +74,7 @@ namespace Foam
         }
         else
         {
-            functionObjectList fol(runTime, runTime.controlDict());
+            functionObjectList fol(runTime);
             fol.start();
             fol.execute();
         }

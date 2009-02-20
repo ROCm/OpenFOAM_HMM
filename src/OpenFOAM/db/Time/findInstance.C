@@ -23,7 +23,9 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Return the location of "directory" containing the file "name".
+    If "name" is empty: return the location of "directory"
+    If "name" is not empty: return the location of "directory" containing the
+    file "name".
     Used in reading mesh data.
 
 \*---------------------------------------------------------------------------*/
@@ -40,68 +42,74 @@ Foam::word Foam::Time::findInstance
     const IOobject::readOption rOpt
 ) const
 {
-    // Is the mesh data in the current time directory ?
+    // Note: if name is empty, just check the directory itself
+
+    // check the current time directory
     if
     (
-        file(path()/timeName()/dir/name)
-     && IOobject(name, timeName(), dir, *this).headerOk()
+        name.empty()
+      ? isDir(path()/timeName()/dir)
+      :
+        (
+            isFile(path()/timeName()/dir/name)
+         && IOobject(name, timeName(), dir, *this).headerOk()
+        )
     )
     {
         if (debug)
         {
-            Info<< "Time::findInstance(const word& dir, const word& name) : "
-                << "reading " << name
-                << " from " << timeName()/dir
+            Info<< "Time::findInstance(const fileName&, const word&) : "
+                << "found \"" << name
+                << "\" in " << timeName()/dir
                 << endl;
         }
 
         return timeName();
     }
 
-    // Search back through the time directories list to find the time
+    // Search back through the time directories to find the time
     // closest to and lower than current time
 
     instantList ts = times();
-    label i;
+    label instanceI;
 
-    for (i=ts.size()-1; i>=0; i--)
+    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[i].value() <= timeOutputValue())
+        if (ts[instanceI].value() <= timeOutputValue())
         {
             break;
         }
     }
 
-    // Noting that the current directory has already been searched
-    // for mesh data, start searching from the previously stored time directory
-
-    if (i>=0)
+    // continue searching from here
+    for (; instanceI >= 0; --instanceI)
     {
-        for (label j=i; j>=0; j--)
-        {
-            if
+        if
+        (
+            name.empty()
+          ? isDir(path()/ts[instanceI].name()/dir)
+          :
             (
-                file(path()/ts[j].name()/dir/name)
-             && IOobject(name, ts[j].name(), dir, *this).headerOk()
+                isFile(path()/ts[instanceI].name()/dir/name)
+             && IOobject(name, ts[instanceI].name(), dir, *this).headerOk()
             )
+        )
+        {
+            if (debug)
             {
-                if (debug)
-                {
-                    Info<< "Time::findInstance(const word& dir, "
-                        << "const word& name) : "
-                        << "reading " << name
-                        << " from " << ts[j].name()/dir
-                        << endl;
-                }
-
-                return ts[j].name();
+                Info<< "Time::findInstance"
+                    "(const fileName&,const word&) : "
+                    << "found \"" << name
+                    << "\" in " << ts[instanceI].name()/dir
+                    << endl;
             }
+
+            return ts[instanceI].name();
         }
     }
 
 
-    // If the mesh data is not in any of the time directories
-    // Try in constant
+    // not in any of the time directories, try constant
 
     // Note. This needs to be a hard-coded constant, rather than the
     // constant function of the time, because the latter points to
@@ -109,16 +117,21 @@ Foam::word Foam::Time::findInstance
 
     if
     (
-        file(path()/constant()/dir/name)
-     && IOobject(name, constant(), dir, *this).headerOk()
+        name.empty()
+      ? isDir(path()/constant()/dir)
+      :
+        (
+            isFile(path()/constant()/dir/name)
+         && IOobject(name, constant(), dir, *this).headerOk()
+        )
     )
     {
         if (debug)
         {
-            Info<< "Time::findInstance(const word& dir, "
-                << "const word& name) : "
-                << "reading " << name
-                << " from " << constant()/dir
+            Info<< "Time::findInstance"
+                   "(const fileName&,const word&) : "
+                << "found \"" << name
+                << "\" in " << constant()/dir
                 << endl;
         }
 
@@ -127,7 +140,10 @@ Foam::word Foam::Time::findInstance
 
     if (rOpt == IOobject::MUST_READ)
     {
-        FatalErrorIn("Time::findInstance(const word& dir, const word& name)")
+        FatalErrorIn
+            (
+                "Time::findInstance(const fileName&,const word&)"
+            )
             << "Cannot find file \"" << name << "\" in directory "
             << constant()/dir
             << exit(FatalError);
@@ -135,5 +151,6 @@ Foam::word Foam::Time::findInstance
 
     return constant();
 }
+
 
 // ************************************************************************* //

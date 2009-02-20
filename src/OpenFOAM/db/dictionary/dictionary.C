@@ -28,6 +28,7 @@ License
 #include "primitiveEntry.H"
 #include "dictionaryEntry.H"
 #include "regExp.H"
+#include "OSHA1stream.H"
 
 /* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
 
@@ -46,7 +47,7 @@ bool Foam::dictionary::findInPatterns
     DLList<autoPtr<regExp> >::const_iterator& reLink
 ) const
 {
-    if (patternEntries_.size() > 0)
+    if (patternEntries_.size())
     {
         while (wcLink != patternEntries_.end())
         {
@@ -76,7 +77,7 @@ bool Foam::dictionary::findInPatterns
     DLList<autoPtr<regExp> >::iterator& reLink
 )
 {
-    if (patternEntries_.size() > 0)
+    if (patternEntries_.size())
     {
         while (wcLink != patternEntries_.end())
         {
@@ -232,6 +233,25 @@ Foam::label Foam::dictionary::endLineNumber() const
 }
 
 
+Foam::SHA1Digest Foam::dictionary::digest() const
+{
+    OSHA1stream os;
+
+    // process entries
+    for
+    (
+        IDLList<entry>::const_iterator iter = begin();
+        iter != end();
+        ++iter
+    )
+    {
+        os << *iter;
+    }
+
+    return os.digest();
+}
+
+
 bool Foam::dictionary::found(const word& keyword, bool recursive) const
 {
     if (hashedEntries_.found(keyword))
@@ -240,7 +260,7 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
     }
     else
     {
-        if (patternEntries_.size() > 0)
+        if (patternEntries_.size())
         {
             DLList<entry*>::const_iterator wcLink = patternEntries_.begin();
             DLList<autoPtr<regExp> >::const_iterator reLink =
@@ -276,7 +296,7 @@ const Foam::entry* Foam::dictionary::lookupEntryPtr
 
     if (iter == hashedEntries_.end())
     {
-        if (patternMatch && patternEntries_.size() > 0)
+        if (patternMatch && patternEntries_.size())
         {
             DLList<entry*>::const_iterator wcLink =
                 patternEntries_.begin();
@@ -315,7 +335,7 @@ Foam::entry* Foam::dictionary::lookupEntryPtr
 
     if (iter == hashedEntries_.end())
     {
-        if (patternMatch && patternEntries_.size() > 0)
+        if (patternMatch && patternEntries_.size())
         {
             DLList<entry*>::iterator wcLink =
                 patternEntries_.begin();

@@ -25,19 +25,13 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "searchableSurfacesQueries.H"
-#include "SortableList.H"
+#include "ListOps.H"
 #include "OFstream.H"
 #include "meshTools.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(searchableSurfacesQueries, 0);
-
-}
-
+defineTypeNameAndDebug(Foam::searchableSurfacesQueries, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -146,13 +140,14 @@ bool Foam::searchableSurfacesQueries::morphTet
 
     for (label iter = 0; iter < maxIter; iter++)
     {
-        // Get the indices of highest, second-highest and lowest values.
-        label ihi, inhi, ilo;
+        // Get the indices of lowest, highest and second-highest values.
+        label ilo, ihi, inhi;
         {
-            SortableList<scalar> sortedY(y);
-            ilo = sortedY.indices()[0];
-            ihi = sortedY.indices()[sortedY.size()-1];
-            inhi = sortedY.indices()[sortedY.size()-2];
+            labelList sortedIndices;
+            sortedOrder(y, sortedIndices);
+            ilo  = sortedIndices[0];
+            ihi  = sortedIndices[sortedIndices.size()-1];
+            inhi = sortedIndices[sortedIndices.size()-2];
         }
 
         if (debug)
@@ -482,7 +477,7 @@ void Foam::searchableSurfacesQueries::findAllIntersections
     hitSurfaces.setSize(start.size());
     hitInfo.setSize(start.size());
 
-    if (surfacesToTest.size() == 0)
+    if (surfacesToTest.empty())
     {
         return;
     }
@@ -669,7 +664,7 @@ void Foam::searchableSurfacesQueries::findNearest
     forAll(surfacesToTest, testI)
     {
         allSurfaces[surfacesToTest[testI]].findNearest
-        (   
+        (
             samples,
             minDistSqr,
             hitInfo
@@ -681,7 +676,7 @@ void Foam::searchableSurfacesQueries::findNearest
             if (hitInfo[pointI].hit())
             {
                 minDistSqr[pointI] = magSqr
-                (   
+                (
                     hitInfo[pointI].hitPoint()
                   - samples[pointI]
                 );

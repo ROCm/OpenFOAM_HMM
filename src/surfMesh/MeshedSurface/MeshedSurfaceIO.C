@@ -37,16 +37,16 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
 {
     clear();
 
-    List<surfGroup> patchLst(is);
+    List<surfZone> newZones(is);
 
     // copy and set the indices
-    patches_.setSize(patchLst.size());
-    forAll(patchLst, patchI)
+    zones_.setSize(newZones.size());
+    forAll(newZones, zoneI)
     {
-        patches_[patchI] = surfGroup
+        zones_[zoneI] = surfZone
         (
-            patchLst[patchI],
-            patchI
+            newZones[zoneI],
+            zoneI
         );
     }
 
@@ -62,13 +62,13 @@ bool Foam::MeshedSurface<Face>::read(Istream& is)
         surf.reset
         (
             Xfer<pointField>::null(),
-            xferMove(faceLst)
+            faceLst.xfer()
         );
-        surf.addPatches(patches_);
+        surf.addZones(zones_);
 
         // this will break if the triangulation needed points
         surf.triangulate();
-        patches_ = surf.patches();
+        zones_ = surf.zones();
 
         // transcribe from face -> triFace (Face)
         const List<face>& origFaces = surf.faces();
@@ -101,12 +101,12 @@ void Foam::MeshedSurface<Face>::write(Ostream& os) const
     IOobject::writeBanner(os);
     os  << "// OpenFOAM Surface Format" << nl
         << "// ~~~~~~~~~~~~~~~~~~~~~~~" << nl
-        << "// regions:" << nl
-        << patches_.size() << nl << token::BEGIN_LIST << incrIndent << nl;
+        << "// zones:" << nl
+        << zones_.size() << nl << token::BEGIN_LIST << incrIndent << nl;
 
-    forAll(patches_, patchI)
+    forAll(zones_, zoneI)
     {
-        patches_[patchI].writeDict(os);
+        zones_[zoneI].writeDict(os);
     }
     os  << decrIndent << token::END_LIST << nl;
 

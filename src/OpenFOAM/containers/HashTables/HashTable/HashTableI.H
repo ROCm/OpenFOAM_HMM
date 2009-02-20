@@ -52,6 +52,13 @@ inline Foam::label Foam::HashTable<T, Key, Hash>::size() const
 
 
 template<class T, class Key, class Hash>
+inline bool Foam::HashTable<T, Key, Hash>::empty() const
+{
+    return !nElmts_;
+}
+
+
+template<class T, class Key, class Hash>
 inline bool Foam::HashTable<T, Key, Hash>::insert
 (
     const Key& key,
@@ -445,7 +452,7 @@ const Key& Foam::HashTable<T, Key, Hash>::const_iterator::key()
 
 template<class T, class Key, class Hash>
 inline typename Foam::HashTable<T, Key, Hash>::const_iterator
-Foam::HashTable<T, Key, Hash>::begin() const
+Foam::HashTable<T, Key, Hash>::cbegin() const
 {
     label i = 0;
 
@@ -467,6 +474,22 @@ Foam::HashTable<T, Key, Hash>::begin() const
     {
         return const_iterator(*this, table_[i], i);
     }
+}
+
+
+template<class T, class Key, class Hash>
+inline const typename Foam::HashTable<T, Key, Hash>::const_iterator&
+Foam::HashTable<T, Key, Hash>::cend() const
+{
+    return HashTable<T, Key, Hash>::endConstIter_;
+}
+
+
+template<class T, class Key, class Hash>
+inline typename Foam::HashTable<T, Key, Hash>::const_iterator
+Foam::HashTable<T, Key, Hash>::begin() const
+{
+    return this->cbegin();
 }
 
 

@@ -64,7 +64,7 @@ int main(int argc, char *argv[])
 
         word patchName = pp.name();
 
-        if (patchName.size() == 0)
+        if (patchName.empty())
         {
             patchName = "patch" + Foam::name(patchI);
         }

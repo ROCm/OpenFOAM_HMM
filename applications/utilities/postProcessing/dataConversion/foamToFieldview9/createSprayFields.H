@@ -2,13 +2,13 @@
 List<IOField<scalar>* > sprayScalarFieldPtrs
 (
     sprayScalarNames.size(),
-    reinterpret_cast<IOField<scalar>*>(NULL)
+    reinterpret_cast<IOField<scalar>*>(0)
 );
 
 List<IOField<vector>* > sprayVectorFieldPtrs
 (
     sprayVectorNames.size(),
-    reinterpret_cast<IOField<vector>*>(NULL)
+    reinterpret_cast<IOField<vector>*>(0)
 );
 
 {

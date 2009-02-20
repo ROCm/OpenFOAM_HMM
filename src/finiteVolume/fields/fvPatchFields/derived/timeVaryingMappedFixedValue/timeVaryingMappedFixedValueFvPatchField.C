@@ -28,7 +28,6 @@ License
 #include "Time.H"
 #include "triSurfaceTools.H"
 #include "triSurface.H"
-#include "cartesianCS.H"
 #include "vector2D.H"
 #include "OFstream.H"
 #include "long.H"
@@ -207,7 +206,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::autoMap
 )
 {
     fixedValueFvPatchField<Type>::autoMap(m);
-    if (startSampledValues_.size() > 0)
+    if (startSampledValues_.size())
     {
         startSampledValues_.autoMap(m);
         endSampledValues_.autoMap(m);
@@ -348,12 +347,12 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
 
     referenceCS_.reset
     (
-        new cartesianCS
+        new coordinateSystem
         (
             "reference",
-            p0,             // origin
-            n,              // normal
-            e1              // 0-axis
+            p0,  // origin
+            n,   // normal
+            e1   // 0-axis
         )
     );
 
@@ -397,7 +396,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::readSamplePoints()
             str<< "v " << p.x() << ' ' << p.y() << ' ' << p.z() << nl;
         }
     }
-    
+
     // Determine interpolation onto face centres.
     triSurfaceTools::calcInterpolationWeights
     (
@@ -721,7 +720,7 @@ void timeVaryingMappedFixedValueFvPatchField<Type>::updateCoeffs()
     {
         const Field<Type>& fld = *this;
 
-        Type averagePsi = 
+        Type averagePsi =
             gSum(this->patch().magSf()*fld)
            /gSum(this->patch().magSf());
 

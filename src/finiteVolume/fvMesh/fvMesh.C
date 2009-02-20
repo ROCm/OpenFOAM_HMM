@@ -58,10 +58,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(fvMesh, 0);
-}
+defineTypeNameAndDebug(Foam::fvMesh, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -165,7 +162,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
 
     // Check the existance of the cell volumes and read if present
     // and set the storage of V00
-    if (file(time().timePath()/"V0"))
+    if (isFile(time().timePath()/"V0"))
     {
         V0Ptr_ = new DimensionedField<scalar, volMesh>
         (
@@ -185,7 +182,7 @@ Foam::fvMesh::fvMesh(const IOobject& io)
 
     // Check the existance of the mesh fluxes, read if present and set the
     // mesh to be moving
-    if (file(time().timePath()/"meshPhi"))
+    if (isFile(time().timePath()/"meshPhi"))
     {
         phiPtr_ = new surfaceScalarField
         (
@@ -302,7 +299,7 @@ void Foam::fvMesh::addFvPatches
     const bool validBoundary
 )
 {
-    if (boundary().size() > 0)
+    if (boundary().size())
     {
         FatalErrorIn
         (
@@ -488,17 +485,11 @@ void Foam::fvMesh::mapFields(const mapPolyMesh& meshMap)
 template<class Type>
 void MeshObjectMovePoints(const Foam::fvMesh& mesh)
 {
-    if
-    (
-        mesh.db().objectRegistry::foundObject<Type>
-        (
-            Type::typeName
-        )
-    )
+    if (mesh.thisDb().foundObject<Type>(Type::typeName))
     {
         const_cast<Type&>
         (
-            mesh.db().objectRegistry::lookupObject<Type>
+            mesh.thisDb().lookupObject<Type>
             (
                 Type::typeName
             )

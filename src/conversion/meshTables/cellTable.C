@@ -208,7 +208,7 @@ Foam::word Foam::cellTable::name(const label& id) const
 
 Foam::label Foam::cellTable::findIndex(const word& name) const
 {
-    if (!name.size())
+    if (name.empty())
     {
         return -1;
     }
@@ -466,7 +466,7 @@ void Foam::cellTable::addCellZones
     forAll(zoneCells, zoneI)
     {
         zoneCells[zoneI].shrink();
-        if (zoneCells[zoneI].size() > 0)
+        if (zoneCells[zoneI].size())
         {
             zoneUsed[nZone++] = zoneI;
         }
@@ -509,27 +509,37 @@ void Foam::cellTable::addCellZones
 
 void Foam::cellTable::combine(const dictionary& mapDict, labelList& tableIds)
 {
-    if (!mapDict.size())
+    if (mapDict.empty())
     {
         return;
     }
 
-    bool remap = false;
-    labelList mapping(identity(max(this->toc()) + 1));
+    Map<word> origNames(names());
+    labelList mapping(identity(max(origNames.toc()) + 1));
 
+    bool remap = false;
     forAllConstIter(dictionary, mapDict, iter)
     {
-        Map<word> matches = names(wordReList(iter().stream()));
+        wordReList patterns(iter().stream());
+
+        // find all matches
+        Map<word> matches;
+        forAllConstIter(Map<word>, origNames, namesIter)
+        {
+            if (findStrings(patterns, namesIter()))
+            {
+                matches.insert(namesIter.key(), namesIter());
+            }
+        }
 
         if (matches.size())
         {
-            remap = true;
             label targetId = this->findIndex(iter().keyword());
 
             Info<< "combine cellTable: " << iter().keyword();
             if (targetId < 0)
             {
-                // re-use the first element if possible
+                // not found - reuse 1st element but with different name
                 targetId = min(matches.toc());
                 operator[](targetId).set("Label", iter().keyword());
 
@@ -541,19 +551,22 @@ void Foam::cellTable::combine(const dictionary& mapDict, labelList& tableIds)
             }
 
 
+            // the mapping and name for targetId is already okay
+            matches.erase(targetId);
+            origNames.erase(targetId);
+
+            // remove matched names, leaving targetId on 'this'
+            this->erase(matches);
+            origNames.erase(matches);
+
             forAllConstIter(Map<word>, matches, matchIter)
             {
-                label idx = matchIter.key();
-
-                if (idx != targetId && idx >= 0)
-                {
-                    mapping[idx] = targetId;
-                    this->erase(idx);
-                }
-
+                mapping[matchIter.key()] = targetId;
                 Info<< " " << matchIter();
             }
             Info<< " )" << endl;
+
+            remap = true;
         }
     }
 

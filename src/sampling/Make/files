@@ -22,13 +22,14 @@ $(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 
 cuttingPlane/cuttingPlane.C
 
-sampledSurface/patch/sampledPatch.C
-sampledSurface/plane/sampledPlane.C
+sampledSurface/sampledPatch/sampledPatch.C
+sampledSurface/sampledPlane/sampledPlane.C
 sampledSurface/isoSurface/isoSurface.C
 sampledSurface/isoSurface/sampledIsoSurface.C
 sampledSurface/isoSurface/isoSurfaceCell.C
 sampledSurface/isoSurface/sampledIsoSurfaceCell.C
 sampledSurface/distanceSurface/distanceSurface.C
+sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfacesFunctionObject/sampledSurfacesFunctionObject.C
@@ -46,8 +47,6 @@ $(surfWriters)/vtk/vtkSurfaceWriterRunTime.C
 graphField/writePatchGraph.C
 graphField/writeCellGraph.C
 graphField/makeGraph.C
-
-outputFilters/outputFilterOutputControl/outputFilterOutputControl.C
 
 meshToMesh = meshToMeshInterpolation/meshToMesh
 $(meshToMesh)/meshToMesh.C

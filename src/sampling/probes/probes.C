@@ -41,7 +41,7 @@ namespace Foam
 
 void Foam::probes::findCells(const fvMesh& mesh)
 {
-    if (cellList_.size() == 0)
+    if (cellList_.empty())
     {
         cellList_.setSize(probeLocations_.size());
 
@@ -299,6 +299,12 @@ Foam::probes::~probes()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::probes::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::probes::end()
 {
     // Do nothing - only valid on write
 }

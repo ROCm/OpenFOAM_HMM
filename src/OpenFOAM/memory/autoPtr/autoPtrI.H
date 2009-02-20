@@ -54,6 +54,13 @@ inline Foam::autoPtr<T>::~autoPtr()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
+inline bool Foam::autoPtr<T>::empty() const
+{
+    return !ptr_;
+}
+
+
+template<class T>
 inline bool Foam::autoPtr<T>::valid() const
 {
     return ptr_;

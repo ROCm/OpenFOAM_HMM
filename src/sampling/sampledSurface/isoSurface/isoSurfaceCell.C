@@ -81,7 +81,7 @@ Foam::scalar Foam::isoSurfaceCell::isoFraction
 
 Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 (
-    const PackedList<1>& isTet,
+    const PackedBoolList& isTet,
     const scalarField& cellValues,
     const scalarField& pointValues,
     const label cellI
@@ -203,7 +203,7 @@ Foam::isoSurfaceCell::cellCutType Foam::isoSurfaceCell::calcCutType
 
 void Foam::isoSurfaceCell::calcCutTypes
 (
-    const PackedList<1>& isTet,
+    const PackedBoolList& isTet,
     const scalarField& cVals,
     const scalarField& pVals
 )
@@ -289,9 +289,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 {
     pointIndexHit info(false, vector::zero, localTris.size());
 
-    if (localTris.size() == 0)
-    {}
-    else if (localTris.size() == 1)
+    if (localTris.size() == 1)
     {
         const labelledTri& tri = localTris[0];
         info.setPoint(tri.centre(localPoints));
@@ -318,7 +316,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
             info.setHit();
         }
     }
-    else
+    else if (localTris.size())
     {
         // Check if single region. Rare situation.
         triSurface surf
@@ -350,7 +348,7 @@ Foam::pointIndexHit Foam::isoSurfaceCell::collapseSurface
 
 void Foam::isoSurfaceCell::calcSnappedCc
 (
-    const PackedList<1>& isTet,
+    const PackedBoolList& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
 
@@ -404,11 +402,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
                 }
             }
 
-            if (localPoints.size() == 0)
-            {
-                // No near intersections
-            }
-            else if (localPoints.size() == 1)
+            if (localPoints.size() == 1)
             {
                 // No need for any analysis.
                 snappedCc[cellI] = snappedPoints.size();
@@ -432,7 +426,7 @@ void Foam::isoSurfaceCell::calcSnappedCc
                 //    << " intersections down to "
                 //    << snappedPoints[snappedCc[cellI]] << endl;
             }
-            else
+            else if (localPoints.size())
             {
                 // Need to analyse
                 forAll(cFaces, cFaceI)
@@ -627,8 +621,8 @@ void Foam::isoSurfaceCell::genPointTris
 
 void Foam::isoSurfaceCell::calcSnappedPoint
 (
-    const PackedList<1>& isBoundaryPoint,
-    const PackedList<1>& isTet,
+    const PackedBoolList& isBoundaryPoint,
+    const PackedBoolList& isTet,
     const scalarField& cVals,
     const scalarField& pVals,
 
@@ -719,11 +713,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
             }
         }
 
-        if (localTriPoints.size() == 0)
-        {
-            // No near intersections
-        }
-        else if (localTriPoints.size() == 3)
+        if (localTriPoints.size() == 3)
         {
             // Single triangle. No need for any analysis. Average points.
             pointField points;
@@ -734,7 +724,7 @@ void Foam::isoSurfaceCell::calcSnappedPoint
             //    << " replacing coord:" << mesh_.points()[pointI]
             //    << " by average:" << collapsedPoint[pointI] << endl;
         }
-        else
+        else if (localTriPoints.size())
         {
             // Convert points into triSurface.
 
@@ -1124,7 +1114,7 @@ void Foam::isoSurfaceCell::walkOrientation
 
     changedFaces.append(seedTriI);
 
-    while (changedFaces.size() > 0)
+    while (changedFaces.size())
     {
         DynamicList<label> newChangedFaces(changedFaces.size());
 
@@ -1412,7 +1402,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
     mergeDistance_(mergeTol*mesh.bounds().mag())
 {
     // Determine if cell is tet
-    PackedList<1> isTet(mesh_.nCells());
+    PackedBoolList isTet(mesh_.nCells());
     {
         tetMatcher tet;
 
@@ -1427,7 +1417,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 
     // Determine if point is on boundary. Points on boundaries are never
     // snapped. Coupled boundaries are handled explicitly so not marked here.
-    PackedList<1> isBoundaryPoint(mesh_.nPoints());
+    PackedBoolList isBoundaryPoint(mesh_.nPoints());
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
     forAll(patches, patchI)
     {
@@ -1636,7 +1626,7 @@ Foam::isoSurfaceCell::isoSurfaceCell
 //// ones so limited benefit (e.g. 60 v.s. 88 triangles)
 //void Foam::isoSurfaceCell::combineCellTriangles()
 //{
-//    if (size() > 0)
+//    if (size())
 //    {
 //        DynamicList<labelledTri> newTris(size());
 //        DynamicList<label> newTriToCell(size());
