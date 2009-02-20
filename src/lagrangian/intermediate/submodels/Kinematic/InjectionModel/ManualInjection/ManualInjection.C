@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::ManualInjection<CloudType>::nParcelsToInject
+Foam::label Foam::ManualInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
@@ -135,36 +135,38 @@ Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
 
 
 template<class CloudType>
-Foam::vector Foam::ManualInjection<CloudType>::position
+void Foam::ManualInjection<CloudType>::setPositionAndCell
 (
     const label iParcel,
     const scalar time,
-    const polyMeshInfo& meshInfo
+    const polyMeshInfo& meshInfo,
+    vector& position,
+    label& cellOwner
 )
 {
-    vector pos = positions_[iParcel];
+    position = positions_[iParcel];
+    this->findCellAtPosition(cellOwner, position);
+
     if (meshInfo.caseIs2d())
     {
         if (meshInfo.caseIs2dWedge())
         {
-            pos.component(meshInfo.emptyComponent()) = 0.0;
+            position.component(meshInfo.emptyComponent()) = 0.0;
         }
         else if (meshInfo.caseIs2dSlab())
         {
-            pos.component(meshInfo.emptyComponent()) =
+            position.component(meshInfo.emptyComponent()) =
                 meshInfo.centrePoint().component(meshInfo.emptyComponent());
         }
         else
         {
             FatalErrorIn
             (
-                "Foam::vector Foam::ManualInjection<CloudType>::position"
+                "void Foam::ManualInjection<CloudType>::setPositionAndCell"
             )   << "Could not determine 2-D case geometry" << nl
                 << abort(FatalError);
         }
     }
-
-    return pos;
 }
 
 

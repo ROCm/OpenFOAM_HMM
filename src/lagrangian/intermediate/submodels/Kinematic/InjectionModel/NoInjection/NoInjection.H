@@ -58,7 +58,7 @@ protected:
     // Protected member functions
 
         //- Number of parcels to introduce over the time step
-        label nParcelsToInject
+        label parcelsToInject
         (
             const scalar,
             const scalar
@@ -104,12 +104,14 @@ public:
 
         // Injection geometry
 
-            //- Return the injection position
-            vector position
+            //- Set the injection position and owner cell
+            void setPositionAndCell
             (
                 const label iParcel,
                 const scalar time,
-                const polyMeshInfo& meshInfo
+                const polyMeshInfo& meshInfo,
+                vector& position,
+                label& cellOwner
             );
 
             //- Return the velocity of the parcel to introduce at a time

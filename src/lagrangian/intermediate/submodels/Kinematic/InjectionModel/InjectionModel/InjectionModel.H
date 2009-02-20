@@ -108,10 +108,10 @@ protected:
             label nInjections_;
 
             //- Running counter of parcels added during each injection
-            label nParcelsAdded_;
+            label parcelsAdded_;
 
             //- Running counter of total number of parcels added
-            label nParcelsAddedTotal_;
+            label parcelsAddedTotal_;
 
 
         // Injection properties per Lagrangian time step
@@ -134,7 +134,7 @@ protected:
     // Protected member functions
 
         //- Number of parcels to introduce over the time step
-        virtual label nParcelsToInject
+        virtual label parcelsToInject
         (
             const scalar time0,
             const scalar time1
@@ -153,13 +153,14 @@ protected:
         (
             const scalar time0,
             const scalar time1,
-            label& nParcels,
-            scalar& volume
+            label& newParcels,
+            scalar& newVolume
         );
 
-        //- Find the cell that contains the injector position
-        //  Will modify position slightly towards the owner cell centroid
-        virtual void findInjectorCellAndPosition
+        //- Find the cell that contains the supplied position
+        //  Will modify position slightly towards the owner cell centroid to
+        //  ensure that it lies in a cell and not edge/face
+        virtual void findCellAtPosition
         (
             label& cellI,
             vector& position
@@ -168,7 +169,7 @@ protected:
         //- Set number of particles to inject given parcel properties
         scalar setNumberOfParticles
         (
-            const label nParcels,
+            const label parcels,
             const scalar diameter,
             const scalar volumeFraction,
             const scalar rho,
@@ -265,7 +266,7 @@ public:
                 inline label nInjections() const;
 
                 //- Return the total number parcels added
-                inline label nParcelsAddedTotal() const;
+                inline label parcelsAddedTotal() const;
 
 
         // Per-injection event functions
@@ -280,12 +281,14 @@ public:
 
         // Injection geometry
 
-            //- Return the injection position
-            virtual vector position
+            //- Set the injection position and owner cell
+            virtual void setPositionAndCell
             (
                 const label iParcel,
                 const scalar time,
-                const polyMeshInfo& meshInfo
+                const polyMeshInfo& meshInfo,
+                vector& position,
+                label& cellOwner
             ) = 0;
 
             //- Return the velocity of the parcel to introduce at a time
