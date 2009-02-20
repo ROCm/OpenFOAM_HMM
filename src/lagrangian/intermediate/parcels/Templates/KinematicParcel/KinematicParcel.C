@@ -160,8 +160,6 @@ Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     vector Unew = td.cloud().UIntegrator().integrate(U_, dt, ap, bp).value();
 
-//    Info<< "U_, Unew = " << U_ << ", " << Unew << endl;
-
     // Calculate the momentum transfer to the continuous phase
     // - do not include gravity impulse
     dUTrans = -mass()*(Unew - U_ - dt*td.g());
@@ -186,7 +184,7 @@ Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
         }
         else
         {
-            FatalErrorIn("void Foam::KinematicParcel::calcVelocity")
+             FatalErrorIn("Foam::vector Foam::KinematicParcel::calcVelocity")
                 << "Could not determine 2-D case geometry" << nl
                 << abort(FatalError);
         }
@@ -251,11 +249,7 @@ bool Foam::KinematicParcel<ParcelType>::move
         {
             if (p.face() > -1)
             {
-                if
-                (
-                    isType<processorPolyPatch>
-                        (pbMesh[p.patch(p.face())])
-                )
+                if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
                 {
                     td.switchProcessor = true;
                 }
