@@ -127,10 +127,10 @@ template<class CloudType>
 Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 (
     const label parcels,
-    const scalar diameter,
-    const scalar volumeFraction,
-    const scalar rho,
     const scalar volume
+    const scalar volumeFraction,
+    const scalar diameter,
+    const scalar rho,
 )
 {
     scalar nP = 0.0;
@@ -294,29 +294,37 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
         vector pos = vector::zero;
         setPositionAndCell(iParcel, timeInj, owner_.meshInfo(), pos, cellI);
 
-        // Diameter of parcels
-        scalar d = d0(iParcel, timeInj);
-
-        // Number of particles per parcel
-        scalar nP = setNumberOfParticles
-        (
-            newParcels,
-            d,
-            volFraction,
-            rho,
-            newVolume
-        );
-
-        // Velocity of parcels
-        vector U = velocity(iParcel, timeInj, owner_.meshInfo());
-
         if (cellI >= 0)
         {
-            scalar dt = time - timeInj;
-            td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);
+            // Diameter of parcels
+            scalar d = d0(iParcel, timeInj);
 
+            // Number of particles per parcel
+            scalar nP = setNumberOfParticles
+            (
+                newParcels,
+                newVolume,
+                volFraction,
+                d,
+                rho
+            );
+
+            // Velocity of parcels
+            vector U = velocity(iParcel, timeInj, owner_.meshInfo());
+
+            // Lagrangian timestep
+            scalar dt = time - timeInj;
+
+            // Add the new parcel
+            td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);
             massInjected_ += nP*rho*mathematicalConstant::pi*pow3(d)/6.0;
             parcelsAdded_++;
+        }
+        else
+        {
+            WarningIn("Foam::InjectionModel<CloudType>::inject(TrackData& td)")
+                << "Failed to inject new parcel:" <<
+                << "    id = " << iParcel << ", position = " pos << nl << endl;
         }
     }
 

@@ -170,10 +170,10 @@ protected:
         scalar setNumberOfParticles
         (
             const label parcels,
-            const scalar diameter,
+            const scalar volume,
             const scalar volumeFraction,
-            const scalar rho,
-            const scalar volume
+            const scalar diameter,
+            const scalar rho
         );
 
         //- Post injection checks
