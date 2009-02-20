@@ -1097,15 +1097,42 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
                 scalar targetCellSizeB = targetCellSize;
 
+                // if
+                // (
+                //     vA->indexOfClosestPatch() == 1
+                //  && vA->distanceToClosestSurface() < 0.03
+                // )
+                // {
+                //     targetCellSizeA *= 0.5;
+                // }
+                // else if (vA->indexOfClosestPatch() == 0)
+                // {
+                //     targetCellSizeA *= 2;
+                // }
+
+                // if
+                // (
+                //     vB->indexOfClosestPatch() == 1
+                //  && vB->distanceToClosestSurface() < 0.03
+                // )
+                // {
+                //     targetCellSizeB *= 0.5;
+                // }
+                // else if (vB->indexOfClosestPatch() == 0)
+                // {
+                //     targetCellSizeB *= 2;
+                // }
+
                 if
                 (
                     vA->indexOfClosestPatch() == 1
-                 && vA->distanceToClosestSurface() < 0.03
+                 && vA->distanceToClosestSurface() < 0.04
                 )
                 {
-                    targetCellSizeA *= 0.5;
+                    targetCellSizeA *=
+                    (43.75*vA->distanceToClosestSurface() + 0.25);
                 }
-                else if (vA->indexOfClosestPatch() == 0)
+                else
                 {
                     targetCellSizeA *= 2;
                 }
@@ -1113,12 +1140,13 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                 if
                 (
                     vB->indexOfClosestPatch() == 1
-                 && vB->distanceToClosestSurface() < 0.03
+                 && vB->distanceToClosestSurface() < 0.04
                 )
                 {
-                    targetCellSizeB *= 0.5;
+                    targetCellSizeB *=
+                    (43.75*vB->distanceToClosestSurface() + 0.25);
                 }
-                else if (vB->indexOfClosestPatch() == 0)
+                else
                 {
                     targetCellSizeB *= 2;
                 }
