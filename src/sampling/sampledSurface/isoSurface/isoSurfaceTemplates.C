@@ -369,39 +369,41 @@ void Foam::isoSurface::generateTriPoints
     {
         const polyPatch& pp = patches[patchI];
 
-        if (isA<processorPolyPatch>(pp))
+        if
+        (
+            isA<processorPolyPatch>(pp)
+         && refCast<const processorPolyPatch>(pp).owner()
+         && !refCast<const processorPolyPatch>(pp).separated()
+        )
         {
-            if (refCast<const processorPolyPatch>(pp).owner())
+            label faceI = pp.start();
+
+            forAll(pp, i)
             {
-                label faceI = pp.start();
-
-                forAll(pp, i)
+                if (faceCutType_[faceI] != NOTCUT)
                 {
-                    if (faceCutType_[faceI] != NOTCUT)
-                    {
-                        generateFaceTriPoints
-                        (
-                            cVals,
-                            pVals,
+                    generateFaceTriPoints
+                    (
+                        cVals,
+                        pVals,
 
-                            cCoords,
-                            pCoords,
+                        cCoords,
+                        pCoords,
 
-                            snappedPoints,
-                            snappedCc,
-                            snappedPoint,
-                            faceI,
+                        snappedPoints,
+                        snappedCc,
+                        snappedPoint,
+                        faceI,
 
-                            cVals.boundaryField()[patchI][i],
-                            cCoords.boundaryField()[patchI][i],
-                            neiSnappedCc[faceI-mesh_.nInternalFaces()],
+                        cVals.boundaryField()[patchI][i],
+                        cCoords.boundaryField()[patchI][i],
+                        neiSnappedCc[faceI-mesh_.nInternalFaces()],
 
-                            triPoints,
-                            triMeshCells
-                        );
-                    }
-                    faceI++;
+                        triPoints,
+                        triMeshCells
+                    );
                 }
+                faceI++;
             }
         }
         else if (isA<emptyPolyPatch>(pp))
@@ -482,8 +484,8 @@ void Foam::isoSurface::generateTriPoints
 //{
 //    return tmp<Field<Type> >(new Field<Type>(vField, meshCells()));
 //}
-//
-//
+
+
 template <class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurface::interpolate

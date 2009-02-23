@@ -33,15 +33,15 @@ License
 template<class Type>
 void Foam::fieldAverage::addMeanField
 (
-    const label fieldi,
+    const label fieldI,
     wordList& meanFieldList
 ) const
 {
-    if (faItems_[fieldi].mean())
+    if (faItems_[fieldI].mean())
     {
         typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-        const word& fieldName = faItems_[fieldi].fieldName();
+        const word& fieldName = faItems_[fieldI].fieldName();
 
         const word meanFieldName = fieldName + EXT_MEAN;
 
@@ -49,14 +49,14 @@ void Foam::fieldAverage::addMeanField
 
         if (obr_.foundObject<fieldType>(meanFieldName))
         {
-            meanFieldList[fieldi] = meanFieldName;
+            meanFieldList[fieldI] = meanFieldName;
         }
         else if (obr_.found(meanFieldName))
         {
             Info<< "Cannot allocate average field " << meanFieldName
                 << " since an object with that name already exists."
                 << " Disabling averaging." << nl << endl;
-            meanFieldList[fieldi] = word::null;
+            meanFieldList[fieldI] = word::null;
         }
         else
         {
@@ -79,7 +79,7 @@ void Foam::fieldAverage::addMeanField
             // Store on registry
             fPtr->store();
 
-            meanFieldList[fieldi] = meanFieldName;
+            meanFieldList[fieldI] = meanFieldName;
         }
     }
 }
@@ -88,38 +88,38 @@ void Foam::fieldAverage::addMeanField
 template<class Type1, class Type2>
 void Foam::fieldAverage::addPrime2MeanField
 (
-    const label fieldi,
+    const label fieldI,
     const wordList& meanFieldList,
     wordList& prime2MeanFieldList
 ) const
 {
-    if (faItems_[fieldi].mean() && meanFieldList[fieldi] != word::null)
+    if (faItems_[fieldI].mean() && meanFieldList[fieldI].size())
     {
         typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
         typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
 
-        const word& fieldName = faItems_[fieldi].fieldName();
+        const word& fieldName = faItems_[fieldI].fieldName();
 
         const word meanFieldName = fieldName + EXT_PRIME2MEAN;
         Info<< "Reading/calculating field " << meanFieldName << nl << endl;
 
         if (obr_.foundObject<fieldType2>(meanFieldName))
         {
-            prime2MeanFieldList[fieldi] = meanFieldName;
+            prime2MeanFieldList[fieldI] = meanFieldName;
         }
         else if (obr_.found(meanFieldName))
         {
             Info<< "Cannot allocate average field " << meanFieldName
                 << " since an object with that name already exists."
                 << " Disabling averaging." << nl << endl;
-            prime2MeanFieldList[fieldi] = word::null;
+            prime2MeanFieldList[fieldI] = word::null;
         }
         else
         {
             const fieldType1& baseField =
                 obr_.lookupObject<fieldType1>(fieldName);
             const fieldType1& meanField =
-                obr_.lookupObject<fieldType1>(meanFieldList[fieldi]);
+                obr_.lookupObject<fieldType1>(meanFieldList[fieldI]);
 
             fieldType2* fPtr = new fieldType2
             (
@@ -137,7 +137,7 @@ void Foam::fieldAverage::addPrime2MeanField
             // Store on registry
             fPtr->store();
 
-            prime2MeanFieldList[fieldi] = meanFieldName;
+            prime2MeanFieldList[fieldI] = meanFieldName;
         }
     }
 }
@@ -153,7 +153,7 @@ const
 
     forAll(faItems_, i)
     {
-        if (faItems_[i].mean() && meanFieldList[i] != word::null)
+        if (faItems_[i].mean() && meanFieldList[i].size())
         {
             const word& fieldName = faItems_[i].fieldName();
             const fieldType& baseField =
@@ -199,8 +199,8 @@ void Foam::fieldAverage::calculatePrime2MeanFields
         if
         (
             faItems_[i].prime2Mean()
-         && meanFieldList[i] != word::null
-         && prime2MeanFieldList[i] != word::null
+         && meanFieldList[i].size()
+         && prime2MeanFieldList[i].size()
         )
         {
             const word& fieldName = faItems_[i].fieldName();
@@ -250,8 +250,8 @@ void Foam::fieldAverage::addMeanSqrToPrime2Mean
         if
         (
             faItems_[i].prime2Mean()
-         && meanFieldList[i] != word::null
-         && prime2MeanFieldList[i] != word::null
+         && meanFieldList[i].size()
+         && prime2MeanFieldList[i].size()
         )
         {
             const fieldType1& meanField =
@@ -274,7 +274,7 @@ void Foam::fieldAverage::writeFieldList(const wordList& fieldList) const
 
     forAll(fieldList, i)
     {
-        if (fieldList[i] != word::null)
+        if (fieldList[i].size())
         {
             const fieldType& f = obr_.lookupObject<fieldType>(fieldList[i]);
             f.write();

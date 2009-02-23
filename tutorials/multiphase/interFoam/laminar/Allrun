@@ -3,7 +3,7 @@
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application name from directory
-application=${PWD##*/}
+application="interFoam"
 
 setDamBreakFine ()
 {
@@ -45,8 +45,4 @@ cd damBreakFine
     hostname > system/machines
     runParallel $application 4 system/machines
     runApplication reconstructPar
-cd ..
-
-cd nozzleFlow2D
-    ./Allrun
 cd ..

@@ -31,25 +31,20 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(regIOobject, 0);
+defineTypeNameAndDebug(Foam::regIOobject, 0);
 
-int regIOobject::fileModificationSkew
+int Foam::regIOobject::fileModificationSkew
 (
-    debug::optimisationSwitch("fileModificationSkew", 30)
+    Foam::debug::optimisationSwitch("fileModificationSkew", 30)
 );
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from IOobject
-regIOobject::regIOobject(const IOobject& io)
+Foam::regIOobject::regIOobject(const IOobject& io)
 :
     IOobject(io),
     registered_(false),
@@ -66,7 +61,7 @@ regIOobject::regIOobject(const IOobject& io)
 
 
 // Construct as copy
-regIOobject::regIOobject(const regIOobject& rio)
+Foam::regIOobject::regIOobject(const regIOobject& rio)
 :
     IOobject(rio),
     registered_(false),
@@ -80,7 +75,7 @@ regIOobject::regIOobject(const regIOobject& rio)
 
 // Construct as copy, and transfering objectRegistry registration to copy
 // if registerCopy is true
-regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
+Foam::regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
 :
     IOobject(rio),
     registered_(false),
@@ -99,7 +94,7 @@ regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 // Delete read stream, checkout from objectRegistry and destroy
-regIOobject::~regIOobject()
+Foam::regIOobject::~regIOobject()
 {
     if (objectRegistry::debug)
     {
@@ -125,7 +120,7 @@ regIOobject::~regIOobject()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void regIOobject::checkIn()
+void Foam::regIOobject::checkIn()
 {
     if (!registered_)
     {
@@ -153,7 +148,7 @@ void regIOobject::checkIn()
 }
 
 
-void regIOobject::checkOut()
+void Foam::regIOobject::checkOut()
 {
     if (registered_)
     {
@@ -164,7 +159,7 @@ void regIOobject::checkOut()
 
 
 // Rename object and re-register with objectRegistry under new name
-void regIOobject::rename(const word& newName)
+void Foam::regIOobject::rename(const word& newName)
 {
     // Check out of objectRegistry
     checkOut();
@@ -177,7 +172,7 @@ void regIOobject::rename(const word& newName)
 
 
 // Assign to IOobject
-void regIOobject::operator=(const IOobject& io)
+void Foam::regIOobject::operator=(const IOobject& io)
 {
     if (isPtr_)
     {
@@ -194,9 +189,5 @@ void regIOobject::operator=(const IOobject& io)
     checkIn();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

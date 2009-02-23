@@ -29,10 +29,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(objectRegistry, 0);
-}
+defineTypeNameAndDebug(Foam::objectRegistry, 0);
 
 
 // * * * * * * * * * * * * * * * * Constructors *  * * * * * * * * * * * * * //
@@ -86,9 +83,9 @@ Foam::objectRegistry::~objectRegistry()
     {
         if (iter()->ownedByRegistry())
         {
-            regIOobject* elemPtr = iter();
+            regIOobject* object = iter();
             erase(iter);
-            delete elemPtr;
+            delete object;
         }
     }
 }
@@ -206,18 +203,15 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
 
 bool Foam::objectRegistry::modified() const
 {
-    bool anyModified = false;
-
     for (const_iterator iter = begin(); iter != end(); ++iter)
     {
         if (iter()->modified())
         {
-            anyModified = true;
-            break;
+            return true;
         }
     }
 
-    return anyModified;
+    return false;
 }
 
 

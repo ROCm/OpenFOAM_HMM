@@ -41,15 +41,14 @@ namespace Foam
 Foam::systemCall::systemCall
 (
     const word& name,
-    const objectRegistry& obr,
+    const objectRegistry&,
     const dictionary& dict,
-    const bool loadFromFiles
+    const bool
 )
 :
     name_(name),
-    obr_(obr),
-    active_(true),
     executeCalls_(),
+    endCalls_(),
     writeCalls_()
 {
     read(dict);
@@ -66,8 +65,16 @@ Foam::systemCall::~systemCall()
 
 void Foam::systemCall::read(const dictionary& dict)
 {
-    dict.lookup("executeCalls") >> executeCalls_;
-    dict.lookup("writeCalls") >> writeCalls_;
+    dict.readIfPresent("executeCalls", executeCalls_);
+    dict.readIfPresent("endCalls",     endCalls_);
+    dict.readIfPresent("writeCalls",   writeCalls_);
+
+    if (executeCalls_.empty() && endCalls_.empty() && writeCalls_.empty())
+    {
+        WarningIn("Foam::system::read(const dictionary&)")
+            << "no executeCalls, endCalls or writeCalls defined."
+            << endl;
+    }
 }
 
 
@@ -78,6 +85,16 @@ void Foam::systemCall::execute()
         ::system(executeCalls_[callI].c_str());
     }
 }
+
+
+void Foam::systemCall::end()
+{
+    forAll(endCalls_, callI)
+    {
+        ::system(endCalls_[callI].c_str());
+    }
+}
+
 
 void Foam::systemCall::write()
 {

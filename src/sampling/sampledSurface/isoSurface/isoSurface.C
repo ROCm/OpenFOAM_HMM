@@ -29,6 +29,7 @@ License
 #include "mergePoints.H"
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
+#include "slicedVolFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -347,24 +348,36 @@ void Foam::isoSurface::getNeighbour
     {
         label nbr = (own[faceI] == cellI ? nei[faceI] : own[faceI]);
         nbrValue = cVals[nbr];
-        nbrPoint = mesh_.C()[nbr];
+        nbrPoint = mesh_.cellCentres()[nbr];
     }
     else
     {
         label bFaceI = faceI-mesh_.nInternalFaces();
         label patchI = boundaryRegion[bFaceI];
-        label patchFaceI = faceI-mesh_.boundaryMesh()[patchI].start();
+        const polyPatch& pp = mesh_.boundaryMesh()[patchI];
+        label patchFaceI = faceI-pp.start();
 
-        if (isA<emptyPolyPatch>(mesh_.boundaryMesh()[patchI]))
+        if (isA<emptyPolyPatch>(pp))
         {
             // Assume zero gradient
             nbrValue = cVals[own[faceI]];
+            nbrPoint = mesh_.faceCentres()[faceI];
+        }
+        else if
+        (
+            pp.coupled()
+        && !refCast<const coupledPolyPatch>(pp).separated()
+        )
+        {
+            // other side value
+            nbrValue = cVals.boundaryField()[patchI][patchFaceI];
+            // other side cell centre
             nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
         }
         else
         {
             nbrValue = cVals.boundaryField()[patchI][patchFaceI];
-            nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
+            nbrPoint = mesh_.faceCentres()[faceI];
         }
     }
 }
@@ -383,6 +396,7 @@ void Foam::isoSurface::calcSnappedCc
 ) const
 {
     const pointField& pts = mesh_.points();
+    const pointField& cc = mesh_.cellCentres();
 
     snappedCc.setSize(mesh_.nCells());
     snappedCc = -1;
@@ -427,7 +441,7 @@ void Foam::isoSurface::calcSnappedCc
 
                 // From cc to neighbour cc.
                 s[2] = isoFraction(cVal, nbrValue);
-                pt[2] = (1.0-s[2])*mesh_.C()[cellI] + s[2]*nbrPoint;
+                pt[2] = (1.0-s[2])*cc[cellI] + s[2]*nbrPoint;
 
                 const face& f = mesh_.faces()[cFaces[cFaceI]];
 
@@ -436,12 +450,12 @@ void Foam::isoSurface::calcSnappedCc
                     // From cc to fp
                     label p0 = f[fp];
                     s[0] = isoFraction(cVal, pVals[p0]);
-                    pt[0] = (1.0-s[0])*mesh_.C()[cellI] + s[0]*pts[p0];
+                    pt[0] = (1.0-s[0])*cc[cellI] + s[0]*pts[p0];
 
                     // From cc to fp+1
                     label p1 = f[f.fcIndex(fp)];
                     s[1] = isoFraction(cVal, pVals[p1]);
-                    pt[1] = (1.0-s[1])*mesh_.C()[cellI] + s[1]*pts[p1];
+                    pt[1] = (1.0-s[1])*cc[cellI] + s[1]*pts[p1];
 
                     if
                     (
@@ -548,6 +562,7 @@ void Foam::isoSurface::calcSnappedPoint
 ) const
 {
     const pointField& pts = mesh_.points();
+    const pointField& cc = mesh_.cellCentres();
 
 
     const point greatPoint(VGREAT, VGREAT, VGREAT);
@@ -616,7 +631,7 @@ void Foam::isoSurface::calcSnappedPoint
 
             label fp = findIndex(f, pointI);
             s[0] = isoFraction(pVals[pointI], cVals[own]);
-            pt[0] = (1.0-s[0])*pts[pointI] + s[0]*mesh_.C()[own];
+            pt[0] = (1.0-s[0])*pts[pointI] + s[0]*cc[own];
 
             s[1] = isoFraction(pVals[pointI], nbrValue);
             pt[1] = (1.0-s[1])*pts[pointI] + s[1]*nbrPoint;
@@ -815,13 +830,6 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
         tris.transfer(dynTris);
     }
 
-    if (debug)
-    {
-        Pout<< "isoSurface : merged from " << nTris
-            << " down to " << tris.size() << " triangles." << endl;
-    }
-
-
 
     // Determine 'flat hole' situation (see RMT paper).
     // Two unconnected triangles get connected because (some of) the edges
@@ -862,6 +870,12 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
 
         triMap.transfer(newToOldTri);
         tris.setSize(triMap.size());
+
+        if (debug)
+        {
+            Pout<< "isoSurface : merged from " << nTris
+                << " down to " << tris.size() << " unique triangles." << endl;
+        }
     }
 
     return triSurface(tris, geometricSurfacePatchList(0), newPoints, true);
@@ -1504,17 +1518,21 @@ Foam::isoSurface::isoSurface
     {
         const polyPatch& pp = patches[patchI];
 
-        if (pp.coupled())
-        {
-            label faceI = pp.start();
+        label faceI = pp.start();
 
-            forAll(pp, i)
-            {
-                boundaryRegion[faceI-mesh_.nInternalFaces()] = patchI;
-                faceI++;
-            }
+        forAll(pp, i)
+        {
+            boundaryRegion[faceI-mesh_.nInternalFaces()] = patchI;
+            faceI++;
         }
-        else
+
+        // Mark all points that are not physically coupled (so anything
+        // but collocated coupled patches)
+        if
+        (
+           !pp.coupled()
+        || refCast<const coupledPolyPatch>(pp).separated()
+        )
         {
             label faceI = pp.start();
 
@@ -1594,6 +1612,48 @@ Foam::isoSurface::isoSurface
     }
 
 
+    // Generate field to interpolate. This is identical to the mesh.C()
+    // except on separated coupled patches.
+    slicedVolVectorField meshC
+    (
+        IOobject
+        (
+            "C",
+            mesh_.pointsInstance(),
+            mesh_.meshSubDir,
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimLength,
+        mesh_.cellCentres(),
+        mesh_.faceCentres()
+    );
+    {
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+        forAll(patches, patchI)
+        {
+            if
+            (
+                patches[patchI].coupled()
+             && refCast<const coupledPolyPatch>(patches[patchI]).separated()
+            )
+            {
+                fvPatchVectorField& pfld = const_cast<fvPatchVectorField&>
+                (
+                    meshC.boundaryField()[patchI]
+                );
+                pfld.operator==
+                (
+                    patches[patchI].patchSlice(mesh_.faceCentres())
+                );
+            }
+        }
+    }
+
+
     DynamicList<point> triPoints(nCutCells_);
     DynamicList<label> triMeshCells(nCutCells_);
 
@@ -1602,7 +1662,7 @@ Foam::isoSurface::isoSurface
         cVals,
         pVals,
 
-        mesh_.C(),
+        meshC,
         mesh_.points(),
 
         snappedPoints,

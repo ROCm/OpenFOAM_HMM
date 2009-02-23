@@ -63,13 +63,11 @@ protected:
         //- Name of this set of system calls
         word name_;
 
-        const objectRegistry& obr_;
-
-        //- on/off switch
-        bool active_;
-
         //- List of calls to execute - every step
         stringList executeCalls_;
+
+        //- List of calls to execute when exiting the time-loop
+        stringList endCalls_;
 
         //- List of calls to execute - write steps
         stringList writeCalls_;
@@ -97,9 +95,9 @@ public:
         systemCall
         (
             const word& name,
-            const objectRegistry&,
+            const objectRegistry& unused,
             const dictionary&,
-            const bool loadFromFiles = false
+            const bool loadFromFilesUnused = false
         );
 
 
@@ -119,10 +117,13 @@ public:
         //- Read the system calls
         virtual void read(const dictionary&);
 
-        //- Execute
+        //- Execute the "executeCalls" at each time-step
         virtual void execute();
 
-        //- Write
+        //- Execute the "endCalls" at the final time-loop
+        virtual void end();
+
+        //- Write, execute the "writeCalls"
         virtual void write();
 
         //- Update for changes of mesh

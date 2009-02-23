@@ -3,8 +3,7 @@
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application directory
-parentDir=`dirname $PWD`
-application=`basename $parentDir`
+application="channelFoam"
 
 runApplication blockMesh
 runApplication $application

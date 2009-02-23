@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 0 -1 0 0 0 0];
+dimensions      [ 0 0 -1 0 0 0 0 ];
 
 internalField   uniform 2.6;
 
@@ -24,13 +24,15 @@ boundaryField
     movingWall
     {
         type            omegaWallFunction;
-        value           uniform 2.6;
+        value           uniform 0;
     }
+
     fixedWalls
     {
         type            omegaWallFunction;
-        value           uniform 2.6;
+        value           uniform 0;
     }
+
     frontAndBack
     {
         type            empty;
