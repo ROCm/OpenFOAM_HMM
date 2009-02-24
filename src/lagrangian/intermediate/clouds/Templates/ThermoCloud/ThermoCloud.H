@@ -66,7 +66,6 @@ class ThermoCloud
     public KinematicCloud<ParcelType>,
     public thermoCloud
 {
-
     // Private data
 
         //- Thermo parcel constant properties
@@ -118,10 +117,6 @@ class ThermoCloud
 
 public:
 
-    //- Runtime type information
-//    TypeName("ThermoCloud");
-
-
     // Constructors
 
         //- Construct given carrier gas fields
@@ -135,9 +130,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~ThermoCloud();
+    //- Destructor
+    virtual ~ThermoCloud();
 
 
     // Member Functions

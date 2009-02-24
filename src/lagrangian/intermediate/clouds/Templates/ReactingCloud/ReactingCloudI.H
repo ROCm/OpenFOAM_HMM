@@ -59,10 +59,10 @@ Foam::ReactingCloud<ParcelType>::composition() const
 
 
 template<class ParcelType>
-inline const Foam::DevolatilisationModel<Foam::ReactingCloud<ParcelType> >&
-Foam::ReactingCloud<ParcelType>::devolatilisation() const
+inline const Foam::PhaseChangeModel<Foam::ReactingCloud<ParcelType> >&
+Foam::ReactingCloud<ParcelType>::phaseChange() const
 {
-    return devolatilisationModel_;
+    return phaseChangeModel_;
 }
 
 
@@ -128,5 +128,6 @@ Foam::ReactingCloud<ParcelType>::Srho1() const
 
     return trhoTrans/(this->db().time().deltaT()*this->mesh().V());
 }
+
 
 // ************************************************************************* //

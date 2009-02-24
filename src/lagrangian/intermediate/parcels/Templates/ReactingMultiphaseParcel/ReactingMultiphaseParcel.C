@@ -93,6 +93,12 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcCoupled
     scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
 
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    // Calculate phase change
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    calcPhaseChange(td, dt, T0, T1, dMassMT);
+
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate Devolatilisation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -251,6 +257,12 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcUncoupled
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar htc = 0.0;
     scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    // Calculate phase change
+    // ~~~~~~~~~~~~~~~~~~~~~~
+    calcPhaseChange(td, dt, T0, T1, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~

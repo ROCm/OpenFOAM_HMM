@@ -23,75 +23,76 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::thermoCloud
+    Foam::NoPhaseChange
 
 Description
-    Virtual abstract base class for templated ThermoCloud
-
-SourceFiles
+    Dummy devolatilisation model for 'no phase change'
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef thermoCloud_H
-#define thermoCloud_H
+#ifndef NoPhaseChange_H
+#define NoPhaseChange_H
 
-#include "volFields.H"
+#include "PhaseChangeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 /*---------------------------------------------------------------------------*\
-                       Class thermoCloud Declaration
+                       Class NoPhaseChange Declaration
 \*---------------------------------------------------------------------------*/
 
-class thermoCloud
+template<class CloudType>
+class NoPhaseChange
+:
+    public PhaseChangeModel<CloudType>
 {
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        thermoCloud(const thermoCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const thermoCloud&);
-
 
 public:
 
     //- Runtime type information
-    TypeName("thermoCloud");
+    TypeName("NoPhaseChange");
+
 
     // Constructors
 
-        //- Null constructor
-        thermoCloud();
+        //- Construct from dictionary
+        NoPhaseChange
+        (
+            const dictionary& dict,
+            CloudType& cloud
+        );
 
 
     //- Destructor
-    virtual ~thermoCloud();
+    ~NoPhaseChange();
 
 
     // Member Functions
 
-        // Access
+        //- Flag to indicate whether model activates phase change model
+        bool active() const;
 
-            // Radiation
-
-                //- Return tmp equivalent particulate emission
-                virtual tmp<volScalarField> Ep() const = 0;
-
-                //- Return tmp equivalent particulate absorption
-                virtual tmp<volScalarField> ap() const = 0;
-
-                //- Return tmp equivalent particulate scattering factor
-                virtual tmp<volScalarField> sigmap() const = 0;
+        //- Update model
+        scalar calculate
+        (
+            const scalar,
+            const scalarField&,
+            const scalar
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "NoPhaseChange.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

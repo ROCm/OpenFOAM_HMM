@@ -294,8 +294,8 @@ public:
             //- Read
             static void readFields(ReactingCloud<ParcelType>& c);
 
-        //- Write
-        static void writeFields(const ReactingCloud<ParcelType>& c);
+            //- Write
+            static void writeFields(const ReactingCloud<ParcelType>& c);
 
 
     // Ostream Operator

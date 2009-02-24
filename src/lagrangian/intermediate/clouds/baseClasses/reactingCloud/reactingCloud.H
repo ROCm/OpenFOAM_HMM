@@ -48,7 +48,6 @@ namespace Foam
 
 class reactingCloud
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

@@ -23,31 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::ReactingCloud
+    Foam::ReactingMultiphaseCloud
 
 Description
-    Templated base class for reacting cloud
-    - Adds to thermodynamic cloud
-      - Variable composition (single phase)
-      - Phase change
-      - Surface reactions
+    Templated base class for multiphase reacting cloud
+    - Adds to reacting cloud
+      - Devolatilisatsion
+      - multiphase composition
 
 SourceFiles
-    ReactingCloudI.H
-    ReactingCloud.C
+    ReactingMultiphaseCloudI.H
+    ReactingMultiphaseCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ReactingCloud_H
-#define ReactingCloud_H
+#ifndef ReactingMultiphaseCloud_H
+#define ReactingMultiphaseCloud_H
 
-#include "autoPtr.H"
-#include "hCombustionThermo.H"
-
-#include "ThermoCloud.H"
-#include "reactingCloud.H"
-
-#include "ReactingCloudThermoTypes.H"
+#include "ReactingCloud.H"
+#include "reactingMultiphaseCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,23 +51,17 @@ namespace Foam
 // Forward declaration of classes
 
 template<class CloudType>
-class CompositionModel;
-
-template<class CloudType>
-class PhaseChangeModel;
-
-template<class CloudType>
-class SurfaceReactionModel;
+class DevolatilisationModel;
 
 /*---------------------------------------------------------------------------*\
-                      Class ReactingCloud Declaration
+                   Class ReactingMultiphaseCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParcelType>
-class ReactingCloud
+class ReactingMultiphaseCloud
 :
-    public ThermoCloud<ParcelType>,
-    public reactingCloud
+    public ReactingCloud<ParcelType>,
+    public reactingMultiphaseCloud
 {
     // Private data
 
@@ -89,20 +77,13 @@ class ReactingCloud
 
         // References to the cloud sub-models
 
-            //- Reacting composition model
-            autoPtr<CompositionModel<ReactingCloud<ParcelType> > >
-                compositionModel_;
-
-            //- Reacting phase change model
-            autoPtr<PhaseChangeModel<ReactingCloud<ParcelType> > >
-                phaseChangeModel_;
-
-            //- Reacting surface reaction model
+            //- Devolatilisation model
             autoPtr
             <
-                SurfaceReactionModel<ReactingCloud<ParcelType> >
+                DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >
             >
-            surfaceReactionModel_;
+            devolatilisationModel_;
+
 
 
         // Sources
@@ -114,10 +95,10 @@ class ReactingCloud
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        ReactingCloud(const ReactingCloud&);
+        ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
 
         //- Disallow default bitwise assignment
-        void operator=(const ReactingCloud&);
+        void operator=(const ReactingMultiphaseCloud&);
 
 
 public:
@@ -125,7 +106,7 @@ public:
     // Constructors
 
         //- Construct given carrier gas fields
-        ReactingCloud
+        ReactingMultiphaseCloud
         (
             const word& cloudType,
             const volScalarField& rho,
@@ -137,7 +118,7 @@ public:
 
 
     //- Destructor
-    virtual ~ReactingCloud();
+    virtual ~ReactingMultiphaseCloud();
 
 
     // Member Functions
@@ -156,17 +137,12 @@ public:
 
             // Sub-models
 
-                //- Return reference to reacting composition model
-                inline const CompositionModel<ReactingCloud<ParcelType> >&
-                    composition() const;
-
-                //- Return reference to reacting phase change model
-                inline const PhaseChangeModel<ReactingCloud<ParcelType> >&
-                    phaseChange() const;
-
-                //- Return reference to reacting surface reaction model
-                inline const SurfaceReactionModel<ReactingCloud<ParcelType> >&
-                    surfaceReaction() const;
+                //- Return reference to devolatilisation model
+                inline const DevolatilisationModel
+                <
+                    ReactingMultiphaseCloud<ParcelType>
+                >&
+                devolatilisation() const;
 
 
             // Sources
@@ -219,12 +195,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ReactingCloudI.H"
+#include "ReactingMultiphaseCloudI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ReactingCloud.C"
+#   include "ReactingMultiphaseCloud.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

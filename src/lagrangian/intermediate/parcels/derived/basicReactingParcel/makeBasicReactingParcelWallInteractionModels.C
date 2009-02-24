@@ -26,13 +26,13 @@ License
 
 #include "basicReactingParcel.H"
 #include "KinematicCloud.H"
+
 #include "Rebound.H"
 #include "StandardWallInteraction.H"
 
 namespace Foam
 {
     makeWallInteractionModel(KinematicCloud<basicReactingParcel>);
-//    makeWallInteractionModel(ReactingCloud<basicReactingParcel>);
 
     // Add instances of wall interaction model to the table
     makeWallInteractionModelType

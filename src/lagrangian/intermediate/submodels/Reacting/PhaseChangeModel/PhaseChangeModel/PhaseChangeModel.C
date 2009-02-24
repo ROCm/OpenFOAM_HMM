@@ -24,23 +24,55 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "ReactingCloud.H"
+#include "PhaseChangeModel.H"
 
-#include "NoSurfaceReaction.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CloudType>
+Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
+(
+    const dictionary& dict,
+    CloudType& owner,
+    const word& type
+)
+:   dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::PhaseChangeModel<CloudType>::~PhaseChangeModel()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+template<class CloudType>
+const CloudType& Foam::PhaseChangeModel<CloudType>::owner() const
 {
-    makeSurfaceReactionModel(ReactingCloud<basicReactingParcel>);
+    return owner_;
+}
 
-    // Add instances of surface reaction model to the table
-    makeSurfaceReactionModelType
-    (
-        NoSurfaceReaction,
-        ReactingCloud,
-        basicReactingParcel
-    );
-};
 
+template<class CloudType>
+const Foam::dictionary& Foam::PhaseChangeModel<CloudType>::dict() const
+{
+    return dict_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::PhaseChangeModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "NewPhaseChangeModel.C"
 
 // ************************************************************************* //
+

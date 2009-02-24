@@ -160,11 +160,7 @@ protected:
         //- Find the cell that contains the supplied position
         //  Will modify position slightly towards the owner cell centroid to
         //  ensure that it lies in a cell and not edge/face
-        virtual void findCellAtPosition
-        (
-            label& cellI,
-            vector& position
-        );
+        virtual void findCellAtPosition(label& cellI, vector& position);
 
         //- Set number of particles to inject given parcel properties
         scalar setNumberOfParticles

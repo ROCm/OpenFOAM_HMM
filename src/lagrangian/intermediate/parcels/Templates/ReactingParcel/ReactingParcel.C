@@ -100,12 +100,6 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     calcPhaseChange(td, dt, T0, T1, dMassMT);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate devolatilisation
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    calcDevolatilisation(td, dt, T0, T1, dMassMT);
-
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate surface reactions
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -236,12 +230,6 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
     calcPhaseChange(td, dt, T0, T1, dMassMT);
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate devolatilisation
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    calcDevolatilisation(td, dt, T0, T1, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~

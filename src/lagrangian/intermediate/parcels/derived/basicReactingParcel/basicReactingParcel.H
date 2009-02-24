@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class basicReactingParcel Declaration
+                    Class basicReactingParcel Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicReactingParcel
@@ -63,18 +63,15 @@ public:
         //- Construct from components
         basicReactingParcel
         (
-             ReactingCloud<basicReactingParcel>& owner,
-             const label typeId,
-             const vector& position,
-             const label celli,
-             const scalar d0,
-             const vector& U0,
-             const scalar nParticle0,
-             const scalarField& YGas0,
-             const scalarField& YLiquid0,
-             const scalarField& YSolid0,
-             const scalarField& YMixture0,
-             const constantProperties& constProps
+            ReactingCloud<basicReactingParcel>& owner,
+            const label typeId,
+            const vector& position,
+            const label celli,
+            const scalar d0,
+            const vector& U0,
+            const scalar nParticle0,
+            const scalarField& YMixture0,
+            const constantProperties& constProps
         );
 
         //- Construct from Istream
@@ -88,14 +85,12 @@ public:
         //- Construct and return a clone
         autoPtr<basicReactingParcel> clone() const
         {
-            return autoPtr<basicReactingParcel>
-                (new basicReactingParcel(*this));
+            return autoPtr<basicReactingParcel>(new basicReactingParcel(*this));
         }
 
 
-    // Destructors
-
-        virtual ~basicReactingParcel();
+    //- Destructor
+    virtual ~basicReactingParcel();
 };
 
 

@@ -22,38 +22,44 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedefs
+    Foam::cloudThermoTypes
+
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "ReactingCloud.H"
-#include "NoDevolatilisation.H"
-#include "ConstantRateDevolatilisation.H"
-#include "SingleKineticRateDevolatilisation.H"
+#ifndef ReactingCloudThermoTypes_H
+#define ReactingCloudThermoTypes_H
+
+#include "sutherlandTransport.H"
+#include "multiComponentMixture.H"
+#include "specie.H"
+#include "constTransport.H"
+#include "specieThermo.H"
+#include "hConstThermo.H"
+#include "janafThermo.H"
+#include "perfectGas.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeDevolatilisationModel(ReactingCloud<basicReactingParcel>);
+//    typedef multiComponentMixture<constTransport<specieThermo<hConstThermo<perfectGas> > > > specieProperties;
+//    typedef hConstThermo<perfectGas> specieProperties;
 
-    // Add instances of mass transfer model to the table
-    makeDevolatilisationModelType
-    (
-        NoDevolatilisation,
-        ReactingCloud,
-        basicReactingParcel
-    );
-    makeDevolatilisationModelType
-    (
-        ConstantRateDevolatilisation,
-        ReactingCloud,
-        basicReactingParcel
-    );
-    makeDevolatilisationModelType
-    (
-        SingleKineticRateDevolatilisation,
-        ReactingCloud,
-        basicReactingParcel
-    );
-};
+//    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
+//        specieProperties;
 
+    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
+        specieReactingProperties;
+
+    typedef constTransport<specieThermo<hConstThermo<perfectGas> > >
+        specieConstProperties;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

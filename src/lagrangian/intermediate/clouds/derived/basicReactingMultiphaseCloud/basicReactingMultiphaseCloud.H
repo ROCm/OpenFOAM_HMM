@@ -52,7 +52,6 @@ class basicReactingMultiphaseCloud
 :
     public ReactingCloud<basicReactingMultiphaseParcel>
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

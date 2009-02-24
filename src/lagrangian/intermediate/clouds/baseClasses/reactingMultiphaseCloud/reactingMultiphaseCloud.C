@@ -24,23 +24,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "ReactingCloud.H"
+#include "reactingMultiphaseCloud.H"
 
-#include "NoSurfaceReaction.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeSurfaceReactionModel(ReactingCloud<basicReactingParcel>);
+    defineTypeNameAndDebug(reactingMultiphaseCloud, 0);
+}
 
-    // Add instances of surface reaction model to the table
-    makeSurfaceReactionModelType
-    (
-        NoSurfaceReaction,
-        ReactingCloud,
-        basicReactingParcel
-    );
-};
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::reactingMultiphaseCloud::reactingMultiphaseCloud()
+{}
+
+
+// * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
+
+Foam::reactingMultiphaseCloud::~reactingMultiphaseCloud()
+{}
 
 
 // ************************************************************************* //

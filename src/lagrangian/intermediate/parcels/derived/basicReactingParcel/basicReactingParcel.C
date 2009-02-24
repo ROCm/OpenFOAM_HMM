@@ -47,9 +47,6 @@ Foam::basicReactingParcel::basicReactingParcel
     const scalar d0,
     const vector& U0,
     const scalar nParticle0,
-    const scalarField& YGas0,
-    const scalarField& YLiquid0,
-    const scalarField& YSolid0,
     const scalarField& YMixture0,
     const constantProperties& constProps
 )
@@ -63,9 +60,6 @@ Foam::basicReactingParcel::basicReactingParcel
         d0,
         U0,
         nParticle0,
-        YGas0,
-        YLiquid0,
-        YSolid0,
         YMixture0,
         constProps
     )

@@ -48,7 +48,6 @@ namespace Foam
 
 class kinematicCloud
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct

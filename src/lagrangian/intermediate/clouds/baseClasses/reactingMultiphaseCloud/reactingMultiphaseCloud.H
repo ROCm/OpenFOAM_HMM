@@ -22,25 +22,63 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::reactingMultiphaseCloud
+
+Description
+    Virtual abstract base class for templated reactingMultiphaseCloud
+
+SourceFiles
+
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "ReactingCloud.H"
+#ifndef reactingMultiphaseCloud_H
+#define reactingMultiphaseCloud_H
 
-#include "NoSurfaceReaction.H"
+#include "volFields.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeSurfaceReactionModel(ReactingCloud<basicReactingParcel>);
 
-    // Add instances of surface reaction model to the table
-    makeSurfaceReactionModelType
-    (
-        NoSurfaceReaction,
-        ReactingCloud,
-        basicReactingParcel
-    );
+/*---------------------------------------------------------------------------*\
+                  Class reactingMultiphaseCloud Declaration
+\*---------------------------------------------------------------------------*/
+
+class reactingMultiphaseCloud
+{
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        reactingMultiphaseCloud(const reactingMultiphaseCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const reactingMultiphaseCloud&);
+
+
+public:
+
+    //- Runtime type information
+    TypeName("reactingMultiphaseCloud");
+
+    // Constructors
+
+        //- Null constructor
+        reactingMultiphaseCloud();
+
+
+    //- Destructor
+    virtual ~reactingMultiphaseCloud();
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

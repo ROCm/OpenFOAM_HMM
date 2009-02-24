@@ -51,7 +51,6 @@ class basicReactingCloud
 :
     public ReactingCloud<basicReactingParcel>
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -82,8 +81,7 @@ public:
 
 
     //- Destructor
-
-        ~basicReactingCloud();
+    ~basicReactingCloud();
 
 
     // Member Functions

@@ -79,7 +79,6 @@ class KinematicParcel
 :
     public Particle<ParcelType>
 {
-
 public:
 
     //- Class to hold kinematic particle constant properties
@@ -183,7 +182,7 @@ public:
 
 protected:
 
-    // Protected member data
+    // Protected data
 
         // Parcel properties
 
@@ -447,8 +446,10 @@ public:
 
         // I-O
 
+            //- Read
             static void readFields(KinematicCloud<ParcelType>& c);
 
+            //- write
             static void writeFields(const KinematicCloud<ParcelType>& c);
 
 

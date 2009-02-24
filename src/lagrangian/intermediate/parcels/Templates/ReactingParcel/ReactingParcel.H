@@ -71,7 +71,6 @@ class ReactingParcel
 :
     public ThermoParcel<ParcelType>
 {
-
 public:
 
     //- Class to hold reacting particle constant properties

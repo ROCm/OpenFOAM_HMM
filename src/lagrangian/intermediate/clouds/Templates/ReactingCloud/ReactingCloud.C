@@ -25,8 +25,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactingCloud.H"
+
 #include "CompositionModel.H"
-#include "DevolatilisationModel.H"
+#include "PhaseChangeModel.H"
 #include "SurfaceReactionModel.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
@@ -91,9 +92,9 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             *this
         )
     ),
-    devolatilisationModel_
+    phaseChangeModel_
     (
-        DevolatilisationModel<ReactingCloud<ParcelType> >::New
+        PhaseChangeModel<ReactingCloud<ParcelType> >::New
         (
             this->particleProperties(),
             *this
@@ -161,37 +162,37 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     const volScalarField cp = carrierThermo_.Cp();
     const volScalarField& p = carrierThermo_.p();
 
-    autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         this->rho()
     );
 
-    autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
+    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
     (
         this->interpolationSchemes(),
         this->U()
     );
 
-    autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         this->mu()
     );
 
-    autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         T
     );
 
-    autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         cp
     );
 
-    autoPtr<interpolation<scalar> > pInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > pInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         p
@@ -201,12 +202,12 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     (
         *this,
         constProps_,
-        rhoInterpolator(),
-        UInterpolator(),
-        muInterpolator(),
-        TInterpolator(),
-        cpInterpolator(),
-        pInterpolator(),
+        rhoInterp(),
+        UInterp(),
+        muInterp(),
+        TInterp(),
+        cpInterp(),
+        pInterp(),
         this->g().value()
     );
 

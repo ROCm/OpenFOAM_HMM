@@ -26,11 +26,15 @@ License
 
 #include "basicReactingMultiphaseParcel.H"
 #include "ReactingCloud.H"
+
 #include "NoSurfaceReaction.H"
 
 namespace Foam
 {
-    makeSurfaceReactionModel(ReactingCloud<basicReactingMultiphaseParcel>);
+    makeSurfaceReactionModel
+    (
+        ReactingCloud<basicReactingMultiphaseParcel>
+    );
 
     // Add instances of surface reaction model to the table
     makeSurfaceReactionModelType

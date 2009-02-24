@@ -25,12 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "KinematicCloud.H"
+#include "IntegrationScheme.H"
+#include "interpolation.H"
+
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
 #include "WallInteractionModel.H"
-#include "IntegrationScheme.H"
-#include "interpolation.H"
 
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //

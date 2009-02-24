@@ -24,23 +24,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "ReactingCloud.H"
+#include "NoPhaseChange.H"
 
-#include "NoSurfaceReaction.H"
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
+template <class CloudType>
+Foam::NoPhaseChange<CloudType>::NoPhaseChange
+(
+    const dictionary& dict,
+    CloudType& cloud
+)
+:
+    PhaseChangeModel<CloudType>(dict, cloud, typeName)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template <class CloudType>
+Foam::NoPhaseChange<CloudType>::~NoPhaseChange()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::NoPhaseChange<CloudType>::active() const
 {
-    makeSurfaceReactionModel(ReactingCloud<basicReactingParcel>);
+    return false;
+}
 
-    // Add instances of surface reaction model to the table
-    makeSurfaceReactionModelType
-    (
-        NoSurfaceReaction,
-        ReactingCloud,
-        basicReactingParcel
-    );
-};
+
+template<class CloudType>
+Foam::scalar Foam::NoPhaseChange<CloudType>::calculate
+(
+    const scalar,
+    const scalarField&,
+    const scalar
+) const
+{
+    // Nothing to do...
+    return 0.0;
+}
 
 
 // ************************************************************************* //

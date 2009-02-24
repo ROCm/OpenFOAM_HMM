@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicReactingMultiphaseParcel.H"
-#include "ReactingCloud.H"
+#include "ReactingMultiphaseCloud.H"
 
 namespace Foam
 {
@@ -69,8 +69,8 @@ namespace Foam
     );
 //    defineTemplateTypeNameAndDebug
 //    (
-//      KinematicCloud<basicReactingMultiphaseParcel>,
-//      0
+//        KinematicCloud<basicReactingMultiphaseParcel>,
+//        0
 //    );
 
     defineParcelTypeNameAndDebug
@@ -92,6 +92,17 @@ namespace Foam
 //    defineTemplateTypeNameAndDebug
 //    (
 //        ReactingCloud<basicReactingMultiphaseParcel>,
+//        0
+//    );
+
+    defineParcelTypeNameAndDebug
+    (
+        ReactingMultiphaseCloud<basicReactingMultiphaseParcel>,
+        0
+    );
+//    defineTemplateTypeNameAndDebug
+//    (
+//        ReactingMultiphaseCloud<basicReactingMultiphaseParcel>,
 //        0
 //    );
 

@@ -72,7 +72,6 @@ class ThermoParcel
 :
     public KinematicParcel<ParcelType>
 {
-
 public:
 
     //- Class to hold thermo particle constant properties
@@ -306,8 +305,10 @@ public:
 
         // I-O
 
+            //- Read
             static void readFields(ThermoCloud<ParcelType>& c);
 
+            //- Write
             static void writeFields(const ThermoCloud<ParcelType>& c);
 
 

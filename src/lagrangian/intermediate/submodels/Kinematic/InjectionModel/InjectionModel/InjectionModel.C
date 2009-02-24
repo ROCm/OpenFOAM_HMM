@@ -130,10 +130,10 @@ template<class CloudType>
 Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 (
     const label parcels,
-    const scalar volume
+    const scalar volume,
     const scalar volumeFraction,
     const scalar diameter,
-    const scalar rho,
+    const scalar rho
 )
 {
     scalar nP = 0.0;
@@ -330,8 +330,9 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
         else
         {
             WarningIn("Foam::InjectionModel<CloudType>::inject(TrackData& td)")
-                << "Failed to inject new parcel:" <<
-                << "    id = " << iParcel << ", position = " pos << nl << endl;
+                << "Failed to inject new parcel:" << nl
+                << "    id = " << iParcel << ", position = " << pos
+                << nl << endl;
         }
     }
 

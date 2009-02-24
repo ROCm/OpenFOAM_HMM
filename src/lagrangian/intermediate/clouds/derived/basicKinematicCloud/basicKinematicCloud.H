@@ -52,7 +52,6 @@ class basicKinematicCloud
 :
     public KinematicCloud<basicKinematicParcel>
 {
-
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -82,8 +81,7 @@ public:
 
 
     //- Destructor
-
-        ~basicKinematicCloud();
+    ~basicKinematicCloud();
 
 
     // Member functions

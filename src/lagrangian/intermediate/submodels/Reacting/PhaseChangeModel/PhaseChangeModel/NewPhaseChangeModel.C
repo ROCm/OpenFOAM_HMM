@@ -24,22 +24,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicKinematicParcel.H"
-#include "KinematicCloud.H"
-#include "NoHeatTransfer.H"
+#include "PhaseChangeModel.H"
 
-namespace Foam
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::autoPtr<Foam::PhaseChangeModel<CloudType> >
+Foam::PhaseChangeModel<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner
+)
 {
-    makeHeatTransferModel(KinematicCloud<basicKinematicParcel>);
+    word PhaseChangeModelType(dict.lookup("PhaseChangeModel"));
 
-    // Add instances of heat transfer model to the table
-    makeHeatTransferModelType
-    (
-        NoHeatTransfer,
-        KinematicCloud,
-        basicKinematicParcel
-    );
-};
+    Info<< "Selecting PhaseChangeModel " << PhaseChangeModelType << endl;
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(PhaseChangeModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "PhaseChangeModel<CloudType>::New\n"
+            "(\n"
+            "    const dictionary&,\n"
+            "    CloudType&\n"
+            ")"
+        )
+            << "Unknown PhaseChangeModelType type "
+            << PhaseChangeModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid PhaseChangeModel types are :" << nl
+            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+    }
+
+    return autoPtr<PhaseChangeModel<CloudType> >(cstrIter()(dict, owner));
+}
 
 
 // ************************************************************************* //

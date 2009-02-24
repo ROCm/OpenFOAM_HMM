@@ -26,6 +26,7 @@ License
 
 #include "basicReactingMultiphaseParcel.H"
 #include "KinematicCloud.H"
+
 #include "NoDrag.H"
 #include "SphereDrag.H"
 
@@ -35,7 +36,12 @@ namespace Foam
 
     // Add instances of drag model to the table
     makeDragModelType(NoDrag, KinematicCloud, basicReactingMultiphaseParcel);
-    makeDragModelType(SphereDrag, KinematicCloud, basicReactingMultiphaseParcel);
+    makeDragModelType
+    (
+        SphereDrag,
+        KinematicCloud,
+        basicReactingMultiphaseParcel
+    );
 };
 
 

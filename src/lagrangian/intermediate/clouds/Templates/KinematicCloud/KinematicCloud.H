@@ -84,9 +84,6 @@ class KinematicCloud
     public Cloud<ParcelType>,
     public kinematicCloud
 {
-
-private:
-
     // Private data
 
         //- Cloud type - used to set the name of the parcel properties
