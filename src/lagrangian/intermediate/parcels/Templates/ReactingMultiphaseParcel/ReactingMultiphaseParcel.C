@@ -24,28 +24,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ReactingParcel.H"
+#include "ReactingMultiphaseParcel.H"
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ReactingParcel<ParcelType>::updateCellQuantities
+void Foam::ReactingMultiphaseParcel<ParcelType>::updateCellQuantities
 (
     TrackData& td,
     const scalar dt,
     const label celli
 )
 {
-    ThermoParcel<ParcelType>::updateCellQuantities(td, dt, celli);
-
-    pc_ = td.pInterp().interpolate(this->position(), celli);
+    ReactingParcel<ParcelType>::updateCellQuantities(td, dt, celli);
 }
 
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ReactingParcel<ParcelType>::calcCoupled
+void Foam::ReactingMultiphaseParcel<ParcelType>::calcCoupled
 (
     TrackData& td,
     const scalar dt,
@@ -60,6 +58,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     const scalar cp0 = this->cp_;
     const scalar np0 = this->nParticle_;
     const scalar T0 = this->T_;
+    scalarList& YMix = this->YMixture_;
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     // Initialise transfer terms
@@ -94,14 +93,8 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate phase change
-    // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T0, T1, dMassMT);
-
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate devolatilisation
+    // Calculate Devolatilisation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     calcDevolatilisation(td, dt, T0, T1, dMassMT);
 
@@ -118,10 +111,28 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // New total mass
     const scalar mass1 = mass0 - sum(dMassMT) - sum(dMassSR);
 
+    // Correct particle temperature to account for latent heat of
+    // devolatilisation
+    T1 -=
+        td.constProps().Ldevol()
+       *sum(dMassMT)
+       /(0.5*(mass0 + mass1)*cp0);
+
     // Add retained enthalpy from surface reaction to particle and remove
     // from gas
     T1 += dhRet/(0.5*(mass0 + mass1)*cp0);
     dhTrans -= dhRet;
+
+    // Correct dhTrans to account for enthalpy of evolved volatiles
+    dhTrans +=
+        sum(dMassMT)
+       *td.cloud().composition().HGas(YGas_, 0.5*(T0 + T1));
+
+    // Correct dhTrans to account for enthalpy of consumed solids
+    dhTrans +=
+        sum(dMassSR)
+       *td.cloud().composition().HSolid(YSolid_, 0.5*(T0 + T1));
+
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
     // Accumulate source terms
@@ -159,6 +170,12 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
         {
             td.cloud().rhoTrans(i)[celli] += np0*dMassMT[i];
         }
+        td.cloud().hTrans()[celli] +=
+            np0*mass1
+           *(
+                YMix[0]*td.cloud().composition().HGas(YGas_, T1)
+              + YMix[2]*td.cloud().composition().HSolid(YSolid_, T1)
+            );
         td.cloud().UTrans()[celli] += np0*mass1*U1;
     }
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -168,7 +185,10 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     {
         this->U_ = U1;
         this->T_ = T1;
-        //        this->cp_ = ??? // TODO:
+        this->cp_ =
+            YMix[0]*td.cloud().composition().cpGas(YGas_, T1)
+          + YMix[1]*td.cloud().composition().cpLiquid(YLiquid_, this->pc_, T1)
+          + YMix[2]*td.cloud().composition().cpSolid(YSolid_);
 
         // Update particle density or diameter
         if (td.constProps().constantVolume())
@@ -185,7 +205,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ReactingParcel<ParcelType>::calcUncoupled
+void Foam::ReactingMultiphaseParcel<ParcelType>::calcUncoupled
 (
     TrackData& td,
     const scalar dt,
@@ -198,6 +218,7 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     const scalar T0 = this->T_;
     const scalar mass0 = this->mass();
     const scalar cp0 = this->cp_;
+    scalarList& YMix = this->YMixture_;
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     // Initialise transfer terms
@@ -232,14 +253,8 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate phase change
-    // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T0, T1, dMassMT);
-
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate devolatilisation
+    // Calculate Devolatilisation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     calcDevolatilisation(td, dt, T0, T1, dMassMT);
 
@@ -257,7 +272,10 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     const scalar mass1 = mass0 - sum(dMassMT) - sum(dMassSR);
 
     // New specific heat capacity
-    const scalar cp1 = cp0; // TODO: new cp1
+    const scalar cp1 =
+        YMix[0]*td.cloud().composition().cpGas(YGas_, T1)
+      + YMix[1]*td.cloud().composition().cpLiquid(YLiquid_, this->pc_, T1)
+      + YMix[2]*td.cloud().composition().cpSolid(YSolid_);
 
     // Add retained enthalpy to particle
     T1 += dhRet/(mass0*0.5*(cp0 + cp1));
@@ -293,7 +311,7 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ReactingParcel<ParcelType>::calcPhaseChange
+void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
 (
     TrackData& td,
     const scalar dt,
@@ -302,29 +320,54 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalarList& dMassMT
 )
 {
-    //    if (!td.cloud().phaseChange().active())
+    if (td.cloud().composition().YMixture0()[1]>SMALL)
+    {
+        notImplemented
+        (
+            "void Foam::ReactingMultiphaseParcel<ParcelType>::"
+            "calcDevolatilisation \n"
+            "("
+            "    TrackData&,\n"
+            "    const scalar,\n"
+            "    const scalar,\n"
+            "    const scalar,\n"
+            "    scalarList&\n"
+            ")\n"
+            "no treatment currently available for particles containing "
+            "liquid species"
+        )
+    }
+
+    // Check that model is active, and that the parcel temperature is
+    // within necessary limits for devolatilisation to occur
+    if
+    (
+        !td.cloud().devolatilisation().active()
+     || this->T_<td.constProps().Tvap()
+     || this->T_<td.constProps().Tbp()
+    )
     {
         return;
     }
 
-    /*
     // Determine mass to add to carrier phase
     const scalar mass = this->mass();
+    scalarList& YMix = this->YMixture_;
     const scalar dMassTot = td.cloud().devolatilisation().calculate
     (
         dt,
-        mass0_,
+        this->mass0_,
         mass,
         td.cloud().composition().YMixture0(),
-        YMixture_,
+        YMix,
         T0,
         canCombust_
     );
 
     // Update (total) mass fractions
-    YMixture_[0] = (YMixture_[0]*mass - dMassTot)/(mass - dMassTot);
-    YMixture_[1] = YMixture_[1]*mass/(mass - dMassTot);
-    YMixture_[2] = 1.0 - YMixture_[0] - YMixture_[1];
+    YMix[0] = (YMix[0]*mass - dMassTot)/(mass - dMassTot);
+    YMix[1] = YMix[1]*mass/(mass - dMassTot);
+    YMix[2] = 1.0 - YMix[0] - YMix[1];
 
     // Add to cummulative mass transfer
     forAll (YGas_, i)
@@ -335,13 +378,56 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         scalar volatileMass = YGas_[i]*dMassTot;
         dMassMT[id] += volatileMass;
     }
-        */
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
+(
+    TrackData& td,
+    const scalar dt,
+    const label celli,
+    const scalar T0,
+    const scalar T1,
+    const scalarList& dMassMT,
+    scalarList& dMassSR,
+    scalar& dhRet
+)
+{
+    // Check that model is active
+    if (!td.cloud().surfaceReaction().active() || !canCombust_)
+    {
+        return;
+    }
+
+    // Update mass transfer(s)
+    // - Also updates Y()'s
+    td.cloud().surfaceReaction().calculate
+    (
+        dt,
+        celli,
+        this->d_,
+        T0,
+        T1,
+        this->Tc_,
+        this->pc_,
+        this->rhoc_,
+        this->mass(),
+        dMassMT,
+        YGas_,
+        YLiquid_,
+        YSolid_,
+        this->YMixture_,
+        dMassSR,
+        dhRet
+    );
 }
 
 
 // * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
 
-#include "ReactingParcelIO.C"
+#include "ReactingMultiphaseParcelIO.C"
 
 // ************************************************************************* //
 

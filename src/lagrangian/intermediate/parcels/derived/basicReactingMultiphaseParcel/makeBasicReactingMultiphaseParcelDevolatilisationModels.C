@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
+#include "basicReactingMultiphaseParcel.H"
 #include "ReactingCloud.H"
 #include "NoDevolatilisation.H"
 #include "ConstantRateDevolatilisation.H"
@@ -32,26 +32,26 @@ License
 
 namespace Foam
 {
-    makeDevolatilisationModel(ReactingCloud<basicReactingParcel>);
+    makeDevolatilisationModel(ReactingCloud<basicReactingMultiphaseParcel>);
 
     // Add instances of mass transfer model to the table
     makeDevolatilisationModelType
     (
         NoDevolatilisation,
         ReactingCloud,
-        basicReactingParcel
+        basicReactingMultiphaseParcel
     );
     makeDevolatilisationModelType
     (
         ConstantRateDevolatilisation,
         ReactingCloud,
-        basicReactingParcel
+        basicReactingMultiphaseParcel
     );
     makeDevolatilisationModelType
     (
         SingleKineticRateDevolatilisation,
         ReactingCloud,
-        basicReactingParcel
+        basicReactingMultiphaseParcel
     );
 };
 

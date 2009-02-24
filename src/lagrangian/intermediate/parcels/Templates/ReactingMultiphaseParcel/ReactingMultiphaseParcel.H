@@ -23,29 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::ReactingParcel
+    Foam::ReactingMultiphaseParcel
 
 Description
-    Reacting parcel class with one/two-way coupling with the continuous
-    phase.
+    Multiphase variant of the reacting parcel class with one/two-way coupling
+    with the continuous phase.
 
 SourceFiles
-    ReactingParcelI.H
-    ReactingParcel.C
-    ReactingParcelIO.C
+    ReactingMultiphaseParcelI.H
+    ReactingMultiphaseParcel.C
+    ReactingMultiphaseParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ReactingParcel_H
-#define ReactingParcel_H
+#ifndef ReactingMultiphaseParcel_H
+#define ReactingMultiphaseParcel_H
 
-#include "IOstream.H"
-#include "autoPtr.H"
-#include "interpolationCellPoint.H"
-#include "contiguous.H"
-
-#include "ThermoParcel.H"
-#include "ReactingCloud.H"
+#include "ReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,23 +47,23 @@ namespace Foam
 {
 
 template<class ParcelType>
-class ReactingParcel;
+class ReactingMultiphaseParcel;
 
 template<class ParcelType>
 Ostream& operator<<
 (
     Ostream&,
-    const ReactingParcel<ParcelType>&
+    const ReactingMultiphaseParcel<ParcelType>&
 );
 
 /*---------------------------------------------------------------------------*\
-                        Class ReactingParcel Declaration
+                 Class ReactingMultiphaseParcel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParcelType>
-class ReactingParcel
+class ReactingMultiphaseParcel
 :
-    public ThermoParcel<ParcelType>
+    public ReactingParcel<ParcelType>
 {
 
 public:
@@ -77,12 +71,18 @@ public:
     //- Class to hold reacting particle constant properties
     class constantProperties
     :
-        public ThermoParcel<ParcelType>::constantProperties
+        public ReactingParcel<ParcelType>::constantProperties
     {
         // Private data
 
-            //- Constant volume flag - e.g. during mass transfer
-            Switch constantVolume_;
+            //- Vapourisation temperature [K]
+            const scalar Tvap_;
+
+            //- Boiling point [K]
+            const scalar Tbp_;
+
+            //- Latent heat of devolatilisation [J/kg]
+            const scalar Ldevol_;
 
 
     public:
@@ -92,27 +92,26 @@ public:
 
         // Access
 
-            //- Return const access to the constant volume flag
-            inline Switch constantVolume() const;
+            //- Return const access to the vapourisation temperature
+            inline scalar Tvap() const;
+
+            //- Return const access to the boiling point
+            inline scalar Tbp() const;
+
+            //- Return const access to the latent heat of devolatilisation
+            inline scalar Ldevol() const;
     };
 
 
     //- Class used to pass reacting tracking data to the trackToFace function
     class trackData
     :
-        public ThermoParcel<ParcelType>::trackData
+        public ReactingParcel<ParcelType>::trackData
     {
-
         // Private data
-
-            //- Reference to the cloud containing this particle
-            ReactingCloud<ParcelType>& cloud_;
 
             //- Particle constant properties
             const constantProperties& constProps_;
-
-            //- Interpolator for continuous phase pressure field
-            const interpolation<scalar>& pInterp_;
 
 
     public:
@@ -136,15 +135,8 @@ public:
 
         // Member functions
 
-            //- Return access to the owner cloud
-            inline ReactingCloud<ParcelType>& cloud();
-
             //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
-
-            //- Return conat access to the interpolator for continuous
-            //  phase pressure field
-            inline const interpolation<scalar>& pInterp() const;
     };
 
 
@@ -154,24 +146,25 @@ protected:
 
         // Parcel properties
 
-            //- Initial particle mass [kg]
-            scalar mass0_;
+            //- Mass fractions of gases []
+            scalarField YGas_;
 
-            //- Mass fractions of mixture []
-            scalarField YMixture_;
+            //- Mass fractions of liquids []
+            scalarField YLiquid_;
 
+            //- Mass fractions of solids []
+            scalarField YSolid_;
 
-        // Cell-based quantities
-
-            //- Pressure [Pa]
-            scalar pc_;
+            //- Flag to say that the particle is allowed to combust
+            //  Only true after volatile content falls below threshold value
+            bool canCombust_;
 
 
     // Protected member functions
 
-        //- Calculate Phase change
+        //- Calculate Devolatilisation
         template<class TrackData>
-        void calcPhaseChange
+        void calcDevolatilisation
         (
             TrackData& td,
             const scalar dt,
@@ -180,11 +173,25 @@ protected:
             scalarList& dMassMT
         );
 
+        //- Calculate surface reactions
+        template<class TrackData>
+        void calcSurfaceReactions
+        (
+            TrackData& td,
+            const scalar dt,
+            const label celli,
+            const scalar T0,
+            const scalar T1,
+            const scalarList& dMassMT,
+            scalarList& dMassSR,
+            scalar& dhRet
+        );
+
 
 public:
 
     //- Runtime type information
-    TypeName("ReactingParcel");
+    TypeName("ReactingMultiphaseParcel");
 
     friend class Cloud<ParcelType>;
 
@@ -192,7 +199,7 @@ public:
     // Constructors
 
         //- Construct from components
-        inline ReactingParcel
+        inline ReactingMultiphaseParcel
         (
             ReactingCloud<ParcelType>& owner,
             const label typeId,
@@ -201,12 +208,15 @@ public:
             const scalar d0,
             const vector& U0,
             const scalar nParticle0,
+            const scalarField& YGas0,
+            const scalarField& YLiquid0,
+            const scalarField& YSolid0,
             const scalarField& YMixture0,
             const constantProperties& constProps
         );
 
         //- Construct from Istream
-        ReactingParcel
+        ReactingMultiphaseParcel
         (
             const Cloud<ParcelType>& c,
             Istream& is,
@@ -216,7 +226,10 @@ public:
         //- Construct and return a clone
         autoPtr<ParcelType> clone() const
         {
-            return autoPtr<ParcelType>(new ReactingParcel<ParcelType>(*this));
+            return autoPtr<ParcelType>
+            (
+                new ReactingMultiphaseParcel<ParcelType>(*this)
+            );
         }
 
 
@@ -224,23 +237,26 @@ public:
 
         // Access
 
-            //- Return const access to initial mass
-            inline scalar mass0() const;
+            //- Return const access to mass fractions of gases
+            inline const scalarField& YGas() const;
 
-            //- Return const access to mass fractions of mixture
-            inline const scalarField& YMixture() const;
+            //- Return const access to mass fractions of liquids
+            inline const scalarField& YLiquid() const;
 
-            //- Return the owner cell pressure
-            inline scalar pc() const;
+            //- Return const access to mass fractions of solids
+            inline const scalarField& YSolid() const;
 
 
         // Edit
 
-            //- Return access to initial mass
-            inline scalar& mass0();
+            //- Return access to mass fractions of gases
+            inline scalarField& YGas();
 
-            //- Return access to mass fractions of mixture
-            inline scalarField& YMixture();
+            //- Return access to mass fractions of liquids
+            inline scalarField& YLiquid();
+
+            //- Return access to mass fractions of solids
+            inline scalarField& YSolid();
 
 
         // Main calculation loop
@@ -278,8 +294,8 @@ public:
             //- Read
             static void readFields(ReactingCloud<ParcelType>& c);
 
-            //- Write
-            static void writeFields(const ReactingCloud<ParcelType>& c);
+        //- Write
+        static void writeFields(const ReactingCloud<ParcelType>& c);
 
 
     // Ostream Operator
@@ -287,7 +303,7 @@ public:
         friend Ostream& operator<< <ParcelType>
         (
             Ostream&,
-            const ReactingParcel<ParcelType>&
+            const ReactingMultiphaseParcel<ParcelType>&
         );
 };
 
@@ -298,12 +314,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ReactingParcelI.H"
+#include "ReactingMultiphaseParcelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "ReactingParcel.C"
+    #include "ReactingMultiphaseParcel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

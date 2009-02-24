@@ -27,18 +27,21 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
+inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+constantProperties
 (
     const dictionary& dict
 )
 :
-    ThermoParcel<ParcelType>::constantProperties(dict),
-    constantVolume_(dict.lookup("constantVolume"))
+    ReactingParcel<ParcelType>::constantProperties(dict),
+    Tvap_(dimensionedScalar(dict.lookup("Tvap")).value()),
+    Tbp_(dimensionedScalar(dict.lookup("Tbp")).value()),
+    Ldevol_(dimensionedScalar(dict.lookup("Ldevol")).value())
 {}
 
 
 template<class ParcelType>
-inline Foam::ReactingParcel<ParcelType>::trackData::trackData
+inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
 (
     ReactingCloud<ParcelType>& cloud,
     const constantProperties& constProps,
@@ -51,7 +54,7 @@ inline Foam::ReactingParcel<ParcelType>::trackData::trackData
     const vector& g
 )
 :
-    ThermoParcel<ParcelType>::trackData
+    ReactingParcel<ParcelType>::trackData
     (
         cloud,
         constProps,
@@ -60,16 +63,14 @@ inline Foam::ReactingParcel<ParcelType>::trackData::trackData
         muInterp,
         TInterp,
         CpInterp,
+        pInterp,
         g
-    ),
-    cloud_(cloud),
-    constProps_(constProps),
-    pInterp_(pInterp)
+    )
 {}
 
 
 template<class ParcelType>
-inline Foam::ReactingParcel<ParcelType>::ReactingParcel
+inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
     ReactingCloud<ParcelType>& owner,
     const label typeId,
@@ -78,11 +79,14 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     const scalar d0,
     const vector& U0,
     const scalar nParticle0,
+    const scalarField& YGas0,
+    const scalarField& YLiquid0,
+    const scalarField& YSolid0,
     const scalarField& YMixture0,
     const constantProperties& constProps
 )
 :
-    ThermoParcel<ParcelType>
+    ReactingParcel<ParcelType>
     (
         owner,
         typeId,
@@ -91,88 +95,96 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
         d0,
         U0,
         nParticle0,
+        YMixture0,
         constProps
     ),
-    mass0_(0.0),
-    YMixture_(YMixture0),
-    pc_(0.0)
-{
-    // Set initial parcel mass
-    mass0_ = this->mass();
-}
+    YGas_(YGas0),
+    YLiquid_(YLiquid0),
+    YSolid_(YSolid0)
+{}
 
 
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
 
 template<class ParcelType>
-inline Foam::Switch
-Foam::ReactingParcel<ParcelType>::constantProperties::constantVolume() const
+inline Foam::scalar
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Tvap() const
 {
-    return constantVolume_;
+    return Tvap_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Tbp() const
+{
+    return Tbp_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Ldevol() const
+{
+    return Ldevol_;
 }
 
 
 // * * * * * * * * * * * trackData Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline Foam::ReactingCloud<ParcelType>&
-Foam::ReactingParcel<ParcelType>::trackData::cloud()
-{
-    return cloud_;
-}
-
-
-template<class ParcelType>
-inline const typename Foam::ReactingParcel<ParcelType>::constantProperties&
-Foam::ReactingParcel<ParcelType>::trackData::constProps() const
+inline const typename Foam::ReactingMultiphaseParcel<ParcelType>::
+constantProperties&
+Foam::ReactingMultiphaseParcel<ParcelType>::trackData::constProps() const
 {
     return constProps_;
-}
-
-
-template<class ParcelType>
-inline const Foam::interpolation<Foam::scalar>&
-Foam::ReactingParcel<ParcelType>::trackData::pInterp() const
-{
-    return pInterp_;
 }
 
 
 // * * * * * * * * * * ThermoParcel Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline Foam::scalar Foam::ReactingParcel<ParcelType>::mass0() const
+inline const Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::
+YGas() const
 {
-    return mass0_;
+    return YGas_;
 }
 
 
 template<class ParcelType>
-inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::
-YMixture() const
+inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YGas()
 {
-    return YMixture_;
+    return YGas_;
 }
 
 
 template<class ParcelType>
-inline Foam::scalar Foam::ReactingParcel<ParcelType>::pc() const
+inline const Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::
+YLiquid() const
 {
-    return pc_;
+    return YLiquid_;
 }
 
 
 template<class ParcelType>
-inline Foam::scalar& Foam::ReactingParcel<ParcelType>::mass0()
+inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YLiquid()
 {
-    return mass0_;
+    return YLiquid_;
 }
 
 
 template<class ParcelType>
-inline Foam::scalarField& Foam::ReactingParcel<ParcelType>::YMixture()
+inline const Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::
+YSolid() const
 {
-    return YMixture_;
+    return YSolid_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YSolid()
+{
+    return YSolid_;
 }
 
 

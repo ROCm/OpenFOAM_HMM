@@ -24,36 +24,54 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "ReactingCloud.H"
-#include "NoDevolatilisation.H"
-#include "ConstantRateDevolatilisation.H"
-#include "SingleKineticRateDevolatilisation.H"
+#include "basicReactingMultiphaseCloud.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeDevolatilisationModel(ReactingCloud<basicReactingParcel>);
-
-    // Add instances of mass transfer model to the table
-    makeDevolatilisationModelType
-    (
-        NoDevolatilisation,
-        ReactingCloud,
-        basicReactingParcel
-    );
-    makeDevolatilisationModelType
-    (
-        ConstantRateDevolatilisation,
-        ReactingCloud,
-        basicReactingParcel
-    );
-    makeDevolatilisationModelType
-    (
-        SingleKineticRateDevolatilisation,
-        ReactingCloud,
-        basicReactingParcel
-    );
+    defineTypeNameAndDebug(basicReactingMultiphaseCloud, 0);
 };
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
+(
+    const word& cloudType,
+    const volScalarField& rho,
+    const volVectorField& U,
+    const dimensionedVector& g,
+    hCombustionThermo& thermo,
+    PtrList<specieReactingProperties>& gases
+)
+:
+    ReactingCloud<basicReactingMultiphaseParcel>
+    (
+        cloudType,
+        rho,
+        U,
+        g,
+        thermo,
+        gases
+    )
+{
+    basicReactingMultiphaseParcel::readFields(*this);
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::basicReactingMultiphaseCloud::~basicReactingMultiphaseCloud()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::basicReactingMultiphaseCloud::writeFields() const
+{
+    basicReactingMultiphaseParcel::writeFields(*this);
+}
 
 
 // ************************************************************************* //
