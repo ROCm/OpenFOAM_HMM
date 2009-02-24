@@ -51,7 +51,6 @@ class GradientDispersionRAS
 :
     public DispersionRASModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -68,9 +67,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~GradientDispersionRAS();
+    //- Destructor
+    virtual ~GradientDispersionRAS();
 
 
     // Member Functions

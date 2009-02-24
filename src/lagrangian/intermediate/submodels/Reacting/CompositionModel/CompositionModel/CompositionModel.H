@@ -61,7 +61,6 @@ namespace Foam
 template<class CloudType>
 class CompositionModel
 {
-
     // Private data
 
         //- The cloud dictionary
@@ -116,18 +115,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~CompositionModel();
 
-        virtual ~CompositionModel();
 
-
-    // Selector
-
-        static autoPtr<CompositionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<CompositionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Member Functions

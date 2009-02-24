@@ -48,7 +48,6 @@ class NoHeatTransfer
 :
     public HeatTransferModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -65,9 +64,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoHeatTransfer();
+    //- Destructor
+    virtual ~NoHeatTransfer();
 
 
     // Member Functions

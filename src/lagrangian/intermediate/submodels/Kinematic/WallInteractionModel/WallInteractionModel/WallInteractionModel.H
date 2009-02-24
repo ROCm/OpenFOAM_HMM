@@ -54,7 +54,6 @@ namespace Foam
 template<class CloudType>
 class WallInteractionModel
 {
-
     // Private data
 
         //- The cloud dictionary
@@ -97,18 +96,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~WallInteractionModel();
 
-        virtual ~WallInteractionModel();
 
-
-    // Selector
-
-        static autoPtr<WallInteractionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<WallInteractionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access

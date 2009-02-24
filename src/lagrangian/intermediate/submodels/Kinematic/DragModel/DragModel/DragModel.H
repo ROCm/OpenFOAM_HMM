@@ -25,7 +25,6 @@ License
 Class
     Foam::DragModel
 
-
 Description
     Templated drag model class
 
@@ -54,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class DragModel
 {
-
     // Private data
 
         //- The cloud dictionary
@@ -93,18 +91,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~DragModel();
 
-        virtual ~DragModel();
 
-
-    // Selector
-
-        static autoPtr<DragModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+    //- Selector
+    static autoPtr<DragModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& cloud
+    );
 
 
     // Access

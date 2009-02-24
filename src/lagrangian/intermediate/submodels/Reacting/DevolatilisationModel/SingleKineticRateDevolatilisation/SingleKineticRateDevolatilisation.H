@@ -48,7 +48,6 @@ class SingleKineticRateDevolatilisation
 :
     public DevolatilisationModel<CloudType>
 {
-
     // Private data
 
         // Model constants
@@ -81,9 +80,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~SingleKineticRateDevolatilisation();
+    //- Destructor
+    virtual ~SingleKineticRateDevolatilisation();
 
 
     // Member Functions

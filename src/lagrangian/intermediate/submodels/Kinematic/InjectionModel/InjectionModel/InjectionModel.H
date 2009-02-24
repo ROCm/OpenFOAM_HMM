@@ -25,7 +25,6 @@ License
 Class
     Foam::InjectionModel
 
-
 Description
     Templated injection model class
 
@@ -54,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class InjectionModel
 {
-
 public:
 
     // Enumerations

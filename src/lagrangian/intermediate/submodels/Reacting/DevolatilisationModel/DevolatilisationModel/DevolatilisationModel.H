@@ -53,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class DevolatilisationModel
 {
-
 protected:
 
     // Protected data
@@ -98,18 +97,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~DevolatilisationModel();
 
-        virtual ~DevolatilisationModel();
 
-
-    // Selector
-
-        static autoPtr<DevolatilisationModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<DevolatilisationModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access

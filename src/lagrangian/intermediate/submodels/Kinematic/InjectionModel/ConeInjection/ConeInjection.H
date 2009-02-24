@@ -65,7 +65,6 @@ class ConeInjection
 :
     public InjectionModel<CloudType>
 {
-
     // Private data
 
         //- Coefficients dictionary
@@ -143,9 +142,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~ConeInjection();
+    //- Destructor
+    virtual ~ConeInjection();
 
 
     // Member Functions

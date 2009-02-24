@@ -49,7 +49,6 @@ class ConstantRateDevolatilisation
 :
     public DevolatilisationModel<CloudType>
 {
-
     // Private data
 
         // Model constants
@@ -79,9 +78,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~ConstantRateDevolatilisation();
+    //- Destructor
+    virtual ~ConstantRateDevolatilisation();
 
 
     // Member Functions

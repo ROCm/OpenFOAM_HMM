@@ -40,7 +40,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                            Class NoSurfaceReaction Declaration
+                     Class NoSurfaceReaction Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -48,7 +48,6 @@ class NoSurfaceReaction
 :
     public SurfaceReactionModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -65,9 +64,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoSurfaceReaction();
+    //- Destructor
+    virtual ~NoSurfaceReaction();
 
 
     // Member Functions

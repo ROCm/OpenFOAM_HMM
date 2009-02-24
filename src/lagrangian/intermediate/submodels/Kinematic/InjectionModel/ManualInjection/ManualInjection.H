@@ -64,7 +64,6 @@ class ManualInjection
 :
     public InjectionModel<CloudType>
 {
-
     // Private data
 
         //- Coefficients dictionary
@@ -124,9 +123,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~ManualInjection();
+    //- Destructor
+    virtual ~ManualInjection();
 
 
     // Member Functions

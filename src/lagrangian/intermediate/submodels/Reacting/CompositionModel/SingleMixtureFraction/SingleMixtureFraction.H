@@ -54,7 +54,6 @@ class SingleMixtureFraction
 :
     public CompositionModel<CloudType>
 {
-
     // Private data
 
         //- Parcel properties
@@ -134,9 +133,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~SingleMixtureFraction();
+    //- Destructor
+    virtual ~SingleMixtureFraction();
 
 
     // Member Functions

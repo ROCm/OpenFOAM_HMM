@@ -89,18 +89,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~DispersionModel();
 
-        virtual ~DispersionModel();
 
-
-    // Selector
-
-        static autoPtr<DispersionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<DispersionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access

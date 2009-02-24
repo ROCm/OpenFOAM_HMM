@@ -49,7 +49,6 @@ class NoDispersion
 :
     public DispersionModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -66,9 +65,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoDispersion();
+    //- Destructor
+    virtual ~NoDispersion();
 
 
     // Member Functions

@@ -48,7 +48,6 @@ class NoDrag
 :
     public DragModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -65,9 +64,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoDrag();
+    //- Destructor
+    virtual ~NoDrag();
 
 
     // Member Functions

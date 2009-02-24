@@ -65,9 +65,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoDevolatilisation();
+    //- Destructor
+    virtual ~NoDevolatilisation();
 
 
     // Member Functions

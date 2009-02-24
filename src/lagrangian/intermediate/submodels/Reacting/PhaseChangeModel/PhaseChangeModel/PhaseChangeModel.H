@@ -53,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class PhaseChangeModel
 {
-
 protected:
 
     // Protected data

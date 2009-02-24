@@ -25,7 +25,6 @@ License
 Class
     Foam::HeatTransferModel
 
-
 Description
     Templated heat transfer model class
 
@@ -54,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class HeatTransferModel
 {
-
     // Private data
 
         //- The cloud dictionary
@@ -97,18 +95,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~HeatTransferModel();
 
-        virtual ~HeatTransferModel();
 
-
-    // Selector
-
-        static autoPtr<HeatTransferModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<HeatTransferModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access

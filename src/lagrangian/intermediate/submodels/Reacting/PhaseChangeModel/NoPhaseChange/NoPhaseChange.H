@@ -48,7 +48,6 @@ class NoPhaseChange
 :
     public PhaseChangeModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -66,7 +65,7 @@ public:
 
 
     //- Destructor
-    ~NoPhaseChange();
+    virtual ~NoPhaseChange();
 
 
     // Member Functions

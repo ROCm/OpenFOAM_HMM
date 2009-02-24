@@ -52,7 +52,6 @@ class NoInjection
 :
     public InjectionModel<CloudType>
 {
-
 protected:
 
     // Protected member functions
@@ -88,9 +87,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoInjection();
+    //- Destructor
+    virtual ~NoInjection();
 
 
     // Member Functions

@@ -25,7 +25,6 @@ License
 Class
     Foam::SurfaceReactionModel
 
-
 Description
     Templated surface reaction model class
 
@@ -101,18 +100,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~SurfaceReactionModel();
 
-        virtual ~SurfaceReactionModel();
 
-
-    // Selector
-
-        static autoPtr<SurfaceReactionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+    //- Selector
+    static autoPtr<SurfaceReactionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& cloud
+    );
 
 
     // Access
