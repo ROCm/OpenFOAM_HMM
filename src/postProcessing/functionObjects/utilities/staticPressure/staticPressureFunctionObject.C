@@ -24,18 +24,18 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dynamicPressureFunctionObject.H"
+#include "staticPressureFunctionObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineNamedTemplateTypeNameAndDebug(dynamicPressureFunctionObject, 0);
+    defineNamedTemplateTypeNameAndDebug(staticPressureFunctionObject, 0);
 
     addToRunTimeSelectionTable
     (
         functionObject,
-        dynamicPressureFunctionObject,
+        staticPressureFunctionObject,
         dictionary
     );
 }

@@ -23,24 +23,29 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    Foam::IOdynamicPressure
+    Foam::staticPressureFunctionObject
 
 Description
-    Instance of the generic IOOutputFilter for dynamicPressure.
+    FunctionObject wrapper around staticPressure to allow it to be created via
+    the functions list within controlDict.
+
+SourceFiles
+    staticPressureFunctionObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IOdynamicPressure_H
-#define IOdynamicPressure_H
+#ifndef staticPressureFunctionObject_H
+#define staticPressureFunctionObject_H
 
-#include "dynamicPressure.H"
-#include "IOOutputFilter.H"
+#include "staticPressure.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef IOOutputFilter<dynamicPressure> IOdynamicPressure;
+    typedef OutputFilterFunctionObject<staticPressure>
+        staticPressureFunctionObject;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
