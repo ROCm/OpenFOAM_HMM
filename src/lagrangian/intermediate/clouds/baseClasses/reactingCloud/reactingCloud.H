@@ -69,14 +69,8 @@ public:
         reactingCloud();
 
 
-    // Destructors
-
-        virtual ~reactingCloud();
-
-
-    // Member Functions
-
-        // Access
+    //- Destructor
+    virtual ~reactingCloud();
 };
 
 

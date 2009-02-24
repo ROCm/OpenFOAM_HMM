@@ -114,8 +114,11 @@ void Foam::InjectionModel<CloudType>::findCellAtPosition
     {
         FatalErrorIn
         (
-            "InjectionModel<CloudType>::findCellAtPosition"
-            "(label&, vector&)"
+            "Foam::InjectionModel<CloudType>::findCellAtPosition"
+            "(\n"
+            "    label&,\n"
+            "    vector&\n"
+            ")"
         )<< "Cannot find parcel injection cell. "
          << "Parcel position = " << p0 << nl
          << abort(FatalError);
@@ -231,7 +234,11 @@ Foam::InjectionModel<CloudType>::InjectionModel
         FatalErrorIn
         (
             "Foam::InjectionModel<CloudType>::InjectionModel"
-            "(const dictionary&, CloudType&, const word&)"
+            "(\n"
+            "    const dictionary&,\n"
+            "    CloudType&,\n"
+            "    const word&\n"
+            ")"
         )<< "parcelBasisType must be either 'number' or 'mass'" << nl
          << exit(FatalError);
     }

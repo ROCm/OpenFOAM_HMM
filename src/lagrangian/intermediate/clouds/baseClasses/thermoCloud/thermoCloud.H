@@ -69,9 +69,8 @@ public:
         thermoCloud();
 
 
-    // Destructors
-
-        virtual ~thermoCloud();
+    //- Destructor
+    virtual ~thermoCloud();
 
 
     // Member Functions

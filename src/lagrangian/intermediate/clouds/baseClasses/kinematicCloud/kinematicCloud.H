@@ -69,14 +69,8 @@ public:
         kinematicCloud();
 
 
-    // Destructors
-
-        virtual ~kinematicCloud();
-
-
-    // Member Functions
-
-        // Access
+    //- Destructor
+    virtual ~kinematicCloud();
 };
 
 
