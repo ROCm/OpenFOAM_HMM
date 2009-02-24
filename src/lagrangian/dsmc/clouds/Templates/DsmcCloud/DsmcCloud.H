@@ -169,7 +169,6 @@ public:
             inline Random& rndGen();
 
 
-
             // Sub-models
 
                 //- Return reference to injection model
