@@ -49,26 +49,52 @@ Foam::DsmcCloud<ParcelType>::particleProperties() const
 
 
 template<class ParcelType>
-inline const Foam::CollisionModel<Foam::DsmcCloud<ParcelType> >&
-Foam::DsmcCloud<ParcelType>::collision() const
+inline Foam::label Foam::DsmcCloud<ParcelType>::nParticle() const
 {
-    return collisionModel_;
+    return nParticle_;
 }
 
 
 template<class ParcelType>
-inline const Foam::InjectionModel<Foam::DsmcCloud<ParcelType> >&
-Foam::DsmcCloud<ParcelType>::injection() const
+inline const Foam::List<Foam::DynamicList<ParcelType*> >&
+Foam::DsmcCloud<ParcelType>::cellOccupancy() const
 {
-    return injectionModel_;
+    return cellOccupancy_;
 }
 
 
 template<class ParcelType>
-inline Foam::InjectionModel<Foam::DsmcCloud<ParcelType> >&
-Foam::DsmcCloud<ParcelType>::injection()
+inline const Foam::List<typename ParcelType::constantProperties>&
+Foam::DsmcCloud<ParcelType>::constProps() const
 {
-    return injectionModel_();
+    return constProps_;
+}
+
+
+template<class ParcelType>
+inline const typename ParcelType::constantProperties&
+Foam::DsmcCloud<ParcelType>::constProps
+(
+    label typeId
+) const
+{
+    if (typeId < 0 || typeId >= constProps_.size())
+    {
+        FatalErrorIn("Foam::DsmcCloud<ParcelType>::constProps(label typeId)")
+            << "constantProperties for requested typeId index "
+            << typeId << " do not exist"  << nl
+            << abort(FatalError);
+    }
+
+    return constProps_[typeId];
+}
+
+
+template<class ParcelType>
+inline const Foam::BinaryElasticCollisionModel<Foam::DsmcCloud<ParcelType> >&
+Foam::DsmcCloud<ParcelType>::binaryElasticCollision() const
+{
+    return binaryElasticCollisionModel_;
 }
 
 
@@ -77,14 +103,6 @@ inline const Foam::WallInteractionModel<Foam::DsmcCloud<ParcelType> >&
 Foam::DsmcCloud<ParcelType>::wallInteraction() const
 {
     return wallInteractionModel_;
-}
-
-
-template<class ParcelType>
-inline const Foam::vectorIntegrationScheme&
-Foam::DsmcCloud<ParcelType>::UIntegrator() const
-{
-    return UIntegrator_;
 }
 
 
@@ -188,7 +206,7 @@ Foam::DsmcCloud<ParcelType>::U() const
 {
     tmp<volScalarField> tU
     (
-        new volScalarField
+        new volVectorField
         (
             IOobject
             (
@@ -215,15 +233,15 @@ Foam::DsmcCloud<ParcelType>::U() const
 
 template<class ParcelType>
 inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::T() const
+Foam::DsmcCloud<ParcelType>::totalKE() const
 {
-    tmp<volScalarField> tT
+    tmp<volScalarField> ttotalKE
     (
         new volScalarField
         (
             IOobject
             (
-                this->name() + "T",
+                this->name() + "totalKE",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -235,7 +253,7 @@ Foam::DsmcCloud<ParcelType>::T() const
         )
     );
 
-    return tT;
+    return ttotalKE;
 }
 
 // template<class ParcelType>

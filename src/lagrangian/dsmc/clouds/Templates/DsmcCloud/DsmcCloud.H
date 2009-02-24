@@ -45,8 +45,6 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 
-#include "IntegrationSchemesFwd.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -55,10 +53,7 @@ namespace Foam
 // Forward declaration of classes
 
 template<class CloudType>
-class CollisionModel;
-
-template<class CloudType>
-class InjectionModel;
+class BinaryElasticCollisionModel;
 
 template<class CloudType>
 class WallInteractionModel;
@@ -88,44 +83,39 @@ private:
         //- Dictionary of particle properties
         IOdictionary particleProperties_;
 
+        //- Number of real atoms/molecules represented by a parcel
+        scalar nParticle_;
+
         //- A data structure holding which particles are in which cell
         List<DynamicList<ParcelType*> > cellOccupancy_;
 
-        //- Parcel constant properties - one for each species
+        //- Parcel constant properties - one for each type
         List<typename ParcelType::constantProperties> constProps_;
 
         //- Random number generator
         Random rndGen_;
 
-        //- Interpolation schemes dictionary
-        dictionary interpolationSchemes_;
-
-
         // References to the cloud sub-models
 
-            //- Injector model
-            autoPtr<CollisionModel<DsmcCloud<ParcelType> > >
-                collisionModel_;
-
-            //- Injector model
-            autoPtr<InjectionModel<DsmcCloud<ParcelType> > >
-                injectionModel_;
+            //- Binary Elastic Collision model
+            autoPtr<BinaryElasticCollisionModel<DsmcCloud<ParcelType> > >
+                binaryElasticCollisionModel_;
 
             //- Wall interaction model
             autoPtr<WallInteractionModel<DsmcCloud<ParcelType> > >
                 wallInteractionModel_;
 
 
-        // Reference to the particle integration schemes
-
-            //- Velocity integration
-            autoPtr<vectorIntegrationScheme> UIntegrator_;
-
-
     // Private Member Functions
 
+        //- Build the constant properties for all of the species
+        void buildConstProps();
+
         //- Record which particles are in which cell
-        void buildCellOccupancy()
+        void buildCellOccupancy();
+
+        //- Calculate collisions between molecules
+        void collisions();
 
         //- Disallow default bitwise copy construct
         DsmcCloud(const DsmcCloud&);
@@ -165,34 +155,37 @@ public:
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;
 
+                //- Return the number of real particles represented by one
+                //- parcel
+                inline label nParticle() const;
+
+                //- Return the cell occupancy addressing
+                inline const List<DynamicList<ParcelType*> >&
+                    cellOccupancy() const;
+
+                //- Return all of the constant properties
+                inline const List<typename ParcelType::constantProperties>&
+                    constProps() const;
+
+                //- Return the constant properties of the given typeId
+                inline const typename ParcelType::constantProperties&
+                    constProps(label typeId) const;
+
+
             //- Return refernce to the random object
             inline Random& rndGen();
 
 
             // Sub-models
 
-                //- Return reference to injection model
-                inline const CollisionModel<DsmcCloud<ParcelType> >&
-                    collision() const;
-
-                //- Return reference to injection model
-                inline const InjectionModel<DsmcCloud<ParcelType> >&
-                    injection() const;
-
-                inline InjectionModel<DsmcCloud<ParcelType> >&
-                    injection();
+                //- Return reference to binary elastic collision model
+                inline const
+                BinaryElasticCollisionModel<DsmcCloud<ParcelType> >&
+                    binaryElasticCollision() const;
 
                 //- Return reference to wall interaction model
                 inline const WallInteractionModel<DsmcCloud<ParcelType> >&
                     wallInteraction() const;
-
-
-            // Integration schemes
-
-                //-Return reference to velocity integration
-                inline const vectorIntegrationScheme& UIntegrator() const;
-
-
 
         // Check
 
@@ -224,7 +217,7 @@ public:
                 inline const tmp<volVectorField> U() const;
 
                 //- Return the temperature field
-                inline const tmp<volScalarField> T() const;
+                inline const tmp<volScalarField> totalKE() const;
 
 
         // Cloud evolution functions
@@ -235,7 +228,7 @@ public:
                 const vector& position,
                 const vector& U,
                 const label cellId,
-                const label speciesId,
+                const label typeId
             );
 
             //- Evolve the cloud (move, collide)

@@ -25,10 +25,39 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DsmcCloud.H"
-#include "CollisionModel.H"
-#include "InjectionModel.H"
+#include "BinaryElasticCollisionModel.H"
 #include "WallInteractionModel.H"
-#include "IntegrationScheme.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::DsmcCloud<ParcelType>::buildConstProps()
+{
+    Info<< "Building Constant Properties - PLACEHOLDER." << endl;
+}
+
+
+template<class ParcelType>
+void Foam::DsmcCloud<ParcelType>::buildCellOccupancy()
+{
+    forAll(cellOccupancy_, cO)
+    {
+        cellOccupancy_[cO].clear();
+    }
+
+    forAllIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        cellOccupancy_[iter().cell()].append(&iter());
+    }
+}
+
+
+template<class ParcelType>
+void Foam::DsmcCloud<ParcelType>::collisions()
+{
+    Info<< "DsmcCloud collisions() - PLACEHOLDER" << endl;
+}
+
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -38,7 +67,7 @@ void Foam::DsmcCloud<ParcelType>::addNewParcel
     const vector& position,
     const vector& U,
     const label cellId,
-    const label speciesId
+    const label typeId
 )
 {
     ParcelType* pPtr = new ParcelType
@@ -47,8 +76,7 @@ void Foam::DsmcCloud<ParcelType>::addNewParcel
         position,
         U,
         cellId,
-        speciesId,
-        constProps_(speciesId)
+        typeId
     );
 
     addParticle(pPtr);
@@ -73,26 +101,18 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
         IOobject
         (
             cloudType + "Properties",
-            rho.mesh().time().constant(),
-            rho.mesh(),
+            mesh.time().constant(),
+            mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
-    constProps_(particleProperties_),
+    nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
+    constProps_(),
     rndGen_(label(971501)),
-    interpolationSchemes_(particleProperties_.subDict("interpolationSchemes")),
-    collisionModel_
+    binaryElasticCollisionModel_
     (
-        CollisionModel<DsmcCloud<ParcelType> >::New
-        (
-            particleProperties_,
-            *this
-        )
-    ),
-    injectionModel_
-    (
-        InjectionModel<DsmcCloud<ParcelType> >::New
+        BinaryElasticCollisionModel<DsmcCloud<ParcelType> >::New
         (
             particleProperties_,
             *this
@@ -105,16 +125,12 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             particleProperties_,
             *this
         )
-    ),
-    UIntegrator_
-    (
-        vectorIntegrationScheme::New
-        (
-            "U",
-            particleProperties_.subDict("integrationSchemes")
-        )
     )
-{}
+{
+    buildConstProps();
+
+    buildCellOccupancy();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -129,22 +145,20 @@ Foam::DsmcCloud<ParcelType>::~DsmcCloud()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::evolve()
 {
-    typename ParcelType::trackData td
-    (
-        *this,
-        constProps_
-    );
+    typename ParcelType::trackData td(*this);
 
-    this->injection().inject(td);
+    //this->injection().inject(td);
 
     if (debug)
     {
         this->dumpParticlePositions();
     }
 
+    // Move the particles ballistically with their current velocities
     Cloud<ParcelType>::move(td);
 
-    this->collision().collide();
+    // Calculate new velocities via stochastic collisions
+    collisions();
 }
 
 

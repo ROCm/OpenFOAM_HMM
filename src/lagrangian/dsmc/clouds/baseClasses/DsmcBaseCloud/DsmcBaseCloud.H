@@ -35,6 +35,8 @@ SourceFiles
 #ifndef DsmcBaseCloud_H
 #define DsmcBaseCloud_H
 
+#include "volFields.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
