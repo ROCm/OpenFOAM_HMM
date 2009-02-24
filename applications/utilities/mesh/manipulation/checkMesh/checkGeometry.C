@@ -23,16 +23,13 @@ Foam::label Foam::checkGeometry(const polyMesh& mesh, const bool allGeometry)
     scalar minDistSqr = magSqr(1e-6 * globalBb.span());
 
     // Non-empty directions
-    const Vector<label> validDirs = (mesh.directions() + Vector<label>::one)/2;
+    const Vector<label> validDirs = (mesh.geometricD() + Vector<label>::one)/2;
+    Info<< "    Mesh (non-empty, non-wedge) directions " << validDirs << endl;
 
-    Info<< "    Mesh (non-empty) directions " << validDirs << endl;
+    const Vector<label> solDirs = (mesh.solutionD() + Vector<label>::one)/2;
+    Info<< "    Mesh (non-empty) directions " << solDirs << endl;
 
-    scalar nGeomDims = mesh.nGeometricD();
-
-    Info<< "    Mesh (non-empty, non-wedge) dimensions "
-        << nGeomDims << endl;
-
-    if (nGeomDims < 3)
+    if (mesh.nGeometricD() < 3)
     {
         pointSet nonAlignedPoints(mesh, "nonAlignedEdges", mesh.nPoints()/100);
 

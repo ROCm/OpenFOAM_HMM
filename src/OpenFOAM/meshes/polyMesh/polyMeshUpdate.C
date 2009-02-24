@@ -68,6 +68,11 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
         newMotionPoints.map(oldMotionPoints, mpm.pointMap());
     }
 
+    // Reset valid directions (could change by faces put into empty patches)
+    geometricD_ = Vector<label>::zero;
+    solutionD_ = Vector<label>::zero;
+
+
     // Hack until proper callbacks. Below are all the polyMesh-MeshObjects.
 
     // pointMesh
