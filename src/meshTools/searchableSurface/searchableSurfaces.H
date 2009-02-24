@@ -69,6 +69,8 @@ class searchableSurfaces
         labelList allSurfaces_;
 
 
+    // Private Member Functions
+
         //- Disallow default bitwise copy construct
         searchableSurfaces(const searchableSurfaces&);
 
