@@ -30,6 +30,7 @@ License
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
 #include "slicedVolFields.H"
+#include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -343,6 +344,7 @@ void Foam::isoSurface::getNeighbour
 {
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
+    const surfaceScalarField& weights = mesh_.weights();
 
     if (mesh_.isInternalFace(faceI))
     {
@@ -363,16 +365,26 @@ void Foam::isoSurface::getNeighbour
             nbrValue = cVals[own[faceI]];
             nbrPoint = mesh_.faceCentres()[faceI];
         }
-        else if
-        (
-            pp.coupled()
-        && !refCast<const coupledPolyPatch>(pp).separated()
-        )
+        else if (pp.coupled())
         {
-            // other side value
-            nbrValue = cVals.boundaryField()[patchI][patchFaceI];
-            // other side cell centre
-            nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
+            if (!refCast<const coupledPolyPatch>(pp).separated())
+            {
+                // Behave as internal face:
+                // other side value
+                nbrValue = cVals.boundaryField()[patchI][patchFaceI];
+                // other side cell centre
+                nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
+            }
+            else
+            {
+                // Do some interpolation for now
+                const scalarField& w = weights.boundaryField()[patchI];
+
+                nbrPoint = mesh_.faceCentres()[faceI];
+                nbrValue =
+                    (1-w[patchFaceI])*cVals[own[faceI]]
+                  + w[patchFaceI]*cVals.boundaryField()[patchI][patchFaceI];
+            }
         }
         else
         {
@@ -846,22 +858,26 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
         forAll(tris, triI)
         {
             const labelledTri& tri = tris[triI];
-
             const labelList& pFaces = pointFaces[tri[0]];
 
-            // Find the minimum of any duplicates
+            // Find the maximum of any duplicates. Maximum since the tris
+            // below triI
+            // get overwritten so we cannot use them in a comparison.
             label dupTriI = -1;
             forAll(pFaces, i)
             {
-                if (pFaces[i] < triI && tris[pFaces[i]] == tri)
+                label nbrTriI = pFaces[i];
+
+                if (nbrTriI > triI && (tris[nbrTriI] == tri))
                 {
-                    dupTriI = pFaces[i];
+                    dupTriI = nbrTriI;
+                    break;
                 }
             }
 
             if (dupTriI == -1)
             {
-                // There is no lower triangle
+                // There is no (higher numbered) duplicate triangle
                 label newTriI = newToOldTri.size();
                 newToOldTri.append(triI);
                 tris[newTriI] = tris[triI];
@@ -875,6 +891,43 @@ Foam::triSurface Foam::isoSurface::stitchTriPoints
         {
             Pout<< "isoSurface : merged from " << nTris
                 << " down to " << tris.size() << " unique triangles." << endl;
+        }
+
+
+        if (debug)
+        {
+            triSurface surf(tris, geometricSurfacePatchList(0), newPoints);
+
+            forAll(surf, faceI)
+            {
+                const labelledTri& f = surf[faceI];
+                const labelList& fFaces = surf.faceFaces()[faceI];
+
+                forAll(fFaces, i)
+                {
+                    label nbrFaceI = fFaces[i];
+
+                    if (nbrFaceI <= faceI)
+                    {
+                        // lower numbered faces already checked
+                        continue;
+                    }
+
+                    const labelledTri& nbrF = surf[nbrFaceI];
+
+                    if (f == nbrF)
+                    {
+                        FatalErrorIn("validTri(const triSurface&, const label)")
+                            << "Check : "
+                            << " triangle " << faceI << " vertices " << f
+                            << " fc:" << f.centre(surf.points())
+                            << " has the same vertices as triangle " << nbrFaceI
+                            << " vertices " << nbrF
+                            << " fc:" << nbrF.centre(surf.points())
+                            << abort(FatalError);
+                    }
+                }
+            }
         }
     }
 
@@ -1526,7 +1579,7 @@ Foam::isoSurface::isoSurface
             faceI++;
         }
 
-        // Mark all points that are not physically coupled (so anything
+        // Mark all boundary points that are not physically coupled (so anything
         // but collocated coupled patches)
         if
         (
@@ -1538,8 +1591,6 @@ Foam::isoSurface::isoSurface
 
             forAll(pp, i)
             {
-                boundaryRegion[faceI-mesh_.nInternalFaces()] = patchI;
-
                 const face& f = mesh_.faces()[faceI];
 
                 forAll(f, fp)
