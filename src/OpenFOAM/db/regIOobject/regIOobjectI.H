@@ -43,7 +43,7 @@ inline Type& Foam::regIOobject::store(Type* tPtr)
 {
     if (!tPtr)
     {
-        FatalErrorIn("Type& store(Type*)")
+        FatalErrorIn("Type& regIOobject::store(Type*)")
             << "object deallocated"
             << abort(FatalError);
     }
@@ -63,13 +63,13 @@ inline Type& Foam::regIOobject::store(autoPtr<Type>& atPtr)
     {
         FatalErrorIn
             (
-                "Type& store(autoPtr<Type>&)"
+                "Type& regIOobject::store(autoPtr<Type>&)"
             )   << "object deallocated"
                 << abort(FatalError);
     }
 
     tPtr->regIOobject::ownedByRegistry_ = true;
-    
+
     return *tPtr;
 }
 

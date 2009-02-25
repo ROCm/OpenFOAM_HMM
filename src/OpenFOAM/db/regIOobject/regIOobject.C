@@ -107,6 +107,7 @@ Foam::regIOobject::~regIOobject()
     if (isPtr_)
     {
         delete isPtr_;
+        isPtr_ = NULL;
     }
 
     // Check out of objectRegistry if not owned by the registry
@@ -120,47 +121,47 @@ Foam::regIOobject::~regIOobject()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::regIOobject::checkIn()
+bool Foam::regIOobject::checkIn()
 {
     if (!registered_)
     {
-        // Attempt to register object with objectRegistry
-        if (!db().checkIn(*this))
+        // multiple checkin of same object is disallowed - this would mess up
+        // any mapping
+        registered_ = db().checkIn(*this);
+
+        // checkin on defaultRegion is allowed to fail, since subsetted meshes
+        // are created with the same name as their originating mesh
+        if (!registered_ && debug && name() != polyMesh::defaultRegion)
         {
-            // Disallow checkin of same object twice since would mess up
-            // any mapping.
-            // Check on defaultRegion is needed to prevent subsetted meshes
-            // (which are created with same name as their originating mesh)
-            // from upsetting this.
-            if (debug && name() != polyMesh::defaultRegion)
-            {
-                WarningIn("regIOobject::checkIn()")
-                    << "failed to register object " << objectPath()
+            WarningIn("regIOobject::checkIn()")
+                << "failed to register object " << objectPath()
                     << " the name already exists in the objectRegistry"
-                    << endl;
-            }
-        }
-        else
-        {
-            registered_ = true;
+                << endl;
         }
     }
+
+    return registered_;
 }
 
 
-void Foam::regIOobject::checkOut()
+bool Foam::regIOobject::checkOut()
 {
     if (registered_)
     {
-        db().checkOut(*this);
         registered_ = false;
+        return db().checkOut(*this);
     }
+
+    return false;
 }
 
 
 // Rename object and re-register with objectRegistry under new name
 void Foam::regIOobject::rename(const word& newName)
 {
+    // TODO: verify that this works properly with unregistered objects
+    // I suspect that it incorrectly registers them
+
     // Check out of objectRegistry
     checkOut();
 

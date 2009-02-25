@@ -91,7 +91,7 @@ bool regIOobject::writeObject
         // Try opening an OFstream for object
         OFstream os(objectPath(), fmt, ver, cmp);
 
-        // If this has failed, return (leave error handling to Ostream class)
+        // If any of these fail, return (leave error handling to Ostream class)
         if (!os.good())
         {
             return false;
@@ -108,7 +108,8 @@ bool regIOobject::writeObject
             return false;
         }
 
-        os  << "\n\n// ************************************************************************* //"
+        os  << "\n\n"
+            "// ************************************************************************* //"
             << endl;
 
         osGood = os.good();
