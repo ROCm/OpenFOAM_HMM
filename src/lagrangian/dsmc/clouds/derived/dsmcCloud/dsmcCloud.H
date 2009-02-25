@@ -77,6 +77,13 @@ public:
             const fvMesh& mesh
         );
 
+        //- Construct from with the typeIdListDict, used to initialise
+        dsmcCloud
+        (
+            const word& cloudType,
+            const fvMesh& mesh,
+            const IOdictionary& dsmcInitialiseDict
+        );
 
     //- Destructor
 

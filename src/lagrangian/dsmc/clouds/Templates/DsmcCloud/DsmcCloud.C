@@ -33,7 +33,26 @@ License
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::buildConstProps()
 {
-    Info<< "Building Constant Properties - PLACEHOLDER." << endl;
+    Info<< nl << "Building Constant Properties - PLACEHOLDER." << endl;
+
+    Info<< nl << "typeIds found " << typeIdList_ << endl;
+
+    constProps_.setSize(typeIdList_.size());
+
+    dictionary moleculeProperties
+    (
+        particleProperties_.subDict("moleculeProperties")
+    );
+
+    forAll(typeIdList_, i)
+    {
+        const word& id(typeIdList_[i]);
+
+        const dictionary& molDict(moleculeProperties.subDict(id));
+
+        constProps_[i] =
+        typename ParcelType::constantProperties::constantProperties(molDict);
+    }
 }
 
 
@@ -49,6 +68,42 @@ void Foam::DsmcCloud<ParcelType>::buildCellOccupancy()
     {
         cellOccupancy_[iter().cell()].append(&iter());
     }
+}
+
+
+template<class ParcelType>
+void Foam::DsmcCloud<ParcelType>::initialise
+(
+    const IOdictionary& dsmcInitialiseDict
+)
+{
+    const scalar temperature
+    (
+        readScalar(dsmcInitialiseDict.lookup("temperature"))
+    );
+
+    const vector velocity(dsmcInitialiseDict.lookup("velocity"));
+
+    List<word> molecules
+    (
+        dsmcInitialiseDict.lookup("molecules")
+    );
+
+    Field<scalar> numberDensities
+    (
+        dsmcInitialiseDict.lookup("numberDensities")
+    );
+
+    if(molecules.size() != numberDensities.size())
+    {
+        FatalErrorIn("Foam::Foam::DsmcCloud<ParcelType>::initialise")
+            << "molecules and numberDensities must be the same size."
+            << nl << abort(FatalError);
+    }
+
+    numberDensities /= nParticle_;
+
+
 }
 
 
@@ -107,6 +162,7 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             IOobject::NO_WRITE
         )
     ),
+    typeIdList_(particleProperties_.lookup("typeIdList")),
     nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
     constProps_(),
     rndGen_(label(971501)),
@@ -130,6 +186,44 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     buildConstProps();
 
     buildCellOccupancy();
+}
+
+
+template<class ParcelType>
+Foam::DsmcCloud<ParcelType>::DsmcCloud
+(
+    const word& cloudType,
+    const fvMesh& mesh,
+    const IOdictionary& dsmcInitialiseDict
+)
+    :
+    Cloud<ParcelType>(mesh, cloudType, false),
+    DsmcBaseCloud(),
+    cloudType_(cloudType),
+    mesh_(mesh),
+    particleProperties_
+    (
+        IOobject
+        (
+            cloudType + "Properties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    typeIdList_(particleProperties_.lookup("typeIdList")),
+    nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
+    constProps_(),
+    rndGen_(label(971501)),
+    binaryCollisionModel_(),
+    wallInteractionModel_()
+{
+    clear();
+
+    buildConstProps();
+
+    initialise(dsmcInitialiseDict);
 }
 
 

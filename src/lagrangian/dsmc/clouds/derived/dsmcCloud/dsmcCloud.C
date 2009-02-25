@@ -48,6 +48,19 @@ Foam::dsmcCloud::dsmcCloud
 }
 
 
+Foam::dsmcCloud::dsmcCloud
+(
+    const word& cloudType,
+    const fvMesh& mesh,
+    const IOdictionary& dsmcInitialiseDict
+)
+:
+    DsmcCloud<dsmcParcel>(cloudType, mesh, dsmcInitialiseDict)
+{
+    dsmcParcel::readFields(*this);
+}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::dsmcCloud::~dsmcCloud()

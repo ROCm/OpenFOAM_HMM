@@ -81,14 +81,11 @@ public:
 
         // Private data
 
-            //- Name of species
-            const word name_;
-
             //- Particle mass [kg] (constant)
-            const scalar mass_;
+            scalar mass_;
 
             //- Particle hard sphere diameter [m] (constant)
-            const scalar d_;
+            scalar d_;
 
 
     public:
@@ -101,9 +98,6 @@ public:
         inline constantProperties(const dictionary& dict);
 
         // Member functions
-
-            //- Return the name of the species
-            inline const word& name() const;
 
             //- Return const access to the particle density
             inline scalar mass() const;

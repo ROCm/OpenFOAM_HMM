@@ -29,7 +29,6 @@ License
 template <class ParcelType>
 inline Foam::DsmcParcel<ParcelType>::constantProperties::constantProperties()
 :
-    name_("nullConstructed"),
     mass_(0),
     d_(0)
 {}
@@ -41,9 +40,8 @@ inline Foam::DsmcParcel<ParcelType>::constantProperties::constantProperties
     const dictionary& dict
 )
 :
-    name_(dict.name()),
-    mass_(dimensionedScalar(dict.lookup("mass")).value()),
-    d_(dimensionedScalar(dict.lookup("d")).value())
+    mass_(readScalar(dict.lookup("mass"))),
+    d_(readScalar(dict.lookup("diameter")))
 {}
 
 
@@ -75,14 +73,6 @@ inline Foam::DsmcParcel<ParcelType>::DsmcParcel
 
 
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
-
-template <class ParcelType>
-inline const Foam::word&
-Foam::DsmcParcel<ParcelType>::constantProperties::name() const
-{
-    return name_;
-}
-
 
 template <class ParcelType>
 inline Foam::scalar

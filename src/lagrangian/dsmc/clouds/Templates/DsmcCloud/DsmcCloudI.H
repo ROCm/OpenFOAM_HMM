@@ -48,6 +48,15 @@ Foam::DsmcCloud<ParcelType>::particleProperties() const
 }
 
 
+
+template<class ParcelType>
+inline const Foam::List<Foam::word>&
+Foam::DsmcCloud<ParcelType>::typeIdList() const
+{
+    return typeIdList_;
+}
+
+
 template<class ParcelType>
 inline Foam::label Foam::DsmcCloud<ParcelType>::nParticle() const
 {
@@ -87,6 +96,13 @@ Foam::DsmcCloud<ParcelType>::constProps
     }
 
     return constProps_[typeId];
+}
+
+
+template<class ParcelType>
+inline void Foam::DsmcCloud<ParcelType>::clear()
+{
+    return IDLList<ParcelType>::clear();
 }
 
 

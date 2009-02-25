@@ -83,6 +83,12 @@ private:
         //- Dictionary of particle properties
         IOdictionary particleProperties_;
 
+       //- A list of unique instances of molecule types in the simulation.  The
+       // position of an entry in the list maps to the label identifying the
+       // typeId, i.e. where typeIdList_ = (N2 O2 CO2)
+       // N2 has typeId label = 0, O2 = 1, CO2 = 2.
+        List<word> typeIdList_;
+
         //- Number of real atoms/molecules represented by a parcel
         scalar nParticle_;
 
@@ -114,6 +120,9 @@ private:
         //- Record which particles are in which cell
         void buildCellOccupancy();
 
+        //- Initialise the system
+    void initialise(const IOdictionary& dsmcInitialiseDict);
+
         //- Calculate collisions between molecules
         void collisions();
 
@@ -128,13 +137,21 @@ public:
 
     // Constructors
 
-        //- Construct given carrier gas fields
+        //- Construct given name and mesh, will read Parcels from file
         DsmcCloud
         (
             const word& cloudType,
             const fvMesh& mesh
         );
 
+        //- Construct given name, mesh, and typeIdListDict.  Used by
+        // dsmcInitialse.
+        DsmcCloud
+        (
+            const word& cloudType,
+            const fvMesh& mesh,
+            const IOdictionary& dsmcInitialiseDict
+        );
 
     //- Destructor
     virtual ~DsmcCloud();
@@ -155,6 +172,9 @@ public:
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;
 
+                //- Return the idList
+                inline const List<word>& typeIdList() const;
+
                 //- Return the number of real particles represented by one
                 //- parcel
                 inline label nParticle() const;
@@ -171,6 +191,8 @@ public:
                 inline const typename ParcelType::constantProperties&
                     constProps(label typeId) const;
 
+                //- Clear the Cloud
+                inline void clear();
 
             //- Return refernce to the random object
             inline Random& rndGen();
