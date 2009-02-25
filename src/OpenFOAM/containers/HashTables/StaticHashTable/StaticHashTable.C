@@ -101,14 +101,17 @@ Foam::StaticHashTable<T, Key, Hash>::~StaticHashTable()
 template<class T, class Key, class Hash>
 bool Foam::StaticHashTable<T, Key, Hash>::found(const Key& key) const
 {
-    label hashIdx = Hash()(key, keys_.size());
-    const List<Key>& localKeys = keys_[hashIdx];
-
-    forAll(localKeys, elemIdx)
+    if (nElmts_)
     {
-        if (key == localKeys[elemIdx])
+        label hashIdx = Hash()(key, keys_.size());
+        const List<Key>& localKeys = keys_[hashIdx];
+
+        forAll(localKeys, elemIdx)
         {
-            return true;
+            if (key == localKeys[elemIdx])
+            {
+                return true;
+            }
         }
     }
 
@@ -131,14 +134,17 @@ Foam::StaticHashTable<T, Key, Hash>::find
     const Key& key
 )
 {
-    label hashIdx = Hash()(key, keys_.size());
-    const List<Key>& localKeys = keys_[hashIdx];
-
-    forAll(localKeys, elemIdx)
+    if (nElmts_)
     {
-        if (key == localKeys[elemIdx])
+        label hashIdx = Hash()(key, keys_.size());
+        const List<Key>& localKeys = keys_[hashIdx];
+
+        forAll(localKeys, elemIdx)
         {
-            return iterator(*this, hashIdx, elemIdx);
+            if (key == localKeys[elemIdx])
+            {
+                return iterator(*this, hashIdx, elemIdx);
+            }
         }
     }
 

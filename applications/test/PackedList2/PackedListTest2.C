@@ -32,6 +32,7 @@ Description
 #include "boolList.H"
 #include "PackedBoolList.H"
 #include "HashSet.H"
+#include "StaticHashTable.H"
 #include "cpuTime.H"
 #include <vector>
 
@@ -55,10 +56,13 @@ int main(int argc, char *argv[])
 
     labelHashSet emptyHash;
     labelHashSet fullHash(1000);
-    for(label i = 0; i < n; i++)
+    for (label i = 0; i < n; i++)
     {
         fullHash.insert(i);
     }
+
+    // don't use fullStaticHash, it's too slow
+    StaticHashTable<nil, label, Hash<label> > emptyStaticHash;
 
     cpuTime timer;
 
@@ -234,6 +238,22 @@ int main(int argc, char *argv[])
         << " s" << endl;
     Info<< "  sum " << sum << endl;
 
+
+    // Read empty static hash
+    sum = 0;
+    for (label iter = 0; iter < nIters; ++iter)
+    {
+        forAll(unpacked, i)
+        {
+            sum += emptyStaticHash.found(i);
+        }
+    }
+    Info<< "Reading empty StaticHash:" << timer.cpuTimeIncrement()
+        << " s" << endl;
+    Info<< "  sum " << sum << endl;
+
+
+    Info<< "Starting write tests" << endl;
 
     //
     // Write

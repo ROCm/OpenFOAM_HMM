@@ -39,7 +39,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
-    for (label i=0; i<tableSize_; i++)
+    for (label i=0; i < tableSize_; i++)
     {
         table_[i] = 0;
     }
@@ -133,10 +133,13 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
         )
         {
             is.putBack(lastToken);
+
             Key key;
             is >> key;
+
             T element;
             is >> element;
+
             L.insert(key, element);
 
             is.fatalCheck
@@ -174,8 +177,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
     // Write contents
     for
     (
-        typename HashTable<T, Key, Hash>::const_iterator iter = L.begin();
-        iter != L.end();
+        typename HashTable<T, Key, Hash>::const_iterator iter = L.cbegin();
+        iter != L.cend();
         ++iter
     )
     {

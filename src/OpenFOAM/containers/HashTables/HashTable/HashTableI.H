@@ -112,7 +112,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
 {
     const_iterator iter = find(key);
 
-    if (iter == end())
+    if (iter == cend())
     {
         FatalErrorIn("HashTable<T, Key, Hash>::operator[](const Key&) const")
             << key << " not found in table.  Valid entries: "
@@ -283,8 +283,15 @@ Foam::HashTable<T, Key, Hash>::begin()
 {
     label i = 0;
 
-    while (table_ && !table_[i] && ++i < tableSize_)
-    {}
+    if (nElmts_)
+    {
+        while (table_ && !table_[i] && ++i < tableSize_)
+        {}
+    }
+    else
+    {
+        i = tableSize_;
+    }
 
     if (i == tableSize_)
     {
@@ -456,8 +463,15 @@ Foam::HashTable<T, Key, Hash>::cbegin() const
 {
     label i = 0;
 
-    while (table_ && !table_[i] && ++i < tableSize_)
-    {}
+    if (nElmts_)
+    {
+        while (table_ && !table_[i] && ++i < tableSize_)
+        {}
+    }
+    else
+    {
+        i = tableSize_;
+    }
 
     if (i == tableSize_)
     {

@@ -71,7 +71,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
             table_[hashIdx] = 0;
         }
 
-        for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
+        for (const_iterator iter = ht.cbegin(); iter != ht.cend(); ++iter)
         {
             insert(iter.key(), *iter);
         }
@@ -113,9 +113,9 @@ Foam::HashTable<T, Key, Hash>::~HashTable()
 template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
 {
-    if (tableSize_)
+    if (nElmts_)
     {
-        label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = Hash()(key, tableSize_);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -145,9 +145,9 @@ Foam::HashTable<T, Key, Hash>::find
     const Key& key
 )
 {
-    if (tableSize_)
+    if (nElmts_)
     {
-        label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = Hash()(key, tableSize_);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -177,7 +177,7 @@ Foam::HashTable<T, Key, Hash>::find
     const Key& key
 ) const
 {
-    if (tableSize_)
+    if (nElmts_)
     {
         label hashIdx = Hash()(key, tableSize_);
 
@@ -198,7 +198,7 @@ Foam::HashTable<T, Key, Hash>::find
     }
 #   endif
 
-    return end();
+    return cend();
 }
 
 
@@ -209,7 +209,7 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::toc() const
     List<Key> tofc(nElmts_);
     label i = 0;
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         tofc[i++] = iter.key();
     }
@@ -351,7 +351,7 @@ bool Foam::HashTable<T, Key, Hash>::erase(const iterator& cit)
             else
             {
                 // No previous found. Mark with special value which is
-                // - not end()
+                // - not end()/cend()
                 // - handled by operator++
                 it.elmtPtr_ = reinterpret_cast<hashedEntry*>(this);
                 it.hashIndex_ = -1;
@@ -466,7 +466,7 @@ void Foam::HashTable<T, Key, Hash>::resize(const label newSize)
 
     HashTable<T, Key, Hash>* newTable = new HashTable<T, Key, Hash>(newSize);
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         newTable->insert(iter.key(), *iter);
     }
@@ -565,7 +565,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
         clear();
     }
 
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         insert(iter.key(), *iter);
     }
@@ -579,22 +579,22 @@ bool Foam::HashTable<T, Key, Hash>::operator==
 ) const
 {
     // Are all my elements in rhs?
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         const_iterator fnd = rhs.find(iter.key());
 
-        if (fnd == rhs.end() || fnd() != iter())
+        if (fnd == rhs.cend() || fnd() != iter())
         {
             return false;
         }
     }
 
     // Are all rhs elements in me?
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         const_iterator fnd = find(iter.key());
 
-        if (fnd == end() || fnd() != iter())
+        if (fnd == cend() || fnd() != iter())
         {
             return false;
         }

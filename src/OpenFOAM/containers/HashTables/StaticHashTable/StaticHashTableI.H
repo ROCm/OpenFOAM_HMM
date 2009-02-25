@@ -102,7 +102,7 @@ inline const T& Foam::StaticHashTable<T, Key, Hash>::operator[]
 {
     const_iterator iter = find(key);
 
-    if (iter == end())
+    if (iter == cend())
     {
         FatalErrorIn
         (
