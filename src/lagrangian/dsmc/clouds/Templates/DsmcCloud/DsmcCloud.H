@@ -53,7 +53,7 @@ namespace Foam
 // Forward declaration of classes
 
 template<class CloudType>
-class BinaryElasticCollisionModel;
+class BinaryCollisionModel;
 
 template<class CloudType>
 class WallInteractionModel;
@@ -97,9 +97,9 @@ private:
 
         // References to the cloud sub-models
 
-            //- Binary Elastic Collision model
-            autoPtr<BinaryElasticCollisionModel<DsmcCloud<ParcelType> > >
-                binaryElasticCollisionModel_;
+            //- Binary  Collision model
+            autoPtr<BinaryCollisionModel<DsmcCloud<ParcelType> > >
+                binaryCollisionModel_;
 
             //- Wall interaction model
             autoPtr<WallInteractionModel<DsmcCloud<ParcelType> > >
@@ -180,8 +180,8 @@ public:
 
                 //- Return reference to binary elastic collision model
                 inline const
-                BinaryElasticCollisionModel<DsmcCloud<ParcelType> >&
-                    binaryElasticCollision() const;
+                BinaryCollisionModel<DsmcCloud<ParcelType> >&
+                    binaryCollision() const;
 
                 //- Return reference to wall interaction model
                 inline const WallInteractionModel<DsmcCloud<ParcelType> >&

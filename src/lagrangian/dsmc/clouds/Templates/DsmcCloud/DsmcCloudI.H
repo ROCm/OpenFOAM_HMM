@@ -91,10 +91,10 @@ Foam::DsmcCloud<ParcelType>::constProps
 
 
 template<class ParcelType>
-inline const Foam::BinaryElasticCollisionModel<Foam::DsmcCloud<ParcelType> >&
-Foam::DsmcCloud<ParcelType>::binaryElasticCollision() const
+inline const Foam::BinaryCollisionModel<Foam::DsmcCloud<ParcelType> >&
+Foam::DsmcCloud<ParcelType>::binaryCollision() const
 {
-    return binaryElasticCollisionModel_;
+    return binaryCollisionModel_;
 }
 
 

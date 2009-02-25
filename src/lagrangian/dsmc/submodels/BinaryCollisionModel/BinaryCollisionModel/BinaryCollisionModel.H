@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::BinaryElasticCollisionModel
+    Foam::BinaryCollisionModel
 
 Description
     Templated DSMC particle collision class
 
 SourceFiles
-    BinaryElasticCollisionModel.C
-    NewBinaryElasticCollisionModel.C
+    BinaryCollisionModel.C
+    NewBinaryCollisionModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef BinaryElasticCollisionModel_H
-#define BinaryElasticCollisionModel_H
+#ifndef BinaryCollisionModel_H
+#define BinaryCollisionModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -47,11 +47,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class BinaryElasticCollisionModel Declaration
+                     Class BinaryCollisionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class BinaryElasticCollisionModel
+class BinaryCollisionModel
 {
 
     // Private data
@@ -69,13 +69,13 @@ class BinaryElasticCollisionModel
 public:
 
     //- Runtime type information
-    TypeName("BinaryElasticCollisionModel");
+    TypeName("BinaryCollisionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        BinaryElasticCollisionModel,
+        BinaryCollisionModel,
         dictionary,
         (
             const dictionary& dict,
@@ -88,7 +88,7 @@ public:
     // Constructors
 
         //- Construct from components
-        BinaryElasticCollisionModel
+        BinaryCollisionModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -98,12 +98,12 @@ public:
 
     // Destructor
 
-        virtual ~BinaryElasticCollisionModel();
+        virtual ~BinaryCollisionModel();
 
 
     // Selector
 
-        static autoPtr<BinaryElasticCollisionModel<CloudType> > New
+        static autoPtr<BinaryCollisionModel<CloudType> > New
         (
             const dictionary& dict,
             CloudType& owner
@@ -141,26 +141,26 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBinaryElasticCollisionModel(CloudType)                            \
+#define makeBinaryCollisionModel(CloudType)                            \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        BinaryElasticCollisionModel<CloudType>,                               \
+        BinaryCollisionModel<CloudType>,                               \
         0                                                                     \
     );                                                                        \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        BinaryElasticCollisionModel<CloudType>,                               \
+        BinaryCollisionModel<CloudType>,                               \
         dictionary                                                            \
     );
 
 
-#define makeBinaryElasticCollisionModelType(SS, CloudType, ParcelType)        \
+#define makeBinaryCollisionModelType(SS, CloudType, ParcelType)        \
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    BinaryElasticCollisionModel<CloudType<ParcelType> >::                     \
+    BinaryCollisionModel<CloudType<ParcelType> >::                     \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
@@ -168,7 +168,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "BinaryElasticCollisionModel.C"
+#   include "BinaryCollisionModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

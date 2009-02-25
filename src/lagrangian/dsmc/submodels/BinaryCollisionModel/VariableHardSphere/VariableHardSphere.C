@@ -35,7 +35,7 @@ Foam::VariableHardSphere<CloudType>::VariableHardSphere
     CloudType& cloud
 )
 :
-    BinaryElasticCollisionModel<CloudType>(dict, cloud, typeName)
+    BinaryCollisionModel<CloudType>(dict, cloud, typeName)
 {}
 
 

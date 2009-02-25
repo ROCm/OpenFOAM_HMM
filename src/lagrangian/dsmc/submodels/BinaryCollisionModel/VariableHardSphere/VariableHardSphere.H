@@ -21,52 +21,83 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+Class
+    Foam::VariableHardSphere
+
+Description
+    Variable Hard Sphere BinaryCollision Model
 
 \*---------------------------------------------------------------------------*/
 
-#include "BinaryElasticCollisionModel.H"
+#ifndef VariableHardSphere_H
+#define VariableHardSphere_H
+
+#include "BinaryCollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::autoPtr<Foam::BinaryElasticCollisionModel<CloudType> >
-Foam::BinaryElasticCollisionModel<CloudType>::New
-(
-    const dictionary& dict,
-    CloudType& owner
-)
+namespace Foam
 {
-    word BinaryElasticCollisionModelType
-    (
-        dict.lookup("BinaryElasticCollisionModel")
-    );
+/*---------------------------------------------------------------------------*\
+                      Class VariableHardSphere Declaration
+\*---------------------------------------------------------------------------*/
 
-    Info<< "Selecting BinaryElasticCollisionModel "
-        << BinaryElasticCollisionModelType
-        << endl;
+template<class CloudType>
+class VariableHardSphere
+:
+    public BinaryCollisionModel<CloudType>
+{
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(BinaryElasticCollisionModelType);
+    // Private data
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
+    // const scalar something_;
+
+public:
+
+    //- Runtime type information
+    TypeName("VariableHardSphere");
+
+
+    // Constructors
+
+        //- Construct from dictionary
+        VariableHardSphere
         (
-            "BinaryElasticCollisionModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
-        )
-            << "Unknown BinaryElasticCollisionModelType type "
-            << BinaryElasticCollisionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid BinaryElasticCollisionModel types are :" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
-    }
+            const dictionary& dict,
+            CloudType& cloud
+        );
 
-    return autoPtr<BinaryElasticCollisionModel<CloudType> >
-    (
-        cstrIter()(dict, owner)
-    );
-}
 
+    // Destructor
+
+        ~VariableHardSphere();
+
+
+    // Member Functions
+
+        //- Apply collision
+        virtual void collide
+        (
+            label idA,
+            label idB,
+            vector& UA,
+            vector& UB
+        ) const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "VariableHardSphere.C"
+#endif
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

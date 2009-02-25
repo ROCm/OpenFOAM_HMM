@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DsmcCloud.H"
-#include "BinaryElasticCollisionModel.H"
+#include "BinaryCollisionModel.H"
 #include "WallInteractionModel.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -110,9 +110,9 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
     constProps_(),
     rndGen_(label(971501)),
-    binaryElasticCollisionModel_
+    binaryCollisionModel_
     (
-        BinaryElasticCollisionModel<DsmcCloud<ParcelType> >::New
+        BinaryCollisionModel<DsmcCloud<ParcelType> >::New
         (
             particleProperties_,
             *this

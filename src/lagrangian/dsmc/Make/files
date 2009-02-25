@@ -9,7 +9,7 @@ clouds/derived/dsmcCloud/dsmcCloud.C
 
 /* submodels */
 parcels/derived/dsmcParcel/defineDsmcParcel.C
-parcels/derived/dsmcParcel/makeDsmcParcelBinaryElasticCollisionModels.C
+parcels/derived/dsmcParcel/makeDsmcParcelBinaryCollisionModels.C
 parcels/derived/dsmcParcel/makeDsmcParcelWallInteractionModels.C
 
 LIB = $(FOAM_LIBBIN)/libdsmc

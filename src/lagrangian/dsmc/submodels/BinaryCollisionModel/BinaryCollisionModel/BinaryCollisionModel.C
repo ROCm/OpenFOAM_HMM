@@ -21,83 +21,62 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-Class
-    Foam::VariableHardSphere
-
-Description
-    Variable Hard Sphere BinaryElasticCollision Model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef VariableHardSphere_H
-#define VariableHardSphere_H
+#include "BinaryCollisionModel.H"
 
-#include "BinaryElasticCollisionModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-/*---------------------------------------------------------------------------*\
-                      Class VariableHardSphere Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-class VariableHardSphere
-:
-    public BinaryElasticCollisionModel<CloudType>
+Foam::BinaryCollisionModel<CloudType>::BinaryCollisionModel
+(
+    const dictionary& dict,
+    CloudType& owner,
+    const word& type
+)
+:   dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::BinaryCollisionModel<CloudType>::~BinaryCollisionModel()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+const CloudType&
+Foam::BinaryCollisionModel<CloudType>::owner() const
 {
-
-    // Private data
-
-    // const scalar something_;
-
-public:
-
-    //- Runtime type information
-    TypeName("VariableHardSphere");
+    return owner_;
+}
 
 
-    // Constructors
-
-        //- Construct from dictionary
-        VariableHardSphere
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+template<class CloudType>
+const Foam::dictionary&
+Foam::BinaryCollisionModel<CloudType>::dict() const
+{
+    return dict_;
+}
 
 
-    // Destructor
-
-        ~VariableHardSphere();
-
-
-    // Member Functions
-
-        //- Apply collision
-        virtual void collide
-        (
-            label idA,
-            label idB,
-            vector& UA,
-            vector& UB
-        ) const;
-};
+template<class CloudType>
+const Foam::dictionary&
+Foam::BinaryCollisionModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "VariableHardSphere.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+#include "NewBinaryCollisionModel.C"
 
 // ************************************************************************* //
+

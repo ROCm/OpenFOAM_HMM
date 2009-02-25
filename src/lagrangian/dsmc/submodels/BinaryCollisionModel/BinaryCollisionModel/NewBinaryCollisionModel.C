@@ -24,22 +24,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dsmcParcel.H"
-#include "DsmcCloud.H"
-#include "VariableHardSphere.H"
+#include "BinaryCollisionModel.H"
 
-namespace Foam
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::autoPtr<Foam::BinaryCollisionModel<CloudType> >
+Foam::BinaryCollisionModel<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner
+)
 {
-    makeBinaryElasticCollisionModel(DsmcCloud<dsmcParcel>);
-
-    // Add instances of collision model to the table
-    makeBinaryElasticCollisionModelType
+    word BinaryCollisionModelType
     (
-        VariableHardSphere,
-        DsmcCloud,
-        dsmcParcel
+        dict.lookup("BinaryCollisionModel")
     );
-};
+
+    Info<< "Selecting BinaryCollisionModel "
+        << BinaryCollisionModelType
+        << endl;
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(BinaryCollisionModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "BinaryCollisionModel<CloudType>::New"
+            "(const dictionary&, CloudType&)"
+        )
+            << "Unknown BinaryCollisionModelType type "
+            << BinaryCollisionModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid BinaryCollisionModel types are :" << nl
+            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+    }
+
+    return autoPtr<BinaryCollisionModel<CloudType> >
+    (
+        cstrIter()(dict, owner)
+    );
+}
 
 
 // ************************************************************************* //

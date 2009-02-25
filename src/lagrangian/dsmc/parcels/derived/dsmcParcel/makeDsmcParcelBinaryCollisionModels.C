@@ -24,59 +24,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "BinaryElasticCollisionModel.H"
+#include "dsmcParcel.H"
+#include "DsmcCloud.H"
+#include "VariableHardSphere.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::BinaryElasticCollisionModel<CloudType>::BinaryElasticCollisionModel
-(
-    const dictionary& dict,
-    CloudType& owner,
-    const word& type
-)
-:   dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::BinaryElasticCollisionModel<CloudType>::~BinaryElasticCollisionModel()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-const CloudType&
-Foam::BinaryElasticCollisionModel<CloudType>::owner() const
+namespace Foam
 {
-    return owner_;
-}
+    makeBinaryCollisionModel(DsmcCloud<dsmcParcel>);
 
+    // Add instances of collision model to the table
+    makeBinaryCollisionModelType
+    (
+        VariableHardSphere,
+        DsmcCloud,
+        dsmcParcel
+    );
+};
 
-template<class CloudType>
-const Foam::dictionary&
-Foam::BinaryElasticCollisionModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary&
-Foam::BinaryElasticCollisionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "NewBinaryElasticCollisionModel.C"
 
 // ************************************************************************* //
-
