@@ -33,8 +33,6 @@ License
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::buildConstProps()
 {
-    Info<< nl << "Building Constant Properties - PLACEHOLDER." << endl;
-
     Info<< nl << "typeIds found " << typeIdList_ << endl;
 
     constProps_.setSize(typeIdList_.size());
@@ -103,7 +101,73 @@ void Foam::DsmcCloud<ParcelType>::initialise
 
     numberDensities /= nParticle_;
 
+    scalar x0 = mesh_.bounds().min().x();
+    scalar xR = mesh_.bounds().max().x() - x0;
 
+    scalar y0 = mesh_.bounds().min().y();
+    scalar yR = mesh_.bounds().max().y() - y0;
+
+    scalar z0 = mesh_.bounds().min().z();
+    scalar zR = mesh_.bounds().max().z() - z0;
+
+    forAll(molecules, i)
+    {
+        const word& moleculeName(molecules[i]);
+
+        label typeId(findIndex(typeIdList_, moleculeName));
+
+        if(typeId == -1)
+        {
+            FatalErrorIn("Foam::DsmcCloud<ParcelType>::initialise")
+                << "typeId " << moleculeName << "not defined." << nl
+                << abort(FatalError);
+        }
+
+        scalar numberDensity = numberDensities[i];
+
+        scalar spacing = pow(numberDensity,-(1.0/3.0));
+
+        int ni = label(xR/spacing) + 1;
+        int nj = label(yR/spacing) + 1;
+        int nk = label(zR/spacing) + 1;
+
+        vector delta(xR/ni, yR/nj, zR/nk);
+
+        scalar pert = spacing;
+
+        for (int i = 0; i < ni; i++)
+        {
+            for (int j = 0; j < nj; j++)
+            {
+                for (int k = 0; k < nk; k++)
+                {
+                    point p
+                    (
+                        x0 + (i + 0.5)*delta.x(),
+                        y0 + (j + 0.5)*delta.y(),
+                        z0 + (k + 0.5)*delta.z()
+                    );
+
+                    p.x() += pert*(rndGen_.scalar01() - 0.5);
+                    p.y() += pert*(rndGen_.scalar01() - 0.5);
+                    p.z() += pert*(rndGen_.scalar01() - 0.5);
+
+                    label cell = mesh_.findCell(p);
+
+                    if (cell >= 0)
+                    {
+                        addNewParcel
+                        (
+                            p,
+                            velocity,
+                            cell,
+                            typeId
+                        );
+                    }
+                }
+            }
+        }
+    }
 }
 
 

@@ -56,9 +56,7 @@ Foam::dsmcCloud::dsmcCloud
 )
 :
     DsmcCloud<dsmcParcel>(cloudType, mesh, dsmcInitialiseDict)
-{
-    dsmcParcel::readFields(*this);
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
