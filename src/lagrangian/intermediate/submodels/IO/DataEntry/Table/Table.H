@@ -84,23 +84,18 @@ class Table
 
 public:
 
-    // Runtime type information
+    //- Runtime type information
     TypeName("Table");
 
 
     // Constructors
 
         //- Construct from dictionary
-        Table
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        Table(const word& entryName, const dictionary& dict);
 
 
     //- Destructor
-
-        ~Table();
+    virtual ~Table();
 
 
     // Member Functions

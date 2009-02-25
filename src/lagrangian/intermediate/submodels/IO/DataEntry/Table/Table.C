@@ -42,11 +42,11 @@ Foam::Table<Type>::Table
     {
         FatalErrorIn
         (
-             "Foam::Table<Type>::Table"
-             "("
-                 "const word& entryName,"
-                 "const dictionary& dict"
-             ")"
+             "Foam::Table<Type>::Table\n"
+             "(\n"
+             "    const word& entryName,\n"
+             "    const dictionary& dict\n"
+             ")\n"
         ) << "Table is invalid (empty)" << nl
           << exit(FatalError);
     }

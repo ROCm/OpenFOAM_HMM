@@ -62,6 +62,7 @@ class Constant
 {
     // Private data
 
+        //- Constant value
         Type value_;
 
 
@@ -91,8 +92,7 @@ public:
 
 
     //- Destructor
-
-        ~Constant();
+    virtual ~Constant();
 
 
     // Member Functions

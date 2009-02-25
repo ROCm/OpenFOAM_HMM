@@ -26,6 +26,10 @@ Class
     Foam::DataEntry
 
 Description
+    Top level data entry class for use in dictionaries. Provides a mechanism
+    to specify a variable as a certain type, e.g. constant or table, and
+    provide functions to return the (interpolated) value, and integral between
+    limits.
 
 SourceFiles
     DataEntry.C
@@ -101,16 +105,15 @@ public:
 
 
     //- Selector
-        static autoPtr<DataEntry<Type> > New
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+    static autoPtr<DataEntry<Type> > New
+    (
+        const word& entryName,
+        const dictionary& dict
+    );
 
 
     //- Destructor
-
-        virtual ~DataEntry();
+    virtual ~DataEntry();
 
 
     // Member Functions
