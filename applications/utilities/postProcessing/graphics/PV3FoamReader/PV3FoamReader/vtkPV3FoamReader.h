@@ -65,9 +65,9 @@ public:
     vtkGetMacro(CacheMesh, int);
 
     // Description:
-    // FOAM extrapolate internal values onto the walls
-    vtkSetMacro(ExtrapolateWalls, int);
-    vtkGetMacro(ExtrapolateWalls, int);
+    // FOAM extrapolate internal values onto the patches
+    vtkSetMacro(ExtrapolatePatches, int);
+    vtkGetMacro(ExtrapolatePatches, int);
 
     // FOAM read sets control
     vtkSetMacro(IncludeSets, int);
@@ -183,7 +183,7 @@ private:
     int TimeStepRange[2];
     int CacheMesh;
 
-    int ExtrapolateWalls;
+    int ExtrapolatePatches;
     int IncludeSets;
     int IncludeZones;
     int ShowPatchNames;

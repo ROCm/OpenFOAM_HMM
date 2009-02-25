@@ -83,11 +83,11 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::findFaceDirs
 #   ifndef SPHERICAL_GEOMETRY
     if (mesh.nGeometricD() <= 2) // find the normal direction
     {
-        if (mesh.directions()[0] == -1)
+        if (mesh.geometricD()[0] == -1)
         {
             kdir = vector(1, 0, 0);
         }
-        else if (mesh.directions()[1] == -1)
+        else if (mesh.geometricD()[1] == -1)
         {
             kdir = vector(0, 1, 0);
         }
@@ -115,7 +115,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::findFaceDirs
 
         if (magk < SMALL)
         {
-            FatalErrorIn("findFaceDirs") << " calculated kdir = zero"
+            FatalErrorIn("findFaceDirs(..)") << " calculated kdir = zero"
                 << exit(FatalError);
         }
         else

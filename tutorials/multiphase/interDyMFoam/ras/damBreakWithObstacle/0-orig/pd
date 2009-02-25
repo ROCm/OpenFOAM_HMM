@@ -10,30 +10,37 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    location    "0";
-    object      k.old;
+    object      pd;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -2 0 0 0 0];
+dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform 0.1;
+internalField   uniform 0;
 
 boundaryField
 {
-    floor
+    walls
     {
         type            zeroGradient;
     }
-    ceiling
+
+    obstacle
     {
         type            zeroGradient;
     }
-    fixedWalls
+
+    atmosphere
     {
-        type            zeroGradient;
+        type            totalPressure;
+        p0              uniform 0;
+        U               U;
+        phi             phi;
+        rho             rho;
+        psi             none;
+        gamma           1;
+        value           uniform 0;
     }
 }
-
 
 // ************************************************************************* //

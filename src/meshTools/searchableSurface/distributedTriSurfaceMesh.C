@@ -1347,19 +1347,6 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 :
     triSurfaceMesh(io),
-//    triSurfaceMesh
-//    (
-//        IOobject
-//        (
-//            io.name(),
-//            io.db().time().findInstanceDir(io.local()),
-//            io.local(),
-//            io.db(),
-//            io.readOpt(),
-//            io.writeOpt(),
-//            io.registerObject()
-//        )
-//    ),
     dict_
     (
         IOobject
@@ -1385,20 +1372,6 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 )
 :
     triSurfaceMesh(io, dict),
-//    triSurfaceMesh
-//    (
-//        IOobject
-//        (
-//            io.name(),
-//            io.db().time().findInstanceDir(io.local()),
-//            io.local(),
-//            io.db(),
-//            io.readOpt(),
-//            io.writeOpt(),
-//            io.registerObject()
-//        ),
-//        dict
-//    ),
     dict_
     (
         IOobject

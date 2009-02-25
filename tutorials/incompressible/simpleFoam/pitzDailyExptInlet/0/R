@@ -20,28 +20,28 @@ internalField   uniform (0 0 0 0 0 0);
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform (0 0 0 0 0 0);
     }
 
-    outlet          
+    outlet
     {
         type            zeroGradient;
     }
 
-    upperWall       
+    upperWall
     {
-        type            zeroGradient;
+        type            kQRWallFunction;
     }
 
-    lowerWall       
+    lowerWall
     {
-        type            zeroGradient;
+        type            kQRWallFunction;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            empty;
     }

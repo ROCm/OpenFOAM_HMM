@@ -1,56 +1,62 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  dev                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       volScalarField;
-    object      pd;
+    location    "0";
+    object      mut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+dimensions      [ 1 -1 -1 0 0 0 0 ];
 
 internalField   uniform 0;
 
 boundaryField
 {
-    leftWall        
+    front
     {
-        type            zeroGradient;
-    }
-
-    rightWall       
-    {
-        type            zeroGradient;
-    }
-
-    lowerWall       
-    {
-        type            zeroGradient;
-    }
-
-    atmosphere      
-    {
-        type            totalPressure;
-        p0              uniform 0;
-        U               U;
-        phi             phi;
-        rho             none;
-        psi             none;
-        gamma           1;
+        type            mutWallFunction;
         value           uniform 0;
     }
 
-    defaultFaces    
+    back
     {
-        type            empty;
+        type            mutWallFunction;
+        value           uniform 0;
+    }
+
+    wall
+    {
+        type            mutWallFunction;
+        value           uniform 0;
+    }
+
+    porosityWall
+    {
+        type            mutWallFunction;
+        value           uniform 0;
+    }
+
+    inlet
+    {
+        type            calculated;
+        value           uniform 0;
+    }
+
+    outlet
+    {
+        type            calculated;
+        value           uniform 0;
     }
 }
+
 
 // ************************************************************************* //
