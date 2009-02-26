@@ -48,6 +48,45 @@ Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 }
 
 
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+Foam::Ostream&
+Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
+{
+    label used = 0;
+    label maxChain = 0;
+    unsigned avgChain = 0;
+
+    for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
+    {
+        label count = 0;
+        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
+        {
+            ++count;
+        }
+
+        if (count)
+        {
+            ++used;
+            avgChain += count;
+
+            if (maxChain < count)
+            {
+                maxChain = count;
+            }
+        }
+    }
+
+    os  << "HashTable<T,Key,Hash>"
+        << " elements:" << size() << " slots:" << used << "/" << tableSize_
+        << " chaining(avg/max):" << (used ? float(avgChain/used) : 0)
+        << "/" << maxChain << endl;
+
+    return os;
+}
+
+
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>

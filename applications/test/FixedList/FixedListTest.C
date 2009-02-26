@@ -52,16 +52,18 @@ int main(int argc, char *argv[])
     list[1] = 2;
     list[2] = 3;
     list[3] = 4;
-    Info<< list << endl;
+
+    Info<< "list:" << list
+        << " hash:" << FixedList<label, 4>::Hash<>()(list) << endl;
 
     label a[4] = {0, 1, 2, 3};
     FixedList<label, 4> list2(a);
-    Info<< list2 << endl;
 
-    Info<< FixedList<label, 4>::Hash<>()(list2) << endl;
+    Info<< "list:" << list2
+        << " hash:" << FixedList<label, 4>::Hash<>()(list2) << endl;
 
-    //FixedList<label, 3> hmm(Sin);
-    //Info<< hmm << endl;
+    // FixedList<label, 3> hmm(Sin);
+    // Info<< hmm << endl;
 
     if (Pstream::parRun())
     {
@@ -69,7 +71,12 @@ int main(int argc, char *argv[])
         {
             Serr<< "slave sending to master "
                 << Pstream::masterNo() << endl;
-            OPstream toMaster(Pstream::masterNo(), IOstream::ASCII);
+
+            OPstream toMaster
+            (
+                Pstream::blocking, Pstream::masterNo(), IOstream::ASCII
+            );
+
             FixedList<label, 2> list3;
             list3[0] = 0;
             list3[1] = 1;
@@ -79,13 +86,16 @@ int main(int argc, char *argv[])
         {
             for
             (
-                int slave=Pstream::firstSlave();
-                slave<=Pstream::lastSlave();
+                int slave = Pstream::firstSlave();
+                slave <= Pstream::lastSlave();
                 slave++
             )
             {
                 Serr << "master receiving from slave " << slave << endl;
-                IPstream fromSlave(slave, IOstream::ASCII);
+                IPstream fromSlave
+                (
+                    Pstream::blocking, slave, IOstream::ASCII
+                );
                 FixedList<label, 2> list3(fromSlave);
 
                 Serr<< list3 << endl;

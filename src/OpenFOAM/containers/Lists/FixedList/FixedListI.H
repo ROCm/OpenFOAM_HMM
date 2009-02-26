@@ -408,7 +408,8 @@ template<class HashT>
 inline Foam::FixedList<T, Size>::Hash<HashT>::Hash()
 {}
 
-//- Rotating Hash. From http://burtleburtle.net/bob/hash/doobs.html
+
+// Rotating Hash
 template<class T, Foam::label Size>
 template<class HashT>
 inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
@@ -422,7 +423,7 @@ inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
 
     for (register int i=0; i<Size; i++)
     {
-        val = (val<<4)^(val>>farbit)^HashT()(lst[i]);
+        val = (val << 4) ^ (val >> farbit) ^ HashT()(lst[i]);
     }
 
     return val;
@@ -436,7 +437,7 @@ inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
     const label tableSize
 ) const
 {
-    return mag(operator()(lst)) % tableSize;
+    return ::abs(operator()(lst)) % tableSize;
 }
 #endif
 

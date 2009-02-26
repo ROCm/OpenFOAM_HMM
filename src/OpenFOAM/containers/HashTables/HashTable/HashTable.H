@@ -142,10 +142,10 @@ public:
     // Constructors
 
         //- Construct given initial table size
-        HashTable(const label size = 100);
+        HashTable(const label size = 128);
 
         //- Construct from Istream
-        HashTable(Istream&, const label size = 100);
+        HashTable(Istream&, const label size = 128);
 
         //- Construct as copy
         HashTable(const HashTable<T, Key, Hash>&);
@@ -183,6 +183,8 @@ public:
             //- Return the table of contents
             List<Key> toc() const;
 
+            //- Print information
+            Ostream& printInfo(Ostream&) const;
 
         // Edit
 

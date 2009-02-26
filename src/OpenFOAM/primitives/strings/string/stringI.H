@@ -133,7 +133,7 @@ inline bool Foam::string::meta(const string& str, const char quote)
 
 
 template<class String>
-inline Foam::string 
+inline Foam::string
 Foam::string::quotemeta(const string& str, const char quote)
 {
     if (!quote)
@@ -205,14 +205,14 @@ inline Foam::string::size_type Foam::string::hash::operator()
     const string& key
 ) const
 {
-    register size_type hashVal = 0;
+    register size_type val = 0;
 
     for (string::const_iterator iter=key.begin(); iter!=key.end(); ++iter)
     {
-        hashVal = hashVal<<1 ^ *iter;
+        val = (val << 1) ^ *iter;
     }
 
-    return hashVal;
+    return val;
 }
 
 

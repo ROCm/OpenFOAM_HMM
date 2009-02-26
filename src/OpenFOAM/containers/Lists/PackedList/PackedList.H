@@ -148,9 +148,11 @@ public:
         //- Masking for all bits below the offset
         inline static unsigned int maskLower(unsigned offset);
 
-    // Forward declaration of iteratorBase
+    // Forward declaration of iterators
 
         class iteratorBase;
+        class iterator;
+        class const_iterator;
 
     // Constructors
 
@@ -355,7 +357,10 @@ public:
             public iteratorBase
         {
 
-            //- Should never violate const-ness!
+            //- Disallow copy constructor from const_iterator - violates const-ness!
+            iterator(const const_iterator&);
+
+            //- Disallow assignment from const_iterator - violates const-ness!
             void operator=(const const_iterator&);
 
         public:

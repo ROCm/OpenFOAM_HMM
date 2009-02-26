@@ -141,10 +141,10 @@ public:
     // Constructors
 
         //- Construct given initial table size
-        StaticHashTable(const label size = 100);
+        StaticHashTable(const label size = 128);
 
         //- Construct from Istream
-        StaticHashTable(Istream&, const label size = 100);
+        StaticHashTable(Istream&, const label size = 128);
 
         //- Construct as copy
         StaticHashTable(const StaticHashTable<T, Key, Hash>&);
@@ -180,6 +180,9 @@ public:
 
             //- Return the table of contents
             List<Key> toc() const;
+
+            //- Print information
+            Ostream& printInfo(Ostream&) const;
 
 
         // Edit
