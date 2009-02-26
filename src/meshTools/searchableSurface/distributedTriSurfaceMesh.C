@@ -1341,27 +1341,53 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     dict_(io, dict)
 {
     read();
+
+    if (debug)
+    {
+        Info<< "Constructed from triSurface:" << endl;
+        writeStats(Info);
+    }
 }
 
 
 Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 :
-    triSurfaceMesh(io),
+    //triSurfaceMesh(io),
+    triSurfaceMesh
+    (
+        IOobject
+        (
+            io.name(),
+            io.time().findInstance(io.local(), word::null),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            io.registerObject()
+        )
+    ),
     dict_
     (
         IOobject
         (
-            searchableSurface::name() + "Dict",
-            searchableSurface::instance(),
-            searchableSurface::local(),
-            searchableSurface::db(),
-            searchableSurface::readOpt(),
-            searchableSurface::writeOpt(),
-            searchableSurface::registerObject()
+            triSurfaceMesh::name() + "Dict",
+            triSurfaceMesh::instance(),
+            triSurfaceMesh::local(),
+            triSurfaceMesh::db(),
+            triSurfaceMesh::readOpt(),
+            triSurfaceMesh::writeOpt(),
+            triSurfaceMesh::registerObject()
         )
     )
 {
     read();
+
+    if (debug)
+    {
+        Info<< "Read distributedTriSurface from " << io.objectPath()
+            << ':' << endl;
+        writeStats(Info);
+    }
 }
 
 
@@ -1371,22 +1397,43 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     const dictionary& dict
 )
 :
-    triSurfaceMesh(io, dict),
+    //triSurfaceMesh(io, dict),
+    triSurfaceMesh
+    (
+        IOobject
+        (
+            io.name(),
+            io.time().findInstance(io.local(), word::null),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            io.registerObject()
+        ),
+        dict
+    ),
     dict_
     (
         IOobject
         (
-            searchableSurface::name() + "Dict",
-            searchableSurface::instance(),
-            searchableSurface::local(),
-            searchableSurface::db(),
-            searchableSurface::readOpt(),
-            searchableSurface::writeOpt(),
-            searchableSurface::registerObject()
+            triSurfaceMesh::name() + "Dict",
+            triSurfaceMesh::instance(),
+            triSurfaceMesh::local(),
+            triSurfaceMesh::db(),
+            triSurfaceMesh::readOpt(),
+            triSurfaceMesh::writeOpt(),
+            triSurfaceMesh::registerObject()
         )
     )
 {
     read();
+
+    if (debug)
+    {
+        Info<< "Read distributedTriSurface from " << io.objectPath()
+            << " and dictionary:" << endl;
+        writeStats(Info);
+    }
 }
 
 

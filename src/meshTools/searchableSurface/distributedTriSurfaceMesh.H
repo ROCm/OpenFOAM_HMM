@@ -317,10 +317,11 @@ public:
             const dictionary& dict
         );
 
-        //- Construct read
+        //- Construct read. Does findInstance to find io.local().
         distributedTriSurfaceMesh(const IOobject& io);
 
-        //- Construct from dictionary (used by searchableSurface)
+        //- Construct from dictionary (used by searchableSurface).
+        //  Does read. Does findInstance to find io.local().
         distributedTriSurfaceMesh
         (
             const IOobject& io,

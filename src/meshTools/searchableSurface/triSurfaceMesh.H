@@ -117,7 +117,6 @@ public:
         triSurfaceMesh(const IOobject& io);
 
         //- Construct from IO and dictionary (used by searchableSurface).
-        //  Does timeInstance search.
         //  Dictionary may contain a 'scale' entry (eg, 0.001: mm -> m)
         triSurfaceMesh
         (
