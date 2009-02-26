@@ -76,10 +76,8 @@ bool Foam::distributedTriSurfaceMesh::read()
     // Distribution type
     distType_ = distributionTypeNames_.read(dict_.lookup("distributionType"));
 
-    if (dict_.found("mergeDistance"))
-    {
-        dict_.lookup("mergeDistance") >> mergeDist_;
-    }
+    // Merge distance
+    mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
 
     return true;
 }
@@ -1346,6 +1344,19 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     {
         Info<< "Constructed from triSurface:" << endl;
         writeStats(Info);
+
+        labelList nTris(Pstream::nProcs());
+        nTris[Pstream::myProcNo()] = triSurface::size();
+        Pstream::gatherList(nTris);
+        Pstream::scatterList(nTris);
+
+        Info<< endl<< "\tproc\ttris\tbb" << endl;
+        forAll(nTris, procI)
+        {
+            Info<< '\t' << procI << '\t' << nTris[procI]
+                 << '\t' << procBb_[procI] << endl;
+        }
+        Info<< endl;
     }
 }
 
@@ -1370,13 +1381,13 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
     (
         IOobject
         (
-            triSurfaceMesh::name() + "Dict",
-            triSurfaceMesh::instance(),
-            triSurfaceMesh::local(),
-            triSurfaceMesh::db(),
-            triSurfaceMesh::readOpt(),
-            triSurfaceMesh::writeOpt(),
-            triSurfaceMesh::registerObject()
+            searchableSurface::name() + "Dict",
+            searchableSurface::instance(),
+            searchableSurface::local(),
+            searchableSurface::db(),
+            searchableSurface::readOpt(),
+            searchableSurface::writeOpt(),
+            searchableSurface::registerObject()
         )
     )
 {
@@ -1387,6 +1398,19 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
         Info<< "Read distributedTriSurface from " << io.objectPath()
             << ':' << endl;
         writeStats(Info);
+
+        labelList nTris(Pstream::nProcs());
+        nTris[Pstream::myProcNo()] = triSurface::size();
+        Pstream::gatherList(nTris);
+        Pstream::scatterList(nTris);
+
+        Info<< endl<< "\tproc\ttris\tbb" << endl;
+        forAll(nTris, procI)
+        {
+            Info<< '\t' << procI << '\t' << nTris[procI]
+                 << '\t' << procBb_[procI] << endl;
+        }
+        Info<< endl;
     }
 }
 
@@ -1416,13 +1440,13 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     (
         IOobject
         (
-            triSurfaceMesh::name() + "Dict",
-            triSurfaceMesh::instance(),
-            triSurfaceMesh::local(),
-            triSurfaceMesh::db(),
-            triSurfaceMesh::readOpt(),
-            triSurfaceMesh::writeOpt(),
-            triSurfaceMesh::registerObject()
+            searchableSurface::name() + "Dict",
+            searchableSurface::instance(),
+            searchableSurface::local(),
+            searchableSurface::db(),
+            searchableSurface::readOpt(),
+            searchableSurface::writeOpt(),
+            searchableSurface::registerObject()
         )
     )
 {
@@ -1433,6 +1457,19 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
         Info<< "Read distributedTriSurface from " << io.objectPath()
             << " and dictionary:" << endl;
         writeStats(Info);
+
+        labelList nTris(Pstream::nProcs());
+        nTris[Pstream::myProcNo()] = triSurface::size();
+        Pstream::gatherList(nTris);
+        Pstream::scatterList(nTris);
+
+        Info<< endl<< "\tproc\ttris\tbb" << endl;
+        forAll(nTris, procI)
+        {
+            Info<< '\t' << procI << '\t' << nTris[procI]
+                 << '\t' << procBb_[procI] << endl;
+        }
+        Info<< endl;
     }
 }
 
@@ -2436,6 +2473,8 @@ void Foam::distributedTriSurfaceMesh::writeStats(Ostream& os) const
     boundBox bb;
     label nPoints;
     calcBounds(bb, nPoints);
+    reduce(bb.min(), minOp<point>());
+    reduce(bb.max(), maxOp<point>());
 
     os  << "Triangles    : " << returnReduce(triSurface::size(), sumOp<label>())
         << endl

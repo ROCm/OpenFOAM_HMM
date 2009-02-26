@@ -91,14 +91,13 @@ public:
 
 private:
 
+    // Private member data
+
         //- Merging distance
         scalar mergeDist_;
 
         //- Decomposition used when independently decomposing surface.
         autoPtr<decompositionMethod> decomposer_;
-
-
-    // Private member data
 
         //- Bounding box settings
         IOdictionary dict_;
