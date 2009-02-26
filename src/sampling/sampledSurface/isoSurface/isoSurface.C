@@ -199,81 +199,47 @@ void Foam::isoSurface::calcCutTypes
             }
         }
     }
+
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
 
         label faceI = pp.start();
 
-        if (isA<emptyPolyPatch>(pp))
+        forAll(pp, i)
         {
-            // Still needs special treatment?
+            bool ownLower = (cVals[own[faceI]] < iso_);
 
-            forAll(pp, i)
+            scalar nbrValue;
+            point nbrPoint;
+            getNeighbour
+            (
+                boundaryRegion,
+                cVals,
+                own[faceI],
+                faceI,
+                nbrValue,
+                nbrPoint
+            );
+
+            bool neiLower = (nbrValue < iso_);
+
+            if (ownLower != neiLower)
             {
-                bool ownLower = (cVals[own[faceI]] < iso_);
-
-                scalar nbrValue;
-                point nbrPoint;
-                getNeighbour
-                (
-                    boundaryRegion,
-                    cVals,
-                    own[faceI],
-                    faceI,
-                    nbrValue,
-                    nbrPoint
-                );
-
-                bool neiLower = (nbrValue < iso_);
-
+                faceCutType_[faceI] = CUT;
+            }
+            else
+            {
+                // Mesh edge.
                 const face f = mesh_.faces()[faceI];
 
                 if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
                 {
                     faceCutType_[faceI] = CUT;
                 }
-
-                faceI++;
             }
-        }
-        else
-        {
-            forAll(pp, i)
-            {
-                bool ownLower = (cVals[own[faceI]] < iso_);
 
-                scalar nbrValue;
-                point nbrPoint;
-                getNeighbour
-                (
-                    boundaryRegion,
-                    cVals,
-                    own[faceI],
-                    faceI,
-                    nbrValue,
-                    nbrPoint
-                );
-
-                bool neiLower = (nbrValue < iso_);
-
-                if (ownLower != neiLower)
-                {
-                    faceCutType_[faceI] = CUT;
-                }
-                else
-                {
-                    // Mesh edge.
-                    const face f = mesh_.faces()[faceI];
-
-                    if (isEdgeOfFaceCut(pVals, f, ownLower, neiLower))
-                    {
-                        faceCutType_[faceI] = CUT;
-                    }
-                }
-
-                faceI++;
-            }
+            faceI++;
         }
     }
 
@@ -1589,26 +1555,6 @@ Foam::isoSurface::isoSurface
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // Check
-    forAll(patches, patchI)
-    {
-        if (isA<emptyPolyPatch>(patches[patchI]))
-        {
-            FatalErrorIn
-            (
-                "isoSurface::isoSurface\n"
-                "(\n"
-                "    const volScalarField& cVals,\n"
-                "    const scalarField& pVals,\n"
-                "    const scalar iso,\n"
-                "    const bool regularise,\n"
-                "    const scalar mergeTol\n"
-                ")\n"
-            )   << "Iso surfaces not supported on case with empty patches."
-                << exit(FatalError);
-        }
-    }
-
     // Pre-calculate patch-per-face to avoid whichPatch call.
     labelList boundaryRegion(mesh_.nFaces()-mesh_.nInternalFaces());
 
@@ -1724,7 +1670,7 @@ Foam::isoSurface::isoSurface
 
 
     // Generate field to interpolate. This is identical to the mesh.C()
-    // except on separated coupled patches.
+    // except on separated coupled patches and on empty patches.
     slicedVolVectorField meshC
     (
         IOobject
@@ -1746,10 +1692,12 @@ Foam::isoSurface::isoSurface
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
         forAll(patches, patchI)
         {
+            const polyPatch& pp = patches[patchI];
+
             if
             (
-                patches[patchI].coupled()
-             && refCast<const coupledPolyPatch>(patches[patchI]).separated()
+                pp.coupled()
+             && refCast<const coupledPolyPatch>(pp).separated()
             )
             {
                 fvPatchVectorField& pfld = const_cast<fvPatchVectorField&>
@@ -1758,8 +1706,31 @@ Foam::isoSurface::isoSurface
                 );
                 pfld.operator==
                 (
-                    patches[patchI].patchSlice(mesh_.faceCentres())
+                    pp.patchSlice(mesh_.faceCentres())
                 );
+            }
+            else if (isA<emptyPolyPatch>(pp))
+            {
+                typedef slicedVolVectorField::GeometricBoundaryField bType;
+
+                bType& bfld = const_cast<bType&>(meshC.boundaryField());
+
+                // Clear old value. Cannot resize it since slice.
+                bfld.set(patchI, NULL);
+
+                // Set new value we can change
+                bfld.set
+                (
+                    patchI,
+                    new calculatedFvPatchField<vector>
+                    (
+                        mesh_.boundary()[patchI],
+                        meshC
+                    )
+                );
+
+                // Change to face centres
+                bfld[patchI] = pp.patchSlice(mesh_.faceCentres());
             }
         }
     }
@@ -1885,6 +1856,14 @@ Foam::isoSurface::isoSurface
 
     orientSurface(*this, faceEdges, edgeFace0, edgeFace1, edgeFacesRest);
     //}
+
+
+    if (debug)
+    {
+        fileName stlFile = mesh_.time().path() + ".stl";
+        Pout<< "Dumping surface to " << stlFile << endl;
+        triSurface::write(stlFile);
+    }
 }
 
 
