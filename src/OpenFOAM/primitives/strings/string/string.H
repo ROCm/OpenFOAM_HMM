@@ -89,9 +89,10 @@ public:
     class hash
     {
     public:
-        inline hash();
+        hash()
+        {}
+
         inline size_type operator()(const string&) const;
-        inline size_type operator()(const string&, const size_type) const;
     };
 
 

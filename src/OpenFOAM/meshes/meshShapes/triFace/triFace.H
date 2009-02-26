@@ -164,7 +164,7 @@ public:
 };
 
 
-//- Hash<triFace> specialisation
+//- Hash specialization for hashing triFace
 //  Simple commutative hash.
 template<>
 inline label Hash<triFace>::operator()(const triFace& t) const

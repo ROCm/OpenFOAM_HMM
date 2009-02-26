@@ -30,20 +30,49 @@ License
 #include "HashTable.H"
 #include "List.H"
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+Foam::label Foam::HashTable<T, Key, Hash>::canonicalSize(const label size)
+{
+    if (size < 1)
+    {
+        return 0;
+    }
+
+    // enforce power of two
+    unsigned int goodSize = size;
+
+    if (goodSize & (goodSize - 1))
+    {
+        // brute-force is fast enough
+        goodSize = 1;
+        while (goodSize < unsigned(size))
+        {
+            goodSize <<= 1;
+        }
+    }
+
+    return goodSize;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable(const label size)
 :
-    tableSize_(size),
-    table_(NULL),
+    HashTableName(),
     nElmts_(0),
+    tableSize_(canonicalSize(size)),
+    table_(NULL),
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
     if (tableSize_)
     {
         table_ = new hashedEntry*[tableSize_];
+
         for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
         {
             table_[hashIdx] = 0;
@@ -56,9 +85,9 @@ template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 :
     HashTableName(),
+    nElmts_(0),
     tableSize_(ht.tableSize_),
     table_(NULL),
-    nElmts_(0),
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
@@ -85,9 +114,9 @@ Foam::HashTable<T, Key, Hash>::HashTable
 )
 :
     HashTableName(),
+    nElmts_(0),
     tableSize_(0),
     table_(NULL),
-    nElmts_(0),
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
@@ -115,7 +144,7 @@ bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
 {
     if (nElmts_)
     {
-        const label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = hashKeyIndex(key);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -147,7 +176,7 @@ Foam::HashTable<T, Key, Hash>::find
 {
     if (nElmts_)
     {
-        const label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = hashKeyIndex(key);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -179,7 +208,7 @@ Foam::HashTable<T, Key, Hash>::find
 {
     if (nElmts_)
     {
-        label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = hashKeyIndex(key);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -231,7 +260,8 @@ bool Foam::HashTable<T, Key, Hash>::set
         resize(2);
     }
 
-    label hashIdx = Hash()(key, tableSize_);
+    const label hashIdx = hashKeyIndex(key);
+
     hashedEntry* existing = 0;
     hashedEntry* prev = 0;
 
@@ -449,14 +479,16 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
 
 
 template<class T, class Key, class Hash>
-void Foam::HashTable<T, Key, Hash>::resize(const label newSize)
+void Foam::HashTable<T, Key, Hash>::resize(const label sz)
 {
+    label newSize = canonicalSize(sz);
+
     if (newSize == tableSize_)
     {
 #       ifdef FULLDEBUG
         if (debug)
         {
-            Info<< "HashTable<T, Key, Hash>::resize(const label newSize) : "
+            Info<< "HashTable<T, Key, Hash>::resize(const label) : "
                 << "new table size == old table size\n";
         }
 #       endif

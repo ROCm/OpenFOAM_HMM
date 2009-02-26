@@ -108,17 +108,24 @@ class HashTable
 
     // Private data: size of table, the table and current number of elements
 
+        //- The current number of elements in table
+        label nElmts_;
+
         //- Number of primary entries allocated in table (not necessarily used)
         label tableSize_;
 
         //- The table of primary entries
         hashedEntry** table_;
 
-        //- The current number of elements in table
-        label nElmts_;
-
 
     // Private Member Functions
+
+        //- Return a canonical (power-of-two) size
+        static label canonicalSize(const label);
+
+        //- Return the hash index of the Key within the current table size.
+        //  No checks for zero-sized tables.
+        inline label hashKeyIndex(const Key&) const;
 
         //- Assign a new hashedEntry to a possibly already existing key
         bool set(const Key&, const T& newElmt, bool protect);

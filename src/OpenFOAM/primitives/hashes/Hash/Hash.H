@@ -27,7 +27,7 @@ Class
 
 Description
     Hash function class for primitives.  All non-primitives used to hash
-    entries on hash tables need a specialised version of this class.
+    entries on hash tables need a specialized version of this class.
 
 \*---------------------------------------------------------------------------*/
 
@@ -35,6 +35,7 @@ Description
 #define Hash_H
 
 #include "label.H"
+#include "pTraits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Hash Declaration
+                            Class Hash Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class PrimitiveType>
@@ -59,10 +60,26 @@ public:
         return label(p);
     }
 
-    label operator()(const PrimitiveType& p, const label tableSize) const
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Hash specialization for hashing pointer addresses
+template<>
+class Hash<void*>
+{
+
+public:
+
+    Hash()
+    {}
+
+    long operator()(const void* const& p) const
     {
-        return mag(operator()(p)) % tableSize;
+        return long(p);
     }
+
 };
 
 

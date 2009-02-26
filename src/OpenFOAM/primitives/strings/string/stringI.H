@@ -196,10 +196,6 @@ inline Foam::string Foam::string::operator()(const size_type n) const
 }
 
 
-inline Foam::string::hash::hash()
-{}
-
-
 inline Foam::string::size_type Foam::string::hash::operator()
 (
     const string& key
@@ -213,16 +209,6 @@ inline Foam::string::size_type Foam::string::hash::operator()
     }
 
     return val;
-}
-
-
-inline Foam::string::size_type Foam::string::hash::operator()
-(
-    const string& key,
-    const size_type tableSize
-) const
-{
-    return ::abs(operator()(key)) % tableSize;
 }
 
 

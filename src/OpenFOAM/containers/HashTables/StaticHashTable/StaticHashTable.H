@@ -99,6 +99,13 @@ class StaticHashTable
         //- The current number of elements in table
         label nElmts_;
 
+        //- Return a canonical (power-of-two) size
+        static label canonicalSize(const label);
+
+        //- Return the hash index of the Key within the current table size.
+        //  No checks for zero-sized tables.
+        inline label hashKeyIndex(const Key&) const;
+
         //- Assign a new hashed entry to a possibly already existing key
         bool set(const Key&, const T& newElmt, bool protect);
 
@@ -150,7 +157,7 @@ public:
         StaticHashTable(const StaticHashTable<T, Key, Hash>&);
 
         //- Construct by transferring the parameter contents
-        StaticHashTable(const Xfer<StaticHashTable<T, Key, Hash> >&);
+        StaticHashTable(const Xfer< StaticHashTable<T, Key, Hash> >&);
 
     // Destructor
 
@@ -218,7 +225,7 @@ public:
             void transfer(StaticHashTable<T, Key, Hash>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<StaticHashTable<T, Key, Hash> > xfer();
+            inline Xfer< StaticHashTable<T, Key, Hash> > xfer();
 
 
     // Member Operators

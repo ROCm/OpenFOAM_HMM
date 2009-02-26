@@ -80,17 +80,12 @@ public:
     //  Rotating hash from http://burtleburtle.net/bob/hash/doobs.html
     template<class HashT=Hash<T> >
     class Hash
-    :
-        public Foam::Hash<FixedList<T, Size> >
     {
     public:
-        inline Hash();
+        Hash()
+        {}
+
         label operator()(const FixedList<T, Size>&) const;
-        label operator()
-        (
-            const FixedList<T, Size>&,
-            const label tableSize
-        ) const;
     };
 
     // Static Member Functions

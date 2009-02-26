@@ -29,6 +29,17 @@ License
 
 // * * * * * * * * * * * * * Private Member Classes * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+inline Foam::label
+Foam::StaticHashTable<T, Key, Hash>::hashKeyIndex(const Key& key) const
+{
+    // size is power of two - this is the modulus
+    return Hash()(key) & (keys_.size() - 1);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -68,7 +79,7 @@ inline bool Foam::StaticHashTable<T, Key, Hash>::set
 
 
 template<class T, class Key, class Hash>
-inline Foam::Xfer<Foam::StaticHashTable<T, Key, Hash> >
+inline Foam::Xfer< Foam::StaticHashTable<T, Key, Hash> >
 Foam::StaticHashTable<T, Key, Hash>::xfer()
 {
     return xferMove(*this);

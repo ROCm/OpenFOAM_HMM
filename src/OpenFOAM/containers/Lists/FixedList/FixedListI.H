@@ -403,11 +403,6 @@ inline bool Foam::FixedList<T, Size>::empty() const
 
 
 #ifndef __CINT__
-template<class T, Foam::label Size>
-template<class HashT>
-inline Foam::FixedList<T, Size>::Hash<HashT>::Hash()
-{}
-
 
 // Rotating Hash
 template<class T, Foam::label Size>
@@ -429,17 +424,6 @@ inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
     return val;
 }
 
-template<class T, Foam::label Size>
-template<class HashT>
-inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
-(
-    const FixedList<T, Size>& lst,
-    const label tableSize
-) const
-{
-    return ::abs(operator()(lst)) % tableSize;
-}
-#endif
-
+#endif  // __CINT__
 
 // ************************************************************************* //
