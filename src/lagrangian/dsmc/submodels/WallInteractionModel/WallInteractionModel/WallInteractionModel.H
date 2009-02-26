@@ -116,6 +116,9 @@ public:
         //- Return the owner cloud object
         const CloudType& owner() const;
 
+        //- Return non-const access to the owner cloud object
+        CloudType& owner();
+
         //- Return the dictionary
         const dictionary& dict() const;
 
@@ -135,7 +138,7 @@ public:
             const label faceId,
             vector& U,
             scalar mass
-        ) const = 0;
+        ) = 0;
 };
 
 

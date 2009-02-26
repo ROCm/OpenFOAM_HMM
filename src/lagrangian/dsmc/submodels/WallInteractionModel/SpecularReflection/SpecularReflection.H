@@ -23,16 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::MaxwellianThermal
+    Foam::SpecularReflection
 
 Description
-    Wall interaction setting microscopic velocity to a random one drawn from a
-    Maxwellian distribution corresponding to a specified temperature
+    Reversing the wall-normal component of the particle velocity
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MaxwellianThermal_H
-#define MaxwellianThermal_H
+#ifndef SpecularReflection_H
+#define SpecularReflection_H
 
 #include "WallInteractionModel.H"
 
@@ -41,31 +40,25 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class MaxwellianThermal Declaration
+                      Class SpecularReflection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class MaxwellianThermal
+class SpecularReflection
 :
     public WallInteractionModel<CloudType>
 {
 
-    // Private data
-
-        //- Temperature
-        const scalar T_;
-
-
 public:
 
     //- Runtime type information
-    TypeName("MaxwellianThermal");
+    TypeName("SpecularReflection");
 
 
     // Constructors
 
         //- Construct from dictionary
-        MaxwellianThermal
+        SpecularReflection
         (
             const dictionary& dict,
             CloudType& cloud
@@ -74,7 +67,7 @@ public:
 
     // Destructor
 
-        ~MaxwellianThermal();
+        ~SpecularReflection();
 
 
     // Member Functions
@@ -100,7 +93,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "MaxwellianThermal.C"
+#   include "SpecularReflection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

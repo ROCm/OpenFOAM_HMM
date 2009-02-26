@@ -28,6 +28,12 @@ License
 #include "BinaryCollisionModel.H"
 #include "WallInteractionModel.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class ParcelType>
+Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -57,6 +63,7 @@ void Foam::DsmcCloud<ParcelType>::buildConstProps()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::buildCellOccupancy()
 {
+
     forAll(cellOccupancy_, cO)
     {
         cellOccupancy_[cO].clear();
@@ -123,6 +130,8 @@ void Foam::DsmcCloud<ParcelType>::initialise
                 << abort(FatalError);
         }
 
+        const typename ParcelType::constantProperties& cP = constProps(typeId);
+
         scalar numberDensity = numberDensities[i];
 
         scalar spacing = pow(numberDensity,-(1.0/3.0));
@@ -154,12 +163,20 @@ void Foam::DsmcCloud<ParcelType>::initialise
 
                     label cell = mesh_.findCell(p);
 
+                    vector U = equipartitionLinearVelocity
+                    (
+                        temperature,
+                        cP.mass()
+                    );
+
+                    U += velocity;
+
                     if (cell >= 0)
                     {
                         addNewParcel
                         (
                             p,
-                            velocity,
+                            U,
                             cell,
                             typeId
                         );
@@ -228,6 +245,7 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     ),
     typeIdList_(particleProperties_.lookup("typeIdList")),
     nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
+    cellOccupancy_(mesh_.nCells()),
     constProps_(),
     rndGen_(label(971501)),
     binaryCollisionModel_
@@ -278,6 +296,7 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     ),
     typeIdList_(particleProperties_.lookup("typeIdList")),
     nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
+    cellOccupancy_(),
     constProps_(),
     rndGen_(label(971501)),
     binaryCollisionModel_(),
@@ -329,6 +348,22 @@ void Foam::DsmcCloud<ParcelType>::info() const
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl
         << endl;
+}
+
+
+template<class ParcelType>
+Foam::vector Foam::DsmcCloud<ParcelType>::equipartitionLinearVelocity
+(
+    scalar temperature,
+    scalar mass
+)
+{
+    return sqrt(kb*temperature/mass)*vector
+    (
+        rndGen_.GaussNormal(),
+        rndGen_.GaussNormal(),
+        rndGen_.GaussNormal()
+    );
 }
 
 

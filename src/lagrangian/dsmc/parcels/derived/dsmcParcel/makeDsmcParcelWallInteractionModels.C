@@ -27,6 +27,7 @@ License
 #include "dsmcParcel.H"
 #include "DsmcCloud.H"
 #include "MaxwellianThermal.H"
+#include "SpecularReflection.H"
 
 namespace Foam
 {
@@ -36,6 +37,12 @@ namespace Foam
     makeWallInteractionModelType
     (
         MaxwellianThermal,
+        DsmcCloud,
+        dsmcParcel
+    );
+    makeWallInteractionModelType
+    (
+        SpecularReflection,
         DsmcCloud,
         dsmcParcel
     );

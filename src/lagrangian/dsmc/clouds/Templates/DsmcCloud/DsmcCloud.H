@@ -121,7 +121,7 @@ private:
         void buildCellOccupancy();
 
         //- Initialise the system
-    void initialise(const IOdictionary& dsmcInitialiseDict);
+        void initialise(const IOdictionary& dsmcInitialiseDict);
 
         //- Calculate collisions between molecules
         void collisions();
@@ -134,6 +134,11 @@ private:
 
 
 public:
+
+    // Static data members
+
+        static scalar kb;
+
 
     // Constructors
 
@@ -191,11 +196,11 @@ public:
                 inline const typename ParcelType::constantProperties&
                     constProps(label typeId) const;
 
-                //- Clear the Cloud
-                inline void clear();
+                //- Return refernce to the random object
+                inline Random& rndGen();
 
-            //- Return refernce to the random object
-            inline Random& rndGen();
+            //- Clear the Cloud
+            inline void clear();
 
 
             // Sub-models
@@ -209,6 +214,10 @@ public:
                 inline const WallInteractionModel<DsmcCloud<ParcelType> >&
                     wallInteraction() const;
 
+                //- Return non-const reference to wall interaction model
+                inline WallInteractionModel<DsmcCloud<ParcelType> >&
+                    wallInteraction();
+
         // Check
 
             //- Total mass injected
@@ -219,6 +228,14 @@ public:
 
             //- Print cloud information
             void info() const;
+
+            //- Generate a random velocity sampled from the Maxwellian speed
+            // distribution
+            vector equipartitionLinearVelocity
+            (
+                scalar temperature,
+                scalar mass
+            );
 
             //- Dump particle positions to .obj file
             void dumpParticlePositions() const;

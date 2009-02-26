@@ -193,11 +193,6 @@ public:
             //- Return const access to velocity
             inline const vector& U() const;
 
-            //- The nearest distance to a wall that
-            //  the particle can be in the n direction
-            inline scalar wallImpactDistance(const vector& n) const;
-
-
         // Edit
 
             //- Return access to diameter

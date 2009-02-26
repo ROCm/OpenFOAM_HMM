@@ -51,8 +51,14 @@ Foam::WallInteractionModel<CloudType>::~WallInteractionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType&
-Foam::WallInteractionModel<CloudType>::owner() const
+const CloudType& Foam::WallInteractionModel<CloudType>::owner() const
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+CloudType& Foam::WallInteractionModel<CloudType>::owner()
 {
     return owner_;
 }

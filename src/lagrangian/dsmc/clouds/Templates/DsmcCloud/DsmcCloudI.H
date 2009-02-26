@@ -123,6 +123,14 @@ Foam::DsmcCloud<ParcelType>::wallInteraction() const
 
 
 template<class ParcelType>
+inline Foam::WallInteractionModel<Foam::DsmcCloud<ParcelType> >&
+Foam::DsmcCloud<ParcelType>::wallInteraction()
+{
+    return wallInteractionModel_();
+}
+
+
+template<class ParcelType>
 inline Foam::scalar Foam::DsmcCloud<ParcelType>::massInSystem() const
 {
     scalar sysMass = 0.0;

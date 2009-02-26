@@ -26,40 +26,39 @@ License
 
 #include "error.H"
 
-#include "MaxwellianThermal.H"
+#include "SpecularReflection.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::MaxwellianThermal<CloudType>::MaxwellianThermal
+Foam::SpecularReflection<CloudType>::SpecularReflection
 (
     const dictionary& dict,
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud, typeName),
-    T_(dimensionedScalar(this->coeffDict().lookup("T")).value())
+    WallInteractionModel<CloudType>(dict, cloud, typeName)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::MaxwellianThermal<CloudType>::~MaxwellianThermal()
+Foam::SpecularReflection<CloudType>::~SpecularReflection()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::MaxwellianThermal<CloudType>::active() const
+bool Foam::SpecularReflection<CloudType>::active() const
 {
     return true;
 }
 
 
 template <class CloudType>
-void Foam::MaxwellianThermal<CloudType>::correct
+void Foam::SpecularReflection<CloudType>::correct
 (
     const wallPolyPatch& wpp,
     const label faceId,
@@ -68,48 +67,14 @@ void Foam::MaxwellianThermal<CloudType>::correct
 )
 {
     vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
-
-    // Normal unit vector
     nw /= mag(nw);
 
-    // Normal velocity magnitude
     scalar magUn = U & nw;
 
-    // Wall tangential velocity (flow direction)
-    vector Ut = U - magUn*nw;
-
-    CloudType& cloud(WallInteractionModel<CloudType>::owner());
-
-    Random& rndGen(cloud.rndGen());
-
-    while (mag(Ut) < SMALL)
+    if (magUn > 0.0)
     {
-        // If the incident velocity is parallel to the face normal, no
-        // tangential direction can be chosen.  Add a perturbation to the
-        // incoming velocity and recalculate.
-
-        U = vector
-        (
-            U.x()*(0.8 + 0.2*rndGen.scalar01()),
-            U.y()*(0.8 + 0.2*rndGen.scalar01()),
-            U.z()*(0.8 + 0.2*rndGen.scalar01())
-        );
-
-        magUn = U & nw;
-
-        Ut = U - magUn*nw;
+        U -= 2.0*magUn*nw;
     }
-
-    // Wall tangential unit vector
-    vector tw1 = Ut/mag(Ut);
-
-    // Other tangential unit vector
-    vector tw2 = nw ^ tw1;
-
-    scalar C = sqrt(CloudType::kb*T_/mass);
-
-    U = C*(rndGen.GaussNormal()*tw1 + rndGen.GaussNormal()*tw2
-    - sqrt(-2.0*log(max(1 - rndGen.scalar01(),VSMALL)))*nw);
 }
 
 

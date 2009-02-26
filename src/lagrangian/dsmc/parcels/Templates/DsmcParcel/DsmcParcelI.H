@@ -110,20 +110,6 @@ inline Foam::label Foam::DsmcParcel<ParcelType>::typeId() const
 
 
 template <class ParcelType>
-inline Foam::scalar Foam::DsmcParcel<ParcelType>::wallImpactDistance
-(
-    const vector&
-) const
-{
-    Info<< "PLACEHOLDER FOR Foam::DsmcParcel<ParcelType>::wallImpactDistance"
-        << endl;
-
-    return 0;
-    // return 0.5*d_;
-}
-
-
-template <class ParcelType>
 inline const Foam::vector& Foam::DsmcParcel<ParcelType>::U() const
 {
     return U_;
