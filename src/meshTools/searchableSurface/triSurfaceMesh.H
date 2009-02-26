@@ -113,7 +113,7 @@ public:
         //- Construct from triSurface
         triSurfaceMesh(const IOobject&, const triSurface&);
 
-        //- Construct read. Does timeInstance search.
+        //- Construct read.
         triSurfaceMesh(const IOobject& io);
 
         //- Construct from IO and dictionary (used by searchableSurface).
