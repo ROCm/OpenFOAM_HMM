@@ -291,6 +291,10 @@ void Foam::DsmcCloud<ParcelType>::collisions()
         }
     }
 
+    reduce(collisions, sumOp<label>());
+
+    reduce(collisionCandidates, sumOp<label>());
+
     Info<< "    Collisions                      = "
         << collisions << nl
         << "    Acceptance rate                 = "
