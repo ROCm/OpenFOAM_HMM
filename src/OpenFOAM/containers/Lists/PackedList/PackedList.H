@@ -148,9 +148,11 @@ public:
         //- Masking for all bits below the offset
         inline static unsigned int maskLower(unsigned offset);
 
-    // Forward declaration of iteratorBase
+    // Forward declaration of iterators
 
         class iteratorBase;
+        class iterator;
+        class const_iterator;
 
     // Constructors
 
@@ -328,7 +330,7 @@ public:
 
             // Member Operators
 
-                //- Compare positions
+                //- Compare values (not positions)
                 inline bool operator==(const iteratorBase&) const;
                 inline bool operator!=(const iteratorBase&) const;
 
@@ -355,7 +357,10 @@ public:
             public iteratorBase
         {
 
-            //- Should never violate const-ness!
+            //- Disallow copy constructor from const_iterator - violates const-ness!
+            iterator(const const_iterator&);
+
+            //- Disallow assignment from const_iterator - violates const-ness!
             void operator=(const const_iterator&);
 
         public:
@@ -374,6 +379,10 @@ public:
                 inline iterator(const PackedList*, const label);
 
             // Member Operators
+
+                //- Compare positions (not values)
+                inline bool operator==(const iteratorBase&) const;
+                inline bool operator!=(const iteratorBase&) const;
 
                 //- Assign from iteratorBase, eg iter = packedlist[i]
                 //  An out-of-range iterator is assigned end()
@@ -420,16 +429,20 @@ public:
 
                 //- Construct from iterator base, eg iter(packedlist[i])
                 //  but also  "const_iterator iter = packedlist[i];"
-                //  An out-of-range iterator is assigned end()
+                //  An out-of-range iterator is assigned cend()
                 inline const_iterator(const iteratorBase&);
 
                 //- Construct from base list and position index
                 inline const_iterator(const PackedList*, const label);
 
-                //- Construct from non-const iterator
+                //- Construct from iterator
                 inline const_iterator(const iterator&);
 
             // Member operators
+
+                //- Compare positions (not values)
+                inline bool operator==(const iteratorBase&) const;
+                inline bool operator!=(const iteratorBase&) const;
 
                 //- Assign from iteratorBase or derived
                 //  eg, iter = packedlist[i] or even iter = list.begin()
