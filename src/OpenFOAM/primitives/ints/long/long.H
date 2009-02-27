@@ -22,38 +22,40 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::labelVector
+Primitive
+    long
 
 Description
-    labelVector obtained from generic Vector
+    A long integer
 
 SourceFiles
-    labelVector.C
+    longIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelVector_H
-#define labelVector_H
+#ifndef long_H
+#define long_H
 
-#include "label.H"
-#include "Vector.H"
-#include "contiguous.H"
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+class Istream;
+class Ostream;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef Vector<label> labelVector;
+//- Return a string representation of a long
+word name(long);
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-//- Data associated with labelVector type are contiguous
-template<>
-inline bool contiguous<labelVector>() {return true;}
-
+long readLong(Istream&);
+Istream& operator>>(Istream&, long&);
+Ostream& operator<<(Ostream&, const long);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

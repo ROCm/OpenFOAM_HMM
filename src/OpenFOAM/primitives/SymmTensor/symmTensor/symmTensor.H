@@ -22,40 +22,37 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Primitive
-    ulong
+Typedef
+    Foam::symmTensor
 
 Description
-    System ulong
+    SymmTensor of scalars.
 
 SourceFiles
-    ulongIO.C
+    symmTensor.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ulong_H
-#define ulong_H
+#ifndef symmTensor_H
+#define symmTensor_H
 
-#include "word.H"
+#include "SymmTensor.H"
+#include "vector.H"
+#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class Istream;
-class Ostream;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Return a string representation of an ulong
-word name(const unsigned long);
+typedef SymmTensor<scalar> symmTensor;
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+//- Data associated with symmTensor type are contiguous
+template<>
+inline bool contiguous<symmTensor>() {return true;}
 
-unsigned long readUlong(Istream&);
-Istream& operator>>(Istream&, unsigned long&);
-Ostream& operator<<(Ostream&, const unsigned long);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

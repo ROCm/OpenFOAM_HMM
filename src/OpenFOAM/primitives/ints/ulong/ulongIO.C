@@ -22,43 +22,75 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::labelSymmTensor
-
 Description
-    SymmTensor or labels.
-
-SourceFiles
-    labelSymmTensor.C
+    Reads a ulong from an input stream.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef labelSymmTensor_H
-#define labelSymmTensor_H
+#include "error.H"
 
-#include "SymmTensor.H"
-#include "contiguous.H"
+#include "ulong.H"
+#include "IOstreams.H"
+
+#include <sstream>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::word Foam::name(const unsigned long val)
 {
+    std::ostringstream buf;
+    buf << val;
+    return buf.str();
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-typedef SymmTensor<label> labelSymmTensor;
+Foam::Istream& Foam::operator>>(Istream& is, unsigned long& i)
+{
+    token t(is);
 
-//- Data associated with labelSymmTensor type are contiguous
-template<>
-inline bool contiguous<labelSymmTensor>() {return true;}
+    if (!t.good())
+    {
+        is.setBad();
+        return is;
+    }
+
+    if (t.isLabel())
+    {
+        i = static_cast<unsigned long>(t.labelToken());
+    }
+    else
+    {
+        is.setBad();
+        FatalIOErrorIn("operator>>(Istream&, unsigned long&)", is)
+            << "wrong token type - expected unsigned long found " << t.info()
+            << exit(FatalIOError);
+
+        return is;
+    }
+
+    // Check state of Istream
+    is.check("Istream& operator>>(Istream&, unsigned long&)");
+
+    return is;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+unsigned long Foam::readUlong(Istream& is)
+{
+    unsigned long val;
+    is >> val;
 
-} // End namespace Foam
+    return val;
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#endif
+Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long i)
+{
+    os.write(label(i));
+    os.check("Ostream& operator<<(Ostream&, const unsigned long)");
+    return os;
+}
+
 
 // ************************************************************************* //

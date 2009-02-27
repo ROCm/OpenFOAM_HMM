@@ -23,23 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    Foam::tensor
+    Foam::labelVector
 
 Description
-    Tensor or scalars.
+    Vector of labels.
 
 SourceFiles
-    tensor.C
+    labelVector.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef tensor_H
-#define tensor_H
+#ifndef labelVector_H
+#define labelVector_H
 
-#include "Tensor.H"
-#include "vector.H"
-#include "sphericalTensor.H"
-#include "symmTensor.H"
+#include "label.H"
+#include "Vector.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -49,19 +47,12 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef Tensor<scalar> tensor;
+typedef Vector<label> labelVector;
 
-vector eigenValues(const tensor& t);
-vector eigenVector(const tensor& t, const scalar lambda);
-tensor eigenVectors(const tensor& t);
 
-vector eigenValues(const symmTensor& t);
-vector eigenVector(const symmTensor& t, const scalar lambda);
-tensor eigenVectors(const symmTensor& t);
-
-//- Data associated with tensor type are contiguous
+//- Data associated with labelVector type are contiguous
 template<>
-inline bool contiguous<tensor>() {return true;}
+inline bool contiguous<labelVector>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

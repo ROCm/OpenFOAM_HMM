@@ -26,7 +26,8 @@ Typedef
     Foam::label
 
 Description
-    A label is an int/long/long long depending on the range wanted.
+    A label is an int/long/long long depending on the range desired.
+
     A readLabel function is defined so that label can be constructed from
     Istream.
 

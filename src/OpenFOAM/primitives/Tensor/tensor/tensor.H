@@ -22,40 +22,47 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Primitive
-    long long
+Typedef
+    Foam::tensor
 
 Description
-    A long long (64 bits)
+    Tensor of scalars.
 
 SourceFiles
-    longLongIO.C
+    tensor.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef longLong_H
-#define longLong_H
+#ifndef tensor_H
+#define tensor_H
 
-#include "word.H"
+#include "Tensor.H"
+#include "vector.H"
+#include "sphericalTensor.H"
+#include "symmTensor.H"
+#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class Istream;
-class Ostream;
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Return a string representation of a long long
-word name(long long);
+typedef Tensor<scalar> tensor;
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+vector eigenValues(const tensor& t);
+vector eigenVector(const tensor& t, const scalar lambda);
+tensor eigenVectors(const tensor& t);
 
-long long readLongLong(Istream&);
-Istream& operator>>(Istream&, long long&);
-Ostream& operator<<(Ostream&, const long long);
+vector eigenValues(const symmTensor& t);
+vector eigenVector(const symmTensor& t, const scalar lambda);
+tensor eigenVectors(const symmTensor& t);
+
+//- Data associated with tensor type are contiguous
+template<>
+inline bool contiguous<tensor>() {return true;}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

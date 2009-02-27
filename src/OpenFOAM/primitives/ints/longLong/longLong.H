@@ -22,78 +22,47 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Primitive
+    long long
+
 Description
-    Reads an ulong from an input stream, for a given version
-    number and File format. If an ascii File is being read,
-    then the line numbers are counted and an erroneous read
-    ised.
+    A long long (64 bits on many systems)
+
+SourceFiles
+    longLongIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#ifndef longLong_H
+#define longLong_H
 
-#include "ulong.H"
-#include "IOstreams.H"
-
-#include <sstream>
+#include "word.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::word Foam::name(const unsigned long val)
+namespace Foam
 {
-    std::ostringstream buf;
-    buf << val;
-    return buf.str();
-}
+
+class Istream;
+class Ostream;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Return a string representation of a long long
+word name(long long);
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, unsigned long& i)
-{
-    token t(is);
+long long readLongLong(Istream&);
+Istream& operator>>(Istream&, long long&);
+Ostream& operator<<(Ostream&, const long long);
 
-    if (!t.good())
-    {
-        is.setBad();
-        return is;
-    }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    if (t.isLabel())
-    {
-        i = static_cast<unsigned long>(t.labelToken());
-    }
-    else
-    {
-        is.setBad();
-        FatalIOErrorIn("operator>>(Istream&, unsigned long&)", is)
-            << "wrong token type - expected unsigned long found " << t.info()
-            << exit(FatalIOError);
+} // End namespace Foam
 
-        return is;
-    }
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, unsigned long&)");
-
-    return is;
-}
-
-
-unsigned long Foam::readUlong(Istream& is)
-{
-    unsigned long val;
-    is >> val;
-
-    return val;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long i)
-{
-    os.write(label(i));
-    os.check("Ostream& operator<<(Ostream&, const unsigned long)");
-    return os;
-}
-
+#endif
 
 // ************************************************************************* //

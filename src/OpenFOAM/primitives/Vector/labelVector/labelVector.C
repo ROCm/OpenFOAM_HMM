@@ -22,47 +22,23 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Primitive
-    long
-
-Description
-    A long int
-
-SourceFiles
-    longIO.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef long_H
-#define long_H
+#include "labelVector.H"
 
-#include "word.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+const char* const Foam::labelVector::typeName = "labelVector";
 
-namespace Foam
-{
+template<>
+const char* Foam::labelVector::componentNames[] = {"x", "y", "z"};
 
-class Istream;
-class Ostream;
+template<>
+const Foam::labelVector Foam::labelVector::zero(0, 0, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<>
+const Foam::labelVector Foam::labelVector::one(1, 1, 1);
 
-//- Return a string representation of a long
-word name(long);
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-long readLong(Istream&);
-Istream& operator>>(Istream&, long&);
-Ostream& operator<<(Ostream&, const long);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

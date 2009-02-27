@@ -26,7 +26,10 @@ Typedef
     Foam::uLabel
 
 Description
-    A uLabel is an unsigned label. See label.H.
+    A uLabel is an unsigned label.
+
+SeeAlso
+    label.H
 
 \*---------------------------------------------------------------------------*/
 

@@ -23,21 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Typedef
-    Foam::symmTensor
+    Foam::labelSymmTensor
 
 Description
-    SymmTensor or scalars.
+    SymmTensor of labels.
 
 SourceFiles
-    symmTensor.C
+    labelSymmTensor.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef symmTensor_H
-#define symmTensor_H
+#ifndef labelSymmTensor_H
+#define labelSymmTensor_H
 
 #include "SymmTensor.H"
-#include "vector.H"
 #include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,11 +46,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-typedef SymmTensor<scalar> symmTensor;
+typedef SymmTensor<label> labelSymmTensor;
 
-//- Data associated with symmTensor type are contiguous
+//- Data associated with labelSymmTensor type are contiguous
 template<>
-inline bool contiguous<symmTensor>() {return true;}
+inline bool contiguous<labelSymmTensor>() {return true;}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

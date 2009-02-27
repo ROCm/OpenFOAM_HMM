@@ -22,27 +22,47 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Primitive
+    ulong
+
 Description
-    Vector of labels.
+    System unsigned long
+
+SourceFiles
+    ulongIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelVector.H"
+#ifndef ulong_H
+#define ulong_H
 
+#include "word.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const char* const Foam::labelVector::typeName = "labelVector";
+namespace Foam
+{
 
-template<>
-const char* Foam::labelVector::componentNames[] = {"x", "y", "z"};
+class Istream;
+class Ostream;
 
-template<>
-const Foam::labelVector Foam::labelVector::zero(0, 0, 0);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<>
-const Foam::labelVector Foam::labelVector::one(1, 1, 1);
+//- Return a string representation of an ulong
+word name(const unsigned long);
 
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+unsigned long readUlong(Istream&);
+Istream& operator>>(Istream&, unsigned long&);
+Ostream& operator<<(Ostream&, const unsigned long);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
