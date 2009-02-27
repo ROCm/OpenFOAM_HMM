@@ -210,6 +210,8 @@ void Foam::DsmcCloud<ParcelType>::initialise
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::collisions()
 {
+    buildCellOccupancy();
+
     scalar deltaT = mesh_.time().deltaT().value();
 
     label collisionCandidates = 0;
@@ -451,8 +453,6 @@ Foam::DsmcCloud<ParcelType>::~DsmcCloud()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::evolve()
 {
-    buildCellOccupancy();
-
     typename ParcelType::trackData td(*this);
 
     //this->injection().inject(td);
