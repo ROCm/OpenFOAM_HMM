@@ -115,6 +115,9 @@ public:
         //- Return the owner cloud object
         const CloudType& owner() const;
 
+        //- Return non-const access to the owner cloud object
+        CloudType& owner();
+
         //- Return the dictionary
         const dictionary& dict() const;
 
@@ -124,14 +127,23 @@ public:
 
     // Member Functions
 
+        //- Return the collision cross section * relative velocity product
+        virtual scalar sigmaTcR
+        (
+            label typeIdP,
+            label typeIdQ,
+            const vector& UP,
+            const vector& UQ
+        ) const = 0;
+
         //- Apply collision
         virtual void collide
         (
-            label idA,
-            label idB,
-            vector& UA,
-            vector& UB
-        ) const = 0;
+            label typeIdP,
+            label typeIdQ,
+            vector& UP,
+            vector& UQ
+        ) = 0;
 };
 
 

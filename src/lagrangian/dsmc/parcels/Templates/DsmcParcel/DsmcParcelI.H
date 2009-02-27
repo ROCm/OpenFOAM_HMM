@@ -41,7 +41,12 @@ inline Foam::DsmcParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     mass_(readScalar(dict.lookup("mass"))),
-    d_(readScalar(dict.lookup("diameter")))
+    d_(readScalar(dict.lookup("diameter"))),
+    internalDegreesOfFreedom_
+    (
+        readScalar(dict.lookup("internalDegreesOfFreedom"))
+    ),
+    omega_(readScalar(dict.lookup("omega")))
 {}
 
 
@@ -87,6 +92,31 @@ inline Foam::scalar
 Foam::DsmcParcel<ParcelType>::constantProperties::d() const
 {
     return d_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::DsmcParcel<ParcelType>::constantProperties::sigmaT() const
+{
+    return mathematicalConstant::pi*d_*d_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::DsmcParcel<ParcelType>::constantProperties::internalDegreesOfFreedom()
+const
+{
+    return internalDegreesOfFreedom_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::DsmcParcel<ParcelType>::constantProperties::omega() const
+{
+    return omega_;
 }
 
 

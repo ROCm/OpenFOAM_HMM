@@ -33,6 +33,8 @@ License
 template<class ParcelType>
 Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
 
+template<class ParcelType>
+Foam::scalar Foam::DsmcCloud<ParcelType>::Tref = 273;
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -185,13 +187,113 @@ void Foam::DsmcCloud<ParcelType>::initialise
             }
         }
     }
+
+    // Initialise the sigmaTcRMax_ field to the product of the cross section of
+    // the most abundant species and the most probable thermal speed (Bird,
+    // p222-223)
+
+    label mostAbundantType(findMax(numberDensities));
+
+    const typename ParcelType::constantProperties& cP = constProps
+    (
+        mostAbundantType
+    );
+
+    sigmaTcRMax_.internalField() = cP.sigmaT()*maxwellianMostProbableSpeed
+    (
+        temperature,
+        cP.mass()
+    );
 }
 
 
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::collisions()
 {
-    Info<< "DsmcCloud collisions() - PLACEHOLDER" << endl;
+    scalar deltaT = mesh_.time().deltaT().value();
+
+    label collisionCandidates = 0;
+
+    label collisions = 0;
+
+    forAll(cellOccupancy_, celli)
+    {
+        const DynamicList<ParcelType*>& cellParcels(cellOccupancy_[celli]);
+
+        label nC(cellParcels.size());
+
+        if (nC > 1)
+        {
+            scalar sigmaTcRMax = sigmaTcRMax_[celli];
+
+            scalar selectedPairs = collisionSelectionRemainder_[celli]
+            + 0.5*nC*(nC-1)*nParticle_*sigmaTcRMax*deltaT
+            /mesh_.cellVolumes()[celli];
+
+            label nCandidates(selectedPairs);
+
+            collisionSelectionRemainder_[celli] = selectedPairs - nCandidates;
+
+            collisionCandidates += nCandidates;
+
+            for(label c = 0; c < nCandidates; c++)
+            {
+                // Select the first collision candidate
+
+                label candidateP = rndGen_.integer(0, nC-1);
+
+                label candidateQ = rndGen_.integer(0, nC-1);
+
+                // If the same candidate is chosen, choose again
+                while(candidateP == candidateQ)
+                {
+                    candidateQ = rndGen_.integer(0, nC-1);
+                }
+
+                ParcelType* parcelP = cellParcels[candidateP];
+                ParcelType* parcelQ = cellParcels[candidateQ];
+
+                label typeIdP = parcelP->typeId();
+                label typeIdQ = parcelQ->typeId();
+
+                scalar sigmaTcR = binaryCollision().sigmaTcR
+                (
+                    typeIdP,
+                    typeIdQ,
+                    parcelP->U(),
+                    parcelQ->U()
+                );
+
+                // Update the maximum value of sigmaTcR stored, but use the
+                // initial value in the acceptance-rejection criteria because
+                // the number of collision candidates selected was based on this
+
+                if (sigmaTcR > sigmaTcRMax_[celli])
+                {
+                    sigmaTcRMax_[celli] = sigmaTcR;
+                }
+
+                if ((sigmaTcR/sigmaTcRMax) > rndGen_.scalar01())
+                {
+                    binaryCollision().collide
+                    (
+                        typeIdP,
+                        typeIdQ,
+                        parcelP->U(),
+                        parcelQ->U()
+                    );
+
+                    collisions++;
+                }
+            }
+        }
+    }
+
+    Info<< "    Collisions                      = "
+        << collisions << nl
+        << "    Acceptance rate                 = "
+        << scalar(collisions)/scalar(collisionCandidates) << nl
+        << endl;
 }
 
 
@@ -246,6 +348,19 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     typeIdList_(particleProperties_.lookup("typeIdList")),
     nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
     cellOccupancy_(mesh_.nCells()),
+    sigmaTcRMax_
+    (
+        IOobject
+        (
+            this->name() + "SigmaTcRMax",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    ),
+    collisionSelectionRemainder_(mesh_.nCells(), 0),
     constProps_(),
     rndGen_(label(971501)),
     binaryCollisionModel_
@@ -297,6 +412,20 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     typeIdList_(particleProperties_.lookup("typeIdList")),
     nParticle_(readScalar(particleProperties_.lookup("nEquivalentParticles"))),
     cellOccupancy_(),
+    sigmaTcRMax_
+    (
+        IOobject
+        (
+            this->name() + "SigmaTcRMax",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("zero",  dimensionSet(0, 3, -1, 0, 0), 0.0)
+    ),
+    collisionSelectionRemainder_(),
     constProps_(),
     rndGen_(label(971501)),
     binaryCollisionModel_(),
@@ -322,13 +451,15 @@ Foam::DsmcCloud<ParcelType>::~DsmcCloud()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::evolve()
 {
+    buildCellOccupancy();
+
     typename ParcelType::trackData td(*this);
 
     //this->injection().inject(td);
 
     if (debug)
     {
-        this->dumpParticlePositions();
+       this->dumpParticlePositions();
     }
 
     // Move the particles ballistically with their current velocities

@@ -78,7 +78,7 @@ void Foam::MaxwellianThermal<CloudType>::correct
     // Wall tangential velocity (flow direction)
     vector Ut = U - magUn*nw;
 
-    CloudType& cloud(WallInteractionModel<CloudType>::owner());
+    CloudType& cloud(this->owner());
 
     Random& rndGen(cloud.rndGen());
 

@@ -87,6 +87,11 @@ public:
             //- Particle hard sphere diameter [m] (constant)
             scalar d_;
 
+            //- Internal degrees of freedom
+            scalar internalDegreesOfFreedom_;
+
+            //- Viscosity index
+            scalar omega_;
 
     public:
 
@@ -104,6 +109,16 @@ public:
 
             //- Return const access to the minimum particle mass
             inline scalar d() const;
+
+            //- Return the reference total collision cross section
+            inline scalar sigmaT() const;
+
+            //- Return the internalDegreesOfFreedom
+            inline scalar internalDegreesOfFreedom() const;
+
+            //- Return the viscosity index
+            inline scalar omega() const;
+
     };
 
 
@@ -194,9 +209,6 @@ public:
             inline const vector& U() const;
 
         // Edit
-
-            //- Return access to diameter
-            inline scalar& d();
 
             //- Return access to velocity
             inline vector& U();

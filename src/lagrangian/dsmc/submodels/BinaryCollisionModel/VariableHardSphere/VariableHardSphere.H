@@ -75,14 +75,23 @@ public:
 
     // Member Functions
 
+        //- Return the collision cross section * relative velocity product
+        virtual scalar sigmaTcR
+        (
+            label typeIdP,
+            label typeIdQ,
+            const vector& UP,
+            const vector& UQ
+        ) const;
+
         //- Apply collision
         virtual void collide
         (
-            label idA,
-            label idB,
-            vector& UA,
-            vector& UB
-        ) const;
+            label typeIdP,
+            label typeIdQ,
+            vector& UP,
+            vector& UQ
+        );
 };
 
 

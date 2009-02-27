@@ -44,6 +44,7 @@ SourceFiles
 #include "Random.H"
 #include "fvMesh.H"
 #include "volFields.H"
+#include "scalarIOField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,6 +96,14 @@ private:
         //- A data structure holding which particles are in which cell
         List<DynamicList<ParcelType*> > cellOccupancy_;
 
+        //- An IOField holding the value of (sigmaT * cR)max for each cell (see
+        // Bird p220). Initialised with the parcelsm updated as required, and
+        // read in on start/restart.
+        volScalarField sigmaTcRMax_;
+
+        //- A field holding the remainder from the previous collision selections
+        scalarField collisionSelectionRemainder_;
+
         //- Parcel constant properties - one for each type
         List<typename ParcelType::constantProperties> constProps_;
 
@@ -137,7 +146,11 @@ public:
 
     // Static data members
 
+        //- Boltzmann constant
         static scalar kb;
+
+        //- Reference temperature for all models
+        static scalar Tref;
 
 
     // Constructors
@@ -181,12 +194,20 @@ public:
                 inline const List<word>& typeIdList() const;
 
                 //- Return the number of real particles represented by one
-                //- parcel
+                //  parcel
                 inline label nParticle() const;
 
                 //- Return the cell occupancy addressing
                 inline const List<DynamicList<ParcelType*> >&
                     cellOccupancy() const;
+
+                //- Return the sigmaTcRMax field.  non-const access to allow
+                // updating.
+                inline volScalarField& sigmaTcRMax();
+
+                //- Return the collision selection remainder field.  non-const
+                // access to allow updating.
+                inline scalarField& collisionSelectionRemainder();
 
                 //- Return all of the constant properties
                 inline const List<typename ParcelType::constantProperties>&
@@ -199,16 +220,51 @@ public:
                 //- Return refernce to the random object
                 inline Random& rndGen();
 
+                // Kinetic theory helper functions
+
+                //- Generate a random velocity sampled from the Maxwellian speed
+                // distribution
+                vector equipartitionLinearVelocity
+                (
+                    scalar temperature,
+                    scalar mass
+                );
+
+                //- From the Maxwellian distribution:
+
+                //- Average particle speed
+                inline scalar maxwellianAverageSpeed
+                (
+                    scalar temperature,
+                    scalar mass
+                ) const;
+
+                //- RMS particle speed
+                inline scalar maxwellianRMSSpeed
+                (
+                    scalar temperature,
+                    scalar mass
+                ) const;
+
+                //- Most probable speed
+                inline scalar maxwellianMostProbableSpeed
+                (
+                    scalar temperature,
+                    scalar mass
+                ) const;
+
             //- Clear the Cloud
             inline void clear();
-
 
             // Sub-models
 
                 //- Return reference to binary elastic collision model
-                inline const
-                BinaryCollisionModel<DsmcCloud<ParcelType> >&
+                inline const BinaryCollisionModel<DsmcCloud<ParcelType> >&
                     binaryCollision() const;
+
+                //- Return non-const reference to binary elastic collision model
+                inline BinaryCollisionModel<DsmcCloud<ParcelType> >&
+                    binaryCollision();
 
                 //- Return reference to wall interaction model
                 inline const WallInteractionModel<DsmcCloud<ParcelType> >&
@@ -228,14 +284,6 @@ public:
 
             //- Print cloud information
             void info() const;
-
-            //- Generate a random velocity sampled from the Maxwellian speed
-            // distribution
-            vector equipartitionLinearVelocity
-            (
-                scalar temperature,
-                scalar mass
-            );
 
             //- Dump particle positions to .obj file
             void dumpParticlePositions() const;

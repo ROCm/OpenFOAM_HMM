@@ -73,6 +73,21 @@ Foam::DsmcCloud<ParcelType>::cellOccupancy() const
 
 
 template<class ParcelType>
+inline Foam::volScalarField& Foam::DsmcCloud<ParcelType>::sigmaTcRMax()
+{
+    return sigmaTcRMax_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalarField&
+Foam::DsmcCloud<ParcelType>::collisionSelectionRemainder()
+{
+    return collisionSelectionRemainder_;
+}
+
+
+template<class ParcelType>
 inline const Foam::List<typename ParcelType::constantProperties>&
 Foam::DsmcCloud<ParcelType>::constProps() const
 {
@@ -115,6 +130,14 @@ Foam::DsmcCloud<ParcelType>::binaryCollision() const
 
 
 template<class ParcelType>
+inline Foam::BinaryCollisionModel<Foam::DsmcCloud<ParcelType> >&
+Foam::DsmcCloud<ParcelType>::binaryCollision()
+{
+    return binaryCollisionModel_();
+}
+
+
+template<class ParcelType>
 inline const Foam::WallInteractionModel<Foam::DsmcCloud<ParcelType> >&
 Foam::DsmcCloud<ParcelType>::wallInteraction() const
 {
@@ -135,6 +158,8 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::massInSystem() const
 {
     scalar sysMass = 0.0;
 
+    Info<< "massInSystem() not implemented" << endl;
+
     return sysMass;
 }
 
@@ -143,6 +168,40 @@ template<class ParcelType>
 inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
 {
     return rndGen_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
+(
+    scalar temperature,
+    scalar mass
+) const
+{
+    return 2.0*sqrt(2.0*kb*temperature/(mathematicalConstant::pi*mass));
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianRMSSpeed
+(
+    scalar temperature,
+    scalar mass
+) const
+{
+    return sqrt(3.0*kb*temperature/mass);
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::DsmcCloud<ParcelType>::maxwellianMostProbableSpeed
+(
+    scalar temperature,
+    scalar mass
+) const
+{
+    return sqrt(2.0*kb*temperature/mass);
 }
 
 

@@ -59,6 +59,14 @@ Foam::BinaryCollisionModel<CloudType>::owner() const
 
 
 template<class CloudType>
+CloudType&
+Foam::BinaryCollisionModel<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
 const Foam::dictionary&
 Foam::BinaryCollisionModel<CloudType>::dict() const
 {
