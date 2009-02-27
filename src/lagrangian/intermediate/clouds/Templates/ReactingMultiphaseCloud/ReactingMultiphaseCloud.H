@@ -108,6 +108,10 @@ public:
     virtual ~ReactingMultiphaseCloud();
 
 
+    //- Type of parcel the cloud was instantiated for
+    typedef ParcelType parcelType;
+
+
     // Member Functions
 
         // Access
