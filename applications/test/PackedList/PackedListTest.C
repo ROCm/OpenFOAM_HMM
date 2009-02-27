@@ -28,6 +28,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "uLabel.H"
 #include "IOstreams.H"
 #include "PackedBoolList.H"
 
@@ -38,7 +39,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Info<< "PackedList max_bits() = " << PackedList<0>::max_bits() << nl;
+    Info<< "PackedList max_bits() = " << PackedList<>::max_bits() << nl;
 
     Info<< "\ntest allocation with value\n";
     PackedList<3> list1(5,1);

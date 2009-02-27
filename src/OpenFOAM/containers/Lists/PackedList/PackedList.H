@@ -76,9 +76,6 @@ Note
 SeeAlso
     Foam::DynamicList
 
-ToDo
-    Checks for bad template parameters (ie, nBits=0, nBits too large)?
-
 SourceFiles
     PackedListI.H
     PackedList.C
@@ -89,6 +86,7 @@ SourceFiles
 #define PackedList_H
 
 #include "labelList.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -119,6 +117,10 @@ class PackedList
 {
     typedef unsigned int      StorageType;
     typedef List<StorageType> StorageList;
+
+    //- nBits must be positive (non-zero) and fit within the storage
+    //  For simplicity, assume 8-bit bytes
+    StaticAssert(nBits && nBits < (sizeof(StorageType) << 3));
 
     // Private data
 

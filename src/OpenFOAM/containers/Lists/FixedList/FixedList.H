@@ -43,6 +43,7 @@ SourceFiles
 #include "uLabel.H"
 #include "Hash.H"
 #include "autoPtr.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,6 +71,9 @@ template<class T> class SLList;
 template<class T, unsigned Size>
 class FixedList
 {
+    //- Size must be positive (non-zero) and also fit as a signed value
+    StaticAssert(Size && Size <= INT_MAX);
+
     // Private data
 
         //- Vector of values of type T of size Size.
