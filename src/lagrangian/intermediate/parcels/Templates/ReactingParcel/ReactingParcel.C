@@ -97,7 +97,8 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // ~~~~~~~~~~~~~~~~~~~~~~
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T, dMassMT);
+    scalarField X = td.cliud().composition().X(0, YMixture_);
+    calcPhaseChange(td, dt, T, X, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -229,7 +230,8 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // ~~~~~~~~~~~~~~~~~~~~~~
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T, dMassMT);
+    scalarField X = td.cloud().composition().X(0, YMixture_);
+    calcPhaseChange(td, dt, T, X, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -286,6 +288,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     TrackData& td,
     const scalar dt,
     const scalar T,
+    scalarField& X,
     scalarList& dMassMT
 )
 {
@@ -296,35 +299,22 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 
     // TODO: separate treatment for boiling
 
-    /*
-    // Determine mass to add to carrier phase
-    const scalar mass = this->mass();
-    const scalar dMassTot = td.cloud().devolatilisation().calculate
+    scalar dMassTot = td.cloud().phaseChange().calculate
     (
-        dt,
-        mass0_,
-        mass,
-        td.cloud().composition().YMixture0(),
-        YMixture_,
-        T0,
-        canCombust_
+        T,
+        this->d_,
+        X,
+        dMassMT,
+        this->U_ - this->Uc_,
+        this->Tc_,
+        pc_,
+        this->muc_/this->rhoc_,
+        dt
     );
 
-    // Update (total) mass fractions
-    YMixture_[0] = (YMixture_[0]*mass - dMassTot)/(mass - dMassTot);
-    YMixture_[1] = YMixture_[1]*mass/(mass - dMassTot);
-    YMixture_[2] = 1.0 - YMixture_[0] - YMixture_[1];
+    // TODO: Re-calculate mass fractions
 
-    // Add to cummulative mass transfer
-    forAll (YGas_, i)
-    {
-        label id = td.cloud().composition().gasGlobalIds()[i];
 
-        // Volatiles mass transfer
-        scalar volatileMass = YGas_[i]*dMassTot;
-        dMassMT[id] += volatileMass;
-    }
-        */
 }
 
 

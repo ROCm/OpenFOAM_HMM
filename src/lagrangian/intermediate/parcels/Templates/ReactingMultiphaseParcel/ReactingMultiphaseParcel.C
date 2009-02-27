@@ -100,7 +100,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcCoupled
     // ~~~~~~~~~~~~~~~~~~~~~~
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T0, dMassMT);
+    scalarField X = td.cloud().composition().X(idLiquid, YLiquid_);
+    calcPhaseChange(td, dt, T0, X, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -271,7 +272,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcUncoupled
     // ~~~~~~~~~~~~~~~~~~~~~~
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T0, dMassMT);
+    scalarField X = td.cloud().composition().X(idLiquid, YLiquid_);
+    calcPhaseChange(td, dt, T0, YLiquid_, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -347,7 +349,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
         (
             "void Foam::ReactingMultiphaseParcel<ParcelType>::"
             "calcDevolatilisation \n"
-            "("
+            "(\n"
             "    TrackData&,\n"
             "    const scalar,\n"
             "    const scalar,\n"

@@ -146,14 +146,16 @@ Foam::scalar Foam::liquidEvaporation<CloudType>::calculate
     const scalar T,
     const scalar d,
     const scalarField& Xc,
-    const scalarField& dMassMT,
-    const vector Ur
+    const scalarList& dMassMT,
+    const vector& Ur
     const scalar Tc,
     const scalar pc,
     const scalar nuc
     const scalar dt,
 ) const
 {
+    scalar dMassTot = 0.0;
+
     if (T < Tvap_)
     {
         // not reached temperature threshold
@@ -192,9 +194,13 @@ Foam::scalar Foam::liquidEvaporation<CloudType>::calculate
             scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
             // mass transfer
-            dMassMT[i] -= Ni*A*liquids_.properies()[i].W()*dt;
+            scalar dm = Ni*A*liquids_.properies()[i].W()*dt;
+            dMassMT[i] -= dm;
+            dMassTot += dm;
         }
     }
+
+    return dMassTot;
 }
 
 

@@ -29,7 +29,6 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 Foam::phaseProperties::phaseProperties(Istream& is)
 :
     phase_(UNKNOWN),

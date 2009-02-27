@@ -242,6 +242,56 @@ const Foam::scalarField& Foam::CompositionModel<CloudType>::Y0
 
 
 template<class CloudType>
+Foam::scalarField Foam::CompositionModel<CloudType>::X
+(
+    const label phaseI,
+    const scalarField& Y
+) const
+{
+    const phaseProperties& props = phaseProps_[phaseI];
+    scalarField X(Y.size(), 0.0);
+    scalar WInv = 0.0;
+    switch (props.phase())
+    {
+        case phaseProperties::GAS:
+        {
+            forAll(Y, i)
+            {
+                label gid = props.globalIds()[i];
+                WInv += Y[i]/this->gases()[gid].W();
+                X[i] = Y[i]/this->gases()[gid].W();
+            }
+            break;
+        }
+        case phaseProperties::LIQUID:
+        {
+            forAll(Y, i)
+            {
+                label gid = props.globalIds()[i];
+                WInv += Y[i]/this->liquids().properties()[gid].W();
+                X[i] += Y[i]/this->liquids().properties()[gid].W();
+            }
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "Foam::scalarField Foam::CompositionModel<CloudType>::X\n"
+                "(\n"
+                "    const label phaseI,\n"
+                "    const scalarField Y\n"
+                ") const"
+            )   << "Only possible to convert gas and liquid mass fractions"
+                << nl << abort(FatalError);
+        }
+    }
+
+    return X/WInv;
+}
+
+
+template<class CloudType>
 Foam::scalar Foam::CompositionModel<CloudType>::H
 (
     const label phaseI,
