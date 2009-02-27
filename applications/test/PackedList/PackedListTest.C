@@ -73,6 +73,50 @@ int main(int argc, char *argv[])
     list1[1] = list1[8] = list1[10] = list1[14] = 2;
     list1.print(Info);
 
+
+    Info<< "\ntest operator== between references\n";
+    if (list1[1] == list1[8])
+    {
+        Info<< "[1] == [8] (expected)\n";
+    }
+    else
+    {
+        Info<< "[1] != [8] (unexpected)\n";
+    }
+
+    if (list1[0] != list1[1])
+    {
+        Info<< "[0] != [1] (expected)\n";
+    }
+    else
+    {
+        Info<< "[0] == [1] (unexpected)\n";
+    }
+
+    Info<< "\ntest operator== with iterator\n";
+    {
+        PackedList<3>::iterator iter = list1[1];
+
+        if (iter != list1[8])
+        {
+            Info<< "iter != [8] (expected)\n";
+        }
+        else
+        {
+            Info<< "iter == [8] (unexpected)\n";
+        }
+
+        if (*iter != list1[8])
+        {
+            Info<< "*iter != [8] (unexpected)\n";
+        }
+        else
+        {
+            Info<< "*iter == [8] (expected)\n";
+        }
+    }
+
+
     {
         const PackedList<3>& constLst = list1;
         Info<< "\ntest operator[] const with out-of-range index\n";

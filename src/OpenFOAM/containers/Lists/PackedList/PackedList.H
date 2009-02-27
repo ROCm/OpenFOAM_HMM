@@ -330,7 +330,7 @@ public:
 
             // Member Operators
 
-                //- Compare positions
+                //- Compare values (not positions)
                 inline bool operator==(const iteratorBase&) const;
                 inline bool operator!=(const iteratorBase&) const;
 
@@ -380,6 +380,10 @@ public:
 
             // Member Operators
 
+                //- Compare positions (not values)
+                inline bool operator==(const iteratorBase&) const;
+                inline bool operator!=(const iteratorBase&) const;
+
                 //- Assign from iteratorBase, eg iter = packedlist[i]
                 //  An out-of-range iterator is assigned end()
                 inline iterator& operator=(const iteratorBase&);
@@ -425,16 +429,20 @@ public:
 
                 //- Construct from iterator base, eg iter(packedlist[i])
                 //  but also  "const_iterator iter = packedlist[i];"
-                //  An out-of-range iterator is assigned end()
+                //  An out-of-range iterator is assigned cend()
                 inline const_iterator(const iteratorBase&);
 
                 //- Construct from base list and position index
                 inline const_iterator(const PackedList*, const label);
 
-                //- Construct from non-const iterator
+                //- Construct from iterator
                 inline const_iterator(const iterator&);
 
             // Member operators
+
+                //- Compare positions (not values)
+                inline bool operator==(const iteratorBase&) const;
+                inline bool operator!=(const iteratorBase&) const;
 
                 //- Assign from iteratorBase or derived
                 //  eg, iter = packedlist[i] or even iter = list.begin()
