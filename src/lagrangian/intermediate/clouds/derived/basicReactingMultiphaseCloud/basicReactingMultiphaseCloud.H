@@ -36,7 +36,7 @@ SourceFiles
 #ifndef basicReactingMultiphaseCloud_H
 #define basicReactingMultiphaseCloud_H
 
-#include "ReactingCloud.H"
+#include "ReactingMultiphaseCloud.H"
 #include "basicReactingMultiphaseParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,7 +50,7 @@ namespace Foam
 
 class basicReactingMultiphaseCloud
 :
-    public ReactingCloud<basicReactingMultiphaseParcel>
+    public ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
 {
     // Private Member Functions
 

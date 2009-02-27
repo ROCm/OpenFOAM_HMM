@@ -174,8 +174,7 @@ protected:
         (
             TrackData& td,
             const scalar dt,
-            const scalar T0,
-            const scalar T1,
+            const scalar T,
             scalarList& dMassMT
         );
 

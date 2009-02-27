@@ -27,7 +27,7 @@ License
 #include "basicReactingParcel.H"
 #include "ReactingCloud.H"
 
-#include "SingleMixtureFraction.H"
+#include "SinglePhaseMixture.H"
 
 namespace Foam
 {
@@ -36,7 +36,7 @@ namespace Foam
     // Add instances of composition model to the table
     makeCompositionModelType
     (
-        SingleMixtureFraction,
+        SinglePhaseMixture,
         ReactingCloud,
         basicReactingParcel
     );

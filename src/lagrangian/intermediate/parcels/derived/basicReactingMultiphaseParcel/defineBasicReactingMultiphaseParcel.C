@@ -61,50 +61,37 @@ namespace Foam
         ReactingParcel<basicReactingMultiphaseParcel>,
         0
     );
+    defineParcelTypeNameAndDebug
+    (
+        ReactingMultiphaseParcel<basicReactingMultiphaseParcel>,
+        0
+    );
+    defineTemplateTypeNameAndDebug
+    (
+        ReactingMultiphaseParcel<basicReactingMultiphaseParcel>,
+        0
+    );
 
     defineParcelTypeNameAndDebug
     (
         KinematicCloud<basicReactingMultiphaseParcel>,
         0
     );
-//    defineTemplateTypeNameAndDebug
-//    (
-//        KinematicCloud<basicReactingMultiphaseParcel>,
-//        0
-//    );
-
     defineParcelTypeNameAndDebug
     (
         ThermoCloud<basicReactingMultiphaseParcel>,
         0
     );
-//    defineTemplateTypeNameAndDebug
-//    (
-//        ThermoCloud<basicReactingMultiphaseParcel>,
-//        0
-//    );
-
     defineParcelTypeNameAndDebug
     (
         ReactingCloud<basicReactingMultiphaseParcel>,
         0
     );
-//    defineTemplateTypeNameAndDebug
-//    (
-//        ReactingCloud<basicReactingMultiphaseParcel>,
-//        0
-//    );
-
     defineParcelTypeNameAndDebug
     (
         ReactingMultiphaseCloud<basicReactingMultiphaseParcel>,
         0
     );
-//    defineTemplateTypeNameAndDebug
-//    (
-//        ReactingMultiphaseCloud<basicReactingMultiphaseParcel>,
-//        0
-//    );
 
 };
 

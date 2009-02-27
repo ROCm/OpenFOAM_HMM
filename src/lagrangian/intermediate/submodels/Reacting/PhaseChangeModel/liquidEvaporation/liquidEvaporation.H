@@ -23,41 +23,73 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::NoPhaseChange
+    Foam::liquidEvaporation
 
 Description
-    Dummy phase change model for 'no phase change'
+    Liquid evaporation model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoPhaseChange_H
-#define NoPhaseChange_H
+#ifndef liquidEvaporation_H
+#define liquidEvaporation_H
 
 #include "PhaseChangeModel.H"
+#include "liquidMixture.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class NoPhaseChange Declaration
+                       Class liquidEvaporation Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoPhaseChange
+class liquidEvaporation
 :
     public PhaseChangeModel<CloudType>
 {
+protected:
+
+    // Protected data
+
+        //- Global liquid properties data
+        autoPtr<liquidMixture> liquids_;
+
+        //- Vaporisation temperature [K]
+        //  Local droplet temperature must exceed Tvap before evaporation is
+        //  allowed
+        scalar Tvap_;
+
+        //- Component diffusion coefficients - one per specie
+        //  Note: need to be in same order as defined by liquids in thermo
+        //        props
+        scalarList Dm_;
+
+        //- Component saturation pressure vs temperature
+        List<List<Tuple2<scalar, scalar> > > pSat_;
+
+
+    // Protected member functions
+
+        //- Sherwood number as a function of Reynolds and Schmidt numbers
+        scalar Sh(const scalar Re, const scalar Sc) const;
+
+        //- Return the saturation pressure for species i at temperature, T
+        scalar pSat(const label i, const scalar T) const;
+
+
 public:
 
     //- Runtime type information
-    TypeName("NoPhaseChange");
+    TypeName("liquidEvaporation");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoPhaseChange
+        liquidEvaporation
         (
             const dictionary& dict,
             CloudType& cloud
@@ -65,7 +97,7 @@ public:
 
 
     //- Destructor
-    virtual ~NoPhaseChange();
+    virtual ~liquidEvaporation();
 
 
     // Member Functions
@@ -96,7 +128,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoPhaseChange.C"
+#   include "liquidEvaporation.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -24,44 +24,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "CompositionModel.H"
+#include "phasePropertiesList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::autoPtr<Foam::CompositionModel<CloudType> >
-Foam::CompositionModel<CloudType>::New
+Foam::phasePropertiesList::phasePropertiesList
 (
-    const dictionary& dict,
-    CloudType& owner
+    Istream& is,
+    const PtrList<volScalarField>& YGas,
+    const wordList& liquidNames,
+    const wordList& solidNames
 )
+:
+    props_(is),
+    phaseTypeNames_()
 {
-    word CompositionModelType(dict.lookup("CompositionModel"));
-
-    Info<< "Selecting CompositionModel " << CompositionModelType << endl;
-
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(CompositionModelType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    forAll(props_, i)
     {
-        FatalErrorIn
-        (
-            "CompositionModel<CloudType>::New\n"
-            "(\n"
-            "    const dictionary&,\n"
-            "    CloudType&\n"
-            ")"
-        )
-            << "Unknown CompositionModelType type "
-            << CompositionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid CompositionModel types are :" << nl
-            << dictionaryConstructorTablePtr_->toc() << nl
-            << exit(FatalError);
+        props_[i].initialiseGlobalIds(YGas, liquidNames, solidNames);
     }
 
-    return autoPtr<CompositionModel<CloudType> >(cstrIter()(dict, owner));
+    phaseTypeNames_.setSize(props_.size());
+    forAll(phaseTypeNames_, i)
+    {
+        phaseTypeNames_[i] = props_[i].phaseTypeName();
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::phasePropertiesList::~phasePropertiesList()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::List<Foam::phaseProperties>&
+Foam::phasePropertiesList::props() const
+{
+    return props_;
+}
+
+
+const Foam::wordList& Foam::phasePropertiesList::phaseTypes() const
+{
+    return phaseTypeNames_;
+}
+
+
+Foam::label Foam::phasePropertiesList::size() const
+{
+    return props_.size();
+}
+
+
+const Foam::phaseProperties&
+Foam::phasePropertiesList::operator[](const label phaseI) const
+{
+    return props_[phaseI];
 }
 
 

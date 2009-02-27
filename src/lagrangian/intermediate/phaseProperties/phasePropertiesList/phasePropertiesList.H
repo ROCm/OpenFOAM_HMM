@@ -22,41 +22,80 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedefs
-    Foam::cloudThermoTypes
+Class
+    Foam::phasePropertiesList
 
 Description
+    Simple container for a list of phase properties
+
+SourceFiles
+    phasePropertiesList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ReactingCloudThermoTypes_H
-#define ReactingCloudThermoTypes_H
+#ifndef phasePropertiesList_H
+#define phasePropertiesList_H
 
-#include "sutherlandTransport.H"
-#include "multiComponentMixture.H"
-#include "specie.H"
-#include "constTransport.H"
-#include "specieThermo.H"
-#include "hConstThermo.H"
-#include "janafThermo.H"
-#include "perfectGas.H"
+#include "Istream.H"
+#include "volFields.H"
+#include "wordList.H"
+#include "phaseProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-//    typedef multiComponentMixture<constTransport<specieThermo<hConstThermo<perfectGas> > > > specieProperties;
-//    typedef hConstThermo<perfectGas> specieProperties;
 
-//    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
-//        specieProperties;
+/*---------------------------------------------------------------------------*\
+                    Class phasePropertiesList Declaration
+\*---------------------------------------------------------------------------*/
 
-    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
-        specieReactingProperties;
+class phasePropertiesList
+{
+    // Private data
 
-    typedef constTransport<specieThermo<hConstThermo<perfectGas> > >
-        specieConstProperties;
-}
+        //- List of phase properties
+        List<phaseProperties> props_;
+
+        //- List of word representation of phase types
+        wordList phaseTypeNames_;
+
+
+public:
+
+    //- Constructor
+    phasePropertiesList
+    (
+        Istream& is,
+        const PtrList<volScalarField>& YGas,
+        const wordList& liquidNames,
+        const wordList& solidNames
+    );
+
+    //- Destructor
+    ~phasePropertiesList();
+
+
+    // Public member functions
+
+        //- Return the list of phase properties
+        const List<phaseProperties>& props() const;
+
+        //- Return the list of word representation of phase types
+        const wordList& phaseTypes() const;
+
+        //- Return the size (number of phases)
+        label size() const;
+
+
+    // Member operators
+
+        const phaseProperties& operator[](const label) const;
+};
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

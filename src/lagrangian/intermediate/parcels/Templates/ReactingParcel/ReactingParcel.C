@@ -97,7 +97,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // ~~~~~~~~~~~~~~~~~~~~~~
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T0, T1, dMassMT);
+    calcPhaseChange(td, dt, T, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -117,6 +117,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     T1 += dhRet/(0.5*(mass0 + mass1)*cp0);
     dhTrans -= dhRet;
 
+
     // ~~~~~~~~~~~~~~~~~~~~~~~
     // Accumulate source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~
@@ -134,7 +135,6 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     td.cloud().UCoeff()[celli] += np0*mass0*Cud;
 
     // Update enthalpy transfer
-    // - enthalpy of lost solids already accounted for
     td.cloud().hTrans()[celli] += np0*dhTrans;
 
     // Accumulate coefficient to be applied in carrier phase enthalpy coupling
@@ -229,7 +229,7 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // ~~~~~~~~~~~~~~~~~~~~~~
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
-    calcPhaseChange(td, dt, T0, T1, dMassMT);
+    calcPhaseChange(td, dt, T, dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -285,15 +285,16 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 (
     TrackData& td,
     const scalar dt,
-    const scalar T0,
-    const scalar T1,
+    const scalar T,
     scalarList& dMassMT
 )
 {
-    //    if (!td.cloud().phaseChange().active())
+    if (!td.cloud().phaseChange().active())
     {
         return;
     }
+
+    // TODO: separate treatment for boiling
 
     /*
     // Determine mass to add to carrier phase

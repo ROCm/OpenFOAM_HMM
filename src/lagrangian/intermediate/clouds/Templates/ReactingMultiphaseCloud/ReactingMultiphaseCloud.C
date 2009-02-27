@@ -43,6 +43,10 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::addNewParcel
     const scalar lagrangianDt
 )
 {
+    label idGas = this->composition().idGas();
+    label idLiquid = this->composition().idLiquid();
+    label idSolid = this->composition().idSolid();
+
     ParcelType* pPtr = new ParcelType
     (
         *this,
@@ -52,9 +56,9 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::addNewParcel
         d,
         U,
         nParticles,
-        this->composition().YGas0(),
-        this->composition().YLiquid0(),
-        this->composition().YSolid0(),
+        this->composition().Y0(idGas),
+        this->composition().Y0(idLiquid),
+        this->composition().Y0(idSolid),
         this->composition().YMixture0(),
         constProps_
     );
@@ -112,9 +116,9 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
 {
-    const volScalarField& T = carrierThermo_.T();
-    const volScalarField cp = carrierThermo_.Cp();
-    const volScalarField& p = carrierThermo_.p();
+    const volScalarField& T = this->carrierThermo().T();
+    const volScalarField cp = this->carrierThermo().Cp();
+    const volScalarField& p = this->carrierThermo().p();
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (

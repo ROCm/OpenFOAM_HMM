@@ -63,7 +63,7 @@ public:
         //- Construct from components
         basicReactingMultiphaseParcel
         (
-             ReactingCloud<basicReactingMultiphaseParcel>& owner,
+             ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
              const label typeId,
              const vector& position,
              const label celli,

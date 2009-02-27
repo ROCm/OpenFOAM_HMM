@@ -68,12 +68,6 @@ class ReactingMultiphaseCloud
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
 
-        //- Thermodynamics package (combustion)
-        hCombustionThermo& carrierThermo_;
-
-        //- Gas phase properties
-        PtrList<specieReactingProperties>& gases_;
-
 
         // References to the cloud sub-models
 
@@ -83,13 +77,6 @@ class ReactingMultiphaseCloud
                 DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >
             >
             devolatilisationModel_;
-
-
-
-        // Sources
-
-            //- Mass transfer fields - one per carrier phase specie
-            PtrList<DimensionedField<scalar, volMesh> > rhoTrans_;
 
 
     // Private Member Functions
@@ -125,16 +112,6 @@ public:
 
         // Access
 
-            //- Return const access to carrier phase thermo package
-            inline const hCombustionThermo& carrierThermo() const;
-
-            //- Return access to carrier phase thermo package
-            inline hCombustionThermo& carrierThermo();
-
-            //- Gas phase properties
-            inline const PtrList<specieReactingProperties>& gases() const;
-
-
             // Sub-models
 
                 //- Return reference to devolatilisation model
@@ -143,29 +120,6 @@ public:
                     ReactingMultiphaseCloud<ParcelType>
                 >&
                 devolatilisation() const;
-
-
-            // Sources
-
-                //- Mass
-
-                    //- Return reference to mass source for field i
-                    inline DimensionedField<scalar, volMesh>&
-                        rhoTrans(const label i);
-
-                    //- Return reference to mass source fields
-                    inline PtrList<DimensionedField<scalar, volMesh> >&
-                        rhoTrans();
-
-                    //- Return tmp mass source for field i
-                    //  Fully explicit
-                    inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho1(const label i) const;
-
-                    //- Return tmp total mass source for carrier phase
-                    //  Fully explicit
-                    inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho1() const;
 
 
         // Cloud evolution functions

@@ -44,32 +44,34 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 {
     if (readFields)
     {
-        const ReactingCloud<ParcelType>& cR =
-            dynamic_cast<const ReactingCloud<ParcelType>& >(cloud);
+        const ReactingMultiphaseCloud<ParcelType>& cR =
+            dynamic_cast<const ReactingMultiphaseCloud<ParcelType>& >(cloud);
 
-        const label nGas = cR.composition().gasNames().size();
-        const label nLiquid = cR.composition().liquidNames().size();
-        const label nSolid = cR.composition().solidNames().size();
+        const label idGas = cR.composition().idGas();
+        const label nGas = cR.composition().componentNames(idGas).size();
+        const label idLiquid = cR.composition().idLiquid();
+        const label nLiquid = cR.composition().componentNames(idLiquid).size();
+        const label idSolid = cR.composition().idGas();
+        const label nSolid = cR.composition().componentNames(idSolid).size();
 
         YGas_.setSize(nGas);
         YLiquid_.setSize(nLiquid);
         YSolid_.setSize(nSolid);
 
-        const scalarField& YMix = this->YMixture_;
         if (is.format() == IOstream::ASCII)
         {
             is >> YGas_ >> YLiquid_ >> YSolid_;
-            YGas_ /= YMix[0] + VSMALL;
-            YLiquid_ /= YMix[1] + VSMALL;
-            YSolid_ /= YMix[2] + VSMALL;
         }
         else
         {
             is >> YGas_ >> YLiquid_ >> YSolid_;
-            YGas_ /= YMix[0] + VSMALL;
-            YLiquid_ /= YMix[1] + VSMALL;
-            YSolid_ /= YMix[2] + VSMALL;
         }
+
+        // scale the mass fractions
+        const scalarField& YMix = this->YMixture_;
+        YGas_ /= YMix[0] + ROOTVSMALL;
+        YLiquid_ /= YMix[1] + ROOTVSMALL;
+        YSolid_ /= YMix[2] + ROOTVSMALL;
     }
 
     // Check state of Istream
@@ -88,7 +90,7 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 template<class ParcelType>
 void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
 (
-    ReactingCloud<ParcelType>& c
+    ReactingMultiphaseCloud<ParcelType>& c
 )
 {
     if (!c.size())
@@ -99,20 +101,20 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
     ReactingParcel<ParcelType>::readFields(c);
 
     // Get names and sizes for each Y...
-    const wordList gasNames = c.composition().gasNames();
-    const wordList liquidNames = c.composition().liquidNames();
-    const wordList solidNames = c.composition().solidNames();
-    const label nGas = gasNames.size();
-    const label nLiquid = liquidNames.size();
-    const label nSolid = solidNames.size();
+    const label idGas = c.composition().idGas();
+    const wordList gasNames = c.composition().componentNames(idGas);
+    const label idLiquid = c.composition().idLiquid();
+    const wordList liquidNames = c.composition().componentNames(idLiquid);
+    const label idSolid = c.composition().idSolid();
+    const wordList solidNames = c.composition().componentNames(idSolid);
 
     // Set storage for each Y... for each parcel
     forAllIter(typename Cloud<ParcelType>, c, iter)
     {
         ReactingMultiphaseParcel<ParcelType>& p = iter();
-        p.YGas_.setSize(nGas, 0.0);
-        p.YLiquid_.setSize(nLiquid, 0.0);
-        p.YSolid_.setSize(nSolid, 0.0);
+        p.YGas_.setSize(gasNames.size(), 0.0);
+        p.YLiquid_.setSize(liquidNames.size(), 0.0);
+        p.YSolid_.setSize(solidNames.size(), 0.0);
     }
 
     // Populate YGas for each parcel
@@ -127,7 +129,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         forAllIter(typename Cloud<ParcelType>, c, iter)
         {
             ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YGas_[j] = YGas[i++]/p.YMixture()[0];
+            p.YGas_[j] = YGas[i++]/(p.YMixture()[0] + ROOTVSMALL);
         }
     }
     // Populate YLiquid for each parcel
@@ -142,7 +144,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         forAllIter(typename Cloud<ParcelType>, c, iter)
         {
             ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YLiquid_[j] = YLiquid[i++]/p.YMixture()[1];
+            p.YLiquid_[j] = YLiquid[i++]/(p.YMixture()[1] + ROOTVSMALL);
         }
     }
     // Populate YSolid for each parcel
@@ -157,7 +159,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         forAllIter(typename Cloud<ParcelType>, c, iter)
         {
             ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YSolid_[j] = YSolid[i++]/p.YMixture()[2];
+            p.YSolid_[j] = YSolid[i++]/(p.YMixture()[2] + ROOTVSMALL);
         }
     }
 }
@@ -166,7 +168,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
 template<class ParcelType>
 void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
 (
-    const ReactingCloud<ParcelType>& c
+    const ReactingMultiphaseCloud<ParcelType>& c
 )
 {
     ReactingParcel<ParcelType>::writeFields(c);
@@ -176,7 +178,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
     // Write the composition fractions
     if (np > 0)
     {
-        const wordList& gasNames = c.composition().gasNames();
+        const label idGas = c.composition().idGas();
+        const wordList gasNames = c.composition().componentNames(idGas);
         forAll(gasNames, j)
         {
             IOField<scalar> YGas
@@ -194,7 +197,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
 
             YGas.write();
         }
-        const wordList& liquidNames = c.composition().liquidNames();
+        const label idLiquid = c.composition().idLiquid();
+        const wordList liquidNames = c.composition().componentNames(idLiquid);
         forAll(liquidNames, j)
         {
             IOField<scalar> YLiquid
@@ -212,7 +216,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
 
             YLiquid.write();
         }
-        const wordList& solidNames = c.composition().solidNames();
+        const label idSolid = c.composition().idSolid();
+        const wordList solidNames = c.composition().componentNames(idSolid);
         forAll(solidNames, j)
         {
             IOField<scalar> YSolid
@@ -248,14 +253,14 @@ Foam::Ostream& Foam::operator<<
     scalarField YSolidLoc = p.YSolid()*p.YMixture()[2];
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ReactingParcel<ParcelType>& >(p)
+        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>& >(p)
             << token::SPACE << YGasLoc
             << token::SPACE << YLiquidLoc
             << token::SPACE << YSolidLoc;
     }
     else
     {
-        os  << static_cast<const ReactingParcel<ParcelType>& >(p);
+        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>& >(p);
         os << YGasLoc << YLiquidLoc << YSolidLoc;
     }
 

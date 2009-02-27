@@ -46,7 +46,7 @@ Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
     PtrList<specieReactingProperties>& gases
 )
 :
-    ReactingCloud<basicReactingMultiphaseParcel>
+    ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
     (
         cloudType,
         rho,

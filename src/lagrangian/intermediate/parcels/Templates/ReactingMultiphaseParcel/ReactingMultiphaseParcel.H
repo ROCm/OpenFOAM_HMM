@@ -40,6 +40,7 @@ SourceFiles
 #define ReactingMultiphaseParcel_H
 
 #include "ReactingParcel.H"
+#include "ReactingMultiphaseCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,6 +111,9 @@ public:
     {
         // Private data
 
+            //- Reference to the cloud containing this particle
+            ReactingMultiphaseCloud<ParcelType>& cloud_;
+
             //- Particle constant properties
             const constantProperties& constProps_;
 
@@ -121,7 +125,7 @@ public:
             //- Construct from components
             inline trackData
             (
-                ReactingCloud<ParcelType>& cloud,
+                ReactingMultiphaseCloud<ParcelType>& cloud,
                 const constantProperties& constProps,
                 const interpolation<scalar>& rhoInterp,
                 const interpolation<vector>& UInterp,
@@ -134,6 +138,9 @@ public:
 
 
         // Member functions
+
+            //- Return access to the owner cloud
+            inline ReactingMultiphaseCloud<ParcelType>& cloud();
 
             //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
@@ -201,7 +208,7 @@ public:
         //- Construct from components
         inline ReactingMultiphaseParcel
         (
-            ReactingCloud<ParcelType>& owner,
+            ReactingMultiphaseCloud<ParcelType>& owner,
             const label typeId,
             const vector& position,
             const label celli,
@@ -292,10 +299,13 @@ public:
         // I-O
 
             //- Read
-            static void readFields(ReactingCloud<ParcelType>& c);
+            static void readFields(ReactingMultiphaseCloud<ParcelType>& c);
 
             //- Write
-            static void writeFields(const ReactingCloud<ParcelType>& c);
+            static void writeFields
+            (
+                const ReactingMultiphaseCloud<ParcelType>& c
+            );
 
 
     // Ostream Operator

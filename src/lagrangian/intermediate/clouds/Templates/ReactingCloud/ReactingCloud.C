@@ -52,9 +52,6 @@ void Foam::ReactingCloud<ParcelType>::addNewParcel
         d,
         U,
         nParticles,
-        composition().YGas0(),
-        composition().YLiquid0(),
-        composition().YSolid0(),
         composition().YMixture0(),
         constProps_
     );
@@ -120,12 +117,12 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                     this->name() + "rhoTrans" + Foam::name(i),
-                     this->db().time().timeName(),
-                     this->db(),
-                     IOobject::NO_READ,
-                     IOobject::NO_WRITE,
-                     false
+                    this->name() + "rhoTrans" + Foam::name(i),
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 this->mesh(),
                 dimensionedScalar("zero", dimMass, 0.0)

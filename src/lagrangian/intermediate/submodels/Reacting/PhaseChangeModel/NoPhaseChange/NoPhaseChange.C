@@ -59,7 +59,13 @@ template<class CloudType>
 Foam::scalar Foam::NoPhaseChange<CloudType>::calculate
 (
     const scalar,
+    const scalar,
     const scalarField&,
+    const scalarField&,
+    const vector,
+    const scalar,
+    const scalar,
+    const scalar,
     const scalar
 ) const
 {

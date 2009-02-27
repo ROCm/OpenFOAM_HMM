@@ -43,7 +43,7 @@ constantProperties
 template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
 (
-    ReactingCloud<ParcelType>& cloud,
+    ReactingMultiphaseCloud<ParcelType>& cloud,
     const constantProperties& constProps,
     const interpolation<scalar>& rhoInterp,
     const interpolation<vector>& UInterp,
@@ -65,14 +65,16 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
         CpInterp,
         pInterp,
         g
-    )
+    ),
+    cloud_(cloud),
+    constProps_(constProps)
 {}
 
 
 template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
-    ReactingCloud<ParcelType>& owner,
+    ReactingMultiphaseCloud<ParcelType>& owner,
     const label typeId,
     const vector& position,
     const label celli,
@@ -131,6 +133,14 @@ Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Ldevol() const
 
 
 // * * * * * * * * * * * trackData Member Functions  * * * * * * * * * * * * //
+
+template<class ParcelType>
+inline Foam::ReactingMultiphaseCloud<ParcelType>&
+Foam::ReactingMultiphaseParcel<ParcelType>::trackData::cloud()
+{
+    return cloud_;
+}
+
 
 template<class ParcelType>
 inline const typename Foam::ReactingMultiphaseParcel<ParcelType>::

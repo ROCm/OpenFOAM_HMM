@@ -67,6 +67,12 @@ protected:
         const dictionary coeffDict_;
 
 
+    // Protected member functions
+
+        //- Sherwood number
+        scalar Sh() const;
+
+
 public:
 
     //- Runtime type information
@@ -129,9 +135,15 @@ public:
         //- Update model
         virtual scalar calculate
         (
-            const scalar dt,
-            const scalarField& YMixture,
-            const scalar T
+            const scalar T,
+            const scalar d,
+            const scalarField& Xc,
+            const scalarField& dMassMT,
+            const vector Ur,
+            const scalar Tc,
+            const scalar pc,
+            const scalar nuc,
+            const scalar dt
         ) const = 0;
 };
 

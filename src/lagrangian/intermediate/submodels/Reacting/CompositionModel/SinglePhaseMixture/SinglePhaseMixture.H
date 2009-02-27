@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SingleMixtureFraction
+    Foam::SinglePhaseMixture
 
 Description
-    Templated parcel multi-phase, multi-component class
+    Templated parcel single phase, multi-component class
 
 SourceFiles
-    SingleMixtureFraction.C
+    SinglePhaseMixture.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SingleMixtureFraction_H
-#define SingleMixtureFraction_H
+#ifndef SinglePhaseMixture_H
+#define SinglePhaseMixture_H
 
 #include "CompositionModel.H"
 
@@ -44,17 +44,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class SingleMixtureFraction Declaration
+                      Class SinglePhaseMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class SingleMixtureFraction
+class SinglePhaseMixture
 :
     public CompositionModel<CloudType>
 {
     // Private data
 
-        // Indices of the phases
+        // Indices of the phases - only 1 will be set
 
             //- Gas
             label idGas_;
@@ -66,33 +66,27 @@ class SingleMixtureFraction
             label idSolid_;
 
 
-       // Mixture properties
-
-            //- Phase component total fractions
-            scalarField YMixture0_;
-
-
     // Private member functions
 
         //- Construct the indices and check correct specification of
-        //  1 gas, 1 liquid and 1 solid
+        //  1 gas or 1 liquid or 1 solid
         void constructIds();
 
 
 public:
 
     //- Runtime type information
-    TypeName("SingleMixtureFraction");
+    TypeName("SinglePhaseMixture");
 
 
     // Constructors
 
         //- Construct from dictionary
-        SingleMixtureFraction(const dictionary& dict, CloudType& owner);
+        SinglePhaseMixture(const dictionary& dict, CloudType& owner);
 
 
     //- Destructor
-    virtual ~SingleMixtureFraction();
+    virtual ~SinglePhaseMixture();
 
 
     // Member Functions
@@ -148,7 +142,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "SingleMixtureFraction.C"
+#   include "SinglePhaseMixture.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -68,8 +68,12 @@ submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
 /* integration schemes */
 IntegrationScheme/makeIntegrationSchemes.C
 
+/* phase properties */
+phaseProperties/phaseProperties/phaseProperties.C
+phaseProperties/phaseProperties/phasePropertiesIO.C
+phaseProperties/phasePropertiesList/phasePropertiesList.C
 
-/* Data entries */
+/* data entries */
 submodels/IO/DataEntry/makeDataEntries.C
 
 

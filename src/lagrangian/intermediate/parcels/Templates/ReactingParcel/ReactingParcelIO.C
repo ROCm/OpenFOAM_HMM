@@ -47,7 +47,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
         const ReactingCloud<ParcelType>& cR =
             dynamic_cast<const ReactingCloud<ParcelType>& >(cloud);
 
-        const label nMixture = cR.composition().compositionNames().size();
+        const label nMixture = cR.composition().phaseTypes().size();
         YMixture_.setSize(nMixture);
 
         if (is.format() == IOstream::ASCII)
@@ -102,22 +102,22 @@ void Foam::ReactingParcel<ParcelType>::readFields
     }
 
     // Get names and sizes for each Y...
-    const wordList compositionNames = c.composition().compositionNames();
-    const label nComposition = compositionNames.size();
+    const wordList phaseTypes = c.composition().phaseTypes();
+    const label nPhases = phaseTypes.size();
 
     // Set storage for each Y... for each parcel
     forAllIter(typename Cloud<ParcelType>, c, iter)
     {
         ReactingParcel<ParcelType>& p = iter();
-        p.YMixture_.setSize(nComposition, 0.0);
+        p.YMixture_.setSize(nPhases, 0.0);
     }
 
     // Populate YMixture for each parcel
-    forAll(compositionNames, j)
+    forAll(phaseTypes, j)
     {
         IOField<scalar> YMixture
         (
-            c.fieldIOobject("Y" + compositionNames[j], IOobject::MUST_READ)
+            c.fieldIOobject("Y" + phaseTypes[j], IOobject::MUST_READ)
         );
 
         label i = 0;
@@ -154,12 +154,12 @@ void Foam::ReactingParcel<ParcelType>::writeFields
     // Write the composition fractions
     if (np > 0)
     {
-        const wordList compositionNames = c.composition().compositionNames();
-        forAll(compositionNames, j)
+        const wordList phaseTypes = c.composition().phaseTypes();
+        forAll(phaseTypes, j)
         {
             IOField<scalar> YMixture
             (
-                c.fieldIOobject("Y" + compositionNames[j], IOobject::NO_READ),
+                c.fieldIOobject("Y" + phaseTypes[j], IOobject::NO_READ),
                 np
             );
 
@@ -196,6 +196,7 @@ Foam::Ostream& Foam::operator<<
         os  << static_cast<const ThermoParcel<ParcelType>& >(p);
         os.write
         (
+
             reinterpret_cast<const char*>(&p.mass0_),
             sizeof(p.mass0())
         );
