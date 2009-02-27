@@ -32,8 +32,6 @@ License
 #include "PackedList.H"
 #include "syncTools.H"
 
-#include "faceSet.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
@@ -104,6 +102,23 @@ Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
             )
             {
                 zoneFacesSet[faceI] = 1u;
+            }
+        }
+        forAll(patches, patchI)
+        {
+            const polyPatch& pp = patches[patchI];
+
+            if (pp.coupled())
+            {
+                forAll(pp, i)
+                {
+                    label faceI = pp.start()+i;
+
+                    if (zoneCell.get(own[faceI]) == 1u)
+                    {
+                        zoneFacesSet[faceI] = 1u;
+                    }
+                }
             }
         }
         syncTools::syncFaceList(mesh_, zoneFacesSet, orEqOp<unsigned int>());
