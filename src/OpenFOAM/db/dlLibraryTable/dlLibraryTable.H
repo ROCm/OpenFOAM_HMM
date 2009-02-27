@@ -36,9 +36,9 @@ SourceFiles
 #ifndef dlLibraryTable_H
 #define dlLibraryTable_H
 
-#include "HashTable.H"
 #include "label.H"
 #include "Hash.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -38,7 +38,9 @@ SourceFiles
 #ifndef FixedList_H
 #define FixedList_H
 
+#include "bool.H"
 #include "label.H"
+#include "uLabel.H"
 #include "Hash.H"
 #include "autoPtr.H"
 
@@ -49,12 +51,12 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 
-template<class T, label Size>
+template<class T, unsigned Size>
 Istream& operator>>(Istream&, FixedList<T, Size>&);
 
-template<class T, label Size>
+template<class T, unsigned Size>
 Ostream& operator<<(Ostream&, const FixedList<T, Size>&);
 
 template<class T> class UList;
@@ -65,7 +67,7 @@ template<class T> class SLList;
                            Class FixedList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, label Size>
+template<class T, unsigned Size>
 class FixedList
 {
     // Private data
@@ -78,14 +80,14 @@ public:
 
     //- Hashing function class
     //  Rotating hash from http://burtleburtle.net/bob/hash/doobs.html
-    template<class HashT=Hash<T> >
+    template< class HashT=Hash<T> >
     class Hash
     {
     public:
         Hash()
         {}
 
-        label operator()(const FixedList<T, Size>&) const;
+        inline unsigned operator()(const FixedList<T, Size>&) const;
     };
 
     // Static Member Functions

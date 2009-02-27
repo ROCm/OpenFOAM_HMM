@@ -196,20 +196,21 @@ inline Foam::string Foam::string::operator()(const size_type n) const
 }
 
 
-inline Foam::string::size_type Foam::string::hash::operator()
+inline unsigned Foam::string::hash::operator()
 (
     const string& key
 ) const
 {
-    register size_type val = 0;
+    const size_type len = key.length();
+    const char *data = key.data();
 
-    for (string::const_iterator iter=key.begin(); iter!=key.end(); ++iter)
+    register unsigned val = 0;
+    for (register size_type i=0; i < len; ++data, ++i)
     {
-        val = (val << 1) ^ *iter;
+        val = (val << 1) ^ *data;
     }
 
     return val;
 }
-
 
 // ************************************************************************* //

@@ -106,8 +106,8 @@ class fvMeshDistribute
             }
         };
 
-        // Hash labelPair. Note non-commutative since p[0] is face, p[1] is
-        // processor.
+        //- Hash labelPair.
+        //  Note non-commutative since p[0] is face, p[1] is processor.
         class labelPairHash
         {
         public:
@@ -115,12 +115,11 @@ class fvMeshDistribute
             labelPairHash()
             {}
 
-            label operator()(const labelPair& p, const uLabel tableSize) const
+            unsigned operator()(const labelPair& p) const
             {
                 uLabel p0 = static_cast<uLabel>(p[0]);
                 uLabel p1 = static_cast<uLabel>(p[1]);
-                uLabel key = p0*p0+p0+p1;
-                return key % tableSize;
+                return (p0*p0 + p0+p1);
             }
         };
 
@@ -287,7 +286,7 @@ class fvMeshDistribute
             void addProcPatches
             (
                 const labelList&, // processor that neighbour is on
-                labelList& procPatchID              
+                labelList& procPatchID
             );
 
             //- Get boundary faces to be repatched. Is -1 or new patchID

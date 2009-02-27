@@ -40,7 +40,6 @@ SourceFiles
 #ifndef SubField_H
 #define SubField_H
 
-#include "Field.H"
 #include "SubList.H"
 #include "Field.H"
 
@@ -48,6 +47,10 @@ SourceFiles
 
 namespace Foam
 {
+
+//- Pre-declare SubField and related Field type
+template<class Type> class Field;
+template<class Type> class SubField;
 
 /*---------------------------------------------------------------------------*\
                            Class SubField Declaration

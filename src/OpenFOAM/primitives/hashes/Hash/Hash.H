@@ -35,6 +35,7 @@ Description
 #define Hash_H
 
 #include "label.H"
+#include "uLabel.H"
 #include "pTraits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,9 +56,9 @@ public:
     Hash()
     {}
 
-    label operator()(const PrimitiveType& p) const
+    unsigned operator()(const PrimitiveType& p) const
     {
-        return label(p);
+        return unsigned(p);
     }
 
 };
@@ -75,7 +76,7 @@ public:
     Hash()
     {}
 
-    long operator()(const void* const& p) const
+    unsigned operator()(const void* const& p) const
     {
         return long(p);
     }

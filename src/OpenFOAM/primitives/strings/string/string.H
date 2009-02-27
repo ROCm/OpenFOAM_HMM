@@ -85,14 +85,14 @@ public:
         static const string null;
 
 
-    //- Hashing function class
+    //- Hashing function class, shared by all the derived classes
     class hash
     {
     public:
         hash()
         {}
 
-        inline size_type operator()(const string&) const;
+        inline unsigned operator()(const string&) const;
     };
 
 

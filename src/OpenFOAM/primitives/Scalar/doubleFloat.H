@@ -27,8 +27,8 @@ License
 #ifndef doubleFloat_H
 #define doubleFloat_H
 
-#include "products.H"
 #include "label.H"
+#include "products.H"
 
 #include <cmath>
 

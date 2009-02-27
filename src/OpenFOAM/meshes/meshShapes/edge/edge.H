@@ -136,7 +136,7 @@ public:
 //- Hash specialization for hashing edges
 //  Simple commutative hash.
 template<>
-inline label Hash<edge>::operator()(const edge& e) const
+inline unsigned Hash<edge>::operator()(const edge& e) const
 {
     return (e[0]*e[1] + e[0]+e[1]);
 }

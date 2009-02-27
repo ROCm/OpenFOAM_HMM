@@ -26,7 +26,7 @@ Typedef
     Foam::vector
 
 Description
-    vector obtained from generic Vector
+    A scalar version of the templated Vector
 
 SourceFiles
     vector.C

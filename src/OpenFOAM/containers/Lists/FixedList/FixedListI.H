@@ -29,44 +29,44 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList()
 {}
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(const T v[Size])
 {
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = v[i];
     }
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(const T& t)
 {
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = t;
     }
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(const UList<T>& lst)
 {
     checkSize(lst.size());
 
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = lst[i];
     }
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& lst)
 {
     checkSize(lst.size());
@@ -84,41 +84,41 @@ inline Foam::FixedList<T, Size>::FixedList(const SLList<T>& lst)
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::FixedList<T, Size>::FixedList(const FixedList<T, Size>& lst)
 {
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = lst[i];
     }
 }
 
 
-template<class T, Foam::label Size>
-inline Foam::autoPtr<Foam::FixedList<T, Size> >
+template<class T, unsigned Size>
+inline Foam::autoPtr< Foam::FixedList<T, Size> >
 Foam::FixedList<T, Size>::clone() const
 {
-    return autoPtr<FixedList<T, Size> >(new FixedList<T, Size>(*this));
+    return autoPtr< FixedList<T, Size> >(new FixedList<T, Size>(*this));
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline const Foam::FixedList<T, Size>& Foam::FixedList<T, Size>::null()
 {
     return *reinterpret_cast< FixedList<T, Size>* >(0);
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::label Foam::FixedList<T, Size>::fcIndex(const label i) const
 {
     return (i == Size-1 ? 0 : i+1);
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::label Foam::FixedList<T, Size>::rcIndex(const label i) const
 {
     return (i ? i-1 : Size-1);
@@ -126,51 +126,51 @@ inline Foam::label Foam::FixedList<T, Size>::rcIndex(const label i) const
 
 
 // Check start is within valid range (0 ... size-1).
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::checkStart(const label start) const
 {
-    if (start<0 || (start && start>=Size))
+    if (start < 0 || (start && unsigned(start) >= Size))
     {
         FatalErrorIn("FixedList<T, Size>::checkStart(const label)")
-            << "start " << start << " out of range 0 ... " << max(Size-1, 0)
+            << "start " << start << " out of range 0 ... " << (Size-1)
             << abort(FatalError);
     }
 }
 
 
 // Check size is within valid range (0 ... size).
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::checkSize(const label size) const
 {
-    if (size<0 || size>Size)
+    if (size < 0 || unsigned(size) > Size)
     {
         FatalErrorIn("FixedList<T, Size>::checkSize(const label)")
-            << "size " << size << " out of range 0 ... " << Size
+            << "size " << size << " out of range 0 ... " << (Size)
             << abort(FatalError);
     }
 }
 
 
 // Check index i is within valid range (0 ... size-1).
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::checkIndex(const label i) const
 {
     if (!Size)
     {
         FatalErrorIn("FixedList<T, Size>::checkIndex(const label)")
-            << "attempt to access element from zero sized list"
+            << "attempt to access element from zero-sized list"
             << abort(FatalError);
     }
-    else if (i<0 || i>=Size)
+    else if (i < 0 || i >= Size)
     {
         FatalErrorIn("FixedList<T, Size>::checkIndex(const label)")
-            << "index " << i << " out of range 0 ... " << Size-1
+            << "index " << i << " out of range 0 ... " << (Size-1)
             << abort(FatalError);
     }
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::resize(const label s)
 {
 #   ifdef FULLDEBUG
@@ -178,7 +178,7 @@ inline void Foam::FixedList<T, Size>::resize(const label s)
 #   endif
 }
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::setSize(const label s)
 {
 #   ifdef FULLDEBUG
@@ -186,17 +186,17 @@ inline void Foam::FixedList<T, Size>::setSize(const label s)
 #   endif
 }
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::transfer(const FixedList<T, Size>& lst)
 {
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = lst[i];
     }
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline const T*
 Foam::FixedList<T, Size>::cdata() const
 {
@@ -204,7 +204,7 @@ Foam::FixedList<T, Size>::cdata() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline T*
 Foam::FixedList<T, Size>::data()
 {
@@ -215,7 +215,7 @@ Foam::FixedList<T, Size>::data()
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 // element access
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline T& Foam::FixedList<T, Size>::operator[](const label i)
 {
 #   ifdef FULLDEBUG
@@ -226,7 +226,7 @@ inline T& Foam::FixedList<T, Size>::operator[](const label i)
 
 
 // const element access
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline const T& Foam::FixedList<T, Size>::operator[](const label i) const
 {
 #   ifdef FULLDEBUG
@@ -236,27 +236,27 @@ inline const T& Foam::FixedList<T, Size>::operator[](const label i) const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::operator=(const T lst[Size])
 {
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = lst[i];
     }
 }
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::operator=(const UList<T>& lst)
 {
     checkSize(lst.size());
 
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = lst[i];
     }
 }
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& lst)
 {
     checkSize(lst.size());
@@ -273,10 +273,10 @@ inline void Foam::FixedList<T, Size>::operator=(const SLList<T>& lst)
     }
 }
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::operator=(const T& t)
 {
-    for (register label i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         v_[i] = t;
     }
@@ -285,7 +285,7 @@ inline void Foam::FixedList<T, Size>::operator=(const T& t)
 
 // * * * * * * * * * * * * * * STL Member Functions  * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::iterator
 Foam::FixedList<T, Size>::begin()
 {
@@ -293,7 +293,7 @@ Foam::FixedList<T, Size>::begin()
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::begin() const
 {
@@ -301,7 +301,7 @@ Foam::FixedList<T, Size>::begin() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::cbegin() const
 {
@@ -309,7 +309,7 @@ Foam::FixedList<T, Size>::cbegin() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::iterator
 Foam::FixedList<T, Size>::end()
 {
@@ -317,7 +317,7 @@ Foam::FixedList<T, Size>::end()
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::end() const
 {
@@ -325,7 +325,7 @@ Foam::FixedList<T, Size>::end() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::cend() const
 {
@@ -333,7 +333,7 @@ Foam::FixedList<T, Size>::cend() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::iterator
 Foam::FixedList<T, Size>::rbegin()
 {
@@ -341,7 +341,7 @@ Foam::FixedList<T, Size>::rbegin()
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::rbegin() const
 {
@@ -349,7 +349,7 @@ Foam::FixedList<T, Size>::rbegin() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::crbegin() const
 {
@@ -357,7 +357,7 @@ Foam::FixedList<T, Size>::crbegin() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::iterator
 Foam::FixedList<T, Size>::rend()
 {
@@ -365,7 +365,7 @@ Foam::FixedList<T, Size>::rend()
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::rend() const
 {
@@ -373,7 +373,7 @@ Foam::FixedList<T, Size>::rend() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline typename Foam::FixedList<T, Size>::const_iterator
 Foam::FixedList<T, Size>::crend() const
 {
@@ -381,21 +381,21 @@ Foam::FixedList<T, Size>::crend() const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::label Foam::FixedList<T, Size>::size() const
 {
     return Size;
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline Foam::label Foam::FixedList<T, Size>::max_size() const
 {
     return Size;
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 inline bool Foam::FixedList<T, Size>::empty() const
 {
     return false;
@@ -405,18 +405,18 @@ inline bool Foam::FixedList<T, Size>::empty() const
 #ifndef __CINT__
 
 // Rotating Hash
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 template<class HashT>
-inline Foam::label Foam::FixedList<T, Size>::Hash<HashT>::operator()
+inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
 (
     const FixedList<T, Size>& lst
 ) const
 {
-    static const label farbit(8*sizeof(label)-4);
+    static const unsigned farbit(8*sizeof(label)-4);
 
-    label val = Size;
+    unsigned val = Size;
 
-    for (register int i=0; i<Size; i++)
+    for (register unsigned i=0; i<Size; i++)
     {
         val = (val << 4) ^ (val >> farbit) ^ HashT()(lst[i]);
     }

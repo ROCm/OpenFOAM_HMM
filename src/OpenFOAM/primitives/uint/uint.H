@@ -26,7 +26,7 @@ Primitive
     uint
 
 Description
-    System uinteger
+    System unsigned integer
 
 SourceFiles
     uintIO.C

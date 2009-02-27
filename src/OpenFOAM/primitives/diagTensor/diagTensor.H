@@ -26,7 +26,7 @@ Typedef
     Foam::diagTensor
 
 Description
-    3D diagTensor obtained from generic Vector
+    A scalar version of the templated DiagTensor
 
 SourceFiles
     diagTensor.C

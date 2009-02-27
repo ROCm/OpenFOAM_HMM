@@ -45,9 +45,10 @@ SourceFiles
 #define StaticHashTable_H
 
 #include "label.H"
+#include "uLabel.H"
 #include "word.H"
-#include "className.H"
 #include "Xfer.H"
+#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
