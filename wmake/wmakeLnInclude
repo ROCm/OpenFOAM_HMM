@@ -145,16 +145,6 @@ find -L . -type l -exec rm \{\} \;
 find .. $findOpt \
     \( -name lnInclude -o -name Make -o -name config -o -name noLink \) -prune \
  -o \( -name '*.[CHh]' -o -name '*.[ch]xx' -o -name '*.[ch]pp' -o -name '*.type' \)  \
- -a ! -name ".#*" \
- -print | \
-    while read src
-    do
-        link=$(readlink ${src##*/})
-        if [ "$link" != "$src" ]
-        then
-            rm $link 2>/dev/null
-            ln $lnOpt $src .
-        fi
-    done
+ -exec ln $lnOpt {} . \;
 
 #------------------------------------------------------------------------------
