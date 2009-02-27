@@ -72,13 +72,6 @@ Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
 
     if (!faceZoneFound)
     {
-        WarningIn
-        (
-            "Foam::MRFZone::MRFZone(const fvMesh& , const dictionary&)"
-        )   << "cannot find MRF faceZone " << name_
-            << " ; taking faces on outside of cellZone."
-            << endl;
-
         // Determine faces in cell zone
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         // (does not construct cells)
@@ -129,9 +122,9 @@ Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
         }
 
         Info<< nl
-            << "MRFZone " << name_ << " : found "
+            << "MRFZone " << name_ << " : did not find a faceZone; using "
             << returnReduce(outsideFaces_.size(), sumOp<label>())
-            << " faces inside cellZone." << endl;
+            << " faces internal to cellZone instead." << endl;
 
 
         // Flag use of outsideFaces
