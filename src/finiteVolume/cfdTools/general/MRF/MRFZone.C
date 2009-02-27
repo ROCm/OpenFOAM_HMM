@@ -29,6 +29,10 @@ License
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "fvMatrices.H"
+#include "PackedList.H"
+#include "syncTools.H"
+
+#include "faceSet.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -39,12 +43,15 @@ Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
     dict_(is),
     cellZoneID_(mesh_.cellZones().findZoneID(name_)),
     faceZoneID_(mesh_.faceZones().findZoneID(name_)),
+    outsideFaces_(0),
     patchNames_(dict_.lookup("patches")),
     origin_(dict_.lookup("origin")),
     axis_(dict_.lookup("axis")),
     omega_(dict_.lookup("omega")),
     Omega_("Omega", omega_*axis_)
 {
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
     axis_ = axis_/mag(axis_);
     Omega_ = omega_*axis_;
 
@@ -65,18 +72,78 @@ Foam::MRFZone::MRFZone(const fvMesh& mesh, Istream& is)
 
     if (!faceZoneFound)
     {
-        FatalErrorIn
+        WarningIn
         (
             "Foam::MRFZone::MRFZone(const fvMesh& , const dictionary&)"
         )   << "cannot find MRF faceZone " << name_
-            << exit(FatalError);
+            << " ; taking faces on outside of cellZone."
+            << endl;
+
+        // Determine faces in cell zone
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // (does not construct cells)
+
+        const labelList& own = mesh_.faceOwner();
+        const labelList& nei = mesh_.faceNeighbour();
+
+        // Cells in zone
+        PackedBoolList zoneCell(mesh_.nCells());
+
+        if (cellZoneID_ != -1)
+        {
+            const labelList& cellLabels = mesh_.cellZones()[cellZoneID_];
+            forAll(cellLabels, i)
+            {
+                zoneCell[cellLabels[i]] = 1u;
+            }
+        }
+
+
+        // Faces in zone
+        PackedBoolList zoneFacesSet(mesh_.nFaces());
+
+        for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+        {
+            if
+            (
+                zoneCell.get(own[faceI]) == 1u
+             || zoneCell.get(nei[faceI]) == 1u
+            )
+            {
+                zoneFacesSet[faceI] = 1u;
+            }
+        }
+        syncTools::syncFaceList(mesh_, zoneFacesSet, orEqOp<unsigned int>());
+
+
+        // Transfer to labelList
+        label n = zoneFacesSet.count();
+        outsideFaces_.setSize(n);
+        n = 0;
+        forAll(zoneFacesSet, faceI)
+        {
+            if (zoneFacesSet.get(faceI) == 1u)
+            {
+                outsideFaces_[n++] = faceI;
+            }
+        }
+
+        Info<< nl
+            << "MRFZone " << name_ << " : found "
+            << returnReduce(outsideFaces_.size(), sumOp<label>())
+            << " faces inside cellZone." << endl;
+
+
+        // Flag use of outsideFaces
+        faceZoneID_ = -2;
     }
+
 
     patchLabels_.setSize(patchNames_.size());
 
     forAll(patchNames_, i)
     {
-        patchLabels_[i] = mesh_.boundaryMesh().findPatchID(patchNames_[i]);
+        patchLabels_[i] = patches.findPatchID(patchNames_[i]);
 
         if (patchLabels_[i] == -1)
         {
@@ -125,7 +192,13 @@ void Foam::MRFZone::relativeFlux(surfaceScalarField& phi) const
     const vector& origin = origin_.value();
     const vector& Omega = Omega_.value();
 
-    const labelList& faces = mesh_.faceZones()[faceZoneID_];
+    // Use either zone faces or outsideFaces_
+    const labelList& faces =
+    (
+        faceZoneID_ == -2
+      ? outsideFaces_
+      : mesh_.faceZones()[faceZoneID_]
+    );
 
     forAll(faces, i)
     {
