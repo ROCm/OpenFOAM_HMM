@@ -24,30 +24,33 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamEbrowse
+#     foamTags
 #
 # Description
-#     Build the Ebrowse database for all the .H and .C files
+#     Build the tags files for all the .C and .H files
 #
 #------------------------------------------------------------------------------
-sourcesFile=${TMPDIR:-/tmp}/sourcesFile.$$
 
 if [ $# -ne 0 ]; then
    echo "Usage : ${0##*/}"
    echo ""
-   echo "Build the Ebrowse dadbase for all the .H and .C files"
+   echo "Build the tags files for all the .C and .H files"
    echo ""
    exit 1
 fi
 
-# Clean up on termination and on Ctrl-C
-trap 'rm -f $sourcesFile 2>/dev/null; exit 0' EXIT TERM INT
-
 cd $WM_PROJECT_DIR
 mkdir .tags 2>/dev/null
-cd .tags
 
-find -H .. \( -name "*.[HC]" -not -name "lnInclude" -not -name "Doxygen" \) -print > $sourcesFile
-ebrowse --files=$sourcesFile --output-file=ebrowse
+find -H . \( -name "*.[HC]" -not -name "lnInclude" -not -name "Doxygen" \) | \
+    etags --declarations -l c++ -o .tags/etags -
+find -H . \( -name "*.[HC]" -not -name "lnInclude" -not -name "Doxygen" \) | \
+    etags -l c++ -o .tags/etagsDef -
+find -H . \( -name "*.H" -not -name "lnInclude" -not -name "Doxygen" \) | \
+    etags --declarations -l c++ -o .tags/etagsDec -
+
+gtags -i --gtagsconf bin/tools/gtagsrc .tags
+
+foamEbrowse
 
 #------------------------------------------------------------------------------
