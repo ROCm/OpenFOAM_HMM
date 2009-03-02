@@ -52,6 +52,8 @@ $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyTypeIO.C
 $(strings)/wordRe/wordReIO.C
 
+primitives/hashes/Hashing/Hashing.C
+
 sha1 = primitives/hashes/SHA1
 $(sha1)/SHA1.C
 $(sha1)/SHA1Digest.C

@@ -114,7 +114,7 @@ public:
     // Constructors
 
         //- Construct null
-	inline SHA1();
+        inline SHA1();
 
         //- Construct and append initial std::string
         explicit inline SHA1(const std::string&);
@@ -124,24 +124,24 @@ public:
 
     // Member Functions
 
-	//- Reset the hashed data before appending more
-	void clear();
+        //- Reset the hashed data before appending more
+        void clear();
 
-	//- Append data for processing
-	inline SHA1& append(const char* data, size_t len);
+        //- Append data for processing
+        inline SHA1& append(const char* data, size_t len);
 
-	//- Append string for processing
+        //- Append string for processing
         inline SHA1& append(const std::string&);
 
-	//- Append string for processing
-	inline SHA1& append(const char* str);
+        //- Append string for processing
+        inline SHA1& append(const char* str);
 
-	//- Finalized the calculations (normally not needed directly).
+        //- Finalized the calculations (normally not needed directly).
         //  Returns false if no bytes were passed for processing
-	bool finalize();
+        bool finalize();
 
         //- Calculate current digest from appended data.
-	SHA1Digest digest() const;
+        SHA1Digest digest() const;
 
 
     // Member Operators
