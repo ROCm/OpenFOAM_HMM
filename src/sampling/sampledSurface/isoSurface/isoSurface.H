@@ -31,9 +31,6 @@ Description
     G.M. Treece, R.W. Prager and A.H. Gee.
 
     Note:
-    - not possible on patches of type 'empty'. There are no values on
-    'empty' patch fields so even the api would have to change
-     (no volScalarField as argument). Too messy.
     - in parallel the regularisation (coarsening) always takes place
     and slightly different surfaces will be created compared to non-parallel.
     The surface will still be continuous though!
@@ -43,6 +40,7 @@ Description
     - uses geometric merge with fraction of bounding box as distance.
     - triangles can be between two cell centres so constant sampling
       does not make sense.
+    - on empty patches behaves like zero gradient.
     - does not do 2D correctly, creates non-flat iso surface.
 
 SourceFiles
@@ -135,9 +133,20 @@ class isoSurface
             const bool neiLower
         ) const;
 
+        void getNeighbour
+        (
+            const labelList& boundaryRegion,
+            const volScalarField& cVals,
+            const label cellI,
+            const label faceI,
+            scalar& nbrValue,
+            point& nbrPoint
+        ) const;
+
         //- Set faceCutType,cellCutType.
         void calcCutTypes
         (
+            const labelList& boundaryRegion,
             const volScalarField& cVals,
             const scalarField& pVals
         );
@@ -155,16 +164,6 @@ class isoSurface
             pointField& localPoints,
             DynamicList<labelledTri, 64>& localTris
         );
-
-        void getNeighbour
-        (
-            const labelList& boundaryRegion,
-            const volScalarField& cVals,
-            const label cellI,
-            const label faceI,
-            scalar& nbrValue,
-            point& nbrPoint
-        ) const;
 
         //- Determine per cc whether all near cuts can be snapped to single
         //  point.
@@ -193,37 +192,39 @@ class isoSurface
         template<class Type>
         Type generatePoint
         (
-            const DynamicList<Type>& snappedPoints,
-
             const scalar s0,
             const Type& p0,
-            const label p0Index,
+            const bool hasSnap0,
+            const Type& snapP0,
 
             const scalar s1,
             const Type& p1,
-            const label p1Index
+            const bool hasSnap1,
+            const Type& snapP1
         ) const;
 
         template<class Type>
         void generateTriPoints
         (
-            const DynamicList<Type>& snapped,
-
             const scalar s0,
             const Type& p0,
-            const label p0Index,
+            const bool hasSnap0,
+            const Type& snapP0,
 
             const scalar s1,
             const Type& p1,
-            const label p1Index,
+            const bool hasSnap1,
+            const Type& snapP1,
 
             const scalar s2,
             const Type& p2,
-            const label p2Index,
+            const bool hasSnap2,
+            const Type& snapP2,
 
             const scalar s3,
             const Type& p3,
-            const label p3Index,
+            const bool hasSnap3,
+            const Type& snapP3,
 
             DynamicList<Type>& points
         ) const;
@@ -244,7 +245,8 @@ class isoSurface
 
             const scalar neiVal,
             const Type& neiPt,
-            const label neiSnap,
+            const bool hasNeiSnap,
+            const Type& neiSnapPt,
 
             DynamicList<Type>& triPoints,
             DynamicList<label>& triMeshCells

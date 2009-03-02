@@ -39,8 +39,6 @@ defineTypeNameAndDebug(searchableSurfaces, 0);
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct with length.
@@ -187,14 +185,6 @@ Foam::searchableSurfaces::searchableSurfaces
         // their object name. Maybe have stlTriSurfaceMesh which appends .stl
         // when reading/writing?
         namedIO().rename(key);  // names_[surfI]
-        if (namedIO().local() != word::null)
-        {
-            namedIO().instance() = namedIO().time().findInstance
-            (
-                namedIO().local(),
-                namedIO().name()
-            );
-        }
 
         // Create and hook surface
         set

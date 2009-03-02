@@ -30,16 +30,16 @@
 
     <!-- Global settings -->
 
-    <!-- Extrapolate Walls check-box -->
+    <!-- Extrapolate Patches check-box -->
     <IntVectorProperty
-      name="ExtrapolateWalls"
-      command="SetExtrapolateWalls"
+      name="ExtrapolatePatches"
+      command="SetExtrapolatePatches"
       number_of_elements="1"
       default_values="0"
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
-        Extrapolate internalField to wall and empty patches
+        Extrapolate internalField to non-constraint patches
       </Documentation>
     </IntVectorProperty>
 

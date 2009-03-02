@@ -60,7 +60,7 @@ void Foam::lduMatrix::Amul
         interfaceBouCoeffs,
         interfaces,
         psi,
-        Apsi, 
+        Apsi,
         cmpt
     );
 
@@ -79,7 +79,7 @@ void Foam::lduMatrix::Amul
 
     register const label nFaces = upper().size();
     #ifdef ICC_IA64_PREFETCH
-    #pragma swp  
+    #pragma swp
     #endif
     for (register label face=0; face<nFaces; face++)
     {
@@ -227,7 +227,7 @@ void Foam::lduMatrix::sumA
     }
 
     #ifdef ICC_IA64_PREFETCH
-    #pragma swp  
+    #pragma swp
     #endif
 
     for (register label face=0; face<nFaces; face++)
@@ -316,7 +316,7 @@ void Foam::lduMatrix::residual
         mBouCoeffs,
         interfaces,
         psi,
-        rA, 
+        rA,
         cmpt
     );
 
@@ -336,7 +336,7 @@ void Foam::lduMatrix::residual
 
     register const label nFaces = upper().size();
     #ifdef ICC_IA64_PREFETCH
-    #pragma swp  
+    #pragma swp
     #endif
     for (register label face=0; face<nFaces; face++)
     {

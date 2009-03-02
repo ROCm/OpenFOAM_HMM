@@ -659,29 +659,55 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         }
     }
 
+    // Count number of zones we're actually going to display. This is truncated
+    // to a max per patch
+
+    const label MAXPATCHZONES = 20;
+
+    label displayZoneI = 0;
+
+    forAll(pbMesh, patchI)
+    {
+        displayZoneI += min(MAXPATCHZONES, nZones[patchI]);
+    }
+
+
     zoneCentre.shrink();
 
     if (debug)
     {
         Info<< "patch zone centres = " << zoneCentre << nl
+            << "displayed zone centres = " << displayZoneI << nl
             << "zones per patch = " << nZones << endl;
     }
 
     // Set the size of the patch labels to max number of zones
-    patchTextActorsPtrs_.setSize(zoneCentre.size());
+    patchTextActorsPtrs_.setSize(displayZoneI);
 
     if (debug)
     {
         Info<< "constructing patch labels" << endl;
     }
 
+    // Actor index
+    displayZoneI = 0;
+
+    // Index in zone centres
     label globalZoneI = 0;
+
     forAll(pbMesh, patchI)
     {
         const polyPatch& pp = pbMesh[patchI];
 
         // Only selected patches will have a non-zero number of zones
-        for (label i=0; i<nZones[patchI]; i++)
+        label nDisplayZones = min(MAXPATCHZONES, nZones[patchI]);
+        label increment = 1;
+        if (nZones[patchI] >= MAXPATCHZONES)
+        {
+            increment = nZones[patchI]/MAXPATCHZONES;
+        }
+
+        for (label i = 0; i < nDisplayZones; i++)
         {
             if (debug)
             {
@@ -719,14 +745,15 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
 
             // Maintain a list of text labels added so that they can be
             // removed later
-            patchTextActorsPtrs_[globalZoneI] = txt;
+            patchTextActorsPtrs_[displayZoneI] = txt;
 
-            globalZoneI++;
+            globalZoneI += increment;
+            displayZoneI++;
         }
     }
 
     // Resize the patch names list to the actual number of patch names added
-    patchTextActorsPtrs_.setSize(globalZoneI);
+    patchTextActorsPtrs_.setSize(displayZoneI);
 
     if (debug)
     {

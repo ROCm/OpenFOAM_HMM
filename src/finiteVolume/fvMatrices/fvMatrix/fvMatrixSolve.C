@@ -82,7 +82,7 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Type>::solve
     (
         pow
         (
-            psi_.mesh().directions(),
+            psi_.mesh().solutionD(),
             pTraits<typename powProduct<Vector<label>, Type::rank>::type>::zero
         )
     );

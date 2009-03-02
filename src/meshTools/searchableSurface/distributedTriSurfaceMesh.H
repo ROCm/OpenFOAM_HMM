@@ -91,14 +91,13 @@ public:
 
 private:
 
+    // Private member data
+
         //- Merging distance
         scalar mergeDist_;
 
         //- Decomposition used when independently decomposing surface.
         autoPtr<decompositionMethod> decomposer_;
-
-
-    // Private member data
 
         //- Bounding box settings
         IOdictionary dict_;
@@ -317,10 +316,11 @@ public:
             const dictionary& dict
         );
 
-        //- Construct read
+        //- Construct read. Does findInstance to find io.local().
         distributedTriSurfaceMesh(const IOobject& io);
 
-        //- Construct from dictionary (used by searchableSurface)
+        //- Construct from dictionary (used by searchableSurface).
+        //  Does read. Does findInstance to find io.local().
         distributedTriSurfaceMesh
         (
             const IOobject& io,
