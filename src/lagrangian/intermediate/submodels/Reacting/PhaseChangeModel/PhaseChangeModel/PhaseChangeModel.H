@@ -94,6 +94,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        PhaseChangeModel(CloudType& owner);
+
         //- Construct from dictionary
         PhaseChangeModel
         (

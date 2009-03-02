@@ -26,7 +26,7 @@ Class
     Foam::NoHeatTransfer
 
 Description
-    Dummy heat transfer model for 'no heat transfer'
+    Dummy heat transfer model for 'none'
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,7 +40,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                          Class NoHeatTransfer Declaration
+                       Class NoHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -51,17 +51,13 @@ class NoHeatTransfer
 public:
 
     //- Runtime type information
-    TypeName("NoHeatTransfer");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoHeatTransfer
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+        NoHeatTransfer(const dictionary&, CloudType& owner);
 
 
     //- Destructor

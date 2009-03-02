@@ -30,6 +30,61 @@ License
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class CloudType>
+void Foam::InjectionModel<CloudType>::readProps()
+{
+    IOobject propsDictHeader
+    (
+        "injectionProperties",
+        owner_.db().time().timeName(),
+        "uniform/Lagrangian"/owner_.name(),
+        owner_.db(),
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (propsDictHeader.headerOk())
+    {
+        const IOdictionary propsDict(propsDictHeader);
+
+        propsDict.readIfPresent("massInjected", massInjected_);
+        propsDict.readIfPresent("nInjections", nInjections_);
+        propsDict.readIfPresent("parcelsAddedTotal", parcelsAddedTotal_);
+        propsDict.readIfPresent("timeStep0", timeStep0_);
+    }
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::writeProps()
+{
+    if (owner_.db().time().outputTime())
+    {
+        IOdictionary propsDict
+        (
+            IOobject
+            (
+                "injectionProperties",
+                owner_.db().time().timeName(),
+                "uniform/Lagrangian"/owner_.name(),
+                owner_.db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        propsDict.add("massInjected", massInjected_);
+        propsDict.add("nInjections", nInjections_);
+        propsDict.add("parcelsAddedTotal", parcelsAddedTotal_);
+        propsDict.add("timeStep0", timeStep0_);
+
+        propsDict.regIOobject::write();
+    }
+}
+
+
+template<class CloudType>
 void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
 (
     const scalar time0,
@@ -114,7 +169,7 @@ void Foam::InjectionModel<CloudType>::findCellAtPosition
     {
         FatalErrorIn
         (
-            "Foam::InjectionModel<CloudType>::findCellAtPosition"
+            "Foam::InjectionModel<CloudType>::findCellAtPosition\n"
             "(\n"
             "    label&,\n"
             "    vector&\n"
@@ -156,7 +211,7 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
             FatalErrorIn
             (
                 "Foam::scalar "
-                "Foam::InjectionModel<CloudType>::setNumberOfParticles"
+                "Foam::InjectionModel<CloudType>::setNumberOfParticles\n"
                 "(\n"
                 "    const label,\n"
                 "    const scalar,\n"
@@ -186,18 +241,41 @@ void Foam::InjectionModel<CloudType>::postInjectCheck()
     // Increment total number of parcels added
     parcelsAddedTotal_ += parcelsAdded_;
 
-    // Reset parcel counters
-    parcelsAdded_ = 0;
-
     // Update time for start of next injection
     time0_ = owner_.db().time().value();
 
     // Increment number of injections
     nInjections_++;
+
+    // Reset added parcels counter
+    parcelsAdded_ = 0;
+
+    writeProps();
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
+:
+    dict_(dictionary::null),
+    owner_(owner),
+    coeffDict_(dictionary::null),
+    SOI_(0.0),
+    volumeTotal_(0.0),
+    massTotal_(0.0),
+    massInjected_(0.0),
+    nInjections_(0),
+    parcelsAdded_(0),
+    parcelsAddedTotal_(0),
+    parcelBasis_(pbNumber),
+    time0_(0.0),
+    timeStep0_(0.0)
+{
+    readProps();
+}
+
 
 template<class CloudType>
 Foam::InjectionModel<CloudType>::InjectionModel
@@ -206,7 +284,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
     CloudType& owner,
     const word& type
 )
-:   dict_(dict),
+:
+    dict_(dict),
     owner_(owner),
     coeffDict_(dict.subDict(type + "Coeffs")),
     SOI_(readScalar(coeffDict_.lookup("SOI"))),
@@ -216,16 +295,16 @@ Foam::InjectionModel<CloudType>::InjectionModel
     nInjections_(0),
     parcelsAdded_(0),
     parcelsAddedTotal_(0),
-    parcelBasisType_(coeffDict_.lookup("parcelBasisType")),
     parcelBasis_(pbNumber),
     time0_(owner.db().time().value()),
     timeStep0_(0.0)
 {
-    if (parcelBasisType_ == "mass")
+    word parcelBasisType = coeffDict_.lookup("parcelBasisType");
+    if (parcelBasisType == "mass")
     {
         parcelBasis_ = pbMass;
     }
-    else if (parcelBasisType_ == "number")
+    else if (parcelBasisType == "number")
     {
         parcelBasis_ = pbNumber;
     }
@@ -233,7 +312,7 @@ Foam::InjectionModel<CloudType>::InjectionModel
     {
         FatalErrorIn
         (
-            "Foam::InjectionModel<CloudType>::InjectionModel"
+            "Foam::InjectionModel<CloudType>::InjectionModel\n"
             "(\n"
             "    const dictionary&,\n"
             "    CloudType&,\n"
@@ -242,6 +321,8 @@ Foam::InjectionModel<CloudType>::InjectionModel
         )<< "parcelBasisType must be either 'number' or 'mass'" << nl
          << exit(FatalError);
     }
+
+    readProps();
 }
 
 

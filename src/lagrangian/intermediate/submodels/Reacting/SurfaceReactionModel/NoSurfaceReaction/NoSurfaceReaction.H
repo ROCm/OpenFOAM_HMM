@@ -26,7 +26,7 @@ Class
     Foam::NoSurfaceReaction
 
 Description
-    Dummy Devolatisation model for 'no devolatisation'
+    Dummy surface reaction model for 'none'
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,7 +51,7 @@ class NoSurfaceReaction
 public:
 
     //- Runtime type information
-    TypeName("NoSurfaceReaction");
+    TypeName("none");
 
 
     // Constructors

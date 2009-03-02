@@ -86,6 +86,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        HeatTransferModel(CloudType& owner);
+
         //- Construct from dictionary
         HeatTransferModel
         (

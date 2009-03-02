@@ -56,11 +56,11 @@ Foam::scalar Foam::NoInjection<CloudType>::volumeToInject
 template<class CloudType>
 Foam::NoInjection<CloudType>::NoInjection
 (
-    const dictionary& dict,
+    const dictionary&,
     CloudType& owner
 )
 :
-    InjectionModel<CloudType>(dict, owner, typeName)
+    InjectionModel<CloudType>(owner)
 {}
 
 

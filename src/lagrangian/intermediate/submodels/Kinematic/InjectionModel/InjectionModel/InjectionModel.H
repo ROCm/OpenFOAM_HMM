@@ -80,6 +80,15 @@ private:
         const dictionary coeffDict_;
 
 
+    // Private member functions
+
+        //- Read injector properties from previous run (if applicable)
+        void readProps();
+
+        //- Write injector properties
+        void writeProps();
+
+
 protected:
 
     // Protected data
@@ -114,13 +123,8 @@ protected:
 
         // Injection properties per Lagrangian time step
 
-            // Parcel basis
-
-                //- Parcel basis name
-                const word parcelBasisType_;
-
-                //- Parcel basis enumeration
-                parcelBasis parcelBasis_;
+            //- Parcel basis enumeration
+            parcelBasis parcelBasis_;
 
             //- Continuous phase time at start of injection time step [s]
             scalar time0_;
@@ -147,7 +151,7 @@ protected:
 
 
         //- Determine properties for next time step/injection interval
-        void prepareForNextTimeStep
+        virtual void prepareForNextTimeStep
         (
             const scalar time0,
             const scalar time1,
@@ -161,7 +165,7 @@ protected:
         virtual void findCellAtPosition(label& cellI, vector& position);
 
         //- Set number of particles to inject given parcel properties
-        scalar setNumberOfParticles
+        virtual scalar setNumberOfParticles
         (
             const label parcels,
             const scalar volume,
@@ -171,7 +175,7 @@ protected:
         );
 
         //- Post injection checks
-        void postInjectCheck();
+        virtual void postInjectCheck();
 
 
 public:
@@ -194,6 +198,9 @@ public:
 
 
     // Constructors
+
+        //- Construct null from owner
+        InjectionModel(CloudType& owner);
 
         //- Construct from dictionary
         InjectionModel

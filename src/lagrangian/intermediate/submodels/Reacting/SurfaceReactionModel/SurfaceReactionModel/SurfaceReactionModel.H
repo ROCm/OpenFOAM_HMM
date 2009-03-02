@@ -91,6 +91,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        SurfaceReactionModel(CloudType& owner);
+
         //- Construct from dictionary
         SurfaceReactionModel
         (

@@ -26,7 +26,7 @@ Class
     Foam::NoDevolatilisation
 
 Description
-    Dummy devolatilisation model for 'no devolatilisation'
+    Dummy devolatilisation model for 'none'
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,17 +52,13 @@ class NoDevolatilisation
 public:
 
     //- Runtime type information
-    TypeName("NoDevolatilisation");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoDevolatilisation
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+        NoDevolatilisation(const dictionary&, CloudType& owner);
 
 
     //- Destructor

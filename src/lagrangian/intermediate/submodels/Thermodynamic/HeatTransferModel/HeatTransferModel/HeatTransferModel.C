@@ -29,6 +29,15 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
+:
+    dict_(dictionary::null),
+    owner_(owner),
+    coeffDict_(dictionary::null)
+{}
+
+
+template<class CloudType>
 Foam::HeatTransferModel<CloudType>::HeatTransferModel
 (
     const dictionary& dict,

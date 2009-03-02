@@ -31,6 +31,17 @@ License
 template<class CloudType>
 Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
 (
+    CloudType& owner
+)
+:   dict_(dictionary::null),
+    owner_(owner),
+    coeffDict_(dictionary::null)
+{}
+
+
+template<class CloudType>
+Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
+(
     const dictionary& dict,
     CloudType& owner,
     const word& type

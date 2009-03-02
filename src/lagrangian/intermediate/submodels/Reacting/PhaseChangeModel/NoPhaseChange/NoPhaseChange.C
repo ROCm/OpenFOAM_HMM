@@ -31,11 +31,11 @@ License
 template <class CloudType>
 Foam::NoPhaseChange<CloudType>::NoPhaseChange
 (
-    const dictionary& dict,
-    CloudType& cloud
+    const dictionary&,
+    CloudType& owner
 )
 :
-    PhaseChangeModel<CloudType>(dict, cloud, typeName)
+    PhaseChangeModel<CloudType>(owner)
 {}
 
 

@@ -26,7 +26,7 @@ Class
     Foam::NoInjection
 
 Description
-    Place holder for 'no injection' option
+    Place holder for 'none' option
 
 SourceFiles
     NoInjection.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class NoInjection Declaration
+                       Class NoInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -74,7 +74,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("NoInjection");
+    TypeName("none");
 
 
     // Constructors
@@ -82,8 +82,8 @@ public:
         //- Construct from components
         NoInjection
         (
-            const dictionary& dict,
-            CloudType& owner
+            const dictionary&,
+            CloudType&
         );
 
 

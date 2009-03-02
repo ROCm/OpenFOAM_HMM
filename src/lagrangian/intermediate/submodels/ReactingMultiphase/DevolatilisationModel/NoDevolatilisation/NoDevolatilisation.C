@@ -31,11 +31,11 @@ License
 template <class CloudType>
 Foam::NoDevolatilisation<CloudType>::NoDevolatilisation
 (
-    const dictionary& dict,
-    CloudType& cloud
+    const dictionary&,
+    CloudType& owner
 )
 :
-    DevolatilisationModel<CloudType>(dict, cloud, typeName)
+    DevolatilisationModel<CloudType>(owner)
 {}
 
 

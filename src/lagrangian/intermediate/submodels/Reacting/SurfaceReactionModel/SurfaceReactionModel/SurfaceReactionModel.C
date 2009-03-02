@@ -31,11 +31,24 @@ License
 template<class CloudType>
 Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
 (
+    CloudType& owner
+)
+:
+    dict_(dictionary::null),
+    owner_(owner),
+    coeffDict_(dictionary::null)
+{}
+
+
+template<class CloudType>
+Foam::SurfaceReactionModel<CloudType>::SurfaceReactionModel
+(
     const dictionary& dict,
     CloudType& owner,
     const word& type
 )
-:   dict_(dict),
+:
+    dict_(dict),
     owner_(owner),
     coeffDict_(dict.subDict(type + "Coeffs"))
 {}

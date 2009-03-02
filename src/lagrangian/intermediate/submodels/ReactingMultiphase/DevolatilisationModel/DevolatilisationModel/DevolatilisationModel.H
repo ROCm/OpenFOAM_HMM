@@ -88,6 +88,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        DevolatilisationModel(CloudType& owner);
+
         //- Construct from dictionary
         DevolatilisationModel
         (

@@ -26,7 +26,7 @@ Class
     Foam::NoPhaseChange
 
 Description
-    Dummy phase change model for 'no phase change'
+    Dummy phase change model for 'none'
 
 \*---------------------------------------------------------------------------*/
 
@@ -51,17 +51,13 @@ class NoPhaseChange
 public:
 
     //- Runtime type information
-    TypeName("NoPhaseChange");
+    TypeName("none");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoPhaseChange
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+        NoPhaseChange(const dictionary&, CloudType&);
 
 
     //- Destructor
