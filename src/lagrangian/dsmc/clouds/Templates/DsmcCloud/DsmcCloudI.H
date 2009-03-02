@@ -165,6 +165,49 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::massInSystem() const
 
 
 template<class ParcelType>
+inline Foam::vector Foam::DsmcCloud<ParcelType>::linearMomentumOfSystem() const
+{
+    vector linearMomentum(vector::zero);
+
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        const typename ParcelType::constantProperties& cP = constProps
+        (
+            p.typeId()
+        );
+
+        linearMomentum += cP.mass()*p.U();
+    }
+
+    return nParticle_*linearMomentum;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::DsmcCloud<ParcelType>::linearKineticEnergyOfSystem() const
+{
+    scalar linearKineticEnergy = 0.0;
+
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        const typename ParcelType::constantProperties& cP = constProps
+        (
+            p.typeId()
+        );
+
+        linearKineticEnergy += 0.5*cP.mass()*(p.U() & p.U());
+    }
+
+    return nParticle_*linearKineticEnergy;
+}
+
+
+template<class ParcelType>
 inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
 {
     return rndGen_;

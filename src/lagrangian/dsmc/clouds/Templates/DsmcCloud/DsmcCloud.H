@@ -282,6 +282,12 @@ public:
             //- Total mass in system
             inline scalar massInSystem() const;
 
+            //- Total linear momentum of the system
+            inline vector linearMomentumOfSystem() const;
+
+            //- Total linear kinetic energy in the system
+            inline scalar linearKineticEnergyOfSystem() const;
+
             //- Print cloud information
             void info() const;
 

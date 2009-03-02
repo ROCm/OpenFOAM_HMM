@@ -477,11 +477,21 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::info() const
 {
+    vector linearMomentum = linearMomentumOfSystem();
+
+    reduce(linearMomentum, sumOp<vector>());
+
     Info<< "Cloud name: " << this->name() << nl
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl
+        << "    Linear momentum                 = "
+        << linearMomentum << nl
+        << "    Linear momentum magnitude       = "
+        << mag(linearMomentum) << nl
+        << "    Linear kinetic energy           = "
+        << returnReduce(linearKineticEnergyOfSystem(), sumOp<scalar>()) << nl
         << endl;
 }
 
