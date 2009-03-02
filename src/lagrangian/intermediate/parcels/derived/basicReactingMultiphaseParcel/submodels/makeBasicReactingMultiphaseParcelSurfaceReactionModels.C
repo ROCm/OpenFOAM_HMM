@@ -24,28 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicReactingMultiphaseParcel.H"
+#include "ReactingMultiphaseCloud.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+#include "NoSurfaceReaction.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeSurfaceReactionModel
+    (
+        ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
+    );
 
-
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    // Add instances of surface reaction model to the table
+    makeSurfaceReactionModelType
+    (
+        NoSurfaceReaction,
+        ReactingMultiphaseCloud,
+        basicReactingMultiphaseParcel
+    );
+};
 
 
 // ************************************************************************* //

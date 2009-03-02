@@ -24,28 +24,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicReactingParcel.H"
+#include "ThermoCloud.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+#include "NoHeatTransfer.H"
+#include "RanzMarshall.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeHeatTransferModel(ThermoCloud<basicReactingParcel>);
 
-
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    // Add instances of heat transfer model to the table
+    makeHeatTransferModelType
+    (
+        NoHeatTransfer,
+        ThermoCloud,
+        basicReactingParcel
+    );
+    makeHeatTransferModelType
+    (
+        RanzMarshall,
+        ThermoCloud,
+        basicReactingParcel
+    );
+};
 
 
 // ************************************************************************* //

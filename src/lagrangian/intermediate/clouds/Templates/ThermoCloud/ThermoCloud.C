@@ -215,4 +215,11 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 }
 
 
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::info() const
+{
+    KinematicCloud<ParcelType>::info();
+}
+
+
 // ************************************************************************* //

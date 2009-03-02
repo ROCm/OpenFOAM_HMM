@@ -24,28 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicReactingMultiphaseParcel.H"
+#include "ReactingMultiphaseCloud.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+#include "NoDevolatilisation.H"
+#include "ConstantRateDevolatilisation.H"
+#include "SingleKineticRateDevolatilisation.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeDevolatilisationModel
+    (
+        ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
+    );
 
-
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    // Add instances of devolatilisation model to the table
+    makeDevolatilisationModelType
+    (
+        NoDevolatilisation,
+        ReactingMultiphaseCloud,
+        basicReactingMultiphaseParcel
+    );
+    makeDevolatilisationModelType
+    (
+        ConstantRateDevolatilisation,
+        ReactingMultiphaseCloud,
+        basicReactingMultiphaseParcel
+    );
+    makeDevolatilisationModelType
+    (
+        SingleKineticRateDevolatilisation,
+        ReactingMultiphaseCloud,
+        basicReactingMultiphaseParcel
+    );
+};
 
 
 // ************************************************************************* //

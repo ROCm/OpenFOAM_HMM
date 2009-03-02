@@ -24,28 +24,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicKinematicParcel.H"
+#include "KinematicCloud.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+#include "NoInjection.H"
+#include "ManualInjection.H"
+#include "ConeInjection.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeInjectionModel(KinematicCloud<basicKinematicParcel>);
 
-
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    // Add instances of injection model to the table
+    makeInjectionModelType
+    (
+        NoInjection,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeInjectionModelType
+    (
+        ManualInjection,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeInjectionModelType
+    (
+        ConeInjection,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+};
 
 
 // ************************************************************************* //

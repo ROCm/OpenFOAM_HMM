@@ -30,7 +30,6 @@ Description
     - Adds to thermodynamic cloud
       - Variable composition (single phase)
       - Phase change
-      - Surface reactions
 
 SourceFiles
     ReactingCloudI.H
@@ -61,9 +60,6 @@ class CompositionModel;
 
 template<class CloudType>
 class PhaseChangeModel;
-
-template<class CloudType>
-class SurfaceReactionModel;
 
 /*---------------------------------------------------------------------------*\
                       Class ReactingCloud Declaration
@@ -97,18 +93,17 @@ class ReactingCloud
             autoPtr<PhaseChangeModel<ReactingCloud<ParcelType> > >
                 phaseChangeModel_;
 
-            //- Reacting surface reaction model
-            autoPtr
-            <
-                SurfaceReactionModel<ReactingCloud<ParcelType> >
-            >
-            surfaceReactionModel_;
-
 
         // Sources
 
             //- Mass transfer fields - one per carrier phase specie
             PtrList<DimensionedField<scalar, volMesh> > rhoTrans_;
+
+
+        // Check
+
+            //- Total mass transferred to continuous phase via phase change
+            scalar dMassPhaseChange_;
 
 
     // Private Member Functions
@@ -168,10 +163,6 @@ public:
                 inline const PhaseChangeModel<ReactingCloud<ParcelType> >&
                     phaseChange() const;
 
-                //- Return reference to reacting surface reaction model
-                inline const SurfaceReactionModel<ReactingCloud<ParcelType> >&
-                    surfaceReaction() const;
-
 
             // Sources
 
@@ -194,6 +185,15 @@ public:
                     //  Fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
                         Srho1() const;
+
+
+        // Check
+
+            //- Print cloud information
+            void info() const;
+
+            //- Add to cumulative phase change mass transfer
+            void addToMassPhaseChange(const scalar dMass);
 
 
         // Cloud evolution functions

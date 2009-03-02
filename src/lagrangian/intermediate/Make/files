@@ -22,44 +22,43 @@ clouds/derived/basicReactingMultiphaseCloud/basicReactingMultiphaseCloud.C
 /* kinematic parcel sub-models */
 KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
 $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
-$(KINEMATICPARCEL)/makeBasicKinematicParcelDispersionModels.C
-$(KINEMATICPARCEL)/makeBasicKinematicParcelDragModels.C
-$(KINEMATICPARCEL)/makeBasicKinematicParcelInjectionModels.C
-$(KINEMATICPARCEL)/makeBasicKinematicParcelWallInteractionModels.C
+$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDispersionModels.C
+$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDragModels.C
+$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelInjectionModels.C
+$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelWallInteractionModels.C
 
 /* thermo parcel sub-models */
 THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel
 $(THERMOPARCEL)/defineBasicThermoParcel.C
-$(THERMOPARCEL)/makeBasicThermoParcelDispersionModels.C
-$(THERMOPARCEL)/makeBasicThermoParcelDragModels.C
-$(THERMOPARCEL)/makeBasicThermoParcelHeatTransferModels.C
-$(THERMOPARCEL)/makeBasicThermoParcelInjectionModels.C
-$(THERMOPARCEL)/makeBasicThermoParcelWallInteractionModels.C
+$(THERMOPARCEL)/submodels/makeBasicThermoParcelDispersionModels.C
+$(THERMOPARCEL)/submodels/makeBasicThermoParcelDragModels.C
+$(THERMOPARCEL)/submodels/makeBasicThermoParcelHeatTransferModels.C
+$(THERMOPARCEL)/submodels/makeBasicThermoParcelInjectionModels.C
+$(THERMOPARCEL)/submodels/makeBasicThermoParcelWallInteractionModels.C
 
 /* reacting parcel sub-models */
 REACTINGPARCEL=$(DERIVEDPARCELS)/basicReactingParcel
 $(REACTINGPARCEL)/defineBasicReactingParcel.C
-$(REACTINGPARCEL)/makeBasicReactingParcelCompositionModels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelDispersionModels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelDragModels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelHeatTransferModels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelInjectionModels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelPhaseChangeModels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelSurfaceReactionModels.C
-$(REACTINGPARCEL)/makeBasicReactingParcelWallInteractionModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelCompositionModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelDispersionModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelDragModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelHeatTransferModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelInjectionModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelPhaseChangeModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelWallInteractionModels.C
 
 /* reacting multiphase parcel sub-models */
 REACTINGMPPARCEL=$(DERIVEDPARCELS)/basicReactingMultiphaseParcel
 $(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelCompositionModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelDevolatilisationModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelDispersionModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelDragModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelHeatTransferModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelInjectionModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelPhaseChangeModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSurfaceReactionModels.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelWallInteractionModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelCompositionModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDevolatilisationModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDispersionModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDragModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelHeatTransferModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelInjectionModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelPhaseChangeModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelSurfaceReactionModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelWallInteractionModels.C
 
 /* bolt-on models */
 submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C

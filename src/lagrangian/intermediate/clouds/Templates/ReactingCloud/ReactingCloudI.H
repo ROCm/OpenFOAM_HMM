@@ -67,14 +67,6 @@ Foam::ReactingCloud<ParcelType>::phaseChange() const
 
 
 template<class ParcelType>
-inline const Foam::SurfaceReactionModel<Foam::ReactingCloud<ParcelType> >&
-Foam::ReactingCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
-
-
-template<class ParcelType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
 Foam::ReactingCloud<ParcelType>::rhoTrans(const label i)
 {

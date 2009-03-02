@@ -28,7 +28,6 @@ License
 
 #include "CompositionModel.H"
 #include "PhaseChangeModel.H"
-#include "SurfaceReactionModel.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -97,15 +96,8 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             *this
         )
     ),
-    surfaceReactionModel_
-    (
-        SurfaceReactionModel<ReactingCloud<ParcelType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    ),
-    rhoTrans_(thermo.composition().Y().size())
+    rhoTrans_(thermo.composition().Y().size()),
+    dMassPhaseChange_(0.0)
 {
     // Set storage for mass source fields and initialise to zero
     forAll(rhoTrans_, i)
@@ -221,6 +213,23 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::info() const
+{
+    ThermoCloud<ParcelType>::info();
+
+    Info<< "    Mass transfer phase change      = "
+        << returnReduce(dMassPhaseChange_, sumOp<scalar>()) << nl;
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::addToMassPhaseChange(const scalar dMass)
+{
+    dMassPhaseChange_ += dMass;
 }
 
 

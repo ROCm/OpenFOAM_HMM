@@ -24,28 +24,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicKinematicParcel.H"
+#include "KinematicCloud.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeWallInteractionModel(KinematicCloud<basicKinematicParcel>);
 
-
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    // Add instances of wall interaction model to the table
+    makeWallInteractionModelType
+    (
+        Rebound,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeWallInteractionModelType
+    (
+        StandardWallInteraction,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+};
 
 
 // ************************************************************************* //

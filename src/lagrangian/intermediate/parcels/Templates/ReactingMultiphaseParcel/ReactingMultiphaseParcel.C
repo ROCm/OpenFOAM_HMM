@@ -402,6 +402,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
         scalar volatileMass = YGas_[i]*dMassTot;
         dMassMT[id] += volatileMass;
     }
+
+    td.cloud().addToMassDevolatilisation(dMassTot);
 }
 
 
@@ -446,6 +448,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
         dMassSR,
         dhRet
     );
+
+    // TODO: td.cloud().addToMassDevolatilisation(sum(dMassSR));
 }
 
 

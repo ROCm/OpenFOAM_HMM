@@ -24,28 +24,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicReactingMultiphaseParcel.H"
+#include "KinematicCloud.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+#include "NoDispersion.H"
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeDispersionModel(KinematicCloud<basicReactingMultiphaseParcel>);
 
+    defineNamedTemplateTypeNameAndDebug
+    (
+        DispersionRASModel<KinematicCloud<basicReactingMultiphaseParcel> >,
+        0
+    );
 
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    // Add instances of dispersion model to the table
+    makeDispersionModelType
+    (
+        NoDispersion,
+        KinematicCloud,
+        basicReactingMultiphaseParcel
+    );
+    makeDispersionModelType
+    (
+        GradientDispersionRAS,
+        KinematicCloud,
+        basicReactingMultiphaseParcel
+    );
+    makeDispersionModelType
+    (
+        StochasticDispersionRAS,
+        KinematicCloud,
+        basicReactingMultiphaseParcel
+    );
+};
 
 
 // ************************************************************************* //

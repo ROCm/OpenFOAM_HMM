@@ -24,28 +24,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicThermoParcel.H"
+#include "ThermoCloud.H"
+#include "NoInjection.H"
+#include "ManualInjection.H"
+#include "ConeInjection.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeInjectionModel(KinematicCloud<basicThermoParcel>);
 
+    // Add instances of injection model to the table
+    makeInjectionModelType(NoInjection, KinematicCloud, basicThermoParcel);
 
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    makeInjectionModelType(ManualInjection, KinematicCloud, basicThermoParcel);
+
+    makeInjectionModelType(ConeInjection, KinematicCloud, basicThermoParcel);
+};
 
 
 // ************************************************************************* //

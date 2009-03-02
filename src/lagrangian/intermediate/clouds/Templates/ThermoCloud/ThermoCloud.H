@@ -197,6 +197,12 @@ public:
                     inline tmp<volScalarField> sigmap() const;
 
 
+        // Check
+
+            //- Print cloud information
+            void info() const;
+
+
         // Cloud evolution functions
 
             //- Add new parcel

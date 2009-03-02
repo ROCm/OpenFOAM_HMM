@@ -61,6 +61,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     const scalar np0 = this->nParticle_;
     const scalar T0 = this->T_;
 
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     // Initialise transfer terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,11 +75,6 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // Mass transfer from particle to carrier phase
     // - components exist in particle already
     scalarList dMassMT(td.cloud().gases().size(), 0.0);
-
-    // Mass transfer due to surface reactions from particle to carrier phase
-    // - components do not necessarily exist in particle already
-    scalarList dMassSR(td.cloud().gases().size(), 0.0);
-
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate velocity - update U
@@ -100,23 +96,8 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     scalarField X = td.cliud().composition().X(0, YMixture_);
     calcPhaseChange(td, dt, T, X, dMassMT);
 
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate surface reactions
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Initialise enthalpy retention to zero
-    scalar dhRet = 0.0;
-
-    calcSurfaceReactions(td, dt, celli, T0, T1, dMassMT, dMassSR, dhRet);
-
     // New total mass
-    const scalar mass1 = mass0 - sum(dMassMT) - sum(dMassSR);
-
-    // Add retained enthalpy from surface reaction to particle and remove
-    // from gas
-    T1 += dhRet/(0.5*(mass0 + mass1)*cp0);
-    dhTrans -= dhRet;
+    const scalar mass1 = mass0 - sum(dMassMT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,7 +107,7 @@ void Foam::ReactingParcel<ParcelType>::calcCoupled
     // Transfer mass lost from particle to carrier mass source
     forAll(dMassMT, i)
     {
-        td.cloud().rhoTrans(i)[celli] += np0*(dMassMT[i] + dMassSR[i]);
+        td.cloud().rhoTrans(i)[celli] += np0*dMassMT[i];
     }
 
     // Update momentum transfer
@@ -194,6 +175,7 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     const scalar mass0 = this->mass();
     const scalar cp0 = this->cp_;
 
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     // Initialise transfer terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -207,10 +189,6 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // Mass transfer from particle to carrier phase
     // - components exist in particle already
     scalarList dMassMT(td.cloud().gases().size(), 0.0);
-
-    // Mass transfer due to surface reactions from particle to carrier phase
-    // - components do not necessarily exist in particle already
-    scalarList dMassSR(td.cloud().gases().size(), 0.0);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -231,7 +209,8 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~
     scalarField X = td.cloud().composition().X(0, YMixture_);
-    calcPhaseChange(td, dt, T, X, dMassMT);
+    scalar dMassPC = calcPhaseChange(td, dt, T, X, dMassMT);
+    T1 -= td.constProps().Lvap()*dMassPC/(0.5*mass0*cp0);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -241,10 +220,8 @@ void Foam::ReactingParcel<ParcelType>::calcUncoupled
     // Initialise enthalpy retention to zero
     scalar dhRet = 0.0;
 
-    calcSurfaceReactions(td, dt, celli, T0, T1, dMassMT, dMassSR, dhRet);
-
     // New total mass
-    const scalar mass1 = mass0 - sum(dMassMT) - sum(dMassSR);
+    const scalar mass1 = mass0 - sum(dMassMT);
 
     // New specific heat capacity
     const scalar cp1 = cp0; // TODO: new cp1
@@ -312,6 +289,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         dt
     );
 
+    td.cloud().addToMassPhaseChange(dMassTot);
     // TODO: Re-calculate mass fractions
 
 

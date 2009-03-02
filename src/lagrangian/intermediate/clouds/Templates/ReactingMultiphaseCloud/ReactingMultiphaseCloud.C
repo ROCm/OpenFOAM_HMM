@@ -26,7 +26,6 @@ License
 
 #include "ReactingMultiphaseCloud.H"
 
-#include "CompositionModel.H"
 #include "DevolatilisationModel.H"
 #include "SurfaceReactionModel.H"
 
@@ -93,7 +92,16 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
             this->particleProperties(),
             *this
         )
-    )
+    ),
+    surfaceReactionModel_
+    (
+        SurfaceReactionModel<ReactingMultiphaseCloud<ParcelType> >::New
+        (
+            this->particleProperties(),
+            *this
+        )
+    ),
+    dMassDevolatilisation_(0.0)
 {}
 
 
@@ -182,6 +190,37 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+}
+
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::info() const
+{
+    ReactingCloud<ParcelType>::info();
+    Info<< "    Mass transfer devolatilisation  = "
+        << returnReduce(dMassDevolatilisation_, sumOp<scalar>()) << nl;
+    Info<< "    Mass transfer surface reaction  = "
+        << returnReduce(dMassSurfaceReaction_, sumOp<scalar>()) << nl;
+}
+
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::addToMassDevolatilisation
+(
+    const scalar dMass
+)
+{
+    dMassDevolatilisation_ += dMass;
+}
+
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::addToMassSurfaceReaction
+(
+    const scalar dMass
+)
+{
+    dMassSurfaceReaction_ += dMass;
 }
 
 

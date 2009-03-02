@@ -253,8 +253,7 @@ void Foam::KinematicCloud<ParcelType>::info() const
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
-        << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << endl;
+        << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
 }
 
 

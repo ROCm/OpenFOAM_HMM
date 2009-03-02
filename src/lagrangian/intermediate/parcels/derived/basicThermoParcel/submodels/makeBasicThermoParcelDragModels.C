@@ -24,28 +24,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "basicThermoParcel.H"
+#include "KinematicCloud.H"
+#include "NoDrag.H"
+#include "SphereDrag.H"
 
-template<class ParcelType>
-inline const Foam::DevolatilisationModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::devolatilisation() const
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    return devolatilisationModel_;
-}
+    makeDragModel(KinematicCloud<basicThermoParcel>);
 
-
-template<class ParcelType>
-inline const Foam::SurfaceReactionModel
-<
-    Foam::ReactingMultiphaseCloud<ParcelType>
->&
-Foam::ReactingMultiphaseCloud<ParcelType>::surfaceReaction() const
-{
-    return surfaceReactionModel_;
-}
+    // Add instances of drag model to the table
+    makeDragModelType(NoDrag, KinematicCloud, basicThermoParcel);
+    makeDragModelType(SphereDrag, KinematicCloud, basicThermoParcel);
+};
 
 
 // ************************************************************************* //

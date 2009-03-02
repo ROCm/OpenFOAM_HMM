@@ -28,8 +28,9 @@ Class
 Description
     Templated base class for multiphase reacting cloud
     - Adds to reacting cloud
-      - Devolatilisatsion
       - multiphase composition
+      - devolatilisatsion
+      - surface reactions
 
 SourceFiles
     ReactingMultiphaseCloudI.H
@@ -52,6 +53,9 @@ namespace Foam
 
 template<class CloudType>
 class DevolatilisationModel;
+
+template<class CloudType>
+class SurfaceReactionModel;
 
 /*---------------------------------------------------------------------------*\
                    Class ReactingMultiphaseCloud Declaration
@@ -77,6 +81,23 @@ class ReactingMultiphaseCloud
                 DevolatilisationModel<ReactingMultiphaseCloud<ParcelType> >
             >
             devolatilisationModel_;
+
+            //- Surface reaction model
+            autoPtr
+            <
+                SurfaceReactionModel<ReactingMultiphaseCloud<ParcelType> >
+            >
+            surfaceReactionModel_;
+
+
+        // Check
+
+            //- Total mass transferred to continuous phase via devolatilisation
+            scalar dMassDevolatilisation_;
+
+            //- Total mass transferred to continuous phase via surface
+            //  reactions
+            scalar dMassSurfaceReaction_;
 
 
     // Private Member Functions
@@ -124,6 +145,25 @@ public:
                     ReactingMultiphaseCloud<ParcelType>
                 >&
                 devolatilisation() const;
+
+                //- Return reference to reacting surface reaction model
+                inline const SurfaceReactionModel
+                <
+                    ReactingMultiphaseCloud<ParcelType>
+                >&
+                surfaceReaction() const;
+
+
+        // Check
+
+            //- Print cloud information
+            void info() const;
+
+            //- Add to cumulative volatilisation mass transfer
+            void addToMassDevolatilisation(const scalar dMass);
+
+            //- Add to cumulative surface reaction transfer
+            void addToMassSurfaceReaction(const scalar dMass);
 
 
         // Cloud evolution functions
