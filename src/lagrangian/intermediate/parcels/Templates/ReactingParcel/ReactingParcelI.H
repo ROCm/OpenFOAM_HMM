@@ -33,7 +33,10 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     ThermoParcel<ParcelType>::constantProperties(dict),
-    constantVolume_(dict.lookup("constantVolume"))
+    constantVolume_(dict.lookup("constantVolume")),
+    Tbp_(dimensionedScalar(dict.lookup("Tbp")).value()),
+    Tvap_(dimensionedScalar(dict.lookup("Tvap")).value()),
+    Lvap_(dimensionedScalar(dict.lookup("Lvap")).value())
 {}
 
 
@@ -109,6 +112,30 @@ inline Foam::Switch
 Foam::ReactingParcel<ParcelType>::constantProperties::constantVolume() const
 {
     return constantVolume_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ReactingParcel<ParcelType>::constantProperties::Tbp() const
+{
+    return Tbp_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ReactingParcel<ParcelType>::constantProperties::Tvap() const
+{
+    return Tvap_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ReactingParcel<ParcelType>::constantProperties::Lvap() const
+{
+    return Lvap_;
 }
 
 

@@ -34,8 +34,6 @@ constantProperties
 )
 :
     ReactingParcel<ParcelType>::constantProperties(dict),
-    Tvap_(dimensionedScalar(dict.lookup("Tvap")).value()),
-    Tbp_(dimensionedScalar(dict.lookup("Tbp")).value()),
     Ldevol_(dimensionedScalar(dict.lookup("Ldevol")).value())
 {}
 
@@ -107,22 +105,6 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 
 
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
-
-template<class ParcelType>
-inline Foam::scalar
-Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Tvap() const
-{
-    return Tvap_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalar
-Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Tbp() const
-{
-    return Tbp_;
-}
-
 
 template<class ParcelType>
 inline Foam::scalar
