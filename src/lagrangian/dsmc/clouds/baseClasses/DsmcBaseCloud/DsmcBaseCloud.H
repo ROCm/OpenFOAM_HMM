@@ -29,6 +29,7 @@ Description
     Virtual abstract base class for templated DsmcCloud
 
 SourceFiles
+    DsmcBaseCloud.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,7 +49,6 @@ namespace Foam
 
 class DsmcBaseCloud
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -68,15 +68,8 @@ public:
         //- Null constructor
         DsmcBaseCloud();
 
-
-    // Destructors
-
-        virtual ~DsmcBaseCloud();
-
-
-    // Member Functions
-
-        // Access
+    //- Destructor
+    virtual ~DsmcBaseCloud();
 };
 
 

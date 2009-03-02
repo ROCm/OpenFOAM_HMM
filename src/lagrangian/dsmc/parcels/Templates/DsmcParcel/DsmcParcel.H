@@ -72,13 +72,11 @@ class DsmcParcel
 :
     public Particle<ParcelType>
 {
-
 public:
 
     //- Class to hold DSMC particle constant properties
     class constantProperties
     {
-
         // Private data
 
             //- Particle mass [kg] (constant)
@@ -93,14 +91,18 @@ public:
             //- Viscosity index
             scalar omega_;
 
+
     public:
 
-        //- Null constructor, allows List of constantProperties to be created
-        //- before the contents is initialised
-        inline constantProperties();
+        // Constrcutors
 
-        //- Constructor from dictionary
-        inline constantProperties(const dictionary& dict);
+            //- Null constructor, allows List of constantProperties to be
+            //  created before the contents is initialised
+            inline constantProperties();
+
+            //- Constructor from dictionary
+            inline constantProperties(const dictionary& dict);
+
 
         // Member functions
 
@@ -127,18 +129,18 @@ public:
     :
         public Particle<ParcelType>::trackData
     {
-
         // Private data
 
             //- Reference to the cloud containing this particle
             DsmcCloud<ParcelType>& cloud_;
 
-   public:
+
+    public:
 
         // Constructors
 
-           //- Construct from components
-           inline trackData
+            //- Construct from components
+            inline trackData
             (
                 DsmcCloud<ParcelType>& cloud
             );
@@ -162,6 +164,7 @@ protected:
 
             //- Parcel type id
             label typeId_;
+
 
 public:
 
@@ -312,9 +315,9 @@ public:
 
 #define defineParcelTypeNameAndDebug(Type, DebugSwitch)                       \
     template<>                                                                \
-    const Foam::word DsmcParcel<Type>::typeName(#Type);                  \
+    const Foam::word DsmcParcel<Type>::typeName(#Type);                       \
     template<>                                                                \
-    int DsmcParcel<Type>::debug                                          \
+    int DsmcParcel<Type>::debug                                               \
     (                                                                         \
         Foam::debug::debugSwitch(#Type, DebugSwitch)                          \
     );

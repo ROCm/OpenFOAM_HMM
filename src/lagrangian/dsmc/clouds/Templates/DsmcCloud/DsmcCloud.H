@@ -60,7 +60,7 @@ template<class CloudType>
 class WallInteractionModel;
 
 /*---------------------------------------------------------------------------*\
-                       Class DsmcCloud Declaration
+                         Class DsmcCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParcelType>
@@ -69,9 +69,6 @@ class DsmcCloud
     public Cloud<ParcelType>,
     public DsmcBaseCloud
 {
-
-private:
-
     // Private data
 
         //- Cloud type - used to set the name of the parcel properties
@@ -84,10 +81,10 @@ private:
         //- Dictionary of particle properties
         IOdictionary particleProperties_;
 
-       //- A list of unique instances of molecule types in the simulation.  The
-       // position of an entry in the list maps to the label identifying the
-       // typeId, i.e. where typeIdList_ = (N2 O2 CO2)
-       // N2 has typeId label = 0, O2 = 1, CO2 = 2.
+        //- A list of unique instances of molecule types in the simulation.
+        // The position of an entry in the list maps to the label identifying
+        // the typeId, i.e. where typeIdList_ = (N2 O2 CO2)
+        // N2 has typeId label = 0, O2 = 1, CO2 = 2.
         List<word> typeIdList_;
 
         //- Number of real atoms/molecules represented by a parcel
@@ -171,6 +168,7 @@ public:
             const IOdictionary& dsmcInitialiseDict
         );
 
+
     //- Destructor
     virtual ~DsmcCloud();
 
@@ -220,7 +218,8 @@ public:
                 //- Return refernce to the random object
                 inline Random& rndGen();
 
-                // Kinetic theory helper functions
+
+            // Kinetic theory helper functions
 
                 //- Generate a random velocity sampled from the Maxwellian speed
                 // distribution
@@ -256,6 +255,7 @@ public:
             //- Clear the Cloud
             inline void clear();
 
+
             // Sub-models
 
                 //- Return reference to binary elastic collision model
@@ -273,6 +273,7 @@ public:
                 //- Return non-const reference to wall interaction model
                 inline WallInteractionModel<DsmcCloud<ParcelType> >&
                     wallInteraction();
+
 
         // Check
 

@@ -36,10 +36,7 @@ Foam::BinaryCollisionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word BinaryCollisionModelType
-    (
-        dict.lookup("BinaryCollisionModel")
-    );
+    word BinaryCollisionModelType(dict.lookup("BinaryCollisionModel"));
 
     Info<< "Selecting BinaryCollisionModel "
         << BinaryCollisionModelType
@@ -58,7 +55,7 @@ Foam::BinaryCollisionModel<CloudType>::New
             << "Unknown BinaryCollisionModelType type "
             << BinaryCollisionModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid BinaryCollisionModel types are :" << nl
+            << "    Valid BinaryCollisionModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

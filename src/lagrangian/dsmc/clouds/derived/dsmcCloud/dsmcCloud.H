@@ -45,14 +45,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class dsmcCloud Declaration
+                          Class dsmcCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 class dsmcCloud
 :
     public DsmcCloud<dsmcParcel>
 {
-
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -86,8 +85,7 @@ public:
         );
 
     //- Destructor
-
-        ~dsmcCloud();
+    ~dsmcCloud();
 
 
     // Member functions

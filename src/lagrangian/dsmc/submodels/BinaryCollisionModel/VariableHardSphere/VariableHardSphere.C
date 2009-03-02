@@ -60,15 +60,19 @@ Foam::scalar Foam::VariableHardSphere<CloudType>::sigmaTcR
 {
     const CloudType& cloud(this->owner());
 
-    scalar dPQ = 0.5*
-    (
-        cloud.constProps(typeIdP).d() + cloud.constProps(typeIdQ).d()
-    );
+    scalar dPQ =
+        0.5
+       *(
+            cloud.constProps(typeIdP).d()
+          + cloud.constProps(typeIdQ).d()
+        );
 
-    scalar omegaPQ = 0.5*
-    (
-        cloud.constProps(typeIdP).omega() + cloud.constProps(typeIdQ).omega()
-    );
+    scalar omegaPQ =
+        0.5
+       *(
+            cloud.constProps(typeIdP).omega()
+          + cloud.constProps(typeIdQ).omega()
+        );
 
     scalar cR = mag(UP - UQ);
 
@@ -76,12 +80,13 @@ Foam::scalar Foam::VariableHardSphere<CloudType>::sigmaTcR
 
     scalar mQ = cloud.constProps(typeIdQ).mass();
 
-    scalar mR = mP*mQ/(mP+ mQ);
+    scalar mR = mP*mQ/(mP + mQ);
 
-    // calculating cross section = pi * dPQ^2, where dPQ is from Bird, eq. 4.79
-    scalar sigmaTPQ = mathematicalConstant::pi*dPQ*dPQ
-    *pow(2.0*CloudType::kb*CloudType::Tref/(mR*cR*cR),omegaPQ - 0.5)
-    /exp(Foam::lgamma(2.5 - omegaPQ));
+    // calculating cross section = pi*dPQ^2, where dPQ is from Bird, eq. 4.79
+    scalar sigmaTPQ =
+        mathematicalConstant::pi*dPQ*dPQ
+       *pow(2.0*CloudType::kb*CloudType::Tref/(mR*cR*cR), omegaPQ - 0.5)
+       /exp(Foam::lgamma(2.5 - omegaPQ));
 
     return sigmaTPQ*cR;
 }
@@ -114,12 +119,14 @@ void Foam::VariableHardSphere<CloudType>::collide
 
     scalar phi = 2.0*mathematicalConstant::pi*rndGen.scalar01();
 
-    vector postCollisionRelU = cR*vector
-    (
-        cosTheta,
-        sinTheta*cos(phi),
-        sinTheta*sin(phi)
-    );
+    vector postCollisionRelU =
+        cR
+       *vector
+        (
+            cosTheta,
+            sinTheta*cos(phi),
+            sinTheta*sin(phi)
+        );
 
     UP = Ucm + postCollisionRelU*mQ/(mP + mQ);
 

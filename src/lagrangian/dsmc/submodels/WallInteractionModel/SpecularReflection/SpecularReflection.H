@@ -48,7 +48,6 @@ class SpecularReflection
 :
     public WallInteractionModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -66,8 +65,7 @@ public:
 
 
     // Destructor
-
-        ~SpecularReflection();
+    virtual ~SpecularReflection();
 
 
     // Member Functions

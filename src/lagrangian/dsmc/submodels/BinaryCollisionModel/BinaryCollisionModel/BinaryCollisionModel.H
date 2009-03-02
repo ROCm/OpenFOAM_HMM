@@ -53,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class BinaryCollisionModel
 {
-
     // Private data
 
         //- The cloud dictionary
@@ -97,17 +96,15 @@ public:
 
 
     // Destructor
+    virtual ~BinaryCollisionModel();
 
-        virtual ~BinaryCollisionModel();
 
-
-    // Selector
-
-        static autoPtr<BinaryCollisionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<BinaryCollisionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access
