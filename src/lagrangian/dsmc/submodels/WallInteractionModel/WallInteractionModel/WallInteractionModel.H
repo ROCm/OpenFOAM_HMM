@@ -25,7 +25,6 @@ License
 Class
     Foam::WallInteractionModel
 
-
 Description
     Templated wall interaction model class
 
@@ -54,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class WallInteractionModel
 {
-
     // Private data
 
         //- The cloud dictionary
@@ -98,17 +96,15 @@ public:
 
 
     // Destructor
+    virtual ~WallInteractionModel();
 
-        virtual ~WallInteractionModel();
 
-
-    // Selector
-
-        static autoPtr<WallInteractionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<WallInteractionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access

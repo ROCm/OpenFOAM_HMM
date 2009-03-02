@@ -47,11 +47,6 @@ class VariableHardSphere
 :
     public BinaryCollisionModel<CloudType>
 {
-
-    // Private data
-
-    // const scalar something_;
-
 public:
 
     //- Runtime type information
@@ -69,8 +64,7 @@ public:
 
 
     // Destructor
-
-        ~VariableHardSphere();
+    virtual ~VariableHardSphere();
 
 
     // Member Functions

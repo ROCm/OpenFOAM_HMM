@@ -86,8 +86,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~dsmcParcel();
+    virtual ~dsmcParcel();
 };
 
 

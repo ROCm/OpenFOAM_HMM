@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "MaxwellianThermal.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -108,8 +106,13 @@ void Foam::MaxwellianThermal<CloudType>::correct
 
     scalar C = sqrt(CloudType::kb*T_/mass);
 
-    U = C*(rndGen.GaussNormal()*tw1 + rndGen.GaussNormal()*tw2
-    - sqrt(-2.0*log(max(1 - rndGen.scalar01(),VSMALL)))*nw);
+    U =
+        C
+       *(
+            rndGen.GaussNormal()*tw1
+          + rndGen.GaussNormal()*tw2
+          - sqrt(-2.0*log(max(1 - rndGen.scalar01(),VSMALL)))*nw
+        );
 }
 
 

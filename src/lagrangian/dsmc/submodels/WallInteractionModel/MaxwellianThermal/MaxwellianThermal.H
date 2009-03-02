@@ -49,7 +49,6 @@ class MaxwellianThermal
 :
     public WallInteractionModel<CloudType>
 {
-
     // Private data
 
         //- Temperature
@@ -73,8 +72,7 @@ public:
 
 
     // Destructor
-
-        ~MaxwellianThermal();
+    virtual ~MaxwellianThermal();
 
 
     // Member Functions
