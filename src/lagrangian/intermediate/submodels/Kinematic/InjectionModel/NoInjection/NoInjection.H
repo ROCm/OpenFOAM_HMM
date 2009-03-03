@@ -107,7 +107,6 @@ public:
             (
                 const label iParcel,
                 const scalar time,
-                const polyMeshInfo& meshInfo,
                 vector& position,
                 label& cellOwner
             );
@@ -115,17 +114,20 @@ public:
             //- Return the velocity of the parcel to introduce at a time
             vector velocity
             (
-                const label,
-                const scalar time,
-                const polyMeshInfo& meshInfo
+                const label iParcel,
+                const scalar time
             );
 
             //- Return the diameter of the parcel to introduce at a time
             scalar d0
             (
-                const label,
-                const scalar
+                const label iParcel,
+                const scalar time
             ) const;
+
+            //- Return flag to identify whether or not injection in cellI is
+            //  permitted
+            bool validInjection(const label cellI);
 };
 
 

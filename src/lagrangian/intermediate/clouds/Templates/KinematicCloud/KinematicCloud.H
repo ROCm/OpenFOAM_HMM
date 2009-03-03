@@ -320,6 +320,10 @@ public:
                 //  Note: for particles belonging to this cloud only
                 inline const tmp<volScalarField> alpha() const;
 
+                //- Return the particle effective density field
+                //  Note: for particles belonging to this cloud only
+                inline const tmp<volScalarField> rhoEff() const;
+
 
         // Cloud evolution functions
 

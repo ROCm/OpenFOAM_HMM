@@ -88,6 +88,12 @@ private:
         //- Write injector properties
         void writeProps();
 
+        //- Geometry correction for 2-D cases
+        void geometryCorrection(vector& pos) const;
+
+        //- Velocity correction for 2-D cases
+        void velocityCorrection(vector& U) const;
+
 
 protected:
 
@@ -149,6 +155,9 @@ protected:
             const scalar time1
         ) const = 0;
 
+        //- Additional flag to identify whether or not injection in cellI is
+        //  permitted
+        virtual bool validInjection(const label iParcel) = 0;
 
         //- Determine properties for next time step/injection interval
         virtual void prepareForNextTimeStep
@@ -287,7 +296,6 @@ public:
             (
                 const label iParcel,
                 const scalar time,
-                const polyMeshInfo& meshInfo,
                 vector& position,
                 label& cellOwner
             ) = 0;
@@ -296,8 +304,7 @@ public:
             virtual vector velocity
             (
                 const label iParcel,
-                const scalar time,
-                const polyMeshInfo& meshInfo
+                const scalar time
             ) = 0;
 
             //- Return the diameter of the parcel to introduce at a time

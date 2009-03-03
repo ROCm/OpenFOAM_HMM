@@ -139,34 +139,12 @@ void Foam::ManualInjection<CloudType>::setPositionAndCell
 (
     const label iParcel,
     const scalar time,
-    const polyMeshInfo& meshInfo,
     vector& position,
     label& cellOwner
 )
 {
     position = positions_[iParcel];
     this->findCellAtPosition(cellOwner, position);
-
-    if (meshInfo.caseIs2d())
-    {
-        if (meshInfo.caseIs2dWedge())
-        {
-            position.component(meshInfo.emptyComponent()) = 0.0;
-        }
-        else if (meshInfo.caseIs2dSlab())
-        {
-            position.component(meshInfo.emptyComponent()) =
-                meshInfo.centrePoint().component(meshInfo.emptyComponent());
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "void Foam::ManualInjection<CloudType>::setPositionAndCell"
-            )   << "Could not determine 2-D case geometry" << nl
-                << abort(FatalError);
-        }
-    }
 }
 
 
@@ -174,18 +152,10 @@ template<class CloudType>
 Foam::vector Foam::ManualInjection<CloudType>::velocity
 (
     const label,
-    const scalar,
-    const polyMeshInfo& meshInfo
+    const scalar
 )
 {
-    vector vel = U0_;
-    if (meshInfo.caseIs2dSlab())
-    {
-        vel.component(meshInfo.emptyComponent()) =
-            meshInfo.centrePoint().component(meshInfo.emptyComponent());
-    }
-
-    return vel;
+    return U0_;
 }
 
 
@@ -197,6 +167,13 @@ Foam::scalar Foam::ManualInjection<CloudType>::d0
 ) const
 {
     return diameters_[iParcel];
+}
+
+
+template<class CloudType>
+bool Foam::ManualInjection<CloudType>::validInjection(const label)
+{
+    return true;
 }
 
 

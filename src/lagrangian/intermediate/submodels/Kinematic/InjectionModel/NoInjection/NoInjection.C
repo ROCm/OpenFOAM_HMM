@@ -92,7 +92,6 @@ void Foam::NoInjection<CloudType>::setPositionAndCell
 (
     const label,
     const scalar,
-    const polyMeshInfo&,
     vector&,
     label&
 )
@@ -103,8 +102,7 @@ template<class CloudType>
 Foam::vector Foam::NoInjection<CloudType>::velocity
 (
     const label,
-    const scalar,
-    const polyMeshInfo&
+    const scalar
 )
 {
     return vector::zero;
@@ -119,6 +117,13 @@ Foam::scalar Foam::NoInjection<CloudType>::d0
 ) const
 {
     return 0.0;
+}
+
+
+template<class CloudType>
+bool Foam::NoInjection<CloudType>::validInjection(const label)
+{
+    return false;
 }
 
 

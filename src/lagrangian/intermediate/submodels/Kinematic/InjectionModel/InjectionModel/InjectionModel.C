@@ -229,6 +229,49 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 
 
 template<class CloudType>
+void Foam::InjectionModel<CloudType>::geometryCorrection(vector& pos) const
+{
+    if (owner_.meshInfo().caseIs2d())
+    {
+        if (owner_.meshInfo().caseIs2dWedge())
+        {
+            pos.component(owner_.meshInfo().emptyComponent()) = 0.0;
+        }
+        else if (owner_.meshInfo().caseIs2dSlab())
+        {
+            pos.component(owner_.meshInfo().emptyComponent()) =
+                owner_.meshInfo().centrePoint().component
+                (
+                    owner_.meshInfo().emptyComponent()
+                );
+        }
+        else
+        {
+            FatalErrorIn
+            (
+                "void Foam::InjectionModel<CloudType>::geometryCorrection"
+                "(vector& pos)"
+            )   << "Could not determine 2-D case geometry" << nl
+                << abort(FatalError);
+        }
+    }
+}
+
+
+template<class CloudType>
+void Foam::InjectionModel<CloudType>::velocityCorrection(vector& U) const
+{
+    if (owner_.meshInfo().caseIs2dSlab())
+    {
+        U.component(owner_.meshInfo().emptyComponent()) =
+            owner_.meshInfo().centrePoint().component
+            (
+                owner_.meshInfo().emptyComponent()
+            );
+    }
+}
+
+template<class CloudType>
 void Foam::InjectionModel<CloudType>::postInjectCheck()
 {
     if (parcelsAdded_ > 0)
@@ -380,33 +423,40 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
         // Determine the injection position and owner cell
         label cellI = -1;
         vector pos = vector::zero;
-        setPositionAndCell(iParcel, timeInj, owner_.meshInfo(), pos, cellI);
+        setPositionAndCell(iParcel, timeInj, pos, cellI);
 
         if (cellI >= 0)
         {
-            // Diameter of parcels
-            scalar d = d0(iParcel, timeInj);
+            if (validInjection(iParcel))
+            {
+                // Diameter of parcels
+                scalar d = d0(iParcel, timeInj);
 
-            // Number of particles per parcel
-            scalar nP = setNumberOfParticles
-            (
-                newParcels,
-                newVolume,
-                volFraction,
-                d,
-                rho
-            );
+                // Number of particles per parcel
+                scalar nP = setNumberOfParticles
+                (
+                    newParcels,
+                    newVolume,
+                    volFraction,
+                    d,
+                    rho
+                );
 
-            // Velocity of parcels
-            vector U = velocity(iParcel, timeInj, owner_.meshInfo());
+                // Velocity of parcels
+                vector U = velocity(iParcel, timeInj);
 
-            // Lagrangian timestep
-            scalar dt = time - timeInj;
+                // Lagrangian timestep
+                scalar dt = time - timeInj;
 
-            // Add the new parcel
-            td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);
-            massInjected_ += nP*rho*mathematicalConstant::pi*pow3(d)/6.0;
-            parcelsAdded_++;
+                // Apply corrections for 2-D cases
+                geometryCorrection(pos);
+                velocityCorrection(U);
+
+                // Add the new parcel
+                td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);
+                massInjected_ += nP*rho*mathematicalConstant::pi*pow3(d)/6.0;
+                parcelsAdded_++;
+            }
         }
         else
         {

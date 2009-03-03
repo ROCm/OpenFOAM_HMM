@@ -33,11 +33,7 @@ Description
       - Parcel positions in file @c positionsFile
       - Initial parcel velocity
     - Parcel diameters obtained by PDF model
-    - All parcels introduced at the start of the calculation
-
-Note
-    Not suitable for 2-D slab/wedge simulations unless the @c positionsFile
-    describes 2-D data.
+    - All parcels introduced at SOI
 
 SourceFiles
     ManualInjection.C
@@ -143,7 +139,6 @@ public:
             (
                 const label iParcel,
                 const scalar time,
-                const polyMeshInfo& meshInfo,
                 vector& position,
                 label& cellOwner
             );
@@ -151,17 +146,20 @@ public:
             //- Return the velocity of the parcel to introduce at a time
             vector velocity
             (
-                const label,
-                const scalar time,
-                const polyMeshInfo& meshInfo
+                const label iParcel,
+                const scalar time
             );
 
             //- Return the diameter of the parcel to introduce at a time
             scalar d0
             (
-                const label,
+                const label iParcel,
                 const scalar
             ) const;
+
+            //- Return flag to identify whether or not injection in cellI is
+            //  permitted
+            bool validInjection(const label iParcel);
 };
 
 
