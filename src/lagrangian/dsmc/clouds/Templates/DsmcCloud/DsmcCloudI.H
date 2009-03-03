@@ -57,7 +57,7 @@ Foam::DsmcCloud<ParcelType>::typeIdList() const
 
 
 template<class ParcelType>
-inline Foam::label Foam::DsmcCloud<ParcelType>::nParticle() const
+inline Foam::scalar Foam::DsmcCloud<ParcelType>::nParticle() const
 {
     return nParticle_;
 }
@@ -163,6 +163,22 @@ inline Foam::WallInteractionModel<Foam::DsmcCloud<ParcelType> >&
 Foam::DsmcCloud<ParcelType>::wallInteraction()
 {
     return wallInteractionModel_();
+}
+
+
+template<class ParcelType>
+inline const Foam::InflowBoundaryModel<Foam::DsmcCloud<ParcelType> >&
+Foam::DsmcCloud<ParcelType>::inflowBoundary() const
+{
+    return inflowBoundaryModel_;
+}
+
+
+template<class ParcelType>
+inline Foam::InflowBoundaryModel<Foam::DsmcCloud<ParcelType> >&
+Foam::DsmcCloud<ParcelType>::inflowBoundary()
+{
+    return inflowBoundaryModel_();
 }
 
 

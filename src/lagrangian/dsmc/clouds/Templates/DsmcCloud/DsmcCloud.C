@@ -27,6 +27,7 @@ License
 #include "DsmcCloud.H"
 #include "BinaryCollisionModel.H"
 #include "WallInteractionModel.H"
+#include "InflowBoundaryModel.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -234,8 +235,8 @@ void Foam::DsmcCloud<ParcelType>::collisions()
             scalar sigmaTcRMax = sigmaTcRMax_[celli];
 
             scalar selectedPairs = collisionSelectionRemainder_[celli]
-            + 0.5*nC*(nC-1)*nParticle_*sigmaTcRMax*deltaT
-            /mesh_.cellVolumes()[celli];
+              + 0.5*nC*(nC-1)*nParticle_*sigmaTcRMax*deltaT
+               /mesh_.cellVolumes()[celli];
 
             label nCandidates(selectedPairs);
 
@@ -403,6 +404,14 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             particleProperties_,
             *this
         )
+    ),
+    inflowBoundaryModel_
+    (
+        InflowBoundaryModel<DsmcCloud<ParcelType> >::New
+        (
+            particleProperties_,
+            *this
+        )
     )
 {
     buildConstProps();
@@ -490,7 +499,8 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
         )
     ),
     binaryCollisionModel_(),
-    wallInteractionModel_()
+    wallInteractionModel_(),
+    inflowBoundaryModel_()
 {
     clear();
 
@@ -526,12 +536,13 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 {
     typename ParcelType::trackData td(*this);
 
-    //this->injection().inject(td);
-
     if (debug)
     {
        this->dumpParticlePositions();
     }
+
+    // Insert new particles from the inflow boundary
+    this->inflowBoundary().inflow();
 
     // Move the particles ballistically with their current velocities
     Cloud<ParcelType>::move(td);

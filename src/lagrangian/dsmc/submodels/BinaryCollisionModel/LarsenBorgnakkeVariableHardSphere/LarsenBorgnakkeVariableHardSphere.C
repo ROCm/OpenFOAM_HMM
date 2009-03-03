@@ -109,7 +109,8 @@ Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::LarsenBorgnakkeVariableHardS
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::~LarsenBorgnakkeVariableHardSphere()
+Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::
+~LarsenBorgnakkeVariableHardSphere()
 {}
 
 

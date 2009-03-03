@@ -23,43 +23,41 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::MaxwellianThermal
+    Foam::NoInflow
 
 Description
-    Wall interaction setting microscopic velocity to a random one drawn from a
-    Maxwellian distribution corresponding to a specified temperature
+    Not inserting any particles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MaxwellianThermal_H
-#define MaxwellianThermal_H
+#ifndef NoInflow_H
+#define NoInflow_H
 
-#include "WallInteractionModel.H"
+#include "InflowBoundaryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class MaxwellianThermal Declaration
+                      Class NoInflow Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class MaxwellianThermal
+class NoInflow
 :
-    public WallInteractionModel<CloudType>
+    public InflowBoundaryModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("MaxwellianThermal");
+    TypeName("NoInflow");
 
 
     // Constructors
 
         //- Construct from dictionary
-        MaxwellianThermal
+        NoInflow
         (
             const dictionary& dict,
             CloudType& cloud
@@ -67,19 +65,13 @@ public:
 
 
     // Destructor
-    virtual ~MaxwellianThermal();
+    virtual ~NoInflow();
 
 
     // Member Functions
 
-        //- Apply wall correction
-        virtual void correct
-        (
-            const wallPolyPatch& wpp,
-            const label faceId,
-            vector& U,
-            scalar mass
-        );
+        //- Introduce particles (none in this case)
+        virtual void inflow();
 };
 
 
@@ -90,7 +82,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "MaxwellianThermal.C"
+#   include "NoInflow.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

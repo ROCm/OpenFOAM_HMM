@@ -24,50 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#include "InflowBoundaryModel.H"
 
-#include "SpecularReflection.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template <class CloudType>
-Foam::SpecularReflection<CloudType>::SpecularReflection
+template<class CloudType>
+Foam::autoPtr<Foam::InflowBoundaryModel<CloudType> >
+Foam::InflowBoundaryModel<CloudType>::New
 (
     const dictionary& dict,
-    CloudType& cloud
-)
-:
-    WallInteractionModel<CloudType>(dict, cloud, typeName)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template <class CloudType>
-Foam::SpecularReflection<CloudType>::~SpecularReflection()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template <class CloudType>
-void Foam::SpecularReflection<CloudType>::correct
-(
-    const wallPolyPatch& wpp,
-    const label faceId,
-    vector& U,
-    scalar mass
+    CloudType& owner
 )
 {
-    vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
-    nw /= mag(nw);
+    word InflowBoundaryModelType
+    (
+        dict.lookup("InflowBoundaryModel")
+    );
 
-    scalar magUn = U & nw;
+    Info<< "Selecting InflowBoundaryModel " << InflowBoundaryModelType << endl;
 
-    if (magUn > 0.0)
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(InflowBoundaryModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        U -= 2.0*magUn*nw;
+        FatalErrorIn
+        (
+            "InflowBoundaryModel<CloudType>::New"
+            "(const dictionary&, CloudType&)"
+        )   << "Unknown InflowBoundaryModelType type "
+            << InflowBoundaryModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid InflowBoundaryModel types are :" << nl
+            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
+
+    return autoPtr<InflowBoundaryModel<CloudType> >(cstrIter()(dict, owner));
 }
 
 

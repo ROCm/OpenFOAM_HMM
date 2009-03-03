@@ -59,6 +59,9 @@ class BinaryCollisionModel;
 template<class CloudType>
 class WallInteractionModel;
 
+template<class CloudType>
+class InflowBoundaryModel;
+
 /*---------------------------------------------------------------------------*\
                          Class DsmcCloud Declaration
 \*---------------------------------------------------------------------------*/
@@ -126,6 +129,10 @@ class DsmcCloud
             //- Wall interaction model
             autoPtr<WallInteractionModel<DsmcCloud<ParcelType> > >
                 wallInteractionModel_;
+
+            //- Inflow boundary model
+            autoPtr<InflowBoundaryModel<DsmcCloud<ParcelType> > >
+                inflowBoundaryModel_;
 
 
     // Private Member Functions
@@ -205,7 +212,7 @@ public:
 
                 //- Return the number of real particles represented by one
                 //  parcel
-                inline label nParticle() const;
+                inline scalar nParticle() const;
 
                 //- Return the cell occupancy addressing
                 inline const List<DynamicList<ParcelType*> >&
@@ -291,6 +298,14 @@ public:
                 //- Return non-const reference to wall interaction model
                 inline WallInteractionModel<DsmcCloud<ParcelType> >&
                     wallInteraction();
+
+                //- Return reference to wall interaction model
+                inline const InflowBoundaryModel<DsmcCloud<ParcelType> >&
+                    inflowBoundary() const;
+
+                //- Return non-const reference to wall interaction model
+                inline InflowBoundaryModel<DsmcCloud<ParcelType> >&
+                    inflowBoundary();
 
 
         // Check

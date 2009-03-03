@@ -23,43 +23,66 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::MaxwellianThermal
+    Foam::FreeStream
 
 Description
-    Wall interaction setting microscopic velocity to a random one drawn from a
-    Maxwellian distribution corresponding to a specified temperature
+    Inserting new particles across the faces of a specified patch for a free
+    stream.  Uniform values of temperature, velocity and number densities
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef MaxwellianThermal_H
-#define MaxwellianThermal_H
+#ifndef FreeStream_H
+#define FreeStream_H
 
-#include "WallInteractionModel.H"
+#include "InflowBoundaryModel.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class MaxwellianThermal Declaration
+                        Class FreeStream Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class MaxwellianThermal
+class FreeStream
 :
-    public WallInteractionModel<CloudType>
+    public InflowBoundaryModel<CloudType>
 {
+
+    // Private data
+
+        //- Index of patch to introduce particles across
+        label patchIndex_;
+
+        //- Temperature of the free stream
+        scalar temperature_;
+
+        //- Velocity of the free stream
+        vector velocity_;
+
+        //- The molecule types to be introduced
+        List<label> moleculeTypeIds_;
+
+        //- The number density of the species in the inflow
+        Field<scalar> numberDensities_;
+
+        //- A List of Fields, one Field for every species to be introduced, each
+        // field entry corresponding to a face on the patch to be injected
+        // across.
+        List<Field<scalar> > particleFluxAccumulators_;
 
 public:
 
     //- Runtime type information
-    TypeName("MaxwellianThermal");
+    TypeName("FreeStream");
 
 
     // Constructors
 
         //- Construct from dictionary
-        MaxwellianThermal
+        FreeStream
         (
             const dictionary& dict,
             CloudType& cloud
@@ -67,19 +90,13 @@ public:
 
 
     // Destructor
-    virtual ~MaxwellianThermal();
+    virtual ~FreeStream();
 
 
     // Member Functions
 
-        //- Apply wall correction
-        virtual void correct
-        (
-            const wallPolyPatch& wpp,
-            const label faceId,
-            vector& U,
-            scalar mass
-        );
+        //- Introduce particles
+        virtual void inflow();
 };
 
 
@@ -90,7 +107,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "MaxwellianThermal.C"
+#   include "FreeStream.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

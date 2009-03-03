@@ -70,9 +70,6 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
-        bool active() const;
-
         //- Apply wall correction
         virtual void correct
         (

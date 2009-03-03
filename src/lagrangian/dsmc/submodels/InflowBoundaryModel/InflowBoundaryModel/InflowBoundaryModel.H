@@ -23,19 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::WallInteractionModel
+    Foam::InflowBoundaryModel
+
 
 Description
-    Templated wall interaction model class
+    Templated inflow boundary model class
 
 SourceFiles
-    WallInteractionModel.C
-    NewWallInteractionModel.C
+    InflowBoundaryModel.C
+    NewInflowBoundaryModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WallInteractionModel_H
-#define WallInteractionModel_H
+#ifndef InflowBoundaryModel_H
+#define InflowBoundaryModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -47,18 +48,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class WallInteractionModel Declaration
+                     Class InflowBoundaryModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WallInteractionModel
+class InflowBoundaryModel
 {
     // Private data
 
         //- The cloud dictionary
         const dictionary& dict_;
 
-        // reference to the owner cloud class
+        // Reference to the owner cloud class
         CloudType& owner_;
 
         //- The coefficients dictionary
@@ -68,13 +69,13 @@ class WallInteractionModel
 public:
 
     //- Runtime type information
-    TypeName("WallInteractionModel");
+    TypeName("InflowBoundaryModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        WallInteractionModel,
+        InflowBoundaryModel,
         dictionary,
         (
             const dictionary& dict,
@@ -86,8 +87,8 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        WallInteractionModel
+        //- Construct from dictionary
+        InflowBoundaryModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -95,12 +96,12 @@ public:
         );
 
 
-    // Destructor
-    virtual ~WallInteractionModel();
+    //- Destructor
+    virtual ~InflowBoundaryModel();
 
 
     //- Selector
-    static autoPtr<WallInteractionModel<CloudType> > New
+    static autoPtr<InflowBoundaryModel<CloudType> > New
     (
         const dictionary& dict,
         CloudType& owner
@@ -109,29 +110,21 @@ public:
 
     // Access
 
-        //- Return the owner cloud object
-        const CloudType& owner() const;
+        //- Return const access the owner cloud object
+        inline const CloudType& owner() const;
 
-        //- Return non-const access to the owner cloud object
-        CloudType& owner();
+        //- Return non-const access the owner cloud object for manipulation
+        inline CloudType& owner();
 
-        //- Return the dictionary
-        const dictionary& dict() const;
+        //- Return the owner cloud dictionary
+        inline const dictionary& dict() const;
 
         //- Return the coefficients dictionary
-        const dictionary& coeffDict() const;
+        inline const dictionary& coeffDict() const;
 
+    //- Introduce particles
+    virtual void inflow() = 0;
 
-    // Member Functions
-
-        //- Apply wall correction
-        virtual void correct
-        (
-            const wallPolyPatch& wpp,
-            const label faceId,
-            vector& U,
-            scalar mass
-        ) = 0;
 };
 
 
@@ -141,22 +134,22 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeWallInteractionModel(CloudType)                                   \
+#define makeInflowBoundaryModel(CloudType)                                    \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(WallInteractionModel<CloudType>, 0);  \
+    defineNamedTemplateTypeNameAndDebug(InflowBoundaryModel<CloudType>, 0);   \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        WallInteractionModel<CloudType>,                                      \
+        InflowBoundaryModel<CloudType>,                                       \
         dictionary                                                            \
     );
 
 
-#define makeWallInteractionModelType(SS, CloudType, ParcelType)               \
+#define makeInflowBoundaryModelType(SS, CloudType, ParcelType)                \
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    WallInteractionModel<CloudType<ParcelType> >::                            \
+    InflowBoundaryModel<CloudType<ParcelType> >::                             \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
@@ -164,7 +157,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WallInteractionModel.C"
+#   include "InflowBoundaryModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

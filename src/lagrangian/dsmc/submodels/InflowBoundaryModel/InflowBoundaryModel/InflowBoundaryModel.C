@@ -24,51 +24,63 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "SpecularReflection.H"
+#include "InflowBoundaryModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::SpecularReflection<CloudType>::SpecularReflection
+template<class CloudType>
+Foam::InflowBoundaryModel<CloudType>::InflowBoundaryModel
 (
     const dictionary& dict,
-    CloudType& cloud
+    CloudType& owner,
+    const word& type
 )
-:
-    WallInteractionModel<CloudType>(dict, cloud, typeName)
+:   dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::SpecularReflection<CloudType>::~SpecularReflection()
+template<class CloudType>
+Foam::InflowBoundaryModel<CloudType>::~InflowBoundaryModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <class CloudType>
-void Foam::SpecularReflection<CloudType>::correct
-(
-    const wallPolyPatch& wpp,
-    const label faceId,
-    vector& U,
-    scalar mass
-)
+template<class CloudType>
+const CloudType& Foam::InflowBoundaryModel<CloudType>::owner() const
 {
-    vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
-    nw /= mag(nw);
-
-    scalar magUn = U & nw;
-
-    if (magUn > 0.0)
-    {
-        U -= 2.0*magUn*nw;
-    }
+    return owner_;
 }
 
 
+template<class CloudType>
+CloudType& Foam::InflowBoundaryModel<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::InflowBoundaryModel<CloudType>::dict() const
+{
+    return dict_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::InflowBoundaryModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "NewInflowBoundaryModel.C"
+
 // ************************************************************************* //
+

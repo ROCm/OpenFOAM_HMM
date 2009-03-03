@@ -24,96 +24,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "MaxwellianThermal.H"
+#include "NoInflow.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::MaxwellianThermal<CloudType>::MaxwellianThermal
+Foam::NoInflow<CloudType>::NoInflow
 (
     const dictionary& dict,
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud, typeName)
+    InflowBoundaryModel<CloudType>(dict, cloud, typeName)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::MaxwellianThermal<CloudType>::~MaxwellianThermal()
+Foam::NoInflow<CloudType>::~NoInflow()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class CloudType>
-void Foam::MaxwellianThermal<CloudType>::correct
-(
-    const wallPolyPatch& wpp,
-    const label faceId,
-    vector& U,
-    scalar mass
-)
-{
-    label wppIndex = wpp.index();
-
-    label wppLocalFace = wpp.whichFace(faceId);
-
-    vector nw = wpp.faceAreas()[wppLocalFace];
-
-    // Normal unit vector
-    nw /= mag(nw);
-
-    // Normal velocity magnitude
-    scalar magUn = U & nw;
-
-    // Wall tangential velocity (flow direction)
-    vector Ut = U - magUn*nw;
-
-    CloudType& cloud(this->owner());
-
-    Random& rndGen(cloud.rndGen());
-
-    while (mag(Ut) < SMALL)
-    {
-        // If the incident velocity is parallel to the face normal, no
-        // tangential direction can be chosen.  Add a perturbation to the
-        // incoming velocity and recalculate.
-
-        U = vector
-        (
-            U.x()*(0.8 + 0.2*rndGen.scalar01()),
-            U.y()*(0.8 + 0.2*rndGen.scalar01()),
-            U.z()*(0.8 + 0.2*rndGen.scalar01())
-        );
-
-        magUn = U & nw;
-
-        Ut = U - magUn*nw;
-    }
-
-    // Wall tangential unit vector
-    vector tw1 = Ut/mag(Ut);
-
-    // Other tangential unit vector
-    vector tw2 = nw ^ tw1;
-
-    scalar T = cloud.T().boundaryField()[wppIndex][wppLocalFace];
-
-    scalar C = sqrt(CloudType::kb*T/mass);
-
-    U =
-        C
-       *(
-            rndGen.GaussNormal()*tw1
-          + rndGen.GaussNormal()*tw2
-          - sqrt(-2.0*log(max(1 - rndGen.scalar01(),VSMALL)))*nw
-        );
-
-    U += cloud.U().boundaryField()[wppIndex][wppLocalFace];
-}
+void Foam::NoInflow<CloudType>::inflow()
+{}
 
 
 // ************************************************************************* //

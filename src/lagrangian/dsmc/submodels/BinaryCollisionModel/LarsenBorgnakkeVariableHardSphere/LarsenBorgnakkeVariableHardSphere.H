@@ -50,7 +50,7 @@ class LarsenBorgnakkeVariableHardSphere
 {
     // Private data
 
-        //- Temperature
+        //- Relaxation collision number
         const scalar relaxationCollisionNumber_;
 
 

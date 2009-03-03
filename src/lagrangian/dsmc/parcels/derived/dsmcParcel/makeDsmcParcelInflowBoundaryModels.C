@@ -24,51 +24,29 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#include "dsmcParcel.H"
+#include "DsmcCloud.H"
+#include "FreeStream.H"
+#include "NoInflow.H"
 
-#include "SpecularReflection.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template <class CloudType>
-Foam::SpecularReflection<CloudType>::SpecularReflection
-(
-    const dictionary& dict,
-    CloudType& cloud
-)
-:
-    WallInteractionModel<CloudType>(dict, cloud, typeName)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template <class CloudType>
-Foam::SpecularReflection<CloudType>::~SpecularReflection()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template <class CloudType>
-void Foam::SpecularReflection<CloudType>::correct
-(
-    const wallPolyPatch& wpp,
-    const label faceId,
-    vector& U,
-    scalar mass
-)
+namespace Foam
 {
-    vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
-    nw /= mag(nw);
+    makeInflowBoundaryModel(DsmcCloud<dsmcParcel>);
 
-    scalar magUn = U & nw;
-
-    if (magUn > 0.0)
-    {
-        U -= 2.0*magUn*nw;
-    }
-}
+    // Add instances of inflow boundary model to the table
+    makeInflowBoundaryModelType
+    (
+        FreeStream,
+        DsmcCloud,
+        dsmcParcel
+    );
+    makeInflowBoundaryModelType
+    (
+        NoInflow,
+        DsmcCloud,
+        dsmcParcel
+    );
+};
 
 
 // ************************************************************************* //
