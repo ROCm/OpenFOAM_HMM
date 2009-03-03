@@ -26,9 +26,11 @@ License
 
 #include "basicThermoParcel.H"
 #include "ThermoCloud.H"
-#include "NoInjection.H"
-#include "ManualInjection.H"
+
 #include "ConeInjection.H"
+#include "EntrainmentInjection.H"
+#include "ManualInjection.H"
+#include "NoInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,11 +39,32 @@ namespace Foam
     makeInjectionModel(KinematicCloud<basicThermoParcel>);
 
     // Add instances of injection model to the table
-    makeInjectionModelType(NoInjection, KinematicCloud, basicThermoParcel);
 
-    makeInjectionModelType(ManualInjection, KinematicCloud, basicThermoParcel);
+    makeInjectionModelType
+    (
+        ConeInjection,
+        KinematicCloud,
+        basicThermoParcel
+    );
+    makeInjectionModelType
+    (
+        EntrainmentInjection,
+        KinematicCloud,
+        basicThermoParcel
+    );
+    makeInjectionModelType
+    (
+        ManualInjection,
+        KinematicCloud,
+        basicThermoParcel
+    );
+    makeInjectionModelType
+    (
+        NoInjection,
+        KinematicCloud,
+        basicThermoParcel
+    );
 
-    makeInjectionModelType(ConeInjection, KinematicCloud, basicThermoParcel);
 };
 
 

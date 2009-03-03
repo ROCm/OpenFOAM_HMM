@@ -27,9 +27,10 @@ License
 #include "basicReactingParcel.H"
 #include "ReactingCloud.H"
 
-#include "NoInjection.H"
-#include "ManualInjection.H"
 #include "ConeInjection.H"
+#include "EntrainmentInjection.H"
+#include "ManualInjection.H"
+#include "NoInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -40,7 +41,13 @@ namespace Foam
     // Add instances of injection model to the table
     makeInjectionModelType
     (
-        NoInjection,
+        ConeInjection,
+        KinematicCloud,
+        basicReactingParcel
+    );
+    makeInjectionModelType
+    (
+        EntrainmentInjection,
         KinematicCloud,
         basicReactingParcel
     );
@@ -52,7 +59,7 @@ namespace Foam
     );
     makeInjectionModelType
     (
-        ConeInjection,
+        NoInjection,
         KinematicCloud,
         basicReactingParcel
     );
