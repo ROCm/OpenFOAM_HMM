@@ -162,6 +162,10 @@ protected:
             //- Velocity of Parcel [m/s]
             vector U_;
 
+            //- Internal energy of the Parcel, covering all non-translational
+            // degrees of freedom [J]
+            scalar Ei_;
+
             //- Parcel type id
             label typeId_;
 
@@ -182,6 +186,7 @@ public:
             DsmcCloud<ParcelType>& owner,
             const vector& position,
             const vector& U,
+            const scalar Ei,
             const label celli,
             const label typeId
         );
@@ -211,10 +216,16 @@ public:
             //- Return const access to velocity
             inline const vector& U() const;
 
+            //- Return const access to internal energy
+            inline scalar Ei() const;
+
         // Edit
 
             //- Return access to velocity
             inline vector& U();
+
+            //- Return access to internal energy
+            inline scalar& Ei();
 
 
         // Main calculation loop

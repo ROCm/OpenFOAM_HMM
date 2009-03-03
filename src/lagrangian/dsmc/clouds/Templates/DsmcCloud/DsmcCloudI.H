@@ -48,7 +48,6 @@ Foam::DsmcCloud<ParcelType>::particleProperties() const
 }
 
 
-
 template<class ParcelType>
 inline const Foam::List<Foam::word>&
 Foam::DsmcCloud<ParcelType>::typeIdList() const
@@ -115,9 +114,23 @@ Foam::DsmcCloud<ParcelType>::constProps
 
 
 template<class ParcelType>
-inline void Foam::DsmcCloud<ParcelType>::clear()
+inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
 {
-    return IDLList<ParcelType>::clear();
+    return rndGen_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::T() const
+{
+    return T_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::U() const
+{
+    return U_;
 }
 
 
@@ -158,9 +171,19 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::massInSystem() const
 {
     scalar sysMass = 0.0;
 
-    Info<< "massInSystem() not implemented" << endl;
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
 
-    return sysMass;
+        const typename ParcelType::constantProperties& cP = constProps
+        (
+            p.typeId()
+        );
+
+        sysMass += cP.mass();
+    }
+
+    return nParticle_*sysMass;
 }
 
 
@@ -208,9 +231,19 @@ Foam::DsmcCloud<ParcelType>::linearKineticEnergyOfSystem() const
 
 
 template<class ParcelType>
-inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
+inline Foam::scalar
+Foam::DsmcCloud<ParcelType>::internalEnergyOfSystem() const
 {
-    return rndGen_;
+    scalar internalEnergy = 0.0;
+
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        internalEnergy += p.Ei();
+    }
+
+    return nParticle_*internalEnergy;
 }
 
 
@@ -327,96 +360,10 @@ Foam::DsmcCloud<ParcelType>::rhoNP() const
 
 
 template<class ParcelType>
-inline const Foam::tmp<Foam::volVectorField>
-Foam::DsmcCloud<ParcelType>::U() const
+inline void Foam::DsmcCloud<ParcelType>::clear()
 {
-    tmp<volScalarField> tU
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                this->name() + "U",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedVector
-            (
-                "zero",
-                dimensionSet(0, 1, -1, 0, 0),
-                vector::zero
-            )
-        )
-    );
-
-    return tU;
+    return IDLList<ParcelType>::clear();
 }
-
-
-template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::totalKE() const
-{
-    tmp<volScalarField> ttotalKE
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "totalKE",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(0, 0, 0, 1, 0), 0.0)
-        )
-    );
-
-    return ttotalKE;
-}
-
-// template<class ParcelType>
-// inline const Foam::tmp<Foam::volScalarField>
-// Foam::DsmcCloud<ParcelType>::alpha() const
-// {
-//     tmp<volScalarField> talpha
-//     (
-//         new volScalarField
-//         (
-//             IOobject
-//             (
-//                 this->name() + "Alpha",
-//                 this->db().time().timeName(),
-//                 this->db(),
-//                 IOobject::NO_READ,
-//                 IOobject::NO_WRITE,
-//                 false
-//             ),
-//             mesh_,
-//             dimensionedScalar("zero", dimensionSet(0, 0, 0, 0, 0), 0.0)
-//         )
-//     );
-
-//     scalarField& alpha = talpha().internalField();
-//     forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-//     {
-//         const ParcelType& p = iter();
-//         const label cellI = p.cell();
-
-//         alpha[cellI] += p.nParticle()*p.mass();
-//     }
-
-//     alpha /= (mesh().cellVolumes()*rho_);
-
-//     return talpha;
-// }
 
 
 // ************************************************************************* //

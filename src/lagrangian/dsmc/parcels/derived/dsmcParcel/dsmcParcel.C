@@ -43,6 +43,7 @@ Foam::dsmcParcel::dsmcParcel
     DsmcCloud<dsmcParcel>& owner,
     const vector& position,
     const vector& U,
+    const scalar Ei,
     const label celli,
     const label typeId
 )
@@ -52,6 +53,7 @@ Foam::dsmcParcel::dsmcParcel
         owner,
         position,
         U,
+        Ei,
         celli,
         typeId
     )

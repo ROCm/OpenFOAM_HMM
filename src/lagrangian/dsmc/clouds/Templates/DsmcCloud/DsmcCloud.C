@@ -41,8 +41,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::Tref = 273;
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::buildConstProps()
 {
-    Info<< nl << "typeIds found " << typeIdList_ << endl;
-
+    Info<< nl << "Constructing constant properties for" << endl;
     constProps_.setSize(typeIdList_.size());
 
     dictionary moleculeProperties
@@ -53,6 +52,8 @@ void Foam::DsmcCloud<ParcelType>::buildConstProps()
     forAll(typeIdList_, i)
     {
         const word& id(typeIdList_[i]);
+
+        Info<< "    " << id << endl;
 
         const dictionary& molDict(moleculeProperties.subDict(id));
 
@@ -65,7 +66,6 @@ void Foam::DsmcCloud<ParcelType>::buildConstProps()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::buildCellOccupancy()
 {
-
     forAll(cellOccupancy_, cO)
     {
         cellOccupancy_[cO].clear();
@@ -91,21 +91,21 @@ void Foam::DsmcCloud<ParcelType>::initialise
 
     const vector velocity(dsmcInitialiseDict.lookup("velocity"));
 
-    List<word> molecules
+    const dictionary& numberDensitiesDict
     (
-        dsmcInitialiseDict.lookup("molecules")
+        dsmcInitialiseDict.subDict("numberDensities")
     );
 
-    Field<scalar> numberDensities
-    (
-        dsmcInitialiseDict.lookup("numberDensities")
-    );
+    List<word> molecules(numberDensitiesDict.toc());
 
-    if(molecules.size() != numberDensities.size())
+    Field<scalar> numberDensities(molecules.size());
+
+    forAll(molecules, i)
     {
-        FatalErrorIn("Foam::Foam::DsmcCloud<ParcelType>::initialise")
-            << "molecules and numberDensities must be the same size."
-            << nl << abort(FatalError);
+        numberDensities[i] = readScalar
+        (
+            numberDensitiesDict.lookup(molecules[i])
+        );
     }
 
     numberDensities /= nParticle_;
@@ -171,6 +171,10 @@ void Foam::DsmcCloud<ParcelType>::initialise
                         cP.mass()
                     );
 
+                    scalar Ei =
+                        0.5*cP.internalDegreesOfFreedom()
+                       *kb*temperature;
+
                     U += velocity;
 
                     if (cell >= 0)
@@ -179,6 +183,7 @@ void Foam::DsmcCloud<ParcelType>::initialise
                         (
                             p,
                             U,
+                            Ei,
                             cell,
                             typeId
                         );
@@ -282,7 +287,9 @@ void Foam::DsmcCloud<ParcelType>::collisions()
                         typeIdP,
                         typeIdQ,
                         parcelP->U(),
-                        parcelQ->U()
+                        parcelQ->U(),
+                        parcelP->Ei(),
+                        parcelQ->Ei()
                     );
 
                     collisions++;
@@ -295,11 +302,18 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
     reduce(collisionCandidates, sumOp<label>());
 
-    Info<< "    Collisions                      = "
-        << collisions << nl
-        << "    Acceptance rate                 = "
-        << scalar(collisions)/scalar(collisionCandidates) << nl
-        << endl;
+    if (collisionCandidates)
+    {
+        Info<< "    Collisions                      = "
+            << collisions << nl
+            << "    Acceptance rate                 = "
+            << scalar(collisions)/scalar(collisionCandidates) << nl
+            << endl;
+    }
+    else
+    {
+        Info<< "    No collisions" << endl;
+    }
 }
 
 
@@ -310,6 +324,7 @@ void Foam::DsmcCloud<ParcelType>::addNewParcel
 (
     const vector& position,
     const vector& U,
+    const scalar Ei,
     const label cellId,
     const label typeId
 )
@@ -319,6 +334,7 @@ void Foam::DsmcCloud<ParcelType>::addNewParcel
         *this,
         position,
         U,
+        Ei,
         cellId,
         typeId
     );
@@ -333,20 +349,21 @@ template<class ParcelType>
 Foam::DsmcCloud<ParcelType>::DsmcCloud
 (
     const word& cloudType,
-    const fvMesh& mesh
+    const volScalarField& T,
+    const volVectorField& U
 )
 :
-    Cloud<ParcelType>(mesh, cloudType, false),
+    Cloud<ParcelType>(T.mesh(), cloudType, false),
     DsmcBaseCloud(),
     cloudType_(cloudType),
-    mesh_(mesh),
+    mesh_(T.mesh()),
     particleProperties_
     (
         IOobject
         (
             cloudType + "Properties",
-            mesh.time().constant(),
-            mesh,
+            mesh_.time().constant(),
+            mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -369,6 +386,8 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     collisionSelectionRemainder_(mesh_.nCells(), 0),
     constProps_(),
     rndGen_(label(971501)),
+    T_(T),
+    U_(U),
     binaryCollisionModel_
     (
         BinaryCollisionModel<DsmcCloud<ParcelType> >::New
@@ -396,8 +415,7 @@ template<class ParcelType>
 Foam::DsmcCloud<ParcelType>::DsmcCloud
 (
     const word& cloudType,
-    const fvMesh& mesh,
-    const IOdictionary& dsmcInitialiseDict
+    const fvMesh& mesh
 )
     :
     Cloud<ParcelType>(mesh, cloudType, false),
@@ -409,8 +427,8 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
         IOobject
         (
             cloudType + "Properties",
-            mesh.time().constant(),
-            mesh,
+            mesh_.time().constant(),
+            mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -434,12 +452,61 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     collisionSelectionRemainder_(),
     constProps_(),
     rndGen_(label(971501)),
+    T_
+    (
+        volScalarField
+        (
+            IOobject
+            (
+                "T",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar("zero",  dimensionSet(0, 0, 0, 1, 0), 0.0)
+        )
+    ),
+    U_
+    (
+        volVectorField
+        (
+            IOobject
+            (
+                "U",
+                mesh_.time().timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedVector
+            (
+                "zero",
+                dimensionSet(0, 1, -1, 0, 0),
+                vector::zero
+            )
+        )
+    ),
     binaryCollisionModel_(),
     wallInteractionModel_()
 {
     clear();
 
     buildConstProps();
+
+    IOdictionary dsmcInitialiseDict
+    (
+        IOobject
+        (
+            "dsmcInitialiseDict",
+            mesh_.time().system(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
 
     initialise(dsmcInitialiseDict);
 }
@@ -478,8 +545,13 @@ template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::info() const
 {
     vector linearMomentum = linearMomentumOfSystem();
-
     reduce(linearMomentum, sumOp<vector>());
+
+    scalar linearKineticEnergy = linearKineticEnergyOfSystem();
+    reduce(linearKineticEnergy, sumOp<scalar>());
+
+    scalar internalEnergy = internalEnergyOfSystem();
+    reduce(internalEnergy, sumOp<scalar>());
 
     Info<< "Cloud name: " << this->name() << nl
         << "    Current number of parcels       = "
@@ -491,7 +563,11 @@ void Foam::DsmcCloud<ParcelType>::info() const
         << "    Linear momentum magnitude       = "
         << mag(linearMomentum) << nl
         << "    Linear kinetic energy           = "
-        << returnReduce(linearKineticEnergyOfSystem(), sumOp<scalar>()) << nl
+        << linearKineticEnergy << nl
+        << "    Internal energy                 = "
+        << internalEnergy << nl
+        << "    Total energy                    = "
+        << internalEnergy + linearKineticEnergy << nl
         << endl;
 }
 

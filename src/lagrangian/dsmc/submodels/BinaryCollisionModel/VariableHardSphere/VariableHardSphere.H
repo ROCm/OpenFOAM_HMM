@@ -84,7 +84,9 @@ public:
             label typeIdP,
             label typeIdQ,
             vector& UP,
-            vector& UQ
+            vector& UQ,
+            scalar& EiP,
+            scalar& EiQ
         );
 };
 

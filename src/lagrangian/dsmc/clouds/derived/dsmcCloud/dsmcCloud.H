@@ -73,15 +73,15 @@ public:
         dsmcCloud
         (
             const word& cloudType,
-            const fvMesh& mesh
+            const volScalarField& T,
+            const volVectorField& U
         );
 
-        //- Construct from with the typeIdListDict, used to initialise
+        //- Construct from name and mesh, used to initialise.
         dsmcCloud
         (
             const word& cloudType,
-            const fvMesh& mesh,
-            const IOdictionary& dsmcInitialiseDict
+            const fvMesh& mesh
         );
 
     //- Destructor

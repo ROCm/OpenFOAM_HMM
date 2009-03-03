@@ -21,86 +21,103 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
 Class
-    Foam::dsmcParcel
+    Foam::LarsenBorgnakkeVariableHardSphere
 
 Description
-
-
-SourceFiles
-    dsmcParcel.C
+    Variable Hard Sphere BinaryCollision Model with Larsen Borgnakke internal
+    energy redistribution.  Based on the INELRS subroutine in Bird's DSMC0R.FOR
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dsmcParcel_H
-#define dsmcParcel_H
+#ifndef LarsenBorgnakkeVariableHardSphere_H
+#define LarsenBorgnakkeVariableHardSphere_H
 
-#include "DsmcParcel.H"
+#include "BinaryCollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 /*---------------------------------------------------------------------------*\
-                         Class dsmcParcel Declaration
+                      Class LarsenBorgnakkeVariableHardSphere Declaration
 \*---------------------------------------------------------------------------*/
 
-class dsmcParcel
+template<class CloudType>
+class LarsenBorgnakkeVariableHardSphere
 :
-    public DsmcParcel<dsmcParcel>
+    public BinaryCollisionModel<CloudType>
 {
+    // Private data
+
+        //- Temperature
+        const scalar relaxationCollisionNumber_;
+
+
+    // Private Member Functions
+
+        //- Calculate the energy ratio for distribution to internal degrees of
+        // freedom
+        scalar energyRatio
+        (
+            scalar ChiA,
+            scalar ChiB
+        );
+
 
 public:
 
-    //- Run-time type information
-    TypeName("dsmcParcel");
+    //- Runtime type information
+    TypeName("LarsenBorgnakkeVariableHardSphere");
 
 
     // Constructors
 
-        //- Construct from components
-        dsmcParcel
+        //- Construct from dictionary
+        LarsenBorgnakkeVariableHardSphere
         (
-            DsmcCloud<dsmcParcel>& owner,
-            const vector& position,
-            const vector& U,
-            const scalar Ei,
-            const label celli,
-            const label typeId
+            const dictionary& dict,
+            CloudType& cloud
         );
 
-        //- Construct from Istream
-        dsmcParcel
+
+    // Destructor
+    virtual ~LarsenBorgnakkeVariableHardSphere();
+
+
+    // Member Functions
+
+        //- Return the collision cross section * relative velocity product
+        virtual scalar sigmaTcR
         (
-            const Cloud<dsmcParcel>& c,
-            Istream& is,
-            bool readFields = true
+            label typeIdP,
+            label typeIdQ,
+            const vector& UP,
+            const vector& UQ
+        ) const;
+
+        //- Apply collision
+        virtual void collide
+        (
+            label typeIdP,
+            label typeIdQ,
+            vector& UP,
+            vector& UQ,
+            scalar& EiP,
+            scalar& EiQ
         );
-
-        //- Construct and return a clone
-        autoPtr<dsmcParcel> clone() const
-        {
-            return autoPtr<dsmcParcel>(new dsmcParcel(*this));
-        }
-
-
-    //- Destructor
-    virtual ~dsmcParcel();
 };
-
-
-template<>
-inline bool contiguous<dsmcParcel>()
-{
-    return true;
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "LarsenBorgnakkeVariableHardSphere.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -39,10 +39,11 @@ namespace Foam
 Foam::dsmcCloud::dsmcCloud
 (
     const word& cloudType,
-    const fvMesh& mesh
+    const volScalarField& T,
+    const volVectorField& U
 )
 :
-    DsmcCloud<dsmcParcel>(cloudType, mesh)
+    DsmcCloud<dsmcParcel>(cloudType, T, U)
 {
     dsmcParcel::readFields(*this);
 }
@@ -51,11 +52,10 @@ Foam::dsmcCloud::dsmcCloud
 Foam::dsmcCloud::dsmcCloud
 (
     const word& cloudType,
-    const fvMesh& mesh,
-    const IOdictionary& dsmcInitialiseDict
+    const fvMesh& mesh
 )
 :
-    DsmcCloud<dsmcParcel>(cloudType, mesh, dsmcInitialiseDict)
+    DsmcCloud<dsmcParcel>(cloudType, mesh)
 {}
 
 

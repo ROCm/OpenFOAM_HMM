@@ -26,8 +26,8 @@ Application
     dsmcFoam
 
 Description
-    Initialise a case for dsmcFoam by reading the initialise subdictionary in
-    dsmcProperties
+    Initialise a case for dsmcFoam by reading the initialisation dictionary
+    system/dsmcInitialise
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,21 +42,11 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
 
-    IOdictionary dsmcInitialiseDict
-    (
-        IOobject
-        (
-            "dsmcInitialiseDict",
-            mesh.time().system(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "Initialising dsmc for Time = " << runTime.timeName() << nl << endl;
 
-    dsmcCloud dsmc("dsmc", mesh, dsmcInitialiseDict);
+    dsmcCloud dsmc("dsmc", mesh);
 
     label totalMolecules = dsmc.size();
 

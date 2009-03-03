@@ -107,9 +107,19 @@ class DsmcCloud
         //- Random number generator
         Random rndGen_;
 
+
+        // References to the macroscopic fields
+
+            //- Temperature
+            const volScalarField& T_;
+
+            //- Velocity
+            const volVectorField& U_;
+
+
         // References to the cloud sub-models
 
-            //- Binary  Collision model
+            //- Binary collision model
             autoPtr<BinaryCollisionModel<DsmcCloud<ParcelType> > >
                 binaryCollisionModel_;
 
@@ -156,16 +166,15 @@ public:
         DsmcCloud
         (
             const word& cloudType,
-            const fvMesh& mesh
+            const volScalarField& T,
+            const volVectorField& U
         );
 
-        //- Construct given name, mesh, and typeIdListDict.  Used by
-        // dsmcInitialse.
+        //- Construct given name and mesh.  Used to initialise.
         DsmcCloud
         (
             const word& cloudType,
-            const fvMesh& mesh,
-            const IOdictionary& dsmcInitialiseDict
+            const fvMesh& mesh
         );
 
 
@@ -184,6 +193,9 @@ public:
 
                 //- Return refernce to the mesh
                 inline const fvMesh& mesh() const;
+
+
+            // References to the dsmc specific data
 
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;
@@ -219,6 +231,15 @@ public:
                 inline Random& rndGen();
 
 
+            // References to the macroscopic fields
+
+                //- Return macroscopic temperature
+                inline const volScalarField& T() const;
+
+                //- Return macroscopic velocity
+                inline const volVectorField& U() const;
+
+
             // Kinetic theory helper functions
 
                 //- Generate a random velocity sampled from the Maxwellian speed
@@ -251,9 +272,6 @@ public:
                     scalar temperature,
                     scalar mass
                 ) const;
-
-            //- Clear the Cloud
-            inline void clear();
 
 
             // Sub-models
@@ -289,6 +307,9 @@ public:
             //- Total linear kinetic energy in the system
             inline scalar linearKineticEnergyOfSystem() const;
 
+            //- Total internal energy in the system
+            inline scalar internalEnergyOfSystem() const;
+
             //- Print cloud information
             void info() const;
 
@@ -307,12 +328,6 @@ public:
                 //- Return the field of number of DSMC particles
                 inline const tmp<volScalarField> rhoNP() const;
 
-                //- Return the velocity field
-                inline const tmp<volVectorField> U() const;
-
-                //- Return the temperature field
-                inline const tmp<volScalarField> totalKE() const;
-
 
         // Cloud evolution functions
 
@@ -321,12 +336,19 @@ public:
             (
                 const vector& position,
                 const vector& U,
+                const scalar Ei,
                 const label cellId,
                 const label typeId
             );
 
             //- Evolve the cloud (move, collide)
             void evolve();
+
+
+            //- Clear the Cloud
+            inline void clear();
+
+
 };
 
 

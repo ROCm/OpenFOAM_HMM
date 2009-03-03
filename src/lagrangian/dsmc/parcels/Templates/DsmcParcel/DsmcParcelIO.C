@@ -41,6 +41,7 @@ Foam::DsmcParcel<ParcelType>::DsmcParcel
 :
     Particle<ParcelType>(cloud, is, readFields),
     U_(vector::zero),
+    Ei_(0.0),
     typeId_(-1)
 {
     if (readFields)
@@ -48,6 +49,7 @@ Foam::DsmcParcel<ParcelType>::DsmcParcel
         if (is.format() == IOstream::ASCII)
         {
             is >> U_;
+            Ei_ = readScalar(is);
             typeId_ = readLabel(is);
         }
         else
@@ -56,6 +58,7 @@ Foam::DsmcParcel<ParcelType>::DsmcParcel
             (
                 reinterpret_cast<char*>(&U_),
                 sizeof(U_)
+              + sizeof(Ei_)
               + sizeof(typeId_)
             );
         }
@@ -84,6 +87,9 @@ void Foam::DsmcParcel<ParcelType>::readFields
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
 
+    IOField<scalar> Ei(c.fieldIOobject("Ei", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, Ei);
+
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::MUST_READ));
     c.checkFieldIOobject(c, typeId);
 
@@ -93,6 +99,7 @@ void Foam::DsmcParcel<ParcelType>::readFields
         ParcelType& p = iter();
 
         p.U_ = U[i];
+        p.Ei_ = Ei[i];
         p.typeId_ = typeId[i];
         i++;
     }
@@ -110,6 +117,7 @@ void Foam::DsmcParcel<ParcelType>::writeFields
     label np =  c.size();
 
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
+    IOField<scalar> Ei(c.fieldIOobject("Ei", IOobject::NO_READ), np);
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::NO_READ), np);
 
     label i = 0;
@@ -118,11 +126,13 @@ void Foam::DsmcParcel<ParcelType>::writeFields
         const DsmcParcel<ParcelType>& p = iter();
 
         U[i] = p.U();
+        Ei[i] = p.Ei();
         typeId[i] = p.typeId();
         i++;
     }
 
     U.write();
+    Ei.write();
     typeId.write();
 }
 
@@ -140,6 +150,7 @@ Foam::Ostream& Foam::operator<<
     {
         os  << static_cast<const Particle<ParcelType>& >(p)
             << token::SPACE << p.U()
+            << token::SPACE << p.Ei()
             << token::SPACE << p.typeId();
     }
     else
@@ -149,6 +160,7 @@ Foam::Ostream& Foam::operator<<
         (
             reinterpret_cast<const char*>(&p.U_),
             sizeof(p.U())
+          + sizeof(p.Ei())
           + sizeof(p.typeId())
         );
     }

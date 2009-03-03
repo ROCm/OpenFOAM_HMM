@@ -67,12 +67,14 @@ inline Foam::DsmcParcel<ParcelType>::DsmcParcel
     DsmcCloud<ParcelType>& owner,
     const vector& position,
     const vector& U,
+    const scalar Ei,
     const label celli,
     const label typeId
 )
 :
     Particle<ParcelType>(owner, position, celli),
     U_(U),
+    Ei_(Ei),
     typeId_(typeId)
 {}
 
@@ -147,9 +149,23 @@ inline const Foam::vector& Foam::DsmcParcel<ParcelType>::U() const
 
 
 template <class ParcelType>
+inline Foam::scalar Foam::DsmcParcel<ParcelType>::Ei() const
+{
+    return Ei_;
+}
+
+
+template <class ParcelType>
 inline Foam::vector& Foam::DsmcParcel<ParcelType>::U()
 {
     return U_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar& Foam::DsmcParcel<ParcelType>::Ei()
+{
+    return Ei_;
 }
 
 

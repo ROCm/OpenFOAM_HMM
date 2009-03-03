@@ -65,8 +65,7 @@ bool Foam::DsmcParcel<ParcelType>::move
             {
                 if
                 (
-                    isType<processorPolyPatch>
-                        (pbMesh[p.patch(p.face())])
+                    isType<processorPolyPatch>(pbMesh[p.patch(p.face())])
                 )
                 {
                     td.switchProcessor = true;
