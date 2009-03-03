@@ -35,8 +35,7 @@ Foam::MaxwellianThermal<CloudType>::MaxwellianThermal
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud, typeName),
-    T_(dimensionedScalar(this->coeffDict().lookup("T")).value())
+    WallInteractionModel<CloudType>(dict, cloud, typeName)
 {}
 
 
@@ -65,7 +64,11 @@ void Foam::MaxwellianThermal<CloudType>::correct
     scalar mass
 )
 {
-    vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
+    label wppIndex = wpp.index();
+
+    label wppLocalFace = wpp.whichFace(faceId);
+
+    vector nw = wpp.faceAreas()[wppLocalFace];
 
     // Normal unit vector
     nw /= mag(nw);
@@ -104,7 +107,9 @@ void Foam::MaxwellianThermal<CloudType>::correct
     // Other tangential unit vector
     vector tw2 = nw ^ tw1;
 
-    scalar C = sqrt(CloudType::kb*T_/mass);
+    scalar T = cloud.T().boundaryField()[wppIndex][wppLocalFace];
+
+    scalar C = sqrt(CloudType::kb*T/mass);
 
     U =
         C
@@ -113,6 +118,8 @@ void Foam::MaxwellianThermal<CloudType>::correct
           + rndGen.GaussNormal()*tw2
           - sqrt(-2.0*log(max(1 - rndGen.scalar01(),VSMALL)))*nw
         );
+
+    U += cloud.U().boundaryField()[wppIndex][wppLocalFace];
 }
 
 

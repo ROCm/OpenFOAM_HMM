@@ -49,11 +49,6 @@ class MaxwellianThermal
 :
     public WallInteractionModel<CloudType>
 {
-    // Private data
-
-        //- Temperature
-        const scalar T_;
-
 
 public:
 

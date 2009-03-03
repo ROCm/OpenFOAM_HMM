@@ -68,16 +68,18 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::energyRatio
         }
         else
         {
-            P = pow
-            (
-                (ChiAMinusOne + ChiBMinusOne)*energyRatio/ChiAMinusOne,
-                ChiAMinusOne
-            )
-           *pow
-            (
-                (ChiAMinusOne + ChiBMinusOne)*(1 - energyRatio)/ChiBMinusOne,
-                ChiBMinusOne
-            );
+            P =
+                pow
+                (
+                    (ChiAMinusOne + ChiBMinusOne)*energyRatio/ChiAMinusOne,
+                    ChiAMinusOne
+                )
+               *pow
+                (
+                    (ChiAMinusOne + ChiBMinusOne)*(1 - energyRatio)
+                    /ChiBMinusOne,
+                    ChiBMinusOne
+                );
         }
     }
 
