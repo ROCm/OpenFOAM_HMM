@@ -415,22 +415,22 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     const scalar padTime = max(0.0, SOI_ - time0_);
 
     // Introduce new parcels linearly with time
-    for (label iParcel=0; iParcel<newParcels; iParcel++)
+    for (label parcelI=0; parcelI<newParcels; parcelI++)
     {
-        // Calculate the pseudo time of injection for parcel 'iParcel'
-        scalar timeInj = time0_ + padTime + deltaT*iParcel/newParcels;
+        // Calculate the pseudo time of injection for parcel 'parcelI'
+        scalar timeInj = time0_ + padTime + deltaT*parcelI/newParcels;
 
         // Determine the injection position and owner cell
         label cellI = -1;
         vector pos = vector::zero;
-        setPositionAndCell(iParcel, timeInj, pos, cellI);
+        setPositionAndCell(parcelI, timeInj, pos, cellI);
 
         if (cellI >= 0)
         {
-            if (validInjection(iParcel))
+            if (validInjection(parcelI))
             {
                 // Diameter of parcels
-                scalar d = d0(iParcel, timeInj);
+                scalar d = d0(parcelI, timeInj);
 
                 // Number of particles per parcel
                 scalar nP = setNumberOfParticles
@@ -443,7 +443,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 );
 
                 // Velocity of parcels
-                vector U = velocity(iParcel, timeInj);
+                vector U = velocity(parcelI, timeInj);
 
                 // Lagrangian timestep
                 scalar dt = time - timeInj;
@@ -462,7 +462,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
         {
             WarningIn("Foam::InjectionModel<CloudType>::inject(TrackData& td)")
                 << "Failed to inject new parcel:" << nl
-                << "    id = " << iParcel << ", position = " << pos
+                << "    id = " << parcelI << ", position = " << pos
                 << nl << endl;
         }
     }

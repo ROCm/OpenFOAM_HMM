@@ -137,13 +137,13 @@ Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
 template<class CloudType>
 void Foam::ManualInjection<CloudType>::setPositionAndCell
 (
-    const label iParcel,
+    const label parcelI,
     const scalar time,
     vector& position,
     label& cellOwner
 )
 {
-    position = positions_[iParcel];
+    position = positions_[parcelI];
     this->findCellAtPosition(cellOwner, position);
 }
 
@@ -162,11 +162,11 @@ Foam::vector Foam::ManualInjection<CloudType>::velocity
 template<class CloudType>
 Foam::scalar Foam::ManualInjection<CloudType>::d0
 (
-    const label iParcel,
+    const label parcelI,
     const scalar
 ) const
 {
-    return diameters_[iParcel];
+    return diameters_[parcelI];
 }
 
 

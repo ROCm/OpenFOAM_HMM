@@ -137,7 +137,7 @@ public:
             //- Set the injection position and owner cell
             void setPositionAndCell
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time,
                 vector& position,
                 label& cellOwner
@@ -146,20 +146,20 @@ public:
             //- Return the velocity of the parcel to introduce at a time
             vector velocity
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time
             );
 
             //- Return the diameter of the parcel to introduce at a time
             scalar d0
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar
             ) const;
 
             //- Return flag to identify whether or not injection in cellI is
             //  permitted
-            bool validInjection(const label iParcel);
+            bool validInjection(const label parcelI);
 };
 
 

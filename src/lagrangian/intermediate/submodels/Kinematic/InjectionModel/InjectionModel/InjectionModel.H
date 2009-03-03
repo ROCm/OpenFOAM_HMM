@@ -157,7 +157,7 @@ protected:
 
         //- Additional flag to identify whether or not injection in cellI is
         //  permitted
-        virtual bool validInjection(const label iParcel) = 0;
+        virtual bool validInjection(const label parcelI) = 0;
 
         //- Determine properties for next time step/injection interval
         virtual void prepareForNextTimeStep
@@ -294,7 +294,7 @@ public:
             //- Set the injection position and owner cell
             virtual void setPositionAndCell
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time,
                 vector& position,
                 label& cellOwner
@@ -303,14 +303,14 @@ public:
             //- Return the velocity of the parcel to introduce at a time
             virtual vector velocity
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time
             ) = 0;
 
             //- Return the diameter of the parcel to introduce at a time
             virtual scalar d0
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time
             ) const = 0;
 };

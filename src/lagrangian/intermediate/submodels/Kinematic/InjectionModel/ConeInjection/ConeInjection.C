@@ -226,7 +226,7 @@ Foam::scalar Foam::ConeInjection<CloudType>::d0
 
 
 template<class CloudType>
-bool Foam::ConeInjection<CloudType>::validInjection(const label iParcel)
+bool Foam::ConeInjection<CloudType>::validInjection(const label parcelI)
 {
     return true;
 }
