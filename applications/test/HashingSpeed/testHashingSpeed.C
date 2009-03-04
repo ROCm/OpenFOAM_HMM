@@ -1,6 +1,6 @@
 // code taken more-or-less from Paul Hsieh's tests
 
-#include "Hashing.H"
+#include "Hasher.H"
 
 #include <stdio.h>
 #include <time.h>
@@ -692,7 +692,7 @@ uint32_t hashLookup3Orig (const char * k, int length) {
 }
 
 uint32_t hashLookup3 (const char * k, int length) {
-    return Foam::Hashing::jenkins(k, length);
+    return Foam::Hasher(k, length, 0);
 }
 
 

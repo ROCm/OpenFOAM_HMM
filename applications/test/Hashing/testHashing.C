@@ -37,7 +37,7 @@ Description
 #include "labelList.H"
 #include "labelPair.H"
 
-#include "Hashing.H"
+#include "Hash.H"
 
 using namespace Foam;
 
@@ -65,64 +65,40 @@ int main(int argc, char *argv[])
 
             forAll(lst, i)
             {
-                unsigned hash1 = Hashing::jenkins(lst[i]);
-                unsigned hash2 = string::hash()(lst[i]);
+                unsigned hash1 = string::hash()(lst[i]);
 
-                Info<< hex << hash1
-                    << " (prev " << hash2 << ")"
-                    << ": " << lst[i] << endl;
+                Info<< hex << hash1 << ": " << lst[i] << endl;
             }
 
         }
         else if (listType == "labelList")
         {
-            Info<<"contiguous = " << contiguous<label>() << " "
-                << "sizeof(label) " << unsigned(sizeof(label)) << endl << endl;
+            Info<<"contiguous = " << contiguous<label>() << endl << endl;
 
             labelList lst(is);
 
-            unsigned hash4 = 0;
-
             forAll(lst, i)
             {
-                unsigned hash1 = Hashing::intHash(lst[i]);
+                // direct value
+                unsigned hash1 = Hash<label>()(lst[i]);
 
-                unsigned hash2 = Hashing::jenkins
-                (
-                    reinterpret_cast<const char*>(&lst[i]),
-                    sizeof(label)
-                );
-
-                unsigned hash3 = Hashing::jenkins
-                (
-                    reinterpret_cast<const unsigned*>(&lst[i]),
-                    1
-                );
-
-                // incremental
-                hash4 = Hashing::jenkins
-                (
-                    reinterpret_cast<const char*>(&lst[i]),
-                    sizeof(label),
-                    hash4
-                );
+                // hashed byte-wise
+                unsigned hash2 = Hash<label>()(lst[i], 0);
 
                 Info<< hex << hash1
-                    << " (alt: " << hash2 << ")"
-                    << " (alt: " << hash3 << ")"
-                    << " (incr: " << hash4 << ")"
+                    << " (seeded: " << hash2 << ")"
                     << ": " << dec << lst[i] << endl;
             }
 
             if (contiguous<label>())
             {
-                unsigned hash1 = Hashing::jenkins
+                unsigned hash3 = Hasher
                 (
                     lst.cdata(),
                     lst.size() * sizeof(label)
                 );
 
-                Info<<"contiguous hashed value " << hex << hash1 << endl;
+                Info<<"contiguous hashed value " << hex << hash3 << endl;
             }
         }
         else if (listType == "labelListList")
@@ -131,9 +107,9 @@ int main(int argc, char *argv[])
 
             forAll(lst, i)
             {
-                unsigned hash1 = Hashing::jenkins
+                unsigned hash1 = Hasher
                 (
-                    reinterpret_cast<const char*>(lst[i].cdata()),
+                    lst[i].cdata(),
                     lst[i].size() * sizeof(label)
                 );
 

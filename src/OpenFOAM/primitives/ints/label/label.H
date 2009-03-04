@@ -43,24 +43,27 @@ Description
 
 
 #if FOAM_LABEL64
-#    define WANTEDRANGE 9000000000000000000
+#    define FOAM_LABEL_MAX 9000000000000000000
 #else
-#    define WANTEDRANGE 2000000000
+#    define FOAM_LABEL_MAX 2000000000
 #endif
 
 
-#if INT_MAX > WANTEDRANGE
+#if INT_MAX > FOAM_LABEL_MAX
 
 // Define label as an int
 
-#include "int.H"
+# undef  FOAM_LABEL_MAX
+# define FOAM_LABEL_MAX INT_MAX
+
+# include "int.H"
 
 namespace Foam
 {
     typedef int label;
 
-    static const label labelMax = INT_MAX;
     static const label labelMin = INT_MIN;
+    static const label labelMax = INT_MAX;
 
     inline label readLabel(Istream& is)
     {
@@ -70,19 +73,21 @@ namespace Foam
 } // End namespace Foam
 
 
-#elif LONG_MAX > WANTEDRANGE
-
+#elif LONG_MAX > FOAM_LABEL_MAX
 // Define label as a long
 
-#include "int.H"
-#include "long.H"
+# undef  FOAM_LABEL_MAX
+# define FOAM_LABEL_MAX LONG_MAX
+
+# include "int.H"
+# include "long.H"
 
 namespace Foam
 {
     typedef long label;
 
-    static const label labelMax = LONG_MAX;
     static const label labelMin = LONG_MIN;
+    static const label labelMax = LONG_MAX;
 
     inline label readLabel(Istream& is)
     {
@@ -92,20 +97,23 @@ namespace Foam
 } // End namespace Foam
 
 
-#elif LLONG_MAX > WANTEDRANGE
+#elif LLONG_MAX > FOAM_LABEL_MAX
 
 // Define label as a long long
 
-#include "int.H"
-#include "long.H"
-#include "longLong.H"
+# undef  FOAM_LABEL_MAX
+# define FOAM_LABEL_MAX LLONG_MAX
+
+# include "int.H"
+# include "long.H"
+# include "longLong.H"
 
 namespace Foam
 {
     typedef long long label;
 
-    static const label labelMax = LLONG_MAX;
     static const label labelMin = LLONG_MIN;
+    static const label labelMax = LLONG_MAX;
 
     inline label readLabel(Istream& is)
     {
@@ -125,7 +133,7 @@ namespace Foam
 namespace Foam
 {
 
-// template specialisation for pTraits<label>
+//- template specialization for pTraits<label>
 template<>
 class pTraits<label>
 {
@@ -151,8 +159,8 @@ public:
         static const char* componentNames[];
         static const label zero;
         static const label one;
-        static const label max;
         static const label min;
+        static const label max;
 
     // Constructors
 

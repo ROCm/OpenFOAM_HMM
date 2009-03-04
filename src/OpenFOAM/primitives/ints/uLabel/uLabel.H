@@ -43,24 +43,27 @@ SeeAlso
 
 
 #if FOAM_LABEL64
-#    define WANTEDURANGE 18000000000000000000
+#    define FOAM_ULABEL_MAX 18000000000000000000
 #else
-#    define WANTEDURANGE 4000000000
+#    define FOAM_ULABEL_MAX 4000000000
 #endif
 
 
-#if UINT_MAX > WANTEDURANGE
+#if UINT_MAX > FOAM_ULABEL_MAX
 
 // Define uLabel as an unsigned int
 
-#include "uint.H"
+# undef  FOAM_ULABEL_MAX
+# define FOAM_ULABEL_MAX UINT_MAX
+
+# include "uint.H"
 
 namespace Foam
 {
     typedef unsigned int uLabel;
 
-    static const uLabel uLabelMax = UINT_MAX;
     static const uLabel uLabelMin = 0;
+    static const uLabel uLabelMax = UINT_MAX;
 
     inline uLabel readULabel(Istream& is)
     {
@@ -70,19 +73,22 @@ namespace Foam
 } // End namespace Foam
 
 
-#elif ULONG_MAX > WANTEDURANGE
+#elif ULONG_MAX > FOAM_ULABEL_MAX
 
 // Define uLabel as an unsigned long
 
-#include "uint.H"
-#include "ulong.H"
+# undef  FOAM_ULABEL_MAX
+# define FOAM_ULABEL_MAX ULONG_MAX
+
+# include "uint.H"
+# include "ulong.H"
 
 namespace Foam
 {
     typedef unsigned long uLabel;
 
-    static const uLabel uLabelMax = ULONG_MAX;
     static const uLabel uLabelMin = 0;
+    static const uLabel uLabelMax = ULONG_MAX;
 
     inline uLabel readULabel(Istream& is)
     {
@@ -92,11 +98,13 @@ namespace Foam
 } // End namespace Foam
 
 
-#elif ULLONG_MAX > WANTEDURANGE
+#elif ULLONG_MAX > FOAM_ULABEL_MAX
 
 // Define uLabel as an unsigned long long
 
-#error "Not implemented yet"
+# undef  FOAM_ULABEL_MAX
+
+# error "Not implemented yet"
 
 #endif
 
@@ -109,7 +117,7 @@ namespace Foam
 namespace Foam
 {
 
-// template specialisation for pTraits<label>
+//- template specialization for pTraits<uLabel>
 template<>
 class pTraits<uLabel>
 {

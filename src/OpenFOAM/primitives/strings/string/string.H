@@ -47,6 +47,7 @@ SourceFiles
 #define string_H
 
 #include "char.H"
+#include "Hasher.H"
 
 #include <string>
 #include <cstring>
@@ -92,7 +93,7 @@ public:
         hash()
         {}
 
-        inline unsigned operator()(const string&) const;
+        inline unsigned operator()(const string&, unsigned seed = 0) const;
     };
 
 

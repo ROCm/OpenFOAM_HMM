@@ -37,8 +37,8 @@ namespace Foam
 const char* const pTraits<label>::typeName = "label";
 const label pTraits<label>::zero = 0;
 const label pTraits<label>::one = 1;
-const label pTraits<label>::max = labelMax;
 const label pTraits<label>::min = labelMin;
+const label pTraits<label>::max = labelMax;
 
 const char* pTraits<label>::componentNames[] = { "x" };
 

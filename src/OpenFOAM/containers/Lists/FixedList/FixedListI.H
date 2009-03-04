@@ -403,25 +403,31 @@ inline bool Foam::FixedList<T, Size>::empty() const
 
 
 #ifndef __CINT__
-
-// Rotating Hash
 template<class T, unsigned Size>
 template<class HashT>
 inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
 (
-    const FixedList<T, Size>& lst
+    const FixedList<T, Size>& lst,
+    unsigned seed
 ) const
 {
-    static const unsigned farbit(8*sizeof(label)-4);
-
-    unsigned val = Size;
-
-    for (register unsigned i=0; i<Size; i++)
+    if (contiguous<T>())
     {
-        val = (val << 4) ^ (val >> farbit) ^ HashT()(lst[i]);
+        // hash directly
+        return Hasher(lst.v_, sizeof(lst.v_), seed);
     }
+    else
+    {
+        // hash incrementally
+        unsigned val = seed;
 
-    return val;
+        for (register unsigned i=0; i<Size; i++)
+        {
+            val = HashT()(lst[i], val);
+        }
+
+        return val;
+    }
 }
 
 #endif  // __CINT__

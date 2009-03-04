@@ -45,7 +45,7 @@ Foam::word Foam::name(const unsigned long val)
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, unsigned long& i)
+Foam::Istream& Foam::operator>>(Istream& is, unsigned long& val)
 {
     token t(is);
 
@@ -57,7 +57,7 @@ Foam::Istream& Foam::operator>>(Istream& is, unsigned long& i)
 
     if (t.isLabel())
     {
-        i = static_cast<unsigned long>(t.labelToken());
+        val = static_cast<unsigned long>(t.labelToken());
     }
     else
     {
@@ -85,9 +85,9 @@ unsigned long Foam::readUlong(Istream& is)
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long i)
+Foam::Ostream& Foam::operator<<(Ostream& os, const unsigned long val)
 {
-    os.write(label(i));
+    os.write(label(val));
     os.check("Ostream& operator<<(Ostream&, const unsigned long)");
     return os;
 }

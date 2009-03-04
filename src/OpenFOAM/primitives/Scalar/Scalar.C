@@ -34,8 +34,8 @@ namespace Foam
 const char* const pTraits<Scalar>::typeName = "scalar";
 const Scalar pTraits<Scalar>::zero = 0.0;
 const Scalar pTraits<Scalar>::one = 1.0;
-const Scalar pTraits<Scalar>::max = ScalarVGREAT;
 const Scalar pTraits<Scalar>::min = -ScalarVGREAT;
+const Scalar pTraits<Scalar>::max = ScalarVGREAT;
 
 const char* pTraits<Scalar>::componentNames[] = { "x" };
 
@@ -47,11 +47,11 @@ pTraits<Scalar>::pTraits(Istream& is)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-word name(const Scalar s)
+word name(const Scalar val)
 {
-    std::ostringstream osBuffer;
-    osBuffer << s;
-    return osBuffer.str();
+    std::ostringstream buf;
+    buf << val;
+    return buf.str();
 }
 
 

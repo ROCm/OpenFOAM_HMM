@@ -26,13 +26,15 @@ Description
     Hashing functions, mostly from Bob Jenkins
 \*---------------------------------------------------------------------------*/
 
-#include "Hashing.H"
-
-#include <cstring>
+#include "Hasher.H"
 
 #if defined (__GLIBC__)
 #  include <endian.h>
 #endif
+
+// Left-rotate a 32-bit value and carry by nBits
+#define bitRotateLeft(x, nBits)  (((x) << (nBits)) | ((x) >> (32 - (nBits))))
+
 
 // ----------------------------------------------------------------------------
 // lookup3.c, by Bob Jenkins, May 2006, Public Domain.
@@ -67,7 +69,6 @@ Description
 // mixing with 12*3 instructions on 3 integers than you can with 3 instructions
 // on 1 byte), but shoehorning those bytes into integers efficiently is messy.
 // ----------------------------------------------------------------------------
-
 
 // ----------------------------------------------------------------------------
 // mix -- mix 3 32-bit values reversibly.
@@ -112,6 +113,17 @@ Description
 // rotates.
 // ----------------------------------------------------------------------------
 
+#define bitMixer(a, b, c)                                                     \
+    {                                                                         \
+        a -= c; a ^= bitRotateLeft(c, 4); c += b;                             \
+        b -= a; b ^= bitRotateLeft(a, 6); a += c;                             \
+        c -= b; c ^= bitRotateLeft(b, 8); b += a;                             \
+        a -= c; a ^= bitRotateLeft(c,16); c += b;                             \
+        b -= a; b ^= bitRotateLeft(a,19); a += c;                             \
+        c -= b; c ^= bitRotateLeft(b, 4); b += a;                             \
+    }
+
+
 // ----------------------------------------------------------------------------
 // final -- final mixing of 3 32-bit values (a,b,c) into c
 //
@@ -135,6 +147,18 @@ Description
 //  10  8 15 26 3 22 24
 //  11  8 15 26 3 22 24
 // ----------------------------------------------------------------------------
+
+#define bitMixerFinal(a, b, c)                                                \
+    {                                                                         \
+        c ^= b; c -= bitRotateLeft(b, 14);                                    \
+        a ^= c; a -= bitRotateLeft(c, 11);                                    \
+        b ^= a; b -= bitRotateLeft(a, 25);                                    \
+        c ^= b; c -= bitRotateLeft(b, 16);                                    \
+        a ^= c; a -= bitRotateLeft(c, 4);                                     \
+        b ^= a; b -= bitRotateLeft(a, 14);                                    \
+        c ^= b; c -= bitRotateLeft(b, 24);                                    \
+    }
+
 
 // * * * * * * * * * * * * * * Static Functions  * * * * * * * * * * * * * * //
 
@@ -165,11 +189,11 @@ Description
 
 //- specialized little-endian code
 #if !defined (__BYTE_ORDER) || (__BYTE_ORDER == __LITTLE_ENDIAN)
-static uint32_t jenkins_hashlittle
+static unsigned jenkins_hashlittle
 (
     const void *key,
     size_t length,
-    uint32_t initval
+    unsigned initval
 )
 {
     uint32_t a, b, c;
@@ -343,11 +367,11 @@ static uint32_t jenkins_hashlittle
 // ----------------------------------------------------------------------------
 // specialized big-endian code
 #if !defined (__BYTE_ORDER) || (__BYTE_ORDER == __BIG_ENDIAN)
-static uint32_t jenkins_hashbig
+static unsigned jenkins_hashbig
 (
     const void *key,
     size_t length,
-    uint32_t initval
+    unsigned initval
 )
 {
     uint32_t a, b, c;
@@ -447,6 +471,37 @@ static uint32_t jenkins_hashbig
 
 // * * * * * * * * * * * * * * * * Functions * * * * * * * * * * * * * * * * //
 
+
+unsigned Foam::Hasher
+(
+    const void *key,
+    size_t length,
+    unsigned initval
+)
+{
+#ifdef __BYTE_ORDER
+# if (__BYTE_ORDER == __BIG_ENDIAN)
+    return jenkins_hashbig(key, length, initval);
+# else
+    return jenkins_hashlittle(key, length, initval);
+# endif
+#else
+    // endian-ness not known at compile-time: runtime endian test
+    const short endianTest = 0x0100;
+
+    // yields 0x01 for big endian
+    if (*(reinterpret_cast<const char *>(&endianTest)))
+    {
+        return jenkins_hashbig(key, length, initval);
+    }
+    else
+    {
+        return jenkins_hashlittle(key, length, initval);
+    }
+#endif
+}
+
+
 // ----------------------------------------------------------------------------
 //  This works on all machines.  To be useful, it requires
 //  -- that the key be an array of uint32_t's, and
@@ -458,11 +513,11 @@ static uint32_t jenkins_hashbig
 //  bytes.  hashlittle() is more complicated than hashword() only because
 //  hashlittle() has to dance around fitting the key bytes into registers.
 // ----------------------------------------------------------------------------
-uint32_t Foam::Hashing::jenkins
+unsigned Foam::HasherSingle
 (
     const uint32_t *k,
     size_t length,
-    uint32_t seed
+    unsigned seed
 )
 {
     uint32_t a, b, c;
@@ -502,12 +557,12 @@ uint32_t Foam::Hashing::jenkins
 // both be initialized with seeds.  If you pass in (*pb)==0, the output
 // (*pc) will be the same as the return value from hashword().
 // ----------------------------------------------------------------------------
-uint32_t Foam::Hashing::jenkinsTwin
+unsigned Foam::HasherDual
 (
     const uint32_t *k,
     size_t length,
-    uint32_t& hash1,  // IN: seed OUT: primary hash value
-    uint32_t& hash2   // IN: more seed OUT: secondary hash value
+    unsigned& hash1,  // IN: seed OUT: primary hash value
+    unsigned& hash2   // IN: more seed OUT: secondary hash value
 )
 {
     uint32_t a, b, c;
@@ -544,37 +599,6 @@ uint32_t Foam::Hashing::jenkinsTwin
 
     // return primary hash value
     return c;
-}
-
-
-
-uint32_t Foam::Hashing::jenkins
-(
-    const void *key,
-    size_t length,
-    uint32_t initval
-)
-{
-#ifdef __BYTE_ORDER
-# if (__BYTE_ORDER == __BIG_ENDIAN)
-    return jenkins_hashbig(key, length, initval);
-# else
-    return jenkins_hashlittle(key, length, initval);
-# endif
-#else
-    // endian-ness not known at compile-time: runtime endian test
-    const short endianTest = 0x0100;
-
-    // yields 0x01 for big endian
-    if (*(reinterpret_cast<const char *>(&endianTest)))
-    {
-        return jenkins_hashbig(key, length, initval);
-    }
-    else
-    {
-        return jenkins_hashlittle(key, length, initval);
-    }
-#endif
 }
 
 

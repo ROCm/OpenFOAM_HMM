@@ -52,7 +52,7 @@ $(strings)/fileName/fileNameIO.C
 $(strings)/keyType/keyTypeIO.C
 $(strings)/wordRe/wordReIO.C
 
-primitives/hashes/Hashing/Hashing.C
+primitives/hashes/Hasher/Hasher.C
 
 sha1 = primitives/hashes/SHA1
 $(sha1)/SHA1.C

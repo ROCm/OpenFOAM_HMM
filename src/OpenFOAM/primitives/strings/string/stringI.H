@@ -198,19 +198,11 @@ inline Foam::string Foam::string::operator()(const size_type n) const
 
 inline unsigned Foam::string::hash::operator()
 (
-    const string& key
+    const string& key,
+    unsigned seed
 ) const
 {
-    const size_type len = key.length();
-    const char *data = key.data();
-
-    register unsigned val = 0;
-    for (register size_type i=0; i < len; ++data, ++i)
-    {
-        val = (val << 1) ^ *data;
-    }
-
-    return val;
+    return Hasher(key.data(), key.size(), seed);
 }
 
 // ************************************************************************* //

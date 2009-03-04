@@ -82,8 +82,8 @@ class FixedList
 
 public:
 
-    //- Hashing function class
-    //  Rotating hash from http://burtleburtle.net/bob/hash/doobs.html
+    //- Hashing function class.
+    //  Use Hasher directly for contiguous data. Otherwise hash incrementally.
     template< class HashT=Hash<T> >
     class Hash
     {
@@ -91,7 +91,11 @@ public:
         Hash()
         {}
 
-        inline unsigned operator()(const FixedList<T, Size>&) const;
+        inline unsigned operator()
+        (
+            const FixedList<T, Size>&,
+            unsigned seed = 0
+        ) const;
     };
 
     // Static Member Functions

@@ -56,6 +56,12 @@ int main(int argc, char *argv[])
     Info<< "list:" << list
         << " hash:" << FixedList<label, 4>::Hash<>()(list) << endl;
 
+    Info<< "FixedList<label, ..> is contiguous, "
+        "thus hashing function is irrelevant: with string::hash" << endl;
+
+    Info<< "list:" << list
+        << " hash:" << FixedList<label, 4>::Hash<string::hash>()(list) << endl;
+
     label a[4] = {0, 1, 2, 3};
     FixedList<label, 4> list2(a);
 
