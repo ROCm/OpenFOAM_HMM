@@ -230,24 +230,6 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 
 
 template<class CloudType>
-void Foam::InjectionModel<CloudType>::geometryCorrection(vector& pos) const
-{
-    meshTools::constrainToMeshCentre(owner_.mesh(), pos);
-}
-
-
-template<class CloudType>
-void Foam::InjectionModel<CloudType>::velocityCorrection(vector& U) const
-{
-    meshTools::constrainDirection
-    (
-        owner_.mesh(),
-        owner_.mesh().solutionD(),
-        U
-    );
-}
-
-template<class CloudType>
 void Foam::InjectionModel<CloudType>::postInjectCheck()
 {
     if (parcelsAdded_ > 0)
@@ -269,6 +251,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck()
     // Reset added parcels counter
     parcelsAdded_ = 0;
 
+    // Write current state to properties file
     writeProps();
 }
 
@@ -425,8 +408,13 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 scalar dt = time - timeInj;
 
                 // Apply corrections for 2-D cases
-                geometryCorrection(pos);
-                velocityCorrection(U);
+                meshTools::constrainToMeshCentre(owner_.mesh(), pos);
+                meshTools::constrainDirection
+                (
+                    owner_.mesh(),
+                    owner_.mesh().solutionD(),
+                    U
+                );
 
                 // Add the new parcel
                 td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);

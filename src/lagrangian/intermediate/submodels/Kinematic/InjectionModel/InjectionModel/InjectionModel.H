@@ -88,12 +88,6 @@ private:
         //- Write injector properties
         void writeProps();
 
-        //- Geometry correction for 2-D cases
-        void geometryCorrection(vector& pos) const;
-
-        //- Velocity correction for 2-D cases
-        void velocityCorrection(vector& U) const;
-
 
 protected:
 
