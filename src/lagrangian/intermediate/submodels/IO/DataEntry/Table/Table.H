@@ -28,18 +28,14 @@ Class
 Description
     Templated table container data entry. Items are stored in a list of
     Tuple2's. First column is always stored as scalar entries. Data is read
-    in the form, e.g. for (scalar, vector):
+    in the form, e.g. for an entry <entryName> that is (scalar, vector):
 
     @verbatim
-        entry                    Table
-        entryCoeffs
-        {
-            table
-            (
-                0.0 (1 2 3)
-                1.0 (4 5 6)
-            )
-        }
+        <entryName>   table
+        (
+            0.0 (1 2 3)
+            1.0 (4 5 6)
+        );
     @endverbatim
 
 SourceFiles
@@ -85,13 +81,13 @@ class Table
 public:
 
     //- Runtime type information
-    TypeName("Table");
+    TypeName("table");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        Table(const word& entryName, const dictionary& dict);
+        //- Construct from entry name and Istream
+        Table(const word& entryName, Istream& is);
 
 
     //- Destructor

@@ -29,15 +29,9 @@ License
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::DataEntry<Type>::DataEntry
-(
-    const word& typeName,
-    const word& entryName,
-    const dictionary& dict
-)
+Foam::DataEntry<Type>::DataEntry(const word& entryName)
 :
-    dict_(dict.subDict(entryName + "Coeffs")),
-    entry_(entryName)
+    name_(entryName)
 {}
 
 
@@ -51,9 +45,9 @@ Foam::DataEntry<Type>::~DataEntry()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-const Foam::dictionary& Foam::DataEntry<Type>::dict() const
+const Foam::word& Foam::DataEntry<Type>::name() const
 {
-    return dict_;
+    return name_;
 }
 
 

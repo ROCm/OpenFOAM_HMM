@@ -29,26 +29,16 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Table<Type>::Table
-(
-    const word& entryName,
-    const dictionary& dict
-)
+Foam::Table<Type>::Table(const word& entryName, Istream& is)
 :
-    DataEntry<Type>(typeName, entryName, dict),
-    table_(this->dict_.lookup("table"))
+    DataEntry<Type>(entryName),
+    table_(is)
 {
     if (!table_.size())
     {
-        FatalErrorIn
-        (
-             "Foam::Table<Type>::Table\n"
-             "(\n"
-             "    const word& entryName,\n"
-             "    const dictionary& dict\n"
-             ")\n"
-        ) << "Table is invalid (empty)" << nl
-          << exit(FatalError);
+        FatalErrorIn("Foam::Table<Type>::Table(const Istream&)")
+            << "Table for entry " << this->name_ << " is invalid (empty)"
+            << nl << exit(FatalError);
     }
 }
 

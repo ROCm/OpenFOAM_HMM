@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class DataEntry Declaration
+                         Class DataEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -67,11 +67,8 @@ protected:
 
     // Protected data
 
-        //- Coefficients dictionary
-        const dictionary dict_;
-
         //- Name of entry
-        const word entry_;
+        const word name_;
 
 
 public:
@@ -87,21 +84,16 @@ public:
         dictionary,
         (
             const word& entryName,
-            const dictionary& dict
+            Istream& is
         ),
-        (entryName, dict)
+        (entryName, is)
     );
 
 
     // Constructor
 
-        //- Construct from type name and dictionary
-        DataEntry
-        (
-            const word& TypeName,
-            const word& entryName,
-            const dictionary& dict
-        );
+        //- Construct from entry name
+        DataEntry(const word& entryName);
 
 
     //- Selector
@@ -120,8 +112,8 @@ public:
 
         // Access
 
-            //- Return the dictionary
-            const dictionary& dict() const;
+            //- Return the name of the entry
+            const word& name() const;
 
 
         // Evaluation

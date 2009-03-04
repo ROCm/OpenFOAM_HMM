@@ -28,12 +28,9 @@ Class
 Description
     Templated basic entry that holds a constant value.
 
+    Usage - for entry <entryName> having the value <value>:
     @verbatim
-        entry                    Constant
-        entryCoeffs
-        {
-            value                100.0; // Constant value
-        }
+        <entryName>    constant  <value>
     @endverbatim
 
 SourceFiles
@@ -78,17 +75,13 @@ class Constant
 public:
 
     // Runtime type information
-    TypeName("Constant");
+    TypeName("constant");
 
 
     // Constructors
 
-        //- Construct from dictionary
-        Constant
-        (
-            const word& entryName,
-            const dictionary& dict
-        );
+        //- Construct from entry name and Istream
+        Constant(const word& entryName, Istream& is);
 
 
     //- Destructor
@@ -108,10 +101,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<>
-Constant<label>::Constant(const word& entryName, const dictionary& dict);
+Constant<label>::Constant(const word& entryName, Istream& is);
 
 template<>
-Constant<scalar>::Constant(const word& entryName, const dictionary& dict);
+Constant<scalar>::Constant(const word& entryName, Istream& is);
 
 
 } // End namespace Foam
