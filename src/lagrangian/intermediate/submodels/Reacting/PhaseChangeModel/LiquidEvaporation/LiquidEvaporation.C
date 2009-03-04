@@ -24,13 +24,51 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "liquidEvaporation.H"
+#include "LiquidEvaporation.H"
 #include "specie.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::scalar Foam::liquidEvaporation<CloudType>::Sh
+Foam::label Foam::LiquidEvaporation<CloudType>::carrierSpecieId
+(
+    const word& specieName
+) const
+{
+    forAll (this->owner().carrierThermo().composition().Y(), i)
+    {
+        if
+        (
+            this->owner().carrierThermo().composition().Y()[i].name()
+         == specieName
+        )
+        {
+            return i;
+        }
+    }
+
+    wordList species(this->owner().carrierThermo().composition().Y().size());
+    forAll (this->owner().carrierThermo().composition().Y(), i)
+    {
+        species[i] = this->owner().carrierThermo().composition().Y()[i].name();
+    }
+
+    FatalErrorIn
+    (
+        "Foam::label Foam::LiquidEvaporation<CloudType>::carrierSpecieId"
+        "("
+            "const word&"
+        ") const"
+    )   << "Could not find " << specieName << " in species list" << nl
+        <<  "Avialable species:" << nl << species
+        << nl << exit(FatalError);
+
+    return -1;
+}
+
+
+template <class CloudType>
+Foam::scalar Foam::LiquidEvaporation<CloudType>::Sh
 (
     const scalar Re,
     const scalar Sc
@@ -40,86 +78,47 @@ Foam::scalar Foam::liquidEvaporation<CloudType>::Sh
 }
 
 
-template <class CloudType>
-Foam::scalar Foam::liquidEvaporation<CloudType>::pSat
-(
-    const label i,
-    const scalar T
-) const
-{
-    const List<Tuple2<scalar, scalar> >& pSat = pSat_[i];
-
-    label id = 0;
-    label nT = pSat.size();
-    while ((id < nT) && (pSat[id].first() < T))
-    {
-        id++;
-    }
-
-    if (id == 0 || id == nT - 1)
-    {
-        return pSat[id].second();
-    }
-    else
-    {
-        return
-            (pSat[id].first() - T)
-           /(pSat[id].first() - pSat[id-1].first())
-           *(pSat[id].second() - pSat[id-1].second())
-          + pSat[id-1].second();
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::liquidEvaporation<CloudType>::liquidEvaporation
+Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
 (
     const dictionary& dict,
     CloudType& owner
 )
 :
     PhaseChangeModel<CloudType>(dict, owner, typeName),
-    gases_(owner.gases()),
     liquids_
     (
         liquidMixture::New
         (
             owner.mesh().objectRegistry::lookupObject<dictionary>
             (
-                owner.carrierThermo().name().name()
+                owner.carrierThermo().name()
             )
         )
     ),
-    Tvap_(readScalar(coeffDict().lookup("Tvap"))),
-    Dm_(coeffDict().lookup("DiffusionCoeffs")),
-    pSat_(coeffDict().lookup("pSat"))
+    Tvap_(readScalar(this->coeffDict().lookup("Tvap"))),
+    evapProps_(this->coeffDict().lookup("activeLiquids")),
+    liqToGasMap_(evapProps_.size())
 {
-    if (liquids_.size() != Dm_.size())
+    if (evapProps_.size() == 0)
     {
-        FatalErrorIn
+        WarningIn
         (
-            "Foam::liquidEvaporation<CloudType>::liquidEvaporation\n"
-            "(\n"
-            "    const dictionary& dict,\n"
-            "    CloudType& cloud\n"
-            ")\n"
-        )   << "Size of diffusionCoeffs list not equal to the number of liquid "
-            << "species" << nl << exit(FatalError);
+            "Foam::LiquidEvaporation<CloudType>::LiquidEvaporation"
+            "("
+                "const dictionary& dict, "
+                "CloudType& owner"
+            ")"
+        )   << "Evaporation model selected, but no active liquids defined"
+            << nl << endl;
     }
 
-    if (liquids_.size() != pSat_.size())
+    // Calculate mapping between liquid and carrier phase species
+    forAll(evapProps_, i)
     {
-        FatalErrorIn
-        (
-            "Foam::liquidEvaporation<CloudType>::liquidEvaporation\n"
-            "(\n"
-            "    const dictionary& dict,\n"
-            "    CloudType& cloud\n"
-            ")\n"
-        )   << "Size of saturation pressure lists not equal to the number of "
-            << "liquid species" << nl << exit(FatalError);
+        liqToGasMap_[i] = carrierSpecieId(evapProps_[i].name());
     }
 }
 
@@ -127,75 +126,79 @@ Foam::liquidEvaporation<CloudType>::liquidEvaporation
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::liquidEvaporation<CloudType>::~liquidEvaporation()
+Foam::LiquidEvaporation<CloudType>::~LiquidEvaporation()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::liquidEvaporation<CloudType>::active() const
+bool Foam::LiquidEvaporation<CloudType>::active() const
 {
     return true;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::liquidEvaporation<CloudType>::calculate
+Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
 (
     const scalar T,
     const scalar d,
     const scalarField& Xc,
-    const scalarList& dMassMT,
-    const vector& Ur
+    scalarList& dMassMT,
+    const vector& Ur,
     const scalar Tc,
     const scalar pc,
-    const scalar nuc
-    const scalar dt,
+    const scalar nuc,
+    const scalar dt
 ) const
 {
     scalar dMassTot = 0.0;
 
     if (T < Tvap_)
     {
-        // not reached temperature threshold
-        return 0.0;
+        // not reached model activation temperature
+        return dMassTot;
     }
     else
     {
         // droplet area
         scalar A = mathematicalConstant::pi*sqr(d);
 
-        // universal gas constant
-        const scalar R = specie::RR.value();
-
         // Reynolds number
         scalar Re = mag(Ur)*d/(nuc + ROOTVSMALL);
 
-        // calculate mass transfer of each specie
-        forAll(dMassMT, i)
+        // Calculate mass transfer of each specie in liquid
+        forAll(evapProps_, i)
         {
+            // Diffusion coefficient for species i
+            scalar Dab = evapProps_[i].Dab();
+
+            // Saturation pressure for species i at temperature T
+            scalar pSat = evapProps_[i].TvsPSat().value(T);
+
             // Schmidt number
-            scalar Sc = nuc/(Dm_[i] + ROOTVSMALL);
+            scalar Sc = nuc/(Dab + ROOTVSMALL);
 
             // Sherwood number
             scalar Sh = this->Sh(Re, Sc);
 
             // mass transfer coefficient [m/s]
-            scalar kc = Sh*Dm_[i]/(d + ROOTVSMALL);
+            scalar kc = Sh*Dab/(d + ROOTVSMALL);
 
             // vapour concentration at droplet surface [kgmol/m3]
-            scalar Cs = pSat(i, T)/(R*T);
+            scalar Cs = pSat/(specie::RR*T);
 
             // vapour concentration in bulk gas [kgmol/m3]
-            scalar Cinf = Xc[i]*pc/(R*Tc);
+            scalar Cinf = Xc[i]*pc/(specie::RR*Tc);
 
             // molar flux of vapour [kgmol/m2/s]
             scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
             // mass transfer
-            scalar dm = Ni*A*liquids_.properies()[i].W()*dt;
-            dMassMT[i] -= dm;
+            label globalLiqId = liqToGasMap_[i];
+            scalar dm = Ni*A*liquids_->properties()[globalLiqId].W()*dt;
+            dMassMT[globalLiqId] -= dm;
             dMassTot += dm;
         }
     }

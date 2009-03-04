@@ -24,54 +24,57 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoPhaseChange.H"
+#include "evaporationProperties.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoPhaseChange<CloudType>::NoPhaseChange
+Foam::evaporationProperties::evaporationProperties()
+:
+    name_("unknownSpecie"),
+    Dab_(0.0),
+    TvsPSat_()
+{}
+
+
+Foam::evaporationProperties::evaporationProperties
 (
-    const dictionary&,
-    CloudType& owner
+    const evaporationProperties& pp
 )
 :
-    PhaseChangeModel<CloudType>(owner)
+    name_(pp.name_),
+    Dab_(pp.Dab_),
+    TvsPSat_(pp.TvsPSat_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoPhaseChange<CloudType>::~NoPhaseChange()
+Foam::evaporationProperties::~evaporationProperties()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class CloudType>
-bool Foam::NoPhaseChange<CloudType>::active() const
+const Foam::word& Foam::evaporationProperties::name() const
 {
-    return false;
+    return name_;
 }
 
 
-template<class CloudType>
-Foam::scalar Foam::NoPhaseChange<CloudType>::calculate
-(
-    const scalar,
-    const scalar,
-    const scalarField&,
-    scalarList&,
-    const vector&,
-    const scalar,
-    const scalar,
-    const scalar,
-    const scalar
-) const
+Foam::scalar Foam::evaporationProperties::Dab() const
 {
-    // Nothing to do...
-    return 0.0;
+    return Dab_;
+}
+
+
+const Foam::DataEntry<Foam::scalar>&
+Foam::evaporationProperties::TvsPSat() const
+{
+    return TvsPSat_();
 }
 
 
 // ************************************************************************* //
+

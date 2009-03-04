@@ -54,6 +54,16 @@ SourceFiles
 namespace Foam
 {
 
+template<class Type>
+class Table;
+
+template<class Type>
+Ostream& operator<<
+(
+    Ostream&,
+    const Table<Type>&
+);
+
 /*---------------------------------------------------------------------------*\
                            Class Table Declaration
 \*---------------------------------------------------------------------------*/
@@ -71,9 +81,6 @@ class Table
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        Table(const Table<Type>&);
-
         //- Disallow default bitwise assignment
         void operator=(const Table<Type>&);
 
@@ -89,6 +96,9 @@ public:
         //- Construct from entry name and Istream
         Table(const word& entryName, Istream& is);
 
+        //- Copy constructor
+        Table(const Table<Type>& tbl);
+
 
     //- Destructor
     virtual ~Table();
@@ -101,6 +111,14 @@ public:
 
         //- Integrate between two (scalar) values
         Type integrate(const scalar x1, const scalar x2) const;
+
+
+    //- Ostream Operator
+    friend Ostream& operator<< <Type>
+    (
+        Ostream&,
+        const Constant<Type>&
+    );
 };
 
 

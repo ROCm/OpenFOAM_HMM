@@ -28,6 +28,7 @@ License
 #include "ReactingCloud.H"
 
 #include "NoPhaseChange.H"
+#include "LiquidEvaporation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,6 +43,12 @@ namespace Foam
     makePhaseChangeModelType
     (
         NoPhaseChange,
+        ReactingCloud,
+        basicReactingMultiphaseParcel
+    );
+    makePhaseChangeModelType
+    (
+        LiquidEvaporation,
         ReactingCloud,
         basicReactingMultiphaseParcel
     );

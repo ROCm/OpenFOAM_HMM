@@ -141,7 +141,7 @@ public:
             const scalar T,
             const scalar d,
             const scalarField& Xc,
-            const scalarList& dMassMT,
+            scalarList& dMassMT,
             const vector& Ur,
             const scalar Tc,
             const scalar pc,

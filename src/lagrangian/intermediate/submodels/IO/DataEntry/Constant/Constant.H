@@ -48,6 +48,16 @@ SourceFiles
 namespace Foam
 {
 
+template<class Type>
+class Constant;
+
+template<class Type>
+Ostream& operator<<
+(
+    Ostream&,
+    const Constant<Type>&
+);
+
 /*---------------------------------------------------------------------------*\
                            Class Constant Declaration
 \*---------------------------------------------------------------------------*/
@@ -65,9 +75,6 @@ class Constant
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        Constant(const Constant<Type>&);
-
         //- Disallow default bitwise assignment
         void operator=(const Constant<Type>&);
 
@@ -83,6 +90,9 @@ public:
         //- Construct from entry name and Istream
         Constant(const word& entryName, Istream& is);
 
+        //- Copy constructor
+        Constant(const Constant<Type>& cnst);
+
 
     //- Destructor
     virtual ~Constant();
@@ -95,6 +105,14 @@ public:
 
         //- Integrate between two values
         Type integrate(const scalar x1, const scalar x2) const;
+
+
+    //- Ostream Operator
+    friend Ostream& operator<< <Type>
+    (
+        Ostream&,
+        const Constant<Type>&
+    );
 };
 
 

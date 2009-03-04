@@ -23,77 +23,92 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::NoPhaseChange
+    Foam::evaporationProperties
 
 Description
-    Dummy phase change model for 'none'
+    Helper class to manage evaporation properties
+
+SourceFiles
+    evaporationProperties.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoPhaseChange_H
-#define NoPhaseChange_H
+#ifndef evaporationProperties_H
+#define evaporationProperties_H
 
-#include "PhaseChangeModel.H"
+#include "DataEntry.H"
+#include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
-                       Class NoPhaseChange Declaration
+                    Class evaporationProperties Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class NoPhaseChange
-:
-    public PhaseChangeModel<CloudType>
+class evaporationProperties
 {
+   // Private data
+
+        //- Name of specie
+        word name_;
+
+        //- Diffusion coefficient
+        scalar Dab_;
+
+        //- Data entry for saturation pressure as a function of temperature
+        autoPtr<DataEntry<scalar> > TvsPSat_;
+
+
+    // Private member functions
+
+
+
 public:
-
-    //- Runtime type information
-    TypeName("none");
-
 
     // Constructors
 
-        //- Construct from dictionary
-        NoPhaseChange(const dictionary&, CloudType&);
+        //- Null constructor
+        evaporationProperties();
+
+        //- Construct from Istream
+        evaporationProperties(Istream&);
+
+        //- Construct as copy
+        evaporationProperties(const evaporationProperties&);
 
 
     //- Destructor
-    virtual ~NoPhaseChange();
+    ~evaporationProperties();
 
 
-    // Member Functions
+    // Public member functions
 
-        //- Flag to indicate whether model activates phase change model
-        bool active() const;
+        // Access
 
-        //- Update model
-        scalar calculate
-        (
-            const scalar T,
-            const scalar d,
-            const scalarField& Xc,
-            scalarList& dMassMT,
-            const vector& Ur,
-            const scalar Tc,
-            const scalar pc,
-            const scalar nuc,
-            const scalar dt
-        ) const;
+            //- Return const access to the specie name
+            const word& name() const;
+
+            //- Return const access to the diffusion coefficient
+            scalar Dab() const;
+
+            //- Return const access to the saturation pressure as a function
+            //  of temperature
+            const DataEntry<scalar>& TvsPSat() const;
+
+
+    // IOstream Operators
+
+        friend Istream& operator>>(Istream&, evaporationProperties&);
+        friend Ostream& operator<<(Ostream&, const evaporationProperties&);
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "NoPhaseChange.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

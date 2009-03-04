@@ -35,6 +35,13 @@ Foam::DataEntry<Type>::DataEntry(const word& entryName)
 {}
 
 
+template<class Type>
+Foam::DataEntry<Type>::DataEntry(const DataEntry<Type>& de)
+:
+    name_(de.name_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -49,6 +56,11 @@ const Foam::word& Foam::DataEntry<Type>::name() const
 {
     return name_;
 }
+
+
+// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
+
+#include "DataEntryIO.C"
 
 
 // ************************************************************************* //

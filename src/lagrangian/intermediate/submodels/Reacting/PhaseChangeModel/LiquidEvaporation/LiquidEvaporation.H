@@ -23,30 +23,32 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::liquidEvaporation
+    Foam::LiquidEvaporation
 
 Description
     Liquid evaporation model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef liquidEvaporation_H
-#define liquidEvaporation_H
+#ifndef LiquidEvaporation_H
+#define LiquidEvaporation_H
 
 #include "PhaseChangeModel.H"
 #include "liquidMixture.H"
 #include "Tuple2.H"
+
+#include "evaporationProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                       Class liquidEvaporation Declaration
+                       Class LiquidEvaporation Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class liquidEvaporation
+class LiquidEvaporation
 :
     public PhaseChangeModel<CloudType>
 {
@@ -62,34 +64,32 @@ protected:
         //  allowed
         scalar Tvap_;
 
-        //- Component diffusion coefficients - one per specie
-        //  Note: need to be in same order as defined by liquids in thermo
-        //        props
-        scalarList Dm_;
+        //- List of evaporation properties
+        List<evaporationProperties> evapProps_;
 
-        //- Component saturation pressure vs temperature
-        List<List<Tuple2<scalar, scalar> > > pSat_;
+        //- Mapping between liquid and carrier gas species
+        List<label> liqToGasMap_;
 
 
     // Protected member functions
 
+        //- Return the id of species specieName in the carrier phase
+        label carrierSpecieId(const word& specieName) const;
+
         //- Sherwood number as a function of Reynolds and Schmidt numbers
         scalar Sh(const scalar Re, const scalar Sc) const;
-
-        //- Return the saturation pressure for species i at temperature, T
-        scalar pSat(const label i, const scalar T) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("liquidEvaporation");
+    TypeName("LiquidEvaporation");
 
 
     // Constructors
 
         //- Construct from dictionary
-        liquidEvaporation
+        LiquidEvaporation
         (
             const dictionary& dict,
             CloudType& cloud
@@ -97,7 +97,7 @@ public:
 
 
     //- Destructor
-    virtual ~liquidEvaporation();
+    virtual ~LiquidEvaporation();
 
 
     // Member Functions
@@ -111,7 +111,7 @@ public:
             const scalar T,
             const scalar d,
             const scalarField& Xc,
-            const scalarList& dMassMT,
+            scalarList& dMassMT,
             const vector& Ur,
             const scalar Tc,
             const scalar pc,
@@ -128,7 +128,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "liquidEvaporation.C"
+#   include "LiquidEvaporation.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

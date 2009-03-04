@@ -24,53 +24,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoPhaseChange.H"
+#include "DataEntry.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::NoPhaseChange<CloudType>::NoPhaseChange
+template<class Type>
+Foam::Ostream& Foam::operator<<
 (
-    const dictionary&,
-    CloudType& owner
+    Ostream& os,
+    const Table<Type>& de
 )
-:
-    PhaseChangeModel<CloudType>(owner)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template <class CloudType>
-Foam::NoPhaseChange<CloudType>::~NoPhaseChange()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoPhaseChange<CloudType>::active() const
 {
-    return false;
-}
+    if (os.format() == IOstream::ASCII)
+    {
+        os  << static_cast<const DataEntry<Type>& >(de)
+            << token::SPACE << de.table_;
+    }
+    else
+    {
+        os  << static_cast<const DataEntry<Type>& >(de);
+        os.write
+        (
+            reinterpret_cast<const char*>(&de.table_),
+            sizeof(de.table_)
+        );
+    }
 
+    // Check state of Ostream
+    os.check
+    (
+        "Ostream& operator<<(Ostream&, const Table<Type>&)"
+    );
 
-template<class CloudType>
-Foam::scalar Foam::NoPhaseChange<CloudType>::calculate
-(
-    const scalar,
-    const scalar,
-    const scalarField&,
-    scalarList&,
-    const vector&,
-    const scalar,
-    const scalar,
-    const scalar,
-    const scalar
-) const
-{
-    // Nothing to do...
-    return 0.0;
+    return os;
 }
 
 

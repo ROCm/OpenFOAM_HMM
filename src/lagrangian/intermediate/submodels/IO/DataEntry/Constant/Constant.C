@@ -36,6 +36,14 @@ Foam::Constant<Type>::Constant(const word& entryName, Istream& is)
 {}
 
 
+template<class Type>
+Foam::Constant<Type>::Constant(const Constant<Type>& cnst)
+:
+    DataEntry<Type>(cnst),
+    value_(cnst.value_)
+{}
+
+
 template<>
 Foam::Constant<Foam::label>::Constant(const word& entryName, Istream& is)
 :
@@ -73,6 +81,11 @@ Type Foam::Constant<Type>::integrate(const scalar x1, const scalar x2) const
 {
     return (x2 - x1)*value_;
 }
+
+
+// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
+
+#include "ConstantIO.C"
 
 
 // ************************************************************************* //

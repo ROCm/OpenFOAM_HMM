@@ -43,6 +43,14 @@ Foam::Table<Type>::Table(const word& entryName, Istream& is)
 }
 
 
+template<class Type>
+Foam::Table<Type>::Table(const Table<Type>& tbl)
+:
+    DataEntry<Type>(tbl),
+    table_(tbl.table_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
@@ -130,6 +138,11 @@ Type Foam::Table<Type>::integrate(const scalar x1, const scalar x2) const
 
     return sum;
 }
+
+
+// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
+
+#include "TableIO.C"
 
 
 // ************************************************************************* //

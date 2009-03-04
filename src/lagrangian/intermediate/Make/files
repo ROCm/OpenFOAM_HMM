@@ -72,6 +72,11 @@ phaseProperties/phaseProperties/phaseProperties.C
 phaseProperties/phaseProperties/phasePropertiesIO.C
 phaseProperties/phasePropertiesList/phasePropertiesList.C
 
+/* evaporation properties */
+evaporationProperties/evaporationProperties/evaporationProperties.C
+evaporationProperties/evaporationProperties/evaporationPropertiesIO.C
+
+
 /* data entries */
 submodels/IO/DataEntry/makeDataEntries.C
 

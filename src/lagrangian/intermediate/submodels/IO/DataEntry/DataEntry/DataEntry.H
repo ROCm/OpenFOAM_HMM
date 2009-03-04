@@ -47,6 +47,16 @@ SourceFiles
 namespace Foam
 {
 
+template<class Type>
+class DataEntry;
+
+template<class Type>
+Ostream& operator<<
+(
+    Ostream&,
+    const DataEntry<Type>&
+);
+
 /*---------------------------------------------------------------------------*\
                          Class DataEntry Declaration
 \*---------------------------------------------------------------------------*/
@@ -55,9 +65,6 @@ template<class Type>
 class DataEntry
 {
     // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        DataEntry(const DataEntry<Type>&);
 
         //- Disallow default bitwise assignment
         void operator=(const DataEntry<Type>&);
@@ -95,6 +102,9 @@ public:
         //- Construct from entry name
         DataEntry(const word& entryName);
 
+        //- Copy constructor
+        DataEntry(const DataEntry<Type>& de);
+
 
     //- Selector
     static autoPtr<DataEntry<Type> > New
@@ -123,6 +133,14 @@ public:
 
             //- Integrate between two (scalar) values
             virtual Type integrate(const scalar x1, const scalar x2) const = 0;
+
+
+    //- Ostream Operator
+    friend Ostream& operator<< <Type>
+    (
+        Ostream&,
+        const DataEntry<Type>&
+    );
 };
 
 
