@@ -139,16 +139,8 @@ Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     vector& dUTrans
 )
 {
-    // Correct carrier phase velocity for 2-D slab cases
-    const polyMeshInfo& meshInfo = td.cloud().meshInfo();
-    if (meshInfo.caseIs2dSlab())
-    {
-        Uc_.component(meshInfo.emptyComponent()) = 0.0;
-    }
-
     // Return linearised term from drag model
     Cud = td.cloud().drag().Cu(U_ - Uc_, d_, rhoc_, rho_, muc_);
-
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Set new particle velocity
@@ -163,32 +155,6 @@ Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     // Calculate the momentum transfer to the continuous phase
     // - do not include gravity impulse
     dUTrans = -mass()*(Unew - U_ - dt*td.g());
-
-    // Make corrections for 2-D cases
-    if (meshInfo.caseIs2d())
-    {
-        if (meshInfo.caseIs2dSlab())
-        {
-            // Remove the slab normal parcel velocity component
-            Unew.component(meshInfo.emptyComponent()) = 0.0;
-            dUTrans.component(meshInfo.emptyComponent()) = 0.0;
-
-            // Snap parcels to central plane
-            this->position().component(meshInfo.emptyComponent()) =
-                meshInfo.centrePoint().component(meshInfo.emptyComponent());
-        }
-        else if (meshInfo.caseIs2dWedge())
-        {
-            // Snap parcels to central plane
-            this->position().component(meshInfo.emptyComponent()) = 0.0;
-        }
-        else
-        {
-             FatalErrorIn("Foam::vector Foam::KinematicParcel::calcVelocity")
-                << "Could not determine 2-D case geometry" << nl
-                << abort(FatalError);
-        }
-    }
 
     return Unew;
 }

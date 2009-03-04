@@ -39,8 +39,7 @@ SourceFiles
 #include "cloud.H"
 #include "IDLList.H"
 #include "IOField.H"
-
-#include "polyMeshInfo.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +67,6 @@ class Cloud
     public cloud,
     public IDLList<ParticleType>
 {
-
     // Private data
 
         const polyMesh& polyMesh_;
@@ -78,9 +76,6 @@ class Cloud
         const vectorField& allFaceCentres_;
         const unallocLabelList& owner_;
         const unallocLabelList& neighbour_;
-
-        //- Mesh information object
-        const polyMeshInfo meshInfo_;
 
 
     // Private member functions
@@ -171,12 +166,6 @@ public:
             label patchFace(const label patchi, const label facei) const
             {
                 return polyMesh_.boundaryMesh()[patchi].whichFace(facei);
-            }
-
-            //- Return reference to the mesh information object
-            const polyMeshInfo& meshInfo() const
-            {
-                return meshInfo_;
             }
 
             label size() const

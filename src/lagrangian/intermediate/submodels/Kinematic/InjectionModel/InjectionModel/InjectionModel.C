@@ -26,6 +26,7 @@ License
 
 #include "InjectionModel.H"
 #include "mathematicalConstants.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -231,44 +232,19 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::geometryCorrection(vector& pos) const
 {
-    if (owner_.meshInfo().caseIs2d())
-    {
-        if (owner_.meshInfo().caseIs2dWedge())
-        {
-            pos.component(owner_.meshInfo().emptyComponent()) = 0.0;
-        }
-        else if (owner_.meshInfo().caseIs2dSlab())
-        {
-            pos.component(owner_.meshInfo().emptyComponent()) =
-                owner_.meshInfo().centrePoint().component
-                (
-                    owner_.meshInfo().emptyComponent()
-                );
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "void Foam::InjectionModel<CloudType>::geometryCorrection"
-                "(vector& pos)"
-            )   << "Could not determine 2-D case geometry" << nl
-                << abort(FatalError);
-        }
-    }
+    meshTools::constrainToMeshCentre(owner_.mesh(), pos);
 }
 
 
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::velocityCorrection(vector& U) const
 {
-    if (owner_.meshInfo().caseIs2dSlab())
-    {
-        U.component(owner_.meshInfo().emptyComponent()) =
-            owner_.meshInfo().centrePoint().component
-            (
-                owner_.meshInfo().emptyComponent()
-            );
-    }
+    meshTools::constrainDirection
+    (
+        owner_.mesh(),
+        owner_.mesh().solutionD(),
+        U
+    );
 }
 
 template<class CloudType>
@@ -278,7 +254,7 @@ void Foam::InjectionModel<CloudType>::postInjectCheck()
     {
         Pout<< "\n--> Cloud: " << owner_.name() << nl
             << "    Added " << parcelsAdded_
-            <<  " new parcels" << nl << endl;
+            << " new parcels" << nl << endl;
     }
 
     // Increment total number of parcels added
