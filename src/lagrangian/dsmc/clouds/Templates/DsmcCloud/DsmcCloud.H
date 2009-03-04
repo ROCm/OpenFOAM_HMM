@@ -97,7 +97,7 @@ class DsmcCloud
         List<DynamicList<ParcelType*> > cellOccupancy_;
 
         //- An IOField holding the value of (sigmaT * cR)max for each cell (see
-        // Bird p220). Initialised with the parcelsm updated as required, and
+        // Bird p220). Initialised with the parcels, updated as required, and
         // read in on start/restart.
         volScalarField sigmaTcRMax_;
 

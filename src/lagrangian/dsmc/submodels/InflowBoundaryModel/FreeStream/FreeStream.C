@@ -126,8 +126,59 @@ void Foam::FreeStream<CloudType>::inflow()
     {
         particleFluxAccumulators_[i] +=
            -patch.faceAreas() & (velocity_*numberDensities_[i]*deltaT);
+    }
 
-        forAll(particleFluxAccumulators_[i], f)
+    forAll(patch, f)
+    {
+        // Loop over all faces as the outer loop to avoid calculating
+        // geometrical properties multiple times.
+
+        labelList faceVertices = patch[f];
+
+        label nVertices = faceVertices.size();
+
+        label globalFaceIndex = f + patch.start();
+
+        label cell = mesh.faceOwner()[globalFaceIndex];
+
+        const vector& fC = patch.faceCentres()[f];
+
+        scalar fA = mag(patch.faceAreas()[f]);
+
+        // Cummulative triangle area fractions
+        List<scalar> cTriAFracs(nVertices);
+
+        for (label v = 0; v < nVertices - 1; v++)
+        {
+            const point& vA = mesh.points()[faceVertices[v]];
+
+            const point& vB = mesh.points()[faceVertices[(v + 1)]];
+
+            cTriAFracs[v] =
+                0.5*mag((vA - fC)^(vB - fC))/fA
+              + cTriAFracs[max((v - 1), 0)];
+        }
+
+        // Force the last area fraction value to 1.0 to avoid any
+        // rounding/non-flat face errors giving a value < 1.0
+        cTriAFracs[nVertices - 1] = 1.0;
+
+        // Normal unit vector *negative* so normal is pointing into the
+        // domain
+        vector nw = patch.faceAreas()[f];
+        nw /= -mag(nw);
+
+        // Wall tangential unit vector. Use the direction between the
+        // face centre and the first vertex in the list
+        vector tw1 = fC - (mesh.points()[faceVertices[0]]);
+        tw1 /= mag(tw1);
+
+        // Other tangential unit vector.  Rescaling in case face is not
+        // flat and nw and tw1 aren't perfectly orthogonal
+        vector tw2 = nw ^ tw1;
+        tw2 /= mag(tw2);
+
+        forAll(particleFluxAccumulators_, i)
         {
             scalar& faceAccumulator = particleFluxAccumulators_[i][f];
 
@@ -140,39 +191,44 @@ void Foam::FreeStream<CloudType>::inflow()
 
             scalar mass = cloud.constProps(typeId).mass();
 
-            labelList faceVertices = patch[f];
-
-            label globalFaceIndex = f + patch.start();
-
-            label cell = mesh.faceOwner()[globalFaceIndex];
-
-            const vector& fC = patch.faceCentres()[f];
-
             for (label n = 0; n < nI; n++)
             {
-                // Temporarily insert particles half way between the face and
-                // cell centres
-                vector p = 0.5*(fC + mesh.cellCentres()[cell]);
+                // Choose a triangle to insert on, based on their relative area
 
-                // Normal unit vector *negative* so normal is pointing into the
-                // domain
-                vector nw = patch.faceAreas()[f];
-                nw /= -mag(nw);
+                scalar triSelection = rndGen.scalar01();
 
-                // Wall tangential unit vector. Use the direction between the
-                // face centre and the first vertex in the list
-                vector tw1 = fC - (mesh.points()[faceVertices[0]]);
-                tw1 /= mag(tw1);
+                // Selected triangle
+                label sTri = -1;
 
-                // Other tangential unit vector.  Rescaling in case face is not
-                // flat and nw and tw1 aren't perfectly orthogonal
-                vector tw2 = nw ^ tw1;
-                tw2 /= mag(tw2);
+                forAll(cTriAFracs, tri)
+                {
+                    sTri = tri;
 
-                scalar C = sqrt(CloudType::kb*temperature_/mass);
+                    if (cTriAFracs[tri] >= triSelection)
+                    {
+                        break;
+                    }
+                }
+
+                // Randomly distribute the points on the triangle, using the
+                // method from:
+                // Generating Random Points in Triangles
+                // by Greg Turk
+                // from "Graphics Gems", Academic Press, 1990
+                // http://tog.acm.org/GraphicsGems/gems/TriPoints.c
+
+                const point& A = fC;
+                const point& B = mesh.points()[faceVertices[sTri]];
+                const point& C =
+                    mesh.points()[faceVertices[(sTri + 1) % nVertices]];
+
+                scalar s = rndGen.scalar01();
+                scalar t = sqrt(rndGen.scalar01());
+
+                point p = (1 - t)*A + (1 - s)*t*B + s*t*C;
 
                 vector U =
-                    C
+                    sqrt(CloudType::kb*temperature_/mass)
                    *(
                         rndGen.GaussNormal()*tw1
                       + rndGen.GaussNormal()*tw2
@@ -204,14 +260,6 @@ void Foam::FreeStream<CloudType>::inflow()
     Info<< "    Particles inserted              = "
         << particlesInserted << endl;
 
-    // Info<< "insert particles now! " << nl
-    //     << temperature_ << nl
-    //     << velocity_ << nl
-    //     << moleculeTypeIds_ << nl
-    //     << numberDensities_ << nl
-    //     << particleFluxAccumulators_ << nl
-    //     << patch
-    //     << endl;
 }
 
 

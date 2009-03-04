@@ -555,6 +555,11 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::info() const
 {
+    label nDsmcParticles = this->size();
+    reduce(nDsmcParticles, sumOp<label>());
+
+    scalar nMol = nDsmcParticles*nParticle_;
+
     vector linearMomentum = linearMomentumOfSystem();
     reduce(linearMomentum, sumOp<vector>());
 
@@ -565,20 +570,22 @@ void Foam::DsmcCloud<ParcelType>::info() const
     reduce(internalEnergy, sumOp<scalar>());
 
     Info<< "Cloud name: " << this->name() << nl
-        << "    Current number of parcels       = "
-        << returnReduce(this->size(), sumOp<label>()) << nl
-        << "    Current mass in system          = "
+        << "    Number of dsmc particles        = "
+        << nDsmcParticles << nl
+        << "    Number of molecules             = "
+        << nMol << nl
+        << "    Mass in system                  = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << "    Linear momentum                 = "
-        << linearMomentum << nl
-        << "    Linear momentum magnitude       = "
-        << mag(linearMomentum) << nl
-        << "    Linear kinetic energy           = "
-        << linearKineticEnergy << nl
-        << "    Internal energy                 = "
-        << internalEnergy << nl
-        << "    Total energy                    = "
-        << internalEnergy + linearKineticEnergy << nl
+        << "    Average linear momentum         = "
+        << linearMomentum/nMol << nl
+        << "   |Average linear momentum|        = "
+        << mag(linearMomentum)/nMol << nl
+        << "    Average linear kinetic energy   = "
+        << linearKineticEnergy/nMol << nl
+        << "    Average internal energy         = "
+        << internalEnergy/nMol << nl
+        << "    Average total energy            = "
+        << (internalEnergy + linearKineticEnergy)/nMol << nl
         << endl;
 }
 

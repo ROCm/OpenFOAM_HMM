@@ -102,10 +102,8 @@ void Foam::MaxwellianThermal<CloudType>::correct
 
     scalar T = cloud.T().boundaryField()[wppIndex][wppLocalFace];
 
-    scalar C = sqrt(CloudType::kb*T/mass);
-
     U =
-        C
+        sqrt(CloudType::kb*T/mass)
        *(
             rndGen.GaussNormal()*tw1
           + rndGen.GaussNormal()*tw2
