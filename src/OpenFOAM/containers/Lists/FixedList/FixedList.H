@@ -128,7 +128,7 @@ public:
         FixedList(Istream&);
 
         //- Clone
-        inline autoPtr<FixedList<T, Size> > clone() const;
+        inline autoPtr< FixedList<T, Size> > clone() const;
 
 
     // Member Functions

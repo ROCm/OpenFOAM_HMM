@@ -26,6 +26,7 @@ License
 
 #include "UList.H"
 #include "SLList.H"
+#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
