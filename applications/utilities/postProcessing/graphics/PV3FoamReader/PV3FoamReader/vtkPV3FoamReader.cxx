@@ -64,7 +64,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     CacheMesh = 1;
 
-    ExtrapolateWalls = 0;
+    ExtrapolatePatches = 0;
     IncludeSets = 0;
     IncludeZones = 0;
     ShowPatchNames = 0;

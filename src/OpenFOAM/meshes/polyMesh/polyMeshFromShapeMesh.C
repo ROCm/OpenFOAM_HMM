@@ -217,7 +217,8 @@ Foam::polyMesh::polyMesh
         boundaryFaces.size() + 1    // add room for a default patch
     ),
     bounds_(points_, syncPar),
-    directions_(Vector<label>::zero),
+    geometricD_(Vector<label>::zero),
+    solutionD_(Vector<label>::zero),
     pointZones_
     (
         IOobject

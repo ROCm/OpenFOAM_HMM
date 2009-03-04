@@ -43,6 +43,64 @@ addToRunTimeSelectionTable(searchableSurface, triSurfaceMesh, dict);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+//// Special version of Time::findInstance that does not check headerOk
+//// to search for instances of raw files
+//Foam::word Foam::triSurfaceMesh::findRawInstance
+//(
+//    const Time& runTime,
+//    const fileName& dir,
+//    const word& name
+//)
+//{
+//    // Check current time first
+//    if (isFile(runTime.path()/runTime.timeName()/dir/name))
+//    {
+//        return runTime.timeName();
+//    }
+//    instantList ts = runTime.times();
+//    label instanceI;
+//
+//    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
+//    {
+//        if (ts[instanceI].value() <= runTime.timeOutputValue())
+//        {
+//            break;
+//        }
+//    }
+//
+//    // continue searching from here
+//    for (; instanceI >= 0; --instanceI)
+//    {
+//        if (isFile(runTime.path()/ts[instanceI].name()/dir/name))
+//        {
+//            return ts[instanceI].name();
+//        }
+//    }
+//
+//
+//    // not in any of the time directories, try constant
+//
+//    // Note. This needs to be a hard-coded constant, rather than the
+//    // constant function of the time, because the latter points to
+//    // the case constant directory in parallel cases
+//
+//    if (isFile(runTime.path()/runTime.constant()/dir/name))
+//    {
+//        return runTime.constant();
+//    }
+//
+//    FatalErrorIn
+//    (
+//        "searchableSurfaces::findRawInstance"
+//        "(const Time&, const fileName&, const word&)"
+//    )   << "Cannot find file \"" << name << "\" in directory "
+//        << runTime.constant()/dir
+//        << exit(FatalError);
+//
+//    return runTime.constant();
+//}
+
+
 //- Check file existence
 const Foam::fileName& Foam::triSurfaceMesh::checkFile
 (
@@ -149,7 +207,19 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
 :
     searchableSurface(io),
-    objectRegistry(io),
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            io.instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface(s),
     surfaceClosed_(-1)
 {}
@@ -157,8 +227,34 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
 
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
 :
+    // Find instance for triSurfaceMesh
     searchableSurface(io),
-    objectRegistry(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            static_cast<const searchableSurface&>(*this).instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface
     (
         checkFile
@@ -178,7 +274,32 @@ Foam::triSurfaceMesh::triSurfaceMesh
 )
 :
     searchableSurface(io),
-    objectRegistry(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            static_cast<const searchableSurface&>(*this).instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface
     (
         checkFile

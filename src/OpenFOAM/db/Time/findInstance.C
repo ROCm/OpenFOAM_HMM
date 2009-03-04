@@ -58,8 +58,9 @@ Foam::word Foam::Time::findInstance
     {
         if (debug)
         {
-            Info<< "Time::findInstance(const fileName&, const word&) : "
-                << "found \"" << name
+            Info<< "Time::findInstance"
+                "(const fileName&, const word&, const IOobject::readOption)"
+                << " : found \"" << name
                 << "\" in " << timeName()/dir
                 << endl;
         }
@@ -98,8 +99,8 @@ Foam::word Foam::Time::findInstance
             if (debug)
             {
                 Info<< "Time::findInstance"
-                    "(const fileName&,const word&) : "
-                    << "found \"" << name
+                    "(const fileName&, const word&, const IOobject::readOption)"
+                    << " : found \"" << name
                     << "\" in " << ts[instanceI].name()/dir
                     << endl;
             }
@@ -129,8 +130,8 @@ Foam::word Foam::Time::findInstance
         if (debug)
         {
             Info<< "Time::findInstance"
-                   "(const fileName&,const word&) : "
-                << "found \"" << name
+                "(const fileName&, const word&, const IOobject::readOption)"
+                << " : found \"" << name
                 << "\" in " << constant()/dir
                 << endl;
         }
@@ -141,10 +142,10 @@ Foam::word Foam::Time::findInstance
     if (rOpt == IOobject::MUST_READ)
     {
         FatalErrorIn
-            (
-                "Time::findInstance(const fileName&,const word&)"
-            )
-            << "Cannot find file \"" << name << "\" in directory "
+        (
+            "Time::findInstance"
+            "(const fileName&, const word&, const IOobject::readOption)"
+        )   << "Cannot find file \"" << name << "\" in directory "
             << constant()/dir
             << exit(FatalError);
     }
