@@ -76,6 +76,14 @@ private:
 
     // Private Member Functions
 
+        ////- Helper: find instance of files without header
+        //static word findRawInstance
+        //(
+        //    const Time&,
+        //    const fileName&,
+        //    const word&
+        //);
+
         //- Check file existence
         static const fileName& checkFile
         (
@@ -105,10 +113,10 @@ public:
         //- Construct from triSurface
         triSurfaceMesh(const IOobject&, const triSurface&);
 
-        //- Construct read
+        //- Construct read.
         triSurfaceMesh(const IOobject& io);
 
-        //- Construct from dictionary (used by searchableSurface)
+        //- Construct from IO and dictionary (used by searchableSurface).
         //  Dictionary may contain a 'scale' entry (eg, 0.001: mm -> m)
         triSurfaceMesh
         (

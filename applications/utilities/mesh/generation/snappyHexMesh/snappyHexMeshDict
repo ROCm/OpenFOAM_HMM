@@ -316,6 +316,11 @@ meshQualityControls
     //must be >0 for Fluent compatibility
     minTriangleTwist -1;
 
+    //- if >0 : preserve single cells with all points on the surface if the
+    //  resulting volume after snapping is larger than minVolFraction times old
+    //  volume. If <0 : delete always.
+    minVolFraction 0.1;
+
 
     // Advanced
 

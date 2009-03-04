@@ -55,7 +55,7 @@ doc/[Dd]oxygen/man
 # ignore .timeStamp in the main directory
 /.timeStamp
 
-# ignore .ebrowse in the main directory
-/.ebrowse
+# ignore .tags in the main directory
+/.tags
 
 # end-of-file
