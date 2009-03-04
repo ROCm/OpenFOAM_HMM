@@ -150,14 +150,14 @@ template<class T, class Key, class Hash>
 template<class TRef, class TableRef>
 inline Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::Iterator
 (
-    TableRef curHashTable,
+    TableRef hashTbl,
     label hashIndex,
-    label elementIndex
+    label elemIndex
 )
 :
-    curHashTable_(curHashTable),
+    hashTable_(hashTbl),
     hashIndex_(hashIndex),
-    elementIndex_(elementIndex)
+    elemIndex_(elemIndex)
 {}
 
 
@@ -168,9 +168,9 @@ inline Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::Iterator
     const iterator& iter
 )
 :
-    curHashTable_(iter.curHashTable_),
+    hashTable_(iter.hashTable_),
     hashIndex_(iter.hashIndex_),
-    elementIndex_(iter.elementIndex_)
+    elemIndex_(iter.elemIndex_)
 {}
 
 
@@ -183,7 +183,7 @@ Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::operator=
 )
 {
     this->hashIndex_ = iter.hashIndex_;
-    this->elementIndex_ = iter.elementIndex_;
+    this->elemIndex_ = iter.elemIndex_;
 }
 
 
@@ -195,7 +195,7 @@ Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::operator==
     const iterator& iter
 ) const
 {
-    return hashIndex_ == iter.hashIndex_ && elementIndex_ == iter.elementIndex_;
+    return hashIndex_ == iter.hashIndex_ && elemIndex_ == iter.elemIndex_;
 }
 
 
@@ -207,7 +207,7 @@ Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::operator==
     const const_iterator& iter
 ) const
 {
-    return hashIndex_ == iter.hashIndex_ && elementIndex_ == iter.elementIndex_;
+    return hashIndex_ == iter.hashIndex_ && elemIndex_ == iter.elemIndex_;
 }
 
 
@@ -240,7 +240,7 @@ template<class TRef, class TableRef>
 inline TRef
 Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::operator*()
 {
-    return curHashTable_.objects_[hashIndex_][elementIndex_];
+    return hashTable_.objects_[hashIndex_][elemIndex_];
 }
 
 
@@ -271,29 +271,29 @@ Foam::StaticHashTable<T, Key, Hash>::Iterator
     if (hashIndex_ >= 0)
     {
         // Try the next element on the local list
-        elementIndex_++;
+        elemIndex_++;
 
-        if (elementIndex_ < curHashTable_.objects_[hashIndex_].size())
+        if (elemIndex_ < hashTable_.objects_[hashIndex_].size())
         {
             return *this;
         }
     }
 
     // Step to the next table entry
-    elementIndex_ = 0;
+    elemIndex_ = 0;
 
     while
     (
-        ++hashIndex_ < curHashTable_.objects_.size()
-     && !curHashTable_.objects_[hashIndex_].size()
+        ++hashIndex_ < hashTable_.objects_.size()
+     && !hashTable_.objects_[hashIndex_].size()
     )
     {}
 
 
-    if (hashIndex_ >= curHashTable_.objects_.size())
+    if (hashIndex_ >= hashTable_.objects_.size())
     {
         // make end iterator
-        hashIndex_ = curHashTable_.keys_.size();
+        hashIndex_ = hashTable_.keys_.size();
     }
 
     return *this;
@@ -326,9 +326,9 @@ Foam::StaticHashTable<T, Key, Hash>::Iterator
 template<class T, class Key, class Hash>
 template<class TRef, class TableRef>
 inline const Key&
-Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::key()
+Foam::StaticHashTable<T, Key, Hash>::Iterator<TRef, TableRef>::key() const
 {
-    return curHashTable_.keys_[hashIndex_][elementIndex_];
+    return hashTable_.keys_[hashIndex_][elemIndex_];
 }
 
 

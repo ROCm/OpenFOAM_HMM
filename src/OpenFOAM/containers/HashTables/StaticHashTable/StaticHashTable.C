@@ -304,7 +304,7 @@ bool Foam::StaticHashTable<T, Key, Hash>::erase(const iterator& cit)
         List<T>& localObjects = objects_[cit.hashIndex_];
 
         // Copy down
-        for (label i = cit.elementIndex_+1; i < localKeys.size(); i++)
+        for (label i = cit.elemIndex_+1; i < localKeys.size(); i++)
         {
             localKeys[i-1] = localKeys[i];
             localObjects[i-1] = localObjects[i];
@@ -315,8 +315,8 @@ bool Foam::StaticHashTable<T, Key, Hash>::erase(const iterator& cit)
         // adjust iterator after erase
         iterator& it = const_cast<iterator&>(cit);
 
-        it.elementIndex_--;
-        if (it.elementIndex_ < 0)
+        it.elemIndex_--;
+        if (it.elemIndex_ < 0)
         {
             // No previous element in the local list
 
@@ -327,7 +327,7 @@ bool Foam::StaticHashTable<T, Key, Hash>::erase(const iterator& cit)
             if (it.hashIndex_ >= 0)
             {
                 // The last element in the local list
-                it.elementIndex_ = objects_[it.hashIndex_].size() - 1;
+                it.elemIndex_ = objects_[it.hashIndex_].size() - 1;
             }
             else
             {
@@ -335,7 +335,7 @@ bool Foam::StaticHashTable<T, Key, Hash>::erase(const iterator& cit)
                 // - not end()
                 // - handled by operator++
                 it.hashIndex_ = -1;
-                it.elementIndex_ = 0;
+                it.elemIndex_ = 0;
             }
         }
 

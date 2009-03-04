@@ -32,7 +32,6 @@ Note
     Uses straight lists as underlying type.
     Is slower to insert than the standard HashTable, but should be more
     memory efficient and faster to access.
-    Explicitly does not have default size.
 
 SourceFiles
     StaticHashTableI.H
@@ -284,13 +283,13 @@ public:
             // Private data
 
                 //- Reference to the StaticHashTable this is an iterator for
-                TableRef curHashTable_;
+                TableRef hashTable_;
 
                 //- Current hash index
                 label hashIndex_;
 
                 //- Index of current element at hashIndex
-                label elementIndex_;
+                label elemIndex_;
 
         public:
 
@@ -299,9 +298,9 @@ public:
                 //- Construct from hash table, hash index and element index
                 inline Iterator
                 (
-                    TableRef curHashTable,
+                    TableRef,
                     label hashIndex_,
-                    label elementIndex_
+                    label elemIndex_
                 );
 
                 //- Construct from the non-const iterator
@@ -310,13 +309,13 @@ public:
 
             // Member operators
 
-                inline void operator=(const iterator& iter);
+                inline void operator=(const iterator&);
 
-                inline bool operator==(const iterator& iter) const;
-                inline bool operator==(const const_iterator& iter) const;
+                inline bool operator==(const iterator&) const;
+                inline bool operator==(const const_iterator&) const;
 
-                inline bool operator!=(const iterator& iter) const;
-                inline bool operator!=(const const_iterator& iter) const;
+                inline bool operator!=(const iterator&) const;
+                inline bool operator!=(const const_iterator&) const;
 
                 inline TRef operator*();
                 inline TRef operator()();
@@ -324,7 +323,7 @@ public:
                 inline Iterator& operator++();
                 inline Iterator operator++(int);
 
-                inline const Key& key();
+                inline const Key& key() const;
         };
 
 

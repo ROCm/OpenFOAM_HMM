@@ -290,14 +290,13 @@ public:
             // Private data
 
                 //- Reference to the HashTable this is an iterator for
-                HashTable<T, Key, Hash>& curHashTable_;
+                HashTable<T, Key, Hash>& hashTable_;
 
                 //- Current element
                 hashedEntry* elmtPtr_;
 
                 //- Current hash index
                 label hashIndex_;
-
 
         public:
 
@@ -310,7 +309,6 @@ public:
                     hashedEntry* elmt,
                     label hashIndex
                 );
-
 
             // Member operators
 
@@ -328,7 +326,7 @@ public:
                 inline iterator& operator++();
                 inline iterator operator++(int);
 
-                inline const Key& key();
+                inline const Key& key() const;
         };
 
 
@@ -349,7 +347,7 @@ public:
             // Private data
 
                 //- Reference to the HashTable this is an iterator for
-                const HashTable<T, Key, Hash>& curHashTable_;
+                const HashTable<T, Key, Hash>& hashTable_;
 
                 //- Current element
                 const hashedEntry* elmtPtr_;
@@ -390,7 +388,7 @@ public:
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);
 
-                inline const Key& key();
+                inline const Key& key() const;
         };
 
 
