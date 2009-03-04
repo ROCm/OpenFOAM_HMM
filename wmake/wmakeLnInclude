@@ -90,6 +90,7 @@ if [ $# -eq 1 ]
 then
     baseDir=$1
 elif [ $# -eq 2 ]
+then
     baseDir=$1
     lnOpt="$2"
 else
