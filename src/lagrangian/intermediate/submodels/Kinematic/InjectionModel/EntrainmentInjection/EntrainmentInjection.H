@@ -26,6 +26,16 @@ Class
     Foam::EntrainmentInjection
 
 Description
+    Injection at specified positions, with the condition that for injection
+    to be allowed
+
+        rhol <= c_*0.5*rhoc*|Uc|^2
+
+    where:
+      - rhol is the effective density (of all clouds)
+      - c_ is a modelling constant [s2/m2]
+      - rhoc is the carrier phase density
+      - Uc is the carrier phase velocity
 
 SourceFiles
     EntrainmentInjection.C
@@ -57,7 +67,7 @@ class EntrainmentInjection
 
         // Model parameters
 
-            //- Injection permission: rhol <= c_*0.5*rho*|U|^2
+            //- Modelling constant
             const scalar c_;
 
             //- Carrier phase density field
