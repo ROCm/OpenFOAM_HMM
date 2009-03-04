@@ -46,7 +46,7 @@ bool Foam::meshTools::visNormal
             return false;
         }
     }
-    
+
     return true;
 }
 
@@ -63,7 +63,7 @@ Foam::vectorField Foam::meshTools::calcBoxPointNormals(const primitivePatch& pp)
     octantNormal[pXmYpZ] = vector(1, -1, 1);
     octantNormal[mXpYpZ] = vector(-1, 1, 1);
     octantNormal[pXpYpZ] = vector(1, 1, 1);
-    
+
     octantNormal /= mag(octantNormal);
 
 
@@ -300,7 +300,7 @@ bool Foam::meshTools::edgeOnCell
 )
 {
     return findIndex(mesh.edgeCells(edgeI), cellI) != -1;
-}        
+}
 
 
 bool Foam::meshTools::edgeOnFace
@@ -311,7 +311,7 @@ bool Foam::meshTools::edgeOnFace
 )
 {
     return findIndex(mesh.faceEdges(faceI), edgeI) != -1;
-}        
+}
 
 
 // Return true if faceI part of cellI
@@ -635,9 +635,14 @@ Foam::label Foam::meshTools::walkFace
 }
 
 
-void Foam::meshTools::constrainToMeshCentre(const polyMesh& mesh, point& pt)
+void Foam::meshTools::constrainToMeshCentre
+(
+    const polyMesh& mesh,
+    point& pt
+)
 {
     const Vector<label>& dirs = mesh.geometricD();
+
     const point& min = mesh.bounds().min();
     const point& max = mesh.bounds().max();
 
@@ -645,7 +650,7 @@ void Foam::meshTools::constrainToMeshCentre(const polyMesh& mesh, point& pt)
     {
         if (dirs[cmpt] == -1)
         {
-            pt[cmpt] = 0.5*(min[cmpt]+max[cmpt]);
+            pt[cmpt] = 0.5*(min[cmpt] + max[cmpt]);
         }
     }
 }
@@ -658,6 +663,7 @@ void Foam::meshTools::constrainToMeshCentre
 )
 {
     const Vector<label>& dirs = mesh.geometricD();
+
     const point& min = mesh.bounds().min();
     const point& max = mesh.bounds().max();
 
@@ -679,7 +685,7 @@ void Foam::meshTools::constrainToMeshCentre
             {
                 if (dirs[cmpt] == -1)
                 {
-                    pts[i][cmpt] = 0.5*(min[cmpt]+max[cmpt]);
+                    pts[i][cmpt] = 0.5*(min[cmpt] + max[cmpt]);
                 }
             }
         }
@@ -688,10 +694,13 @@ void Foam::meshTools::constrainToMeshCentre
 
 
 //- Set the constrained components of directions/velocity to zero
-void Foam::meshTools::constrainDirection(const polyMesh& mesh, vector& d)
+void Foam::meshTools::constrainDirection
+(
+    const polyMesh& mesh,
+    const Vector<label>& dirs,
+    vector& d
+)
 {
-    const Vector<label>& dirs = mesh.geometricD();
-
     for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
     {
         if (dirs[cmpt] == -1)
@@ -702,10 +711,13 @@ void Foam::meshTools::constrainDirection(const polyMesh& mesh, vector& d)
 }
 
 
-void Foam::meshTools::constrainDirection(const polyMesh& mesh, vectorField& d)
+void Foam::meshTools::constrainDirection
+(
+    const polyMesh& mesh,
+    const Vector<label>& dirs,
+    vectorField& d
+)
 {
-    const Vector<label>& dirs = mesh.geometricD();
-
     bool isConstrained = false;
     for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
     {
@@ -857,7 +869,7 @@ Foam::label Foam::meshTools::cutDirToEdge
                 doneEdges.insert(e2);
                 doneEdges.insert(e3);
             }
-        }       
+        }
     }
 
     forAll(cEdges, cEdgeI)
