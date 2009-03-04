@@ -31,9 +31,6 @@ Description
     G.M. Treece, R.W. Prager and A.H. Gee.
 
     Note:
-    - not possible on patches of type 'empty'. There are no values on
-    'empty' patch fields so even the api would have to change
-     (no volScalarField as argument). Too messy.
     - in parallel the regularisation (coarsening) always takes place
     and slightly different surfaces will be created compared to non-parallel.
     The surface will still be continuous though!
@@ -43,6 +40,7 @@ Description
     - uses geometric merge with fraction of bounding box as distance.
     - triangles can be between two cell centres so constant sampling
       does not make sense.
+    - on empty patches behaves like zero gradient.
     - does not do 2D correctly, creates non-flat iso surface.
 
 SourceFiles

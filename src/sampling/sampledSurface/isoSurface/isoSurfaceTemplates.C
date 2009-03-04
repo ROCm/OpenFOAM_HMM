@@ -514,8 +514,52 @@ void Foam::isoSurface::generateTriPoints
         }
         else if (isA<emptyPolyPatch>(pp))
         {
-            // Assume zero-gradient. But what about coordinates?
+            // Check if field is there (when generating geometry the
+            // empty patches have been rewritten to be the face centres),
+            // otherwise use zero-gradient.
+
             label faceI = pp.start();
+
+
+            const fvPatchScalarField& fvp = cVals.boundaryField()[patchI];
+
+            // Owner value of cVals
+            scalarField internalVals;
+            if (fvp.size() == 0)
+            {
+                internalVals.setSize(pp.size());
+                forAll(pp, i)
+                {
+                    internalVals[i] = cVals[own[pp.start()+i]];
+                }
+            }
+            const scalarField& bVals =
+            (
+                fvp.size() > 0
+              ? static_cast<const scalarField&>(fvp)
+              : internalVals
+            );
+
+
+            const fvPatchField<Type>& pc = cCoords.boundaryField()[patchI];
+
+            // Owner value of cCoords
+            Field<Type> internalCoords;
+            if (pc.size() == 0)
+            {
+                internalCoords.setSize(pp.size());
+                forAll(pp, i)
+                {
+                    internalCoords[i] = cCoords[own[pp.start()+i]];
+                }
+            }
+            const Field<Type>& bCoords =
+            (
+                pc.size() > 0
+              ? static_cast<const Field<Type>&>(pc)
+              : internalCoords
+            );
+
 
             forAll(pp, i)
             {
@@ -534,8 +578,8 @@ void Foam::isoSurface::generateTriPoints
                         snappedPoint,
                         faceI,
 
-                        cVals[own[faceI]],
-                        cCoords.boundaryField()[patchI][i],
+                        bVals[i],
+                        bCoords[i],
                         false,  // fc not snapped
                         pTraits<Type>::zero,
 

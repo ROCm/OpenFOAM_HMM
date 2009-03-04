@@ -228,19 +228,19 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
 :
     // Find instance for triSurfaceMesh
-    searchableSurface
-    (
-        IOobject
-        (
-            io.name(),
-            io.time().findInstance(io.local(), word::null),
-            io.local(),
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject()
-        )
-    ),
+    searchableSurface(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
     // Reused found instance in objectRegistry
     objectRegistry
     (
@@ -273,19 +273,19 @@ Foam::triSurfaceMesh::triSurfaceMesh
     const dictionary& dict
 )
 :
-    searchableSurface
-    (
-        IOobject
-        (
-            io.name(),
-            io.time().findInstance(io.local(), word::null),
-            io.local(),
-            io.db(),
-            io.readOpt(),
-            io.writeOpt(),
-            io.registerObject()
-        )
-    ),
+    searchableSurface(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
     // Reused found instance in objectRegistry
     objectRegistry
     (

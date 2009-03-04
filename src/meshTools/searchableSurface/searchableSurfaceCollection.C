@@ -59,43 +59,44 @@ void Foam::searchableSurfaceCollection::findNearest
 
     List<pointIndexHit> hitInfo(samples.size());
 
+    const scalarField localMinDistSqr(samples.size(), GREAT);
+
     forAll(subGeom_, surfI)
     {
         // Transform then divide
         tmp<pointField> localSamples = cmptDivide
         (
-            transform_[surfI].localPosition
-            (
-                samples
-            ),
+            transform_[surfI].localPosition(samples),
             scale_[surfI]
         );
-        
-        subGeom_[surfI].findNearest(localSamples, minDistSqr, hitInfo);
+
+        subGeom_[surfI].findNearest(localSamples, localMinDistSqr, hitInfo);
 
         forAll(hitInfo, pointI)
         {
             if (hitInfo[pointI].hit())
             {
-                minDistSqr[pointI] = magSqr
-                (   
-                    hitInfo[pointI].hitPoint()
-                  - localSamples()[pointI]
-                );
-
                 // Rework back into global coordinate sys. Multiply then
                 // transform
-                nearestInfo[pointI] = hitInfo[pointI];
-                nearestInfo[pointI].rawPoint() = 
-                    transform_[surfI].globalPosition
+                point globalPt = transform_[surfI].globalPosition
+                (
+                    cmptMultiply
                     (
-                        cmptMultiply
-                        (
-                            nearestInfo[pointI].rawPoint(),
-                            scale_[surfI]
-                        )
-                    );
-                nearestSurf[pointI] = surfI;
+                        hitInfo[pointI].rawPoint(),
+                        scale_[surfI]
+                    )
+                );
+
+                scalar distSqr = magSqr(globalPt - samples[pointI]);
+
+                if (distSqr < minDistSqr[pointI])
+                {
+                    minDistSqr[pointI] = distSqr;
+                    nearestInfo[pointI].setPoint(globalPt);
+                    nearestInfo[pointI].setHit();
+                    nearestInfo[pointI].setIndex(hitInfo[pointI].index());
+                    nearestSurf[pointI] = surfI;
+                }
             }
         }
     }

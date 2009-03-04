@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,9 +10,9 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      snappyHexMeshDict;
+    object      autoHexMeshDict;
 }
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Which of the steps to run
@@ -29,27 +29,78 @@ addLayers       true;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    fridgeA
-    {
-        type            searchableBox;
-        min             ( 2 2 0 );
-        max             ( 3 3 2 );
-    }
-
-    fridgeB
-    {
-        type            searchableBox;
-        min             ( 3.5 3 0 );
-        max             ( 4.3 3.8 1.8 );
-    }
-
     igloo
     {
-        type            searchableSphere;
-        centre          ( 3 3 0 );
-        radius          4;
+        type searchableSphere;
+        centre (3 3 0);
+        radius 4;
     }
-}
+
+    box1
+    {
+        type searchableBox;
+        min (0 0 0);
+        max (1 1 1);
+    }
+    fridgeFreezer
+    {
+        type searchableSurfaceCollection;
+    
+        freezer
+        {
+            surface box1;
+            scale (1 1 1);
+            transform
+            {
+                type    cartesian;
+                origin  (0 0 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
+            }
+        }
+        fridge
+        {
+            surface box1;
+            scale (1 1 1.1);
+            transform
+            {
+                type    cartesian;
+                origin  (0 0 1);
+                e1      (1 0 0);
+                e3      (0 0 1);
+            }
+        }
+    }
+    twoFridgeFreezers
+    {
+        type searchableSurfaceCollection;
+    
+        seal
+        {
+            surface fridgeFreezer;
+            scale (1.0 1.0 1.0);
+            transform
+            {
+                type    cartesian;
+                origin  (2 2 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
+            }
+        }
+        herring
+        {
+            surface fridgeFreezer;
+            scale (1.0 1.0 1.0);
+            transform
+            {
+                type    cartesian;
+                origin  (3.5 3 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
+            }
+        }
+    }
+};
 
 
 
@@ -63,20 +114,20 @@ castellatedMeshControls
     // While refining maximum number of cells per processor. This is basically
     // the number of cells that fit on a processor. If you choose this too small
     // it will do just more refinement iterations to obtain a similar mesh.
-    maxLocalCells   1000000;
+    maxLocalCells 1000000;
 
     // Overall cell limit (approximately). Refinement will stop immediately
     // upon reaching this number so a refinement level might not complete.
     // Note that this is the number of cells before removing the part which
     // is not 'visible' from the keepPoint. The final number of cells might
     // actually be a lot less.
-    maxGlobalCells  2000000;
+    maxGlobalCells 2000000;
 
     // The surface refinement loop might spend lots of iterations refining just a
     // few cells. This setting will cause refinement to stop if <= minimumRefine
     // are selected for refinement. Note: it will at least do one iteration
     // (unless the number of cells to refine is 0)
-    minRefinementCells 0;
+    minRefinementCells 100;
 
     // Number of buffer layers between different levels.
     // 1 means normal 2:1 refinement restriction, larger means slower
@@ -92,10 +143,10 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-        //{
-        //    file "someLine.eMesh";
-        //    level 2;
-        //}
+//        {
+//            file "fridgeA.eMesh";
+//            level 3;
+//        }
     );
 
 
@@ -108,26 +159,34 @@ castellatedMeshControls
     // The second level is the maximum level. Cells that 'see' multiple
     // intersections where the intersections make an
     // angle > resolveFeatureAngle get refined up to the maximum level.
+
     refinementSurfaces
     {
-        fridgeA
+        twoFridgeFreezers
         {
             // Surface-wise min and max refinement level
-            level           ( 2 2 );
+            level (2 2);
+
+            regions
+            {
+                // Region-wise override
+                "cook.*"
+                {
+                    level (3 3);
+                }
+            }
         }
 
-        fridgeB
+        "iglo.*"
         {
-            level           ( 2 2 );
-        }
-
-        igloo
-        {
-            level           ( 1 1 );
+            // Surface-wise min and max refinement level
+            level (1 1);
         }
     }
 
+    // Resolve sharp angles on fridges
     resolveFeatureAngle 60;
+
 
     // Region-wise refinement
     // ~~~~~~~~~~~~~~~~~~~~~~
@@ -155,7 +214,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh  ( 3 0.28 0.43 );
+    locationInMesh (3 0.28 0.43);
 }
 
 
@@ -165,19 +224,19 @@ snapControls
 {
     //- Number of patch smoothing iterations before finding correspondence
     //  to surface
-    nSmoothPatch    3;
+    nSmoothPatch 3;
 
     //- Relative distance for points to be attracted by surface feature point
     //  or edge. True distance is this factor times local
     //  maximum edge length.
-    tolerance       4;
+    tolerance 4.0;
 
     //- Number of mesh displacement relaxation iterations.
-    nSolveIter      30;
+    nSolveIter 30;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
-    nRelaxIter      5;
+    nRelaxIter 5;
 }
 
 
@@ -188,25 +247,18 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        fridgeA_region0
+        "two.*"
         {
-            nSurfaceLayers  1;
+            nSurfaceLayers 3;
         }
-
-        fridgeB_region0
+        "igloo_.*"
         {
-            nSurfaceLayers  1;
-        }
-
-        igloo_region0
-        {
-            nSurfaceLayers  1;
+            nSurfaceLayers 1;
         }
     }
 
-
     // Expansion factor for layer mesh
-    expansionRatio  1;
+    expansionRatio 1.0;
 
     //- Wanted thickness of final added cell layer. If multiple layers
     //  is the
@@ -217,29 +269,29 @@ addLayersControls
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
     //  Relative to undistorted size of cell outside layer.
-    minThickness    0.25;
+    minThickness 0.25;
 
     //- If points get not extruded do nGrow layers of connected faces that are
     //  also not grown. This helps convergence of the layer addition process
     //  close to features.
-    nGrow           0;
+    nGrow 0;
 
 
     // Advanced settings
 
     //- When not to extrude surface. 0 is flat surface, 90 is when two faces
     //  make straight angle.
-    featureAngle    60;
+    featureAngle 60;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
-    nRelaxIter      5;
+    nRelaxIter 5;
 
     // Number of smoothing iterations of surface normals
     nSmoothSurfaceNormals 1;
 
     // Number of smoothing iterations of interior mesh movement direction
-    nSmoothNormals  3;
+    nSmoothNormals 3;
 
     // Smooth layer thickness over surface patches
     nSmoothThickness 10;
@@ -265,7 +317,7 @@ addLayersControls
 meshQualityControls
 {
     //- Maximum non-orthogonality allowed. Set to 180 to disable.
-    maxNonOrtho     65;
+    maxNonOrtho 65;
 
     //- Max skewness allowed. Set to <0 to disable.
     maxBoundarySkewness 20;
@@ -274,32 +326,31 @@ meshQualityControls
     //- Max concaveness allowed. Is angle (in degrees) below which concavity
     //  is allowed. 0 is straight face, <0 would be convex face.
     //  Set to 180 to disable.
-    maxConcave      80;
+    maxConcave 80;
 
     //- Minimum projected area v.s. actual area. Set to -1 to disable.
-    minFlatness     0.5;
+    minFlatness 0.5;
 
     //- Minimum pyramid volume. Is absolute volume of cell pyramid.
-    //  Set to a sensible fraction of the smallest cell volume expected.
     //  Set to very negative number (e.g. -1E30) to disable.
-    minVol          1e-13;
+    minVol 1e-13;
 
     //- Minimum face area. Set to <0 to disable.
-    minArea         -1;
+    minArea -1;
 
     //- Minimum face twist. Set to <-1 to disable. dot product of face normal
     //- and face centre triangles normal
-    minTwist        0.05;
+    minTwist 0.05;
 
     //- minimum normalised cell determinant
     //- 1 = hex, <= 0 = folded or flattened illegal cell
-    minDeterminant  0.001;
+    minDeterminant 0.001;
 
     //- minFaceWeight (0 -> 0.5)
-    minFaceWeight   0.05;
+    minFaceWeight 0.05;
 
     //- minVolRatio (0 -> 1)
-    minVolRatio     0.01;
+    minVolRatio 0.01;
 
     //must be >0 for Fluent compatibility
     minTriangleTwist -1;
@@ -308,11 +359,10 @@ meshQualityControls
     // Advanced
 
     //- Number of error distribution iterations
-    nSmoothScale    4;
+    nSmoothScale 4;
     //- amount to scale back displacement at error points
-    errorReduction  0.75;
+    errorReduction 0.75;
 }
-
 
 
 // Advanced
@@ -322,12 +372,11 @@ meshQualityControls
 // 1 : write intermediate meshes
 // 2 : write volScalarField with cellLevel for postprocessing
 // 4 : write current intersections as .obj files
-debug           0;
+debug 0;
 
 
 // Merge tolerance. Is fraction of overall bounding box of initial mesh.
 // Note: the write tolerance needs to be higher than this.
-mergeTolerance  1e-06;
-
+mergeTolerance 1E-6;
 
 // ************************************************************************* //

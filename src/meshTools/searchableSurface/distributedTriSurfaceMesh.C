@@ -76,10 +76,8 @@ bool Foam::distributedTriSurfaceMesh::read()
     // Distribution type
     distType_ = distributionTypeNames_.read(dict_.lookup("distributionType"));
 
-    if (dict_.found("mergeDistance"))
-    {
-        dict_.lookup("mergeDistance") >> mergeDist_;
-    }
+    // Merge distance
+    mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
 
     return true;
 }
@@ -1341,12 +1339,44 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     dict_(io, dict)
 {
     read();
+
+    if (debug)
+    {
+        Info<< "Constructed from triSurface:" << endl;
+        writeStats(Info);
+
+        labelList nTris(Pstream::nProcs());
+        nTris[Pstream::myProcNo()] = triSurface::size();
+        Pstream::gatherList(nTris);
+        Pstream::scatterList(nTris);
+
+        Info<< endl<< "\tproc\ttris\tbb" << endl;
+        forAll(nTris, procI)
+        {
+            Info<< '\t' << procI << '\t' << nTris[procI]
+                 << '\t' << procBb_[procI] << endl;
+        }
+        Info<< endl;
+    }
 }
 
 
 Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
 :
-    triSurfaceMesh(io),
+    //triSurfaceMesh(io),
+    triSurfaceMesh
+    (
+        IOobject
+        (
+            io.name(),
+            io.time().findInstance(io.local(), word::null),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            io.registerObject()
+        )
+    ),
     dict_
     (
         IOobject
@@ -1362,6 +1392,26 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
     )
 {
     read();
+
+    if (debug)
+    {
+        Info<< "Read distributedTriSurface from " << io.objectPath()
+            << ':' << endl;
+        writeStats(Info);
+
+        labelList nTris(Pstream::nProcs());
+        nTris[Pstream::myProcNo()] = triSurface::size();
+        Pstream::gatherList(nTris);
+        Pstream::scatterList(nTris);
+
+        Info<< endl<< "\tproc\ttris\tbb" << endl;
+        forAll(nTris, procI)
+        {
+            Info<< '\t' << procI << '\t' << nTris[procI]
+                 << '\t' << procBb_[procI] << endl;
+        }
+        Info<< endl;
+    }
 }
 
 
@@ -1371,7 +1421,21 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     const dictionary& dict
 )
 :
-    triSurfaceMesh(io, dict),
+    //triSurfaceMesh(io, dict),
+    triSurfaceMesh
+    (
+        IOobject
+        (
+            io.name(),
+            io.time().findInstance(io.local(), word::null),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            io.registerObject()
+        ),
+        dict
+    ),
     dict_
     (
         IOobject
@@ -1387,6 +1451,26 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     )
 {
     read();
+
+    if (debug)
+    {
+        Info<< "Read distributedTriSurface from " << io.objectPath()
+            << " and dictionary:" << endl;
+        writeStats(Info);
+
+        labelList nTris(Pstream::nProcs());
+        nTris[Pstream::myProcNo()] = triSurface::size();
+        Pstream::gatherList(nTris);
+        Pstream::scatterList(nTris);
+
+        Info<< endl<< "\tproc\ttris\tbb" << endl;
+        forAll(nTris, procI)
+        {
+            Info<< '\t' << procI << '\t' << nTris[procI]
+                 << '\t' << procBb_[procI] << endl;
+        }
+        Info<< endl;
+    }
 }
 
 
@@ -2389,6 +2473,8 @@ void Foam::distributedTriSurfaceMesh::writeStats(Ostream& os) const
     boundBox bb;
     label nPoints;
     calcBounds(bb, nPoints);
+    reduce(bb.min(), minOp<point>());
+    reduce(bb.max(), maxOp<point>());
 
     os  << "Triangles    : " << returnReduce(triSurface::size(), sumOp<label>())
         << endl
