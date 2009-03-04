@@ -492,11 +492,15 @@ void Foam::vtkPV3Foam::Update
     convertLagrangianFields(lagrangianOutput);
     reader_->UpdateProgress(0.95);
 
+    meshChanged_ = fieldsChanged_ = false;
+}
+
+
+void Foam::vtkPV3Foam::CleanUp()
+{
     // reclaim some memory
     reduceMemory();
     reader_->UpdateProgress(1.0);
-
-    meshChanged_ = fieldsChanged_ = false;
 }
 
 
