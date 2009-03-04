@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::cellPointWeight
+    Foam::cellPointWeightWallModified
 
 Description
-    Foam::cellPointWeight
+    Foam::cellPointWeightWallModified
 
 SourceFiles
-    cellPointWeight.C
+    cellPointWeightWallModified.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellPointWeight_H
-#define cellPointWeight_H
+#ifndef cellPointWeightWallModified_H
+#define cellPointWeightWallModified_H
 
-#include "vector.H"
+#include "cellPointWeight.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,83 +46,25 @@ namespace Foam
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class cellPointWeight Declaration
+                 Class cellPointWeightWallModified Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellPointWeight
+class cellPointWeightWallModified
+:
+    public cellPointWeight
 {
-protected:
-
-    // Protected data
-
-       //- Cell index
-       const label cellIndex_;
-
-       //- Weights applied to tet vertices
-       FixedList<scalar, 4> weights_;
-
-       //- Face vertex indices
-       FixedList<label, 3> faceVertices_;
-
-
-    // Protected Member Functions
-
-        void findTetrahedron
-        (
-            const polyMesh& mesh,
-            const vector& position,
-            const label cellIndex
-        );
-
-        void findTriangle
-        (
-            const polyMesh& mesh,
-            const vector& position,
-            const label faceIndex
-        );
-
-
 public:
-
-    //- Debug switch
-    static int debug;
-
-    //- Tolerance used in calculating barycentric co-ordinates
-    //  (applied to normailised values)
-    static scalar tol;
-
 
     // Constructors
 
         //- Construct from components
-        cellPointWeight
+        cellPointWeightWallModified
         (
             const polyMesh& mesh,
             const vector& position,
             const label nCell,
             const label facei = -1
         );
-
-
-    // Member Functions
-
-        //- Cell index
-        inline label cell() const
-        {
-            return cellIndex_;
-        }
-
-        //- interpolation weights
-        inline const FixedList<scalar, 4>& weights() const
-        {
-            return weights_;
-        }
-
-        //- interpolation addressing for points on face
-        inline const FixedList<label, 3>& faceVertices() const
-        {
-            return faceVertices_;
-        }
 };
 
 

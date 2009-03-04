@@ -23,112 +23,77 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::cellPointWeight
+    Foam::interpolationCellPoint
 
 Description
-    Foam::cellPointWeight
-
-SourceFiles
-    cellPointWeight.C
+    Same as interpolationCellPoint, but if interpolating a wall face, uses
+    cell centre value instead
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cellPointWeight_H
-#define cellPointWeight_H
+#ifndef interpolationCellPointWallModified_H
+#define interpolationCellPointWallModified_H
 
-#include "vector.H"
+#include "interpolationCellPoint.H"
+#include "cellPointWeightWallModified.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class polyMesh;
-
 /*---------------------------------------------------------------------------*\
-                           Class cellPointWeight Declaration
+                    Class interpolationCellPoint Declaration
 \*---------------------------------------------------------------------------*/
 
-class cellPointWeight
+template<class Type>
+class interpolationCellPointWallModified
+:
+    public interpolationCellPoint<Type>
 {
-protected:
-
-    // Protected data
-
-       //- Cell index
-       const label cellIndex_;
-
-       //- Weights applied to tet vertices
-       FixedList<scalar, 4> weights_;
-
-       //- Face vertex indices
-       FixedList<label, 3> faceVertices_;
-
-
-    // Protected Member Functions
-
-        void findTetrahedron
-        (
-            const polyMesh& mesh,
-            const vector& position,
-            const label cellIndex
-        );
-
-        void findTriangle
-        (
-            const polyMesh& mesh,
-            const vector& position,
-            const label faceIndex
-        );
-
-
 public:
 
-    //- Debug switch
-    static int debug;
-
-    //- Tolerance used in calculating barycentric co-ordinates
-    //  (applied to normailised values)
-    static scalar tol;
+    //- Runtime type information
+    TypeName("cellPointWallModified");
 
 
     // Constructors
 
         //- Construct from components
-        cellPointWeight
+        interpolationCellPointWallModified
         (
-            const polyMesh& mesh,
-            const vector& position,
-            const label nCell,
-            const label facei = -1
+            const GeometricField<Type, fvPatchField, volMesh>& psi
         );
 
 
     // Member Functions
 
-        //- Cell index
-        inline label cell() const
-        {
-            return cellIndex_;
-        }
+        //- Interpolate field for the given cellPointWeight
+        inline Type interpolate(const cellPointWeightWallModified& cpw) const;
 
-        //- interpolation weights
-        inline const FixedList<scalar, 4>& weights() const
-        {
-            return weights_;
-        }
-
-        //- interpolation addressing for points on face
-        inline const FixedList<label, 3>& faceVertices() const
-        {
-            return faceVertices_;
-        }
+        //- Interpolate field to the given point in the given cell
+        inline Type interpolate
+        (
+            const vector& position,
+            const label nCell,
+            const label facei = -1
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "interpolationCellPointWallModifiedI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "interpolationCellPointWallModified.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
