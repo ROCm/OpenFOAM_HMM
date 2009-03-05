@@ -36,6 +36,8 @@ Description
 #include "stringList.H"
 #include "labelList.H"
 #include "labelPair.H"
+#include "edgeList.H"
+#include "triFaceList.H"
 
 #include "Hash.H"
 
@@ -117,6 +119,44 @@ int main(int argc, char *argv[])
             }
 
         }
+        else if (listType == "edgeList")
+        {
+            Info<<"contiguous = " << contiguous<edge>() << endl << endl;
+
+            edgeList lst(is);
+
+            forAll(lst, i)
+            {
+                unsigned hash1 = Hash<edge>()(lst[i]);
+
+                // as FixedList
+                unsigned hash2 = labelPair::Hash<>()(lst[i]);
+
+                Info<< hex << hash1 << " (as FixedList: " << hash2
+                    << "): " << dec << lst[i] << endl;
+            }
+        }
+        else if (listType == "triFaceList")
+        {
+            Info<<"contiguous = " << contiguous<triFace>() << endl << endl;
+
+            triFaceList lst(is);
+
+            forAll(lst, i)
+            {
+                // direct value
+                unsigned hash1 = Hash<triFace>()(lst[i]);
+                unsigned hash2 = FixedList<label, 3>::Hash<>()(lst[i]);
+
+                Info<< hex << hash1 << " (as FixedList: " << hash2
+                    << "): " << dec << lst[i] << endl;
+            }
+        }
+        else
+        {
+            Info<< "unknown type: " << listType << endl;
+        }
+
     }
 
     return 0;
