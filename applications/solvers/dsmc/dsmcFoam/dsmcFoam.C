@@ -52,7 +52,25 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
+        // Carry out dsmcCloud timestep
+
         dsmc.evolve();
+
+        // Retrieve field data from dsmcCloud
+
+        rhoN = dsmc.rhoN();
+
+        rhoM = dsmc.rhoM();
+
+        dsmcRhoN = dsmc.dsmcRhoN();
+
+        momentum = dsmc.momentum();
+
+        q = dsmc.q();
+
+        fD = dsmc.fD();
+
+        // Print status of dsmcCloud
 
         dsmc.info();
 

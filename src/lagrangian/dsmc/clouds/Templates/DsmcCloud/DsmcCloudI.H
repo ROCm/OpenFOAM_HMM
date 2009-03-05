@@ -121,6 +121,34 @@ inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
 
 
 template<class ParcelType>
+inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::q() const
+{
+    return q_;
+}
+
+
+template<class ParcelType>
+inline Foam::volScalarField& Foam::DsmcCloud<ParcelType>::q()
+{
+    return q_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::fD() const
+{
+    return fD_;
+}
+
+
+template<class ParcelType>
+inline Foam::volVectorField& Foam::DsmcCloud<ParcelType>::fD()
+{
+    return fD_;
+}
+
+
+template<class ParcelType>
 inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::T() const
 {
     return T_;
@@ -319,6 +347,17 @@ Foam::DsmcCloud<ParcelType>::rhoN() const
         )
     );
 
+    scalarField& rhoN = trhoN().internalField();
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        rhoN[cellI]++;
+    }
+
+    rhoN *= nParticle_/mesh().cellVolumes();
+
     return trhoN;
 }
 
@@ -345,21 +384,32 @@ Foam::DsmcCloud<ParcelType>::rhoM() const
         )
     );
 
+    scalarField& rhoM = trhoM().internalField();
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        rhoM[cellI] += constProps(p.typeId()).mass();
+    }
+
+    rhoM *= nParticle_/mesh().cellVolumes();
+
     return trhoM;
 }
 
 
 template<class ParcelType>
 inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::rhoNP() const
+Foam::DsmcCloud<ParcelType>::dsmcRhoN() const
 {
-    tmp<volScalarField> trhoNP
+    tmp<volScalarField> tdsmcRhoN
     (
         new volScalarField
         (
             IOobject
             (
-                this->name() + "rhoNP",
+                this->name() + "dsmcRhoN",
                 this->db().time().timeName(),
                 this->db(),
                 IOobject::NO_READ,
@@ -371,7 +421,174 @@ Foam::DsmcCloud<ParcelType>::rhoNP() const
         )
     );
 
-    return trhoNP;
+    scalarField& dsmcRhoN = tdsmcRhoN().internalField();
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        dsmcRhoN[cellI]++;
+    }
+
+    return tdsmcRhoN;
+}
+
+
+template<class ParcelType>
+inline const Foam::tmp<Foam::volVectorField>
+Foam::DsmcCloud<ParcelType>::momentum() const
+{
+    tmp<volVectorField> tmomentum
+    (
+        new volVectorField
+        (
+            IOobject
+            (
+                this->name() + "momentum",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedVector
+            (
+                "zero",
+                dimensionSet(1, -2, -1, 0, 0),
+                vector::zero
+            )
+        )
+    );
+
+    vectorField& momentum = tmomentum().internalField();
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        momentum[cellI] += constProps(p.typeId()).mass()*p.U();
+    }
+
+    momentum *= nParticle_/mesh().cellVolumes();
+
+    return tmomentum;
+}
+
+
+template<class ParcelType>
+inline const Foam::tmp<Foam::volScalarField>
+Foam::DsmcCloud<ParcelType>::linearKE() const
+{
+    tmp<volScalarField> tlinearKE
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                this->name() + "linearKE",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimensionSet(1, -1, -2, 0, 0), 0.0)
+        )
+    );
+
+    scalarField& linearKE = tlinearKE().internalField();
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        linearKE[cellI] += 0.5*constProps(p.typeId()).mass()*(p.U() & p.U());
+    }
+
+    linearKE *= nParticle_/mesh().cellVolumes();
+
+    return tlinearKE;
+}
+
+
+template<class ParcelType>
+inline const Foam::tmp<Foam::volScalarField>
+Foam::DsmcCloud<ParcelType>::internalE() const
+{
+    tmp<volScalarField> tinternalE
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                this->name() + "internalE",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimensionSet(1, -1, -2, 0, 0), 0.0)
+        )
+    );
+
+    scalarField& internalE = tinternalE().internalField();
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        internalE[cellI] += p.Ei();
+    }
+
+    internalE *= nParticle_/mesh().cellVolumes();
+
+    return tinternalE;
+}
+
+
+template<class ParcelType>
+inline const Foam::tmp<Foam::volScalarField>
+Foam::DsmcCloud<ParcelType>::iDof() const
+{
+    tmp<volScalarField> tiDof
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                this->name() + "iDof",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimless, 0.0)
+        )
+    );
+
+    scalarField& iDof = tiDof().internalField();
+    scalarField nDsmcParticles(iDof.size(),0);
+
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        iDof[cellI] += constProps(p.typeId()).internalDegreesOfFreedom();
+
+        // Avoiding divide by zero for nDsmcParticles where a cell is empty
+        nDsmcParticles[cellI] = max(1, ++nDsmcParticles[cellI]);
+    }
+
+    iDof /= nDsmcParticles;
+
+    return tiDof;
 }
 
 

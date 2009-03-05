@@ -104,6 +104,12 @@ class DsmcCloud
         //- A field holding the remainder from the previous collision selections
         scalarField collisionSelectionRemainder_;
 
+        //- Heat flux at surface field
+        volScalarField q_;
+
+        //- Force density at surface field
+        volVectorField fD_;
+
         //- Parcel constant properties - one for each type
         List<typename ParcelType::constantProperties> constProps_;
 
@@ -148,6 +154,9 @@ class DsmcCloud
 
         //- Calculate collisions between molecules
         void collisions();
+
+        //- Reset the surface data accumulation field values
+        void resetSurfaceDataFields();
 
         //- Disallow default bitwise copy construct
         DsmcCloud(const DsmcCloud&);
@@ -236,6 +245,21 @@ public:
 
                 //- Return refernce to the random object
                 inline Random& rndGen();
+
+
+            // References to the surface data collection fields
+
+                //- Return heat flux at surface field
+                inline const volScalarField& q() const;
+
+                //- Return non-const heat flux at surface field
+                inline volScalarField& q();
+
+                //- Return force density at surface field
+                inline const volVectorField& fD() const;
+
+                //- Return non-const force density at surface field
+                inline volVectorField& fD();
 
 
             // References to the macroscopic fields
@@ -341,7 +365,20 @@ public:
                 inline const tmp<volScalarField> rhoM() const;
 
                 //- Return the field of number of DSMC particles
-                inline const tmp<volScalarField> rhoNP() const;
+                inline const tmp<volScalarField> dsmcRhoN() const;
+
+                //- Return the momentum density field
+                inline const tmp<volVectorField> momentum() const;
+
+                //- Return the total linear kinetic energy (translational and
+                // thermal density field
+                inline const tmp<volScalarField> linearKE() const;
+
+                //- Return the internal energy density field
+                inline const tmp<volScalarField> internalE() const;
+
+                //- Return the average internal degrees of freedom  field
+                inline const tmp<volScalarField> iDof() const;
 
 
         // Cloud evolution functions

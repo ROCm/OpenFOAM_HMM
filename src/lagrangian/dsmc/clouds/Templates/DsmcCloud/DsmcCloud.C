@@ -318,6 +318,25 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 }
 
 
+template<class ParcelType>
+void Foam::DsmcCloud<ParcelType>::resetSurfaceDataFields()
+{
+    volScalarField::GeometricBoundaryField& qBF(q_.boundaryField());
+
+    forAll(qBF, p)
+    {
+        qBF[p] = 0.0;
+    }
+
+    volVectorField::GeometricBoundaryField& fDBF(fD_.boundaryField());
+
+    forAll(fDBF, p)
+    {
+        fDBF[p] = vector::zero;
+    }
+}
+
+
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -385,6 +404,37 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
         mesh_
     ),
     collisionSelectionRemainder_(mesh_.nCells(), 0),
+    q_
+    (
+        IOobject
+        (
+            this->name() + "q_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("zero",  dimensionSet(1, 0, -3, 0, 0), 0.0)
+    ),
+    fD_
+    (
+        IOobject
+        (
+            this->name() + "fD_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedVector
+        (
+            "zero",
+            dimensionSet(1, -1, -2, 0, 0),
+            vector::zero
+        )
+    ),
     constProps_(),
     rndGen_(label(971501)),
     T_(T),
@@ -459,6 +509,37 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
         dimensionedScalar("zero",  dimensionSet(0, 3, -1, 0, 0), 0.0)
     ),
     collisionSelectionRemainder_(),
+    q_
+    (
+        IOobject
+        (
+            this->name() + "q_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("zero",  dimensionSet(1, 0, -3, 0, 0), 0.0)
+    ),
+    fD_
+    (
+        IOobject
+        (
+            this->name() + "fD_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedVector
+        (
+            "zero",
+            dimensionSet(1, -1, -2, 0, 0),
+            vector::zero
+        )
+    ),
     constProps_(),
     rndGen_(label(971501)),
     T_
@@ -543,6 +624,9 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 
     // Insert new particles from the inflow boundary
     this->inflowBoundary().inflow();
+
+    // Reset the surface data collection fields
+    resetSurfaceDataFields();
 
     // Move the particles ballistically with their current velocities
     Cloud<ParcelType>::move(td);

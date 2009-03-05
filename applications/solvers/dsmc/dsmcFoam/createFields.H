@@ -1,4 +1,18 @@
 
+    Info<< nl << "Reading field T" << endl;
+    volScalarField T
+    (
+        IOobject
+        (
+            "T",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
     Info<< nl << "Reading field U" << endl;
     volVectorField U
     (
@@ -13,12 +27,12 @@
         mesh
     );
 
-    Info<< nl << "Reading field T" << endl;
-    volScalarField T
+    Info<< nl << "Reading field momentum (momentum density)" << endl;
+    volVectorField momentum
     (
         IOobject
         (
-            "T",
+            "momentum",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -104,4 +118,3 @@
     Info<< "Constructing dsmcCloud " << endl;
 
 dsmcCloud dsmc("dsmc", T, U);
-    //, rhoN, rhoM, dsmcRhoN, q, f);

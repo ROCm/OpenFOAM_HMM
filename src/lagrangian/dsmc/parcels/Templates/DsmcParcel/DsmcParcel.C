@@ -109,9 +109,11 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
 {
     const constantProperties& constProps(td.cloud().constProps(typeId_));
 
-    scalar preInteractionEnergy = 0.5*constProps.mass()*(U_ & U_) + Ei_;
+    // pre-interaction energy
+    scalar preIE = 0.5*constProps.mass()*(U_ & U_) + Ei_;
 
-    vector preInteractionMomentum = constProps.mass()*U_;
+    // pre-interaction momentum
+    vector preIMom = constProps.mass()*U_;
 
     td.cloud().wallInteraction().correct
     (
@@ -121,13 +123,27 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
         constProps.mass()
     );
 
-    scalar postInteractionEnergy = 0.5*constProps.mass()*(U_ & U_) + Ei_;
+    // post-interaction energy
+    scalar postIE = 0.5*constProps.mass()*(U_ & U_) + Ei_;
 
-    vector postInteractionMomentum = constProps.mass()*U_;
+    // post-interaction momentum
+    vector postIMom = constProps.mass()*U_;
 
-    scalar deltaEnergy =preInteractionEnergy - postInteractionEnergy;
+    label wppIndex = wpp.index();
 
-    vector deltaMomentum = preInteractionMomentum - postInteractionMomentum;
+    label wppLocalFace = wpp.whichFace(this->face());
+
+    const scalar fA = mag(wpp.faceAreas()[wppLocalFace]);
+
+    const scalar deltaT = td.cloud().mesh().time().deltaT().value();
+
+    scalar deltaQ = td.cloud().nParticle()*(preIE - postIE)/(deltaT*fA);
+
+    vector deltaFD = td.cloud().nParticle()*(preIMom - postIMom)/(deltaT*fA);
+
+    td.cloud().q().boundaryField()[wppIndex][wppLocalFace] += deltaQ;
+
+    td.cloud().fD().boundaryField()[wppIndex][wppLocalFace] += deltaFD;
 }
 
 
