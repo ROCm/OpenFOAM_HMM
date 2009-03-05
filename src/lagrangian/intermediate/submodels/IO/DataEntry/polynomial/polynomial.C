@@ -26,6 +26,13 @@ License
 
 #include "polynomial.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(polynomial, 0);
+}
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::polynomial::polynomial(const word& entryName, Istream& is)

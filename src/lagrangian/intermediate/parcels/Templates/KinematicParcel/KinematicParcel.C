@@ -35,18 +35,18 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
 (
     TrackData& td,
     const scalar dt,
-    const label celli
+    const label cellI
 )
 {
-    rhoc_ = td.rhoInterp().interpolate(this->position(), celli);
-    Uc_ = td.UInterp().interpolate(this->position(), celli);
-    muc_ = td.muInterp().interpolate(this->position(), celli);
+    rhoc_ = td.rhoInterp().interpolate(this->position(), cellI);
+    Uc_ = td.UInterp().interpolate(this->position(), cellI);
+    muc_ = td.muInterp().interpolate(this->position(), cellI);
 
     // Apply dispersion components to carrier phase velocity
     Uc_ = td.cloud().dispersion().update
     (
         dt,
-        celli,
+        cellI,
         U_,
         Uc_,
         UTurb_,
@@ -57,44 +57,33 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::KinematicParcel<ParcelType>::calcCoupled
+void Foam::KinematicParcel<ParcelType>::calc
 (
     TrackData& td,
     const scalar dt,
-    const label celli
+    const label cellI
 )
 {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Define local properties at beginning of timestep
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//    const scalar mass0 = mass();
-//    const vector U0 = U_;
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Momentum transfer from the particle to the carrier phase
-    vector dUTrans = vector::zero;
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Calculate velocity - update U, dUTrans
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar Cud = 0.0;
+    vector dUTrans = vector::zero;
     const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    // Accumulate source terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~
+    if (td.cloud().coupled())
+    {
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Accumulate carrier phase source terms
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Update momentum transfer
-    td.cloud().UTrans()[celli] += nParticle_*dUTrans;
+        // Update momentum transfer
+        td.cloud().UTrans()[cellI] += nParticle_*dUTrans;
 
-    // Accumulate coefficient to be applied in carrier phase momentum coupling
-    td.cloud().UCoeff()[celli] += nParticle_*mass()*Cud;
+        // Coefficient to be applied in carrier phase momentum coupling
+        td.cloud().UCoeff()[cellI] += nParticle_*mass()*Cud;
+    }
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -106,41 +95,17 @@ void Foam::KinematicParcel<ParcelType>::calcCoupled
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::KinematicParcel<ParcelType>::calcUncoupled
-(
-    TrackData& td,
-    const scalar dt,
-    const label
-)
-{
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Momentum transfer from the particle to the carrier phase
-    vector dUTrans = vector::zero;
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Cud = 0.0;
-    this->U() = calcVelocity(td, dt, Cud, dUTrans);
-}
-
-
-template<class ParcelType>
-template<class TrackData>
-Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
+const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 (
     TrackData& td,
     const scalar dt,
     scalar& Cud,
     vector& dUTrans
-)
+) const
 {
     // Return linearised term from drag model
     Cud = td.cloud().drag().Cu(U_ - Uc_, d_, rhoc_, rho_, muc_);
+
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Set new particle velocity
@@ -188,7 +153,7 @@ bool Foam::KinematicParcel<ParcelType>::move
 
         // Remember which cell the Parcel is in
         // since this will change if a face is hit
-        label celli = p.cell();
+        label cellI = p.cell();
 
         dt *= p.trackToFace(p.position() + dt*U_, td);
 
@@ -196,19 +161,12 @@ bool Foam::KinematicParcel<ParcelType>::move
         p.stepFraction() = 1.0 - tEnd/deltaT;
 
         // Update cell based properties
-        p.updateCellQuantities(td, dt, celli);
+        p.updateCellQuantities(td, dt, cellI);
 
         // Avoid problems with extremely small timesteps
         if (dt > ROOTVSMALL)
         {
-            if (td.cloud().coupled())
-            {
-                p.calcCoupled(td, dt, celli);
-            }
-            else
-            {
-                p.calcUncoupled(td, dt, celli);
-            }
+            p.calc(td, dt, cellI);
         }
 
         if (p.onBoundary() && td.keepParticle)

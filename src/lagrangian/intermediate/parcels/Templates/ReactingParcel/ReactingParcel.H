@@ -175,7 +175,7 @@ protected:
             scalar mass0_;
 
             //- Mass fractions of mixture []
-            scalarField YMixture_;
+            scalarField Y_;
 
 
         // Cell-based quantities
@@ -188,13 +188,22 @@ protected:
 
         //- Calculate Phase change
         template<class TrackData>
-        void calcPhaseChange
+        scalar calcPhaseChange
         (
             TrackData& td,
             const scalar dt,
+            const label cellI,
             const scalar T,
-            scalarField& X,
             scalarList& dMassMT
+        );
+
+        //- Update mass fraction
+        void updateMassFraction
+        (
+            const scalar mass0,
+            const scalar mass1,
+            const scalarList& dMass,
+            scalarField& Y
         );
 
 
@@ -214,11 +223,11 @@ public:
             ReactingCloud<ParcelType>& owner,
             const label typeId,
             const vector& position,
-            const label celli,
+            const label cellI,
             const scalar d0,
             const vector& U0,
             const scalar nParticle0,
-            const scalarField& YMixture0,
+            const scalarField& Y0,
             const constantProperties& constProps
         );
 
@@ -245,7 +254,7 @@ public:
             inline scalar mass0() const;
 
             //- Return const access to mass fractions of mixture
-            inline const scalarField& YMixture() const;
+            inline const scalarField& Y() const;
 
             //- Return the owner cell pressure
             inline scalar pc() const;
@@ -257,7 +266,7 @@ public:
             inline scalar& mass0();
 
             //- Return access to mass fractions of mixture
-            inline scalarField& YMixture();
+            inline scalarField& Y();
 
 
         // Main calculation loop
@@ -268,25 +277,16 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Coupled calculation with the continuous phase
+            //- Update parcel properties over the time interval
             template<class TrackData>
-            void calcCoupled
+            void calc
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
-            );
-
-            //- Uncoupled calculation with the continuous phase
-            template<class TrackData>
-            void calcUncoupled
-            (
-                TrackData& td,
-                const scalar dt,
-                const label
+                const label cellI
             );
 
 

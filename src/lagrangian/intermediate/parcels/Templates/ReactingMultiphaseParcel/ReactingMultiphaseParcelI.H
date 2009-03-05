@@ -34,7 +34,8 @@ constantProperties
 )
 :
     ReactingParcel<ParcelType>::constantProperties(dict),
-    Ldevol_(dimensionedScalar(dict.lookup("Ldevol")).value())
+    Ldevol_(dimensionedScalar(dict.lookup("Ldevol")).value()),
+    fh_(dimensionedScalar(dict.lookup("fh")).value())
 {}
 
 
@@ -75,14 +76,14 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ReactingMultiphaseCloud<ParcelType>& owner,
     const label typeId,
     const vector& position,
-    const label celli,
+    const label cellI,
     const scalar d0,
     const vector& U0,
     const scalar nParticle0,
     const scalarField& YGas0,
     const scalarField& YLiquid0,
     const scalarField& YSolid0,
-    const scalarField& YMixture0,
+    const scalarField& Y0,
     const constantProperties& constProps
 )
 :
@@ -91,11 +92,11 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         owner,
         typeId,
         position,
-        celli,
+        cellI,
         d0,
         U0,
         nParticle0,
-        YMixture0,
+        Y0,
         constProps
     ),
     YGas_(YGas0),
@@ -111,6 +112,14 @@ inline Foam::scalar
 Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Ldevol() const
 {
     return Ldevol_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::fh() const
+{
+    return fh_;
 }
 
 

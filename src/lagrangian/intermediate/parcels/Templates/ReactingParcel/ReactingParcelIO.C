@@ -39,7 +39,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
 :
     ThermoParcel<ParcelType>(cloud, is, readFields),
     mass0_(0.0),
-    YMixture_(0),
+    Y_(0),
     pc_(0.0)
 {
     if (readFields)
@@ -48,11 +48,11 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
             dynamic_cast<const ReactingCloud<ParcelType>& >(cloud);
 
         const label nMixture = cR.composition().phaseTypes().size();
-        YMixture_.setSize(nMixture);
+        Y_.setSize(nMixture);
 
         if (is.format() == IOstream::ASCII)
         {
-            is >> mass0_ >> YMixture_;
+            is >> mass0_ >> Y_;
         }
         else
         {
@@ -61,7 +61,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
                 reinterpret_cast<char*>(&mass0_),
               + sizeof(mass0_)
             );
-            is >> YMixture_;
+            is >> Y_;
         }
     }
 
@@ -109,13 +109,13 @@ void Foam::ReactingParcel<ParcelType>::readFields
     forAllIter(typename Cloud<ParcelType>, c, iter)
     {
         ReactingParcel<ParcelType>& p = iter();
-        p.YMixture_.setSize(nPhases, 0.0);
+        p.Y_.setSize(nPhases, 0.0);
     }
 
-    // Populate YMixture for each parcel
+    // Populate Y for each parcel
     forAll(phaseTypes, j)
     {
-        IOField<scalar> YMixture
+        IOField<scalar> Y
         (
             c.fieldIOobject("Y" + phaseTypes[j], IOobject::MUST_READ)
         );
@@ -124,7 +124,7 @@ void Foam::ReactingParcel<ParcelType>::readFields
         forAllIter(typename Cloud<ParcelType>, c, iter)
         {
             ReactingParcel<ParcelType>& p = iter();
-            p.YMixture_[j] = YMixture[i++];
+            p.Y_[j] = Y[i++];
         }
     }
 }
@@ -157,7 +157,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
         const wordList phaseTypes = c.composition().phaseTypes();
         forAll(phaseTypes, j)
         {
-            IOField<scalar> YMixture
+            IOField<scalar> Y
             (
                 c.fieldIOobject("Y" + phaseTypes[j], IOobject::NO_READ),
                 np
@@ -167,10 +167,10 @@ void Foam::ReactingParcel<ParcelType>::writeFields
             forAllConstIter(typename Cloud<ParcelType>, c, iter)
             {
                 const ReactingParcel<ParcelType>& p0 = iter();
-                YMixture[i++] = p0.YMixture()[j];
+                Y[i++] = p0.Y()[j];
             }
 
-            YMixture.write();
+            Y.write();
         }
     }
 }
@@ -189,7 +189,7 @@ Foam::Ostream& Foam::operator<<
     {
         os  << static_cast<const ThermoParcel<ParcelType>& >(p)
             << token::SPACE << p.mass0()
-            << token::SPACE << p.YMixture();
+            << token::SPACE << p.Y();
     }
     else
     {
@@ -200,7 +200,7 @@ Foam::Ostream& Foam::operator<<
             reinterpret_cast<const char*>(&p.mass0_),
             sizeof(p.mass0())
         );
-        os << p.YMixture();
+        os << p.Y();
     }
 
     // Check state of Ostream

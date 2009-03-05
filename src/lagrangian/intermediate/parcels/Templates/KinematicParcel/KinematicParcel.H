@@ -224,13 +224,13 @@ protected:
 
         //- Calculate new particle velocity
         template<class TrackData>
-        vector calcVelocity
+        const vector calcVelocity
         (
             TrackData& td,
             const scalar dt,
             scalar& Cud,
             vector& dUTrans
-        );
+        ) const;
 
 
 public:
@@ -249,7 +249,7 @@ public:
             KinematicCloud<ParcelType>& owner,
             const label typeId,
             const vector& position,
-            const label celli,
+            const label cellI,
             const scalar d0,
             const vector& U0,
             const scalar nParticle0,
@@ -355,25 +355,16 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Coupled calculation with the continuous phase
+            //- Update parcel properties over the time interval
             template<class TrackData>
-            void calcCoupled
+            void calc
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
-            );
-
-            //- Uncoupled calculation with the continuous phase
-            template<class TrackData>
-            void calcUncoupled
-            (
-                TrackData& td,
-                const scalar dt,
-                const label
+                const label cellI
             );
 
 

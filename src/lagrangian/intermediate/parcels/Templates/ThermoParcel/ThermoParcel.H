@@ -209,7 +209,7 @@ protected:
         (
             TrackData& td,
             const scalar dt,
-            const label celli,
+            const label cellI,
             scalar& htc,
             scalar& dhTrans
         );
@@ -231,7 +231,7 @@ public:
             ThermoCloud<ParcelType>& owner,
             const label typeId,
             const vector& position,
-            const label celli,
+            const label cellI,
             const scalar d0,
             const vector& U0,
             const scalar nParticle0,
@@ -281,25 +281,16 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Coupled calculation with the continuous phase
+            //- Update parcel properties over the time interval
             template<class TrackData>
-            void calcCoupled
+            void calc
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
-            );
-
-            //- Uncoupled calculation with the continuous phase
-            template<class TrackData>
-            void calcUncoupled
-            (
-                TrackData& td,
-                const scalar dt,
-                const label
+                const label cellI
             );
 
 

@@ -77,11 +77,11 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     ReactingCloud<ParcelType>& owner,
     const label typeId,
     const vector& position,
-    const label celli,
+    const label cellI,
     const scalar d0,
     const vector& U0,
     const scalar nParticle0,
-    const scalarField& YMixture0,
+    const scalarField& Y0,
     const constantProperties& constProps
 )
 :
@@ -90,14 +90,14 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
         owner,
         typeId,
         position,
-        celli,
+        cellI,
         d0,
         U0,
         nParticle0,
         constProps
     ),
     mass0_(0.0),
-    YMixture_(YMixture0),
+    Y_(Y0),
     pc_(0.0)
 {
     // Set initial parcel mass
@@ -176,9 +176,9 @@ inline Foam::scalar Foam::ReactingParcel<ParcelType>::mass0() const
 
 template<class ParcelType>
 inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::
-YMixture() const
+Y() const
 {
-    return YMixture_;
+    return Y_;
 }
 
 
@@ -197,9 +197,9 @@ inline Foam::scalar& Foam::ReactingParcel<ParcelType>::mass0()
 
 
 template<class ParcelType>
-inline Foam::scalarField& Foam::ReactingParcel<ParcelType>::YMixture()
+inline Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y()
 {
-    return YMixture_;
+    return Y_;
 }
 
 

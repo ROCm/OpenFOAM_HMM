@@ -64,14 +64,14 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
     KinematicCloud<ParcelType>& owner,
     const label typeId,
     const vector& position,
-    const label celli,
+    const label cellI,
     const scalar d0,
     const vector& U0,
     const scalar nParticle0,
     const constantProperties& constProps
 )
 :
-    Particle<ParcelType>(owner, position, celli),
+    Particle<ParcelType>(owner, position, cellI),
     typeId_(typeId),
     d_(d0),
     U_(U0),

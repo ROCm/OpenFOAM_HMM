@@ -72,15 +72,15 @@ public:
         //- Update model
         scalar calculate
         (
+            const scalar dt,
+            const label cellI,
             const scalar T,
-            const scalar d,
-            const scalarField& Xc,
-            scalarList& dMassMT,
-            const vector& Ur,
-            const scalar Tc,
             const scalar pc,
+            const scalar d,
+            const scalar Tc,
             const scalar nuc,
-            const scalar dt
+            const vector& Ur,
+            scalarList& dMassMT
         ) const;
 };
 

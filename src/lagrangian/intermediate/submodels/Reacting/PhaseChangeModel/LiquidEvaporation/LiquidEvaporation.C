@@ -67,6 +67,26 @@ Foam::label Foam::LiquidEvaporation<CloudType>::carrierSpecieId
 }
 
 
+template<class CloudType>
+Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
+(
+    const label cellI
+) const
+{
+    scalarField Xc(this->owner().carrierThermo().composition().Y().size());
+
+    scalar Winv = 0.0;
+    forAll(Xc, i)
+    {
+        scalar Y = this->owner().carrierThermo().composition().Y()[i][cellI];
+        Winv += Y/this->owner().gases()[i].W();
+        Xc[i] = Y/this->owner().gases()[i].W();
+    }
+
+    return Xc/Winv;
+}
+
+
 template <class CloudType>
 Foam::scalar Foam::LiquidEvaporation<CloudType>::Sh
 (
@@ -99,10 +119,10 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
         )
     ),
     Tvap_(readScalar(this->coeffDict().lookup("Tvap"))),
-    evapProps_(this->coeffDict().lookup("activeLiquids")),
-    liqToGasMap_(evapProps_.size())
+    activeLiquids_(this->coeffDict().lookup("activeLiquids")),
+    liqToGasMap_(activeLiquids_.size())
 {
-    if (evapProps_.size() == 0)
+    if (activeLiquids_.size() == 0)
     {
         WarningIn
         (
@@ -116,9 +136,9 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
     }
 
     // Calculate mapping between liquid and carrier phase species
-    forAll(evapProps_, i)
+    forAll(activeLiquids_, i)
     {
-        liqToGasMap_[i] = carrierSpecieId(evapProps_[i].name());
+        liqToGasMap_[i] = carrierSpecieId(activeLiquids_[i]);
     }
 }
 
@@ -142,15 +162,15 @@ bool Foam::LiquidEvaporation<CloudType>::active() const
 template<class CloudType>
 Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
 (
+    const scalar dt,
+    const label cellI,
     const scalar T,
-    const scalar d,
-    const scalarField& Xc,
-    scalarList& dMassMT,
-    const vector& Ur,
-    const scalar Tc,
     const scalar pc,
+    const scalar d,
+    const scalar Tc,
     const scalar nuc,
-    const scalar dt
+    const vector& Ur,
+    scalarList& dMassMT
 ) const
 {
     scalar dMassTot = 0.0;
@@ -162,20 +182,25 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
     }
     else
     {
-        // droplet area
+        // Construct carrier phase species volume fractions
+        scalarField Xc = calcXc(cellI);
+
+        // droplet surface area
         scalar A = mathematicalConstant::pi*sqr(d);
 
         // Reynolds number
         scalar Re = mag(Ur)*d/(nuc + ROOTVSMALL);
 
         // Calculate mass transfer of each specie in liquid
-        forAll(evapProps_, i)
+        forAll(activeLiquids_, i)
         {
-            // Diffusion coefficient for species i
-            scalar Dab = evapProps_[i].Dab();
+            label gid = liqToGasMap_[i];
 
-            // Saturation pressure for species i at temperature T
-            scalar pSat = evapProps_[i].TvsPSat().value(T);
+            // Vapour diffusivity [m2/s]
+            scalar Dab = liquids_->properties()[gid].D(pc, T);
+
+            // Saturation pressure for species i [pa]
+            scalar pSat = liquids_->properties()[gid].pv(pc, T);
 
             // Schmidt number
             scalar Sc = nuc/(Dab + ROOTVSMALL);
@@ -190,15 +215,14 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
             scalar Cs = pSat/(specie::RR*T);
 
             // vapour concentration in bulk gas [kgmol/m3]
-            scalar Cinf = Xc[i]*pc/(specie::RR*Tc);
+            scalar Cinf = Xc[gid]*pc/(specie::RR*Tc);
 
             // molar flux of vapour [kgmol/m2/s]
             scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
-            // mass transfer
-            label globalLiqId = liqToGasMap_[i];
-            scalar dm = Ni*A*liquids_->properties()[globalLiqId].W()*dt;
-            dMassMT[globalLiqId] -= dm;
+            // mass transfer [kg]
+            scalar dm = Ni*A*liquids_->properties()[gid].W()*dt;
+            dMassMT[gid] -= dm;
             dMassTot += dm;
         }
     }

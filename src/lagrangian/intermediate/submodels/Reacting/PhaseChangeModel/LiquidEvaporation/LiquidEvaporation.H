@@ -35,9 +35,6 @@ Description
 
 #include "PhaseChangeModel.H"
 #include "liquidMixture.H"
-#include "Tuple2.H"
-
-#include "evaporationProperties.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,8 +61,8 @@ protected:
         //  allowed
         scalar Tvap_;
 
-        //- List of evaporation properties
-        List<evaporationProperties> evapProps_;
+        //- List of active liquid names
+        List<word> activeLiquids_;
 
         //- Mapping between liquid and carrier gas species
         List<label> liqToGasMap_;
@@ -78,6 +75,9 @@ protected:
 
         //- Sherwood number as a function of Reynolds and Schmidt numbers
         scalar Sh(const scalar Re, const scalar Sc) const;
+
+        //- Calculate the carrier phase comonent volume fractions at cellI
+        scalarField calcXc(const label cellI) const;
 
 
 public:
@@ -108,15 +108,15 @@ public:
         //- Update model
         scalar calculate
         (
+            const scalar dt,
+            const label cellI,
             const scalar T,
-            const scalar d,
-            const scalarField& Xc,
-            scalarList& dMassMT,
-            const vector& Ur,
-            const scalar Tc,
             const scalar pc,
+            const scalar d,
+            const scalar Tc,
             const scalar nuc,
-            const scalar dt
+            const vector& Ur,
+            scalarList& dMassMT
         ) const;
 };
 

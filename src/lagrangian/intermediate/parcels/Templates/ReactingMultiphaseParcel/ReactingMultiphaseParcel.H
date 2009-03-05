@@ -79,6 +79,10 @@ public:
             //- Latent heat of devolatilisation [J/kg]
             const scalar Ldevol_;
 
+            //- Fraction of enthalpy retained by parcel due to surface
+            //  reactions
+            const scalar fh_;
+
 
     public:
 
@@ -89,6 +93,10 @@ public:
 
             //- Return const access to the latent heat of devolatilisation
             inline scalar Ldevol() const;
+
+            //- Return const access to the fraction of enthalpy retained by
+            // parcel due to surface reactions
+            inline scalar fh() const;
     };
 
 
@@ -174,7 +182,7 @@ protected:
         (
             TrackData& td,
             const scalar dt,
-            const label celli,
+            const label cellI,
             const scalar T0,
             const scalar T1,
             const scalarList& dMassMT,
@@ -199,14 +207,14 @@ public:
             ReactingMultiphaseCloud<ParcelType>& owner,
             const label typeId,
             const vector& position,
-            const label celli,
+            const label cellI,
             const scalar d0,
             const vector& U0,
             const scalar nParticle0,
             const scalarField& YGas0,
             const scalarField& YLiquid0,
             const scalarField& YSolid0,
-            const scalarField& YMixture0,
+            const scalarField& Y0,
             const constantProperties& constProps
         );
 
@@ -262,25 +270,16 @@ public:
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Coupled calculation with the continuous phase
+            //- Update parcel properties over the time interval
             template<class TrackData>
-            void calcCoupled
+            void calc
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
-            );
-
-            //- Uncoupled calculation with the continuous phase
-            template<class TrackData>
-            void calcUncoupled
-            (
-                TrackData& td,
-                const scalar dt,
-                const label
+                const label cellI
             );
 
 
