@@ -23,28 +23,28 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::Table
+    Foam::polynomial
 
 Description
-    Templated table container data entry. Items are stored in a list of
-    Tuple2's. First column is always stored as scalar entries. Data is read
-    in the form, e.g. for an entry <entryName> that is (scalar, vector):
+    Templated polynomial container data entry. Items are stored in a list of
+    Tuple2's. Data is input in the form, e.g. for an entry <entryName> that
+    describes y = x^2 + 2x^3
 
     @verbatim
-        <entryName>   table
+        <entryName>   polynomial
         (
-            0.0 (1 2 3)
-            1.0 (4 5 6)
+            (1    2)
+            (2    3)
         );
     @endverbatim
 
 SourceFiles
-    Table.C
+    polynomial.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Table_H
-#define Table_H
+#ifndef polynomial_H
+#define polynomial_H
 
 #include "DataEntry.H"
 #include "Tuple2.H"
@@ -54,70 +54,67 @@ SourceFiles
 namespace Foam
 {
 
-template<class Type>
-class Table;
+class polynomial;
 
-template<class Type>
 Ostream& operator<<
 (
     Ostream&,
-    const Table<Type>&
+    const polynomial&
 );
 
 /*---------------------------------------------------------------------------*\
-                           Class Table Declaration
+                        Class polynomial Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class Table
+class polynomial
 :
-    public DataEntry<Type>
+    public DataEntry<scalar>
 {
     // Private data
 
-        //- Table data
-        List<Tuple2<scalar, Type> > table_;
+        //- Polynomial coefficients - list of prefactor, exponent
+        List<Tuple2<scalar, scalar> > coeffs_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise assignment
-        void operator=(const Table<Type>&);
+        void operator=(const polynomial&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("table");
+    TypeName("polynomial");
 
 
     // Constructors
 
         //- Construct from entry name and Istream
-        Table(const word& entryName, Istream& is);
+        polynomial(const word& entryName, Istream& is);
 
         //- Copy constructor
-        Table(const Table<Type>& tbl);
+        polynomial(const polynomial& poly);
 
 
     //- Destructor
-    virtual ~Table();
+    virtual ~polynomial();
 
 
     // Member Functions
 
-        //- Return Table value
-        Type value(const scalar x) const;
+        //- Return polynomial value
+        scalar value(const scalar x) const;
 
         //- Integrate between two (scalar) values
-        Type integrate(const scalar x1, const scalar x2) const;
+        scalar integrate(const scalar x1, const scalar x2) const;
 
 
     //- Ostream Operator
-    friend Ostream& operator<< <Type>
+    friend Ostream& operator<<
     (
         Ostream&,
-        const Constant<Type>&
+        const polynomial&
     );
 };
 
@@ -125,12 +122,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "Table.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -24,36 +24,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DataEntry.H"
+#include "polynomial.H"
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const Constant<Type>& cnst
+    const polynomial& poly
 )
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const DataEntry<Type>& >(cnst)
-            << token::SPACE << cnst.value_;
+        os  << static_cast<const DataEntry<scalar>& >(poly)
+            << token::SPACE << poly.coeffs_;
     }
     else
     {
-        os  << static_cast<const DataEntry<Type>& >(cnst);
+        os  << static_cast<const DataEntry<scalar>& >(poly);
         os.write
         (
-            reinterpret_cast<const char*>(&cnst.value_),
-            sizeof(cnst.value_)
+            reinterpret_cast<const char*>(&poly.coeffs_),
+            sizeof(poly.coeffs_)
         );
     }
 
     // Check state of Ostream
     os.check
     (
-        "Ostream& operator<<(Ostream&, const Constant<Type>&)"
+        "Ostream& operator<<(Ostream&, const polynomial&)"
     );
 
     return os;

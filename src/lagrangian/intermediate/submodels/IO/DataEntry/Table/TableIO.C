@@ -32,21 +32,21 @@ template<class Type>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const Table<Type>& de
+    const Table<Type>& tbl
 )
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const DataEntry<Type>& >(de)
-            << token::SPACE << de.table_;
+        os  << static_cast<const DataEntry<Type>& >(tbl)
+            << token::SPACE << tbl.table_;
     }
     else
     {
-        os  << static_cast<const DataEntry<Type>& >(de);
+        os  << static_cast<const DataEntry<Type>& >(tbl);
         os.write
         (
-            reinterpret_cast<const char*>(&de.table_),
-            sizeof(de.table_)
+            reinterpret_cast<const char*>(&tbl.table_),
+            sizeof(tbl.table_)
         );
     }
 

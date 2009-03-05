@@ -79,6 +79,6 @@ evaporationProperties/evaporationProperties/evaporationPropertiesIO.C
 
 /* data entries */
 submodels/IO/DataEntry/makeDataEntries.C
-
+submodels/IO/DataEntry/polynomial/polynomial.C
 
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate

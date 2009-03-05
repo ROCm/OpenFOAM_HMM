@@ -24,39 +24,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DataEntry.H"
+#include "polynomial.H"
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class Type>
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const Constant<Type>& cnst
-)
+Foam::polynomial::polynomial(const word& entryName, Istream& is)
+:
+    DataEntry<scalar>(entryName),
+    coeffs_(is)
 {
-    if (os.format() == IOstream::ASCII)
+    if (!coeffs_.size())
     {
-        os  << static_cast<const DataEntry<Type>& >(cnst)
-            << token::SPACE << cnst.value_;
+        FatalErrorIn("Foam::polynomial::polynomial(const word&, Istream&)")
+            << "polynomial coefficients for entry " << this->name_
+            << " is invalid (empty)" << nl << exit(FatalError);
     }
-    else
+}
+
+
+Foam::polynomial::polynomial(const polynomial& poly)
+:
+    DataEntry<scalar>(poly),
+    coeffs_(poly.coeffs_)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::polynomial::~polynomial()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::scalar Foam::polynomial::value(const scalar x) const
+{
+    scalar y = 0.0;
+    forAll(coeffs_, i)
     {
-        os  << static_cast<const DataEntry<Type>& >(cnst);
-        os.write
-        (
-            reinterpret_cast<const char*>(&cnst.value_),
-            sizeof(cnst.value_)
-        );
+        y += coeffs_[i].first()*pow(x, coeffs_[i].second());
     }
 
-    // Check state of Ostream
-    os.check
-    (
-        "Ostream& operator<<(Ostream&, const Constant<Type>&)"
-    );
+    return y;
+}
 
-    return os;
+
+Foam::scalar Foam::polynomial::integrate(const scalar x1, const scalar x2) const
+{
+    scalar intx = 0.0;
+
+    forAll(coeffs_, i)
+    {
+        intx +=
+            coeffs_[i].first()/(coeffs_[i].second() + 1)
+           *(
+                pow(x2, coeffs_[i].second() + 1)
+              - pow(x1, coeffs_[i].second() + 1)
+            );
+    }
+
+    return intx;
 }
 
 
