@@ -106,8 +106,6 @@ void Foam::vtkPV3Foam::convertVolFields
         printMemory();
     }
 
-    // Construct interpolation on the raw mesh
-    volPointInterpolation pInterp(mesh);
 
     PtrList<PrimitivePatchInterpolation<primitivePatch> >
         ppInterpList(mesh.boundaryMesh().size());
@@ -127,23 +125,23 @@ void Foam::vtkPV3Foam::convertVolFields
 
     convertVolFields<scalar>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<vector>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<sphericalTensor>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<symmTensor>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<tensor>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
 
     if (debug)

@@ -60,10 +60,12 @@ SourceFiles
 
 #include "className.H"
 #include "fileName.H"
-#include "volPointInterpolation.H"
 #include "stringList.H"
 #include "wordList.H"
 #include "primitivePatch.H"
+#include "PrimitivePatchInterpolation.H"
+#include "volFields.H"
+#include "pointFields.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -491,7 +493,6 @@ class vtkPV3Foam
             void convertVolFields
             (
                 const fvMesh&,
-                const volPointInterpolation&,
                 const PtrList<PrimitivePatchInterpolation<primitivePatch> >&,
                 const IOobjectList&,
                 vtkMultiBlockDataSet* output
@@ -502,7 +503,7 @@ class vtkPV3Foam
             void convertVolFieldBlock
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
-                const GeometricField<Type, pointPatchField, pointMesh>&,
+                autoPtr<GeometricField<Type, pointPatchField, pointMesh> >&,
                 vtkMultiBlockDataSet* output,
                 const partInfo& selector,
                 const List<polyDecomp>& decompLst
