@@ -64,8 +64,7 @@ SourceFiles
 #include "wordList.H"
 #include "primitivePatch.H"
 #include "PrimitivePatchInterpolation.H"
-#include "volFields.H"
-#include "pointFields.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
