@@ -131,6 +131,12 @@ castellatedMeshControls
                     level (3 3);
                 }
             }
+
+            // Optional angle to detect small-large cell situation perpendicular
+            // to the surface. Is the angle of face w.r.t the local surface
+            // normal. Use on flat(ish) surfaces only. Otherwise
+            // leave out or set to negative number.
+            //perpendicularAngle 10;
         }
     }
 
@@ -317,9 +323,9 @@ meshQualityControls
     minTriangleTwist -1;
 
     //- if >0 : preserve single cells with all points on the surface if the
-    //  resulting volume after snapping is larger than minVolFraction times old
-    //  volume. If <0 : delete always.
-    minVolFraction 0.1;
+    //  resulting volume after snapping (approximation) is larger than
+    //  minVolFraction times old volume. If <0 : delete always.
+    minVolFraction 0.5;
 
 
     // Advanced
