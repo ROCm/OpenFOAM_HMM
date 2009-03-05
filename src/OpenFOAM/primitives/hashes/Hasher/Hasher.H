@@ -22,8 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
-    Foam::Hashing
+InNamespace
+    Foam
 
 Description
     Misc. hashing functions, mostly from Bob Jenkins.
@@ -35,6 +35,7 @@ Description
 
 SeeAlso
     http://burtleburtle.net/bob/c/lookup3.c
+    and HasherInt.H for a specialized version
 
 SourceFiles
     Hasher.C
@@ -44,9 +45,7 @@ SourceFiles
 #ifndef Hasher_H
 #define Hasher_H
 
-#include <climits>
 #include <cstddef>
-#include <stdint.h>    // C++0x uses <cstdint>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,27 +59,6 @@ namespace Foam
     //  @param[in] len  - the number of bytes
     //  @param[in] seed - the previous hash, or an arbitrary value
     unsigned Hasher(const void* data, size_t len, unsigned seed = 0);
-
-    //- An optimized version of Hasher
-    //  @param[in] data - an array of uint32_t values
-    //  @param[in] len  - the number of values (not bytes)
-    //  @param[in] seed - the previous hash, or an arbitrary value
-    unsigned HasherSingle(const uint32_t*, size_t length, unsigned seed = 0);
-
-    //- An optimized version of Hasher, returning dual hash values
-    //  @param[in] data - an array of uint32_t values
-    //  @param[in] len  - the number of values (not bytes)
-    //  @param[in] hash1 - the previous hash, or an arbitrary value
-    //    on output, the primary hash value
-    //  @param[in] hash1 - the previous hash, or an arbitrary value
-    //    on output, the secondary hash value
-    unsigned HasherDual
-    (
-        const uint32_t*,
-        size_t len,
-        unsigned& hash1,
-        unsigned& hash2
-    );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

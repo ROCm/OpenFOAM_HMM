@@ -54,8 +54,7 @@ int main(int argc, char *argv[])
         const word listType(is);
 
         Info<< endl;
-        IOobject::writeDivider(Info);
-        Info<< listType << endl;
+        IOobject::writeDivider(Info) << listType << endl;
 
         if (listType == "stringList")
         {

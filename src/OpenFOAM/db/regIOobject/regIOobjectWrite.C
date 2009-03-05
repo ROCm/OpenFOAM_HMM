@@ -34,12 +34,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-bool regIOobject::writeObject
+bool Foam::regIOobject::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
@@ -131,7 +126,7 @@ bool regIOobject::writeObject
 }
 
 
-bool regIOobject::write() const
+bool Foam::regIOobject::write() const
 {
     return writeObject
     (
@@ -140,10 +135,5 @@ bool regIOobject::write() const
         time().writeCompression()
     );
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

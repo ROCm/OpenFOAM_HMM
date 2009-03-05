@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Constructors & destructor for regIOobject.
-
 \*---------------------------------------------------------------------------*/
 
 #include "regIOobject.H"
@@ -159,16 +156,16 @@ bool Foam::regIOobject::checkOut()
 // Rename object and re-register with objectRegistry under new name
 void Foam::regIOobject::rename(const word& newName)
 {
-    // TODO: verify that this works properly with unregistered objects
-    // I suspect that it incorrectly registers them
-
     // Check out of objectRegistry
     checkOut();
 
     IOobject::rename(newName);
 
-    // Re-register object with objectRegistry
-    checkIn();
+    if (registerObject())
+    {
+        // Re-register object with objectRegistry
+        checkIn();
+    }
 }
 
 
@@ -186,8 +183,11 @@ void Foam::regIOobject::operator=(const IOobject& io)
 
     IOobject::operator=(io);
 
-    // Re-register object with objectRegistry
-    checkIn();
+    if (registerObject())
+    {
+        // Re-register object with objectRegistry
+        checkIn();
+    }
 }
 
 

@@ -32,10 +32,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(polyBoundaryMesh, 0);
-}
+defineTypeNameAndDebug(Foam::polyBoundaryMesh, 0);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

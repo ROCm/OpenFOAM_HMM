@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "Hasher.H"
+#include "HasherInt.H"
 
 #if defined (__GLIBC__)
 #  include <endian.h>
@@ -469,7 +470,7 @@ static unsigned jenkins_hashbig
 #endif
 
 
-// * * * * * * * * * * * * * * * * Functions * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 
 unsigned Foam::Hasher
@@ -513,7 +514,7 @@ unsigned Foam::Hasher
 //  bytes.  hashlittle() is more complicated than hashword() only because
 //  hashlittle() has to dance around fitting the key bytes into registers.
 // ----------------------------------------------------------------------------
-unsigned Foam::HasherSingle
+unsigned Foam::HasherInt
 (
     const uint32_t *k,
     size_t length,

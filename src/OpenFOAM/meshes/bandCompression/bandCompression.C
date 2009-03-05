@@ -35,11 +35,8 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // Constructor from components
-labelList bandCompression(const labelListList& cellCellAddressing)
+Foam::labelList Foam::bandCompression(const labelListList& cellCellAddressing)
 {
     labelList newOrder(cellCellAddressing.size());
 
@@ -105,9 +102,5 @@ labelList bandCompression(const labelListList& cellCellAddressing)
     return newOrder;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

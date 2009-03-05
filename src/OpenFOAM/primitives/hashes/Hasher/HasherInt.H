@@ -22,31 +22,59 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+InNamespace
+    Foam
+
 Description
-    Return location of contact sphere on the face
+    Optimized hashing functions.
+
+SeeAlso
+    Hasher.H
 
 \*---------------------------------------------------------------------------*/
 
-#include "face.H"
+#ifndef HasherInt_H
+#define HasherInt_H
+
+#include "Hasher.H"
+
+#include <cstddef>
+#include <stdint.h>    // C++0x uses <cstdint>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::face::contactSphereDiameter
-(
-    const point& p,
-    const vector& n,
-    const pointField& meshPoints
-) const
+namespace Foam
 {
-    scalar magN = Foam::mag(n);
 
-    vector n1 = n/(magN + SMALL);
-    vector n2 = normal(meshPoints);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    n2 /= Foam::mag(n2) + SMALL;
+    //- An optimized version of Hasher
+    //  @param[in] data - an array of uint32_t values
+    //  @param[in] len  - the number of values (not bytes)
+    //  @param[in] seed - the previous hash, or an arbitrary value
+    unsigned HasherInt(const uint32_t*, size_t length, unsigned seed = 0);
 
-    return 2*((centre(meshPoints) - p) & n2)/((n1 & n2) - 1.0);
-}
+    //- An optimized version of Hasher, returning dual hash values
+    //  @param[in] data - an array of uint32_t values
+    //  @param[in] len  - the number of values (not bytes)
+    //  @param[in] hash1 - the previous hash, or an arbitrary value
+    //    on output, the primary hash value
+    //  @param[in] hash1 - the previous hash, or an arbitrary value
+    //    on output, the secondary hash value
+    unsigned HasherDual
+    (
+        const uint32_t*,
+        size_t len,
+        unsigned& hash1,
+        unsigned& hash2
+    );
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
