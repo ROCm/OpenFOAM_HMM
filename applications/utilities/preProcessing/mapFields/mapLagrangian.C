@@ -94,7 +94,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
     (
         readDir
         (
-            meshSource.time().timePath()/"lagrangian",
+            meshSource.time().timePath()/cloud::subInstance,
             fileName::DIRECTORY
         )
     );
@@ -106,7 +106,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
         (
             meshSource,
             meshSource.time().timeName(),
-            "lagrangian"/cloudDirs[cloudI]
+            cloud::subInstance/cloudDirs[cloudI]
         );
 
         IOobject* positionsPtr = objects.lookup("positions");

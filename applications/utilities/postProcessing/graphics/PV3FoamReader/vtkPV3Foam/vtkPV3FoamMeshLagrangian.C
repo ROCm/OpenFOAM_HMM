@@ -53,7 +53,7 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::lagrangianVTKMesh - timePath "
-            << mesh.time().timePath()/"lagrangian"/cloudName << endl;
+            << mesh.time().timePath()/cloud::subInstance/cloudName << endl;
         printMemory();
     }
 
@@ -63,7 +63,7 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
     (
         mesh,
         mesh.time().timeName(),
-        "lagrangian"/cloudName
+        cloud::subInstance/cloudName
     );
 
     IOobject* positionsPtr = sprayObjs.lookup("positions");

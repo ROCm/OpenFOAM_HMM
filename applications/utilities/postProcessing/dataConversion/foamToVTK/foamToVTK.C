@@ -914,7 +914,7 @@ int main(int argc, char *argv[])
         (
             readDir
             (
-                runTime.timePath()/regionPrefix/"lagrangian",
+                runTime.timePath()/regionPrefix/cloud::subInstance,
                 fileName::DIRECTORY
             )
         );
@@ -925,18 +925,18 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudDirs[i]
+                cloud::subInstance/cloudDirs[i]
             );
 
             IOobject* positionsPtr = sprayObjs.lookup("positions");
 
             if (positionsPtr)
             {
-                mkDir(fvPath/"lagrangian"/cloudDirs[i]);
+                mkDir(fvPath/cloud::subInstance/cloudDirs[i]);
 
                 fileName lagrFileName
                 (
-                    fvPath/"lagrangian"/cloudDirs[i]/cloudDirs[i]
+                    fvPath/cloud::subInstance/cloudDirs[i]/cloudDirs[i]
                   + "_" + name(timeI) + ".vtk"
                 );
 

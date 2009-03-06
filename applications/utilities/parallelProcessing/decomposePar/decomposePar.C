@@ -312,7 +312,7 @@ int main(int argc, char *argv[])
 
     fileNameList cloudDirs
     (
-        readDir(runTime.timePath()/"lagrangian", fileName::DIRECTORY)
+        readDir(runTime.timePath()/cloud::subInstance, fileName::DIRECTORY)
     );
 
     // Particles
@@ -344,7 +344,7 @@ int main(int argc, char *argv[])
         (
             mesh,
             runTime.timeName(),
-            "lagrangian"/cloudDirs[i]
+            cloud::subInstance/cloudDirs[i]
         );
 
         IOobject* positionsPtr = sprayObjs.lookup("positions");
@@ -418,7 +418,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudDirs[cloudI]
+                cloud::subInstance/cloudDirs[cloudI]
             );
 
             lagrangianFieldDecomposer::readFields

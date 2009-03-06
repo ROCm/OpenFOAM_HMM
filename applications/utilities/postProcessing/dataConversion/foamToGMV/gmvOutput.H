@@ -2,13 +2,13 @@ for(label i=0; i < nTypes; i++)
 {
     wordList fieldNames = objects.names(fieldTypes[i]);
 
-    if ( fieldTypes[i] == "volScalarField" ) 
+    if ( fieldTypes[i] == "volScalarField" )
     {
         gmvFile << "variable" << nl;
     }
     for(label j=0; j < fieldNames.size(); j++)
     {
-        
+
         word fieldName = fieldNames[j];
 
         IOobject fieldObject
@@ -19,8 +19,8 @@ for(label i=0; i < nTypes; i++)
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         );
-        
-        if ( fieldTypes[i] == "volScalarField" ) 
+
+        if ( fieldTypes[i] == "volScalarField" )
         {
             volScalarField gmvScalarField(fieldObject, mesh);
             gmvFile << fieldName << " 0" << nl;
@@ -30,8 +30,8 @@ for(label i=0; i < nTypes; i++)
             }
             gmvFile << nl;
         }
-        
-        if ( fieldTypes[i] == "volVectorField" ) 
+
+        if ( fieldTypes[i] == "volVectorField" )
         {
             if (fieldName == vComp)
             {
@@ -52,21 +52,21 @@ for(label i=0; i < nTypes; i++)
                 gmvFile << nl;
             }
         }
-                
-        if ( fieldTypes[i] == "surfaceScalarField" ) 
+
+        if ( fieldTypes[i] == "surfaceScalarField" )
         {
             // ...
         }
-        
+
     }
 
-    if ( fieldTypes[i] == "lagrangian") 
+    if ( fieldTypes[i] == cloud::subInstance )
     {
         IOobject lagrangianHeader
         (
             "positions",
             runTime.timeName(),
-            "lagrangian",
+            cloud::subInstance,
             mesh,
             IOobject::NO_READ
         );
@@ -74,9 +74,9 @@ for(label i=0; i < nTypes; i++)
         if (lagrangianHeader.headerOk())
         {
             Cloud<passiveParticle> particles(mesh);
-            
-            IOobjectList objects(mesh, runTime.timeName(), "lagrangian");
-            
+
+            IOobjectList objects(mesh, runTime.timeName(), cloud::subInstance);
+
             wordList lagrangianScalarNames = objects.names("scalarField");
             wordList lagrangianVectorNames = objects.names("vectorField");
 
@@ -87,7 +87,7 @@ for(label i=0; i < nTypes; i++)
         }
     }
 
-    if ( fieldTypes[i] == "volScalarField" ) 
+    if ( fieldTypes[i] == "volScalarField" )
     {
         gmvFile << "endvars" << nl;
     }

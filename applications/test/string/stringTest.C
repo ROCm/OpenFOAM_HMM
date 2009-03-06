@@ -70,6 +70,28 @@ int main(int argc, char *argv[])
     string test2("~OpenFOAM/controlDict");
     Info<< test2 << " => " << test2.expand() << endl;
 
+    // replace controlDict with "newName"
+    {
+        string::size_type i = test2.rfind('/');
+
+        if (i == string::npos)
+        {
+            test2 = "newName";
+        }
+        else
+        {
+            // this uses the std::string::replace
+            test2.replace(i+1, string::npos, "newName");
+        }
+        Info<< "after replace: " << test2 << endl;
+
+        // do another replace
+        // this uses the Foam::string::replace
+        test2.replace("OpenFOAM", "openfoam");
+
+        Info<< "after replace: " << test2 << endl;
+    }
+
     string s;
     Sin.getLine(s);
 
@@ -78,8 +100,7 @@ int main(int argc, char *argv[])
     cout<< "output string with " << s2.length() << " characters\n";
     cout<< "ostream<<  >" << s2 << "<\n";
     Info<< "Ostream<<  >" << s2 << "<\n";
-    Info<< "hash:" << unsigned(string::hash()(s2)) << endl;
-
+    Info<< "hash:" << hex << string::hash()(s2) << endl;
 
     Info << "End\n" << endl;
 

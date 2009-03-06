@@ -42,7 +42,7 @@ forAllConstIter(HashTable<HashTable<word> >, cloudFields, cloudIter)
 
     caseFile
         << setw(16) << "measured: 2"
-        << fileName(dataMask/"lagrangian"/cloudName/"positions").c_str()
+        << fileName(dataMask/cloud::subInstance/cloudName/"positions").c_str()
             << nl;
 }
 caseFile
@@ -122,7 +122,7 @@ forAllConstIter(HashTable<HashTable<word> >, cloudFields, cloudIter)
                 ensightType,
                 fieldName,
                 dataMask,
-                "lagrangian"/cloudName,
+                cloud::subInstance/cloudName,
                 cloudNo,
                 2
             );

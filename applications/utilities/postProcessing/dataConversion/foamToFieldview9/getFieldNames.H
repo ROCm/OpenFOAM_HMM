@@ -42,7 +42,7 @@ forAll(Times, timeI)
 
 
     // Same for spray
-    IOobjectList sprayObjects(mesh, runTime.timeName(), "lagrangian");
+    IOobjectList sprayObjects(mesh, runTime.timeName(), cloud::subInstance);
     {
         wordList fieldNames(sprayObjects.names(scalarIOField::typeName));
         forAll(fieldNames, fieldI)

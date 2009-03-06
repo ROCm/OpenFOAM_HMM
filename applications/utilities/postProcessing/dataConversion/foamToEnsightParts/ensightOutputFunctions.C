@@ -27,7 +27,6 @@ License
 #include "ensightOutputFunctions.H"
 
 #include "passiveParticle.H"
-#include "Cloud.H"
 #include "IOField.H"
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -101,7 +100,7 @@ void ensightParticlePositions
 {
     Cloud<passiveParticle> parcels(mesh, cloudName, false);
 
-    fileName cloudDir = subDir/"lagrangian"/cloudName;
+    fileName cloudDir = subDir/cloud::subInstance/cloudName;
     fileName postFileName = cloudDir/"positions";
 
     // the ITER/lagrangian subdirectory must exist
@@ -165,7 +164,7 @@ void ensightLagrangianField
 {
     Info<< " " << fieldObject.name() << flush;
 
-    fileName cloudDir = subDir/"lagrangian"/cloudName;
+    fileName cloudDir = subDir/cloud::subInstance/cloudName;
     fileName postFileName = cloudDir/fieldObject.name();
 
     string title =

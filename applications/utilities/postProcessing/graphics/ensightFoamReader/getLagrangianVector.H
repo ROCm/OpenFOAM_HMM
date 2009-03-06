@@ -14,7 +14,7 @@ if (nVar >= 0)
         (
             name,
             runTime.timeName(),
-            "lagrangian",
+            cloud::subInstance,
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE

@@ -41,7 +41,7 @@ Description
 Note
     If the string contents are changed - eg, by the operator+=() or by
     string::replace(), etc - it will be necessary to use compile() or
-    recompile() to sychronize the regular expression.
+    recompile() to synchronize the regular expression.
 
 SourceFiles
     wordRe.C
