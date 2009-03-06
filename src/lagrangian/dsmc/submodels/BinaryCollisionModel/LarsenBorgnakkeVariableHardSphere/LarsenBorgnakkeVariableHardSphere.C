@@ -142,6 +142,11 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::sigmaTcR
 
     scalar cR = mag(UP - UQ);
 
+    if (cR < VSMALL)
+    {
+        return 0;
+    }
+
     scalar mP = cloud.constProps(typeIdP).mass();
 
     scalar mQ = cloud.constProps(typeIdQ).mass();

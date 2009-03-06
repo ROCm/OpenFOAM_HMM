@@ -438,7 +438,7 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
         )
     ),
     constProps_(),
-    rndGen_(label(971501)),
+    rndGen_(label(149382906) + 7183*Pstream::myProcNo()),
     T_(T),
     U_(U),
     binaryCollisionModel_
@@ -543,7 +543,7 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
         )
     ),
     constProps_(),
-    rndGen_(label(971501)),
+    rndGen_(label(971501) + 1526*Pstream::myProcNo()),
     T_
     (
         volScalarField
