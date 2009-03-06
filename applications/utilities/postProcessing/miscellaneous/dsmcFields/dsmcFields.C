@@ -140,7 +140,6 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             // TODO Sort out boundary field values if required
 
             Info<< nl << "Calculating UMean field." << endl;
-
             volVectorField UMean
             (
                 IOobject
@@ -153,8 +152,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 momentumMean/rhoMMean
             );
 
-            Info<< nl << "Calculating TMean fields." << endl;
-
+            Info<< nl << "Calculating translationalTMean field." << endl;
             volScalarField translationalTMean
             (
                 IOobject
@@ -168,6 +166,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                *(linearKEMean - 0.5*rhoMMean*(UMean & UMean))
             );
 
+            Info<< nl << "Calculating internalTMean field." << endl;
             volScalarField internalTMean
             (
                 IOobject
@@ -180,6 +179,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                 2.0/(dsmcCloud::kb*iDofMean)*internalEMean
             );
 
+            Info<< nl << "Calculating overallTMean field." << endl;
             volScalarField overallTMean
             (
                 IOobject
@@ -193,7 +193,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
                *(linearKEMean - 0.5*rhoMMean*(UMean & UMean) + internalEMean)
             );
 
-            Info<< nl << "magUMean max/min : "
+            Info<< nl << "mag(UMean) max/min : "
                 << max(mag(UMean)).value() << " "
                 << min(mag(UMean)).value() << endl;
 
