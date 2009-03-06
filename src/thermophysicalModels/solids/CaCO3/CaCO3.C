@@ -22,92 +22,65 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::Cs
-
-Description
-    Graphite
-
-SourceFiles
-    Cs.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef solid_Cs_H
-#define solid_Cs_H
-
-#include "solid.H"
+#include "CaCO3.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                            Class Cs Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class Cs
+defineTypeNameAndDebug(CaCO3, 0);
+addToRunTimeSelectionTable(solid, CaCO3,);
+addToRunTimeSelectionTable(solid, CaCO3, Istream);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::CaCO3::CaCO3()
 :
-    public solid
+    solid(2710, 850, 1.3, 0.0, 1.0)
 {
-
-public:
-
-    //- Runtime type information
-    TypeName("Cs");
-
-
-    // Constructors
-
-        //- Construct null
-        Cs()
-        :
-            solid(2010, 710, 0.04, 0.0, 1.0)
-        {
-            WarningIn("Cs::Cs()")
-                << "Properties of graphite need to be checked!!!"
-                << endl;
-        }
-
-        //- Construct from solid
-        Cs
-        (
-            const solid& s
-        )
-        :
-            solid(s)
-        {}
-
-        //- Construct from Istream
-        Cs(Istream& is)
-        :
-            solid(is)
-        {}
-
-        //- Write the function coefficients
-        void writeData(Ostream& os) const
-        {
-            solid::writeData(os);
-        }
+    WarningIn("CaCO3::CaCO3()")
+        << "Properties of CaCO3 need to be checked!!!"
+        << endl;
+}
 
 
-    // Ostream Operator
+Foam::CaCO3::CaCO3(const solid& s)
+:
+    solid(s)
+{}
 
-        friend Ostream& operator<<(Ostream& os, const Cs& s)
-        {
-            s.writeData(os);
-            return os;
-        }
-};
+
+Foam::CaCO3::CaCO3(Istream& is)
+:
+    solid(is)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::CaCO3::writeData(Ostream& os) const
+{
+    solid::writeData(os);
+}
+
+
+// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
+
+Foam::Ostream& operator<<(Ostream& os, const CaCO3& s)
+{
+    s.writeData(os);
+    return os;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

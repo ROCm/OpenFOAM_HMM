@@ -236,7 +236,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
 }
 
 
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
+// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ReactingParcelIO.C"
 

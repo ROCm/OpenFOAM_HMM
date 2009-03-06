@@ -24,63 +24,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ash.H"
-#include "addToRunTimeSelectionTable.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+inline Foam::scalar Foam::solid::rho() const
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(ash, 0);
-addToRunTimeSelectionTable(solid, ash,);
-addToRunTimeSelectionTable(solid, ash, Istream);
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::ash::ash()
-:
-    solid(2010, 710, 0.04, 0.0, 1.0)
-{
-    WarningIn("ash::ash()")
-        << "Properties of ash need to be checked!!!"
-        << endl;
+    return rho_;
 }
 
 
-Foam::ash::ash(const solid& s)
-:
-    solid(s)
-{}
-
-
-Foam::ash::ash(Istream& is)
-:
-    solid(is)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::ash::writeData(Ostream& os) const
+inline Foam::scalar Foam::solid::cp() const
 {
-    solid::writeData(os);
+    return cp_;
 }
 
 
-// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
-
-Foam::Ostream& operator<<(Ostream& os, const ash& s)
+inline Foam::scalar Foam::solid::K() const
 {
-    s.writeData(os);
-    return os;
+    return K_;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+inline Foam::scalar Foam::solid::Hf() const
+{
+    return Hf_;
+}
 
-} // End namespace Foam
+
+inline Foam::scalar Foam::solid::emissivity() const
+{
+    return emissivity_;
+}
+
 
 // ************************************************************************* //

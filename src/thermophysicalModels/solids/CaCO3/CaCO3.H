@@ -22,65 +22,81 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::CaCO3
+
+Description
+    Calcium carbonate (limestone)
+
+SourceFiles
+    CaCO3.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "ash.H"
-#include "addToRunTimeSelectionTable.H"
+#ifndef solid_CaCO3_H
+#define solid_CaCO3_H
+
+#include "solid.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+class CaCO3;
 
-defineTypeNameAndDebug(ash, 0);
-addToRunTimeSelectionTable(solid, ash,);
-addToRunTimeSelectionTable(solid, ash, Istream);
+Ostream& operator<<
+(
+     Ostream&,
+     const CaCO3&
+);
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ash::ash()
+/*---------------------------------------------------------------------------*\
+                              Class CaCO3 Declaration
+\*---------------------------------------------------------------------------*/
+
+class CaCO3
 :
-    solid(2010, 710, 0.04, 0.0, 1.0)
+    public solid
 {
-    WarningIn("ash::ash()")
-        << "Properties of ash need to be checked!!!"
-        << endl;
-}
+
+public:
+
+    //- Runtime type information
+    TypeName("CaCO3");
 
 
-Foam::ash::ash(const solid& s)
-:
-    solid(s)
-{}
+    // Constructors
+
+        //- Construct null
+        CaCO3();
+
+        //- Construct from solid
+        CaCO3(const solid& s);
+
+        //- Construct from Istream
+        CaCO3(Istream& is);
 
 
-Foam::ash::ash(Istream& is)
-:
-    solid(is)
-{}
+    // I-O
+
+        //- Write the function coefficients
+        void writeData(Ostream& os) const;
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+    // Ostream Operator
 
-void Foam::ash::writeData(Ostream& os) const
-{
-    solid::writeData(os);
-}
-
-
-// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
-
-Foam::Ostream& operator<<(Ostream& os, const ash& s)
-{
-    s.writeData(os);
-    return os;
-}
+        friend Ostream& operator<<(Ostream& os, const CaCO3& s);
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

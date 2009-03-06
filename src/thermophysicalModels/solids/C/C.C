@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ash.H"
+#include "C.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,29 +34,29 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(ash, 0);
-addToRunTimeSelectionTable(solid, ash,);
-addToRunTimeSelectionTable(solid, ash, Istream);
+defineTypeNameAndDebug(C, 0);
+addToRunTimeSelectionTable(solid, C,);
+addToRunTimeSelectionTable(solid, C, Istream);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::ash::ash()
+Foam::C::C()
 :
     solid(2010, 710, 0.04, 0.0, 1.0)
 {
-    WarningIn("ash::ash()")
-        << "Properties of ash need to be checked!!!"
+    WarningIn("C::C()")
+        << "Properties of graphite need to be checked!!!"
         << endl;
 }
 
 
-Foam::ash::ash(const solid& s)
+Foam::C::C(const solid& s)
 :
     solid(s)
 {}
 
 
-Foam::ash::ash(Istream& is)
+Foam::C::C(Istream& is)
 :
     solid(is)
 {}
@@ -64,7 +64,7 @@ Foam::ash::ash(Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::ash::writeData(Ostream& os) const
+void Foam::C::writeData(Ostream& os) const
 {
     solid::writeData(os);
 }
@@ -72,7 +72,7 @@ void Foam::ash::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& operator<<(Ostream& os, const ash& s)
+Foam::Ostream& operator<<(Ostream& os, const C& s)
 {
     s.writeData(os);
     return os;

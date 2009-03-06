@@ -22,24 +22,79 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::C
+
+Description
+    Graphite
+
+SourceFiles
+    C.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "Cs.H"
-#include "addToRunTimeSelectionTable.H"
+#ifndef solid_C_H
+#define solid_C_H
+
+#include "solid.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+class C;
 
-defineTypeNameAndDebug(Cs, 0);
-addToRunTimeSelectionTable(solid, Cs,);
-addToRunTimeSelectionTable(solid, Cs, Istream);
+Ostream& operator<<
+(
+     Ostream&,
+     const C&
+);
+
+
+/*---------------------------------------------------------------------------*\
+                            Class C Declaration
+\*---------------------------------------------------------------------------*/
+
+class C
+:
+    public solid
+{
+public:
+
+    //- Runtime type information
+    TypeName("C");
+
+
+    // Constructors
+
+        //- Construct null
+        C();
+
+        //- Construct from solid
+        C(const solid& s);
+
+        //- Construct from Istream
+        C(Istream& is);
+
+
+    // I-O
+
+        //- Write the function coefficients
+        void writeData(Ostream& os) const;
+
+
+    //- Ostream Operator
+    friend Ostream& operator<<(Ostream& os, const C& s);
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

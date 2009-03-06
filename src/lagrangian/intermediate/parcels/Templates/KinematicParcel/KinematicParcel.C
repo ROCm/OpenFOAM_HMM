@@ -268,7 +268,7 @@ void Foam::KinematicParcel<ParcelType>::transformProperties
 }
 
 
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
+// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "KinematicParcelIO.C"
 

@@ -385,7 +385,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
 }
 
 
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
+// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ReactingMultiphaseParcelIO.C"
 
