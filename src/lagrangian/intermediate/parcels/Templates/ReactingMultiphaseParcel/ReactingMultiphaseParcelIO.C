@@ -77,11 +77,11 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     // Check state of Istream
     is.check
     (
-        "ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel\n"
-        "(\n"
-        "    const Cloud<ParcelType>&,\n"
-        "    Istream&,\n"
-        "    bool\n"
+        "ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel"
+        "("
+            "const Cloud<ParcelType>&, "
+            "Istream&, "
+            "bool"
         ")"
     );
 }
@@ -102,11 +102,12 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
 
     // Get names and sizes for each Y...
     const label idGas = c.composition().idGas();
-    const wordList gasNames = c.composition().componentNames(idGas);
+    const wordList& gasNames = c.composition().componentNames(idGas);
     const label idLiquid = c.composition().idLiquid();
-    const wordList liquidNames = c.composition().componentNames(idLiquid);
+    const wordList& liquidNames = c.composition().componentNames(idLiquid);
     const label idSolid = c.composition().idSolid();
-    const wordList solidNames = c.composition().componentNames(idSolid);
+    const wordList& solidNames = c.composition().componentNames(idSolid);
+    const wordList& stateLabels = c.composition().stateLabels();
 
     // Set storage for each Y... for each parcel
     forAllIter(typename Cloud<ParcelType>, c, iter)
@@ -122,7 +123,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
     {
         IOField<scalar> YGas
         (
-            c.fieldIOobject("Y" + gasNames[j], IOobject::MUST_READ)
+            c.fieldIOobject
+            (
+                "Y" + gasNames[j] + stateLabels[idGas],
+                IOobject::MUST_READ
+            )
         );
 
         label i = 0;
@@ -137,7 +142,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
     {
         IOField<scalar> YLiquid
         (
-            c.fieldIOobject("Y" + liquidNames[j], IOobject::MUST_READ)
+            c.fieldIOobject
+            (
+                "Y" + liquidNames[j] + stateLabels[idLiquid],
+                 IOobject::MUST_READ
+            )
         );
 
         label i = 0;
@@ -152,7 +161,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
     {
         IOField<scalar> YSolid
         (
-            c.fieldIOobject("Y" + solidNames[j], IOobject::MUST_READ)
+            c.fieldIOobject
+            (
+                "Y" + solidNames[j] + stateLabels[idSolid],
+                IOobject::MUST_READ
+            )
         );
 
         label i = 0;
@@ -178,13 +191,19 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
     // Write the composition fractions
     if (np > 0)
     {
+        const wordList& stateLabels = c.composition().stateLabels();
+
         const label idGas = c.composition().idGas();
-        const wordList gasNames = c.composition().componentNames(idGas);
+        const wordList& gasNames = c.composition().componentNames(idGas);
         forAll(gasNames, j)
         {
             IOField<scalar> YGas
             (
-                c.fieldIOobject("Y" + gasNames[j], IOobject::NO_READ),
+                c.fieldIOobject
+                (
+                    "Y" + gasNames[j] + stateLabels[idGas],
+                    IOobject::NO_READ
+                ),
                 np
             );
 
@@ -197,13 +216,18 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
 
             YGas.write();
         }
+
         const label idLiquid = c.composition().idLiquid();
-        const wordList liquidNames = c.composition().componentNames(idLiquid);
+        const wordList& liquidNames = c.composition().componentNames(idLiquid);
         forAll(liquidNames, j)
         {
             IOField<scalar> YLiquid
             (
-                c.fieldIOobject("Y" + liquidNames[j], IOobject::NO_READ),
+                c.fieldIOobject
+                (
+                    "Y" + liquidNames[j] + stateLabels[idLiquid],
+                    IOobject::NO_READ
+                ),
                 np
             );
 
@@ -216,13 +240,18 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
 
             YLiquid.write();
         }
+
         const label idSolid = c.composition().idSolid();
-        const wordList solidNames = c.composition().componentNames(idSolid);
+        const wordList& solidNames = c.composition().componentNames(idSolid);
         forAll(solidNames, j)
         {
             IOField<scalar> YSolid
             (
-                c.fieldIOobject("Y" + solidNames[j], IOobject::NO_READ),
+                c.fieldIOobject
+                (
+                    "Y" + solidNames[j] + stateLabels[idSolid],
+                    IOobject::NO_READ
+                ),
                 np
             );
 
@@ -267,10 +296,10 @@ Foam::Ostream& Foam::operator<<
     // Check state of Ostream
     os.check
     (
-        "Ostream& operator<<\n"
-        "(\n"
-        "    Ostream&,\n"
-        "    const ReactingMultiphaseParcel<ParcelType>&\n"
+        "Ostream& operator<<"
+        "("
+            "Ostream&, "
+            "const ReactingMultiphaseParcel<ParcelType>&"
         ")"
     );
 

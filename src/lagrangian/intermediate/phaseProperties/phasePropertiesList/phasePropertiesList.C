@@ -37,7 +37,8 @@ Foam::phasePropertiesList::phasePropertiesList
 )
 :
     props_(is),
-    phaseTypeNames_()
+    phaseTypeNames_(),
+    stateLabels_()
 {
     forAll(props_, i)
     {
@@ -45,9 +46,11 @@ Foam::phasePropertiesList::phasePropertiesList
     }
 
     phaseTypeNames_.setSize(props_.size());
-    forAll(phaseTypeNames_, i)
+    stateLabels_.setSize(props_.size());
+    forAll(props_, i)
     {
         phaseTypeNames_[i] = props_[i].phaseTypeName();
+        stateLabels_[i] = props_[i].stateLabel();
     }
 }
 
@@ -70,6 +73,12 @@ Foam::phasePropertiesList::props() const
 const Foam::wordList& Foam::phasePropertiesList::phaseTypes() const
 {
     return phaseTypeNames_;
+}
+
+
+const Foam::wordList& Foam::phasePropertiesList::stateLabels() const
+{
+    return stateLabels_;
 }
 
 

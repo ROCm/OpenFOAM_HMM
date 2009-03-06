@@ -31,11 +31,11 @@ License
 template <class CloudType>
 Foam::NoSurfaceReaction<CloudType>::NoSurfaceReaction
 (
-    const dictionary& dict,
+    const dictionary&,
     CloudType& owner
 )
 :
-    SurfaceReactionModel<CloudType>(dict, owner, typeName)
+    SurfaceReactionModel<CloudType>(owner)
 {}
 
 

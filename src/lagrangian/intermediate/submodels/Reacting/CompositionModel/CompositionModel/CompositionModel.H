@@ -172,6 +172,9 @@ public:
                 //  If only 1 phase, return the component names of that phase
                 const wordList& phaseTypes() const;
 
+                //- Return the list of state labels (s), (l), (g) etc.
+                const wordList& stateLabels() const;
+
                 //- Return the list of component names for phaseI
                 const wordList& componentNames(const label phaseI) const;
 
@@ -226,8 +229,17 @@ public:
                 const scalar T
             ) const;
 
-            //- Return cp for the phase phaseI
+            //- Return specific heat caoacity for the phase phaseI
             virtual scalar cp
+            (
+                const label phaseI,
+                const scalarField& Y,
+                const scalar p,
+                const scalar T
+            ) const;
+
+            //- Return latent heat for the phase phaseI
+            virtual scalar L
             (
                 const label phaseI,
                 const scalarField& Y,

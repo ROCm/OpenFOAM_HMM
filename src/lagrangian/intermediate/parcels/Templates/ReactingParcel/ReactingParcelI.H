@@ -35,8 +35,7 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     ThermoParcel<ParcelType>::constantProperties(dict),
     constantVolume_(dict.lookup("constantVolume")),
     Tbp_(dimensionedScalar(dict.lookup("Tbp")).value()),
-    Tvap_(dimensionedScalar(dict.lookup("Tvap")).value()),
-    Lvap_(dimensionedScalar(dict.lookup("Lvap")).value())
+    Tvap_(dimensionedScalar(dict.lookup("Tvap")).value())
 {}
 
 
@@ -131,14 +130,6 @@ Foam::ReactingParcel<ParcelType>::constantProperties::Tvap() const
 }
 
 
-template<class ParcelType>
-inline Foam::scalar
-Foam::ReactingParcel<ParcelType>::constantProperties::Lvap() const
-{
-    return Lvap_;
-}
-
-
 // * * * * * * * * * * * trackData Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -175,8 +166,7 @@ inline Foam::scalar Foam::ReactingParcel<ParcelType>::mass0() const
 
 
 template<class ParcelType>
-inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::
-Y() const
+inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y() const
 {
     return Y_;
 }

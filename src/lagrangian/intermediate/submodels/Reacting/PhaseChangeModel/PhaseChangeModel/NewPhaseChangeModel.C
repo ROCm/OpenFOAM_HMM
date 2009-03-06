@@ -47,16 +47,15 @@ Foam::PhaseChangeModel<CloudType>::New
     {
         FatalErrorIn
         (
-            "PhaseChangeModel<CloudType>::New\n"
-            "(\n"
-            "    const dictionary&,\n"
-            "    CloudType&\n"
+            "PhaseChangeModel<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
             ")"
-        )
-            << "Unknown PhaseChangeModelType type "
+        )   << "Unknown PhaseChangeModelType type "
             << PhaseChangeModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid PhaseChangeModel types are :" << nl
+            << "    Valid PhaseChangeModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

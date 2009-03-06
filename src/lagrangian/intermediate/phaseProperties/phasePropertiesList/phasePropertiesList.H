@@ -60,6 +60,9 @@ class phasePropertiesList
         //- List of word representation of phase types
         wordList phaseTypeNames_;
 
+        //- List of state labels
+        wordList stateLabels_;
+
 
 public:
 
@@ -83,6 +86,9 @@ public:
 
         //- Return the list of word representation of phase types
         const wordList& phaseTypes() const;
+
+        //- Return the list of state labels
+        const wordList& stateLabels() const;
 
         //- Return the size (number of phases)
         label size() const;

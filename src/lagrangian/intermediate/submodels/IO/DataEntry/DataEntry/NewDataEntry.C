@@ -47,7 +47,7 @@ Foam::autoPtr<Foam::DataEntry<Type> > Foam::DataEntry<Type>::New
         FatalErrorIn("DataEntry<Type>::New(Istream&)")
             << "Unknown DataEntry type " << DataEntryType << " for DataEntry "
             << entryName << ". Constructor not in hash table" << nl << nl
-            << "    Valid DataEntry types are :" << nl
+            << "    Valid DataEntry types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << nl
             << exit(FatalError);
     }

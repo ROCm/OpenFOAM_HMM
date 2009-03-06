@@ -142,6 +142,10 @@ public:
 
         // Access
 
+            //- Return the constant properties
+            inline const typename ParcelType::constantProperties&
+                constProps() const;
+
             //- Return const access to thermo package
             inline const basicThermo& carrierThermo() const;
 

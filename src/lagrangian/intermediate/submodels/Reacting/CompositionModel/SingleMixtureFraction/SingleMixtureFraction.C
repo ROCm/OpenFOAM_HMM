@@ -106,11 +106,11 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
         FatalErrorIn
         (
             "Foam::SingleMixtureFraction<CloudType>::"
-            "SingleMixtureFraction\n"
-            "(\n"
-            "    const dictionary&,\n"
-            "    CloudType&\n"
-            ")\n"
+            "SingleMixtureFraction"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
         )   << "Incorrect numebr of phases: " << nl
             << "    Please specify 1 gas, 1 liquid and 1 solid" << nl
             << exit(FatalError);
@@ -125,11 +125,11 @@ Foam::SingleMixtureFraction<CloudType>::SingleMixtureFraction
         FatalErrorIn
         (
             "Foam::SingleMixtureFraction<CloudType>::"
-            "SingleMixtureFraction\n"
-            "(\n"
-            "    const dictionary&,\n"
-            "    CloudType&\n"
-            ")\n"
+            "SingleMixtureFraction"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
         )   << "Sum of phases should be 1. Phase fractions:" << nl
             << YMixture0_ << nl << exit(FatalError);
     }

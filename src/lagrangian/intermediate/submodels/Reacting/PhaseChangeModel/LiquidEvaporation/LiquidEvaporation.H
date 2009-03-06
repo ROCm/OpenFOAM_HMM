@@ -56,16 +56,14 @@ protected:
         //- Global liquid properties data
         autoPtr<liquidMixture> liquids_;
 
-        //- Vaporisation temperature [K]
-        //  Local droplet temperature must exceed Tvap before evaporation is
-        //  allowed
-        scalar Tvap_;
-
         //- List of active liquid names
         List<word> activeLiquids_;
 
         //- Mapping between liquid and carrier gas species
         List<label> liqToGasMap_;
+
+        //- Mapping between local and global liquid species
+        List<label> liqToLiqMap_;
 
 
     // Protected member functions

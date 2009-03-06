@@ -163,6 +163,14 @@ Foam::CompositionModel<CloudType>::phaseTypes() const
 
 template<class CloudType>
 const Foam::wordList&
+Foam::CompositionModel<CloudType>::stateLabels() const
+{
+    return phaseProps_.stateLabels();
+}
+
+
+template<class CloudType>
+const Foam::wordList&
 Foam::CompositionModel<CloudType>::componentNames(const label phaseI) const
 {
     return phaseProps_[phaseI].names();
@@ -182,10 +190,10 @@ Foam::label Foam::CompositionModel<CloudType>::globalId
     {
         FatalErrorIn
         (
-            "Foam::label Foam::CompositionModel<CloudType>::globalId\n"
-            "(\n"
-            "    const label phaseI,\n"
-            "    const word& cmptName\n"
+            "Foam::label Foam::CompositionModel<CloudType>::globalId"
+            "("
+                "const label, "
+                "const word&"
             ") const"
         )   << "Unable to determine global id for requested component "
             << cmptName << nl << abort(FatalError);
@@ -218,10 +226,10 @@ Foam::label Foam::CompositionModel<CloudType>::localId
     {
         FatalErrorIn
         (
-            "Foam::label Foam::CompositionModel<CloudType>::localId\n"
-            "(\n"
-            "    const label phaseI,\n"
-            "    const word& cmptName\n"
+            "Foam::label Foam::CompositionModel<CloudType>::localId"
+            "("
+                "const label, "
+                "const word&"
             ") const"
         )   << "Unable to determine local id for component " << cmptName
             << nl << abort(FatalError);
@@ -277,10 +285,10 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
         {
             FatalErrorIn
             (
-                "Foam::scalarField Foam::CompositionModel<CloudType>::X\n"
-                "(\n"
-                "    const label phaseI,\n"
-                "    const scalarField Y\n"
+                "Foam::scalarField Foam::CompositionModel<CloudType>::X"
+                "("
+                    "const label, "
+                    "const scalarField&"
                 ") const"
             )   << "Only possible to convert gas and liquid mass fractions"
                 << nl << abort(FatalError);
@@ -340,12 +348,12 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
         {
             FatalErrorIn
             (
-                "Foam::scalar Foam::CompositionModel<CloudType>::H\n"
-                "(\n"
-                "    const label phaseI,\n"
-                "    const scalarField& Y,"
-                "    const scalar p,\n"
-                "    const scalar T\n"
+                "Foam::scalar Foam::CompositionModel<CloudType>::H"
+                "("
+                "    const label, "
+                "    const scalarField&, "
+                "    const scalar, "
+                "    const scalar"
                 ") const"
             )   << "Unknown phase enumeration" << nl << abort(FatalError);
         }
@@ -399,18 +407,89 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
         {
             FatalErrorIn
             (
-                "Foam::scalar Foam::CompositionModel<CloudType>::cp\n"
-                "(\n"
-                "    const label phaseI,\n"
-                "    const scalarField& Y,"
-                "    const scalar p,\n"
-                "    const scalar T\n"
+                "Foam::scalar Foam::CompositionModel<CloudType>::cp"
+                "("
+                    "const label, "
+                    "const scalarField&, "
+                    "const scalar, "
+                    "const scalar"
                 ") const"
             )   << "Unknown phase enumeration" << nl << abort(FatalError);
         }
     }
 
     return cpMixture;
+}
+
+
+template<class CloudType>
+Foam::scalar Foam::CompositionModel<CloudType>::L
+(
+    const label phaseI,
+    const scalarField& Y,
+    const scalar p,
+    const scalar T
+) const
+{
+    const phaseProperties& props = phaseProps_[phaseI];
+    scalar LMixture = 0.0;
+    switch (props.phase())
+    {
+        case phaseProperties::GAS:
+        {
+            notImplemented
+            (
+                "Foam::scalar Foam::CompositionModel<CloudType>::L"
+                "("
+                    "const label, "
+                    "const scalarField&, "
+                    "const scalar, "
+                    "const scalar"
+                ") const\n"
+                "*** No support for gaseous components"
+            );
+            break;
+        }
+        case phaseProperties::LIQUID:
+        {
+            forAll(Y, i)
+            {
+                label gid = props.globalIds()[i];
+                LMixture += Y[i]*this->liquids().properties()[gid].hl(p, T);
+            }
+            break;
+        }
+        case phaseProperties::SOLID:
+        {
+            notImplemented
+            (
+                "Foam::scalar Foam::CompositionModel<CloudType>::L"
+                "("
+                    "const label, "
+                    "const scalarField&, "
+                    "const scalar, "
+                    "const scalar"
+                ") const\n"
+                "*** No support for solid components"
+            );
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "Foam::scalar Foam::CompositionModel<CloudType>::L"
+                "("
+                    "const label, "
+                    "const scalarField&, "
+                    "const scalar, "
+                    "const scalar"
+                ") const"
+            )   << "Unknown phase enumeration" << nl << abort(FatalError);
+        }
+    }
+
+    return LMixture;
 }
 
 

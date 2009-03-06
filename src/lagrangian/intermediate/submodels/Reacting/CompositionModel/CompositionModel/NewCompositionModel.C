@@ -47,16 +47,15 @@ Foam::CompositionModel<CloudType>::New
     {
         FatalErrorIn
         (
-            "CompositionModel<CloudType>::New\n"
-            "(\n"
-            "    const dictionary&,\n"
-            "    CloudType&\n"
+            "CompositionModel<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
             ")"
-        )
-            << "Unknown CompositionModelType type "
+        )   << "Unknown CompositionModelType type "
             << CompositionModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid CompositionModel types are :" << nl
+            << "    Valid CompositionModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << nl
             << exit(FatalError);
     }

@@ -118,9 +118,9 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
             )
         )
     ),
-    Tvap_(readScalar(this->coeffDict().lookup("Tvap"))),
     activeLiquids_(this->coeffDict().lookup("activeLiquids")),
-    liqToGasMap_(activeLiquids_.size())
+    liqToGasMap_(activeLiquids_.size(), -1),
+    liqToLiqMap_(activeLiquids_.size(), -1)
 {
     if (activeLiquids_.size() == 0)
     {
@@ -135,10 +135,36 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
             << nl << endl;
     }
 
-    // Calculate mapping between liquid and carrier phase species
+    // Determine mapping between liquid and carrier phase species
     forAll(activeLiquids_, i)
     {
         liqToGasMap_[i] = carrierSpecieId(activeLiquids_[i]);
+    }
+
+    // Determine mapping between local and global liquids
+    forAll(activeLiquids_, i)
+    {
+        forAll(liquids_->components(), j)
+        {
+            if (liquids_->components()[j] == activeLiquids_[i])
+            {
+                liqToLiqMap_[i] = j;
+            }
+        }
+
+        if (liqToLiqMap_[i] < 0)
+        {
+            FatalErrorIn
+            (
+                "Foam::LiquidEvaporation<CloudType>::LiquidEvaporation"
+                "("
+                    "const dictionary& dict, "
+                    "CloudType& owner"
+                ")"
+            )   << "Unable to find liquid species " << activeLiquids_[i]
+                << " in global liquids list. Avaliable liquids:" << nl
+                << liquids_->components() << nl << exit(FatalError);
+        }
     }
 }
 
@@ -173,58 +199,52 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
     scalarList& dMassMT
 ) const
 {
+    // initialise total mass transferred from the particle to carrier phase
     scalar dMassTot = 0.0;
 
-    if (T < Tvap_)
+    // construct carrier phase species volume fractions for cell, cellI
+    scalarField Xc = calcXc(cellI);
+
+    // droplet surface area
+    scalar A = mathematicalConstant::pi*sqr(d);
+
+    // Reynolds number
+    scalar Re = mag(Ur)*d/(nuc + ROOTVSMALL);
+
+    // calculate mass transfer of each specie in liquid
+    forAll(activeLiquids_, i)
     {
-        // not reached model activation temperature
-        return dMassTot;
-    }
-    else
-    {
-        // Construct carrier phase species volume fractions
-        scalarField Xc = calcXc(cellI);
+        label gid = liqToGasMap_[i];
+        label lid = liqToLiqMap_[i];
 
-        // droplet surface area
-        scalar A = mathematicalConstant::pi*sqr(d);
+        // vapour diffusivity [m2/s]
+        scalar Dab = liquids_->properties()[lid].D(pc, T);
 
-        // Reynolds number
-        scalar Re = mag(Ur)*d/(nuc + ROOTVSMALL);
+        // saturation pressure for species i [pa]
+        scalar pSat = liquids_->properties()[lid].pv(pc, T);
 
-        // Calculate mass transfer of each specie in liquid
-        forAll(activeLiquids_, i)
-        {
-            label gid = liqToGasMap_[i];
+        // Schmidt number
+        scalar Sc = nuc/(Dab + ROOTVSMALL);
 
-            // Vapour diffusivity [m2/s]
-            scalar Dab = liquids_->properties()[gid].D(pc, T);
+        // Sherwood number
+        scalar Sh = this->Sh(Re, Sc);
 
-            // Saturation pressure for species i [pa]
-            scalar pSat = liquids_->properties()[gid].pv(pc, T);
+        // mass transfer coefficient [m/s]
+        scalar kc = Sh*Dab/(d + ROOTVSMALL);
 
-            // Schmidt number
-            scalar Sc = nuc/(Dab + ROOTVSMALL);
+        // vapour concentration at droplet surface [kgmol/m3]
+        scalar Cs = pSat/(specie::RR*T);
 
-            // Sherwood number
-            scalar Sh = this->Sh(Re, Sc);
+        // vapour concentration in bulk gas [kgmol/m3]
+        scalar Cinf = Xc[gid]*pc/(specie::RR*Tc);
 
-            // mass transfer coefficient [m/s]
-            scalar kc = Sh*Dab/(d + ROOTVSMALL);
+        // molar flux of vapour [kgmol/m2/s]
+        scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
-            // vapour concentration at droplet surface [kgmol/m3]
-            scalar Cs = pSat/(specie::RR*T);
-
-            // vapour concentration in bulk gas [kgmol/m3]
-            scalar Cinf = Xc[gid]*pc/(specie::RR*Tc);
-
-            // molar flux of vapour [kgmol/m2/s]
-            scalar Ni = max(kc*(Cs - Cinf), 0.0);
-
-            // mass transfer [kg]
-            scalar dm = Ni*A*liquids_->properties()[gid].W()*dt;
-            dMassMT[gid] -= dm;
-            dMassTot += dm;
-        }
+        // mass transfer [kg]
+        scalar dm = Ni*A*liquids_->properties()[lid].W()*dt;
+        dMassMT[gid] += dm;
+        dMassTot += dm;
     }
 
     return dMassTot;

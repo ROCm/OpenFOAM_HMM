@@ -53,17 +53,17 @@ void Foam::ThermoParcel<ParcelType>::calc
     const label cellI
 )
 {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Define local properties at beginning of timestep
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Define local properties at beginning of time step
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const vector U0 = this->U_;
     const scalar mass0 = this->mass();
     const scalar np0 = this->nParticle_;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 1. Initialise transfer terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Momentum transfer from the particle to the carrier phase
     vector dUTrans = vector::zero;
@@ -72,26 +72,25 @@ void Foam::ThermoParcel<ParcelType>::calc
     scalar dhTrans = 0.0;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 2. Calculate velocity - update U
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar Cud = 0.0;
     const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate heat transfer - update T
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 3. Calculate heat transfer - update T
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar htc = 0.0;
     const scalar T1 = calcHeatTransfer(td, dt, cellI, htc, dhTrans);
 
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 4. Accumulate carrier phase source terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (td.cloud().coupled())
     {
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // Accumulate carrier phase source terms
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*dUTrans;
 
@@ -105,9 +104,9 @@ void Foam::ThermoParcel<ParcelType>::calc
         td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Set new particle properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 5. Set new particle properties
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     this->U() = U1;
     this->T() = T1;
 }
@@ -163,10 +162,6 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     }
     bp *= 6.0/(this->rho_*this->d_*cp_);
 
-
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Set new particle temperature
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =

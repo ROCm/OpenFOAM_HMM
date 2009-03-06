@@ -56,6 +56,14 @@ Foam::KinematicCloud<ParcelType>::particleProperties() const
 
 
 template<class ParcelType>
+inline const typename ParcelType::constantProperties&
+Foam::KinematicCloud<ParcelType>::constProps() const
+{
+    return constProps_;
+}
+
+
+template<class ParcelType>
 inline const Foam::Switch Foam::KinematicCloud<ParcelType>::coupled() const
 {
     return coupled_;

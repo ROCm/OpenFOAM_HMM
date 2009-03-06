@@ -143,6 +143,10 @@ public:
 
         // Access
 
+            //- Return the constant properties
+            inline const typename ParcelType::constantProperties&
+                constProps() const;
+
             //- Return const access to carrier phase thermo package
             inline const hCombustionThermo& carrierThermo() const;
 

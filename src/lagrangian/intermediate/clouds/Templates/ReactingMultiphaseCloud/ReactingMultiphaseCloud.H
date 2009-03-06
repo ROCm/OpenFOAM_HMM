@@ -137,6 +137,11 @@ public:
 
         // Access
 
+            //- Return the constant properties
+            inline const typename ParcelType::constantProperties&
+                constProps() const;
+
+
             // Sub-models
 
                 //- Return reference to devolatilisation model

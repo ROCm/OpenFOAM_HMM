@@ -68,12 +68,12 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
     // Check state of Istream
     is.check
     (
-        "ReactingParcel<ParcelType>::ReactingParcel\n"
-        "(\n"
-        "    const Cloud<ParcelType>&,\n"
-        "    Istream&,\n"
-        "    bool\n"
-        ")\n"
+        "ReactingParcel<ParcelType>::ReactingParcel"
+        "("
+            "const Cloud<ParcelType>&, "
+            "Istream&, "
+            "bool"
+        ")"
     );
 }
 
@@ -102,8 +102,14 @@ void Foam::ReactingParcel<ParcelType>::readFields
     }
 
     // Get names and sizes for each Y...
-    const wordList phaseTypes = c.composition().phaseTypes();
+    const wordList& phaseTypes = c.composition().phaseTypes();
     const label nPhases = phaseTypes.size();
+    wordList stateLabels(nPhases, "");
+    if (c.composition().nPhase() == 1)
+    {
+        stateLabels = c.composition().stateLabels();
+    }
+
 
     // Set storage for each Y... for each parcel
     forAllIter(typename Cloud<ParcelType>, c, iter)
@@ -117,7 +123,11 @@ void Foam::ReactingParcel<ParcelType>::readFields
     {
         IOField<scalar> Y
         (
-            c.fieldIOobject("Y" + phaseTypes[j], IOobject::MUST_READ)
+            c.fieldIOobject
+            (
+                "Y" + phaseTypes[j] + stateLabels[j],
+                 IOobject::MUST_READ
+            )
         );
 
         label i = 0;
@@ -138,28 +148,37 @@ void Foam::ReactingParcel<ParcelType>::writeFields
 {
     ThermoParcel<ParcelType>::writeFields(c);
 
-    label np =  c.size();
+    const label np =  c.size();
 
-    IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
-
-    label i = 0;
-    forAllConstIter(typename Cloud<ParcelType>, c, iter)
-    {
-        const ReactingParcel<ParcelType>& p = iter();
-        mass0[i++] = p.mass0_;
-    }
-
-    mass0.write();
-
-    // Write the composition fractions
     if (np > 0)
     {
-        const wordList phaseTypes = c.composition().phaseTypes();
+        IOField<scalar> mass0(c.fieldIOobject("mass0", IOobject::NO_READ), np);
+
+        label i = 0;
+        forAllConstIter(typename Cloud<ParcelType>, c, iter)
+        {
+            const ReactingParcel<ParcelType>& p = iter();
+            mass0[i++] = p.mass0_;
+        }
+        mass0.write();
+
+        // Write the composition fractions
+        const wordList& phaseTypes = c.composition().phaseTypes();
+        wordList stateLabels(phaseTypes.size(), "");
+        if (c.composition().nPhase() == 1)
+        {
+            stateLabels = c.composition().stateLabels();
+        }
+
         forAll(phaseTypes, j)
         {
             IOField<scalar> Y
             (
-                c.fieldIOobject("Y" + phaseTypes[j], IOobject::NO_READ),
+                c.fieldIOobject
+                (
+                    "Y" + phaseTypes[j] + stateLabels[j],
+                    IOobject::NO_READ
+                ),
                 np
             );
 

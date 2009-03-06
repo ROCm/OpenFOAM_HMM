@@ -216,6 +216,11 @@ public:
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;
 
+                //- Return the constant properties
+                inline const typename ParcelType::constantProperties&
+                    constProps() const;
+
+
             //- Return coupled flag
             inline const Switch coupled() const;
 

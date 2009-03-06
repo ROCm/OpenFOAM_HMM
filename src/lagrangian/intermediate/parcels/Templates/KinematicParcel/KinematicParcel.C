@@ -64,20 +64,19 @@ void Foam::KinematicParcel<ParcelType>::calc
     const label cellI
 )
 {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate velocity - update U, dUTrans
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 1. Calculate velocity - update U, dUTrans
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar Cud = 0.0;
     vector dUTrans = vector::zero;
     const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
 
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 2. Accumulate carrier phase source terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (td.cloud().coupled())
     {
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // Accumulate carrier phase source terms
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += nParticle_*dUTrans;
 
@@ -86,9 +85,9 @@ void Foam::KinematicParcel<ParcelType>::calc
     }
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Set new particle properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 3. Set new particle properties
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     this->U() = U1;
 }
 

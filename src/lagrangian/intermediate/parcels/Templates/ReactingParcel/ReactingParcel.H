@@ -89,9 +89,6 @@ public:
             //- Vapourisation temperature [K]
             const scalar Tvap_;
 
-            //- Latent heat of vaporisation [J/kg]
-            const scalar Lvap_;
-
 
     public:
 
@@ -108,9 +105,6 @@ public:
 
             //- Return const access to the vapourisation temperature
             inline scalar Tvap() const;
-
-            //- Return const access to the latent heat of vaporisation
-            inline scalar Lvap() const;
     };
 
 
@@ -194,6 +188,7 @@ protected:
             const scalar dt,
             const label cellI,
             const scalar T,
+            const scalar YPhase,
             scalarList& dMassMT
         );
 
@@ -201,7 +196,6 @@ protected:
         void updateMassFraction
         (
             const scalar mass0,
-            const scalar mass1,
             const scalarList& dMass,
             scalarField& Y
         );

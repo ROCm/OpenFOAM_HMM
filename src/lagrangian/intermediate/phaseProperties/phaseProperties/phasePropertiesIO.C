@@ -32,6 +32,7 @@ License
 Foam::phaseProperties::phaseProperties(Istream& is)
 :
     phase_(UNKNOWN),
+    stateLabel_("(unknown)"),
     names_(0),
     Y_(0),
     globalIds_(0)
@@ -52,6 +53,8 @@ Foam::phaseProperties::phaseProperties(Istream& is)
     Y_.setSize(nComponents);
 
     phase_ = phaseTypeNames_[phaseInfo.keyword()];
+
+    stateLabel_ = phaseToStateLabel(phase_);
 
     label cmptI = 0;
     forAllConstIter(IDLList<entry>, phaseInfo, iter)
@@ -95,6 +98,8 @@ Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
 
     pp.phase_ = pp.phaseTypeNames_[phaseInfo.keyword()];
 
+    pp.stateLabel_ = pp.phaseToStateLabel(pp.phase_);
+
     label cmptI = 0;
     forAllConstIter(IDLList<entry>, phaseInfo, iter)
     {
@@ -117,7 +122,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const phaseProperties& pp)
     os.check
     (
         "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::phaseProperties&)"
+        "("
+            "Foam::Ostream&, "
+            "const Foam::phaseProperties&"
+        ")"
     );
 
     os  << pp.phaseTypeNames_[pp.phase_] << nl << token::BEGIN_BLOCK << nl
@@ -134,7 +142,10 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const phaseProperties& pp)
     os.check
     (
         "Foam::Ostream& Foam::operator<<"
-        "(Foam::Ostream&, const Foam::phaseProperties&)"
+        "("
+            "Foam::Ostream&, "
+            "const Foam::phaseProperties&"
+        ")"
     );
 
     return os;

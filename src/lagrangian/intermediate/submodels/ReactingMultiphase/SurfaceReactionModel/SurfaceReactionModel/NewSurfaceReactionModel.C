@@ -36,10 +36,7 @@ Foam::SurfaceReactionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word SurfaceReactionModelType
-    (
-        dict.lookup("SurfaceReactionModel")
-    );
+    word SurfaceReactionModelType(dict.lookup("SurfaceReactionModel"));
 
     Info<< "Selecting SurfaceReactionModel " << SurfaceReactionModelType
         << endl;
@@ -52,12 +49,14 @@ Foam::SurfaceReactionModel<CloudType>::New
         FatalErrorIn
         (
             "SurfaceReactionModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
-        )
-            << "Unknown SurfaceReactionModelType type "
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown SurfaceReactionModelType type "
             << SurfaceReactionModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid SurfaceReactionModel types are :" << nl
+            << "    Valid SurfaceReactionModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

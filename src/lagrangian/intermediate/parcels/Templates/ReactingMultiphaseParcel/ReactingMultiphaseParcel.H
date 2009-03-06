@@ -143,6 +143,19 @@ public:
     };
 
 
+private:
+
+    // Private member functions
+
+        //- Return the mixture effective specific heat capacity
+        template<class TrackData>
+        scalar cpEff(TrackData& td, const scalar p, const scalar T) const;
+
+        //- Return the mixture effective enthalpy
+        template<class TrackData>
+        scalar HEff(TrackData& td, const scalar p, const scalar T) const;
+
+
 protected:
 
     // Protected data
@@ -167,12 +180,11 @@ protected:
 
         //- Calculate Devolatilisation
         template<class TrackData>
-        void calcDevolatilisation
+        scalar calcDevolatilisation
         (
             TrackData& td,
             const scalar dt,
-            const scalar T0,
-            const scalar T1,
+            const scalar T,
             scalarList& dMassMT
         );
 

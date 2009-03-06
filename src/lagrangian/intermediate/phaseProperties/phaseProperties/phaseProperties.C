@@ -72,9 +72,9 @@ void Foam::phaseProperties::setGlobalGasIds
 
             FatalErrorIn
             (
-                "void phaseProperties::setGlobalGasIds\n"
-                "(\n"
-                "    const PtrList<volScalarField>&\n"
+                "void phaseProperties::setGlobalGasIds"
+                "("
+                    "const PtrList<volScalarField>&"
                 ")"
             )   << "Could not find gas species " << names_[i]
                 << " in species list" <<  nl
@@ -131,11 +131,47 @@ void Foam::phaseProperties::checkTotalMassFraction() const
 }
 
 
+Foam::word Foam::phaseProperties::phaseToStateLabel(phaseType pt)
+{
+    word state = "(unknown)";
+    switch (pt)
+    {
+        case GAS:
+        {
+            state = "(g)";
+            break;
+        }
+        case LIQUID:
+        {
+            state = "(l)";
+            break;
+        }
+        case SOLID:
+        {
+            state = "(s)";
+            break;
+        }
+        default:
+        {
+            FatalErrorIn
+            (
+                "Foam::phaseProperties::phaseToStateLabel(phaseType pt)"
+            )   << "Invalid phase: " << phaseTypeNames_[pt] << nl
+                << "    phase must be gas, liquid or solid" << nl
+                << exit(FatalError);
+        }
+    }
+
+    return state;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::phaseProperties::phaseProperties()
 :
     phase_(UNKNOWN),
+    stateLabel_("(unknown)"),
     names_(0),
     Y_(0),
     globalIds_(0)
@@ -145,6 +181,7 @@ Foam::phaseProperties::phaseProperties()
 Foam::phaseProperties::phaseProperties(const phaseProperties& pp)
 :
     phase_(pp.phase_),
+    stateLabel_(pp.stateLabel_),
     names_(pp.names_),
     Y_(pp.Y_),
     globalIds_(pp.globalIds_)
@@ -189,11 +226,11 @@ void Foam::phaseProperties::initialiseGlobalIds
         {
             FatalErrorIn
             (
-                "Foam::phaseProperties::setGlobalIds\n"
-                "(\n"
-                "    const PtrList<volScalarField>&,\n"
-                "    const wordList&,\n"
-                "    const wordList&\n"
+                "Foam::phaseProperties::setGlobalIds"
+                "("
+                    "const PtrList<volScalarField>&, "
+                    "const wordList&, "
+                    "const wordList&"
                 ")"
             )   << "Invalid phase: " << phaseTypeNames_[phase_] << nl
                 << "    phase must be gas, liquid or solid" << nl
@@ -206,6 +243,12 @@ void Foam::phaseProperties::initialiseGlobalIds
 Foam::phaseProperties::phaseType Foam::phaseProperties::phase() const
 {
     return phase_;
+}
+
+
+const Foam::word& Foam::phaseProperties::stateLabel() const
+{
+    return stateLabel_;
 }
 
 
@@ -229,7 +272,7 @@ const Foam::word& Foam::phaseProperties::name(const label cmptI) const
         (
             "const Foam::word& Foam::phaseProperties::name"
             "("
-                "const label cmptI"
+                "const label"
             ") const"
         )   << "Requested component " << cmptI << "out of range" << nl
             << "Available phase components:" << nl << names_ << nl
@@ -254,7 +297,7 @@ Foam::scalar& Foam::phaseProperties::Y(const label cmptI)
         (
             "const Foam::scalar& Foam::phaseProperties::Y"
             "("
-                "const label cmptI"
+                "const label"
             ") const"
         )   << "Requested component " << cmptI << "out of range" << nl
             << "Available phase components:" << nl << names_ << nl

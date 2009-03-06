@@ -36,10 +36,7 @@ Foam::DevolatilisationModel<CloudType>::New
     CloudType& owner
 )
 {
-    word DevolatilisationModelType
-    (
-        dict.lookup("DevolatilisationModel")
-    );
+    word DevolatilisationModelType(dict.lookup("DevolatilisationModel"));
 
     Info<< "Selecting DevolatilisationModel " << DevolatilisationModelType
         << endl;
@@ -52,12 +49,14 @@ Foam::DevolatilisationModel<CloudType>::New
         FatalErrorIn
         (
             "DevolatilisationModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
-        )
-            << "Unknown DevolatilisationModelType type "
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown DevolatilisationModelType type "
             << DevolatilisationModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid DevolatilisationModel types are :" << nl
+            << "    Valid DevolatilisationModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

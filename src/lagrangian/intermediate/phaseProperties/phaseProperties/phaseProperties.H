@@ -76,6 +76,9 @@ private:
         //- Phase type
         phaseType phase_;
 
+        //- State label (s), (l), (g) etc.
+        word stateLabel_;
+
         //- List of component names
         List<word> names_;
 
@@ -96,6 +99,9 @@ private:
 
         //- Check the total mass fraction
         void checkTotalMassFraction() const;
+
+        //- Set the state label
+        word phaseToStateLabel(phaseType pt);
 
 
 public:
@@ -131,6 +137,9 @@ public:
 
             //- Return const access to the phase type
             phaseType phase() const;
+
+            //- Return const access to the phase state label
+            const word& stateLabel() const;
 
             //- Return word representation of the phase type
             word phaseTypeName() const;

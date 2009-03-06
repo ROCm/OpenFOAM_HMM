@@ -27,6 +27,14 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+inline const typename ParcelType::constantProperties&
+Foam::ReactingCloud<ParcelType>::constProps() const
+{
+    return constProps_;
+}
+
+
+template<class ParcelType>
 inline const Foam::hCombustionThermo&
 Foam::ReactingCloud<ParcelType>::carrierThermo() const
 {

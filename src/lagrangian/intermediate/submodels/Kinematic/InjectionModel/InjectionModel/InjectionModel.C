@@ -170,10 +170,10 @@ void Foam::InjectionModel<CloudType>::findCellAtPosition
     {
         FatalErrorIn
         (
-            "Foam::InjectionModel<CloudType>::findCellAtPosition\n"
-            "(\n"
-            "    label&,\n"
-            "    vector&\n"
+            "Foam::InjectionModel<CloudType>::findCellAtPosition"
+            "("
+                "label&, "
+                "vector&"
             ")"
         )<< "Cannot find parcel injection cell. "
          << "Parcel position = " << p0 << nl
@@ -212,13 +212,13 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
             FatalErrorIn
             (
                 "Foam::scalar "
-                "Foam::InjectionModel<CloudType>::setNumberOfParticles\n"
-                "(\n"
-                "    const label,\n"
-                "    const scalar,\n"
-                "    const scalar,\n"
-                "    const scalar,\n"
-                "    const scalar\n"
+                "Foam::InjectionModel<CloudType>::setNumberOfParticles"
+                "("
+                "    const label, "
+                "    const scalar, "
+                "    const scalar, "
+                "    const scalar, "
+                "    const scalar"
                 ")"
             )<< "Unknown parcelBasis type" << nl
              << exit(FatalError);
@@ -314,11 +314,11 @@ Foam::InjectionModel<CloudType>::InjectionModel
     {
         FatalErrorIn
         (
-            "Foam::InjectionModel<CloudType>::InjectionModel\n"
-            "(\n"
-            "    const dictionary&,\n"
-            "    CloudType&,\n"
-            "    const word&\n"
+            "Foam::InjectionModel<CloudType>::InjectionModel"
+            "("
+                "const dictionary&, "
+                "CloudType&, "
+                "const word&"
             ")"
         )<< "parcelBasisType must be either 'number' or 'mass'" << nl
          << exit(FatalError);
