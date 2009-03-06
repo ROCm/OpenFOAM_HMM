@@ -281,8 +281,17 @@ public:
                     scalar mass
                 );
 
-                //- From the Maxwellian distribution:
+                //- Generate a random internal energy, sampled from the
+                // equilibrium distribution (Bird eqn 11.22 and 11.23 and
+                // adapting code from DSMC3.FOR)
+                scalar equipartitionInternalEnergy
+                (
+                    scalar temperature,
+                    scalar internalDegreesOfFreedom
+                );
 
+
+                // From the Maxwellian distribution:
                 //- Average particle speed
                 inline scalar maxwellianAverageSpeed
                 (

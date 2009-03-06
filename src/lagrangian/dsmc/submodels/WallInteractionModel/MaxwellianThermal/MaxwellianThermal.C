@@ -54,7 +54,8 @@ void Foam::MaxwellianThermal<CloudType>::correct
     const wallPolyPatch& wpp,
     const label faceId,
     vector& U,
-    scalar mass
+    scalar& Ei,
+    label typeId
 )
 {
     label wppIndex = wpp.index();
@@ -102,6 +103,10 @@ void Foam::MaxwellianThermal<CloudType>::correct
 
     scalar T = cloud.T().boundaryField()[wppIndex][wppLocalFace];
 
+    scalar mass = cloud.constProps(typeId).mass();
+
+    scalar iDof = cloud.constProps(typeId).internalDegreesOfFreedom();
+
     U =
         sqrt(CloudType::kb*T/mass)
        *(
@@ -111,6 +116,8 @@ void Foam::MaxwellianThermal<CloudType>::correct
         );
 
     U += cloud.U().boundaryField()[wppIndex][wppLocalFace];
+
+    Ei = cloud.equipartitionInternalEnergy(T, iDof);
 }
 
 

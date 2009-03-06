@@ -109,25 +109,28 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
 {
     const constantProperties& constProps(td.cloud().constProps(typeId_));
 
+    scalar m = constProps.mass();
+
     // pre-interaction energy
-    scalar preIE = 0.5*constProps.mass()*(U_ & U_) + Ei_;
+    scalar preIE = 0.5*m*(U_ & U_) + Ei_;
 
     // pre-interaction momentum
-    vector preIMom = constProps.mass()*U_;
+    vector preIMom = m*U_;
 
     td.cloud().wallInteraction().correct
     (
         wpp,
         this->face(),
         U_,
-        constProps.mass()
+        Ei_,
+        typeId_
     );
 
     // post-interaction energy
-    scalar postIE = 0.5*constProps.mass()*(U_ & U_) + Ei_;
+    scalar postIE = 0.5*m*(U_ & U_) + Ei_;
 
     // post-interaction momentum
-    vector postIMom = constProps.mass()*U_;
+    vector postIMom = m*U_;
 
     label wppIndex = wpp.index();
 

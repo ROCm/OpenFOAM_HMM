@@ -76,7 +76,8 @@ public:
             const wallPolyPatch& wpp,
             const label faceId,
             vector& U,
-            scalar mass
+            scalar& Ei,
+            label typeId
         );
 };
 

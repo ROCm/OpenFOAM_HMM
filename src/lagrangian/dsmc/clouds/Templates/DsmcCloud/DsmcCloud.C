@@ -172,9 +172,11 @@ void Foam::DsmcCloud<ParcelType>::initialise
                         cP.mass()
                     );
 
-                    scalar Ei =
-                        0.5*cP.internalDegreesOfFreedom()
-                       *kb*temperature;
+                    scalar Ei = equipartitionInternalEnergy
+                    (
+                        temperature,
+                        cP.internalDegreesOfFreedom()
+                    );
 
                     U += velocity;
 
@@ -687,6 +689,47 @@ Foam::vector Foam::DsmcCloud<ParcelType>::equipartitionLinearVelocity
         rndGen_.GaussNormal(),
         rndGen_.GaussNormal()
     );
+}
+
+
+template<class ParcelType>
+Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
+(
+    scalar temperature,
+    scalar iDof
+)
+{
+    scalar Ei = 0.0;
+
+    if
+    (
+        iDof < 2.0 + SMALL
+     && iDof > 2.0 - SMALL
+    )
+    {
+        // Special case for iDof = 2, i.e. diatomics;
+        Ei = -log(rndGen_.scalar01())*kb*temperature;
+    }
+    else
+    {
+        scalar a = 0.5*iDof - 1;
+
+        scalar energyRatio;
+
+        scalar P;
+
+        do
+        {
+            energyRatio = 10*rndGen_.scalar01();
+
+            P = pow((energyRatio/a), a)*exp(a - energyRatio);
+
+        } while (P < rndGen_.scalar01());
+
+        Ei = energyRatio*kb*temperature;
+    }
+
+    return Ei;
 }
 
 

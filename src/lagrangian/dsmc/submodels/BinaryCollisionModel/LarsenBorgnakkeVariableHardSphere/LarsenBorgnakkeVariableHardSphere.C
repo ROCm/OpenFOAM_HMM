@@ -81,9 +81,7 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::energyRatio
                     ChiBMinusOne
                 );
         }
-    }
-
-    while (P < rndGen.scalar01());
+    } while (P < rndGen.scalar01());
 
     return energyRatio;
 }

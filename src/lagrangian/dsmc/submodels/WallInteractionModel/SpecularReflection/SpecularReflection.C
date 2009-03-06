@@ -56,7 +56,8 @@ void Foam::SpecularReflection<CloudType>::correct
     const wallPolyPatch& wpp,
     const label faceId,
     vector& U,
-    scalar mass
+    scalar& Ei,
+    label typeId
 )
 {
     vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];

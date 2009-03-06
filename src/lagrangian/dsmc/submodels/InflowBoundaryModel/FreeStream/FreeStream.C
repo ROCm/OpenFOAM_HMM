@@ -237,9 +237,11 @@ void Foam::FreeStream<CloudType>::inflow()
 
                 U += velocity_;
 
-                scalar Ei =
-                    0.5*cloud.constProps(typeId).internalDegreesOfFreedom()
-                   *CloudType::kb*temperature_;
+                scalar Ei = cloud.equipartitionInternalEnergy
+                (
+                    temperature_,
+                    cloud.constProps(typeId).internalDegreesOfFreedom()
+                );
 
                 cloud.addNewParcel
                 (
