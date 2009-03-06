@@ -66,6 +66,12 @@ int main(int argc, char *argv[])
 
         momentum = dsmc.momentum();
 
+        linearKE = dsmc.linearKE();
+
+        internalE = dsmc.internalE();
+
+        iDof = dsmc.iDof();
+
         q = dsmc.q();
 
         fD = dsmc.fD();

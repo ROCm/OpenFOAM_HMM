@@ -568,12 +568,11 @@ Foam::DsmcCloud<ParcelType>::iDof() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimless, 0.0)
+            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), 0.0)
         )
     );
 
     scalarField& iDof = tiDof().internalField();
-    scalarField nDsmcParticles(iDof.size(),0);
 
     forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
     {
@@ -581,12 +580,9 @@ Foam::DsmcCloud<ParcelType>::iDof() const
         const label cellI = p.cell();
 
         iDof[cellI] += constProps(p.typeId()).internalDegreesOfFreedom();
-
-        // Avoiding divide by zero for nDsmcParticles where a cell is empty
-        nDsmcParticles[cellI] = max(1, ++nDsmcParticles[cellI]);
     }
 
-    iDof /= nDsmcParticles;
+    iDof *= nParticle_/mesh().cellVolumes();
 
     return tiDof;
 }

@@ -1,10 +1,10 @@
 
-    Info<< nl << "Reading field T" << endl;
-    volScalarField T
+    Info<< nl << "Reading field boundaryT" << endl;
+    volScalarField boundaryT
     (
         IOobject
         (
-            "T",
+            "boundaryT",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -13,12 +13,12 @@
         mesh
     );
 
-    Info<< nl << "Reading field U" << endl;
-    volVectorField U
+    Info<< nl << "Reading field boundaryU" << endl;
+    volVectorField boundaryU
     (
         IOobject
         (
-            "U",
+            "boundaryU",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -27,21 +27,7 @@
         mesh
     );
 
-    Info<< nl << "Reading field momentum (momentum density)" << endl;
-    volVectorField momentum
-    (
-        IOobject
-        (
-            "momentum",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    Info<< nl << "Reading field rhoN" << endl;
+    Info<< nl << "Reading field rhoN (number density)" << endl;
     volScalarField rhoN
     (
         IOobject
@@ -55,7 +41,7 @@
         mesh
     );
 
-    Info<< nl << "Reading field rhoM" << endl;
+    Info<< nl << "Reading field rhoM (mass density)" << endl;
     volScalarField rhoM
     (
         IOobject
@@ -83,9 +69,65 @@
         mesh
     );
 
-    Info<< nl
-        << "Fields required to record solid surface forces and heat flux:"
+    Info<< nl << "Reading field momentum (momentum density)" << endl;
+    volVectorField momentum
+    (
+        IOobject
+        (
+            "momentum",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< nl << "Reading field linearKE (linear kinetic energy density)"
         << endl;
+
+    volScalarField linearKE
+    (
+        IOobject
+        (
+            "linearKE",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< nl << "Reading field internalE (internal energy density)" << endl;
+    volScalarField internalE
+    (
+        IOobject
+        (
+            "internalE",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
+
+    Info<< nl << "Reading field iDof (internal degree of freedom density)"
+        << endl;
+
+    volScalarField iDof
+    (
+        IOobject
+        (
+            "iDof",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh
+    );
 
     Info<< nl << "Reading field q (surface heat transfer)" << endl;
     volScalarField q
@@ -101,7 +143,7 @@
         mesh
     );
 
-    Info<< nl << "Reading field fD (surface force density" << endl;
+    Info<< nl << "Reading field fD (surface force density)" << endl;
     volVectorField fD
     (
         IOobject
@@ -115,6 +157,6 @@
         mesh
     );
 
-    Info<< "Constructing dsmcCloud " << endl;
+    Info<< nl << "Constructing dsmcCloud " << endl;
 
-dsmcCloud dsmc("dsmc", T, U);
+    dsmcCloud dsmc("dsmc", boundaryT, boundaryU);
