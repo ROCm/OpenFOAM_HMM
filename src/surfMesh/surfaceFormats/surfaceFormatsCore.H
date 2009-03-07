@@ -61,30 +61,19 @@ namespace fileFormats
 
 class surfaceFormatsCore
 {
-public:
+protected:
 
-    // Static Data
-
-    //- The file extension corresponding to 'native' surface format
-    //  Normally "ofs" (mnemonic: OF = OpenFOAM, S = Surface)
-    static word nativeExt;
-
-    // Static Member Functions
-
-        //- Check if file extension corresponds to 'native' surface format
-        static bool isNative(const word&);
-
-        //- Read non-comment line
-        static string getLineNoComment(IFstream&);
-
-        //- Return the local file name (within time directory)
-        static fileName localMeshFileName(const word& surfName="");
-
-        //- Find instance with surfName
-        static fileName findMeshInstance(const Time&, const word& surfName="");
-
-        //- Find mesh file with surfName
-        static fileName findMeshFile(const Time&, const word& surfName="");
+        //- Return a list with a single entry,
+        //  the size corresponds to that of the container
+        template<class Container>
+        static List<surfZone> oneZone
+        (
+            const Container& container,
+            const word& name = "zone0"
+        )
+        {
+            return List<surfZone>(1, surfZone(name, container.size(), 0, 0));
+        }
 
         //- Determine the sort order from the zone ids.
         //  Returns zone list and sets faceMap to indices within faceLst
@@ -95,6 +84,31 @@ public:
             labelList& faceMap
         );
 
+        //- Read non-comment line
+        static string getLineNoComment(IFstream&);
+
+public:
+
+    // Static Data
+
+        //- The file extension corresponding to 'native' surface format
+        //  Normally "ofs" (mnemonic: OF = OpenFOAM, S = Surface)
+        static word nativeExt;
+
+    // Static Member Functions
+
+        //- Check if file extension corresponds to 'native' surface format
+        static bool isNative(const word&);
+
+        //- Return the local file name (within time directory)
+        static fileName localMeshFileName(const word& surfName="");
+
+        //- Find instance with surfName
+        static fileName findMeshInstance(const Time&, const word& surfName="");
+
+        //- Find mesh file with surfName
+        static fileName findMeshFile(const Time&, const word& surfName="");
+
         static bool checkSupport
         (
             const wordHashSet& available,
@@ -102,6 +116,7 @@ public:
             const bool verbose,
             const word& functionName
         );
+
 
     // Constructors
 

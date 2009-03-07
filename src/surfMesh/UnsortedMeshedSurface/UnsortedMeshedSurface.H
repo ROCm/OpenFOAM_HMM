@@ -47,7 +47,7 @@ SourceFiles
 #ifndef UnsortedMeshedSurface_H
 #define UnsortedMeshedSurface_H
 
-#include "BasicMeshedSurface.H"
+#include "MeshedSurface.H"
 #include "surfZoneIdentifierList.H"
 #include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
@@ -64,14 +64,10 @@ namespace Foam
 
 class Time;
 class IFstream;
-template<class Face> class UnsortedMeshedSurface;
+
 template<class Face> class MeshedSurface;
-
-class polyBoundaryMesh;
-
-template<class Face>
-Ostream& operator<<(Ostream&, const UnsortedMeshedSurface<Face>&);
-
+template<class Face> class MeshedSurfaceProxy;
+template<class Face> class UnsortedMeshedSurface;
 
 /*---------------------------------------------------------------------------*\
                    Class UnsortedMeshedSurface Declaration
@@ -80,8 +76,7 @@ Ostream& operator<<(Ostream&, const UnsortedMeshedSurface<Face>&);
 template<class Face>
 class UnsortedMeshedSurface
 :
-    public BasicMeshedSurface<Face>,
-    public fileFormats::surfaceFormatsCore
+    public MeshedSurface<Face>
 {
     // friends despite different faces
     template<class Face2>
@@ -95,9 +90,11 @@ class UnsortedMeshedSurface
 
 private:
 
-    //- Typedefs for convenience
-        typedef BasicMeshedSurface<Face> ParentType;
-        typedef MeshedSurface<Face> SiblingType;
+    //- Private typedefs for convenience
+
+        typedef MeshedSurface<Face>       ParentType;
+        typedef MeshedSurface<Face>       FriendType;
+        typedef MeshedSurfaceProxy<Face>  ProxyType;
 
     // Private Member Data
 
@@ -166,10 +163,10 @@ public:
         //  (points, faces, zone ids, zone info).
         UnsortedMeshedSurface
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face> >&,
-            const Xfer<List<label> >& zoneIds,
-            const Xfer<surfZoneIdentifierList>&
+            const Xfer< pointField >&,
+            const Xfer< List<Face> >&,
+            const Xfer< List<label> >& zoneIds,
+            const Xfer< surfZoneIdentifierList >&
         );
 
         //- Construct by transferring points, faces.
@@ -178,16 +175,12 @@ public:
         (
             const Xfer<pointField>&,
             const Xfer<List<Face> >&,
-            const UList<label>& zoneSizes = UList<label>::null(),
-            const UList<word>& zoneNames = UList<word>::null()
+            const UList<label>& zoneSizes = UList<label>(),
+            const UList<word>& zoneNames = UList<word>()
         );
 
-        //- Construct from a boundary mesh with local points/faces
-        UnsortedMeshedSurface
-        (
-            const polyBoundaryMesh&,
-            const bool globalPoints=false
-        );
+        //- Construct as copy
+        UnsortedMeshedSurface(const UnsortedMeshedSurface<Face>&);
 
         //- Construct from a meshedSurface
         UnsortedMeshedSurface(const MeshedSurface<Face>&);
@@ -209,9 +202,6 @@ public:
 
         //- Construct from objectRegistry
         UnsortedMeshedSurface(const Time&, const word& surfName="");
-
-        //- Construct as copy
-        UnsortedMeshedSurface(const UnsortedMeshedSurface<Face>&);
 
     // Declare run-time constructor selection table
 
@@ -292,8 +282,7 @@ public:
         surfZoneList sortedZones(labelList& faceMap) const;
 
         //- Set zones to 0 and set a single zone
-        //  Optionally with a specific name
-        void oneZone(const word& name = word::null);
+        void setOneZone();
 
         //- Set zone ids and zones
         void setZones(const surfZoneList&);
@@ -328,9 +317,17 @@ public:
         //- Transfer components (points, faces, zone ids).
         virtual void reset
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face> >&,
-            const Xfer<List<label> >& zoneIds = Xfer<List<label> >::null()
+            const Xfer< pointField >&,
+            const Xfer< List<Face> >&,
+            const Xfer< List<label> >& zoneIds
+        );
+
+        //- Transfer components (points, faces, zone ids).
+        virtual void reset
+        (
+            const Xfer< List<point> >&,
+            const Xfer< List<Face> >&,
+            const Xfer< List<label> >& zoneIds
         );
 
         //- Transfer the contents of the argument and annull the argument
@@ -354,9 +351,6 @@ public:
 
     // Write
 
-        //- Write to Ostream in simple FOAM format
-        virtual void write(Ostream&) const;
-
         //- Generic write routine. Chooses writer based on extension.
         virtual void write(const fileName& name) const
         {
@@ -371,15 +365,6 @@ public:
 
         void operator=(const UnsortedMeshedSurface<Face>&);
 
-
-    // Ostream Operator
-
-        friend Ostream& operator<<
-        <Face>
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
 
 };
 

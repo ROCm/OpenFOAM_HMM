@@ -23,20 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::SMESHsurfaceFormatCore
+    Foam::fileFormats::OFSsurfaceFormatCore
 
 Description
-    Internal class used by the SMESHsurfaceFormat
+    Internal class used by the OFSsurfaceFormat
 
 SourceFiles
-    SMESHsurfaceFormatCore.C
+    OFSsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SMESHsurfaceFormatCore_H
-#define SMESHsurfaceFormatCore_H
+#ifndef OFSsurfaceFormatCore_H
+#define OFSsurfaceFormatCore_H
 
 #include "Ostream.H"
+#include "OFstream.H"
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
 
@@ -48,24 +49,21 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class SMESHsurfaceFormatCore Declaration
+                    Class OFSsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
-class SMESHsurfaceFormatCore
+class OFSsurfaceFormatCore
 {
 protected:
     // Protected Member Functions
 
-    //- Write header information with points
+    //- Write header information and surfZoneList
     static void writeHeader
     (
         Ostream&,
         const pointField&,
-        const label nFaces
+        const UList<surfZone>&
     );
-
-    //- Write tail information
-    static void writeTail(Ostream&);
 
 };
 

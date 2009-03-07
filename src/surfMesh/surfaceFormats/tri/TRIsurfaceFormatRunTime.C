@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "TRIsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,6 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
+// read MeshedSurface
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -53,10 +53,10 @@ addNamedTemplatedToRunTimeSelectionTable
     tri
 );
 
-
+// write MeshedSurfaceProxy
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     TRIsurfaceFormat,
     face,
     write,
@@ -65,7 +65,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     TRIsurfaceFormat,
     triFace,
     write,
@@ -73,6 +73,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     tri
 );
 
+// write UnsortedMeshedSurface
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     UnsortedMeshedSurface,

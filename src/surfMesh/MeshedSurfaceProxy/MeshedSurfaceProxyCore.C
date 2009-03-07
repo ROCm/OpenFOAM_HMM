@@ -22,60 +22,28 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::fileFormats::OBJsurfaceFormatCore
-
-Description
-    Internal class used by the OBJsurfaceFormat
-
-SourceFiles
-    OBJsurfaceFormatCore.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef OBJsurfaceFormatCore_H
-#define OBJsurfaceFormatCore_H
-
-#include "Ostream.H"
-#include "OFstream.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace fileFormats
-{
 
-/*---------------------------------------------------------------------------*\
-                    Class OBJsurfaceFormatCore Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-class OBJsurfaceFormatCore
-{
-protected:
-    // Protected Member Functions
+#define makeSurface(surfType, faceType)                                       \
+    defineNamedTemplateTypeNameAndDebug(surfType<faceType>, 0);               \
+    defineTemplatedMemberFunctionSelectionTable(surfType,write,fileExtension,faceType);
 
-    //- Write header information with points
-    static void writeHeader
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
 
-};
-
+makeSurface(MeshedSurfaceProxy, face)
+makeSurface(MeshedSurfaceProxy, triFace)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

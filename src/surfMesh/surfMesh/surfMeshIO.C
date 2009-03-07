@@ -31,20 +31,22 @@ License
 
 void Foam::surfMesh::setInstance(const fileName& inst)
 {
-    if (debug)
+    if (debug or true)
     {
         Info<< "void surfMesh::setInstance(const fileName& inst) : "
             << "Resetting file instance to " << inst << endl;
     }
 
-    storedPoints_.writeOpt() = IOobject::AUTO_WRITE;
-    storedPoints_.instance() = inst;
+    instance() = inst;
 
-    storedFaces_.writeOpt() = IOobject::AUTO_WRITE;
-    storedFaces_.instance() = inst;
+    storedIOPoints().writeOpt() = IOobject::AUTO_WRITE;
+    storedIOPoints().instance() = inst;
 
-    surfZones_.writeOpt() = IOobject::AUTO_WRITE;
-    surfZones_.instance() = inst;
+    storedIOFaces().writeOpt() = IOobject::AUTO_WRITE;
+    storedIOFaces().instance() = inst;
+
+    storedIOZones().writeOpt() = IOobject::AUTO_WRITE;
+    storedIOZones().instance() = inst;
 }
 
 
@@ -81,9 +83,9 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         // Set instance to new instance.
         // Note points instance can differ from faces instance.
         setInstance(facesInst);
-        storedPoints_.instance() = pointsInst;
+        storedIOPoints().instance() = pointsInst;
 
-        storedPoints_ = pointIOField
+        storedIOPoints() = pointIOField
         (
             IOobject
             (
@@ -97,7 +99,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             )
         );
 
-        storedFaces_ = faceIOList
+        storedFaces() = faceIOList
         (
             IOobject
             (
@@ -110,9 +112,6 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
                 false
             )
         );
-
-        // synchronize sizes and references?
-//        MeshReference::operator=(MeshReference(storedFaces_, storedPoints_));
 
         // Reset the surface zones
         surfZoneIOList newZones
@@ -132,15 +131,16 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         // Check that zone types and names are unchanged
         bool zonesChanged = false;
 
-        if (surfZones_.size() != newZones.size())
+        surfZoneList& zones = this->storedIOZones();
+        if (zones.size() != newZones.size())
         {
             zonesChanged = true;
         }
         else
         {
-            forAll (surfZones_, zoneI)
+            forAll(zones, zoneI)
             {
-                if (surfZones_[zoneI].name() != newZones[zoneI].name())
+                if (zones[zoneI].name() != newZones[zoneI].name())
                 {
                     zonesChanged = true;
                     break;
@@ -148,7 +148,7 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
             }
         }
 
-        surfZones_.transfer(newZones);
+        zones.transfer(newZones);
 
         if (zonesChanged)
         {
@@ -173,10 +173,9 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
         }
 
         clearGeom();
+        storedIOPoints().instance() = pointsInst;
 
-        storedPoints_.instance() = pointsInst;
-
-        storedPoints_ = pointIOField
+        storedIOPoints() = pointIOField
         (
             IOobject
             (
@@ -202,6 +201,8 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 
     return surfMesh::UNCHANGED;
 }
+
+
 
 
 // ************************************************************************* //

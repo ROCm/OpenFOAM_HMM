@@ -267,7 +267,7 @@ Foam::fileFormats::surfaceFormatsCore::checkSupport
 
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl
-            <<"Valid types: ( " << nativeExt;
+            <<"Valid types: (";
         // compact output:
         forAll(known, i)
         {

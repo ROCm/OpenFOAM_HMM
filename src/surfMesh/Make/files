@@ -2,16 +2,20 @@ surfZone/surfZone/surfZone.C
 surfZone/surfZone/surfZoneIOList.C
 surfZone/surfZoneIdentifier/surfZoneIdentifier.C
 
+MeshedSurfaceAllocator/MeshedSurfaceIOAllocator.C
+
 MeshedSurface/MeshedSurfaceCore.C
 MeshedSurface/MeshedSurfaces.C
 UnsortedMeshedSurface/UnsortedMeshedSurfaces.C
 
+MeshedSurfaceProxy/MeshedSurfaceProxyCore.C
+
 surfaceRegistry/surfaceRegistry.C
-surfFields/surfFields.C
-surfPointFields/surfPointFields.C
 surfMesh/surfMesh.C
 surfMesh/surfMeshClear.C
 surfMesh/surfMeshIO.C
+surfFields/surfFields/surfFields.C
+surfFields/surfPointFields/surfPointFields.C
 
 surfaceFormats = surfaceFormats
 $(surfaceFormats)/surfaceFormatsCore.C
@@ -22,11 +26,10 @@ $(surfaceFormats)/ftr/FTRsurfaceFormatRunTime.C
 $(surfaceFormats)/gts/GTSsurfaceFormatRunTime.C
 $(surfaceFormats)/nas/NASsurfaceFormatCore.C
 $(surfaceFormats)/nas/NASsurfaceFormatRunTime.C
-$(surfaceFormats)/obj/OBJsurfaceFormatCore.C
 $(surfaceFormats)/obj/OBJsurfaceFormatRunTime.C
-$(surfaceFormats)/off/OFFsurfaceFormatCore.C
 $(surfaceFormats)/off/OFFsurfaceFormatRunTime.C
-$(surfaceFormats)/smesh/SMESHsurfaceFormatCore.C
+$(surfaceFormats)/ofs/OFSsurfaceFormatCore.C
+$(surfaceFormats)/ofs/OFSsurfaceFormatRunTime.C
 $(surfaceFormats)/smesh/SMESHsurfaceFormatRunTime.C
 $(surfaceFormats)/starcd/STARCDsurfaceFormatCore.C
 $(surfaceFormats)/starcd/STARCDsurfaceFormatRunTime.C

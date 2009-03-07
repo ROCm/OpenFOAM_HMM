@@ -41,7 +41,6 @@ SourceFiles
 #include "triFace.H"
 #include "IFstream.H"
 #include "Ostream.H"
-#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +50,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class STLsurfaceFormatCore Declaration
+                    Class STLsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class STLsurfaceFormatCore
@@ -84,10 +83,10 @@ class STLsurfaceFormatCore
         static int detectBINARY(const fileName&);
 
         //- Read ASCII
-        bool readASCII(IFstream&, const off_t);
+        bool readASCII(istream&, const off_t);
 
         //- Read BINARY
-        bool readBINARY(IFstream&, const off_t);
+        bool readBINARY(istream&, const off_t);
 
 public:
 

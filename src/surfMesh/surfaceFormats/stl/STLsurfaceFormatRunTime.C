@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,6 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
+// read MeshedSurface (ascii)
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -53,6 +53,7 @@ addNamedTemplatedToRunTimeSelectionTable
     stl
 );
 
+// read MeshedSurface (binary)
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -71,9 +72,10 @@ addNamedTemplatedToRunTimeSelectionTable
 );
 
 
+// write MeshedSurfaceProxy (ascii)
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     STLsurfaceFormat,
     face,
     write,
@@ -82,7 +84,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     STLsurfaceFormat,
     triFace,
     write,
@@ -90,9 +92,10 @@ addNamedTemplatedToMemberFunctionSelectionTable
     stl
 );
 
+// write MeshedSurfaceProxy (binary)
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     STLsurfaceFormat,
     face,
     write,
@@ -101,7 +104,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     STLsurfaceFormat,
     triFace,
     write,
@@ -109,6 +112,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     stlb
 );
 
+// write UnsortedMeshedSurface (ascii)
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     UnsortedMeshedSurface,
@@ -128,6 +132,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     stl
 );
 
+// write UnsortedMeshedSurface (binary)
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     UnsortedMeshedSurface,

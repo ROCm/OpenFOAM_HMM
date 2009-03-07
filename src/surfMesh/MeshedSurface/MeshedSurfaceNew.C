@@ -31,7 +31,7 @@ License
 
 
 template<class Face>
-Foam::autoPtr<Foam::MeshedSurface<Face> >
+Foam::autoPtr< Foam::MeshedSurface<Face> >
 Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
 {
     if (debug)
@@ -47,19 +47,18 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
     if (cstrIter == fileExtensionConstructorTablePtr_->end())
     {
         // no direct reader, delegate if possible
-        wordHashSet supported = SiblingType::readTypes();
+        wordHashSet supported = FriendType::readTypes();
         if (supported.found(ext))
         {
             // create indirectly
             autoPtr<MeshedSurface<Face> > surf(new MeshedSurface<Face>);
-            surf().transfer(SiblingType::New(name, ext)());
+            surf().transfer(FriendType::New(name, ext)());
 
             return surf;
         }
 
         // nothing left to try, issue error
         supported += readTypes();
-        supported.insert(nativeExt);
 
         FatalErrorIn
         (
@@ -76,7 +75,7 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
 
 
 template<class Face>
-Foam::autoPtr<Foam::MeshedSurface<Face> >
+Foam::autoPtr< Foam::MeshedSurface<Face> >
 Foam::MeshedSurface<Face>::New(const fileName& name)
 {
     word ext = name.ext();

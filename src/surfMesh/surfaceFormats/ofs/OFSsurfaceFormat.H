@@ -23,30 +23,28 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::AC3DsurfaceFormat
+    Foam::fileFormats::OFSsurfaceFormat
 
 Description
-    Provide a means of reading/writing AC3D format.
-
-    http://www.inivis.com/ac3d/man/ac3dfileformat.html
+    Provide a means of reading/writing the single-file OpenFOAM surface format.
 
 Note
-    On input, the faces are already organized as zones.
-    The output is always sorted by zones.
-    In the absence of zones, a single zone will be assigned.
+   This class provides more methods than the regular surface format interface.x
 
 SourceFiles
-    AC3DsurfaceFormat.C
+    OFSsurfaceFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef AC3DsurfaceFormat_H
-#define AC3DsurfaceFormat_H
+#ifndef OFSsurfaceFormat_H
+#define OFSsurfaceFormat_H
 
+#include "Ostream.H"
+#include "OFstream.H"
 #include "MeshedSurface.H"
 #include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
-#include "AC3DsurfaceFormatCore.H"
+#include "OFSsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,29 +54,29 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class AC3DsurfaceFormat Declaration
+                      Class OFSsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
-class AC3DsurfaceFormat
+class OFSsurfaceFormat
 :
     public MeshedSurface<Face>,
-    public AC3DsurfaceFormatCore
+    public OFSsurfaceFormatCore
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        AC3DsurfaceFormat(const AC3DsurfaceFormat<Face>&);
+        OFSsurfaceFormat(const OFSsurfaceFormat<Face>&);
 
         //- Disallow default bitwise assignment
-        void operator=(const AC3DsurfaceFormat<Face>&);
+        void operator=(const OFSsurfaceFormat<Face>&);
 
 public:
 
     // Constructors
 
         //- Construct from file name
-        AC3DsurfaceFormat(const fileName&);
+        OFSsurfaceFormat(const fileName&);
 
     // Selectors
 
@@ -87,23 +85,44 @@ public:
         {
             return autoPtr<MeshedSurface<Face> >
             (
-                new AC3DsurfaceFormat<Face>(name)
+                new OFSsurfaceFormat<Face>(name)
             );
         }
 
     // Destructor
 
-        virtual ~AC3DsurfaceFormat()
+        virtual ~OFSsurfaceFormat()
         {}
 
 
     // Member Functions
 
+        //- Read surface mesh components
+        static bool read
+        (
+            Istream&,
+            pointField&,
+            List<Face>&,
+            List<surfZone>&
+        );
+
+        //- Read MeshedSurface
+        static bool read
+        (
+            Istream&,
+            MeshedSurface<Face>&
+        );
+
+        //- Read UnsortedMeshedSurface
+        //  The output is sorted by zones
+        static bool read
+        (
+            Istream&,
+            UnsortedMeshedSurface<Face>&
+        );
+
         //- Write surface mesh components by proxy
         static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
-
-        //- Write UnsortedMeshedSurface, the output is always sorted by zones.
-        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
 
         //- Read from file
@@ -126,7 +145,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "AC3DsurfaceFormat.C"
+#   include "OFSsurfaceFormat.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

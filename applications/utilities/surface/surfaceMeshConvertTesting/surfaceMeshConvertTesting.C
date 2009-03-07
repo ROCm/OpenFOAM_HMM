@@ -271,13 +271,40 @@ int main(int argc, char *argv[])
                 args.caseName()
             );
 
+            // start with "constant"
+            runTime.setTime(instant(0, runTime.constant()), 0);
+
+            Info<< "runTime.instance() = " << runTime.instance() << endl;
+            Info<< "runTime.timeName() = " << runTime.timeName() << endl;
+
+
+            surfMesh surfIn
+            (
+                IOobject
+                (
+                    "default",
+                    runTime.timeName(),
+                    runTime,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
+            );
+
+
+            Info<< "surfIn = " << surfIn.nFaces() << endl;
+
+            Info<< "runTime.instance() = " << runTime.instance() << endl;
+
             surfMesh surfOut
             (
                 IOobject
                 (
                     "mySurf",
                     runTime.instance(),
-                    runTime
+                    runTime,
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 surf.xfer()
             );
@@ -299,6 +326,25 @@ int main(int argc, char *argv[])
                 dimless
             );
 
+            Info<<" surf name= " << surfOut.name() <<nl;
+            Info<< "rename to anotherSurf" << endl;
+            surfOut.rename("anotherSurf");
+
+            Info<<" surf name= " << surfOut.name() <<nl;
+
+            // advance time to 1
+            runTime.setTime(instant(1), 1);
+            surfOut.setInstance(runTime.timeName());
+
+
+
+            Info<< "writing surfMesh again well: " << surfOut.objectPath() << endl;
+            surfOut.write();
+
+            // write directly
+            surfOut.write("someName.ofs");
+
+#if 1
             const surfZoneList& zones = surfOut.surfZones();
             forAll(zones, zoneI)
             {
@@ -318,9 +364,10 @@ int main(int argc, char *argv[])
             (
                 IOobject
                 (
-                    "pointIds",
+                    "zoneIds.",
+//                    "pointIds",
                     surfOut.instance(),
-                    "pointFields",
+//                    "pointFields",
                     surfOut,
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
@@ -337,6 +384,10 @@ int main(int argc, char *argv[])
             Info<< "write pointIds (for testing only): "
                 << pointIds.objectPath() << endl;
             pointIds.write();
+
+            Info<<"surfMesh with these names: " << surfOut.names() << endl;
+
+#endif
         }
     }
 

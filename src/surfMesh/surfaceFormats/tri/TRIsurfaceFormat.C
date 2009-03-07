@@ -131,19 +131,55 @@ bool Foam::fileFormats::TRIsurfaceFormat<Face>::read
 template<class Face>
 void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfZone>& zoneLst
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
-    label faceIndex = 0;
-    forAll(zoneLst, zoneI)
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
+
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size() > 1
+      ? surf.surfZones()
+      : oneZone(faceLst)
+    );
+
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+    OFstream os(filename);
+    if (!os.good())
     {
-        forAll(zoneLst[zoneI], localFaceI)
+        FatalErrorIn
+        (
+            "fileFormats::TRIsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+    label faceIndex = 0;
+    forAll(zones, zoneI)
+    {
+        const surfZone& zone = zones[zoneI];
+
+        if (useFaceMap)
         {
-            const Face& f = faceLst[faceIndex++];
-            writeShell(os, pointLst, f, zoneI);
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceMap[faceIndex++]];
+                writeShell(os, pointLst, f, zoneI);
+            }
+        }
+        else
+        {
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+                writeShell(os, pointLst, f, zoneI);
+            }
         }
     }
 }
@@ -152,32 +188,37 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::TRIsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    write(os, surf.points(), surf.faces(), surf.zones());
-}
-
-
-template<class Face>
-void Foam::fileFormats::TRIsurfaceFormat<Face>::write
-(
-    Ostream& os,
+    const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
     const pointField& pointLst = surf.points();
     const List<Face>& faceLst  = surf.faces();
 
-    bool doSort = false;
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::TRIsurfaceFormat::write"
+            "(const fileName&, const UnsortedMeshedSurface<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+
     // a single zone needs no sorting
     if (surf.zoneToc().size() == 1)
     {
-        doSort = false;
-    }
+        const List<label>& zoneIds  = surf.zoneIds();
 
-    if (doSort)
+        forAll(faceLst, faceI)
+        {
+            writeShell(os, pointLst, faceLst[faceI], zoneIds[faceI]);
+        }
+    }
+    else
     {
         labelList faceMap;
         List<surfZone> zoneLst = surf.sortedZones(faceMap);
@@ -190,15 +231,6 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
                 const Face& f = faceLst[faceMap[faceIndex++]];
                 writeShell(os, pointLst, f, zoneI);
             }
-        }
-    }
-    else
-    {
-        const List<label>& zoneIds  = surf.zoneIds();
-
-        forAll(faceLst, faceI)
-        {
-            writeShell(os, pointLst, faceLst[faceI], zoneIds[faceI]);
         }
     }
 }
