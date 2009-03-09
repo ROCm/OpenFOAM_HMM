@@ -39,6 +39,7 @@ SourceFiles
 #define token_H
 
 #include "label.H"
+#include "uLabel.H"
 #include "scalar.H"
 #include "word.H"
 #include "InfoProxy.H"

@@ -32,14 +32,14 @@ License
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 Foam::FixedList<T, Size>::FixedList(Istream& is)
 {
     operator>>(is, *this);
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 {
     is.fatalCheck("operator>>(Istream&, FixedList<T, Size>&)");
@@ -86,7 +86,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 
         if (listDelimiter == token::BEGIN_LIST)
         {
-            for (register label i=0; i<Size; i++)
+            for (register unsigned i=0; i<Size; i++)
             {
                 is >> L[i];
 
@@ -108,7 +108,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
                 "reading the single entry"
             );
 
-            for (register label i=0; i<Size; i++)
+            for (register unsigned i=0; i<Size; i++)
             {
                 L[i] = element;
             }
@@ -134,7 +134,7 @@ Foam::Istream& Foam::operator>>(Foam::Istream& is, FixedList<T, Size>& L)
 
 // * * * * * * * * * * * * * * * Ostream Operator *  * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 void Foam::FixedList<T, Size>::writeEntry(Ostream& os) const
 {
     if
@@ -153,7 +153,7 @@ void Foam::FixedList<T, Size>::writeEntry(Ostream& os) const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 void Foam::FixedList<T, Size>::writeEntry
 (
     const word& keyword,
@@ -166,7 +166,7 @@ void Foam::FixedList<T, Size>::writeEntry
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 Foam::Ostream& Foam::operator<<(Ostream& os, const FixedList<T, Size>& L)
 {
     // Write list contents depending on data format

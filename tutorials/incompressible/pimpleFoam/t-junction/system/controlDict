@@ -47,7 +47,23 @@ adjustTimeStep  yes;
 
 maxCo           5;
 
-functions       ( probes { type probes ; functionObjectLibs ( "libsampling.so" ) ; name probes ; probeLocations ( ( 1e-06 0 0.01 ) ( 0.21 -0.20999 0.01 ) ( 0.21 0.20999 0.01 ) ( 0.21 0 0.01 ) ) ; fields ( p U ) ; } );
+functions
+{
+    probes
+    {
+        type        probes;
+        name        probes;
+        functionObjectLibs ( "libsampling.so" );
+        probeLocations
+        (
+            ( 1e-06 0 0.01 )
+            ( 0.21 -0.20999 0.01 )
+            ( 0.21 0.20999 0.01 )
+            ( 0.21 0 0.01 )
+        );
+        fields ( p U );
+    }
+}
 
 
 // ************************************************************************* //

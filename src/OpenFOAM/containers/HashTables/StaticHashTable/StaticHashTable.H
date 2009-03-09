@@ -32,7 +32,6 @@ Note
     Uses straight lists as underlying type.
     Is slower to insert than the standard HashTable, but should be more
     memory efficient and faster to access.
-    Explicitly does not have default size.
 
 SourceFiles
     StaticHashTableI.H
@@ -45,9 +44,10 @@ SourceFiles
 #define StaticHashTable_H
 
 #include "label.H"
+#include "uLabel.H"
 #include "word.H"
-#include "className.H"
 #include "Xfer.H"
+#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -99,6 +99,13 @@ class StaticHashTable
         //- The current number of elements in table
         label nElmts_;
 
+        //- Return a canonical (power-of-two) size
+        static label canonicalSize(const label);
+
+        //- Return the hash index of the Key within the current table size.
+        //  No checks for zero-sized tables.
+        inline label hashKeyIndex(const Key&) const;
+
         //- Assign a new hashed entry to a possibly already existing key
         bool set(const Key&, const T& newElmt, bool protect);
 
@@ -141,16 +148,16 @@ public:
     // Constructors
 
         //- Construct given initial table size
-        StaticHashTable(const label size = 100);
+        StaticHashTable(const label size = 128);
 
         //- Construct from Istream
-        StaticHashTable(Istream&, const label size = 100);
+        StaticHashTable(Istream&, const label size = 128);
 
         //- Construct as copy
         StaticHashTable(const StaticHashTable<T, Key, Hash>&);
 
         //- Construct by transferring the parameter contents
-        StaticHashTable(const Xfer<StaticHashTable<T, Key, Hash> >&);
+        StaticHashTable(const Xfer< StaticHashTable<T, Key, Hash> >&);
 
     // Destructor
 
@@ -180,6 +187,9 @@ public:
 
             //- Return the table of contents
             List<Key> toc() const;
+
+            //- Print information
+            Ostream& printInfo(Ostream&) const;
 
 
         // Edit
@@ -215,7 +225,7 @@ public:
             void transfer(StaticHashTable<T, Key, Hash>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<StaticHashTable<T, Key, Hash> > xfer();
+            inline Xfer< StaticHashTable<T, Key, Hash> > xfer();
 
 
     // Member Operators
@@ -273,13 +283,13 @@ public:
             // Private data
 
                 //- Reference to the StaticHashTable this is an iterator for
-                TableRef curHashTable_;
+                TableRef hashTable_;
 
                 //- Current hash index
                 label hashIndex_;
 
                 //- Index of current element at hashIndex
-                label elementIndex_;
+                label elemIndex_;
 
         public:
 
@@ -288,9 +298,9 @@ public:
                 //- Construct from hash table, hash index and element index
                 inline Iterator
                 (
-                    TableRef curHashTable,
+                    TableRef,
                     label hashIndex_,
-                    label elementIndex_
+                    label elemIndex_
                 );
 
                 //- Construct from the non-const iterator
@@ -299,13 +309,13 @@ public:
 
             // Member operators
 
-                inline void operator=(const iterator& iter);
+                inline void operator=(const iterator&);
 
-                inline bool operator==(const iterator& iter) const;
-                inline bool operator==(const const_iterator& iter) const;
+                inline bool operator==(const iterator&) const;
+                inline bool operator==(const const_iterator&) const;
 
-                inline bool operator!=(const iterator& iter) const;
-                inline bool operator!=(const const_iterator& iter) const;
+                inline bool operator!=(const iterator&) const;
+                inline bool operator!=(const const_iterator&) const;
 
                 inline TRef operator*();
                 inline TRef operator()();
@@ -313,7 +323,7 @@ public:
                 inline Iterator& operator++();
                 inline Iterator operator++(int);
 
-                inline const Key& key();
+                inline const Key& key() const;
         };
 
 

@@ -120,7 +120,7 @@ public:
         //- Construct given size and initial value
         Field(const label, const Type&);
 
-        //- Construct as copy of a UList<Type>
+        //- Construct as copy of a UList\<Type\>
         explicit Field(const UList<Type>&);
 
         //- Construct by transferring the List contents

@@ -50,13 +50,13 @@ maxCo           0.5;
 maxDeltaT       1;
 
 functions
-(
+{
     probes
     {
-        type probes;
-        outputControl timeStep;
-        outputInterval 1;
-        name probes;
+        type            probes;
+        name            probes;
+        outputControl   timeStep;
+        outputInterval  1;
         probeLocations
         (
             ( 0 9.95 19.77 )
@@ -70,11 +70,11 @@ functions
 
     wallPressure
     {
-        type surfaces;
+        type            surfaces;
         functionObjectLibs ( "libsampling.so" );
-        outputControl timeStep;
-        outputInterval 10;
-        surfaceFormat raw;
+        outputControl   timeStep;
+        outputInterval  10;
+        surfaceFormat   raw;
         fields
         (
             p
@@ -84,13 +84,13 @@ functions
         (
             walls
             {
-                type patch;
-                patchName walls;
+                type        patch;
+                patchName   walls;
                 triangulate false;
             }
         );
     }
-);
+}
 
 
 // ************************************************************************* //

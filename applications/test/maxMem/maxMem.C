@@ -28,5 +28,5 @@ int main(int argc, char *argv[])
         cout << "allocated " << i*nBytes/(1024U*1024U) << " Mbytes" << endl;
     }
 
-    return(0);
+    return 0;
 }

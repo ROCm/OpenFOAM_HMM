@@ -28,17 +28,11 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "token.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-bool checkStream(istream& is, const string& fnName)
+bool Foam::checkStream(istream& is, const string& fnName)
 {
     if (!is.good())
     {
@@ -50,7 +44,7 @@ bool checkStream(istream& is, const string& fnName)
 }
 
 
-bool checkStream(ostream& os, const string& fnName)
+bool Foam::checkStream(ostream& os, const string& fnName)
 {
     if (!os.good())
     {
@@ -61,9 +55,5 @@ bool checkStream(ostream& os, const string& fnName)
     return good();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

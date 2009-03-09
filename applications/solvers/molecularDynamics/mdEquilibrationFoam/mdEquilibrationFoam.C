@@ -52,9 +52,8 @@ int main(int argc, char *argv[])
 
     Info << "\nStarting time loop\n" << endl;
 
-    while (runTime.run())
+    while (runTime.loop())
     {
-        runTime++;
 
         nAveragingSteps++;
 
@@ -82,5 +81,5 @@ int main(int argc, char *argv[])
 
     Info << "End\n" << endl;
 
-    return(0);
+    return 0;
 }

@@ -36,8 +36,8 @@ SourceFiles
 #ifndef readHexLabel_H
 #define readHexLabel_H
 
-#include "ISstream.H"
 #include "label.H"
+#include "ISstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

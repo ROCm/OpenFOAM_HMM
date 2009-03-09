@@ -26,15 +26,12 @@ License
 
 #include "objectRegistry.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-wordList objectRegistry::names() const
+Foam::wordList
+Foam::objectRegistry::names() const
 {
     wordList objectNames(size());
 
@@ -54,7 +51,8 @@ wordList objectRegistry::names() const
 
 
 template<class Type>
-HashTable<const Type*> objectRegistry::lookupClass() const
+Foam::HashTable<const Type*>
+Foam::objectRegistry::lookupClass() const
 {
     HashTable<const Type*> objectsOfClass(size());
 
@@ -75,7 +73,7 @@ HashTable<const Type*> objectRegistry::lookupClass() const
 
 
 template<class Type>
-bool objectRegistry::foundObject(const word& name) const
+bool Foam::objectRegistry::foundObject(const word& name) const
 {
     const_iterator iter = find(name);
 
@@ -107,7 +105,7 @@ bool objectRegistry::foundObject(const word& name) const
 
 
 template<class Type>
-const Type& objectRegistry::lookupObject(const word& name) const
+const Type& Foam::objectRegistry::lookupObject(const word& name) const
 {
     const_iterator iter = find(name);
 
@@ -153,9 +151,5 @@ const Type& objectRegistry::lookupObject(const word& name) const
     return *dummyPtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

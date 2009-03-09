@@ -133,7 +133,7 @@ inline Foam::pointField Foam::triFace::points(const pointField& points) const
 
 inline Foam::face Foam::triFace::triFaceFace() const
 {
-    face f(3);
+    Foam::face f(3);
 
     f[0] = operator[](0);
     f[1] = operator[](1);
