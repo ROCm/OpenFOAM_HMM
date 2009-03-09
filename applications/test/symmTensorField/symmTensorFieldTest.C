@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     Info<< symm(tf1) << endl;
 
-    return(0);
+    return 0;
 }
 
 

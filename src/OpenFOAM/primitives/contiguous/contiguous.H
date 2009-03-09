@@ -29,14 +29,12 @@ Description
     Template function to specify if the data of a type are contiguous.
 
     The default function specifies that data are not contiguous.
-    This is specialised for the types (e.g. primitives) with contiguous data.
+    This is specialised for the types (eg, primitives) with contiguous data.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef contiguous_H
 #define contiguous_H
-
-#include "label.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,7 +44,7 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward declaration of friend functions and operators
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 template<class T> class Pair;
 
 

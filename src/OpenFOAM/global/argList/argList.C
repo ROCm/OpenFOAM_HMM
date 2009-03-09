@@ -285,9 +285,9 @@ Foam::argList::argList
     // Print the banner once only for parallel runs
     if (Pstream::master() && bannerEnabled)
     {
-        IOobject::writeBanner(Info, true);
-        Info<< "Build  : " << Foam::FOAMbuild << nl
-            << "Exec   : " << argListString.c_str() << nl            
+        IOobject::writeBanner(Info, true)
+            << "Build  : " << Foam::FOAMbuild << nl
+            << "Exec   : " << argListString.c_str() << nl
             << "Date   : " << dateString.c_str() << nl
             << "Time   : " << timeString.c_str() << nl
             << "Host   : " << hostName() << nl

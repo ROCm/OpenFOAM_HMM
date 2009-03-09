@@ -39,9 +39,10 @@ SourceFiles
 #ifndef Matrix_H
 #define Matrix_H
 
-#include "List.H"
-#include "label.H"
 #include "bool.H"
+#include "label.H"
+#include "uLabel.H"
+#include "List.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

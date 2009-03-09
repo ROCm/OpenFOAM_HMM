@@ -27,14 +27,10 @@ License
 #include "primitiveMesh.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::pointFaces() const
+const Foam::labelListList& Foam::primitiveMesh::pointFaces() const
 {
     if (!pfPtr_)
     {
@@ -51,9 +47,5 @@ const labelListList& primitiveMesh::pointFaces() const
     return *pfPtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

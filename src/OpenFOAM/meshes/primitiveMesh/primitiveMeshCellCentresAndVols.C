@@ -30,14 +30,9 @@ Description
 
 #include "primitiveMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void primitiveMesh::calcCellCentresAndVols() const
+void Foam::primitiveMesh::calcCellCentresAndVols() const
 {
     if (debug)
     {
@@ -75,7 +70,7 @@ void primitiveMesh::calcCellCentresAndVols() const
 }
 
 
-void primitiveMesh::makeCellCentresAndVols
+void Foam::primitiveMesh::makeCellCentresAndVols
 (
     const vectorField& fCtrs,
     const vectorField& fAreas,
@@ -152,7 +147,7 @@ void primitiveMesh::makeCellCentresAndVols
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const vectorField& primitiveMesh::cellCentres() const
+const Foam::vectorField& Foam::primitiveMesh::cellCentres() const
 {
     if (!cellCentresPtr_)
     {
@@ -163,7 +158,7 @@ const vectorField& primitiveMesh::cellCentres() const
 }
 
 
-const scalarField& primitiveMesh::cellVolumes() const
+const Foam::scalarField& Foam::primitiveMesh::cellVolumes() const
 {
     if (!cellVolumesPtr_)
     {
@@ -173,9 +168,5 @@ const scalarField& primitiveMesh::cellVolumes() const
     return *cellVolumesPtr_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

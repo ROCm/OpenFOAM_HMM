@@ -30,10 +30,9 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-namespace Foam
-{
-    defineTypeNameAndDebug(primitiveMesh, 0);
-}
+
+defineTypeNameAndDebug(Foam::primitiveMesh, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

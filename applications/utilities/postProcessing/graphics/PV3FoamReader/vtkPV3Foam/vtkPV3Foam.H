@@ -700,6 +700,9 @@ public:
             vtkMultiBlockDataSet* lagrangianOutput
         );
 
+        //- Clean any storage
+        void CleanUp();
+
         //- Allocate and return a list of selected times
         //  returns the count via the parameter
         double* findTimes(int& nTimeSteps);

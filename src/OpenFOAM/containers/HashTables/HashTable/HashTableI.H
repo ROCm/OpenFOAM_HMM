@@ -42,6 +42,17 @@ inline Foam::HashTable<T, Key, Hash>::hashedEntry::hashedEntry
 {}
 
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+inline Foam::label
+Foam::HashTable<T, Key, Hash>::hashKeyIndex(const Key& key) const
+{
+    // size is power of two - this is the modulus
+    return Hash()(key) & (tableSize_ - 1);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
@@ -112,7 +123,7 @@ inline const T& Foam::HashTable<T, Key, Hash>::operator[](const Key& key) const
 {
     const_iterator iter = find(key);
 
-    if (iter == end())
+    if (iter == cend())
     {
         FatalErrorIn("HashTable<T, Key, Hash>::operator[](const Key&) const")
             << key << " not found in table.  Valid entries: "
@@ -146,12 +157,12 @@ inline T& Foam::HashTable<T, Key, Hash>::operator()(const Key& key)
 template<class T, class Key, class Hash>
 inline Foam::HashTable<T, Key, Hash>::iterator::iterator
 (
-    HashTable<T, Key, Hash>& curHashTable,
+    HashTable<T, Key, Hash>& hashTbl,
     hashedEntry* elmt,
     label hashIndex
 )
 :
-    curHashTable_(curHashTable),
+    hashTable_(hashTbl),
     elmtPtr_(elmt),
     hashIndex_(hashIndex)
 {}
@@ -241,12 +252,12 @@ Foam::HashTable<T, Key, Hash>::iterator::operator++()
     // Step to the next table entry
     while
     (
-        ++hashIndex_ < curHashTable_.tableSize_
-     && !(elmtPtr_ = curHashTable_.table_[hashIndex_])
+        ++hashIndex_ < hashTable_.tableSize_
+     && !(elmtPtr_ = hashTable_.table_[hashIndex_])
     )
     {}
 
-    if (hashIndex_ == curHashTable_.tableSize_)
+    if (hashIndex_ == hashTable_.tableSize_)
     {
         // make end iterator
         elmtPtr_ = 0;
@@ -271,7 +282,7 @@ Foam::HashTable<T, Key, Hash>::iterator::operator++
 
 template<class T, class Key, class Hash>
 inline
-const Key& Foam::HashTable<T, Key, Hash>::iterator::key()
+const Key& Foam::HashTable<T, Key, Hash>::iterator::key() const
 {
     return elmtPtr_->key_;
 }
@@ -283,8 +294,15 @@ Foam::HashTable<T, Key, Hash>::begin()
 {
     label i = 0;
 
-    while (table_ && !table_[i] && ++i < tableSize_)
-    {}
+    if (nElmts_)
+    {
+        while (table_ && !table_[i] && ++i < tableSize_)
+        {}
+    }
+    else
+    {
+        i = tableSize_;
+    }
 
     if (i == tableSize_)
     {
@@ -317,12 +335,12 @@ Foam::HashTable<T, Key, Hash>::end()
 template<class T, class Key, class Hash>
 inline Foam::HashTable<T, Key, Hash>::const_iterator::const_iterator
 (
-    const HashTable<T, Key, Hash>& curHashTable,
+    const HashTable<T, Key, Hash>& hashTbl,
     const hashedEntry* elmt,
     label hashIndex
 )
 :
-    curHashTable_(curHashTable),
+    hashTable_(hashTbl),
     elmtPtr_(elmt),
     hashIndex_(hashIndex)
 {}
@@ -334,7 +352,7 @@ inline Foam::HashTable<T, Key, Hash>::const_iterator::const_iterator
     const iterator& iter
 )
 :
-    curHashTable_(iter.curHashTable_),
+    hashTable_(iter.hashTable_),
     elmtPtr_(iter.elmtPtr_),
     hashIndex_(iter.hashIndex_)
 {}
@@ -413,14 +431,14 @@ Foam::HashTable<T, Key, Hash>::const_iterator::operator++()
     if
     (
         !(elmtPtr_ = elmtPtr_->next_)
-     && ++hashIndex_ < curHashTable_.tableSize_
-     && !(elmtPtr_ = curHashTable_.table_[hashIndex_])
+     && ++hashIndex_ < hashTable_.tableSize_
+     && !(elmtPtr_ = hashTable_.table_[hashIndex_])
     )
     {
         while
         (
-            ++hashIndex_ < curHashTable_.tableSize_
-         && !(elmtPtr_ = curHashTable_.table_[hashIndex_])
+            ++hashIndex_ < hashTable_.tableSize_
+         && !(elmtPtr_ = hashTable_.table_[hashIndex_])
         )
         {}
     }
@@ -444,7 +462,7 @@ Foam::HashTable<T, Key, Hash>::const_iterator::operator++
 
 template<class T, class Key, class Hash>
 inline
-const Key& Foam::HashTable<T, Key, Hash>::const_iterator::key()
+const Key& Foam::HashTable<T, Key, Hash>::const_iterator::key() const
 {
     return elmtPtr_->key_;
 }
@@ -456,8 +474,15 @@ Foam::HashTable<T, Key, Hash>::cbegin() const
 {
     label i = 0;
 
-    while (table_ && !table_[i] && ++i < tableSize_)
-    {}
+    if (nElmts_)
+    {
+        while (table_ && !table_[i] && ++i < tableSize_)
+        {}
+    }
+    else
+    {
+        i = tableSize_;
+    }
 
     if (i == tableSize_)
     {

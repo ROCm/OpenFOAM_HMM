@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
     Info<< Sf << endl;
 
-    return(0);
+    return 0;
 }
 
 

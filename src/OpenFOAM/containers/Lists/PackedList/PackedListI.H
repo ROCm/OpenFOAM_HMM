@@ -176,7 +176,7 @@ inline bool Foam::PackedList<nBits>::iteratorBase::operator==
     const iteratorBase& iter
 ) const
 {
-    return this->index_ == iter.index_;
+    return this->get() == iter.get();
 }
 
 
@@ -186,7 +186,7 @@ inline bool Foam::PackedList<nBits>::iteratorBase::operator!=
     const iteratorBase& iter
 ) const
 {
-    return this->index_ != iter.index_;
+    return this->get() != iter.get();
 }
 
 
@@ -309,6 +309,48 @@ inline Foam::PackedList<nBits>::const_iterator::const_iterator
 :
     iteratorBase(static_cast<const iteratorBase&>(iter))
 {}
+
+
+template<unsigned nBits>
+inline bool Foam::PackedList<nBits>::iterator::operator==
+(
+    const iteratorBase& iter
+) const
+{
+    return this->index_ == iter.index_;
+}
+
+
+template<unsigned nBits>
+inline bool Foam::PackedList<nBits>::iterator::operator!=
+(
+    const iteratorBase& iter
+) const
+{
+    return this->index_ != iter.index_;
+}
+
+
+
+template<unsigned nBits>
+inline bool Foam::PackedList<nBits>::const_iterator::operator==
+(
+    const iteratorBase& iter
+) const
+{
+    return this->index_ == iter.index_;
+}
+
+
+template<unsigned nBits>
+inline bool Foam::PackedList<nBits>::const_iterator::operator!=
+(
+    const iteratorBase& iter
+) const
+{
+    return this->index_ != iter.index_;
+}
+
 
 
 template<unsigned nBits>

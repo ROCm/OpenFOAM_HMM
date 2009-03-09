@@ -35,10 +35,8 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(IOdictionary, 0);
-}
+defineTypeNameAndDebug(Foam::IOdictionary, 0);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

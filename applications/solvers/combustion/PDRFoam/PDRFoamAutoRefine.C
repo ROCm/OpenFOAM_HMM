@@ -195,7 +195,7 @@ scalar StCoNum = 0.0;
 
     Info<< "\n end\n";
 
-    return(0);
+    return 0;
 }
 
 
