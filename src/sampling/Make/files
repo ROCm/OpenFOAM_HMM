@@ -41,6 +41,7 @@ $(surfWriters)/dx/dxSurfaceWriterRunTime.C
 $(surfWriters)/foamFile/foamFileSurfaceWriterRunTime.C
 $(surfWriters)/null/nullSurfaceWriterRunTime.C
 $(surfWriters)/raw/rawSurfaceWriterRunTime.C
+$(surfWriters)/obj/objSurfaceWriterRunTime.C
 $(surfWriters)/stl/stlSurfaceWriterRunTime.C
 $(surfWriters)/vtk/vtkSurfaceWriterRunTime.C
 

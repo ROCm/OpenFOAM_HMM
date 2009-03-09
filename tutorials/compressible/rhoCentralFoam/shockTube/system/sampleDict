@@ -21,9 +21,19 @@ setFormat       raw;
 
 surfaceFormat   vtk;
 
-sets            ( line { type face ; axis x ; start ( -5 0 0 ) ; end ( 5 0 0 ) ; nPoints 100 ; } );
+sets
+(
+    line
+    {
+        type    face;
+        axis    x;
+        start   ( -5 0 0 );
+        end     ( 5 0 0 );
+        nPoints 100;
+    }
+);
 
-surfaces        ( );
+surfaces        ();
 
 fields          ( p U.component(0) T rho );
 

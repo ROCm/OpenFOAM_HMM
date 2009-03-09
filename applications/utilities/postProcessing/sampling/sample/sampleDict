@@ -30,6 +30,7 @@ setFormat raw;
 //      dx          : DX scalar or vector format
 //      vtk         : VTK ascii format
 //      raw         : x y z value format for use with e.g. gnuplot 'splot'.
+//      obj         : Wavefront obj. Does not contain values!
 //      stl         : ascii stl. Does not contain values!
 surfaceFormat vtk;
 

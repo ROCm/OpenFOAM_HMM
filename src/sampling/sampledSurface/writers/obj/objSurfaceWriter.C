@@ -24,17 +24,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "stlSurfaceWriter.H"
+#include "objSurfaceWriter.H"
 #include "fileName.H"
 #include "OFstream.H"
 #include "faceList.H"
 #include "OSspecific.H"
-#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::stlSurfaceWriter<Type>::stlSurfaceWriter()
+Foam::objSurfaceWriter<Type>::objSurfaceWriter()
 :
     surfaceWriter<Type>()
 {}
@@ -43,14 +42,14 @@ Foam::stlSurfaceWriter<Type>::stlSurfaceWriter()
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::stlSurfaceWriter<Type>::~stlSurfaceWriter()
+Foam::objSurfaceWriter<Type>::~objSurfaceWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::stlSurfaceWriter<Type>::write
+void Foam::objSurfaceWriter<Type>::write
 (
     const fileName& samplePath,
     const fileName& timeDir,
@@ -69,46 +68,52 @@ void Foam::stlSurfaceWriter<Type>::write
         mkDir(surfaceDir);
     }
 
-    fileName fName(surfaceDir/surfaceName + ".stl");
+    fileName fName(surfaceDir/surfaceName + ".obj");
 
     if (verbose)
     {
         Info<< "Writing field " << fieldName << " to " << fName << endl;
     }
 
-    // Convert faces to triangles.
-    DynamicList<labelledTri> tris(faces.size());
+    // this is a quick hack
+    OFstream os(fName);
+
+    os  << "# Wavefront OBJ file" << nl
+        << "o " << os.name().lessExt().name() << nl
+        << nl
+        << "# points : " << points.size() << nl
+        << "# faces  : " << faces.size() << nl
+        << "# no zones " << nl;
+
+    os  << nl
+        << "# <points count=\"" << points.size() << "\">" << endl;
+
+    // Write vertex coords
+    forAll(points, ptI)
+    {
+        os  << "v " << points[ptI].x()
+            << ' '  << points[ptI].y()
+            << ' '  << points[ptI].z() << nl;
+    }
+
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faces.size() << "\">" << endl;
 
     forAll(faces, i)
     {
         const face& f = faces[i];
 
-        faceList triFaces(f.nTriangles(points));
-        label nTris = 0;
-        f.triangles(points, nTris, triFaces);
-
-        forAll(triFaces, triI)
+        os << 'f';
+        forAll(f, fp)
         {
-            const face& tri = triFaces[triI];
-            tris.append(labelledTri(tri[0], tri[1], tri[2], 0));
+            os << ' ' << f[fp] + 1;
         }
+        os << nl;
+
     }
 
-    triSurface
-    (
-        tris.shrink(),
-        geometricSurfacePatchList
-        (
-            1,
-            geometricSurfacePatch
-            (
-                "patch",                            // geometricType
-                string::validate<word>(fieldName),  // fieldName
-                0                                   // index
-            )
-        ),
-        points
-    ).write(fName);
+    os << "# </faces>" << endl;
 }
 
 
