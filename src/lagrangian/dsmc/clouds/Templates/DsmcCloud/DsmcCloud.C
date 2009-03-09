@@ -85,6 +85,8 @@ void Foam::DsmcCloud<ParcelType>::initialise
     const IOdictionary& dsmcInitialiseDict
 )
 {
+    Info<< nl << "Initialising particles" << endl;
+
     const scalar temperature
     (
         readScalar(dsmcInitialiseDict.lookup("temperature"))
@@ -619,6 +621,9 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 {
     typename ParcelType::trackData td(*this);
 
+    // Reset the surface data collection fields
+    resetSurfaceDataFields();
+
     if (debug)
     {
        this->dumpParticlePositions();
@@ -626,9 +631,6 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 
     // Insert new particles from the inflow boundary
     this->inflowBoundary().inflow();
-
-    // Reset the surface data collection fields
-    resetSurfaceDataFields();
 
     // Move the particles ballistically with their current velocities
     Cloud<ParcelType>::move(td);

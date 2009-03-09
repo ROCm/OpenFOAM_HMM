@@ -358,6 +358,10 @@ Foam::DsmcCloud<ParcelType>::rhoN() const
 
     rhoN *= nParticle_/mesh().cellVolumes();
 
+    trhoN().boundaryField() = trhoN().boundaryField().boundaryInternalField();
+
+    trhoN().correctBoundaryConditions();
+
     return trhoN;
 }
 
@@ -395,6 +399,10 @@ Foam::DsmcCloud<ParcelType>::rhoM() const
 
     rhoM *= nParticle_/mesh().cellVolumes();
 
+    trhoM().boundaryField() = trhoM().boundaryField().boundaryInternalField();
+
+    trhoM().correctBoundaryConditions();
+
     return trhoM;
 }
 
@@ -429,6 +437,11 @@ Foam::DsmcCloud<ParcelType>::dsmcRhoN() const
 
         dsmcRhoN[cellI]++;
     }
+
+    tdsmcRhoN().boundaryField() =
+        tdsmcRhoN().boundaryField().boundaryInternalField();
+
+    tdsmcRhoN().correctBoundaryConditions();
 
     return tdsmcRhoN;
 }
@@ -472,6 +485,11 @@ Foam::DsmcCloud<ParcelType>::momentum() const
 
     momentum *= nParticle_/mesh().cellVolumes();
 
+    tmomentum().boundaryField() =
+        tmomentum().boundaryField().boundaryInternalField();
+
+    tmomentum().correctBoundaryConditions();
+
     return tmomentum;
 }
 
@@ -508,6 +526,11 @@ Foam::DsmcCloud<ParcelType>::linearKE() const
     }
 
     linearKE *= nParticle_/mesh().cellVolumes();
+
+    tlinearKE().boundaryField() =
+        tlinearKE().boundaryField().boundaryInternalField();
+
+    tlinearKE().correctBoundaryConditions();
 
     return tlinearKE;
 }
@@ -546,6 +569,11 @@ Foam::DsmcCloud<ParcelType>::internalE() const
 
     internalE *= nParticle_/mesh().cellVolumes();
 
+    tinternalE().boundaryField() =
+        tinternalE().boundaryField().boundaryInternalField();
+
+    tinternalE().correctBoundaryConditions();
+
     return tinternalE;
 }
 
@@ -583,6 +611,11 @@ Foam::DsmcCloud<ParcelType>::iDof() const
     }
 
     iDof *= nParticle_/mesh().cellVolumes();
+
+    tiDof().boundaryField() =
+        tiDof().boundaryField().boundaryInternalField();
+
+    tiDof().correctBoundaryConditions();
 
     return tiDof;
 }

@@ -34,6 +34,7 @@ Description
 #include "calc.H"
 #include "fvc.H"
 #include "dsmcCloud.H"
+#include "dsmcFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -133,97 +134,17 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         Info<< "Reading field iDofMean" << endl;
         volScalarField iDofMean(iDofMeanheader, mesh);
 
-        // Check if there are any zero values in the density fields
+        dsmcFields dF
+        (
+            "dsmcFieldsUtility",
+            mesh,
+            dictionary(),
+            false
+        );
 
-        if (min(rhoNMean).value() > VSMALL)
+        if (writeResults)
         {
-            // TODO Sort out boundary field values if required
-
-            Info<< nl << "Calculating UMean field." << endl;
-            volVectorField UMean
-            (
-                IOobject
-                (
-                    "UMean",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                momentumMean/rhoMMean
-            );
-
-            Info<< nl << "Calculating translationalTMean field." << endl;
-            volScalarField translationalTMean
-            (
-                IOobject
-                (
-                    "translationalTMean",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                2.0/(3.0*dsmcCloud::kb*rhoNMean)
-               *(linearKEMean - 0.5*rhoMMean*(UMean & UMean))
-            );
-
-            Info<< nl << "Calculating internalTMean field." << endl;
-            volScalarField internalTMean
-            (
-                IOobject
-                (
-                    "internalTMean",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                2.0/(dsmcCloud::kb*iDofMean)*internalEMean
-            );
-
-            Info<< nl << "Calculating overallTMean field." << endl;
-            volScalarField overallTMean
-            (
-                IOobject
-                (
-                    "overallTMean",
-                    runTime.timeName(),
-                    mesh,
-                    IOobject::NO_READ
-                ),
-                2.0/(dsmcCloud::kb*(3.0*rhoNMean + iDofMean))
-               *(linearKEMean - 0.5*rhoMMean*(UMean & UMean) + internalEMean)
-            );
-
-            Info<< nl << "mag(UMean) max/min : "
-                << max(mag(UMean)).value() << " "
-                << min(mag(UMean)).value() << endl;
-
-            Info<< nl << "translationalTMean max/min : "
-                << max(translationalTMean).value() << " "
-                << min(translationalTMean).value() << endl;
-
-            Info<< nl << "internalTMean max/min : "
-                << max(internalTMean).value() << " "
-                << min(internalTMean).value() << endl;
-
-            Info<< nl << "overallTMean max/min : "
-                << max(overallTMean).value() << " "
-                << min(overallTMean).value() << endl;
-
-            if (writeResults)
-            {
-                UMean.write();
-                translationalTMean.write();
-                internalTMean.write();
-                overallTMean.write();
-            }
-        }
-        else
-        {
-            Info<< "Small or negative value (" << min(rhoNMean)
-                << ") found in rhoNMean field. "
-                << "Not calculating fields to avoid division by zero "
-                << "or invalid results."
-                << endl;
+            dF.write();
         }
     }
 }
