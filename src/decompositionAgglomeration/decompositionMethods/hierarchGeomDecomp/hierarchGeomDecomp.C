@@ -165,6 +165,11 @@ void Foam::hierarchGeomDecomp::findBinary
     // (one beyond) index of highValue
     label high = values.size();
 
+    // Safeguards to avoid infinite loop.
+    label lowPrev = -1;
+    label midPrev = -1;
+    label highPrev = -1;
+
     //while (low <= high)
     while (true)
     {
@@ -197,6 +202,20 @@ void Foam::hierarchGeomDecomp::findBinary
         // Update mid, midValue
         midValue = 0.5*(lowValue+highValue);
         mid = findLower(values, midValue, low, high);
+
+        // Safeguard if same as previous.
+        bool hasNotChanged = (mid == midPrev) && (low == lowPrev) && (high == highPrev);
+        if (returnReduce(hasNotChanged, andOp<bool>()))
+        {
+            WarningIn("hierarchGeomDecomp::findBinary(..)")
+                << "unable to find desired deomposition split, making do!" 
+                << endl;
+            break;
+        }
+
+        midPrev = mid;
+        lowPrev = low;
+        highPrev = high;
     }
 }
 
