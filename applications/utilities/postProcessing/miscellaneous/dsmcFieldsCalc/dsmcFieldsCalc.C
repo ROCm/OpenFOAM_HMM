@@ -35,117 +35,112 @@ Description
 #include "fvc.H"
 #include "dsmcCloud.H"
 #include "dsmcFields.H"
+#include "IOobjectList.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    template<class Type>
+    bool addFieldsToList
+    (
+        const fvMesh& mesh,
+        PtrList<GeometricField<Type, fvPatchField, volMesh> >& list,
+        const wordList& fieldNames
+    )
+    {
+        typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+        label index = 0;
+        forAll(fieldNames, i)
+        {
+            IOobject obj
+            (
+                fieldNames[i],
+                mesh.time().timeName(),
+                mesh,
+                IOobject::MUST_READ
+            );
+
+            if (obj.headerOk() && obj.headerClassName() == fieldType::typeName)
+            {
+                list.set(index++, new fieldType(obj, mesh));
+            }
+            else
+            {
+                Info<< "Could not find " << fieldNames[i] << endl;
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+}
+
 
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
     bool writeResults = !args.options().found("noWrite");
 
-    IOobject rhoNMeanheader
+    wordList extensiveVSFNames
     (
-        "rhoNMean",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    IOobject rhoMMeanheader
-    (
-        "rhoMMean",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    IOobject momentumMeanheader
-    (
-        "momentumMean",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    IOobject linearKEMeanheader
-    (
-        "linearKEMean",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    IOobject internalEMeanheader
-    (
-        "internalEMean",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    IOobject iDofMeanheader
-    (
-        "iDofMean",
-        runTime.timeName(),
-        mesh,
-        IOobject::MUST_READ
-    );
-
-    if (!rhoNMeanheader.headerOk())
-    {
-        Info<< "    No rhoNMean" << endl;
-    }
-    else if (!rhoMMeanheader.headerOk())
-    {
-        Info<< "    No rhoMMean" << endl;
-    }
-    else if (!momentumMeanheader.headerOk())
-    {
-        Info<< "    No momentumMean" << endl;
-    }
-    else if (!linearKEMeanheader.headerOk())
-    {
-        Info<< "    No linearKEMean" << endl;
-    }
-    else if (!internalEMeanheader.headerOk())
-    {
-        Info<< "    No internalEMean" << endl;
-    }
-    else if (!iDofMeanheader.headerOk())
-    {
-        Info<< "    No iDofMean" << endl;
-    }
-    else
-    {
-        Info<< "Reading field rhoNMean" << endl;
-        volScalarField rhoNMean(rhoNMeanheader, mesh);
-
-        Info<< "Reading field rhoMMean" << endl;
-        volScalarField rhoMMean(rhoMMeanheader, mesh);
-
-        Info<< "Reading field momentumMean" << endl;
-        volVectorField momentumMean(momentumMeanheader, mesh);
-
-        Info<< "Reading field linearKEMean" << endl;
-        volScalarField linearKEMean(linearKEMeanheader, mesh);
-
-        Info<< "Reading field internalEMean" << endl;
-        volScalarField internalEMean(internalEMeanheader, mesh);
-
-        Info<< "Reading field iDofMean" << endl;
-        volScalarField iDofMean(iDofMeanheader, mesh);
-
-        dsmcFields dF
+        IStringStream
         (
-            "dsmcFieldsUtility",
-            mesh,
-            dictionary(),
-            false
-        );
+            "( \
+                rhoNMean \
+                rhoMMean \
+                linearKEMean \
+                internalEMean \
+                iDofMean \
+            )"
+        )()
+    );
 
-        if (writeResults)
-        {
-            dF.write();
-        }
+    PtrList<volScalarField> extensiveVSFs(extensiveVSFNames.size());
+
+    if
+    (
+        !addFieldsToList
+        (
+            mesh,
+            extensiveVSFs,
+            extensiveVSFNames
+        )
+    )
+    {
+        return;
+    }
+
+    wordList extensiveVVFNames(IStringStream ("(momentumMean)")());
+
+    PtrList<volVectorField> extensiveVVFs(extensiveVVFNames.size());
+
+    if
+    (
+        !addFieldsToList
+        (
+            mesh,
+            extensiveVVFs,
+            extensiveVVFNames
+        )
+    )
+    {
+        return;
+    }
+
+    dsmcFields dF
+    (
+        "dsmcFieldsUtility",
+        mesh,
+        dictionary::null,
+        false
+    );
+
+    if (writeResults)
+    {
+        dF.write();
     }
 }
 

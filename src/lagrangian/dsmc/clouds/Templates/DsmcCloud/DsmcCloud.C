@@ -214,6 +214,8 @@ void Foam::DsmcCloud<ParcelType>::initialise
         temperature,
         cP.mass()
     );
+
+    sigmaTcRMax_.correctBoundaryConditions();
 }
 
 
