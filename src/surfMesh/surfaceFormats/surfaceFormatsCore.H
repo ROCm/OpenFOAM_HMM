@@ -75,15 +75,6 @@ protected:
             return List<surfZone>(1, surfZone(name, container.size(), 0, 0));
         }
 
-        //- Determine the sort order from the zone ids.
-        //  Returns zone list and sets faceMap to indices within faceLst
-        static surfZoneList sortedZonesById
-        (
-            const UList<label>& zoneIds,
-            const Map<word>& zoneNames,
-            labelList& faceMap
-        );
-
         //- Read non-comment line
         static string getLineNoComment(IFstream&);
 
@@ -97,18 +88,6 @@ public:
 
     // Static Member Functions
 
-        //- Check if file extension corresponds to 'native' surface format
-        static bool isNative(const word&);
-
-        //- Return the local file name (within time directory)
-        static fileName localMeshFileName(const word& surfName="");
-
-        //- Find instance with surfName
-        static fileName findMeshInstance(const Time&, const word& surfName="");
-
-        //- Find mesh file with surfName
-        static fileName findMeshFile(const Time&, const word& surfName="");
-
         static bool checkSupport
         (
             const wordHashSet& available,
@@ -117,6 +96,18 @@ public:
             const word& functionName
         );
 
+
+        //- Return the local file name (within time directory)
+        //  NEEDS FIXING
+        static fileName localMeshFileName(const word& surfName="");
+
+        //- Find instance with surfName
+        //  NEEDS FIXING
+        static fileName findMeshInstance(const Time&, const word& surfName="");
+
+        //- Find mesh file with surfName
+        //  NEEDS FIXING
+        static fileName findMeshFile(const Time&, const word& surfName="");
 
     // Constructors
 

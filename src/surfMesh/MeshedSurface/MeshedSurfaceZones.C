@@ -26,11 +26,6 @@ License
 
 #include "MeshedSurface.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Face>
@@ -38,7 +33,7 @@ void Foam::MeshedSurface<Face>::checkZones()
 {
     // extra safety, ensure we have at some zones
     // and they cover all the faces - fix start silently
-    surfZoneList& zones = storedZones();
+    surfZoneList& zones = this->storedZones();
     if (zones.size())
     {
         label count = 0;
@@ -48,25 +43,25 @@ void Foam::MeshedSurface<Face>::checkZones()
             count += zones[zoneI].size();
         }
 
-        if (count < size())
+        if (count < this->size())
         {
             WarningIn
             (
                 "MeshedSurface::checkZones()\n"
             )
-                << "more faces " << size() << " than zones " << count
+                << "more faces " << this->size() << " than zones " << count
                 << " ... extending final zone"
                 << endl;
 
-            zones[zones.size()-1].size() += count - size();
+            zones[zones.size()-1].size() += count - this->size();
         }
-        else if (count > size())
+        else if (count > this->size())
         {
             FatalErrorIn
             (
                 "MeshedSurface::checkZones()\n"
             )
-                << "more zones " << count << " than faces " << size()
+                << "more zones " << count << " than faces " << this->size()
                 << exit(FatalError);
         }
     }
@@ -101,7 +96,7 @@ void Foam::MeshedSurface<Face>::sortFacesAndStore
         List<Face> newFaces(faceMap.size());
         forAll(faceMap, faceI)
         {
-            // use transfer to recover memory if possible
+            // use transfer to recover memory where possible
             newFaces[faceI].transfer(oldFaces[faceMap[faceI]]);
         }
         this->storedFaces().transfer(newFaces);
@@ -204,11 +199,5 @@ void Foam::MeshedSurface<Face>::removeZones()
     this->storedZones().clear();
 }
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

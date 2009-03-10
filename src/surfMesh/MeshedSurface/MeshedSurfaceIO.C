@@ -34,7 +34,7 @@ template<class Face>
 void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
 {
     os  << "points      : " << this->points().size() << nl;
-    if (this->isTri())
+    if (MeshedSurface<Face>::isTri())
     {
         os << "triangles   : " << this->size() << nl;
     }

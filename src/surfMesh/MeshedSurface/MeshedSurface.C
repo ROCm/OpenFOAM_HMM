@@ -28,8 +28,6 @@ License
 #include "UnsortedMeshedSurface.H"
 #include "MeshedSurfaceProxy.H"
 #include "mergePoints.H"
-#include "IFstream.H"
-#include "OFstream.H"
 #include "Time.H"
 #include "ListOps.H"
 #include "polyBoundaryMesh.H"
@@ -140,12 +138,7 @@ void Foam::MeshedSurface<Face>::write
 
         if (supported.found(ext))
         {
-            MeshedSurfaceProxy<Face>
-            (
-                surf.points(),
-                surf.faces(),
-                surf.surfZones()
-            ).write(name);
+            MeshedSurfaceProxy<Face>(surf).write(name);
         }
         else
         {
@@ -367,11 +360,37 @@ Foam::MeshedSurface<Face>::MeshedSurface(const fileName& name)
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const Time& d, const word& surfName)
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const Time& t,
+    const word& surfName
+)
 :
     ParentType(List<Face>(), pointField())
 {
-    read(this->findMeshFile(d, surfName));
+    surfMesh mesh
+    (
+        IOobject
+        (
+            "dummyName",
+            t.timeName(),
+            t,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        surfName
+    );
+
+    // same face type as surfMesh
+    MeshedSurface<face> surf
+    (
+        xferMove(mesh.storedPoints()),
+        xferMove(mesh.storedFaces()),
+        xferMove(mesh.storedZones())
+    );
+
+    this->transcribe(surf);
 }
 
 
@@ -1133,11 +1152,11 @@ bool Foam::MeshedSurface<Face>::read
 template<class Face>
 void Foam::MeshedSurface<Face>::write
 (
-    const Time& d,
+    const Time& t,
     const word& surfName
 ) const
 {
-    write(findMeshFile(d, surfName));
+    MeshedSurfaceProxy<Face>(*this).write(t, surfName);
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -1152,6 +1171,18 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
     this->storedZones()  = surf.surfZones();
 }
 
+
+template<class Face>
+Foam::MeshedSurface<Face>::operator
+Foam::MeshedSurfaceProxy<Face>() const
+{
+    return MeshedSurfaceProxy<Face>
+    (
+        this->points(),
+        this->faces(),
+        this->surfZones()
+    );
+}
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 

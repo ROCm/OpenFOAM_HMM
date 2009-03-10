@@ -51,7 +51,7 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
         if (supported.found(ext))
         {
             // create indirectly
-            autoPtr<MeshedSurface<Face> > surf(new MeshedSurface<Face>);
+            autoPtr< MeshedSurface<Face> > surf(new MeshedSurface<Face>);
             surf().transfer(FriendType::New(name, ext)());
 
             return surf;
@@ -70,7 +70,7 @@ Foam::MeshedSurface<Face>::New(const fileName& name, const word& ext)
             << exit(FatalError);
     }
 
-    return autoPtr<MeshedSurface<Face> >(cstrIter()(name));
+    return autoPtr< MeshedSurface<Face> >(cstrIter()(name));
 }
 
 

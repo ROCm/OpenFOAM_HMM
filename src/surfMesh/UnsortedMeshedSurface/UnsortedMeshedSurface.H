@@ -78,15 +78,10 @@ class UnsortedMeshedSurface
 :
     public MeshedSurface<Face>
 {
-    // friends despite different faces
-    template<class Face2>
-    friend class MeshedSurface;
-
-    // friends despite different faces
-    template<class Face2>
-    friend class UnsortedMeshedSurface;
-
-    friend class MeshedSurface<Face>;
+    // friends - despite different face representationsx
+    template<class Face2> friend class MeshedSurface;
+    template<class Face2> friend class UnsortedMeshedSurface;
+    friend class surfMesh;
 
 private:
 
@@ -200,7 +195,7 @@ public:
         //- Construct from Istream
         UnsortedMeshedSurface(Istream&);
 
-        //- Construct from objectRegistry
+        //- Construct from objectRegistry and a named surface
         UnsortedMeshedSurface(const Time&, const word& surfName="");
 
     // Declare run-time constructor selection table
@@ -277,7 +272,7 @@ public:
             return zoneToc_;
         }
 
-        //- Sort faces according to zone.
+        //- Sort faces according to zoneIds
         //  Returns a surfZoneList and sets faceMap to index within faces()
         surfZoneList sortedZones(labelList& faceMap) const;
 
@@ -365,6 +360,8 @@ public:
 
         void operator=(const UnsortedMeshedSurface<Face>&);
 
+        //- Conversion operator to MeshedSurfaceProxy
+        operator MeshedSurfaceProxy<Face>() const;
 
 };
 

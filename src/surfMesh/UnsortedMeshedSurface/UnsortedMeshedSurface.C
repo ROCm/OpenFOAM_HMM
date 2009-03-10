@@ -26,6 +26,7 @@ License
 
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Time.H"
@@ -127,16 +128,7 @@ void Foam::UnsortedMeshedSurface<Face>::write
 
         if (supported.found(ext))
         {
-            labelList faceMap;
-            List<surfZone> zoneLst = surf.sortedZones(faceMap);
-
-            MeshedSurfaceProxy<Face>
-            (
-                surf.points(),
-                surf.faces(),
-                zoneLst,
-                faceMap
-            ).write(name);
+            MeshedSurfaceProxy<Face>(surf).write(name);
         }
         else
         {
@@ -291,13 +283,14 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface(const fileName& name)
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 (
-    const Time& d,
+    const Time& t,
     const word& surfName
 )
 :
     ParentType()
 {
-    read(this->findMeshFile(d, surfName));
+    MeshedSurface<Face> surf(t, surfName);
+    transfer(surf);
 }
 
 
@@ -473,7 +466,75 @@ Foam::surfZoneList Foam::UnsortedMeshedSurface<Face>::sortedZones
         zoneNames.insert(zoneI, zoneToc_[zoneI].name());
     }
 
-    return this->sortedZonesById(zoneIds_, zoneNames, faceMap);
+    // std::sort() really seems to mix up the order.
+    // and std::stable_sort() might take too long / too much memory
+
+    // Assuming that we have relatively fewer zones compared to the
+    // number of items, just do it ourselves
+
+    // step 1: get zone sizes and store (origId => zoneI)
+    Map<label> lookup;
+    forAll(zoneIds_, faceI)
+    {
+        const label origId = zoneIds_[faceI];
+
+        Map<label>::iterator fnd = lookup.find(origId);
+        if (fnd != lookup.end())
+        {
+            fnd()++;
+        }
+        else
+        {
+            lookup.insert(origId, 1);
+        }
+    }
+
+    // step 2: assign start/size (and name) to the newZones
+    // re-use the lookup to map (zoneId => zoneI)
+    surfZoneList zoneLst(lookup.size());
+    label start = 0;
+    label zoneI = 0;
+    forAllIter(Map<label>, lookup, iter)
+    {
+        label origId = iter.key();
+
+        word name;
+        Map<word>::const_iterator fnd = zoneNames.find(origId);
+        if (fnd != zoneNames.end())
+        {
+            name = fnd();
+        }
+        else
+        {
+            name = word("zone") + ::Foam::name(zoneI);
+        }
+
+        zoneLst[zoneI] = surfZone
+        (
+            name,
+            0,           // initialize with zero size
+            start,
+            zoneI
+        );
+
+        // increment the start for the next zone
+        // and save the (zoneId => zoneI) mapping
+        start += iter();
+        iter() = zoneI++;
+    }
+
+
+    // step 3: build the re-ordering
+    faceMap.setSize(zoneIds_.size());
+
+    forAll(zoneIds_, faceI)
+    {
+        label zoneI = lookup[zoneIds_[faceI]];
+        faceMap[faceI] = zoneLst[zoneI].start() + zoneLst[zoneI].size()++;
+    }
+
+    // with reordered faces registered in faceMap
+    return zoneLst;
 }
 
 
@@ -670,11 +731,11 @@ bool Foam::UnsortedMeshedSurface<Face>::read
 template<class Face>
 void Foam::UnsortedMeshedSurface<Face>::write
 (
-    const Time& d,
+    const Time& t,
     const word& surfName
 ) const
 {
-    write(OFstream(this->findMeshFile(d, surfName))());
+    MeshedSurfaceProxy<Face>(*this).write(t, surfName);
 }
 
 
@@ -693,6 +754,24 @@ void Foam::UnsortedMeshedSurface<Face>::operator=
     zoneIds_ = surf.zoneIds_;
     zoneToc_ = surf.zoneToc_;
 }
+
+
+template<class Face>
+Foam::UnsortedMeshedSurface<Face>::operator
+Foam::MeshedSurfaceProxy<Face>() const
+{
+    labelList faceMap;
+    List<surfZone> zoneLst = this->sortedZones(faceMap);
+
+    return MeshedSurfaceProxy<Face>
+    (
+        this->points(),
+        this->faces(),
+        zoneLst,
+        faceMap
+    );
+}
+
 
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //

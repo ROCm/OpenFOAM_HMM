@@ -278,6 +278,14 @@ int main(int argc, char *argv[])
             Info<< "runTime.timeName() = " << runTime.timeName() << endl;
 
 
+            Info<< "write MeshedSurface 'yetAnother' via proxy as surfMesh"
+                << endl;
+            surf.write
+            (
+                runTime,
+                "yetAnother"
+            );
+
             surfMesh surfIn
             (
                 IOobject
@@ -291,7 +299,16 @@ int main(int argc, char *argv[])
             );
 
 
-            Info<< "surfIn = " << surfIn.nFaces() << endl;
+            MeshedSurface<face> surfIn2(runTime, "foobar");
+
+            Info<<"surfIn2 = " << surfIn2.size() << endl;
+
+            Info<< "surfIn = " << surfIn.size() << endl;
+
+
+            Info<< "writing surfMesh as obj = oldSurfIn.obj" << endl;
+            surfIn.write("oldSurfIn.obj");
+
 
             Info<< "runTime.instance() = " << runTime.instance() << endl;
 

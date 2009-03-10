@@ -85,14 +85,9 @@ class MeshedSurface
     public PrimitivePatch<Face, ::Foam::List, pointField, point>,
     public fileFormats::surfaceFormatsCore
 {
-    // friends despite different faces
-    template<class Face2>
-    friend class MeshedSurface;
-
-    // friends despite different faces
-    template<class Face2>
-    friend class UnsortedMeshedSurface;
-
+    // friends - despite different face representationsx
+    template<class Face2> friend class MeshedSurface;
+    template<class Face2> friend class UnsortedMeshedSurface;
     friend class surfMesh;
 
 private:
@@ -232,7 +227,7 @@ public:
         //- Construct from file name (uses extension to determine type)
         MeshedSurface(const fileName&, const word& ext);
 
-        //- Construct from objectRegistry
+        //- Construct from database
         MeshedSurface(const Time&, const word& surfName="");
 
     // Declare run-time constructor selection table
@@ -436,6 +431,9 @@ public:
     // Member operators
 
         void operator=(const MeshedSurface<Face>&);
+
+        //- Conversion operator to MeshedSurfaceProxy
+        operator MeshedSurfaceProxy<Face>() const;
 
 };
 

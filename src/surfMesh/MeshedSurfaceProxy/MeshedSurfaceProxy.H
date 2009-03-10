@@ -76,15 +76,6 @@ class MeshedSurfaceProxy
 
         const List<label>& faceMap_;
 
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        MeshedSurfaceProxy(const MeshedSurfaceProxy&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const MeshedSurfaceProxy&);
-
 public:
 
         //- Runtime type information
@@ -106,12 +97,6 @@ public:
             const List<Face>&,
             const List<surfZone>&,
             const List<label>& faceMap = List<label>()
-        );
-
-        //- Construct from MeshedSurface
-        explicit MeshedSurfaceProxy
-        (
-            const MeshedSurface<Face>&
         );
 
     // Destructor
@@ -176,8 +161,6 @@ public:
 
     // Write
 
-//??        void writeStats(Ostream& os) const;
-
         //- Generic write routine. Chooses writer based on extension.
         virtual void write(const fileName& name) const
         {
@@ -185,7 +168,9 @@ public:
         }
 
         //- Write to database
-//??        void write(const Time&, const word& surfName="") const;
+        virtual void write(const Time&, const word& surfName = "") const;
+
+    //??        void writeStats(Ostream& os) const;
 
 };
 

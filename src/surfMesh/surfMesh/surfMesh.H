@@ -60,6 +60,9 @@ class surfMesh
     private MeshedSurfaceIOAllocator,
     public  PrimitivePatch<face, ::Foam::UList, ::Foam::SubField<point>, point>
 {
+    // friends
+    template<class Face> friend class MeshedSurface;
+    template<class Face> friend class UnsortedMeshedSurface;
 
 public:
 
@@ -259,16 +262,14 @@ public:
             void transfer(MeshedSurface<face>&);
 
 
-
+        //- Avoid masking the normal objectRegistry write
         using surfaceRegistry::write;
-
 
         //- Write to file
         static void write(const fileName&, const surfMesh&);
 
         //- Write to file
         void write(const fileName&);
-
 
         //  Storage management
 

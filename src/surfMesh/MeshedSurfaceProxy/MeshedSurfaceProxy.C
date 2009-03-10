@@ -25,9 +25,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MeshedSurfaceProxy.H"
+#include "MeshedSurface.H"
 #include "Time.H"
 #include "surfMesh.H"
-#include "MeshedSurface.H"
+#include "OFstream.H"
+#include "ListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -86,6 +88,127 @@ void Foam::MeshedSurfaceProxy<Face>::write
 }
 
 
+template<class Face>
+void Foam::MeshedSurfaceProxy<Face>::write
+(
+    const Time& t,
+    const word& surfName
+) const
+{
+    // the surface name to be used
+    word name(surfName.size() ? surfName : surfaceRegistry::defaultName);
+
+    if (debug)
+    {
+        Info<< "MeshedSurfaceProxy::write"
+            "(const Time&, const word&) : "
+            "writing to " << name
+            << endl;
+    }
+
+
+    // the local location
+    const fileName objectDir
+    (
+        t.timePath()/surfaceRegistry::subInstance/name/surfMesh::meshSubDir
+    );
+
+    if (!isDir(objectDir))
+    {
+        mkDir(objectDir);
+    }
+
+
+    // write surfMesh/points
+    {
+        pointIOField io
+        (
+            IOobject
+            (
+                "points",
+                t.timeName(),
+                surfMesh::meshSubDir,
+                t,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        OFstream os(objectDir/io.name());
+        io.writeHeader(os);
+
+        os  << this->points();
+
+        os  << "\n\n"
+            "// ************************************************************************* //\n";
+    }
+
+
+    // write surfMesh/faces
+    {
+        faceIOList io
+        (
+            IOobject
+            (
+                "faces",
+                t.timeName(),
+                surfMesh::meshSubDir,
+                t,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        OFstream os(objectDir/io.name());
+        io.writeHeader(os);
+
+        if (this->useFaceMap())
+        {
+            // this is really a bit annoying (and wasteful) but no other way
+            os  << reorder(this->faceMap(), this->faces());
+        }
+        else
+        {
+            os  << this->faces();
+        }
+
+        os  << "\n\n"
+            "// ************************************************************************* //\n";
+    }
+
+
+    // write surfMesh/surfZones
+    {
+        surfZoneIOList io
+        (
+            IOobject
+            (
+                "surfZones",
+                t.timeName(),
+                surfMesh::meshSubDir,
+                t,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+
+        OFstream os(objectDir/io.name());
+        io.writeHeader(os);
+
+        os  << this->surfZones();
+
+        os  << "\n\n"
+            "// ************************************************************************* //"
+            << endl;
+    }
+
+}
+
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -104,19 +227,6 @@ Foam::MeshedSurfaceProxy<Face>::MeshedSurfaceProxy
 {}
 
 
-template<class Face>
-Foam::MeshedSurfaceProxy<Face>::MeshedSurfaceProxy
-(
-    const MeshedSurface<Face>& surf
-)
-:
-    points_(surf.points()),
-    faces_(surf.faces()),
-    zones_(surf.surfZones()),
-    faceMap_(List<label>())
-{}
-
-
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -130,16 +240,6 @@ Foam::MeshedSurfaceProxy<Face>::~MeshedSurfaceProxy()
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// template<class Face>
-// void Foam::MeshedSurfaceProxy<Face>::write
-// (
-//     const Time& d,
-//     const word& surfName
-// ) const
-// {
-//     write(findMeshFile(d, surfName)());
-// }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
