@@ -224,6 +224,9 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 {
     buildCellOccupancy();
 
+    // Temporary storage for subCells
+    List<DynamicList<label> > subCells(8);
+
     scalar deltaT = mesh_.time().deltaT().value();
 
     label collisionCandidates = 0;
@@ -238,6 +241,37 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
         if (nC > 1)
         {
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Assign particles to one of 8 Cartesian subCells
+
+            // Clear temporary lists
+            forAll(subCells, i)
+            {
+                subCells[i].clear();
+            }
+
+            // Inverse addressing specifying which subCell a parcel is in
+            List<label> whichSubCell(cellParcels.size());
+
+            const point& cC = mesh_.cellCentres()[celli];
+
+            forAll(cellParcels, i)
+            {
+                ParcelType* p = cellParcels[i];
+
+                vector relPos = p->position() - cC;
+
+                label subCell =
+                    pos(relPos.x()) + 2*pos(relPos.y()) + 4*pos(relPos.z());
+
+                subCells[subCell].append(i);
+
+                whichSubCell[i] = subCell;
+            }
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
             scalar sigmaTcRMax = sigmaTcRMax_[celli];
 
             scalar selectedPairs = collisionSelectionRemainder_[celli]
@@ -252,17 +286,60 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
             for(label c = 0; c < nCandidates; c++)
             {
-                // Select the first collision candidate
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                // subCell candidate selection procedure
 
+                // Select the first collision candidate
                 label candidateP = rndGen_.integer(0, nC-1);
 
-                label candidateQ = rndGen_.integer(0, nC-1);
+                // Declare the second collision candidate
+                label candidateQ = -1;
 
-                // If the same candidate is chosen, choose again
-                while(candidateP == candidateQ)
+                List<label> subCellPs = subCells[whichSubCell[candidateP]];
+
+                label nSC = subCellPs.size();
+
+                if (nSC > 1)
                 {
-                    candidateQ = rndGen_.integer(0, nC-1);
+                    // If there are two or more particle in a subCell, choose
+                    // another from the same cell.  If the same candidate is
+                    // chosen, choose again.
+
+                    do
+                    {
+                        candidateQ = subCellPs[rndGen_.integer(0, nSC-1)];
+
+                    } while(candidateP == candidateQ);
                 }
+                else
+                {
+                    // Select a possible second collision candidate from the
+                    // whole cell.  If the same candidate is chosen, choose
+                    // again.
+
+                    do
+                    {
+                        candidateQ = rndGen_.integer(0, nC-1);
+
+                    } while(candidateP == candidateQ);
+                }
+
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                // uniform candidate selection procedure
+
+                // // Select the first collision candidate
+                // label candidateP = rndGen_.integer(0, nC-1);
+
+                // // Select a possible second collision candidate
+                // label candidateQ = rndGen_.integer(0, nC-1);
+
+                // // If the same candidate is chosen, choose again
+                // while(candidateP == candidateQ)
+                // {
+                //     candidateQ = rndGen_.integer(0, nC-1);
+                // }
+
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
                 ParcelType* parcelP = cellParcels[candidateP];
                 ParcelType* parcelQ = cellParcels[candidateQ];
