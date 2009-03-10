@@ -80,4 +80,15 @@ void Foam::regIOobject::release()
 }
 
 
+Foam::label Foam::regIOobject::eventNo() const
+{
+    return eventNo_;
+}
+
+Foam::label& Foam::regIOobject::eventNo()
+{
+    return eventNo_;
+}
+
+
 // ************************************************************************* //

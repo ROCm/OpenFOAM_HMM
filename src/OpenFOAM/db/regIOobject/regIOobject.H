@@ -45,6 +45,7 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+
 namespace Foam
 {
 
@@ -69,6 +70,9 @@ private:
 
         //- Time of last modification
         mutable time_t lastModified_;
+
+        //- eventNo of last update
+        label eventNo_;
 
         //- Istream for reading
         Istream* isPtr_;
@@ -140,6 +144,24 @@ public:
             //- Release ownership of this object from its registry
             inline void release();
 
+
+        // Dependency checking
+
+            //- Event number at last update.
+            inline label eventNo() const;
+
+            //- Event number at last update.
+            inline label& eventNo();
+
+            //- Am I uptodate with respect to other regIOobjects
+            bool uptodate(const word&) const;
+            bool uptodate(const word&, const word&) const;
+            bool uptodate(const word&, const word&, const word&) const;
+            bool uptodate(const word&, const word&, const word&, const word&)
+             const;
+
+            //- Flag me as uptodate
+            void setUptodate();
 
         // Edit
 
