@@ -85,12 +85,12 @@ public:
 
     // Constructors
 
-        //- Construct the time objectRegistry given an initial estimate 
+        //- Construct the time objectRegistry given an initial estimate
         //  for the number of entries
         explicit objectRegistry
         (
             const Time& db,
-            const label nIoObjects = 100
+            const label nIoObjects = 128
         );
 
         //- Construct a sub-registry given an IObject to describe the registry
@@ -98,7 +98,7 @@ public:
         explicit objectRegistry
         (
             const IOobject& io,
-            const label nIoObjects = 100
+            const label nIoObjects = 128
         );
 
 

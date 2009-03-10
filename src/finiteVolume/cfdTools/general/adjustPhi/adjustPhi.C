@@ -27,7 +27,7 @@ License
 #include "adjustPhi.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-#include "processorFvPatchFields.H"
+#include "processorFvsPatchFields.H"
 #include "inletOutletFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
@@ -52,7 +52,7 @@ bool Foam::adjustPhi
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
             const fvsPatchScalarField& phip = phi.boundaryField()[patchi];
 
-            if (!isType<processorFvPatchScalarField>(phip))
+            if (!isType<processorFvsPatchScalarField>(phip))
             {
                 if
                 (
@@ -128,7 +128,7 @@ bool Foam::adjustPhi
             const fvPatchVectorField& Up = U.boundaryField()[patchi];
             fvsPatchScalarField& phip = phi.boundaryField()[patchi];
 
-            if (!isType<processorFvPatchScalarField>(phip))
+            if (!isType<processorFvsPatchScalarField>(phip))
             {
                 if
                 (

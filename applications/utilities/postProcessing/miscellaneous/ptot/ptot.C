@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-    return(0);
+    return 0;
 }
 
 

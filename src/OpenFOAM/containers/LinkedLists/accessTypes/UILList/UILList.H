@@ -38,6 +38,7 @@ SourceFiles
 #define UILList_H
 
 #include "label.H"
+#include "uLabel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

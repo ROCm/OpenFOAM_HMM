@@ -205,7 +205,7 @@ Foam::List<T>::List(InputIterator first, InputIterator last)
 
 // Construct as copy of FixedList<T, Size>
 template<class T>
-template<Foam::label Size>
+template<unsigned Size>
 Foam::List<T>::List(const FixedList<T, Size>& lst)
 :
     UList<T>(NULL, Size)

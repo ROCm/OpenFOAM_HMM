@@ -88,7 +88,7 @@ forAll(Tpatches, patchI)
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 }

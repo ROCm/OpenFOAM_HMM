@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 
     solve(fvm::ddt(st) + fvm::div(phi, st) - fvm::laplacian(st));
 
-    return(0);
+    return 0;
 }
 
 

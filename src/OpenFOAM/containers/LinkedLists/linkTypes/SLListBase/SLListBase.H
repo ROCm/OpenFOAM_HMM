@@ -38,6 +38,7 @@ SourceFiles
 
 #include "bool.H"
 #include "label.H"
+#include "uLabel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

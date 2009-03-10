@@ -47,9 +47,8 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting iteration loop\n" << endl;
 
-    while (runTime.run())
+    while (runTime.loop())
     {
-        runTime++;
         Info<< "Iteration = " << runTime.timeName() << nl << endl;
 
         solve
@@ -73,7 +72,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

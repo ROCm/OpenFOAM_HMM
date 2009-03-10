@@ -60,7 +60,7 @@ int main()
 
     Info<< "end" << endl;
 
-    return(0);
+    return 0;
 }
 
 

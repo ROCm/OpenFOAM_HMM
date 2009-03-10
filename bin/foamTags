@@ -42,15 +42,24 @@ fi
 cd $WM_PROJECT_DIR
 mkdir .tags 2>/dev/null
 
-find -H . \( -name "*.[HC]" -not -name "lnInclude" -not -name "Doxygen" \) | \
-    etags --declarations -l c++ -o .tags/etags -
-find -H . \( -name "*.[HC]" -not -name "lnInclude" -not -name "Doxygen" \) | \
-    etags -l c++ -o .tags/etagsDef -
-find -H . \( -name "*.H" -not -name "lnInclude" -not -name "Doxygen" \) | \
-    etags --declarations -l c++ -o .tags/etagsDec -
+#etagsCmd="etags --declarations -l c++ -o .tags/etags -"
+#etagsDefCmd="etags -l c++ -o .tags/etagsDef -"
+#etagsDecCmd="etags --declarations -l c++ -o .tags/etagsDec -"
+
+etagsCmd="ectags -e --extra=+fq --file-scope=no --c-kinds=+p -o .tags/etags -L -"
+etagsDefCmd="ectags -e --extra=+fq --file-scope=no -o .tags/etagsDef -L -"
+etagsDecCmd="ectags -e --extra=+fq --file-scope=no --c-kinds=+p -o .tags/etagsDec -L -"
+
+ectagsDecCmd="ectags -o .tags/ectagsDec --file-scope=no --c-kinds=+p --excmd=n --extra=+fq --fields=+afiKmnsSzt -L -"
+
+find -H . \( -name "*.[HC]" -o -name lnInclude -prune -o -name Doxygen -prune \) | $etagsCmd
+find -H . \( -name "*.[HC]" -o -name lnInclude -prune -o -name Doxygen -prune \) | $etagsDefCmd
+find -H . \( -name "*.H" -o -name lnInclude -prune -o -name Doxygen -prune \) | $etagsDecCmd
+find -H . \( -name "*.H" -o -name lnInclude -prune -o -name Doxygen -prune \) | $ectagsDecCmd
 
 gtags -i --gtagsconf bin/tools/gtagsrc .tags
 
 foamEbrowse
+
 
 #------------------------------------------------------------------------------

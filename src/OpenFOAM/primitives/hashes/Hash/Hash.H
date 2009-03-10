@@ -27,7 +27,7 @@ Class
 
 Description
     Hash function class for primitives.  All non-primitives used to hash
-    entries on hash tables need a specialised version of this class.
+    entries on hash tables likely need a specialized version of this class.
 
 \*---------------------------------------------------------------------------*/
 
@@ -35,6 +35,9 @@ Description
 #define Hash_H
 
 #include "label.H"
+#include "uLabel.H"
+#include "Hasher.H"
+#include "pTraits.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,27 +45,81 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class Hash Declaration
+                            Class Hash Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class PrimitiveType>
 class Hash
 {
-
 public:
 
     Hash()
     {}
 
-    label operator()(const PrimitiveType& p) const
+    unsigned operator()(const PrimitiveType& p, unsigned seed) const
     {
-        return label(p);
+        return Hasher(&p, sizeof(p), seed);
     }
 
-    label operator()(const PrimitiveType& p, const label tableSize) const
+    unsigned operator()(const PrimitiveType& p) const
     {
-        return mag(operator()(p)) % tableSize;
+        return Hasher(&p, sizeof(p));
     }
+
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Hash specialization for hashing pointer addresses.
+//  Treat a pointer like a long.
+//  This should work for both 32-bit and 64-bit pointers.
+template<>
+class Hash<void*>
+{
+public:
+
+    Hash()
+    {}
+
+    unsigned operator()(const void* const& p, unsigned seed) const
+    {
+        return Hash<long>()(long(p), seed);
+    }
+
+    unsigned operator()(const void* const& p) const
+    {
+        return Hash<long>()(long(p));
+    }
+
+};
+
+
+//- Hash specialization for hashing labels
+template<>
+class Hash<Foam::label>
+{
+public:
+
+    Hash()
+    {}
+
+    //- Incrementally hash a label.
+    //  This will necessarily return a different value than the
+    //  non-incremental version.
+    unsigned operator()(const label& p, unsigned seed) const
+    {
+        return Hasher(&p, sizeof(label), seed);
+    }
+
+    //- Return the unsigned representation of a label.
+    //  This helps if people have relied on the hash value corresponding to
+    //  the natural order.
+    unsigned operator()(const label& p) const
+    {
+        return p;
+    }
+
 };
 
 
