@@ -25,13 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MeshedSurfaceProxy.H"
-#include "MeshedSurface.H"
+
 #include "Time.H"
 #include "surfMesh.H"
 #include "OFstream.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurfaceProxy<Face>::writeTypes()
@@ -39,8 +39,6 @@ Foam::wordHashSet Foam::MeshedSurfaceProxy<Face>::writeTypes()
     return wordHashSet(*writefileExtensionMemberFunctionTablePtr_);
 }
 
-
-// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
 bool Foam::MeshedSurfaceProxy<Face>::canWriteType
@@ -135,13 +133,19 @@ void Foam::MeshedSurfaceProxy<Face>::write
             )
         );
 
-        OFstream os(objectDir/io.name());
+        OFstream os
+        (
+            objectDir/io.name(),
+            t.writeFormat(),
+            IOstream::currentVersion,
+            t.writeCompression()
+        );
+
         io.writeHeader(os);
 
         os  << this->points();
 
-        os  << "\n\n"
-            "// ************************************************************************* //\n";
+        io.writeEndDivider(os);
     }
 
 
@@ -161,7 +165,13 @@ void Foam::MeshedSurfaceProxy<Face>::write
             )
         );
 
-        OFstream os(objectDir/io.name());
+        OFstream os
+        (
+            objectDir/io.name(),
+            t.writeFormat(),
+            IOstream::currentVersion,
+            t.writeCompression()
+        );
         io.writeHeader(os);
 
         if (this->useFaceMap())
@@ -174,8 +184,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
             os  << this->faces();
         }
 
-        os  << "\n\n"
-            "// ************************************************************************* //\n";
+        io.writeEndDivider(os);
     }
 
 
@@ -195,14 +204,13 @@ void Foam::MeshedSurfaceProxy<Face>::write
             )
         );
 
+        // write as ascii
         OFstream os(objectDir/io.name());
         io.writeHeader(os);
 
         os  << this->surfZones();
 
-        os  << "\n\n"
-            "// ************************************************************************* //"
-            << endl;
+        io.writeEndDivider(os);
     }
 
 }

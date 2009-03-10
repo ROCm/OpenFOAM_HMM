@@ -31,48 +31,61 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 template<class Type>
-autoPtr<surfaceWriter<Type> > surfaceWriter<Type>::New(const word& writeType)
+Foam::autoPtr< Foam::surfaceWriter<Type> >
+Foam::surfaceWriter<Type>::New(const word& writeType)
 {
     typename wordConstructorTable::iterator cstrIter =
-        wordConstructorTablePtr_
-            ->find(writeType);
+        wordConstructorTablePtr_->find(writeType);
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
-        FatalErrorIn
+        // unknown, check if it can handle Foam::nil specialization
+        // (ie, geometry write)
+
+        // generally supported, but not for this data type
+        if
         (
-            "surfaceWriter::New(const word&)"
-        )   << "Unknown write type " << writeType
-            << endl << endl
-            << "Valid write types : " << endl
-            << wordConstructorTablePtr_->toc()
-            << exit(FatalError);
+            Foam::surfaceWriter<Foam::nil>::wordConstructorTablePtr_->found
+            (
+                writeType
+            )
+        )
+        {
+            // use 'null' file instead
+            cstrIter = wordConstructorTablePtr_->find("null");
+        }
+
+
+        if (cstrIter == wordConstructorTablePtr_->end())
+        {
+            FatalErrorIn
+            (
+                "surfaceWriter::New(const word&)"
+            )   << "Unknown write type " << writeType
+                << endl << endl
+                << "Valid write types : " << endl
+                << wordConstructorTablePtr_->toc()
+                << exit(FatalError);
+        }
     }
 
-    return autoPtr<surfaceWriter<Type> >(cstrIter()());
+    return autoPtr< surfaceWriter<Type> >(cstrIter()());
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-surfaceWriter<Type>::surfaceWriter()
+Foam::surfaceWriter<Type>::surfaceWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-surfaceWriter<Type>::~surfaceWriter()
+Foam::surfaceWriter<Type>::~surfaceWriter()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

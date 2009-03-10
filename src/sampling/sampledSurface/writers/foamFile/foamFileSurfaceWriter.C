@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "foamFileSurfaceWriter.H"
+
 #include "fileName.H"
 #include "OFstream.H"
 #include "faceList.H"
@@ -47,6 +48,43 @@ Foam::foamFileSurfaceWriter<Type>::~foamFileSurfaceWriter()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+namespace Foam
+{
+template<>
+void Foam::foamFileSurfaceWriter<Foam::nil>::write
+(
+    const fileName& samplePath,
+    const fileName& timeDir,
+    const fileName& surfaceName,
+    const pointField& points,
+    const faceList& faces,
+    const fileName& fieldName,
+    const Field<Foam::nil>& values,
+    const bool verbose
+) const
+{
+    fileName surfaceDir(samplePath/timeDir/surfaceName);
+
+    if (!isDir(surfaceDir))
+    {
+        mkDir(surfaceDir);
+    }
+
+    if (verbose)
+    {
+        Info<< "Writing nil to " << surfaceDir << endl;
+    }
+
+    // Points
+    OFstream(surfaceDir/"points")() << points;
+
+    // Faces
+    OFstream(surfaceDir/"faces")() << faces;
+}
+
+}
+
 
 template<class Type>
 void Foam::foamFileSurfaceWriter<Type>::write

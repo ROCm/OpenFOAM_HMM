@@ -41,19 +41,26 @@ SourceFiles
 #include "autoPtr.H"
 #include "pointField.H"
 #include "faceList.H"
+#include "nil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+
+template<class Type> class surfaceWriter;
+
 /*---------------------------------------------------------------------------*\
-                           Class surfaceWriter Declaration
+                        Class surfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
 class surfaceWriter
 {
+    //- friendship between writer data types
+    template<class Type2> friend class surfaceWriter;
 
 public:
 

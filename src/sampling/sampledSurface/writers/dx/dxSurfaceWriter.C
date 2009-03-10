@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dxSurfaceWriter.H"
+
 #include "fileName.H"
 #include "OFstream.H"
 #include "faceList.H"
@@ -33,12 +34,12 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void Foam::dxSurfaceWriter<Type>::writeDXGeometry
+void Foam::dxSurfaceWriter<Type>::writeGeometry
 (
+    Ostream& os,
     const pointField& points,
-    const faceList& faces,
-    Ostream& os
-) const
+    const faceList& faces
+)
 {
     // Write vertex coordinates
 
@@ -69,7 +70,7 @@ void Foam::dxSurfaceWriter<Type>::writeDXGeometry
         {
             FatalErrorIn
             (
-                "writeDXGeometry(Ostream&, const pointField&, const faceList&)"
+                "writeGeometry(Ostream&, const pointField&, const faceList&)"
             )   << "Face " << faceI << " vertices " << f
                 << " is not a triangle."
                 << exit(FatalError);
@@ -82,181 +83,137 @@ void Foam::dxSurfaceWriter<Type>::writeDXGeometry
 }
 
 
-// Write scalarField in DX format
-template<class Type>
-void Foam::dxSurfaceWriter<Type>::writeDXData
-(
-    const pointField& points,
-    const scalarField& values,
-    Ostream& os
-) const
+namespace Foam
 {
-    // Write data
-    os  << "object 3 class array type float rank 0 items "
-        << values.size()
-        << " data follows" << nl;
-
-    forAll(values, elemI)
+    // Write scalarField in DX format
+    template<>
+    void Foam::dxSurfaceWriter<Foam::scalar>::writeData
+    (
+        Ostream& os,
+        const Field<scalar>& values
+    )
     {
-        os << float(values[elemI]) << nl;
+        // Write data
+        os  << "object 3 class array type float rank 0 items "
+            << values.size() << " data follows" << nl;
+
+        forAll(values, elemI)
+        {
+            os << float(values[elemI]) << nl;
+        }
     }
 
-    if (values.size() == points.size())
+
+    // Write vectorField in DX format
+    template<>
+    void Foam::dxSurfaceWriter<Foam::vector>::writeData
+    (
+        Ostream& os,
+        const Field<vector>& values
+    )
     {
-        os  << nl << "attribute \"dep\" string \"positions\""
-            << nl << nl;
+        // Write data
+        os  << "object 3 class array type float rank 1 shape 3 items "
+            << values.size() << " data follows" << nl;
+
+        forAll(values, elemI)
+        {
+            os  << float(values[elemI].x()) << ' '
+                << float(values[elemI].y()) << ' '
+                << float(values[elemI].z()) << nl;
+        }
     }
-    else
+
+
+    // Write sphericalTensorField in DX format
+    template<>
+    void Foam::dxSurfaceWriter<Foam::sphericalTensor>::writeData
+    (
+        Ostream& os,
+        const Field<sphericalTensor>& values
+    )
     {
-        os  << nl << "attribute \"dep\" string \"connections\""
-            << nl << nl;
+        // Write data
+        os  << "object 3 class array type float rank 0 items "
+            << values.size() << " data follows" << nl;
+
+        forAll(values, elemI)
+        {
+            os << float(values[elemI][0]) << nl;
+        }
+    }
+
+
+    // Write symmTensorField in DX format
+    template<>
+    void Foam::dxSurfaceWriter<Foam::symmTensor>::writeData
+    (
+        Ostream& os,
+        const Field<symmTensor>& values
+    )
+    {
+        // Write data
+        os  << "object 3 class array type float rank 2 shape 3 items "
+            << values.size() << " data follows" << nl;
+
+        forAll(values, elemI)
+        {
+            const symmTensor& t = values[elemI];
+
+            os  << float(t.xx()) << ' ' << float(t.xy()) << ' ' << float(t.xz())
+                << float(t.xy()) << ' ' << float(t.yy()) << ' ' << float(t.yz())
+                << float(t.xz()) << ' ' << float(t.yz()) << ' ' << float(t.zz())
+                << nl;
+        }
+    }
+
+
+    // Write tensorField in DX format
+    template<>
+    void Foam::dxSurfaceWriter<Foam::tensor>::writeData
+    (
+        Ostream& os,
+        const Field<tensor>& values
+    )
+    {
+        // Write data
+        os  << "object 3 class array type float rank 2 shape 3 items "
+            << values.size() << " data follows" << nl;
+
+        forAll(values, elemI)
+        {
+            const tensor& t = values[elemI];
+
+            os  << float(t.xx()) << ' ' << float(t.xy()) << ' ' << float(t.xz())
+                << float(t.yx()) << ' ' << float(t.yy()) << ' ' << float(t.yz())
+                << float(t.zx()) << ' ' << float(t.zy()) << ' ' << float(t.zz())
+                << nl;
+        }
     }
 }
-
-
-// Write vectorField in DX format
-template<class Type>
-void Foam::dxSurfaceWriter<Type>::writeDXData
-(
-    const pointField& points,
-    const vectorField& values,
-    Ostream& os
-) const
-{
-    // Write data
-    os  << "object 3 class array type float rank 1 shape 3 items "
-        << values.size()
-        << " data follows" << nl;
-
-    forAll(values, elemI)
-    {
-        os  << float(values[elemI].x()) << ' '
-            << float(values[elemI].y()) << ' '
-            << float(values[elemI].z()) << nl;
-    }
-
-    if (values.size() == points.size())
-    {
-        os  << nl << "attribute \"dep\" string \"positions\""
-            << nl << nl;
-    }
-    else
-    {
-        os  << nl << "attribute \"dep\" string \"connections\""
-            << nl << nl;
-    }
-}
-
-
-// Write sphericalTensorField in DX format
-template<class Type>
-void Foam::dxSurfaceWriter<Type>::writeDXData
-(
-    const pointField& points,
-    const sphericalTensorField& values,
-    Ostream& os
-) const
-{
-    // Write data
-    os  << "object 3 class array type float rank 0 items "
-        << values.size()
-        << " data follows" << nl;
-
-    forAll(values, elemI)
-    {
-        os << float(values[elemI][0]) << nl;
-    }
-
-    if (values.size() == points.size())
-    {
-        os  << nl << "attribute \"dep\" string \"positions\""
-            << nl << nl;
-    }
-    else
-    {
-        os  << nl << "attribute \"dep\" string \"connections\""
-            << nl << nl;
-    }
-}
-
-
-// Write symmTensorField in DX format
-template<class Type>
-void Foam::dxSurfaceWriter<Type>::writeDXData
-(
-    const pointField& points,
-    const symmTensorField& values,
-    Ostream& os
-) const
-{
-    // Write data
-    os  << "object 3 class array type float rank 2 shape 3 items "
-        << values.size()
-        << " data follows" << nl;
-
-    forAll(values, elemI)
-    {
-        const symmTensor& t = values[elemI];
-
-        os  << float(t.xx()) << ' ' << float(t.xy()) << ' ' << float(t.xz())
-            << float(t.xy()) << ' ' << float(t.yy()) << ' ' << float(t.yz())
-            << float(t.xz()) << ' ' << float(t.yz()) << ' ' << float(t.zz())
-            << nl;
-    }
-
-    if (values.size() == points.size())
-    {
-        os  << nl << "attribute \"dep\" string \"positions\""
-            << nl << nl;
-    }
-    else
-    {
-        os  << nl << "attribute \"dep\" string \"connections\""
-            << nl << nl;
-    }
-}
-
 
 // Write tensorField in DX format
 template<class Type>
-void Foam::dxSurfaceWriter<Type>::writeDXData
+void Foam::dxSurfaceWriter<Type>::writeData
 (
-    const pointField& points,
-    const tensorField& values,
-    Ostream& os
-) const
+    Ostream& os,
+    const Field<Type>& values
+)
 {
     // Write data
-    os  << "object 3 class array type float rank 2 shape 3 items "
-        << values.size()
-        << " data follows" << nl;
+    os  << "object 3 class array type float rank 0 items "
+        << values.size() << " data follows" << nl;
 
     forAll(values, elemI)
     {
-        const tensor& t = values[elemI];
-
-        os  << float(t.xx()) << ' ' << float(t.xy()) << ' ' << float(t.xz())
-            << float(t.yx()) << ' ' << float(t.yy()) << ' ' << float(t.yz())
-            << float(t.zx()) << ' ' << float(t.zy()) << ' ' << float(t.zz())
-            << nl;
-    }
-
-    if (values.size() == points.size())
-    {
-        os  << nl << "attribute \"dep\" string \"positions\""
-            << nl << nl;
-    }
-    else
-    {
-        os  << nl << "attribute \"dep\" string \"connections\""
-            << nl << nl;
+        os << float(0.0) << nl;
     }
 }
 
 
 // Write trailer in DX format
 template<class Type>
-void Foam::dxSurfaceWriter<Type>::writeDXTrailer(Ostream& os) const
+void Foam::dxSurfaceWriter<Type>::writeTrailer(Ostream& os)
 {
     os  << "# the field, with three components: \"positions\","
         << " \"connections\", and \"data\"" << nl
@@ -316,11 +273,22 @@ void Foam::dxSurfaceWriter<Type>::write
 
     OFstream os(fName);
 
-    writeDXGeometry(points, faces, os);
+    writeGeometry(os, points, faces);
 
-    writeDXData(points, values, os);
+    writeData(os, values);
 
-    writeDXTrailer(os);
+    if (values.size() == points.size())
+    {
+        os  << nl << "attribute \"dep\" string \"positions\""
+            << nl << nl;
+    }
+    else
+    {
+        os  << nl << "attribute \"dep\" string \"connections\""
+            << nl << nl;
+    }
+
+    writeTrailer(os);
 
     os << "end" << nl;
 }

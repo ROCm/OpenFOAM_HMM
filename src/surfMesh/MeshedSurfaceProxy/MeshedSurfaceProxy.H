@@ -83,10 +83,12 @@ public:
 
     // Static
 
-        //- Can we write this file format?
+        //- The file format types that can be written via MeshedSurfaceProxy
+        static wordHashSet writeTypes();
+
+        //- Can this file format type be written via MeshedSurfaceProxy?
         static bool canWriteType(const word& ext, const bool verbose=false);
 
-        static wordHashSet writeTypes();
 
     // Constructors
 
@@ -95,7 +97,7 @@ public:
         (
             const pointField&,
             const List<Face>&,
-            const List<surfZone>&,
+            const List<surfZone>& = List<surfZone>(),
             const List<label>& faceMap = List<label>()
         );
 

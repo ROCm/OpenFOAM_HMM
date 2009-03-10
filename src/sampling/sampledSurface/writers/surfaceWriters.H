@@ -39,7 +39,7 @@ Description
 // Only used internally
 #define makeTypeSurfaceWritersTypeName(typeWriter, dataType)                 \
                                                                              \
-    defineNamedTemplateTypeNameAndDebug(typeWriter<dataType >, 0);
+    defineNamedTemplateTypeNameAndDebug(typeWriter< dataType >, 0)
 
 // Sometimes used externally
 #define makeSurfaceWritersTypeName(typeWriter)                               \
@@ -48,16 +48,16 @@ Description
     makeTypeSurfaceWritersTypeName(typeWriter, vector);                      \
     makeTypeSurfaceWritersTypeName(typeWriter, sphericalTensor);             \
     makeTypeSurfaceWritersTypeName(typeWriter, symmTensor);                  \
-    makeTypeSurfaceWritersTypeName(typeWriter, tensor);
+    makeTypeSurfaceWritersTypeName(typeWriter, tensor)
 
 // Define type info for single dataType template instantiation (eg, vector)
 #define makeSurfaceWriterType(typeWriter, dataType)                          \
                                                                              \
-    defineNamedTemplateTypeNameAndDebug(typeWriter<dataType >, 0);           \
+    defineNamedTemplateTypeNameAndDebug(typeWriter< dataType >, 0);          \
     addTemplatedToRunTimeSelectionTable                                      \
     (                                                                        \
         surfaceWriter, typeWriter, dataType, word                            \
-    );
+    )
 
 
 // Define type info for scalar, vector etc. instantiations
@@ -67,7 +67,7 @@ Description
     makeSurfaceWriterType(typeWriter, vector);                               \
     makeSurfaceWriterType(typeWriter, sphericalTensor);                      \
     makeSurfaceWriterType(typeWriter, symmTensor);                           \
-    makeSurfaceWriterType(typeWriter, tensor);
+    makeSurfaceWriterType(typeWriter, tensor)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

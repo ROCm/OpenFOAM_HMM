@@ -54,49 +54,11 @@ class dxSurfaceWriter
 
     // Private Member Functions
 
-        void writeDXGeometry
-        (
-            const pointField& points,
-            const faceList& faces,
-            Ostream& os
-        ) const;
+        static void writeGeometry(Ostream&, const pointField&, const faceList&);
 
-        void writeDXData
-        (
-            const pointField& points,
-            const scalarField& values,
-            Ostream& os
-        ) const;
+        static void writeData(Ostream&, const Field<Type>& values);
 
-        void writeDXData
-        (
-            const pointField& points,
-            const vectorField& values,
-            Ostream& os
-        ) const;
-
-        void writeDXData
-        (
-            const pointField& points,
-            const sphericalTensorField& values,
-            Ostream& os
-        ) const;
-
-        void writeDXData
-        (
-            const pointField& points,
-            const symmTensorField& values,
-            Ostream& os
-        ) const;
-
-        void writeDXData
-        (
-            const pointField& points,
-            const tensorField& values,
-            Ostream& os
-        ) const;
-
-        void writeDXTrailer(Ostream& os) const;
+        static void writeTrailer(Ostream&);
 
 public:
 

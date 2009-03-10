@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "rawSurfaceWriter.H"
+
 #include "fileName.H"
 #include "OFstream.H"
 #include "faceList.H"
@@ -37,9 +38,9 @@ template<class Type>
 void Foam::rawSurfaceWriter<Type>::writeGeometry
 (
     const pointField& points,
-    const label& pointI,
+    const label pointI,
     Ostream& os
-) const
+)
 {
     const point& pt = points[pointI];
 
@@ -52,14 +53,15 @@ void Foam::rawSurfaceWriter<Type>::writeGeometry
 (
     const pointField& points,
     const faceList& faces,
-    const label& faceI,
+    const label faceI,
     Ostream& os
-) const
+)
 {
     const point& ct = faces[faceI].centre(points);
 
     os << ct.x() << ' ' << ct.y() << ' ' << ct.z() << ' ';
 }
+
 
 // Write scalarField in raw format
 template<class Type>
@@ -70,38 +72,29 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const faceList& faces,
     const scalarField& values,
     Ostream& os
-) const
+)
 {
     // header
-    os << "# " << fieldName;
+    os  << "#  x  y  z  " << fieldName << endl;
 
+    // Write data
     if (values.size() == points.size())
     {
-        os  << "  POINT_DATA " << values.size()
-            << nl;
+        forAll(values, elemI)
+        {
+            writeGeometry(points, elemI, os);
+            os << values[elemI] << nl;
+        }
     }
     else
     {
-        os  << "  FACE_DATA " << values.size()
-            << nl;
-    }
-
-    os  << "#  x  y  z  " << fieldName
-        << endl;
-
-    // Write data
-    forAll(values, elemI)
-    {
-        if (values.size() == points.size())
-        {
-            writeGeometry(points, elemI, os);
-        }
-        else
+        forAll(values, elemI)
         {
             writeGeometry(points, faces, elemI, os);
+            os << values[elemI] << nl;
         }
-        os << values[elemI] << endl;
     }
+
     os << nl;
 }
 
@@ -115,22 +108,9 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const faceList& faces,
     const vectorField& values,
     Ostream& os
-) const
+)
 {
     // header
-    os << "# " << fieldName;
-
-    if (values.size() == points.size())
-    {
-        os  << "  POINT_DATA " << values.size()
-            << nl;
-    }
-    else
-    {
-        os  << "  FACE_DATA " << values.size()
-            << nl;
-    }
-
     os  << "#  x  y  z  "
         << fieldName << "_x  "
         << fieldName << "_y  "
@@ -138,21 +118,27 @@ void Foam::rawSurfaceWriter<Type>::writeData
         << endl;
 
     // Write data
-    forAll(values, elemI)
+    if (values.size() == points.size())
     {
-        const vector& v = values[elemI];
-
-        if (values.size() == points.size())
+        forAll(values, elemI)
         {
             writeGeometry(points, elemI, os);
+
+            const vector& v = values[elemI];
+            os << v[0] << ' ' << v[1] << ' ' << v[2] << nl;
         }
-        else
+    }
+    else
+    {
+        forAll(values, elemI)
         {
             writeGeometry(points, faces, elemI, os);
-        }
 
-        os << v[0] << ' ' << v[1] << ' ' << v[2] << nl;
+            const vector& v = values[elemI];
+            os << v[0] << ' ' << v[1] << ' ' << v[2] << nl;
+        }
     }
+
 }
 
 
@@ -165,40 +151,32 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const faceList& faces,
     const sphericalTensorField& values,
     Ostream& os
-) const
+)
 {
     // header
-    os << "# " << fieldName;
-
-    if (values.size() == points.size())
-    {
-        os  << "  POINT_DATA " << values.size()
-            << nl;
-    }
-    else
-    {
-        os  << "  FACE_DATA " << values.size()
-            << nl;
-    }
-
     os  << "#  ii  ";
     os << fieldName << "_ii" << endl;
 
     // Write data
-    forAll(values, elemI)
+    if (values.size() == points.size())
     {
-        const sphericalTensor& v = values[elemI];
-
-        if (values.size() == points.size())
+        forAll(values, elemI)
         {
             writeGeometry(points, elemI, os);
+
+            const sphericalTensor& v = values[elemI];
+            os  << v[0] << nl;
         }
-        else
+    }
+    else
+    {
+        forAll(values, elemI)
         {
             writeGeometry(points, faces, elemI, os);
-        }
 
-        os  << v[0] << nl;
+            const sphericalTensor& v = values[elemI];
+            os  << v[0] << nl;
+        }
     }
 }
 
@@ -212,22 +190,9 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const faceList& faces,
     const symmTensorField& values,
     Ostream& os
-) const
+)
 {
     // header
-    os << "# " << fieldName;
-
-    if (values.size() == points.size())
-    {
-        os  << "  POINT_DATA " << values.size()
-            << nl;
-    }
-    else
-    {
-        os  << "  FACE_DATA " << values.size()
-            << nl;
-    }
-
     os  << "#  xx  xy  xz  yy  yz ";
     for(int i=0; i<6; i++)
     {
@@ -236,22 +201,31 @@ void Foam::rawSurfaceWriter<Type>::writeData
     os << endl;
 
     // Write data
-    forAll(values, elemI)
+    if (values.size() == points.size())
     {
-        const symmTensor& v = values[elemI];
-
-        if (values.size() == points.size())
+        forAll(values, elemI)
         {
             writeGeometry(points, elemI, os);
+
+            const symmTensor& v = values[elemI];
+
+            os  << v[0] << ' ' << v[1] << ' ' << v[2]
+                << v[3] << ' ' << v[4] << ' ' << v[5]
+                << nl;
         }
-        else
+    }
+    else
+    {
+        forAll(values, elemI)
         {
             writeGeometry(points, faces, elemI, os);
-        }
 
-        os  << v[0] << ' ' << v[1] << ' ' << v[2]
-            << v[3] << ' ' << v[4] << ' ' << v[5]
-            << nl;
+            const symmTensor& v = values[elemI];
+
+            os  << v[0] << ' ' << v[1] << ' ' << v[2]
+                << v[3] << ' ' << v[4] << ' ' << v[5]
+                << nl;
+        }
     }
 }
 
@@ -265,46 +239,40 @@ void Foam::rawSurfaceWriter<Type>::writeData
     const faceList& faces,
     const tensorField& values,
     Ostream& os
-) const
+)
 {
     // header
-    os << "# " << fieldName;
-
-    if (values.size() == points.size())
-    {
-        os  << "  POINT_DATA " << values.size()
-            << nl;
-    }
-    else
-    {
-        os  << "  FACE_DATA " << values.size()
-            << nl;
-    }
-
     os  << "#  xx  xy  xz  yx  yy  yz  zx  zy  zz";
-    for(int i=0; i<9; i++)
+    for (int i=0; i<9; ++i)
     {
         os << fieldName << "_" << i << "  ";
     }
     os << endl;
 
     // Write data
-    forAll(values, elemI)
+    if (values.size() == points.size())
     {
-        const tensor& v = values[elemI];
-
-        if (values.size() == points.size())
+        forAll(values, elemI)
         {
             writeGeometry(points, elemI, os);
+
+            const tensor& v = values[elemI];
+            os  << v[0] << ' ' << v[1] << ' ' << v[2]
+                << v[3] << ' ' << v[4] << ' ' << v[5]
+                << v[6] << ' ' << v[7] << ' ' << v[8] << nl;
         }
-        else
+    }
+    else
+    {
+        forAll(values, elemI)
         {
             writeGeometry(points, faces, elemI, os);
-        }
 
-        os  << v[0] << ' ' << v[1] << ' ' << v[2]
-            << v[3] << ' ' << v[4] << ' ' << v[5]
-            << v[6] << ' ' << v[7] << ' ' << v[8] << nl;
+            const tensor& v = values[elemI];
+            os  << v[0] << ' ' << v[1] << ' ' << v[2]
+                << v[3] << ' ' << v[4] << ' ' << v[5]
+                << v[6] << ' ' << v[7] << ' ' << v[8] << nl;
+        }
     }
 }
 
@@ -326,6 +294,55 @@ Foam::rawSurfaceWriter<Type>::~rawSurfaceWriter()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+template<>
+void Foam::rawSurfaceWriter<Foam::nil>::write
+(
+    const fileName& samplePath,
+    const fileName& timeDir,
+    const fileName& surfaceName,
+    const pointField& points,
+    const faceList& faces,
+    const fileName& fieldName,
+    const Field<Foam::nil>& values,
+    const bool verbose
+) const
+{
+    fileName surfaceDir(samplePath/timeDir);
+
+    if (!isDir(surfaceDir))
+    {
+        mkDir(surfaceDir);
+    }
+
+    fileName fName(surfaceDir/surfaceName + ".raw");
+
+    if (verbose)
+    {
+        Info<< "Writing nil to " << fName << endl;
+    }
+
+    OFstream os(fName);
+
+    // header
+    os  << "# geometry NO_DATA " << faces.size() << nl
+        << "#  x  y  z" << endl;
+
+    // Write faces
+    forAll(faces, elemI)
+    {
+        writeGeometry(points, faces, elemI, os);
+        os << nl;
+    }
+
+    os << nl;
+}
+
+}
+
 
 template<class Type>
 void Foam::rawSurfaceWriter<Type>::write
@@ -355,6 +372,20 @@ void Foam::rawSurfaceWriter<Type>::write
     }
 
     OFstream os(fName);
+
+    // header
+    os  << "# " << fieldName;
+    if (values.size() == points.size())
+    {
+        os  << "  POINT_DATA ";
+    }
+    else
+    {
+        os  << "  FACE_DATA ";
+    }
+
+    os  << values.size() << nl;
+
     writeData(fieldName, points, faces, values, os);
 }
 

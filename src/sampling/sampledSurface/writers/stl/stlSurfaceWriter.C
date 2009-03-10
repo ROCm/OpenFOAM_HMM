@@ -49,6 +49,74 @@ Foam::stlSurfaceWriter<Type>::~stlSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+namespace Foam
+{
+
+template<>
+void Foam::stlSurfaceWriter<Foam::nil>::write
+(
+    const fileName& samplePath,
+    const fileName& timeDir,
+    const fileName& surfaceName,
+    const pointField& points,
+    const faceList& faces,
+    const fileName& fieldName,
+    const Field<Foam::nil>& values,
+    const bool verbose
+) const
+{
+    fileName surfaceDir(samplePath/timeDir);
+
+    if (!isDir(surfaceDir))
+    {
+        mkDir(surfaceDir);
+    }
+
+    fileName fName(surfaceDir/surfaceName + ".stl");
+
+    if (verbose)
+    {
+        Info<< "Writing nil to " << fName << endl;
+    }
+
+    // Convert faces to triangles.
+    DynamicList<labelledTri> tris(faces.size());
+
+    forAll(faces, i)
+    {
+        const face& f = faces[i];
+
+        faceList triFaces(f.nTriangles(points));
+        label nTris = 0;
+        f.triangles(points, nTris, triFaces);
+
+        forAll(triFaces, triI)
+        {
+            const face& tri = triFaces[triI];
+            tris.append(labelledTri(tri[0], tri[1], tri[2], 0));
+        }
+    }
+
+    triSurface
+    (
+        tris.shrink(),
+        geometricSurfacePatchList
+        (
+            1,
+            geometricSurfacePatch
+            (
+                "patch",   // geometricType
+                "patch0",  // fieldName
+                0          // index
+            )
+        ),
+        points
+    ).write(fName);
+}
+
+}
+
+
 template<class Type>
 void Foam::stlSurfaceWriter<Type>::write
 (
