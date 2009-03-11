@@ -47,6 +47,7 @@ Foam::regIOobject::regIOobject(const IOobject& io)
     registered_(false),
     ownedByRegistry_(false),
     lastModified_(0),
+    eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
     // Register with objectRegistry if requested
@@ -64,6 +65,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio)
     registered_(false),
     ownedByRegistry_(false),
     lastModified_(rio.lastModified_),
+    eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
     // Do not register copy with objectRegistry
@@ -78,6 +80,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
     registered_(false),
     ownedByRegistry_(false),
     lastModified_(rio.lastModified_),
+    eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
     if (registerCopy && rio.registered_)
@@ -150,6 +153,91 @@ bool Foam::regIOobject::checkOut()
     }
 
     return false;
+}
+
+
+bool Foam::regIOobject::uptodate(const word& a) const
+{
+    if (db().lookupObject<regIOobject>(a).eventNo() >= eventNo_)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+bool Foam::regIOobject::uptodate(const word& a, const word& b) const
+{
+    if
+    (
+        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
+    )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+bool Foam::regIOobject::uptodate
+(
+    const word& a,
+    const word& b,
+    const word& c
+) const
+{
+    if
+    (
+        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(c).eventNo() >= eventNo_
+    )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+bool Foam::regIOobject::uptodate
+(
+    const word& a,
+    const word& b,
+    const word& c,
+    const word& d
+) const
+{
+    if
+    (
+        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(c).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(d).eventNo() >= eventNo_
+    )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+//- Flag me as uptodate
+void Foam::regIOobject::setUptodate()
+{
+    eventNo_ = db().getEvent();
 }
 
 

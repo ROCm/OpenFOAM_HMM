@@ -64,6 +64,9 @@ class objectRegistry
         //- Local directory path of this objectRegistry relative to time
         fileName dbDir_;
 
+        //- Current event
+        mutable label event_;
+
 
     // Private Member Functions
 
@@ -150,6 +153,9 @@ public:
             //- Lookup and return the object of the given Type
             template<class Type>
             const Type& lookupObject(const word& name) const;
+
+            //- Return new event number.
+            label getEvent() const;
 
 
         // Edit

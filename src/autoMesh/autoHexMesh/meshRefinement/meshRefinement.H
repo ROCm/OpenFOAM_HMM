@@ -374,11 +374,28 @@ private:
                 const labelList&
             ) const;
 
+            bool isCollapsedFace
+            (
+                const pointField&,
+                const pointField& neiCc,
+                const scalar minFaceArea,
+                const scalar maxNonOrtho,
+                const label faceI
+            ) const;
+
+            bool isCollapsedCell
+            (
+                const pointField&,
+                const scalar volFraction,
+                const label cellI
+            ) const;
+
             //- Returns list with for every internal face -1 or the patch
             //  they should be baffled into. If removeEdgeConnectedCells is set
             //  removes cells based on perpendicularAngle.
             labelList markFacesOnProblemCells
             (
+                const dictionary& motionDict,
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
                 const labelList& globalToPatch

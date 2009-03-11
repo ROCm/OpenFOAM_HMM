@@ -38,7 +38,8 @@ Foam::scalar Foam::compressibleCourantNo
     scalar CoNum = 0.0;
     scalar meanCoNum = 0.0;
 
-    if (mesh.nInternalFaces())
+    //- Can have fluid domains with 0 cells so do not test.
+    //if (mesh.nInternalFaces())
     {
         surfaceScalarField SfUfbyDelta =
             mesh.surfaceInterpolation::deltaCoeffs()

@@ -55,7 +55,8 @@ Foam::objectRegistry::objectRegistry
     HashTable<regIOobject*>(nIoObjects),
     time_(t),
     parent_(t),
-    dbDir_(name())
+    dbDir_(name()),
+    event_(1)
 {}
 
 
@@ -69,7 +70,8 @@ Foam::objectRegistry::objectRegistry
     HashTable<regIOobject*>(nIoObjects),
     time_(io.time()),
     parent_(io.db()),
-    dbDir_(parent_.dbDir()/local()/name())
+    dbDir_(parent_.dbDir()/local()/name()),
+    event_(1)
 {
     writeOpt() = IOobject::AUTO_WRITE;
 }
@@ -132,6 +134,42 @@ const Foam::objectRegistry& Foam::objectRegistry::subRegistry
 ) const
 {
     return lookupObject<objectRegistry>(name);
+}
+
+
+Foam::label Foam::objectRegistry::getEvent() const
+{
+    label curEvent = event_++;
+
+    if (event_ == labelMax)
+    {
+        WarningIn("objectRegistry::getEvent() const")
+            << "Event counter has overflowed. Resetting counter on all"
+            << " dependent objects." << endl
+            << "This might cause extra evaluations." << endl;
+
+        // Reset event counter
+        curEvent = 1;
+        event_ = 2;
+
+        for (const_iterator iter = begin(); iter != end(); ++iter)
+        {
+            const regIOobject& io = *iter();
+
+            if (objectRegistry::debug)
+            {
+                Pout<< "objectRegistry::getEvent() : "
+                    << "resetting count on " << iter.key() << endl;
+            }
+
+            if (io.eventNo() != 0)
+            {
+                const_cast<regIOobject&>(io).eventNo() = curEvent;
+            }
+        }
+    }
+
+    return curEvent;
 }
 
 

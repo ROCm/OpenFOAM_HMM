@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
     }
 
     Info<< "writing " << exportName;
-    if (scaleFactor > 0)
+    if (scaleFactor <= 0)
     {
         Info<< " without scaling" << endl;
     }
