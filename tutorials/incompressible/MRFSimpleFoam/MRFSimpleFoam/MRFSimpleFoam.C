@@ -26,7 +26,7 @@ Application
     MRFSimpleFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flow of non-Newtonian 
+    Steady-state solver for incompressible, turbulent flow of non-Newtonian
     fluids with MRF regions.
 
 \*---------------------------------------------------------------------------*/
@@ -63,10 +63,10 @@ int main(int argc, char *argv[])
         // Pressure-velocity SIMPLE corrector
         {
             // Momentum predictor
-
             tmp<fvVectorMatrix> UEqn
             (
                 fvm::div(phi, U)
+              - fvm::Sp(fvc::div(phi), U)
               + turbulence->divDevReff(U)
             );
             mrfZones.addCoriolis(UEqn());
