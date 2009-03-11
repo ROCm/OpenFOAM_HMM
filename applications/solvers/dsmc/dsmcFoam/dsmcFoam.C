@@ -56,21 +56,30 @@ int main(int argc, char *argv[])
 
         dsmc.evolve();
 
-        // Retrieve field data from dsmcCloud
+        // Retrieve flow field data from dsmcCloud
 
         rhoN = dsmc.rhoN();
+        rhoN.correctBoundaryConditions();
 
         rhoM = dsmc.rhoM();
+        rhoM.correctBoundaryConditions();
 
         dsmcRhoN = dsmc.dsmcRhoN();
+        dsmcRhoN.correctBoundaryConditions();
 
         momentum = dsmc.momentum();
+        momentum.correctBoundaryConditions();
 
         linearKE = dsmc.linearKE();
+        linearKE.correctBoundaryConditions();
 
         internalE = dsmc.internalE();
+        internalE.correctBoundaryConditions();
 
         iDof = dsmc.iDof();
+        iDof.correctBoundaryConditions();
+
+        // Retrieve surface field data from dsmcCloud
 
         q = dsmc.q();
 
