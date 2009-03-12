@@ -103,8 +103,8 @@ void Foam::polyMeshGeometry::updateCellCentresAndVols
 )
 {
     // Clear the fields for accumulation
-    IndirectList<vector>(cellCentres_, changedCells) = vector::zero;
-    IndirectList<scalar>(cellVolumes_, changedCells) = 0.0;
+    UIndirectList<vector>(cellCentres_, changedCells) = vector::zero;
+    UIndirectList<scalar>(cellVolumes_, changedCells) = 0.0;
 
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
@@ -112,9 +112,9 @@ void Foam::polyMeshGeometry::updateCellCentresAndVols
     // first estimate the approximate cell centre as the average of face centres
 
     vectorField cEst(mesh_.nCells());
-    IndirectList<vector>(cEst, changedCells) = vector::zero;
+    UIndirectList<vector>(cEst, changedCells) = vector::zero;
     scalarField nCellFaces(mesh_.nCells());
-    IndirectList<scalar>(nCellFaces, changedCells) = 0.0;
+    UIndirectList<scalar>(nCellFaces, changedCells) = 0.0;
 
     forAll(changedFaces, i)
     {

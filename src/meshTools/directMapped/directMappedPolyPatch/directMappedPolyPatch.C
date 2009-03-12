@@ -474,7 +474,7 @@ void Foam::directMappedPolyPatch::calcMapping() const
 
     forAll(subMap, procI)
     {
-        sendLabels[procI] = IndirectList<label>
+        sendLabels[procI] = UIndirectList<label>
         (
             sampleIndices,
             subMap[procI]
@@ -493,7 +493,7 @@ void Foam::directMappedPolyPatch::calcMapping() const
     forAll(constructMap, procI)
     {
         receiveFaceLabels[procI] =
-            IndirectList<label>(patchFaces, constructMap[procI]);
+            UIndirectList<label>(patchFaces, constructMap[procI]);
 
         if (debug)
         {

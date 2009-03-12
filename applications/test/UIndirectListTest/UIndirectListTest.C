@@ -26,51 +26,68 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "UIndirectList.H"
+#include "IOstreams.H"
 
-//- Construct given size
-template<class T>
-inline Foam::IndirectList<T>::IndirectList
-(
-    const Foam::UList<T>& completeList,
-    const Foam::List<label>& addresses
-)
-:
-    completeList_(completeList),
-    addresses_(addresses)
-{}
+using namespace Foam;
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class T>
-inline Foam::label Foam::IndirectList<T>::size() const
+int main(int argc, char *argv[])
 {
-    return addresses_.size();
-}
+    List<double> completeList(10);
+
+    forAll(completeList, i)
+    {
+        completeList[i] = 0.1*i;
+    }
+
+    List<label> addresses(5);
+    addresses[0] = 1;
+    addresses[1] = 0;
+    addresses[2] = 7;
+    addresses[3] = 8;
+    addresses[4] = 5;
+
+    UIndirectList<double> idl(completeList, addresses);
+
+    forAll(idl, i)
+    {
+        Info<< idl[i] << token::SPACE;
+    }
+
+    Info<< endl;
+
+    idl[1] = -666;
+
+    Info<< "idl[1] changed:" << idl() << endl;
+
+    idl = -999;
+
+    Info<< "idl changed:" << idl() << endl;
+
+    UIndirectList<double> idl2(idl);
+
+    Info<< "idl2:" << idl2() << endl;
+
+    idl = idl2();
+
+    Info<< "idl assigned from UList:" << idl() << endl;
 
 
-template<class T>
-inline const Foam::UList<T>& Foam::IndirectList<T>::
-completeList() const
-{
-    return completeList_;
-}
+    List<double> realList = UIndirectList<double>(completeList, addresses);
+
+    Info<< "realList:" << realList << endl;
+
+    List<double> realList2(UIndirectList<double>(completeList, addresses));
+
+    Info<< "realList2:" << realList2 << endl;
 
 
-template<class T>
-inline const Foam::List<Foam::label>& Foam::IndirectList<T>::addresses() const
-{
-    return addresses_;
-}
+    Info << "\nEnd\n" << endl;
 
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-inline const T& Foam::IndirectList<T>::operator[](const Foam::label i) const
-{
-    return completeList_[addresses_[i]];
+    return 0;
 }
 
 

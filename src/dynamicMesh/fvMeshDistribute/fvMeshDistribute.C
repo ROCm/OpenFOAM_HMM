@@ -718,7 +718,7 @@ void Foam::fvMeshDistribute::getNeighbourData
             // Which processor they will end up on
             const labelList newProc
             (
-                IndirectList<label>(distribution, pp.faceCells())
+                UIndirectList<label>(distribution, pp.faceCells())
             );
 
             OPstream toNeighbour(Pstream::blocking, procPatch.neighbProcNo());
@@ -1192,7 +1192,7 @@ void Foam::fvMeshDistribute::sendMesh
     //
     //    forAll(cellZones, zoneI)
     //    {
-    //        IndirectList<label>(cellZoneID, cellZones[zoneI]) = zoneI;
+    //        UIndirectList<label>(cellZoneID, cellZones[zoneI]) = zoneI;
     //    }
     //}
 

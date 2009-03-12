@@ -565,7 +565,7 @@ void Foam::combineFaces::setRefinement
             const labelList& setFaces = faceSets[setI];
 
             masterFace_[setI] = setFaces[0];
-            faceSetsVertices_[setI] = IndirectList<face>
+            faceSetsVertices_[setI] = UIndirectList<face>
             (
                 mesh_.faces(),
                 setFaces

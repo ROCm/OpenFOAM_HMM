@@ -353,7 +353,7 @@ void Foam::removePoints::setRefinement
                 // Points from the mesh
                 List<point> meshPoints
                 (
-                    IndirectList<point>
+                    UIndirectList<point>
                     (
                         mesh_.points(),
                         mesh_.faces()[savedFaceLabels_[saveI]]  // mesh face

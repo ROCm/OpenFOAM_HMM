@@ -81,7 +81,7 @@ Foam::PatchTools::edgeOwner
                     << "Edge " << edgeI << " vertices:" << edges[edgeI]
                     << " is used by faces " << nbrFaces
                     << " vertices:"
-                    << IndirectList<Face>(localFaces, nbrFaces)()
+                    << UIndirectList<Face>(localFaces, nbrFaces)()
                     << " none of which use the edge vertices in the same order"
                     << nl << "I give up" << abort(FatalError);
             }
