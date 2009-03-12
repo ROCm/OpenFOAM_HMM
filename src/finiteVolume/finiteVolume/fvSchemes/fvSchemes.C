@@ -29,14 +29,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-int fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", false));
+int Foam::fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", false));
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fvSchemes::fvSchemes(const objectRegistry& obr)
+Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
 :
     IOdictionary
     (
@@ -124,7 +121,12 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
         ITstream(objectPath() + "::fluxRequired",
         tokenList())()
     ),
-    defaultFluxRequired_(false)
+    defaultFluxRequired_(false),
+    cacheFields_
+    (
+        ITstream(objectPath() + "::cacheFields",
+        tokenList())()
+    )
 {
     read();
 }
@@ -132,7 +134,7 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool fvSchemes::read()
+bool Foam::fvSchemes::read()
 {
     if (regIOobject::read())
     {
@@ -329,6 +331,11 @@ bool fvSchemes::read()
             }
         }
 
+        if (dict.found("cacheFields"))
+        {
+            cacheFields_ = dict.subDict("cacheFields");
+        }
+
         return true;
     }
     else
@@ -338,7 +345,7 @@ bool fvSchemes::read()
 }
 
 
-const dictionary& fvSchemes::schemesDict() const
+const Foam::dictionary& Foam::fvSchemes::schemesDict() const
 {
     if (found("select"))
     {
@@ -351,7 +358,7 @@ const dictionary& fvSchemes::schemesDict() const
 }
 
 
-ITstream& fvSchemes::ddtScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::ddtScheme(const word& name) const
 {
     if (debug)
     {
@@ -370,7 +377,7 @@ ITstream& fvSchemes::ddtScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::d2dt2Scheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::d2dt2Scheme(const word& name) const
 {
     if (debug)
     {
@@ -389,7 +396,7 @@ ITstream& fvSchemes::d2dt2Scheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::interpolationScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::interpolationScheme(const word& name) const
 {
     if (debug)
     {
@@ -412,7 +419,7 @@ ITstream& fvSchemes::interpolationScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::divScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::divScheme(const word& name) const
 {
     if (debug)
     {
@@ -431,7 +438,7 @@ ITstream& fvSchemes::divScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::gradScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::gradScheme(const word& name) const
 {
     if (debug)
     {
@@ -450,7 +457,7 @@ ITstream& fvSchemes::gradScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::snGradScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::snGradScheme(const word& name) const
 {
     if (debug)
     {
@@ -469,7 +476,7 @@ ITstream& fvSchemes::snGradScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::laplacianScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::laplacianScheme(const word& name) const
 {
     if (debug)
     {
@@ -488,7 +495,7 @@ ITstream& fvSchemes::laplacianScheme(const word& name) const
 }
 
 
-bool fvSchemes::fluxRequired(const word& name) const
+bool Foam::fvSchemes::fluxRequired(const word& name) const
 {
     if (debug)
     {
@@ -506,8 +513,22 @@ bool fvSchemes::fluxRequired(const word& name) const
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+bool Foam::fvSchemes::cache(const word& name) const
+{
+    if (debug)
+    {
+        Info<< "Lookup cache for " << name << endl;
+    }
 
-} // End namespace Foam
+    if (cacheFields_.found(name))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 // ************************************************************************* //
