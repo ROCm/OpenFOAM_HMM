@@ -161,10 +161,6 @@ bool Foam::solution::read()
         {
             relaxationFactors_ = dict.subDict("relaxationFactors");
         }
-        else
-        {
-            relaxationFactors_.add("default", "none");
-        }
 
         if (relaxationFactors_.found("default"))
         {
