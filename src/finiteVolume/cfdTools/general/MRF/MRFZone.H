@@ -26,7 +26,7 @@ Class
     Foam::MRFZone
 
 Description
-    MRF zone definition based on cell zone and optional face zone and parameters
+    MRF zone definition based on cell zone and parameters
     obtained from a control dictionary constructed from the given stream.
 
     The rotation of the MRF region is defined by an origin and axis of
@@ -74,15 +74,8 @@ class MRFZone
 
         label cellZoneID_;
 
-        //- label of face zone with faces on outside of cell zone.
-        label faceZoneID_;
-
-        //- Do patches move with frame (true) or are explicitly provided (false,
-        //  old behaviour)
-        Switch allPatchesMove_;
-
-        const wordList patchNames_;
-        labelList patchLabels_;
+        const wordList excludedPatchNames_;
+        labelList excludedPatchLabels_;
 
         //- Internal faces that are part of MRF
         labelList internalFaces_;
@@ -102,15 +95,7 @@ class MRFZone
     // Private Member Functions
 
         //- Divide faces in frame according to patch
-        void setMRFFaces
-        (
-            labelList& faceType,
-            const labelList& excludedPatchIDs
-        );
-
-        //- Divide faces in frame according to patch
         void setMRFFaces();
-
 
         //- Disallow default bitwise copy construct
         MRFZone(const MRFZone&);
@@ -120,6 +105,10 @@ class MRFZone
 
 
 public:
+
+    // Declare name of the class and its debug switch
+    ClassName("MRFZone");
+
 
     // Constructors
 
@@ -165,8 +154,14 @@ public:
         //- Add the Coriolis force contribution to the momentum equation
         void addCoriolis(fvVectorMatrix& UEqn) const;
 
+        //- Make the given absolute velocity relative within the MRF region
+        void relativeVelocity(volVectorField& U) const;
+
         //- Make the given absolute flux relative within the MRF region
         void relativeFlux(surfaceScalarField& phi) const;
+
+        //- Make the given relative flux absolute within the MRF region
+        void absoluteFlux(surfaceScalarField& phi) const;
 
         //- Correct the boundary velocity for the roation of the MRF region
         void correctBoundaryVelocity(volVectorField& U) const;
