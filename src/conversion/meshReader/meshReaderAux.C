@@ -98,7 +98,7 @@ void Foam::meshReader::writeInterfaces(const objectRegistry& registry) const
     ioObj.writeHeader(os);
 
     os << interfaces_;
-    io.writeEndDivider(os);
+    ioObj.writeEndDivider(os);
 }
 
 
