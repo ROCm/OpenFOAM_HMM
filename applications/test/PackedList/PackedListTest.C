@@ -28,6 +28,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "uLabel.H"
 #include "IOstreams.H"
 #include "PackedBoolList.H"
 
@@ -38,7 +39,7 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    Info<< "PackedList max_bits() = " << PackedList<0>::max_bits() << nl;
+    Info<< "PackedList max_bits() = " << PackedList<>::max_bits() << nl;
 
     Info<< "\ntest allocation with value\n";
     PackedList<3> list1(5,1);
@@ -72,6 +73,50 @@ int main(int argc, char *argv[])
     Info<< "\ntest assign between references, with chaining and auto-vivify\n";
     list1[1] = list1[8] = list1[10] = list1[14] = 2;
     list1.print(Info);
+
+
+    Info<< "\ntest operator== between references\n";
+    if (list1[1] == list1[8])
+    {
+        Info<< "[1] == [8] (expected)\n";
+    }
+    else
+    {
+        Info<< "[1] != [8] (unexpected)\n";
+    }
+
+    if (list1[0] != list1[1])
+    {
+        Info<< "[0] != [1] (expected)\n";
+    }
+    else
+    {
+        Info<< "[0] == [1] (unexpected)\n";
+    }
+
+    Info<< "\ntest operator== with iterator\n";
+    {
+        PackedList<3>::iterator iter = list1[1];
+
+        if (iter != list1[8])
+        {
+            Info<< "iter != [8] (expected)\n";
+        }
+        else
+        {
+            Info<< "iter == [8] (unexpected)\n";
+        }
+
+        if (*iter != list1[8])
+        {
+            Info<< "*iter != [8] (unexpected)\n";
+        }
+        else
+        {
+            Info<< "*iter == [8] (expected)\n";
+        }
+    }
+
 
     {
         const PackedList<3>& constLst = list1;

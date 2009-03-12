@@ -59,7 +59,7 @@ template<class T> class List;
 
 template<class T> Istream& operator>>(Istream&, List<T>&);
 
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 template<class T> class PtrList;
 template<class T> class SLList;
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
@@ -117,7 +117,7 @@ public:
         List(InputIterator first, InputIterator last);
 
         //- Construct as copy of FixedList<T, Size>
-        template<label Size>
+        template<unsigned Size>
         List(const FixedList<T, Size>&);
 
         //- Construct as copy of PtrList<T>

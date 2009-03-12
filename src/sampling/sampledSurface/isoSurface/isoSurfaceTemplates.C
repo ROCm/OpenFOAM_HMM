@@ -27,8 +27,115 @@ License
 #include "isoSurface.H"
 #include "polyMesh.H"
 #include "syncTools.H"
+#include "surfaceFields.H"
+#include "OFstream.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template<class Type>
+Foam::tmp<Foam::SlicedGeometricField
+<
+    Type,
+    Foam::fvPatchField,
+    Foam::slicedFvPatchField,
+    Foam::volMesh
+> >
+Foam::isoSurface::adaptPatchFields
+(
+    const GeometricField<Type, fvPatchField, volMesh>& fld
+) const
+{
+    typedef SlicedGeometricField
+    <
+        Type,
+        fvPatchField,
+        slicedFvPatchField,
+        volMesh
+    > FieldType;
+
+    tmp<FieldType> tsliceFld
+    (
+        new FieldType
+        (
+            IOobject
+            (
+                fld.name(),
+                fld.instance(),
+                fld.db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            fld,        // internal field
+            true        // preserveCouples
+        )
+    );
+    FieldType& sliceFld = tsliceFld();
+
+    const fvMesh& mesh = fld.mesh();
+
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (isA<emptyPolyPatch>(pp))
+        {
+            // Clear old value. Cannot resize it since is a slice.
+            sliceFld.boundaryField().set(patchI, NULL);
+
+            // Set new value we can change
+            sliceFld.boundaryField().set
+            (
+                patchI,
+                new calculatedFvPatchField<Type>
+                (
+                    mesh.boundary()[patchI],
+                    sliceFld
+                )
+            );
+            sliceFld.boundaryField()[patchI] ==
+                mesh.boundary()[patchI].patchInternalField
+                (
+                    sliceFld
+                );
+        }
+        else if (isA<cyclicPolyPatch>(pp))
+        {
+            // Already has interpolate as value
+        }
+        else if (isA<processorPolyPatch>(pp) && !collocatedPatch(pp))
+        {
+            fvPatchField<Type>& pfld = const_cast<fvPatchField<Type>&>
+            (
+                fld.boundaryField()[patchI]
+            );
+
+            const scalarField& w = mesh.weights().boundaryField()[patchI];
+
+            tmp<Field<Type> > f =
+                w*pfld.patchInternalField()
+              + (1.0-w)*pfld.patchNeighbourField();
+
+            PackedBoolList isCollocated
+            (
+                collocatedFaces(refCast<const processorPolyPatch>(pp))
+            );
+
+            forAll(isCollocated, i)
+            {
+                if (!isCollocated[i])
+                {
+                    pfld[i] = f()[i];
+                }
+            }
+        }
+    }
+    return tsliceFld;
+}
+
 
 template<class Type>
 Type Foam::isoSurface::generatePoint
@@ -389,7 +496,6 @@ void Foam::isoSurface::generateTriPoints
     }
 
 
-
     // Generate triangle points
 
     triPoints.clear();
@@ -456,36 +562,26 @@ void Foam::isoSurface::generateTriPoints
     syncTools::swapBoundaryFaceList(mesh_, neiSnappedPoint, false);
 
 
+
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
 
-        if
-        (
-            isA<processorPolyPatch>(pp)
-         && !refCast<const processorPolyPatch>(pp).separated()
-        )
+        if (isA<processorPolyPatch>(pp))
         {
-            //if (refCast<const processorPolyPatch>(pp).owner())
+            const processorPolyPatch& cpp =
+                refCast<const processorPolyPatch>(pp);
+
+            PackedBoolList isCollocated(collocatedFaces(cpp));
+
+            forAll(isCollocated, i)
             {
-                label faceI = pp.start();
+                label faceI = pp.start()+i;
 
-                forAll(pp, i)
+                if (faceCutType_[faceI] != NOTCUT)
                 {
-                    if (faceCutType_[faceI] != NOTCUT)
+                    if (isCollocated[i])
                     {
-                        label bFaceI = faceI-mesh_.nInternalFaces();
-                        if
-                        (
-                            neiSnapped[bFaceI]
-                         && (neiSnappedPoint[bFaceI]==pTraits<Type>::zero)
-                        )
-                        {
-                            FatalErrorIn("isoSurface::generateTriPoints(..)")
-                                << "problem:" << abort(FatalError);
-                        }
-
-
                         generateFaceTriPoints
                         (
                             cVals,
@@ -508,42 +604,31 @@ void Foam::isoSurface::generateTriPoints
                             triMeshCells
                         );
                     }
-                    faceI++;
+                    else
+                    {
+                        generateFaceTriPoints
+                        (
+                            cVals,
+                            pVals,
+
+                            cCoords,
+                            pCoords,
+
+                            snappedPoints,
+                            snappedCc,
+                            snappedPoint,
+                            faceI,
+
+                            cVals.boundaryField()[patchI][i],
+                            cCoords.boundaryField()[patchI][i],
+                            false,
+                            pTraits<Type>::zero,
+
+                            triPoints,
+                            triMeshCells
+                        );
+                    }
                 }
-            }
-        }
-        else if (isA<emptyPolyPatch>(pp))
-        {
-            // Assume zero-gradient. But what about coordinates?
-            label faceI = pp.start();
-
-            forAll(pp, i)
-            {
-                if (faceCutType_[faceI] != NOTCUT)
-                {
-                    generateFaceTriPoints
-                    (
-                        cVals,
-                        pVals,
-
-                        cCoords,
-                        pCoords,
-
-                        snappedPoints,
-                        snappedCc,
-                        snappedPoint,
-                        faceI,
-
-                        cVals[own[faceI]],
-                        cCoords.boundaryField()[patchI][i],
-                        false,  // fc not snapped
-                        pTraits<Type>::zero,
-
-                        triPoints,
-                        triMeshCells
-                    );
-                }
-                faceI++;
             }
         }
         else
@@ -598,12 +683,20 @@ template <class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::isoSurface::interpolate
 (
-    const volScalarField& cVals,
-    const scalarField& pVals,
     const GeometricField<Type, fvPatchField, volMesh>& cCoords,
     const Field<Type>& pCoords
 ) const
 {
+    // Recalculate boundary values
+    tmp<SlicedGeometricField
+    <
+        Type,
+        fvPatchField,
+        slicedFvPatchField,
+        volMesh
+    > > c2(adaptPatchFields(cCoords));
+
+
     DynamicList<Type> triPoints(nCutCells_);
     DynamicList<label> triMeshCells(nCutCells_);
 
@@ -614,10 +707,10 @@ Foam::isoSurface::interpolate
 
     generateTriPoints
     (
-        cVals,
-        pVals,
+        cValsPtr_(),
+        pVals_,
 
-        cCoords,
+        c2(),
         pCoords,
 
         snappedPoints,

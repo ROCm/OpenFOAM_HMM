@@ -33,7 +33,7 @@ License
 template<class T, class Key, class Hash>
 Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
 (
-    Istream& is, 
+    Istream& is,
     const label size
 )
 :
@@ -54,6 +54,41 @@ Foam::StaticHashTable<T, Key, Hash>::StaticHashTable
     }
 
     operator>>(is, *this);
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+Foam::Ostream&
+Foam::StaticHashTable<T, Key, Hash>::printInfo(Ostream& os) const
+{
+    label used = 0;
+    label maxChain = 0;
+    unsigned avgChain = 0;
+
+    // Find first non-empty entry
+    forAll(keys_, hashIdx)
+    {
+        const label count = keys_[hashIdx].size();
+        if (count)
+        {
+            ++used;
+            avgChain += count;
+
+            if (maxChain < count)
+            {
+                maxChain = count;
+            }
+        }
+    }
+
+    os  << "StaticHashTable<T,Key,Hash>"
+        << " elements:" << size() << " slots:" << used << "/" << keys_.size()
+        << " chaining(avg/max):" << (used ? float(avgChain/used) : 0)
+        << "/" << maxChain << endl;
+
+    return os;
 }
 
 
@@ -142,10 +177,13 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
         )
         {
             is.putBack(lastToken);
+
             Key key;
             is >> key;
+
             T element;
             is >> element;
+
             L.insert(key, element);
 
             is.fatalCheck

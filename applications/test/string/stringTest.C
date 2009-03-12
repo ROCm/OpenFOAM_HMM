@@ -38,10 +38,11 @@ int main(int argc, char *argv[])
 {
     string test("$HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$");
 
-    Info<< test << endl;
+    Info<< "string:" << test << nl << "hash:"
+        << unsigned(string::hash()(test)) << endl;
 
     // test sub-strings via iterators
-    string::const_iterator iter = test.end();
+    string::const_iterator iter  = test.end();
     string::const_iterator iter2 = test.end();
     string::size_type fnd = test.find('\\');
 
@@ -77,6 +78,8 @@ int main(int argc, char *argv[])
     cout<< "output string with " << s2.length() << " characters\n";
     cout<< "ostream<<  >" << s2 << "<\n";
     Info<< "Ostream<<  >" << s2 << "<\n";
+    Info<< "hash:" << unsigned(string::hash()(s2)) << endl;
+
 
     Info << "End\n" << endl;
 

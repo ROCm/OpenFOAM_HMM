@@ -209,7 +209,7 @@ void Foam::directMappedPolyPatch::findSamples
                 // patch faces
                 const labelList patchFaces(identity(pp.size()) + pp.start());
 
-                const treeBoundBox patchBb
+                treeBoundBox patchBb
                 (
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
@@ -217,6 +217,8 @@ void Foam::directMappedPolyPatch::findSamples
                         1E-4
                     )
                 );
+                patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+                patchBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
                 autoPtr<indexedOctree<treeDataFace> > boundaryTree
                 (

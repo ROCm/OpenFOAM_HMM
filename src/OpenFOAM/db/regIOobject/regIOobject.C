@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Constructors & destructor for regIOobject.
-
 \*---------------------------------------------------------------------------*/
 
 #include "regIOobject.H"
@@ -50,6 +47,7 @@ Foam::regIOobject::regIOobject(const IOobject& io)
     registered_(false),
     ownedByRegistry_(false),
     lastModified_(0),
+    eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
     // Register with objectRegistry if requested
@@ -67,6 +65,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio)
     registered_(false),
     ownedByRegistry_(false),
     lastModified_(rio.lastModified_),
+    eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
     // Do not register copy with objectRegistry
@@ -81,6 +80,7 @@ Foam::regIOobject::regIOobject(const regIOobject& rio, bool registerCopy)
     registered_(false),
     ownedByRegistry_(false),
     lastModified_(rio.lastModified_),
+    eventNo_(db().getEvent()),
     isPtr_(NULL)
 {
     if (registerCopy && rio.registered_)
@@ -107,6 +107,7 @@ Foam::regIOobject::~regIOobject()
     if (isPtr_)
     {
         delete isPtr_;
+        isPtr_ = NULL;
     }
 
     // Check out of objectRegistry if not owned by the registry
@@ -120,41 +121,123 @@ Foam::regIOobject::~regIOobject()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::regIOobject::checkIn()
+bool Foam::regIOobject::checkIn()
 {
     if (!registered_)
     {
-        // Attempt to register object with objectRegistry
-        if (!db().checkIn(*this))
+        // multiple checkin of same object is disallowed - this would mess up
+        // any mapping
+        registered_ = db().checkIn(*this);
+
+        // checkin on defaultRegion is allowed to fail, since subsetted meshes
+        // are created with the same name as their originating mesh
+        if (!registered_ && debug && name() != polyMesh::defaultRegion)
         {
-            // Disallow checkin of same object twice since would mess up
-            // any mapping.
-            // Check on defaultRegion is needed to prevent subsetted meshes
-            // (which are created with same name as their originating mesh)
-            // from upsetting this.
-            if (debug && name() != polyMesh::defaultRegion)
-            {
-                WarningIn("regIOobject::checkIn()")
-                    << "failed to register object " << objectPath()
+            WarningIn("regIOobject::checkIn()")
+                << "failed to register object " << objectPath()
                     << " the name already exists in the objectRegistry"
-                    << endl;
-            }
+                << endl;
         }
-        else
-        {
-            registered_ = true;
-        }
+    }
+
+    return registered_;
+}
+
+
+bool Foam::regIOobject::checkOut()
+{
+    if (registered_)
+    {
+        registered_ = false;
+        return db().checkOut(*this);
+    }
+
+    return false;
+}
+
+
+bool Foam::regIOobject::uptodate(const word& a) const
+{
+    if (db().lookupObject<regIOobject>(a).eventNo() >= eventNo_)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
     }
 }
 
 
-void Foam::regIOobject::checkOut()
+bool Foam::regIOobject::uptodate(const word& a, const word& b) const
 {
-    if (registered_)
+    if
+    (
+        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
+    )
     {
-        db().checkOut(*this);
-        registered_ = false;
+        return false;
     }
+    else
+    {
+        return true;
+    }
+}
+
+
+bool Foam::regIOobject::uptodate
+(
+    const word& a,
+    const word& b,
+    const word& c
+) const
+{
+    if
+    (
+        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(c).eventNo() >= eventNo_
+    )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+bool Foam::regIOobject::uptodate
+(
+    const word& a,
+    const word& b,
+    const word& c,
+    const word& d
+) const
+{
+    if
+    (
+        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(c).eventNo() >= eventNo_
+     || db().lookupObject<regIOobject>(d).eventNo() >= eventNo_
+    )
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+}
+
+
+//- Flag me as uptodate
+void Foam::regIOobject::setUptodate()
+{
+    eventNo_ = db().getEvent();
 }
 
 
@@ -166,8 +249,11 @@ void Foam::regIOobject::rename(const word& newName)
 
     IOobject::rename(newName);
 
-    // Re-register object with objectRegistry
-    checkIn();
+    if (registerObject())
+    {
+        // Re-register object with objectRegistry
+        checkIn();
+    }
 }
 
 
@@ -185,8 +271,11 @@ void Foam::regIOobject::operator=(const IOobject& io)
 
     IOobject::operator=(io);
 
-    // Re-register object with objectRegistry
-    checkIn();
+    if (registerObject())
+    {
+        // Re-register object with objectRegistry
+        checkIn();
+    }
 }
 
 

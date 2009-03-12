@@ -1503,6 +1503,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         (
             markFacesOnProblemCells
             (
+                motionDict,
                 removeEdgeConnectedCells,
                 perpendicularAngle,
                 globalToPatch
@@ -1548,6 +1549,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
             (
                 markFacesOnProblemCells
                 (
+                    motionDict,
                     removeEdgeConnectedCells,
                     perpendicularAngle,
                     globalToPatch

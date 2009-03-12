@@ -154,7 +154,7 @@ public:
                 return cellZoneNames_;
             }
 
-            //- Get indices of named surfaces (surfaces with faceZoneName)
+            //- Get indices of unnamed surfaces (surfaces without faceZoneName)
             labelList getUnnamedSurfaces() const;
 
             //- Get indices of named surfaces (surfaces with faceZoneName)

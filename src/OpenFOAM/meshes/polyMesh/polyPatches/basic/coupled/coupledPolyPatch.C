@@ -31,10 +31,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(coupledPolyPatch, 0);
-}
+defineTypeNameAndDebug(Foam::coupledPolyPatch, 0);
 
 Foam::scalar Foam::coupledPolyPatch::matchTol = 1E-3;
 
