@@ -53,9 +53,9 @@ inline Foam::SubList<T>::SubList
 {
 #   ifdef FULLDEBUG
 
-    // Artificially allowing the start of a zero-sized subList to be
+    // Artificially allow the start of a zero-sized subList to be
     // one past the end of the original list.
-    if (subSize > 0)
+    if (subSize)
     {
         list.checkStart(startIndex);
         list.checkSize(startIndex + subSize);
@@ -84,7 +84,7 @@ inline const Foam::SubList<T>& Foam::SubList<T>::null()
 template<class T>
 inline Foam::SubList<T>::operator const Foam::List<T>&() const
 {
-    return *reinterpret_cast<const List<T>*>(this);
+    return *reinterpret_cast< const List<T>* >(this);
 }
 
 

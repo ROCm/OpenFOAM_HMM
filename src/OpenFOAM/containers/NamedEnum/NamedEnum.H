@@ -37,6 +37,7 @@ SourceFiles
 #define NamedEnum_H
 
 #include "HashTable.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,6 +53,9 @@ class NamedEnum
 :
     public HashTable<int>
 {
+    //- nEnum must be positive (non-zero)
+    StaticAssert(nEnum > 0);
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -99,7 +103,7 @@ public:
             return Enum(HashTable<int>::operator[](name));
         }
 
-        //- Return the name or the given enumeration element
+        //- Return the name of the given enumeration element
         const char* operator[](const Enum e) const
         {
             return names[e];

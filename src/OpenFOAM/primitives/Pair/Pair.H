@@ -59,7 +59,7 @@ public:
 
     // Constructors
 
-        //- Null constructor for lists
+        //- Null constructor
         inline Pair()
         {}
 
@@ -131,6 +131,27 @@ public:
                         << " does not contain " << a << abort(FatalError);
                 }
                 return first();
+            }
+        }
+
+
+        //- compare Pairs
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same pair, but reversed order
+        static inline int compare(const Pair<Type>& a, const Pair<Type>& b)
+        {
+            if (a[0] == b[0] && a[1] == b[1])
+            {
+                return 1;
+            }
+            else if (a[0] == b[1] && a[1] == b[0])
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
             }
         }
 

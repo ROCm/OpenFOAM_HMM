@@ -32,6 +32,7 @@ Description
 #include "boolList.H"
 #include "PackedBoolList.H"
 #include "HashSet.H"
+#include "StaticHashTable.H"
 #include "cpuTime.H"
 #include <vector>
 
@@ -55,10 +56,25 @@ int main(int argc, char *argv[])
 
     labelHashSet emptyHash;
     labelHashSet fullHash(1000);
-    for(label i = 0; i < n; i++)
+    for (label i = 0; i < n; i++)
     {
         fullHash.insert(i);
     }
+
+    // fullStaticHash is really slow
+    // give it lots of slots to help
+    StaticHashTable<nil, label, Hash<label> > emptyStaticHash;
+    StaticHashTable<nil, label, Hash<label> > fullStaticHash(100000);
+    for (label i = 0; i < n; i++)
+    {
+        fullStaticHash.insert(i, nil());
+    }
+
+    emptyHash.printInfo(Info);
+    fullHash.printInfo(Info);
+    emptyStaticHash.printInfo(Info);
+    fullStaticHash.printInfo(Info);
+
 
     cpuTime timer;
 
@@ -234,6 +250,37 @@ int main(int argc, char *argv[])
         << " s" << endl;
     Info<< "  sum " << sum << endl;
 
+
+    // Read empty static hash
+    sum = 0;
+    for (label iter = 0; iter < nIters; ++iter)
+    {
+        forAll(unpacked, i)
+        {
+            sum += emptyStaticHash.found(i);
+        }
+    }
+    Info<< "Reading empty StaticHash:" << timer.cpuTimeIncrement()
+        << " s" << endl;
+    Info<< "  sum " << sum << endl;
+
+#if 0
+    // we can skip this test - it is usually quite slow
+    // Read full static hash
+    sum = 0;
+    for (label iter = 0; iter < nIters; ++iter)
+    {
+        forAll(unpacked, i)
+        {
+            sum += fullStaticHash.found(i);
+        }
+    }
+    Info<< "Reading full StaticHash:" << timer.cpuTimeIncrement()
+        << " s" << endl;
+    Info<< "  sum " << sum << endl;
+#endif
+
+    Info<< "Starting write tests" << endl;
 
     //
     // Write

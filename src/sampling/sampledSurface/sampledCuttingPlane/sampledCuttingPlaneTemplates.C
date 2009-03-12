@@ -67,13 +67,7 @@ Foam::sampledCuttingPlane::interpolateField
             volPointInterpolation::New(volSubFld.mesh()).interpolate(volSubFld);
 
         // Sample.
-        return surface().interpolate
-        (
-            cellDistancePtr_(),
-            pointDistance_,
-            volSubFld,
-            tpointSubFld()
-        );
+        return surface().interpolate(volSubFld, tpointSubFld());
     }
     else
     {
@@ -83,13 +77,7 @@ Foam::sampledCuttingPlane::interpolateField
         );
 
         // Sample.
-        return surface().interpolate
-        (
-            cellDistancePtr_(),
-            pointDistance_,
-            volFld,
-            tpointFld()
-        );
+        return surface().interpolate(volFld, tpointFld());
     }
 }
 

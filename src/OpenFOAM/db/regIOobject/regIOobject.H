@@ -45,11 +45,12 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+
 namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class regIOobject Declaration
+                         Class regIOobject Declaration
 \*---------------------------------------------------------------------------*/
 
 class regIOobject
@@ -69,6 +70,9 @@ private:
 
         //- Time of last modification
         mutable time_t lastModified_;
+
+        //- eventNo of last update
+        label eventNo_;
 
         //- Istream for reading
         Istream* isPtr_;
@@ -115,13 +119,13 @@ public:
 
         // Registration
 
-            //- Register object with registry
-            void checkIn();
+            //- Add object to registry
+            bool checkIn();
 
-            //- Check-out object from registry
-            void checkOut();
+            //- Remove object from registry
+            bool checkOut();
 
-            //- Is this object owned by the registry
+            //- Is this object owned by the registry?
             inline bool ownedByRegistry() const;
 
             //- Transfer ownership of this object to its registry
@@ -130,16 +134,34 @@ public:
             //- Transfer ownership of the given object pointer to its registry
             //  and return reference to object.
             template<class Type>
-            inline static Type& store(Type* tPtr);
+            inline static Type& store(Type*);
 
             //- Transfer ownership of the given object pointer to its registry
             //  and return reference to object.
             template<class Type>
-            inline static Type& store(autoPtr<Type>& atPtr);
+            inline static Type& store(autoPtr<Type>&);
 
             //- Release ownership of this object from its registry
             inline void release();
 
+
+        // Dependency checking
+
+            //- Event number at last update.
+            inline label eventNo() const;
+
+            //- Event number at last update.
+            inline label& eventNo();
+
+            //- Am I uptodate with respect to other regIOobjects
+            bool uptodate(const word&) const;
+            bool uptodate(const word&, const word&) const;
+            bool uptodate(const word&, const word&, const word&) const;
+            bool uptodate(const word&, const word&, const word&, const word&)
+             const;
+
+            //- Flag me as uptodate
+            void setUptodate();
 
         // Edit
 
@@ -179,9 +201,9 @@ public:
             //- Write using given format, version and compression
             virtual bool writeObject
             (
-                IOstream::streamFormat fmt,
-                IOstream::versionNumber ver,
-                IOstream::compressionType cmp
+                IOstream::streamFormat,
+                IOstream::versionNumber,
+                IOstream::compressionType
             ) const;
 
             //- Write using setting from DB

@@ -164,13 +164,30 @@ public:
 };
 
 
-//- Hash<triFace> specialisation
-//  Simple commutative hash.
+//- Hash specialization for hashing triFace - a commutative hash value.
+//  Hash incrementally.
 template<>
-inline label Hash<triFace>::operator()(const triFace& t) const
+inline unsigned Hash<triFace>::operator()(const triFace& t, unsigned seed) const
 {
-    return (t[0]*t[1]*t[2] + t[0]+t[1]+t[2]);
+    // Fortunately we don't need this very often
+    const uLabel t0(t[0]);
+    const uLabel t1(t[1]);
+    const uLabel t2(t[2]);
+
+    const uLabel val = (t0*t1*t2 + t0+t1+t2);
+
+    return Hash<uLabel>()(val, seed);
 }
+
+
+//- Hash specialization for hashing triFace - a commutative hash value.
+//  Hash incrementally.
+template<>
+inline unsigned Hash<triFace>::operator()(const triFace& t) const
+{
+    return Hash<triFace>::operator()(t, 0);
+}
+
 
 template<>
 inline bool contiguous<triFace>()  {return true;}

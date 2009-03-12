@@ -46,9 +46,8 @@ int main(int argc, char *argv[])
 
     autoPtr<Foam::motionSolver> motionPtr = motionSolver::New(mesh);
 
-    while (runTime.run())
+    while (runTime.loop())
     {
-        runTime++;
         Info<< "Time = " << runTime.timeName() << endl;
 
         mesh.movePoints(motionPtr->newPoints());

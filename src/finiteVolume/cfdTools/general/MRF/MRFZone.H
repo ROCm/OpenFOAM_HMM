@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
     Foam::MRFZone
 
 Description
-    MRF zone definition based on cell zone and optional face zone and parameters
+    MRF zone definition based on cell zone and parameters
     obtained from a control dictionary constructed from the given stream.
 
     The rotation of the MRF region is defined by an origin and axis of
@@ -74,16 +74,17 @@ class MRFZone
 
         label cellZoneID_;
 
-        //- label of face zone with faces on outside of cell zone.
-        //  If -2 determines outside faces itself
-        label faceZoneID_;
+        const wordList excludedPatchNames_;
+        labelList excludedPatchLabels_;
 
-        //- outside faces (only if faceZoneID = -2)
-        labelList outsideFaces_;
+        //- Internal faces that are part of MRF
+        labelList internalFaces_;
 
+        //- Outside faces (per patch) that move with the MRF
+        labelListList includedFaces_;
 
-        const wordList patchNames_;
-        labelList patchLabels_;
+        //- Excluded faces (per patch) that do not move with the MRF
+        labelListList excludedFaces_;
 
         const dimensionedVector origin_;
         dimensionedVector axis_;
@@ -93,6 +94,9 @@ class MRFZone
 
     // Private Member Functions
 
+        //- Divide faces in frame according to patch
+        void setMRFFaces();
+
         //- Disallow default bitwise copy construct
         MRFZone(const MRFZone&);
 
@@ -101,6 +105,10 @@ class MRFZone
 
 
 public:
+
+    // Declare name of the class and its debug switch
+    ClassName("MRFZone");
+
 
     // Constructors
 
@@ -136,11 +144,24 @@ public:
 
     // Member Functions
 
+        //- Update the mesh corresponding to given map
+        void updateMesh(const mapPolyMesh& mpm)
+        {
+            // Only updates face addressing
+            setMRFFaces();
+        }
+
         //- Add the Coriolis force contribution to the momentum equation
         void addCoriolis(fvVectorMatrix& UEqn) const;
 
+        //- Make the given absolute velocity relative within the MRF region
+        void relativeVelocity(volVectorField& U) const;
+
         //- Make the given absolute flux relative within the MRF region
         void relativeFlux(surfaceScalarField& phi) const;
+
+        //- Make the given relative flux absolute within the MRF region
+        void absoluteFlux(surfaceScalarField& phi) const;
 
         //- Correct the boundary velocity for the roation of the MRF region
         void correctBoundaryVelocity(volVectorField& U) const;

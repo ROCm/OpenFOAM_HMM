@@ -27,7 +27,7 @@ Application
 
 Description
     Steady-state solver for incompressible, turbulent flow of non-Newtonian
-    fluids with single rotating frame.
+    fluids in a single rotating frame.
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,37 +40,32 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-    //mesh.clearPrimitives();
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.run())
+    while (runTime.loop())
     {
-        runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readSIMPLEControls.H"
-#       include "initConvergenceCheck.H"
+        #include "readSIMPLEControls.H"
+        #include "initConvergenceCheck.H"
 
         p.storePrevIter();
 
         // Pressure-velocity SIMPLE corrector
         {
-#           include "UEqn.H"
-#           include "pEqn.H"
+            #include "UrelEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
-
 
         if (runTime.outputTime())
         {
@@ -94,12 +89,12 @@ int main(int argc, char *argv[])
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
 
-#       include "convergenceCheck.H"
+        #include "convergenceCheck.H"
     }
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

@@ -30,20 +30,49 @@ License
 #include "HashTable.H"
 #include "List.H"
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+Foam::label Foam::HashTable<T, Key, Hash>::canonicalSize(const label size)
+{
+    if (size < 1)
+    {
+        return 0;
+    }
+
+    // enforce power of two
+    unsigned int goodSize = size;
+
+    if (goodSize & (goodSize - 1))
+    {
+        // brute-force is fast enough
+        goodSize = 1;
+        while (goodSize < unsigned(size))
+        {
+            goodSize <<= 1;
+        }
+    }
+
+    return goodSize;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable(const label size)
 :
-    tableSize_(size),
-    table_(NULL),
+    HashTableName(),
     nElmts_(0),
+    tableSize_(canonicalSize(size)),
+    table_(NULL),
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
     if (tableSize_)
     {
         table_ = new hashedEntry*[tableSize_];
+
         for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
         {
             table_[hashIdx] = 0;
@@ -56,9 +85,9 @@ template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
 :
     HashTableName(),
+    nElmts_(0),
     tableSize_(ht.tableSize_),
     table_(NULL),
-    nElmts_(0),
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
@@ -71,7 +100,7 @@ Foam::HashTable<T, Key, Hash>::HashTable(const HashTable<T, Key, Hash>& ht)
             table_[hashIdx] = 0;
         }
 
-        for (const_iterator iter = ht.begin(); iter != ht.end(); ++iter)
+        for (const_iterator iter = ht.cbegin(); iter != ht.cend(); ++iter)
         {
             insert(iter.key(), *iter);
         }
@@ -85,9 +114,9 @@ Foam::HashTable<T, Key, Hash>::HashTable
 )
 :
     HashTableName(),
+    nElmts_(0),
     tableSize_(0),
     table_(NULL),
-    nElmts_(0),
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
@@ -113,9 +142,9 @@ Foam::HashTable<T, Key, Hash>::~HashTable()
 template<class T, class Key, class Hash>
 bool Foam::HashTable<T, Key, Hash>::found(const Key& key) const
 {
-    if (tableSize_)
+    if (nElmts_)
     {
-        label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = hashKeyIndex(key);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -145,9 +174,9 @@ Foam::HashTable<T, Key, Hash>::find
     const Key& key
 )
 {
-    if (tableSize_)
+    if (nElmts_)
     {
-        label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = hashKeyIndex(key);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -177,9 +206,9 @@ Foam::HashTable<T, Key, Hash>::find
     const Key& key
 ) const
 {
-    if (tableSize_)
+    if (nElmts_)
     {
-        label hashIdx = Hash()(key, tableSize_);
+        const label hashIdx = hashKeyIndex(key);
 
         for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
         {
@@ -198,7 +227,7 @@ Foam::HashTable<T, Key, Hash>::find
     }
 #   endif
 
-    return end();
+    return cend();
 }
 
 
@@ -209,7 +238,7 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::toc() const
     List<Key> tofc(nElmts_);
     label i = 0;
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         tofc[i++] = iter.key();
     }
@@ -231,7 +260,8 @@ bool Foam::HashTable<T, Key, Hash>::set
         resize(2);
     }
 
-    label hashIdx = Hash()(key, tableSize_);
+    const label hashIdx = hashKeyIndex(key);
+
     hashedEntry* existing = 0;
     hashedEntry* prev = 0;
 
@@ -351,7 +381,7 @@ bool Foam::HashTable<T, Key, Hash>::erase(const iterator& cit)
             else
             {
                 // No previous found. Mark with special value which is
-                // - not end()
+                // - not end()/cend()
                 // - handled by operator++
                 it.elmtPtr_ = reinterpret_cast<hashedEntry*>(this);
                 it.hashIndex_ = -1;
@@ -449,14 +479,16 @@ Foam::label Foam::HashTable<T, Key, Hash>::erase
 
 
 template<class T, class Key, class Hash>
-void Foam::HashTable<T, Key, Hash>::resize(const label newSize)
+void Foam::HashTable<T, Key, Hash>::resize(const label sz)
 {
+    label newSize = canonicalSize(sz);
+
     if (newSize == tableSize_)
     {
 #       ifdef FULLDEBUG
         if (debug)
         {
-            Info<< "HashTable<T, Key, Hash>::resize(const label newSize) : "
+            Info<< "HashTable<T, Key, Hash>::resize(const label) : "
                 << "new table size == old table size\n";
         }
 #       endif
@@ -466,7 +498,7 @@ void Foam::HashTable<T, Key, Hash>::resize(const label newSize)
 
     HashTable<T, Key, Hash>* newTable = new HashTable<T, Key, Hash>(newSize);
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         newTable->insert(iter.key(), *iter);
     }
@@ -565,7 +597,7 @@ void Foam::HashTable<T, Key, Hash>::operator=
         clear();
     }
 
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         insert(iter.key(), *iter);
     }
@@ -579,22 +611,22 @@ bool Foam::HashTable<T, Key, Hash>::operator==
 ) const
 {
     // Are all my elements in rhs?
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         const_iterator fnd = rhs.find(iter.key());
 
-        if (fnd == rhs.end() || fnd() != iter())
+        if (fnd == rhs.cend() || fnd() != iter())
         {
             return false;
         }
     }
 
     // Are all rhs elements in me?
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         const_iterator fnd = find(iter.key());
 
-        if (fnd == end() || fnd() != iter())
+        if (fnd == cend() || fnd() != iter())
         {
             return false;
         }

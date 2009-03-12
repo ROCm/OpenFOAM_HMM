@@ -48,31 +48,31 @@ adjustTimeStep  yes;
 maxCo           0.5;
 
 functions
-(
+{
     fieldAverage1
     {
-        type fieldAverage;
+        type            fieldAverage;
         functionObjectLibs ( "libfieldFunctionObjects.so" );
-        enabled true;
-        outputControl outputTime;
+        enabled         true;
+        outputControl   outputTime;
         fields
         (
             U
             {
-                mean on;
-                prime2Mean on;
-                base time;
+                mean        on;
+                prime2Mean  on;
+                base        time;
             }
 
             p
             {
-                mean on;
-                prime2Mean on;
-                base time;
+                mean        on;
+                prime2Mean  on;
+                base        time;
             }
         );
     }
-);
+}
 
 
 // ************************************************************************* //

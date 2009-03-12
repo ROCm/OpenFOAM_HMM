@@ -46,9 +46,8 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createDynamicFvMesh.H"
 
-    while (runTime.run())
+    while (runTime.loop())
     {
-        runTime++;
         Info<< "Time = " << runTime.timeName() << endl;
 
         mesh.update();

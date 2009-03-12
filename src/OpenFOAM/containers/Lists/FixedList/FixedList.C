@@ -31,7 +31,7 @@ License
 
 // * * * * * * * * * * * * * * STL Member Functions  * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& a)
 {
     List_ACCESS(T, (*this), vp);
@@ -47,7 +47,7 @@ void Foam::FixedList<T, Size>::swap(FixedList<T, Size>& a)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
 {
     bool equal = true;
@@ -63,20 +63,20 @@ bool Foam::FixedList<T, Size>::operator==(const FixedList<T, Size>& a) const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 bool Foam::FixedList<T, Size>::operator!=(const FixedList<T, Size>& a) const
 {
     return !operator==(a);
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& a) const
 {
     for
     (
-        const_iterator vi = begin(), ai = a.begin();
-        vi < end() && ai < a.end();
+        const_iterator vi = cbegin(), ai = a.cbegin();
+        vi < cend() && ai < a.cend();
         vi++, ai++
     )
     {
@@ -101,21 +101,21 @@ bool Foam::FixedList<T, Size>::operator<(const FixedList<T, Size>& a) const
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 bool Foam::FixedList<T, Size>::operator>(const FixedList<T, Size>& a) const
 {
     return a.operator<(*this);
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 bool Foam::FixedList<T, Size>::operator<=(const FixedList<T, Size>& a) const
 {
     return !operator>(a);
 }
 
 
-template<class T, Foam::label Size>
+template<class T, unsigned Size>
 bool Foam::FixedList<T, Size>::operator>=(const FixedList<T, Size>& a) const
 {
     return !operator<(a);

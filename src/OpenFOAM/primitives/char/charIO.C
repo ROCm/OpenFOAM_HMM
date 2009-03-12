@@ -39,7 +39,7 @@ Description
 Foam::Istream& Foam::operator>>(Istream& is, char& c)
 {
     is.read(c);
-    is.check("Istream& operator>>(Istream& is, char& c)");
+    is.check("Istream& operator>>(Istream&, char&)");
     return is;
 }
 

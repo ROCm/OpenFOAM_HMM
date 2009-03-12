@@ -30,6 +30,7 @@ License
 #include "syncTools.H"
 #include "addToRunTimeSelectionTable.H"
 #include "slicedVolFields.H"
+#include "volFields.H"
 #include "surfaceFields.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -40,6 +41,243 @@ namespace Foam
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::isoSurface::noTransform(const tensor& tt) const
+{
+    return
+        (mag(tt.xx()-1) < mergeDistance_)
+     && (mag(tt.yy()-1) < mergeDistance_)
+     && (mag(tt.zz()-1) < mergeDistance_)
+     && (mag(tt.xy()) < mergeDistance_)
+     && (mag(tt.xz()) < mergeDistance_)
+     && (mag(tt.yx()) < mergeDistance_)
+     && (mag(tt.yz()) < mergeDistance_)
+     && (mag(tt.zx()) < mergeDistance_)
+     && (mag(tt.zy()) < mergeDistance_);
+}
+
+
+bool Foam::isoSurface::collocatedPatch(const polyPatch& pp)
+{
+    const coupledPolyPatch& cpp = refCast<const coupledPolyPatch>(pp);
+
+    return cpp.parallel() && !cpp.separated();
+}
+
+
+// Calculates per face whether couple is collocated.
+Foam::PackedBoolList Foam::isoSurface::collocatedFaces
+(
+    const coupledPolyPatch& pp
+) const
+{
+    // Initialise to false
+    PackedBoolList collocated(pp.size());
+
+    const vectorField& separation = pp.separation();
+    const tensorField& forwardT = pp.forwardT();
+
+    if (forwardT.size() == 0)
+    {
+        // Parallel.
+        if (separation.size() == 0)
+        {
+            collocated = 1u;
+        }
+        else if (separation.size() == 1)
+        {
+            // Fully separate. Do not synchronise.
+        }
+        else
+        {
+            // Per face separation.
+            forAll(pp, faceI)
+            {
+                if (mag(separation[faceI]) < mergeDistance_)
+                {
+                    collocated[faceI] = 1u;
+                }
+            }
+        }
+    }
+    else if (forwardT.size() == 1)
+    {
+        // Fully transformed.
+    }
+    else
+    {
+        // Per face transformation.
+        forAll(pp, faceI)
+        {
+            if (noTransform(forwardT[faceI]))
+            {
+                collocated[faceI] = 1u;
+            }
+        }
+    }
+    return collocated;
+}
+
+
+// Insert the data for local point patchPointI into patch local values
+// and/or into the shared values field.
+void Foam::isoSurface::insertPointData
+(
+    const processorPolyPatch& pp,
+    const Map<label>& meshToShared,
+    const pointField& pointValues,
+    const label patchPointI,
+    pointField& patchValues,
+    pointField& sharedValues
+) const
+{
+    label meshPointI = pp.meshPoints()[patchPointI];
+
+    // Store in local field
+    label nbrPointI = pp.neighbPoints()[patchPointI];
+    if (nbrPointI >= 0 && nbrPointI < patchValues.size())
+    {
+        minEqOp<point>()(patchValues[nbrPointI], pointValues[meshPointI]);
+    }
+
+    // Store in shared field
+    Map<label>::const_iterator iter = meshToShared.find(meshPointI);
+    if (iter != meshToShared.end())
+    {
+        minEqOp<point>()(sharedValues[iter()], pointValues[meshPointI]);
+    }
+}
+
+
+void Foam::isoSurface::syncUnseparatedPoints
+(
+    pointField& pointValues,
+    const point& nullValue
+) const
+{
+    // Until syncPointList handles separated coupled patches with multiple
+    // transforms do our own synchronisation of non-separated patches only
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    const globalMeshData& pd = mesh_.globalData();
+    const labelList& sharedPtAddr = pd.sharedPointAddr();
+    const labelList& sharedPtLabels = pd.sharedPointLabels();
+
+    // Create map from meshPoint to globalShared index.
+    Map<label> meshToShared(2*sharedPtLabels.size());
+    forAll(sharedPtLabels, i)
+    {
+        meshToShared.insert(sharedPtLabels[i], sharedPtAddr[i]);
+    }
+
+    // Values on shared points.
+    pointField sharedInfo(pd.nGlobalPoints(), nullValue);
+
+
+    if (Pstream::parRun())
+    {
+        // Send
+        forAll(patches, patchI)
+        {
+            if
+            (
+                isA<processorPolyPatch>(patches[patchI])
+             && patches[patchI].nPoints() > 0
+            )
+            {
+                const processorPolyPatch& pp =
+                    refCast<const processorPolyPatch>(patches[patchI]);
+                const labelList& meshPts = pp.meshPoints();
+
+                pointField patchInfo(meshPts.size(), nullValue);
+
+                PackedBoolList isCollocated(collocatedFaces(pp));
+
+                forAll(isCollocated, faceI)
+                {
+                    if (isCollocated[faceI])
+                    {
+                        const face& f = pp.localFaces()[faceI];
+
+                        forAll(f, fp)
+                        {
+                            label pointI = f[fp];
+
+                            insertPointData
+                            (
+                                pp,
+                                meshToShared,
+                                pointValues,
+                                pointI,
+                                patchInfo,
+                                sharedInfo
+                            );
+                        }
+                    }
+                }
+
+                OPstream toNbr(Pstream::blocking, pp.neighbProcNo());
+                toNbr << patchInfo;
+            }
+        }
+
+        // Receive and combine.
+
+        forAll(patches, patchI)
+        {
+            if
+            (
+                isA<processorPolyPatch>(patches[patchI])
+             && patches[patchI].nPoints() > 0
+            )
+            {
+                const processorPolyPatch& pp =
+                    refCast<const processorPolyPatch>(patches[patchI]);
+
+                pointField nbrPatchInfo(pp.nPoints());
+                {
+                    // We do not know the number of points on the other side
+                    // so cannot use Pstream::read.
+                    IPstream fromNbr(Pstream::blocking, pp.neighbProcNo());
+                    fromNbr >> nbrPatchInfo;
+                }
+
+                // Null any value which is not on neighbouring processor
+                nbrPatchInfo.setSize(pp.nPoints(), nullValue);
+
+                const labelList& meshPts = pp.meshPoints();
+
+                forAll(meshPts, pointI)
+                {
+                    label meshPointI = meshPts[pointI];
+                    minEqOp<point>()
+                    (
+                        pointValues[meshPointI],
+                        nbrPatchInfo[pointI]
+                    );
+                }
+            }
+        }
+    }
+
+
+    // Don't do cyclics for now. Are almost always separated anyway.
+
+
+    // Shared points
+
+    // Combine on master.
+    Pstream::listCombineGather(sharedInfo, minEqOp<point>());
+    Pstream::listCombineScatter(sharedInfo);
+
+    // Now we will all have the same information. Merge it back with
+    // my local information. (Note assignment and not combine operator)
+    forAll(sharedPtLabels, i)
+    {
+        label meshPointI = sharedPtLabels[i];
+        pointValues[meshPointI] = sharedInfo[sharedPtAddr[i]];
+    }
+}
+
 
 Foam::scalar Foam::isoSurface::isoFraction
 (
@@ -89,6 +327,7 @@ bool Foam::isoSurface::isEdgeOfFaceCut
 void Foam::isoSurface::getNeighbour
 (
     const labelList& boundaryRegion,
+    const volVectorField& meshC,
     const volScalarField& cVals,
     const label cellI,
     const label faceI,
@@ -98,13 +337,12 @@ void Foam::isoSurface::getNeighbour
 {
     const labelList& own = mesh_.faceOwner();
     const labelList& nei = mesh_.faceNeighbour();
-    const surfaceScalarField& weights = mesh_.weights();
 
     if (mesh_.isInternalFace(faceI))
     {
         label nbr = (own[faceI] == cellI ? nei[faceI] : own[faceI]);
         nbrValue = cVals[nbr];
-        nbrPoint = mesh_.cellCentres()[nbr];
+        nbrPoint = meshC[nbr];
     }
     else
     {
@@ -113,38 +351,8 @@ void Foam::isoSurface::getNeighbour
         const polyPatch& pp = mesh_.boundaryMesh()[patchI];
         label patchFaceI = faceI-pp.start();
 
-        if (isA<emptyPolyPatch>(pp))
-        {
-            // Assume zero gradient
-            nbrValue = cVals[own[faceI]];
-            nbrPoint = mesh_.faceCentres()[faceI];
-        }
-        else if (pp.coupled())
-        {
-            if (!refCast<const coupledPolyPatch>(pp).separated())
-            {
-                // Behave as internal face:
-                // other side value
-                nbrValue = cVals.boundaryField()[patchI][patchFaceI];
-                // other side cell centre
-                nbrPoint = mesh_.C().boundaryField()[patchI][patchFaceI];
-            }
-            else
-            {
-                // Do some interpolation for now
-                const scalarField& w = weights.boundaryField()[patchI];
-
-                nbrPoint = mesh_.faceCentres()[faceI];
-                nbrValue =
-                    (1-w[patchFaceI])*cVals[own[faceI]]
-                  + w[patchFaceI]*cVals.boundaryField()[patchI][patchFaceI];
-            }
-        }
-        else
-        {
-            nbrValue = cVals.boundaryField()[patchI][patchFaceI];
-            nbrPoint = mesh_.faceCentres()[faceI];
-        }
+        nbrValue = cVals.boundaryField()[patchI][patchFaceI];
+        nbrPoint = meshC.boundaryField()[patchI][patchFaceI];
     }
 }
 
@@ -153,6 +361,7 @@ void Foam::isoSurface::getNeighbour
 void Foam::isoSurface::calcCutTypes
 (
     const labelList& boundaryRegion,
+    const volVectorField& meshC,
     const volScalarField& cVals,
     const scalarField& pVals
 )
@@ -174,6 +383,7 @@ void Foam::isoSurface::calcCutTypes
         getNeighbour
         (
             boundaryRegion,
+            meshC,
             cVals,
             own[faceI],
             faceI,
@@ -215,6 +425,7 @@ void Foam::isoSurface::calcCutTypes
             getNeighbour
             (
                 boundaryRegion,
+                meshC,
                 cVals,
                 own[faceI],
                 faceI,
@@ -408,6 +619,7 @@ Foam::pointIndexHit Foam::isoSurface::collapseSurface
 void Foam::isoSurface::calcSnappedCc
 (
     const labelList& boundaryRegion,
+    const volVectorField& meshC,
     const volScalarField& cVals,
     const scalarField& pVals,
 
@@ -448,6 +660,7 @@ void Foam::isoSurface::calcSnappedCc
                 getNeighbour
                 (
                     boundaryRegion,
+                    meshC,
                     cVals,
                     cellI,
                     faceI,
@@ -574,6 +787,7 @@ void Foam::isoSurface::calcSnappedPoint
 (
     const PackedBoolList& isBoundaryPoint,
     const labelList& boundaryRegion,
+    const volVectorField& meshC,
     const volScalarField& cVals,
     const scalarField& pVals,
 
@@ -639,6 +853,7 @@ void Foam::isoSurface::calcSnappedPoint
             getNeighbour
             (
                 boundaryRegion,
+                meshC,
                 cVals,
                 own,
                 faceI,
@@ -747,14 +962,22 @@ void Foam::isoSurface::calcSnappedPoint
         }
     }
 
-    syncTools::syncPointList
-    (
-        mesh_,
-        collapsedPoint,
-        minEqOp<point>(),
-        greatPoint,
-        true                // are coordinates so separate
-    );
+
+//Pout<< "**hack" << endl;
+//pointField oldCollaped(collapsedPoint);
+    syncUnseparatedPoints(collapsedPoint, greatPoint);
+//forAll(collapsedPoint, pointI)
+//{
+//    if (collapsedPoint[pointI] != oldCollaped[pointI])
+//    {
+//        Pout<< "**Synced point " << pointI
+//            << " coord:" << mesh_.points()[pointI]
+//            << " from " << oldCollaped[pointI]
+//            << " to " << collapsedPoint[pointI]
+//            << endl;
+//    }
+//}
+
 
     snappedPoint.setSize(mesh_.nPoints());
     snappedPoint = -1;
@@ -1534,6 +1757,7 @@ Foam::isoSurface::isoSurface
 )
 :
     mesh_(cVals.mesh()),
+    pVals_(pVals),
     iso_(iso),
     mergeDistance_(mergeTol*mesh_.bounds().mag())
 {
@@ -1545,8 +1769,8 @@ Foam::isoSurface::isoSurface
             << min(cVals.internalField()) << " / "
             << max(cVals.internalField()) << nl
             << "    point min/max : "
-            << min(pVals) << " / "
-            << max(pVals) << nl
+            << min(pVals_) << " / "
+            << max(pVals_) << nl
             << "    isoValue      : " << iso << nl
             << "    regularise    : " << regularise << nl
             << "    mergeTol      : " << mergeTol << nl
@@ -1554,6 +1778,89 @@ Foam::isoSurface::isoSurface
     }
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+
+    // Rewrite input field
+    // ~~~~~~~~~~~~~~~~~~~
+    // Rewrite input volScalarField to have interpolated values
+    // on separated patches.
+
+    cValsPtr_.reset(adaptPatchFields(cVals).ptr());
+
+
+    // Construct cell centres field consistent with cVals
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Generate field to interpolate. This is identical to the mesh.C()
+    // except on separated coupled patches and on empty patches.
+
+    slicedVolVectorField meshC
+    (
+        IOobject
+        (
+            "C",
+            mesh_.pointsInstance(),
+            mesh_.meshSubDir,
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        mesh_,
+        dimLength,
+        mesh_.cellCentres(),
+        mesh_.faceCentres()
+    );
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        // Adapt separated coupled (proc and cyclic) patches
+        if (isA<coupledPolyPatch>(pp) && !collocatedPatch(pp))
+        {
+            fvPatchVectorField& pfld = const_cast<fvPatchVectorField&>
+            (
+                meshC.boundaryField()[patchI]
+            );
+
+            PackedBoolList isCollocated
+            (
+                collocatedFaces(refCast<const coupledPolyPatch>(pp))
+            );
+
+            forAll(isCollocated, i)
+            {
+                if (!isCollocated[i])
+                {
+                    pfld[i] = mesh_.faceCentres()[pp.start()+i];
+                }
+            }
+        }
+        else if (isA<emptyPolyPatch>(pp))
+        {
+            typedef slicedVolVectorField::GeometricBoundaryField bType;
+
+            bType& bfld = const_cast<bType&>(meshC.boundaryField());
+
+            // Clear old value. Cannot resize it since is a slice.
+            bfld.set(patchI, NULL);
+
+            // Set new value we can change
+            bfld.set
+            (
+                patchI,
+                new calculatedFvPatchField<vector>
+                (
+                    mesh_.boundary()[patchI],
+                    meshC
+                )
+            );
+
+            // Change to face centres
+            bfld[patchI] = pp.patchSlice(mesh_.faceCentres());
+        }
+    }
+
+
 
     // Pre-calculate patch-per-face to avoid whichPatch call.
     labelList boundaryRegion(mesh_.nFaces()-mesh_.nInternalFaces());
@@ -1572,8 +1879,9 @@ Foam::isoSurface::isoSurface
     }
 
 
+
     // Determine if any cut through face/cell
-    calcCutTypes(boundaryRegion, cVals, pVals);
+    calcCutTypes(boundaryRegion, meshC, cValsPtr_(), pVals_);
 
 
     DynamicList<point> snappedPoints(nCutCells_);
@@ -1585,8 +1893,9 @@ Foam::isoSurface::isoSurface
         calcSnappedCc
         (
             boundaryRegion,
-            cVals,
-            pVals,
+            meshC,
+            cValsPtr_(),
+            pVals_,
 
             snappedPoints,
             snappedCc
@@ -1609,48 +1918,67 @@ Foam::isoSurface::isoSurface
     label nCellSnaps = snappedPoints.size();
 
 
-    // Determine if point is on boundary. Points on boundaries are never
-    // snapped. Coupled boundaries are handled explicitly so not marked here.
-    PackedBoolList isBoundaryPoint(mesh_.nPoints());
-
-    forAll(patches, patchI)
-    {
-        // Mark all boundary points that are not physically coupled (so anything
-        // but collocated coupled patches)
-        const polyPatch& pp = patches[patchI];
-
-        if
-        (
-           !pp.coupled()
-        || refCast<const coupledPolyPatch>(pp).separated()
-        )
-        {
-            label faceI = pp.start();
-
-            forAll(pp, i)
-            {
-                const face& f = mesh_.faces()[faceI];
-
-                forAll(f, fp)
-                {
-                    isBoundaryPoint.set(f[fp], 1);
-                }
-                faceI++;
-            }
-        }
-    }
-
-
     // Per point -1 or a point inside snappedPoints.
     labelList snappedPoint;
     if (regularise)
     {
+        // Determine if point is on boundary.
+        PackedBoolList isBoundaryPoint(mesh_.nPoints());
+
+        forAll(patches, patchI)
+        {
+            // Mark all boundary points that are not physically coupled
+            // (so anything but collocated coupled patches)
+
+            if (patches[patchI].coupled())
+            {
+                if (!collocatedPatch(patches[patchI]))
+                {
+                    const coupledPolyPatch& cpp =
+                        refCast<const coupledPolyPatch>
+                        (
+                            patches[patchI]
+                        );
+
+                    PackedBoolList isCollocated(collocatedFaces(cpp));
+
+                    forAll(isCollocated, i)
+                    {
+                        if (!isCollocated[i])
+                        {
+                            const face& f = mesh_.faces()[cpp.start()+i];
+
+                            forAll(f, fp)
+                            {
+                                isBoundaryPoint.set(f[fp], 1);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                const polyPatch& pp = patches[patchI];
+
+                forAll(pp, i)
+                {
+                    const face& f = mesh_.faces()[pp.start()+i];
+
+                    forAll(f, fp)
+                    {
+                        isBoundaryPoint.set(f[fp], 1);
+                    }
+                }
+            }
+        }
+
         calcSnappedPoint
         (
             isBoundaryPoint,
             boundaryRegion,
-            cVals,
-            pVals,
+            meshC,
+            cValsPtr_(),
+            pVals_,
 
             snappedPoints,
             snappedPoint
@@ -1669,80 +1997,14 @@ Foam::isoSurface::isoSurface
     }
 
 
-    // Generate field to interpolate. This is identical to the mesh.C()
-    // except on separated coupled patches and on empty patches.
-    slicedVolVectorField meshC
-    (
-        IOobject
-        (
-            "C",
-            mesh_.pointsInstance(),
-            mesh_.meshSubDir,
-            mesh_,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        dimLength,
-        mesh_.cellCentres(),
-        mesh_.faceCentres()
-    );
-    {
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-        forAll(patches, patchI)
-        {
-            const polyPatch& pp = patches[patchI];
-
-            if
-            (
-                pp.coupled()
-             && refCast<const coupledPolyPatch>(pp).separated()
-            )
-            {
-                fvPatchVectorField& pfld = const_cast<fvPatchVectorField&>
-                (
-                    meshC.boundaryField()[patchI]
-                );
-                pfld.operator==
-                (
-                    pp.patchSlice(mesh_.faceCentres())
-                );
-            }
-            else if (isA<emptyPolyPatch>(pp))
-            {
-                typedef slicedVolVectorField::GeometricBoundaryField bType;
-
-                bType& bfld = const_cast<bType&>(meshC.boundaryField());
-
-                // Clear old value. Cannot resize it since slice.
-                bfld.set(patchI, NULL);
-
-                // Set new value we can change
-                bfld.set
-                (
-                    patchI,
-                    new calculatedFvPatchField<vector>
-                    (
-                        mesh_.boundary()[patchI],
-                        meshC
-                    )
-                );
-
-                // Change to face centres
-                bfld[patchI] = pp.patchSlice(mesh_.faceCentres());
-            }
-        }
-    }
-
 
     DynamicList<point> triPoints(nCutCells_);
     DynamicList<label> triMeshCells(nCutCells_);
 
     generateTriPoints
     (
-        cVals,
-        pVals,
+        cValsPtr_(),
+        pVals_,
 
         meshC,
         mesh_.points(),

@@ -44,14 +44,14 @@ timePrecision   6;
 runTimeModifiable yes;
 
 functions
-(
+{
     probes1
     {
-        type probes;
+        type            probes;
         functionObjectLibs ( "libsampling.so" );
-        enabled true;
-        outputControl timeStep;
-        outputInterval 1;
+        enabled         true;
+        outputControl   timeStep;
+        outputInterval  1;
         probeLocations
         (
             ( 0.0254 0.0253 0 )
@@ -70,28 +70,28 @@ functions
 
     fieldAverage1
     {
-        type fieldAverage;
+        type            fieldAverage;
         functionObjectLibs ( "libfieldFunctionObjects.so" );
-        enabled true;
-        outputControl outputTime;
+        enabled         true;
+        outputControl   outputTime;
         fields
         (
             U
             {
-                mean on;
-                prime2Mean on;
-                base time;
+                mean        on;
+                prime2Mean  on;
+                base        time;
             }
 
             p
             {
-                mean on;
-                prime2Mean on;
-                base time;
+                mean        on;
+                prime2Mean  on;
+                base        time;
             }
         );
     }
-);
+}
 
 
 // ************************************************************************* //
