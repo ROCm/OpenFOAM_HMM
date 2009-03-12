@@ -28,6 +28,8 @@ License
 #include "polyMesh.H"
 #include "syncTools.H"
 #include "surfaceFields.H"
+#include "OFstream.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -565,18 +567,20 @@ void Foam::isoSurface::generateTriPoints
     {
         const polyPatch& pp = patches[patchI];
 
-        if (isA<processorPolyPatch>(pp) && collocatedPatch(pp))
+        if (isA<processorPolyPatch>(pp))
         {
-            // Coincident processor patches. Boundary field of 
-            // cVals and cCoords is opposite cell.
+            const processorPolyPatch& cpp =
+                refCast<const processorPolyPatch>(pp);
 
-            //if (refCast<const processorPolyPatch>(pp).owner())
+            PackedBoolList isCollocated(collocatedFaces(cpp));
+
+            forAll(isCollocated, i)
             {
-                label faceI = pp.start();
+                label faceI = pp.start()+i;
 
-                forAll(pp, i)
+                if (faceCutType_[faceI] != NOTCUT)
                 {
-                    if (faceCutType_[faceI] != NOTCUT)
+                    if (isCollocated[i])
                     {
                         generateFaceTriPoints
                         (
@@ -600,7 +604,30 @@ void Foam::isoSurface::generateTriPoints
                             triMeshCells
                         );
                     }
-                    faceI++;
+                    else
+                    {
+                        generateFaceTriPoints
+                        (
+                            cVals,
+                            pVals,
+
+                            cCoords,
+                            pCoords,
+
+                            snappedPoints,
+                            snappedCc,
+                            snappedPoint,
+                            faceI,
+
+                            cVals.boundaryField()[patchI][i],
+                            cCoords.boundaryField()[patchI][i],
+                            false,
+                            pTraits<Type>::zero,
+
+                            triPoints,
+                            triMeshCells
+                        );
+                    }
                 }
             }
         }

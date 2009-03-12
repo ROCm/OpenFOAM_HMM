@@ -108,7 +108,7 @@ Foam::PatchTools::sortedEdgeFaces
 
             faceAngles.sort();
 
-            sortedEdgeFaces[edgeI] = IndirectList<label>
+            sortedEdgeFaces[edgeI] = UIndirectList<label>
             (
                 faceNbs,
                 faceAngles.indices()

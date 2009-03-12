@@ -352,17 +352,24 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 {
     if (tree_.empty())
     {
-        treeBoundBox bb(points(), meshPoints());
-
         // Random number generator. Bit dodgy since not exactly random ;-)
         Random rndGen(65431);
+
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points(), meshPoints()).extend(rndGen, 1E-4)
+        );
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         tree_.reset
         (
             new indexedOctree<treeDataTriSurface>
             (
                 treeDataTriSurface(*this),
-                bb.extend(rndGen, 1E-4),    // slightly randomize bb
+                bb,
                 10,     // maxLevel
                 10,     // leafsize
                 3.0     // duplicity
@@ -375,12 +382,10 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 
 
 const Foam::indexedOctree<Foam::treeDataEdge>&
-    Foam::triSurfaceMesh::edgeTree() const
+ Foam::triSurfaceMesh::edgeTree() const
 {
     if (edgeTree_.empty())
     {
-        treeBoundBox bb(localPoints());
-
         // Boundary edges
         labelList bEdges
         (
@@ -395,6 +400,15 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
         // Random number generator. Bit dodgy since not exactly random ;-)
         Random rndGen(65431);
 
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points(), meshPoints()).extend(rndGen, 1E-4)
+        );
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
         edgeTree_.reset
         (
             new indexedOctree<treeDataEdge>
@@ -406,7 +420,7 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
                     localPoints(),  // points
                     bEdges          // selected edges
                 ),
-                bb.extend(rndGen, 1E-4),    // slightly randomize bb
+                bb,     // bb
                 8,      // maxLevel
                 10,     // leafsize
                 3.0     // duplicity
@@ -463,8 +477,11 @@ void Foam::triSurfaceMesh::findNearest
 
     forAll(samples, i)
     {
-        static_cast<pointIndexHit&>(info[i]) =
-            octree.findNearest(samples[i], nearestDistSqr[i]);
+        static_cast<pointIndexHit&>(info[i]) = octree.findNearest
+        (
+            samples[i],
+            nearestDistSqr[i]
+        );
     }
 }
 
@@ -504,8 +521,11 @@ void Foam::triSurfaceMesh::findLineAny
 
     forAll(start, i)
     {
-        static_cast<pointIndexHit&>(info[i]) =
-            octree.findLineAny(start[i], end[i]);
+        static_cast<pointIndexHit&>(info[i]) = octree.findLineAny
+        (
+            start[i],
+            end[i]
+        );
     }
 }
 

@@ -375,7 +375,7 @@ void Foam::removeFaces::mergeFaces
     //{
     //    Pout<< "Modifying masterface " << faceI
     //        << " from faces:" << faceLabels
-    //        << " old verts:" << IndirectList<face>(mesh_.faces(), faceLabels)
+    //        << " old verts:" << UIndirectList<face>(mesh_.faces(), faceLabels)
     //        << " for new verts:"
     //        << mergedFace
     //        << " possibly new owner " << own

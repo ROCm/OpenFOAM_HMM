@@ -209,7 +209,7 @@ void Foam::directMappedPolyPatch::findSamples
                 // patch faces
                 const labelList patchFaces(identity(pp.size()) + pp.start());
 
-                const treeBoundBox patchBb
+                treeBoundBox patchBb
                 (
                     treeBoundBox(pp.points(), pp.meshPoints()).extend
                     (
@@ -217,6 +217,8 @@ void Foam::directMappedPolyPatch::findSamples
                         1E-4
                     )
                 );
+                patchBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+                patchBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
                 autoPtr<indexedOctree<treeDataFace> > boundaryTree
                 (
@@ -472,7 +474,7 @@ void Foam::directMappedPolyPatch::calcMapping() const
 
     forAll(subMap, procI)
     {
-        sendLabels[procI] = IndirectList<label>
+        sendLabels[procI] = UIndirectList<label>
         (
             sampleIndices,
             subMap[procI]
@@ -491,7 +493,7 @@ void Foam::directMappedPolyPatch::calcMapping() const
     forAll(constructMap, procI)
     {
         receiveFaceLabels[procI] =
-            IndirectList<label>(patchFaces, constructMap[procI]);
+            UIndirectList<label>(patchFaces, constructMap[procI]);
 
         if (debug)
         {

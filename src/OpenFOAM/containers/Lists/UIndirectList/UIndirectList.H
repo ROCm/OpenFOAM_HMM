@@ -23,17 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::IndirectList
+    Foam::UIndirectList
 
 Description
+    A List with indirect addressing. Like IndirectList but does not store
+    addressing.
 
 SourceFiles
-    IndirectListI.H
+    UIndirectListI.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IndirectList_H
-#define IndirectList_H
+#ifndef UIndirectList_H
+#define UIndirectList_H
 
 #include "List.H"
 
@@ -43,22 +45,16 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class IndirectList Declaration
+                           Class UIndirectList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
-class IndirectList
+class UIndirectList
 {
     // Private data
 
-        const UList<T>& completeList_;
-        List<label> addresses_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise assignment
-        void operator=(const IndirectList<T>&);
+        UList<T>& completeList_;
+        const UList<label>& addressing_;
 
 
 public:
@@ -66,7 +62,7 @@ public:
     // Constructors
 
         //- Construct given the complete list and the addressing array
-        inline IndirectList(const UList<T>&, const List<label>&);
+        inline UIndirectList(const UList<T>&, const UList<label>&);
 
 
     // Member Functions
@@ -74,14 +70,28 @@ public:
         // Access
 
             inline label size() const;
+            inline bool  empty() const;
+
             inline const UList<T>& completeList() const;
-            inline const List<label>& addresses() const;
+            inline const List<label>& addressing() const;
 
 
         // Member Operators
 
+            //- Return the addressed elements as a List
+            inline List<T> operator()() const;
+
+            //- Return non-const access to an element
+            inline T& operator[](const label);
+
             //- Return const access to an element
             inline const T& operator[](const label) const;
+
+            //- Assignment from UList of addressed elements
+            inline void operator=(const UList<T>&);
+
+            //- Assignment of all entries to the given value
+            inline void operator=(const T&);
 };
 
 
@@ -91,7 +101,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "IndirectListI.H"
+#include "UIndirectListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
