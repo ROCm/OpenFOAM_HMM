@@ -187,22 +187,22 @@ public:
 
             //- Assign copy
             //  Always case sensitive
-            inline void operator=(const wordRe&);
+            inline const wordRe& operator=(const wordRe&);
 
             //- Copy word, never a regular expression
-            inline void operator=(const word&);
+            inline const wordRe& operator=(const word&);
 
             //- Copy string, auto-test for regular expression
             //  Always case sensitive
-            inline void operator=(const string&);
+            inline const wordRe& operator=(const string&);
 
             //- Copy string, auto-test for regular expression
             //  Always case sensitive
-            inline void operator=(const std::string&);
+            inline const wordRe& operator=(const std::string&);
 
             //- Copy string, auto-test for regular expression
             //  Always case sensitive
-            inline void operator=(const char*);
+            inline const wordRe& operator=(const char*);
 
 
     // IOstream operators
