@@ -154,14 +154,20 @@ public:
             inline label& eventNo();
 
             //- Am I uptodate with respect to other regIOobjects
-            bool uptodate(const word&) const;
-            bool uptodate(const word&, const word&) const;
-            bool uptodate(const word&, const word&, const word&) const;
-            bool uptodate(const word&, const word&, const word&, const word&)
-             const;
+            bool upToDate(const word&) const;
+            bool upToDate(const word&, const word&) const;
+            bool upToDate(const word&, const word&, const word&) const;
+            bool upToDate
+            (
+                const word&,
+                const word&,
+                const word&,
+                const word&
+            ) const;
 
-            //- Flag me as uptodate
-            void setUptodate();
+            //- Flag me as up to date
+            void setUpToDate();
+
 
         // Edit
 
