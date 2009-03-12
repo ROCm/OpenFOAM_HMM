@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
     Info << "Vmax/Vmin = " << Vmax/Vmin << endl;
     Info << "\n end\n";
 
-    return(0);
+    return 0;
 }
 
 

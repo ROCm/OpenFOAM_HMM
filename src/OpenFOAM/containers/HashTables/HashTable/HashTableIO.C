@@ -33,18 +33,58 @@ License
 template<class T, class Key, class Hash>
 Foam::HashTable<T, Key, Hash>::HashTable(Istream& is, const label size)
 :
-    tableSize_(size),
-    table_(new hashedEntry*[tableSize_]),
+    HashTableName(),
     nElmts_(0),
+    tableSize_(canonicalSize(size)),
+    table_(new hashedEntry*[tableSize_]),
     endIter_(*this, NULL, 0),
     endConstIter_(*this, NULL, 0)
 {
-    for (label i=0; i<tableSize_; i++)
+    for (label hashIdx = 0; hashIdx < tableSize_; hashIdx++)
     {
-        table_[i] = 0;
+        table_[hashIdx] = 0;
     }
 
     operator>>(is, *this);
+}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+template<class T, class Key, class Hash>
+Foam::Ostream&
+Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
+{
+    label used = 0;
+    label maxChain = 0;
+    unsigned avgChain = 0;
+
+    for (label hashIdx = 0; hashIdx < tableSize_; ++hashIdx)
+    {
+        label count = 0;
+        for (hashedEntry* ep = table_[hashIdx]; ep; ep = ep->next_)
+        {
+            ++count;
+        }
+
+        if (count)
+        {
+            ++used;
+            avgChain += count;
+
+            if (maxChain < count)
+            {
+                maxChain = count;
+            }
+        }
+    }
+
+    os  << "HashTable<T,Key,Hash>"
+        << " elements:" << size() << " slots:" << used << "/" << tableSize_
+        << " chaining(avg/max):" << (used ? float(avgChain/used) : 0)
+        << "/" << maxChain << endl;
+
+    return os;
 }
 
 
@@ -133,10 +173,13 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
         )
         {
             is.putBack(lastToken);
+
             Key key;
             is >> key;
+
             T element;
             is >> element;
+
             L.insert(key, element);
 
             is.fatalCheck
@@ -174,8 +217,8 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
     // Write contents
     for
     (
-        typename HashTable<T, Key, Hash>::const_iterator iter = L.begin();
-        iter != L.end();
+        typename HashTable<T, Key, Hash>::const_iterator iter = L.cbegin();
+        iter != L.cend();
         ++iter
     )
     {

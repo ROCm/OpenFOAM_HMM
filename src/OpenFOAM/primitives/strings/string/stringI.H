@@ -133,7 +133,7 @@ inline bool Foam::string::meta(const string& str, const char quote)
 
 
 template<class String>
-inline Foam::string 
+inline Foam::string
 Foam::string::quotemeta(const string& str, const char quote)
 {
     if (!quote)
@@ -196,34 +196,13 @@ inline Foam::string Foam::string::operator()(const size_type n) const
 }
 
 
-inline Foam::string::hash::hash()
-{}
-
-
-inline Foam::string::size_type Foam::string::hash::operator()
-(
-    const string& key
-) const
-{
-    register size_type hashVal = 0;
-
-    for (string::const_iterator iter=key.begin(); iter!=key.end(); ++iter)
-    {
-        hashVal = hashVal<<1 ^ *iter;
-    }
-
-    return hashVal;
-}
-
-
-inline Foam::string::size_type Foam::string::hash::operator()
+inline unsigned Foam::string::hash::operator()
 (
     const string& key,
-    const size_type tableSize
+    unsigned seed
 ) const
 {
-    return ::abs(operator()(key)) % tableSize;
+    return Hasher(key.data(), key.size(), seed);
 }
-
 
 // ************************************************************************* //

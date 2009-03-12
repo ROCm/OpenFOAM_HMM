@@ -84,9 +84,6 @@ class autoSnapDriver
 
         // Snapping
 
-             //- Split surfaces into non-zoned and zones ones
-            void getZonedSurfaces(labelList&, labelList&) const;
-
             //- Get faces to repatch. Returns map from face to patch.
             Map<label> getZoneBafflePatches(const bool allowBoundary) const;
 

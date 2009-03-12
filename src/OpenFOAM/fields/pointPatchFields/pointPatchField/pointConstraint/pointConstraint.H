@@ -41,10 +41,11 @@ SourceFiles
 #ifndef pointConstraint_H
 #define pointConstraint_H
 
-#include "Tuple2.H"
 #include "label.H"
+#include "uLabel.H"
 #include "vector.H"
 #include "tensor.H"
+#include "Tuple2.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -51,13 +51,13 @@ namespace Foam
     defineTypeNameAndDebug(hexRef8, 0);
 
     //- Reduction class. If x and y are not equal assign value.
-    template< int value >
+    template<int value>
     class ifEqEqOp
     {
         public:
-        void operator()( label& x, const label& y ) const
+        void operator()(label& x, const label& y) const
         {
-            x = (x==y) ? x:value;
+            x = (x==y) ? x : value;
         }
     };
 }

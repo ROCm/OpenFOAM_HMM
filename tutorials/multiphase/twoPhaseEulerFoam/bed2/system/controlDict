@@ -50,41 +50,44 @@ maxCo           0.9;
 maxDeltaT       1e-05;
 
 functions
-(
+{
     fieldAverage1
     {
-        type fieldAverage;
+        type            fieldAverage;
         functionObjectLibs ( "libfieldFunctionObjects.so" );
-        outputControl     outputTime;
+        outputControl   outputTime;
         fields
         (
             Ua
             {
-                 mean on;
-                 prime2Mean off;
-                 base time;
+                 mean        on;
+                 prime2Mean  off;
+                 base        time;
             }
+
             Ub
             {
-                 mean on;
-                 prime2Mean off;
-                 base time;
+                 mean        on;
+                 prime2Mean  off;
+                 base        time;
             }
+
             alpha
             {
-                 mean on;
-                 prime2Mean off;
-                 base time;
+                 mean        on;
+                 prime2Mean  off;
+                 base        time;
             }
+
             p
             {
-                 mean on;
-                 prime2Mean off;
-                 base time;
+                 mean        on;
+                 prime2Mean  off;
+                 base        time;
             }
         );
     }
-);
+}
 
 
 // ************************************************************************* //

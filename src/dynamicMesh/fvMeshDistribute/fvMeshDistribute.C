@@ -864,7 +864,7 @@ void Foam::fvMeshDistribute::findCouples
 {
     // Store domain neighbour as map so we can easily look for pair
     // with same face+proc.
-    HashTable<label, labelPair, labelPairHash> map(domainFace.size());
+    HashTable<label, labelPair, labelPair::Hash<> > map(domainFace.size());
 
     forAll(domainFace, bFaceI)
     {
@@ -884,8 +884,8 @@ void Foam::fvMeshDistribute::findCouples
         {
             labelPair myData(sourceFace[bFaceI], sourceProc[bFaceI]);
 
-            HashTable<label, labelPair, labelPairHash>::const_iterator iter =
-                map.find(myData);
+            HashTable<label, labelPair, labelPair::Hash<> >::const_iterator
+                iter = map.find(myData);
 
             if (iter != map.end())
             {

@@ -39,10 +39,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(polyMesh, 0);
-}
+defineTypeNameAndDebug(Foam::polyMesh, 0);
+
 
 Foam::word Foam::polyMesh::defaultRegion = "region0";
 Foam::word Foam::polyMesh::meshSubDir = "polyMesh";

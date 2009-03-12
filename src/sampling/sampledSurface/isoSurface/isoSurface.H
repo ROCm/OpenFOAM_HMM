@@ -56,6 +56,7 @@ SourceFiles
 #include "pointIndexHit.H"
 #include "PackedBoolList.H"
 #include "volFields.H"
+#include "slicedVolFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,6 +93,11 @@ class isoSurface
         //- Reference to mesh
         const fvMesh& mesh_;
 
+        const scalarField& pVals_;
+
+        //- Input volScalarField with separated coupled patches rewritten
+        autoPtr<slicedVolScalarField> cValsPtr_;
+
         //- Isosurface value
         const scalar iso_;
 
@@ -117,6 +123,38 @@ class isoSurface
 
     // Private Member Functions
 
+        // Point synchronisation
+
+            //- Does tensor differ (to within mergeTolerance) from identity
+            bool noTransform(const tensor& tt) const;
+
+            //- Is patch a collocated (i.e. non-separated) coupled patch?
+            static bool collocatedPatch(const polyPatch&);
+
+            //- Per face whether is collocated
+            PackedBoolList collocatedFaces(const coupledPolyPatch&) const;
+
+            //- Take value at local point patchPointI and assign it to its
+            //  correct place in patchValues (for transferral) and sharedValues
+            //  (for reduction)
+            void insertPointData
+            (
+                const processorPolyPatch& pp,
+                const Map<label>& meshToShared,
+                const pointField& pointValues,
+                const label patchPointI,
+                pointField& patchValues,
+                pointField& sharedValues
+            ) const;
+
+            //- Synchonise points on all non-separated coupled patches
+            void syncUnseparatedPoints
+            (
+                pointField& collapsedPoint,
+                const point& nullValue
+            ) const;
+
+
         //- Get location of iso value as fraction inbetween s0,s1
         scalar isoFraction
         (
@@ -136,6 +174,7 @@ class isoSurface
         void getNeighbour
         (
             const labelList& boundaryRegion,
+            const volVectorField& meshC,
             const volScalarField& cVals,
             const label cellI,
             const label faceI,
@@ -147,6 +186,7 @@ class isoSurface
         void calcCutTypes
         (
             const labelList& boundaryRegion,
+            const volVectorField& meshC,
             const volScalarField& cVals,
             const scalarField& pVals
         );
@@ -170,6 +210,7 @@ class isoSurface
         void calcSnappedCc
         (
             const labelList& boundaryRegion,
+            const volVectorField& meshC,
             const volScalarField& cVals,
             const scalarField& pVals,
             DynamicList<point>& snappedPoints,
@@ -182,10 +223,21 @@ class isoSurface
         (
             const PackedBoolList& isBoundaryPoint,
             const labelList& boundaryRegion,
+            const volVectorField& meshC,
             const volScalarField& cVals,
             const scalarField& pVals,
             DynamicList<point>& snappedPoints,
             labelList& snappedPoint
+        ) const;
+
+
+        //- Return input field with coupled (and empty) patch values rewritten
+        template<class Type>
+        tmp<SlicedGeometricField
+        <Type, fvPatchField, slicedFvPatchField, volMesh> >
+        adaptPatchFields
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& fld
         ) const;
 
         //- Generate single point by interpolation or snapping
@@ -345,8 +397,8 @@ public:
     // Constructors
 
         //- Construct from cell values and point values. Uses boundaryField
-        //  for boundary values. Requires on coupled patchfields to be set
-        //  to the opposite cell value.
+        //  for boundary values. Holds reference to cellIsoVals and
+        //  pointIsoVals.
         isoSurface
         (
             const volScalarField& cellIsoVals,
@@ -376,8 +428,6 @@ public:
         template <class Type>
         tmp<Field<Type> > interpolate
         (
-            const volScalarField& cellIsoVals,
-            const scalarField& pointIsoVals,
             const GeometricField<Type, fvPatchField, volMesh>& cCoords,
             const Field<Type>& pCoords
         ) const;
