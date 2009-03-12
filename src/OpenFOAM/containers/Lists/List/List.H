@@ -68,6 +68,7 @@ template<class T> class SortableList;
 template<class T> class IndirectList;
 template<class T> class BiIndirectList;
 
+typedef UList<label> unallocLabelList;
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -111,6 +112,9 @@ public:
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
+
+        //- Construct as subset.
+        List(const UList<T>&, const unallocLabelList& mapAddressing);
 
         //- Construct given start and end iterators.
         template<class InputIterator>

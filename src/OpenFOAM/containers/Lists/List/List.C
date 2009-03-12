@@ -171,6 +171,29 @@ Foam::List<T>::List(List<T>& a, bool reUse)
 }
 
 
+// Construct as subset
+template<class T>
+Foam::List<T>::List(const UList<T>& a, const unallocLabelList& map)
+:
+    UList<T>(NULL, map.size())
+{
+    if (this->size_)
+    {
+        this->v_ = new T[this->size_];
+
+        List_ACCESS(T, (*this), vp);
+        List_CONST_ACCESS(T, a, ap);
+        List_FOR_ALL(map, i)
+            List_ELEM((*this), vp, i) = List_ELEM(a, ap, (map[i]));
+        List_END_FOR_ALL
+    }
+    else
+    {
+        this->v_ = 0;
+    }
+}
+
+
 // Construct given start and end iterators.
 template<class T>
 template<class InputIterator>
