@@ -26,6 +26,7 @@ Class
     Foam::basicReactingCloud
 
 Description
+    Reacting cloud templated on the reacting parcel
 
 SourceFiles
     basicReactingCloud.C

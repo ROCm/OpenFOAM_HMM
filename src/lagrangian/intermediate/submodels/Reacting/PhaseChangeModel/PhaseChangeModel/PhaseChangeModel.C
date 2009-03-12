@@ -33,7 +33,8 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
 (
     CloudType& owner
 )
-:   dict_(dictionary::null),
+:
+    dict_(dictionary::null),
     owner_(owner),
     coeffDict_(dictionary::null)
 {}
@@ -46,7 +47,8 @@ Foam::PhaseChangeModel<CloudType>::PhaseChangeModel
     CloudType& owner,
     const word& type
 )
-:   dict_(dict),
+:
+    dict_(dict),
     owner_(owner),
     coeffDict_(dict.subDict(type + "Coeffs"))
 {}

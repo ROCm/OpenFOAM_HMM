@@ -53,7 +53,6 @@ class cloudAbsorptionEmission
 :
     public absorptionEmissionModel
 {
-
     // Private data
 
         //- Coefficients dictionary
@@ -72,16 +71,11 @@ public:
     // Constructors
 
         //- Construct from components
-        cloudAbsorptionEmission
-        (
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+        cloudAbsorptionEmission(const dictionary& dict, const fvMesh& mesh);
 
 
     // Destructor
-
-        ~cloudAbsorptionEmission();
+    virtual ~cloudAbsorptionEmission();
 
 
     // Member Operators

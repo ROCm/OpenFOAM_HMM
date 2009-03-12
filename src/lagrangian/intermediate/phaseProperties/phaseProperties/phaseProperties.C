@@ -131,7 +131,7 @@ void Foam::phaseProperties::checkTotalMassFraction() const
 }
 
 
-Foam::word Foam::phaseProperties::phaseToStateLabel(phaseType pt)
+Foam::word Foam::phaseProperties::phaseToStateLabel(phaseType pt) const
 {
     word state = "(unknown)";
     switch (pt)

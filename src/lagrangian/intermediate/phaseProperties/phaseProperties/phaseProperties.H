@@ -101,7 +101,7 @@ private:
         void checkTotalMassFraction() const;
 
         //- Set the state label
-        word phaseToStateLabel(phaseType pt);
+        word phaseToStateLabel(phaseType pt) const;
 
 
 public:
