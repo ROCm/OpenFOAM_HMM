@@ -51,8 +51,14 @@ Foam::FreeStream<CloudType>::FreeStream
 
     if (patchIndex_ == -1)
     {
-        FatalErrorIn("Foam::DsmcCloud<ParcelType>::initialise")
-        << "patch " << patchName << " not found." << nl
+        FatalErrorIn
+        (
+            "Foam::FreeStream<CloudType>::FreeStream"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "patch " << patchName << " not found." << nl
             << abort(FatalError);
     }
 
@@ -78,8 +84,14 @@ Foam::FreeStream<CloudType>::FreeStream
 
         if (moleculeTypeIds_[i] == -1)
         {
-            FatalErrorIn("Foam::DsmcCloud<ParcelType>::initialise")
-                << "typeId " << molecules[i] << "not defined in cloud." << nl
+            FatalErrorIn
+            (
+                "Foam::FreeStream<CloudType>::FreeStream"
+                "("
+                    "const dictionary&, "
+                    "CloudType&"
+                ")"
+            )   << "typeId " << molecules[i] << "not defined in cloud." << nl
                 << abort(FatalError);
         }
     }
@@ -175,7 +187,7 @@ void Foam::FreeStream<CloudType>::inflow()
 
         // Other tangential unit vector.  Rescaling in case face is not
         // flat and nw and tw1 aren't perfectly orthogonal
-        vector tw2 = nw ^ tw1;
+        vector tw2 = nw^tw1;
         tw2 /= mag(tw2);
 
         forAll(particleFluxAccumulators_, i)
@@ -232,7 +244,7 @@ void Foam::FreeStream<CloudType>::inflow()
                    *(
                         rndGen.GaussNormal()*tw1
                       + rndGen.GaussNormal()*tw2
-                      - sqrt(-2.0*log(max(1 - rndGen.scalar01(),VSMALL)))*nw
+                      - sqrt(-2.0*log(max(1 - rndGen.scalar01(), VSMALL)))*nw
                     );
 
                 U += velocity_;

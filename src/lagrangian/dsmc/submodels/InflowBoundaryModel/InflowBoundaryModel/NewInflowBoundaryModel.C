@@ -36,10 +36,7 @@ Foam::InflowBoundaryModel<CloudType>::New
     CloudType& owner
 )
 {
-    word InflowBoundaryModelType
-    (
-        dict.lookup("InflowBoundaryModel")
-    );
+    word InflowBoundaryModelType(dict.lookup("InflowBoundaryModel"));
 
     Info<< "Selecting InflowBoundaryModel " << InflowBoundaryModelType << endl;
 
@@ -55,7 +52,7 @@ Foam::InflowBoundaryModel<CloudType>::New
         )   << "Unknown InflowBoundaryModelType type "
             << InflowBoundaryModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid InflowBoundaryModel types are :" << nl
+            << "    Valid InflowBoundaryModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

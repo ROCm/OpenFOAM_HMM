@@ -124,7 +124,6 @@ public:
 
     //- Introduce particles
     virtual void inflow() = 0;
-
 };
 
 

@@ -40,7 +40,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class NoInflow Declaration
+                          Class NoInflow Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>

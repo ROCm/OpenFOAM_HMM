@@ -105,7 +105,7 @@ Foam::DsmcCloud<ParcelType>::constProps
     {
         FatalErrorIn("Foam::DsmcCloud<ParcelType>::constProps(label typeId)")
             << "constantProperties for requested typeId index "
-            << typeId << " do not exist"  << nl
+            << typeId << " do not exist" << nl
             << abort(FatalError);
     }
 

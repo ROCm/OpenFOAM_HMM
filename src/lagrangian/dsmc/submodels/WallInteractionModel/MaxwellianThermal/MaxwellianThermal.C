@@ -99,7 +99,7 @@ void Foam::MaxwellianThermal<CloudType>::correct
     vector tw1 = Ut/mag(Ut);
 
     // Other tangential unit vector
-    vector tw2 = nw ^ tw1;
+    vector tw2 = nw^tw1;
 
     scalar T = cloud.T().boundaryField()[wppIndex][wppLocalFace];
 
@@ -112,7 +112,7 @@ void Foam::MaxwellianThermal<CloudType>::correct
        *(
             rndGen.GaussNormal()*tw1
           + rndGen.GaussNormal()*tw2
-          - sqrt(-2.0*log(max(1 - rndGen.scalar01(),VSMALL)))*nw
+          - sqrt(-2.0*log(max(1 - rndGen.scalar01(), VSMALL)))*nw
         );
 
     U += cloud.U().boundaryField()[wppIndex][wppLocalFace];

@@ -128,7 +128,7 @@ void Foam::DsmcCloud<ParcelType>::initialise
 
         label typeId(findIndex(typeIdList_, moleculeName));
 
-        if(typeId == -1)
+        if (typeId == -1)
         {
             FatalErrorIn("Foam::DsmcCloud<ParcelType>::initialise")
                 << "typeId " << moleculeName << "not defined." << nl
@@ -274,7 +274,8 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
             scalar sigmaTcRMax = sigmaTcRMax_[celli];
 
-            scalar selectedPairs = collisionSelectionRemainder_[celli]
+            scalar selectedPairs =
+                collisionSelectionRemainder_[celli]
               + 0.5*nC*(nC-1)*nParticle_*sigmaTcRMax*deltaT
                /mesh_.cellVolumes()[celli];
 
@@ -284,13 +285,13 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
             collisionCandidates += nCandidates;
 
-            for(label c = 0; c < nCandidates; c++)
+            for (label c = 0; c < nCandidates; c++)
             {
                 // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 // subCell candidate selection procedure
 
                 // Select the first collision candidate
-                label candidateP = rndGen_.integer(0, nC-1);
+                label candidateP = rndGen_.integer(0, nC - 1);
 
                 // Declare the second collision candidate
                 label candidateQ = -1;
@@ -307,7 +308,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
                     do
                     {
-                        candidateQ = subCellPs[rndGen_.integer(0, nSC-1)];
+                        candidateQ = subCellPs[rndGen_.integer(0, nSC - 1)];
 
                     } while(candidateP == candidateQ);
                 }
@@ -319,7 +320,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
                     do
                     {
-                        candidateQ = rndGen_.integer(0, nC-1);
+                        candidateQ = rndGen_.integer(0, nC - 1);
 
                     } while(candidateP == candidateQ);
                 }
@@ -705,7 +706,7 @@ void Foam::DsmcCloud<ParcelType>::evolve()
 
     if (debug)
     {
-       this->dumpParticlePositions();
+        this->dumpParticlePositions();
     }
 
     // Insert new particles from the inflow boundary
@@ -764,12 +765,14 @@ Foam::vector Foam::DsmcCloud<ParcelType>::equipartitionLinearVelocity
     scalar mass
 )
 {
-    return sqrt(kb*temperature/mass)*vector
-    (
-        rndGen_.GaussNormal(),
-        rndGen_.GaussNormal(),
-        rndGen_.GaussNormal()
-    );
+    return
+        sqrt(kb*temperature/mass)
+       *vector
+        (
+            rndGen_.GaussNormal(),
+            rndGen_.GaussNormal(),
+            rndGen_.GaussNormal()
+        );
 }
 
 
@@ -782,11 +785,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
 {
     scalar Ei = 0.0;
 
-    if
-    (
-        iDof < 2.0 + SMALL
-     && iDof > 2.0 - SMALL
-    )
+    if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
     {
         // Special case for iDof = 2, i.e. diatomics;
         Ei = -log(rndGen_.scalar01())*kb*temperature;

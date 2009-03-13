@@ -50,7 +50,6 @@ class FreeStream
 :
     public InflowBoundaryModel<CloudType>
 {
-
     // Private data
 
         //- Index of patch to introduce particles across
@@ -72,6 +71,7 @@ class FreeStream
         // field entry corresponding to a face on the patch to be injected
         // across.
         List<Field<scalar> > particleFluxAccumulators_;
+
 
 public:
 

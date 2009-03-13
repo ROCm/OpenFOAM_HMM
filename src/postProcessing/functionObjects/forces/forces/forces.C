@@ -163,7 +163,13 @@ Foam::forces::forces
         active_ = false;
         WarningIn
         (
-            "forces::forces(const objectRegistry& obr, const dictionary& dict)"
+            "Foam::forces::forces"
+            "("
+                "const word&, "
+                "const objectRegistry&, "
+                "const dictionary&, "
+                "const bool"
+            ")"
         )   << "No fvMesh available, deactivating."
             << endl;
     }

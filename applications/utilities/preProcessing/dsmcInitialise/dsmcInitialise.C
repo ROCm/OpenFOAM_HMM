@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
-            << "Failed writing moleculeCloud."
+            << "Failed writing dsmcCloud."
             << nl << exit(FatalError);
     }
 
