@@ -151,6 +151,8 @@ Foam::forces::forces
     patchSet_(),
     pName_(""),
     UName_(""),
+    directForceDensity_(false),
+    fDName_(""),
     rhoRef_(0),
     CofR_(vector::zero),
     forcesFilePtr_(NULL)
@@ -161,7 +163,13 @@ Foam::forces::forces
         active_ = false;
         WarningIn
         (
-            "forces::forces(const objectRegistry& obr, const dictionary& dict)"
+            "Foam::forces::forces"
+            "("
+                "const word&, "
+                "const objectRegistry&, "
+                "const dictionary&, "
+                "const bool"
+            ")"
         )   << "No fvMesh available, deactivating."
             << endl;
     }
@@ -189,27 +197,50 @@ void Foam::forces::read(const dictionary& dict)
         patchSet_ =
             mesh.boundaryMesh().patchSet(wordList(dict.lookup("patches")));
 
-        // Optional entries U and p
-        pName_ = dict.lookupOrDefault<word>("pName", "p");
-        UName_ = dict.lookupOrDefault<word>("UName", "U");
+        dict.readIfPresent("directForceDensity", directForceDensity_);
 
-        // Check whether UName and pName exists, if not deactivate forces
-        if
-        (
-            !obr_.foundObject<volVectorField>(UName_)
-         || !obr_.foundObject<volScalarField>(pName_)
-        )
+        if (directForceDensity_)
         {
-            active_ = false;
-            WarningIn("void forces::read(const dictionary& dict)")
-                << "Could not find " << UName_ << " or "
-                << pName_ << " in database." << nl
-                << "    De-activating forces."
-                << endl;
-        }
+            // Optional entry for fDName
+            fDName_ = dict.lookupOrDefault<word>("fDName", "fD");
 
-        // Reference density needed for incompressible calculations
-        rhoRef_ = readScalar(dict.lookup("rhoInf"));
+            // Check whether fDName exists, if not deactivate forces
+            if
+            (
+                !obr_.foundObject<volVectorField>(fDName_)
+            )
+            {
+                active_ = false;
+                WarningIn("void forces::read(const dictionary& dict)")
+                << "Could not find " << fDName_ << " in database." << nl
+                    << "    De-activating forces."
+                    << endl;
+            }
+        }
+        else
+        {
+            // Optional entries U and p
+            pName_ = dict.lookupOrDefault<word>("pName", "p");
+            UName_ = dict.lookupOrDefault<word>("UName", "U");
+
+            // Check whether UName and pName exists, if not deactivate forces
+            if
+            (
+                !obr_.foundObject<volVectorField>(UName_)
+             || !obr_.foundObject<volScalarField>(pName_)
+            )
+            {
+                active_ = false;
+                WarningIn("void forces::read(const dictionary& dict)")
+                << "Could not find " << UName_ << " or "
+                    << pName_ << " in database." << nl
+                    << "    De-activating forces."
+                    << endl;
+            }
+
+            // Reference density needed for incompressible calculations
+            rhoRef_ = readScalar(dict.lookup("rhoInf"));
+        }
 
         // Centre of rotation for moment calculations
         CofR_ = dict.lookup("CofR");
@@ -307,40 +338,76 @@ void Foam::forces::write()
 
 Foam::forces::forcesMoments Foam::forces::calcForcesMoment() const
 {
-    const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
-    const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
-
-    const fvMesh& mesh = U.mesh();
-
     forcesMoments fm
     (
         pressureViscous(vector::zero, vector::zero),
         pressureViscous(vector::zero, vector::zero)
     );
 
-    const surfaceVectorField::GeometricBoundaryField& Sfb =
-        mesh.Sf().boundaryField();
-
-    tmp<volSymmTensorField> tdevRhoReff = devRhoReff();
-    const volSymmTensorField::GeometricBoundaryField& devRhoReffb
-        = tdevRhoReff().boundaryField();
-
-    forAllConstIter(labelHashSet, patchSet_, iter)
+    if (directForceDensity_)
     {
-        label patchi = iter.key();
+        const volVectorField& fD = obr_.lookupObject<volVectorField>(fDName_);
 
-        vectorField Md = mesh.C().boundaryField()[patchi] - CofR_;
+        const fvMesh& mesh = fD.mesh();
 
-        vectorField pf =
-            mesh.Sf().boundaryField()[patchi]*p.boundaryField()[patchi];
+        const surfaceVectorField::GeometricBoundaryField& Sfb =
+            mesh.Sf().boundaryField();
 
-        fm.first().first() += rho(p)*sum(pf);
-        fm.second().first() += rho(p)*sum(Md ^ pf);
+        forAllConstIter(labelHashSet, patchSet_, iter)
+        {
+            label patchi = iter.key();
 
-        vectorField vf = Sfb[patchi] & devRhoReffb[patchi];
+            vectorField Md = mesh.C().boundaryField()[patchi] - CofR_;
 
-        fm.first().second() += sum(vf);
-        fm.second().second() += sum(Md ^ vf);
+            scalarField sA = mag(Sfb[patchi]);
+
+            // Normal force = surfaceUnitNormal * (surfaceNormal & forceDensity)
+            vectorField fN =
+                Sfb[patchi]/sA
+               *(
+                    Sfb[patchi] & fD.boundaryField()[patchi]
+                );
+
+            fm.first().first() += sum(fN);
+            fm.second().first() += sum(Md ^ fN);
+
+            // Tangential force (total force minus normal fN)
+            vectorField fT = sA*fD.boundaryField()[patchi] - fN;
+
+            fm.first().second() += sum(fT);
+            fm.second().second() += sum(Md ^ fT);
+        }
+    }
+    else
+    {
+        const volVectorField& U = obr_.lookupObject<volVectorField>(UName_);
+        const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
+
+        const fvMesh& mesh = U.mesh();
+
+        const surfaceVectorField::GeometricBoundaryField& Sfb =
+            mesh.Sf().boundaryField();
+
+        tmp<volSymmTensorField> tdevRhoReff = devRhoReff();
+        const volSymmTensorField::GeometricBoundaryField& devRhoReffb
+            = tdevRhoReff().boundaryField();
+
+        forAllConstIter(labelHashSet, patchSet_, iter)
+        {
+            label patchi = iter.key();
+
+            vectorField Md = mesh.C().boundaryField()[patchi] - CofR_;
+
+            vectorField pf = Sfb[patchi]*p.boundaryField()[patchi];
+
+            fm.first().first() += rho(p)*sum(pf);
+            fm.second().first() += rho(p)*sum(Md ^ pf);
+
+            vectorField vf = Sfb[patchi] & devRhoReffb[patchi];
+
+            fm.first().second() += sum(vf);
+            fm.second().second() += sum(Md ^ vf);
+        }
     }
 
     reduce(fm, sumOp());
