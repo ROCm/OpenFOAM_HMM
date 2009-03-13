@@ -36,5 +36,5 @@ int main()
     Info<< "tet circumRadius = "
         << tetrahedron<point, point>(a, b, c, d).circumRadius() << endl;
 
-    return(0);
+    return 0;
 }

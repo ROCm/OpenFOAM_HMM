@@ -57,7 +57,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class multiphaseMixture Declaration
+                      Class multiphaseMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 class multiphaseMixture
@@ -84,15 +84,6 @@ public:
             label operator()(const interfacePair& key) const
             {
                 return word::hash()(key.first()) + word::hash()(key.second());
-            }
-
-            label operator()
-            (
-                const interfacePair& key,
-                const label tableSize
-            ) const
-            {
-                return mag(operator()(key)) % tableSize;
             }
         };
 

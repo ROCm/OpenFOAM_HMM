@@ -43,6 +43,64 @@ addToRunTimeSelectionTable(searchableSurface, triSurfaceMesh, dict);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+//// Special version of Time::findInstance that does not check headerOk
+//// to search for instances of raw files
+//Foam::word Foam::triSurfaceMesh::findRawInstance
+//(
+//    const Time& runTime,
+//    const fileName& dir,
+//    const word& name
+//)
+//{
+//    // Check current time first
+//    if (isFile(runTime.path()/runTime.timeName()/dir/name))
+//    {
+//        return runTime.timeName();
+//    }
+//    instantList ts = runTime.times();
+//    label instanceI;
+//
+//    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
+//    {
+//        if (ts[instanceI].value() <= runTime.timeOutputValue())
+//        {
+//            break;
+//        }
+//    }
+//
+//    // continue searching from here
+//    for (; instanceI >= 0; --instanceI)
+//    {
+//        if (isFile(runTime.path()/ts[instanceI].name()/dir/name))
+//        {
+//            return ts[instanceI].name();
+//        }
+//    }
+//
+//
+//    // not in any of the time directories, try constant
+//
+//    // Note. This needs to be a hard-coded constant, rather than the
+//    // constant function of the time, because the latter points to
+//    // the case constant directory in parallel cases
+//
+//    if (isFile(runTime.path()/runTime.constant()/dir/name))
+//    {
+//        return runTime.constant();
+//    }
+//
+//    FatalErrorIn
+//    (
+//        "searchableSurfaces::findRawInstance"
+//        "(const Time&, const fileName&, const word&)"
+//    )   << "Cannot find file \"" << name << "\" in directory "
+//        << runTime.constant()/dir
+//        << exit(FatalError);
+//
+//    return runTime.constant();
+//}
+
+
 //- Check file existence
 const Foam::fileName& Foam::triSurfaceMesh::checkFile
 (
@@ -149,7 +207,19 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
 :
     searchableSurface(io),
-    objectRegistry(io),
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            io.instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface(s),
     surfaceClosed_(-1)
 {}
@@ -157,8 +227,34 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
 
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
 :
+    // Find instance for triSurfaceMesh
     searchableSurface(io),
-    objectRegistry(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            static_cast<const searchableSurface&>(*this).instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface
     (
         checkFile
@@ -178,7 +274,32 @@ Foam::triSurfaceMesh::triSurfaceMesh
 )
 :
     searchableSurface(io),
-    objectRegistry(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            static_cast<const searchableSurface&>(*this).instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface
     (
         checkFile
@@ -231,17 +352,24 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 {
     if (tree_.empty())
     {
-        treeBoundBox bb(points(), meshPoints());
-
         // Random number generator. Bit dodgy since not exactly random ;-)
         Random rndGen(65431);
+
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points(), meshPoints()).extend(rndGen, 1E-4)
+        );
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         tree_.reset
         (
             new indexedOctree<treeDataTriSurface>
             (
                 treeDataTriSurface(*this),
-                bb.extend(rndGen, 1E-4),    // slightly randomize bb
+                bb,
                 10,     // maxLevel
                 10,     // leafsize
                 3.0     // duplicity
@@ -254,12 +382,10 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 
 
 const Foam::indexedOctree<Foam::treeDataEdge>&
-    Foam::triSurfaceMesh::edgeTree() const
+ Foam::triSurfaceMesh::edgeTree() const
 {
     if (edgeTree_.empty())
     {
-        treeBoundBox bb(localPoints());
-
         // Boundary edges
         labelList bEdges
         (
@@ -274,6 +400,15 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
         // Random number generator. Bit dodgy since not exactly random ;-)
         Random rndGen(65431);
 
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points(), meshPoints()).extend(rndGen, 1E-4)
+        );
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
         edgeTree_.reset
         (
             new indexedOctree<treeDataEdge>
@@ -285,7 +420,7 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
                     localPoints(),  // points
                     bEdges          // selected edges
                 ),
-                bb.extend(rndGen, 1E-4),    // slightly randomize bb
+                bb,     // bb
                 8,      // maxLevel
                 10,     // leafsize
                 3.0     // duplicity
@@ -342,8 +477,11 @@ void Foam::triSurfaceMesh::findNearest
 
     forAll(samples, i)
     {
-        static_cast<pointIndexHit&>(info[i]) =
-            octree.findNearest(samples[i], nearestDistSqr[i]);
+        static_cast<pointIndexHit&>(info[i]) = octree.findNearest
+        (
+            samples[i],
+            nearestDistSqr[i]
+        );
     }
 }
 
@@ -383,8 +521,11 @@ void Foam::triSurfaceMesh::findLineAny
 
     forAll(start, i)
     {
-        static_cast<pointIndexHit&>(info[i]) =
-            octree.findLineAny(start[i], end[i]);
+        static_cast<pointIndexHit&>(info[i]) = octree.findLineAny
+        (
+            start[i],
+            end[i]
+        );
     }
 }
 

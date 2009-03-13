@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
         wdot.write();
     }
 
-    return(0);
+    return 0;
 }
 
 

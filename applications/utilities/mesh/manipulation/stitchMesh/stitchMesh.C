@@ -60,7 +60,6 @@ Description
 #include "polyTopoChanger.H"
 #include "mapPolyMesh.H"
 #include "ListOps.H"
-#include "IndirectList.H"
 #include "slidingInterface.H"
 #include "perfectInterface.H"
 #include "IOobjectList.H"

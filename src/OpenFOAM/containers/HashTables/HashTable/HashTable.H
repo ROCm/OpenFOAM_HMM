@@ -39,9 +39,10 @@ SourceFiles
 #define HashTable_H
 
 #include "label.H"
+#include "uLabel.H"
 #include "word.H"
-#include "className.H"
 #include "Xfer.H"
+#include "className.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -108,17 +109,24 @@ class HashTable
 
     // Private data: size of table, the table and current number of elements
 
+        //- The current number of elements in table
+        label nElmts_;
+
         //- Number of primary entries allocated in table (not necessarily used)
         label tableSize_;
 
         //- The table of primary entries
         hashedEntry** table_;
 
-        //- The current number of elements in table
-        label nElmts_;
-
 
     // Private Member Functions
+
+        //- Return a canonical (power-of-two) size
+        static label canonicalSize(const label);
+
+        //- Return the hash index of the Key within the current table size.
+        //  No checks for zero-sized tables.
+        inline label hashKeyIndex(const Key&) const;
 
         //- Assign a new hashedEntry to a possibly already existing key
         bool set(const Key&, const T& newElmt, bool protect);
@@ -142,10 +150,10 @@ public:
     // Constructors
 
         //- Construct given initial table size
-        HashTable(const label size = 100);
+        HashTable(const label size = 128);
 
         //- Construct from Istream
-        HashTable(Istream&, const label size = 100);
+        HashTable(Istream&, const label size = 128);
 
         //- Construct as copy
         HashTable(const HashTable<T, Key, Hash>&);
@@ -183,6 +191,8 @@ public:
             //- Return the table of contents
             List<Key> toc() const;
 
+            //- Print information
+            Ostream& printInfo(Ostream&) const;
 
         // Edit
 
@@ -280,14 +290,13 @@ public:
             // Private data
 
                 //- Reference to the HashTable this is an iterator for
-                HashTable<T, Key, Hash>& curHashTable_;
+                HashTable<T, Key, Hash>& hashTable_;
 
                 //- Current element
                 hashedEntry* elmtPtr_;
 
                 //- Current hash index
                 label hashIndex_;
-
 
         public:
 
@@ -300,7 +309,6 @@ public:
                     hashedEntry* elmt,
                     label hashIndex
                 );
-
 
             // Member operators
 
@@ -318,7 +326,7 @@ public:
                 inline iterator& operator++();
                 inline iterator operator++(int);
 
-                inline const Key& key();
+                inline const Key& key() const;
         };
 
 
@@ -339,7 +347,7 @@ public:
             // Private data
 
                 //- Reference to the HashTable this is an iterator for
-                const HashTable<T, Key, Hash>& curHashTable_;
+                const HashTable<T, Key, Hash>& hashTable_;
 
                 //- Current element
                 const hashedEntry* elmtPtr_;
@@ -380,7 +388,7 @@ public:
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);
 
-                inline const Key& key();
+                inline const Key& key() const;
         };
 
 

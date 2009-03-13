@@ -27,7 +27,7 @@ License
 #include "solution.H"
 #include "Time.H"
 
-// these are for old syntax compatibility:
+// These are for old syntax compatibility:
 #include "BICCG.H"
 #include "ICCG.H"
 #include "IStringStream.H"
@@ -36,7 +36,7 @@ License
 
 int Foam::solution::debug(::Foam::debug::debugSwitch("solution", 0));
 
-// list of sub-dictionaries to rewrite
+// List of sub-dictionaries to rewrite
 //! @cond localScope
 static const Foam::List<Foam::word> subDictNames
 (
@@ -59,7 +59,12 @@ Foam::solution::solution(const objectRegistry& obr, const fileName& dictName)
             IOobject::NO_WRITE
         )
     ),
-    relaxationFactors_(ITstream("relaxationFactors", tokenList())()),
+    relaxationFactors_
+    (
+        ITstream("relaxationFactors",
+        tokenList())()
+    ),
+    defaultRelaxationFactor_(0),
     solvers_(ITstream("solvers", tokenList())())
 {
     read();
@@ -157,6 +162,11 @@ bool Foam::solution::read()
             relaxationFactors_ = dict.subDict("relaxationFactors");
         }
 
+        if (relaxationFactors_.found("default"))
+        {
+            relaxationFactors_.lookup("default") >> defaultRelaxationFactor_;
+        }
+
         if (dict.found("solvers"))
         {
             solvers_ = dict.subDict("solvers");
@@ -192,7 +202,9 @@ bool Foam::solution::relax(const word& name) const
         Info<< "Find relax for " << name << endl;
     }
 
-    return relaxationFactors_.found(name);
+    return
+        relaxationFactors_.found(name)
+     || relaxationFactors_.found("default");
 }
 
 
@@ -203,7 +215,26 @@ Foam::scalar Foam::solution::relaxationFactor(const word& name) const
         Info<< "Lookup relaxationFactor for " << name << endl;
     }
 
-    return readScalar(relaxationFactors_.lookup(name));
+    if (relaxationFactors_.found(name))
+    {
+        return readScalar(relaxationFactors_.lookup(name));
+    }
+    else if (defaultRelaxationFactor_ > SMALL)
+    {
+        return defaultRelaxationFactor_;
+    }
+    else
+    {
+        FatalIOErrorIn
+        (
+            "Foam::solution::relaxationFactor(const word& name)",
+            relaxationFactors_
+        )   << "Cannot find relaxationFactor for '" << name
+            << "' or a suitable default value."
+            << exit(FatalIOError);
+
+        return 0;
+    }
 }
 
 

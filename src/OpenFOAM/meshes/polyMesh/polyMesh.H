@@ -120,9 +120,13 @@ private:
             //  Created from points on construction, updated when the mesh moves
             boundBox bounds_;
 
+            //- vector of non-constrained directions in mesh
+            //  defined according to the presence of empty and wedge patches
+            mutable Vector<label> geometricD_;
+
             //- vector of valid directions in mesh
             //  defined according to the presence of empty patches
-            mutable Vector<label> directions_;
+            mutable Vector<label> solutionD_;
 
 
         // Zoning information
@@ -309,17 +313,22 @@ public:
                 return bounds_;
             }
 
-            //- Return the vector of valid directions in mesh.
-            //  Defined according to the presence of empty patches.
-            //  1 indicates valid direction and -1 an invalid direction.
-            const Vector<label>& directions() const;
+            //- Return the vector of geometric directions in mesh.
+            //  Defined according to the presence of empty and wedge patches.
+            //  1 indicates unconstrained direction and -1 a constrained
+            //  direction.
+            const Vector<label>& geometricD() const;
 
             //- Return the number of valid geometric dimensions in the mesh
             label nGeometricD() const;
 
-            //- Return the number of valid solution dimensions in the mesh.
-            //  For wedge cases this includes the circumferential direction
-            //  in case of swirl.
+            //- Return the vector of solved-for directions in mesh.
+            //  Differs from geometricD in that it includes for wedge cases
+            //  the circumferential direction in case of swirl.
+            //  1 indicates valid direction and -1 an invalid direction.
+            const Vector<label>& solutionD() const;
+
+            //- Return the number of valid solved-for dimensions in the mesh
             label nSolutionD() const;
 
             //- Return point zone mesh

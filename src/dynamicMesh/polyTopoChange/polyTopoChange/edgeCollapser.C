@@ -28,7 +28,6 @@ License
 #include "polyMesh.H"
 #include "polyTopoChange.H"
 #include "ListOps.H"
-#include "IndirectList.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

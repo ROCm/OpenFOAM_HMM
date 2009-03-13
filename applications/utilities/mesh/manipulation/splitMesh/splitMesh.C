@@ -50,14 +50,11 @@ Description
 #include "attachDetach.H"
 #include "attachPolyTopoChanger.H"
 #include "regionSide.H"
+#include "primitiveFacePatch.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Calculation engine for set of faces in a mesh
-typedef PrimitivePatch<face, List, const pointField&> facePatch;
-
 
 // Find edge between points v0 and v1.
 label findEdge(const primitiveMesh& mesh, const label v0, const label v1)
@@ -163,10 +160,16 @@ int main(int argc, char *argv[])
     // set of edges on side of this region. Use PrimitivePatch to find these.
     //
 
-    IndirectList<face> zoneFaces(mesh.faces(), faces);
-
     // Addressing on faces only in mesh vertices.
-    facePatch fPatch(zoneFaces(), mesh.points());
+    primitiveFacePatch fPatch
+    (
+        UIndirectList<face>
+        (
+            mesh.faces(),
+            faces
+        ),
+        mesh.points()
+    );
 
     const labelList& meshPoints = fPatch.meshPoints();
 

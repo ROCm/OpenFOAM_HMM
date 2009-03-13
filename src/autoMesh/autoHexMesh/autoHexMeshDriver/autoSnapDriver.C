@@ -58,35 +58,6 @@ defineTypeNameAndDebug(autoSnapDriver, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::autoSnapDriver::getZonedSurfaces
-(
-    labelList& zonedSurfaces,
-    labelList& unzonedSurfaces
-) const
-{    // Surfaces with zone information
-    const wordList& faceZoneNames = meshRefiner_.surfaces().faceZoneNames();
-
-    zonedSurfaces.setSize(faceZoneNames.size());
-    label zonedI = 0;
-    unzonedSurfaces.setSize(faceZoneNames.size());
-    label unzonedI = 0;
-
-    forAll(faceZoneNames, surfI)
-    {
-        if (faceZoneNames[surfI].size())
-        {
-            zonedSurfaces[zonedI++] = surfI;
-        }
-        else
-        {
-            unzonedSurfaces[unzonedI++] = surfI;
-        }
-    }
-    zonedSurfaces.setSize(zonedI);
-    unzonedSurfaces.setSize(unzonedI);
-}
-
-
 // Get faces to repatch. Returns map from face to patch.
 Foam::Map<Foam::label> Foam::autoSnapDriver::getZoneBafflePatches
 (
@@ -711,9 +682,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::createZoneBaffles
     List<labelPair>& baffles
 )
 {
-    labelList zonedSurfaces;
-    labelList unzonedSurfaces;
-    getZonedSurfaces(zonedSurfaces, unzonedSurfaces);
+    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
 
     autoPtr<mapPolyMesh> map;
 
@@ -798,9 +767,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::mergeZoneBaffles
     const List<labelPair>& baffles
 )
 {
-    labelList zonedSurfaces;
-    labelList unzonedSurfaces;
-    getZonedSurfaces(zonedSurfaces, unzonedSurfaces);
+    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
 
     autoPtr<mapPolyMesh> map;
 
@@ -1048,9 +1015,10 @@ Foam::vectorField Foam::autoSnapDriver::calcNearestSurface
         labelList snapSurf(localPoints.size(), -1);
 
         // Divide surfaces into zoned and unzoned
-        labelList zonedSurfaces;
-        labelList unzonedSurfaces;
-        getZonedSurfaces(zonedSurfaces, unzonedSurfaces);
+        labelList zonedSurfaces =
+            meshRefiner_.surfaces().getNamedSurfaces();
+        labelList unzonedSurfaces =
+            meshRefiner_.surfaces().getUnnamedSurfaces();
 
 
         // 1. All points to non-interface surfaces
@@ -1270,10 +1238,7 @@ void Foam::autoSnapDriver::smoothDisplacement
         magDisp().write();
 
         Pout<< "Writing actual patch displacement ..." << endl;
-        vectorField actualPatchDisp
-        (
-            IndirectList<point>(disp, pp.meshPoints())()
-        );
+        vectorField actualPatchDisp(disp, pp.meshPoints());
         dumpMove
         (
             mesh.time().path()/"actualPatchDisplacement.obj",
@@ -1368,9 +1333,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
     indirectPrimitivePatch& pp = ppPtr();
 
     // Divide surfaces into zoned and unzoned
-    labelList zonedSurfaces;
-    labelList unzonedSurfaces;
-    getZonedSurfaces(zonedSurfaces, unzonedSurfaces);
+    labelList zonedSurfaces = meshRefiner_.surfaces().getNamedSurfaces();
+    labelList unzonedSurfaces = meshRefiner_.surfaces().getUnnamedSurfaces();
 
 
     // Faces that do not move

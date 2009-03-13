@@ -649,6 +649,7 @@ typename
 Foam::GeometricField<Type, PatchField, GeoMesh>::DimensionedInternalField&
 Foam::GeometricField<Type, PatchField, GeoMesh>::dimensionedInternalField()
 {
+    this->setUpToDate();
     storeOldTimes();
     return *this;
 }
@@ -659,6 +660,7 @@ typename
 Foam::GeometricField<Type, PatchField, GeoMesh>::InternalField&
 Foam::GeometricField<Type, PatchField, GeoMesh>::internalField()
 {
+    this->setUpToDate();
     storeOldTimes();
     return *this;
 }
@@ -670,6 +672,7 @@ typename
 Foam::GeometricField<Type, PatchField, GeoMesh>::GeometricBoundaryField&
 Foam::GeometricField<Type, PatchField, GeoMesh>::boundaryField()
 {
+    this->setUpToDate();
     storeOldTimes();
     return boundaryField_;
 }
@@ -822,6 +825,7 @@ template<class Type, template<class> class PatchField, class GeoMesh>
 void Foam::GeometricField<Type, PatchField, GeoMesh>::
 correctBoundaryConditions()
 {
+    this->setUpToDate();
     storeOldTimes();
     boundaryField_.evaluate();
 }

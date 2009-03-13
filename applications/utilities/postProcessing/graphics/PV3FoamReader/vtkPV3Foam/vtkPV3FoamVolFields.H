@@ -34,6 +34,8 @@ InClass
 #include "emptyFvPatchField.H"
 #include "wallPolyPatch.H"
 #include "faceSet.H"
+#include "volPointInterpolation.H"
+
 #include "vtkPV3FoamFaceField.H"
 #include "vtkPV3FoamPatchField.H"
 
@@ -43,7 +45,6 @@ template<class Type>
 void Foam::vtkPV3Foam::convertVolFields
 (
     const fvMesh& mesh,
-    const volPointInterpolation& pInterp,
     const PtrList<PrimitivePatchInterpolation<primitivePatch> >& ppInterpList,
     const IOobjectList& objects,
     vtkMultiBlockDataSet* output
@@ -63,23 +64,22 @@ void Foam::vtkPV3Foam::convertVolFields
             continue;
         }
 
+        // Load field
         GeometricField<Type, fvPatchField, volMesh> tf
         (
             *iter(),
             mesh
         );
 
-        tmp<GeometricField<Type, pointPatchField, pointMesh> > tptf
-        (
-            pInterp.interpolate(tf)
-        );
+        // Interpolated field (demand driven)
+        autoPtr<GeometricField<Type, pointPatchField, pointMesh> > ptfPtr;
 
 
         // Convert activated internalMesh regions
         convertVolFieldBlock
         (
             tf,
-            tptf(),
+            ptfPtr,
             output,
             partInfoVolume_,
             regionPolyDecomp_
@@ -89,7 +89,7 @@ void Foam::vtkPV3Foam::convertVolFields
         convertVolFieldBlock
         (
             tf,
-            tptf(),
+            ptfPtr,
             output,
             partInfoCellZones_,
             zonePolyDecomp_
@@ -99,7 +99,7 @@ void Foam::vtkPV3Foam::convertVolFields
         convertVolFieldBlock
         (
             tf,
-            tptf(),
+            ptfPtr,
             output,
             partInfoCellSets_,
             csetPolyDecomp_
@@ -132,8 +132,8 @@ void Foam::vtkPV3Foam::convertVolFields
                 isType<emptyFvPatchField<Type> >(ptf)
              ||
                 (
-                    typeid(patches[patchId]) == typeid(wallPolyPatch)
-                 && reader_->GetExtrapolateWalls()
+                    reader_->GetExtrapolatePatches()
+                && !polyPatch::constraintType(patches[patchId].type())
                 )
             )
             {
@@ -258,44 +258,58 @@ void Foam::vtkPV3Foam::convertVolFields
     }
 }
 
+
 template<class Type>
 void Foam::vtkPV3Foam::convertVolFieldBlock
 (
     const GeometricField<Type, fvPatchField, volMesh>& tf,
-    const GeometricField<Type, pointPatchField, pointMesh>& ptf,
+    autoPtr<GeometricField<Type, pointPatchField, pointMesh> >& ptfPtr,
     vtkMultiBlockDataSet* output,
     const partInfo& selector,
     const List<polyDecomp>& decompLst
 )
 {
-   for (int partId = selector.start(); partId < selector.end(); ++partId)
-   {
-       const label datasetNo = partDataset_[partId];
+    for (int partId = selector.start(); partId < selector.end(); ++partId)
+    {
+        const label datasetNo = partDataset_[partId];
 
-       if (datasetNo >= 0 && partStatus_[partId])
-       {
-           convertVolField
-           (
-               tf,
-               output,
-               selector,
-               datasetNo,
-               decompLst[datasetNo]
-           );
+        if (datasetNo >= 0 && partStatus_[partId])
+        {
+            convertVolField
+            (
+                tf,
+                output,
+                selector,
+                datasetNo,
+                decompLst[datasetNo]
+            );
 
-           convertPointField
-           (
-               ptf,
-               tf,
-               output,
-               selector,
-               datasetNo,
-               decompLst[datasetNo]
-           );
-       }
-   }
+            if (!ptfPtr.valid())
+            {
+                if (debug)
+                {
+                    Info<< "convertVolFieldBlock interpolating:" << tf.name()
+                        << endl;
+                }
+
+                ptfPtr.reset
+                (
+                    volPointInterpolation::New(tf.mesh()).interpolate(tf).ptr()
+                );
+            }
+
+            convertPointField
+            (
+                ptfPtr(),
+                tf,
+                output,
+                selector,
+                datasetNo,
+                decompLst[datasetNo]
+            );
+        }
+    }
 }
-
 
 
 template<class Type>

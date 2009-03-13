@@ -86,8 +86,7 @@ int main(int argc, char *argv[])
 
     List<Tuple2<wordRe, string> > rawList(IFstream("testRegexps")());
     Info<< "input list:" << rawList << endl;
-    IOobject::writeDivider(Info);
-    Info<< endl;
+    IOobject::writeDivider(Info) << endl;
 
     forAll(rawList, elemI)
     {

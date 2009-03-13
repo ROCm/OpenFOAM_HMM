@@ -102,6 +102,67 @@ Foam::label Foam::checkTopology
         }
     }
 
+    if (allTopology)
+    {
+        labelList nInternalFaces(mesh.nCells(), 0);
+
+        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        {
+            nInternalFaces[mesh.faceOwner()[faceI]]++;
+            nInternalFaces[mesh.faceNeighbour()[faceI]]++;
+        }
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const unallocLabelList& owners = patches[patchI].faceCells();
+
+                forAll(owners, i)
+                {
+                    nInternalFaces[owners[i]]++;
+                }
+            }
+        }
+
+        faceSet oneCells(mesh, "oneInternalFaceCells", mesh.nCells()/100);
+        faceSet twoCells(mesh, "twoInternalFacesCells", mesh.nCells()/100);
+
+        forAll(nInternalFaces, cellI)
+        {
+            if (nInternalFaces[cellI] <= 1)
+            {
+                oneCells.insert(cellI);
+            }
+            else if (nInternalFaces[cellI] == 2)
+            {
+                twoCells.insert(cellI);
+            }
+        }
+
+        label nOneCells = returnReduce(oneCells.size(), sumOp<label>());
+
+        if (nOneCells > 0)
+        {
+            Info<< "  <<Writing " << nOneCells
+                << " cells with with single non-boundary face to set "
+                << oneCells.name()
+                << endl;
+            oneCells.write();
+        }
+
+        label nTwoCells = returnReduce(twoCells.size(), sumOp<label>());
+
+        if (nTwoCells > 0)
+        {
+            Info<< "  <<Writing " << nTwoCells
+                << " cells with with single non-boundary face to set "
+                << twoCells.name()
+                << endl;
+            twoCells.write();
+        }
+    }
+
     {
         regionSplit rs(mesh);
 

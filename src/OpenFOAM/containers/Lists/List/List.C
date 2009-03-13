@@ -31,6 +31,7 @@ License
 #include "PtrList.H"
 #include "SLList.H"
 #include "IndirectList.H"
+#include "UIndirectList.H"
 #include "BiIndirectList.H"
 #include "contiguous.H"
 
@@ -171,6 +172,29 @@ Foam::List<T>::List(List<T>& a, bool reUse)
 }
 
 
+// Construct as subset
+template<class T>
+Foam::List<T>::List(const UList<T>& a, const unallocLabelList& map)
+:
+    UList<T>(NULL, map.size())
+{
+    if (this->size_)
+    {
+        this->v_ = new T[this->size_];
+
+        List_ACCESS(T, (*this), vp);
+        List_CONST_ACCESS(T, a, ap);
+        List_FOR_ALL(map, i)
+            List_ELEM((*this), vp, i) = List_ELEM(a, ap, (map[i]));
+        List_END_FOR_ALL
+    }
+    else
+    {
+        this->v_ = 0;
+    }
+}
+
+
 // Construct given start and end iterators.
 template<class T>
 template<class InputIterator>
@@ -205,7 +229,7 @@ Foam::List<T>::List(InputIterator first, InputIterator last)
 
 // Construct as copy of FixedList<T, Size>
 template<class T>
-template<Foam::label Size>
+template<unsigned Size>
 Foam::List<T>::List(const FixedList<T, Size>& lst)
 :
     UList<T>(NULL, Size)
@@ -279,6 +303,28 @@ Foam::List<T>::List(const SLList<T>& lst)
 // Construct as copy of IndirectList<T>
 template<class T>
 Foam::List<T>::List(const IndirectList<T>& lst)
+:
+    UList<T>(NULL, lst.size())
+{
+    if (this->size_)
+    {
+        this->v_ = new T[this->size_];
+
+        forAll(*this, i)
+        {
+            this->operator[](i) = lst[i];
+        }
+    }
+    else
+    {
+        this->v_ = 0;
+    }
+}
+
+
+// Construct as copy of UIndirectList<T>
+template<class T>
+Foam::List<T>::List(const UIndirectList<T>& lst)
 :
     UList<T>(NULL, lst.size())
 {
@@ -548,6 +594,28 @@ void Foam::List<T>::operator=(const SLList<T>& lst)
 // Assignment operator. Takes linear time.
 template<class T>
 void Foam::List<T>::operator=(const IndirectList<T>& lst)
+{
+    if (lst.size() != this->size_)
+    {
+        if (this->v_) delete[] this->v_;
+        this->v_ = 0;
+        this->size_ = lst.size();
+        if (this->size_) this->v_ = new T[this->size_];
+    }
+
+    if (this->size_)
+    {
+        forAll(*this, i)
+        {
+            this->operator[](i) = lst[i];
+        }
+    }
+}
+
+
+// Assignment operator. Takes linear time.
+template<class T>
+void Foam::List<T>::operator=(const UIndirectList<T>& lst)
 {
     if (lst.size() != this->size_)
     {

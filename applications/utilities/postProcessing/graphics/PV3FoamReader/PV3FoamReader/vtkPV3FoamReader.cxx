@@ -64,7 +64,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     CacheMesh = 1;
 
-    ExtrapolateWalls = 0;
+    ExtrapolatePatches = 0;
     IncludeSets = 0;
     IncludeZones = 0;
     ShowPatchNames = 0;
@@ -319,6 +319,7 @@ int vtkPV3FoamReader::RequestData
             << output->GetNumberOfBlocks() << " blocks\n";
     }
 
+
 #ifdef EXPERIMENTAL_TIME_CACHING
     bool needsUpdate = false;
 
@@ -372,6 +373,9 @@ int vtkPV3FoamReader::RequestData
     }
 
 #endif
+
+    // Do any cleanup on the Foam side
+    foamData_->CleanUp();
 
     return 1;
 }

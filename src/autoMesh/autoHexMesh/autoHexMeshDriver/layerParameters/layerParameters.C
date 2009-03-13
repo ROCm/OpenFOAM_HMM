@@ -29,6 +29,7 @@ License
 #include "mathematicalConstants.H"
 #include "refinementSurfaces.H"
 #include "searchableSurfaces.H"
+#include "regExp.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -300,10 +301,44 @@ Foam::layerParameters::layerParameters
             //    readScalar(layerDict.lookup("minThickness"));
         }
     }
+
+
+    // Check whether layer specification matches any patches
+    const List<keyType> wildCards = layersDict.keys(true);
+
+    forAll(wildCards, i)
+    {
+        regExp re(wildCards[i]);
+
+        bool hasMatch = false;
+        forAll(boundaryMesh, patchI)
+        {
+            if (re.match(boundaryMesh[patchI].name()))
+            {
+                hasMatch = true;
+                break;
+            }
+        }
+        if (!hasMatch)
+        {
+            IOWarningIn("layerParameters::layerParameters(..)", layersDict)
+                << "Wildcard layer specification for " << wildCards[i]
+                << " does not match any patch." << endl;
+        }
+    }
+
+    const List<keyType> nonWildCards = layersDict.keys(false);
+
+    forAll(nonWildCards, i)
+    {
+        if (boundaryMesh.findPatchID(nonWildCards[i]) == -1)
+        {
+            IOWarningIn("layerParameters::layerParameters(..)", layersDict)
+                << "Layer specification for " << nonWildCards[i]
+                << " does not match any patch." << endl;
+        }
+    }
 }
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

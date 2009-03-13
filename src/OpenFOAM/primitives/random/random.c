@@ -248,7 +248,7 @@ initstate(seed, arg_state, n)
 	if (n < BREAK_0) {
 		(void)fprintf(stderr,
 		    "random: not enough state (%d bytes); ignored.\n", n);
-		return(0);
+		return 0;
 	}
 	if (n < BREAK_1) {
 		rand_type = TYPE_0;

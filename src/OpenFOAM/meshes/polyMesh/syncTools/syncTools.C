@@ -87,8 +87,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 
     labelList minProc(mesh.globalData().nGlobalPoints(), labelMax);
 
-    IndirectList<label>(minProc, sharedPointAddr) =
-        Pstream::myProcNo();
+    UIndirectList<label>(minProc, sharedPointAddr) = Pstream::myProcNo();
 
     Pstream::listCombineGather(minProc, minEqOp<label>());
     Pstream::listCombineScatter(minProc);
@@ -207,8 +206,7 @@ Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
     labelList minProc(mesh.globalData().nGlobalEdges(), labelMax);
 
-    IndirectList<label>(minProc, sharedEdgeAddr) =
-        Pstream::myProcNo();
+    UIndirectList<label>(minProc, sharedEdgeAddr) = Pstream::myProcNo();
 
     Pstream::listCombineGather(minProc, minEqOp<label>());
     Pstream::listCombineScatter(minProc);

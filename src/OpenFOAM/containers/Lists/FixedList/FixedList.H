@@ -38,9 +38,12 @@ SourceFiles
 #ifndef FixedList_H
 #define FixedList_H
 
+#include "bool.H"
 #include "label.H"
+#include "uLabel.H"
 #include "Hash.H"
 #include "autoPtr.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,12 +52,12 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 
-template<class T, label Size>
+template<class T, unsigned Size>
 Istream& operator>>(Istream&, FixedList<T, Size>&);
 
-template<class T, label Size>
+template<class T, unsigned Size>
 Ostream& operator<<(Ostream&, const FixedList<T, Size>&);
 
 template<class T> class UList;
@@ -65,9 +68,12 @@ template<class T> class SLList;
                            Class FixedList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, label Size>
+template<class T, unsigned Size>
 class FixedList
 {
+    //- Size must be positive (non-zero) and also fit as a signed value
+    StaticAssert(Size && Size <= INT_MAX);
+
     // Private data
 
         //- Vector of values of type T of size Size.
@@ -76,20 +82,19 @@ class FixedList
 
 public:
 
-    //- Hashing function class
-    //  Rotating hash from http://burtleburtle.net/bob/hash/doobs.html
-    template<class HashT=Hash<T> >
+    //- Hashing function class.
+    //  Use Hasher directly for contiguous data. Otherwise hash incrementally.
+    template< class HashT=Hash<T> >
     class Hash
-    :
-        public Foam::Hash<FixedList<T, Size> >
     {
     public:
-        inline Hash();
-        label operator()(const FixedList<T, Size>&) const;
-        label operator()
+        Hash()
+        {}
+
+        inline unsigned operator()
         (
             const FixedList<T, Size>&,
-            const label tableSize
+            unsigned seed = 0
         ) const;
     };
 
@@ -123,7 +128,7 @@ public:
         FixedList(Istream&);
 
         //- Clone
-        inline autoPtr<FixedList<T, Size> > clone() const;
+        inline autoPtr< FixedList<T, Size> > clone() const;
 
 
     // Member Functions

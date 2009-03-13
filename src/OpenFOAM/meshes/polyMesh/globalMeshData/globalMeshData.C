@@ -40,10 +40,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(globalMeshData, 0);
-}
+defineTypeNameAndDebug(Foam::globalMeshData, 0);
 
 // Geometric matching tolerance. Factor of mesh bounding box.
 const Foam::scalar Foam::globalMeshData::matchTol_ = 1E-8;
@@ -632,7 +629,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
 
             toMaster
                 << sharedPointAddr_ 
-                << IndirectList<point>(mesh_.points(), sharedPointLabels_)();
+                << UIndirectList<point>(mesh_.points(), sharedPointLabels_)();
         }
 
         // Receive sharedPoints

@@ -165,7 +165,7 @@ void directMappedFixedValueFvPatchField<Type>::getNewValues
         if (Pstream::myProcNo() == sendProc)
         {
             OPstream toProc(Pstream::scheduled, recvProc);
-            toProc<< IndirectList<Type>(sendValues, sendLabels[recvProc])();
+            toProc<< UIndirectList<Type>(sendValues, sendLabels[recvProc])();
         }
         else
         {
@@ -188,7 +188,11 @@ void directMappedFixedValueFvPatchField<Type>::getNewValues
 
     // Do data from myself
     {
-        IndirectList<Type> fromFld(sendValues, sendLabels[Pstream::myProcNo()]);
+        UIndirectList<Type> fromFld
+        (
+            sendValues,
+            sendLabels[Pstream::myProcNo()]
+        );
 
         // Destination faces
         const labelList& faceLabels = receiveFaceLabels[Pstream::myProcNo()];

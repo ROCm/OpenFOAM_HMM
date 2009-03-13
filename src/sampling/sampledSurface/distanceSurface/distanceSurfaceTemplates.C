@@ -62,13 +62,7 @@ Foam::distanceSurface::interpolateField
     );
 
     // Sample.
-    return surface().interpolate
-    (
-        cellDistancePtr_(),
-        pointDistance_,
-        volFld,
-        pointFld()
-    );
+    return surface().interpolate(volFld, pointFld());
 }
 
 

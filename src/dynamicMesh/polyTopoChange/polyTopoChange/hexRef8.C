@@ -51,13 +51,13 @@ namespace Foam
     defineTypeNameAndDebug(hexRef8, 0);
 
     //- Reduction class. If x and y are not equal assign value.
-    template< int value >
+    template<int value>
     class ifEqEqOp
     {
         public:
-        void operator()( label& x, const label& y ) const
+        void operator()(label& x, const label& y) const
         {
-            x = (x==y) ? x:value;
+            x = (x==y) ? x : value;
         }
     };
 }
@@ -746,7 +746,7 @@ Foam::label Foam::hexRef8::findLevel
 
             FatalErrorIn("hexRef8::findLevel(..)")
                 << "face:" << f
-                << " level:" << IndirectList<label>(pointLevel_, f)()
+                << " level:" << UIndirectList<label>(pointLevel_, f)()
                 << " startFp:" << startFp
                 << " wantedLevel:" << wantedLevel
                 << abort(FatalError);
@@ -774,7 +774,7 @@ Foam::label Foam::hexRef8::findLevel
 
     FatalErrorIn("hexRef8::findLevel(..)")
         << "face:" << f
-        << " level:" << IndirectList<label>(pointLevel_, f)()
+        << " level:" << UIndirectList<label>(pointLevel_, f)()
         << " startFp:" << startFp
         << " wantedLevel:" << wantedLevel
         << abort(FatalError);
@@ -823,7 +823,7 @@ void Foam::hexRef8::checkInternalOrientation
 )
 {
     face compactFace(identity(newFace.size()));
-    pointField compactPoints(IndirectList<point>(meshMod.points(), newFace)());
+    pointField compactPoints(meshMod.points(), newFace);
 
     vector n(compactFace.normal(compactPoints));
 
@@ -869,7 +869,7 @@ void Foam::hexRef8::checkBoundaryOrientation
 )
 {
     face compactFace(identity(newFace.size()));
-    pointField compactPoints(IndirectList<point>(meshMod.points(), newFace)());
+    pointField compactPoints(meshMod.points(), newFace);
 
     vector n(compactFace.normal(compactPoints));
 
@@ -1308,11 +1308,11 @@ void Foam::hexRef8::createInternalFaces
                             << "cell:" << cellI << " cLevel:" << cLevel
                             << " cell points:" << cPoints
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, cPoints)()
+                            << UIndirectList<label>(pointLevel_, cPoints)()
                             << " face:" << faceI
                             << " f:" << f
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, f)()
+                            << UIndirectList<label>(pointLevel_, f)()
                             << " faceAnchorLevel:" << faceAnchorLevel[faceI]
                             << " faceMidPoint:" << faceMidPoint[faceI]
                             << " faceMidPointI:" << faceMidPointI
@@ -1381,11 +1381,11 @@ void Foam::hexRef8::createInternalFaces
                             << "cell:" << cellI << " cLevel:" << cLevel
                             << " cell points:" << cPoints
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, cPoints)()
+                            << UIndirectList<label>(pointLevel_, cPoints)()
                             << " face:" << faceI
                             << " f:" << f
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, f)()
+                            << UIndirectList<label>(pointLevel_, f)()
                             << " faceAnchorLevel:" << faceAnchorLevel[faceI]
                             << " faceMidPoint:" << faceMidPoint[faceI]
                             << " faceMidPointI:" << faceMidPointI
@@ -3511,7 +3511,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                         << " lower level" << endl
                         << "cellPoints:" << cPoints << endl
                         << "pointLevels:"
-                        << IndirectList<label>(pointLevel_, cPoints)() << endl
+                        << UIndirectList<label>(pointLevel_, cPoints)() << endl
                         << abort(FatalError);
                 }
             }
@@ -4473,7 +4473,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << faceI
                     << " on patch " << patchI
                     << " " << mesh_.boundaryMesh()[patchI].name()
-                    << " coords:" << IndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
                     << " has face area:" << magArea
                     << " (coupled) neighbour face area differs:"
                     << neiFaceAreas[i]
@@ -4515,7 +4515,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << faceI
                     << " on patch " << patchI
                     << " " << mesh_.boundaryMesh()[patchI].name()
-                    << " coords:" << IndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
                     << " has size:" << f.size()
                     << " (coupled) neighbour face has size:"
                     << nVerts[i]
@@ -4565,7 +4565,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << faceI
                     << " on patch " << patchI
                     << " " << mesh_.boundaryMesh()[patchI].name()
-                    << " coords:" << IndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
                     << " has anchor vector:" << anchorVec
                     << " (coupled) neighbour face anchor vector differs:"
                     << anchorPoints[i]
