@@ -82,35 +82,33 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     scalar Cud = 0.0;
     vector dUTrans = vector::zero;
-    const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 2. Calculate heat transfer
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar htc = 0.0;
-    scalar dhHT = 0.0;
-//    TODO: T1 no longer used - return dhHT instead??????????????????????????????
-//    scalar T1 = calcHeatTransfer(td, dt, cellI, htc, dhHT);
-    calcHeatTransfer(td, dt, cellI, htc, dhHT);
+    const vector U1 = calcVelocity(td, dt, vector::zero, mass0, Cud, dUTrans);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 3. Calculate phase change
+    // 2. Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     // Mass transfer from particle to carrier phase
     scalarList dMassPC(td.cloud().gases().size(), 0.0);
     const scalar dMassPCTot = calcPhaseChange(td, dt, cellI, T0, 1.0, dMassPC);
 
-    // Update particle component mass fractions
-    updateMassFraction(mass0, dMassPC, Y_);
-
     // Enthalpy change due to change in particle composition (sink)
-    scalar dhPC = -dMassPCTot*td.cloud().composition().L(0, Y_, pc, T0);
+    scalar ShPC = -dMassPCTot*td.cloud().composition().L(0, Y_, pc, T0);
 
     // Enthalpy change due to species released into the carrier (source)
     scalar HEff = td.cloud().composition().H(0, Y_, pc, T0);
-    dhPC += dMassPCTot*HEff;
+    ShPC += dMassPCTot*HEff;
+
+    // Update particle component mass fractions
+    updateMassFraction(mass0, dMassPC, Y_);
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 3. Calculate heat transfer
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    scalar htc = 0.0;
+    scalar ShHT = 0.0;
+    scalar T1 = calcHeatTransfer(td, dt, cellI, ShPC, htc, ShHT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -121,13 +119,10 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalar mass1 = mass0 - dMassPCTot;
 
     // Total enthalpy transfer from the particle to the carrier phase
-    scalar dhTrans = dhHT + dhPC;
+    scalar dhTrans = ShHT + ShPC;
 
-    // New specific heat capacity of mixture - using old temperature
-    scalar cp1 = td.cloud().composition().cp(0, Y_, pc_, T0);
-
-    // New particle temperature - using average mass over the time interval
-    scalar T1 = T0 + dhTrans/(0.5*(mass0 + mass1)*cp1);
+    // New specific heat capacity of mixture - using new temperature
+    scalar cp1 = td.cloud().composition().cp(0, Y_, pc_, T1);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -203,7 +198,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar dt,
     const label cellI,
     const scalar T,
-    const scalar YPhase,
+    const scalar YPhase, // TODO: NEEDED?????????????????????????????????????????
     scalarList& dMassMT
 )
 {

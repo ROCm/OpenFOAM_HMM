@@ -109,6 +109,28 @@ Foam::KinematicCloud<ParcelType>::interpolationSchemes() const
 
 
 template<class ParcelType>
+inline Foam::Switch Foam::KinematicCloud<ParcelType>::forceGravity() const
+{
+    return forceGravity_;
+}
+
+
+template<class ParcelType>
+inline Foam::Switch Foam::KinematicCloud<ParcelType>::forceVirtualMass() const
+{
+    return forceVirtualMass_;
+}
+
+
+template<class ParcelType>
+inline Foam::Switch Foam::KinematicCloud<ParcelType>::
+forcePressureGradient() const
+{
+    return forcePressureGradient_;
+}
+
+
+template<class ParcelType>
 inline const Foam::DispersionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::dispersion() const
 {

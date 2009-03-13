@@ -72,18 +72,18 @@ void Foam::ThermoParcel<ParcelType>::calc
     scalar dhTrans = 0.0;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 2. Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Cud = 0.0;
-    const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
-
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 3. Calculate heat transfer - update T
+    // 2. Calculate heat transfer - update T
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar htc = 0.0;
-    const scalar T1 = calcHeatTransfer(td, dt, cellI, htc, dhTrans);
+    const scalar T1 = calcHeatTransfer(td, dt, cellI, 0.0, htc, dhTrans);
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // 3. Calculate velocity - update U
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    scalar Cud = 0.0;
+    const vector U1 = calcVelocity(td, dt, vector::zero, Cud, mass0, dUTrans);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -108,7 +108,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     // 5. Set new particle properties
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     this->U() = U1;
-    this->T() = T1;
+    T_ = T1;
 }
 
 
@@ -119,6 +119,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     TrackData& td,
     const scalar dt,
     const label cellI,
+    const scalar Sh,
     scalar& htc,
     scalar& dhTrans
 )
@@ -142,9 +143,12 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         this->muc_
     );
 
+    //- Assuming diameter = diameter at start of time step
+    scalar Ap = this->areasS();
+
     // Determine ap and bp coefficients
-    scalar ap = Tc_;
-    scalar bp = htc;
+    scalar ap = Tc_ + Sh/(htc*Ap + ROOTVSMALL);
+    scalar bp = 6.0*htc/(this->rho_*this->d_*cp_);
     if (td.cloud().radiation())
     {
         // Carrier phase incident radiation field
@@ -156,19 +160,18 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         // Helper variables
         const scalar sigma = radiation::sigmaSB.value();
         const scalar epsilon = td.constProps().epsilon0();
-        const scalar epsilonSigmaT3 = epsilon*sigma*pow3(T_);
-        ap = (htc*Tc_ + 0.25*epsilon*G[cellI])/(htc + epsilonSigmaT3);
-        bp += epsilonSigmaT3;
+        const scalar D = epsilon*sigma*pow3(T_)/(htc + ROOTVSMALL) + 1.0;
+        ap += 0.25*epsilon*G[cellI]/(htc + ROOTVSMALL);
+        ap /= D;
+        bp *= D;
     }
-    bp *= 6.0/(this->rho_*this->d_*cp_);
-
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
 
     // Using average parcel temperature for enthalpy transfer calculation
-    dhTrans = dt*this->areaS()*htc*(Tres.average() - Tc_);
+    dhTrans = dt*Ap*htc*(Tres.average() - Tc_);
 
     return Tres.value();
 }

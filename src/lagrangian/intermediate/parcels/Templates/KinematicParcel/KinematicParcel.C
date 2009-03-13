@@ -27,6 +27,8 @@ License
 #include "KinematicParcel.H"
 #include "dimensionedConstants.H"
 
+#include "fvcGrad.H"
+
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -69,7 +71,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar Cud = 0.0;
     vector dUTrans = vector::zero;
-    const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
+    const vector U1 = calcVelocity(td, dt, vector::zero, mass(), Cud, dUTrans);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -88,7 +90,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // 3. Set new particle properties
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    this->U() = U1;
+    U_ = U1;
 }
 
 
@@ -98,27 +100,51 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 (
     TrackData& td,
     const scalar dt,
+    const vector& Fx,
+    const scalar mass,
     scalar& Cud,
-    vector& dUTrans
+    vector& dUTrans,
 ) const
 {
     // Return linearised term from drag model
     Cud = td.cloud().drag().Cu(U_ - Uc_, d_, rhoc_, rho_, muc_);
 
+    // Initialise total force (per unit mass)
+    vector Ftot = vector::zero;
+
+    // Gravity force
+    if (td.cloud().forceGravity())
+    {
+        Ftot += td.g()*(1 - rhoc_/rho_);
+    }
+
+    // Virtual mass force
+    if (td.cloud().forceVirtualMass())
+    {
+//        Ftot += td.constProps().Cvm()*rhoc_/rho_*d(Uc - U_)/dt;
+    }
+
+    // Pressure gradient force
+    if (td.cloud().forcePressureGradient())
+    {
+        Ftot += rhoc_/rho_*(U_ & fvc::grad(Uc_))
+    }
 
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Set new particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const vector ap = Uc_ + (1 - rhoc_/rho_)/(Cud + VSMALL)*td.g();
+    const vector ap = Uc_ + (Ftot + Fx)/(Cud + VSMALL);
     const scalar bp = Cud;
 
     vector Unew = td.cloud().UIntegrator().integrate(U_, dt, ap, bp).value();
 
     // Calculate the momentum transfer to the continuous phase
     // - do not include gravity impulse
-    dUTrans = -mass()*(Unew - U_ - dt*td.g());
+
+    // TODO: USE AVERAGE PARTICLE MASS
+    dUTrans = -mass*(Unew - U_ - dt*td.g());
 
     return Unew;
 }

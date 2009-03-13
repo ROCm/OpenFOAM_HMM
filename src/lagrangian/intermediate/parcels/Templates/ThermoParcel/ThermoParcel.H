@@ -210,6 +210,7 @@ protected:
             TrackData& td,
             const scalar dt,
             const label cellI,
+            const scalar Sh,
             scalar& htc,
             scalar& dhTrans
         );

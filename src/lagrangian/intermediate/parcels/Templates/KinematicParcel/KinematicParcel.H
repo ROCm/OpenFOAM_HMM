@@ -93,6 +93,9 @@ public:
             //- Minimum particle mass [kg]
             const scalar minParticleMass_;
 
+            //- Virtual mass coefficient []
+            const scalar Cvm_;
+
 
     public:
 
@@ -106,6 +109,9 @@ public:
 
             //- Return const access to the minimum particle mass
             inline scalar minParticleMass() const;
+
+            //- Return const access to the virtual mass coefficient
+            inline scalar Cvm() const;
     };
 
 
@@ -228,6 +234,8 @@ protected:
         (
             TrackData& td,
             const scalar dt,
+            const vector& Fx,
+            const scalar mass,
             scalar& Cud,
             vector& dUTrans
         ) const;

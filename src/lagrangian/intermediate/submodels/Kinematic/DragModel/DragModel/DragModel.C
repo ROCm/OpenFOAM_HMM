@@ -75,7 +75,7 @@ Foam::scalar Foam::DragModel<CloudType>::Cu
 {
     const scalar magUr = mag(Ur);
 
-    const scalar Re = rhoc*magUr*d/(mu + SMALL);
+    const scalar Re = rhoc*magUr*d/(mu + ROOTVSMALL);
 
     const scalar Cd = this->Cd(Re);
 

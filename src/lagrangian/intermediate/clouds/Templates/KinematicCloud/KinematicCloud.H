@@ -133,6 +133,21 @@ class KinematicCloud
         dictionary interpolationSchemes_;
 
 
+        // Forces to include in particle motion evaluation
+
+            //- Dictionary of forces
+            dictionary forcesDict_;
+
+            //- Gravity
+            Switch forceGravity_;
+
+            //- Virtual mass
+            Switch forceVirtualMass_;
+
+            //- Pressure gradient
+            Switch forcePressureGradient_;
+
+
         // References to the cloud sub-models
 
             //- Dispersion model
@@ -250,6 +265,18 @@ public:
 
                 //- Return reference to the interpolation dictionary
                 inline const dictionary& interpolationSchemes() const;
+
+
+            // Forces to include in particle motion evaluation
+
+                //- Return reference to the gravity force flag
+                inline Switch forceGravity() const;
+
+                //- Return reference to the virtual mass force flag
+                inline Switch forceVirtualMass() const;
+
+                //- Return reference to the pressure gradient force flag
+                inline Switch forcePressureGradient() const;
 
 
             // Sub-models
