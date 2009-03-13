@@ -124,7 +124,7 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
     );
 
     // Processors involved in my schedule
-    return IndirectList<labelPair>(allComms, mySchedule);
+    return UIndirectList<labelPair>(allComms, mySchedule);
 
 
     //if (debug)

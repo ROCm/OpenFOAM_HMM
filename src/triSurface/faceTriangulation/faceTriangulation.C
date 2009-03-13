@@ -422,7 +422,7 @@ bool Foam::faceTriangulation::split
             "split(const bool, const pointField&, const face&"
             ", const vector&, label&)"
         )   << "Illegal face:" << f
-            << " with points " << IndirectList<point>(points, f)()
+            << " with points " << UIndirectList<point>(points, f)()
             << endl;
 
         return false;
@@ -501,7 +501,8 @@ bool Foam::faceTriangulation::split
                     "split(const bool, const pointField&, const face&"
                     ", const vector&, label&)"
                 )   << "Cannot find valid diagonal on face " << f
-                    << " with points " << IndirectList<point>(points, f)() << nl
+                    << " with points " << UIndirectList<point>(points, f)()
+                    << nl
                     << "Returning naive triangulation starting from "
                     << f[maxIndex] << " which might not be correct for a"
                     << " concave or warped face" << endl;
@@ -530,7 +531,8 @@ bool Foam::faceTriangulation::split
                     "split(const bool, const pointField&, const face&"
                     ", const vector&, label&)"
                 )   << "Cannot find valid diagonal on face " << f
-                    << " with points " << IndirectList<point>(points, f)() << nl
+                    << " with points " << UIndirectList<point>(points, f)()
+                    << nl
                     << "Returning empty triFaceList" << endl;
 
                 return false;
@@ -564,7 +566,7 @@ bool Foam::faceTriangulation::split
                 "split(const bool, const pointField&, const face&"
                 ", const vector&, label&)"
             )   << "Illegal split of face:" << f
-                << " with points " << IndirectList<point>(points, f)()
+                << " with points " << UIndirectList<point>(points, f)()
                 << " at indices " << index1 << " and " << index2
                 << abort(FatalError);
         }

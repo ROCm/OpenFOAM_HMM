@@ -255,10 +255,7 @@ void topoSet::writeDebug
 ) const
 {
     // Bounding box of contents.
-    boundBox bb
-    (
-        pointField(IndirectList<point>(coords, toc())())
-    );
+    boundBox bb(pointField(coords, toc()));
 
     Pout<< "Set bounding box: min = "
         << bb.min() << "    max = " << bb.max() << " meters. " << endl << endl;

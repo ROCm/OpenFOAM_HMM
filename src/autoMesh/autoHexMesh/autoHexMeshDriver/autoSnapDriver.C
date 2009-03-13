@@ -1238,10 +1238,7 @@ void Foam::autoSnapDriver::smoothDisplacement
         magDisp().write();
 
         Pout<< "Writing actual patch displacement ..." << endl;
-        vectorField actualPatchDisp
-        (
-            IndirectList<point>(disp, pp.meshPoints())()
-        );
+        vectorField actualPatchDisp(disp, pp.meshPoints());
         dumpMove
         (
             mesh.time().path()/"actualPatchDisplacement.obj",

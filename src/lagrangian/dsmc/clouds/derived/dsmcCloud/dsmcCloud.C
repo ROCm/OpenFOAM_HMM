@@ -22,56 +22,54 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
+
+#include "dsmcCloud.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(dsmcCloud, 0);
+};
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct given size
-template<class T>
-inline Foam::IndirectList<T>::IndirectList
+Foam::dsmcCloud::dsmcCloud
 (
-    const Foam::UList<T>& completeList,
-    const Foam::List<label>& addresses
+    const word& cloudType,
+    const volScalarField& T,
+    const volVectorField& U
 )
 :
-    completeList_(completeList),
-    addresses_(addresses)
+    DsmcCloud<dsmcParcel>(cloudType, T, U)
+{
+    dsmcParcel::readFields(*this);
+}
+
+
+Foam::dsmcCloud::dsmcCloud
+(
+    const word& cloudType,
+    const fvMesh& mesh
+)
+:
+    DsmcCloud<dsmcParcel>(cloudType, mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::dsmcCloud::~dsmcCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class T>
-inline Foam::label Foam::IndirectList<T>::size() const
+void Foam::dsmcCloud::writeFields() const
 {
-    return addresses_.size();
+    dsmcParcel::writeFields(*this);
 }
-
-
-template<class T>
-inline const Foam::UList<T>& Foam::IndirectList<T>::
-completeList() const
-{
-    return completeList_;
-}
-
-
-template<class T>
-inline const Foam::List<Foam::label>& Foam::IndirectList<T>::addresses() const
-{
-    return addresses_;
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<class T>
-inline const T& Foam::IndirectList<T>::operator[](const Foam::label i) const
-{
-    return completeList_[addresses_[i]];
-}
-
 
 // ************************************************************************* //

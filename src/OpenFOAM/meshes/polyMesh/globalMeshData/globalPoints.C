@@ -653,8 +653,8 @@ void Foam::globalPoints::sendSharedPoints(const labelList& changedIndices) const
             }
 
             toNeighbour
-                << IndirectList<label>(sharedPointAddr_, changedIndices)()
-                << IndirectList<label>(sharedPointLabels_, changedIndices)();
+                << UIndirectList<label>(sharedPointAddr_, changedIndices)()
+                << UIndirectList<label>(sharedPointLabels_, changedIndices)();
         }
     }
 }

@@ -145,12 +145,7 @@ inline Foam::scalar Foam::janafThermo<equationOfState>::hs
     const scalar T
 ) const
 {
-    const coeffArray& a = coeffs(T);
-    scalar Tr = T - specie::Tstd;
-    return this->RR*
-    (
-        ((((a[4]/5.0*Tr + a[3]/4.0)*Tr + a[2]/3.0)*Tr + a[1]/2.0)*Tr + a[0])*Tr
-    );
+    return h(T) - hc();
 }
 
 

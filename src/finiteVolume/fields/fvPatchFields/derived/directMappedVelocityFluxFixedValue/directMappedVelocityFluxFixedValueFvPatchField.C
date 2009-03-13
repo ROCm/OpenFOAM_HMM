@@ -162,8 +162,8 @@ void directMappedVelocityFluxFixedValueFvPatchField::getNewValues
         if (Pstream::myProcNo() == sendProc)
         {
             OPstream toProc(Pstream::scheduled, recvProc);
-            toProc<< IndirectList<vector>(sendUValues, sendLabels[recvProc])();
-            toProc<< IndirectList<scalar>
+            toProc<< UIndirectList<vector>(sendUValues, sendLabels[recvProc])();
+            toProc<< UIndirectList<scalar>
                 (
                     sendPhiValues,
                     sendLabels[recvProc]
@@ -192,13 +192,13 @@ void directMappedVelocityFluxFixedValueFvPatchField::getNewValues
 
     // Do data from myself
     {
-        IndirectList<vector> fromUFld
+        UIndirectList<vector> fromUFld
             (
                 sendUValues,
                 sendLabels[Pstream::myProcNo()]
             );
 
-        IndirectList<scalar> fromPhiFld
+        UIndirectList<scalar> fromPhiFld
             (
                 sendPhiValues,
                 sendLabels[Pstream::myProcNo()]

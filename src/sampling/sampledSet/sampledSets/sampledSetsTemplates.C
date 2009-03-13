@@ -198,8 +198,11 @@ void Foam::sampledSets::combineSampledValues
                     )
                 );
 
-                masterValues[seti] =
-                    IndirectList<T>(allData, indexSets[seti])();
+                masterValues[seti] = UIndirectList<T>
+                (
+                    allData,
+                    indexSets[seti]
+                )();
             }
         }
 

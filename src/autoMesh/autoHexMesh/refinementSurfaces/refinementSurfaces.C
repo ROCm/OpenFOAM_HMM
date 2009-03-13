@@ -922,7 +922,7 @@ void Foam::refinementSurfaces::findNearest
     List<pointIndexHit>& hitInfo
 ) const
 {
-    labelList geometries(IndirectList<label>(surfaces_, surfacesToTest));
+    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
 
     // Do the tests. Note that findNearest returns index in geometries.
     searchableSurfacesQueries::findNearest
@@ -955,7 +955,7 @@ void Foam::refinementSurfaces::findNearestRegion
     labelList& hitRegion
 ) const
 {
-    labelList geometries(IndirectList<label>(surfaces_, surfacesToTest));
+    labelList geometries(UIndirectList<label>(surfaces_, surfacesToTest));
 
     // Do the tests. Note that findNearest returns index in geometries.
     List<pointIndexHit> hitInfo;
@@ -991,7 +991,7 @@ void Foam::refinementSurfaces::findNearestRegion
 
         List<pointIndexHit> localHits
         (
-            IndirectList<pointIndexHit>
+            UIndirectList<pointIndexHit>
             (
                 hitInfo,
                 localIndices

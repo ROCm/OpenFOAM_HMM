@@ -41,13 +41,18 @@ int Foam::regIOobject::fileModificationSkew
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from IOobject
-Foam::regIOobject::regIOobject(const IOobject& io)
+Foam::regIOobject::regIOobject(const IOobject& io, const bool isTime)
 :
     IOobject(io),
     registered_(false),
     ownedByRegistry_(false),
     lastModified_(0),
-    eventNo_(db().getEvent()),
+    eventNo_                // Do not get event for top level Time database
+    (
+        isTime
+      ? 0
+      : db().getEvent()
+    ),
     isPtr_(NULL)
 {
     // Register with objectRegistry if requested
@@ -156,7 +161,7 @@ bool Foam::regIOobject::checkOut()
 }
 
 
-bool Foam::regIOobject::uptodate(const word& a) const
+bool Foam::regIOobject::upToDate(const word& a) const
 {
     if (db().lookupObject<regIOobject>(a).eventNo() >= eventNo_)
     {
@@ -169,7 +174,7 @@ bool Foam::regIOobject::uptodate(const word& a) const
 }
 
 
-bool Foam::regIOobject::uptodate(const word& a, const word& b) const
+bool Foam::regIOobject::upToDate(const word& a, const word& b) const
 {
     if
     (
@@ -186,7 +191,7 @@ bool Foam::regIOobject::uptodate(const word& a, const word& b) const
 }
 
 
-bool Foam::regIOobject::uptodate
+bool Foam::regIOobject::upToDate
 (
     const word& a,
     const word& b,
@@ -209,7 +214,7 @@ bool Foam::regIOobject::uptodate
 }
 
 
-bool Foam::regIOobject::uptodate
+bool Foam::regIOobject::upToDate
 (
     const word& a,
     const word& b,
@@ -234,8 +239,8 @@ bool Foam::regIOobject::uptodate
 }
 
 
-//- Flag me as uptodate
-void Foam::regIOobject::setUptodate()
+//- Flag me as up to date
+void Foam::regIOobject::setUpToDate()
 {
     eventNo_ = db().getEvent();
 }

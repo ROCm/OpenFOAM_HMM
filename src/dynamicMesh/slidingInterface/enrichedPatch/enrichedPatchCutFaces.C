@@ -202,7 +202,7 @@ void Foam::enrichedPatch::calcCutFaces() const
                 // Grab the next point options
 //                 Pout << "curPointLabel: " << mp[curPointLabel] << endl;
                 const labelList& nextPoints = pp[curPointLabel];
-//                 Pout << "nextPoints: " << IndirectList<label>(mp, nextPoints) << endl;
+//                 Pout << "nextPoints: " << UIndirectList<label>(mp, nextPoints) << endl;
                 // Get the vector along the edge and the right vector
                 vector ahead = curPoint - lp[prevPointLabel];
                 ahead -= normal*(normal & ahead);
