@@ -99,8 +99,9 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject
-        regIOobject(const IOobject&);
+        //- Construct from IOobject. Optional flag for if IOobject is the
+        //  top level regIOobject.
+        regIOobject(const IOobject&, const bool isTime = false);
 
         //- Construct as copy
         regIOobject(const regIOobject&);
