@@ -33,6 +33,8 @@ sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfacesFunctionObject/sampledSurfacesFunctionObject.C
+sampledSurface/thresholdCellFaces/thresholdCellFaces.C
+sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 
 surfWriters = sampledSurface/writers
 
