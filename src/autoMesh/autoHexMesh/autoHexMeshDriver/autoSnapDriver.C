@@ -29,7 +29,6 @@ Description
 
 #include "autoSnapDriver.H"
 #include "Time.H"
-#include "pointFields.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
 #include "OFstream.H"

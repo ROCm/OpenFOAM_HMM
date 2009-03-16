@@ -38,7 +38,6 @@ SourceFiles
 
 #include "autoPtr.H"
 #include "dictionary.H"
-#include "pointField.H"
 #include "boolList.H"
 #include "wallPoint.H"
 #include "searchableSurfaces.H"
