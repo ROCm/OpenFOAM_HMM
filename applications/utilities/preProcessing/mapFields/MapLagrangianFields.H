@@ -73,7 +73,7 @@ void MapLagrangianFields
             (
                 fieldIter()->name(),
                 meshTarget.time().timeName(),
-                cloud::subInstance/cloudName,
+                cloud::prefix/cloudName,
                 meshTarget,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,

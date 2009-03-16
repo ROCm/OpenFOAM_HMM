@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
                 !isDir
                 (
                     runTime.timePath()/regionPrefix/
-                    cloud::subInstance/cloudName
+                    cloud::prefix/cloudName
                 )
             )
             {
@@ -340,7 +340,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                cloud::subInstance/cloudName
+                cloud::prefix/cloudName
             );
 
             // check that the positions field is present for this time
@@ -372,7 +372,7 @@ int main(int argc, char *argv[])
                 if (!fieldObject)
                 {
                     Info<< "missing "
-                        << runTime.timeName()/cloud::subInstance/cloudName
+                        << runTime.timeName()/cloud::prefix/cloudName
                         / fieldName
                         << endl;
                     continue;

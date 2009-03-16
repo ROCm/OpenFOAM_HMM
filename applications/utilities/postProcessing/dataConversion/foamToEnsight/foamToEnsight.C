@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 
         fileNameList cloudDirs = readDir
         (
-            runTime.timePath()/regionPrefix/cloud::subInstance,
+            runTime.timePath()/regionPrefix/cloud::prefix,
             fileName::DIRECTORY
         );
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                cloud::subInstance/cloudDirs[cloudI]
+                cloud::prefix/cloudDirs[cloudI]
             );
 
             IOobject* positionsPtr = cloudObjs.lookup("positions");
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                cloud::subInstance/cloudIter.key()
+                cloud::prefix/cloudIter.key()
             );
 
             forAllConstIter(IOobjectList, cloudObjs, fieldIter)
@@ -426,7 +426,7 @@ int main(int argc, char *argv[])
 
             fileNameList currentCloudDirs = readDir
             (
-                runTime.timePath()/regionPrefix/cloud::subInstance,
+                runTime.timePath()/regionPrefix/cloud::prefix,
                 fileName::DIRECTORY
             );
 
@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
                 (
                     fieldName,
                     mesh.time().timeName(),
-                    cloud::subInstance/cloudName,
+                    cloud::prefix/cloudName,
                     mesh,
                     IOobject::MUST_READ
                 );

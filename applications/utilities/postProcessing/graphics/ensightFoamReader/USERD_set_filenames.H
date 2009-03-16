@@ -164,7 +164,7 @@ int USERD_set_filenames
     (
         "positions",
         runTime.timeName(),
-        cloud::subInstance,
+        cloud::prefix,
         runTime,
         IOobject::NO_READ,
         IOobject::NO_WRITE,
@@ -179,7 +179,7 @@ int USERD_set_filenames
 
         sprayPtr = new Cloud<passiveParticle>(*meshPtr);
 
-        IOobjectList objects(*meshPtr, runTime.timeName(), cloud::subInstance);
+        IOobjectList objects(*meshPtr, runTime.timeName(), cloud::prefix);
 
         lagrangianScalarNames =
             (const wordList&)objects.names(sprayScalarFieldName);

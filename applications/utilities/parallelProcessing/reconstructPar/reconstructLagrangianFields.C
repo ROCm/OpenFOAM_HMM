@@ -47,7 +47,7 @@ Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
             (
                 fieldName,
                 mesh.time().timeName(),
-                cloud::subInstance/cloudName,
+                cloud::prefix/cloudName,
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -64,7 +64,7 @@ Foam::tmp<Foam::IOField<Type> > Foam::reconstructLagrangianField
         (
             fieldName,
             meshes[i].time().timeName(),
-            cloud::subInstance/cloudName,
+            cloud::prefix/cloudName,
             meshes[i],
             IOobject::MUST_READ,
             IOobject::NO_WRITE

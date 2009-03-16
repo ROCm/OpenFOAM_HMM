@@ -69,8 +69,8 @@ public:
     //- Runtime type information
     TypeName("cloud");
 
-        //- The subInstance (local) to prefix: %lagrangian
-        static const word subInstance;
+        //- The prefix to local: %lagrangian
+        static const word prefix;
 
         //- The default cloud name: %defaultCloud
         static word defaultName;

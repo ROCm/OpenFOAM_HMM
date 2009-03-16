@@ -108,7 +108,7 @@ void Foam::MeshedSurfaceProxy<Face>::write
     // the local location
     const fileName objectDir
     (
-        t.timePath()/surfaceRegistry::subInstance/name/surfMesh::meshSubDir
+        t.timePath()/surfaceRegistry::prefix/name/surfMesh::meshSubDir
     );
 
     if (!isDir(objectDir))

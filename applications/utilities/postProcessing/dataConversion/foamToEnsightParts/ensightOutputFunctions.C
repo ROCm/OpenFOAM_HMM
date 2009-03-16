@@ -100,7 +100,7 @@ void ensightParticlePositions
 {
     Cloud<passiveParticle> parcels(mesh, cloudName, false);
 
-    fileName cloudDir = subDir/cloud::subInstance/cloudName;
+    fileName cloudDir = subDir/cloud::prefix/cloudName;
     fileName postFileName = cloudDir/"positions";
 
     // the ITER/lagrangian subdirectory must exist
@@ -164,7 +164,7 @@ void ensightLagrangianField
 {
     Info<< " " << fieldObject.name() << flush;
 
-    fileName cloudDir = subDir/cloud::subInstance/cloudName;
+    fileName cloudDir = subDir/cloud::prefix/cloudName;
     fileName postFileName = cloudDir/fieldObject.name();
 
     string title =

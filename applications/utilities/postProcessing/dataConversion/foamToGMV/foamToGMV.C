@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
         "volScalarField",
         "volVectorField",
         "surfaceScalarField",
-        cloud::subInstance
+        cloud::prefix
     };
 
 #   include "setRootCase.H"

@@ -62,9 +62,7 @@ Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
 
     return fileName
     (
-        surfaceRegistry::subInstance
-      / name
-      / surfMesh::meshSubDir
+        surfaceRegistry::prefix/name/surfMesh::meshSubDir
       / name + "." + nativeExt
     );
 }

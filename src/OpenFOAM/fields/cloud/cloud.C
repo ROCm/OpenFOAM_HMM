@@ -31,7 +31,7 @@ License
 
 defineTypeNameAndDebug(Foam::cloud, 0);
 
-const Foam::word Foam::cloud::subInstance("lagrangian");
+const Foam::word Foam::cloud::prefix("lagrangian");
 Foam::word Foam::cloud::defaultName("defaultCloud");
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -44,7 +44,7 @@ Foam::cloud::cloud(const objectRegistry& obr, const word& cloudName)
         (
             ( cloudName.size() ? cloudName : defaultName ),
             obr.time().timeName(),
-            subInstance,
+            prefix,
             obr,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE

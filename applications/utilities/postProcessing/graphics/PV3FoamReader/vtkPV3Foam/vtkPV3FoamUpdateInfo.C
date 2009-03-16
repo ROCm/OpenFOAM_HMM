@@ -149,16 +149,16 @@ void Foam::vtkPV3Foam::updateInfoLagrangian()
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::updateInfoLagrangian" << nl
-            << "    " << dbPtr_->timePath()/cloud::subInstance << endl;
+            << "    " << dbPtr_->timePath()/cloud::prefix << endl;
     }
 
 
     // use the db directly since this might be called without a mesh,
     // but the region must get added back in
-    fileName lagrangianPrefix(cloud::subInstance);
+    fileName lagrangianPrefix(cloud::prefix);
     if (meshRegion_ != polyMesh::defaultRegion)
     {
-        lagrangianPrefix = meshRegion_/cloud::subInstance;
+        lagrangianPrefix = meshRegion_/cloud::prefix;
     }
 
     // Search for list of lagrangian objects for this time
@@ -464,10 +464,10 @@ void Foam::vtkPV3Foam::updateInfoLagrangianFields()
 
     // use the db directly since this might be called without a mesh,
     // but the region must get added back in
-    fileName lagrangianPrefix(cloud::subInstance);
+    fileName lagrangianPrefix(cloud::prefix);
     if (meshRegion_ != polyMesh::defaultRegion)
     {
-        lagrangianPrefix = meshRegion_/cloud::subInstance;
+        lagrangianPrefix = meshRegion_/cloud::prefix;
     }
 
     IOobjectList objects
