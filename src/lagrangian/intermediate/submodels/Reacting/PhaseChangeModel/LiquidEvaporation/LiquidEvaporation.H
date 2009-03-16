@@ -104,7 +104,7 @@ public:
         bool active() const;
 
         //- Update model
-        scalar calculate
+        void calculate
         (
             const scalar dt,
             const label cellI,
@@ -114,7 +114,7 @@ public:
             const scalar Tc,
             const scalar nuc,
             const vector& Ur,
-            scalarList& dMassMT
+            scalarList& dMass
         ) const;
 };
 

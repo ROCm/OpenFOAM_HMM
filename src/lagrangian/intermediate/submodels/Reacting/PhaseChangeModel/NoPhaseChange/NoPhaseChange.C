@@ -56,7 +56,7 @@ bool Foam::NoPhaseChange<CloudType>::active() const
 
 
 template<class CloudType>
-Foam::scalar Foam::NoPhaseChange<CloudType>::calculate
+void Foam::NoPhaseChange<CloudType>::calculate
 (
     const scalar,
     const label,
@@ -70,7 +70,6 @@ Foam::scalar Foam::NoPhaseChange<CloudType>::calculate
 ) const
 {
     // Nothing to do...
-    return 0.0;
 }
 
 

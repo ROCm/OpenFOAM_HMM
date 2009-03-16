@@ -188,8 +188,10 @@ protected:
             const scalar dt,
             const label cellI,
             const scalar T,
+            const label idPhase,
             const scalar YPhase,
-            scalarList& dMassMT
+	    const scalarField& YComponents,
+            scalarList& dMass
         );
 
         //- Update mass fraction

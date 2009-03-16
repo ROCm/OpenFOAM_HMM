@@ -76,47 +76,41 @@ void Foam::ReactingParcel<ParcelType>::calc
     const scalar np0 = this->nParticle_;
     const scalar T0 = this->T_;
 
-    // ~~~~~~~~~~~~~~~~~~~~~
-    // 1. Calculate velocity
-    // ~~~~~~~~~~~~~~~~~~~~~
-
-    scalar Cud = 0.0;
-    vector dUTrans = vector::zero;
-    const vector U1 = calcVelocity(td, dt, vector::zero, mass0, Cud, dUTrans);
-
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 2. Calculate phase change
+    // 1. Calculate phase change
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
     // Mass transfer from particle to carrier phase
     scalarList dMassPC(td.cloud().gases().size(), 0.0);
-    const scalar dMassPCTot = calcPhaseChange(td, dt, cellI, T0, 1.0, dMassPC);
-
-    // Enthalpy change due to change in particle composition (sink)
-    scalar ShPC = -dMassPCTot*td.cloud().composition().L(0, Y_, pc, T0);
-
-    // Enthalpy change due to species released into the carrier (source)
-    scalar HEff = td.cloud().composition().H(0, Y_, pc, T0);
-    ShPC += dMassPCTot*HEff;
+    scalar ShPC = calcPhaseChange(td, dt, cellI, T0, 0, 1.0, Y_, dMassPC);
 
     // Update particle component mass fractions
     updateMassFraction(mass0, dMassPC, Y_);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 3. Calculate heat transfer
+    // 2. Calculate heat transfer
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar htc = 0.0;
     scalar ShHT = 0.0;
     scalar T1 = calcHeatTransfer(td, dt, cellI, ShPC, htc, ShHT);
 
 
+    // ~~~~~~~~~~~~~~~~~~~~~
+    // 3. Calculate velocity
+    // ~~~~~~~~~~~~~~~~~~~~~
+    // Update mass
+    scalar mass1 = mass0 - sum(dMassPC);
+    scalar Cud = 0.0;
+    vector dUTrans = vector::zero;
+    vector Fx = vector::zero;
+    vector U1 = calcVelocity(td, dt, Fx, 0.5*(mass0 + mass1), Cud, dUTrans);
+
+
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // 4. Collect contributions to determine new particle thermo properties
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // New mass
-    scalar mass1 = mass0 - dMassPCTot;
 
     // Total enthalpy transfer from the particle to the carrier phase
     scalar dhTrans = ShHT + ShPC;
@@ -165,6 +159,7 @@ void Foam::ReactingParcel<ParcelType>::calc
                 td.cloud().rhoTrans(i)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
+            scalar HEff = td.cloud().composition().H(0, YComponents, pc_, T1);
             td.cloud().hTrans()[cellI] += np0*mass1*HEff;
         }
     }
@@ -198,36 +193,47 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar dt,
     const label cellI,
     const scalar T,
-    const scalar YPhase, // TODO: NEEDED?????????????????????????????????????????
-    scalarList& dMassMT
+    const label idPhase,
+    const scalar YPhase,
+    scalarField& YComponents,
+    scalarList& dMass
 )
 {
     if
     (
         !td.cloud().phaseChange().active()
      || T < td.constProps().Tvap()
-     || YPhase > SMALL
+     || YPhase < SMALL
     )
     {
         return 0.0;
     }
 
-    scalar dMass = td.cloud().phaseChange().calculate
+    td.cloud().phaseChange().calculate
     (
         dt,
         cellI,
-        T,
+        min(T, td.constProps().Tbp()), // Limiting to boiling temperature
         pc_,
         this->d_,
         this->Tc_,
         this->muc_/this->rhoc_,
         this->U_ - this->Uc_,
-        dMassMT
+        dMass
     );
 
-    td.cloud().addToMassPhaseChange(dMass);
+    scalar dMassTot = sum(dMass);
 
-    return dMass;
+    // Add to cumulative phase change mass
+    td.cloud().addToMassPhaseChange(dMassTot);
+
+    // Effective latent heat of vaporisation
+    scalar LEff = td.cloud().composition().L(idPhase, YComponents, pc_, T);
+
+    // Effective heat of vaporised components
+    scalar HEff = td.cloud().composition().H(idPhase, YComponents, pc_, T);
+
+    return dMassTot*(HEff - LEff);
 }
 
 

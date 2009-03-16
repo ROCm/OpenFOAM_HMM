@@ -66,14 +66,14 @@ Foam::scalar Foam::ConstantRateDevolatilisation<CloudType>::calculate
     const scalar dt,
     const scalar mass0,
     const scalar mass,
-    const scalarField& YMixture0,
-    const scalarField& YMixture,
+    const scalar YVolatile0,
+    const scalarField& YVolatile,
     const scalar T,
     bool& canCombust
 ) const
 {
-    const scalar massVolatile0 = YMixture0[0]*mass0;
-    const scalar massVolatile  = YMixture[0]*mass;
+    const scalar massVolatile0 = YVolatile0*mass0;
+    const scalar massVolatile  = YVolatile*mass;
 
     if (massVolatile <= volatileResidualCoeff_*massVolatile0)
     {

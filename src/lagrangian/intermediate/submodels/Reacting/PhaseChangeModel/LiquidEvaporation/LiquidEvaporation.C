@@ -186,7 +186,7 @@ bool Foam::LiquidEvaporation<CloudType>::active() const
 
 
 template<class CloudType>
-Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
+void Foam::LiquidEvaporation<CloudType>::calculate
 (
     const scalar dt,
     const label cellI,
@@ -196,7 +196,7 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
     const scalar Tc,
     const scalar nuc,
     const vector& Ur,
-    scalarList& dMassMT
+    scalarList& dMass
 ) const
 {
     // initialise total mass transferred from the particle to carrier phase
@@ -242,12 +242,8 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::calculate
         scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
         // mass transfer [kg]
-        scalar dm = Ni*A*liquids_->properties()[lid].W()*dt;
-        dMassMT[gid] += dm;
-        dMassTot += dm;
+        dMass[gid] += Ni*A*liquids_->properties()[lid].W()*dt;
     }
-
-    return dMassTot;
 }
 
 

@@ -87,146 +87,102 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Define local properties at beginning of timestep
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const vector U0 = this->U_;
     const scalar mass0 = this->mass();
-    const scalar cp0 = this->cp_;
     const scalar np0 = this->nParticle_;
-    scalar T0 = this->T_;
+    const scalar T0 = this->T_;
     const scalar pc = this->pc_;
-    scalarField& Y = this->Y_;
-    scalar mass1 = mass0;
+    scalarField& YMix = this->Y_;
+    const label idL = td.cloud().composition().idLiquid();
 
-    label idGas = td.cloud().composition().idGas();
-    label idLiquid = td.cloud().composition().idLiquid();
-    label idSolid = td.cloud().composition().idSolid();
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Momentum transfer from the particle to the carrier phase
-    vector dUTrans = vector::zero;
-
-    // Enthalpy transfer from the particle to the carrier phase
-    scalar dhTrans = 0.0;
-
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Calculate phase change in liquid phase
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Mass transfer from particle to carrier phase
-    // - components exist in particle already
-    scalarList dMassMT(td.cloud().gases().size(), 0.0);
+    scalarList dMassPC(td.cloud().gases().size(), 0.0);
+    scalar shPC = 
+        calcPhaseChange(td, dt, cellI, T0, idL, YMix[idL], YLiquid_, dMassPC);
 
-    // Mass transfer due to surface reactions from particle to carrier phase
-    // - components do not necessarily exist in particle already
-    scalarList dMassSR(td.cloud().gases().size(), 0.0);
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Cud = 0.0;
-    const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate heat transfer - update T
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar htc = 0.0;
-    scalar T1 = calcHeatTransfer(td, dt, cellI, htc, dhTrans);
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate phase change - update mass, Y, cp, T, dhTrans
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const scalar dMassPC = calcPhaseChange(td, dt, cellI, T1, Y[idLiquid], dMassMT);
-
-    // Update particle mass
-    mass1 -= dMassPC;
-
-    // Update particle liquid component mass fractions
-    this->updateMassFraction(mass0, dMassMT, YLiquid_);
-
-    // New specific heat capacity of mixture
-    scalar cp1 = cpEff(td, pc, T1);
-
-    // Correct temperature due to evaporated components
-    // TODO: use hl function in liquidMixture???
-//    scalar dhPC = -dMassPCTot*td.cloud().composition().L(0, Y_, pc, T0);
-    scalar Lvap = td.cloud().composition().L(idLiquid, this->YLiquid_, pc, T0);
-    T1 -= Lvap*dMassPC/(0.5*(mass0 + mass1)*cp1);
-
-    // Correct dhTrans to account for the change in enthalpy due to the
-    // liquid phase change
-    dhTrans +=
-        dMassPC
-       *td.cloud().composition().H(idLiquid, YLiquid_, pc, 0.5*(T0 + T1));
-
-//????????????????????????????????????????????????????????????????????????????????
-    // Store temperature for the start of the next process
-    T0 = T1;
-//????????????????????????????????????????????????????????????????????????????????
+    // Update particle component mass fractions
+    updateMassFraction(mass0, dMassPC, YLiquid_);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate Devolatilisation
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const scalar dMassD = calcDevolatilisation(td, dt, T0, dMassMT);
-
-    // Update particle mass
-    mass1 -= dMassD;
-
-    // New specific heat capacity of mixture
-    cp1 = cpEff(td, pc, T1);
-
-    // Update gas and solid component mass fractions
-//    updateMassFraction(mass0, mass1, dMassMT, YGas_);
-//    updateMassFraction(mass0, mass1, dMassMT, YSolid_);
-
-    // Correct particle temperature to account for latent heat of
-    // devolatilisation
-    T1 -=
-        td.constProps().Ldevol()
-       *sum(dMassMT)
-       /(0.5*(mass0 + mass1)*cp1);
+    // Mass transfer from particle to carrier phase
+    // - components exist in particle already
+    scalarList dMassDV(td.cloud().gases().size(), 0.0);
+    scalar shDV = calcDevolatilisation(td, dt, T0, mass0, idGas, YMix, dMassDV);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Calculate surface reactions
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+    // Mass transfer of volatile components from particle to carrier phase
+    const scalarList dMassMT = dMassPC + dMassDV;
+    // Mass transfer due to surface reactions from particle to carrier phase
+    // - components do not necessarily exist in particle already
+    scalarList dMassSR(td.cloud().gases().size(), 0.0);
     // Initialise enthalpy retention to zero
     scalar dhRet = 0.0;
-
-    calcSurfaceReactions(td, dt, cellI, T0, T1, dMassMT, dMassSR, dhRet);
-
-    // New total mass
-    mass1 -= sum(dMassSR);
-
+    calcSurfaceReactions(td, dt, cellI, T0, dMassMT, dMassSR, dhRet);
 
     // Enthalpy retention divided between particle and carrier phase by the
     // fraction fh and (1 - fh)
-    T1 += td.constProps().fh()*dhRet/(0.5*(mass0 + mass1)*cp0);
+    scalar ShSR = td.constProps().fh()*dhRet;
     dhTrans -= (1.0 - td.constProps().fh())*dhRet;
-
-    // Correct dhTrans to account for enthalpy of evolved volatiles
-    dhTrans +=
-        sum(dMassMT)
-       *td.cloud().composition().H(idGas, YGas_, pc, 0.5*(T0 + T1));
 
     // Correct dhTrans to account for enthalpy of consumed solids
     dhTrans +=
-        sum(dMassSR)
-       *td.cloud().composition().H(idSolid, YSolid_, pc, 0.5*(T0 + T1));
+        sum(dMassSR)*td.cloud().composition().H(idSolid, YSolid_, pc, T0);
+
+    // Correct dhTrans to account for enthalpy of evolved volatiles
+    dhTrans +=
+        sum(dMassMT)*td.cloud().composition().H(idGas, YGas_, pc, T0);
 
 
+    // ~~~~~~~~~~~~~~~~~~~~~~~
+    // Calculate heat transfer
+    // ~~~~~~~~~~~~~~~~~~~~~~~
+    scalar htc = 0.0;
+
+    // Total enthalpy source
+    scalar Sh = ShPC + ShDV + ShSR;
+
+    scalar T1 = calcHeatTransfer(td, dt, cellI, Sh, htc, shHT);
+
+
+    // ~~~~~~~~~~~~~~~~~~
+    // Calculate velocity
+    // ~~~~~~~~~~~~~~~~~~
+    // Update mass
+    scalar mass1 = mass0 - massPC - massD - massSR;
+    scalar Cud = 0.0;
+    vector dUTrans = vector::zero;
+    vector Fx = vector::zero;
+    vector U1 = calcVelocity(td, dt, Fx, 0.5*(mass0 + mass1), Cud, dUTrans);
+
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Collect contributions to determine new particle thermo properties
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Update specific heat capacity
+    cp1 = cpEff(td, pc, T1);
+
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Accumulate carrier phase source terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (td.cloud().coupled())
     {
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-        // Accumulate carrier phase source terms
-        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
         // Transfer mass lost from particle to carrier mass source
         forAll(dMassMT, i)
         {
-            td.cloud().rhoTrans(i)[cellI] += np0*(dMassMT[i] + dMassSR[i]);
+            td.cloud().rhoTrans(i)[cellI] +=
+                np0*(dMassPC[i] + dMassDV[i] + dMassSR[i]);
         }
 
         // Update momentum transfer
@@ -266,7 +222,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     {
         this->U_ = U1;
         this->T_ = T1;
-        this->cp_ = cpEff(td, pc, T1);
+        this->cp_ = cp1;
 
         // Update particle density or diameter
         if (td.constProps().constantVolume())
@@ -288,6 +244,9 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     TrackData& td,
     const scalar dt,
     const scalar T,
+    const scalar mass,
+    const label idVolatile,
+    scalarField_ YMixture,
     scalarList& dMassMT
 )
 {
@@ -296,37 +255,34 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     if
     (
         !td.cloud().devolatilisation().active()
-     || this->T_<td.constProps().Tvap()
-     || this->T_<td.constProps().Tbp()
+     || T < td.constProps().Tvap()
+     || T < td.constProps().Tbp()
     )
     {
         return 0.0;
     }
 
     // Determine mass to add to carrier phase
-    const scalar mass = this->mass();
-    scalarField& Y = this->Y_;
     const scalar dMassTot = td.cloud().devolatilisation().calculate
     (
         dt,
         this->mass0_,
         mass,
-        td.cloud().composition().YMixture0(),
-        Y,
+        td.cloud().composition().YMixture0()[idVolatile],
+        YMix[0],
         T,
         canCombust_
     );
 
     // Update (total) mass fractions
-    Y[0] = (Y[0]*mass - dMassTot)/(mass - dMassTot);
-    Y[1] = Y[1]*mass/(mass - dMassTot);
-    Y[2] = 1.0 - Y[0] - Y[1];
+    YMix[0] = (YMix[0]*mass - dMassTot)/(mass - dMassTot);
+    YMix[1] = YMix[1]*mass/(mass - dMassTot);
+    YMix[2] = 1.0 - YMix[0] - YMix[1];
 
     // Add to cummulative mass transfer
-    label idGas = td.cloud().composition().idGas();
     forAll (YGas_, i)
     {
-        label id = td.cloud().composition().globalIds(idGas)[i];
+        label id = td.cloud().composition().globalIds(idVolatile)[i];
 
         // Volatiles mass transfer
         scalar volatileMass = YGas_[i]*dMassTot;
@@ -335,7 +291,7 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
 
     td.cloud().addToMassDevolatilisation(dMassTot);
 
-    return dMassTot;
+    return = td.constProps().Ldevol()*dMassTot;
 }
 
 
@@ -346,8 +302,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     TrackData& td,
     const scalar dt,
     const label cellI,
-    const scalar T0,
-    const scalar T1,
+    const scalar T,
     const scalarList& dMassMT,
     scalarList& dMassSR,
     scalar& dhRet
@@ -366,8 +321,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
         dt,
         cellI,
         this->d_,
-        T0,
-        T1,
+        T,
         this->Tc_,
         this->pc_,
         this->rhoc_,

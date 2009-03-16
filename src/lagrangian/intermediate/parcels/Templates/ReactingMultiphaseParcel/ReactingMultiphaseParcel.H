@@ -185,6 +185,8 @@ protected:
             TrackData& td,
             const scalar dt,
             const scalar T,
+	    const scalar mass,
+	    const label idVolatile,
             scalarList& dMassMT
         );
 

@@ -61,33 +61,24 @@ void Foam::ThermoParcel<ParcelType>::calc
     const scalar np0 = this->nParticle_;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 1. Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Momentum transfer from the particle to the carrier phase
-    vector dUTrans = vector::zero;
-
-    // Enthalpy transfer from the particle to the carrier phase
-    scalar dhTrans = 0.0;
-
-
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 2. Calculate heat transfer - update T
+    // 1. Calculate heat transfer - update T
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar htc = 0.0;
-    const scalar T1 = calcHeatTransfer(td, dt, cellI, 0.0, htc, dhTrans);
+    scalar ShHT = 0.0;
+    const scalar T1 = calcHeatTransfer(td, dt, cellI, 0.0, htc, ShHT);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 3. Calculate velocity - update U
+    // 2. Calculate velocity - update U
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     scalar Cud = 0.0;
+    vector dUTrans = vector::zero;
     const vector U1 = calcVelocity(td, dt, vector::zero, Cud, mass0, dUTrans);
 
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 4. Accumulate carrier phase source terms
+    // 3. Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (td.cloud().coupled())
     {
@@ -98,7 +89,7 @@ void Foam::ThermoParcel<ParcelType>::calc
         td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
 
         // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*dhTrans;
+        td.cloud().hTrans()[cellI] += np0*ShHT;
 
         // Coefficient to be applied in carrier phase enthalpy coupling
         td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
@@ -121,7 +112,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const label cellI,
     const scalar Sh,
     scalar& htc,
-    scalar& dhTrans
+    scalar& ShHT
 )
 {
     if (!td.cloud().heatTransfer().active())
@@ -171,7 +162,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
 
     // Using average parcel temperature for enthalpy transfer calculation
-    dhTrans = dt*Ap*htc*(Tres.average() - Tc_);
+    ShHT = dt*Ap*htc*(Tres.average() - Tc_);
 
     return Tres.value();
 }

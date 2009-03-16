@@ -136,7 +136,7 @@ public:
         virtual bool active() const = 0;
 
         //- Update model
-        virtual scalar calculate
+        virtual void calculate
         (
             const scalar dt,
             const label cellI,
@@ -146,7 +146,7 @@ public:
             const scalar Tc,
             const scalar nuc,
             const vector& Ur,
-            scalarList& dMassMT
+            scalarList& dMass
         ) const = 0;
 };
 
