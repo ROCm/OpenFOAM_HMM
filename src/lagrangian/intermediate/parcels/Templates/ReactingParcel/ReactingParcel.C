@@ -69,7 +69,6 @@ void Foam::ReactingParcel<ParcelType>::calc
     const label cellI
 )
 {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const scalar mass0 = this->mass();
@@ -77,51 +76,54 @@ void Foam::ReactingParcel<ParcelType>::calc
     const scalar T0 = this->T_;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 1. Calculate phase change
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Mass transfer from particle to carrier phase
+    // Intialise transfer terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Momentum
+    vector dUTrans = vector::zero;
+
+    // Enthalpy
+    scalar dhTrans = 0.0;
+
+    // Mass transfer due to phase change
     scalarList dMassPC(td.cloud().gases().size(), 0.0);
+
+
+    // Phase change
+    // ~~~~~~~~~~~~
+
+    // Return enthalpy source and calc mass transfer due to phase change
     scalar ShPC = calcPhaseChange(td, dt, cellI, T0, 0, 1.0, Y_, dMassPC);
 
     // Update particle component mass fractions
     updateMassFraction(mass0, dMassPC, Y_);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 2. Calculate heat transfer
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Heat transfer
+    // ~~~~~~~~~~~~~
+
+    // Calculate new particle temperature
     scalar htc = 0.0;
-    scalar ShHT = 0.0;
-    scalar T1 = calcHeatTransfer(td, dt, cellI, ShPC, htc, ShHT);
+    scalar T1 = calcHeatTransfer(td, dt, cellI, ShPC, htc, dhTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~
-    // 3. Calculate velocity
-    // ~~~~~~~~~~~~~~~~~~~~~
+    // Motion
+    // ~~~~~~
+
     // Update mass
     scalar mass1 = mass0 - sum(dMassPC);
-    scalar Cud = 0.0;
-    vector dUTrans = vector::zero;
+
+    // No additional forces
     vector Fx = vector::zero;
-    vector U1 = calcVelocity(td, dt, Fx, 0.5*(mass0 + mass1), Cud, dUTrans);
+
+    // Calculate new particle velocity
+    scalar Cud = 0.0;
+    vector U1 =
+        calcVelocity(td, dt, cellI, Fx, 0.5*(mass0 + mass1), Cud, dUTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 4. Collect contributions to determine new particle thermo properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-    // Total enthalpy transfer from the particle to the carrier phase
-    scalar dhTrans = ShHT + ShPC;
-
-    // New specific heat capacity of mixture - using new temperature
-    scalar cp1 = td.cloud().composition().cp(0, Y_, pc_, T1);
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 5. Accumulate carrier phase source terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Accumulate carrier phase source terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (td.cloud().coupled())
     {
         // Transfer mass lost from particle to carrier mass source
@@ -137,16 +139,15 @@ void Foam::ReactingParcel<ParcelType>::calc
         td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
 
         // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*dhTrans;
+        td.cloud().hTrans()[cellI] += np0*(dhTrans + ShPC);
 
         // Coefficient to be applied in carrier phase enthalpy coupling
         td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
     }
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 6a. Remove the particle when mass falls below minimum threshold
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Remove the particle when mass falls below minimum threshold
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (mass1 < td.constProps().minParticleMass())
     {
         td.keepParticle = false;
@@ -159,18 +160,20 @@ void Foam::ReactingParcel<ParcelType>::calc
                 td.cloud().rhoTrans(i)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
-            scalar HEff = td.cloud().composition().H(0, YComponents, pc_, T1);
+            scalar HEff = td.cloud().composition().H(0, Y_, pc_, T1);
             td.cloud().hTrans()[cellI] += np0*mass1*HEff;
         }
     }
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 6b. Set new particle properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+    // Set new particle properties
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     else
     {
         this->U_ = U1;
         this->T_ = T1;
-        this->cp_ = cp1;
+        this->cp_ = td.cloud().composition().cp(0, Y_, pc_, T1);
 
         // Update particle density or diameter
         if (td.constProps().constantVolume())
@@ -195,7 +198,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar T,
     const label idPhase,
     const scalar YPhase,
-    scalarField& YComponents,
+    const scalarField& YComponents,
     scalarList& dMass
 )
 {

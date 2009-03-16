@@ -185,23 +185,23 @@ protected:
             TrackData& td,
             const scalar dt,
             const scalar T,
-	    const scalar mass,
-	    const label idVolatile,
-            scalarList& dMassMT
+            const scalar mass,
+            const label idVolatile,
+            scalarField& YMixture,
+            scalarList& dMassDV
         );
 
         //- Calculate surface reactions
         template<class TrackData>
-        void calcSurfaceReactions
+        scalar calcSurfaceReactions
         (
             TrackData& td,
             const scalar dt,
             const label cellI,
-            const scalar T0,
-            const scalar T1,
+            const scalar T,
             const scalarList& dMassMT,
-            scalarList& dMassSR,
-            scalar& dhRet
+            scalarList& dMassSRc,
+            scalar& dhTrans
         );
 
 

@@ -338,9 +338,6 @@ public:
             //- Print cloud information
             void info() const;
 
-            //- Dump particle positions to .obj file
-            void dumpParticlePositions() const;
-
 
             // Fields
 

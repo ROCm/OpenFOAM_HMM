@@ -232,7 +232,7 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
     if (debug)
     {
-        this->dumpParticlePositions();
+        this->writePositions();
     }
 
     if (coupled_)
@@ -258,27 +258,6 @@ void Foam::KinematicCloud<ParcelType>::info() const
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
         << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::dumpParticlePositions() const
-{
-    OFstream pObj
-    (
-        this->db().time().path()/"parcelPositions_"
-      + this->name() + "_"
-      + name(this->injection().nInjections()) + ".obj"
-    );
-
-    forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        pObj<< "v " << p.position().x() << " " << p.position().y() << " "
-            << p.position().z() << nl;
-    }
-
-    pObj.flush();
 }
 
 

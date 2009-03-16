@@ -53,7 +53,6 @@ void Foam::ThermoParcel<ParcelType>::calc
     const label cellI
 )
 {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const vector U0 = this->U_;
@@ -61,25 +60,37 @@ void Foam::ThermoParcel<ParcelType>::calc
     const scalar np0 = this->nParticle_;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 1. Calculate heat transfer - update T
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar htc = 0.0;
-    scalar ShHT = 0.0;
-    const scalar T1 = calcHeatTransfer(td, dt, cellI, 0.0, htc, ShHT);
+    // Initialise transfer terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 2. Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Cud = 0.0;
     vector dUTrans = vector::zero;
-    const vector U1 = calcVelocity(td, dt, vector::zero, Cud, mass0, dUTrans);
+    scalar dhTrans = 0.0;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 3. Accumulate carrier phase source terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Heat transfer
+    // ~~~~~~~~~~~~~
+
+    // No additional enthalpy sources
+    vector Sh = 0.0;
+
+    // Calculate new particle velocity
+    scalar htc = 0.0;
+    scalar T1 = calcHeatTransfer(td, dt, cellI, Sh, htc, dhTrans);
+
+
+    // Motion
+    // ~~~~~~
+
+    // No additional forces
+    vector Fx = vector::zero;
+
+    // Calculate new particle velocity
+    scalar Cud = 0.0;
+    vector U1 = calcVelocity(td, dt, cellI, Fx, Cud, mass0, dUTrans);
+
+
+    //  Accumulate carrier phase source terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (td.cloud().coupled())
     {
         // Update momentum transfer
@@ -89,16 +100,15 @@ void Foam::ThermoParcel<ParcelType>::calc
         td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
 
         // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*ShHT;
+        td.cloud().hTrans()[cellI] += np0*dhTrans;
 
         // Coefficient to be applied in carrier phase enthalpy coupling
         td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
     }
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 5. Set new particle properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    this->U() = U1;
+    // Set new particle properties
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    this->U_ = U1;
     T_ = T1;
 }
 
@@ -118,7 +128,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     if (!td.cloud().heatTransfer().active())
     {
         htc = 0.0;
-        dhTrans = 0.0;
+        ShHT = 0.0;
         return T_;
     }
 
@@ -134,7 +144,11 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         this->muc_
     );
 
-    //- Assuming diameter = diameter at start of time step
+
+    // Set new particle temperature
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Assuming diameter = diameter at start of time step
     scalar Ap = this->areasS();
 
     // Determine ap and bp coefficients
@@ -161,7 +175,8 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
 
-    // Using average parcel temperature for enthalpy transfer calculation
+    // Enthalpy transfer
+    // - Using average particle temperature
     ShHT = dt*Ap*htc*(Tres.average() - Tc_);
 
     return Tres.value();

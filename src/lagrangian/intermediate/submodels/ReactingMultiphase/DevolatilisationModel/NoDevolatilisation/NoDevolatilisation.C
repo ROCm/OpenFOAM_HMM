@@ -61,8 +61,8 @@ Foam::scalar Foam::NoDevolatilisation<CloudType>::calculate
     const scalar,
     const scalar,
     const scalar,
-    const scalarField&,
-    const scalarField&,
+    const scalar,
+    const scalar,
     const scalar,
     bool& canCombust
 ) const

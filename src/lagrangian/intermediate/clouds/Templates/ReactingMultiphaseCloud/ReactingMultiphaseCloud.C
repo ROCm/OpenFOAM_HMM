@@ -181,7 +181,7 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
 
     if (debug)
     {
-        this->dumpParticlePositions();
+        this->writePositions();
     }
 
     if (this->coupled())

@@ -27,8 +27,6 @@ License
 #include "KinematicParcel.H"
 #include "dimensionedConstants.H"
 
-#include "fvcGrad.H"
-
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -66,30 +64,43 @@ void Foam::KinematicParcel<ParcelType>::calc
     const label cellI
 )
 {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 1. Calculate velocity - update U, dUTrans
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Cud = 0.0;
+    // Define local properties at beginning of time step
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const scalar mass0 = mass();
+
+
+    // Initialise transfer terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // Momentum
     vector dUTrans = vector::zero;
-    const vector U1 = calcVelocity(td, dt, vector::zero, mass(), Cud, dUTrans);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 2. Accumulate carrier phase source terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Motion
+    // ~~~~~~
+
+    // No additional forces
+    vector Fx = vector::zero;
+
+    // Calculate new particle velocity
+    scalar Cud = 0.0;
+    vector U1 = calcVelocity(td, dt, cellI, Fx, mass0, Cud, dUTrans);
+
+
+    // Accumulate carrier phase source terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     if (td.cloud().coupled())
     {
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += nParticle_*dUTrans;
 
         // Coefficient to be applied in carrier phase momentum coupling
-        td.cloud().UCoeff()[cellI] += nParticle_*mass()*Cud;
+        td.cloud().UCoeff()[cellI] += nParticle_*mass0*Cud;
     }
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // 3. Set new particle properties
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Set new particle properties
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     U_ = U1;
 }
 
@@ -100,10 +111,11 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 (
     TrackData& td,
     const scalar dt,
+    const label cellI,
     const vector& Fx,
     const scalar mass,
     scalar& Cud,
-    vector& dUTrans,
+    vector& dUTrans
 ) const
 {
     // Return linearised term from drag model
@@ -127,12 +139,13 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     // Pressure gradient force
     if (td.cloud().forcePressureGradient())
     {
-        Ftot += rhoc_/rho_*(U_ & fvc::grad(Uc_))
+        const vector& d = this->mesh().deltaCoeffs()[cellI];
+        Ftot += rhoc_/rho_*(U_ & (d^Uc_));
     }
 
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Set new particle velocity
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // New particle velocity
+    //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
     const vector ap = Uc_ + (Ftot + Fx)/(Cud + VSMALL);
@@ -142,8 +155,6 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     // Calculate the momentum transfer to the continuous phase
     // - do not include gravity impulse
-
-    // TODO: USE AVERAGE PARTICLE MASS
     dUTrans = -mass*(Unew - U_ - dt*td.g());
 
     return Unew;

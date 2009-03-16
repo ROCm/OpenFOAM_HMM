@@ -204,7 +204,7 @@ void Foam::ReactingCloud<ParcelType>::evolve()
 
     if (debug)
     {
-        this->dumpParticlePositions();
+        this->writePositions();
     }
 
     if (this->coupled())

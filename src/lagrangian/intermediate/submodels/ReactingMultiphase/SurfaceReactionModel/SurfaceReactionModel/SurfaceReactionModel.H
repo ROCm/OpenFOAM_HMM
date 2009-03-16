@@ -132,24 +132,23 @@ public:
         virtual bool active() const = 0;
 
         //- Update surface reactions
-        virtual void calculate
+        //  Returns the heat of reaction
+        virtual scalar calculate
         (
             const scalar dt,
-            const label celli,
-            const scalar dp,
-            const scalar T0,
-            const scalar T1,
+            const label cellI,
+            const scalar d,
+            const scalar T,
             const scalar Tc,
             const scalar pc,
             const scalar rhoc,
-            const scalar massp,
+            const scalar mass,
             const scalarList& dMassMT,
             scalarField& YGas,
             scalarField& YLiquid,
             scalarField& YSolid,
             scalarField& YMixture,
-            scalarList& dMassSR,
-            scalar& dhRet
+            scalarList& dMassSRc
         ) const = 0;
 };
 

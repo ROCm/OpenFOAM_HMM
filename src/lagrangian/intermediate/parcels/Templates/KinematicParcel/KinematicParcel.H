@@ -84,7 +84,6 @@ public:
     //- Class to hold kinematic particle constant properties
     class constantProperties
     {
-
         // Private data
 
             //- Particle density [kg/m3] (constant)
@@ -120,7 +119,6 @@ public:
     :
         public Particle<ParcelType>::trackData
     {
-
         // Private data
 
             //- Reference to the cloud containing this particle
@@ -234,6 +232,7 @@ protected:
         (
             TrackData& td,
             const scalar dt,
+            const label cellI,
             const vector& Fx,
             const scalar mass,
             scalar& Cud,

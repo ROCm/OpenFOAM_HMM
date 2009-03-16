@@ -93,9 +93,9 @@ public:
             const scalar dt,
             const scalar mass0,
             const scalar mass,
-            const scalar YVolatile0,
-            const scalarField& YVolatile,
             const scalar T,
+            const scalar YVolatile0,
+            const scalar YVolatile,
             bool& canCombust
         ) const;
 };

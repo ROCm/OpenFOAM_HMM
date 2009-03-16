@@ -56,27 +56,26 @@ bool Foam::NoSurfaceReaction<CloudType>::active() const
 
 
 template<class CloudType>
-void Foam::NoSurfaceReaction<CloudType>::calculate
+Foam::scalar Foam::NoSurfaceReaction<CloudType>::calculate
 (
-    const scalar dt,
-    const label celli,
-    const scalar dp,
-    const scalar T0,
-    const scalar T1,
-    const scalar Tc,
-    const scalar pc,
-    const scalar rhoc,
-    const scalar massp,
-    const scalarList& dMassMT,
-    scalarField& YGas,
-    scalarField& YLiquid,
-    scalarField& YSolid,
-    scalarField& YMixture,
-    scalarList& dMassSR,
-    scalar& dhRet
+    const scalar,
+    const label,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalar,
+    const scalarList&,
+    scalarField&,
+    scalarField&,
+    scalarField&,
+    scalarField&,
+    scalarList&
 ) const
 {
     // do nothing
+    return 0.0;
 }
 
 

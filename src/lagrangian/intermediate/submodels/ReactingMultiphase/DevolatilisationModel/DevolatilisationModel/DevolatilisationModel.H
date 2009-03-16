@@ -135,9 +135,9 @@ public:
             const scalar dt,
             const scalar mass0,
             const scalar mass,
-            const scalarField& YMixture0,
-            const scalarField& YMixture,
             const scalar T,
+            const scalar YVolatile0,
+            const scalar YVolatile,
             bool& canCombust
         ) const = 0;
 };

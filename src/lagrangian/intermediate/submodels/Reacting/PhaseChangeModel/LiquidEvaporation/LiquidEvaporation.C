@@ -199,9 +199,6 @@ void Foam::LiquidEvaporation<CloudType>::calculate
     scalarList& dMass
 ) const
 {
-    // initialise total mass transferred from the particle to carrier phase
-    scalar dMassTot = 0.0;
-
     // construct carrier phase species volume fractions for cell, cellI
     scalarField Xc = calcXc(cellI);
 
