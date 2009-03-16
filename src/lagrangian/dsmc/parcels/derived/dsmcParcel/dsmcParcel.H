@@ -23,19 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::IndirectList
+    Foam::dsmcParcel
 
 Description
 
+
 SourceFiles
-    IndirectListI.H
+    dsmcParcel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef IndirectList_H
-#define IndirectList_H
+#ifndef dsmcParcel_H
+#define dsmcParcel_H
 
-#include "List.H"
+#include "DsmcParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,55 +44,63 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class IndirectList Declaration
+                         Class dsmcParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T>
-class IndirectList
+class dsmcParcel
+:
+    public DsmcParcel<dsmcParcel>
 {
-    // Private data
-
-        const UList<T>& completeList_;
-        List<label> addresses_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise assignment
-        void operator=(const IndirectList<T>&);
-
 
 public:
 
+    //- Run-time type information
+    TypeName("dsmcParcel");
+
+
     // Constructors
 
-        //- Construct given the complete list and the addressing array
-        inline IndirectList(const UList<T>&, const List<label>&);
+        //- Construct from components
+        dsmcParcel
+        (
+            DsmcCloud<dsmcParcel>& owner,
+            const vector& position,
+            const vector& U,
+            const scalar Ei,
+            const label celli,
+            const label typeId
+        );
+
+        //- Construct from Istream
+        dsmcParcel
+        (
+            const Cloud<dsmcParcel>& c,
+            Istream& is,
+            bool readFields = true
+        );
+
+        //- Construct and return a clone
+        autoPtr<dsmcParcel> clone() const
+        {
+            return autoPtr<dsmcParcel>(new dsmcParcel(*this));
+        }
 
 
-    // Member Functions
-
-        // Access
-
-            inline label size() const;
-            inline const UList<T>& completeList() const;
-            inline const List<label>& addresses() const;
-
-
-        // Member Operators
-
-            //- Return const access to an element
-            inline const T& operator[](const label) const;
+    //- Destructor
+    virtual ~dsmcParcel();
 };
+
+
+template<>
+inline bool contiguous<dsmcParcel>()
+{
+    return true;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "IndirectListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

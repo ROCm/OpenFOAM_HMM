@@ -269,7 +269,7 @@ bool Foam::hexCellLooper::cut
         {
             FatalErrorIn("hexCellLooper::walkHex") << "Face:" << faceVerts
                 << " on points:" << facePoints << endl
-                << IndirectList<point>(facePoints, faceVerts)()
+                << UIndirectList<point>(facePoints, faceVerts)()
                 << abort(FatalError);
         }
     }

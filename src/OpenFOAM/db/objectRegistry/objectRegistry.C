@@ -50,7 +50,8 @@ Foam::objectRegistry::objectRegistry
             IOobject::NO_READ,
             IOobject::AUTO_WRITE,
             false
-        )
+        ),
+        true    // to flag that this is the top-level regIOobject
     ),
     HashTable<regIOobject*>(nIoObjects),
     time_(t),

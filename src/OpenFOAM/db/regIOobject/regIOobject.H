@@ -99,8 +99,9 @@ public:
 
     // Constructors
 
-        //- Construct from IOobject
-        regIOobject(const IOobject&);
+        //- Construct from IOobject. Optional flag for if IOobject is the
+        //  top level regIOobject.
+        regIOobject(const IOobject&, const bool isTime = false);
 
         //- Construct as copy
         regIOobject(const regIOobject&);
@@ -154,14 +155,20 @@ public:
             inline label& eventNo();
 
             //- Am I uptodate with respect to other regIOobjects
-            bool uptodate(const word&) const;
-            bool uptodate(const word&, const word&) const;
-            bool uptodate(const word&, const word&, const word&) const;
-            bool uptodate(const word&, const word&, const word&, const word&)
-             const;
+            bool upToDate(const word&) const;
+            bool upToDate(const word&, const word&) const;
+            bool upToDate(const word&, const word&, const word&) const;
+            bool upToDate
+            (
+                const word&,
+                const word&,
+                const word&,
+                const word&
+            ) const;
 
-            //- Flag me as uptodate
-            void setUptodate();
+            //- Flag me as up to date
+            void setUpToDate();
+
 
         // Edit
 

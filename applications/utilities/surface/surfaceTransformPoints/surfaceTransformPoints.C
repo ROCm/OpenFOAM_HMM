@@ -23,8 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Transform (scale/rotate) a surface. Like transforPoints but then for
+    Transform (scale/rotate) a surface. Like transformPoints but then for
     surfaces.
+
+    The rollPitchYaw option takes three angles (degrees):
+    - roll (rotation about x) followed by
+    - pitch (rotation about y) followed by
+    - yaw (rotation about z)
+
+    The yawPitchRoll does yaw followed by pitch followed by roll.
 
 \*---------------------------------------------------------------------------*/
 
@@ -35,8 +42,10 @@ Description
 #include "boundBox.H"
 #include "transformField.H"
 #include "Pair.H"
+#include "quaternion.H"
 
 using namespace Foam;
+using namespace Foam::mathematicalConstant;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,6 +61,8 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("translate", "vector");
     argList::validOptions.insert("rotate", "(vector vector)");
     argList::validOptions.insert("scale", "vector");
+    argList::validOptions.insert("rollPitchYaw", "(roll pitch yaw)");
+    argList::validOptions.insert("yawPitchRoll", "(yaw pitch roll)");
     argList args(argc, argv);
 
     fileName surfFileName(args.additionalArgs()[0]);
@@ -95,6 +106,48 @@ int main(int argc, char *argv[])
         Info<< "Rotating points by " << T << endl;
 
         points = transform(T, points);
+    }
+    else if (args.options().found("rollPitchYaw"))
+    {
+        vector v(IStringStream(args.options()["rollPitchYaw"])());
+
+        Info<< "Rotating points by" << nl
+            << "    roll  " << v.x() << nl
+            << "    pitch " << v.y() << nl
+            << "    yaw   " << v.z() << endl;
+
+
+        // Convert to radians
+        v *= pi/180.0;
+
+        quaternion R(v.x(), v.y(), v.z());
+
+        Info<< "Rotating points by quaternion " << R << endl;
+        points = transform(R, points);
+    }
+    else if (args.options().found("yawPitchRoll"))
+    {
+        vector v(IStringStream(args.options()["yawPitchRoll"])());
+
+        Info<< "Rotating points by" << nl
+            << "    yaw   " << v.x() << nl
+            << "    pitch " << v.y() << nl
+            << "    roll  " << v.z() << endl;
+
+
+        // Convert to radians
+        v *= pi/180.0;
+
+        scalar yaw = v.x();
+        scalar pitch = v.y();
+        scalar roll = v.z();
+
+        quaternion R = quaternion(vector(0, 0, 1), yaw);
+        R *= quaternion(vector(0, 1, 0), pitch);
+        R *= quaternion(vector(1, 0, 0), roll);
+
+        Info<< "Rotating points by quaternion " << R << endl;
+        points = transform(R, points);
     }
 
     if (args.options().found("scale"))

@@ -35,14 +35,22 @@ Description
     -rotate (vector vector)
         Rotates the points from the first vector to the second,
 
+     or -yawPitchRoll (yawdegrees pitchdegrees rolldegrees)
+     or -rollPitchYaw (rolldegrees pitchdegrees yawdegrees)
+
     -scale vector
         Scales the points by the given vector.
 
     The any or all of the three options may be specified and are processed
     in the above order.
 
-    With -rotateFields (in combination with -rotate) it will also
-    read & transform vector & tensor fields.
+    With -rotateFields (in combination with -rotate/yawPitchRoll/rollPitchYaw)
+    it will also read & transform vector & tensor fields.
+
+    Note:
+    yaw (rotation about z)
+    pitch (rotation about y)
+    roll (rotation about x)
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,6 +66,7 @@ Description
 #include "IStringStream.H"
 
 using namespace Foam;
+using namespace Foam::mathematicalConstant;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -131,6 +140,8 @@ int main(int argc, char *argv[])
 {
     argList::validOptions.insert("translate", "vector");
     argList::validOptions.insert("rotate", "(vector vector)");
+    argList::validOptions.insert("rollPitchYaw", "(roll pitch yaw)");
+    argList::validOptions.insert("yawPitchRoll", "(yaw pitch roll)");
     argList::validOptions.insert("rotateFields", "");
     argList::validOptions.insert("scale", "vector");
  
@@ -183,6 +194,58 @@ int main(int argc, char *argv[])
         if (args.options().found("rotateFields"))
         {
             rotateFields(runTime, T);
+        }
+    }
+    else if (args.options().found("rollPitchYaw"))
+    {
+        vector v(IStringStream(args.options()["rollPitchYaw"])());
+
+        Info<< "Rotating points by" << nl
+            << "    roll  " << v.x() << nl
+            << "    pitch " << v.y() << nl
+            << "    yaw   " << v.z() << endl;
+
+
+        // Convert to radians
+        v *= pi/180.0;
+
+        quaternion R(v.x(), v.y(), v.z());
+
+        Info<< "Rotating points by quaternion " << R << endl;
+        points = transform(R, points);
+
+        if (args.options().found("rotateFields"))
+        {
+            rotateFields(runTime, R.R());
+        }
+    }
+    else if (args.options().found("yawPitchRoll"))
+    {
+        vector v(IStringStream(args.options()["yawPitchRoll"])());
+
+        Info<< "Rotating points by" << nl
+            << "    yaw   " << v.x() << nl
+            << "    pitch " << v.y() << nl
+            << "    roll  " << v.z() << endl;
+
+
+        // Convert to radians
+        v *= pi/180.0;
+
+        scalar yaw = v.x();
+        scalar pitch = v.y();
+        scalar roll = v.z();
+
+        quaternion R = quaternion(vector(0, 0, 1), yaw);
+        R *= quaternion(vector(0, 1, 0), pitch);
+        R *= quaternion(vector(1, 0, 0), roll);
+
+        Info<< "Rotating points by quaternion " << R << endl;
+        points = transform(R, points);
+
+        if (args.options().found("rotateFields"))
+        {
+            rotateFields(runTime, R.R());
         }
     }
 

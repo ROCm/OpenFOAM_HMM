@@ -79,6 +79,8 @@ class fvSchemes
         dictionary fluxRequired_;
         bool defaultFluxRequired_;
 
+        dictionary cacheFields_;
+
 
     // Private Member Functions
 
@@ -120,6 +122,8 @@ public:
             ITstream& laplacianScheme(const word& name) const;
 
             bool fluxRequired(const word& name) const;
+
+            bool cache(const word& name) const;
 
 
         // Read

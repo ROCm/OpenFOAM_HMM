@@ -70,7 +70,7 @@ void writePointSet
 
     labelList pointLabels(set.toc());
 
-    pointField setPoints(IndirectList<point>(mesh.points(), pointLabels)());
+    pointField setPoints(mesh.points(), pointLabels);
 
     // Write points
 

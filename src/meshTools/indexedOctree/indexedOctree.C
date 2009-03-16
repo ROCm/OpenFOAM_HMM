@@ -26,7 +26,6 @@ License
 
 #include "indexedOctree.H"
 #include "linePointRef.H"
-// #include "triSurface.H"
 #include "meshTools.H"
 #include "OFstream.H"
 

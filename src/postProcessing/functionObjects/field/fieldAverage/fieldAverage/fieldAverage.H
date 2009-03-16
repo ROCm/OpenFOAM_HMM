@@ -41,6 +41,11 @@ Description
         // averaging info if available
         cleanRestart true;
 
+        // Whether to reset the averaged fields after they have been written.
+        // Used to average over only the preceding write interval for transient
+        // cases.
+        resetOnOutput true;
+
         // Fields to be averaged. runTime modifiable!
         fields
         (
@@ -131,6 +136,9 @@ protected:
 
         //- Clean restart flag
         Switch cleanRestart_;
+
+        //- resetOnOutput flag
+        Switch resetOnOutput_;
 
         //- List of field average items, describing what averages to be
         //  calculated and output

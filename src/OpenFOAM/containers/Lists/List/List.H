@@ -66,8 +66,10 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
     class DynamicList;
 template<class T> class SortableList;
 template<class T> class IndirectList;
+template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
+typedef UList<label> unallocLabelList;
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -112,6 +114,9 @@ public:
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
 
+        //- Construct as subset.
+        List(const UList<T>&, const unallocLabelList& mapAddressing);
+
         //- Construct given start and end iterators.
         template<class InputIterator>
         List(InputIterator first, InputIterator last);
@@ -128,6 +133,9 @@ public:
 
         //- Construct as copy of IndirectList<T>
         List(const IndirectList<T>&);
+
+        //- Construct as copy of UIndirectList<T>
+        List(const UIndirectList<T>&);
 
         //- Construct as copy of BiIndirectList<T>
         List(const BiIndirectList<T>&);
@@ -205,6 +213,9 @@ public:
 
         //- Assignment from IndirectList operator. Takes linear time.
         void operator=(const IndirectList<T>&);
+
+        //- Assignment from UIndirectList operator. Takes linear time.
+        void operator=(const UIndirectList<T>&);
 
         //- Assignment from BiIndirectList operator. Takes linear time.
         void operator=(const BiIndirectList<T>&);

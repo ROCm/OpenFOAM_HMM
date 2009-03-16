@@ -34,7 +34,7 @@ boundaryField
 
     wall
     {
-        type            nutWallFunction;
+        type            nutSpalartAllmarasWallFunction;
         value           uniform 0;
     }
 

@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
     List<vector> list(IStringStream("1 ((0 1 2))")());
     Info<< list << endl;
 
-    List<vector> list2(IStringStream("((0 1 2) (3 4 5) (3 4 5))")());
+    List<vector> list2(IStringStream("((0 1 2) (3 4 5) (6 7 8))")());
     Info<< list2 << endl;
 
     Info<< findIndex(list2, vector(3, 4, 5)) << endl;
@@ -58,6 +58,13 @@ int main(int argc, char *argv[])
     Info<< "Transferred via the xfer() method" << endl;
     Info<< list2 << nl
         << list3 << endl;
+
+
+    // Subset
+    const labelList map(IStringStream("2 (0 2)")());
+    List<vector> subList3(list3, map);
+    Info<< "Elements " << map << " out of " << list3
+        << " : " << subList3 << endl;
 
     return 0;
 }

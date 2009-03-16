@@ -786,7 +786,7 @@ inline bool Foam::PackedList<nBits>::set
             << "negative index " << i << " max=" << size_-1
             << abort(FatalError);
     }
-#endif
+#   endif
 
     // lazy evaluation - increase size on assigment
     if (i >= size_)
