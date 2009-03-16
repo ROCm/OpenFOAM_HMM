@@ -26,9 +26,8 @@ License
 
 #include "objSurfaceWriter.H"
 
-#include "fileName.H"
+#include "MeshedSurfaceProxy.H"
 #include "OFstream.H"
-#include "faceList.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -49,146 +48,33 @@ Foam::objSurfaceWriter<Type>::~objSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-template<>
-void Foam::objSurfaceWriter<Foam::nil>::write
-(
-    const fileName& samplePath,
-    const fileName& timeDir,
-    const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
-    const fileName& fieldName,
-    const Field<Foam::nil>& values,
-    const bool verbose
-) const
-{
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
-    {
-        mkDir(surfaceDir);
-    }
-
-    fileName fName(surfaceDir/surfaceName + ".obj");
-
-    if (verbose)
-    {
-        Info<< "Writing nil to " << fName << endl;
-    }
-
-    // this is a quick hack
-    OFstream os(fName);
-
-    os  << "# Wavefront OBJ file" << nl
-        << "o " << os.name().lessExt().name() << nl
-        << nl
-        << "# points : " << points.size() << nl
-        << "# faces  : " << faces.size() << nl
-        << "# no zones " << nl;
-
-    os  << nl
-        << "# <points count=\"" << points.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(points, ptI)
-    {
-        os  << "v " << points[ptI].x()
-            << ' '  << points[ptI].y()
-            << ' '  << points[ptI].z() << nl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faces.size() << "\">" << endl;
-
-    forAll(faces, i)
-    {
-        const face& f = faces[i];
-
-        os << 'f';
-        forAll(f, fp)
-        {
-            os << ' ' << f[fp] + 1;
-        }
-        os << nl;
-
-    }
-
-    os << "# </faces>" << endl;
-}
-
-}
-
-
 template<class Type>
 void Foam::objSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
-    const fileName& fieldName,
-    const Field<Type>& values,
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
 
-    fileName fName(surfaceDir/surfaceName + ".obj");
+    fileName fName(outputDir/surfaceName + ".obj");
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << fName << endl;
+        Info<< "Writing geometry to " << fName << endl;
     }
 
-    // this is a quick hack
-    OFstream os(fName);
-
-    os  << "# Wavefront OBJ file" << nl
-        << "o " << os.name().lessExt().name() << nl
-        << nl
-        << "# points : " << points.size() << nl
-        << "# faces  : " << faces.size() << nl
-        << "# no zones " << nl;
-
-    os  << nl
-        << "# <points count=\"" << points.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(points, ptI)
-    {
-        os  << "v " << points[ptI].x()
-            << ' '  << points[ptI].y()
-            << ' '  << points[ptI].z() << nl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << faces.size() << "\">" << endl;
-
-    forAll(faces, i)
-    {
-        const face& f = faces[i];
-
-        os << 'f';
-        forAll(f, fp)
-        {
-            os << ' ' << f[fp] + 1;
-        }
-        os << nl;
-
-    }
-
-    os << "# </faces>" << endl;
+    MeshedSurfaceProxy<face>
+    (
+        points,
+        faces
+    ).write(fName);
 }
 
 

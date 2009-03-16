@@ -26,9 +26,7 @@ License
 
 #include "vtkSurfaceWriter.H"
 
-#include "fileName.H"
 #include "OFstream.H"
-#include "faceList.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -198,7 +196,7 @@ namespace Foam
 }
 
 
-// Write tensorField in vtk format
+// Write generic field in vtk format
 template<class Type>
 void Foam::vtkSurfaceWriter<Type>::writeData
 (
@@ -234,47 +232,37 @@ Foam::vtkSurfaceWriter<Type>::~vtkSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
-{
-template<>
-void Foam::vtkSurfaceWriter<Foam::nil>::write
+template<class Type>
+void Foam::vtkSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
-    const fileName& fieldName,
-    const Field<Foam::nil>& values,
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
 
-    fileName fName(surfaceDir/surfaceName + ".vtk");
+    fileName fName(outputDir/surfaceName + ".vtk");
 
     if (verbose)
     {
-        Info<< "Writing nil to " << fName << endl;
+        Info<< "Writing geometry to " << fName << endl;
     }
 
     OFstream os(fName);
     writeGeometry(os, points, faces);
 }
 
-}
-
 
 template<class Type>
 void Foam::vtkSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
@@ -283,21 +271,21 @@ void Foam::vtkSurfaceWriter<Type>::write
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
 
-    fileName fName(surfaceDir/fieldName + '_' + surfaceName + ".vtk");
+    OFstream os
+    (
+        outputDir/fieldName + '_' + surfaceName + ".vtk"
+    );
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << fName << endl;
+        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
 
-    OFstream os(fName);
     writeGeometry(os, points, faces);
 
     // start writing data

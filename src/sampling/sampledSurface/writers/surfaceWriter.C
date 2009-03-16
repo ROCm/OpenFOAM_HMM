@@ -27,7 +27,6 @@ License
 #include "surfaceWriter.H"
 #include "HashTable.H"
 #include "word.H"
-#include "fileName.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,13 +39,13 @@ Foam::surfaceWriter<Type>::New(const word& writeType)
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
-        // unknown, check if it can handle Foam::nil specialization
+        // unknown, check if it can handle 'bool' specialization
         // (ie, geometry write)
 
         // generally supported, but not for this data type
         if
         (
-            Foam::surfaceWriter<Foam::nil>::wordConstructorTablePtr_->found
+            Foam::surfaceWriter<bool>::wordConstructorTablePtr_->found
             (
                 writeType
             )
@@ -87,5 +86,7 @@ template<class Type>
 Foam::surfaceWriter<Type>::~surfaceWriter()
 {}
 
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -36,7 +36,7 @@ namespace Foam
     defineNamedTemplateTypeNameAndDebug(surfaceWriter< dataType >, 0);        \
     defineTemplatedRunTimeSelectionTable(surfaceWriter, word, dataType)
 
-defineSurfaceWriterType(nil);
+defineSurfaceWriterType(bool);
 
 defineSurfaceWriterType(scalar);
 defineSurfaceWriterType(vector);

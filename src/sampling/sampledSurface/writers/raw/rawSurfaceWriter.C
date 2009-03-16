@@ -26,9 +26,7 @@ License
 
 #include "rawSurfaceWriter.H"
 
-#include "fileName.H"
 #include "OFstream.H"
-#include "faceList.H"
 #include "OSspecific.H"
 #include "IOmanip.H"
 
@@ -295,37 +293,31 @@ Foam::rawSurfaceWriter<Type>::~rawSurfaceWriter()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-template<>
-void Foam::rawSurfaceWriter<Foam::nil>::write
+template<class Type>
+void Foam::rawSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
-    const fileName& fieldName,
-    const Field<Foam::nil>& values,
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
 
-    fileName fName(surfaceDir/surfaceName + ".raw");
+    OFstream os
+    (
+        outputDir/surfaceName + ".raw"
+    );
 
     if (verbose)
     {
-        Info<< "Writing nil to " << fName << endl;
+        Info<< "Writing geometry to " << os.name() << endl;
     }
 
-    OFstream os(fName);
 
     // header
     os  << "# geometry NO_DATA " << faces.size() << nl
@@ -341,14 +333,29 @@ void Foam::rawSurfaceWriter<Foam::nil>::write
     os << nl;
 }
 
+
+namespace Foam
+{
+    // bool fields aren't supported
+    template<>
+    void Foam::rawSurfaceWriter<bool>::write
+    (
+        const fileName& outputDir,
+        const fileName& surfaceName,
+        const pointField& points,
+        const faceList& faces,
+        const fileName& fieldName,
+        const Field<bool>& values,
+        const bool verbose
+    ) const
+    {}
 }
 
 
 template<class Type>
 void Foam::rawSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
@@ -357,21 +364,21 @@ void Foam::rawSurfaceWriter<Type>::write
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
 
-    fileName fName(surfaceDir/fieldName + '_' + surfaceName + ".raw");
+    OFstream os
+    (
+        outputDir/fieldName + '_' + surfaceName + ".raw"
+    );
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << fName << endl;
+        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
 
-    OFstream os(fName);
 
     // header
     os  << "# " << fieldName;

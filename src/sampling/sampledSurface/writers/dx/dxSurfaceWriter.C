@@ -26,9 +26,7 @@ License
 
 #include "dxSurfaceWriter.H"
 
-#include "fileName.H"
 #include "OFstream.H"
-#include "faceList.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -247,8 +245,7 @@ Foam::dxSurfaceWriter<Type>::~dxSurfaceWriter()
 template<class Type>
 void Foam::dxSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
@@ -257,21 +254,20 @@ void Foam::dxSurfaceWriter<Type>::write
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
 
-    fileName fName(surfaceDir/fieldName + '_' + surfaceName + ".dx");
+    OFstream os
+    (
+        outputDir/fieldName + '_' + surfaceName + ".dx"
+    );
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << fName << endl;
+        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
-
-    OFstream os(fName);
 
     writeGeometry(os, points, faces);
 

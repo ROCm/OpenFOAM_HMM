@@ -37,11 +37,12 @@ SourceFiles
 
 #include "Field.H"
 #include "typeInfo.H"
-#include "runTimeSelectionTables.H"
 #include "autoPtr.H"
 #include "pointField.H"
 #include "faceList.H"
-#include "nil.H"
+#include "fileName.H"
+
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -98,12 +99,30 @@ public:
 
     // Member Functions
 
+        //- Return true if the surface format supports separate files
+        virtual bool separateFiles()
+        {
+            return false;
+        }
+
+
+        //- Writes single surface geometry to file.
+        virtual void write
+        (
+            const fileName& outputDir,      // <root>/<case>/surface/TIME
+            const fileName& surfaceName,    // name of surface
+            const pointField& points,
+            const faceList& faces,
+            const bool verbose = false
+        ) const
+        {}
+
+
         //- Writes single surface to file. Either one value per vertex or
         //  one value per face (detected by values.size()==faces.size())
         virtual void write
         (
-            const fileName& samplePath,     // <root>/<case>/sampleSurfaces
-            const fileName& timeDir,        // time directory
+            const fileName& outputDir,      // <root>/<case>/surface/TIME
             const fileName& surfaceName,    // name of surface
             const pointField& points,
             const faceList& faces,

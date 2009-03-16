@@ -76,8 +76,7 @@ public:
         //- Writes single surface to file.
         virtual void write
         (
-            const fileName& samplePath,
-            const fileName& timeDir,
+            const fileName& outputDir,
             const fileName& surfaceName,
             const pointField& points,
             const faceList& faces,

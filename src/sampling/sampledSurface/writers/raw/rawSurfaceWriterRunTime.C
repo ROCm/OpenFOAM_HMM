@@ -35,7 +35,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makeSurfaceWriterType(rawSurfaceWriter, nil);
+makeSurfaceWriterType(rawSurfaceWriter, bool);
 makeSurfaceWriters(rawSurfaceWriter);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
