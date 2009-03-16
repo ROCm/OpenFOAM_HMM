@@ -30,6 +30,7 @@ License
 #include "PstreamCombineReduceOps.H"
 #include "mapPolyMesh.H"
 #include "Time.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -317,6 +318,25 @@ void Foam::Cloud<ParticleType>::autoMap(const mapPolyMesh& mapper)
             pIter().track(p);
         }
     }
+}
+
+
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::writePositions() const
+{
+    OFstream pObj
+    (
+        this->db().time().path()/this->name() + "_positions.obj"
+    );
+
+    forAllConstIter(typename Cloud<ParticleType>, *this, pIter)
+    {
+        const ParticleType& p = pIter();
+        pObj<< "v " << p.position().x() << " " << p.position().y() << " "
+            << p.position().z() << nl;
+    }
+
+    pObj.flush();
 }
 
 

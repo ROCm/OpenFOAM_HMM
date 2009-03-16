@@ -46,6 +46,7 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of functions
 template<class ParticleType>
 class Cloud;
 
@@ -173,43 +174,46 @@ public:
                 return IDLList<ParticleType>::size();
             };
 
-            const const_iterator begin() const
-            {
-                return IDLList<ParticleType>::begin();
-            };
 
-            const const_iterator cbegin() const
-            {
-                return IDLList<ParticleType>::cbegin();
-            };
+            // Iterators
 
-            const const_iterator end() const
-            {
-                return IDLList<ParticleType>::end();
-            };
+                const const_iterator begin() const
+                {
+                    return IDLList<ParticleType>::begin();
+                };
 
-            const const_iterator cend() const
-            {
-                return IDLList<ParticleType>::cend();
-            };
+                const const_iterator cbegin() const
+                {
+                    return IDLList<ParticleType>::cbegin();
+                };
 
-            iterator begin()
-            {
-                return IDLList<ParticleType>::begin();
-            };
+                const const_iterator end() const
+                {
+                    return IDLList<ParticleType>::end();
+                };
 
-            iterator end()
-            {
-                return IDLList<ParticleType>::end();
-            };
+                const const_iterator cend() const
+                {
+                    return IDLList<ParticleType>::cend();
+                };
+
+                iterator begin()
+                {
+                    return IDLList<ParticleType>::begin();
+                };
+
+                iterator end()
+                {
+                    return IDLList<ParticleType>::end();
+                };
+
+
+        // Edit
 
             void clear()
             {
                 return IDLList<ParticleType>::clear();
             };
-
-
-        // Edit
 
             //- Transfer particle to cloud
             void addParticle(ParticleType* pPtr);
@@ -261,6 +265,9 @@ public:
                 IOstream::versionNumber ver,
                 IOstream::compressionType cmp
             ) const;
+
+            //- Write positions to <cloudName>_positions.obj file
+            void writePositions() const;
 
 
     // Ostream Operator
