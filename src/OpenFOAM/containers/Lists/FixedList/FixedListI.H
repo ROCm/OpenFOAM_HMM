@@ -152,17 +152,12 @@ inline void Foam::FixedList<T, Size>::checkSize(const label size) const
 }
 
 
-// Check index i is within valid range (0 ... size-1).
+// Check index i is within valid range (0 ... size-1)
+// The check for zero-sized list is already done in static assert
 template<class T, unsigned Size>
 inline void Foam::FixedList<T, Size>::checkIndex(const label i) const
 {
-    if (!Size)
-    {
-        FatalErrorIn("FixedList<T, Size>::checkIndex(const label)")
-            << "attempt to access element from zero-sized list"
-            << abort(FatalError);
-    }
-    else if (i < 0 || i >= label(Size))
+    if (i < 0 || unsigned(i) >= Size)
     {
         FatalErrorIn("FixedList<T, Size>::checkIndex(const label)")
             << "index " << i << " out of range 0 ... " << (Size-1)
