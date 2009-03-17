@@ -1,4 +1,7 @@
 dynamicPressure/dynamicPressure.C
 dynamicPressure/dynamicPressureFunctionObject.C
 
+dsmcFields/dsmcFields.C
+dsmcFields/dsmcFieldsFunctionObject.C
+
 LIB = $(FOAM_LIBBIN)/libutilityFunctionObjects
