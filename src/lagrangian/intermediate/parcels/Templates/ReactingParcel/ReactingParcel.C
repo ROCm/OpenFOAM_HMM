@@ -166,7 +166,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
         if (td.cloud().coupled())
         {
-            // Absorb particle(s) into carrier phase
+            // Absorb parcel into carrier phase
             forAll(Y_, i)
             {
                 label id = td.composition().localToGlobalGasId(0, i);

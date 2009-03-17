@@ -135,13 +135,12 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const label cellI,
     const scalar Sh,
     scalar& htc,
-    scalar& ShHT
+    scalar& dhTrans
 )
 {
     if (!td.cloud().heatTransfer().active())
     {
         htc = 0.0;
-        ShHT = 0.0;
         return T_;
     }
 
@@ -190,7 +189,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     // Enthalpy transfer
     // - Using average particle temperature
-    ShHT = dt*Ap*htc*(Tres.average() - Tc_);
+    dhTrans = dt*Ap*htc*(Tres.average() - Tc_);
 
     return Tres.value();
 }

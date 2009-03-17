@@ -162,7 +162,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     scalarField dMassSRGas(YGas_.size(), 0.0);
     scalarField dMassSRLiquid(YLiquid_.size(), 0.0);
     scalarField dMassSRSolid(YSolid_.size(), 0.0);
-    scalarField dMassSRc(td.cloud().gases().size(), 0.0);
+    scalarField dMassSRCarrier(td.cloud().gases().size(), 0.0);
 
 
     // Phase change in liquid phase
@@ -177,8 +177,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~
 
     // Return enthalpy source and calc mass transfer due to devolatilisation
-    scalar ShDV =
-        calcDevolatilisation(td, dt, T0, mass0, idG, YMix, dMassDV);
+    scalar ShDV = calcDevolatilisation(td, dt, T0, mass0, idG, YMix, dMassDV);
 
 
     // Surface reactions
@@ -196,7 +195,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             dMassSRGas,
             dMassSRLiquid,
             dMassSRSolid,
-            dMassSRc,
+            dMassSRCarrier,
             dhTrans
         );
 
@@ -257,9 +256,9 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 //            label id = td.composition().localToGlobalGasId(SOLID, i);
 //            td.cloud().rhoTrans(id)[cellI] += np0*dMassSolid[i];
 //        }
-        forAll(dMassSRc, i)
+        forAll(dMassSRCarrier, i)
         {
-            td.cloud().rhoTrans(i)[cellI] += np0*dMassSRc[i];
+            td.cloud().rhoTrans(i)[cellI] += np0*dMassSRCarrier[i];
         }
 
         // Update momentum transfer
@@ -270,7 +269,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
         // Update enthalpy transfer
         // - enthalpy of lost solids already accounted for
-        td.cloud().hTrans()[cellI] += np0*dhTrans;
+        td.cloud().hTrans()[cellI] += np0*(dhTrans + Sh);
 
         // Coefficient to be applied in carrier phase enthalpy coupling
         td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
@@ -286,25 +285,36 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
 
         if (td.cloud().coupled())
         {
-            // Absorb particle(s) into carrier phase
+            // Absorb parcel into carrier phase
             forAll(YGas_, i)
             {
                 label id = td.composition().localToGlobalGasId(GAS, i);
-                td.cloud().rhoTrans(id)[cellI] += np0*dMassGas[i];
+                td.cloud().rhoTrans(id)[cellI] += np0*mass1*YMix[GAS]*YGas_[i];
             }
             forAll(YLiquid_, i)
             {
                 label id = td.composition().localToGlobalGasId(LIQUID, i);
-                td.cloud().rhoTrans(id)[cellI] += np0*dMassLiquid[i];
+                td.cloud().rhoTrans(id)[cellI] +=
+                    np0
+                   *mass1
+                   *YMix[LIQUID]
+                   *YLiquid_[i];
             }
             // No mapping between solid components and carrier phase
 //            forAll(YSolid_, i)
 //            {
 //                label id = td.composition().localToGlobalGasId(SOLID, i);
-//                td.cloud().rhoTrans(id)[cellI] += np0*dMassSolid[i];
+//                td.cloud().rhoTrans(id)[cellI] +=
+//                    np0
+//                   *mass1
+//                   *YMix[SOLID]
+//                   *YSolid_[i];
 //            }
 
-            td.cloud().hTrans()[cellI] += np0*mass1*HEff(td, pc, T1, idG, idL, idS);
+            td.cloud().hTrans()[cellI] +=
+                np0
+               *mass1
+               *HEff(td, pc, T1, idG, idL, idS);
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
         }
     }
@@ -397,7 +407,7 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     scalarField& dMassSRGas,
     scalarField& dMassSRLiquid,
     scalarField& dMassSRSolid,
-    scalarList& dMassSRc,
+    scalarList& dMassSRCarrier,
     scalar& dhTrans
 )
 {
@@ -426,7 +436,7 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
         dMassSRGas,
         dMassSRLiquid,
         dMassSRSolid,
-        dMassSRc
+        dMassSRCarrier
     );
 
     // Heat of reaction divided between particle and carrier phase by the

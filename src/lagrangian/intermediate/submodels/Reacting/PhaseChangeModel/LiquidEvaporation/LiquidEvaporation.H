@@ -68,9 +68,6 @@ protected:
 
     // Protected member functions
 
-        //- Return the id of species specieName in the carrier phase
-        label carrierSpecieId(const word& specieName) const;
-
         //- Sherwood number as a function of Reynolds and Schmidt numbers
         scalar Sh(const scalar Re, const scalar Sc) const;
 

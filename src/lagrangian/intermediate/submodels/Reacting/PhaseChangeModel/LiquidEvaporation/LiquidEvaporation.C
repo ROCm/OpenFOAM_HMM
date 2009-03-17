@@ -29,44 +29,6 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::label Foam::LiquidEvaporation<CloudType>::carrierSpecieId
-(
-    const word& specieName
-) const
-{
-    forAll (this->owner().carrierThermo().composition().Y(), i)
-    {
-        if
-        (
-            this->owner().carrierThermo().composition().Y()[i].name()
-         == specieName
-        )
-        {
-            return i;
-        }
-    }
-
-    wordList species(this->owner().carrierThermo().composition().Y().size());
-    forAll (this->owner().carrierThermo().composition().Y(), i)
-    {
-        species[i] = this->owner().carrierThermo().composition().Y()[i].name();
-    }
-
-    FatalErrorIn
-    (
-        "Foam::label Foam::LiquidEvaporation<CloudType>::carrierSpecieId"
-        "("
-            "const word&"
-        ") const"
-    )   << "Could not find " << specieName << " in species list" << nl
-        <<  "Avialable species:" << nl << species
-        << nl << exit(FatalError);
-
-    return -1;
-}
-
-
 template<class CloudType>
 Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
 (
@@ -136,35 +98,18 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
     }
 
     // Determine mapping between liquid and carrier phase species
+    label idLiquid = owner.composition().idLiquid();
     forAll(activeLiquids_, i)
     {
-        liqToGasMap_[i] = carrierSpecieId(activeLiquids_[i]);
+        liqToGasMap_[i] =
+            owner.composition().globalId(idLiquid, activeLiquids_[i]);
     }
 
     // Determine mapping between local and global liquids
     forAll(activeLiquids_, i)
     {
-        forAll(liquids_->components(), j)
-        {
-            if (liquids_->components()[j] == activeLiquids_[i])
-            {
-                liqToLiqMap_[i] = j;
-            }
-        }
-
-        if (liqToLiqMap_[i] < 0)
-        {
-            FatalErrorIn
-            (
-                "Foam::LiquidEvaporation<CloudType>::LiquidEvaporation"
-                "("
-                    "const dictionary& dict, "
-                    "CloudType& owner"
-                ")"
-            )   << "Unable to find liquid species " << activeLiquids_[i]
-                << " in global liquids list. Avaliable liquids:" << nl
-                << liquids_->components() << nl << exit(FatalError);
-        }
+        liqToLiqMap_[i] =
+            owner.composition().localId(idLiquid, activeLiquids_[i]);
     }
 }
 
@@ -239,7 +184,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
         // mass transfer [kg]
-        dMass[gid] += Ni*A*liquids_->properties()[lid].W()*dt;
+        dMass[lid] += Ni*A*liquids_->properties()[lid].W()*dt;
     }
 }
 

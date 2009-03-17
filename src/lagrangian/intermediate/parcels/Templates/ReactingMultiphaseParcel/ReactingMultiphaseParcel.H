@@ -66,8 +66,14 @@ class ReactingMultiphaseParcel
 :
     public ReactingParcel<ParcelType>
 {
-
 public:
+
+    // IDs of phases in ReacingParcel phase list (Y)
+
+        static const label GAS;
+        static const label LIQUID;
+        static const label SOLID;
+
 
     //- Class to hold reacting particle constant properties
     class constantProperties
@@ -184,13 +190,6 @@ private:
 protected:
 
     // Protected data
-
-        // IDs of phases in parent phase list
-
-            static const label GAS;
-            static const label LIQUID;
-            static const label SOLID;
-
 
         // Parcel properties
 

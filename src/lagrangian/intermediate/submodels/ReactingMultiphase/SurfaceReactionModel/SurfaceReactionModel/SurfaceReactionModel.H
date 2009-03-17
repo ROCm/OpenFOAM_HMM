@@ -151,7 +151,7 @@ public:
             scalarField& dMassGas,
             scalarField& dMassLiquid,
             scalarField& dMassSolid,
-            scalarList& dMassSRc
+            scalarList& dMassSRCarrier
         ) const = 0;
 };
 
