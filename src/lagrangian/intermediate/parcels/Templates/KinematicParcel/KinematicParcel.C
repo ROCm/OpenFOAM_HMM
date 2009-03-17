@@ -39,6 +39,19 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
 )
 {
     rhoc_ = td.rhoInterp().interpolate(this->position(), cellI);
+    if (rhoc_ < SMALL)
+    {
+        WarningIn
+        (
+            "void Foam::KinematicParcel<ParcelType>::updateCellQuantities"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Density < " << SMALL << " in cell " << cellI << nl << endl;
+    }
+
     Uc_ = td.UInterp().interpolate(this->position(), cellI);
     muc_ = td.muInterp().interpolate(this->position(), cellI);
 

@@ -40,6 +40,18 @@ void Foam::ReactingParcel<ParcelType>::updateCellQuantities
     ThermoParcel<ParcelType>::updateCellQuantities(td, dt, cellI);
 
     pc_ = td.pInterp().interpolate(this->position(), cellI);
+    if (pc_ < SMALL)
+    {
+        WarningIn
+        (
+            "void Foam::ReactingParcel<ParcelType>::updateCellQuantities"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Pressure < " << SMALL << " in cell " << cellI << nl << endl;
+    }
 }
 
 

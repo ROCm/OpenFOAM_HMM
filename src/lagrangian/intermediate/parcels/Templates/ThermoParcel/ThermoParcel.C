@@ -40,6 +40,19 @@ void Foam::ThermoParcel<ParcelType>::updateCellQuantities
     KinematicParcel<ParcelType>::updateCellQuantities(td, dt, cellI);
 
     Tc_ = td.TInterp().interpolate(this->position(), cellI);
+    if (Tc_ < SMALL)
+    {
+        WarningIn
+        (
+            "void Foam::ThermoParcel<ParcelType>::updateCellQuantities"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Temperature < " << SMALL << " in cell " << cellI << nl << endl;
+    }
+
     cpc_ = td.cpInterp().interpolate(this->position(), cellI);
 }
 
