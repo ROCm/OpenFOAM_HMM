@@ -23,20 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::STARCDsurfaceFormatCore
+    Foam::fileFormats::WRLsurfaceFormatCore
 
 Description
-    Internal class used by the STARCDsurfaceFormat
+    Internal class used by the WRLsurfaceFormat
 
 SourceFiles
-    STARCDsurfaceFormatCore.C
+    WRLsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDsurfaceFormatCore_H
-#define STARCDsurfaceFormatCore_H
+#ifndef WRLsurfaceFormatCore_H
+#define WRLsurfaceFormatCore_H
 
-#include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
@@ -49,29 +48,26 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
+                    Class WRLsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCDsurfaceFormatCore
+class WRLsurfaceFormatCore
 {
 protected:
     // Protected Member Functions
 
-    static bool readHeader(IFstream&, const word&);
-
-    static void writeHeader(Ostream&, const char* filetype);
-
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
-
-    static void writePoints(Ostream&, const pointField&);
-
-    static void writeCase
+    //- Write file header
+    static void writeHeader
     (
         Ostream&,
         const pointField&,
         const label nFaces,
         const UList<surfZone>&
     );
+
+
+    //- Write appearance node
+    static void writeAppearance(Ostream&);
 
 };
 
@@ -80,8 +76,6 @@ protected:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

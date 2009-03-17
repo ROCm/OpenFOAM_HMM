@@ -23,23 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::STARCDsurfaceFormatCore
+    Foam::fileFormats::WRLsurfaceFormat
 
 Description
-    Internal class used by the STARCDsurfaceFormat
+    Provide a means of writing VRML97 (wrl) format.
 
 SourceFiles
-    STARCDsurfaceFormatCore.C
+    WRLsurfaceFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDsurfaceFormatCore_H
-#define STARCDsurfaceFormatCore_H
+#ifndef WRLsurfaceFormat_H
+#define WRLsurfaceFormat_H
 
-#include "IFstream.H"
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
+#include "UnsortedMeshedSurface.H"
+#include "WRLsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,29 +49,50 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
+                      Class WRLsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCDsurfaceFormatCore
+template<class Face>
+class WRLsurfaceFormat
+:
+    public MeshedSurface<Face>,
+    public WRLsurfaceFormatCore
+
 {
-protected:
-    // Protected Member Functions
+    // Private Member Functions
 
-    static bool readHeader(IFstream&, const word&);
+        //- Disallow default bitwise copy construct
+        WRLsurfaceFormat(const WRLsurfaceFormat<Face>&);
 
-    static void writeHeader(Ostream&, const char* filetype);
+        //- Disallow default bitwise assignment
+        void operator=(const WRLsurfaceFormat<Face>&);
 
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
+public:
 
-    static void writePoints(Ostream&, const pointField&);
+    // Constructors
 
-    static void writeCase
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
+        //- Construct null
+        WRLsurfaceFormat();
+
+    // Selectors
+
+
+    // Destructor
+
+        virtual ~WRLsurfaceFormat()
+        {}
+
+
+    // Member Functions
+
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+        //- Write object file
+        virtual void write(const fileName& name) const
+        {
+            write(name, MeshedSurfaceProxy<Face>(*this));
+        }
 
 };
 
@@ -82,6 +103,10 @@ protected:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "WRLsurfaceFormat.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

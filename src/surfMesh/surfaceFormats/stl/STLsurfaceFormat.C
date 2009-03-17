@@ -412,7 +412,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
     const List<label>& zoneIds  = surf.zoneIds();
 
     unsigned int nTris = 0;
-    if (surf.isTri())
+    if (MeshedSurface<Face>::isTri())
     {
         nTris = faceLst.size();
     }

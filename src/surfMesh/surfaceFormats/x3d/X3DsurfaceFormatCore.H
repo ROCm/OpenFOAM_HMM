@@ -23,20 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::STARCDsurfaceFormatCore
+    Foam::fileFormats::X3DsurfaceFormatCore
 
 Description
-    Internal class used by the STARCDsurfaceFormat
+    Internal class used by the X3DsurfaceFormat
 
 SourceFiles
-    STARCDsurfaceFormatCore.C
+    X3DsurfaceFormatCore.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDsurfaceFormatCore_H
-#define STARCDsurfaceFormatCore_H
+#ifndef X3DsurfaceFormatCore_H
+#define X3DsurfaceFormatCore_H
 
-#include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
@@ -49,29 +48,19 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
+                    Class X3DsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCDsurfaceFormatCore
+class X3DsurfaceFormatCore
 {
 protected:
     // Protected Member Functions
 
-    static bool readHeader(IFstream&, const word&);
+    //- Write file header
+    static void writeHeader(Ostream&);
 
-    static void writeHeader(Ostream&, const char* filetype);
-
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
-
-    static void writePoints(Ostream&, const pointField&);
-
-    static void writeCase
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
+    //- Write appearance node
+    static void writeAppearance(Ostream&);
 
 };
 
@@ -80,8 +69,6 @@ protected:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

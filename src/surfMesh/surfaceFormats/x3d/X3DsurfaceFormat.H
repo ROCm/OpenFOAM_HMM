@@ -23,23 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::STARCDsurfaceFormatCore
+    Foam::fileFormats::X3DsurfaceFormat
 
 Description
-    Internal class used by the STARCDsurfaceFormat
+    Provide a means of writing x3d format.
 
 SourceFiles
-    STARCDsurfaceFormatCore.C
+    X3DsurfaceFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef STARCDsurfaceFormatCore_H
-#define STARCDsurfaceFormatCore_H
+#ifndef X3DsurfaceFormat_H
+#define X3DsurfaceFormat_H
 
-#include "IFstream.H"
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
+#include "UnsortedMeshedSurface.H"
+#include "X3DsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,29 +49,49 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class STARCDsurfaceFormatCore Declaration
+                      Class X3DsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class STARCDsurfaceFormatCore
+template<class Face>
+class X3DsurfaceFormat
+:
+    public MeshedSurface<Face>,
+    public X3DsurfaceFormatCore
 {
-protected:
-    // Protected Member Functions
+    // Private Member Functions
 
-    static bool readHeader(IFstream&, const word&);
+        //- Disallow default bitwise copy construct
+        X3DsurfaceFormat(const X3DsurfaceFormat<Face>&);
 
-    static void writeHeader(Ostream&, const char* filetype);
+        //- Disallow default bitwise assignment
+        void operator=(const X3DsurfaceFormat<Face>&);
 
-    static bool readPoints(IFstream&, pointField&, labelList& ids);
+public:
 
-    static void writePoints(Ostream&, const pointField&);
+    // Constructors
 
-    static void writeCase
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
+        //- Construct null
+        X3DsurfaceFormat();
+
+    // Selectors
+
+
+    // Destructor
+
+        virtual ~X3DsurfaceFormat()
+        {}
+
+
+    // Member Functions
+
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+        //- Write object file
+        virtual void write(const fileName& name) const
+        {
+            write(name, MeshedSurfaceProxy<Face>(*this));
+        }
 
 };
 
@@ -82,6 +102,10 @@ protected:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "X3DsurfaceFormat.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
