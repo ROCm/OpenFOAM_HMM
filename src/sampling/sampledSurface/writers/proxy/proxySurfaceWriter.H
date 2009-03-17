@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::objSurfaceWriter
+    Foam::proxySurfaceWriter
 
 Description
 
 SourceFiles
-    objSurfaceWriter.C
+    proxySurfaceWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef objSurfaceWriter_H
-#define objSurfaceWriter_H
+#ifndef proxySurfaceWriter_H
+#define proxySurfaceWriter_H
 
 #include "surfaceWriter.H"
 
@@ -43,30 +43,35 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class objSurfaceWriter Declaration
+                      Class proxySurfaceWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class objSurfaceWriter
+class proxySurfaceWriter
 :
     public surfaceWriter<Type>
 {
 
+    // Private data
+
+        //- The associated file extension
+        word ext_;
+
 public:
 
     //- Runtime type information
-    TypeName("obj");
+    TypeName("proxy");
 
 
     // Constructors
 
-        //- Construct null
-        objSurfaceWriter();
+        //- Construct for a given extension
+        proxySurfaceWriter(const word& ext);
 
 
     // Destructor
 
-        virtual ~objSurfaceWriter();
+        virtual ~proxySurfaceWriter();
 
 
     // Member Functions
@@ -112,7 +117,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "objSurfaceWriter.C"
+#   include "proxySurfaceWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

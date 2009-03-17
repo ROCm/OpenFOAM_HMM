@@ -24,21 +24,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "objSurfaceWriter.H"
-#include "surfaceWriters.H"
-#include "addToRunTimeSelectionTable.H"
+#include "proxySurfaceWriter.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "MeshedSurfaceProxy.H"
+#include "OFstream.H"
+#include "OSspecific.H"
 
-namespace Foam
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::proxySurfaceWriter<Type>::proxySurfaceWriter(const word& ext)
+:
+    surfaceWriter<Type>(),
+    ext_(ext)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class Type>
+Foam::proxySurfaceWriter<Type>::~proxySurfaceWriter()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type>
+void Foam::proxySurfaceWriter<Type>::write
+(
+    const fileName& outputDir,
+    const fileName& surfaceName,
+    const pointField& points,
+    const faceList& faces,
+    const bool verbose
+) const
 {
+    // avoid bad values
+    if (ext_.empty())
+    {
+        return;
+    }
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    if (!isDir(outputDir))
+    {
+        mkDir(outputDir);
+    }
 
-makeSurfaceWriterType(objSurfaceWriter, bool);
+    fileName fName(outputDir/surfaceName + "." + ext_);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    if (verbose)
+    {
+        Info<< "Writing geometry to " << fName << endl;
+    }
 
-} // End namespace Foam
+    MeshedSurfaceProxy<face>
+    (
+        points,
+        faces
+    ).write(fName);
+
+}
+
 
 // ************************************************************************* //

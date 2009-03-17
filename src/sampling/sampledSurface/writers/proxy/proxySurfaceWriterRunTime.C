@@ -24,59 +24,23 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "stlSurfaceWriter.H"
+#include "proxySurfaceWriter.H"
+#include "surfaceWriters.H"
+#include "addToRunTimeSelectionTable.H"
 
-#include "MeshedSurfaceProxy.H"
-#include "OFstream.H"
-#include "OSspecific.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::stlSurfaceWriter<Type>::stlSurfaceWriter()
-:
-    surfaceWriter<Type>()
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::stlSurfaceWriter<Type>::~stlSurfaceWriter()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class Type>
-void Foam::stlSurfaceWriter<Type>::write
-(
-    const fileName& outputDir,
-    const fileName& surfaceName,
-    const pointField& points,
-    const faceList& faces,
-    const bool verbose
-) const
+namespace Foam
 {
-    if (!isDir(outputDir))
-    {
-        mkDir(outputDir);
-    }
 
-    fileName fName(outputDir/surfaceName + ".stl");
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-    if (verbose)
-    {
-        Info<< "Writing geometry to " << fName << endl;
-    }
+// create type names, but do not register with run-time tables
+makeTypeSurfaceWritersTypeName(proxySurfaceWriter, bool);
+makeSurfaceWritersTypeName(proxySurfaceWriter);
 
-    MeshedSurfaceProxy<face>
-    (
-        points,
-        faces
-    ).write(fName);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //

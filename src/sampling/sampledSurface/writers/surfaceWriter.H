@@ -52,6 +52,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 template<class Type> class surfaceWriter;
+template<class Type> class nullSurfaceWriter;
+template<class Type> class proxySurfaceWriter;
 
 /*---------------------------------------------------------------------------*\
                         Class surfaceWriter Declaration

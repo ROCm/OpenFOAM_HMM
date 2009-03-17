@@ -42,9 +42,8 @@ $(surfWriters)/surfaceWriters.C
 $(surfWriters)/dx/dxSurfaceWriterRunTime.C
 $(surfWriters)/foamFile/foamFileSurfaceWriterRunTime.C
 $(surfWriters)/null/nullSurfaceWriterRunTime.C
+$(surfWriters)/proxy/proxySurfaceWriterRunTime.C
 $(surfWriters)/raw/rawSurfaceWriterRunTime.C
-$(surfWriters)/obj/objSurfaceWriterRunTime.C
-$(surfWriters)/stl/stlSurfaceWriterRunTime.C
 $(surfWriters)/vtk/vtkSurfaceWriterRunTime.C
 
 graphField/writePatchGraph.C

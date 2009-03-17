@@ -25,6 +25,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceWriter.H"
+
+#include "MeshedSurfaceProxy.H"
+#include "nullSurfaceWriter.H"
+#include "proxySurfaceWriter.H"
+
 #include "HashTable.H"
 #include "word.H"
 
@@ -39,10 +44,8 @@ Foam::surfaceWriter<Type>::New(const word& writeType)
 
     if (cstrIter == wordConstructorTablePtr_->end())
     {
-        // unknown, check if it can handle 'bool' specialization
-        // (ie, geometry write)
-
-        // generally supported, but not for this data type
+        // not supported for this data type, but it generally does work
+        // (it handles the 'bool' specialization - ie, geometry write)
         if
         (
             Foam::surfaceWriter<bool>::wordConstructorTablePtr_->found
@@ -51,20 +54,32 @@ Foam::surfaceWriter<Type>::New(const word& writeType)
             )
         )
         {
-            // use 'null' file instead
-            cstrIter = wordConstructorTablePtr_->find("null");
+            // use 'null' handler instead
+            return autoPtr< surfaceWriter<Type> >
+            (
+                new nullSurfaceWriter<Type>()
+            );
         }
-
+        else if (MeshedSurfaceProxy<face>::canWriteType(writeType))
+        {
+            // generally unknown, but can be written via MeshedSurfaceProxy
+            // use 'proxy' handler instead
+            return autoPtr< surfaceWriter<Type> >
+            (
+                new proxySurfaceWriter<Type>(writeType)
+            );
+        }
 
         if (cstrIter == wordConstructorTablePtr_->end())
         {
             FatalErrorIn
             (
                 "surfaceWriter::New(const word&)"
-            )   << "Unknown write type " << writeType
-                << endl << endl
-                << "Valid write types : " << endl
-                << wordConstructorTablePtr_->toc()
+            )   << "Unknown write type \"" << writeType << "\"\n\n"
+                << "Valid write types : "
+                << wordConstructorTablePtr_->toc() << nl
+                << "Valid proxy types : "
+                << MeshedSurfaceProxy<face>::writeTypes() << endl
                 << exit(FatalError);
         }
     }
