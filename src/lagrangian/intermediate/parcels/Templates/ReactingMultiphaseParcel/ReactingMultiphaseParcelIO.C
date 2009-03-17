@@ -68,7 +68,7 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         }
 
         // scale the mass fractions
-        const scalarField& YMix = this->Y_;
+        const scalarList& YMix = this->Y_;
         YGas_ /= YMix[0] + ROOTVSMALL;
         YLiquid_ /= YMix[1] + ROOTVSMALL;
         YSolid_ /= YMix[2] + ROOTVSMALL;

@@ -169,7 +169,7 @@ protected:
             scalar mass0_;
 
             //- Mass fractions of mixture []
-            scalarField Y_;
+            scalarList Y_;
 
 
         // Cell-based quantities
@@ -250,7 +250,7 @@ public:
             inline scalar mass0() const;
 
             //- Return const access to mass fractions of mixture
-            inline const scalarField& Y() const;
+            inline const scalarList& Y() const;
 
             //- Return the owner cell pressure
             inline scalar pc() const;
@@ -262,7 +262,7 @@ public:
             inline scalar& mass0();
 
             //- Return access to mass fractions of mixture
-            inline scalarField& Y();
+            inline scalarList& Y();
 
 
         // Main calculation loop

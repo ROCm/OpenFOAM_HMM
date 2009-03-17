@@ -166,7 +166,7 @@ inline Foam::scalar Foam::ReactingParcel<ParcelType>::mass0() const
 
 
 template<class ParcelType>
-inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y() const
+inline const Foam::scalarList& Foam::ReactingParcel<ParcelType>::Y() const
 {
     return Y_;
 }
@@ -187,7 +187,7 @@ inline Foam::scalar& Foam::ReactingParcel<ParcelType>::mass0()
 
 
 template<class ParcelType>
-inline Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y()
+inline Foam::scalarList& Foam::ReactingParcel<ParcelType>::Y()
 {
     return Y_;
 }
