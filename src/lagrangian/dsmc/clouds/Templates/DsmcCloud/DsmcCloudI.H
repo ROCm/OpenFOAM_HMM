@@ -343,7 +343,7 @@ Foam::DsmcCloud<ParcelType>::rhoN() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), 0.0)
+            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
         )
     );
 
@@ -380,7 +380,7 @@ Foam::DsmcCloud<ParcelType>::rhoM() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0), 0.0)
+            dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0), VSMALL)
         )
     );
 
@@ -568,7 +568,7 @@ Foam::DsmcCloud<ParcelType>::iDof() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), 0.0)
+            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
         )
     );
 

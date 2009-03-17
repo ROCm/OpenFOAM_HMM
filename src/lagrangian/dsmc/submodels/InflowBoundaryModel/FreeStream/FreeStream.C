@@ -157,7 +157,7 @@ void Foam::FreeStream<CloudType>::inflow()
 
         scalar fA = mag(patch.faceAreas()[f]);
 
-        // Cummulative triangle area fractions
+        // Cumulative triangle area fractions
         List<scalar> cTriAFracs(nVertices);
 
         for (label v = 0; v < nVertices - 1; v++)
