@@ -157,7 +157,8 @@ void Foam::ReactingParcel<ParcelType>::calc
             // Absorb particle(s) into carrier phase
             forAll(Y_, i)
             {
-                td.cloud().rhoTrans(i)[cellI] += np0*mass1*Y_[i];
+                label id = td.composition().localToGlobalGasId(0, i);
+                td.cloud().rhoTrans(id)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
             scalar HEff = td.cloud().composition().H(0, Y_, pc_, T1);

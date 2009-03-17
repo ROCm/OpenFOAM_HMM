@@ -143,11 +143,14 @@ public:
             const scalar pc,
             const scalar rhoc,
             const scalar mass,
-            const scalarList& dMassMT,
-            scalarField& YGas,
-            scalarField& YLiquid,
-            scalarField& YSolid,
-            scalarField& YMixture,
+            const scalarField& YGas,
+            const scalarField& YLiquid,
+            const scalarField& YSolid,
+            const scalarList& YMixture,
+            const scalarList& dMassVolatile,
+            scalarField& dMassGas,
+            scalarField& dMassLiquid,
+            scalarField& dMassSolid,
             scalarList& dMassSRc
         ) const = 0;
 };

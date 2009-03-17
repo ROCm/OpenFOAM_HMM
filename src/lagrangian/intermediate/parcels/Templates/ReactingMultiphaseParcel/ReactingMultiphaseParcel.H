@@ -149,16 +149,48 @@ private:
 
         //- Return the mixture effective specific heat capacity
         template<class TrackData>
-        scalar cpEff(TrackData& td, const scalar p, const scalar T) const;
+        scalar cpEff
+        (
+            TrackData& td,
+            const scalar p,
+            const scalar T,
+            const label idG,
+            const label idL,
+            const label idS
+        ) const;
 
         //- Return the mixture effective enthalpy
         template<class TrackData>
-        scalar HEff(TrackData& td, const scalar p, const scalar T) const;
+        scalar HEff
+        (
+            TrackData& td,
+            const scalar p,
+            const scalar T,
+            const label idG,
+            const label idL,
+            const label idS
+        ) const;
+
+        //- Update the mass fractions (Y, YGas, YLiquid, YSolid)
+        scalar updateMassFractions
+        (
+            const scalar mass0,
+            const scalarField& dMassGas,
+            const scalarField& dMassLiquid,
+            const scalarField& dMassSolid
+        );
 
 
 protected:
 
     // Protected data
+
+        // IDs of phases in parent phase list
+
+            static const label GAS;
+            static const label LIQUID;
+            static const label SOLID;
+
 
         // Parcel properties
 
@@ -187,8 +219,8 @@ protected:
             const scalar T,
             const scalar mass,
             const label idVolatile,
-            scalarField& YMixture,
-            scalarList& dMassDV
+            const scalarField& YMixture,
+            scalarList& dMass
         );
 
         //- Calculate surface reactions
@@ -199,7 +231,10 @@ protected:
             const scalar dt,
             const label cellI,
             const scalar T,
-            const scalarList& dMassMT,
+            const scalarList& dMassVolatile,
+            scalarField& dMassSRGas,
+            scalarField& dMassSRLiquid,
+            scalarField& dMassSRSolid,
             scalarList& dMassSRc,
             scalar& dhTrans
         );

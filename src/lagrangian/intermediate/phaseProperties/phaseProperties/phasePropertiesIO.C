@@ -35,7 +35,8 @@ Foam::phaseProperties::phaseProperties(Istream& is)
     stateLabel_("(unknown)"),
     names_(0),
     Y_(0),
-    globalIds_(0)
+    globalIds_(0),
+    globalGasIds_(0)
 {
     is.check("Foam::phaseProperties::phaseProperties(Istream& is)");
 
@@ -66,6 +67,7 @@ Foam::phaseProperties::phaseProperties(Istream& is)
 
     // initialise global ids to -1
     globalIds_.setSize(nComponents, -1);
+    globalGasIds_.setSize(nComponents, -1);
 
     checkTotalMassFraction();
 }
@@ -110,6 +112,7 @@ Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
 
     // initialise global ids to -1
     pp.globalIds_.setSize(nComponents, -1);
+    pp.globalGasIds_.setSize(nComponents, -1);
 
     pp.checkTotalMassFraction();
 

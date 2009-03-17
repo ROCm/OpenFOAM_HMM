@@ -44,7 +44,7 @@ const Foam::NamedEnum<Foam::phaseProperties::phaseType, 4>
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::phaseProperties::setGlobalGasIds
+void Foam::phaseProperties::setGlobalIds
 (
     const PtrList<volScalarField>& YGas
 )
@@ -106,6 +106,27 @@ void Foam::phaseProperties::setGlobalIds(const wordList& globalNames)
                 << " in species list" <<  nl
                 << "Available species are: " << nl << globalNames << nl
                 << exit(FatalError);
+        }
+    }
+}
+
+
+void Foam::phaseProperties::setGlobalGasIds
+(
+    const PtrList<volScalarField>& YGas
+)
+{
+    forAll(names_, i)
+    {
+        forAll (YGas, j)
+        {
+            word specieName = YGas[j].name();
+
+            if (specieName == names_[i])
+            {
+                globalGasIds_[i] = j;
+                break;
+            }
         }
     }
 }
@@ -209,17 +230,23 @@ void Foam::phaseProperties::initialiseGlobalIds
     {
         case GAS:
         {
-            setGlobalGasIds(YGas);
+            setGlobalIds(YGas);
+            forAll(globalGasIds_, i)
+            {
+                globalGasIds_[i] = globalIds_[i];
+            }
             break;
         }
         case LIQUID:
         {
             setGlobalIds(liquidNames);
+            setGlobalGasIds(YGas);
             break;
         }
         case SOLID:
         {
             setGlobalIds(solidNames);
+            setGlobalGasIds(YGas);
             break;
         }
         default:
@@ -327,6 +354,12 @@ Foam::label Foam::phaseProperties::globalId(const word& cmptName) const
 const Foam::labelList& Foam::phaseProperties::globalIds() const
 {
     return globalIds_;
+}
+
+
+const Foam::labelList& Foam::phaseProperties::globalGasIds() const
+{
+    return globalGasIds_;
 }
 
 

@@ -187,6 +187,13 @@ public:
                 //- Return local id of component cmptName in phase phaseI
                 label localId(const label phaseI, const word& cmptName) const;
 
+                //- Return global gas id of component given local id
+                label localToGlobalGaslId
+                (
+                    const label phaseI,
+                    const label id
+                ) const;
+
                 //- Return the list of phase phaseI mass fractions
                 const scalarField& Y0(const label phaseI) const;
 

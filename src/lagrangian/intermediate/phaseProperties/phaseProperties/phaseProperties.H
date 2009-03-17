@@ -88,14 +88,20 @@ private:
         //- Global ids
         labelList globalIds_;
 
+        //- Map to gas global id
+        labelList globalGasIds_;
+
 
     // Private member functions
 
         //- Set global ids - specialisation for carrier gas phases
-        void setGlobalGasIds(const PtrList<volScalarField>& YGas);
+        void setGlobalIds(const PtrList<volScalarField>& YGas);
 
         //- Set global ids - liquid and solid phases
         void setGlobalIds(const wordList& globalNames);
+
+        //- Set global gas ids - attempts to map component names to global gases
+        void setGlobalGasIds(const PtrList<volScalarField>& YGas);
 
         //- Check the total mass fraction
         void checkTotalMassFraction() const;
@@ -158,6 +164,9 @@ public:
 
             //- Return const acccess to the global ids
             const labelList& globalIds() const;
+
+            //- Return const acccess to the map to the gas global ids
+            const labelList& globalGasIds() const;
 
             //- Return the global id of a component in the local list by name
             //  Returns -1 if not found

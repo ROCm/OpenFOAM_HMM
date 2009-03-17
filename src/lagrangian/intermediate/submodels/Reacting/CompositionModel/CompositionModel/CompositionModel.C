@@ -241,6 +241,33 @@ Foam::label Foam::CompositionModel<CloudType>::localId
 
 
 template<class CloudType>
+Foam::label Foam::CompositionModel<CloudType>::localToGlobalGaslId
+(
+    const label phaseI,
+    const label id
+) const
+{
+    label gid = phaseProps_[phaseI].globalGasIds()[id];
+
+    if (gid < 0)
+    {
+        FatalErrorIn
+        (
+            "Foam::label Foam::CompositionModel<CloudType>::localToGlobalGasId"
+            "("
+                "const label, "
+                "const label"
+            ") const"
+        )   << "Unable to determine global gas id for phase "
+            << phaseI << " with local id " << id
+            << nl << abort(FatalError);
+    }
+
+    return id;
+}
+
+
+template<class CloudType>
 const Foam::scalarField& Foam::CompositionModel<CloudType>::Y0
 (
     const label phaseI
