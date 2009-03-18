@@ -103,29 +103,13 @@ void processorPointPatchField<Type>::initSwapAdd(Field<Type>& pField) const
         // Get internal field into my point order
         Field<Type> pf(this->patchInternalField(pField));
 
-        // Normally points will be ordered same on both sides due to
-        // the point numbering by decomposePar. However this will not be
-        // the case for meshes changed in parallel.
-
-        // Reorder into neighbour point order. Note that one side can have
-        // more or less points than other side if partically decomposed
-        // cyclics are present.
-
-        const labelList& nbrPts = procPatch_.procPolyPatch().neighbPoints();
-
-        Field<Type> nbrf(this->size(), pTraits<Type>::zero);
-
-        forAll(nbrPts, i)
-        {
-            label nbrPointI = nbrPts[i];
-            if (nbrPointI >= 0 && nbrPointI < nbrf.size())
-            {
-                nbrf[nbrPointI] = pf[i];
-            }
-        }
-
-        OPstream toNbr(Pstream::blocking, procPatch_.neighbProcNo());
-        toNbr << nbrf;
+        OPstream::write
+        (
+            Pstream::blocking,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<const char*>(pf.begin()),
+            pf.byteSize()
+        );
     }
 }
 
@@ -136,26 +120,19 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
     if (Pstream::parRun())
     {
         Field<Type> pnf(this->size());
-        {
-            // We do not know the number of points on the other side
-            // so cannot use Pstream::read.
-            IPstream fromNbr
-            (
-                Pstream::blocking,
-                procPatch_.neighbProcNo()
-            );
-            fromNbr >> pnf;
-        }
 
-        pnf.setSize(this->size(), pTraits<Type>::zero);
+        IPstream::read
+        (
+            Pstream::blocking,
+            procPatch_.neighbProcNo(),
+            reinterpret_cast<char*>(pnf.begin()),
+            pnf.byteSize()
+        );
 
         if (doTransform())
         {
             const processorPolyPatch& ppp = procPatch_.procPolyPatch();
             const tensorField& forwardT = ppp.forwardT();
-            const labelList& nonGlobalPatchPoints =
-                procPatch_.nonGlobalPatchPoints();
-            const labelListList& pointFaces = ppp.pointFaces();
 
             if (forwardT.size() == 1)
             {
@@ -163,6 +140,10 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
             }
             else
             {
+                const labelList& nonGlobalPatchPoints =
+                    procPatch_.nonGlobalPatchPoints();
+                const labelListList& pointFaces = ppp.pointFaces();
+
                 forAll(nonGlobalPatchPoints, pfi)
                 {
                     pnf[pfi] = transform
