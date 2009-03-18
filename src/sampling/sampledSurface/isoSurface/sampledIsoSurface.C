@@ -307,6 +307,48 @@ Foam::tmp<Foam::volScalarField> Foam::sampledIsoSurface::average
 }
 
 
+Foam::tmp<Foam::pointScalarField> Foam::sampledIsoSurface::average
+(
+    const pointMesh& pMesh,
+    const volScalarField& fld
+) const
+{
+    tmp<pointScalarField> tpointAvg
+    (
+        new pointScalarField
+        (
+            IOobject
+            (
+                "pointAvg",
+                fld.time().timeName(),
+                fld.db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pMesh,
+            dimensionedScalar("zero", dimless, scalar(0.0))
+        )
+    );
+    pointScalarField& pointAvg = tpointAvg();
+
+    for (label pointI = 0; pointI < fld.mesh().nPoints(); pointI++)
+    {
+        const labelList& pCells = fld.mesh().pointCells(pointI);
+
+        forAll(pCells, i)
+        {
+            pointAvg[pointI] += fld[pCells[i]];
+        }
+        pointAvg[pointI] /= pCells.size();
+    }
+    // Give value to calculatedFvPatchFields
+    pointAvg.correctBoundaryConditions();
+
+    return tpointAvg;
+}
+
+
 bool Foam::sampledIsoSurface::updateGeometry() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
@@ -407,6 +449,7 @@ bool Foam::sampledIsoSurface::updateGeometry() const
                 (
                     *volFieldPtr_,
                     *pointFieldPtr_,
+                    //average(pointMesh::New(mesh()), *volFieldPtr_),
                     isoVal_,
                     regularise_,
                     mergeTol_
