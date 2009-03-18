@@ -1388,11 +1388,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
             }
         }
 
-        pointField localFaceCentres(pp.size());
-        forAll(pp, i)
-        {
-            localFaceCentres[i] = mesh.faceCentres()[pp.addressing()[i]];
-        }
+        pointField localFaceCentres(mesh.faceCentres(), pp.addressing());
 
         // Get nearest surface and region
         labelList hitSurface;
