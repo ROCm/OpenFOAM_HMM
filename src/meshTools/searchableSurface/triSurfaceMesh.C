@@ -120,6 +120,29 @@ const Foam::fileName& Foam::triSurfaceMesh::checkFile
 }
 
 
+bool Foam::triSurfaceMesh::addFaceToEdge
+(
+    const edge& e,
+    EdgeMap<label>& facesPerEdge
+)
+{
+    EdgeMap<label>::iterator eFnd = facesPerEdge.find(e);
+    if (eFnd != facesPerEdge.end())
+    {
+        if (eFnd() == 2)
+        {
+            return false;
+        }
+        eFnd()++;
+    }
+    else
+    {
+        facesPerEdge.insert(e, 1);
+    }
+    return true;
+}
+
+
 bool Foam::triSurfaceMesh::isSurfaceClosed() const
 {
     // Construct pointFaces. Let's hope surface has compact point
@@ -142,48 +165,41 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
             const labelledTri& f = triSurface::operator[](pFaces[i]);
             label fp = findIndex(f, pointI);
 
-            // Forward edge
-            {
-                label p1 = f[f.fcIndex(fp)];
+            // Something weird: if I expand the code of addFaceToEdge in both
+            // below instances it gives a segmentation violation on some
+            // surfaces. Compiler (4.3.2) problem?
 
-                if (p1 > pointI)
+
+            // Forward edge
+            label nextPointI = f[f.fcIndex(fp)];
+
+            if (nextPointI > pointI)
+            {
+                bool okFace = addFaceToEdge
+                (
+                    edge(pointI, nextPointI),
+                    facesPerEdge
+                );
+
+                if (!okFace)
                 {
-                    const edge e(pointI, p1);
-                    EdgeMap<label>::iterator eFnd = facesPerEdge.find(e);
-                    if (eFnd != facesPerEdge.end())
-                    {
-                        if (eFnd() == 2)
-                        {
-                            return false;
-                        }
-                        eFnd()++;
-                    }
-                    else
-                    {
-                        facesPerEdge.insert(e, 1);
-                    }
+                    return false;
                 }
             }
             // Reverse edge
-            {
-                label p1 = f[f.rcIndex(fp)];
+            label prevPointI = f[f.rcIndex(fp)];
 
-                if (p1 > pointI)
+            if (prevPointI > pointI)
+            {
+                bool okFace = addFaceToEdge
+                (
+                    edge(pointI, prevPointI),
+                    facesPerEdge
+                );
+
+                if (!okFace)
                 {
-                    const edge e(pointI, p1);
-                    EdgeMap<label>::iterator eFnd = facesPerEdge.find(e);
-                    if (eFnd != facesPerEdge.end())
-                    {
-                        if (eFnd() == 2)
-                        {
-                            return false;
-                        }
-                        eFnd()++;
-                    }
-                    else
-                    {
-                        facesPerEdge.insert(e, 1);
-                    }
+                    return false;
                 }
             }
         }

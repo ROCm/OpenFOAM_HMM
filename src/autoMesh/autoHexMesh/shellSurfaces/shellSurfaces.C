@@ -193,7 +193,7 @@ void Foam::shellSurfaces::orient()
 
     if (hasSurface)
     {
-        const point outsidePt = 2 * overallBb.span();
+        const point outsidePt = overallBb.max() + overallBb.span();
 
         //Info<< "Using point " << outsidePt << " to orient shells" << endl;
 

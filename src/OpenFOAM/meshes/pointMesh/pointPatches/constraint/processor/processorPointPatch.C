@@ -64,7 +64,7 @@ void Foam::processorPointPatch::initGeometry()
     }
     else
     {
-        // Slave side.  Create the reversed patch and pick up its points
+        // Slave side. Create the reversed patch and pick up its points
         // so that the order is correct
         const polyPatch& pp = patch();
 
