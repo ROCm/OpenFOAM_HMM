@@ -67,30 +67,56 @@ calcMeshData() const
     // number of faces in the patch
     Map<label> markedPoints(4*this->size());
 
-    // if the point is used, set the mark to 1
+
+    // Important:
+    // ~~~~~~~~~~
+    // In <= 1.5 the meshPoints would be in increasing order but this gives
+    // problems in processor point synchronisation where we have to find out
+    // how the opposite side would have allocated points.
+
+    ////- 1.5 code:
+    //// if the point is used, set the mark to 1
+    //forAll (*this, faceI)
+    //{
+    //    const Face& curPoints = this->operator[](faceI);
+    //
+    //    forAll (curPoints, pointI)
+    //    {
+    //        markedPoints.insert(curPoints[pointI], -1);
+    //    }
+    //}
+    //
+    //// Create the storage and store the meshPoints.  Mesh points are
+    //// the ones marked by the usage loop above
+    //meshPointsPtr_ = new labelList(markedPoints.toc());
+    //labelList& pointPatch = *meshPointsPtr_;
+    //
+    //// Sort the list to preserve compatibility with the old ordering
+    //sort(pointPatch);
+    //
+    //// For every point in map give it its label in mesh points
+    //forAll (pointPatch, pointI)
+    //{
+    //    markedPoints.find(pointPatch[pointI])() = pointI;
+    //}
+
+    //- Unsorted version:
+    DynamicList<label> meshPoints(2*this->size());
     forAll (*this, faceI)
     {
         const Face& curPoints = this->operator[](faceI);
 
         forAll (curPoints, pointI)
         {
-            markedPoints.insert(curPoints[pointI], -1);
+            if (markedPoints.insert(curPoints[pointI], meshPoints.size()))
+            {
+                meshPoints.append(curPoints[pointI]);
+            }
         }
     }
+    // Transfer to straight list (reuses storage)
+    meshPointsPtr_ = new labelList(meshPoints, true);
 
-    // Create the storage and store the meshPoints.  Mesh points are
-    // the ones marked by the usage loop above
-    meshPointsPtr_ = new labelList(markedPoints.toc());
-    labelList& pointPatch = *meshPointsPtr_;
-
-    // Sort the list to preserve compatibility with the old ordering
-    sort(pointPatch);
-
-    // For every point in map give it its label in mesh points
-    forAll (pointPatch, pointI)
-    {
-        markedPoints.find(pointPatch[pointI])() = pointI;
-    }
 
     // Create local faces. Note that we start off from copy of original face
     // list (even though vertices are overwritten below). This is done so
