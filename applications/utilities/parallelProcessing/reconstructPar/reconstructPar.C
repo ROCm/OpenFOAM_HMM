@@ -51,6 +51,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
 #   include "addRegionOption.H"
     argList::validOptions.insert("fields", "\"(list of fields)\"");
+    argList::validOptions.insert("noLagrangian", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -60,6 +61,8 @@ int main(int argc, char *argv[])
     {
         IStringStream(args.options()["fields"])() >> selectedFields;
     }
+
+    bool noLagrangian = args.options().found("noLagrangian");
 
     // determine the processor count directly
     label nProcs = 0;
@@ -269,118 +272,121 @@ int main(int argc, char *argv[])
         // the first processor that has them. They are in pass2 only used
         // for name and type (scalar, vector etc).
 
-        HashTable<IOobjectList> cloudObjects;
-
-        forAll (databases, procI)
+        if (!noLagrangian)
         {
-            fileNameList cloudDirs
-            (
-                readDir
-                (
-                    databases[procI].timePath()/regionPrefix/"lagrangian",
-                    fileName::DIRECTORY
-                )
-            );
+            HashTable<IOobjectList> cloudObjects;
 
-            forAll (cloudDirs, i)
+            forAll (databases, procI)
             {
-                // Check if we already have cloud objects for this cloudname.
-                HashTable<IOobjectList>::const_iterator iter =
-                    cloudObjects.find(cloudDirs[i]);
-
-                if (iter == cloudObjects.end())
-                {
-                    // Do local scan for valid cloud objects.
-                    IOobjectList sprayObjs
+                fileNameList cloudDirs
+                (
+                    readDir
                     (
-                        procMeshes.meshes()[procI],
-                        databases[procI].timeName(),
-                        "lagrangian"/cloudDirs[i]
-                    );
+                        databases[procI].timePath()/regionPrefix/"lagrangian",
+                        fileName::DIRECTORY
+                    )
+                );
 
-                    IOobject* positionsPtr = sprayObjs.lookup("positions");
+                forAll (cloudDirs, i)
+                {
+                    // Check if we already have cloud objects for this cloudname
+                    HashTable<IOobjectList>::const_iterator iter =
+                        cloudObjects.find(cloudDirs[i]);
 
-                    if (positionsPtr)
+                    if (iter == cloudObjects.end())
                     {
-                        cloudObjects.insert(cloudDirs[i], sprayObjs);
+                        // Do local scan for valid cloud objects
+                        IOobjectList sprayObjs
+                        (
+                            procMeshes.meshes()[procI],
+                            databases[procI].timeName(),
+                            "lagrangian"/cloudDirs[i]
+                        );
+
+                        IOobject* positionsPtr = sprayObjs.lookup("positions");
+
+                        if (positionsPtr)
+                        {
+                            cloudObjects.insert(cloudDirs[i], sprayObjs);
+                        }
                     }
                 }
             }
-        }
 
 
-        if (cloudObjects.size())
-        {
-            // Pass2: reconstruct the cloud
-            forAllConstIter(HashTable<IOobjectList>, cloudObjects, iter)
+            if (cloudObjects.size())
             {
-                const word cloudName = string::validate<word>(iter.key());
+                // Pass2: reconstruct the cloud
+                forAllConstIter(HashTable<IOobjectList>, cloudObjects, iter)
+                {
+                    const word cloudName = string::validate<word>(iter.key());
 
-                // Objects (on arbitrary processor)
-                const IOobjectList& sprayObjs = iter();
+                    // Objects (on arbitrary processor)
+                    const IOobjectList& sprayObjs = iter();
 
-                Info<< "Reconstructing lagrangian fields for cloud "
-                    << cloudName << nl << endl;
+                    Info<< "Reconstructing lagrangian fields for cloud "
+                        << cloudName << nl << endl;
 
-                reconstructLagrangianPositions
-                (
-                    mesh,
-                    cloudName,
-                    procMeshes.meshes(),
-                    procMeshes.faceProcAddressing(),
-                    procMeshes.cellProcAddressing()
-                );
-                reconstructLagrangianFields<label>
-                (
-                    cloudName,
-                    mesh,
-                    procMeshes.meshes(),
-                    sprayObjs
-                );
-                reconstructLagrangianFields<scalar>
-                (
-                    cloudName,
-                    mesh,
-                    procMeshes.meshes(),
-                    sprayObjs
-                );
-                reconstructLagrangianFields<vector>
-                (
-                    cloudName,
-                    mesh,
-                    procMeshes.meshes(),
-                    sprayObjs
-                );
-                reconstructLagrangianFields<sphericalTensor>
-                (
-                    cloudName,
-                    mesh,
-                    procMeshes.meshes(),
-                    sprayObjs
-                );
-                reconstructLagrangianFields<symmTensor>
-                (
-                    cloudName,
-                    mesh,
-                    procMeshes.meshes(),
-                    sprayObjs
-                );
-                reconstructLagrangianFields<tensor>
-                (
-                    cloudName,
-                    mesh,
-                    procMeshes.meshes(),
-                    sprayObjs
-                );
+                    reconstructLagrangianPositions
+                    (
+                        mesh,
+                        cloudName,
+                        procMeshes.meshes(),
+                        procMeshes.faceProcAddressing(),
+                        procMeshes.cellProcAddressing()
+                    );
+                    reconstructLagrangianFields<label>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFields<scalar>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFields<vector>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFields<sphericalTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFields<symmTensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                    reconstructLagrangianFields<tensor>
+                    (
+                        cloudName,
+                        mesh,
+                        procMeshes.meshes(),
+                        sprayObjs
+                    );
+                }
             }
-        }
-        else
-        {
-            Info << "No lagrangian fields" << nl << endl;
+            else
+            {
+                Info << "No lagrangian fields" << nl << endl;
+            }
         }
 
         // If there are any "uniform" directories copy them from
-        // the master processor.
+        // the master processor
 
         fileName uniformDir0 = databases[0].timePath()/"uniform";
         if (isDir(uniformDir0))
