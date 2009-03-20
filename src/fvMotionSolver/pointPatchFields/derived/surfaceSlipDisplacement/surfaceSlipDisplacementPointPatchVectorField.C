@@ -29,7 +29,7 @@ License
 #include "Time.H"
 #include "transformField.H"
 #include "fvMesh.H"
-#include "displacementLaplacianFvMotionSolver.H"
+#include "displacementFvMotionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,8 +95,8 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
     }
 
     // Get the starting locations from the motionSolver
-    const displacementLaplacianFvMotionSolver& motionSolver =
-        mesh.lookupObject<displacementLaplacianFvMotionSolver>
+    const displacementFvMotionSolver& motionSolver =
+        mesh.lookupObject<displacementFvMotionSolver>
         (
             "dynamicMeshDict"
         );
