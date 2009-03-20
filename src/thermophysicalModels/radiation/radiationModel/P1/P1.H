@@ -86,6 +86,10 @@ class P1
 
 public:
 
+   // Static data members
+
+        static label iterRadId;
+
     //- Runtime type information
     TypeName("P1");
 

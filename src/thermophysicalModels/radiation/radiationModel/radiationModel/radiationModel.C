@@ -54,8 +54,8 @@ Foam::radiation::radiationModel::radiationModel
         IOobject
         (
             "radiationProperties",
-            T.time().constant(),
-            T.db(),
+            T.mesh().time().constant(),
+            T.mesh().db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -64,6 +64,7 @@ Foam::radiation::radiationModel::radiationModel
     mesh_(T.mesh()),
     radiation_(lookup("radiation")),
     radiationModelCoeffs_(subDict(type + "Coeffs")),
+    nFlowIterPerRadIter_(readLabel(lookup("nFlowIterPerRadIter"))),
     absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
     scatter_(scatterModel::New(*this, mesh_))
 {}

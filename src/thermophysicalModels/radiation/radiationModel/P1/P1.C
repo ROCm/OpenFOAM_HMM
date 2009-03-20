@@ -50,6 +50,9 @@ namespace Foam
     }
 }
 
+//  Radiation solver iteration
+Foam::label Foam::radiation::P1::iterRadId = pTraits<label>::one;
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
@@ -135,10 +138,12 @@ bool Foam::radiation::P1::read()
 
 void Foam::radiation::P1::correct()
 {
-    if (!radiation_)
+    if (!radiation_ || !(iterRadId == nFlowIterPerRadIter_))
     {
+        iterRadId++;
         return;
     }
+
     a_ = absorptionEmission_->a();
     e_ = absorptionEmission_->e();
     E_ = absorptionEmission_->E();
@@ -166,6 +171,8 @@ void Foam::radiation::P1::correct()
      ==
       - 4.0*(e_*radiation::sigmaSB*pow4(T_) + E_)
     );
+
+    iterRadId = pTraits<label>::one;
 }
 
 

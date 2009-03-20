@@ -59,14 +59,14 @@ Foam::radiation::absorptionEmissionModel::~absorptionEmissionModel()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::a() const
+Foam::radiation::absorptionEmissionModel::a(label i) const
 {
-    return aDisp() + aCont();
+    return aDisp(i) + aCont(i);
 }
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::aCont() const
+Foam::radiation::absorptionEmissionModel::aCont(label i) const
 {
     return tmp<volScalarField>
     (
@@ -89,7 +89,7 @@ Foam::radiation::absorptionEmissionModel::aCont() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::aDisp() const
+Foam::radiation::absorptionEmissionModel::aDisp(label i) const
 {
     return tmp<volScalarField>
     (
@@ -112,14 +112,14 @@ Foam::radiation::absorptionEmissionModel::aDisp() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::e() const
+Foam::radiation::absorptionEmissionModel::e(label i) const
 {
-    return eDisp() + eCont();
+    return eDisp(i) + eCont(i);
 }
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::eCont() const
+Foam::radiation::absorptionEmissionModel::eCont(label i) const
 {
     return tmp<volScalarField>
     (
@@ -142,7 +142,7 @@ Foam::radiation::absorptionEmissionModel::eCont() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::eDisp() const
+Foam::radiation::absorptionEmissionModel::eDisp(label i) const
 {
     return tmp<volScalarField>
     (
@@ -165,14 +165,14 @@ Foam::radiation::absorptionEmissionModel::eDisp() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::E() const
+Foam::radiation::absorptionEmissionModel::E(label i) const
 {
-    return EDisp() + ECont();
+    return EDisp(i) + ECont(i);
 }
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::ECont() const
+Foam::radiation::absorptionEmissionModel::ECont(label i) const
 {
     return tmp<volScalarField>
     (
@@ -195,7 +195,7 @@ Foam::radiation::absorptionEmissionModel::ECont() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::EDisp() const
+Foam::radiation::absorptionEmissionModel::EDisp(label i) const
 {
     return tmp<volScalarField>
     (
@@ -216,5 +216,41 @@ Foam::radiation::absorptionEmissionModel::EDisp() const
     );
 }
 
+Foam::label
+Foam::radiation::absorptionEmissionModel::nBands() const
+{
+    return pTraits<label>::one;
+}
 
+const Foam::Vector2D<Foam::scalar>&
+Foam::radiation::absorptionEmissionModel::bands(label n) const
+{
+
+    return Vector2D<scalar>::one;
+}
+
+bool Foam::radiation::absorptionEmissionModel::isGrey(void) const
+{
+    return false;
+}
+
+Foam::tmp<Foam::volScalarField>
+Foam::radiation::absorptionEmissionModel::addRadInt
+(
+    const label i,
+    const volScalarField& Ilambdaj
+) const
+{
+    return Ilambdaj;
+}
+
+void Foam::radiation::absorptionEmissionModel::correct
+(
+    volScalarField& a,
+    PtrList<volScalarField>& aj
+) const
+{
+       a.internalField()  =  this->a();
+       aj[0].internalField() =  a.internalField();
+}
 // ************************************************************************* //

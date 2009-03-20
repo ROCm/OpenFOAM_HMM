@@ -49,6 +49,7 @@ SourceFiles
 #include "volFields.H"
 #include "basicThermo.H"
 #include "fvMatrices.H"
+#include "blackBodyEmission.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -82,9 +83,12 @@ protected:
         //- Model specific dictionary input parameters
         Switch radiation_;
 
+
         //- Radiation model dictionary
         dictionary radiationModelCoeffs_;
 
+        //- Number of iteration in the Flow solver per Radiative solver
+        label nFlowIterPerRadIter_;
 
         // References to the radiation sub-models
 
@@ -93,6 +97,7 @@ protected:
 
             //- Scatter model
             autoPtr<scatterModel> scatter_;
+
 
 
 private:
@@ -104,6 +109,7 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const radiationModel&);
+
 
 
 public:
@@ -174,6 +180,8 @@ public:
             (
                 basicThermo& thermo
             ) const;
+
+
 };
 
 

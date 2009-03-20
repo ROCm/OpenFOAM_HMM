@@ -52,8 +52,8 @@ autoPtr<radiationModel> radiationModel::New
             IOobject
             (
                 "radiationProperties",
-                T.time().constant(),
-                T.db(),
+                T.mesh().time().constant(),
+                T.mesh().db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             )
@@ -86,7 +86,7 @@ autoPtr<radiationModel> radiationModel::New
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace radiation
+} // End radiation
 } // End namespace Foam
 
 // ************************************************************************* //

@@ -38,6 +38,7 @@ Description
 #include "autoPtr.H"
 #include "runTimeSelectionTables.H"
 #include "volFields.H"
+#include "Vector2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -115,37 +116,69 @@ public:
             // Absorption coefficient
 
                 //- Absorption coefficient (net)
-                virtual tmp<volScalarField> a() const;
+                virtual tmp<volScalarField> a(const label i = 0) const;
 
                 //- Absorption coefficient for continuous phase
-                virtual tmp<volScalarField> aCont() const;
+                virtual tmp<volScalarField> aCont(const label i = 0) const;
 
                 //- Absorption coefficient for dispersed phase
-                virtual tmp<volScalarField> aDisp() const;
+                virtual tmp<volScalarField> aDisp(const label i = 0) const;
 
 
             // Emission coefficient
 
                 //- Emission coefficient (net)
-                virtual tmp<volScalarField> e() const;
+                virtual tmp<volScalarField> e(const label i = 0) const;
 
                 //- Return emission coefficient for continuous phase
-                virtual tmp<volScalarField> eCont() const;
+                virtual tmp<volScalarField> eCont(const label i = 0) const;
 
                 //- Return emission coefficient for dispersed phase
-                virtual tmp<volScalarField> eDisp() const;
+                virtual tmp<volScalarField> eDisp(const label i = 0) const;
 
 
             // Emission contribution
 
                 //- Emission contribution (net)
-                virtual tmp<volScalarField> E() const;
+                virtual tmp<volScalarField> E(const label i = 0) const;
 
                 //- Emission contribution for continuous phase
-                virtual tmp<volScalarField> ECont() const;
+                virtual tmp<volScalarField> ECont(const label i = 0) const;
 
                 //- Emission contribution for dispersed phase
-                virtual tmp<volScalarField> EDisp() const;
+                virtual tmp<volScalarField> EDisp(const label i = 0) const;
+
+                inline const fvMesh& mesh() const
+                {
+                    return mesh_;
+                }
+
+        // Default for grey absorptionEmission model return 1
+        virtual label nBands() const;
+
+        // Default for grey absorptionEmission model return Vector2D::one
+        virtual const Vector2D<scalar>& bands
+        (
+            label n
+        ) const;
+
+        // Is the absorptionEmission grey
+        virtual bool isGrey(void) const;
+
+
+        // Add radiative intensity fir ray i
+        virtual tmp<volScalarField> addRadInt
+        (
+            const label i,
+            const volScalarField& Ilambdaj
+        ) const;
+
+        // Correct absorption coefficients
+        virtual void correct
+        (
+            volScalarField& a_,
+            PtrList<volScalarField>& aj_
+        ) const ;
 };
 
 
