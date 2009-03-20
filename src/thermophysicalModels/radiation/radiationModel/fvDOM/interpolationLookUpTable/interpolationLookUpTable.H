@@ -29,7 +29,6 @@ Description
     A list of lists. Interpolates based on the first dimension.
     The values must be positive and monotonically increasing in each dimension
 
-
 Note
     - Accessing an empty list results in an error.
     - Accessing a list with a single element always returns the same value.
@@ -48,6 +47,7 @@ SourceFiles
 #include "HashTable.H"
 #include "IOdictionary.H"
 #include "fvCFD.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -60,12 +60,8 @@ namespace Foam
 template<class Type>
 class interpolationLookUpTable
 :
-	  public List<scalarField>
+    public List<scalarField>
 {
-public:
-
-    // Public data types
-
 private:
 
     // Private data
@@ -73,69 +69,69 @@ private:
         //- File name
         fileName fileName_;
 
-	//- table dimensions
+        //- Table dimensions
         List<label>  dim_;
 
-	//- min on each dimension
+        //- Min on each dimension
         List<scalar>  min_;
 
-	//- deltas on each dimension
-		List<scalar>  delta_;
+        //- Deltas on each dimension
+        List<scalar>  delta_;
 
-	//- maximum on each dimension
+        //- Maximum on each dimension
         List<scalar>  max_;
 
-        //- entries dictionaries
+        //- Dictionary entries
         List<dictionary> entries_;
 
-		//- output dictionaries
-		List<dictionary> output_;
+        //- Output dictionaries
+        List<dictionary> output_;
 
-		//- input Indeces from the Look Up Table
-		List<label> entryIndices_;
+        //- Input indices from the look up table
+        List<label> entryIndices_;
 
-		//- output Indeces from the Look Up Table
-		List<label> outputIndices_;
+        //- Output Indeces from the Look Up Table
+        List<label> outputIndices_;
 
-		//- field names and indices
-		HashTable<label> fieldIndices_;
+        //- Field names and indices
+        HashTable<label> fieldIndices_;
 
-		//- Output List containing input and interpolation values of outputs
-		List<scalar> interpOutput_;
+        //- Output list containing input and interpolation values of outputs
+        List<scalar> interpOutput_;
 
-        // Private Member Functions
 
-		//- Read the table of data from file
+    // Private Member Functions
+
+        //- Read the table of data from file
         void readTable(const word& instance, const fvMesh& mesh);
 
-		//- Dimension Table from dictionaries input and output
-		void dimensionTable();
+        //- Dimension table from dictionaries input and output
+        void dimensionTable();
 
-        // Index table finding using scalarList
-		label index(const List<scalar>&, const bool lastDim=true) const;
+        //- Find table index by scalarList
+        label index(const List<scalar>&, const bool lastDim=true) const;
 
-        // Index table finding using scalar
+        //- Find table index by scalar
         label index(const scalar) const;
 
-		//- check range of lookUpValue
-		bool checkRange(const scalar, const label) const;
+        //- Check range of lookup value
+        bool checkRange(const scalar, const label) const;
 
-		//- Interpolate function return an scalar
-		scalar interpolate
-		(
-			const label lo,
-			const label hi,
-			const scalar lookUpValue,
-			const label ofield,
-			const label interfield
-		) const;
+        //- Interpolate function return an scalar
+        scalar interpolate
+        (
+            const label lo,
+            const label hi,
+            const scalar lookUpValue,
+            const label ofield,
+            const label interfield
+        ) const;
 
-		// Check list is monotonically increasing
+        // Check list is monotonically increasing
         void check() const;
 
         // find hi index, interpolate and populate interpOutput_
         void findHi(const label lo, const scalar retvals);
-
 
 
 public:
@@ -156,18 +152,19 @@ public:
          //- Construct from dictionary
         interpolationLookUpTable(const dictionary& dict);
 
-
-		//- Construct copy
+        //- Construct copy
         interpolationLookUpTable(const interpolationLookUpTable& interpTable);
+
 
     // Member Functions
 
-        bool found(const word& key) const;
+        //- Return true if the filed exists in the table
+        bool found(const word& fieldName) const;
 
         //- Return the output list given a single input scalar
-        const List<scalar>& LookUp(const scalar);
+        const List<scalar>& lookUp(const scalar);
 
-		//- Write Look Up Table to filename.
+        //- Write Look Up Table to filename.
         void write
         (
             Ostream& os,
@@ -177,54 +174,40 @@ public:
         ) const;
 
 
-      // Acces
+    // Access
 
-		inline label findFieldIndex(const word& field) const
-		{
-			return fieldIndices_[field];
-		}
+        //- Return the index of a field by name
+        inline label findFieldIndex(const word& fieldName) const;
 
-		 inline const List<dictionary>& output() const
-        {
-            return output_;
-        }
+        //- Return const access to the output dictionaries
+        inline const List<dictionary>& output() const;
 
-		inline const List<dictionary>& entries() const
-        {
-            return entries_;
-        }
+        //- Return const access tp the dictionary entries
+        inline const List<dictionary>& entries() const;
 
-        inline const List<scalar>& min() const
-        {
-            return min_;
-        }
+        //- Return const access to the list of min dimensions
+        inline const List<scalar>& min() const;
 
-        inline const List<label>& dim() const
-        {
-            return dim_;
-        }
+        //- Return const access to the list of dimensions
+        inline const List<label>& dim() const;
 
-		inline const List<scalar>& delta() const
-		{
-	    	return delta_;
-		}
+        //- Return const access to the deltas in each dimension
+        inline const List<scalar>& delta() const;
 
-        inline const List<scalar>& max() const
-        {
-            return max_;
-        }
+        //- Return const access to the list of max dimensions
+        inline const List<scalar>& max() const;
 
-        inline const word tableName() const
-        {
-            return fileName_.name();
-        }
+        //- Return const access to the table name
+        inline const word tableName() const;
+
+
      // Member Operators
 
         //- Return an element of constant List<scalar, Type>
         const scalarField& operator[](const label) const;
 
-		//- Return an element of List<scalar, Type>
-		scalarField & operator[](const label);
+        //- Return an element of List<scalar, Type>
+        scalarField& operator[](const label);
 
 };
 

@@ -28,7 +28,6 @@ Namespace
 Description
     Namespace for radiation modelling
 
-
 Class
     Foam::radiation::radiationModel
 
@@ -58,6 +57,7 @@ namespace Foam
 namespace radiation
 {
 
+// Forward declaration of classes
 class absorptionEmissionModel;
 class scatterModel;
 
@@ -152,8 +152,7 @@ public:
 
 
     // Destructor
-
-        virtual ~radiationModel();
+    virtual ~radiationModel();
 
 
     // Member Functions

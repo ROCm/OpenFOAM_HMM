@@ -53,9 +53,9 @@ namespace Foam
 //  Radiation solver iterator counter
 Foam::label Foam::radiation::fvDOM::iterRadId = pTraits<label>::one;
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
 :
     radiationModel(typeName, T),
@@ -134,25 +134,30 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     aj_.setSize(lambdaj_);
     if (mesh_.nSolutionD() == 3)    //3D
     {
-        RadIntRay_.setSize(4.* Nphi_* Ntheta_);
-        Ni_ = 4. * Nphi_ * Ntheta_;
-        scalar deltaPhi = mathematicalConstant::pi / (2. * Nphi_);
-        scalar deltaTheta = mathematicalConstant::pi / Ntheta_;
+        RadIntRay_.setSize(4.0*Nphi_*Ntheta_);
+        Ni_ = 4.0*Nphi_*Ntheta_;
+        scalar deltaPhi = mathematicalConstant::pi/(2.0*Nphi_);
+        scalar deltaTheta = mathematicalConstant::pi/Ntheta_;
         label i = 0;
-        for(label n = 1 ; n <= Ntheta_ ; n++)
+        for (label n = 1 ; n <= Ntheta_ ; n++)
         {
-            for(label m = 1 ; m <= 4*Nphi_ ; m++)
+            for (label m = 1 ; m <= 4*Nphi_ ; m++)
             {
-                scalar thetai = (2.*n - 1.)*deltaTheta/2.;
-                scalar phii = (2.*m - 1.)*deltaPhi/2.;
+                scalar thetai = (2.0*n - 1.0)*deltaTheta/2.0;
+                scalar phii = (2.0*m - 1.0)*deltaPhi/2.0;
                 RadIntRay_.set
                 (
                     i,
                     new radiativeIntensityRay
                     (
-                        phii, thetai, deltaPhi,
-                        deltaTheta, lambdaj_, mesh_,
-                        absorptionEmission_, blackBody_
+                        phii,
+                        thetai,
+                        deltaPhi,
+                        deltaTheta,
+                        lambdaj_,
+                        mesh_,
+                        absorptionEmission_,
+                        blackBody_
                     )
                 );
                 i++;
@@ -163,23 +168,28 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     {
         if (mesh_.nSolutionD() == 2)    //2D (X & Y)
         {
-            scalar thetai = mathematicalConstant::pi/2.;
+            scalar thetai = mathematicalConstant::pi/2.0;
             scalar deltaTheta = mathematicalConstant::pi;
-            RadIntRay_.setSize(4.* Nphi_);
-            Ni_ = 4. * Nphi_;
-            scalar deltaPhi = mathematicalConstant::pi / (2. * Nphi_);
+            RadIntRay_.setSize(4.0*Nphi_);
+            Ni_ = 4.0*Nphi_;
+            scalar deltaPhi = mathematicalConstant::pi/(2.0*Nphi_);
             label i = 0;
-            for(label m = 1 ; m <= 4*Nphi_ ; m++)
+            for (label m = 1 ; m <= 4*Nphi_ ; m++)
             {
-                scalar phii = (2.*m - 1.)*deltaPhi/2.;
+                scalar phii = (2.0*m - 1.0)*deltaPhi/2.0;
                 RadIntRay_.set
                 (
                     i,
                     new radiativeIntensityRay
                     (
-                        phii, thetai, deltaPhi,
-                        deltaTheta, lambdaj_, mesh_,
-                        absorptionEmission_, blackBody_
+                        phii,
+                        thetai,
+                        deltaPhi,
+                        deltaTheta,
+                        lambdaj_,
+                        mesh_,
+                        absorptionEmission_,
+                        blackBody_
                     )
                 );
                 i++;
@@ -187,23 +197,28 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         }
         else    //1D (X)
         {
-            scalar thetai = mathematicalConstant::pi/2.;
+            scalar thetai = mathematicalConstant::pi/2.0;
             scalar deltaTheta = mathematicalConstant::pi;
             RadIntRay_.setSize(2);
-            Ni_ = 2.;
+            Ni_ = 2.0;
             scalar deltaPhi = mathematicalConstant::pi;
             label i = 0;
-            for(label m = 1 ; m <= 2 ; m++)
+            for (label m = 1 ; m <= 2 ; m++)
             {
-                scalar phii = (2*m - 1.)*deltaPhi/2.;
+                scalar phii = (2.0*m - 1.0)*deltaPhi/2.0;
                 RadIntRay_.set
                 (
                     i,
                     new radiativeIntensityRay
                     (
-                        phii, thetai, deltaPhi,
-                        deltaTheta, lambdaj_, mesh_,
-                        absorptionEmission_, blackBody_
+                        phii,
+                        thetai,
+                        deltaPhi,
+                        deltaTheta,
+                        lambdaj_,
+                        mesh_,
+                        absorptionEmission_,
+                        blackBody_
                     )
                 );
                 i++;
@@ -213,7 +228,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     }
 
 
-// Construct absorption for wave length
+    // Construct absorption for wave length
     for(label i=0; i < lambdaj_; i++)
     {
         volScalarField* volPtr= new volScalarField
@@ -233,6 +248,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     }
 
 }
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::radiation::fvDOM::~fvDOM()
@@ -274,8 +291,8 @@ void Foam::radiation::fvDOM::correct()
     label radIter = 0;
     do
     {
-         radIter ++;
-        for(label i = 0; i < Ni_; i++) //
+        radIter ++;
+        for (label i = 0; i < Ni_; i++)
         {
             maxResidual = 0;
             scalar maxBandResidual = RadIntRay_[i].correct(this);
@@ -284,12 +301,13 @@ void Foam::radiation::fvDOM::correct()
 
         Info << "Radiation solver Iter: " <<  radIter << endl;
 
-    }while(maxResidual > convergenceCriterion);
+    } while(maxResidual > convergenceCriterion);
 
     updateG();
 
     iterRadId = pTraits<label>::one;
 }
+
 
 Foam::tmp<Foam::volScalarField> Foam::radiation::fvDOM::Rp() const
 {
@@ -327,15 +345,15 @@ Foam::radiation::fvDOM::Ru() const
     return  a*G - 4.0*E;
 }
 
+
 void Foam::radiation::fvDOM::updateBlackBodyEmission()
 {
-
-    for(label j=0; j < lambdaj_; j++)
+    for (label j=0; j < lambdaj_; j++)
     {
           blackBody_.correct(j, absorptionEmission_->bands(j));
     }
-
 }
+
 
 void Foam::radiation::fvDOM::updateG()
 {
@@ -343,11 +361,13 @@ void Foam::radiation::fvDOM::updateG()
     G_ = dimensionedScalar("zero",dimMass/pow3(dimTime), 0.0);
     Qr_ = dimensionedScalar("zero",dimMass/pow3(dimTime), 0.0);
 
-    for(label i = 0; i < Ni_; i++)
+    for (label i = 0; i < Ni_; i++)
     {
         RadIntRay_[i].addIntensity();
         G_ +=  RadIntRay_[i].I()* RadIntRay_[i].omegai();
         Qr_ += RadIntRay_[i].Qri();
     }
 }
+
+
 // ************************************************************************* //

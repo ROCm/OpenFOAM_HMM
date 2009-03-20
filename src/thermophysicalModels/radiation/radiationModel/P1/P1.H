@@ -101,8 +101,7 @@ public:
 
 
     // Destructor
-
-        ~P1();
+    virtual ~P1();
 
 
     // Member functions

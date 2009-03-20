@@ -27,25 +27,25 @@ Class
 
 Description
 
-    Finite Volume Discrete Ordinary Method. It solves the RTE equation for n
-    directions in a participating media. It does not consider scatter.
+    Finite Volume Discrete Ordinary Method. Solves the RTE equation for n
+    directions in a participating media, not including scatter.
 
     Available absorption models:
-                                greyMeanAbsoprtionEmission
-                                wideBandAbsorptionEmission
+        greyMeanAbsoprtionEmission
+        wideBandAbsorptionEmission
 
     i.e. dictionary
     fvDOMCoeffs
     {
         Nphi    1;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
         Ntheta  2;          // polar angles in P1 (from Z to X-Y plane)
-        convergence 1e-4;   //convergence criteria for radiation iteration
+        convergence 1e-4;   // convergence criteria for radiation iteration
     }
 
     nFlowIterPerRadIter   1; // Number of flow iterations per radiation
                                 iteration
 
-    The total number of solid angles is  4 * Nphi * Ntheta.
+    The total number of solid angles is  4*Nphi*Ntheta.
 
     In 1D the direction of the rays is X (Nphi and Ntheta are ignored)
     In 2D the direction of the rays is on X-Y plane (only Nphi is considered)
@@ -77,7 +77,6 @@ class fvDOM
 :
     public radiationModel
 {
-
     // Private data
 
         //- Incident radiation  [W/m2]
@@ -131,14 +130,16 @@ class fvDOM
         //- Update Black Body Emissiom
         void updateBlackBodyEmission(void);
 
+
 public:
 
     // Static data members
 
         static label iterRadId;
 
+
     //- Runtime type information
-        TypeName("fvDOM");
+    TypeName("fvDOM");
 
 
     // Constructors
@@ -148,102 +149,73 @@ public:
 
 
     // Destructor
-
-        ~fvDOM();
+    virtual ~fvDOM();
 
 
     // Member functions
 
         // Edit
 
-        //- Update radiationSource varible
-        void correct();
+            //- Update radiation source variable
+            void correct();
 
-        //- Read radiationProperties dictionary
-        bool read();
+            //- Read radiationProperties dictionary
+            bool read();
 
-        //- Update G and calculate total heat flux on boundary
-        void updateG();
+            //- Update G and calculate total heat flux on boundary
+            void updateG();
 
-        //- Source term component (for power of T^4)
-        virtual tmp<volScalarField> Rp() const;
+            //- Source term component (for power of T^4)
+            virtual tmp<volScalarField> Rp() const;
 
-        //- Source term component (constant)
-        virtual tmp<DimensionedField<scalar, volMesh> > Ru() const;
+            //- Source term component (constant)
+            virtual tmp<DimensionedField<scalar, volMesh> > Ru() const;
+
 
         // Access
 
-        //- Intensity Ray on i direction
-        inline const radiativeIntensityRay& RadIntRay(label i) const
-        {
-            return  RadIntRay_[i];
-        }
+            //- Ray intensity in i direction
+            inline const radiativeIntensityRay& RadIntRay(label i) const;
 
-        //- Intensity Ray on i direction and j band-width
-        inline const volScalarField& RadIntRayiLambdaj
-        (
-            const label i,
-            const label j
-        ) const
-        {
-            return  RadIntRay_[i].Ilambdaj(j);
-        }
+            //- Ray intensity in i direction and j band-width
+            inline const volScalarField& RadIntRayiLambdaj
+            (
+                const label i,
+                const label j
+            ) const;
 
-        //-Number of angles in theta
-        label Ntheta() const
-        {
-            return Ntheta_;
-        }
+            //- Number of angles in theta
+            inline label Ntheta() const;
 
-        //- Number of angles in phi
-        label Nphi() const
-        {
-            return Nphi_;
-        }
+            //- Number of angles in phi
+            inline label Nphi() const;
 
-        //- Number of directions
-        label Ni() const
-        {
-            return Ni_;
-        }
+            //- Number of directions
+            inline label Ni() const;
 
-        //- Number of wavelengths
-        inline const label& lambdaj() const
-        {
-            return lambdaj_;
-        }
+            //- Number of wavelengths
+            inline label lambdaj() const;
 
-        // Const access to a
-        inline const volScalarField& a() const
-        {
-            return a_;
-        }
+            // Const access to a
+            inline const volScalarField& a() const;
 
-        // Const access to aj
-        inline const volScalarField& aj(label i) const
-        {
-            return aj_[i];
-        }
+            // Const access to aj
+            inline const volScalarField& aj(label i) const;
 
-        // Const access to G
-        inline const volScalarField& G() const
-        {
-            return G_;
-        }
+            // Const access to G
+            inline const volScalarField& G() const;
 
-        //  Const access to Qr
-        inline const volScalarField& Qr() const
-        {
-            return Qr_;
-        }
+            //  Const access to Qr
+            inline const volScalarField& Qr() const;
 
-        //  Const access to blavkBody
-        virtual const blackBodyEmission& blackBody() const
-        {
-            return blackBody_;
-        }
+            //  Const access to blackBody
+            virtual const blackBodyEmission& blackBody() const;
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "fvDOMI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

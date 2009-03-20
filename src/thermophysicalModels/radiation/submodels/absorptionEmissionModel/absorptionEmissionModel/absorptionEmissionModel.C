@@ -216,11 +216,12 @@ Foam::radiation::absorptionEmissionModel::EDisp(label i) const
     );
 }
 
-Foam::label
-Foam::radiation::absorptionEmissionModel::nBands() const
+
+Foam::label Foam::radiation::absorptionEmissionModel::nBands() const
 {
     return pTraits<label>::one;
 }
+
 
 const Foam::Vector2D<Foam::scalar>&
 Foam::radiation::absorptionEmissionModel::bands(label n) const
@@ -229,10 +230,12 @@ Foam::radiation::absorptionEmissionModel::bands(label n) const
     return Vector2D<scalar>::one;
 }
 
-bool Foam::radiation::absorptionEmissionModel::isGrey(void) const
+
+bool Foam::radiation::absorptionEmissionModel::isGrey() const
 {
     return false;
 }
+
 
 Foam::tmp<Foam::volScalarField>
 Foam::radiation::absorptionEmissionModel::addRadInt
@@ -244,13 +247,16 @@ Foam::radiation::absorptionEmissionModel::addRadInt
     return Ilambdaj;
 }
 
+
 void Foam::radiation::absorptionEmissionModel::correct
 (
     volScalarField& a,
     PtrList<volScalarField>& aj
 ) const
 {
-       a.internalField()  =  this->a();
-       aj[0].internalField() =  a.internalField();
+    a.internalField() = this->a();
+    aj[0].internalField() =  a.internalField();
 }
+
+
 // ************************************************************************* //

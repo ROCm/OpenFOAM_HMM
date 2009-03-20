@@ -45,53 +45,53 @@ namespace Foam
 namespace radiation
 {
 
-
-/*---------------------------------------------------------------------------*\
-                           Class radiativeIntensityRay Declaration
-\*---------------------------------------------------------------------------*/
+// Forward declaration of classes
 class fvDOM;
 
+/*---------------------------------------------------------------------------*\
+                    Class radiativeIntensityRay Declaration
+\*---------------------------------------------------------------------------*/
 
 class radiativeIntensityRay
 {
-
     // Private data
 
-        //- absorptionEmissionModel
+        //- Absorption/emission model
         const absorptionEmissionModel& absEmmModel_;
 
-        //- Temperature
+        //- Reference to the mesh
         const fvMesh& mesh_;
 
-        // black Body
+        //- Black body
         const blackBodyEmission&  blackBody_;
 
-        //- Total Radiative Intensity on i direction  / [W/m2]
+        //- Total radiative intensity in i direction  / [W/m2]
         volScalarField I_;
 
-        // - Total  radiative heat flux on boundary on i direction
+        //- Total radiative heat flux on boundary in i direction
         mutable volScalarField Qri_;
 
         //- Direction i
         vector Si_;
 
-        //- theta angle of direction i
+        //- Theta angle of direction i
         scalar thetai_;
 
-        //- phi angle of direction i
+        //- Phi angle of direction i
         scalar phii_;
 
-        //- solid angle
+        //- Solid angle of direction i
         scalar omegai_;
 
         //- Number of bands on i direction
-        label Nlambdaj_;
+        label nLambdaj_;
 
-        //- average vector inside the solid angle
+        //- Average vector inside the solid angle
         vector Di_;
 
-        //- List of Pointers to Radiative Intensity wave-length
+        //- List of pointers to radiative intensity wave-length
         PtrList<volScalarField> Ilambdaj_;
+
 
     // Private member functions
 
@@ -101,12 +101,13 @@ class radiativeIntensityRay
         //- Disallow default bitwise assignment
         void operator=(const radiativeIntensityRay&);
 
-        //- Integrate Intensity on this direction
-//        void IntegrateRadiativeIntensity(const label i);
+
 public:
 
     // Static data members
+
         static label rayId;
+
 
     // Constructors
 
@@ -125,80 +126,88 @@ public:
 
 
     // Destructor
-
-        ~radiativeIntensityRay();
+    ~radiativeIntensityRay();
 
 
     // Member functions
 
         // Edit
 
-            // Update radiative intensity on i direction
+            //- Update radiative intensity on i direction
             scalar correct(fvDOM*);
 
-            // init the ray on i direction
+            //- Initialise the ray in i direction
             void init
             (
-                scalar phii, scalar thetai, scalar deltaPhi,scalar
-                deltaTheta, scalar lambda
+                const scalar phii,
+                const scalar thetai,
+                const scalar deltaPhi,
+                const scalar deltaTheta,
+                const scalar lambda
             );
 
-            // add radiative heat flux on walls from the boundary patch
-            void add(const scalarField&, label) const;
+            //- Add radiative heat flux on walls from the boundary patch
+            void add(const scalarField&, const label) const;
 
-            // add Radiative intensities from all the bands
+            //- Add Radiative intensities from all the bands
             void addIntensity();
+
 
         // Access
 
-            //- Return Intensity on i direction
+            //- Return intensity in i direction
             inline const volScalarField& I() const
             {
                 return I_;
             }
 
-            //- Return heat flux on boundary on i direction
+            //- Return heat flux on boundary in i direction
             inline const volScalarField& Qri() const
             {
                 return Qri_;
             }
 
+            //- Return direction i
             inline const vector Si() const
             {
                 return Si_;
             }
 
+            //- Return the average vector inside the solid angle
             inline const vector Di() const
             {
                 return Di_;
             }
 
-            scalar lambdaj() const
+            //- Return the number of bands on i direction
+            scalar nLambdaj() const
             {
-                return  Nlambdaj_;
+                return  nlambdaj_;
             }
 
+            //- Return the phi angle of direction i
             scalar phii() const
             {
                 return  phii_;
             }
 
+            //- Return the theta angle of direction i
             scalar thetai() const
             {
                 return  thetai_;
             }
 
+            //- Return the solid angle of direction i
             scalar omegai() const
             {
                 return  omegai_;
             }
 
-
-            const volScalarField& Ilambdaj(label i) const
+            //- Return the list of pointers to radiative intensity wave-length
+            const volScalarField& Ilambdaj(const label i) const
             {
                 return  Ilambdaj_[i];
             }
-
 };
 
 

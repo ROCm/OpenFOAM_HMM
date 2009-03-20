@@ -99,13 +99,10 @@ Description
     }
 
 
-
-
-
 SourceFiles
     wideBandAbsorptionEmission.C
-\*---------------------------------------------------------------------------*/
 
+\*---------------------------------------------------------------------------*/
 
 #ifndef wideBandAbsorptionEmission_H
 #define wideBandAbsorptionEmission_H
@@ -115,8 +112,6 @@ SourceFiles
 #include "HashTable.H"
 #include "absorptionCoeffs.H"
 #include "basicThermo.H"
-
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -133,20 +128,24 @@ class wideBandAbsorptionEmission
 :
     public absorptionEmissionModel
 {
-
 public:
 
+    // Public data
 
-        // - Maximum number of species considered for absorptivity
+        //- Maximum number of species considered for absorptivity
         static const int nSpecies_ = 5;
 
-        // - Maximum number of bands
+        //- Maximum number of bands
         static const int maxBands_ = 10;
 
-        //  Absorption Coefficients
-        FixedList< FixedList<absorptionCoeffs, nSpecies_> , maxBands_> coeffs_;
+        //-  Absorption coefficients
+        FixedList<FixedList<absorptionCoeffs, nSpecies_>, maxBands_> coeffs_;
+
 
 private:
+
+    // Private data
+
         //- Absorption model dictionary
         dictionary coeffsDict_;
 
@@ -162,10 +161,10 @@ private:
         //- Proportion of the heat released rate emitted
         FixedList<scalar, maxBands_ > iEhrrCoeffs_;
 
-        //- Look Up table of species related to ft
-        mutable interpolationLookUpTable<scalar> LookUpTable_;
+        //- Look-up table of species related to ft
+        mutable interpolationLookUpTable<scalar> lookUpTable_;
 
-        //- Thermo
+        //- Thermo package
         const basicThermo& thermo_;
 
         //- Bands
@@ -174,8 +173,9 @@ private:
         //- Pointer list of species being solved involved in the absorption
         UPtrList<volScalarField> Yj_;
 
-        // Total wave lenght cover by the bands
+        // Total wave length covered by the bands
         scalar totalWaveLength_;
+
 
 public:
 
@@ -195,32 +195,30 @@ public:
 
 
     // Destructor
+    virtual ~wideBandAbsorptionEmission();
 
-        ~wideBandAbsorptionEmission();
 
-
-    // Member Operators
+    // Member Functions
 
         // Access
 
             // Absorption coefficient
 
                 //- Absorption coefficient for continuous phase
-                tmp<volScalarField> aCont(const label i = 0) const;
+                tmp<volScalarField> aCont(const label bandI = 0) const;
 
 
             // Emission coefficient
 
                 //- Emission coefficient for continuous phase
-                tmp<volScalarField> eCont(const label i = 0) const;
+                tmp<volScalarField> eCont(const label bandI = 0) const;
 
 
             // Emission contribution
 
                 //- Emission contribution for continuous phase
-                tmp<volScalarField> ECont(const label i = 0) const;
+                tmp<volScalarField> ECont(const label bandI = 0) const;
 
-    // Member Functions
 
         inline bool isGrey(void) const
         {
@@ -228,7 +226,7 @@ public:
         }
 
         // Number of bands
-        label nBands() const
+        inline label nBands() const
         {
             return nBands_;
         }
@@ -240,7 +238,7 @@ public:
         }
 
         //  Add contribution of Ilambdaj to the total Radiative Intensity on
-        //direction i
+        // direction i
         tmp<volScalarField> addRadInt
         (
             const label i,
@@ -248,7 +246,6 @@ public:
         ) const;
 
         void correct(volScalarField& a_, PtrList<volScalarField>& aj) const;
-
 };
 
 

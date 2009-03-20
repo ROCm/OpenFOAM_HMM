@@ -36,10 +36,12 @@ License
 #include "Vector2D.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 Foam::label Foam::radiation::radiativeIntensityRay::rayId = 0;
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 (
     scalar& phii,
@@ -94,44 +96,49 @@ Foam::radiation::radiativeIntensityRay::~radiativeIntensityRay()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 void Foam::radiation::radiativeIntensityRay::init
 (
-    scalar phii, scalar thetai, scalar deltaPhi, scalar deltaTheta,
-    scalar lambdaj
+    const scalar phii,
+    const scalar thetai,
+    const scalar deltaPhi,
+    const scalar deltaTheta,
+    const scalar lambdaj
 )
 {
+    phii_ = phii;
+    thetai_ = thetai;
+    nLambdaj_ = lambdaj;
+
     scalar sinTheta = Foam::sin(thetai);
     scalar cosTheta = Foam::cos(thetai);
     scalar sinPhi = Foam::sin(phii);
     scalar cosPhi = Foam::cos(phii);
-    vector s = vector(sinTheta*sinPhi, sinTheta*cosPhi, cosTheta);
-    Si_ = (s);
-    thetai_ = thetai;
-    phii_ = phii;
-    omegai_ = 2. * Foam::sin(thetai)*Foam::sin(deltaTheta/2.)*deltaPhi;
-    Nlambdaj_ = (lambdaj);
-    Ilambdaj_.setSize(Nlambdaj_);
-    const vector& d = vector
+    Si_ = vector(sinTheta*sinPhi, sinTheta*cosPhi, cosTheta);
+    omegai_ = 2.0*Foam::sin(thetai)*Foam::sin(deltaTheta/2.0)*deltaPhi;
+    Ilambdaj_.setSize(nLambdaj_);
+    Di_ = vector
     (
-        sinPhi * Foam::sin(0.5*deltaPhi) * (deltaTheta - Foam::cos(2.*thetai)
-        * Foam::sin(deltaTheta)) ,
-        cosPhi * Foam::sin(0.5*deltaPhi) * (deltaTheta - Foam::cos(2.*thetai)
-        * Foam::sin(deltaTheta)) ,
-        0.5 * deltaPhi * Foam::sin(2.*thetai) * Foam::sin(deltaTheta)
+        sinPhi
+       *Foam::sin(0.5*deltaPhi)
+       *(deltaTheta - Foam::cos(2.0*thetai)
+       *Foam::sin(deltaTheta)),
+        cosPhi
+       *Foam::sin(0.5*deltaPhi)
+       *(deltaTheta - Foam::cos(2.0*thetai)
+       *Foam::sin(deltaTheta)),
+        0.5*deltaPhi*Foam::sin(2.0*thetai)*Foam::sin(deltaTheta)
     );
-
-    Di_ = (d);
 
     forAll(Ilambdaj_, i)
     {
         IOobject header
         (
-            "Ilambda_" + name(rayId) + "_"+ name(i),
+            "Ilambda_" + name(rayId) + "_" + name(i),
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ
         );
+
         // check if field exists and can be read
         if (header.headerOk())
         {
@@ -188,16 +195,17 @@ void Foam::radiation::radiativeIntensityRay::init
     rayId++;
 }
 
+
 Foam::scalar Foam::radiation::radiativeIntensityRay::correct
 (
     fvDOM* DomPtr
 )
 {
-    Qri_ =  dimensionedScalar("zero",dimMass/pow3(dimTime), 0.0);
+    Qri_ =  dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
 
     scalar maxResidual = 0.0;
 
-    for(label i = 0; i < Nlambdaj_; i++)
+    for(label i = 0; i < nLambdaj_; i++)
     {
         volScalarField k = DomPtr->aj(i);
 
@@ -209,9 +217,10 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct
 
         fvScalarMatrix IiEq
         (
-            fvm::div(Ji,Ilambdaj_[i],"div(Ji,Ii_h)")
+            fvm::div(Ji, Ilambdaj_[i], " div(Ji,Ii_h)")
           + fvm::Sp(k*omegai_, Ilambdaj_[i])
-            == k*omegai_*Ib + E
+         ==
+            k*omegai_*Ib + E
         );
 
         IiEq.relax();
@@ -228,23 +237,26 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct
     return maxResidual;
 }
 
+
 void Foam::radiation::radiativeIntensityRay::addIntensity()
 {
-    I_ = dimensionedScalar("zero",dimMass/pow3(dimTime), 0.0);
+    I_ = dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
 
-    for(label i = 0; i < Nlambdaj_; i++)
+    for (label i = 0; i < nLambdaj_; i++)
     {
-         I_ += absEmmModel_.addRadInt(i, Ilambdaj_[i]);
+        I_ += absEmmModel_.addRadInt(i, Ilambdaj_[i]);
     }
 }
 
+
 void Foam::radiation::radiativeIntensityRay::add
 (
-    const scalarField & qr,
-    label patchI
+    const scalarField& qr,
+    const label patchI
 ) const
 {
-      Qri_.boundaryField()[patchI] += qr;
+    Qri_.boundaryField()[patchI] += qr;
 }
+
 
 // ************************************************************************* //

@@ -40,6 +40,7 @@ SourceFiles
 #include "List.H"
 #include "IOstreams.H"
 #include "IOdictionary.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 namespace Foam
 {
@@ -47,29 +48,33 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class absorptionCoeffs Declaration
+                      Class absorptionCoeffs Declaration
 \*---------------------------------------------------------------------------*/
 
 class absorptionCoeffs
 {
-
 public:
+
+    // Public data members
 
         static const int nCoeffs_ = 6;
         typedef FixedList<scalar, nCoeffs_> coeffArray;
+
 
 private:
 
     // Private data
 
         // Temperature limits of applicability of functions
-        scalar Tcommon_;
 
-        scalar Tlow_;
+            scalar Tcommon_;
 
-        scalar Thigh_;
+            scalar Tlow_;
 
-        // Polynomio using inverse temperatures
+            scalar Thigh_;
+
+
+        // Polynomial using inverse temperatures
         bool invTemp_;
 
         coeffArray highACoeffs_;
@@ -93,26 +98,28 @@ public:
         absorptionCoeffs()
         {}
 
+
     // Destructor
+    ~absorptionCoeffs();
 
-        ~absorptionCoeffs();
 
-    // member functions
+    // Member functions
 
         //- Return the coefficients corresponding to the given temperature
         const coeffArray& coeffs(const scalar T) const;
 
-        // Init from a dictionary
+        // Initialise from a dictionary
         void init(const dictionary&);
 
-        // Init from an Istram
+        // Initialise from an Istream
         inline void init(Istream&)
         {
-             absorptionCoeffs(Istream);
+            absorptionCoeffs(Istream);
         }
 
 
     // Acces Functions
+
         inline bool invTemp() const
         {
             return  invTemp_;
@@ -142,12 +149,15 @@ public:
         {
             return  lowACoeffs_;
         }
-
 };
 
-} // End namespace Foam
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 } // End namespace radiation
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
+// ************************************************************************* //

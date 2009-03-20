@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::WideBandDiffusiveRadiationMixedFvPatchField
+    Foam::greyDiffusiveRadiationMixedFvPatchScalarField
 
 Description
     Radiation temperature specified
 
 SourceFiles
-    WideBandDiffusiveRadiationMixedFvPatchField.C
+    greyDiffusiveRadiationMixedFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WideBandDiffusiveRadiationMixedFvPatchField_H
-#define WideBandDiffusiveRadiationMixedFvPatchField_H
+#ifndef greyDiffusiveRadiationMixedFvPatchScalarField_H
+#define greyDiffusiveRadiationMixedFvPatchScalarField_H
 
 #include "mixedFvPatchFields.H"
 
@@ -45,14 +45,13 @@ namespace Foam
 namespace radiation
 {
 /*---------------------------------------------------------------------------*\
-        Class WideBandDiffusiveRadiationMixedFvPatchField Declaration
+        Class greyDiffusiveRadiationMixedFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class WideBandDiffusiveRadiationMixedFvPatchField
+class greyDiffusiveRadiationMixedFvPatchScalarField
 :
     public mixedFvPatchScalarField
 {
-
     // Private data
 
         //- Name of temperature field
@@ -67,49 +66,50 @@ class WideBandDiffusiveRadiationMixedFvPatchField
         //- Direction index
         label myWaveLengthIndex_;
 
-        //- Init ray flag
+        //- Initialise ray flag
         label myRayIsInit_;
 
-        //- Radiative heat flux on walls.
+        //- Radiative heat flux on walls
         scalarField qr_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("WideBandDiffusiveRadiation");
+    TypeName("greyDiffusiveRadiation");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        WideBandDiffusiveRadiationMixedFvPatchField
+        greyDiffusiveRadiationMixedFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        WideBandDiffusiveRadiationMixedFvPatchField
+        greyDiffusiveRadiationMixedFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given GreyDiffusiveRadiationMixedFvPatchField
-        //  onto a new patch
-        WideBandDiffusiveRadiationMixedFvPatchField
+        //- Construct by mapping given a
+        //  greyDiffusiveRadiationMixedFvPatchScalarField onto a new patch
+        greyDiffusiveRadiationMixedFvPatchScalarField
         (
-            const WideBandDiffusiveRadiationMixedFvPatchField&,
+            const greyDiffusiveRadiationMixedFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        WideBandDiffusiveRadiationMixedFvPatchField
+        greyDiffusiveRadiationMixedFvPatchScalarField
         (
-            const WideBandDiffusiveRadiationMixedFvPatchField&
+            const greyDiffusiveRadiationMixedFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -117,14 +117,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new WideBandDiffusiveRadiationMixedFvPatchField(*this)
+                new greyDiffusiveRadiationMixedFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        WideBandDiffusiveRadiationMixedFvPatchField
+        greyDiffusiveRadiationMixedFvPatchScalarField
         (
-            const WideBandDiffusiveRadiationMixedFvPatchField&,
+            const greyDiffusiveRadiationMixedFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -136,7 +136,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new WideBandDiffusiveRadiationMixedFvPatchField(*this, iF)
+                new greyDiffusiveRadiationMixedFvPatchScalarField(*this, iF)
             );
         }
 
@@ -145,13 +145,13 @@ public:
 
         // Access
 
-        //- Return the temperature field name
+            //- Return the temperature field name
             const word& TName() const
             {
                 return TName_;
             }
 
-        //- Return reference to the temperature field name to allow
+            //- Return reference to the temperature field name to allow
             //  adjustment
             word& TName()
             {
@@ -170,14 +170,14 @@ public:
                 return emissivity_;
             }
 
-
             //- Return heat flux on the boundary
             const scalarField& qr() const
             {
                 return qr_;
             }
 
-            // Mapping functions
+
+        // Mapping functions
 
             //- Map (and resize as needed) from self given a mapping object
             virtual void autoMap

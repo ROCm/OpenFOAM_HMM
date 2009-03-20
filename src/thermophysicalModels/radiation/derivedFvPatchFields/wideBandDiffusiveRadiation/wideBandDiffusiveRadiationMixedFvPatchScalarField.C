@@ -35,11 +35,10 @@ License
 #include "radiationConstants.H"
 #include "mathematicalConstants.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::
-WideBandDiffusiveRadiationMixedFvPatchField
+Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::
+wideBandDiffusiveRadiationMixedFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -51,7 +50,7 @@ WideBandDiffusiveRadiationMixedFvPatchField
     myRayIndex_(0),
     myWaveLengthIndex_(0),
     myRayIsInit_(-1),
-    qr_(0)
+    qr_(p.size(), 0.0)
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -60,10 +59,10 @@ WideBandDiffusiveRadiationMixedFvPatchField
 }
 
 
-Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::
-WideBandDiffusiveRadiationMixedFvPatchField
+Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::
+wideBandDiffusiveRadiationMixedFvPatchScalarField
 (
-    const WideBandDiffusiveRadiationMixedFvPatchField& ptf,
+    const wideBandDiffusiveRadiationMixedFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -79,8 +78,8 @@ WideBandDiffusiveRadiationMixedFvPatchField
 {}
 
 
-Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::
-WideBandDiffusiveRadiationMixedFvPatchField
+Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::
+wideBandDiffusiveRadiationMixedFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -93,16 +92,15 @@ WideBandDiffusiveRadiationMixedFvPatchField
     myRayIndex_(0),
     myWaveLengthIndex_(0),
     myRayIsInit_(-1),
-    qr_(0)
+    qr_(p.size(), 0.0)
 {
     const scalarField& Tp =
         patch().lookupPatchField<volScalarField, scalar>(TName_);
 
-    refValue() = emissivity_*4.0*radiation::sigmaSB.value()*pow4(Tp) /
-                 Foam::mathematicalConstant::pi;
+    refValue() =
+        emissivity_*4.0*radiation::sigmaSB.value()*pow4(Tp)
+       /Foam::mathematicalConstant::pi;
     refGrad() = 0.0;
-
-    qr_.setSize(p.size());
 
     if (dict.found("value"))
     {
@@ -118,10 +116,10 @@ WideBandDiffusiveRadiationMixedFvPatchField
 }
 
 
-Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::
-WideBandDiffusiveRadiationMixedFvPatchField
+Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::
+wideBandDiffusiveRadiationMixedFvPatchScalarField
 (
-    const WideBandDiffusiveRadiationMixedFvPatchField& ptf
+    const wideBandDiffusiveRadiationMixedFvPatchScalarField& ptf
 )
 :
     mixedFvPatchScalarField(ptf),
@@ -134,10 +132,10 @@ WideBandDiffusiveRadiationMixedFvPatchField
 {}
 
 
-Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::
-WideBandDiffusiveRadiationMixedFvPatchField
+Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::
+wideBandDiffusiveRadiationMixedFvPatchScalarField
 (
-    const WideBandDiffusiveRadiationMixedFvPatchField& ptf,
+    const wideBandDiffusiveRadiationMixedFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -148,23 +146,23 @@ WideBandDiffusiveRadiationMixedFvPatchField
     myWaveLengthIndex_(ptf.myWaveLengthIndex_),
     myRayIsInit_(ptf.myRayIsInit_),
     qr_(ptf.qr_)
-
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::autoMap
+void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
 {
     scalarField::autoMap(m);
 
+    qr_.automap(m);
 }
 
 
-void Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::rmap
+void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
@@ -172,14 +170,15 @@ void Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::rmap
 {
     mixedFvPatchScalarField::rmap(ptf, addr);
 
-//    const GreyDiffusiveRadiationMixedFvPatchField& mrptf =
-        refCast<const WideBandDiffusiveRadiationMixedFvPatchField>(ptf);
+    const wideBandDiffusiveRadiationMixedFvPatchScalarField& wbdrpsf =
+        refCast<const wideBandDiffusiveRadiationMixedFvPatchScalarField>(ptf);
+
+    qr_.rmap(wbdrpsf.qr_, addr);
 }
 
 
-void
-Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::updateCoeffs
-()
+void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::
+updateCoeffs()
 {
     if (this->updated())
     {
@@ -187,24 +186,27 @@ Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::updateCoeffs
     }
 
     const radiationModel& rad =
-            db().lookupObject<radiationModel>("radiationProperties");
+        db().lookupObject<radiationModel>("radiationProperties");
 
-    const fvDOM& Dom(refCast<const fvDOM>(rad));
+    const fvDOM& dom(refCast<const fvDOM>(rad));
 
     const label patchi = patch().index();
 
-    if(Dom.lambdaj() > 1)
+    if (dom.lambdaj() > 1)
     {
         if (myRayIsInit_ == -1)
         {
-            for(label i=0; i < Dom.Ni() ; i++)
+            for (label i=0; i < dom.Ni() ; i++)
             {
-                for(label j=0; j < Dom.lambdaj() ; j++)
+                for (label j=0; j < dom.lambdaj() ; j++)
                 {
                     const volScalarField& radiationField =
-                                        Dom.RadIntRayiLambdaj(i,j);
-                    if (&(radiationField.internalField()) ==
-                        &dimensionedInternalField())
+                        dom.RadIntRayiLambdaj(i,j);
+                    if
+                    (
+                        &(radiationField.internalField())
+                      ==&dimensionedInternalField()
+                    )
                     {
                         myRayIndex_ = i;
                         myWaveLengthIndex_ = j;
@@ -220,7 +222,7 @@ Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::updateCoeffs
         FatalErrorIn
         (
             "Foam::radiation::"
-            "WideBandDiffusiveRadiationMixedFvPatchScalarField::"
+            "wideBandDiffusiveRadiationMixedFvPatchScalarField::"
             "updateCoeffs"
         )   << " a Non-grey boundary condition is used with a grey"
             << "absorption model"
@@ -229,24 +231,23 @@ Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::updateCoeffs
 
     vectorField n = patch().Sf()/patch().magSf();
 
-    scalarField& Iw = *(this);
+    scalarField& Iw = *this;
 
-    qr_ =  Iw *(-n & Dom.RadIntRay(myRayIndex_).Di());
+    qr_ =  Iw*(-n & dom.RadIntRay(myRayIndex_).Di());
 
-    Dom.RadIntRay(myRayIndex_).add(qr_,patchi);
+    dom.RadIntRay(myRayIndex_).add(qr_,patchi);
 
     const scalarField Eb =
-            Dom.blackBody().bj(myWaveLengthIndex_).boundaryField()[patchi];
+        dom.blackBody().bj(myWaveLengthIndex_).boundaryField()[patchi];
 
     forAll(Iw, faceI)
     {
-
         scalar Ir = 0.0;
-        for(label i=0; i < Dom.Ni() ; i++) //
+        for(label i=0; i < dom.Ni(); i++)
         {
-            const vector& si = Dom.RadIntRay(i).Si();
+            const vector& si = dom.RadIntRay(i).Si();
 
-            const scalarField& Iface = Dom.RadIntRay(i).Ilambdaj
+            const scalarField& Iface = dom.RadIntRay(i).Ilambdaj
             (
                 myWaveLengthIndex_
             ).boundaryField()[patch().index()];
@@ -255,13 +256,12 @@ Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::updateCoeffs
 
             if (InOut < 0.) // qin into the wall
             {
-                const vector& di = Dom.RadIntRay(i).Di();
+                const vector& di = dom.RadIntRay(i).Di();
                 Ir = Ir + Iface[faceI]*mag(n[faceI] & di);
             }
         }
 
-
-        const vector& mySi = Dom.RadIntRay(myRayIndex_).Si();
+        const vector& mySi = dom.RadIntRay(myRayIndex_).Si();
 
         scalar InOut = -n[faceI] & mySi;
 
@@ -269,8 +269,12 @@ Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::updateCoeffs
         {
             refGrad()[faceI] = 0.0;
             valueFraction()[faceI] = 1.0;
-            refValue()[faceI] = ((1. - emissivity_) * Ir +
-                    emissivity_* Eb[faceI]) / Foam::mathematicalConstant::pi;
+            refValue()[faceI] =
+                (
+                    Ir*(1.0 - emissivity_)
+                  + emissivity_* Eb[faceI]
+                )
+               /mathematicalConstant::pi;
         }
         else if (InOut < 0.) //direction into the wall
         {
@@ -284,7 +288,7 @@ Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::updateCoeffs
 }
 
 
-void Foam::radiation::WideBandDiffusiveRadiationMixedFvPatchField::write
+void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::write
 (
     Ostream& os
 ) const
@@ -305,7 +309,7 @@ namespace radiation
     makePatchTypeField
     (
         fvPatchScalarField,
-        WideBandDiffusiveRadiationMixedFvPatchField
+        wideBandDiffusiveRadiationMixedFvPatchScalarField
     );
 }
 }

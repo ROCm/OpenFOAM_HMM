@@ -27,13 +27,7 @@ License
 #include "absorptionCoeffs.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
-
-Foam::radiation::absorptionCoeffs::~absorptionCoeffs()
-{}
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 Foam::radiation::absorptionCoeffs::absorptionCoeffs(Istream& is)
 :
@@ -42,38 +36,36 @@ Foam::radiation::absorptionCoeffs::absorptionCoeffs(Istream& is)
    Thigh_(readScalar(is)),
    invTemp_(readBool(is))
 {
-    for
-    (
-        label coefLabel=0;
-        absorptionCoeffs::nCoeffs_;
-        coefLabel++
-    )
+    for (label coefLabel=0; absorptionCoeffs::nCoeffs_; coefLabel++)
     {
         is >> highACoeffs_[coefLabel];
     }
 
-    for
-    (
-        label coefLabel=0;
-        absorptionCoeffs::nCoeffs_;
-        coefLabel++
-    )
+    for (label coefLabel=0; absorptionCoeffs::nCoeffs_; coefLabel++)
     {
         is >> lowACoeffs_[coefLabel];
     }
 }
 
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * //
+
+Foam::radiation::absorptionCoeffs::~absorptionCoeffs()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 void Foam::radiation::absorptionCoeffs::checkT(const scalar T) const
 {
-    if (T <  Tlow_ || T > Thigh_)
+    if (T < Tlow_ || T > Thigh_)
     {
         FatalErrorIn
         (
-            "absCoeffs::checkT(const scalar T) const"
-        )   << "attempt to use absCoeff"
-               " out of temperature range "
-            << Tlow_ << " -> " << Thigh_ << ";  T = " << T
-            << abort(FatalError);
+            "absorptionCoeffs::checkT(const scalar T) const"
+        )   << "attempt to use absCoeff out of temperature range:" << nl
+            << "    " << Tlow_ << " -> " << Thigh_ << ";  T = " << T
+            << nl << abort(FatalError);
     }
 }
 
@@ -96,6 +88,7 @@ Foam::radiation::absorptionCoeffs::coeffs
     }
 }
 
+
 void Foam::radiation::absorptionCoeffs::init
 (
     const dictionary& dict
@@ -109,4 +102,6 @@ void Foam::radiation::absorptionCoeffs::init
     dict.lookup("loTcoeffs") >> lowACoeffs_;
     dict.lookup("hiTcoeffs") >> highACoeffs_;
 }
+
+
 // ************************************************************************* //

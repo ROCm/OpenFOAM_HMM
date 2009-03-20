@@ -57,10 +57,10 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
     coeffsDict_((dict.subDict(typeName + "Coeffs"))),
     speciesNames_(0),
     specieIndex_(0),
-    LookUpTable_
+    lookUpTable_
     (
-        fileName(coeffsDict_.lookup("LookUpTableFileName")),
-        "constant",
+        fileName(coeffsDict_.lookup("lookUpTableFileName")),
+        mesh.time().constant(),
         mesh
     ),
     thermo_(mesh.db().lookupObject<basicThermo>("thermophysicalProperties")),
@@ -84,7 +84,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
         totalWaveLength_ += (iBands_[nBand][1] - iBands_[nBand][0]);
 
         label nSpec = 0;
-        const dictionary& SpecDicts = dict.subDict("species");
+        const dictionary& specDicts = dict.subDict("species");
         forAllConstIter(dictionary, SpecDicts, iter)
         {
             const word& key = iter().keyword();
@@ -101,42 +101,37 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
                         "Foam::radiation::wideBandAbsorptionEmission(const"
                         "dictionary& dict, const fvMesh& mesh)"
                     )   << "specie : " << key << "is not in all the bands"
-                        << nl
-                        << exit(FatalError);
+                        << nl << exit(FatalError);
                 }
             }
-            coeffs_[nSpec][nBand].init(SpecDicts.subDict(key));
+            coeffs_[nSpec][nBand].init(specDicts.subDict(key));
             nSpec++;
         }
         nBand++;
     }
     nBands_ = nBand;
 
-/*
-Check that all the species on the dictionary are present in the
-LookupTable  and save the corresponding indexes of the LookupTable
-*/
+    // Check that all the species on the dictionary are present in the
+    // look-up table  and save the corresponding indexes of the look-up table
 
     label j = 0;
     forAllConstIter(HashTable<label>, speciesNames_, iter)
     {
-
-        if(LookUpTable_.found(iter.key()))
+        if (lookUpTable_.found(iter.key()))
         {
-            label index = LookUpTable_.findFieldIndex(iter.key());
-            Info << "specie: " << iter.key() << " found in LookUpTable"
-            << " with index: " << index << endl;
+            label index = lookUpTable_.findFieldIndex(iter.key());
+            Info<< "specie: " << iter.key() << " found in look-up table "
+                << " with index: " << index << endl;
             specieIndex_[iter()] = index;
         }
-        else if
-        (mesh.db().foundObject<volScalarField>(iter.key()))
+        else if (mesh.db().foundObject<volScalarField>(iter.key()))
         {
             volScalarField& Y = const_cast<volScalarField&>
-                    (mesh.db().lookupObject<volScalarField>(iter.key()));
+                (mesh.db().lookupObject<volScalarField>(iter.key()));
 
             Yj_.set(j, &Y);
 
-            specieIndex_[iter()] = 0.;
+            specieIndex_[iter()] = 0.0;
             j++;
             Info << "specie : " << iter.key() << " is being solved" << endl;
         }
@@ -146,9 +141,9 @@ LookupTable  and save the corresponding indexes of the LookupTable
             (
                 "radiation::wideBandAbsorptionEmission(const"
                 "dictionary& dict, const fvMesh& mesh)"
-             )  << "specie : " << iter.key()
-                << " is neither in Look Up Table : "
-                << LookUpTable_.tableName() <<" nor is being slved"
+            )   << "specie : " << iter.key()
+                << " is neither in look-up table : "
+                << lookUpTable_.tableName() << " nor is being solved"
                 << exit(FatalError);
         }
     }
@@ -161,15 +156,16 @@ LookupTable  and save the corresponding indexes of the LookupTable
 Foam::radiation::wideBandAbsorptionEmission::~wideBandAbsorptionEmission()
 {}
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::wideBandAbsorptionEmission::aCont(label iband) const
+Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
 {
     const volScalarField& T = thermo_.T();
     const volScalarField& p = thermo_.p();
     const volScalarField& ft =
-            this->mesh().db().lookupObject<volScalarField>("ft");
+        this->mesh().db().lookupObject<volScalarField>("ft");
 
     label nSpecies = speciesNames_.size();
 
@@ -194,35 +190,40 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(label iband) const
 
     forAll(a, i)
     {
+        const List<scalar>& species = lookUpTable_.lookUp(ft[i]);
 
-        const List<scalar>& species = LookUpTable_.LookUp(ft[i]);
-
-        for(label n=0; n<nSpecies; n++)
+        for (label n=0; n<nSpecies; n++)
         {
             label l = 0;
             scalar Yipi = 0;
-            if(specieIndex_[n] != 0) //moles x pressure [atm]
+            if (specieIndex_[n] != 0)
             {
+                // moles x pressure [atm]
                 Yipi = species[specieIndex_[n]]*p[i]*9.869231e-6;
             }
             else
             {
-                Yipi = Yj_[l][i]; // mass fraction from species being solved
+                // mass fraction from species being solved
+                Yipi = Yj_[l][i];
                 l++;
             }
 
             scalar Ti = T[i];
 
             const absorptionCoeffs::coeffArray& b =
-                                            coeffs_[n][iband].coeffs(T[i]);
+                coeffs_[n][bandI].coeffs(T[i]);
 
-            if (coeffs_[n][iband].invTemp())
+            if (coeffs_[n][bandI].invTemp())
             {
                 Ti = 1./T[i];
             }
 
-            a[i]+=Yipi*
-            (((((b[5]*Ti + b[4])*Ti + b[3])*Ti + b[2])*Ti + b[1])*Ti + b[0]);
+            a[i]+=
+                Yipi
+               *(
+                    ((((b[5]*Ti + b[4])*Ti + b[3])*Ti + b[2])*Ti + b[1])*Ti
+                  + b[0]
+                );
         }
     }
 
@@ -231,7 +232,7 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(label iband) const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::wideBandAbsorptionEmission::eCont(label iband) const
+Foam::radiation::wideBandAbsorptionEmission::eCont(const label bandI) const
 {
     tmp<volScalarField> e
     (
@@ -255,7 +256,7 @@ Foam::radiation::wideBandAbsorptionEmission::eCont(label iband) const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::wideBandAbsorptionEmission::ECont(label iband) const
+Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
 {
     tmp<volScalarField> E
     (
@@ -277,11 +278,13 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(label iband) const
     if (mesh().db().foundObject<volScalarField>("hrr"))
     {
         const volScalarField& hrr =
-                        mesh().db().lookupObject<volScalarField>("hrr");
-        E().internalField() =  iEhrrCoeffs_[iband] *  hrr.internalField() *
-                    (iBands_[iband][1] - iBands_[iband][0])/totalWaveLength_;
+            mesh().db().lookupObject<volScalarField>("hrr");
+        E().internalField() =
+            iEhrrCoeffs_[bandI]
+           *hrr.internalField()
+           *(iBands_[bandI][1] - iBands_[bandI][0])
+           /totalWaveLength_;
     }
-
 
     return E;
 }
@@ -293,7 +296,7 @@ Foam::radiation::wideBandAbsorptionEmission::addRadInt
     const volScalarField& Ilambdaj
 ) const
 {
-     return Ilambdaj*(iBands_[i][1] - iBands_[i][0])/totalWaveLength_;
+    return Ilambdaj*(iBands_[i][1] - iBands_[i][0])/totalWaveLength_;
 }
 
 
@@ -303,16 +306,18 @@ void Foam::radiation::wideBandAbsorptionEmission::correct
     PtrList<volScalarField>& aj
 ) const
 {
-    a = dimensionedScalar("zero",dimless/dimLength, 0.0);
+    a = dimensionedScalar("zero", dimless/dimLength, 0.0);
 
-    for(label j = 0; j < nBands_; j++)
-        {
-            Info << "Calculating... absorption in band : " << j <<endl;
-            aj[j].internalField() = this->a(j);
-            Info << "Calculated absorption in band : " << j <<endl;
-            a.internalField() += aj[j].internalField() *
-                            (iBands_[j][1] - iBands_[j][0])/totalWaveLength_;
-        }
+    for (label j = 0; j < nBands_; j++)
+    {
+        Info << "Calculating absorption in band: " << j <<endl;
+        aj[j].internalField() = this->a(j);
+        Info << "Calculated absorption in band: " << j <<endl;
+        a.internalField() +=
+            aj[j].internalField()
+           *(iBands_[j][1] - iBands_[j][0])
+           /totalWaveLength_;
+    }
 
 }
 // ************************************************************************* //

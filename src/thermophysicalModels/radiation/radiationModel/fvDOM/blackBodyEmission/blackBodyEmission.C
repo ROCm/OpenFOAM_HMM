@@ -24,7 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
 #include "blackBodyEmission.H"
 #include "dimensionedConstants.H"
 
@@ -37,14 +36,15 @@ Foam::radiation::blackBodyEmission::blackBodyEmission
     label lambdaj,
     const volScalarField& T
 )
-:blackBodyEmissiveTable_(fn, instance, T.mesh()),
-C1_("C1",dimensionSet(1,4,3,0,0,0,0),3.7419e-16),
-C2_("C2",dimensionSet(0,1,0,1,0,0,0),14.388e-6),
-bj_(0),
-T_(T)
+:
+    blackBodyEmissiveTable_(fn, instance, T.mesh()),
+    C1_("C1",dimensionSet(1, 4, 3, 0, 0, 0, 0), 3.7419e-16),
+    C2_("C2",dimensionSet(0, 1, 0, 1, 0, 0, 0), 14.388e-6),
+    bj_(0),
+    T_(T)
 {
     bj_.setSize(lambdaj);
-    for(label i=0; i < lambdaj; i++)
+    for (label i=0; i < lambdaj; i++)
     {
         bj_.set
         (
@@ -66,19 +66,22 @@ T_(T)
     }
 }
 
-// * * * * * * *  Destructor * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 Foam::radiation::blackBodyEmission::~blackBodyEmission()
 {}
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 Foam::scalar Foam::radiation::blackBodyEmission::flambdaT
 (
     const scalar lambdaT
 ) const
 {
-    return  blackBodyEmissiveTable_.LookUp(lambdaT*1e6)[1];
+    return  blackBodyEmissiveTable_.LookUp(lambdaT*1.0e6)[1];
 }
-
 
 
 Foam::tmp<Foam::volScalarField>
@@ -125,7 +128,6 @@ Foam::radiation::blackBodyEmission::EbDeltaLambdaT
         }
         return Eb;
     }
-
 }
 
 
@@ -137,7 +139,6 @@ void Foam::radiation::blackBodyEmission::correct
 {
     bj_[j] = EbDeltaLambdaT(T_, band);
 }
-
 
 
 // ************************************************************************* //

@@ -22,66 +22,72 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::radiation::noAbsorptionEmission
-
-Description
-    Dummy absorption-emission model for 'none'
-
-SourceFiles
-    noAbsorptionEmission.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationNoAbsorptionEmission_H
-#define radiationNoAbsorptionEmission_H
-
-#include "absorptionEmissionModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class Type>
+inline Foam::label
+Foam::interpolationLookUpTable<Type>::findFieldIndex
+(
+    const word& fieldName
+) const
 {
-namespace radiation
+    return fieldIndices_[fieldName];
+}
+
+
+template<class Type>
+inline const Foam::List<Foam::dictionary>&
+Foam::interpolationLookUpTable<Type>::output() const
 {
+    return output_;
+}
 
-/*---------------------------------------------------------------------------*\
-                  Class noAbsorptionEmission Declaration
-\*---------------------------------------------------------------------------*/
 
-class noAbsorptionEmission
-:
-    public absorptionEmissionModel
+template<class Type>
+inline const Foam::List<Foam::dictionary>&
+Foam::interpolationLookUpTable<Type>::entries() const
 {
-
-public:
-
-    //- Runtime type information
-    TypeName("noAbsorptionEmission");
+    return entries_;
+}
 
 
-    // Constructors
-
-        //- Construct from components
-        noAbsorptionEmission
-        (
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+template<class Type>
+inline const Foam::List<Foam::scalar>&
+Foam::interpolationLookUpTable<Type>::min() const
+{
+    return min_;
+}
 
 
-    // Destructor
-    virtual ~noAbsorptionEmission();
-};
+template<class Type>
+inline const Foam::List<Foam::label>&
+Foam::interpolationLookUpTable<Type>::dim() const
+{
+    return dim_;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+inline const Foam::List<Foam::scalar>&
+Foam::interpolationLookUpTable<Type>::delta() const
+{
+    return delta_;
+}
 
-} // End namespace radiation
-} // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Type>
+inline const Foam::List<Foam::scalar>&
+Foam::interpolationLookUpTable<Type>::max() const
+{
+    return max_;
+}
 
-#endif
+
+template<class Type>
+inline const Foam::word Foam::interpolationLookUpTable<Type>::tableName() const
+{
+    return fileName_.name();
+}
+
 
 // ************************************************************************* //

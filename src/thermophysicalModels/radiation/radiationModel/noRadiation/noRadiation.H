@@ -77,8 +77,7 @@ public:
 
 
     // Destructor
-
-        ~noRadiation();
+    virtual ~noRadiation();
 
 
     // Member functions

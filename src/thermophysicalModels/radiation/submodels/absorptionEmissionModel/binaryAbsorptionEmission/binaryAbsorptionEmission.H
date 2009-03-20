@@ -53,7 +53,6 @@ class binaryAbsorptionEmission
 :
     public absorptionEmissionModel
 {
-
     // Private data
 
         //- Coefficients dictionary
@@ -83,8 +82,7 @@ public:
 
 
     // Destructor
-
-        ~binaryAbsorptionEmission();
+    virtual ~binaryAbsorptionEmission();
 
 
     // Member Operators
