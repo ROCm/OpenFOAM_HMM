@@ -44,18 +44,20 @@ Foam::label Foam::radiation::radiativeIntensityRay::rayId = 0;
 
 Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 (
+    const fvDOM& dom,
+    const fvMesh& mesh,
     const scalar phi,
     const scalar theta,
     const scalar deltaPhi,
     const scalar deltaTheta,
     const label nLambda,
-    const fvMesh& mesh,
     const absorptionEmissionModel& absEmmModel,
     const blackBodyEmission& blackBody
 )
 :
-    absEmmModel_(absEmmModel),
+    dom_(dom),
     mesh_(mesh),
+    absEmmModel_(absEmmModel),
     blackBody_(blackBody),
     I_
     (
@@ -165,10 +167,7 @@ Foam::radiation::radiativeIntensityRay::~radiativeIntensityRay()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::radiation::radiativeIntensityRay::correct
-(
-    fvDOM* DomPtr
-)
+Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 {
     // reset boundary heat flux to zero
     Qr_ =  dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
@@ -177,7 +176,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct
 
     forAll(IWave_, lambdaI)
     {
-        volScalarField k = DomPtr->aj(lambdaI);
+        const volScalarField& k = dom_.aj(lambdaI);
 
         volScalarField E =
             absEmmModel_.ECont(lambdaI)/Foam::mathematicalConstant::pi;

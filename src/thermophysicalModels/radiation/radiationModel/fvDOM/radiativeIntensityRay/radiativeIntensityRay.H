@@ -57,11 +57,14 @@ class radiativeIntensityRay
 {
     // Private data
 
-        //- Absorption/emission model
-        const absorptionEmissionModel& absEmmModel_;
+        //- Refence to the owner fvDOM object
+        const fvDOM& dom_;
 
         //- Reference to the mesh
         const fvMesh& mesh_;
+
+        //- Absorption/emission model
+        const absorptionEmissionModel& absEmmModel_;
 
         //- Black body
         const blackBodyEmission&  blackBody_;
@@ -115,12 +118,13 @@ public:
         //- Construct form components
         radiativeIntensityRay
         (
+            const fvDOM& dom,
+            const fvMesh& mesh,
             const scalar phi,
             const scalar theta,
             const scalar deltaPhi,
             const scalar deltaTheta,
             const label lambda,
-            const fvMesh& mesh_,
             const absorptionEmissionModel& absEmmModel_,
             const blackBodyEmission& blackBody
         );
@@ -135,7 +139,7 @@ public:
         // Edit
 
             //- Update radiative intensity on i direction
-            scalar correct(fvDOM*);
+            scalar correct();
 
             //- Initialise the ray in i direction
             void init

@@ -157,12 +157,13 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
                     i,
                     new radiativeIntensityRay
                     (
+                        *this,
+                        mesh_,
                         phii,
                         thetai,
                         deltaPhi,
                         deltaTheta,
                         nLambda_,
-                        mesh_,
                         absorptionEmission_,
                         blackBody_
                     )
@@ -189,12 +190,13 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
                     i,
                     new radiativeIntensityRay
                     (
+                        *this,
+                        mesh_,
                         phii,
                         thetai,
                         deltaPhi,
                         deltaTheta,
                         nLambda_,
-                        mesh_,
                         absorptionEmission_,
                         blackBody_
                     )
@@ -218,12 +220,13 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
                     i,
                     new radiativeIntensityRay
                     (
+                        *this,
+                        mesh_,
                         phii,
                         thetai,
                         deltaPhi,
                         deltaTheta,
                         nLambda_,
-                        mesh_,
                         absorptionEmission_,
                         blackBody_
                     )
@@ -304,7 +307,7 @@ void Foam::radiation::fvDOM::correct()
         forAll(IRay_, rayI)
         {
             maxResidual = 0.0;
-            scalar maxBandResidual = IRay_[rayI].correct(this);
+            scalar maxBandResidual = IRay_[rayI].correct();
             maxResidual = max(maxBandResidual, maxResidual);
         }
 
