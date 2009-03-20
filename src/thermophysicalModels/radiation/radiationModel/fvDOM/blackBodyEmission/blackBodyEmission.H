@@ -26,11 +26,10 @@ Class
     Foam::radiation::blackBodyEmission
 
 Description
-    Class Black Body Emission Intensity.
+    Class black body emission
 
 SourceFiles
     blackBodyEmission.C
-
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,26 +49,33 @@ namespace Foam
 {
 namespace radiation
 {
+
 /*---------------------------------------------------------------------------*\
-                           Class blackBodyEmission Declaration
+                      Class blackBodyEmission Declaration
 \*---------------------------------------------------------------------------*/
+
 class blackBodyEmission
 {
     // Private data
 
         mutable interpolationLookUpTable<scalar> blackBodyEmissiveTable_;
 
-        scalar flambdaT(const scalar lambdaT) const;
-
+        //- Constant C1
         const dimensionedScalar C1_;
 
+        //- Constant C2
         const dimensionedScalar C2_;
 
-        // Ptr List for enregy black body emission
+        // Ptr List for black body emission energy field for each wavelength
         PtrList<volScalarField> bj_;
 
         // Reference to the temperature field
         const volScalarField& T_;
+
+
+    // Private member functions
+
+        scalar flambdaT(const scalar lambdaT) const;
 
 
 public:
@@ -95,9 +101,9 @@ public:
         // Access
 
             //- Black body spectrum
-            inline const volScalarField& bj(label i) const
+            inline const volScalarField& bj(const label lambdaI) const
             {
-                return bj_[i];
+                return bj_[lambdaI];
             }
 
             //- Spectral emission for the black body at T and lambda
@@ -121,7 +127,7 @@ public:
     // Edit
 
         // Update black body emission
-        void correct(label j, const Vector2D<scalar>& band);
+        void correct(const label lambdaI, const Vector2D<scalar>& band);
 };
 
 

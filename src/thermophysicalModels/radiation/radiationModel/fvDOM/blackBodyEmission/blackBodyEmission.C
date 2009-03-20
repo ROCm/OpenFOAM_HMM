@@ -31,29 +31,28 @@ License
 
 Foam::radiation::blackBodyEmission::blackBodyEmission
 (
-    const fileName& fn,
+    const fileName& name,
     const word& instance,
-    label lambdaj,
+    label nLambda,
     const volScalarField& T
 )
 :
-    blackBodyEmissiveTable_(fn, instance, T.mesh()),
+    blackBodyEmissiveTable_(name, instance, T.mesh()),
     C1_("C1",dimensionSet(1, 4, 3, 0, 0, 0, 0), 3.7419e-16),
     C2_("C2",dimensionSet(0, 1, 0, 1, 0, 0, 0), 14.388e-6),
-    bj_(0),
+    bj_(nLambda),
     T_(T)
 {
-    bj_.setSize(lambdaj);
-    for (label i=0; i < lambdaj; i++)
+    forAll(bj_, lambdaI)
     {
         bj_.set
         (
-            i,
+            lambdaI,
             new volScalarField
             (
                 IOobject
                 (
-                    "bj_" + Foam::name(i) ,
+                    "bj_" + Foam::name(lambdaI) ,
                     T.mesh().time().timeName(),
                     T.mesh(),
                     IOobject::NO_READ,
@@ -80,7 +79,7 @@ Foam::scalar Foam::radiation::blackBodyEmission::flambdaT
     const scalar lambdaT
 ) const
 {
-    return  blackBodyEmissiveTable_.LookUp(lambdaT*1.0e6)[1];
+    return  blackBodyEmissiveTable_.lookUp(lambdaT*1.0e6)[1];
 }
 
 
@@ -114,7 +113,7 @@ Foam::radiation::blackBodyEmission::EbDeltaLambdaT
     }
     else
     {
-        forAll(T,i)
+        forAll(T, i)
         {
             scalar T1 = flambdaT(band[1]*T[i]);
             scalar T2 = flambdaT(band[0]*T[i]);
@@ -133,11 +132,11 @@ Foam::radiation::blackBodyEmission::EbDeltaLambdaT
 
 void Foam::radiation::blackBodyEmission::correct
 (
-    label j,
+    const label lambdaI,
     const Vector2D<scalar>& band
 )
 {
-    bj_[j] = EbDeltaLambdaT(T_, band);
+    bj_[lambdaI] = EbDeltaLambdaT(T_, band);
 }
 
 

@@ -82,38 +82,41 @@ class fvDOM
         //- Incident radiation  [W/m2]
         volScalarField G_;
 
-        //- Total Radiative heat flux [W/m2]
+        //- Total radiative heat flux [W/m2]
         volScalarField Qr_;
 
-        //- Total Absorption coefficient  [1/m]
+        //- Total absorption coefficient [1/m]
         volScalarField a_;
 
-        //- wavelength total Absorption coefficient [1/m]
-        PtrList<volScalarField> aj_;
-
-        //- Total Emission coefficient [1/m]
+        //- Total emission coefficient [1/m]
         volScalarField e_;
 
         //- Emission contribution [Kg/m/s^3]
         volScalarField E_;
 
         //- Number of solid angles in theta
-        label Ntheta_;
+        label nTheta_;
 
         //- Number of solid angles in phi
-        label Nphi_ ;
+        label nPhi_ ;
 
-        //- Total number of directions
-        label Ni_;
+        //- Total number of rays (1 per direction)
+        label nRay_;
 
         //- Number of wavelength bands
-        label lambdaj_;
+        label nLambda_;
 
-        //- Black Body
+        //- Wavelength total absorption coefficient [1/m]
+        PtrList<volScalarField> aj_;
+
+        //- Black body
         blackBodyEmission blackBody_;
 
-        //- List of Pointers to RadiativeIntensityRay
-        PtrList<radiativeIntensityRay> RadIntRay_;
+        //- List of pointers to radiative intensity rays
+        PtrList<radiativeIntensityRay> IRay_;
+
+        //- Convergence criterion
+        scalar convergence_;
 
 
     // Private member functions
@@ -127,8 +130,8 @@ class fvDOM
         //- Update Absorption Coefficients
 //        void updateAbsorptionCoeffs(void);
 
-        //- Update Black Body Emissiom
-        void updateBlackBodyEmission(void);
+        //- Update nlack body emission
+        void updateBlackBodyEmission();
 
 
 public:
@@ -148,7 +151,7 @@ public:
         fvDOM(const volScalarField& T);
 
 
-    // Destructor
+    //- Destructor
     virtual ~fvDOM();
 
 
@@ -174,42 +177,42 @@ public:
 
         // Access
 
-            //- Ray intensity in i direction
-            inline const radiativeIntensityRay& RadIntRay(label i) const;
+            //- Ray intensity for rayI
+            inline const radiativeIntensityRay& IRay(const label rayI) const;
 
-            //- Ray intensity in i direction and j band-width
-            inline const volScalarField& RadIntRayiLambdaj
+            //- Ray intensity for rayI and lambda bandwidth
+            inline const volScalarField& IRayWave
             (
-                const label i,
-                const label j
+                const label rayI,
+                const label lambdaI
             ) const;
 
             //- Number of angles in theta
-            inline label Ntheta() const;
+            inline label nTheta() const;
 
             //- Number of angles in phi
-            inline label Nphi() const;
+            inline label nPhi() const;
 
-            //- Number of directions
-            inline label Ni() const;
+            //- Number of rays
+            inline label nRay() const;
 
             //- Number of wavelengths
-            inline label lambdaj() const;
+            inline label nLambda() const;
 
-            // Const access to a
+            // Const access to total absorption coefficient
             inline const volScalarField& a() const;
 
-            // Const access to aj
-            inline const volScalarField& aj(label i) const;
+            // Const access to wavelength total absorption coefficient
+            inline const volScalarField& aj(const label lambdaI) const;
 
-            // Const access to G
+            // Const access to incident radiation field
             inline const volScalarField& G() const;
 
-            //  Const access to Qr
+            //  Const access to total radiative heat flux field
             inline const volScalarField& Qr() const;
 
-            //  Const access to blackBody
-            virtual const blackBodyEmission& blackBody() const;
+            //  Const access to black body
+            inline const blackBodyEmission& blackBody() const;
 };
 
 

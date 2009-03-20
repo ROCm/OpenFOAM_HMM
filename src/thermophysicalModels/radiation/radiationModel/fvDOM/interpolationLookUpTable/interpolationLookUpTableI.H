@@ -84,7 +84,7 @@ Foam::interpolationLookUpTable<Type>::max() const
 
 
 template<class Type>
-inline const Foam::word Foam::interpolationLookUpTable<Type>::tableName() const
+inline Foam::word Foam::interpolationLookUpTable<Type>::tableName() const
 {
     return fileName_.name();
 }

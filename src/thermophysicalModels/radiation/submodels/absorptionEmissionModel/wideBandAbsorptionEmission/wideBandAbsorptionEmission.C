@@ -63,7 +63,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
         mesh.time().constant(),
         mesh
     ),
-    thermo_(mesh.db().lookupObject<basicThermo>("thermophysicalProperties")),
+    thermo_(mesh.lookupObject<basicThermo>("thermophysicalProperties")),
     Yj_(0),
     totalWaveLength_(0)
 {
@@ -85,7 +85,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
 
         label nSpec = 0;
         const dictionary& specDicts = dict.subDict("species");
-        forAllConstIter(dictionary, SpecDicts, iter)
+        forAllConstIter(dictionary, specDicts, iter)
         {
             const word& key = iter().keyword();
             if (nBand == 0)
@@ -124,10 +124,10 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
                 << " with index: " << index << endl;
             specieIndex_[iter()] = index;
         }
-        else if (mesh.db().foundObject<volScalarField>(iter.key()))
+        else if (mesh.foundObject<volScalarField>(iter.key()))
         {
             volScalarField& Y = const_cast<volScalarField&>
-                (mesh.db().lookupObject<volScalarField>(iter.key()));
+                (mesh.lookupObject<volScalarField>(iter.key()));
 
             Yj_.set(j, &Y);
 
@@ -164,8 +164,7 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
 {
     const volScalarField& T = thermo_.T();
     const volScalarField& p = thermo_.p();
-    const volScalarField& ft =
-        this->mesh().db().lookupObject<volScalarField>("ft");
+    const volScalarField& ft = mesh_.lookupObject<volScalarField>("ft");
 
     label nSpecies = speciesNames_.size();
 
@@ -275,10 +274,10 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
         )
     );
 
-    if (mesh().db().foundObject<volScalarField>("hrr"))
+    if (mesh().foundObject<volScalarField>("hrr"))
     {
         const volScalarField& hrr =
-            mesh().db().lookupObject<volScalarField>("hrr");
+            mesh().lookupObject<volScalarField>("hrr");
         E().internalField() =
             iEhrrCoeffs_[bandI]
            *hrr.internalField()

@@ -62,14 +62,13 @@ class absorptionEmissionModel;
 class scatterModel;
 
 /*---------------------------------------------------------------------------*\
-                           Class radiationModel Declaration
+                       Class radiationModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class radiationModel
 :
     public IOdictionary
 {
-
 protected:
 
     // Protected data
@@ -83,12 +82,13 @@ protected:
         //- Model specific dictionary input parameters
         Switch radiation_;
 
-
         //- Radiation model dictionary
-        dictionary radiationModelCoeffs_;
+        dictionary coeffs_;
 
-        //- Number of iteration in the Flow solver per Radiative solver
+        //- Number of iterations in the flow solver per radiation solver
+        //  iteration
         label nFlowIterPerRadIter_;
+
 
         // References to the radiation sub-models
 
@@ -97,7 +97,6 @@ protected:
 
             //- Scatter model
             autoPtr<scatterModel> scatter_;
-
 
 
 private:
@@ -109,7 +108,6 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const radiationModel&);
-
 
 
 public:
@@ -135,20 +133,13 @@ public:
     // Constructors
 
         //- Construct from components
-        radiationModel
-        (
-            const word& type,
-            const volScalarField& T
-        );
+        radiationModel(const word& type, const volScalarField& T);
 
 
     // Selectors
 
          //- Return a reference to the selected radiation model
-         static autoPtr<radiationModel> New
-         (
-             const volScalarField& T
-         );
+         static autoPtr<radiationModel> New(const volScalarField& T);
 
 
     // Destructor
@@ -175,12 +166,7 @@ public:
             virtual tmp<DimensionedField<scalar, volMesh> > Ru() const = 0;
 
             //- Enthalpy source term
-            virtual tmp<fvScalarMatrix> Sh
-            (
-                basicThermo& thermo
-            ) const;
-
-
+            virtual tmp<fvScalarMatrix> Sh(basicThermo& thermo) const;
 };
 
 

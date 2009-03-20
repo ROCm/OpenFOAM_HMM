@@ -96,12 +96,11 @@ public:
 
 
     //- Selector
-
-        static autoPtr<absorptionEmissionModel> New
-        (
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+    static autoPtr<absorptionEmissionModel> New
+    (
+        const dictionary& dict,
+        const fvMesh& mesh
+    );
 
 
     //- Destructor
@@ -123,6 +122,7 @@ public:
             {
                 return dict_;
             }
+
 
             // Absorption coefficient
 
@@ -166,16 +166,16 @@ public:
 
             //- Const access to the bands - defaults to Vector2D::one for grey
             //  absorption/emission
-            virtual const Vector2D<scalar>& bands(label n) const;
+            virtual const Vector2D<scalar>& bands(const label n) const;
 
             //- Flag for whether the absorption/emission is for a grey gas
-            virtual bool isGrey(void) const;
+            virtual bool isGrey() const;
 
-            //- Add radiative intensity fir ray i
+            //- Add radiative intensity for ray i
             virtual tmp<volScalarField> addRadInt
             (
-                const label i,
-                const volScalarField& Ilambdaj
+                const label rayI,
+                const volScalarField& IWave
             ) const;
 
             //- Correct absorption coefficients
@@ -183,7 +183,7 @@ public:
             (
                 volScalarField& a,
                 PtrList<volScalarField>& aj
-            ) const ;
+            ) const;
 };
 
 

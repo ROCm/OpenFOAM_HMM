@@ -1,4 +1,3 @@
-
 /* Radiation constants */
 radiationConstants/radiationConstants.C
 
@@ -31,6 +30,7 @@ submodels/absorptionEmissionModel/wideBandAbsorptionEmission/wideBandAbsorptionE
 /* Boundary conditions */
 derivedFvPatchFields/MarshakRadiation/MarshakRadiationMixedFvPatchScalarField.C
 derivedFvPatchFields/MarshakRadiationFixedT/MarshakRadiationFixedTMixedFvPatchScalarField.C
-derivedFvPatchFields/GreyDiffusiveRadiation/GreyDiffusiveRadiationMixedFvPatchScalarField.C
-derivedFvPatchFields/WideBandDiffusiveRadiation/WideBandDiffusiveRadiationMixedFvPatchScalarField.C
+derivedFvPatchFields/greyDiffusiveRadiation/greyDiffusiveRadiationMixedFvPatchScalarField.C
+derivedFvPatchFields/wideBandDiffusiveRadiation/wideBandDiffusiveRadiationMixedFvPatchScalarField.C
+
 LIB = $(FOAM_LIBBIN)/libradiation

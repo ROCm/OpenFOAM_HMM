@@ -25,43 +25,44 @@ License
 \*---------------------------------------------------------------------------*/
 
 inline const Foam::radiation::radiativeIntensityRay&
-Foam::radiation::fvDOM::RadIntRay(label i) const
+Foam::radiation::fvDOM::IRay(const label rayI) const
 {
-    return  RadIntRay_[i];
+    return  IRay_[rayI];
 }
 
 
-inline const Foam::volScalarField& Foam::radiation::fvDOM::RadIntRayiLambdaj
+inline const Foam::volScalarField&
+Foam::radiation::fvDOM::IRayWave
 (
-    const label i,
-    const label j
+    const label rayI,
+    const label lambdaI
 ) const
 {
-    return  RadIntRay_[i].Ilambdaj(j);
+    return IRay_[rayI].IWave(lambdaI);
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::Ntheta() const
+inline Foam::label Foam::radiation::fvDOM::nTheta() const
 {
-    return Ntheta_;
+    return nTheta_;
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::Nphi() const
+inline Foam::label Foam::radiation::fvDOM::nPhi() const
 {
-    return Nphi_;
+    return nPhi_;
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::Ni() const
+inline Foam::label Foam::radiation::fvDOM::nRay() const
 {
-    return Ni_;
+    return nRay_;
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::lambdaj() const
+inline Foam::label Foam::radiation::fvDOM::nLambda() const
 {
-    return lambdaj_;
+    return nLambda_;
 }
 
 
@@ -73,10 +74,10 @@ inline const Foam::volScalarField& Foam::radiation::fvDOM::a() const
 
 inline const Foam::volScalarField& Foam::radiation::fvDOM::aj
 (
-    const label i
+    const label lambdaI
 ) const
 {
-    return aj_[i];
+    return aj_[lambdaI];
 }
 
 
@@ -92,7 +93,7 @@ inline const Foam::volScalarField& Foam::radiation::fvDOM::Qr() const
 }
 
 
-virtual const Foam::radiation::blackBodyEmission&
+inline const Foam::radiation::blackBodyEmission&
 Foam::radiation::fvDOM::blackBody() const
 {
     return blackBody_;

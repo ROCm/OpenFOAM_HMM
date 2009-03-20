@@ -198,7 +198,7 @@ public:
         inline const List<scalar>& max() const;
 
         //- Return const access to the table name
-        inline const word tableName() const;
+        inline word tableName() const;
 
 
      // Member Operators
@@ -211,6 +211,10 @@ public:
 
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "interpolationLookUpTableI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

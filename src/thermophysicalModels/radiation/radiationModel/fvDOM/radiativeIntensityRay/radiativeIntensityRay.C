@@ -44,11 +44,11 @@ Foam::label Foam::radiation::radiativeIntensityRay::rayId = 0;
 
 Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 (
-    scalar& phii,
-    scalar& thetai,
-    scalar& deltaPhi,
-    scalar& deltaTheta,
-    label& lambdaj,
+    const scalar phi,
+    const scalar theta,
+    const scalar deltaPhi,
+    const scalar deltaTheta,
+    const label nLambda,
     const fvMesh& mesh,
     const absorptionEmissionModel& absEmmModel,
     const blackBodyEmission& blackBody
@@ -70,7 +70,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         mesh_,
         dimensionedScalar("I", dimMass/pow3(dimTime), 0.0)
     ),
-    Qri_
+    Qr_
     (
         IOobject
         (
@@ -82,9 +82,78 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         ),
         mesh_,
         dimensionedScalar("Qr", dimMass/pow3(dimTime), 0.0)
-    )
+    ),
+    d_(vector::zero),
+    dAve_(vector::zero),
+    theta_(theta),
+    phi_(phi),
+    omega_(0.0),
+    nLambda_(nLambda),
+    IWave_(nLambda)
 {
-    init(phii,thetai,deltaPhi,deltaTheta,lambdaj);
+    scalar sinTheta = Foam::sin(theta);
+    scalar cosTheta = Foam::cos(theta);
+    scalar sinPhi = Foam::sin(phi);
+    scalar cosPhi = Foam::cos(phi);
+
+    omega_ = 2.0*sinTheta*Foam::sin(deltaTheta/2.0)*deltaPhi;
+    d_ = vector(sinTheta*sinPhi, sinTheta*cosPhi, cosTheta);
+    dAve_ = vector
+    (
+        sinPhi
+       *Foam::sin(0.5*deltaPhi)
+       *(deltaTheta - Foam::cos(2.0*theta)
+       *Foam::sin(deltaTheta)),
+        cosPhi
+       *Foam::sin(0.5*deltaPhi)
+       *(deltaTheta - Foam::cos(2.0*theta)
+       *Foam::sin(deltaTheta)),
+        0.5*deltaPhi*Foam::sin(2.0*theta)*Foam::sin(deltaTheta)
+    );
+
+    forAll(IWave_, i)
+    {
+        IOobject IHeader
+        (
+            "Ilambda_" + name(rayId) + "_" + name(i),
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        );
+
+        // check if field exists and can be read
+        if (IHeader.headerOk())
+        {
+            IWave_.set
+            (
+                i,
+                new volScalarField(IHeader, mesh_)
+            );
+        }
+        else
+        {
+            volScalarField IDefault
+            (
+                IOobject
+                (
+                    "IDefault",
+                    mesh_.time().timeName(),
+                    mesh_,
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                ),
+                mesh_
+            );
+
+            IWave_.set
+            (
+                i,
+                new volScalarField(IHeader, IDefault)
+            );
+        }
+    }
+    rayId++;
 }
 
 
@@ -96,131 +165,34 @@ Foam::radiation::radiativeIntensityRay::~radiativeIntensityRay()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::radiation::radiativeIntensityRay::init
-(
-    const scalar phii,
-    const scalar thetai,
-    const scalar deltaPhi,
-    const scalar deltaTheta,
-    const scalar lambdaj
-)
-{
-    phii_ = phii;
-    thetai_ = thetai;
-    nLambdaj_ = lambdaj;
-
-    scalar sinTheta = Foam::sin(thetai);
-    scalar cosTheta = Foam::cos(thetai);
-    scalar sinPhi = Foam::sin(phii);
-    scalar cosPhi = Foam::cos(phii);
-    Si_ = vector(sinTheta*sinPhi, sinTheta*cosPhi, cosTheta);
-    omegai_ = 2.0*Foam::sin(thetai)*Foam::sin(deltaTheta/2.0)*deltaPhi;
-    Ilambdaj_.setSize(nLambdaj_);
-    Di_ = vector
-    (
-        sinPhi
-       *Foam::sin(0.5*deltaPhi)
-       *(deltaTheta - Foam::cos(2.0*thetai)
-       *Foam::sin(deltaTheta)),
-        cosPhi
-       *Foam::sin(0.5*deltaPhi)
-       *(deltaTheta - Foam::cos(2.0*thetai)
-       *Foam::sin(deltaTheta)),
-        0.5*deltaPhi*Foam::sin(2.0*thetai)*Foam::sin(deltaTheta)
-    );
-
-    forAll(Ilambdaj_, i)
-    {
-        IOobject header
-        (
-            "Ilambda_" + name(rayId) + "_" + name(i),
-            mesh_.time().timeName(),
-            mesh_,
-            IOobject::NO_READ
-        );
-
-        // check if field exists and can be read
-        if (header.headerOk())
-        {
-            Ilambdaj_.set
-            (
-                i,
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        "Ilambda_" + name(rayId) + "_" + name(i),
-                        mesh_.time().timeName(),
-                        mesh_,
-                        IOobject::MUST_READ,
-                        IOobject::AUTO_WRITE
-                    ),
-                    mesh_
-                )
-            );
-        }
-        else
-        {
-            volScalarField Idefault
-            (
-                IOobject
-                (
-                    "Idefault",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_
-            );
-
-            Ilambdaj_.set
-            (
-                i,
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        "Ilambda_" + name(rayId) + "_"+ name(i),
-                        mesh_.time().timeName(),
-                        mesh_,
-                        IOobject::NO_READ,
-                        IOobject::AUTO_WRITE
-                    ),
-                    Idefault
-                )
-            );
-        }
-    }
-    rayId++;
-}
-
-
 Foam::scalar Foam::radiation::radiativeIntensityRay::correct
 (
     fvDOM* DomPtr
 )
 {
-    Qri_ =  dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
+    // reset boundary heat flux to zero
+    Qr_ =  dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
 
     scalar maxResidual = 0.0;
 
-    for(label i = 0; i < nLambdaj_; i++)
+    forAll(IWave_, lambdaI)
     {
-        volScalarField k = DomPtr->aj(i);
+        volScalarField k = DomPtr->aj(lambdaI);
 
-        volScalarField E = absEmmModel_.ECont(i)/Foam::mathematicalConstant::pi;
+        volScalarField E =
+            absEmmModel_.ECont(lambdaI)/Foam::mathematicalConstant::pi;
 
-        surfaceScalarField Ji = Di_ & mesh_.Sf();
+        surfaceScalarField Ji = dAve_ & mesh_.Sf();
 
-        volScalarField Ib = blackBody_.bj(i)/Foam::mathematicalConstant::pi;
+        volScalarField Ib =
+            blackBody_.bj(lambdaI)/Foam::mathematicalConstant::pi;
 
         fvScalarMatrix IiEq
         (
-            fvm::div(Ji, Ilambdaj_[i], " div(Ji,Ii_h)")
-          + fvm::Sp(k*omegai_, Ilambdaj_[i])
+            fvm::div(Ji, IWave_[lambdaI], " div(Ji,Ii_h)")
+          + fvm::Sp(k*omega_, IWave_[lambdaI])
          ==
-            k*omegai_*Ib + E
+            k*omega_*Ib + E
         );
 
         IiEq.relax();
@@ -234,6 +206,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct
         maxResidual = max(eqnResidual, maxResidual);
 
     }
+
     return maxResidual;
 }
 
@@ -242,20 +215,10 @@ void Foam::radiation::radiativeIntensityRay::addIntensity()
 {
     I_ = dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
 
-    for (label i = 0; i < nLambdaj_; i++)
+    forAll(IWave_, lambdaI)
     {
-        I_ += absEmmModel_.addRadInt(i, Ilambdaj_[i]);
+        I_ += absEmmModel_.addRadInt(lambdaI, IWave_[lambdaI]);
     }
-}
-
-
-void Foam::radiation::radiativeIntensityRay::add
-(
-    const scalarField& qr,
-    const label patchI
-) const
-{
-    Qri_.boundaryField()[patchI] += qr;
 }
 
 

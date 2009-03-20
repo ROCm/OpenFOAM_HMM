@@ -54,8 +54,8 @@ Foam::radiation::radiationModel::radiationModel
         IOobject
         (
             "radiationProperties",
-            T.mesh().time().constant(),
-            T.mesh().db(),
+            T.time().constant(),
+            T.mesh().objectRegistry::db(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -63,7 +63,7 @@ Foam::radiation::radiationModel::radiationModel
     T_(T),
     mesh_(T.mesh()),
     radiation_(lookup("radiation")),
-    radiationModelCoeffs_(subDict(type + "Coeffs")),
+    coeffs_(subDict(type + "Coeffs")),
     nFlowIterPerRadIter_(readLabel(lookup("nFlowIterPerRadIter"))),
     absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
     scatter_(scatterModel::New(*this, mesh_))
@@ -83,7 +83,7 @@ bool Foam::radiation::radiationModel::read()
     if (regIOobject::read())
     {
         lookup("radiation") >> radiation_;
-        radiationModelCoeffs_ = subDict(type() + "Coeffs");
+        coeffs_ = subDict(type() + "Coeffs");
 
         return true;
     }

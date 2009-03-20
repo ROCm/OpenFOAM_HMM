@@ -79,18 +79,18 @@ Foam::label Foam::interpolationLookUpTable <Type>::index
 ) const
 {
     label i = 0;
-    label totalindex =
-    min
-    (
-        max
+    label totalIndex =
+        Foam::min
         (
-            label((indice - min_[i])/delta_[i]),
-            0
-        ),
-        dim_[i]
-    );
+            Foam::max
+            (
+                label((indice - min_[i])/delta_[i]),
+                0
+            ),
+            dim_[i]
+        );
 
-    return totalindex;
+    return totalIndex;
 }
 
 

@@ -60,14 +60,11 @@ class wideBandDiffusiveRadiationMixedFvPatchScalarField
         //- Emissivity
         scalar emissivity_;
 
-        //- Direction index
-        label myRayIndex_;
+        //- Ray index
+        label rayId_;
 
-        //- Direction index
-        label myWaveLengthIndex_;
-
-        //- Init ray flag
-        label myRayIsInit_;
+        //- Wavelength index
+        label wavelengthId_;
 
         //- Radiative heat flux on walls.
         scalarField qr_;
