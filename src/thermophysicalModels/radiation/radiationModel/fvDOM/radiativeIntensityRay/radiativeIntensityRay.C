@@ -172,26 +172,24 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
     // reset boundary heat flux to zero
     Qr_ =  dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
 
-    scalar maxResidual = 0.0;
+    scalar maxResidual = -GREAT;
 
     forAll(IWave_, lambdaI)
     {
         const volScalarField& k = dom_.aj(lambdaI);
 
-        volScalarField E =
-            absEmmModel_.ECont(lambdaI)/Foam::mathematicalConstant::pi;
-
         surfaceScalarField Ji = dAve_ & mesh_.Sf();
-
-        volScalarField Ib =
-            blackBody_.bj(lambdaI)/Foam::mathematicalConstant::pi;
 
         fvScalarMatrix IiEq
         (
             fvm::div(Ji, IWave_[lambdaI], " div(Ji,Ii_h)")
           + fvm::Sp(k*omega_, IWave_[lambdaI])
          ==
-            k*omega_*Ib + E
+            1.0/Foam::mathematicalConstant::pi
+           *(
+                k*omega_*blackBody_.bj(lambdaI)
+              + absEmmModel_.ECont(lambdaI)
+            )
         );
 
         IiEq.relax();
