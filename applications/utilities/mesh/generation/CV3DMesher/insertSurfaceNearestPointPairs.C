@@ -888,16 +888,16 @@ void Foam::CV3D::insertSurfaceNearestPointPairs()
 
         if (edgePoints.size())
         {
-            Warning<< "Edge point insertion disabled." << endl;
+            //Warning<< "Edge point insertion disabled." << endl;
 
-            // smoothEdgePositions(edgePoints, edgeLabels);
+            smoothEdgePositions(edgePoints, edgeLabels);
 
-            // insertEdgePointGroups
-            // (
-            //     edgePoints,
-            //     edgeLabels,
-            //     "surfaceNearestEdgePoints.obj"
-            // );
+            insertEdgePointGroups
+            (
+                edgePoints,
+                edgeLabels,
+                "surfaceNearestEdgePoints.obj"
+            );
         }
     }
 

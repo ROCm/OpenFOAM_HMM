@@ -1097,6 +1097,7 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
 
                 scalar targetCellSizeB = targetCellSize;
 
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
                 // if
                 // (
                 //     vA->indexOfClosestPatch() == 1
@@ -1123,33 +1124,35 @@ void Foam::CV3D::relaxPoints(const scalar relaxation)
                 //     targetCellSizeB *= 2;
                 // }
 
-                if
-                (
-                    vA->indexOfClosestPatch() == 1
-                 && vA->distanceToClosestSurface() < 0.04
-                )
-                {
-                    targetCellSizeA *=
-                    (43.75*vA->distanceToClosestSurface() + 0.25);
-                }
-                else
-                {
-                    targetCellSizeA *= 2;
-                }
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                // if
+                // (
+                //     vA->indexOfClosestPatch() == 1
+                //  && vA->distanceToClosestSurface() < 0.04
+                // )
+                // {
+                //     targetCellSizeA *=
+                //     (43.75*vA->distanceToClosestSurface() + 0.25);
+                // }
+                // else
+                // {
+                //     targetCellSizeA *= 2;
+                // }
 
-                if
-                (
-                    vB->indexOfClosestPatch() == 1
-                 && vB->distanceToClosestSurface() < 0.04
-                )
-                {
-                    targetCellSizeB *=
-                    (43.75*vB->distanceToClosestSurface() + 0.25);
-                }
-                else
-                {
-                    targetCellSizeB *= 2;
-                }
+                // if
+                // (
+                //     vB->indexOfClosestPatch() == 1
+                //  && vB->distanceToClosestSurface() < 0.04
+                // )
+                // {
+                //     targetCellSizeB *=
+                //     (43.75*vB->distanceToClosestSurface() + 0.25);
+                // }
+                // else
+                // {
+                //     targetCellSizeB *= 2;
+                // }
+                // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
                 targetCellSize = sqrt(targetCellSizeA * targetCellSizeB);
 
