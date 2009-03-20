@@ -51,13 +51,13 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
     const scalar deltaPhi,
     const scalar deltaTheta,
     const label nLambda,
-    const absorptionEmissionModel& absEmmModel,
+    const absorptionEmissionModel& absorptionEmission,
     const blackBodyEmission& blackBody
 )
 :
     dom_(dom),
     mesh_(mesh),
-    absEmmModel_(absEmmModel),
+    absorptionEmission_(absorptionEmission),
     blackBody_(blackBody),
     I_
     (
@@ -188,7 +188,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
             1.0/Foam::mathematicalConstant::pi
            *(
                 k*omega_*blackBody_.bj(lambdaI)
-              + absEmmModel_.ECont(lambdaI)
+              + absorptionEmission_.ECont(lambdaI)
             )
         );
 
@@ -214,7 +214,7 @@ void Foam::radiation::radiativeIntensityRay::addIntensity()
 
     forAll(IWave_, lambdaI)
     {
-        I_ += absEmmModel_.addRadInt(lambdaI, IWave_[lambdaI]);
+        I_ += absorptionEmission_.addRadInt(lambdaI, IWave_[lambdaI]);
     }
 }
 

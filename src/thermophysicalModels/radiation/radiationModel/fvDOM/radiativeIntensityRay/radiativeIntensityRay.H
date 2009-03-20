@@ -64,10 +64,10 @@ class radiativeIntensityRay
         const fvMesh& mesh_;
 
         //- Absorption/emission model
-        const absorptionEmissionModel& absEmmModel_;
+        const absorptionEmissionModel& absorptionEmission_;
 
         //- Black body
-        const blackBodyEmission&  blackBody_;
+        const blackBodyEmission& blackBody_;
 
         //- Total radiative intensity / [W/m2]
         volScalarField I_;
