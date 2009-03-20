@@ -143,7 +143,7 @@ void Foam::processorPolyPatch::initGeometry()
         (
             Pstream::blocking,
             neighbProcNo(),
-            3*(sizeof(label) + size()*sizeof(vector) + sizeof(float))
+            3*(sizeof(label) + size()*sizeof(vector) + sizeof(scalar))
         );
 
         toNeighbProc
@@ -163,7 +163,7 @@ void Foam::processorPolyPatch::calcGeometry()
             (
                 Pstream::blocking,
                 neighbProcNo(),
-                3*(sizeof(label) + size()*sizeof(vector) + sizeof(float))
+                3*(sizeof(label) + size()*sizeof(vector) + sizeof(scalar))
             );
             fromNeighbProc
                 >> neighbFaceCentres_
