@@ -80,11 +80,7 @@ public:
     // Member Functions
 
         //- Execute the functionEntry in a sub-dict context
-        static bool execute
-        (
-            dictionary& parentDict,
-            Istream& is
-        );
+        static bool execute(dictionary& parentDict, Istream&);
 };
 
 

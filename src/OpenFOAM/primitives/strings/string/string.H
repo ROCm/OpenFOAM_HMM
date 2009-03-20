@@ -144,6 +144,9 @@ public:
         template<class String>
         static inline string quotemeta(const string&, const char quote='\\');
 
+        //- Avoid masking the normal std::string replace
+        using std::string::replace;
+
         //- Replace first occurence of sub-string oldStr with newStr
         //  starting at start
         string& replace

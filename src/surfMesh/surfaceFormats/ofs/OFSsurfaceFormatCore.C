@@ -24,47 +24,52 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SMESHsurfaceFormatCore.H"
+#include "OFSsurfaceFormatCore.H"
 #include "clock.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::fileFormats::SMESHsurfaceFormatCore::writeHeader
+void Foam::fileFormats::OFSsurfaceFormatCore::writeHeader
 (
     Ostream& os,
     const pointField& pointLst,
-    const label nFaces
+    const UList<surfZone>& zoneLst
 )
 {
-    // Write header
-    os << "# tetgen .smesh file written " << clock::dateTime().c_str() << nl;
-    os << "# <points count=\"" << pointLst.size() << "\">" << endl;
-    os << pointLst.size() << " 3" << nl;    // 3: dimensions
+    // just emit some information until we get a nice IOobject
+    IOobject::writeBanner(os)
+        << "// OpenFOAM Surface Format - written "
+        << clock::dateTime().c_str() << nl
+        << "// ~~~~~~~~~~~~~~~~~~~~~~~" << nl << nl
+        << "// surfZones:" << nl;
 
-    // Write vertex coords
-    forAll(pointLst, ptI)
+
+    // treat a single zone as being unzoned
+    if (zoneLst.size() <= 1)
     {
-        os  << ptI
-            << ' ' << pointLst[ptI].x()
-            << ' ' << pointLst[ptI].y()
-            << ' ' << pointLst[ptI].z() << nl;
+        os  << "0" << token::BEGIN_LIST << token::END_LIST << nl << nl;
     }
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << nFaces << "\">" << endl;
+    else
+    {
+        os  << zoneLst.size() << nl << token::BEGIN_LIST << incrIndent << nl;
 
-    os  << nFaces << " 1" << endl;   // one attribute: zone number
+        forAll(zoneLst, zoneI)
+        {
+            zoneLst[zoneI].writeDict(os);
+        }
+        os  << decrIndent << token::END_LIST << nl << nl;
+    }
+
+    // Note: write with global point numbering
+
+    IOobject::writeDivider(os)
+        << "\n// points:" << nl << pointLst << nl;
+
+    IOobject::writeDivider(os);
 }
 
-
-void Foam::fileFormats::SMESHsurfaceFormatCore::writeTail(Ostream& os)
-{
-    os  << "# </faces>" << nl
-        << nl
-        << "# no holes or regions:" << nl
-        << '0' << nl        // holes
-        << '0' << endl;     // regions
-}
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

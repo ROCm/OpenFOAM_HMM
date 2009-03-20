@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FTRsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,6 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
+// read UnsortedMeshedSurface
 addNamedTemplatedToRunTimeSelectionTable
 (
     UnsortedMeshedSurface,

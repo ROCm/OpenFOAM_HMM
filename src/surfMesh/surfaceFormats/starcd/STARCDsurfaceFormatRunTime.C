@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STARCDsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,6 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
+// read MeshedSurface
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -53,10 +53,10 @@ addNamedTemplatedToRunTimeSelectionTable
     inp
 );
 
-
+// write MeshedSurfaceProxy
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     STARCDsurfaceFormat,
     face,
     write,
@@ -65,7 +65,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     STARCDsurfaceFormat,
     triFace,
     write,
@@ -73,25 +73,6 @@ addNamedTemplatedToMemberFunctionSelectionTable
     inp
 );
 
-
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    STARCDsurfaceFormat,
-    face,
-    write,
-    fileExtension,
-    inp
-);
-addNamedTemplatedToMemberFunctionSelectionTable
-(
-    UnsortedMeshedSurface,
-    STARCDsurfaceFormat,
-    triFace,
-    write,
-    fileExtension,
-    inp
-);
 
 }
 }

@@ -106,12 +106,12 @@ public:
 
         // Assignment
 
-            inline void operator=(const keyType&);
-            inline void operator=(const word&);
+            inline const keyType& operator=(const keyType&);
+            inline const keyType& operator=(const word&);
 
             //- Assign from regular expression.
-            inline void operator=(const string&);
-            inline void operator=(const char*);
+            inline const keyType& operator=(const string&);
+            inline const keyType& operator=(const char*);
 
 
     // IOstream operators

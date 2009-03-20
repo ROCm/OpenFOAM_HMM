@@ -24,51 +24,67 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "OBJsurfaceFormatCore.H"
-#include "clock.H"
+#include "sampledThresholdCellFaces.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+#include "thresholdCellFaces.H"
+#include "volFieldsFwd.H"
+#include "pointFields.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::fileFormats::OBJsurfaceFormatCore::writeHeader
+template <class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::sampledThresholdCellFaces::sampleField
 (
-    Ostream& os,
-    const pointField& pointLst,
-    const label nFaces,
-    const UList<surfZone>& zoneLst
-)
+    const GeometricField<Type, fvPatchField, volMesh>& vField
+) const
 {
-    os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
-        << "o " << os.name().lessExt().name() << nl
-        << nl
-        << "# points : " << pointLst.size() << nl
-        << "# faces  : " << nFaces << nl
-        << "# zones  : " << zoneLst.size() << nl;
+    // Recreate geometry if time has changed
+    updateGeometry();
 
-    // Print zone names as comment
-    forAll(zoneLst, zoneI)
-    {
-        os  << "#   " << zoneI << "  " << zoneLst[zoneI].name()
-            << "  (nFaces: " << zoneLst[zoneI].size() << ")" << nl;
-    }
-
-    os  << nl
-        << "# <points count=\"" << pointLst.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << "v " << pointLst[ptI].x()
-            << ' '  << pointLst[ptI].y()
-            << ' '  << pointLst[ptI].z() << nl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << nFaces << "\">" << endl;
+    return tmp<Field<Type> >(new Field<Type>(vField, meshCells_));
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template <class Type>
+Foam::tmp<Foam::Field<Type> >
+Foam::sampledThresholdCellFaces::interpolateField
+(
+    const interpolation<Type>& interpolator
+) const
+{
+    // Recreate geometry if time has changed
+    updateGeometry();
+
+    // One value per point
+    tmp<Field<Type> > tvalues(new Field<Type>(points().size()));
+    Field<Type>& values = tvalues();
+
+    boolList pointDone(points().size(), false);
+
+    forAll(faces(), cutFaceI)
+    {
+        const face& f = faces()[cutFaceI];
+
+        forAll(f, faceVertI)
+        {
+            label pointI = f[faceVertI];
+
+            if (!pointDone[pointI])
+            {
+                values[pointI] = interpolator.interpolate
+                (
+                    points()[pointI],
+                    meshCells_[cutFaceI]
+                );
+                pointDone[pointI] = true;
+            }
+        }
+    }
+
+    return tvalues;
+}
+
 
 // ************************************************************************* //

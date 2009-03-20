@@ -19,9 +19,19 @@ interpolationScheme cellPoint;
 
 setFormat       raw;
 
-sets            ( data { type uniform ; axis x ; start ( -4.995 0 0 ) ; end ( 4.995 0 0 ) ; nPoints 1000 ; } );
+sets
+(
+    data
+    {
+        type    uniform;
+        axis    x;
+        start   ( -4.995 0 0 );
+        end     ( 4.995 0 0 );
+        nPoints 1000;
+    }
+);
 
-surfaces        ( );
+surfaces        ();
 
 fields          ( T magU p );
 

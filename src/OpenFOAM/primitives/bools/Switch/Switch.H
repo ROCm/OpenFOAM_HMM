@@ -176,9 +176,10 @@ public:
         }
 
         //- Assignment from bool
-        void operator=(const bool b)
+        const Switch& operator=(const bool b)
         {
             switch_ = (b ? Switch::TRUE : Switch::FALSE);
+            return *this;
         }
 
 

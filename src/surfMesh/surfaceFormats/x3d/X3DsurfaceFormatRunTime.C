@@ -22,60 +22,40 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::fileFormats::OFFsurfaceFormatCore
-
-Description
-    Internal class used by the OFFsurfaceFormat
-
-SourceFiles
-    OFFsurfaceFormatCore.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef OFFsurfaceFormatCore_H
-#define OFFsurfaceFormatCore_H
+#include "X3DsurfaceFormat.H"
 
-#include "Ostream.H"
-#include "OFstream.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+#include "addToRunTimeSelectionTable.H"
+#include "addToMemberFunctionSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
 namespace fileFormats
 {
 
-/*---------------------------------------------------------------------------*\
-                    Class OFFsurfaceFormatCore Declaration
-\*---------------------------------------------------------------------------*/
+// write MeshedSurfaceProxy
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    X3DsurfaceFormat,
+    face,
+    write,
+    fileExtension,
+    x3d
+);
+addNamedTemplatedToMemberFunctionSelectionTable
+(
+    MeshedSurfaceProxy,
+    X3DsurfaceFormat,
+    triFace,
+    write,
+    fileExtension,
+    x3d
+);
 
-class OFFsurfaceFormatCore
-{
-protected:
-    // Protected Member Functions
-
-    //- Write header information with points
-    static void writeHeader
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
-
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fileFormats
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+}
+}
 
 // ************************************************************************* //

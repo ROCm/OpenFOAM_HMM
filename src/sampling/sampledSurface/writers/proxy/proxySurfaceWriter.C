@@ -24,91 +24,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "stlSurfaceWriter.H"
-#include "fileName.H"
+#include "proxySurfaceWriter.H"
+
+#include "MeshedSurfaceProxy.H"
 #include "OFstream.H"
-#include "faceList.H"
 #include "OSspecific.H"
-#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::stlSurfaceWriter<Type>::stlSurfaceWriter()
+Foam::proxySurfaceWriter<Type>::proxySurfaceWriter(const word& ext)
 :
-    surfaceWriter<Type>()
+    surfaceWriter<Type>(),
+    ext_(ext)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::stlSurfaceWriter<Type>::~stlSurfaceWriter()
+Foam::proxySurfaceWriter<Type>::~proxySurfaceWriter()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void Foam::stlSurfaceWriter<Type>::write
+void Foam::proxySurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
-    const fileName& fieldName,
-    const Field<Type>& values,
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    // avoid bad values
+    if (ext_.empty())
     {
-        mkDir(surfaceDir);
+        return;
     }
 
-    fileName fName(surfaceDir/fieldName + '_' + surfaceName + ".stl");
+    if (!isDir(outputDir))
+    {
+        mkDir(outputDir);
+    }
+
+    fileName fName(outputDir/surfaceName + "." + ext_);
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << fName << endl;
+        Info<< "Writing geometry to " << fName << endl;
     }
 
-    // Convert faces to triangles.
-    DynamicList<labelledTri> tris(faces.size());
-
-    forAll(faces, i)
-    {
-        const face& f = faces[i];
-
-        faceList triFaces(f.nTriangles(points));
-        label nTris = 0;
-        f.triangles(points, nTris, triFaces);
-
-        forAll(triFaces, triI)
-        {
-            const face& tri = triFaces[triI];
-            tris.append(labelledTri(tri[0], tri[1], tri[2], 0));
-        }
-    }
-
-    triSurface
+    MeshedSurfaceProxy<face>
     (
-        tris.shrink(),
-        geometricSurfacePatchList
-        (
-            1,
-            geometricSurfacePatch
-            (
-                "patch",                            // geometricType
-                string::validate<word>(fieldName),  // fieldName
-                0                                   // index
-            )
-        ),
-        points
+        points,
+        faces
     ).write(fName);
+
 }
 
 

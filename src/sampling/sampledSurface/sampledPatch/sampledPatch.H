@@ -50,11 +50,11 @@ namespace Foam
 
 class sampledPatch
 :
-    public BasicMeshedSurface<face>,
+    public MeshedSurface<face>,
     public sampledSurface
 {
     //- Private typedefs for convenience
-        typedef BasicMeshedSurface<face> MeshStorage;
+        typedef MeshedSurface<face> MeshStorage;
 
     // Private data
 

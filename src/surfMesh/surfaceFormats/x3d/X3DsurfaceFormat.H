@@ -23,22 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fileFormats::SMESHsurfaceFormatCore
+    Foam::fileFormats::X3DsurfaceFormat
 
 Description
-    Internal class used by the SMESHsurfaceFormat
+    Provide a means of writing x3d format.
 
 SourceFiles
-    SMESHsurfaceFormatCore.C
+    X3DsurfaceFormat.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SMESHsurfaceFormatCore_H
-#define SMESHsurfaceFormatCore_H
+#ifndef X3DsurfaceFormat_H
+#define X3DsurfaceFormat_H
 
-#include "Ostream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
+#include "X3DsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,24 +49,49 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class SMESHsurfaceFormatCore Declaration
+                      Class X3DsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
-class SMESHsurfaceFormatCore
+template<class Face>
+class X3DsurfaceFormat
+:
+    public MeshedSurface<Face>,
+    public X3DsurfaceFormatCore
 {
-protected:
-    // Protected Member Functions
+    // Private Member Functions
 
-    //- Write header information with points
-    static void writeHeader
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces
-    );
+        //- Disallow default bitwise copy construct
+        X3DsurfaceFormat(const X3DsurfaceFormat<Face>&);
 
-    //- Write tail information
-    static void writeTail(Ostream&);
+        //- Disallow default bitwise assignment
+        void operator=(const X3DsurfaceFormat<Face>&);
+
+public:
+
+    // Constructors
+
+        //- Construct null
+        X3DsurfaceFormat();
+
+    // Selectors
+
+
+    // Destructor
+
+        virtual ~X3DsurfaceFormat()
+        {}
+
+
+    // Member Functions
+
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+        //- Write object file
+        virtual void write(const fileName& name) const
+        {
+            write(name, MeshedSurfaceProxy<Face>(*this));
+        }
 
 };
 
@@ -74,6 +100,12 @@ protected:
 
 } // End namespace fileFormats
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "X3DsurfaceFormat.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

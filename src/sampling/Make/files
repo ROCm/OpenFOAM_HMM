@@ -33,6 +33,8 @@ sampledSurface/sampledCuttingPlane/sampledCuttingPlane.C
 sampledSurface/sampledSurface/sampledSurface.C
 sampledSurface/sampledSurfaces/sampledSurfaces.C
 sampledSurface/sampledSurfacesFunctionObject/sampledSurfacesFunctionObject.C
+sampledSurface/thresholdCellFaces/thresholdCellFaces.C
+sampledSurface/thresholdCellFaces/sampledThresholdCellFaces.C
 
 surfWriters = sampledSurface/writers
 
@@ -40,8 +42,8 @@ $(surfWriters)/surfaceWriters.C
 $(surfWriters)/dx/dxSurfaceWriterRunTime.C
 $(surfWriters)/foamFile/foamFileSurfaceWriterRunTime.C
 $(surfWriters)/null/nullSurfaceWriterRunTime.C
+$(surfWriters)/proxy/proxySurfaceWriterRunTime.C
 $(surfWriters)/raw/rawSurfaceWriterRunTime.C
-$(surfWriters)/stl/stlSurfaceWriterRunTime.C
 $(surfWriters)/vtk/vtkSurfaceWriterRunTime.C
 
 graphField/writePatchGraph.C

@@ -22,84 +22,28 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::stlSurfaceWriter
-
-Description
-
-SourceFiles
-    stlSurfaceWriter.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef stlSurfaceWriter_H
-#define stlSurfaceWriter_H
-
-#include "surfaceWriter.H"
+#include "MeshedSurfaceProxy.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                     Class stlSurfaceWriter Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class Type>
-class stlSurfaceWriter
-:
-    public surfaceWriter<Type>
-{
-
-public:
-
-    //- Runtime type information
-    TypeName("stl");
+#define makeSurface(surfType, faceType)                                       \
+    defineNamedTemplateTypeNameAndDebug(surfType<faceType>, 0);               \
+    defineTemplatedMemberFunctionSelectionTable(surfType,write,fileExtension,faceType);
 
 
-    // Constructors
-
-        //- Construct null
-        stlSurfaceWriter();
-
-
-    // Destructor
-
-        virtual ~stlSurfaceWriter();
-
-
-    // Member Functions
-
-        // Write
-
-        //- Writes single surface to file.
-        virtual void write
-        (
-            const fileName& samplePath,
-            const fileName& timeDir,
-            const fileName& surfaceName,
-            const pointField& points,
-            const faceList& faces,
-            const fileName& fieldName,
-            const Field<Type>& values,
-            const bool verbose = false
-        ) const;
-};
-
+makeSurface(MeshedSurfaceProxy, face)
+makeSurface(MeshedSurfaceProxy, triFace)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "stlSurfaceWriter.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

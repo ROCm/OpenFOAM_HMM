@@ -24,23 +24,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "OFFsurfaceFormatCore.H"
+#include "WRLsurfaceFormatCore.H"
 #include "clock.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::fileFormats::OFFsurfaceFormatCore::writeHeader
+void Foam::fileFormats::WRLsurfaceFormatCore::writeHeader
 (
     Ostream& os,
     const pointField& pointLst,
     const label nFaces,
-    const UList<surfZone>& zoneLst
+    const UList<surfZone>& zoneLst    
 )
 {
-    // Write header
-    os  << "OFF" << endl
-        << "# Geomview OFF file written " << clock::dateTime().c_str() << nl
+    os  << "#VRML V2.0 utf8" << nl
         << nl
+        << "# written " << clock::dateTime().c_str() << nl
         << "# points : " << pointLst.size() << nl
         << "# faces  : " << nFaces << nl
         << "# zones  : " << zoneLst.size() << nl;
@@ -52,27 +53,28 @@ void Foam::fileFormats::OFFsurfaceFormatCore::writeHeader
             << "  (nFaces: " << zoneLst[zoneI].size() << ")" << nl;
     }
 
-    os  << nl
-        << "# nPoints  nFaces  nEdges" << nl
-        << pointLst.size() << ' ' << nFaces << ' ' << 0 << nl;
 
-    os  << nl
-        << "# <points count=\"" << pointLst.size() << "\">" << endl;
-
-    // Write vertex coords
-    forAll(pointLst, ptI)
-    {
-        os  << pointLst[ptI].x() << ' '
-            << pointLst[ptI].y() << ' '
-            << pointLst[ptI].z() << " #" << ptI << endl;
-    }
-
-    os  << "# </points>" << nl
-        << nl
-        << "# <faces count=\"" << nFaces << "\">" << endl;
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+void Foam::fileFormats::WRLsurfaceFormatCore::writeAppearance
+(
+    Ostream& os
+)
+{
+    os  <<
+        "   appearance Appearance {\n"
+        "    material Material {\n"
+        "     diffuseColor   0.8 0.8 0.8\n"
+        "     specularColor  1.0 1.0 1.0\n"
+        "     shininess      0.5\n"
+        "     transparency   0.0\n"
+        "    }\n"                      // end material
+        "   }\n";                      // end appearance
+
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

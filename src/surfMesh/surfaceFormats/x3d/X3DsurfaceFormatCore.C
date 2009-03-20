@@ -22,60 +22,49 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::fileFormats::OBJsurfaceFormatCore
-
-Description
-    Internal class used by the OBJsurfaceFormat
-
-SourceFiles
-    OBJsurfaceFormatCore.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef OBJsurfaceFormatCore_H
-#define OBJsurfaceFormatCore_H
+#include "X3DsurfaceFormatCore.H"
+#include "clock.H"
 
-#include "Ostream.H"
-#include "OFstream.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-namespace Foam
+void Foam::fileFormats::X3DsurfaceFormatCore::writeHeader
+(
+    Ostream& os
+)
 {
-namespace fileFormats
+    os  <<
+        "<?xml version='1.0' encoding='UTF-8'?>\n"
+        "<!DOCTYPE X3D PUBLIC \"ISO//Web3D//DTD X3D 3.0//EN\" \"http://www.web3d.org/specifications/x3d-3.0.dtd\">\n"
+        "<X3D\n"
+        "  version='3.0'\n"
+        "  profile='Immersive'\n"
+        "  xmlns:xsd='http://www.w3.org/2001/XMLSchema-instance'\n"
+        "  xsd:noNamespaceSchemaLocation='http://www.web3d.org/specifications/x3d-3.0.xsd'\n"
+        "  >\n";
+}
+
+
+void Foam::fileFormats::X3DsurfaceFormatCore::writeAppearance
+(
+    Ostream& os
+)
 {
-
-/*---------------------------------------------------------------------------*\
-                    Class OBJsurfaceFormatCore Declaration
-\*---------------------------------------------------------------------------*/
-
-class OBJsurfaceFormatCore
-{
-protected:
-    // Protected Member Functions
-
-    //- Write header information with points
-    static void writeHeader
-    (
-        Ostream&,
-        const pointField&,
-        const label nFaces,
-        const UList<surfZone>&
-    );
-
-};
+    os  <<
+        "  <Appearance>\n"
+        "   <Material"
+        " diffuseColor='0.8 0.8 0.8'"
+        " specularColor='1.0 1.0 1.0'"
+        " shininess='0.5'"
+        " transparency='0.0'"
+        " />\n"           // end material
+        "  </Appearance>\n";
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace fileFormats
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //
