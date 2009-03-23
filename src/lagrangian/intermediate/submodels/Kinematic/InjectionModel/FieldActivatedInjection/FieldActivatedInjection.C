@@ -24,13 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "EntrainmentInjection.H"
+#include "FieldActivatedInjection.H"
 #include "volFields.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::EntrainmentInjection<CloudType>::parcelsToInject
+Foam::label Foam::FieldActivatedInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
@@ -48,7 +48,7 @@ Foam::label Foam::EntrainmentInjection<CloudType>::parcelsToInject
 
 
 template<class CloudType>
-Foam::scalar Foam::EntrainmentInjection<CloudType>::volumeToInject
+Foam::scalar Foam::FieldActivatedInjection<CloudType>::volumeToInject
 (
     const scalar time0,
     const scalar time1
@@ -68,33 +68,25 @@ Foam::scalar Foam::EntrainmentInjection<CloudType>::volumeToInject
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::EntrainmentInjection<CloudType>::EntrainmentInjection
+Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
 (
     const dictionary& dict,
     CloudType& owner
 )
 :
     InjectionModel<CloudType>(dict, owner, typeName),
-    c_(readScalar(this->coeffDict().lookup("c"))),
-    rhoc_
+    referenceField_
     (
         owner.db().objectRegistry::lookupObject<volScalarField>
         (
-            this->coeffDict().lookup("rhoc")
+            this->coeffDict().lookup("referenceField")
         )
     ),
-    rhol_
+    thresholdField_
     (
         owner.db().objectRegistry::lookupObject<volScalarField>
         (
-            this->coeffDict().lookup("rhol")
-        )
-    ),
-    Uc_
-    (
-        owner.db().objectRegistry::lookupObject<volVectorField>
-        (
-            this->coeffDict().lookup("Uc")
+            this->coeffDict().lookup("thresholdField")
         )
     ),
     positionsFile_(this->coeffDict().lookup("positionsFile")),
@@ -153,28 +145,28 @@ Foam::EntrainmentInjection<CloudType>::EntrainmentInjection
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::EntrainmentInjection<CloudType>::~EntrainmentInjection()
+Foam::FieldActivatedInjection<CloudType>::~FieldActivatedInjection()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::EntrainmentInjection<CloudType>::active() const
+bool Foam::FieldActivatedInjection<CloudType>::active() const
 {
     return true;
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::EntrainmentInjection<CloudType>::timeEnd() const
+Foam::scalar Foam::FieldActivatedInjection<CloudType>::timeEnd() const
 {
     return GREAT;
 }
 
 
 template<class CloudType>
-void Foam::EntrainmentInjection<CloudType>::setPositionAndCell
+void Foam::FieldActivatedInjection<CloudType>::setPositionAndCell
 (
     const label parcelI,
     const scalar,
@@ -188,7 +180,7 @@ void Foam::EntrainmentInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-Foam::vector Foam::EntrainmentInjection<CloudType>::velocity
+Foam::vector Foam::FieldActivatedInjection<CloudType>::velocity
 (
     const label,
     const scalar
@@ -199,7 +191,7 @@ Foam::vector Foam::EntrainmentInjection<CloudType>::velocity
 
 
 template<class CloudType>
-Foam::scalar Foam::EntrainmentInjection<CloudType>::d0
+Foam::scalar Foam::FieldActivatedInjection<CloudType>::d0
 (
     const label parcelI,
     const scalar
@@ -210,14 +202,17 @@ Foam::scalar Foam::EntrainmentInjection<CloudType>::d0
 
 
 template<class CloudType>
-bool Foam::EntrainmentInjection<CloudType>::validInjection(const label parcelI)
+bool Foam::FieldActivatedInjection<CloudType>::validInjection
+(
+    const label parcelI
+)
 {
-
     const label cellI = injectorCells_[parcelI];
+
     if
     (
          nParcelsInjected_[parcelI] < nParcelsPerInjector_
-      && rhol_[cellI] < c_*0.5*rhoc_[cellI]*magSqr(Uc_[cellI])
+      && referenceField_[cellI] > thresholdField_[cellI]
     )
     {
         nParcelsInjected_[parcelI]++;

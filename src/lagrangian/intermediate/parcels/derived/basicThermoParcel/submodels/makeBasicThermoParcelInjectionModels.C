@@ -28,7 +28,7 @@ License
 #include "ThermoCloud.H"
 
 #include "ConeInjection.H"
-#include "EntrainmentInjection.H"
+#include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
 
@@ -48,7 +48,7 @@ namespace Foam
     );
     makeInjectionModelType
     (
-        EntrainmentInjection,
+        FieldActivatedInjection,
         KinematicCloud,
         basicThermoParcel
     );

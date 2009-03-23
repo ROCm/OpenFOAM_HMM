@@ -23,27 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::EntrainmentInjection
+    Foam::FieldActivatedInjection
 
 Description
     Injection at specified positions, with the condition that for injection
     to be allowed
 
-        rhol <= c_*0.5*rhoc*|Uc|^2
+        referenceField[cellI] >= thresholdField[cellI]
 
     where:
-      - rhol is the effective density (of all clouds)
-      - c_ is a modelling constant [s2/m2]
-      - rhoc is the carrier phase density
-      - Uc is the carrier phase velocity
+      - referenceField is the field used to supply the look-up values
+      - thresholdField supplies the values beyond which the injection is
+        permitted
 
 SourceFiles
-    EntrainmentInjection.C
+    FieldActivatedInjection.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EntrainmentInjection_H
-#define EntrainmentInjection_H
+#ifndef FieldActivatedInjection_H
+#define FieldActivatedInjection_H
 
 #include "InjectionModel.H"
 #include "pdf.H"
@@ -55,11 +54,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class EntrainmentInjection Declaration
+                    Class FieldActivatedInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class EntrainmentInjection
+class FieldActivatedInjection
 :
     public InjectionModel<CloudType>
 {
@@ -67,17 +66,11 @@ class EntrainmentInjection
 
         // Model parameters
 
-            //- Modelling constant
-            const scalar c_;
+            //- Reference field
+            const volScalarField& referenceField_;
 
-            //- Carrier phase density field
-            const volScalarField& rhoc_;
-
-            //- Lagrangian phase density field
-            const scalarField& rhol_;
-
-            //- Carrier phase velocity field
-            const vectorField& Uc_;
+            //- Threshold field
+            const volScalarField& thresholdField_;
 
 
         // Injector properties
@@ -91,7 +84,7 @@ class EntrainmentInjection
             //- Field of cell labels corresoponding to injector positions
             labelField injectorCells_;
 
-            //- nParcels per injector
+            //- Number of parcels per injector
             const label nParcelsPerInjector_;
 
             //- Field of number of parcels injected for each injector
@@ -132,13 +125,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("EntrainmentInjection");
+    TypeName("FieldActivatedInjection");
 
 
     // Constructors
 
         //- Construct from dictionary
-        EntrainmentInjection
+        FieldActivatedInjection
         (
             const dictionary& dict,
             CloudType& owner
@@ -146,7 +139,7 @@ public:
 
 
     // Destructor
-    virtual ~EntrainmentInjection();
+    virtual ~FieldActivatedInjection();
 
 
     // Member Functions
@@ -196,7 +189,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "EntrainmentInjection.C"
+#   include "FieldActivatedInjection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
