@@ -23,21 +23,74 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::radiation::constantAbsorptionEmission
+    Foam::radiation::greyMeanAbsorptionEmission
 
 Description
-    Constant radiation absorption and emission coefficients for continuous
-    phase
+    greyMeanAbsorptionEmission radiation absorption and emission coefficients
+    for continuous phase
+
+    The coefficients for the species in the Look up table have to be specified
+    for use in moles x P [atm], i.e. (k[i] = species[i]*p*9.869231e-6).
+
+    The coefficients for CO and soot or any other added are multiplied by the
+    respective mass fraction being solved
+
+    All the species in the dictionary need either to be in the look-up table or
+    being solved. Conversely, all the species solved do not need to be included
+    in the calculation of the absorption coefficient
+
+    The names of the species in the absorption dictionary must match exactly the
+    name in the look-up table or the name of the field being solved
+
+    The look-up table ("speciesTable") file should be in constant
+
+    i.e. dictionary
+
+    LookUpTableFileName     "speciesTable";
+
+    EhrrCoeff                0.0;
+
+    CO2
+    {
+        Tcommon         300.;   // Common Temp
+        invTemp         true;   // Is the polynomial using inverse temperature?
+        Tlow            300.;   // Low Temp
+        Thigh           2500.;  // High Temp
+
+        loTcoeffs       // coeffs for T < Tcommon
+        (
+            0           //  a0            +
+            0           //  a1*T          +
+            0           //  a2*T^(+/-)2   +
+            0           //  a3*T^(+/-)3   +
+            0           //  a4*T^(+/-)4   +
+            0           //  a5*T^(+/-)5   +
+        );
+        hiTcoeffs       // coeffs for T > Tcommon
+        (
+            18.741
+            -121.31e3
+            273.5e6
+            -194.05e9
+            56.31e12
+            -5.8169e15
+        );
+
+    }
 
 SourceFiles
-    constantAbsorptionEmission.C
+    greyMeanAbsorptionEmission.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationConstantAbsorptionEmission_H
-#define radiationConstantAbsorptionEmission_H
+#ifndef greyMeanAbsorptionEmission_H
+#define greyMeanAbsorptionEmission_H
 
+#include "interpolationLookUpTable.H"
 #include "absorptionEmissionModel.H"
+#include "HashTable.H"
+#include "absorptionCoeffs.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,35 +103,57 @@ namespace radiation
                   Class constantAbsorptionEmission Declaration
 \*---------------------------------------------------------------------------*/
 
-class constantAbsorptionEmission
+class greyMeanAbsorptionEmission
 :
     public absorptionEmissionModel
 {
+public:
+
+    // Public data
+
+        // - Maximum number of species considered for absorptivity
+        static const int nSpecies_ = 5;
+
+        //  Absorption Coefficients
+        absorptionCoeffs coeffs_[nSpecies_];
+
+
+private:
+
     // Private data
 
         //- Absorption model dictionary
         dictionary coeffsDict_;
 
-        //- Absorption coefficient / [1/m]
-        dimensionedScalar a_;
+        //- Hash table of species names
+        HashTable<label> speciesNames_;
 
-        //- Emission coefficient / [1/m]
-        dimensionedScalar e_;
+        // Indices of species in the look-up table
+        FixedList<label, nSpecies_> specieIndex_;
 
-        //- Emission contribution / [kg/(m s^3)]
-        dimensionedScalar E_;
+        // Look-up table of species related to ft
+        mutable interpolationLookUpTable<scalar> lookUpTable_;
+
+        // Thermo package
+        const basicThermo& thermo_;
+
+        //- Emission constant coefficient
+        const scalar EhrrCoeff_;
+
+        //- Pointer list of species in the registry involved in the absorption
+        UPtrList<volScalarField> Yj_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("constantAbsorptionEmission");
+    TypeName("greyMeanAbsorptionEmission");
 
 
     // Constructors
 
         //- Construct from components
-        constantAbsorptionEmission
+        greyMeanAbsorptionEmission
         (
             const dictionary& dict,
             const fvMesh& mesh
@@ -86,7 +161,7 @@ public:
 
 
     // Destructor
-    virtual ~constantAbsorptionEmission();
+    virtual ~greyMeanAbsorptionEmission();
 
 
     // Member Operators

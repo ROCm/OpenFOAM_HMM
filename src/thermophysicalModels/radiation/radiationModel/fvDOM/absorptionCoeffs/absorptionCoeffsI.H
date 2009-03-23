@@ -22,66 +22,44 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::radiation::noAbsorptionEmission
-
-Description
-    Dummy absorption-emission model for 'none'
-
-SourceFiles
-    noAbsorptionEmission.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationNoAbsorptionEmission_H
-#define radiationNoAbsorptionEmission_H
-
-#include "absorptionEmissionModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+inline bool Foam::radiation::absorptionCoeffs::invTemp() const
 {
-namespace radiation
+    return  invTemp_;
+}
+
+
+inline Foam::scalar Foam::radiation::absorptionCoeffs::Tcommon() const
 {
+    return  Tcommon_;
+}
 
-/*---------------------------------------------------------------------------*\
-                  Class noAbsorptionEmission Declaration
-\*---------------------------------------------------------------------------*/
 
-class noAbsorptionEmission
-:
-    public absorptionEmissionModel
+inline Foam::scalar Foam::radiation::absorptionCoeffs::Tlow() const
 {
-
-public:
-
-    //- Runtime type information
-    TypeName("noAbsorptionEmission");
+    return  Tlow_;
+}
 
 
-    // Constructors
-
-        //- Construct from components
-        noAbsorptionEmission
-        (
-            const dictionary& dict,
-            const fvMesh& mesh
-        );
+inline Foam::scalar Foam::radiation::absorptionCoeffs::Thigh() const
+{
+    return  Thigh_;
+}
 
 
-    // Destructor
-    virtual ~noAbsorptionEmission();
-};
+inline const Foam::radiation::absorptionCoeffs::coeffArray&
+Foam::radiation::absorptionCoeffs::highACoeffs() const
+{
+    return  highACoeffs_;
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+inline const Foam::radiation::absorptionCoeffs::coeffArray&
+Foam::radiation::absorptionCoeffs::lowACoeffs() const
+{
+    return  lowACoeffs_;
+}
 
-} // End namespace radiation
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

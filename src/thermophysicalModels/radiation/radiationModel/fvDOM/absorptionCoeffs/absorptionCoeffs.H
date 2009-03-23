@@ -23,84 +23,121 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::radiation::noRadiation
+    Foam::janafThermo
 
 Description
-    No radiation - does nothing to energy equation source terms
-    (returns zeros)
+    Absorption coefficients class used in greyMeanAbsorptionEmission and
+    wideBandAbsorptionEmission
 
 SourceFiles
-    noRadiation.C
+    absorptionCoeffs.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noRadiation_H
-#define noRadiation_H
+#ifndef absorptionCoeffs_H
+#define absorptionCoeffs_H
 
-#include "radiationModel.H"
+#include "List.H"
+#include "IOstreams.H"
+#include "IOdictionary.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace Foam
 {
 namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                             Class noRadiation Declaration
+                      Class absorptionCoeffs Declaration
 \*---------------------------------------------------------------------------*/
 
-class noRadiation
-:
-    public radiationModel
+class absorptionCoeffs
 {
+public:
+
+    // Public data members
+
+        static const int nCoeffs_ = 6;
+        typedef FixedList<scalar, nCoeffs_> coeffArray;
+
+
+private:
+
+    // Private data
+
+        // Temperature limits of applicability for functions
+
+            scalar Tcommon_;
+
+            scalar Tlow_;
+
+            scalar Thigh_;
+
+
+        // Polynomial using inverse temperatures
+        bool invTemp_;
+
+        coeffArray highACoeffs_;
+        coeffArray lowACoeffs_;
+
+
     // Private member functions
 
-        //- Disallow default bitwise copy construct
-        noRadiation(const noRadiation&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const noRadiation&);
+        //- Check given temperature is within the range of the fitted coeffs
+        void checkT(const scalar T) const;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("noRadiation");
-
-
     // Constructors
 
-        //- Construct from components
-        noRadiation(const volScalarField& T);
+        //- Construct from Istream
+        absorptionCoeffs(Istream&);
+
+        // Null constructor
+        absorptionCoeffs()
+        {}
 
 
-    //- Destructor
-    virtual ~noRadiation();
+    // Destructor
+    ~absorptionCoeffs();
 
 
     // Member functions
 
-        // Edit
+        //- Return the coefficients corresponding to the given temperature
+        const coeffArray& coeffs(const scalar T) const;
 
-            //- Solve radiation equation(s)
-            void calculate();
+        // Initialise from a dictionary
+        void initialise(const dictionary&);
 
-            //- Read radiationProperties dictionary
-            bool read();
+        // Initialise from an Istream
+        void initialise(Istream&);
 
-            //- Source term component (for power of T^4)
-            tmp<volScalarField> Rp() const;
 
-            //- Source term component (constant)
-            tmp<DimensionedField<scalar, volMesh> > Ru() const;
+    // Access Functions
+
+        inline bool invTemp() const;
+
+        inline scalar Tcommon() const;
+
+        inline scalar Tlow() const;
+
+        inline scalar Thigh() const;
+
+        inline const coeffArray& highACoeffs() const;
+
+        inline const coeffArray& lowACoeffs() const;
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace radiation
 } // End namespace Foam
+} // End namespace radiation
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "absorptionCoeffsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
