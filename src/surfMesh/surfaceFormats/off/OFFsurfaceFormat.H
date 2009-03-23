@@ -46,11 +46,9 @@ SourceFiles
 #ifndef OFFsurfaceFormat_H
 #define OFFsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
-#include "OFFsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,8 +64,7 @@ namespace fileFormats
 template<class Face>
 class OFFsurfaceFormat
 :
-    public MeshedSurface<Face>,
-    public OFFsurfaceFormatCore
+    public MeshedSurface<Face>
 {
     // Private Member Functions
 
@@ -101,58 +98,17 @@ public:
 
     // Member Functions
 
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write surface mesh components
-        static void write
-        (
-            Ostream&,
-            const pointField&,
-            const List<Face>&,
-            const List<surfZone>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& name,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
-        //- Write UnsortedMeshedSurface
-        //  The output is sorted by zone.
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  The output is sorted by zone.
-        static void write
-        (
-            const fileName& name,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
         //- Write object
-        virtual void write(Ostream& os) const
+        virtual void write(const fileName& name) const
         {
-            write(os, *this);
+            write(name, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

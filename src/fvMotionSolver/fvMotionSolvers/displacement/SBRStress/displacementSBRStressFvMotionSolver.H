@@ -37,7 +37,7 @@ SourceFiles
 #ifndef displacementSBRStressFvMotionSolver_H
 #define displacementSBRStressFvMotionSolver_H
 
-#include "fvMotionSolver.H"
+#include "displacementFvMotionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -53,12 +53,9 @@ class motionDiffusivity;
 
 class displacementSBRStressFvMotionSolver
 :
-    public fvMotionSolver
+    public displacementFvMotionSolver
 {
     // Private data
-
-        //- Reference point field
-        pointField points0_;
 
         //- Point motion field
         mutable pointVectorField pointDisplacement_;
@@ -104,12 +101,6 @@ public:
 
 
     // Member Functions
-
-        //- Return reference to the reference field
-        const pointField& points0() const
-        {
-            return points0_;
-        }
 
         //- Return reference to the point motion displacement field
         pointVectorField& pointDisplacement()

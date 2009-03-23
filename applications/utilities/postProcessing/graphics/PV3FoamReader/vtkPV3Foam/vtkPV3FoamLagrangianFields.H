@@ -30,6 +30,8 @@ InClass
 #ifndef vtkPV3FoamLagrangianFields_H
 #define vtkPV3FoamLagrangianFields_H
 
+#include "Cloud.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class Type>

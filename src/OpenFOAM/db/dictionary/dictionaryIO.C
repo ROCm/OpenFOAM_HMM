@@ -154,12 +154,8 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
         // Write entry
         os << e;
 
-        // Add new line if applicable
-        if
-        (
-            (e.isDict() || (!e.isDict() && parent()==dictionary::null))
-         && e != *last()
-        )
+        // Add extra new line between entries for "top-level" dictionaries
+        if (!subDict && parent() == dictionary::null && e != *last())
         {
             os << nl;
         }
@@ -167,7 +163,7 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
         // Check stream before going to next entry.
         if (!os.good())
         {
-            WarningIn("dictionary::write(Ostream& os, bool subDict)")
+            WarningIn("dictionary::write(Ostream&, bool subDict)")
                 << "Can't write entry " << iter().keyword()
                 << " for dictionary " << name()
                 << endl;

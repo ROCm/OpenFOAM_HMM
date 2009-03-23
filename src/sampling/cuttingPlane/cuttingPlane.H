@@ -62,10 +62,10 @@ class primitiveMesh;
 class cuttingPlane
 :
     public plane,
-    public BasicMeshedSurface<face>
+    public MeshedSurface<face>
 {
     //- Private typedefs for convenience
-        typedef BasicMeshedSurface<face> MeshStorage;
+        typedef MeshedSurface<face> MeshStorage;
 
     // Private data
 

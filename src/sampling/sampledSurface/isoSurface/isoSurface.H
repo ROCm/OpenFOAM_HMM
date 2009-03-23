@@ -439,8 +439,8 @@ public:
             return triPointMergeMap_;
         }
 
-        //- Interpolates cCoords,pCoords. Takes the original fields
-        //  used to create the iso surface.
+        //- Interpolates cCoords,pCoords. Uses the references to the original
+        //  fields used to create the iso surface.
         template <class Type>
         tmp<Field<Type> > interpolate
         (

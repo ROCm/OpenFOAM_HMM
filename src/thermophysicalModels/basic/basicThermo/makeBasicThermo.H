@@ -44,7 +44,7 @@ typedef Cthermo<Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >     \
 defineTemplateTypeNameAndDebugWithName                                        \
     (Cthermo##Mixture##Transport##Thermo##EqnOfState,                         \
     #Cthermo                                                                  \
-    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0)  \
+    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0); \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \

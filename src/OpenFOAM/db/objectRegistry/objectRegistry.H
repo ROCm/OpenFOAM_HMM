@@ -160,6 +160,9 @@ public:
 
         // Edit
 
+            //- Rename
+            virtual void rename(const word& newName);
+
             //- Add an regIOobject to registry
             bool checkIn(regIOobject&) const;
 

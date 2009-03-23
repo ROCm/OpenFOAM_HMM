@@ -21,7 +21,7 @@ List<IOField<vector>* > sprayVectorFieldPtrs
         (
             sprayScalarNames[fieldI],
             runTime.timeName(),
-            "lagrangian",
+            cloud::prefix,
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -53,7 +53,7 @@ List<IOField<vector>* > sprayVectorFieldPtrs
         (
             sprayVectorNames[fieldI],
             runTime.timeName(),
-            "lagrangian",
+            cloud::prefix,
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE

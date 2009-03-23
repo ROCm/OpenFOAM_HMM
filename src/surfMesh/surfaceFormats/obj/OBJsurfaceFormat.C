@@ -25,8 +25,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "OBJsurfaceFormat.H"
+#include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
+#include "Ostream.H"
+#include "OFstream.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -213,84 +216,108 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 template<class Face>
 void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfZone>& zoneLst
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
-    writeHeader(os, pointLst, faceLst.size(), zoneLst);
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
+
+    // for no zones, suppress the group name
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size() > 1
+      ? surf.surfZones()
+      : oneZone(faceLst, "")
+    );
+
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::OBJsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+
+    os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
+        << "o " << os.name().lessExt().name() << nl
+        << nl
+        << "# points : " << pointLst.size() << nl
+        << "# faces  : " << faceLst.size() << nl
+        << "# zones  : " << zones.size() << nl;
+
+    // Print zone names as comment
+    forAll(zones, zoneI)
+    {
+        os  << "#   " << zoneI << "  " << zones[zoneI].name()
+            << "  (nFaces: " << zones[zoneI].size() << ")" << nl;
+    }
+
+    os  << nl
+        << "# <points count=\"" << pointLst.size() << "\">" << nl;
+
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        const point& pt = pointLst[ptI];
+
+        os  << "v " << pt.x() << ' '  << pt.y() << ' '  << pt.z() << nl;
+    }
+
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+
 
     label faceIndex = 0;
-    forAll(zoneLst, zoneI)
+    forAll(zones, zoneI)
     {
-        const surfZone& zone = zoneLst[zoneI];
+        const surfZone& zone = zones[zoneI];
 
-        os << "g " << zone.name() << endl;
-
-        forAll(zone, localFaceI)
+        if (zone.name().size())
         {
-            const Face& f = faceLst[faceIndex++];
+            os << "g " << zone.name() << endl;
+        }
 
-            os << 'f';
-            forAll(f, fp)
+        if (useFaceMap)
+        {
+            forAll(zone, localFaceI)
             {
-                os << ' ' << f[fp] + 1;
+                const Face& f = faceLst[faceMap[faceIndex++]];
+
+                os << 'f';
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp] + 1;
+                }
+                os << endl;
             }
-            os << endl;
+        }
+        else
+        {
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+
+                os << 'f';
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp] + 1;
+                }
+                os << endl;
+            }
         }
     }
     os << "# </faces>" << endl;
 }
 
-
-template<class Face>
-void Foam::fileFormats::OBJsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    write(os, surf.points(), surf.faces(), surf.zones());
-}
-
-
-template<class Face>
-void Foam::fileFormats::OBJsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-
-    labelList faceMap;
-    List<surfZone> zoneLst = surf.sortedZones(faceMap);
-
-    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
-
-    label faceIndex = 0;
-    forAll(zoneLst, zoneI)
-    {
-        // Print all faces belonging to this zone
-        const surfZone& zone = zoneLst[zoneI];
-
-        os << "g " << zone.name() << endl;
-
-        forAll(zone, localFaceI)
-        {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-
-            os << 'f';
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp] + 1;
-            }
-            os << endl;
-        }
-    }
-
-    os << "# </faces>" << endl;
-}
 
 // ************************************************************************* //

@@ -117,12 +117,7 @@ Foam::dictionary::dictionary
     name_(dict.name()),
     parent_(parentDict)
 {
-    for
-    (
-        IDLList<entry>::iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllIter(IDLList<entry>, *this, iter)
     {
         hashedEntries_.insert(iter().keyword(), &iter());
 
@@ -147,12 +142,7 @@ Foam::dictionary::dictionary
     name_(dict.name()),
     parent_(dictionary::null)
 {
-    for
-    (
-        IDLList<entry>::iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllIter(IDLList<entry>, *this, iter)
     {
         hashedEntries_.insert(iter().keyword(), &iter());
 
@@ -238,12 +228,7 @@ Foam::SHA1Digest Foam::dictionary::digest() const
     OSHA1stream os;
 
     // process entries
-    for
-    (
-        IDLList<entry>::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, *this, iter)
     {
         os << *iter;
     }
@@ -262,7 +247,8 @@ bool Foam::dictionary::found(const word& keyword, bool recursive) const
     {
         if (patternEntries_.size())
         {
-            DLList<entry*>::const_iterator wcLink = patternEntries_.begin();
+            DLList<entry*>::const_iterator wcLink =
+                patternEntries_.begin();
             DLList<autoPtr<regExp> >::const_iterator reLink =
                 patternRegexps_.begin();
 
@@ -475,12 +461,7 @@ Foam::wordList Foam::dictionary::toc() const
     wordList keys(size());
 
     label nKeys = 0;
-    for
-    (
-        IDLList<entry>::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>::const_iterator, *this, iter)
     {
         keys[nKeys++] = iter().keyword();
     }
@@ -494,12 +475,7 @@ Foam::List<Foam::keyType> Foam::dictionary::keys(bool patterns) const
     List<keyType> keys(size());
 
     label nKeys = 0;
-    for
-    (
-        IDLList<entry>::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, *this, iter)
     {
         if (iter().keyword().isPattern() ? patterns : !patterns)
         {
@@ -665,8 +641,10 @@ bool Foam::dictionary::remove(const word& Keyword)
     if (iter != hashedEntries_.end())
     {
         // Delete from patterns first
-        DLList<entry*>::iterator wcLink = patternEntries_.begin();
-        DLList<autoPtr<regExp> >::iterator reLink = patternRegexps_.begin();
+        DLList<entry*>::iterator wcLink =
+            patternEntries_.begin();
+        DLList<autoPtr<regExp> >::iterator reLink =
+            patternRegexps_.begin();
 
         // Find in pattern using exact match only
         if (findInPatterns(false, Keyword, wcLink, reLink))
@@ -792,12 +770,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
 
     bool changed = false;
 
-    for
-    (
-        IDLList<entry>::const_iterator iter = dict.begin();
-        iter != dict.end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, *this, iter)
     {
         HashTable<entry*>::iterator fnd = hashedEntries_.find(iter().keyword());
 
@@ -882,12 +855,7 @@ void Foam::dictionary::operator=(const dictionary& rhs)
     // Create clones of the entries in the given dictionary
     // resetting the parentDict to this dictionary
 
-    for
-    (
-        IDLList<entry>::const_iterator iter = rhs.begin();
-        iter != rhs.end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, rhs, iter)
     {
         add(iter().clone(*this).ptr());
     }
@@ -904,12 +872,7 @@ void Foam::dictionary::operator+=(const dictionary& rhs)
             << abort(FatalError);
     }
 
-    for
-    (
-        IDLList<entry>::const_iterator iter = rhs.begin();
-        iter != rhs.end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, rhs, iter)
     {
         add(iter().clone(*this).ptr());
     }
@@ -926,12 +889,7 @@ void Foam::dictionary::operator|=(const dictionary& rhs)
             << abort(FatalError);
     }
 
-    for
-    (
-        IDLList<entry>::const_iterator iter = rhs.begin();
-        iter != rhs.end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, rhs, iter)
     {
         if (!found(iter().keyword()))
         {
@@ -951,12 +909,7 @@ void Foam::dictionary::operator<<=(const dictionary& rhs)
             << abort(FatalError);
     }
 
-    for
-    (
-        IDLList<entry>::const_iterator iter = rhs.begin();
-        iter != rhs.end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, rhs, iter)
     {
         set(iter().clone(*this).ptr());
     }

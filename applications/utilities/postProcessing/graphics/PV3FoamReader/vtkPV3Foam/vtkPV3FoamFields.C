@@ -266,7 +266,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         (
             mesh,
             dbPtr_().timeName(),
-            "lagrangian"/cloudName
+            cloud::prefix/cloudName
         );
         pruneObjectList(objects, selectedFields);
 

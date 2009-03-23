@@ -158,11 +158,11 @@ public:
 
         // Assignment
 
-            void operator=(const fileName&);
-            void operator=(const word&);
-            void operator=(const string&);
-            void operator=(const std::string&);
-            void operator=(const char*);
+            const fileName& operator=(const fileName&);
+            const fileName& operator=(const word&);
+            const fileName& operator=(const string&);
+            const fileName& operator=(const std::string&);
+            const fileName& operator=(const char*);
 
 
     // IOstream operators

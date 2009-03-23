@@ -31,7 +31,7 @@ License
 
 defineTypeNameAndDebug(Foam::surfaceRegistry, 0);
 
-const Foam::word Foam::surfaceRegistry::subInstance("surfaces");
+const Foam::word Foam::surfaceRegistry::prefix("surfaces");
 Foam::word Foam::surfaceRegistry::defaultName("default");
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -48,7 +48,7 @@ Foam::surfaceRegistry::surfaceRegistry
         (
             ( surfName.size() ? surfName : defaultName ),
             obr.time().timeName(),
-            subInstance,
+            prefix,
             obr,
             IOobject::NO_READ,
             IOobject::NO_WRITE

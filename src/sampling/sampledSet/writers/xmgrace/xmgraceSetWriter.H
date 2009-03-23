@@ -81,7 +81,7 @@ public:
             const coordSet&,
             const wordList&,
             const List<const Field<Type>*>&,
-            Ostream& os
+            Ostream&
         ) const;
 };
 

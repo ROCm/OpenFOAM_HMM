@@ -153,6 +153,16 @@ void Foam::sampledIsoSurface::getIsoFields() const
             }
         }
 
+
+        // If averaging redo the volField. Can only be done now since needs the
+        // point field.
+        if (average_)
+        {
+            storedVolFieldPtr_.reset(average(fvm, *pointFieldPtr_).ptr());
+            volFieldPtr_ = storedVolFieldPtr_.operator->();
+        }
+
+
         if (debug)
         {
             Info<< "sampledIsoSurface::getIsoField() : volField "
@@ -240,6 +250,20 @@ void Foam::sampledIsoSurface::getIsoFields() const
             storedPointSubFieldPtr_->checkOut();
             pointSubFieldPtr_ = storedPointSubFieldPtr_.operator->();
         }
+
+
+
+        // If averaging redo the volField. Can only be done now since needs the
+        // point field.
+        if (average_)
+        {
+            storedVolSubFieldPtr_.reset
+            (
+                average(subFvm, *pointSubFieldPtr_).ptr()
+            );
+            volSubFieldPtr_ = storedVolSubFieldPtr_.operator->();
+        }
+
 
         if (debug)
         {
@@ -394,68 +418,33 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     surfPtr_.clear();
     facesPtr_.clear();
 
-    if (average_)
+    if (subMeshPtr_.valid())
     {
-        if (subMeshPtr_.valid())
-        {
-            surfPtr_.reset
+        surfPtr_.reset
+        (
+            new isoSurface
             (
-                new isoSurface
-                (
-                    average(subMeshPtr_().subMesh(), *pointSubFieldPtr_),
-                    *pointSubFieldPtr_,
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
-        else
-        {
-            surfPtr_.reset
-            (
-                new isoSurface
-                (
-                    average(fvm, *pointFieldPtr_),
-                    *pointFieldPtr_,
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
+                *volSubFieldPtr_,
+                *pointSubFieldPtr_,
+                isoVal_,
+                regularise_,
+                mergeTol_
+            )
+        );
     }
     else
     {
-        if (subMeshPtr_.valid())
-        {
-            surfPtr_.reset
+        surfPtr_.reset
+        (
+            new isoSurface
             (
-                new isoSurface
-                (
-                    *volSubFieldPtr_,
-                    *pointSubFieldPtr_,
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
-        else
-        {
-            surfPtr_.reset
-            (
-                new isoSurface
-                (
-                    *volFieldPtr_,
-                    *pointFieldPtr_,
-                    //average(pointMesh::New(mesh()), *volFieldPtr_),
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
+                *volFieldPtr_,
+                *pointFieldPtr_,
+                isoVal_,
+                regularise_,
+                mergeTol_
+            )
+        );
     }
 
 

@@ -282,7 +282,7 @@ int main(int argc, char *argv[])
                 (
                     readDir
                     (
-                        databases[procI].timePath()/regionPrefix/"lagrangian",
+                        databases[procI].timePath()/regionPrefix/cloud::prefix,
                         fileName::DIRECTORY
                     )
                 );
@@ -300,7 +300,7 @@ int main(int argc, char *argv[])
                         (
                             procMeshes.meshes()[procI],
                             databases[procI].timeName(),
-                            "lagrangian"/cloudDirs[i]
+                            cloud::prefix/cloudDirs[i]
                         );
 
                         IOobject* positionsPtr = sprayObjs.lookup("positions");

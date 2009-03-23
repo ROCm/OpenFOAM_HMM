@@ -43,7 +43,7 @@ typedef MixtureThermo                                                         \
 defineTemplateTypeNameAndDebugWithName                                        \
     (MixtureThermo##Mixture##Transport##Thermo##EqnOfState,                   \
     #MixtureThermo                                                            \
-    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0)  \
+    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0); \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \

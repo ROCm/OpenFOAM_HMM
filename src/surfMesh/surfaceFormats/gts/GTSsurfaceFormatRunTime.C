@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GTSsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,6 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
+// read UnsortedMeshedSurface
 addNamedTemplatedToRunTimeSelectionTable
 (
     UnsortedMeshedSurface,
@@ -53,6 +53,7 @@ addNamedTemplatedToRunTimeSelectionTable
     gts
 );
 
+// write MeshedSurface
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     MeshedSurface,
@@ -72,6 +73,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     gts
 );
 
+// write UnsortedMeshedSurface
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     UnsortedMeshedSurface,

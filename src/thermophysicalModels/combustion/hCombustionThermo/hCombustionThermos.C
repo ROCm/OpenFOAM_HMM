@@ -138,7 +138,7 @@ makeCombustionThermo
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Reaction thermo
 
-defineTemplateTypeNameAndDebug(hMixtureThermo<reactingMixture>, 0)
+defineTemplateTypeNameAndDebug(hMixtureThermo<reactingMixture>, 0);
 
 typedef hMixtureThermo<reactingMixture> hMixtureThermoReactingMixture;
 

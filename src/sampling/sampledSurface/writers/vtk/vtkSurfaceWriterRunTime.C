@@ -35,6 +35,7 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+makeSurfaceWriterType(vtkSurfaceWriter, bool);
 makeSurfaceWriters(vtkSurfaceWriter);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

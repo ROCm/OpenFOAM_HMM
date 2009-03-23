@@ -25,9 +25,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceFormatsCore.H"
+
+#include "Time.H"
 #include "IFstream.H"
 #include "OFstream.H"
-#include "Time.H"
 #include "SortableList.H"
 #include "surfMesh.H"
 
@@ -36,13 +37,6 @@ License
 Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-bool
-Foam::fileFormats::surfaceFormatsCore::isNative(const word& ext)
-{
-    return (ext == nativeExt);
-}
-
 
 Foam::string
 Foam::fileFormats::surfaceFormatsCore::getLineNoComment
@@ -60,7 +54,7 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
     return line;
 }
 
-
+#if 0
 Foam::fileName
 Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
 {
@@ -68,9 +62,7 @@ Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
 
     return fileName
     (
-        surfaceRegistry::subInstance
-      / name
-      / surfMesh::meshSubDir
+        surfaceRegistry::prefix/name/surfMesh::meshSubDir
       / name + "." + nativeExt
     );
 }
@@ -79,7 +71,7 @@ Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
 Foam::fileName
 Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 (
-    const Time& d,
+    const Time& t,
     const word& surfName
 )
 {
@@ -88,12 +80,12 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     // Search back through the time directories list to find the time
     // closest to and lower than current time
 
-    instantList ts = d.times();
+    instantList ts = t.times();
     label instanceI;
 
     for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[instanceI].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= t.timeOutputValue())
         {
             break;
         }
@@ -106,7 +98,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     {
         for (label i = instanceI; i >= 0; --i)
         {
-            if (isFile(d.path()/ts[i].name()/localName))
+            if (isFile(t.path()/ts[i].name()/localName))
             {
                 return ts[i].name();
             }
@@ -120,7 +112,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 Foam::fileName
 Foam::fileFormats::surfaceFormatsCore::findMeshFile
 (
-    const Time& d,
+    const Time& t,
     const word& surfName
 )
 {
@@ -129,12 +121,12 @@ Foam::fileFormats::surfaceFormatsCore::findMeshFile
     // Search back through the time directories list to find the time
     // closest to and lower than current time
 
-    instantList ts = d.times();
+    instantList ts = t.times();
     label instanceI;
 
     for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[instanceI].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= t.timeOutputValue())
         {
             break;
         }
@@ -147,7 +139,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshFile
     {
         for (label i = instanceI; i >= 0; --i)
         {
-            fileName testName(d.path()/ts[i].name()/localName);
+            fileName testName(t.path()/ts[i].name()/localName);
 
             if (isFile(testName))
             {
@@ -157,94 +149,9 @@ Foam::fileFormats::surfaceFormatsCore::findMeshFile
     }
 
     // fallback to "constant"
-    return d.path()/"constant"/localName;
+    return t.path()/"constant"/localName;
 }
-
-
-// Returns zone info.
-// Sets faceMap to the indexing according to zone numbers.
-// Zone numbers start at 0.
-Foam::surfZoneList
-Foam::fileFormats::surfaceFormatsCore::sortedZonesById
-(
-    const UList<label>& zoneIds,
-    const Map<word>& zoneNames,
-    labelList& faceMap
-)
-{
-    // determine sort order according to zone numbers
-
-    // std::sort() really seems to mix up the order.
-    // and std::stable_sort() might take too long / too much memory
-
-    // Assuming that we have relatively fewer zones compared to the
-    // number of items, just do it ourselves
-
-    // step 1: get zone sizes and store (origId => zoneI)
-    Map<label> lookup;
-    forAll(zoneIds, faceI)
-    {
-        const label origId = zoneIds[faceI];
-
-        Map<label>::iterator fnd = lookup.find(origId);
-        if (fnd != lookup.end())
-        {
-            fnd()++;
-        }
-        else
-        {
-            lookup.insert(origId, 1);
-        }
-    }
-
-    // step 2: assign start/size (and name) to the newZones
-    // re-use the lookup to map (zoneId => zoneI)
-    surfZoneList zoneLst(lookup.size());
-    label start = 0;
-    label zoneI = 0;
-    forAllIter(Map<label>, lookup, iter)
-    {
-        label origId = iter.key();
-
-        word name;
-        Map<word>::const_iterator fnd = zoneNames.find(origId);
-        if (fnd != zoneNames.end())
-        {
-            name = fnd();
-        }
-        else
-        {
-            name = word("zone") + ::Foam::name(zoneI);
-        }
-
-        zoneLst[zoneI] = surfZone
-        (
-            name,
-            0,           // initialize with zero size
-            start,
-            zoneI
-        );
-
-        // increment the start for the next zone
-        // and save the (zoneId => zoneI) mapping
-        start += iter();
-        iter() = zoneI++;
-    }
-
-
-    // step 3: build the re-ordering
-    faceMap.setSize(zoneIds.size());
-
-    forAll(zoneIds, faceI)
-    {
-        label zoneI = lookup[zoneIds[faceI]];
-        faceMap[faceI] =
-            zoneLst[zoneI].start() + zoneLst[zoneI].size()++;
-    }
-
-    // with reordered faces registered in faceMap
-    return zoneLst;
-}
+#endif
 
 
 bool
@@ -267,7 +174,7 @@ Foam::fileFormats::surfaceFormatsCore::checkSupport
 
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl
-            <<"Valid types: ( " << nativeExt;
+            <<"Valid types: (";
         // compact output:
         forAll(known, i)
         {
@@ -290,6 +197,7 @@ Foam::fileFormats::surfaceFormatsCore::surfaceFormatsCore()
 
 Foam::fileFormats::surfaceFormatsCore::~surfaceFormatsCore()
 {}
+
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 

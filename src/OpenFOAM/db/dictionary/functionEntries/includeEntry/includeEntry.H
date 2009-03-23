@@ -58,7 +58,7 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class includeEntry Declaration
+                        Class includeEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class includeEntry
@@ -68,7 +68,7 @@ class includeEntry
     // Private Member Functions
 
         //- Read the include fileName from Istream, expand and return
-        static fileName includeFileName(Istream& is);
+        static fileName includeFileName(Istream&);
 
         //- Disallow default bitwise copy construct
         includeEntry(const includeEntry&);
@@ -86,18 +86,14 @@ public:
     // Member Functions
 
         //- Execute the functionEntry in a sub-dict context
-        static bool execute
-        (
-            dictionary& parentDict,
-            Istream& is
-        );
+        static bool execute(dictionary& parentDict, Istream&);
 
         //- Execute the functionEntry in a primitiveEntry context
         static bool execute
         (
             const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
+            primitiveEntry&,
+            Istream&
         );
 
 };

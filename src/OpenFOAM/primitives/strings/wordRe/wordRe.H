@@ -41,7 +41,7 @@ Description
 Note
     If the string contents are changed - eg, by the operator+=() or by
     string::replace(), etc - it will be necessary to use compile() or
-    recompile() to sychronize the regular expression.
+    recompile() to synchronize the regular expression.
 
 SourceFiles
     wordRe.C
@@ -187,22 +187,22 @@ public:
 
             //- Assign copy
             //  Always case sensitive
-            inline void operator=(const wordRe&);
+            inline const wordRe& operator=(const wordRe&);
 
             //- Copy word, never a regular expression
-            inline void operator=(const word&);
+            inline const wordRe& operator=(const word&);
 
             //- Copy string, auto-test for regular expression
             //  Always case sensitive
-            inline void operator=(const string&);
+            inline const wordRe& operator=(const string&);
 
             //- Copy string, auto-test for regular expression
             //  Always case sensitive
-            inline void operator=(const std::string&);
+            inline const wordRe& operator=(const std::string&);
 
             //- Copy string, auto-test for regular expression
             //  Always case sensitive
-            inline void operator=(const char*);
+            inline const wordRe& operator=(const char*);
 
 
     // IOstream operators

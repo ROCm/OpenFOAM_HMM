@@ -147,8 +147,7 @@ const Type& Foam::objectRegistry::lookupObject(const word& name) const
         }
     }
 
-    const Type* dummyPtr_ = NULL;
-    return *dummyPtr_;
+    return *reinterpret_cast< const Type* >(0);
 }
 
 

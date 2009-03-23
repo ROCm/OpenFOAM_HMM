@@ -824,8 +824,10 @@ Foam::direction Foam::indexedOctree<Type>::getFace
 }
 
 
-// Traverse a node. If intersects a triangle return first intersection point.
-// Else return the bounxing box face hit:
+// Traverse a node. If intersects a triangle return first intersection point:
+//  hitInfo.index = index of shape
+//  hitInfo.point = point on shape
+// Else return a miss and the bounding box face hit:
 //  hitInfo.point = coordinate of intersection of ray with bounding box
 //  faceID  = index of bounding box face
 template <class Type>
@@ -918,10 +920,10 @@ void Foam::indexedOctree<Type>::traverseNode
         {
             faceID = 0;
 
-            WarningIn("indexedOctree<Type>::traverseNode")
+            FatalErrorIn("indexedOctree<Type>::traverseNode(..)")
                 << "Did not hit side of box " << subBb
                 << " with ray from " << start << " to " << end
-                << endl;
+                << abort(FatalError);
         }
         else
         {
@@ -936,10 +938,10 @@ void Foam::indexedOctree<Type>::traverseNode
         {
             faceID = 0;
 
-            WarningIn("indexedOctree<Type>::traverseNode")
+            FatalErrorIn("indexedOctree<Type>::traverseNode(..)")
                 << "Did not hit side of box " << subBb
                 << " with ray from " << start << " to " << end
-                << endl;
+                << abort(FatalError);
         }
         else
         {

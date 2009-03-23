@@ -64,24 +64,24 @@ class sampledSurfaces
         template<class Type>
         class fieldGroup
         :
-            public wordList
+            public DynamicList<word>
         {
         public:
 
             //- Surface formatter
-            autoPtr<surfaceWriter<Type> > formatter;
+            autoPtr< surfaceWriter<Type> > formatter;
 
             //- Construct null
             fieldGroup()
             :
-                wordList(0),
+                DynamicList<word>(0),
                 formatter(NULL)
             {}
 
             //- Construct for a particular surface format
             fieldGroup(const word& writeFormat)
             :
-                wordList(0),
+                DynamicList<word>(0),
                 formatter(surfaceWriter<Type>::New(writeFormat))
             {}
 
@@ -93,9 +93,16 @@ class sampledSurfaces
                 const wordList& fieldNames
             )
             :
-                wordList(fieldNames),
+                DynamicList<word>(fieldNames),
                 formatter(surfaceWriter<Type>::New(writeFormat))
             {}
+
+            void reset(const label nElem)
+            {
+                formatter.clear();
+                DynamicList<word>::setCapacity(nElem);
+                DynamicList<word>::clear(); 
+            }
 
             void operator=(const word& writeFormat)
             {
@@ -104,7 +111,7 @@ class sampledSurfaces
 
             void operator=(const wordList& fieldNames)
             {
-                wordList::operator=(fieldNames);
+                DynamicList<word>::operator=(fieldNames);
             }
         };
 
@@ -171,6 +178,9 @@ class sampledSurfaces
 
         // Calculated
 
+            //- Generic surface formatter
+            autoPtr< surfaceWriter<bool> > genericFormatter_;
+
             //- Categorized scalar/vector/tensor fields
             fieldGroup<scalar> scalarFields_;
             fieldGroup<vector> vectorFields_;
@@ -181,16 +191,11 @@ class sampledSurfaces
 
     // Private Member Functions
 
-        //- Classify field types, return true if nFields > 0
-        bool checkFieldTypes();
+        //- Classify field types, returns the number of fields
+        label classifyFieldTypes();
 
-        //- Find the fields in the list of the given type, return count
-        template<class Type>
-        label grep
-        (
-            fieldGroup<Type>& fieldList,
-            const wordList& fieldTypes
-        ) const;
+        //- Write geometry only
+        void writeGeometry() const;
 
         //- Sample and write a particular volume field
         template<class Type>

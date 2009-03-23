@@ -25,117 +25,44 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "boundBox.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// Read surf grouping, points, faces directly from Istream
 template<class Face>
-bool Foam::MeshedSurface<Face>::read(Istream& is)
+void Foam::MeshedSurface<Face>::writeStats(Ostream& os) const
 {
-    clear();
-
-    List<surfZone> newZones(is);
-
-    // copy and set the indices
-    zones_.setSize(newZones.size());
-    forAll(newZones, zoneI)
+    os  << "points      : " << this->points().size() << nl;
+    if (MeshedSurface<Face>::isTri())
     {
-        zones_[zoneI] = surfZone
-        (
-            newZones[zoneI],
-            zoneI
-        );
-    }
-
-    // read points:
-    is >> this->storedPoints();
-
-    // must triangulate?
-    if (this->isTri())
-    {
-        List<face> faceLst(is);
-
-        MeshedSurface<face> surf;
-        surf.reset
-        (
-            Xfer<pointField>::null(),
-            faceLst.xfer()
-        );
-        surf.addZones(zones_);
-
-        // this will break if the triangulation needed points
-        surf.triangulate();
-        zones_ = surf.zones();
-
-        // transcribe from face -> triFace (Face)
-        const List<face>& origFaces = surf.faces();
-        List<Face>  newFaces(origFaces.size());
-        forAll(origFaces, faceI)
-        {
-            newFaces[faceI] = Face
-            (
-                static_cast<const UList<label>&>(origFaces[faceI])
-            );
-        }
-        surf.clear();
-
-        this->storedFaces().transfer(newFaces);
+        os << "triangles   : " << this->size() << nl;
     }
     else
     {
-        // read faces:
-        is >> this->storedFaces();
+        label nTri = 0;
+        label nQuad = 0;
+        forAll(*this, i)
+        {
+            const label n = this->operator[](i).size();
+
+            if (n == 3)
+            {
+                nTri++;
+            }
+            else if (n == 4)
+            {
+                nQuad++;
+            }
+        }
+
+        os  << "faces       : " << this->size()
+            << "  (tri:" << nTri << " quad:" << nQuad
+            << " poly:" << (this->size() - nTri - nQuad ) << ")" << nl;
     }
 
-    return is.good();
+    os  << "boundingBox : " << boundBox(this->points()) << endl;
 }
 
-
-template<class Face>
-void Foam::MeshedSurface<Face>::write(Ostream& os) const
-{
-    // just emit some information until we get a nice IOobject
-    IOobject::writeBanner(os);
-    os  << "// OpenFOAM Surface Format" << nl
-        << "// ~~~~~~~~~~~~~~~~~~~~~~~" << nl
-        << "// zones:" << nl
-        << zones_.size() << nl << token::BEGIN_LIST << incrIndent << nl;
-
-    forAll(zones_, zoneI)
-    {
-        zones_[zoneI].writeDict(os);
-    }
-    os  << decrIndent << token::END_LIST << nl;
-
-    IOobject::writeDivider(os);
-
-    // Note: Write with global point numbering
-    os  << "\n// points:" << nl << this->points() << nl;
-
-    IOobject::writeDivider(os);
-    os  << "\n// faces:"  << nl << this->faces() << nl;
-
-    IOobject::writeDivider(os);
-
-    // Check state of Ostream
-    os.check("MeshedSurface::write(Ostream&)");
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-template<class Face>
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    surf.write(os);
-    return os;
-}
 
 // ************************************************************************* //

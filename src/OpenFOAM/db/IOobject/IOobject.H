@@ -359,6 +359,10 @@ public:
             template<class Stream>
             static inline Stream& writeDivider(Stream& os);
 
+            //- Write the standard end file divider
+            template<class Stream>
+            static inline Stream& writeEndDivider(Stream& os);
+
             //- Write header
             bool writeHeader(Ostream&) const;
 

@@ -26,8 +26,8 @@ License
 
 #include "MeshedSurface.H"
 #include "UnsortedMeshedSurface.H"
-#include "IFstream.H"
-#include "OFstream.H"
+#include "MeshedSurfaceProxy.H"
+#include "mergePoints.H"
 #include "Time.H"
 #include "ListOps.H"
 #include "polyBoundaryMesh.H"
@@ -37,6 +37,13 @@ License
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class Face>
+inline bool Foam::MeshedSurface<Face>::isTri()
+{
+    return false;
+}
+
 
 template<class Face>
 Foam::wordHashSet Foam::MeshedSurface<Face>::readTypes()
@@ -61,21 +68,13 @@ bool Foam::MeshedSurface<Face>::canReadType
     const bool verbose
 )
 {
-    // handle 'native' format directly
-    if (isNative(ext))
-    {
-        return true;
-    }
-    else
-    {
-        return checkSupport
-        (
-            readTypes() | SiblingType::readTypes(),
-            ext,
-            verbose,
-            "reading"
-        );
-    }
+    return checkSupport
+    (
+        readTypes() | FriendType::readTypes(),
+        ext,
+        verbose,
+        "reading"
+   );
 }
 
 
@@ -86,13 +85,13 @@ bool Foam::MeshedSurface<Face>::canWriteType
     const bool verbose
 )
 {
-    // handle 'native' format directly
-    if (isNative(ext))
-    {
-        return true;
-    }
-
-    return checkSupport(writeTypes(), ext, verbose, "writing");
+    return checkSupport
+    (
+        writeTypes() | ProxyType::writeTypes(),
+        ext,
+        verbose,
+        "writing"
+    );
 }
 
 
@@ -116,7 +115,7 @@ template<class Face>
 void Foam::MeshedSurface<Face>::write
 (
     const fileName& name,
-    const MeshedSurface& surf
+    const MeshedSurface<Face>& surf
 )
 {
     if (debug)
@@ -127,30 +126,36 @@ void Foam::MeshedSurface<Face>::write
             << endl;
     }
 
-    word ext = name.ext();
-
-    // handle 'native' format directly
-    if (isNative(ext))
-    {
-        surf.write(OFstream(name)());
-        return;
-    }
+    const word ext = name.ext();
 
     typename writefileExtensionMemberFunctionTable::iterator mfIter =
         writefileExtensionMemberFunctionTablePtr_->find(ext);
 
     if (mfIter == writefileExtensionMemberFunctionTablePtr_->end())
     {
-        FatalErrorIn
-        (
-            "MeshedSurface::write(const fileName&)"
-        )   << "Unknown file extension " << ext << nl << nl
-            << "Valid types are :" << endl
-            << writeTypes()
-            << exit(FatalError);
-    }
+        // no direct writer, delegate to proxy if possible
+        wordHashSet supported = ProxyType::writeTypes();
 
-    mfIter()(name, surf);
+        if (supported.found(ext))
+        {
+            MeshedSurfaceProxy<Face>(surf).write(name);
+        }
+        else
+        {
+            FatalErrorIn
+            (
+                "MeshedSurface::write"
+                "(const fileName&, const MeshedSurface&)"
+            )   << "Unknown file extension " << ext << nl << nl
+                << "Valid types are :" << endl
+                << (supported | writeTypes())
+                << exit(FatalError);
+        }
+    }
+    else
+    {
+        mfIter()(name, surf);
+    }
 }
 
 
@@ -158,36 +163,42 @@ void Foam::MeshedSurface<Face>::write
 
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface()
+:
+    ParentType(List<Face>(), pointField())
 {}
 
 
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst,
-    const Xfer<surfZoneList>& zoneLst
+    const Xfer< pointField >& pointLst,
+    const Xfer< List<Face> >& faceLst,
+    const Xfer< surfZoneList >& zoneLst
 )
 :
-    ParentType(pointLst, faceLst),
-    zones_(zoneLst)
-{}
+    ParentType(List<Face>(), pointField()),
+    zones_()
+{
+    reset(pointLst, faceLst, zoneLst);
+}
 
 
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const Xfer<pointField>& pointLst,
-    const Xfer<List<Face> >& faceLst,
+    const Xfer< pointField >& pointLst,
+    const Xfer< List<Face> >& faceLst,
     const UList<label>& zoneSizes,
     const UList<word>& zoneNames
 )
 :
-    ParentType(pointLst, faceLst)
+    ParentType(List<Face>(), pointField())
 {
-    if (&zoneSizes)
+    reset(pointLst, faceLst, Xfer<surfZoneList>());
+
+    if (zoneSizes.size())
     {
-        if (&zoneNames)
+        if (zoneNames.size())
         {
             addZones(zoneSizes, zoneNames);
         }
@@ -196,10 +207,58 @@ Foam::MeshedSurface<Face>::MeshedSurface
             addZones(zoneSizes);
         }
     }
-    else
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const MeshedSurface<Face>& surf
+)
+:
+    ParentType(surf.faces(), surf.points()),
+    zones_(surf.surfZones())
+{}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const UnsortedMeshedSurface<Face>& surf
+)
+:
+    ParentType(List<Face>(), surf.points())
+{
+    labelList faceMap;
+    this->storedZones().transfer(surf.sortedZones(faceMap));
+
+    const List<Face>& origFaces = surf.faces();
+    List<Face> newFaces(origFaces.size());
+
+    // this is somewhat like ListOps reorder and/or IndirectList
+    forAll(newFaces, faceI)
     {
-        oneZone();
+        newFaces[faceI] = origFaces[faceMap[faceI]];
     }
+
+    this->storedFaces().transfer(newFaces);
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface(const surfMesh& mesh)
+:
+    ParentType(List<Face>(), pointField())
+{
+    // same face type as surfMesh
+    MeshedSurface<face> surf
+    (
+        xferCopy(mesh.points()),
+        xferCopy(mesh.faces()),
+        xferCopy(mesh.surfZones())
+    );
+
+    this->transcribe(surf);
 }
 
 
@@ -209,6 +268,8 @@ Foam::MeshedSurface<Face>::MeshedSurface
     const polyBoundaryMesh& bMesh,
     const bool useGlobalPoints
 )
+:
+    ParentType(List<Face>(), pointField())
 {
     const polyMesh& mesh = bMesh.mesh();
     const polyPatchList& bPatches = bMesh;
@@ -277,14 +338,56 @@ Foam::MeshedSurface<Face>::MeshedSurface
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const surfMesh& mesh)
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const fileName& name,
+    const word& ext
+)
+:
+    ParentType(List<Face>(), pointField())
 {
+    read(name, ext);
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface(const fileName& name)
+:
+    ParentType(List<Face>(), pointField())
+{
+    read(name);
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const Time& t,
+    const word& surfName
+)
+:
+    ParentType(List<Face>(), pointField())
+{
+    surfMesh mesh
+    (
+        IOobject
+        (
+            "dummyName",
+            t.timeName(),
+            t,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        surfName
+    );
+
     // same face type as surfMesh
     MeshedSurface<face> surf
     (
-        xferCopy(mesh.points()),
-        xferCopy(mesh.faces()),
-        xferCopy(mesh.surfZones())
+        xferMove(mesh.storedPoints()),
+        xferMove(mesh.storedFaces()),
+        xferMove(mesh.storedZones())
     );
 
     this->transcribe(surf);
@@ -294,78 +397,22 @@ Foam::MeshedSurface<Face>::MeshedSurface(const surfMesh& mesh)
 template<class Face>
 Foam::MeshedSurface<Face>::MeshedSurface
 (
-    const UnsortedMeshedSurface<Face>& surf
+    const Xfer< UnsortedMeshedSurface<Face> >& surf
 )
-{
-    labelList faceMap;
-    surfZoneList zoneLst = surf.sortedZones(faceMap);
-    zones_.transfer(zoneLst);
-
-    const List<Face>& origFaces = surf.faces();
-    List<Face> newFaces(origFaces.size());
-
-    // this is somewhat like ListOps reorder and/or IndirectList
-    forAll(newFaces, faceI)
-    {
-        newFaces[faceI] = origFaces[faceMap[faceI]];
-    }
-
-    reset(xferCopy(surf.points()), xferMove(newFaces));
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface
-(
-    const fileName& name,
-    const word& ext
-)
-{
-    read(name, ext);
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const fileName& name)
-{
-    read(name);
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(Istream& is)
-{
-    read(is);
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const Time& d, const word& surfName)
-{
-    read(IFstream(findMeshFile(d, surfName))());
-}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const MeshedSurface& surf)
 :
-    ParentType(surf),
-    zones_(surf.zones_)
-{}
-
-
-template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface
-(
-    const Xfer<UnsortedMeshedSurface<Face> >& surf
-)
+    ParentType(List<Face>(), pointField())
 {
     transfer(surf());
 }
 
 
 template<class Face>
-Foam::MeshedSurface<Face>::MeshedSurface(const Xfer<MeshedSurface>& surf)
+Foam::MeshedSurface<Face>::MeshedSurface
+(
+    const Xfer< MeshedSurface<Face> >& surf
+)
+:
+    ParentType(List<Face>(), pointField())
 {
     transfer(surf());
 }
@@ -385,115 +432,6 @@ Foam::MeshedSurface<Face>::~MeshedSurface()
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class Face>
-void Foam::MeshedSurface<Face>::oneZone(const word& name)
-{
-    word zoneName(name);
-    if (zoneName.empty())
-    {
-        if (zones_.size())
-        {
-            zoneName = zones_[0].name();
-        }
-        if (zoneName.empty())
-        {
-            zoneName = "zone0";
-        }
-    }
-
-    // set single default zone
-    zones_.setSize(1);
-    zones_[0] = surfZone
-    (
-        zoneName,
-        this->size(),   // zone size
-        0,              // zone start
-        0               // zone index
-    );
-}
-
-
-template<class Face>
-void Foam::MeshedSurface<Face>::checkZones()
-{
-    // extra safety, ensure we have at some zones
-    // and they cover all the faces - fix start silently
-    if (zones_.size() <= 1)
-    {
-        oneZone();
-    }
-    else
-    {
-        label count = 0;
-        forAll(zones_, zoneI)
-        {
-            zones_[zoneI].start() = count;
-            count += zones_[zoneI].size();
-        }
-
-        if (count < size())
-        {
-            WarningIn
-            (
-                "MeshedSurface::checkZones()\n"
-            )
-                << "more faces " << size() << " than zones " << count
-                << " ... extending final zone"
-                << endl;
-
-            zones_[zones_.size()-1].size() += count - size();
-        }
-        else if (count > size())
-        {
-            FatalErrorIn
-            (
-                "MeshedSurface::checkZones()\n"
-            )
-                << "more zones " << count << " than faces " << size()
-                << exit(FatalError);
-        }
-    }
-}
-
-
-template<class Face>
-void Foam::MeshedSurface<Face>::sortFacesAndStore
-(
-    const Xfer<List<Face> >& unsortedFaces,
-    const Xfer<List<label> >& zoneIds,
-    const bool sorted
-)
-{
-    List<Face>  oldFaces(unsortedFaces);
-    List<label> zones(zoneIds);
-
-    if (sorted)
-    {
-        // already sorted - simply transfer faces
-        this->storedFaces().transfer(oldFaces);
-    }
-    else
-    {
-        // unsorted - determine the sorted order:
-        // avoid SortableList since we discard the main list anyhow
-        List<label> faceMap;
-        sortedOrder(zones, faceMap);
-        zones.clear();
-
-        // sorted faces
-        List<Face> newFaces(faceMap.size());
-        forAll(faceMap, faceI)
-        {
-            // use transfer to recover memory if possible
-            newFaces[faceI].transfer(oldFaces[faceMap[faceI]]);
-        }
-        this->storedFaces().transfer(newFaces);
-
-    }
-    zones.clear();
-}
-
-
-template<class Face>
 void Foam::MeshedSurface<Face>::remapFaces
 (
     const UList<label>& faceMap
@@ -502,22 +440,20 @@ void Foam::MeshedSurface<Face>::remapFaces
     // recalculate the zone start/size
     if (&faceMap && faceMap.size())
     {
-        if (zones_.empty())
-        {
-            oneZone();
-        }
-        else if (zones_.size() == 1)
+        surfZoneList& zones = storedZones();
+
+        if (zones.size() == 1)
         {
             // optimized for single zone case
-            zones_[0].size() = faceMap.size();
+            zones[0].size() = faceMap.size();
         }
-        else
+        else if (zones.size())
         {
             label newFaceI = 0;
             label origEndI = 0;
-            forAll(zones_, zoneI)
+            forAll(zones, zoneI)
             {
-                surfZone& zone = zones_[zoneI];
+                surfZone& zone = zones[zoneI];
 
                 // adjust zone start
                 zone.start() = newFaceI;
@@ -548,9 +484,470 @@ void Foam::MeshedSurface<Face>::remapFaces
 template<class Face>
 void Foam::MeshedSurface<Face>::clear()
 {
-    ParentType::clear();
-    zones_.clear();
+    ParentType::clearOut();
+
+    storedPoints().clear();
+    storedFaces().clear();
+    storedZones().clear();
 }
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::movePoints(const pointField& newPoints)
+{
+    // Remove all geometry dependent data
+    ParentType::clearTopology();
+
+    // Adapt for new point position
+    ParentType::movePoints(newPoints);
+
+    // Copy new points
+    storedPoints() = newPoints;
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::scalePoints(const scalar& scaleFactor)
+{
+    // avoid bad scaling
+    if (scaleFactor > 0 && scaleFactor != 1.0)
+    {
+        // Remove all geometry dependent data
+        ParentType::clearTopology();
+
+        // Adapt for new point position
+        ParentType::movePoints(pointField());
+
+        storedPoints() *= scaleFactor;
+    }
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::reset
+(
+    const Xfer< pointField >& pointLst,
+    const Xfer< List<Face> >& faceLst,
+    const Xfer< surfZoneList >& zoneLst
+)
+{
+    ParentType::clearOut();
+
+    // Take over new primitive data.
+    // Optimized to avoid overwriting data at all
+    if (&pointLst)
+    {
+        storedPoints().transfer(pointLst());
+    }
+
+    if (&faceLst)
+    {
+        storedFaces().transfer(faceLst());
+    }
+
+    if (&zoneLst)
+    {
+        storedZones().transfer(zoneLst());
+    }
+}
+
+
+template<class Face>
+void Foam::MeshedSurface<Face>::reset
+(
+    const Xfer< List<point> >& pointLst,
+    const Xfer< List<Face> >& faceLst,
+    const Xfer< surfZoneList >& zoneLst
+)
+{
+    ParentType::clearOut();
+
+    // Take over new primitive data.
+    // Optimized to avoid overwriting data at all
+    if (&pointLst)
+    {
+        storedPoints().transfer(pointLst());
+    }
+
+    if (&faceLst)
+    {
+        storedFaces().transfer(faceLst());
+    }
+
+    if (&zoneLst)
+    {
+        storedZones().transfer(zoneLst());
+    }
+}
+
+
+// Remove badly degenerate faces, double faces.
+template<class Face>
+void Foam::MeshedSurface<Face>::cleanup(const bool verbose)
+{
+    // merge points (already done for STL, TRI)
+    stitchFaces(SMALL, verbose);
+
+    checkFaces(verbose);
+    this->checkTopology(verbose);
+}
+
+
+template<class Face>
+bool Foam::MeshedSurface<Face>::stitchFaces
+(
+    const scalar tol,
+    const bool verbose
+)
+{
+    pointField& pointLst = this->storedPoints();
+
+    // Merge points
+    labelList  pointMap(pointLst.size());
+    pointField newPoints(pointLst.size());
+
+    bool hasMerged = mergePoints(pointLst, tol, verbose, pointMap, newPoints);
+
+    if (!hasMerged)
+    {
+        return false;
+    }
+
+    if (verbose)
+    {
+        Info<< "MeshedSurface::stitchFaces : Renumbering all faces"
+            << endl;
+    }
+
+    // Set the coordinates to the merged ones
+    pointLst.transfer(newPoints);
+
+    List<Face>& faceLst = this->storedFaces();
+
+    List<label> faceMap(faceLst.size());
+
+    // Reset the point labels to the unique points array
+    label newFaceI = 0;
+    forAll(faceLst, faceI)
+    {
+        Face& f = faceLst[faceI];
+        forAll(f, fp)
+        {
+            f[fp] = pointMap[f[fp]];
+        }
+
+        // for extra safety: collapse face as well
+        if (f.collapse() >= 3)
+        {
+            if (newFaceI != faceI)
+            {
+                faceLst[newFaceI] = f;
+            }
+            faceMap[newFaceI] = faceI;
+            newFaceI++;
+        }
+        else if (verbose)
+        {
+            Pout<< "MeshedSurface::stitchFaces : "
+                << "Removing collapsed face " << faceI << endl
+                << "    vertices   :" << f << endl;
+        }
+    }
+    pointMap.clear();
+
+    if (newFaceI != faceLst.size())
+    {
+        if (verbose)
+        {
+            Pout<< "MeshedSurface::stitchFaces : "
+                << "Removed " << faceLst.size() - newFaceI
+                << " faces" << endl;
+        }
+        faceLst.setSize(newFaceI);
+        remapFaces(faceMap);
+    }
+    faceMap.clear();
+
+    // Merging points might have changed geometric factors
+    ParentType::clearOut();
+    return true;
+}
+
+
+// Remove badly degenerate faces and double faces.
+template<class Face>
+bool Foam::MeshedSurface<Face>::checkFaces
+(
+    const bool verbose
+)
+{
+    bool changed = false;
+    List<Face>& faceLst = this->storedFaces();
+
+    List<label> faceMap(faceLst.size());
+
+    label newFaceI = 0;
+    // Detect badly labelled faces and mark degenerate faces
+    const label maxPointI = this->points().size() - 1;
+    forAll(faceLst, faceI)
+    {
+        Face& f = faceLst[faceI];
+
+        // avoid degenerate faces
+        if (f.collapse() >= 3)
+        {
+            forAll(f, fp)
+            {
+                if (f[fp] < 0 || f[fp] > maxPointI)
+                {
+                    FatalErrorIn("MeshedSurface::checkFaces(bool)")
+                        << "face " << f
+                        << " uses point indices outside point range 0.."
+                    << maxPointI
+                        << exit(FatalError);
+                }
+            }
+
+            faceMap[faceI] = faceI;
+            newFaceI++;
+        }
+        else
+        {
+            // mark as bad face
+            faceMap[faceI] = -1;
+
+            changed = true;
+            if (verbose)
+            {
+                WarningIn
+                (
+                    "MeshedSurface::checkFaces(bool verbose)"
+                )   << "face[" << faceI << "] = " << f
+                    << " does not have three unique vertices" << endl;
+            }
+        }
+    }
+
+    // Detect doubled faces
+    // do not touch the faces
+    const labelListList& fFaces = this->faceFaces();
+    newFaceI = 0;
+    forAll(faceLst, faceI)
+    {
+        // skip already collapsed faces:
+        if (faceMap[faceI] < 0)
+        {
+            continue;
+        }
+
+        const Face& f = faceLst[faceI];
+
+        // duplicate face check
+        bool okay = true;
+        const labelList& neighbours = fFaces[faceI];
+
+        // Check if faceNeighbours use same points as this face.
+        // Note: discards normal information - sides of baffle are merged.
+        forAll(neighbours, neighI)
+        {
+            const label neiFaceI = neighbours[neighI];
+
+            if (neiFaceI <= faceI || faceMap[neiFaceI] < 0)
+            {
+                // lower numbered faces already checked
+                // skip neighbours that are themselves collapsed
+                continue;
+            }
+
+            const Face& nei = faceLst[neiFaceI];
+
+            if (f == nei)
+            {
+                okay = false;
+
+                if (verbose)
+                {
+                    WarningIn
+                    (
+                        "MeshedSurface::checkFaces(bool verbose)"
+                    )   << "faces share the same vertices:" << nl
+                        << "    face[" << faceI << "] : " << f << nl
+                        << "    face[" << neiFaceI << "] : " << nei << endl;
+                    // printFace(Warning, "    ", f, points());
+                    // printFace(Warning, "    ", nei, points());
+                }
+
+                break;
+            }
+        }
+
+        if (okay)
+        {
+            faceMap[faceI] = faceI;
+            newFaceI++;
+        }
+        else
+        {
+            faceMap[faceI] = -1;
+        }
+    }
+
+    // Phase 1: pack
+    // Done to keep numbering constant in phase 1
+
+    if (changed || newFaceI < faceLst.size())
+    {
+        changed = true;
+
+        if (verbose)
+        {
+            WarningIn
+            (
+                "MeshedSurface::checkFaces(bool verbose)"
+            )   << "Removed " << faceLst.size() - newFaceI
+                << " illegal faces." << endl;
+        }
+
+        // compress the face list
+        newFaceI = 0;
+        forAll(faceLst, faceI)
+        {
+            if (faceMap[faceI] >= 0)
+            {
+                if (newFaceI != faceI)
+                {
+                    faceLst[newFaceI] = faceLst[faceI];
+                }
+                faceMap[newFaceI] = faceI;
+                newFaceI++;
+            }
+        }
+
+        faceLst.setSize(newFaceI);
+        remapFaces(faceMap);
+    }
+    faceMap.clear();
+
+    // Topology can change because of renumbering
+    ParentType::clearOut();
+    return changed;
+}
+
+
+template<class Face>
+Foam::label Foam::MeshedSurface<Face>::triangulate()
+{
+    return triangulate
+    (
+        const_cast<List<label>&>(List<label>::null())
+    );
+}
+
+
+template<class Face>
+Foam::label Foam::MeshedSurface<Face>::triangulate
+(
+    List<label>& faceMapOut
+)
+{
+    label nTri = 0;
+    label maxTri = 0;  // the maximum number of triangles for any single face
+    List<Face>& faceLst = this->storedFaces();
+
+    // determine how many triangles will be needed
+    forAll(faceLst, faceI)
+    {
+        const label n = faceLst[faceI].nTriangles();
+        if (maxTri < n)
+        {
+            maxTri = n;
+        }
+        nTri += n;
+    }
+
+    // nothing to do
+    if (nTri <= faceLst.size())
+    {
+        if (&faceMapOut)
+        {
+            faceMapOut.clear();
+        }
+        return 0;
+    }
+
+    List<Face>  newFaces(nTri);
+    List<label> faceMap;
+
+    // reuse storage from optional faceMap
+    if (&faceMapOut)
+    {
+        faceMap.transfer(faceMapOut);
+    }
+    faceMap.setSize(nTri);
+
+    // remember the number of *additional* faces
+    nTri -= faceLst.size();
+
+    if (this->points().empty())
+    {
+        // triangulate without points
+        // simple face triangulation around f[0]
+        label newFaceI = 0;
+        forAll(faceLst, faceI)
+        {
+            const Face& f = faceLst[faceI];
+
+            for (label fp = 1; fp < f.size() - 1; ++fp)
+            {
+                label fp1 = f.fcIndex(fp);
+
+                newFaces[newFaceI] = triFace(f[0], f[fp], f[fp1]);
+                faceMap[newFaceI] = faceI;
+                newFaceI++;
+            }
+        }
+    }
+    else
+    {
+        // triangulate with points
+        List<face> tmpTri(maxTri);
+
+        label newFaceI = 0;
+        forAll(faceLst, faceI)
+        {
+            // 'face' not '<Face>'
+            const face& f = faceLst[faceI];
+
+            label nTmp;
+            f.triangles(this->points(), nTmp, tmpTri);
+            for (label triI = 0; triI < nTmp; triI++)
+            {
+                newFaces[newFaceI] = Face
+                (
+                    static_cast<UList<label>&>(tmpTri[triI])
+                );
+                faceMap[newFaceI] = faceI;
+                newFaceI++;
+            }
+        }
+    }
+
+    faceLst.transfer(newFaces);
+    remapFaces(faceMap);
+
+    // optionally return the faceMap
+    if (&faceMapOut)
+    {
+        faceMapOut.transfer(faceMap);
+    }
+    faceMap.clear();
+
+    // Topology can change because of renumbering
+    ParentType::clearOut();
+    return nTri;
+}
+
+
 
 
 template<class Face>
@@ -578,7 +975,7 @@ Foam::MeshedSurface<Face> Foam::MeshedSurface<Face>::subsetMesh
     }
 
     // create/copy a new zones list, each zone with zero size
-    surfZoneList newZones(zones_);
+    surfZoneList newZones(this->surfZones());
     forAll(newZones, zoneI)
     {
         newZones[zoneI].size() = 0;
@@ -652,88 +1049,6 @@ Foam::MeshedSurface<Face>::subsetMesh
 }
 
 
-template<class Face>
-void Foam::MeshedSurface<Face>::addZones
-(
-    const UList<surfZone>& zones,
-    const bool cullEmpty
-)
-{
-    label nZone = 0;
-
-    zones_.setSize(zones.size());
-    forAll(zones_, zoneI)
-    {
-        if (zones[zoneI].size() || !cullEmpty)
-        {
-            zones_[nZone] = surfZone(zones[zoneI], nZone);
-            nZone++;
-        }
-    }
-    zones_.setSize(nZone);
-}
-
-
-template<class Face>
-void Foam::MeshedSurface<Face>::addZones
-(
-    const UList<label>& sizes,
-    const UList<word>& names,
-    const bool cullEmpty
-)
-{
-    label start   = 0;
-    label nZone = 0;
-
-    zones_.setSize(sizes.size());
-    forAll(zones_, zoneI)
-    {
-        if (sizes[zoneI] || !cullEmpty)
-        {
-            zones_[nZone] = surfZone
-            (
-                names[zoneI],
-                sizes[zoneI],
-                start,
-                nZone
-            );
-            start += sizes[zoneI];
-            nZone++;
-        }
-    }
-    zones_.setSize(nZone);
-}
-
-
-template<class Face>
-void Foam::MeshedSurface<Face>::addZones
-(
-    const UList<label>& sizes,
-    const bool cullEmpty
-)
-{
-    label start   = 0;
-    label nZone = 0;
-
-    zones_.setSize(sizes.size());
-    forAll(zones_, zoneI)
-    {
-        if (sizes[zoneI] || !cullEmpty)
-        {
-            zones_[nZone] = surfZone
-            (
-                word("zone") + ::Foam::name(nZone),
-                sizes[zoneI],
-                start,
-                nZone
-            );
-            start += sizes[zoneI];
-            nZone++;
-        }
-    }
-    zones_.setSize(nZone);
-}
-
 
 template<class Face>
 void Foam::MeshedSurface<Face>::transfer
@@ -741,10 +1056,12 @@ void Foam::MeshedSurface<Face>::transfer
     MeshedSurface<Face>& surf
 )
 {
-    reset(xferMove(surf.storedPoints()), xferMove(surf.storedFaces()));
-    zones_.transfer(surf.zones_);
-
-    surf.clear();
+    reset
+    (
+        xferMove(surf.storedPoints()),
+        xferMove(surf.storedFaces()),
+        xferMove(surf.storedZones())
+    );
 }
 
 
@@ -758,18 +1075,35 @@ void Foam::MeshedSurface<Face>::transfer
 
     labelList faceMap;
     surfZoneList zoneLst = surf.sortedZones(faceMap);
-    List<Face>& oldFaces = surf.storedFaces();
 
-    List<Face> newFaces(faceMap.size());
-    forAll(faceMap, faceI)
+    if (zoneLst.size() <= 1)
     {
-        newFaces[faceI].transfer(oldFaces[faceMap[faceI]]);
+        reset
+        (
+            xferMove(surf.storedPoints()),
+            xferMove(surf.storedFaces()),
+            Xfer<surfZoneList>()
+        );
     }
+    else
+    {
+        List<Face>& oldFaces = surf.storedFaces();
+        List<Face> newFaces(faceMap.size());
+
+        forAll(faceMap, faceI)
+        {
+            newFaces[faceI].transfer(oldFaces[faceMap[faceI]]);
+        }
+
+        reset
+        (
+            xferMove(surf.storedPoints()),
+            xferMove(newFaces),
+            xferMove(zoneLst)
+        );
+    }
+
     faceMap.clear();
-
-    reset(xferMove(surf.storedPoints()), xferMove(newFaces));
-    zones_.transfer(zoneLst);
-
     surf.clear();
 }
 
@@ -807,24 +1141,22 @@ bool Foam::MeshedSurface<Face>::read
     const word& ext
 )
 {
-    // handle 'native' format directly
-    if (isNative(ext))
-    {
-        return read(IFstream(name)());
-    }
-    else
-    {
-        // use selector mechanism
-        transfer(New(name, ext)());
-        return true;
-    }
+    clear();
+
+    // read via selector mechanism
+    transfer(New(name, ext)());
+    return true;
 }
 
 
 template<class Face>
-void Foam::MeshedSurface<Face>::write(const Time& d, const word& surfName) const
+void Foam::MeshedSurface<Face>::write
+(
+    const Time& t,
+    const word& surfName
+) const
 {
-    write(OFstream(findMeshFile(d, surfName))());
+    MeshedSurfaceProxy<Face>(*this).write(t, surfName);
 }
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -836,7 +1168,20 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
 
     this->storedPoints() = surf.points();
     this->storedFaces()  = surf.faces();
-    zones_ = surf.zones_;
+    this->storedZones()  = surf.surfZones();
+}
+
+
+template<class Face>
+Foam::MeshedSurface<Face>::operator
+Foam::MeshedSurfaceProxy<Face>() const
+{
+    return MeshedSurfaceProxy<Face>
+    (
+        this->points(),
+        this->faces(),
+        this->surfZones()
+    );
 }
 
 // * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
@@ -845,6 +1190,7 @@ void Foam::MeshedSurface<Face>::operator=(const MeshedSurface& surf)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "MeshedSurfaceZones.C"
 #include "MeshedSurfaceIO.C"
 #include "MeshedSurfaceNew.C"
 

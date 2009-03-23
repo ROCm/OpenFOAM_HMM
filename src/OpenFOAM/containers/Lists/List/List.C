@@ -58,10 +58,6 @@ Foam::List<T>::List(const label s)
     {
         this->v_ = new T[this->size_];
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
@@ -86,10 +82,6 @@ Foam::List<T>::List(const label s, const T& a)
         List_FOR_ALL((*this), i)
             List_ELEM((*this), vp, i) = a;
         List_END_FOR_ALL
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -119,16 +111,12 @@ Foam::List<T>::List(const List<T>& a)
             List_END_FOR_ALL
         }
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
 // Construct by transferring the parameter contents
 template<class T>
-Foam::List<T>::List(const Xfer<List<T> >& lst)
+Foam::List<T>::List(const Xfer< List<T> >& lst)
 {
     transfer(lst());
 }
@@ -165,10 +153,6 @@ Foam::List<T>::List(List<T>& a, bool reUse)
             List_END_FOR_ALL
         }
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
@@ -187,10 +171,6 @@ Foam::List<T>::List(const UList<T>& a, const unallocLabelList& map)
         List_FOR_ALL(map, i)
             List_ELEM((*this), vp, i) = List_ELEM(a, ap, (map[i]));
         List_END_FOR_ALL
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -234,7 +214,7 @@ Foam::List<T>::List(const FixedList<T, Size>& lst)
 :
     UList<T>(NULL, Size)
 {
-    if (Size)
+    if (this->size_)
     {
         this->v_ = new T[this->size_];
 
@@ -242,10 +222,6 @@ Foam::List<T>::List(const FixedList<T, Size>& lst)
         {
             this->operator[](i) = lst[i];
         }
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -264,10 +240,6 @@ Foam::List<T>::List(const PtrList<T>& lst)
         {
             this->operator[](i) = lst[i];
         }
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -293,10 +265,6 @@ Foam::List<T>::List(const SLList<T>& lst)
             this->operator[](i++) = iter();
         }
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
@@ -314,10 +282,6 @@ Foam::List<T>::List(const IndirectList<T>& lst)
         {
             this->operator[](i) = lst[i];
         }
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -337,10 +301,6 @@ Foam::List<T>::List(const UIndirectList<T>& lst)
             this->operator[](i) = lst[i];
         }
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
@@ -358,10 +318,6 @@ Foam::List<T>::List(const BiIndirectList<T>& lst)
         {
             this->operator[](i) = lst[i];
         }
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
