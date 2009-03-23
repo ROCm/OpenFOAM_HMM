@@ -47,13 +47,11 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     TName_("undefinedT"),
     emissivity_(0.0),
     rayId_(0),
-    wavelengthId_(0),
-    qr_(0)
+    lambdaId_(0)
 {
     refValue() = 0.0;
     refGrad() = 0.0;
     valueFraction() = 1.0;
-    qr_.setSize(p.size());
 }
 
 
@@ -70,8 +68,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     TName_(ptf.TName_),
     emissivity_(ptf.emissivity_),
     rayId_(ptf.rayId_),
-    wavelengthId_(ptf.wavelengthId_),
-    qr_(ptf.qr_)
+    lambdaId_(ptf.lambdaId_)
 {}
 
 
@@ -87,17 +84,16 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     TName_(dict.lookup("T")),
     emissivity_(readScalar(dict.lookup("emissivity"))),
     rayId_(-1),
-    wavelengthId_(-1),
-    qr_(0)
+    lambdaId_(-1)
 {
     const scalarField& Tp =
         patch().lookupPatchField<volScalarField, scalar>(TName_);
 
-    refValue() = emissivity_*4.0*radiation::sigmaSB.value()*pow4(Tp) /
-                 Foam::mathematicalConstant::pi;
-    refGrad() = 0.0;
+    refValue() =
+        emissivity_*4.0*radiation::sigmaSB.value()*pow4(Tp)
+       /Foam::mathematicalConstant::pi;
 
-    qr_.setSize(p.size());
+    refGrad() = 0.0;
 
     if (dict.found("value"))
     {
@@ -123,8 +119,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     TName_(ptf.TName_),
     emissivity_(ptf.emissivity_),
     rayId_(ptf.rayId_),
-    wavelengthId_(ptf.wavelengthId_),
-    qr_(ptf.qr_)
+    lambdaId_(ptf.lambdaId_)
 {}
 
 
@@ -139,38 +134,11 @@ greyDiffusiveRadiationMixedFvPatchScalarField
     TName_(ptf.TName_),
     emissivity_(ptf.emissivity_),
     rayId_(ptf.rayId_),
-    wavelengthId_(ptf.wavelengthId_),
-    qr_(ptf.qr_)
-
+    lambdaId_(ptf.lambdaId_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::autoMap
-(
-    const fvPatchFieldMapper& m
-)
-{
-    mixedFvPatchScalarField::autoMap(m);
-    qr_.autoMap(m);
-}
-
-
-void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::rmap
-(
-    const fvPatchScalarField& ptf,
-    const labelList& addr
-)
-{
-    mixedFvPatchScalarField::rmap(ptf, addr);
-
-    const greyDiffusiveRadiationMixedFvPatchScalarField& gdrpsf =
-        refCast<const greyDiffusiveRadiationMixedFvPatchScalarField>(ptf);
-
-    qr_.rmap(gdrpsf.qr_, addr);
-}
-
 
 void Foam::radiation::greyDiffusiveRadiationMixedFvPatchScalarField::
 updateCoeffs()
@@ -204,7 +172,7 @@ updateCoeffs()
                     )
                     {
                         rayId_ = rayI;
-                        wavelengthId_ = lambdaI;
+                        lambdaId_ = lambdaI;
                         break;
                     }
                 }
@@ -240,10 +208,7 @@ updateCoeffs()
             const vector& d = dom.IRay(rayI).d();
 
             const scalarField& Iface =
-                dom.IRay(rayI).ILambda
-                (
-                    wavelengthId_
-                ).boundaryField()[patchI];
+                dom.IRay(rayI).ILambda(lambdaId_).boundaryField()[patchI];
 
             if ((-n[faceI] & d) < 0.0) // qin into the wall
             {

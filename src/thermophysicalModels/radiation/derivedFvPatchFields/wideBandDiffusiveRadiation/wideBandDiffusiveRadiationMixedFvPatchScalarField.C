@@ -47,13 +47,11 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     TName_("undefinedT"),
     emissivity_(0.0),
     rayId_(0),
-    wavelengthId_(0),
-    qr_(p.size(), 0.0)
+    lambdaId_(0)
 {
     refValue() = 0.0;
     refGrad() = 0.0;
     valueFraction() = 1.0;
-    qr_.setSize(p.size());
 }
 
 
@@ -70,8 +68,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     TName_(ptf.TName_),
     emissivity_(ptf.emissivity_),
     rayId_(ptf.rayId_),
-    wavelengthId_(ptf.wavelengthId_),
-    qr_(ptf.qr_)
+    lambdaId_(ptf.lambdaId_)
 {}
 
 
@@ -87,8 +84,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     TName_(dict.lookup("T")),
     emissivity_(readScalar(dict.lookup("emissivity"))),
     rayId_(0),
-    wavelengthId_(0),
-    qr_(p.size(), 0.0)
+    lambdaId_(0)
 {
     const scalarField& Tp =
         patch().lookupPatchField<volScalarField, scalar>(TName_);
@@ -122,8 +118,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     TName_(ptf.TName_),
     emissivity_(ptf.emissivity_),
     rayId_(ptf.rayId_),
-    wavelengthId_(ptf.wavelengthId_),
-    qr_(ptf.qr_)
+    lambdaId_(ptf.lambdaId_)
 {}
 
 
@@ -138,37 +133,11 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
     TName_(ptf.TName_),
     emissivity_(ptf.emissivity_),
     rayId_(ptf.rayId_),
-    wavelengthId_(ptf.wavelengthId_),
-    qr_(ptf.qr_)
+    lambdaId_(ptf.lambdaId_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::autoMap
-(
-    const fvPatchFieldMapper& m
-)
-{
-    mixedFvPatchScalarField::autoMap(m);
-    qr_.autoMap(m);
-}
-
-
-void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::rmap
-(
-    const fvPatchScalarField& ptf,
-    const labelList& addr
-)
-{
-    mixedFvPatchScalarField::rmap(ptf, addr);
-
-    const wideBandDiffusiveRadiationMixedFvPatchScalarField& wbdrpsf =
-        refCast<const wideBandDiffusiveRadiationMixedFvPatchScalarField>(ptf);
-
-    qr_.rmap(wbdrpsf.qr_, addr);
-}
-
 
 void Foam::radiation::wideBandDiffusiveRadiationMixedFvPatchScalarField::
 updateCoeffs()
@@ -199,7 +168,7 @@ updateCoeffs()
                     )
                     {
                         rayId_ = rayI;
-                        wavelengthId_ = lambdaI;
+                        lambdaId_ = lambdaI;
                         break;
                     }
                 }
@@ -226,7 +195,7 @@ updateCoeffs()
     ray.Qr().boundaryField()[patchI] += Iw*(-n & ray.dAve());
 
     const scalarField Eb =
-        dom.blackBody().bj(wavelengthId_).boundaryField()[patchI];
+        dom.blackBody().bj(lambdaId_).boundaryField()[patchI];
 
     forAll(Iw, faceI)
     {
@@ -236,11 +205,7 @@ updateCoeffs()
             const vector& d = dom.IRay(rayI).d();
 
             const scalarField& Iface =
-                dom.IRay(rayI).ILambda
-                (
-                    wavelengthId_
-                ).boundaryField()[patchI];
-
+                dom.IRay(rayI).ILambda(lambdaId_).boundaryField()[patchI];
 
             if ((-n[faceI] & d) < 0.0) // qin into the wall
             {

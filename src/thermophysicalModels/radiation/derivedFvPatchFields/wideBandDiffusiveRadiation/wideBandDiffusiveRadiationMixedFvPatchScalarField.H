@@ -64,7 +64,7 @@ class wideBandDiffusiveRadiationMixedFvPatchScalarField
         label rayId_;
 
         //- Wavelength index
-        label wavelengthId_;
+        label lambdaId_;
 
         //- Radiative heat flux on walls.
         scalarField qr_;
@@ -166,28 +166,6 @@ public:
             {
                 return emissivity_;
             }
-
-            //- Return heat flux on the boundary
-            const scalarField& qr() const
-            {
-                return qr_;
-            }
-
-
-        // Mapping functions
-
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap
-            (
-                const fvPatchFieldMapper&
-            );
-
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchScalarField&,
-                const labelList&
-            );
 
 
         // Evaluation functions
