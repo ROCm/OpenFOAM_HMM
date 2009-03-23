@@ -178,10 +178,7 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
 template<class ParcelType>
 template<class TrackData>
-bool Foam::KinematicParcel<ParcelType>::move
-(
-    TrackData& td
-)
+bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
 {
     ParcelType& p = static_cast<ParcelType&>(*this);
 
@@ -289,19 +286,12 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::hitPatch
-(
-    const polyPatch&,
-    int&
-)
+void Foam::KinematicParcel<ParcelType>::hitPatch(const polyPatch&, int&)
 {}
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::transformProperties
-(
-    const tensor& T
-)
+void Foam::KinematicParcel<ParcelType>::transformProperties(const tensor& T)
 {
     Particle<ParcelType>::transformProperties(T);
     U_ = transform(T, U_);

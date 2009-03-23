@@ -54,8 +54,10 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
 class polynomial;
 
+// Forward declaration of friend functions
 Ostream& operator<<
 (
     Ostream&,
