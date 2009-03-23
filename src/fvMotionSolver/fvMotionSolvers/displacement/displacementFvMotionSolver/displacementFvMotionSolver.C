@@ -32,8 +32,8 @@ License
 
 namespace Foam
 {
-//    defineTypeNameAndDebug(displacementFvMotionSolver, 0);
-//
+    defineTypeNameAndDebug(displacementFvMotionSolver, 0);
+
 //    addToRunTimeSelectionTable
 //    (
 //        fvMotionSolver,
