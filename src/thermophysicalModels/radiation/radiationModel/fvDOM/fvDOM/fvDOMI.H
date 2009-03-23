@@ -32,13 +32,13 @@ Foam::radiation::fvDOM::IRay(const label rayI) const
 
 
 inline const Foam::volScalarField&
-Foam::radiation::fvDOM::IRayWave
+Foam::radiation::fvDOM::IRayLambda
 (
     const label rayI,
     const label lambdaI
 ) const
 {
-    return IRay_[rayI].IWave(lambdaI);
+    return IRay_[rayI].ILambda(lambdaI);
 }
 
 

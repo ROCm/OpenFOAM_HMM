@@ -94,7 +94,7 @@ class radiativeIntensityRay
         label nLambda_;
 
         //- List of pointers to radiative intensity fields for given wavelengths
-        PtrList<volScalarField> IWave_;
+        PtrList<volScalarField> ILambda_;
 
 
     // Private member functions
@@ -185,7 +185,7 @@ public:
             inline scalar omega() const;
 
             //- Return the radiative intensity for a given wavelength
-            inline const volScalarField& IWave(const label lambdaI) const;
+            inline const volScalarField& ILambda(const label lambdaI) const;
 };
 
 

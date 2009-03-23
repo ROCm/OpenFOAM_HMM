@@ -78,12 +78,12 @@ inline Foam::scalar Foam::radiation::radiativeIntensityRay::omega() const
 }
 
 
-inline const Foam::volScalarField& Foam::radiation::radiativeIntensityRay::IWave
+inline const Foam::volScalarField& Foam::radiation::radiativeIntensityRay::ILambda
 (
     const label lambdaI
 ) const
 {
-    return IWave_[lambdaI];
+    return ILambda_[lambdaI];
 }
 
 

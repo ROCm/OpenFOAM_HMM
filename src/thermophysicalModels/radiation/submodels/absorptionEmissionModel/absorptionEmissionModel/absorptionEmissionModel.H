@@ -175,7 +175,7 @@ public:
             virtual tmp<volScalarField> addRadInt
             (
                 const label rayI,
-                const volScalarField& IWave
+                const volScalarField& ILambda
             ) const;
 
             //- Correct absorption coefficients

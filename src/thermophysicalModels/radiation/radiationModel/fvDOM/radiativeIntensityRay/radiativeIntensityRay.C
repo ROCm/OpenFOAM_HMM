@@ -91,7 +91,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
     phi_(phi),
     omega_(0.0),
     nLambda_(nLambda),
-    IWave_(nLambda)
+    ILambda_(nLambda)
 {
     scalar sinTheta = Foam::sin(theta);
     scalar cosTheta = Foam::cos(theta);
@@ -113,7 +113,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         0.5*deltaPhi*Foam::sin(2.0*theta)*Foam::sin(deltaTheta)
     );
 
-    forAll(IWave_, i)
+    forAll(ILambda_, i)
     {
         IOobject IHeader
         (
@@ -127,7 +127,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         // check if field exists and can be read
         if (IHeader.headerOk())
         {
-            IWave_.set
+            ILambda_.set
             (
                 i,
                 new volScalarField(IHeader, mesh_)
@@ -148,7 +148,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
                 mesh_
             );
 
-            IWave_.set
+            ILambda_.set
             (
                 i,
                 new volScalarField(IHeader, IDefault)
@@ -174,7 +174,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 
     scalar maxResidual = -GREAT;
 
-    forAll(IWave_, lambdaI)
+    forAll(ILambda_, lambdaI)
     {
         const volScalarField& k = dom_.aj(lambdaI);
 
@@ -182,8 +182,8 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 
         fvScalarMatrix IiEq
         (
-            fvm::div(Ji, IWave_[lambdaI], " div(Ji,Ii_h)")
-          + fvm::Sp(k*omega_, IWave_[lambdaI])
+            fvm::div(Ji, ILambda_[lambdaI], " div(Ji,Ii_h)")
+          + fvm::Sp(k*omega_, ILambda_[lambdaI])
          ==
             1.0/Foam::mathematicalConstant::pi
            *(
@@ -212,9 +212,9 @@ void Foam::radiation::radiativeIntensityRay::addIntensity()
 {
     I_ = dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
 
-    forAll(IWave_, lambdaI)
+    forAll(ILambda_, lambdaI)
     {
-        I_ += absorptionEmission_.addRadInt(lambdaI, IWave_[lambdaI]);
+        I_ += absorptionEmission_.addRadInt(lambdaI, ILambda_[lambdaI]);
     }
 }
 

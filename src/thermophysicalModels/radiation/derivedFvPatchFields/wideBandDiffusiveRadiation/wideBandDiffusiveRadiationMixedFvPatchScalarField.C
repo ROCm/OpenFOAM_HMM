@@ -191,7 +191,7 @@ updateCoeffs()
                 for (label lambdaI=0; lambdaI < dom.nLambda(); lambdaI++)
                 {
                     const volScalarField& radiationField =
-                        dom.IRayWave(rayI, lambdaI);
+                        dom.IRayLambda(rayI, lambdaI);
                     if
                     (
                         &(radiationField.internalField())
@@ -236,7 +236,7 @@ updateCoeffs()
             const vector& d = dom.IRay(rayI).d();
 
             const scalarField& Iface =
-                dom.IRay(rayI).IWave
+                dom.IRay(rayI).ILambda
                 (
                     wavelengthId_
                 ).boundaryField()[patchI];

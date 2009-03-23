@@ -240,10 +240,10 @@ Foam::tmp<Foam::volScalarField>
 Foam::radiation::absorptionEmissionModel::addRadInt
 (
     const label rayI,
-    const volScalarField& IWave
+    const volScalarField& ILambda
 ) const
 {
-    return IWave;
+    return ILambda;
 }
 
 

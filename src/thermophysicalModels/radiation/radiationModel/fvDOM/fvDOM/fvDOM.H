@@ -181,7 +181,7 @@ public:
             inline const radiativeIntensityRay& IRay(const label rayI) const;
 
             //- Ray intensity for rayI and lambda bandwidth
-            inline const volScalarField& IRayWave
+            inline const volScalarField& IRayLambda
             (
                 const label rayI,
                 const label lambdaI
