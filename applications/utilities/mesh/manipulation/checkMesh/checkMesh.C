@@ -31,7 +31,9 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "Time.H"
+
 #include "polyMesh.H"
 #include "globalMeshData.H"
 
@@ -45,48 +47,34 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions(false);   // no constant
 #   include "addRegionOption.H"
-
-#   include "addTimeOptionsNoConstant.H"
-
     argList::validOptions.insert("noTopology", "");
     argList::validOptions.insert("allGeometry", "");
     argList::validOptions.insert("allTopology", "");
 
 #   include "setRootCase.H"
+#   include "createTime.H"
+    instantList timeDirs = timeSelector::select0(runTime, args);
+#   include "createNamedPolyMesh.H"
 
-    const bool noTopology = args.options().found("noTopology");
+    const bool noTopology  = args.options().found("noTopology");
     const bool allGeometry = args.options().found("allGeometry");
     const bool allTopology = args.options().found("allTopology");
 
-#   include "createTime.H"
-
-    // Get times list
-    instantList Times = runTime.times();
-
-#   include "checkTimeOptionsNoConstant.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createNamedPolyMesh.H"
-
-    bool firstCheck = true;
-
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(timeDirs[timeI], timeI);
 
         polyMesh::readUpdateState state = mesh.readUpdate();
 
         if
         (
-            firstCheck
+            !timeI
          || state == polyMesh::TOPO_CHANGE
          || state == polyMesh::TOPO_PATCH_CHANGE
         )
         {
-            firstCheck = false;
-
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
             // Clear mesh before checking
@@ -110,32 +98,30 @@ int main(int argc, char *argv[])
 
             if (noFailedChecks == 0)
             {
-                Info<< "\nMesh OK."
-                    << nl << endl;
+                Info<< "\nMesh OK.\n" << endl;
             }
             else
             {
-                Info<< "\nFailed " << noFailedChecks << " mesh checks."
-                    << nl << endl;
+                Info<< "\nFailed " << noFailedChecks << " mesh checks.\n"
+                    << endl;
             }
         }
         else if (state == polyMesh::POINTS_MOVED)
         {
             Info<< "Time = " << runTime.timeName() << nl << endl;
 
-            label noFailedChecks = checkGeometry(mesh, allGeometry);
+            label nFailedChecks = checkGeometry(mesh, allGeometry);
 
-            reduce(noFailedChecks, sumOp<label>());
+            reduce(nFailedChecks, sumOp<label>());
 
-            if (noFailedChecks == 0)
+            if (nFailedChecks)
             {
-                Info << "\nMesh OK."
-                    << nl << endl;
+                Info<< "\nFailed " << nFailedChecks << " mesh checks.\n"
+                    << endl;
             }
             else
             {
-                Info<< "\nFailed " << noFailedChecks << " mesh checks."
-                    << nl << endl;
+                Info << "\nMesh OK.\n" << endl;
             }
         }
     }
