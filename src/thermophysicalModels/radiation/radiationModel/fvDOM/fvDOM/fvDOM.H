@@ -107,7 +107,7 @@ class fvDOM
         label nLambda_;
 
         //- Wavelength total absorption coefficient [1/m]
-        PtrList<volScalarField> aj_;
+        PtrList<volScalarField> aLambda_;
 
         //- Black body
         blackBodyEmission blackBody_;
@@ -198,7 +198,7 @@ public:
             inline const volScalarField& a() const;
 
             // Const access to wavelength total absorption coefficient
-            inline const volScalarField& aj(const label lambdaI) const;
+            inline const volScalarField& aLambda(const label lambdaI) const;
 
             // Const access to incident radiation field
             inline const volScalarField& G() const;

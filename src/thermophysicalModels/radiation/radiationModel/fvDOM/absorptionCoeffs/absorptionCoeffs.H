@@ -65,7 +65,7 @@ private:
 
     // Private data
 
-        // Temperature limits of applicability of functions
+        // Temperature limits of applicability for functions
 
             scalar Tcommon_;
 
@@ -109,52 +109,35 @@ public:
         const coeffArray& coeffs(const scalar T) const;
 
         // Initialise from a dictionary
-        void init(const dictionary&);
+        void initialise(const dictionary&);
 
         // Initialise from an Istream
-        inline void init(Istream&)
-        {
-            absorptionCoeffs(Istream);
-        }
+        void initialise(Istream&);
 
 
-    // Acces Functions
+    // Access Functions
 
-        inline bool invTemp() const
-        {
-            return  invTemp_;
-        }
+        inline bool invTemp() const;
 
-        inline scalar Tcommon() const
-        {
-            return  Tcommon_;
-        }
+        inline scalar Tcommon() const;
 
-        inline scalar Tlow() const
-        {
-            return  Tlow_;
-        }
+        inline scalar Tlow() const;
 
-        inline scalar Thigh() const
-        {
-            return  Thigh_;
-        }
+        inline scalar Thigh() const;
 
-        inline const coeffArray& highACoeffs() const
-        {
-            return  highACoeffs_;
-        }
+        inline const coeffArray& highACoeffs() const;
 
-        inline const coeffArray& lowACoeffs() const
-        {
-            return  lowACoeffs_;
-        }
+        inline const coeffArray& lowACoeffs() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 } // End namespace radiation
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "absorptionCoeffsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

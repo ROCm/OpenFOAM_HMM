@@ -33,26 +33,26 @@ Foam::radiation::blackBodyEmission::blackBodyEmission
 (
     const fileName& name,
     const word& instance,
-    label nLambda,
+    const label nLambda,
     const volScalarField& T
 )
 :
     blackBodyEmissiveTable_(name, instance, T.mesh()),
     C1_("C1",dimensionSet(1, 4, 3, 0, 0, 0, 0), 3.7419e-16),
     C2_("C2",dimensionSet(0, 1, 0, 1, 0, 0, 0), 14.388e-6),
-    bj_(nLambda),
+    bLambda_(nLambda),
     T_(T)
 {
-    forAll(bj_, lambdaI)
+    forAll(bLambda_, lambdaI)
     {
-        bj_.set
+        bLambda_.set
         (
             lambdaI,
             new volScalarField
             (
                 IOobject
                 (
-                    "bj_" + Foam::name(lambdaI) ,
+                    "bLambda_" + Foam::name(lambdaI) ,
                     T.mesh().time().timeName(),
                     T.mesh(),
                     IOobject::NO_READ,
@@ -74,7 +74,7 @@ Foam::radiation::blackBodyEmission::~blackBodyEmission()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::scalar Foam::radiation::blackBodyEmission::flambdaT
+Foam::scalar Foam::radiation::blackBodyEmission::fLambdaT
 (
     const scalar lambdaT
 ) const
@@ -115,15 +115,15 @@ Foam::radiation::blackBodyEmission::EbDeltaLambdaT
     {
         forAll(T, i)
         {
-            scalar T1 = flambdaT(band[1]*T[i]);
-            scalar T2 = flambdaT(band[0]*T[i]);
-            dimensionedScalar flambdaDelta
+            scalar T1 = fLambdaT(band[1]*T[i]);
+            scalar T2 = fLambdaT(band[0]*T[i]);
+            dimensionedScalar fLambdaDelta
             (
-                "flambdaDelta",
+                "fLambdaDelta",
                 dimless,
                 T1 - T2
             );
-            Eb()[i] = Eb()[i]*flambdaDelta.value();
+            Eb()[i] = Eb()[i]*fLambdaDelta.value();
         }
         return Eb;
     }
@@ -136,7 +136,7 @@ void Foam::radiation::blackBodyEmission::correct
     const Vector2D<scalar>& band
 )
 {
-    bj_[lambdaI] = EbDeltaLambdaT(T_, band);
+    bLambda_[lambdaI] = EbDeltaLambdaT(T_, band);
 }
 
 

@@ -237,7 +237,7 @@ bool Foam::radiation::absorptionEmissionModel::isGrey() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::absorptionEmissionModel::addRadInt
+Foam::radiation::absorptionEmissionModel::addIntensity
 (
     const label rayI,
     const volScalarField& ILambda

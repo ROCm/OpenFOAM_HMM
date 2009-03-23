@@ -152,7 +152,7 @@ private:
         //- Hash table with species names
         HashTable<label> speciesNames_;
 
-        //- Indexes of species in the LookUpTable
+        //- Indices of species in the look-up table
         FixedList<label,nSpecies_> specieIndex_;
 
         //- Bands
@@ -178,7 +178,6 @@ private:
 
 
 public:
-
 
     //- Runtime type information
     TypeName("wideBandAbsorptionEmission");
@@ -220,32 +219,36 @@ public:
                 tmp<volScalarField> ECont(const label bandI = 0) const;
 
 
-        inline bool isGrey(void) const
+        inline bool isGrey() const
         {
             return false;
         }
 
-        // Number of bands
+        //- Number of bands
         inline label nBands() const
         {
             return nBands_;
         }
 
-        // lower and upper limit of band i
-        inline const Vector2D<scalar>& bands(label i) const
+        //- Lower and upper limit of band i
+        inline const Vector2D<scalar>& bands(const label i) const
         {
             return iBands_[i];
         }
 
-        //  Add contribution of Ilambdaj to the total Radiative Intensity on
-        // direction i
-        tmp<volScalarField> addRadInt
+        //- Add contribution of ILambda to the total radiative intensity in
+        //  direction i
+        tmp<volScalarField> addIntensity
         (
             const label i,
-            const volScalarField& Ilambdaj
+            const volScalarField& ILambda
         ) const;
 
-        void correct(volScalarField& a_, PtrList<volScalarField>& aj) const;
+        void correct
+        (
+            volScalarField& a_,
+            PtrList<volScalarField>& aLambda
+        ) const;
 };
 
 

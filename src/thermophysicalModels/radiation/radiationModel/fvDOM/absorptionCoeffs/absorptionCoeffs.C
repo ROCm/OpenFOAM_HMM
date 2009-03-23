@@ -89,15 +89,18 @@ Foam::radiation::absorptionCoeffs::coeffs
 }
 
 
-void Foam::radiation::absorptionCoeffs::init
-(
-    const dictionary& dict
-)
+void Foam::radiation::absorptionCoeffs::initialise(Istream&)
 {
-    Tcommon_ = readScalar(dict.lookup("Tcommon"));
-    Tlow_ = readScalar(dict.lookup("Tlow"));
-    Thigh_ = readScalar(dict.lookup("Thigh"));
-    invTemp_ = readBool(dict.lookup("invTemp"));
+    absorptionCoeffs(Istream);
+}
+
+
+void Foam::radiation::absorptionCoeffs::initialise(const dictionary& dict)
+{
+    dict.lookup("Tcommon") >> Tcommon_;
+    dict.lookup("Tlow") >> Tlow_;
+    dict.lookup("Tlow") >> Thigh_;
+    dict.lookup("invTemp") >> invTemp_;
 
     dict.lookup("loTcoeffs") >> lowACoeffs_;
     dict.lookup("hiTcoeffs") >> highACoeffs_;

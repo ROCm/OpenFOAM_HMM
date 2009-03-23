@@ -67,7 +67,7 @@ class blackBodyEmission
         const dimensionedScalar C2_;
 
         // Ptr List for black body emission energy field for each wavelength
-        PtrList<volScalarField> bj_;
+        PtrList<volScalarField> bLambda_;
 
         // Reference to the temperature field
         const volScalarField& T_;
@@ -75,7 +75,7 @@ class blackBodyEmission
 
     // Private member functions
 
-        scalar flambdaT(const scalar lambdaT) const;
+        scalar fLambdaT(const scalar lambdaT) const;
 
 
 public:
@@ -85,9 +85,9 @@ public:
         //- Construct from components
         blackBodyEmission
         (
-            const fileName& fn,
+            const fileName& name,
             const word& instance,
-            label lambdaj,
+            const label nLambda,
             const volScalarField& T
         );
 
@@ -101,19 +101,19 @@ public:
         // Access
 
             //- Black body spectrum
-            inline const volScalarField& bj(const label lambdaI) const
+            inline const volScalarField& bLambda(const label lambdaI) const
             {
-                return bj_[lambdaI];
+                return bLambda_[lambdaI];
             }
 
             //- Spectral emission for the black body at T and lambda
             inline dimensionedScalar EblambdaT
             (
-                const dimensionedScalar T,
+                const dimensionedScalar& T,
                 const scalar lambda
             ) const
             {
-                return (C1_/(pow5(lambda)*(exp(C2_/(lambda*T)) - 1)));
+                return (C1_/(pow5(lambda)*(exp(C2_/(lambda*T)) - 1.0)));
             }
 
             //- Integral energy at T from lambda1 to lambda2

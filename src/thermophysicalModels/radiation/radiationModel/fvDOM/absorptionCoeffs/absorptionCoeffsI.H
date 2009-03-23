@@ -24,79 +24,41 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-inline const Foam::radiation::radiativeIntensityRay&
-Foam::radiation::fvDOM::IRay(const label rayI) const
+inline bool Foam::radiation::absorptionCoeffs::invTemp() const
 {
-    return  IRay_[rayI];
+    return  invTemp_;
 }
 
 
-inline const Foam::volScalarField&
-Foam::radiation::fvDOM::IRayLambda
-(
-    const label rayI,
-    const label lambdaI
-) const
+inline Foam::scalar Foam::radiation::absorptionCoeffs::Tcommon() const
 {
-    return IRay_[rayI].ILambda(lambdaI);
+    return  Tcommon_;
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::nTheta() const
+inline Foam::scalar Foam::radiation::absorptionCoeffs::Tlow() const
 {
-    return nTheta_;
+    return  Tlow_;
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::nPhi() const
+inline Foam::scalar Foam::radiation::absorptionCoeffs::Thigh() const
 {
-    return nPhi_;
+    return  Thigh_;
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::nRay() const
+inline const Foam::radiation::absorptionCoeffs::coeffArray&
+Foam::radiation::absorptionCoeffs::highACoeffs() const
 {
-    return nRay_;
+    return  highACoeffs_;
 }
 
 
-inline Foam::label Foam::radiation::fvDOM::nLambda() const
+inline const Foam::radiation::absorptionCoeffs::coeffArray&
+Foam::radiation::absorptionCoeffs::lowACoeffs() const
 {
-    return nLambda_;
-}
-
-
-inline const Foam::volScalarField& Foam::radiation::fvDOM::a() const
-{
-    return a_;
-}
-
-
-inline const Foam::volScalarField& Foam::radiation::fvDOM::aLambda
-(
-    const label lambdaI
-) const
-{
-    return aLambda_[lambdaI];
-}
-
-
-inline const Foam::volScalarField& Foam::radiation::fvDOM::G() const
-{
-    return G_;
-}
-
-
-inline const Foam::volScalarField& Foam::radiation::fvDOM::Qr() const
-{
-    return Qr_;
-}
-
-
-inline const Foam::radiation::blackBodyEmission&
-Foam::radiation::fvDOM::blackBody() const
-{
-    return blackBody_;
+    return  lowACoeffs_;
 }
 
 

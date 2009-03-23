@@ -125,7 +125,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     nPhi_(readLabel(coeffs_.lookup("nPhi"))),
     nRay_(0),
     nLambda_(absorptionEmission_->nBands()),
-    aj_(nLambda_),
+    aLambda_(nLambda_),
     blackBody_
     (
         fileName("blackBodyEmissivePower"),
@@ -139,7 +139,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     if (mesh_.nSolutionD() == 3)    //3D
     {
         IRay_.setSize(4*nPhi_*nTheta_);
-        nRay_ = 4.0*nPhi_*nTheta_;
+        nRay_ = 4*nPhi_*nTheta_;
         scalar deltaPhi = mathematicalConstant::pi/(2.0*nPhi_);
         scalar deltaTheta = mathematicalConstant::pi/nTheta_;
         label i = 0;
@@ -176,7 +176,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             scalar thetai = mathematicalConstant::pi/2.0;
             scalar deltaTheta = mathematicalConstant::pi;
             IRay_.setSize(4*nPhi_);
-            nRay_ = 4.0*nPhi_;
+            nRay_ = 4*nPhi_;
             scalar deltaPhi = mathematicalConstant::pi/(2.0*nPhi_);
             label i = 0;
             for (label m = 1; m <= 4*nPhi_; m++)
@@ -206,7 +206,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             scalar thetai = mathematicalConstant::pi/2.0;
             scalar deltaTheta = mathematicalConstant::pi;
             IRay_.setSize(2);
-            nRay_ = 2.0;
+            nRay_ = 2;
             scalar deltaPhi = mathematicalConstant::pi;
             label i = 0;
             for (label m = 1; m <= 2; m++)
@@ -236,16 +236,16 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
 
 
     // Construct absorption field for each wavelength
-    forAll(aj_, lambdaI)
+    forAll(aLambda_, lambdaI)
     {
-        aj_.set
+        aLambda_.set
         (
             lambdaI,
             new volScalarField
             (
                 IOobject
                 (
-                    "aj_" + Foam::name(lambdaI) ,
+                    "aLambda_" + Foam::name(lambdaI) ,
                     mesh_.time().timeName(),
                     mesh_,
                     IOobject::NO_READ,
@@ -286,7 +286,7 @@ bool Foam::radiation::fvDOM::read()
 
 void Foam::radiation::fvDOM::calculate()
 {
-    absorptionEmission_->correct(a_, aj_);
+    absorptionEmission_->correct(a_, aLambda_);
 
     updateBlackBodyEmission();
 
@@ -294,7 +294,7 @@ void Foam::radiation::fvDOM::calculate()
     label radIter = 0;
     do
     {
-        radIter ++;
+        radIter++;
         forAll(IRay_, rayI)
         {
             maxResidual = 0.0;
@@ -302,7 +302,7 @@ void Foam::radiation::fvDOM::calculate()
             maxResidual = max(maxBandResidual, maxResidual);
         }
 
-        Info << "Radiation solver Iter: " <<  radIter << endl;
+        Info << "Radiation solver iter: " <<  radIter << endl;
 
     } while(maxResidual > convergence_);
 

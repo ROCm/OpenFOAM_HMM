@@ -65,9 +65,8 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
     ),
     thermo_(mesh.lookupObject<basicThermo>("thermophysicalProperties")),
     EhrrCoeff_(readScalar(coeffsDict_.lookup("EhrrCoeff"))),
-    Yj_(0)
+    Yj_(nSpecies_)
 {
-    Yj_.setSize(nSpecies_);
     label nFunc = 0;
     const dictionary& functionDicts = dict.subDict(typeName + "Coeffs");
 
@@ -81,7 +80,7 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
         const word& key = iter().keyword();
         speciesNames_.insert(key, nFunc);
         const dictionary& dict = iter().dict();
-        coeffs_[nFunc].init(dict);
+        coeffs_[nFunc].initialise(dict);
         nFunc++;
     }
 
@@ -112,8 +111,7 @@ Foam::radiation::greyMeanAbsorptionEmission::greyMeanAbsorptionEmission
                 Yj_.set(j, &Y);
                 specieIndex_[iter()] = 0;
                 j++;
-                Info << "specie: " << iter.key() << " is being solved "
-                     << endl;
+                Info<< "specie: " << iter.key() << " is being solved" << endl;
             }
             else
             {
@@ -171,7 +169,7 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
                 IOobject::NO_WRITE
             ),
             mesh(),
-            dimensionedScalar("a",dimless/dimLength, 0.0)
+            dimensionedScalar("a", dimless/dimLength, 0.0)
         )
     );
 

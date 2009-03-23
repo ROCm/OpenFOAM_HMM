@@ -64,10 +64,9 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
         mesh
     ),
     thermo_(mesh.lookupObject<basicThermo>("thermophysicalProperties")),
-    Yj_(0),
+    Yj_(nSpecies_),
     totalWaveLength_(0)
 {
-    Yj_.setSize(nSpecies_);
     label nBand = 0;
     const dictionary& functionDicts = dict.subDict(typeName +"Coeffs");
     forAllConstIter(dictionary, functionDicts, iter)
@@ -100,11 +99,11 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
                     (
                         "Foam::radiation::wideBandAbsorptionEmission(const"
                         "dictionary& dict, const fvMesh& mesh)"
-                    )   << "specie : " << key << "is not in all the bands"
+                    )   << "specie: " << key << "is not in all the bands"
                         << nl << exit(FatalError);
                 }
             }
-            coeffs_[nSpec][nBand].init(specDicts.subDict(key));
+            coeffs_[nSpec][nBand].initialise(specDicts.subDict(key));
             nSpec++;
         }
         nBand++;
@@ -133,7 +132,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
 
             specieIndex_[iter()] = 0.0;
             j++;
-            Info << "specie : " << iter.key() << " is being solved" << endl;
+            Info<< "species: " << iter.key() << " is being solved" << endl;
         }
         else
         {
@@ -141,7 +140,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
             (
                 "radiation::wideBandAbsorptionEmission(const"
                 "dictionary& dict, const fvMesh& mesh)"
-            )   << "specie : " << iter.key()
+            )   << "specie: " << iter.key()
                 << " is neither in look-up table : "
                 << lookUpTable_.tableName() << " nor is being solved"
                 << exit(FatalError);
@@ -276,8 +275,7 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
 
     if (mesh().foundObject<volScalarField>("hrr"))
     {
-        const volScalarField& hrr =
-            mesh().lookupObject<volScalarField>("hrr");
+        const volScalarField& hrr =  mesh().lookupObject<volScalarField>("hrr");
         E().internalField() =
             iEhrrCoeffs_[bandI]
            *hrr.internalField()
@@ -289,31 +287,31 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
 }
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::wideBandAbsorptionEmission::addRadInt
+Foam::radiation::wideBandAbsorptionEmission::addIntensity
 (
     const label i,
-    const volScalarField& Ilambdaj
+    const volScalarField& ILambda
 ) const
 {
-    return Ilambdaj*(iBands_[i][1] - iBands_[i][0])/totalWaveLength_;
+    return ILambda*(iBands_[i][1] - iBands_[i][0])/totalWaveLength_;
 }
 
 
 void Foam::radiation::wideBandAbsorptionEmission::correct
 (
     volScalarField& a,
-    PtrList<volScalarField>& aj
+    PtrList<volScalarField>& aLambda
 ) const
 {
     a = dimensionedScalar("zero", dimless/dimLength, 0.0);
 
     for (label j = 0; j < nBands_; j++)
     {
-        Info << "Calculating absorption in band: " << j <<endl;
-        aj[j].internalField() = this->a(j);
-        Info << "Calculated absorption in band: " << j <<endl;
+        Info<< "Calculating absorption in band: " << j << endl;
+        aLambda[j].internalField() = this->a(j);
+        Info<< "Calculated absorption in band: " << j << endl;
         a.internalField() +=
-            aj[j].internalField()
+            aLambda[j].internalField()
            *(iBands_[j][1] - iBands_[j][0])
            /totalWaveLength_;
     }

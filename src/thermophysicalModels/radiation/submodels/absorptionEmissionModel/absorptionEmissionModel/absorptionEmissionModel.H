@@ -172,7 +172,7 @@ public:
             virtual bool isGrey() const;
 
             //- Add radiative intensity for ray i
-            virtual tmp<volScalarField> addRadInt
+            virtual tmp<volScalarField> addIntensity
             (
                 const label rayI,
                 const volScalarField& ILambda

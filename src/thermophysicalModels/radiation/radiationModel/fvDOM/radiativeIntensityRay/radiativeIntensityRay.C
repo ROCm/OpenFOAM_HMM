@@ -176,7 +176,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 
     forAll(ILambda_, lambdaI)
     {
-        const volScalarField& k = dom_.aj(lambdaI);
+        const volScalarField& k = dom_.aLambda(lambdaI);
 
         surfaceScalarField Ji = dAve_ & mesh_.Sf();
 
@@ -187,7 +187,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
          ==
             1.0/Foam::mathematicalConstant::pi
            *(
-                k*omega_*blackBody_.bj(lambdaI)
+                k*omega_*blackBody_.bLambda(lambdaI)
               + absorptionEmission_.ECont(lambdaI)
             )
         );
@@ -214,7 +214,7 @@ void Foam::radiation::radiativeIntensityRay::addIntensity()
 
     forAll(ILambda_, lambdaI)
     {
-        I_ += absorptionEmission_.addRadInt(lambdaI, ILambda_[lambdaI]);
+        I_ += absorptionEmission_.addIntensity(lambdaI, ILambda_[lambdaI]);
     }
 }
 
