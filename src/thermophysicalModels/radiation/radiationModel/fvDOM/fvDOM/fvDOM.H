@@ -136,11 +136,6 @@ class fvDOM
 
 public:
 
-    // Static data members
-
-        static label iterRadId;
-
-
     //- Runtime type information
     TypeName("fvDOM");
 
@@ -159,10 +154,10 @@ public:
 
         // Edit
 
-            //- Update radiation source variable
-            void correct();
+            //- Solve radiation equation(s)
+            void calculate();
 
-            //- Read radiationProperties dictionary
+            //- Read radiation properties dictionary
             bool read();
 
             //- Update G and calculate total heat flux on boundary

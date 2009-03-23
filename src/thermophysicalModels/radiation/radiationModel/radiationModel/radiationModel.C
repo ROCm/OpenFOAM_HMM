@@ -43,6 +43,30 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
+Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "radiationProperties",
+            T.time().constant(),
+            T.mesh().objectRegistry::db(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    mesh_(T.mesh()),
+    time_(T.time()),
+    T_(T),
+    radiation_(false),
+    coeffs_(dictionary::null),
+    solverFreq_(0),
+    absorptionEmission_(NULL),
+    scatter_(NULL)
+{}
+
+
 Foam::radiation::radiationModel::radiationModel
 (
     const word& type,
@@ -60,14 +84,17 @@ Foam::radiation::radiationModel::radiationModel
             IOobject::NO_WRITE
         )
     ),
-    T_(T),
     mesh_(T.mesh()),
+    time_(T.time()),
+    T_(T),
     radiation_(lookup("radiation")),
     coeffs_(subDict(type + "Coeffs")),
-    nFlowIterPerRadIter_(readLabel(lookup("nFlowIterPerRadIter"))),
+    solverFreq_(readLabel(lookup("solverFreq"))),
     absorptionEmission_(absorptionEmissionModel::New(*this, mesh_)),
     scatter_(scatterModel::New(*this, mesh_))
-{}
+{
+    solverFreq_ = max(1, solverFreq_);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor    * * * * * * * * * * * * * * //
@@ -90,6 +117,20 @@ bool Foam::radiation::radiationModel::read()
     else
     {
         return false;
+    }
+}
+
+
+void Foam::radiation::radiationModel::correct()
+{
+    if (!radiation_)
+    {
+        return;
+    }
+
+    if ((time_.timeIndex() == 0) || (time_.timeIndex() % solverFreq_ == 0))
+    {
+        calculate();
     }
 }
 

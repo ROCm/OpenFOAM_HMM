@@ -59,7 +59,6 @@ class P1
 :
     public radiationModel
 {
-
     // Private data
 
         //- Incident radiation / [W/m2]
@@ -86,10 +85,6 @@ class P1
 
 public:
 
-   // Static data members
-
-        static label iterRadId;
-
     //- Runtime type information
     TypeName("P1");
 
@@ -108,10 +103,10 @@ public:
 
         // Edit
 
-            //- Update radiationSource varible
-            void correct();
+            //- Solve radiation equation(s)
+            void calculate();
 
-            //- Read radiationProperties dictionary
+            //- Read radiation properties dictionary
             bool read();
 
 

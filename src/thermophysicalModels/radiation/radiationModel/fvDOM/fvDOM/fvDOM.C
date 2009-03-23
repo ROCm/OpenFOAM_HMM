@@ -50,9 +50,6 @@ namespace Foam
     }
 }
 
-//  Radiation solver iterator counter
-Foam::label Foam::radiation::fvDOM::iterRadId = pTraits<label>::one;
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -287,19 +284,13 @@ bool Foam::radiation::fvDOM::read()
 }
 
 
-void Foam::radiation::fvDOM::correct()
+void Foam::radiation::fvDOM::calculate()
 {
-    if (!radiation_ || !(iterRadId == nFlowIterPerRadIter_))
-    {
-        iterRadId++;
-        return;
-    }
-
     absorptionEmission_->correct(a_, aj_);
 
     updateBlackBodyEmission();
 
-    scalar maxResidual = 0;
+    scalar maxResidual = 0.0;
     label radIter = 0;
     do
     {
@@ -316,8 +307,6 @@ void Foam::radiation::fvDOM::correct()
     } while(maxResidual > convergence_);
 
     updateG();
-
-    iterRadId = pTraits<label>::one;
 }
 
 

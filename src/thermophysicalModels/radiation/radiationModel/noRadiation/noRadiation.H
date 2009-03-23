@@ -54,7 +54,6 @@ class noRadiation
 :
     public radiationModel
 {
-
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -76,7 +75,7 @@ public:
         noRadiation(const volScalarField& T);
 
 
-    // Destructor
+    //- Destructor
     virtual ~noRadiation();
 
 
@@ -84,8 +83,8 @@ public:
 
         // Edit
 
-            //- Update radiation source
-            void correct();
+            //- Solve radiation equation(s)
+            void calculate();
 
             //- Read radiationProperties dictionary
             bool read();

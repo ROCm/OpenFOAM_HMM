@@ -73,11 +73,14 @@ protected:
 
     // Protected data
 
+        //- Reference to the mesh database
+        const fvMesh& mesh_;
+
+        //- Reference to the time database
+        const Time& time_;
+
         //- Reference to the temperature field
         const volScalarField& T_;
-
-        //- Reference to the mesh
-        const fvMesh& mesh_;
 
         //- Model specific dictionary input parameters
         Switch radiation_;
@@ -85,9 +88,9 @@ protected:
         //- Radiation model dictionary
         dictionary coeffs_;
 
-        //- Number of iterations in the flow solver per radiation solver
-        //  iteration
-        label nFlowIterPerRadIter_;
+        //- Radiation solver frequency - number flow solver iterations per
+        //  radiation solver iteration
+        label solverFreq_;
 
 
         // References to the radiation sub-models
@@ -132,6 +135,9 @@ public:
 
     // Constructors
 
+        //- Null constructor
+        radiationModel(const volScalarField& T);
+
         //- Construct from components
         radiationModel(const word& type, const volScalarField& T);
 
@@ -142,7 +148,7 @@ public:
          static autoPtr<radiationModel> New(const volScalarField& T);
 
 
-    // Destructor
+    //- Destructor
     virtual ~radiationModel();
 
 
@@ -150,8 +156,11 @@ public:
 
         // Edit
 
+            //- Main update/correction routine
+            virtual void correct();
+
             //- Solve radiation equation(s)
-            virtual void correct() = 0;
+            virtual void calculate() = 0;
 
             //- Read radiationProperties dictionary
             virtual bool read() = 0;

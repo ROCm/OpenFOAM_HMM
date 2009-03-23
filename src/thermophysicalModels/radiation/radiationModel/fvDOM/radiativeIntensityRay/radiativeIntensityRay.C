@@ -117,7 +117,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
     {
         IOobject IHeader
         (
-            "Ilambda_" + name(rayId) + "_" + name(i),
+            "ILambda_" + name(rayId) + "_" + name(i),
             mesh_.time().timeName(),
             mesh_,
             IOobject::MUST_READ,
@@ -170,7 +170,7 @@ Foam::radiation::radiativeIntensityRay::~radiativeIntensityRay()
 Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 {
     // reset boundary heat flux to zero
-    Qr_ =  dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
+    Qr_ = dimensionedScalar("zero", dimMass/pow3(dimTime), 0.0);
 
     scalar maxResidual = -GREAT;
 

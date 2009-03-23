@@ -96,6 +96,9 @@ class radiativeIntensityRay
         //- List of pointers to radiative intensity fields for given wavelengths
         PtrList<volScalarField> ILambda_;
 
+        //- Global ray id - incremented in constructor
+        static label rayId;
+
 
     // Private member functions
 
@@ -107,11 +110,6 @@ class radiativeIntensityRay
 
 
 public:
-
-    // Static data members
-
-        static label rayId;
-
 
     // Constructors
 
