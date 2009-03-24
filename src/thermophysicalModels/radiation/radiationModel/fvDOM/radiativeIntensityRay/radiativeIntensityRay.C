@@ -113,11 +113,11 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         0.5*deltaPhi*Foam::sin(2.0*theta)*Foam::sin(deltaTheta)
     );
 
-    forAll(ILambda_, i)
+    forAll(ILambda_, lambdaI)
     {
         IOobject IHeader
         (
-            "ILambda_" + name(rayId) + "_" + name(i),
+            "ILambda_" + name(rayId) + "_" + name(lambdaI),
             mesh_.time().timeName(),
             mesh_,
             IOobject::MUST_READ,
@@ -129,7 +129,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         {
             ILambda_.set
             (
-                i,
+                lambdaI,
                 new volScalarField(IHeader, mesh_)
             );
         }
@@ -150,7 +150,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
 
             ILambda_.set
             (
-                i,
+                lambdaI,
                 new volScalarField(IHeader, IDefault)
             );
         }
@@ -201,7 +201,6 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
         ).initialResidual();
 
         maxResidual = max(eqnResidual, maxResidual);
-
     }
 
     return maxResidual;
