@@ -32,23 +32,13 @@ License
 
 namespace Foam
 {
-//    defineTypeNameAndDebug(displacementFvMotionSolver, 0);
-//
-//    addToRunTimeSelectionTable
-//    (
-//        fvMotionSolver,
-//        displacementFvMotionSolver,
-//        dictionary
-//    );
+    defineTypeNameAndDebug(displacementFvMotionSolver, 0);
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::displacementFvMotionSolver::
-displacementFvMotionSolver
+Foam::displacementFvMotionSolver::displacementFvMotionSolver
 (
     const polyMesh& mesh,
     Istream&

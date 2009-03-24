@@ -90,12 +90,21 @@ void Foam::vtkPV3Foam::reduceMemory()
 
 
 
-int Foam::vtkPV3Foam::setTime(const double& requestedTime)
+int Foam::vtkPV3Foam::setTime(int nRequest, const double requestTimes[])
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::setTime(" << requestedTime << ")"
-            << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::setTime(";
+        for (int requestI = 0; requestI < nRequest; ++requestI)
+        {
+            if (requestI)
+            {
+                Info<< ", ";
+            }
+
+            Info<< requestTimes[requestI];
+        }
+        Info << ") - previousIndex = " << timeIndex_ << endl;
     }
 
     Time& runTime = dbPtr_();
@@ -103,11 +112,25 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
     // Get times list
     instantList Times = runTime.times();
 
-    int nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
+    int nearestIndex = timeIndex_;
+
+    for (int requestI = 0; requestI < nRequest; ++requestI)
+    {
+        int index = Time::findClosestTimeIndex(Times, requestTimes[requestI]);
+
+        if (index >= 0 && index != timeIndex_)
+        {
+            nearestIndex = index;
+            break;
+        }
+    }
+
+
     if (nearestIndex < 0)
     {
         nearestIndex = 0;
     }
+
 
     // see what has changed
     if (timeIndex_ != nearestIndex)
@@ -138,10 +161,11 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::setTime() - selected time "
-            << Times[nearestIndex].name() << " index=" << nearestIndex
-            << " meshChanged=" << meshChanged_
-            << " fieldsChanged=" << fieldsChanged_ << endl;
+        Info<< "<end> Foam::vtkPV3Foam::setTime() - selectedTime="
+            << Times[nearestIndex].name() << " index=" << timeIndex_
+            << "/" << Times.size()
+            << " meshChanged=" << Switch(meshChanged_)
+            << " fieldsChanged=" << Switch(fieldsChanged_) << endl;
     }
 
     return nearestIndex;
