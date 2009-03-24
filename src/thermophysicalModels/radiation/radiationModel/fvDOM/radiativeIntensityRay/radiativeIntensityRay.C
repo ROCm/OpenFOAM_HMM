@@ -182,7 +182,7 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
 
         fvScalarMatrix IiEq
         (
-            fvm::div(Ji, ILambda_[lambdaI], " div(Ji,Ii_h)")
+            fvm::div(Ji, ILambda_[lambdaI], "div(Ji,Ii_h)")
           + fvm::Sp(k*omega_, ILambda_[lambdaI])
          ==
             1.0/Foam::mathematicalConstant::pi

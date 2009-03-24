@@ -147,7 +147,10 @@ updateCoeffs()
         return;
     }
 
-    const fvDOM& dom = db().lookupObject<fvDOM>("radiationProperties");
+    const radiationModel& radiation =
+            db().lookupObject<radiationModel>("radiationProperties");
+
+    const fvDOM& dom(refCast<const fvDOM>(radiation));
 
     const label patchI = patch().index();
 
