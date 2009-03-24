@@ -1,4 +1,3 @@
-
     Info<< "Reading field p\n" << endl;
     volScalarField p
     (
@@ -33,7 +32,7 @@
 
     label pRefCell = 0;
     scalar pRefValue = 0.0;
-    setRefCell(p, mesh.solutionDict().subDict("PISO"), pRefCell, pRefValue);
+    setRefCell(p, mesh.solutionDict().subDict("PIMPLE"), pRefCell, pRefValue);
 
     singlePhaseTransportModel laminarTransport(U, phi);
 
