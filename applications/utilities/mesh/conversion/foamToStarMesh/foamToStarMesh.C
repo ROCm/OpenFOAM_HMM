@@ -61,6 +61,7 @@ See Also
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "STARCDMeshWriter.H"
@@ -73,20 +74,17 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+    timeSelector::addOptions();
+
     argList::validOptions.insert("scale", "scale");
     argList::validOptions.insert("noBnd", "");
     argList::validOptions.insert("tri", "");
     argList::validOptions.insert("surface", "");
 
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
-    // Get times list
-    instantList Times = runTime.times();
 
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-    runTime.setTime(Times[startTime], startTime);
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
     bool surfaceOnly = false;
     if (args.options().found("surface") or args.options().found("tri"))
@@ -118,17 +116,16 @@ int main(int argc, char *argv[])
 
 #   include "createPolyMesh.H"
 
-    // bool firstCheck = true;
 
-    for (label timeI = startTime; timeI < endTime; ++timeI)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[timeI], timeI);
+        runTime.setTime(timeDirs[timeI], timeI);
 
 #       include "getTimeIndex.H"
 
         polyMesh::readUpdateState state = mesh.readUpdate();
 
-        if (timeI == startTime || state != polyMesh::UNCHANGED)
+        if (!timeI || state != polyMesh::UNCHANGED)
         {
             meshWriters::STARCD writer(mesh, scaleFactor);
 

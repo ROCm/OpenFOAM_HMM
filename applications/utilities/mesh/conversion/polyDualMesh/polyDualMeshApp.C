@@ -348,8 +348,10 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
+
     // Get times list
     instantList Times = runTime.times();
+
 #   include "checkTimeOptions.H"
     runTime.setTime(Times[startTime], startTime);
 
@@ -509,7 +511,7 @@ int main(int argc, char *argv[])
     Info<< "Writing dual mesh to " << runTime.timeName() << endl;
 
     mesh.write();
- 
+
     Info<< "End\n" << endl;
 
     return 0;
