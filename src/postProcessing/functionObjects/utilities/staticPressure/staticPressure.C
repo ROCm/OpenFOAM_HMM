@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "dynamicPressure.H"
+#include "staticPressure.H"
 #include "volFields.H"
 #include "dictionary.H"
 
@@ -32,12 +32,12 @@ License
 
 namespace Foam
 {
-    defineTypeNameAndDebug(dynamicPressure, 0);
+    defineTypeNameAndDebug(staticPressure, 0);
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::dynamicPressure::isKinematicPressure()
+bool Foam::staticPressure::isKinematicPressure()
 {
     const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
 
@@ -47,7 +47,7 @@ bool Foam::dynamicPressure::isKinematicPressure()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::dynamicPressure::dynamicPressure
+Foam::staticPressure::staticPressure
 (
     const word& name,
     const objectRegistry& obr,
@@ -67,7 +67,7 @@ Foam::dynamicPressure::dynamicPressure
         active_ = false;
         WarningIn
         (
-            "dynamicPressure::dynamicPressure"
+            "staticPressure::staticPressure"
             "(const objectRegistry&, const dictionary&)"
         )   << "No fvMesh available, deactivating." << nl
             << endl;
@@ -80,7 +80,7 @@ Foam::dynamicPressure::dynamicPressure
             active_ = false;
             WarningIn
             (
-                "dynamicPressure::dynamicPressure"
+                "staticPressure::staticPressure"
                 "(const objectRegistry&, const dictionary&)"
             )   << "Pressure is not kinematic pressure, deactivating." << nl
                 << endl;
@@ -93,13 +93,13 @@ Foam::dynamicPressure::dynamicPressure
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::dynamicPressure::~dynamicPressure()
+Foam::staticPressure::~staticPressure()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::dynamicPressure::read(const dictionary& dict)
+void Foam::staticPressure::read(const dictionary& dict)
 {
     if (active_)
     {
@@ -109,19 +109,19 @@ void Foam::dynamicPressure::read(const dictionary& dict)
 }
 
 
-void Foam::dynamicPressure::execute()
+void Foam::staticPressure::execute()
 {
     // Do nothing - only valid on write
 }
 
 
-void Foam::dynamicPressure::end()
+void Foam::staticPressure::end()
 {
     // Do nothing - only valid on write
 }
 
 
-void Foam::dynamicPressure::write()
+void Foam::staticPressure::write()
 {
     if (active_)
     {

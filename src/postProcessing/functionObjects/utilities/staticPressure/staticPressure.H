@@ -23,20 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::dynamicPressure
+    Foam::staticPressure
 
 Description
-    Converts kinematic pressure to dynamic pressure, from the name of the
-    pressure field, and density.
+    Converts kinematic pressure to static pressure, from the name of the
+    pressure field, and density, i.e.
+
+        p_static = density*p_kinematic
 
 SourceFiles
-    dynamicPressure.C
-    IOdynamicPressure.H
+    staticPressure.C
+    IOstaticPressure.H
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dynamicPressure_H
-#define dynamicPressure_H
+#ifndef staticPressure_H
+#define staticPressure_H
 
 #include "pointFieldFwd.H"
 
@@ -51,14 +53,14 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class dynamicPressure Declaration
+                           Class staticPressure Declaration
 \*---------------------------------------------------------------------------*/
 
-class dynamicPressure
+class staticPressure
 {
     // Private data
 
-        //- Name of this set of dynamicPressure objects
+        //- Name of this set of staticPressure objects
         word name_;
 
         const objectRegistry& obr_;
@@ -79,23 +81,23 @@ class dynamicPressure
         bool isKinematicPressure();
 
         //- Disallow default bitwise copy construct
-        dynamicPressure(const dynamicPressure&);
+        staticPressure(const staticPressure&);
 
         //- Disallow default bitwise assignment
-        void operator=(const dynamicPressure&);
+        void operator=(const staticPressure&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("dynamicPressure");
+    TypeName("staticPressure");
 
 
     // Constructors
 
         //- Construct for given objectRegistry and dictionary.
         //  Allow the possibility to load fields from files
-        dynamicPressure
+        staticPressure
         (
             const word& name,
             const objectRegistry&,
@@ -106,18 +108,18 @@ public:
 
     // Destructor
 
-        virtual ~dynamicPressure();
+        virtual ~staticPressure();
 
 
     // Member Functions
 
-        //- Return name of the set of dynamicPressure
+        //- Return name of the set of staticPressure
         virtual const word& name() const
         {
             return name_;
         }
 
-        //- Read the dynamicPressure data
+        //- Read the staticPressure data
         virtual void read(const dictionary&);
 
         //- Execute, currently does nothing
@@ -126,7 +128,7 @@ public:
         //- Execute at the final time-loop, currently does nothing
         virtual void end();
 
-        //- Calculate the dynamicPressure and write
+        //- Calculate the staticPressure and write
         virtual void write();
 
         //- Update for changes of mesh
