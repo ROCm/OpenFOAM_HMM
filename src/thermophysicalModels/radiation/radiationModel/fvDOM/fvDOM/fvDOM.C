@@ -128,7 +128,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     aLambda_(nLambda_),
     blackBody_(nLambda_, T),
     IRay_(0),
-    convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0))
+    convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0)),
+    maxIter_(coeffs_.lookupOrDefault<label>("maxIter", 50))
 {
     if (mesh_.nSolutionD() == 3)    //3D
     {
@@ -298,7 +299,7 @@ void Foam::radiation::fvDOM::calculate()
 
         Info << "Radiation solver iter: " << radIter << endl;
 
-    } while(maxResidual > convergence_);
+    } while(maxResidual > convergence_ && radIter < maxIter_);
 
     updateG();
 }

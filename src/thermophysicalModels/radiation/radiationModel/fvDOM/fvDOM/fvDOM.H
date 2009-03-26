@@ -117,6 +117,9 @@ class fvDOM
         //- Convergence criterion
         scalar convergence_;
 
+        //- Maximum number of iterations
+        scalar maxIter_;
+
 
     // Private member functions
 
