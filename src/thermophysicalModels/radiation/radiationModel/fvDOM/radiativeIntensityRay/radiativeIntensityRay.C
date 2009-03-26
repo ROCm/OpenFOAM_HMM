@@ -116,6 +116,9 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         0.5*deltaPhi*Foam::sin(2.0*theta)*Foam::sin(deltaTheta)
     );
 
+
+    autoPtr<volScalarField> IDefaultPtr;
+
     forAll(ILambda_, lambdaI)
     {
         IOobject IHeader
@@ -138,23 +141,34 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         }
         else
         {
-            volScalarField IDefault
-            (
-                IOobject
+            // Demand driven load the IDefault field
+            if (!IDefaultPtr.valid())
+            {
+                IDefaultPtr.reset
                 (
-                    "IDefault",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_
-            );
+                    new volScalarField
+                    (
+                        IOobject
+                        (
+                            "IDefault",
+                            mesh_.time().timeName(),
+                            mesh_,
+                            IOobject::MUST_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh_
+                    )
+                );
+            }
+
+            // Reset the MUST_READ flag
+            IOobject noReadHeader(IHeader);
+            noReadHeader.readOpt() = IOobject::NO_READ;
 
             ILambda_.set
             (
                 lambdaI,
-                new volScalarField(IHeader, IDefault)
+                new volScalarField(noReadHeader, IDefaultPtr())
             );
         }
     }
