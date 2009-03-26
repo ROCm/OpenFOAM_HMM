@@ -203,7 +203,7 @@ Foam::radiation::greyMeanAbsorptionEmission::aCont(const label bandI) const
             {
                 Ti = 1./T[i];
             }
-            a[i]+=
+            a[i] +=
                 Yipi
                *(
                     ((((b[5]*Ti + b[4])*Ti + b[3])*Ti + b[2])*Ti + b[1])*Ti
