@@ -34,6 +34,7 @@ Foam::radiation::blackBodyEmission::emissivePowerTable
 (
     IStringStream
     (
+        "("
         "( 1000 0.00032)"
         "( 1100 0.00091)"
         "( 1200 0.00213)"
@@ -131,6 +132,7 @@ Foam::radiation::blackBodyEmission::emissivePowerTable
         "(30000 0.99529)"
         "(40000 0.99792)"
         "(50000 0.99890)"
+        ")"
     )()
 );
 
