@@ -66,9 +66,6 @@ class wideBandDiffusiveRadiationMixedFvPatchScalarField
         //- Wavelength index
         label lambdaId_;
 
-        //- Radiative heat flux on walls.
-        scalarField qr_;
-
 
 public:
 
