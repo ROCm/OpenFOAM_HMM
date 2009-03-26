@@ -40,7 +40,7 @@ SourceFiles
 #include "dimensionedScalar.H"
 #include "mathematicalConstants.H"
 #include "radiationConstants.H"
-#include "interpolationLookUpTable.H"
+#include "interpolationTable.H"
 #include "Vector2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,9 +56,21 @@ namespace radiation
 
 class blackBodyEmission
 {
+public:
+
+    //- Number of entries in the table
+    static const label nTableEntries = 91;
+
+    //- Static table of black body emissive power
+    static const scalar emissivePowerTable[nTableEntries][2];
+
+
+private:
+
     // Private data
 
-        mutable interpolationLookUpTable<scalar> blackBodyEmissiveTable_;
+        //- Interpolation table of black body emissive power
+        mutable interpolationTable<scalar> table_;
 
         //- Constant C1
         const dimensionedScalar C1_;
@@ -75,6 +87,9 @@ class blackBodyEmission
 
     // Private member functions
 
+        //- Convert the static table into a list of Tuple2<scalar, scalar>
+        List<Tuple2<scalar, scalar> > tableToList() const;
+
         scalar fLambdaT(const scalar lambdaT) const;
 
 
@@ -85,8 +100,6 @@ public:
         //- Construct from components
         blackBodyEmission
         (
-            const fileName& name,
-            const word& instance,
             const label nLambda,
             const volScalarField& T
         );

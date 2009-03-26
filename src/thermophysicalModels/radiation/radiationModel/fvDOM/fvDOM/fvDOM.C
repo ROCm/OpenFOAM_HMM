@@ -126,13 +126,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     nRay_(0),
     nLambda_(absorptionEmission_->nBands()),
     aLambda_(nLambda_),
-    blackBody_
-    (
-        fileName("blackBodyEmissivePower"),
-        mesh_.time().constant(),
-        nLambda_,
-        T
-    ),
+    blackBody_(nLambda_, T),
     IRay_(0),
     convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0))
 {
