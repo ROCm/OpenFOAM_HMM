@@ -100,7 +100,7 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class constantAbsorptionEmission Declaration
+                 Class greyMeanAbsorptionEmission Declaration
 \*---------------------------------------------------------------------------*/
 
 class greyMeanAbsorptionEmission
