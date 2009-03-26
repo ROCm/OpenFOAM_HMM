@@ -51,7 +51,7 @@ Foam::radiation::radiationModel::radiationModel(const volScalarField& T)
         (
             "radiationProperties",
             T.time().constant(),
-            T.mesh().objectRegistry::db(),
+            T.mesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
@@ -79,7 +79,7 @@ Foam::radiation::radiationModel::radiationModel
         (
             "radiationProperties",
             T.time().constant(),
-            T.mesh().objectRegistry::db(),
+            T.mesh(),
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )

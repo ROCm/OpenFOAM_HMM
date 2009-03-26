@@ -126,20 +126,14 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     nRay_(0),
     nLambda_(absorptionEmission_->nBands()),
     aLambda_(nLambda_),
-    blackBody_
-    (
-        fileName("blackBodyEmissivePower"),
-        mesh_.time().constant(),
-        nLambda_,
-        T
-    ),
+    blackBody_(nLambda_, T),
     IRay_(0),
     convergence_(coeffs_.lookupOrDefault<scalar>("convergence", 0.0))
 {
     if (mesh_.nSolutionD() == 3)    //3D
     {
-        IRay_.setSize(4*nPhi_*nTheta_);
         nRay_ = 4*nPhi_*nTheta_;
+        IRay_.setSize(nRay_);
         scalar deltaPhi = mathematicalConstant::pi/(2.0*nPhi_);
         scalar deltaTheta = mathematicalConstant::pi/nTheta_;
         label i = 0;
@@ -175,8 +169,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         {
             scalar thetai = mathematicalConstant::pi/2.0;
             scalar deltaTheta = mathematicalConstant::pi;
-            IRay_.setSize(4*nPhi_);
             nRay_ = 4*nPhi_;
+            IRay_.setSize(nRay_);
             scalar deltaPhi = mathematicalConstant::pi/(2.0*nPhi_);
             label i = 0;
             for (label m = 1; m <= 4*nPhi_; m++)
@@ -205,8 +199,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         {
             scalar thetai = mathematicalConstant::pi/2.0;
             scalar deltaTheta = mathematicalConstant::pi;
-            IRay_.setSize(2);
             nRay_ = 2;
+            IRay_.setSize(nRay_);
             scalar deltaPhi = mathematicalConstant::pi;
             label i = 0;
             for (label m = 1; m <= 2; m++)
@@ -302,7 +296,7 @@ void Foam::radiation::fvDOM::calculate()
             maxResidual = max(maxBandResidual, maxResidual);
         }
 
-        Info << "Radiation solver iter: " <<  radIter << endl;
+        Info << "Radiation solver iter: " << radIter << endl;
 
     } while(maxResidual > convergence_);
 

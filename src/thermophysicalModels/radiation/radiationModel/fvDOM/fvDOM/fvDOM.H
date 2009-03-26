@@ -37,19 +37,19 @@ Description
     i.e. dictionary
     fvDOMCoeffs
     {
-        Nphi    1;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
-        Ntheta  2;          // polar angles in P1 (from Z to X-Y plane)
+        nPhi    1;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
+        nTheta  2;          // polar angles in PI (from Z to X-Y plane)
         convergence 1e-4;   // convergence criteria for radiation iteration
     }
 
-    nFlowIterPerRadIter   1; // Number of flow iterations per radiation
+    solverFreq   1; // Number of flow iterations per radiation
                                 iteration
 
-    The total number of solid angles is  4*Nphi*Ntheta.
+    The total number of solid angles is  4*nPhi*nTheta.
 
-    In 1D the direction of the rays is X (Nphi and Ntheta are ignored)
-    In 2D the direction of the rays is on X-Y plane (only Nphi is considered)
-    In 3D (Nphi and Ntheta are considered)
+    In 1D the direction of the rays is X (nPhi and nTheta are ignored)
+    In 2D the direction of the rays is on X-Y plane (only nPhi is considered)
+    In 3D (nPhi and nTheta are considered)
 
 SourceFiles
     fvDOM.C
@@ -126,9 +126,6 @@ class fvDOM
 
         //- Disallow default bitwise assignment
         void operator=(const fvDOM&);
-
-        //- Update Absorption Coefficients
-//        void updateAbsorptionCoeffs(void);
 
         //- Update nlack body emission
         void updateBlackBodyEmission();

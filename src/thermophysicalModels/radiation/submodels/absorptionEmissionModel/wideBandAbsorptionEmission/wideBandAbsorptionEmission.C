@@ -80,7 +80,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
         const dictionary& dict = iter().dict();
         dict.lookup("bandLimits") >> iBands_[nBand];
         dict.lookup("EhrrCoeff") >> iEhrrCoeffs_[nBand];
-        totalWaveLength_ += (iBands_[nBand][1] - iBands_[nBand][0]);
+        totalWaveLength_ += iBands_[nBand][1] - iBands_[nBand][0];
 
         label nSpec = 0;
         const dictionary& specDicts = dict.subDict("species");
@@ -111,7 +111,7 @@ Foam::radiation::wideBandAbsorptionEmission::wideBandAbsorptionEmission
     nBands_ = nBand;
 
     // Check that all the species on the dictionary are present in the
-    // look-up table  and save the corresponding indexes of the look-up table
+    // look-up table  and save the corresponding indices of the look-up table
 
     label j = 0;
     forAllConstIter(HashTable<label>, speciesNames_, iter)
@@ -180,7 +180,7 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
                 IOobject::NO_WRITE
             ),
             mesh(),
-            dimensionedScalar("a",dimless/dimLength, 0.0)
+            dimensionedScalar("a", dimless/dimLength, 0.0)
         )
     );
 
@@ -193,7 +193,7 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
         for (label n=0; n<nSpecies; n++)
         {
             label l = 0;
-            scalar Yipi = 0;
+            scalar Yipi = 0.0;
             if (specieIndex_[n] != 0)
             {
                 // moles x pressure [atm]
@@ -213,7 +213,7 @@ Foam::radiation::wideBandAbsorptionEmission::aCont(const label bandI) const
 
             if (coeffs_[n][bandI].invTemp())
             {
-                Ti = 1./T[i];
+                Ti = 1.0/T[i];
             }
 
             a[i]+=
@@ -245,7 +245,7 @@ Foam::radiation::wideBandAbsorptionEmission::eCont(const label bandI) const
                 IOobject::NO_WRITE
             ),
             mesh(),
-            dimensionedScalar("e",dimless/dimLength, 0.0)
+            dimensionedScalar("e", dimless/dimLength, 0.0)
         )
     );
 
@@ -275,7 +275,7 @@ Foam::radiation::wideBandAbsorptionEmission::ECont(const label bandI) const
 
     if (mesh().foundObject<volScalarField>("hrr"))
     {
-        const volScalarField& hrr =  mesh().lookupObject<volScalarField>("hrr");
+        const volScalarField& hrr = mesh().lookupObject<volScalarField>("hrr");
         E().internalField() =
             iEhrrCoeffs_[bandI]
            *hrr.internalField()
@@ -305,7 +305,7 @@ void Foam::radiation::wideBandAbsorptionEmission::correct
 {
     a = dimensionedScalar("zero", dimless/dimLength, 0.0);
 
-    for (label j = 0; j < nBands_; j++)
+    for (label j=0; j<nBands_; j++)
     {
         Info<< "Calculating absorption in band: " << j << endl;
         aLambda[j].internalField() = this->a(j);
@@ -317,4 +317,6 @@ void Foam::radiation::wideBandAbsorptionEmission::correct
     }
 
 }
+
+
 // ************************************************************************* //
