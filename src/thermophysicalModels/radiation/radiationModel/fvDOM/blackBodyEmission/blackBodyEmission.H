@@ -28,6 +28,9 @@ Class
 Description
     Class black body emission
 
+    Table of black body emissive power taken from:
+        Modest, "Radiative Heat Transfer", pp.775-777, 1993
+
 SourceFiles
     blackBodyEmission.C
 
@@ -58,11 +61,8 @@ class blackBodyEmission
 {
 public:
 
-    //- Number of entries in the table
-    static const label nTableEntries = 91;
-
     //- Static table of black body emissive power
-    static const scalar emissivePowerTable[nTableEntries][2];
+    static const List<Tuple2<scalar, scalar> > emissivePowerTable;
 
 
 private:
@@ -86,9 +86,6 @@ private:
 
 
     // Private member functions
-
-        //- Convert the static table into a list of Tuple2<scalar, scalar>
-        List<Tuple2<scalar, scalar> > tableToList() const;
 
         scalar fLambdaT(const scalar lambdaT) const;
 
