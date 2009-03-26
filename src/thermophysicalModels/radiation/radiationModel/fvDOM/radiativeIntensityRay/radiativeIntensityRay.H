@@ -55,6 +55,13 @@ class fvDOM;
 
 class radiativeIntensityRay
 {
+public:
+
+    static const word intensityPrefix;
+
+
+private:
+
     // Private data
 
         //- Refence to the owner fvDOM object

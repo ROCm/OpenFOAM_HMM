@@ -45,9 +45,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     TName_("undefinedT"),
-    emissivity_(0.0),
-    rayId_(0),
-    lambdaId_(0)
+    emissivity_(0.0)
 {
     refValue() = 0.0;
     refGrad() = 0.0;
@@ -66,9 +64,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(ptf, p, iF, mapper),
     TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_),
-    rayId_(ptf.rayId_),
-    lambdaId_(ptf.lambdaId_)
+    emissivity_(ptf.emissivity_)
 {}
 
 
@@ -82,9 +78,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(p, iF),
     TName_(dict.lookup("T")),
-    emissivity_(readScalar(dict.lookup("emissivity"))),
-    rayId_(0),
-    lambdaId_(0)
+    emissivity_(readScalar(dict.lookup("emissivity")))
 {
     const scalarField& Tp =
         patch().lookupPatchField<volScalarField, scalar>(TName_);
@@ -116,9 +110,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(ptf),
     TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_),
-    rayId_(ptf.rayId_),
-    lambdaId_(ptf.lambdaId_)
+    emissivity_(ptf.emissivity_)
 {}
 
 
@@ -131,9 +123,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
 :
     mixedFvPatchScalarField(ptf, iF),
     TName_(ptf.TName_),
-    emissivity_(ptf.emissivity_),
-    rayId_(ptf.rayId_),
-    lambdaId_(ptf.lambdaId_)
+    emissivity_(ptf.emissivity_)
 {}
 
 
@@ -152,40 +142,19 @@ updateCoeffs()
 
     const fvDOM& dom(refCast<const fvDOM>(radiation));
 
+    label rayId = -1;
+    label lambdaId = -1;
+    dom.setRayIdLambdaId(dimensionedInternalField().name(), rayId, lambdaId);
+
     const label patchI = patch().index();
 
-    if (dom.nLambda() > 1)
-    {
-        if (rayId_ == -1)
-        {
-            for (label rayI=0; rayI < dom.nRay(); rayI++)
-            {
-                for (label lambdaI=0; lambdaI < dom.nLambda(); lambdaI++)
-                {
-                    const volScalarField& radiationField =
-                        dom.IRayLambda(rayI, lambdaI);
-                    if
-                    (
-                        &(radiationField.internalField())
-                      ==&dimensionedInternalField()
-                    )
-                    {
-                        rayId_ = rayI;
-                        lambdaId_ = lambdaI;
-                        break;
-                    }
-                }
-            }
-        }
-    }
-    else
+    if (dom.nLambda() == 0)
     {
         FatalErrorIn
         (
             "Foam::radiation::"
-            "wideBandDiffusiveRadiationMixedFvPatchScalarField::"
-            "updateCoeffs"
-        )   << " a Non-grey boundary condition is used with a grey"
+            "wideBandDiffusiveRadiationMixedFvPatchScalarField::updateCoeffs"
+        )   << " a non-grey boundary condition is used with a grey "
             << "absorption model" << nl << exit(FatalError);
     }
 
@@ -193,12 +162,12 @@ updateCoeffs()
     vectorField n = patch().Sf()/patch().magSf();
 
     radiativeIntensityRay& ray =
-        const_cast<radiativeIntensityRay&>(dom.IRay(rayId_));
+        const_cast<radiativeIntensityRay&>(dom.IRay(rayId));
 
     ray.Qr().boundaryField()[patchI] += Iw*(-n & ray.dAve());
 
     const scalarField Eb =
-        dom.blackBody().bLambda(lambdaId_).boundaryField()[patchI];
+        dom.blackBody().bLambda(lambdaId).boundaryField()[patchI];
 
     forAll(Iw, faceI)
     {
@@ -207,20 +176,21 @@ updateCoeffs()
         {
             const vector& d = dom.IRay(rayI).d();
 
-            const scalarField& Iface =
-                dom.IRay(rayI).ILambda(lambdaId_).boundaryField()[patchI];
+            const scalarField& IFace =
+                dom.IRay(rayI).ILambda(lambdaId).boundaryField()[patchI];
 
             if ((-n[faceI] & d) < 0.0) // qin into the wall
             {
                 const vector& dAve = dom.IRay(rayI).dAve();
-                Ir = Ir + Iface[faceI]*mag(n[faceI] & dAve);
+                Ir = Ir + IFace[faceI]*mag(n[faceI] & dAve);
             }
         }
 
-        const vector& d = dom.IRay(rayId_).d();
+        const vector& d = dom.IRay(rayId).d();
 
-        if ((-n[faceI] & d) > 0.0) //direction out of the wall
+        if ((-n[faceI] & d) > 0.0)
         {
+            // direction out of the wall
             refGrad()[faceI] = 0.0;
             valueFraction()[faceI] = 1.0;
             refValue()[faceI] =
@@ -230,8 +200,9 @@ updateCoeffs()
                 )
                /mathematicalConstant::pi;
         }
-        else  //direction into the wall
+        else
         {
+            // direction into the wall
             valueFraction()[faceI] = 0.0;
             refGrad()[faceI] = 0.0;
             refValue()[faceI] = 0.0; //not used

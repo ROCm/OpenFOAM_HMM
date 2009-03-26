@@ -160,6 +160,15 @@ public:
             //- Update G and calculate total heat flux on boundary
             void updateG();
 
+            //- Set the rayId and lambdaId from by decomposing an intensity
+            //  field name
+            void setRayIdLambdaId
+            (
+                const word& name,
+                label& rayId,
+                label& lambdaId
+            ) const;
+
             //- Source term component (for power of T^4)
             virtual tmp<volScalarField> Rp() const;
 
@@ -191,19 +200,19 @@ public:
             //- Number of wavelengths
             inline label nLambda() const;
 
-            // Const access to total absorption coefficient
+            //- Const access to total absorption coefficient
             inline const volScalarField& a() const;
 
-            // Const access to wavelength total absorption coefficient
+            //- Const access to wavelength total absorption coefficient
             inline const volScalarField& aLambda(const label lambdaI) const;
 
-            // Const access to incident radiation field
+            //- Const access to incident radiation field
             inline const volScalarField& G() const;
 
-            //  Const access to total radiative heat flux field
+            //- Const access to total radiative heat flux field
             inline const volScalarField& Qr() const;
 
-            //  Const access to black body
+            //- Const access to black body
             inline const blackBodyEmission& blackBody() const;
 };
 

@@ -37,7 +37,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::label Foam::radiation::radiativeIntensityRay::rayId = 0;
+Foam::label Foam::radiation::radiativeIntensityRay::rayId(0);
+
+const Foam::word
+Foam::radiation::radiativeIntensityRay::intensityPrefix("ILambda");
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -117,7 +120,7 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
     {
         IOobject IHeader
         (
-            "ILambda_" + name(rayId) + "_" + name(lambdaI),
+            intensityPrefix + "_" + name(rayId) + "_" + name(lambdaI),
             mesh_.time().timeName(),
             mesh_,
             IOobject::MUST_READ,

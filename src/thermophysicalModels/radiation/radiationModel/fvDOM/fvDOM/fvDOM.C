@@ -363,4 +363,20 @@ void Foam::radiation::fvDOM::updateG()
 }
 
 
+void Foam::radiation::fvDOM::setRayIdLambdaId
+(
+    const word& name,
+    label& rayId,
+    label& lambdaId
+) const
+{
+    // assuming name is in the form: CHARS_rayId_lambdaId
+    size_type i1 = name.find_first_of("_");
+    size_type i2 = name.find_last_of("_");
+
+    rayId = readLabel(IStringStream(name.substr(i1+1, i2-1))());
+    lambdaId = readLabel(IStringStream(name.substr(i2+1, name.size()-1))());
+}
+
+
 // ************************************************************************* //
