@@ -42,8 +42,7 @@ Description
         convergence 1e-4;   // convergence criteria for radiation iteration
     }
 
-    solverFreq   1; // Number of flow iterations per radiation
-                                iteration
+    solverFreq   1; // Number of flow iterations per radiation iteration
 
     The total number of solid angles is  4*nPhi*nTheta.
 
