@@ -71,6 +71,8 @@ SourceFiles
 #include "PrimitivePatchInterpolation.H"
 #include "volPointInterpolation.H"
 
+#undef VTKPV3FOAM_DUALPORT
+
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
 class vtkDataArraySelection;

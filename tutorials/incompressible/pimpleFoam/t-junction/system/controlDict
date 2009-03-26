@@ -52,16 +52,24 @@ functions
     probes
     {
         type        probes;
-        name        probes;
+        // Where to load it from
         functionObjectLibs ( "libsampling.so" );
+        // Name of the directory for probe data
+        name        probes;
         probeLocations
         (
-            ( 1e-06 0 0.01 )
-            ( 0.21 -0.20999 0.01 )
-            ( 0.21 0.20999 0.01 )
-            ( 0.21 0 0.01 )
+            ( 1e-06 0 0.01 )        // at inlet
+            ( 0.21 -0.20999 0.01 )  // at outlet1
+            ( 0.21 0.20999 0.01 )   // at outlet2
+            ( 0.21 0 0.01 )         // at central block
         );
+
+        // Fields to be probed
         fields ( p U );
+
+        // Write at same frequency as fields
+        outputControl   outputTime;
+        outputInterval  1;
     }
 }
 

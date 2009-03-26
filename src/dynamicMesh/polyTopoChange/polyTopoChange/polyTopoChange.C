@@ -1464,6 +1464,11 @@ void Foam::polyTopoChange::resetZones
 
             addressing[zoneI][nPoints[zoneI]++] = iter.key();
         }
+        // Sort the addressing
+        forAll(addressing, zoneI)
+        {
+            stableSort(addressing[zoneI]);
+        }
 
         // So now we both have old zones and the new addressing.
         // Invert the addressing to get pointZoneMap.
@@ -1550,6 +1555,28 @@ void Foam::polyTopoChange::resetZones
 
             addressing[zoneI][index] = faceI;
             flipMode[zoneI][index] = faceZoneFlip_[faceI];
+        }
+        // Sort the addressing
+        forAll(addressing, zoneI)
+        {
+            labelList newToOld;
+            sortedOrder(addressing[zoneI], newToOld);
+            {
+                labelList newAddressing(addressing[zoneI].size());
+                forAll(newAddressing, i)
+                {
+                    newAddressing[i] = addressing[zoneI][newToOld[i]];
+                }
+                addressing[zoneI].transfer(newAddressing);
+            }
+            {
+                boolList newFlipMode(flipMode[zoneI].size());
+                forAll(newFlipMode, i)
+                {
+                    newFlipMode[i] = flipMode[zoneI][newToOld[i]];
+                }
+                flipMode[zoneI].transfer(newFlipMode);
+            }
         }
 
         // So now we both have old zones and the new addressing.
@@ -1643,6 +1670,11 @@ void Foam::polyTopoChange::resetZones
             {
                 addressing[zoneI][nCells[zoneI]++] = cellI;
             }
+        }
+        // Sort the addressing
+        forAll(addressing, zoneI)
+        {
+            stableSort(addressing[zoneI]);
         }
 
         // So now we both have old zones and the new addressing.

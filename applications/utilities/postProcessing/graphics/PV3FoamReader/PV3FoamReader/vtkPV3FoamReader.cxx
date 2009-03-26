@@ -50,6 +50,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     output0_  = NULL;
 
+#ifdef VTKPV3FOAM_DUALPORT
     // Add second output for the Lagrangian
     this->SetNumberOfOutputPorts(2);
     vtkMultiBlockDataSet *lagrangian = vtkMultiBlockDataSet::New();
@@ -57,6 +58,7 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     this->GetExecutive()->SetOutputData(1, lagrangian);
     lagrangian->Delete();
+#endif
 
     TimeStepRange[0] = 0;
     TimeStepRange[1] = 0;
@@ -319,15 +321,6 @@ int vtkPV3FoamReader::RequestData
         )
     );
 
-    vtkMultiBlockDataSet* lagrangianOutput = vtkMultiBlockDataSet::SafeDownCast
-    (
-        outputVector->GetInformationObject(1)->Get
-        (
-            vtkMultiBlockDataSet::DATA_OBJECT()
-        )
-    );
-
-
     if (Foam::vtkPV3Foam::debug)
     {
         cout<< "update output with "
@@ -376,7 +369,21 @@ int vtkPV3FoamReader::RequestData
 
 #else
 
-    foamData_->Update(output, lagrangianOutput);
+#ifdef VTKPV3FOAM_DUALPORT
+    foamData_->Update
+    (
+        output,
+        vtkMultiBlockDataSet::SafeDownCast
+        (
+            outputVector->GetInformationObject(1)->Get
+            (
+                vtkMultiBlockDataSet::DATA_OBJECT()
+            )
+        );
+    );
+#else
+    foamData_->Update(output, output);
+#endif
 
     if (ShowPatchNames)
     {
