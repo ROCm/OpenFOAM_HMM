@@ -74,12 +74,12 @@ template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     ReactingCloud<ParcelType>& owner,
-    const label typeId,
     const vector& position,
     const label cellI,
+    const label typeId,
+    const scalar nParticle0,
     const scalar d0,
     const vector& U0,
-    const scalar nParticle0,
     const scalarField& Y0,
     const constantProperties& constProps
 )
@@ -87,12 +87,12 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
     ThermoParcel<ParcelType>
     (
         owner,
-        typeId,
         position,
         cellI,
+        typeId,
+        nParticle0,
         d0,
         U0,
-        nParticle0,
         constProps
     ),
     mass0_(0.0),
@@ -166,7 +166,7 @@ inline Foam::scalar Foam::ReactingParcel<ParcelType>::mass0() const
 
 
 template<class ParcelType>
-inline const Foam::scalarList& Foam::ReactingParcel<ParcelType>::Y() const
+inline const Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y() const
 {
     return Y_;
 }
@@ -187,7 +187,7 @@ inline Foam::scalar& Foam::ReactingParcel<ParcelType>::mass0()
 
 
 template<class ParcelType>
-inline Foam::scalarList& Foam::ReactingParcel<ParcelType>::Y()
+inline Foam::scalarField& Foam::ReactingParcel<ParcelType>::Y()
 {
     return Y_;
 }

@@ -69,12 +69,12 @@ Foam::scalar Foam::NoSurfaceReaction<CloudType>::calculate
     const scalarField&,
     const scalarField&,
     const scalarField&,
-    const scalarList&,
-    const scalarList&,
+    const scalarField&,
+    const scalarField&,
     scalarField&,
     scalarField&,
     scalarField&,
-    scalarList&
+    scalarField&
 ) const
 {
     // do nothing

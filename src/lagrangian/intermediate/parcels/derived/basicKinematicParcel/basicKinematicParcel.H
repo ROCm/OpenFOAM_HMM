@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class basicKinematicParcel Declaration
+                   Class basicKinematicParcel Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicKinematicParcel
@@ -64,12 +64,12 @@ public:
         basicKinematicParcel
         (
             KinematicCloud<basicKinematicParcel>& owner,
-            const label typeId,
             const vector& position,
             const label cellI,
+            const label typeId,
+            const scalar nParticle0,
             const scalar d0,
             const vector& U0,
-            const scalar nParticle0,
             const constantProperties& constProps
         );
 
@@ -90,8 +90,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~basicKinematicParcel();
+    virtual ~basicKinematicParcel();
 };
 
 

@@ -169,7 +169,7 @@ protected:
             scalar mass0_;
 
             //- Mass fractions of mixture []
-            scalarList Y_;
+            scalarField Y_;
 
 
         // Cell-based quantities
@@ -185,20 +185,22 @@ protected:
         scalar calcPhaseChange
         (
             TrackData& td,
-            const scalar dt,
-            const label cellI,
-            const scalar T,
-            const label idPhase,
-            const scalar YPhase,
-            const scalarField& YComponents,
-            scalarList& dMass
+            const scalar dt,           // timestep
+            const label cellI,         // owner cell
+            const scalar d,            // diameter
+            const scalar T,            // temperature
+            const vector& U,           // velocity
+            const label idPhase,       // id of phase involved in phase change
+            const scalar YPhase,       // total mass fraction
+            const scalarField& YComponents, // component mass fractions
+            scalarField& dMassPC       // mass transfer - local to particle
         );
 
         //- Update mass fraction
         void updateMassFraction
         (
             const scalar mass0,
-            const scalarList& dMass,
+            const scalarField& dMass,
             scalarField& Y
         );
 
@@ -217,12 +219,12 @@ public:
         inline ReactingParcel
         (
             ReactingCloud<ParcelType>& owner,
-            const label typeId,
             const vector& position,
             const label cellI,
+            const label typeId,
+            const scalar nParticle0,
             const scalar d0,
             const vector& U0,
-            const scalar nParticle0,
             const scalarField& Y0,
             const constantProperties& constProps
         );
@@ -250,7 +252,7 @@ public:
             inline scalar mass0() const;
 
             //- Return const access to mass fractions of mixture
-            inline const scalarList& Y() const;
+            inline const scalarField& Y() const;
 
             //- Return the owner cell pressure
             inline scalar pc() const;
@@ -262,7 +264,7 @@ public:
             inline scalar& mass0();
 
             //- Return access to mass fractions of mixture
-            inline scalarList& Y();
+            inline scalarField& Y();
 
 
         // Main calculation loop

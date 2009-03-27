@@ -66,7 +66,7 @@ void Foam::NoPhaseChange<CloudType>::calculate
     const scalar,
     const scalar,
     const vector&,
-    scalarList&
+    scalarField&
 ) const
 {
     // Nothing to do...

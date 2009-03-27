@@ -208,11 +208,16 @@ protected:
         scalar calcHeatTransfer
         (
             TrackData& td,
-            const scalar dt,
-            const label cellI,
-            const scalar Sh,
-            scalar& htc,
-            scalar& dhTrans
+            const scalar dt,           // timestep
+            const label cellI,         // owner cell
+            const scalar d,            // diameter
+            const vector& U,           // velocity
+            const scalar rho,          // density
+            const scalar T,            // temperature
+            const scalar cp,           // specific heat capacity
+            const scalar Sh,           // additional enthalpy sources
+            scalar& htc,               // heat transfer coeff
+            scalar& dhTrans            // enthalpy transfer to carrier phase
         );
 
 
@@ -230,12 +235,12 @@ public:
         inline ThermoParcel
         (
             ThermoCloud<ParcelType>& owner,
-            const label typeId,
             const vector& position,
             const label cellI,
+            const label typeId,
+            const scalar nParticle0,
             const scalar d0,
             const vector& U0,
-            const scalar nParticle0,
             const constantProperties& constProps
         );
 

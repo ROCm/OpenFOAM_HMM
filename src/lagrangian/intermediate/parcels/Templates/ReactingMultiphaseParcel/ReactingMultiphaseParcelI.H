@@ -34,8 +34,8 @@ constantProperties
 )
 :
     ReactingParcel<ParcelType>::constantProperties(dict),
-    Ldevol_(dimensionedScalar(dict.lookup("Ldevol")).value()),
-    fh_(dimensionedScalar(dict.lookup("fh")).value())
+    LDevol_(dimensionedScalar(dict.lookup("LDevol")).value()),
+    hRetentionCoeff_(dimensionedScalar(dict.lookup("hRetentionCoeff")).value())
 {}
 
 
@@ -74,28 +74,28 @@ template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 (
     ReactingMultiphaseCloud<ParcelType>& owner,
-    const label typeId,
     const vector& position,
     const label cellI,
+    const label typeId,
+    const scalar nParticle0,
     const scalar d0,
     const vector& U0,
-    const scalar nParticle0,
+    const scalarField& Y0,
     const scalarField& YGas0,
     const scalarField& YLiquid0,
     const scalarField& YSolid0,
-    const scalarField& Y0,
     const constantProperties& constProps
 )
 :
     ReactingParcel<ParcelType>
     (
         owner,
-        typeId,
         position,
         cellI,
+        typeId,
+        nParticle0,
         d0,
         U0,
-        nParticle0,
         Y0,
         constProps
     ),
@@ -109,17 +109,18 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
 
 template<class ParcelType>
 inline Foam::scalar
-Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::Ldevol() const
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::LDevol() const
 {
-    return Ldevol_;
+    return LDevol_;
 }
 
 
 template<class ParcelType>
 inline Foam::scalar
-Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::fh() const
+Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
+hRetentionCoeff() const
 {
-    return fh_;
+    return hRetentionCoeff_;
 }
 
 
@@ -153,22 +154,8 @@ YGas() const
 
 
 template<class ParcelType>
-inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YGas()
-{
-    return YGas_;
-}
-
-
-template<class ParcelType>
 inline const Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::
 YLiquid() const
-{
-    return YLiquid_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YLiquid()
 {
     return YLiquid_;
 }
@@ -179,6 +166,20 @@ inline const Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::
 YSolid() const
 {
     return YSolid_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YGas()
+{
+    return YGas_;
+}
+
+
+template<class ParcelType>
+inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YLiquid()
+{
+    return YLiquid_;
 }
 
 

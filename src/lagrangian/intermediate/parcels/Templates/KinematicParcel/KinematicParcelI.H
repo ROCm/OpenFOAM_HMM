@@ -63,20 +63,20 @@ template <class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     KinematicCloud<ParcelType>& owner,
-    const label typeId,
     const vector& position,
     const label cellI,
+    const label typeId,
+    const scalar nParticle0,
     const scalar d0,
     const vector& U0,
-    const scalar nParticle0,
     const constantProperties& constProps
 )
 :
     Particle<ParcelType>(owner, position, cellI),
     typeId_(typeId),
+    nParticle_(nParticle0),
     d_(d0),
     U_(U0),
-    nParticle_(nParticle0),
     rho_(constProps.rho0()),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -172,6 +172,13 @@ inline Foam::label Foam::KinematicParcel<ParcelType>::typeId() const
 
 
 template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::nParticle() const
+{
+    return nParticle_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::d() const
 {
     return d_;
@@ -179,9 +186,79 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::d() const
 
 
 template <class ParcelType>
+inline const Foam::vector& Foam::KinematicParcel<ParcelType>::U() const
+{
+    return U_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::rho() const
+{
+    return rho_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::tTurb() const
+{
+    return tTurb_;
+}
+
+
+template <class ParcelType>
+inline const Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb() const
+{
+    return UTurb_;
+}
+
+
+template <class ParcelType>
+inline Foam::label Foam::KinematicParcel<ParcelType>::typeId()
+{
+    return typeId_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::nParticle()
+{
+    return nParticle_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar& Foam::KinematicParcel<ParcelType>::d()
 {
     return d_;
+}
+
+
+template <class ParcelType>
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::U()
+{
+    return U_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::rho()
+{
+    return rho_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar& Foam::KinematicParcel<ParcelType>::tTurb()
+{
+    return tTurb_;
+}
+
+
+template <class ParcelType>
+inline Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb()
+{
+    return UTurb_;
 }
 
 
@@ -211,83 +288,6 @@ inline Foam::label Foam::KinematicParcel<ParcelType>::faceInterpolation() const
 
 
 template <class ParcelType>
-inline const Foam::vector& Foam::KinematicParcel<ParcelType>::U() const
-{
-    return U_;
-}
-
-
-template <class ParcelType>
-inline Foam::vector& Foam::KinematicParcel<ParcelType>::U()
-{
-    return U_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar Foam::KinematicParcel<ParcelType>::nParticle() const
-{
-    return nParticle_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar& Foam::KinematicParcel<ParcelType>::nParticle()
-{
-    return nParticle_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar Foam::KinematicParcel<ParcelType>::rho() const
-{
-    return rho_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar& Foam::KinematicParcel<ParcelType>::rho()
-{
-    return rho_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar Foam::KinematicParcel<ParcelType>::tTurb() const
-{
-    return tTurb_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar& Foam::KinematicParcel<ParcelType>::tTurb()
-{
-    return tTurb_;
-}
-
-
-template <class ParcelType>
-inline const Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb() const
-{
-    return UTurb_;
-}
-
-
-template <class ParcelType>
-inline Foam::vector& Foam::KinematicParcel<ParcelType>::UTurb()
-{
-    return UTurb_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar Foam::KinematicParcel<ParcelType>::volume() const
-{
-    return mathematicalConstant::pi/6.0*pow3(d_);
-}
-
-
-template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::mass() const
 {
     return rho_*volume();
@@ -295,16 +295,47 @@ inline Foam::scalar Foam::KinematicParcel<ParcelType>::mass() const
 
 
 template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::volume() const
+{
+    return volume(d_);
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::volume(const scalar d) const
+{
+    return mathematicalConstant::pi/6.0*pow3(d);
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaP() const
 {
-    return 0.25*areaS();
+    return areaP(d_);
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::areaP(const scalar d) const
+{
+    return 0.25*areaS(d);
 }
 
 
 template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::areaS() const
 {
-    return mathematicalConstant::pi*d_*d_;
+    return areaS(d_);
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::areaS(const scalar d) const
+{
+    return mathematicalConstant::pi*d*d;
 }
 
 

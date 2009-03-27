@@ -46,12 +46,12 @@ void Foam::ThermoCloud<ParcelType>::addNewParcel
     ParcelType* pPtr = new ParcelType
     (
         *this,
-        this->parcelTypeId(),
         position,
         cellId,
+        this->parcelTypeId(),
+        nParticles,
         d,
         U,
-        nParticles,
         constProps_
     );
 

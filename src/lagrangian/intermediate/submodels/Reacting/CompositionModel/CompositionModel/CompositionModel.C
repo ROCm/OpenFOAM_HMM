@@ -241,7 +241,7 @@ Foam::label Foam::CompositionModel<CloudType>::localId
 
 
 template<class CloudType>
-Foam::label Foam::CompositionModel<CloudType>::localToGlobalGaslId
+Foam::label Foam::CompositionModel<CloudType>::localToGlobalGasId
 (
     const label phaseI,
     const label id

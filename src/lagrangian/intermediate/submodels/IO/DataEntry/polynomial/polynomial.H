@@ -26,7 +26,7 @@ Class
     Foam::polynomial
 
 Description
-    Templated polynomial container data entry. Items are stored in a list of
+    Polynomial container data entry for scalars. Items are stored in a list of
     Tuple2's. Data is input in the form, e.g. for an entry <entryName> that
     describes y = x^2 + 2x^3
 

@@ -45,7 +45,7 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     if (readFields)
     {
         const ReactingMultiphaseCloud<ParcelType>& cR =
-            dynamic_cast<const ReactingMultiphaseCloud<ParcelType>& >(cloud);
+            dynamic_cast<const ReactingMultiphaseCloud<ParcelType>&>(cloud);
 
         const label idGas = cR.composition().idGas();
         const label nGas = cR.composition().componentNames(idGas).size();
@@ -68,7 +68,7 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         }
 
         // scale the mass fractions
-        const scalarList& YMix = this->Y_;
+        const scalarField& YMix = this->Y_;
         YGas_ /= YMix[GAS] + ROOTVSMALL;
         YLiquid_ /= YMix[LIQUID] + ROOTVSMALL;
         YSolid_ /= YMix[SOLID] + ROOTVSMALL;
@@ -282,14 +282,14 @@ Foam::Ostream& Foam::operator<<
     scalarField YSolidLoc = p.YSolid()*p.Y()[2];
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>& >(p)
+        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>&>(p)
             << token::SPACE << YGasLoc
             << token::SPACE << YLiquidLoc
             << token::SPACE << YSolidLoc;
     }
     else
     {
-        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>& >(p);
+        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>&>(p);
         os << YGasLoc << YLiquidLoc << YSolidLoc;
     }
 

@@ -64,12 +64,12 @@ public:
         basicReactingParcel
         (
             ReactingCloud<basicReactingParcel>& owner,
-            const label typeId,
             const vector& position,
             const label cellI,
+            const label typeId,
+            const scalar nParticle0,
             const scalar d0,
             const vector& U0,
-            const scalar nParticle0,
             const scalarField& Y0,
             const constantProperties& constProps
         );

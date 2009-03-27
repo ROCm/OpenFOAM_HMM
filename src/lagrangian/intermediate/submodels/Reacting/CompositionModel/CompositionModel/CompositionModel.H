@@ -188,7 +188,7 @@ public:
                 label localId(const label phaseI, const word& cmptName) const;
 
                 //- Return global gas id of component given local id
-                label localToGlobalGaslId
+                label localToGlobalGasId
                 (
                     const label phaseI,
                     const label id

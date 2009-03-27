@@ -59,7 +59,7 @@ template<class ParcelType>
 void Foam::ReactingParcel<ParcelType>::updateMassFraction
 (
     const scalar mass0,
-    const scalarList& dMass,
+    const scalarField& dMass,
     scalarField& Y
 )
 {
@@ -83,9 +83,13 @@ void Foam::ReactingParcel<ParcelType>::calc
 {
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const scalar mass0 = this->mass();
     const scalar np0 = this->nParticle_;
+    const scalar d0 = this->d_;
+    const vector& U0 = this->U_;
+    const scalar rho0 = this->rho_;
     const scalar T0 = this->T_;
+    const scalar cp0 = this->cp_;
+    const scalar mass0 = this->mass();
 
 
     // Intialise transfer terms
@@ -98,14 +102,15 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalar dhTrans = 0.0;
 
     // Mass transfer due to phase change
-    scalarList dMassPC(td.cloud().gases().size(), 0.0);
+    scalarField dMassPC(td.cloud().gases().size(), 0.0);
 
 
     // Phase change
     // ~~~~~~~~~~~~
 
     // Return enthalpy source and calc mass transfer due to phase change
-    scalar ShPC = calcPhaseChange(td, dt, cellI, T0, 0, 1.0, Y_, dMassPC);
+    scalar ShPC =
+        calcPhaseChange(td, dt, cellI, d0, T0, U0, 0, 1.0, Y_, dMassPC);
 
     // Update particle component mass fractions
     updateMassFraction(mass0, dMassPC, Y_);
@@ -116,7 +121,21 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Calculate new particle temperature
     scalar htc = 0.0;
-    scalar T1 = calcHeatTransfer(td, dt, cellI, ShPC, htc, dhTrans);
+    scalar T1 =
+        calcHeatTransfer
+        (
+            td,
+            dt,
+            cellI,
+            d0,
+            U0,
+            rho0,
+            T0,
+            cp0,
+            ShPC,
+            htc,
+            dhTrans
+        );
 
 
     // Motion
@@ -131,7 +150,19 @@ void Foam::ReactingParcel<ParcelType>::calc
     // Calculate new particle velocity
     scalar Cud = 0.0;
     vector U1 =
-        calcVelocity(td, dt, cellI, Fx, 0.5*(mass0 + mass1), Cud, dUTrans);
+        calcVelocity
+        (
+            td,
+            dt,
+            cellI,
+            d0,
+            U0,
+            rho0,
+            0.5*(mass0 + mass1),
+            Fx,
+            Cud,
+            dUTrans
+        );
 
 
     // Accumulate carrier phase source terms
@@ -151,7 +182,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
 
         // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*(dhTrans + ShPC);
+        td.cloud().hTrans()[cellI] += np0*dhTrans;
 
         // Coefficient to be applied in carrier phase enthalpy coupling
         td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
@@ -208,11 +239,13 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     TrackData& td,
     const scalar dt,
     const label cellI,
+    const scalar d,
     const scalar T,
+    const vector& U,
     const label idPhase,
     const scalar YPhase,
     const scalarField& YComponents,
-    scalarList& dMass
+    scalarField& dMassPC
 )
 {
     if
@@ -229,16 +262,16 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     (
         dt,
         cellI,
+        d,
         min(T, td.constProps().Tbp()), // Limiting to boiling temperature
         pc_,
-        this->d_,
         this->Tc_,
         this->muc_/this->rhoc_,
-        this->U_ - this->Uc_,
-        dMass
+        U - this->Uc_,
+        dMassPC
     );
 
-    scalar dMassTot = sum(dMass);
+    scalar dMassTot = sum(dMassPC);
 
     // Add to cumulative phase change mass
     td.cloud().addToMassPhaseChange(dMassTot);
@@ -246,10 +279,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     // Effective latent heat of vaporisation
     scalar LEff = td.cloud().composition().L(idPhase, YComponents, pc_, T);
 
-    // Effective heat of vaporised components
-    scalar HEff = td.cloud().composition().H(idPhase, YComponents, pc_, T);
-
-    return dMassTot*(HEff - LEff);
+    return -dMassTot*LEff;
 }
 
 

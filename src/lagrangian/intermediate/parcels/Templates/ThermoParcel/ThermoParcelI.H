@@ -73,24 +73,24 @@ template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
     ThermoCloud<ParcelType>& owner,
-    const label typeId,
     const vector& position,
     const label cellI,
+    const label typeId,
+    const scalar nParticle0,
     const scalar d0,
     const vector& U0,
-    const scalar nParticle0,
     const constantProperties& constProps
 )
 :
     KinematicParcel<ParcelType>
     (
         owner,
-        typeId,
         position,
         cellI,
+        typeId,
+        nParticle0,
         d0,
         U0,
-        nParticle0,
         constProps
     ),
     T_(constProps.T0()),
@@ -178,16 +178,16 @@ inline Foam::scalar Foam::ThermoParcel<ParcelType>::T() const
 
 
 template<class ParcelType>
-inline Foam::scalar& Foam::ThermoParcel<ParcelType>::T()
+inline Foam::scalar Foam::ThermoParcel<ParcelType>::cp() const
 {
-    return T_;
+    return cp_;
 }
 
 
 template<class ParcelType>
-inline Foam::scalar Foam::ThermoParcel<ParcelType>::cp() const
+inline Foam::scalar& Foam::ThermoParcel<ParcelType>::T()
 {
-    return cp_;
+    return T_;
 }
 
 

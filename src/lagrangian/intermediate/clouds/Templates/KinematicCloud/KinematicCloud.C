@@ -50,12 +50,12 @@ void Foam::KinematicCloud<ParcelType>::addNewParcel
     ParcelType* pPtr = new ParcelType
     (
         *this,
-        parcelTypeId_,
         position,
         cellId,
+        parcelTypeId_,
+        nParticles,
         d,
         U,
-        nParticles,
         constProps_
     );
 

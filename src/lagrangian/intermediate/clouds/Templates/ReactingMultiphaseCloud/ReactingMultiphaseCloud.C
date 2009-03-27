@@ -49,16 +49,16 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::addNewParcel
     ParcelType* pPtr = new ParcelType
     (
         *this,
-        this->parcelTypeId(),
         position,
         cellId,
+        this->parcelTypeId(),
+        nParticles,
         d,
         U,
-        nParticles,
+        this->composition().YMixture0(),
         this->composition().Y0(idGas),
         this->composition().Y0(idLiquid),
         this->composition().Y0(idSolid),
-        this->composition().YMixture0(),
         constProps_
     );
 

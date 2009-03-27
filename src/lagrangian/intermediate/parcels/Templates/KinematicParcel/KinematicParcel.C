@@ -79,6 +79,10 @@ void Foam::KinematicParcel<ParcelType>::calc
 {
     // Define local properties at beginning of time step
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    const scalar np0 = nParticle_;
+    const scalar d0 = d_;
+    const scalar U0 = U_;
+    const scalar rho0 = rho_;
     const scalar mass0 = mass();
 
 
@@ -97,7 +101,8 @@ void Foam::KinematicParcel<ParcelType>::calc
 
     // Calculate new particle velocity
     scalar Cud = 0.0;
-    vector U1 = calcVelocity(td, dt, cellI, Fx, mass0, Cud, dUTrans);
+    vector U1 =
+        calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx, Cud, dUTrans);
 
 
     // Accumulate carrier phase source terms
@@ -105,10 +110,10 @@ void Foam::KinematicParcel<ParcelType>::calc
     if (td.cloud().coupled())
     {
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += nParticle_*dUTrans;
+        td.cloud().UTrans()[cellI] += np0*dUTrans;
 
         // Coefficient to be applied in carrier phase momentum coupling
-        td.cloud().UCoeff()[cellI] += nParticle_*mass0*Cud;
+        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
     }
 
 
@@ -125,14 +130,17 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     TrackData& td,
     const scalar dt,
     const label cellI,
-    const vector& Fx,
+    const scalar d,
+    const vector& U,
+    const scalar rho,
     const scalar mass,
+    const vector& Fx,
     scalar& Cud,
     vector& dUTrans
 ) const
 {
     // Return linearised term from drag model
-    Cud = td.cloud().drag().Cu(U_ - Uc_, d_, rhoc_, rho_, muc_);
+    Cud = td.cloud().drag().Cu(U - Uc_, d, rhoc_, rho, muc_);
 
     // Initialise total force (per unit mass)
     vector Ftot = vector::zero;
@@ -140,20 +148,20 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     // Gravity force
     if (td.cloud().forceGravity())
     {
-        Ftot += td.g()*(1 - rhoc_/rho_);
+        Ftot += td.g()*(1 - rhoc_/rho);
     }
 
     // Virtual mass force
     if (td.cloud().forceVirtualMass())
     {
-//        Ftot += td.constProps().Cvm()*rhoc_/rho_*d(Uc - U_)/dt;
+//        Ftot += td.constProps().Cvm()*rhoc_/rho*d(Uc - U)/dt;
     }
 
     // Pressure gradient force
     if (td.cloud().forcePressureGradient())
     {
-        const vector& d = this->mesh().deltaCoeffs()[cellI];
-        Ftot += rhoc_/rho_*(U_ & (d^Uc_));
+//        const vector& delta = td.cloud().mesh().deltaCoeffs()[cellI];
+//        Ftot += rhoc_/rho*(U & (delta^Uc_));
     }
 
 
@@ -164,11 +172,11 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const vector ap = Uc_ + (Ftot + Fx)/(Cud + VSMALL);
     const scalar bp = Cud;
 
-    vector Unew = td.cloud().UIntegrator().integrate(U_, dt, ap, bp).value();
+    vector Unew = td.cloud().UIntegrator().integrate(U, dt, ap, bp).value();
 
     // Calculate the momentum transfer to the continuous phase
     // - do not include gravity impulse
-    dUTrans = -mass*(Unew - U_ - dt*td.g());
+    dUTrans = -mass*(Unew - U - dt*td.g());
 
     return Unew;
 }

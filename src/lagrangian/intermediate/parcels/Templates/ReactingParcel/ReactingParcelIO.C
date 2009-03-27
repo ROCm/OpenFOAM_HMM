@@ -45,7 +45,7 @@ Foam::ReactingParcel<ParcelType>::ReactingParcel
     if (readFields)
     {
         const ReactingCloud<ParcelType>& cR =
-            dynamic_cast<const ReactingCloud<ParcelType>& >(cloud);
+            dynamic_cast<const ReactingCloud<ParcelType>&>(cloud);
 
         const label nMixture = cR.composition().phaseTypes().size();
         Y_.setSize(nMixture);
@@ -206,13 +206,13 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ThermoParcel<ParcelType>& >(p)
+        os  << static_cast<const ThermoParcel<ParcelType>&>(p)
             << token::SPACE << p.mass0()
             << token::SPACE << p.Y();
     }
     else
     {
-        os  << static_cast<const ThermoParcel<ParcelType>& >(p);
+        os  << static_cast<const ThermoParcel<ParcelType>&>(p);
         os.write
         (
 

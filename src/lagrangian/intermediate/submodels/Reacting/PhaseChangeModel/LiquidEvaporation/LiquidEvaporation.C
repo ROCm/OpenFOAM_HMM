@@ -135,13 +135,13 @@ void Foam::LiquidEvaporation<CloudType>::calculate
 (
     const scalar dt,
     const label cellI,
+    const scalar d,
     const scalar T,
     const scalar pc,
-    const scalar d,
     const scalar Tc,
     const scalar nuc,
     const vector& Ur,
-    scalarList& dMass
+    scalarField& dMassPC
 ) const
 {
     // construct carrier phase species volume fractions for cell, cellI
@@ -184,7 +184,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         scalar Ni = max(kc*(Cs - Cinf), 0.0);
 
         // mass transfer [kg]
-        dMass[lid] += Ni*A*liquids_->properties()[lid].W()*dt;
+        dMassPC[lid] += Ni*A*liquids_->properties()[lid].W()*dt;
     }
 }
 

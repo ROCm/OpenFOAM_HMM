@@ -45,12 +45,12 @@ void Foam::ReactingCloud<ParcelType>::addNewParcel
     ParcelType* pPtr = new ParcelType
     (
         *this,
-        this->parcelTypeId(),
         position,
         cellId,
+        this->parcelTypeId(),
+        nParticles,
         d,
         U,
-        nParticles,
         composition().YMixture0(),
         constProps_
     );

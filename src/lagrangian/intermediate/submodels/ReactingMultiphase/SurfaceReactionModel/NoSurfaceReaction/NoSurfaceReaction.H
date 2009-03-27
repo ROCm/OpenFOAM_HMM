@@ -87,12 +87,12 @@ public:
             const scalarField& YGas,
             const scalarField& YLiquid,
             const scalarField& YSolid,
-            const scalarList& YMixture,
-            const scalarList& dMassVolatile,
+            const scalarField& YMixture,
+            const scalarField& dMassVolatile,
             scalarField& dMassGas,
             scalarField& dMassLiquid,
             scalarField& dMassSolid,
-            scalarList& dMassSRCarrier
+            scalarField& dMassSRCarrier
         ) const;
 };
 

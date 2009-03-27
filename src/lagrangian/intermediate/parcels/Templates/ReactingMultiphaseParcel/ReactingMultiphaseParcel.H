@@ -83,11 +83,11 @@ public:
         // Private data
 
             //- Latent heat of devolatilisation [J/kg]
-            const scalar Ldevol_;
+            const scalar LDevol_;
 
             //- Fraction of enthalpy retained by parcel due to surface
             //  reactions
-            const scalar fh_;
+            const scalar hRetentionCoeff_;
 
 
     public:
@@ -98,11 +98,11 @@ public:
         // Access
 
             //- Return const access to the latent heat of devolatilisation
-            inline scalar Ldevol() const;
+            inline scalar LDevol() const;
 
             //- Return const access to the fraction of enthalpy retained by
-            // parcel due to surface reactions
-            inline scalar fh() const;
+            //  parcel due to surface reactions
+            inline scalar hRetentionCoeff() const;
     };
 
 
@@ -214,12 +214,15 @@ protected:
         scalar calcDevolatilisation
         (
             TrackData& td,
-            const scalar dt,
-            const scalar T,
-            const scalar mass,
-            const label idVolatile,
-            const scalarField& YMixture,
-            scalarList& dMass
+            const scalar dt,           // timestep
+            const scalar T,            // temperature
+            const scalar mass,         // mass
+            const scalar mass0,        // mass (initial on injection)
+            const label idVolatile,    // id of volatile phase
+            const scalar YVolatileTot, // total volatile mass fraction
+            const scalarField& YVolatile, // volatile component mass fractions
+            bool& canCombust,          // 'can combust' flag
+            scalarField& dMassDV       // mass transfer - local to particle
         );
 
         //- Calculate surface reactions
@@ -227,15 +230,22 @@ protected:
         scalar calcSurfaceReactions
         (
             TrackData& td,
-            const scalar dt,
-            const label cellI,
-            const scalar T,
-            const scalarList& dMassVolatile,
-            scalarField& dMassSRGas,
-            scalarField& dMassSRLiquid,
-            scalarField& dMassSRSolid,
-            scalarList& dMassSRc,
-            scalar& dhTrans
+            const scalar dt,           // timestep
+            const label cellI,         // owner cell
+            const scalar d,            // diameter
+            const scalar T,            // temperature
+            const scalar mass,         // mass
+            const bool canCombust,     // 'can combust' flag
+            const scalarField& dMassVolatile, // mass transfer of volatiles
+            const scalarField& YMix,    // mixture mass fractions
+            const scalarField& YGas,   // gas-phase mass fractions
+            const scalarField& YLiquid,// liquid-phase mass fractions
+            const scalarField& YSolid, // solid-phase mass fractions
+            scalarField& dMassSRGas,   // gas-phase mass transfer - local
+            scalarField& dMassSRLiquid,// liquid-phase mass transfer - local
+            scalarField& dMassSRSolid, // solid-phase mass transfer - local
+            scalarField& dMassSRCarrier,// carrier phase mass transfer
+            scalar& dhTrans            // enthalpy transfer to carrier phase
         );
 
 
@@ -253,16 +263,16 @@ public:
         inline ReactingMultiphaseParcel
         (
             ReactingMultiphaseCloud<ParcelType>& owner,
-            const label typeId,
             const vector& position,
             const label cellI,
+            const label typeId,
+            const scalar nParticle0,
             const scalar d0,
             const vector& U0,
-            const scalar nParticle0,
+            const scalarField& Y0,
             const scalarField& YGas0,
             const scalarField& YLiquid0,
             const scalarField& YSolid0,
-            const scalarField& Y0,
             const constantProperties& constProps
         );
 

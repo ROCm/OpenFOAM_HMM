@@ -64,12 +64,12 @@ public:
         basicReactingMultiphaseParcel
         (
              ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
-             const label typeId,
              const vector& position,
              const label cellI,
+             const label typeId,
+             const scalar nParticle0,
              const scalar d0,
              const vector& U0,
-             const scalar nParticle0,
              const scalarField& YGas0,
              const scalarField& YLiquid0,
              const scalarField& YSolid0,
@@ -93,7 +93,7 @@ public:
         }
 
 
-    // Destructor
+    //- Destructor
     virtual ~basicReactingMultiphaseParcel();
 };
 
