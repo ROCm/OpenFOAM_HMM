@@ -28,6 +28,9 @@ Class
 Description
     Class black body emission
 
+    Table of black body emissive power taken from:
+        Modest, "Radiative Heat Transfer", pp.775-777, 1993
+
 SourceFiles
     blackBodyEmission.C
 
@@ -40,7 +43,7 @@ SourceFiles
 #include "dimensionedScalar.H"
 #include "mathematicalConstants.H"
 #include "radiationConstants.H"
-#include "interpolationLookUpTable.H"
+#include "interpolationTable.H"
 #include "Vector2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -56,9 +59,18 @@ namespace radiation
 
 class blackBodyEmission
 {
+public:
+
+    //- Static table of black body emissive power
+    static const List<Tuple2<scalar, scalar> > emissivePowerTable;
+
+
+private:
+
     // Private data
 
-        mutable interpolationLookUpTable<scalar> blackBodyEmissiveTable_;
+        //- Interpolation table of black body emissive power
+        mutable interpolationTable<scalar> table_;
 
         //- Constant C1
         const dimensionedScalar C1_;
@@ -85,8 +97,6 @@ public:
         //- Construct from components
         blackBodyEmission
         (
-            const fileName& name,
-            const word& instance,
             const label nLambda,
             const volScalarField& T
         );

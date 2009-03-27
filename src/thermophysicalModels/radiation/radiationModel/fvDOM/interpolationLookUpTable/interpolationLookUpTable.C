@@ -29,23 +29,23 @@ License
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 template <class Type>
-Foam::label Foam::interpolationLookUpTable <Type>::index
+Foam::label Foam::interpolationLookUpTable<Type>::index
 (
     const List<scalar>& indices,
     const bool lastDim
 ) const
 {
-    label totalindex = 0;
+    label totalIndex = 0;
 
-    for (int i = 0; i < dim_.size() - 1; i++)
+    forAll(dim_, i)
     {
         label dim = 1;
         for (int j = i + 1; j < dim_.size(); j++)
         {
-            dim *=(dim_[j]+1);
+            dim *= dim_[j] + 1;
         }
 
-        totalindex +=
+        totalIndex +=
             dim
            *min
             (
@@ -57,7 +57,7 @@ Foam::label Foam::interpolationLookUpTable <Type>::index
     if (lastDim)
     {
         label iLastdim = dim_.size() - 1;
-        totalindex += Foam::min
+        totalIndex += Foam::min
         (
             max
             (
@@ -68,12 +68,12 @@ Foam::label Foam::interpolationLookUpTable <Type>::index
         );
     }
 
-    return totalindex;
+    return totalIndex;
 }
 
 
 template <class Type>
-Foam::label Foam::interpolationLookUpTable <Type>::index
+Foam::label Foam::interpolationLookUpTable<Type>::index
 (
     const scalar indice
 ) const
@@ -171,15 +171,15 @@ void Foam::interpolationLookUpTable<Type>::dimensionTable()
         max_[i] = readScalar(entries_[i].lookup("max"));
         min_[i] = readScalar(entries_[i].lookup("min"));
         delta_[i] = (max_[i] - min_[i])/dim_[i];
-        tableDim *= (dim_[i] + 1);
-        fieldIndices_.insert(entries_[i].lookup("name"),index);
+        tableDim *= dim_[i] + 1;
+        fieldIndices_.insert(entries_[i].lookup("name"), index);
         entryIndices_[i] = index;
         index++;
     }
 
     forAll(output_,i)
     {
-        fieldIndices_.insert(output_[i].lookup("name"),index);
+        fieldIndices_.insert(output_[i].lookup("name"), index);
         outputIndices_[i] = index;
         index++;
     }
@@ -229,8 +229,7 @@ void Foam::interpolationLookUpTable<Type>::readTable
         FatalErrorIn
         (
             "Foam::interpolationLookUpTable<Type>::readTable()"
-        )   << "table is empty" << nl
-            << exit(FatalError);
+        )   << "table is empty" << nl << exit(FatalError);
     }
 }
 
@@ -240,7 +239,7 @@ void Foam::interpolationLookUpTable<Type>::readTable
 template<class Type>
 Foam::interpolationLookUpTable<Type>::interpolationLookUpTable()
 :
-    List<scalarField >(),
+    List<scalarField>(),
     fileName_("fileNameIsUndefined")
 {}
 
@@ -251,7 +250,7 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
     const fileName& fn, const word& instance, const fvMesh& mesh
 )
 :
-    List<scalarField >(),
+    List<scalarField>(),
     fileName_(fn),
     dim_(0),
     min_(0),
@@ -273,7 +272,7 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
      const interpolationLookUpTable& interpTable
 )
 :
-    List<scalarField >(interpTable),
+    List<scalarField>(interpTable),
     fileName_(interpTable.fileName_),
     entryIndices_(interpTable.entryIndices_),
     outputIndices_(interpTable.outputIndices_),
@@ -293,7 +292,7 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
     const dictionary& dict
 )
 :
-    List<scalarField >(),
+    List<scalarField>(),
     fileName_(fileName(dict.lookup("fileName")).expand()),
     dim_(0),
     min_(0.0),
@@ -315,20 +314,19 @@ Foam::interpolationLookUpTable<Type>::interpolationLookUpTable
 template<class Type>
 void Foam::interpolationLookUpTable<Type>::check() const
 {
-//  check order in the first dimension.
-
-    scalar prevValue = List<scalarField >::operator[](0).operator[](0);
-    label dim = 1 ;
+    // check order in the first dimension.
+    scalar prevValue = List<scalarField>::operator[](0).operator[](0);
+    label dim = 1;
     for (int j = 1; j < dim_.size(); j++)
     {
-        dim *=(dim_[j]+1);
+        dim *= dim_[j] + 1;
     }
 
     for (label i = 1; i < dim_[0]; i++)
     {
         label index = i*dim;
         const scalar currValue =
-            List<scalarField >::operator[](0).operator[](index);
+            List<scalarField>::operator[](0).operator[](index);
 
         // avoid duplicate values (divide-by-zero error)
         if (currValue <= prevValue)
@@ -336,9 +334,8 @@ void Foam::interpolationLookUpTable<Type>::check() const
             FatalErrorIn
             (
                 "Foam::interpolationLookUpTable<Type>::checkOrder() const"
-            )   << "out-of-order value: "
-                << currValue << " at index " << index << nl
-                << exit(FatalError);
+            )   << "out-of-order value: " << currValue
+                << " at index " << index << nl << exit(FatalError);
         }
         prevValue = currValue;
     }
@@ -379,8 +376,7 @@ void Foam::interpolationLookUpTable<Type>::write
         FatalErrorIn
         (
             "Foam::interpolationTable<Type>::write()"
-        )   << "table is empty" << nl
-            << exit(FatalError);
+        )   << "table is empty" << nl << exit(FatalError);
     }
     os.writeKeyword("values");
     os << *this << token::END_STATEMENT << nl;
@@ -400,31 +396,25 @@ Foam::interpolationLookUpTable<Type>::operator[](const label i)
     {
         FatalErrorIn
         (
-            "Foam::interpolationLookUpTable<Type>::operator[]"
-            "(const label) const"
-        )   << "table has (" << n << ") columns" << nl
-            << exit(FatalError);
+            "Foam::interpolationLookUpTable<Type>::operator[](const label)"
+        )   << "table has (" << n << ") columns" << nl << exit(FatalError);
     }
     else if (ii < 0)
     {
         FatalErrorIn
         (
-            "Foam::interpolationLookUpTable<Type>::operator[]"
-            "(const label) const"
-        )   << "index (" << ii << ") underflow" << nl
-            << exit(FatalError);
+            "Foam::interpolationLookUpTable<Type>::operator[](const label)"
+        )   << "index (" << ii << ") underflow" << nl << exit(FatalError);
     }
     else if (ii > n)
     {
         FatalErrorIn
         (
-            "Foam::interpolationLookUpTable<Type>::operator[]"
-            "(const label) const"
-        )   << "index (" << ii << ") overflow" << nl
-            << exit(FatalError);
+            "Foam::interpolationLookUpTable<Type>::operator[](const label)"
+        )   << "index (" << ii << ") overflow" << nl << exit(FatalError);
     }
 
-    return List<scalarField >::operator[](ii);
+    return List<scalarField>::operator[](ii);
 }
 
 
@@ -441,8 +431,7 @@ Foam::interpolationLookUpTable<Type>::operator[](const label i) const
         (
             "Foam::interpolationLookUpTable<Type>::operator[]"
             "(const label) const"
-        )   << "table has (" << n << ") columns" << nl
-            << exit(FatalError);
+        )   << "table has (" << n << ") columns" << nl << exit(FatalError);
     }
     else if (ii < 0)
     {
@@ -450,8 +439,7 @@ Foam::interpolationLookUpTable<Type>::operator[](const label i) const
         (
             "Foam::interpolationLookUpTable<Type>::operator[]"
             "(const label) const"
-        )   << "index (" << ii << ") underflow" << nl
-            << exit(FatalError);
+        )   << "index (" << ii << ") underflow" << nl << exit(FatalError);
     }
 
     else if (ii > n)
@@ -464,7 +452,7 @@ Foam::interpolationLookUpTable<Type>::operator[](const label i) const
             << exit(FatalError);
     }
 
-    return List<scalarField >::operator[](ii);
+    return List<scalarField>::operator[](ii);
 }
 
 
@@ -500,7 +488,7 @@ void Foam::interpolationLookUpTable<Type>::findHi
 
         forAll(entryIndices_,i)
         {
-            if (checkRange(retvals,entryIndices_[i]))
+            if (checkRange(retvals, entryIndices_[i]))
             {
                 label dim = 1;
 

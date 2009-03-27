@@ -54,7 +54,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class interpolationLookUpTable Declaration
+                  Class interpolationLookUpTable Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -64,22 +64,22 @@ class interpolationLookUpTable
 {
 private:
 
-    // Private data
+    // Privsate data
 
         //- File name
         fileName fileName_;
 
         //- Table dimensions
-        List<label>  dim_;
+        List<label> dim_;
 
         //- Min on each dimension
-        List<scalar>  min_;
+        List<scalar> min_;
 
         //- Deltas on each dimension
-        List<scalar>  delta_;
+        List<scalar> delta_;
 
         //- Maximum on each dimension
-        List<scalar>  max_;
+        List<scalar> max_;
 
         //- Dictionary entries
         List<dictionary> entries_;

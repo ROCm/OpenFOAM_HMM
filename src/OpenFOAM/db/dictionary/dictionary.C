@@ -529,7 +529,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
             }
             else
             {
-                IOWarningIn("dictionary::add(entry*)", (*this))
+                IOWarningIn("dictionary::add(entry*, bool)", (*this))
                     << "problem replacing entry "<< entryPtr->keyword()
                     << " in dictionary " << name() << endl;
 
@@ -558,7 +558,7 @@ bool Foam::dictionary::add(entry* entryPtr, bool mergeEntry)
     }
     else
     {
-        IOWarningIn("dictionary::add(entry* entryPtr)", (*this))
+        IOWarningIn("dictionary::add(entry*, bool)", (*this))
             << "attempt to add entry "<< entryPtr->keyword()
             << " which already exists in dictionary " << name()
             << endl;
@@ -574,10 +574,12 @@ void Foam::dictionary::add(const entry& e, bool mergeEntry)
     add(e.clone(*this).ptr(), mergeEntry);
 }
 
+
 void Foam::dictionary::add(const keyType& k, const word& w, bool overwrite)
 {
     add(new primitiveEntry(k, token(w)), overwrite);
 }
+
 
 void Foam::dictionary::add
 (
@@ -589,15 +591,18 @@ void Foam::dictionary::add
     add(new primitiveEntry(k, token(s)), overwrite);
 }
 
+
 void Foam::dictionary::add(const keyType& k, const label l, bool overwrite)
 {
     add(new primitiveEntry(k, token(l)), overwrite);
 }
 
+
 void Foam::dictionary::add(const keyType& k, const scalar s, bool overwrite)
 {
     add(new primitiveEntry(k, token(s)), overwrite);
 }
+
 
 void Foam::dictionary::add
 (
@@ -627,6 +632,7 @@ void Foam::dictionary::set(const entry& e)
 {
     set(e.clone(*this).ptr());
 }
+
 
 void Foam::dictionary::set(const keyType& k, const dictionary& d)
 {
@@ -770,7 +776,7 @@ bool Foam::dictionary::merge(const dictionary& dict)
 
     bool changed = false;
 
-    forAllConstIter(IDLList<entry>, *this, iter)
+    forAllConstIter(IDLList<entry>, dict, iter)
     {
         HashTable<entry*>::iterator fnd = hashedEntries_.find(iter().keyword());
 

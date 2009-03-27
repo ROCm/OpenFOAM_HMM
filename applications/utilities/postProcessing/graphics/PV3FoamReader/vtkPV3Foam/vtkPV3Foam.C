@@ -465,7 +465,6 @@ void Foam::vtkPV3Foam::Update
         cout<< "<beg> Foam::vtkPV3Foam::Update - output with "
             << output->GetNumberOfBlocks() << " and "
             << lagrangianOutput->GetNumberOfBlocks() << " blocks\n";
-
         output->Print(cout);
         lagrangianOutput->Print(cout);
         printMemory();
@@ -504,8 +503,10 @@ void Foam::vtkPV3Foam::Update
         reader_->UpdateProgress(0.7);
     }
 
+#ifdef VTKPV3FOAM_DUALPORT
     // restart port1 at block=0
     blockNo = 0;
+#endif
     convertMeshLagrangian(lagrangianOutput, blockNo);
 
     reader_->UpdateProgress(0.8);

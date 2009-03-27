@@ -259,7 +259,7 @@ void Foam::fieldAverage::readAveragingProperties()
             obr_.time().timeName(),
             "uniform",
             obr_,
-            IOobject::NO_READ,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
         );

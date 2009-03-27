@@ -37,7 +37,10 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::label Foam::radiation::radiativeIntensityRay::rayId = 0;
+Foam::label Foam::radiation::radiativeIntensityRay::rayId(0);
+
+const Foam::word
+Foam::radiation::radiativeIntensityRay::intensityPrefix("ILambda");
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -113,11 +116,14 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         0.5*deltaPhi*Foam::sin(2.0*theta)*Foam::sin(deltaTheta)
     );
 
-    forAll(ILambda_, i)
+
+    autoPtr<volScalarField> IDefaultPtr;
+
+    forAll(ILambda_, lambdaI)
     {
         IOobject IHeader
         (
-            "ILambda_" + name(rayId) + "_" + name(i),
+            intensityPrefix + "_" + name(rayId) + "_" + name(lambdaI),
             mesh_.time().timeName(),
             mesh_,
             IOobject::MUST_READ,
@@ -129,29 +135,40 @@ Foam::radiation::radiativeIntensityRay::radiativeIntensityRay
         {
             ILambda_.set
             (
-                i,
+                lambdaI,
                 new volScalarField(IHeader, mesh_)
             );
         }
         else
         {
-            volScalarField IDefault
-            (
-                IOobject
+            // Demand driven load the IDefault field
+            if (!IDefaultPtr.valid())
+            {
+                IDefaultPtr.reset
                 (
-                    "IDefault",
-                    mesh_.time().timeName(),
-                    mesh_,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE
-                ),
-                mesh_
-            );
+                    new volScalarField
+                    (
+                        IOobject
+                        (
+                            "IDefault",
+                            mesh_.time().timeName(),
+                            mesh_,
+                            IOobject::MUST_READ,
+                            IOobject::NO_WRITE
+                        ),
+                        mesh_
+                    )
+                );
+            }
+
+            // Reset the MUST_READ flag
+            IOobject noReadHeader(IHeader);
+            noReadHeader.readOpt() = IOobject::NO_READ;
 
             ILambda_.set
             (
-                i,
-                new volScalarField(IHeader, IDefault)
+                lambdaI,
+                new volScalarField(noReadHeader, IDefaultPtr())
             );
         }
     }
@@ -201,7 +218,6 @@ Foam::scalar Foam::radiation::radiativeIntensityRay::correct()
         ).initialResidual();
 
         maxResidual = max(eqnResidual, maxResidual);
-
     }
 
     return maxResidual;

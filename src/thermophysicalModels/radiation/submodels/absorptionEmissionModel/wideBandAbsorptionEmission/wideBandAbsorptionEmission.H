@@ -36,9 +36,6 @@ Description
     There is no check of continuity of the bands. They should not ovelap or
     have gaps.
 
-    The black body emission power table(constant/blackBodyEmissivePower) range
-    of lambda * T = [1000; 10000] x 10E-6 (90% of the total emission).
-
     The emission constant proportionality is specified per band (EhrrCoeff).
 
     The coefficients for the species in the LookUpTable have to be specified
@@ -153,13 +150,13 @@ private:
         HashTable<label> speciesNames_;
 
         //- Indices of species in the look-up table
-        FixedList<label,nSpecies_> specieIndex_;
+        FixedList<label, nSpecies_> specieIndex_;
 
         //- Bands
-        FixedList<Vector2D<scalar>, maxBands_ > iBands_;
+        FixedList<Vector2D<scalar>, maxBands_> iBands_;
 
         //- Proportion of the heat released rate emitted
-        FixedList<scalar, maxBands_ > iEhrrCoeffs_;
+        FixedList<scalar, maxBands_> iEhrrCoeffs_;
 
         //- Look-up table of species related to ft
         mutable interpolationLookUpTable<scalar> lookUpTable_;
@@ -168,7 +165,7 @@ private:
         const basicThermo& thermo_;
 
         //- Bands
-        label nBands_ ;
+        label nBands_;
 
         //- Pointer list of species being solved involved in the absorption
         UPtrList<volScalarField> Yj_;

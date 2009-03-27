@@ -37,19 +37,18 @@ Description
     i.e. dictionary
     fvDOMCoeffs
     {
-        Nphi    1;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
-        Ntheta  2;          // polar angles in P1 (from Z to X-Y plane)
+        nPhi    1;          // azimuthal angles in PI/2 on X-Y.(from Y to X)
+        nTheta  2;          // polar angles in PI (from Z to X-Y plane)
         convergence 1e-4;   // convergence criteria for radiation iteration
     }
 
-    nFlowIterPerRadIter   1; // Number of flow iterations per radiation
-                                iteration
+    solverFreq   1; // Number of flow iterations per radiation iteration
 
-    The total number of solid angles is  4*Nphi*Ntheta.
+    The total number of solid angles is  4*nPhi*nTheta.
 
-    In 1D the direction of the rays is X (Nphi and Ntheta are ignored)
-    In 2D the direction of the rays is on X-Y plane (only Nphi is considered)
-    In 3D (Nphi and Ntheta are considered)
+    In 1D the direction of the rays is X (nPhi and nTheta are ignored)
+    In 2D the direction of the rays is on X-Y plane (only nPhi is considered)
+    In 3D (nPhi and nTheta are considered)
 
 SourceFiles
     fvDOM.C
@@ -118,6 +117,9 @@ class fvDOM
         //- Convergence criterion
         scalar convergence_;
 
+        //- Maximum number of iterations
+        scalar maxIter_;
+
 
     // Private member functions
 
@@ -126,9 +128,6 @@ class fvDOM
 
         //- Disallow default bitwise assignment
         void operator=(const fvDOM&);
-
-        //- Update Absorption Coefficients
-//        void updateAbsorptionCoeffs(void);
 
         //- Update nlack body emission
         void updateBlackBodyEmission();
@@ -163,6 +162,15 @@ public:
             //- Update G and calculate total heat flux on boundary
             void updateG();
 
+            //- Set the rayId and lambdaId from by decomposing an intensity
+            //  field name
+            void setRayIdLambdaId
+            (
+                const word& name,
+                label& rayId,
+                label& lambdaId
+            ) const;
+
             //- Source term component (for power of T^4)
             virtual tmp<volScalarField> Rp() const;
 
@@ -194,19 +202,19 @@ public:
             //- Number of wavelengths
             inline label nLambda() const;
 
-            // Const access to total absorption coefficient
+            //- Const access to total absorption coefficient
             inline const volScalarField& a() const;
 
-            // Const access to wavelength total absorption coefficient
+            //- Const access to wavelength total absorption coefficient
             inline const volScalarField& aLambda(const label lambdaI) const;
 
-            // Const access to incident radiation field
+            //- Const access to incident radiation field
             inline const volScalarField& G() const;
 
-            //  Const access to total radiative heat flux field
+            //- Const access to total radiative heat flux field
             inline const volScalarField& Qr() const;
 
-            //  Const access to black body
+            //- Const access to black body
             inline const blackBodyEmission& blackBody() const;
 };
 
