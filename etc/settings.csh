@@ -231,6 +231,15 @@ case FJMPI:
     _foamAddLib  /opt/FJSVpnidt/lib
     breaksw
 
+case QSMPI:
+    setenv MPI_ARCH_PATH /usr/lib/mpi
+    setenv FOAM_MPI_LIBBIN FOAM_LIBBIN/qsmpi
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+    _foamAddLib $MPI_ARCH_PATH/lib
+
+    breaksw
+
 default:
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/dummy
     breaksw

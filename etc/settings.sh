@@ -259,6 +259,15 @@ FJMPI)
     _foamAddLib  /opt/FJSVpnidt/lib
     ;;
 
+QSMPI)
+    export MPI_ARCH_PATH=/usr/lib/mpi
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/qsmpi
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+    _foamAddLib $MPI_ARCH_PATH/lib
+
+    ;;
+
 *)
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/dummy
     ;;
