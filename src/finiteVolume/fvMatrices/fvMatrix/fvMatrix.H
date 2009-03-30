@@ -547,6 +547,18 @@ template<class Type>
 lduMatrix::solverPerformance solve(const tmp<fvMatrix<Type> >&);
 
 
+//- Return the correction form of the given matrix
+//  by subtracting the matrix multiplied by the current field
+template<class Type>
+tmp<fvMatrix<Type> > correction(const fvMatrix<Type>&);
+
+
+//- Return the correction form of the given temporary matrix
+//  by subtracting the matrix multiplied by the current field
+template<class Type>
+tmp<fvMatrix<Type> > correction(const tmp<fvMatrix<Type> >&);
+
+
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //
 
 template<class Type>
