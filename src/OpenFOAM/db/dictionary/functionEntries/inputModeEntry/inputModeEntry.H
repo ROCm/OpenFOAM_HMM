@@ -38,7 +38,7 @@ Description
     @param merge      merge sub-dictionaries when possible
     @param overwrite  keep last entry and silently remove previous ones
     @param error      flag duplicate entry as an error
-    @param default    currently the same as error
+    @param default    currently the same as merge
 
 SourceFiles
     inputModeEntry.C
@@ -68,13 +68,13 @@ class inputModeEntry
         //- input mode options
         enum inputMode
         {
-            imError = 0,
-            imMerge = 0x1,
-            imOverwrite = 0x2
+            ERROR,
+            MERGE,
+            OVERWRITE
         };
 
         //- current input mode
-        static label mode_;
+        static inputMode mode_;
 
 
     // Private Member Functions
@@ -98,19 +98,15 @@ public:
     // Member Functions
 
         //- Execute the functionEntry in a sub-dict context
-        static bool execute
-        (
-            dictionary& parentDict,
-            Istream&
-        );
+        static bool execute(dictionary& parentDict, Istream&);
 
-        //- Reset the inputMode to 'default'
+        //- Reset the inputMode to %default
         static void clear();
 
-        //- Return true if the inputMode is 'merge'
+        //- Return true if the inputMode is %merge
         static bool merge();
 
-        //- Return true if the inputMode is 'overwrite'
+        //- Return true if the inputMode is %overwrite
         static bool overwrite();
 
 };

@@ -117,10 +117,10 @@ public:
 
         // Assignment
 
-            inline void operator=(const word&);
-            inline void operator=(const string&);
-            inline void operator=(const std::string&);
-            inline void operator=(const char*);
+            inline const word& operator=(const word&);
+            inline const word& operator=(const string&);
+            inline const word& operator=(const std::string&);
+            inline const word& operator=(const char*);
 
 
     // Friend Operators

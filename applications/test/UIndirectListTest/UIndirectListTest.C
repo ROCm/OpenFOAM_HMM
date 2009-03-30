@@ -28,6 +28,8 @@ Description
 
 #include "UIndirectList.H"
 #include "IOstreams.H"
+#include "ListOps.H"
+#include "OFstream.H"
 
 using namespace Foam;
 
@@ -52,29 +54,32 @@ int main(int argc, char *argv[])
 
     UIndirectList<double> idl(completeList, addresses);
 
-    forAll(idl, i)
-    {
-        Info<< idl[i] << token::SPACE;
-    }
-
-    Info<< endl;
+    Info<< idl << "\n";
 
     idl[1] = -666;
 
-    Info<< "idl[1] changed:" << idl() << endl;
+    Info<< "idl[1] changed:" << idl << endl;
 
     idl = -999;
 
-    Info<< "idl changed:" << idl() << endl;
+    Info<< "idl changed:" << idl << endl;
 
     UIndirectList<double> idl2(idl);
 
-    Info<< "idl2:" << idl2() << endl;
+    Info<< "idl2: " << idl2 << endl;
 
-    idl = idl2();
 
-    Info<< "idl assigned from UList:" << idl() << endl;
+    {
+        List<double> ident(idl.size());
 
+        forAll(ident, i)
+        {
+            ident[i] = ident.size() - i;
+        }
+        idl = ident;
+    }
+
+    Info<< "idl assigned from UList:" << idl << endl;
 
     List<double> realList = UIndirectList<double>(completeList, addresses);
 

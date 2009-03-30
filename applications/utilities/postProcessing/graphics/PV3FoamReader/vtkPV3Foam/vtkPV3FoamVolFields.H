@@ -326,10 +326,10 @@ void Foam::vtkPV3Foam::convertVolField
     const labelList& superCells = decompInfo.superCells();
 
     vtkFloatArray* celldata = vtkFloatArray::New();
-    celldata->SetNumberOfTuples( superCells.size() );
-    celldata->SetNumberOfComponents( nComp );
-    celldata->Allocate( nComp*superCells.size() );
-    celldata->SetName( tf.name().c_str() );
+    celldata->SetNumberOfTuples(superCells.size());
+    celldata->SetNumberOfComponents(nComp);
+    celldata->Allocate(nComp*superCells.size());
+    celldata->SetName(tf.name().c_str());
 
     if (debug)
     {

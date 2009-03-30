@@ -103,9 +103,7 @@ bool Foam::regIOobject::writeObject
             return false;
         }
 
-        os  << "\n\n"
-            "// ************************************************************************* //"
-            << endl;
+        writeEndDivider(os);
 
         osGood = os.good();
     }

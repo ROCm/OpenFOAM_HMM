@@ -61,53 +61,98 @@ Foam::fileFormats::VTKsurfaceFormat<Face>::VTKsurfaceFormat()
 template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfZone>& zoneLst
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
+
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size() > 1
+      ? surf.surfZones()
+      : oneZone(faceLst)
+    );
+
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::VTKsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+
     writeHeader(os, pointLst);
     writeHeaderPolygons(os, faceLst);
 
     label faceIndex = 0;
-    forAll(zoneLst, zoneI)
+    forAll(zones, zoneI)
     {
-        forAll(zoneLst[zoneI], localFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
+        const surfZone& zone = zones[zoneI];
 
-            os << f.size();
-            forAll(f, fp)
+        if (useFaceMap)
+        {
+            forAll(zone, localFaceI)
             {
-                os << ' ' << f[fp];
+                const Face& f = faceLst[faceMap[faceIndex++]];
+
+                os << f.size();
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp];
+                }
+                os << ' ' << nl;
             }
-            os << ' ' << nl;
+        }
+        else
+        {
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+
+                os << f.size();
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp];
+                }
+                os << ' ' << nl;
+            }
         }
     }
 
-    writeTail(os, zoneLst);
+    writeTail(os, zones);
 }
 
 
 template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    write(os, surf.points(), surf.faces(), surf.zones());
-}
-
-
-template<class Face>
-void Foam::fileFormats::VTKsurfaceFormat<Face>::write
-(
-    Ostream& os,
+    const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::VTKsurfaceFormat::write"
+            "(const fileName&, const UnsortedMeshedSurface<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+
     const List<Face>& faceLst = surf.faces();
 
     writeHeader(os, surf.points());

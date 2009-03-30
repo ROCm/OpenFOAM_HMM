@@ -38,7 +38,7 @@ namespace Foam
         // first triangulate
         surf.triangulate();
         this->storedPoints().transfer(surf.storedPoints());
-        zones_.transfer(surf.zones_);
+        this->storedZones().transfer(surf.storedZones());
 
         // transcribe from face -> triFace
         List<face>&    origFaces = surf.storedFaces();

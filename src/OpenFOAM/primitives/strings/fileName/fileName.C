@@ -196,36 +196,41 @@ Foam::word Foam::fileName::component
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::fileName::operator=(const fileName& str)
+const Foam::fileName& Foam::fileName::operator=(const fileName& str)
 {
     string::operator=(str);
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const word& str)
+const Foam::fileName& Foam::fileName::operator=(const word& str)
 {
     string::operator=(str);
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const string& str)
+const Foam::fileName& Foam::fileName::operator=(const string& str)
 {
     string::operator=(str);
     stripInvalid();
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const std::string& str)
+const Foam::fileName& Foam::fileName::operator=(const std::string& str)
 {
     string::operator=(str);
     stripInvalid();
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const char* str)
+const Foam::fileName& Foam::fileName::operator=(const char* str)
 {
     string::operator=(str);
     stripInvalid();
+    return *this;
 }
 
 

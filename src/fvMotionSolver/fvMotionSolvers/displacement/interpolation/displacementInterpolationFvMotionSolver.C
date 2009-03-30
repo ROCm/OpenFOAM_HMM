@@ -58,26 +58,10 @@ Foam::displacementInterpolationFvMotionSolver::
 displacementInterpolationFvMotionSolver
 (
     const polyMesh& mesh,
-    Istream&
+    Istream& is
 )
 :
-    fvMotionSolver(mesh),
-    points0_
-    (
-        pointIOField
-        (
-            IOobject
-            (
-                "points",
-                mesh.time().constant(),
-                polyMesh::meshSubDir,
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::NO_WRITE,
-                false
-            )
-        )
-    ),
+    displacementFvMotionSolver(mesh, is),
     dynamicMeshCoeffs_
     (
         IOdictionary
@@ -174,7 +158,7 @@ displacementInterpolationFvMotionSolver
             forAll(fz().meshPoints(), localI)
             {
                 label pointI = fz().meshPoints()[localI];
-                const scalar coord = points0_[pointI][dir];
+                const scalar coord = points0()[pointI][dir];
                 minCoord = min(minCoord, coord);
                 maxCoord = max(maxCoord, coord);
             }
@@ -198,7 +182,7 @@ displacementInterpolationFvMotionSolver
         zoneCoordinates[zoneCoordinates.size()-1] += SMALL;
 
         // Check if we have static min and max mesh bounds
-        const scalarField meshCoords = points0_.component(dir);
+        const scalarField meshCoords = points0().component(dir);
 
         scalar minCoord = gMin(meshCoords);
         scalar maxCoord = gMax(meshCoords);
@@ -288,7 +272,7 @@ displacementInterpolationFvMotionSolver
                     "displacementInterpolationFvMotionSolver::"
                     "displacementInterpolationFvMotionSolver"
                     "(const polyMesh&, Istream&)"
-                )   << "Did not find point " << points0_[pointI]
+                )   << "Did not find point " << points0()[pointI]
                     << " coordinate " << meshCoords[pointI]
                     << " in ranges " << rangeToCoord
                     << abort(FatalError);
@@ -344,18 +328,18 @@ Foam::displacementInterpolationFvMotionSolver::
 Foam::tmp<Foam::pointField>
 Foam::displacementInterpolationFvMotionSolver::curPoints() const
 {
-    if (mesh().nPoints() != points0_.size())
+    if (mesh().nPoints() != points0().size())
     {
         FatalErrorIn
         (
             "displacementInterpolationFvMotionSolver::curPoints() const"
         )   << "The number of points in the mesh seems to have changed." << endl
-            << "In constant/polyMesh there are " << points0_.size()
+            << "In constant/polyMesh there are " << points0().size()
             << " points; in the current mesh there are " << mesh().nPoints()
             << " points." << exit(FatalError);
     }
 
-    tmp<pointField> tcurPoints(new pointField(points0_));
+    tmp<pointField> tcurPoints(new pointField(points0()));
     pointField& curPoints = tcurPoints();
 
     // Interpolate the diplacement of the face zones.
@@ -410,70 +394,6 @@ Foam::displacementInterpolationFvMotionSolver::curPoints() const
         }
     }
     return tcurPoints;
-}
-
-
-void Foam::displacementInterpolationFvMotionSolver::updateMesh
-(
-    const mapPolyMesh& mpm
-)
-{
-    fvMotionSolver::updateMesh(mpm);
-
-    // Map points0_. Bit special since we somehow have to come up with
-    // a sensible points0 position for introduced points.
-    // Find out scaling between points0 and current points
-
-    // Get the new points either from the map or the mesh
-    const pointField& points =
-    (
-        mpm.hasMotionPoints()
-      ? mpm.preMotionPoints()
-      : fvMesh_.points()
-    );
-
-    // Note: boundBox does reduce
-    const vector span0 = boundBox(points0_).span();
-    const vector span  = boundBox(points).span();
-
-    vector scaleFactors(cmptDivide(span0, span));
-
-    pointField newPoints0(mpm.pointMap().size());
-
-    forAll(newPoints0, pointI)
-    {
-        label oldPointI = mpm.pointMap()[pointI];
-
-        if (oldPointI >= 0)
-        {
-            label masterPointI = mpm.reversePointMap()[oldPointI];
-
-            if (masterPointI == pointI)
-            {
-                newPoints0[pointI] = points0_[oldPointI];
-            }
-            else
-            {
-                // New point. Assume motion is scaling.
-                newPoints0[pointI] = points0_[oldPointI] + cmptMultiply
-                (
-                    scaleFactors,
-                    points[pointI]-points[masterPointI]
-                );
-            }
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "displacementLaplacianFvMotionSolver::updateMesh"
-                "(const mapPolyMesh& mpm)"
-            )   << "Cannot work out coordinates of introduced vertices."
-                << " New vertex " << pointI << " at coordinate "
-                << points[pointI] << exit(FatalError);
-        }
-    }
-    points0_.transfer(newPoints0);
 }
 
 

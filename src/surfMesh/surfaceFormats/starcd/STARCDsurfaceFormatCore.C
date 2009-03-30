@@ -104,7 +104,7 @@ bool Foam::fileFormats::STARCDsurfaceFormatCore::readPoints
     {
         FatalErrorIn
         (
-            "fileFormats::STARCDsurfaceFormatCore::readPoints(const fileName&)"
+            "fileFormats::STARCDsurfaceFormatCore::readPoints(...)"
         )
             << "Cannot read file " << is.name()
             << exit(FatalError);

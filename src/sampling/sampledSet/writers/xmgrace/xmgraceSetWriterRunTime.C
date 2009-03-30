@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-    makeSetWriters(xmgraceSetWriter)
+    makeSetWriters(xmgraceSetWriter);
 }
 
 // ************************************************************************* //

@@ -25,10 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nullSurfaceWriter.H"
-#include "fileName.H"
-#include "OFstream.H"
-#include "faceList.H"
-#include "OSspecific.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -53,8 +49,7 @@ Foam::nullSurfaceWriter<Type>::~nullSurfaceWriter()
 template<class Type>
 void Foam::nullSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,

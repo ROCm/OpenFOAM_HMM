@@ -40,6 +40,7 @@ Description
       - dx          : DX scalar or vector format
       - vtk         : VTK ascii format
       - raw         : x y z value format for use with e.g. gnuplot 'splot'.
+      - obj         : Wavefron stl. Does not contain values!
       - stl         : ascii stl. Does not contain values!
 
     @param interpolationScheme : interpolation scheme, choice of \n

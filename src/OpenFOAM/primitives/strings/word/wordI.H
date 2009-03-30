@@ -132,30 +132,34 @@ inline bool Foam::word::valid(char c)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::word::operator=(const word& q)
+inline const Foam::word& Foam::word::operator=(const word& q)
 {
     string::operator=(q);
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const string& q)
+inline const Foam::word& Foam::word::operator=(const string& q)
 {
     string::operator=(q);
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const std::string& q)
+inline const Foam::word& Foam::word::operator=(const std::string& q)
 {
     string::operator=(q);
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const char* q)
+inline const Foam::word& Foam::word::operator=(const char* q)
 {
     string::operator=(q);
     stripInvalid();
+    return *this;
 }
 
 

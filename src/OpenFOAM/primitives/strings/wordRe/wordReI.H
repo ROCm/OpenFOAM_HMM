@@ -213,7 +213,7 @@ inline void Foam::wordRe::set(const char* str, const compOption opt)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::wordRe::operator=(const wordRe& str)
+inline const Foam::wordRe& Foam::wordRe::operator=(const wordRe& str)
 {
     string::operator=(str);
 
@@ -225,34 +225,39 @@ inline void Foam::wordRe::operator=(const wordRe& str)
     {
         re_.clear();
     }
+    return *this;
 }
 
 
-inline void Foam::wordRe::operator=(const word& str)
+inline const Foam::wordRe& Foam::wordRe::operator=(const word& str)
 {
     word::operator=(str);
     re_.clear();
+    return *this;
 }
 
 
-inline void Foam::wordRe::operator=(const string& str)
+inline const Foam::wordRe& Foam::wordRe::operator=(const string& str)
 {
     string::operator=(str);
     compile(DETECT);  // auto-detect regex
+    return *this;
 }
 
 
-inline void Foam::wordRe::operator=(const std::string& str)
+inline const Foam::wordRe& Foam::wordRe::operator=(const std::string& str)
 {
     string::operator=(str);
     compile(DETECT);  // auto-detect regex
+    return *this;
 }
 
 
-inline void Foam::wordRe::operator=(const char* str)
+inline const Foam::wordRe& Foam::wordRe::operator=(const char* str)
 {
     string::operator=(str);
     compile(DETECT);  // auto-detect regex
+    return *this;
 }
 
 

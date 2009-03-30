@@ -44,21 +44,21 @@ Description
 int main(int argc, char *argv[])
 {
     const label nTypes = 4;
-    const word fieldTypes[] = 
-    { 
-        "volScalarField", 
-        "volVectorField", 
+    const word fieldTypes[] =
+    {
+        "volScalarField",
+        "volVectorField",
         "surfaceScalarField",
-        "lagrangian"
+        cloud::prefix
     };
 
 #   include "setRootCase.H"
-    
+
 #   include "createTime.H"
 #   include "createMesh.H"
 
 #   include "readConversionProperties.H"
- 
+
     // get the available time-steps
     instantList TimeList = runTime.times();
     Info << TimeList << endl;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
             // Set Time
             runTime.setTime(TimeList[n], n);
             word CurTime = runTime.timeName();
-            
+
             IOobjectList objects(mesh, runTime.timeName());
 
 #           include "moveMesh.H"
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
             // set the filename of the GMV file
             fileName gmvFileName = "plotGMV." + itoa(n);
             OFstream gmvFile(args.rootPath()/args.caseName()/gmvFileName);
-            
+
 #           include "gmvOutputHeader.H"
 #           include "gmvOutput.H"
 #           include "gmvOutputTail.H"

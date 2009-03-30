@@ -29,7 +29,6 @@ Description
 
 #include "autoSnapDriver.H"
 #include "Time.H"
-#include "pointFields.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
 #include "OFstream.H"
@@ -1389,11 +1388,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
             }
         }
 
-        pointField localFaceCentres(pp.size());
-        forAll(pp, i)
-        {
-            localFaceCentres[i] = mesh.faceCentres()[pp.addressing()[i]];
-        }
+        pointField localFaceCentres(mesh.faceCentres(), pp.addressing());
 
         // Get nearest surface and region
         labelList hitSurface;

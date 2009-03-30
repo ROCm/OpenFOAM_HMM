@@ -30,8 +30,7 @@ Description
 
 #include "arcEdge.H"
 #include "mathematicalConstants.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -40,8 +39,7 @@ namespace Foam
     defineTypeNameAndDebug(arcEdge, 0);
 
     // Add the curvedEdge constructor functions to the hash tables
-    curvedEdge::addIstreamConstructorToTable<arcEdge>
-        addArcEdgeIstreamConstructorToTable_;
+    addToRunTimeSelectionTable(curvedEdge, arcEdge, Istream);
 }
 
 

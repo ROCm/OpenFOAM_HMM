@@ -39,6 +39,7 @@ SourceFiles
 
 #include "globalPointPatch.H"
 #include "OFstream.H"
+#include "Cloud.H"
 #include "volFields.H"
 #include "pointFields.H"
 #include "vtkMesh.H"

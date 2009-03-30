@@ -40,7 +40,7 @@ void Foam::surfMesh::removeZones()
     }
 
     // Remove the surface zones
-    surfZones_.clear();
+    storedZones().clear();
 
     clearOut();
 }

@@ -45,7 +45,7 @@ namespace Foam
 {
 
 //- Read a hex label from an input stream
-label readHexLabel(ISstream& is);
+label readHexLabel(ISstream&);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
