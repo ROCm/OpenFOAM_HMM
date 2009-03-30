@@ -1168,7 +1168,7 @@ void Foam::fvMatrix<Type>::operator*=
 }
 
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::checkMethod
@@ -1297,7 +1297,27 @@ Foam::lduMatrix::solverPerformance Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
+(
+    const fvMatrix<Type>& A
+)
+{
+    return A - (A & A.psi());
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
+(
+    const tmp<fvMatrix<Type> >& tA
+)
+{
+    return tA - (tA() & tA().psi());
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==
