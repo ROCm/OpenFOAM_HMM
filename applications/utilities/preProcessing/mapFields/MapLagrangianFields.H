@@ -34,6 +34,7 @@ Description
 #ifndef MapLagrangianFields_H
 #define MapLagrangianFields_H
 
+#include "cloud.H"
 #include "GeometricField.H"
 #include "meshToMesh.H"
 #include "IOobjectList.H"
@@ -60,8 +61,7 @@ void MapLagrangianFields
 
     forAllIter(IOobjectList, fields, fieldIter)
     {
-        Info<< "    mapping lagrangian field "
-            << fieldIter()->name() << endl;
+        Info<< "    mapping lagrangian field " << fieldIter()->name() << endl;
 
         // Read field (does not need mesh)
         IOField<Type> fieldSource(*fieldIter());
@@ -73,7 +73,7 @@ void MapLagrangianFields
             (
                 fieldIter()->name(),
                 meshTarget.time().timeName(),
-                "lagrangian"/cloudName,
+                cloud::prefix/cloudName,
                 meshTarget,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,

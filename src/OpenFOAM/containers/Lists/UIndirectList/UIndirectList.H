@@ -26,8 +26,8 @@ Class
     Foam::UIndirectList
 
 Description
-    A List with indirect addressing. Like IndirectList but does not store
-    addressing.
+    A List with indirect addressing.
+    Like IndirectList but does not store addressing.
 
 SourceFiles
     UIndirectListI.H
@@ -44,8 +44,12 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of friend functions and operators
+template<class T> class UIndirectList;
+template<class T> Ostream& operator<<(Ostream&, const UIndirectList<T>&);
+
 /*---------------------------------------------------------------------------*\
-                           Class UIndirectList Declaration
+                        Class UIndirectList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>
@@ -92,6 +96,17 @@ public:
 
             //- Assignment of all entries to the given value
             inline void operator=(const T&);
+
+    // Ostream operator
+
+        //- Write UIndirectList to Ostream
+        //  Binary output is currently still a bit of a problem
+        friend Ostream& operator<<
+        #ifndef __CINT__
+        <T>
+        #endif
+        (Ostream&, const UIndirectList<T>&);
+
 };
 
 
@@ -102,6 +117,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "UIndirectListI.H"
+
+#ifdef NoRepository
+#   include "UIndirectListIO.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

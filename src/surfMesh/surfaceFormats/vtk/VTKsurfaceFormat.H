@@ -37,9 +37,8 @@ SourceFiles
 #ifndef VTKsurfaceFormat_H
 #define VTKsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 #include "VTKsurfaceFormatCore.H"
 
@@ -89,55 +88,17 @@ public:
 
         // Write
 
-        //- Write surface mesh components
-        static void write
-        (
-            Ostream&,
-            const pointField&,
-            const List<Face>&,
-            const List<surfZone>&
-        );
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
+        //- Write UnsortedMeshedSurface, the output remains unsorted
+        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& name,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
-        //- Write UnsortedMeshedSurface
-        //  The output remains unsorted
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  The output remains unsorted
-        static void write
-        (
-            const fileName& name,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
 
         //- Write object
         virtual void write(Ostream& os) const
         {
-            write(os, *this);
+            write(os, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

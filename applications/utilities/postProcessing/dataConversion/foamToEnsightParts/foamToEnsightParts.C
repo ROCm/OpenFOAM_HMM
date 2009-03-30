@@ -324,7 +324,14 @@ int main(int argc, char *argv[])
         {
             const word& cloudName = cloudIter.key();
 
-            if (!isDir(runTime.timePath()/regionPrefix/"lagrangian"/cloudName))
+            if
+            (
+                !isDir
+                (
+                    runTime.timePath()/regionPrefix/
+                    cloud::prefix/cloudName
+                )
+            )
             {
                 continue;
             }
@@ -333,7 +340,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudName
+                cloud::prefix/cloudName
             );
 
             // check that the positions field is present for this time
@@ -365,7 +372,8 @@ int main(int argc, char *argv[])
                 if (!fieldObject)
                 {
                     Info<< "missing "
-                        << runTime.timeName()/"lagrangian"/cloudName/fieldName
+                        << runTime.timeName()/cloud::prefix/cloudName
+                        / fieldName
                         << endl;
                     continue;
                 }

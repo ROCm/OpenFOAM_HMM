@@ -1242,7 +1242,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
 // Do refinement of consistent set of cells followed by truncation and
 // load balancing.
 Foam::autoPtr<Foam::mapDistributePolyMesh>
- Foam::meshRefinement::refineAndBalance
+Foam::meshRefinement::refineAndBalance
 (
     const string& msg,
     decompositionMethod& decomposer,

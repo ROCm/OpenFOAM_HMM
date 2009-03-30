@@ -27,7 +27,7 @@ Class
 
 Description
     A simple wrapper around bool so that it can be read as a word:
-    true/false, on/off, yes/no or y/n.
+    true/false, on/off, yes/no or y/n or none.
 
 SourceFiles
     Switch.C
@@ -80,6 +80,7 @@ public:
             OFF   = 2,  ON    = 3,
             NO    = 4,  YES   = 5,
             NO_1  = 6,  YES_1 = 7,
+            NONE  = 8,  PLACEHOLDER = 9,
             INVALID
         };
 
@@ -176,9 +177,10 @@ public:
         }
 
         //- Assignment from bool
-        void operator=(const bool b)
+        const Switch& operator=(const bool b)
         {
             switch_ = (b ? Switch::TRUE : Switch::FALSE);
+            return *this;
         }
 
 

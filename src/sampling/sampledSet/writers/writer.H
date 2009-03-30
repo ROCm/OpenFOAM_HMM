@@ -91,22 +91,12 @@ protected:
     //- Generates filename from coordSet and sampled fields
     fileName getBaseName(const coordSet&, const wordList&) const;
 
-    void writeCoord
-    (
-        const coordSet& samples,
-        const label sampleI,
-        Ostream& os
-    ) const;
+    void writeCoord(const coordSet&, const label sampleI, Ostream&) const;
 
     //- Writes single-column ascii write. Column 1 is coordSet coordinate,
     //  columns 2 is the value. Uses write() function
     //  to write coordinate in correct format.
-    void writeTable
-    (
-        const coordSet&,
-        const List<Type>&,
-        Ostream& os
-    ) const;
+    void writeTable(const coordSet&, const List<Type>&, Ostream&) const;
 
     //- Writes multi-column ascii write. Column 1 is coordSet coordinate,
     //  columns 2..n are the values. Uses write() function
@@ -139,10 +129,7 @@ public:
     // Selectors
 
         //- Return a reference to the selected writer
-        static autoPtr<writer> New
-        (
-            const word& writeFormat
-        );
+        static autoPtr<writer> New(const word& writeFormat);
 
 
     // Constructors
@@ -165,8 +152,8 @@ public:
         ) const = 0;
 
         //- General entry point for writing.
-        //  The data is organized in a set of point with one or
-        //  more values per point
+        //  The data is organized in a set of point with one or more values
+        //  per point
         virtual void write
         (
             const coordSet&,
@@ -179,7 +166,7 @@ public:
         virtual Ostream& write(const scalar, Ostream&) const;
 
         template<class VSType>
-        Ostream& writeVS(const VSType& value, Ostream& os) const;
+        Ostream& writeVS(const VSType&, Ostream&) const;
 
         //- Write vector. Tab separated ascii
         virtual Ostream& write(const vector&, Ostream&) const;

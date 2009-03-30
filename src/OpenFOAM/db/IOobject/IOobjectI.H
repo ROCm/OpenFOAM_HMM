@@ -82,5 +82,14 @@ inline Stream& Foam::IOobject::writeDivider(Stream& os)
     return os;
 }
 
+template<class Stream>
+inline Stream& Foam::IOobject::writeEndDivider(Stream& os)
+{
+    os  << "\n\n"
+        "// ************************************************************************* //\n";
+
+    return os;
+}
+
 
 // ************************************************************************* //

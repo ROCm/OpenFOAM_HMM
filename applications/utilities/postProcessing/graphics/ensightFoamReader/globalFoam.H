@@ -32,7 +32,6 @@ static bool isSpray[maxNames];
 static word scalarName             = "volScalarField";
 static word vectorName             = "volVectorField";
 static word tensorName             = "volTensorField";
-static word sprayName              = "lagrangian";
 static word sprayScalarFieldName   = "scalarField";
 static word sprayVectorFieldName   = "vectorField";
 static word sprayTensorFieldName   = "tensorField";

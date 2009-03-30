@@ -175,6 +175,51 @@ Foam::labelList Foam::orientedSurface::edgeToFace
 }
 
 
+void Foam::orientedSurface::walkSurface
+(
+    const triSurface& s,
+    const label startFaceI,
+    labelList& flipState
+)
+{
+    // List of faces that were changed in the last iteration.
+    labelList changedFaces(1, startFaceI);
+    // List of edges that were changed in the last iteration.
+    labelList changedEdges;
+
+    while(true)
+    {
+        changedEdges = faceToEdge(s, changedFaces);
+
+        if (debug)
+        {
+            Pout<< "From changedFaces:" << changedFaces.size()
+                << " to changedEdges:" << changedEdges.size()
+                << endl;
+        }
+
+        if (changedEdges.empty())
+        {
+            break;
+        }
+
+        changedFaces = edgeToFace(s, changedEdges, flipState);
+
+        if (debug)
+        {
+            Pout<< "From changedEdges:" << changedEdges.size()
+                << " to changedFaces:" << changedFaces.size()
+                << endl;
+        }
+
+        if (changedFaces.empty())
+        {
+            break;
+        }
+    }
+}
+
+
 void Foam::orientedSurface::propagateOrientation
 (
     const triSurface& s,
@@ -228,42 +273,8 @@ void Foam::orientedSurface::propagateOrientation
             << endl;
     }
 
-
-    // List of faces that were changed in the last iteration.
-    labelList changedFaces(1, nearestFaceI);
-    // List of edges that were changed in the last iteration.
-    labelList changedEdges;
-
-    while(true)
-    {
-        changedEdges = faceToEdge(s, changedFaces);
-
-        if (debug)
-        {
-            Pout<< "From changedFaces:" << changedFaces.size()
-                << " to changedEdges:" << changedEdges.size()
-                << endl;
-        }
-
-        if (changedEdges.empty())
-        {
-            break;
-        }
-
-        changedFaces = edgeToFace(s, changedEdges, flipState);
-
-        if (debug)
-        {
-            Pout<< "From changedEdges:" << changedEdges.size()
-                << " to changedFaces:" << changedFaces.size()
-                << endl;
-        }
-
-        if (changedFaces.empty())
-        {
-            break;
-        }
-    }
+    // Walk the surface from nearestFaceI, changing the flipstate.
+    walkSurface(s, nearestFaceI, flipState);
 }
 
 
@@ -352,6 +363,26 @@ bool Foam::orientedSurface::orient
     const bool orientOutside
 )
 {
+    bool anyFlipped = false;
+
+    // Do initial flipping to make triangles consistent. Otherwise if the
+    // nearest is e.g. on an edge inbetween inconsistent triangles it might
+    // make the wrong decision.
+    if (s.size() > 0)
+    {
+        // Whether face has to be flipped.
+        //      UNVISITED: unvisited
+        //      NOFLIP: no need to flip
+        //      FLIP: need to flip
+        labelList flipState(s.size(), UNVISITED);
+
+        flipState[0] = NOFLIP;
+        walkSurface(s, 0, flipState);
+
+        anyFlipped = flipSurface(s, flipState);
+    }
+
+
     // Whether face has to be flipped.
     //      UNVISITED: unvisited
     //      NOFLIP: no need to flip
@@ -410,7 +441,9 @@ bool Foam::orientedSurface::orient
     }
 
     // Now finally flip triangles according to flipState.
-    return flipSurface(s, flipState);
+    bool geomFlipped = flipSurface(s, flipState);
+
+    return anyFlipped || geomFlipped;
 }
 
 

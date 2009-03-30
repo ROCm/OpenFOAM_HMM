@@ -41,10 +41,10 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
 )
 {
     os  << cellId                    // includes 1 offset
-        << " " << starcdShellShape_  // 3(shell) shape
-        << " " << f.size()
-        << " " << cellTableId
-        << " " << starcdShellType_;  // 4(shell)
+        << ' ' << starcdShellShape_  // 3(shell) shape
+        << ' ' << f.size()
+        << ' ' << cellTableId
+        << ' ' << starcdShellType_;  // 4(shell)
 
     // primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
@@ -55,7 +55,7 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
         {
             os  << nl << "  " << cellId;
         }
-        os  << " " << f[fp] + 1;
+        os  << ' ' << f[fp] + 1;
         count++;
     }
     os  << endl;
@@ -221,11 +221,23 @@ template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfZone>& zoneLst
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
+
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size() > 1
+      ? surf.surfZones()
+      : oneZone(faceLst)
+    );
+
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+
     fileName baseName = filename.lessExt();
 
     writePoints(OFstream(baseName + ".vrt")(), pointLst);
@@ -233,14 +245,25 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     writeHeader(os, "CELL");
 
     label faceIndex = 0;
-    forAll(zoneLst, zoneI)
+    forAll(zones, zoneI)
     {
-        const surfZone& zone = zoneLst[zoneI];
+        const surfZone& zone = zones[zoneI];
 
-        forAll(zone, localFaceI)
+        if (useFaceMap)
         {
-            const Face& f = faceLst[faceIndex++];
-            writeShell(os, f, faceIndex, zoneI + 1);
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceMap[faceIndex++]];
+                writeShell(os, f, faceIndex, zoneI + 1);
+            }
+        }
+        else
+        {
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+                writeShell(os, f, faceIndex, zoneI + 1);
+            }
         }
     }
 
@@ -250,60 +273,9 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
         OFstream(baseName + ".inp")(),
         pointLst,
         faceLst.size(),
-        zoneLst
-    );
-
-}
-
-
-template<class Face>
-void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
-(
-    const fileName& filename,
-    const MeshedSurface<Face>& surf
-)
-{
-    write(filename, surf.points(), surf.faces(), surf.zones());
-}
-
-
-template<class Face>
-void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
-(
-    const fileName& filename,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    fileName baseName = filename.lessExt();
-
-    writePoints(OFstream(baseName + ".vrt")(), surf.points());
-    OFstream os(baseName + ".cel");
-    writeHeader(os, "CELL");
-
-    const List<Face>& faceLst = surf.faces();
-    labelList faceMap;
-    List<surfZone> zoneLst = surf.sortedZones(faceMap);
-
-    label faceIndex = 0;
-    forAll(zoneLst, zoneI)
-    {
-        const surfZone& zone = zoneLst[zoneI];
-
-        forAll(zone, localFaceI)
-        {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-            writeShell(os, f, faceIndex, zoneI + 1);
-        }
-    }
-
-    // write simple .inp file
-    writeCase
-    (
-        OFstream(baseName + ".inp")(),
-        surf.points(),
-        surf.size(),
-        zoneLst
+        zones
     );
 }
+
 
 // ************************************************************************* //

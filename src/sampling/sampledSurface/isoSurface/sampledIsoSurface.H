@@ -124,6 +124,12 @@ class sampledIsoSurface
             const pointScalarField&
         ) const;
 
+        tmp<pointScalarField> average
+        (
+            const pointMesh&,
+            const volScalarField& fld
+        ) const;
+
         //- Create iso surface (if time has changed)
         //  Do nothing (and return false) if no update was needed
         bool updateGeometry() const;

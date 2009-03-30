@@ -76,6 +76,7 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     Map<label>          lookup;
 
     // assume the types are not intermixed
+    // leave faces that didn't have a group in 0
     bool sorted = true;
     label zoneI = 0;
 
@@ -88,10 +89,6 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     // the zones.
     label ansaId = -1;
     word  ansaType, ansaName;
-
-    // leave faces that didn't have a group in 0
-    //    label groupID = 0;
-    //    label maxGroupID = -1;
 
     // A single warning per unrecognized command
     HashSet<word> unhandledCmd;
@@ -374,8 +371,8 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
     List<word> names(dynSizes.size());
     forAllConstIter(Map<label>, lookup, iter)
     {
-        const label zoneI = iter();
-        const label groupI  = iter.key();
+        const label zoneI  = iter();
+        const label groupI = iter.key();
 
         Map<word>::const_iterator fnd = nameLookup.find(groupI);
         if (fnd != nameLookup.end())
@@ -387,7 +384,6 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
             names[zoneI] = word("zone") + ::Foam::name(zoneI);
         }
     }
-
 
     sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 

@@ -111,8 +111,8 @@ case "$compilerInstall" in
 OpenFOAM)
     case "$WM_COMPILER" in
     Gcc)
-        export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        export WM_COMPILER_DIR=$WM_THIRD_PARTY_DIR/gcc-4.3.3/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         ;;
     Gcc42)
@@ -257,6 +257,15 @@ FJMPI)
     _foamAddLib  $MPI_ARCH_PATH/lib/sparcv9
     _foamAddLib  /opt/FSUNf90/lib/sparcv9
     _foamAddLib  /opt/FJSVpnidt/lib
+    ;;
+
+QSMPI)
+    export MPI_ARCH_PATH=/usr/lib/mpi
+    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/qsmpi
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+    _foamAddLib $MPI_ARCH_PATH/lib
+
     ;;
 
 *)
