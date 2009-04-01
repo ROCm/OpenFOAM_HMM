@@ -1,0 +1,5 @@
+#include CGAL_FILES
+
+
+
+LIB = $(FOAM_APPBIN)/conformalVoronoiMesh

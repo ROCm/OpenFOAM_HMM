@@ -346,9 +346,11 @@ void Foam::CV3D::calcDualMesh
                 if (cc1I < 0 || cc2I < 0)
                 {
                     FatalErrorIn("Foam::CV3D::calcDualMesh")
-                    << "Dual face uses circumcenter defined by a "
+                        << "Dual face uses circumcenter defined by a "
                         << "Delaunay tetrahedron with no internal "
-                        << "or boundary points."
+                        << "or boundary points.  Defining Delaunay edge ends: "
+                        << topoint(vA->point()) << " "
+                        << topoint(vB->point()) << nl
                         << exit(FatalError);
                 }
 
