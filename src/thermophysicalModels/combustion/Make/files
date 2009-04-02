@@ -13,7 +13,7 @@ reactingMixture     = $(mixtures)/reactingMixture
 $(chemistryReader)/chemistryReader.C
 $(foamChemistryReader)/foamChemistryReader.C
 $(chemkinReader)/chemkinReader.C
-$(chemkinReader)/chemkinLexer.C
+$(chemkinReader)/chemkinLexer.L
 
 $(combustionMixture)/combustionMixture.C
 $(reactingMixture)/reactingMixture.C
