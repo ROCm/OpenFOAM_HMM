@@ -265,10 +265,10 @@ bool Foam::radiation::fvDOM::read()
 {
     if (radiationModel::read())
     {
-        // nothing to read
+//      Only reading solution parameters - not changing ray geometry
 
-//        coeffs_.lookup("nTheta") >> nTheta_;
-//        coeffs_.lookup("nPhi") >> nPhi_;
+        coeffs_.readIfPresent("convergence", convergence_);
+        coeffs_.readIfPresent("maxIter", maxIter_);
 
         return true;
     }
