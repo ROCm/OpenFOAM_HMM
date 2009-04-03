@@ -128,7 +128,7 @@ void Foam::radiation::radiationModel::correct()
         return;
     }
 
-    if ((time_.timeIndex() == 0) || (time_.timeIndex() % solverFreq_ == 0))
+    if (time_.timeIndex() % solverFreq_ == 0)
     {
         calculate();
     }

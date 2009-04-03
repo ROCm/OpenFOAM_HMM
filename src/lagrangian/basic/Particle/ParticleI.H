@@ -303,6 +303,12 @@ inline label Particle<ParticleType>::cell() const
     return celli_;
 }
 
+template<class ParticleType>
+inline label& Particle<ParticleType>::cell()
+{
+    return celli_;
+}
+
 
 template<class ParticleType>
 inline label Particle<ParticleType>::face() const

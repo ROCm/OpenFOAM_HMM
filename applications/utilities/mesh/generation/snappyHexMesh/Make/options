@@ -1,6 +1,6 @@
 EXE_INC = \
     /* -g -DFULLDEBUG -O0 */ \
-    -I$(LIB_SRC)/decompositionAgglomeration/decompositionMethods/lnInclude \
+    -I$(LIB_SRC)/decompositionMethods/decompositionMethods/lnInclude \
     -I$(LIB_SRC)/autoMesh/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude \
@@ -9,7 +9,6 @@ EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude
 
 EXE_LIBS = \
-    -L$(FOAM_MPI_LIBBIN) -lparMetisDecompositionMethod \
     -lfiniteVolume \
     -ldecompositionMethods \
     -lmeshTools \

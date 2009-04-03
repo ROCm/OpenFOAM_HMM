@@ -1212,6 +1212,17 @@ void Foam::meshRefinement::findCellZoneTopo
     // by changing cell zone every time we cross a surface.
     while (true)
     {
+        // Synchronise regionToCellZone.
+        // Note:
+        // - region numbers are identical on all processors
+        // - keepRegion is identical ,,
+        // - cellZones are identical ,,
+        // This done at top of loop to account for geometric matching
+        // not being synchronised.
+        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
+        Pstream::listCombineScatter(regionToCellZone);
+
+
         bool changed = false;
 
         // Internal faces
@@ -1292,14 +1303,6 @@ void Foam::meshRefinement::findCellZoneTopo
         {
             break;
         }
-
-        // Synchronise regionToCellZone.
-        // Note:
-        // - region numbers are identical on all processors
-        // - keepRegion is identical ,,
-        // - cellZones are identical ,,
-        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-        Pstream::listCombineScatter(regionToCellZone);
     }
 
 
