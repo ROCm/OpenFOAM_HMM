@@ -52,17 +52,6 @@ _foamAddLib()
 }
 
 
-# make directories if they don't already exist
-_foamMkDir()
-{
-   while [ $# -ge 1 ]
-   do
-      [ -d $1 ] || mkdir -p $1
-      shift
-   done
-}
-
-
 # location of the jobControl directory
 export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
 
@@ -93,9 +82,6 @@ export PATH=$WM_DIR:$WM_PROJECT_DIR/bin:$PATH
 
 _foamAddPath $FOAM_APPBIN $FOAM_USER_APPBIN
 _foamAddLib  $FOAM_LIBBIN $FOAM_USER_LIBBIN
-
-# create these directories if necessary:
-_foamMkDir $FOAM_LIBBIN $FOAM_USER_LIBBIN $FOAM_APPBIN $FOAM_USER_APPBIN
 
 
 # Compiler settings
@@ -160,8 +146,6 @@ OPENMPI)
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin $MPI_ARCH_PATH/lib
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -176,8 +160,6 @@ LAM)
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin $MPI_ARCH_PATH/lib
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -191,8 +173,6 @@ MPICH)
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin $MPI_ARCH_PATH/lib
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -207,8 +187,6 @@ MPICH-GM)
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
     _foamAddLib  $GM_LIB_PATH
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin $MPI_ARCH_PATH/lib
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/mpich-gm
     ;;
@@ -274,8 +252,6 @@ QSMPI)
 esac
 
 _foamAddLib $FOAM_MPI_LIBBIN
-# before compiling, this directory may not exist:
-_foamMkDir  $FOAM_MPI_LIBBIN
 
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
@@ -304,6 +280,6 @@ export MPI_BUFFER_SIZE
 
 # cleanup environment:
 # ~~~~~~~~~~~~~~~~~~~~
-unset _foamAddPath _foamAddLib _foamMkDir minBufferSize
+unset _foamAddPath _foamAddLib minBufferSize
 
 # -----------------------------------------------------------------------------

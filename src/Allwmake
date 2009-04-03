@@ -18,7 +18,8 @@ wmake libso triSurface
 wmake libso edgeMesh
 wmake libso surfMesh
 
-decompositionAgglomeration/Allwmake
+# Decomposition methods needed by meshTools
+decompositionMethods/Allwmake
 
 wmake libso meshTools
 wmake libso finiteVolume
@@ -43,5 +44,7 @@ conversion/Allwmake
 
 wmake libso autoMesh
 wmake libso errorEstimation
+
+fvAgglomerationMethods/Allwmake
 
 # ----------------------------------------------------------------- end-of-file
