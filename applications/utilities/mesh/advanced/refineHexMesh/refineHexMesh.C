@@ -182,6 +182,7 @@ int main(int argc, char *argv[])
     if (overwrite)
     {
         mesh.setInstance(oldInstance);
+        meshCutter.setInstance(oldInstance);
     }
     Info<< "Writing mesh to " << runTime.timeName() << endl;
 
