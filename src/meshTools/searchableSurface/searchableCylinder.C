@@ -105,6 +105,13 @@ Foam::pointIndexHit Foam::searchableCylinder::findNearest
 }
 
 
+Foam::scalar Foam::searchableCylinder::radius2(const point& pt) const
+{
+    const vector x = (pt-point1_) ^ unitDir_;
+    return x&x;
+}
+
+
 // From http://www.gamedev.net/community/forums/topic.asp?topic_id=467789 -
 // intersection of cylinder with ray
 void Foam::searchableCylinder::findLineAll
@@ -118,13 +125,91 @@ void Foam::searchableCylinder::findLineAll
     near.setMiss();
     far.setMiss();
 
-    // Line as P = start + t*V
-    const vector V(end-start);
+    vector point1Start(start-point1_);
+    vector point2Start(start-point2_);
+    vector point1End(end-point1_);
 
-//Pout<< "point1:" << point1_ << " point2:" << point2_
-//    << " start:" << start << " end:" << end << endl;
+    // Quick rejection of complete vector outside endcaps
+    scalar s1 = point1Start&unitDir_;
+    scalar s2 = point1End&unitDir_;
 
-    const vector x = (start-point1_) ^ unitDir_;
+    if ((s1 < 0 && s2 < 0) || (s1 > magDir_ && s2 > magDir_))
+    {
+        return;
+    }
+
+    // Line as P = start+t*V  where V is unit vector and t=[0..mag(end-start)]
+    vector V(end-start);
+    scalar magV = mag(V);
+    if (magV < ROOTVSMALL)
+    {
+        return;
+    }
+    V /= magV;
+
+
+    // We now get the nearest intersections to start. This can either be
+    // the intersection with the end plane or with the cylinder side.
+
+    // Get the two points (expressed in t) on the end planes. This is to
+    // clip any cylinder intersection against.
+    scalar tPoint1;
+    scalar tPoint2;
+
+    // Maintain the two intersections with the endcaps
+    scalar tNear = VGREAT;
+    scalar tFar = VGREAT;
+
+    {
+        scalar s = (V&unitDir_);
+        if (mag(s) > VSMALL)
+        {
+            tPoint1 = -s1/s;
+            tPoint2 = -(point2Start&unitDir_)/s;
+            if (tPoint2 < tPoint1)
+            {
+                Swap(tPoint1, tPoint2);
+            }
+            if (tPoint1 > magV || tPoint2 < 0)
+            {
+                return;
+            }
+
+            // See if the points on the endcaps are actually inside the cylinder
+            if (tPoint1 >= 0 && tPoint1 <= magV)
+            {
+                if (radius2(start+tPoint1*V) <= sqr(radius_))
+                {
+                    tNear = tPoint1;
+                }
+            }
+            if (tPoint2 >= 0 && tPoint2 <= magV)
+            {
+                if (radius2(start+tPoint2*V) <= sqr(radius_))
+                {
+                    // Check if already have a near hit from point1
+                    if (tNear <= 1)
+                    {
+                        tFar = tPoint2;
+                    }
+                    else
+                    {
+                        tNear = tPoint2;
+                    }
+                }
+            }
+        }
+        else
+        {
+            // Vector perpendicular to cylinder. Check for outside already done
+            // above so just set tpoint to allow all.
+            tPoint1 = -VGREAT;
+            tPoint2 = VGREAT;
+        }
+    }
+
+
+    const vector x = point1Start ^ unitDir_;
     const vector y = V ^ unitDir_;
     const scalar d = sqr(radius_);
 
@@ -135,11 +220,12 @@ void Foam::searchableCylinder::findLineAll
 
     const scalar disc = b*b-4*a*c;
 
-//Pout<< "a:" << a << " b:" << b << " c:" << c << " disc:" << disc
-//    << endl;
+    scalar t1 = -VGREAT;
+    scalar t2 = VGREAT;
 
     if (disc < 0)
     {
+        // Fully outside
         return;
     }
     else if (disc < ROOTVSMALL)
@@ -147,12 +233,40 @@ void Foam::searchableCylinder::findLineAll
         // Single solution
         if (mag(a) > ROOTVSMALL)
         {
-            scalar t = -b/(2*a);
-            if (t >= 0 && t <= 1)
+            t1 = -b/(2*a);
+
+            //Pout<< "single solution t:" << t1
+            //    << " for start:" << start << " end:" << end
+            //    << " c:" << c << endl;
+
+            if (t1 >= 0 && t1 <= magV && t1 >= tPoint1 && t1 <= tPoint2)
             {
-                near.setPoint(start + t*V);
-                near.setHit();
-                near.setIndex(0);
+                // valid. Insert sorted.
+                if (t1 < tNear)
+                {
+                    tFar = tNear;
+                    tNear = t1;
+                }
+                else if (t1 < tFar)
+                {
+                    tFar = t1;
+                }
+            }
+            else
+            {
+                return;
+            }
+        }
+        else
+        {
+            // Aligned with axis. Check if outside radius
+            //Pout<< "small discriminant:" << disc
+            //    << " for start:" << start << " end:" << end
+            //    << " magV:" << magV
+            //    << " c:" << c << endl;
+            if (c > 0)
+            {
+                return;
             }
         }
     }
@@ -162,40 +276,78 @@ void Foam::searchableCylinder::findLineAll
         {
             scalar sqrtDisc = sqrt(disc);
 
-            scalar t1 = (-b + sqrtDisc)/2*a;
-            scalar t2 = (-b - sqrtDisc)/2*a;
-
-            if (t1 < t2)
+            t1 = (-b - sqrtDisc)/(2*a);
+            t2 = (-b + sqrtDisc)/(2*a);
+            if (t2 < t1)
             {
-                if (t1 >= 0 && t1 <= 1)
+                Swap(t1, t2);
+            }
+
+            if (t1 >= 0 && t1 <= magV && t1 >= tPoint1 && t1 <= tPoint2)
+            {
+                // valid. Insert sorted.
+                if (t1 < tNear)
                 {
-                    near.setPoint(start + t1*V);
-                    near.setHit();
-                    near.setIndex(0);
+                    tFar = tNear;
+                    tNear = t1;
                 }
-                if (t2 >= 0 && t2 <= 1)
+                else if (t1 < tFar)
                 {
-                    far.setPoint(start + t2*V);
-                    far.setHit();
-                    far.setIndex(0);
+                    tFar = t1;
                 }
             }
-            else
+            if (t2 >= 0 && t2 <= magV && t2 >= tPoint1 && t2 <= tPoint2)
             {
-                if (t2 >= 0 && t2 <= 1)
+                // valid. Insert sorted.
+                if (t2 < tNear)
                 {
-                    near.setPoint(start + t2*V);
-                    near.setHit();
-                    near.setIndex(0);
+                    tFar = tNear;
+                    tNear = t2;
                 }
-                if (t1 >= 0 && t1 <= 1)
+                else if (t2 < tFar)
                 {
-                    far.setPoint(start + t1*V);
-                    far.setHit();
-                    far.setIndex(0);
+                    tFar = t2;
                 }
+            }
+            //Pout<< "two solutions t1:" << t1 << " t2:" << t2
+            //    << " for start:" << start << " end:" << end
+            //    << " magV:" << magV
+            //    << " c:" << c << endl;
+        }
+        else
+        {
+            // Aligned with axis. Check if outside radius
+            //Pout<< "large discriminant:" << disc
+            //    << " small a:" << a
+            //    << " for start:" << start << " end:" << end
+            //    << " magV:" << magV
+            //    << " c:" << c << endl;
+            if (c > 0)
+            {
+                return;
             }
         }
+    }
+
+    // Check tNear, tFar
+    if (tNear >= 0 && tNear <= magV)
+    {
+        near.setPoint(start+tNear*V);
+        near.setHit();
+        near.setIndex(0);
+
+        if (tFar <= magV)
+        {
+            far.setPoint(start+tFar*V);
+            far.setHit();
+            far.setIndex(0);
+        }
+    }
+    else if (tFar >= 0 && tFar <= magV)
+    {
+        near.setPoint(start+tFar*V);
+        near.setHit();
+        near.setIndex(0);
     }
 }
 
@@ -216,13 +368,7 @@ Foam::searchableCylinder::searchableCylinder
     magDir_(mag(point2_-point1_)),
     unitDir_((point2_-point1_)/magDir_),
     radius_(radius)
-{
-    Pout<< "point1_:" << point1_ << endl;
-    Pout<< "point2_:" << point2_ << endl;
-    Pout<< "magDir_:" << magDir_ << endl;
-    Pout<< "unitDir_:" << unitDir_ << endl;
-    Pout<< "radius_:" << radius_ << endl;
-}
+{}
 
 
 Foam::searchableCylinder::searchableCylinder
@@ -237,13 +383,7 @@ Foam::searchableCylinder::searchableCylinder
     magDir_(mag(point2_-point1_)),
     unitDir_((point2_-point1_)/magDir_),
     radius_(readScalar(dict.lookup("radius")))
-{
-    Pout<< "point1_:" << point1_ << endl;
-    Pout<< "point2_:" << point2_ << endl;
-    Pout<< "magDir_:" << magDir_ << endl;
-    Pout<< "unitDir_:" << unitDir_ << endl;
-    Pout<< "radius_:" << radius_ << endl;
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -290,11 +430,10 @@ void Foam::searchableCylinder::findLine
 {
     info.setSize(start.size());
 
-    pointIndexHit b;
-
     forAll(start, i)
     {
         // Pick nearest intersection. If none intersected take second one.
+        pointIndexHit b;
         findLineAll(start[i], end[i], info[i], b);
         if (!info[i].hit() && b.hit())
         {
@@ -313,11 +452,10 @@ void Foam::searchableCylinder::findLineAny
 {
     info.setSize(start.size());
 
-    pointIndexHit b;
-
     forAll(start, i)
     {
         // Discard far intersection
+        pointIndexHit b;
         findLineAll(start[i], end[i], info[i], b);
         if (!info[i].hit() && b.hit())
         {
