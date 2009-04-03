@@ -23,76 +23,81 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::cvControls
+    Foam::uniformGrid
 
 Description
-    Controls for the conformalVoronoiMesh mesh generator
+    Generate a uniform grid of points inside the surfaces to be
+    conformed to of the conformalVoronoiMesh
 
 SourceFiles
-    cvControls.C
+    uniformGrid.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef cvControls_H
-#define cvControls_H
+#ifndef uniformGrid_H
+#define uniformGrid_H
 
-#include "IOdictionary.H"
+#include "Switch.H"
+#include "Random.H"
+#include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-class conformalVoronoiMesh;
-
-
 /*---------------------------------------------------------------------------*\
-                          Class cvControls Declaration
+                           Class uniformGrid Declaration
 \*---------------------------------------------------------------------------*/
 
-class cvControls
+class uniformGrid
+:
+    public initialPointsMethod
 {
+
+private:
+
     // Private data
 
-        //- Reference to the conformalVoronoiMesh holding this cvControls object
-        const conformalVoronoiMesh& cvMesh_;
+    //- The initial cell spacing
+    scalar initialCellSize_;
 
-        //- Reference to the cvMeshDict
-        const IOdictionary& cvMeshDict_;
+    //- Should the initial positions be randomised
+    Switch randomiseInitialGrid_;
+
+    //- Randomise the initial positions by fraction of the initialCellSize_
+    scalar randomPerturbation_;
 
 public:
 
-   // Constructors
+    //- Runtime type information
+    TypeName("uniformGrid");
 
-        //- Construct from references to conformalVoronoiMesh and IOdictionary
-        cvControls
+    // Constructors
+
+        //- Construct from components
+        uniformGrid
         (
-            const conformalVoronoiMesh& cvMesh,
-            const IOdictionary& cvMeshDict
+            const dictionary& initialPointsDict,
+            const conformalVoronoiMesh& cvMesh
         );
 
+
     //- Destructor
-    ~cvControls();
+    virtual ~uniformGrid()
+    {}
 
 
     // Member Functions
 
-        // Access
-
-            // Return the cvMeshDict
-            inline const IOdictionary& cvMeshDict() const;
-
+        //- Return the initial points for the conformalVoronoiMesh
+        virtual std::vector<Vb::Point> initialPoints() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "cvControlsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -37,7 +37,21 @@ SourceFiles
 #ifndef conformalVoronoiMesh_H
 #define conformalVoronoiMesh_H
 
-#include ".H"
+//#define CGAL_INEXACT
+#define CGAL_HIERARCHY
+
+#include "CGALTriangulation3Ddefs.H"
+
+#include "cvControls.H"
+#include "initialPointsMethod.H"
+#include "pointIOField.H"
+#include "DynamicList.H"
+#include "Switch.H"
+#include "Time.H"
+#include "polyMesh.H"
+#include "triSurfaceTools.H"
+#include "mathematicalConstants.H"
+#include "transform.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,28 +59,37 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class Istream;
-class Ostream;
-
-// Forward declaration of friend functions and operators
-class conformalVoronoiMesh;
-Istream& operator>>(Istream&, conformalVoronoiMesh&);
-Ostream& operator<<(Ostream&, const conformalVoronoiMesh&);
+class initialPointsMethod;
 
 
 /*---------------------------------------------------------------------------*\
-                          Class conformalVoronoiMesh Declaration
+                    Class conformalVoronoiMesh Declaration
 \*---------------------------------------------------------------------------*/
 
 class conformalVoronoiMesh
 :
-    public baseClassName
+    public HTriangulation
 {
     // Private data
 
-        //- Description of data_
-        dataType data_;
+        //- The time registry of the application
+        const Time& runTime_;
 
+        //- Controls for the conformal Voronoi meshing process
+        cvControls cvMeshControls_;
+
+        //- Keep track of the start of the internal points
+        label startOfInternalPoints_;
+
+        //- Keep track of the start of the surface point-pairs
+        label startOfSurfacePointPairs_;
+
+        //- Store the feature constraining points to be reinserted after a
+        //- triangulation clear
+        List<Vb> featureConstrainingVertices_;
+
+        //- Method for inserting initial points.  Runtime selectable.
+        autoPtr<initialPointsMethod> initialPointsMethod_;
 
     // Private Member Functions
 
@@ -76,35 +99,48 @@ class conformalVoronoiMesh
         //- Disallow default bitwise assignment
         void operator=(const conformalVoronoiMesh&);
 
+        //- Insert point and return it's index
+        inline label insertPoint
+        (
+            const point& pt,
+            const label type
+        );
+
+        //- Insert a point-pair at a ppDist distance either side of
+        //  surface point surfPt, in the direction n
+        inline void insertPointPair
+        (
+            const scalar ppDist,
+            const point& surfPt,
+            const vector& n
+        );
+
+        //- Insert a Vb (a typedef of CGAL::indexedVertex<K>)
+        inline void insertVb(const Vb& v);
+
+        //- Insert point groups at the feature points.
+        void insertFeaturePoints();
+
+        //- Reinsert stored feature point defining points.
+        void reinsertFeaturePoints();
+
+        //- Insert the initial points into the triangulation, based on the
+        //  initialPointsMethod
+        void insertInitialPoints();
 
 public:
-
-    // Static data members
-
-        //- Static data staticData
-        static const dataType staticData;
-
 
     // Constructors
 
         //- Construct null
         conformalVoronoiMesh();
 
-        //- Construct from components
-        conformalVoronoiMesh(const dataType& data);
-
-        //- Construct from Istream
-        conformalVoronoiMesh(Istream&);
-
-        //- Construct as copy
-        conformalVoronoiMesh(const conformalVoronoiMesh&);
-
-
-    // Selectors
-
-        //- Select null constructed
-        static autoPtr<conformalVoronoiMesh> New();
-
+        //- Construct from Time and cvMeshDict
+        conformalVoronoiMesh
+        (
+            const Time& runTime,
+            const IOdictionary& cvMeshDict
+        );
 
     //- Destructor
     ~conformalVoronoiMesh();
@@ -112,7 +148,23 @@ public:
 
     // Member Functions
 
+        // Conversion functions between point (OpenFOAM) and Point (CGAL)
+
+#       ifdef CGAL_INEXACT
+            typedef const point& pointFromPoint;
+            typedef const Point& PointFrompoint;
+#       else
+            typedef point pointFromPoint;
+            typedef Point PointFrompoint;
+#       endif
+
+        inline pointFromPoint topoint(const Point&) const;
+        inline PointFrompoint toPoint(const point&) const;
+
         // Access
+
+            //- Return the cvMeshControls object
+            inline const cvControls& cvMeshControls() const;
 
         // Check
 
@@ -120,20 +172,6 @@ public:
 
         // Write
 
-
-    // Member Operators
-
-        void operator=(const conformalVoronoiMesh&);
-
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream&, conformalVoronoiMesh&);
-        friend Ostream& operator<<(Ostream&, const conformalVoronoiMesh&);
 };
 
 

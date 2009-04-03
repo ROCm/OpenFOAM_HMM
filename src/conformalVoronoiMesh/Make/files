@@ -1,5 +1,10 @@
 #include CGAL_FILES
 
+conformalVoronoiMesh/conformalVoronoiMesh.C
 
+cvControls/cvControls.C
 
-LIB = $(FOAM_APPBIN)/conformalVoronoiMesh
+initialPointsMethod/initialPointsMethod/initialPointsMethod.C
+initialPointsMethod/uniformGrid/uniformGrid.C
+
+LIB = $(FOAM_LIBBIN)/libconformalVoronoiMesh

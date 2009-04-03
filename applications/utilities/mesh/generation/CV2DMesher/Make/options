@@ -1,16 +1,25 @@
 //EXE_DEBUG = -DFULLDEBUG -g -O0
+EXE_FROUNDING_MATH = -frounding-math
 EXE_NDEBUG = -DNDEBUG
 
 include $(GENERAL_RULES)/CGAL
 FFLAGS = -DCGAL_FILES='"${CGAL_PATH}/CGAL/files"'
 
 EXE_INC = \
+    ${EXE_FROUNDING_MATH} \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
+    -I$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1 \
+    -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude
 
 EXE_LIBS = \
+    -L$(BOOST_ROOT)/lib \
+    -L$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1/platforms/$(WM_ARCH)$(WM_COMPILER_ARCH)/lib \
     -lmeshTools \
-    -ltriSurface
-
+    -ltriSurface \
+    -ldynamicMesh \
+    -lboost_thread-gcc43-mt-1_38 \
+    -lmpfr

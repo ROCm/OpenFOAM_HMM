@@ -10,6 +10,7 @@ EXE_INC = \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
     -I$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1 \
+    -I$(LIB_SRC)/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
@@ -18,6 +19,7 @@ EXE_INC = \
 EXE_LIBS = \
     -L$(BOOST_ROOT)/lib \
     -L$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1/platforms/$(WM_ARCH)$(WM_COMPILER_ARCH)/lib \
+    -lconformalVoronoiMesh \
     -lmeshTools \
     -ltriSurface \
     -ldynamicMesh \

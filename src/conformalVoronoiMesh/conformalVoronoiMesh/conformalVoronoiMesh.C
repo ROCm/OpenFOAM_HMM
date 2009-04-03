@@ -25,43 +25,32 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "conformalVoronoiMesh.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const dataType Foam::conformalVoronoiMesh::staticData();
-
-
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
+#include "uint.H"
+#include "ulong.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::conformalVoronoiMesh::conformalVoronoiMesh()
+Foam::conformalVoronoiMesh::conformalVoronoiMesh
+(
+    const Time& runTime,
+    const IOdictionary& cvMeshDict
+)
 :
-    baseClassName(),
-    data_()
-{}
-
-
-Foam::conformalVoronoiMesh::conformalVoronoiMesh(const dataType& data)
-:
-    baseClassName(),
-    data_(data)
-{}
-
-
-Foam::conformalVoronoiMesh::conformalVoronoiMesh(const conformalVoronoiMesh&)
-:
-    baseClassName(),
-    data_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::conformalVoronoiMesh> Foam::conformalVoronoiMesh::New()
+    HTriangulation(),
+    runTime_(runTime),
+    cvMeshControls_(*this, cvMeshDict),
+    startOfInternalPoints_(0),
+    startOfSurfacePointPairs_(0),
+    initialPointsMethod_
+    (
+        initialPointsMethod::New
+        (
+            cvMeshDict.subDict("surfaceConformation").subDict("initialPoints"),
+            *this
+        )
+    )
 {
-    return autoPtr<conformalVoronoiMesh>(new conformalVoronoiMesh);
+    insertInitialPoints();
 }
 
 
@@ -73,30 +62,41 @@ Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-void Foam::conformalVoronoiMesh::operator=(const conformalVoronoiMesh& rhs)
+void Foam::conformalVoronoiMesh::insertInitialPoints()
 {
-    // Check for assignment to self
-    if (this == &rhs)
+    startOfInternalPoints_ = number_of_vertices();
+
+    label nVert = startOfInternalPoints_;
+
+    Info<< nl << "Inserting initial points" << nl
+        << "    " << nVert << " existing points" << endl;
+
+    std::vector<Point> initialPoints = initialPointsMethod_->initialPoints();
+
+    Info<< "    " << initialPoints.size() << " points to insert..." << endl;
+
+    // using the range insert (faster than inserting points one by one)
+    insert(initialPoints.begin(), initialPoints.end());
+
+    Info<< "    " << number_of_vertices() - startOfInternalPoints_
+        << " points inserted" << endl;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
     {
-        FatalErrorIn("Foam::conformalVoronoiMesh::operator=(const Foam::conformalVoronoiMesh&)")
-            << "Attempted assignment to self"
-            << abort(FatalError);
+        if (vit->uninitialised())
+        {
+            vit->index() = nVert++;
+        }
     }
 }
 
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

@@ -22,80 +22,38 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::cvControls
-
-Description
-    Controls for the conformalVoronoiMesh mesh generator
-
-SourceFiles
-    cvControls.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef cvControls_H
-#define cvControls_H
-
-#include "IOdictionary.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// Forward declaration of classes
-class conformalVoronoiMesh;
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 
-/*---------------------------------------------------------------------------*\
-                          Class cvControls Declaration
-\*---------------------------------------------------------------------------*/
-
-class cvControls
-{
-    // Private data
-
-        //- Reference to the conformalVoronoiMesh holding this cvControls object
-        const conformalVoronoiMesh& cvMesh_;
-
-        //- Reference to the cvMeshDict
-        const IOdictionary& cvMeshDict_;
-
-public:
-
-   // Constructors
-
-        //- Construct from references to conformalVoronoiMesh and IOdictionary
-        cvControls
-        (
-            const conformalVoronoiMesh& cvMesh,
-            const IOdictionary& cvMeshDict
-        );
-
-    //- Destructor
-    ~cvControls();
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 
-    // Member Functions
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-        // Access
 
-            // Return the cvMeshDict
-            inline const IOdictionary& cvMeshDict() const;
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-};
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "cvControlsI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

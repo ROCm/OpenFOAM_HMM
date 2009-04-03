@@ -1,9 +1,9 @@
 /*---------------------------------------------------------------------------*\
- =========                   |
- \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
-  \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 1991-2009 OpenCFD Ltd.
-    \\/      M anipulation   |
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
     This file is part of OpenFOAM.
@@ -22,58 +22,18 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    cvMesh
-
-Description
-    Conformal Voronoi automatic mesh generator
-
 \*---------------------------------------------------------------------------*/
-
-#include "fvCFD.H"
-#include "conformalVoronoiMesh.H"
-
-using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+inline const Foam::IOdictionary& Foam::cvControls::cvMeshDict() const
 {
-#   include "setRootCase.H"
-#   include "createTime.H"
-    runTime.functionObjects().off();
-
-    IOdictionary cvMeshDict
-    (
-        IOobject
-        (
-            "cvMeshDict",
-            runTime.system(),
-            runTime,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
-
-    conformalVoronoiMesh mesh(runTime, cvMeshDict);
-
-    while (runTime.run())
-    {
-        runTime++;
-
-        Info<< nl << "Time = " << runTime.timeName()
-            << endl;
-
-
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
-            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
-    }
-
-    Info << nl << "End\n" << endl;
-
-    return 0;
+    return cvMeshDict_;
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

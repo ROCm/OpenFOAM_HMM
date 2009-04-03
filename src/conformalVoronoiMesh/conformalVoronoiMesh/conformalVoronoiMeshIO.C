@@ -24,28 +24,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "cvControls.H"
 #include "conformalVoronoiMesh.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cvControls::cvControls
-(
-    const conformalVoronoiMesh& cvMesh,
-    const IOdictionary& cvMeshDict
-)
+Foam::conformalVoronoiMesh::conformalVoronoiMesh(Istream& is)
 :
-    cvMesh_(cvMesh),
-    cvMeshDict_(cvMeshDict)
+    base1(is),
+    base2(is),
+    member1(is),
+    member2(is)
 {
-    Info<< nl << "Reading cvMeshDict" << endl;
+    // Check state of Istream
+    is.check("Foam::conformalVoronoiMesh::conformalVoronoiMesh(Foam::Istream&)");
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::cvControls::~cvControls()
-{}
+Foam::Istream& Foam::operator>>(Istream& is, conformalVoronoiMesh&)
+{
+    // Check state of Istream
+    is.check
+    (
+        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::conformalVoronoiMesh&)"
+    );
+
+    return is;
+}
+
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const conformalVoronoiMesh&)
+{
+    // Check state of Ostream
+    os.check
+    (
+        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
+        "const Foam::conformalVoronoiMesh&)"
+    );
+
+    return os;
+}
 
 
 // ************************************************************************* //

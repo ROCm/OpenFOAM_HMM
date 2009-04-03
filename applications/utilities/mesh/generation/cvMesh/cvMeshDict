@@ -32,14 +32,12 @@ geometry
         max ( 2  2  2);
     }
 
-    sphere
+    dm_baffle.obj
     {
-        type searchableSphere;
-        centre  (1.5 1.5 1.5);
-        radius  1.03;
+        type triSurfaceMesh;
     }
 
-    cubeMissingSkewedCorner_patched_refined.obj
+    dangermouse.obj
     {
         type triSurfaceMesh;
     }
@@ -103,61 +101,75 @@ surfaceConformation
     // A faction of the local target cell size
     pointPairDistanceCoeff      0.05;
 
+    maxQuadAngle 125;
+
     geometryToConformTo
     {
+        // Independently specify the featureMethod of individual parts of the
+        // geometry.  Allows some parts to calculate their own features
+        // (including analytical surfaces), others to be read from file.
+        // Optional, if ommited, assume no features.
+
         channelWalls
         {
-            // Independently specify the feature characteristics of individual
-            // parts of the geometry.  Allows some parts to calculate their own
-            // features (including analytical surfaces), others to be read from
-            // file.  Optional, if ommited, assume no features.
-            features
-            {
-                // Included angle used to identify feature edges
-                // 0 = no features, 180 = all features
-                featureAngle 145;
+            featureMethod       extractFeatures;
 
-                maxQuadAngle 125;
+            extractFeaturesDetails
+            {
+                // Included angle used to identify the surface's own feature
+                // edges.  0 = no features, 180 = all features
+                featureAngle 145;
             }
         }
 
-        sphere
+        dm_baffle.obj
         {
             // Allows surfaces to be use to generate baffles, default to no.
-            baffleSurface       no;
+            baffleSurface       yes;
+
+            featureMethod       featureEdgeMesh;
+
+            featureEdgeMeshDetails
+            {
+                featureEdgeMesh  "LOCATION OF FEATUREEDGEMESH"
+            }
         }
 
-        cubeMissingSkewedCorner_patched_refined.obj
+        dangermouse.obj
         {
-            // ignores whether or not the surface is closed when asked to
-            // determine the volumeType of a point (whether it is inside or
-            // outside).  Intended to allow imperfect surface files to be
-            // meshed.  Only valid for triSurfaceMesh types.
-            treatAsClosedSurface true;
+            // Setting treatAsClosed true ignores whether or not the surface is
+            // closed when asked to determine the volumeType of a point (whether
+            // it is inside or outside).  Intended to allow imperfect surface
+            // files to be meshed.  Only valid for triSurfaceMesh types, default
+            // to false.
+            treatAsClosed       true;
 
-            features
+            featureMethod       triSurfaceFeatureSet;
+
+            trisurfacefeatureSetDetails
             {
-
+                featureSet #include "$FOAM_CASE/constant/triSurface/dangermouse.fSet"
             }
         }
     }
 
-    initialPositions
+    initialPoints
     {
-        initialPositionsModel       uniformGrid;
-        //initialPositionsModel       pointsFile;
+        minimumSurfaceDistance      0.0075;
 
-        uniformGridCoeffs
+        initialPointsMethod       uniformGrid;
+        //initialPointsMethod       pointsFile;
+
+        uniformGridDetails
         {
-            initialCellSize         0.06;
+            initialCellSize         0.005;
             randomiseInitialGrid    yes;
             randomPerturbationCoeff 0.1;
         }
 
-        pointsFileCoeffs
+        pointsFileDetails
         {
-            pointsFile              "40/internalDelaunayVertices"
-            minimumSurfaceDistance  12.345;
+            pointsFile              "$FOAM_CASE/40/internalDelaunayVertices"
         }
     }
 }
