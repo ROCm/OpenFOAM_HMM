@@ -43,7 +43,6 @@ SourceFiles
 #include "CGALTriangulation3Ddefs.H"
 
 #include "cvControls.H"
-#include "initialPointsMethod.H"
 #include "pointIOField.H"
 #include "DynamicList.H"
 #include "Switch.H"

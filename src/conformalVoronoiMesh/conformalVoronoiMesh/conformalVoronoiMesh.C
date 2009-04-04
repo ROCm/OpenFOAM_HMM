@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "conformalVoronoiMesh.H"
+#include "initialPointsMethod.H"
 #include "uint.H"
 #include "ulong.H"
 
