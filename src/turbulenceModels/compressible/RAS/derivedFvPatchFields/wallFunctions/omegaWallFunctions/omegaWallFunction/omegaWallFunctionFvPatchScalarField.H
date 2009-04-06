@@ -85,7 +85,7 @@ class omegaWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("omegaWallFunction");
+    TypeName("compressible::omegaWallFunction");
 
 
     // Constructors

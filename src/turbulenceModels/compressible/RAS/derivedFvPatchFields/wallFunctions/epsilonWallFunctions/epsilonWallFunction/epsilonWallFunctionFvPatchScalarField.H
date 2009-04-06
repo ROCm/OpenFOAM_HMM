@@ -87,7 +87,7 @@ class epsilonWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("epsilonWallFunction");
+    TypeName("compressible::epsilonWallFunction");
 
 
     // Constructors
