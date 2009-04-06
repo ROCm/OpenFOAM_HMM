@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,29 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+    Foam::rotatingWallVelocityFvPatchVectorField
 
 Description
-    Calculate epsilon via the mixing length [m]
-
-    Example of the boundary condition specification:
-    @verbatim
-        inlet
-        {
-            type            turbulentMixingLengthDissipationRateInlet;
-            mixingLength    0.005;         // 5 mm
-            value           uniform 200;   // placeholder
-        }
-    @endverbatim
+    Foam::rotatingWallVelocityFvPatchVectorField
 
 SourceFiles
-    turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
+    rotatingWallVelocityFvPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
-#define compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
+#ifndef rotatingWallVelocityFvPatchVectorField_H
+#define rotatingWallVelocityFvPatchVectorField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -53,99 +42,136 @@ SourceFiles
 
 namespace Foam
 {
-namespace compressible
-{
 
 /*---------------------------------------------------------------------------*\
-       Class turbulentMixingLengthDissipationRateInletFvPatch Declaration
+                 Class rotatingWallVelocityFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class turbulentMixingLengthDissipationRateInletFvPatchScalarField
+class rotatingWallVelocityFvPatchVectorField
 :
-    public fixedValueFvPatchScalarField
+    public fixedValueFvPatchVectorField
 {
     // Private data
 
-        //- turbulent length scale
-        scalar mixingLength_;
+        //- Origin of the rotation
+        vector origin_;
+
+        //- Axis of the rotation
+        vector axis_;
+
+        //- Rotational speed
+        scalar omega_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("compressible::turbulentMixingLengthDissipationRateInlet");
+    TypeName("rotatingWallVelocity");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        rotatingWallVelocityFvPatchVectorField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        rotatingWallVelocityFvPatchVectorField
         (
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        //  turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        //- Construct by mapping given rotatingWallVelocityFvPatchVectorField
         //  onto a new patch
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        rotatingWallVelocityFvPatchVectorField
         (
-            const turbulentMixingLengthDissipationRateInletFvPatchScalarField&,
+            const rotatingWallVelocityFvPatchVectorField&,
             const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
+            const DimensionedField<vector, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        rotatingWallVelocityFvPatchVectorField
         (
-            const turbulentMixingLengthDissipationRateInletFvPatchScalarField&
+            const rotatingWallVelocityFvPatchVectorField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchScalarField> clone() const
+        virtual tmp<fvPatchVectorField> clone() const
         {
-            return tmp<fvPatchScalarField>
+            return tmp<fvPatchVectorField>
             (
-                new turbulentMixingLengthDissipationRateInletFvPatchScalarField
-                (
-                    *this
-                )
+                new rotatingWallVelocityFvPatchVectorField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        rotatingWallVelocityFvPatchVectorField
         (
-            const turbulentMixingLengthDissipationRateInletFvPatchScalarField&,
-            const DimensionedField<scalar, volMesh>&
+            const rotatingWallVelocityFvPatchVectorField&,
+            const DimensionedField<vector, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchScalarField> clone
+        virtual tmp<fvPatchVectorField> clone
         (
-            const DimensionedField<scalar, volMesh>& iF
+             const DimensionedField<vector, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchScalarField>
+            return tmp<fvPatchVectorField>
             (
-                new turbulentMixingLengthDissipationRateInletFvPatchScalarField
-                (
-                    *this,
-                    iF
-                )
+                new rotatingWallVelocityFvPatchVectorField(*this, iF)
             );
         }
 
 
+
     // Member functions
+
+        // Access functions
+
+            //- Return the origin of the rotation
+            const vector& origin() const
+            {
+                return origin_;
+            }
+
+            //- Return the axis of the rotation
+            const vector& axis() const
+            {
+                return axis_;
+            }
+
+            //- Return the rotational speed
+            const scalar& omega() const
+            {
+                return omega_;
+            }
+
+            //- Return non-const access to the origin of the rotation
+            vector& origin()
+            {
+                return origin_;
+            }
+
+            //- Return non-const access to the axis of the rotation
+            vector& axis()
+            {
+                return axis_;
+            }
+
+            //- Return non-const access to the rotational speed
+            scalar& omega()
+            {
+                return omega_;
+            }
+
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
@@ -157,7 +183,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
