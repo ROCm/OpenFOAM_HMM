@@ -38,7 +38,7 @@ Foam::cvControls::cvControls
     cvMesh_(cvMesh),
     cvMeshDict_(cvMeshDict)
 {
-    Info<< nl << "Reading cvMeshDict" << endl;
+    Info<< nl << "Reading " << cvMeshDict_.name() << endl;
 }
 
 

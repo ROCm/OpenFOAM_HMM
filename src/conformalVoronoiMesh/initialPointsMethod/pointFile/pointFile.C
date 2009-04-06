@@ -24,24 +24,74 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "pointFile.H"
+#include "addToRunTimeSelectionTable.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(pointFile, 0);
+addToRunTimeSelectionTable(initialPointsMethod, pointFile, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+pointFile::pointFile
+(
+    const dictionary& initialPointsDict,
+    const conformalVoronoiMesh& cvMesh
+)
+:
+    initialPointsMethod(typeName, initialPointsDict, cvMesh),
+    pointFileName_(detailsDict().lookup("pointFile"))
+{}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::Time& Foam::conformalVoronoiMesh::time() const
+std::vector<Vb::Point> pointFile::initialPoints() const
 {
-    return runTime_;
-}
+    pointIOField points
+    (
+        IOobject
+        (
+            pointFileName_.name(),
+            pointFileName_.path(),
+            cvMesh_.time(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    );
+
+    std::vector<Vb::Point> initialPoints;
+
+    forAll(points, i)
+    {
+        const point& p = points[i];
+
+        // TODO Check if inside the surface
+
+        initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+    }
+
+    label nPointsRejected = points.size() - initialPoints.size();
+
+    if (nPointsRejected)
+    {
+        Info<< "    " << nPointsRejected << " points rejected from "
+            << pointFileName_.name() << endl;
+    }
 
 
-inline const Foam::cvControls& Foam::conformalVoronoiMesh::cvMeshControls()
-    const
-{
-    return cvMeshControls_;
+    return initialPoints;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
 // ************************************************************************* //

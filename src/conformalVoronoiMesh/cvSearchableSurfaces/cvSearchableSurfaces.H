@@ -27,7 +27,7 @@ Class
 
 Description
     The surface geometry to be meshed with a conformalVoronoiMesh, adding
-    inside/outside queries and surfaceFeatures
+    inside/outside queries and features of the surface
 
 SourceFiles
     cvSearchableSurfaces.C
@@ -45,19 +45,21 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+class conformalVoronoiMesh;
+
 /*---------------------------------------------------------------------------*\
                      Class cvSearchableSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
 class cvSearchableSurfaces
 :
-    public baseClassName
+    public searchableSurfaces
 {
     // Private data
 
-        //- Description of data_
-        dataType data_;
-
+        //- Reference to the conformalVoronoiMesh holding this cvControls object
+        const conformalVoronoiMesh& cvMesh_;
 
     // Private Member Functions
 
@@ -70,32 +72,14 @@ class cvSearchableSurfaces
 
 public:
 
-    // Static data members
-
-        //- Static data staticData
-        static const dataType staticData;
-
-
     // Constructors
 
-        //- Construct null
-        cvSearchableSurfaces();
-
         //- Construct from components
-        cvSearchableSurfaces(const dataType& data);
-
-        //- Construct from Istream
-        cvSearchableSurfaces(Istream&);
-
-        //- Construct as copy
-        cvSearchableSurfaces(const cvSearchableSurfaces&);
-
-
-    // Selectors
-
-        //- Select null constructed
-        static autoPtr<cvSearchableSurfaces> New();
-
+        cvSearchableSurfaces
+        (
+            const conformalVoronoiMesh& cvMesh,
+            const dictionary& geometryDict
+        );
 
     //- Destructor
     ~cvSearchableSurfaces();
@@ -105,26 +89,20 @@ public:
 
         // Access
 
-        // Check
+        // Query
 
-        // Edit
+            //- Check if point is inside surfacesToConformTo
+            bool inside(const point& pt) const;
 
-        // Write
+            //- Check if point is outside surfacesToConformTo
+            bool outside(const point& pt) const;
 
+            //- Check if point is inside surfacesToConformTo by at least dist2
+            bool wellInside(const point& pt, const scalar dist2) const;
 
-    // Member Operators
+            //- Check if point is outside surfacesToConformTo by at least dist2
+            bool wellOutside(const point& pt, const scalar dist2) const;
 
-        void operator=(const cvSearchableSurfaces&);
-
-
-    // Friend Functions
-
-    // Friend Operators
-
-    // IOstream Operators
-
-        friend Istream& operator>>(Istream&, cvSearchableSurfaces&);
-        friend Ostream& operator<<(Ostream&, const cvSearchableSurfaces&);
 };
 
 

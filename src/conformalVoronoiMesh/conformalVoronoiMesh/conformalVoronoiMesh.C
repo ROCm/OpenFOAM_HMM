@@ -39,6 +39,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 :
     HTriangulation(),
     runTime_(runTime),
+    cvSurfaces_(*this, cvMeshDict.subDict("geometry")),
     cvMeshControls_(*this, cvMeshDict),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
@@ -51,7 +52,15 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         )
     )
 {
+    timeCheck();
+
+    insertFeaturePoints();
+
+    timeCheck();
+
     insertInitialPoints();
+
+    timeCheck();
 }
 
 
@@ -63,14 +72,34 @@ Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
+void Foam::conformalVoronoiMesh::timeCheck() const
+{
+    Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s ] --- " << endl;
+}
+
+
+void Foam::conformalVoronoiMesh::insertFeaturePoints()
+{
+    Info<< nl << "Inserting feature points" << endl;
+
+    Info<< "   Conforming to " << "XXX" << " feature locations" << nl
+        << "   Inserting " << "YYY" << " points" << endl;
+}
+
+
+void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
+{
+
+}
+
+
 void Foam::conformalVoronoiMesh::insertInitialPoints()
 {
     startOfInternalPoints_ = number_of_vertices();
 
     label nVert = startOfInternalPoints_;
 
-    Info<< nl << "Inserting initial points" << nl
-        << "    " << nVert << " existing points" << endl;
+    Info<< nl << "Inserting initial points" << endl;
 
     std::vector<Point> initialPoints = initialPointsMethod_->initialPoints();
 

@@ -25,44 +25,31 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cvSearchableSurfaces.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-const dataType Foam::cvSearchableSurfaces::staticData();
-
-
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
-
+#include "conformalVoronoiMesh.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::cvSearchableSurfaces::cvSearchableSurfaces()
+Foam::cvSearchableSurfaces::cvSearchableSurfaces
+(
+    const conformalVoronoiMesh& cvMesh,
+    const dictionary& geometryDict
+)
 :
-    baseClassName(),
-    data_()
+    searchableSurfaces
+    (
+        IOobject
+        (
+            "cvSearchableSurfacesDirectory",
+            cvMesh.time().constant(),
+            "triSurface",
+            cvMesh.time(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        geometryDict
+    ),
+    cvMesh_(cvMesh)
 {}
-
-
-Foam::cvSearchableSurfaces::cvSearchableSurfaces(const dataType& data)
-:
-    baseClassName(),
-    data_(data)
-{}
-
-
-Foam::cvSearchableSurfaces::cvSearchableSurfaces(const cvSearchableSurfaces&)
-:
-    baseClassName(),
-    data_()
-{}
-
-
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-Foam::autoPtr<Foam::cvSearchableSurfaces> Foam::cvSearchableSurfaces::New()
-{
-    return autoPtr<cvSearchableSurfaces>(new cvSearchableSurfaces);
-}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -74,29 +61,39 @@ Foam::cvSearchableSurfaces::~cvSearchableSurfaces()
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
-
-void Foam::cvSearchableSurfaces::operator=(const cvSearchableSurfaces& rhs)
+bool Foam::cvSearchableSurfaces::inside(const point& pt) const
 {
-    // Check for assignment to self
-    if (this == &rhs)
-    {
-        FatalErrorIn("Foam::cvSearchableSurfaces::operator=(const Foam::cvSearchableSurfaces&)")
-            << "Attempted assignment to self"
-            << abort(FatalError);
-    }
+
 }
 
-// * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * * //
+
+bool Foam::cvSearchableSurfaces::outside(const point& pt) const
+{
+
+}
 
 
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+bool Foam::cvSearchableSurfaces::wellInside
+(
+    const point& pt,
+    const scalar dist2
+) const
+{
+
+}
+
+
+bool Foam::cvSearchableSurfaces::wellOutside
+(
+    const point& pt,
+    const scalar dist2
+) const
+{
+
+}
 
 
 // ************************************************************************* //

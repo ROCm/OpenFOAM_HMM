@@ -42,10 +42,9 @@ SourceFiles
 
 #include "CGALTriangulation3Ddefs.H"
 
+#include "cvSearchableSurfaces.H"
 #include "cvControls.H"
-#include "pointIOField.H"
 #include "DynamicList.H"
-#include "Switch.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "triSurfaceTools.H"
@@ -74,6 +73,9 @@ class conformalVoronoiMesh
         //- The time registry of the application
         const Time& runTime_;
 
+        //- The surfaces to conform to and to use for refinement
+        cvSearchableSurfaces cvSurfaces_;
+
         //- Controls for the conformal Voronoi meshing process
         cvControls cvMeshControls_;
 
@@ -97,6 +99,9 @@ class conformalVoronoiMesh
 
         //- Disallow default bitwise assignment
         void operator=(const conformalVoronoiMesh&);
+
+        //- Write the elapsedCpuTime
+        void timeCheck() const;
 
         //- Insert point and return it's index
         inline label insertPoint
@@ -161,6 +166,9 @@ public:
         inline PointFrompoint toPoint(const point&) const;
 
         // Access
+
+            //- Return the Time object
+            inline const Time& time() const;
 
             //- Return the cvMeshControls object
             inline const cvControls& cvMeshControls() const;

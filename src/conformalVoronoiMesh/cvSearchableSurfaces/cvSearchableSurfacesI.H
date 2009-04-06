@@ -26,19 +26,31 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::Time& Foam::conformalVoronoiMesh::time() const
-{
-    return runTime_;
-}
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 
-inline const Foam::cvControls& Foam::conformalVoronoiMesh::cvMeshControls()
-    const
-{
-    return cvMeshControls_;
-}
+// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

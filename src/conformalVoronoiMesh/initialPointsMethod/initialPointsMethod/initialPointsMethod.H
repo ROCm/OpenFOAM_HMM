@@ -66,6 +66,10 @@ protected:
         //- Method details dictionary
         dictionary detailsDict_;
 
+        //- Only allow the placement of initial points that are within the
+        //  surfaces to be meshed by minimumSurfaceDistance
+        scalar minimumSurfaceDistance_;
+
 private:
 
     // Private Member Functions

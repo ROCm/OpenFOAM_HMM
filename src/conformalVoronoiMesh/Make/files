@@ -4,7 +4,10 @@ conformalVoronoiMesh/conformalVoronoiMesh.C
 
 cvControls/cvControls.C
 
+cvSearchableSurfaces/cvSearchableSurfaces.C
+
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
+initialPointsMethod/pointFile/pointFile.C
 
 LIB = $(FOAM_LIBBIN)/libconformalVoronoiMesh

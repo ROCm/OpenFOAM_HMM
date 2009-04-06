@@ -49,7 +49,14 @@ initialPointsMethod::initialPointsMethod
 :
     dictionary(initialPointsDict),
     cvMesh_(cvMesh),
-    detailsDict_(subDict(type + "Details"))
+    detailsDict_(subDict(type + "Details")),
+    minimumSurfaceDistance_
+    (
+        readScalar
+        (
+            initialPointsDict.lookup("minimumSurfaceDistance")
+        )
+    )
 {}
 
 

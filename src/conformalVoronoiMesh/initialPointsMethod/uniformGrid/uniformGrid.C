@@ -72,7 +72,7 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
     // scalar zR = qSurf_.bb().max().z() - z0;
     // int nk = int(zR/controls_.minCellSize) + 1;
 
-    Info<< "Is this actually uniform?  or is it fitting the span with an "
+    Info<< "    Is this actually uniform?  or is it fitting the span with an "
         << "integer number?" << endl;
 
     scalar x0 = 0.0;

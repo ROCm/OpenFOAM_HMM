@@ -22,26 +22,80 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::pointFile
+
+Description
+    Inserts points at locations specified in a pointFile into the surfaces to
+    be conformed to of the conformalVoronoiMesh
+
+SourceFiles
+    pointFile.C
+
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#ifndef pointFile_H
+#define pointFile_H
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::Time& Foam::conformalVoronoiMesh::time() const
-{
-    return runTime_;
-}
-
-
-inline const Foam::cvControls& Foam::conformalVoronoiMesh::cvMeshControls()
-    const
-{
-    return cvMeshControls_;
-}
-
+#include "fileName.H"
+#include "pointIOField.H"
+#include "initialPointsMethod.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                           Class pointFile Declaration
+\*---------------------------------------------------------------------------*/
+
+class pointFile
+:
+    public initialPointsMethod
+{
+
+private:
+
+    // Private data
+
+        //- The initial cell spacing
+        fileName pointFileName_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("pointFile");
+
+    // Constructors
+
+        //- Construct from components
+        pointFile
+        (
+            const dictionary& initialPointsDict,
+            const conformalVoronoiMesh& cvMesh
+        );
+
+
+    //- Destructor
+    virtual ~pointFile()
+    {}
+
+
+    // Member Functions
+
+        //- Return the initial points for the conformalVoronoiMesh
+        virtual std::vector<Vb::Point> initialPoints() const;
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
