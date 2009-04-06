@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::edgeMesh
+    Foam::primitiveEdgeMesh
 
 Description
     points connected by edges.
 
 SourceFiles
-    edgeMeshI.H
-    edgeMesh.C
-    edgeMeshIO.C
+    primitiveEdgeMeshI.H
+    primitiveEdgeMesh.C
+    primitiveEdgeMeshIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef edgeMesh_H
-#define edgeMesh_H
+#ifndef primitiveEdgeMesh_H
+#define primitiveEdgeMesh_H
 
 #include "pointField.H"
 #include "edgeList.H"
@@ -47,10 +47,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class edgeMesh Declaration
+                      Class primitiveEdgeMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class edgeMesh
+class primitiveEdgeMesh
 {
     // Private data
 
@@ -73,16 +73,16 @@ public:
     // Constructors
 
         //- Construct from components
-        edgeMesh(const pointField&, const edgeList&);
+        primitiveEdgeMesh(const pointField&, const edgeList&);
 
         //- Construct from file
-        edgeMesh(const fileName&);
+        primitiveEdgeMesh(const fileName&);
 
         //- Construct from Istream
-        edgeMesh(Istream&);
+        primitiveEdgeMesh(Istream&);
 
         //- Construct as copy
-        edgeMesh(const edgeMesh&);
+        primitiveEdgeMesh(const primitiveEdgeMesh&);
 
 
 
@@ -103,12 +103,12 @@ public:
 
     // Member Operators
 
-        inline void operator=(const edgeMesh&);
+        inline void operator=(const primitiveEdgeMesh&);
 
     // Ostream Operator
 
-        friend Ostream& operator<<(Ostream&, const edgeMesh&);
-        friend Istream& operator>>(Istream&, edgeMesh&);
+        friend Ostream& operator<<(Ostream&, const primitiveEdgeMesh&);
+        friend Istream& operator>>(Istream&, primitiveEdgeMesh&);
 };
 
 
@@ -118,7 +118,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "edgeMeshI.H"
+#include "primitiveEdgeMeshI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

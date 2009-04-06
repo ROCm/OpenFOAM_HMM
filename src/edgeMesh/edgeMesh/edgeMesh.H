@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::featureEdgeMesh
+    Foam::edgeMesh
 
 Description
-    features (lines), readable from file
+    edges (lines), readable from file
 
 SourceFiles
-    featureEdgeMesh.C
+    edgeMesh.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef featureEdgeMesh_H
-#define featureEdgeMesh_H
+#ifndef edgeMesh_H
+#define edgeMesh_H
 
-#include "edgeMesh.H"
+#include "primitiveEdgeMesh.H"
 #include "regIOobject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,27 +45,27 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class featureEdgeMesh Declaration
+                            Class edgeMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class featureEdgeMesh
+class edgeMesh
 :
     public regIOobject,
-    public edgeMesh
+    public primitiveEdgeMesh
 {
 
 public:
 
-    TypeName("featureEdgeMesh");
+    TypeName("edgeMesh");
 
 
     // Constructors
 
         //- Construct (read) given an IOobject
-        featureEdgeMesh(const IOobject&);
+        edgeMesh(const IOobject&);
 
-        //- Construct from featureEdgeMesh data
-        featureEdgeMesh
+        //- Construct from edgeMesh data
+        edgeMesh
         (
             const IOobject&,
             const pointField&,
@@ -73,7 +73,7 @@ public:
         );
 
         //- Construct as copy
-        featureEdgeMesh(const IOobject&, const featureEdgeMesh&);
+        edgeMesh(const IOobject&, const edgeMesh&);
 
 
         //- ReadData function required for regIOobject read operation

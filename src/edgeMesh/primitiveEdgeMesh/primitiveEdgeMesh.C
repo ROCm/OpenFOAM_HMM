@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "edgeMesh.H"
+#include "primitiveEdgeMesh.H"
 #include "mergePoints.H"
 #include "StaticHashTable.H"
 
@@ -32,11 +32,11 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::edgeMesh::calcPointEdges() const
+void Foam::primitiveEdgeMesh::calcPointEdges() const
 {
     if (pointEdgesPtr_.valid())
     {
-        FatalErrorIn("edgeMesh::calcPointEdges() const")
+        FatalErrorIn("primitiveEdgeMesh::calcPointEdges() const")
             << "pointEdges already calculated." << abort(FatalError);
     }
 
@@ -78,7 +78,11 @@ void Foam::edgeMesh::calcPointEdges() const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // construct from components
-Foam::edgeMesh::edgeMesh(const pointField& points, const edgeList& edges)
+Foam::primitiveEdgeMesh::primitiveEdgeMesh
+(
+    const pointField& points,
+    const edgeList& edges
+)
 :
     points_(points),
     edges_(edges)
@@ -86,7 +90,7 @@ Foam::edgeMesh::edgeMesh(const pointField& points, const edgeList& edges)
 
 
 // construct as copy
-Foam::edgeMesh::edgeMesh(const edgeMesh& em)
+Foam::primitiveEdgeMesh::primitiveEdgeMesh(const primitiveEdgeMesh& em)
 :
     points_(em.points_),
     edges_(em.edges_),
@@ -96,7 +100,7 @@ Foam::edgeMesh::edgeMesh(const edgeMesh& em)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::edgeMesh::regions(labelList& edgeRegion) const
+Foam::label Foam::primitiveEdgeMesh::regions(labelList& edgeRegion) const
 {
     edgeRegion.setSize(edges_.size());
     edgeRegion = -1;
@@ -162,7 +166,7 @@ Foam::label Foam::edgeMesh::regions(labelList& edgeRegion) const
 }
 
 
-void Foam::edgeMesh::mergePoints(const scalar mergeDist)
+void Foam::primitiveEdgeMesh::mergePoints(const scalar mergeDist)
 {
     pointField newPoints;
     labelList pointMap;
@@ -242,7 +246,7 @@ void Foam::edgeMesh::mergePoints(const scalar mergeDist)
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::edgeMesh::operator=(const edgeMesh& rhs)
+void Foam::primitiveEdgeMesh::operator=(const primitiveEdgeMesh& rhs)
 {
     points_ = rhs.points_;
     edges_ = rhs.edges_;

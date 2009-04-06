@@ -24,33 +24,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "featureEdgeMesh.H"
+#include "edgeMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-defineTypeNameAndDebug(featureEdgeMesh, 0);
+defineTypeNameAndDebug(edgeMesh, 0);
 
 }
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
+Foam::edgeMesh::edgeMesh(const IOobject& io)
 :
     regIOobject(io),
-    edgeMesh(pointField(0), edgeList(0))
+    primitiveEdgeMesh(pointField(0), edgeList(0))
 {
     if
     (
@@ -64,7 +55,7 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 
     if (debug)
     {
-        Pout<< "featureEdgeMesh::featureEdgeMesh :"
+        Pout<< "edgeMesh::edgeMesh :"
             << " constructed from IOobject :"
             << " points:" << points().size()
             << " edges:" << edges().size()
@@ -74,7 +65,7 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 
 
 //- Construct from components
-Foam::featureEdgeMesh::featureEdgeMesh
+Foam::edgeMesh::edgeMesh
 (
     const IOobject& io,
     const pointField& points,
@@ -82,40 +73,37 @@ Foam::featureEdgeMesh::featureEdgeMesh
 )
 :
     regIOobject(io),
-    edgeMesh(points, edges)
+    primitiveEdgeMesh(points, edges)
 {}
 
 
 // Construct as copy
-Foam::featureEdgeMesh::featureEdgeMesh
+Foam::edgeMesh::edgeMesh
 (
     const IOobject& io,
-    const featureEdgeMesh& em
+    const edgeMesh& em
 )
 :
     regIOobject(io),
-    edgeMesh(em)
+    primitiveEdgeMesh(em)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::featureEdgeMesh::readData(Istream& is)
+bool Foam::edgeMesh::readData(Istream& is)
 {
     is >> *this;
     return !is.bad();
 }
 
 
-bool Foam::featureEdgeMesh::writeData(Ostream& os) const
+bool Foam::edgeMesh::writeData(Ostream& os) const
 {
     os << *this;
 
     return os.good();
 }
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

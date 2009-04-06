@@ -24,49 +24,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+#include "primitiveEdgeMesh.H"
+#include "IFstream.H"
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-inline const Foam::pointField& Foam::edgeMesh::points() const
+// construct from file
+Foam::primitiveEdgeMesh::primitiveEdgeMesh(const fileName& fname)
+:
+    points_(0),
+    edges_(0),
+    pointEdgesPtr_(NULL)
 {
-    return points_;
-}
+    IFstream is(fname);
 
-
-inline const Foam::edgeList& Foam::edgeMesh::edges() const
-{
-    return edges_;
-}
-
-
-inline const Foam::labelListList& Foam::edgeMesh::pointEdges() const
-{
-    if (pointEdgesPtr_.empty())
+    if (is.good())
     {
-        calcPointEdges();
+        is >> points_ >> edges_;
     }
-    return pointEdgesPtr_();
+    else
+    {
+        FatalErrorIn("primitiveEdgeMesh::primitiveEdgeMesh(const fileName&)")
+            << "cannot open file " << fname
+            << abort(FatalError);
+    }
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+// construct from Istream
+Foam::primitiveEdgeMesh::primitiveEdgeMesh(Istream& is)
+:
+    points_(is),
+    edges_(is),
+    pointEdgesPtr_(NULL)
+{
+    // Check state of Istream
+    is.check("primitiveEdgeMesh::primitiveEdgeMesh(Istream&)");
+}
 
 
-// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const primitiveEdgeMesh& em)
+{
+    os  << em.points_ << nl << em.edges_ << endl;
+
+    // Check state of Ostream
+    os.check("Ostream& operator<<(Ostream&, const primitiveEdgeMesh&)");
+
+    return os;
+}
 
 
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
+Foam::Istream& Foam::operator>>(Istream& is, primitiveEdgeMesh& em)
+{
+    is >> em.points_ >> em.edges_;
 
+    // Check state of Istream
+    is.check("Istream& operator>>(Istream&, primitiveEdgeMesh&)");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    return is;
+}
+
 
 // ************************************************************************* //

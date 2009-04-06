@@ -24,67 +24,27 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "edgeMesh.H"
-#include "IFstream.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-// construct from file
-Foam::edgeMesh::edgeMesh(const fileName& fname)
-:
-    points_(0),
-    edges_(0),
-    pointEdgesPtr_(NULL)
+inline const Foam::pointField& Foam::primitiveEdgeMesh::points() const
 {
-    IFstream is(fname);
+    return points_;
+}
 
-    if (is.good())
+
+inline const Foam::edgeList& Foam::primitiveEdgeMesh::edges() const
+{
+    return edges_;
+}
+
+
+inline const Foam::labelListList& Foam::primitiveEdgeMesh::pointEdges() const
+{
+    if (pointEdgesPtr_.empty())
     {
-        is >> points_ >> edges_;
+        calcPointEdges();
     }
-    else
-    {
-        FatalErrorIn("edgeMesh::edgeMesh(const fileName&)")
-            << "cannot open file " << fname
-            << abort(FatalError);
-    }
-}
-
-
-// construct from Istream
-Foam::edgeMesh::edgeMesh(Istream& is)
-:
-    points_(is),
-    edges_(is),
-    pointEdgesPtr_(NULL)
-{
-    // Check state of Istream
-    is.check("edgeMesh::edgeMesh(Istream&)");
-}
-
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const edgeMesh& em)
-{
-    os  << em.points_ << nl << em.edges_ << endl;
-
-    // Check state of Ostream
-    os.check("Ostream& operator<<(Ostream&, const edgeMesh&)");
-
-    return os;
-}
-
-
-Foam::Istream& Foam::operator>>(Istream& is, edgeMesh& em)
-{
-    is >> em.points_ >> em.edges_;
-
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, edgeMesh&)");
-
-    return is;
+    return pointEdgesPtr_();
 }
 
 
