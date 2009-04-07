@@ -169,12 +169,15 @@ public:
             //- Fast intersection with a ray.
             //  For a hit, the pointHit.distance() is the line parameter t :
             //  intersection=p+t*q. Only defined for VISIBLE, FULL_RAY or
-            //  HALF_RAY.
+            //  HALF_RAY. tol increases the virtual size of the triangle
+            //  by a relative factor - can be used to compensate for
+            //  limited precision.
             inline pointHit intersection
             (
                 const point& p,
                 const vector& q,
-                const intersection::algorithm alg
+                const intersection::algorithm alg,
+                const scalar tol = 0.0
             ) const;
 
             //- Return nearest point to p on triangle
