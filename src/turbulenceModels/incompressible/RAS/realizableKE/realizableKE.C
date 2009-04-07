@@ -277,7 +277,7 @@ void realizableKE::correct()
     volScalarField eta = magS*k_/epsilon_;
     volScalarField C1 = max(eta/(scalar(5) + eta), scalar(0.43));
 
-    volScalarField G("G", nut_*S2);
+    volScalarField G("RASModel::G", nut_*S2);
 
     // Update espsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();

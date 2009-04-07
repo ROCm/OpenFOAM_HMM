@@ -381,7 +381,7 @@ void kOmegaSST::correct()
     tmp<volTensorField> tgradU = fvc::grad(U_);
     volScalarField S2 = magSqr(symm(tgradU()));
     volScalarField GbyMu = (tgradU() && dev(twoSymm(tgradU())));
-    volScalarField G("G", mut_*GbyMu);
+    volScalarField G("RASModel::G", mut_*GbyMu);
     tgradU.clear();
 
     // Update omega and G at the wall
