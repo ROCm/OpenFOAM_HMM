@@ -52,18 +52,17 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-#   include "setRoots.H"
-#   include "createTimeExtruded.H"
+    #include "setRoots.H"
+    #include "createTimeExtruded.H"
 
-
-    if (args.options().found("sourceRoot") == args.options().found("surface"))
+    if (args.options().found("sourceCase") == args.options().found("surface"))
     {
         FatalErrorIn(args.executable())
-            << "Need to specify either -sourceRoot/Case/Patch or -surface"
-            << " option to specify the source of the patch to extrude"
+            << "Specify either -sourceCase and -sourcePatch"
+               " or -surface options\n"
+               "    to specify the source of the patch to extrude"
             << exit(FatalError);
     }
-
 
     autoPtr<extrudedMesh> meshPtr(NULL);
 
@@ -84,23 +83,24 @@ int main(int argc, char *argv[])
         )
     );
 
-    if (args.options().found("sourceRoot"))
+    if (args.options().found("sourceCase"))
     {
-        fileName rootDirSource(args.options()["sourceRoot"]);
-        fileName caseDirSource(args.options()["sourceCase"]);
-        fileName patchName(args.options()["sourcePatch"]);
+        fileName sourceCasePath(args.options()["sourceCase"]);
+        fileName sourceRootDir = sourceCasePath.path();
+        fileName sourceCaseDir = sourceCasePath.name();
+        word patchName(args.options()["sourcePatch"]);
 
         Info<< "Extruding patch " << patchName
-            << " on mesh " << rootDirSource << ' ' << caseDirSource << nl
+            << " on mesh " << sourceCasePath << nl
             << endl;
 
         Time runTime
         (
             Time::controlDictName,
-            rootDirSource,
-            caseDirSource
+            sourceRootDir,
+            sourceCaseDir
         );
-#       include "createPolyMesh.H"
+        #include "createPolyMesh.H"
 
         label patchID = mesh.boundaryMesh().findPatchID(patchName);
 
@@ -171,7 +171,7 @@ int main(int argc, char *argv[])
                 fMesh,
                 model()
             )
-        );        
+        );
     }
     extrudedMesh& mesh = meshPtr();
 
@@ -180,7 +180,7 @@ int main(int argc, char *argv[])
     const vector span = bb.span();
     const scalar mergeDim = 1E-4 * bb.minDim();
 
-    Pout<< "Mesh bounding box:" << bb << nl
+    Info<< "Mesh bounding box:" << bb << nl
         << "        with span:" << span << nl
         << "Merge distance   :" << mergeDim << nl
         << endl;
@@ -201,7 +201,7 @@ int main(int argc, char *argv[])
     // ~~~~~~~~~~~~~~
 
     {
-        Pout<< "Collapsing edges < " << mergeDim << " ..." << nl << endl;
+        Info<< "Collapsing edges < " << mergeDim << " ..." << nl << endl;
 
         // Edge collapsing engine
         edgeCollapser collapser(mesh);
@@ -217,7 +217,7 @@ int main(int argc, char *argv[])
 
             if (d < mergeDim)
             {
-                Pout<< "Merging edge " << e << " since length " << d
+                Info<< "Merging edge " << e << " since length " << d
                     << " << " << mergeDim << nl;
 
                 // Collapse edge to e[0]
@@ -252,8 +252,8 @@ int main(int argc, char *argv[])
 
     if (args.options().found("mergeFaces"))
     {
-        Pout<< "Assuming full 360 degree axisymmetric case;"
-            << " stitching faces on patches " 
+        Info<< "Assuming full 360 degree axisymmetric case;"
+            << " stitching faces on patches "
             << patches[origPatchID].name() << " and "
             << patches[otherPatchID].name() << " together ..." << nl << endl;
 
