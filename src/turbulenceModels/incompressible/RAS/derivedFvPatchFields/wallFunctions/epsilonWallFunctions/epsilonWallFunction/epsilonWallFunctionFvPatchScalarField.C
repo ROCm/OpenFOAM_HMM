@@ -67,7 +67,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     fixedInternalValueFvPatchField<scalar>(p, iF),
     UName_("U"),
     kName_("k"),
-    GName_("G"),
+    GName_("RASModel::G"),
     nuName_("nu"),
     nutName_("nut")
 {
@@ -104,7 +104,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     fixedInternalValueFvPatchField<scalar>(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
     kName_(dict.lookupOrDefault<word>("k", "k")),
-    GName_(dict.lookupOrDefault<word>("G", "G")),
+    GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     nutName_(dict.lookupOrDefault<word>("nut", "nut"))
 {
@@ -219,7 +219,7 @@ void epsilonWallFunctionFvPatchScalarField::write(Ostream& os) const
     fixedInternalValueFvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "k", "k", kName_);
-    writeEntryIfDifferent<word>(os, "G", "G", GName_);
+    writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     writeEntryIfDifferent<word>(os, "nut", "nut", nutName_);
     writeEntry("value", os);
