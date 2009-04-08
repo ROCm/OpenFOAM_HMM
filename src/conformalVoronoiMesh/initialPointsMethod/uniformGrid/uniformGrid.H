@@ -66,7 +66,7 @@ private:
     Switch randomiseInitialGrid_;
 
     //- Randomise the initial positions by fraction of the initialCellSize_
-    scalar randomPerturbation_;
+    scalar randomPerturbationCoeff_;
 
 public:
 

@@ -48,10 +48,9 @@ uniformGrid::uniformGrid
     initialPointsMethod(typeName, initialPointsDict, cvMesh),
     initialCellSize_(readScalar(detailsDict().lookup("initialCellSize"))),
     randomiseInitialGrid_(detailsDict().lookup("randomiseInitialGrid")),
-    randomPerturbation_
+    randomPerturbationCoeff_
     (
         readScalar(detailsDict().lookup("randomPerturbationCoeff"))
-       *initialCellSize_
     )
 {}
 
@@ -60,47 +59,41 @@ uniformGrid::uniformGrid
 
 std::vector<Vb::Point> uniformGrid::initialPoints() const
 {
-    // scalar x0 = qSurf_.bb().min().x();
-    // scalar xR = qSurf_.bb().max().x() - x0;
-    // int ni = int(xR/controls_.minCellSize) + 1;
+    const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
 
-    // scalar y0 = qSurf_.bb().min().y();
-    // scalar yR = qSurf_.bb().max().y() - y0;
-    // int nj = int(yR/controls_.minCellSize) + 1;
+    Info<< bb << endl;
 
-    // scalar z0 = qSurf_.bb().min().z();
-    // scalar zR = qSurf_.bb().max().z() - z0;
-    // int nk = int(zR/controls_.minCellSize) + 1;
+    scalar x0 = bb.min().x();
+    scalar xR = bb.max().x() - x0;
+    int ni = int(xR/initialCellSize_) + 1;
+
+    scalar y0 = bb.min().y();
+    scalar yR = bb.max().y() - y0;
+    int nj = int(yR/initialCellSize_) + 1;
+
+    scalar z0 = bb.min().z();
+    scalar zR = bb.max().z() - z0;
+    int nk = int(zR/initialCellSize_) + 1;
 
     Info<< "    Is this actually uniform?  or is it fitting the span with an "
         << "integer number?" << endl;
-
-    scalar x0 = 0.0;
-    scalar xR = 1.0 - x0;
-    int ni = int(xR/initialCellSize_) + 1;
-
-    scalar y0 = 0.0;
-    scalar yR = 1.0 - y0;
-    int nj = int(yR/initialCellSize_) + 1;
-
-    scalar z0 = 0.0;
-    scalar zR = 1.0 - z0;
-    int nk = int(zR/initialCellSize_) + 1;
 
     vector delta(xR/ni, yR/nj, zR/nk);
 
     delta *= pow((1.0),-(1.0/3.0));
 
     Random rndGen(1735621);
-    scalar pert = randomPerturbation_*cmptMin(delta);
+    scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    std::vector<Vb::Point> initialPoints;
+    pointField points(ni*nj*nk);
 
-    for (int i=0; i<ni; i++)
+    label pI = 0;
+
+    for (int i = 0; i < ni; i++)
     {
-        for (int j=0; j<nj; j++)
+        for (int j = 0; j < nj; j++)
         {
-            for (int k=0; k<nk; k++)
+            for (int k = 0; k < nk; k++)
             {
                 point p
                 (
@@ -116,11 +109,26 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
                     p.z() += pert*(rndGen.scalar01() - 0.5);
                 }
 
-                // if (qSurf_.wellInside(p, 0.5*initialCellSize_2))
-                // {
-                initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
-                // }
+                points[pI++] = p;
             }
+        }
+    }
+
+    std::vector<Vb::Point> initialPoints;
+
+    Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
+    (
+        points,
+        minimumSurfaceDistance_*minimumSurfaceDistance_
+    );
+
+    forAll(insidePoints, i)
+    {
+        if (insidePoints[i])
+        {
+            const point& p(points[i]);
+
+            initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
         }
     }
 

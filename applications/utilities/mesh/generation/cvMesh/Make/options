@@ -13,6 +13,7 @@ EXE_INC = \
     -I$(LIB_SRC)/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
+    -I$(LIB_SRC)/edgeMesh/lnInclude \
     -I$(LIB_SRC)/dynamicMesh/lnInclude \
     -I$(LIB_SRC)/triSurface/lnInclude
 
@@ -21,6 +22,7 @@ EXE_LIBS = \
     -L$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1/platforms/$(WM_ARCH)$(WM_COMPILER_ARCH)/lib \
     -lconformalVoronoiMesh \
     -lmeshTools \
+    -ledgeMesh \
     -ltriSurface \
     -ldynamicMesh \
     -lboost_thread-gcc43-mt-1_38 \

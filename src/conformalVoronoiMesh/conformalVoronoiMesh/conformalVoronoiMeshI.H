@@ -28,14 +28,69 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+#ifdef CGAL_INEXACT
+
+inline Foam::conformalVoronoiMesh::pointFromPoint
+Foam::conformalVoronoiMesh::topoint
+(
+    const Point& P
+) const
+{
+    return reinterpret_cast<pointFromPoint>(P);
+}
+
+inline Foam::conformalVoronoiMesh::PointFrompoint
+Foam::conformalVoronoiMesh::toPoint
+(
+    const point& p
+) const
+{
+    return reinterpret_cast<PointFrompoint>(p);
+}
+
+#else
+
+inline Foam::conformalVoronoiMesh::pointFromPoint
+Foam::conformalVoronoiMesh::topoint
+(
+    const Point& P
+) const
+{
+    return point
+    (
+        CGAL::to_double(P.x()),
+        CGAL::to_double(P.y()),
+        CGAL::to_double(P.z())
+    );
+}
+
+inline Foam::conformalVoronoiMesh::PointFrompoint
+Foam::conformalVoronoiMesh::toPoint
+(
+    const point& p
+) const
+{
+    return Point(p.x(), p.y(), p.z());
+}
+
+#endif
+
+
 inline const Foam::Time& Foam::conformalVoronoiMesh::time() const
 {
     return runTime_;
 }
 
 
-inline const Foam::cvControls& Foam::conformalVoronoiMesh::cvMeshControls()
-    const
+inline const Foam::conformationSurfaces&
+Foam::conformalVoronoiMesh::geometryToConformTo() const
+{
+    return geometryToConformTo_;
+}
+
+
+inline const Foam::cvControls&
+Foam::conformalVoronoiMesh::cvMeshControls() const
 {
     return cvMeshControls_;
 }

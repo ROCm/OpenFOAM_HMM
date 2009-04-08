@@ -26,45 +26,32 @@ License
 
 #include "conformalVoronoiMesh.H"
 #include "IOstreams.H"
+#include "OFstream.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::conformalVoronoiMesh::conformalVoronoiMesh(Istream& is)
-:
-    base1(is),
-    base2(is),
-    member1(is),
-    member2(is)
+void Foam::conformalVoronoiMesh::writePoints
+(
+    const fileName& fName,
+    bool internalOnly
+) const
 {
-    // Check state of Istream
-    is.check("Foam::conformalVoronoiMesh::conformalVoronoiMesh(Foam::Istream&)");
-}
+    Info<< nl << "Writing points to " << fName << endl;
 
+    OFstream str(fName);
 
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-Foam::Istream& Foam::operator>>(Istream& is, conformalVoronoiMesh&)
-{
-    // Check state of Istream
-    is.check
+    for
     (
-        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::conformalVoronoiMesh&)"
-    );
-
-    return is;
-}
-
-
-Foam::Ostream& Foam::operator<<(Ostream& os, const conformalVoronoiMesh&)
-{
-    // Check state of Ostream
-    os.check
-    (
-        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::conformalVoronoiMesh&)"
-    );
-
-    return os;
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (!internalOnly || vit->internalOrBoundaryPoint())
+        {
+            meshTools::writeOBJ(str, topoint(vit->point()));
+        }
+    }
 }
 
 

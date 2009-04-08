@@ -42,11 +42,13 @@ SourceFiles
 
 #include "CGALTriangulation3Ddefs.H"
 
-#include "cvSearchableSurfaces.H"
+#include "searchableSurfaces.H"
+#include "conformationSurfaces.H"
 #include "cvControls.H"
 #include "DynamicList.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "meshTools.H"
 #include "triSurfaceTools.H"
 #include "mathematicalConstants.H"
 #include "transform.H"
@@ -73,8 +75,12 @@ class conformalVoronoiMesh
         //- The time registry of the application
         const Time& runTime_;
 
-        //- The surfaces to conform to and to use for refinement
-        cvSearchableSurfaces cvSurfaces_;
+        //- All geometry of the meshing process, including surfaces to be
+        //  conformed to and those to be used for refinement
+        searchableSurfaces allGeometry_;
+
+        //- The surfaces to conform to
+        conformationSurfaces geometryToConformTo_;
 
         //- Controls for the conformal Voronoi meshing process
         cvControls cvMeshControls_;
@@ -170,6 +176,9 @@ public:
             //- Return the Time object
             inline const Time& time() const;
 
+            //- Return the conformationSurfaces object
+            inline const conformationSurfaces& geometryToConformTo() const;
+
             //- Return the cvMeshControls object
             inline const cvControls& cvMeshControls() const;
 
@@ -179,6 +188,8 @@ public:
 
         // Write
 
+            //- Write Delaunay points to .obj file
+            void writePoints(const fileName& fName, bool internalOnly) const;
 };
 
 

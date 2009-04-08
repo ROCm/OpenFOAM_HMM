@@ -39,7 +39,25 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 :
     HTriangulation(),
     runTime_(runTime),
-    cvSurfaces_(*this, cvMeshDict.subDict("geometry")),
+    allGeometry_
+    (
+        IOobject
+        (
+            "cvSearchableSurfacesDirectory",
+            runTime_.constant(),
+            "triSurface",
+            runTime_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        cvMeshDict.subDict("geometry")
+    ),
+    geometryToConformTo_
+    (
+        *this,
+        allGeometry_,
+        cvMeshDict.subDict("surfaceConformation")
+    ),
     cvMeshControls_(*this, cvMeshDict),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
@@ -47,7 +65,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     (
         initialPointsMethod::New
         (
-            cvMeshDict.subDict("surfaceConformation").subDict("initialPoints"),
+            cvMeshDict.subDict("initialPoints"),
             *this
         )
     )
@@ -123,6 +141,8 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
             vit->index() = nVert++;
         }
     }
+
+    writePoints("initialPoints.obj", true);
 }
 
 

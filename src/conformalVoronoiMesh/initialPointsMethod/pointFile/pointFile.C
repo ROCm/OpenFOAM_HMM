@@ -68,13 +68,20 @@ std::vector<Vb::Point> pointFile::initialPoints() const
 
     std::vector<Vb::Point> initialPoints;
 
-    forAll(points, i)
+    Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
+    (
+        points,
+        minimumSurfaceDistance_*minimumSurfaceDistance_
+    );
+
+    forAll(insidePoints, i)
     {
-        const point& p = points[i];
+        if (insidePoints[i])
+        {
+            const point& p(points[i]);
 
-        // TODO Check if inside the surface
-
-        initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+            initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+        }
     }
 
     label nPointsRejected = points.size() - initialPoints.size();
@@ -84,7 +91,6 @@ std::vector<Vb::Point> pointFile::initialPoints() const
         Info<< "    " << nPointsRejected << " points rejected from "
             << pointFileName_.name() << endl;
     }
-
 
     return initialPoints;
 }

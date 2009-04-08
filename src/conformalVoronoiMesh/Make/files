@@ -1,10 +1,11 @@
 #include CGAL_FILES
 
 conformalVoronoiMesh/conformalVoronoiMesh.C
+conformalVoronoiMesh/conformalVoronoiMeshIO.C
 
 cvControls/cvControls.C
 
-cvSearchableSurfaces/cvSearchableSurfaces.C
+conformationSurfaces/conformationSurfaces.C
 
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
