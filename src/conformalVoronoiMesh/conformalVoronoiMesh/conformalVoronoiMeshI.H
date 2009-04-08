@@ -26,6 +26,52 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+inline Foam::label Foam::conformalVoronoiMesh::insertPoint
+(
+    const point& p,
+    const label type
+)
+{
+    uint nVert = number_of_vertices();
+
+    Vertex_handle vh = insert(toPoint(p));
+
+    if (nVert == number_of_vertices())
+    {
+        WarningIn("Foam::conformalVoronoiMesh::insertPoint")
+            << "Failed to insert point " << p << endl;
+    }
+    else
+    {
+        vh->index() = nVert;
+        vh->type() = type;
+    }
+
+    return vh->index();
+}
+
+
+inline void Foam::conformalVoronoiMesh::insertPointPair
+(
+    const scalar ppDist,
+    const point& surfPt,
+    const vector& n
+)
+{
+    vector ppDistn = ppDist*n;
+
+    label master = insertPoint
+    (
+        surfPt - ppDistn,
+        number_of_vertices() + 1
+    );
+
+    insertPoint(surfPt + ppDistn, master);
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT

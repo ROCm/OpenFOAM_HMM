@@ -61,8 +61,6 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
 {
     const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
 
-    Info<< bb << endl;
-
     scalar x0 = bb.min().x();
     scalar xR = bb.max().x() - x0;
     int ni = int(xR/initialCellSize_) + 1;

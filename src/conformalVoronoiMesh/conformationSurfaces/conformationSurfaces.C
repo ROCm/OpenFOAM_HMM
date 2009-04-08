@@ -233,5 +233,28 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
 }
 
 
+bool Foam::conformationSurfaces::findAnyIntersection
+(
+    point start,
+    point end
+) const
+{
+    labelList hitSurfaces;
+    List<pointIndexHit> hitInfo;
+
+    searchableSurfacesQueries::findAnyIntersection
+    (
+        allGeometry_,
+        surfaces_,
+        pointField(1, start),
+        pointField(1, end),
+        hitSurfaces,
+        hitInfo
+    );
+
+    return hitInfo[0].hit();
+
+}
+
 
 // ************************************************************************* //

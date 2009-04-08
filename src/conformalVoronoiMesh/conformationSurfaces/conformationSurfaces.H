@@ -143,6 +143,10 @@ public:
                 const scalar dist2
             ) const;
 
+            // Finding if the line joining start and end intersects the surface
+            bool findAnyIntersection(point start, point end) const;
+
+
     // Member Operators
 
 };

@@ -100,12 +100,6 @@ class conformalVoronoiMesh
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct
-        conformalVoronoiMesh(const conformalVoronoiMesh&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const conformalVoronoiMesh&);
-
         //- Write the elapsedCpuTime
         void timeCheck() const;
 
@@ -138,6 +132,20 @@ class conformalVoronoiMesh
         //  initialPointsMethod
         void insertInitialPoints();
 
+        //- Check to see if dual cell specified by given vertex iterator
+        //  intersects the boundary and hence reqires a point-pair.
+        bool dualCellSurfaceIntersection
+        (
+            const Triangulation::Finite_vertices_iterator& vit
+        ) const;
+
+        //- Disallow default bitwise copy construct
+        conformalVoronoiMesh(const conformalVoronoiMesh&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const conformalVoronoiMesh&);
+
+
 public:
 
     // Constructors
@@ -158,7 +166,10 @@ public:
 
     // Member Functions
 
-        // Conversion functions between point (OpenFOAM) and Point (CGAL)
+        //- Insert the necessary point pairs to conform to the surface
+        void conformToSurface();
+
+        //- Conversion functions between point (OpenFOAM) and Point (CGAL)
 
 #       ifdef CGAL_INEXACT
             typedef const point& pointFromPoint;

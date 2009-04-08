@@ -29,6 +29,59 @@ License
 #include "uint.H"
 #include "ulong.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+bool Foam::conformalVoronoiMesh::dualCellSurfaceIntersection
+(
+    const Triangulation::Finite_vertices_iterator& vit
+) const
+{
+    std::list<Facet>  facets;
+    incident_facets(vit, std::back_inserter(facets));
+
+    for
+    (
+        std::list<Facet>::iterator fit=facets.begin();
+        fit != facets.end();
+        ++fit
+    )
+    {
+        if
+        (
+            is_infinite(fit->first)
+            || is_infinite(fit->first->neighbor(fit->second))
+        )
+        {
+            return true;
+        }
+
+        point dE0 = topoint(dual(fit->first));
+
+        // If edge end is outside bounding box then edge cuts boundary
+        if (!geometryToConformTo_.bounds().contains(dE0))
+        {
+            return true;
+        }
+
+        point dE1 = topoint(dual(fit->first->neighbor(fit->second)));
+
+        // If other edge end is outside bounding box then edge cuts boundary
+        if (!!geometryToConformTo_.bounds().contains(dE1))
+        {
+            return true;
+        }
+
+        // Check for the edge passing through a surface
+        if (geometryToConformTo_.findAnyIntersection(dE0, dE1))
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::conformalVoronoiMesh::conformalVoronoiMesh
@@ -147,6 +200,11 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::conformalVoronoiMesh::conformToSurface()
+{
+    startOfSurfacePointPairs_ = number_of_vertices();
+}
 
 
 // ************************************************************************* //
