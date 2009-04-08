@@ -1,5 +1,8 @@
 primitiveEdgeMesh/primitiveEdgeMesh.C
 primitiveEdgeMesh/primitiveEdgeMeshIO.C
+
 edgeMesh/edgeMesh.C
+
+featureEdgeMesh/featureEdgeMesh.C
 
 LIB = $(FOAM_LIBBIN)/libedgeMesh
