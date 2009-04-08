@@ -133,7 +133,13 @@ Foam::searchableSphere::searchableSphere
     searchableSurface(io),
     centre_(centre),
     radius_(radius)
-{}
+{
+    bounds() = boundBox
+    (
+        centre_ + radius_*vector::one,
+        centre_ - radius_*vector::one
+    );
+}
 
 
 Foam::searchableSphere::searchableSphere
@@ -145,7 +151,13 @@ Foam::searchableSphere::searchableSphere
     searchableSurface(io),
     centre_(dict.lookup("centre")),
     radius_(readScalar(dict.lookup("radius")))
-{}
+{
+    bounds() = boundBox
+    (
+        centre_ + radius_*vector::one,
+        centre_ - radius_*vector::one
+    );
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

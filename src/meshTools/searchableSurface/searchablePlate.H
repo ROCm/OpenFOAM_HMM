@@ -93,7 +93,6 @@ private:
             const point& end
         ) const;
 
-
         //- Disallow default bitwise copy construct
         searchablePlate(const searchablePlate&);
 

@@ -97,6 +97,8 @@ private:
             pointIndexHit& far
         ) const;
 
+        //- Return the boundBox of the cylinder
+        boundBox calcBounds() const;
 
         //- Disallow default bitwise copy construct
         searchableCylinder(const searchableCylinder&);

@@ -170,7 +170,9 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(bb)
-{}
+{
+    bounds() = static_cast<boundBox>(*this);
+}
 
 
 Foam::searchableBox::searchableBox
@@ -181,7 +183,9 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(dict.lookup("min"), dict.lookup("max"))
-{}
+{
+    bounds() = static_cast<boundBox>(*this);
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

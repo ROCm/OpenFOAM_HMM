@@ -43,6 +43,7 @@ SourceFiles
 #define searchableSurface_H
 
 #include "pointField.H"
+#include "boundBox.H"
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "pointIndexHit.H"
@@ -86,6 +87,8 @@ private:
     // Private data
 
         const word name_;
+
+        boundBox bounds_;
 
 
     // Private Member Functions
@@ -174,6 +177,17 @@ public:
 
     // Member Functions
 
+        //- Return const reference to boundBox
+        const boundBox& bounds() const
+        {
+            return bounds_;
+        }
+
+        //- Return non-const access to the boundBox to allow it to be set.
+        boundBox& bounds()
+        {
+            return bounds_;
+        }
 
         //- Names of regions.
         virtual const wordList& regions() const = 0;

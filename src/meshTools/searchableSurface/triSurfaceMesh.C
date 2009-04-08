@@ -238,7 +238,9 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
     ),
     triSurface(s),
     surfaceClosed_(-1)
-{}
+{
+    bounds() = boundBox(points());
+}
 
 
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
@@ -280,7 +282,9 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
         )
     ),
     surfaceClosed_(-1)
-{}
+{
+    bounds() = boundBox(points());
+}
 
 
 Foam::triSurfaceMesh::triSurfaceMesh
@@ -334,6 +338,8 @@ Foam::triSurfaceMesh::triSurfaceMesh
     {
         triSurface::scalePoints(scaleFactor);
     }
+
+    bounds() = boundBox(points());
 }
 
 

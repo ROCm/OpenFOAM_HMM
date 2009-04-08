@@ -172,6 +172,12 @@ public:
                 List<pointIndexHit>&
             );
 
+            //- Find the boundBox of the selected surfaces
+            static boundBox bounds
+            (
+                const PtrList<searchableSurface>& allSurfaces,
+                const labelList& surfacesToTest
+            );
 
         // Single point queries
 

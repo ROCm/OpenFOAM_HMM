@@ -352,6 +352,22 @@ void Foam::searchableCylinder::findLineAll
 }
 
 
+Foam::boundBox Foam::searchableCylinder::calcBounds() const
+{
+    // Approximating the boundBox by the extents of spheres, centred at the
+    // endpoints, of the same radius as the cylinder
+
+    pointField bbPoints(4);
+
+    bbPoints[0] = point1_ + radius_*vector::one;
+    bbPoints[1] = point1_ - radius_*vector::one;
+    bbPoints[2] = point2_ + radius_*vector::one;
+    bbPoints[3] = point2_ - radius_*vector::one;
+
+    return boundBox(bbPoints);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::searchableCylinder::searchableCylinder
@@ -368,7 +384,9 @@ Foam::searchableCylinder::searchableCylinder
     magDir_(mag(point2_-point1_)),
     unitDir_((point2_-point1_)/magDir_),
     radius_(radius)
-{}
+{
+    bounds() = calcBounds();
+}
 
 
 Foam::searchableCylinder::searchableCylinder
@@ -383,7 +401,9 @@ Foam::searchableCylinder::searchableCylinder
     magDir_(mag(point2_-point1_)),
     unitDir_((point2_-point1_)/magDir_),
     radius_(readScalar(dict.lookup("radius")))
-{}
+{
+    bounds() = calcBounds();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

@@ -688,6 +688,27 @@ void Foam::searchableSurfacesQueries::findNearest
 }
 
 
+Foam::boundBox Foam::searchableSurfacesQueries::bounds
+(
+    const PtrList<searchableSurface>& allSurfaces,
+    const labelList& surfacesToTest
+)
+{
+    pointField bbPoints(2*surfacesToTest.size());
+
+    forAll(surfacesToTest, testI)
+    {
+        const searchableSurface& surface(allSurfaces[surfacesToTest[testI]]);
+
+        bbPoints[2*testI] = surface.bounds().min();
+
+        bbPoints[2*testI + 1] = surface.bounds().max();
+    }
+
+    return boundBox(bbPoints);
+}
+
+
 //- Calculate point which is on a set of surfaces.
 Foam::pointIndexHit Foam::searchableSurfacesQueries::facesIntersection
 (
