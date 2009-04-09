@@ -31,6 +31,9 @@ License
 #include "mapDistribute.H"
 #include "meshTools.H"
 #include "OFstream.H"
+#include "Random.H"
+#include "treeDataFace.H"
+#include "indexedOctree.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
