@@ -79,23 +79,6 @@ bool Foam::distributedTriSurfaceMesh::read()
     // Merge distance
     mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
 
-    // Calculate the overall boundBox of the undistributed surface
-    point overallMin(VGREAT, VGREAT, VGREAT);
-    point overallMax(-VGREAT, -VGREAT, -VGREAT);
-
-    forAll(procBb_, procI)
-    {
-        const List<treeBoundBox>& bbs = procBb_[procI];
-
-        forAll(bbs, bbI)
-        {
-            overallMin = ::Foam::min(overallMin, bbs[bbI].min());
-            overallMax = ::Foam::max(overallMax, bbs[bbI].max());
-        }
-    }
-
-    bounds() = boundBox(overallMin, overallMax);
-
     return true;
 }
 
@@ -1357,6 +1340,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
 {
     read();
 
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
+
     if (debug)
     {
         Info<< "Constructed from triSurface:" << endl;
@@ -1409,6 +1395,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh(const IOobject& io)
     )
 {
     read();
+
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
 
     if (debug)
     {
@@ -1468,6 +1457,9 @@ Foam::distributedTriSurfaceMesh::distributedTriSurfaceMesh
     )
 {
     read();
+
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
 
     if (debug)
     {
@@ -2189,23 +2181,6 @@ void Foam::distributedTriSurfaceMesh::distribute
         {
             procBb_.transfer(newProcBb);
             dict_.set("bounds", procBb_[Pstream::myProcNo()]);
-
-            // Calculate the overall boundBox of the undistributed surface
-            point overallMin(VGREAT, VGREAT, VGREAT);
-            point overallMax(-VGREAT, -VGREAT, -VGREAT);
-
-            forAll(procBb_, procI)
-            {
-                const List<treeBoundBox>& bbs = procBb_[procI];
-
-                forAll(bbs, bbI)
-                {
-                    overallMin = ::Foam::min(overallMin, bbs[bbI].min());
-                    overallMax = ::Foam::max(overallMax, bbs[bbI].max());
-                }
-            }
-
-            bounds() = boundBox(overallMin, overallMax);
         }
     }
 
@@ -2453,6 +2428,12 @@ void Foam::distributedTriSurfaceMesh::distribute
     triSurface::operator=(triSurface(allTris, patches(), allPoints, true));
 
     clearOut();
+
+    // Set the bounds() value to the boundBox of the undecomposed surface
+    triSurfaceMesh::bounds() = boundBox(points());
+
+    reduce(bounds().min(), minOp<point>());
+    reduce(bounds().max(), maxOp<point>());
 
     // Regions stays same
     // Volume type stays same.

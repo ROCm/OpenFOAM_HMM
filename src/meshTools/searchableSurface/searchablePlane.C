@@ -71,19 +71,14 @@ Foam::boundBox Foam::searchablePlane::calcBounds() const
 {
     point max(VGREAT, VGREAT, VGREAT);
 
-    if (mag(normal() & vector(1,0,0)) > 1 - SMALL)
+    for (direction dir = 0; dir < vector::nComponents; dir++)
     {
-        max.x() = 0;
-    }
+        if (mag(normal()[dir]) - 1 < SMALL)
+        {
+            max[dir] = 0;
 
-    if (mag(normal() & vector(0,1,0)) > 1 - SMALL)
-    {
-        max.y() = 0;
-    }
-
-    if (mag(normal() & vector(0,0,1)) > 1 - SMALL)
-    {
-        max.z() = 0;
+            break;
+        }
     }
 
     point min = -max;
