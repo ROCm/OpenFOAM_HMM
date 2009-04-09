@@ -53,52 +53,9 @@ class vtkSurfaceWriter
 {
     // Private Member Functions
 
-        void writeGeometry
-        (
-            const pointField& points,
-            const faceList& faces,
-            Ostream& os
-        ) const;
+        static void writeGeometry(Ostream&, const pointField&, const faceList&);
 
-        void writeData
-        (
-            const fileName& fieldName,
-            const pointField& points,
-            const scalarField& values,
-            Ostream& os
-        ) const;
-
-        void writeData
-        (
-            const fileName& fieldName,
-            const pointField& points,
-            const vectorField& values,
-            Ostream& os
-        ) const;
-
-        void writeData
-        (
-            const fileName& fieldName,
-            const pointField& points,
-            const sphericalTensorField& values,
-            Ostream& os
-        ) const;
-
-        void writeData
-        (
-            const fileName& fieldName,
-            const pointField& points,
-            const symmTensorField& values,
-            Ostream& os
-        ) const;
-
-        void writeData
-        (
-            const fileName& fieldName,
-            const pointField& points,
-            const tensorField& values,
-            Ostream& os
-        ) const;
+        static void writeData(Ostream&, const Field<Type>& values);
 
 
 public:
@@ -122,11 +79,21 @@ public:
 
         // Write
 
+        //- Write geometry to file.
+        virtual void write
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const bool verbose = false
+        ) const;
+
+
         //- Writes single surface to file.
         virtual void write
         (
-            const fileName& samplePath,
-            const fileName& timeDir,
+            const fileName& outputDir,
             const fileName& surfaceName,
             const pointField& points,
             const faceList& faces,

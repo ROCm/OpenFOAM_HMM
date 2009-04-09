@@ -24,7 +24,7 @@ boundaryField
     inlet
     {
         type            turbulentIntensityKineticEnergyInlet;
-        intensity       0.05;
+        intensity       0.05;       // 5% turbulent intensity
         value           uniform 1;
     }
 

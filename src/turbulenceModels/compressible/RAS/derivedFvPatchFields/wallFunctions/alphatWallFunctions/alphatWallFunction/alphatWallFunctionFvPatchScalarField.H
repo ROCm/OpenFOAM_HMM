@@ -66,7 +66,7 @@ class alphatWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("alphatWallFunction");
+    TypeName("compressible::alphatWallFunction");
 
 
     // Constructors

@@ -207,7 +207,20 @@ void Foam::attachDetach::attachInterface
                     mesh.faceZones()[modifiedFaceZone].whichFace(curFaceID)
                 ];
         }
-            
+
+
+        label patchID = mesh.boundaryMesh().whichPatch(curFaceID);
+        label neiCell;
+        if (patchID == -1)
+        {
+            neiCell = nei[curFaceID];
+        }
+        else
+        {
+            neiCell = -1;
+        }
+
+
         // Modify the face
         ref.setAction
         (
@@ -216,9 +229,9 @@ void Foam::attachDetach::attachInterface
                 newFace,                // modified face
                 curFaceID,              // label of face being modified
                 own[curFaceID],         // owner
-                nei[curFaceID],         // neighbour
+                neiCell,                // neighbour
                 false,                  // face flip
-                mesh.boundaryMesh().whichPatch(curFaceID),// patch for face
+                patchID,                // patch for face
                 false,                  // remove from zone
                 modifiedFaceZone,       // zone for face
                 modifiedFaceZoneFlip    // face flip in zone

@@ -27,9 +27,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "simpleSplineEdge.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,10 +38,8 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(simpleSplineEdge, 0);
+addToRunTimeSelectionTable(curvedEdge, simpleSplineEdge, Istream);
 
-// Add the curvedEdge constructor functions to the hash tables
-curvedEdge::addIstreamConstructorToTable<simpleSplineEdge>
-    addSimpleSplineEdgeIstreamConstructorToTable_;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

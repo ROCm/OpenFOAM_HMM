@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    turbDyMFoam
+    pimpleDyMFoam.C
 
 Description
     Transient solver for incompressible, flow of Newtonian fluids
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
 #   include "createTime.H"
 #   include "createDynamicFvMesh.H"
-#   include "readPISOControls.H"
+#   include "readPIMPLEControls.H"
 #   include "initContinuityErrs.H"
 #   include "createFields.H"
 #   include "readTimeControls.H"

@@ -72,7 +72,7 @@ class turbulentMixingLengthDissipationRateInletFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("turbulentMixingLengthDissipationRateInlet");
+    TypeName("compressible::turbulentMixingLengthDissipationRateInlet");
 
 
     // Constructors

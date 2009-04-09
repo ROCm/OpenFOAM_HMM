@@ -67,11 +67,25 @@ Foam::interpolationTable<Type>::interpolationTable()
 
 
 template<class Type>
-Foam::interpolationTable<Type>::interpolationTable(const fileName& fn)
+Foam::interpolationTable<Type>::interpolationTable
+(
+    const List<Tuple2<scalar, Type> >& values,
+    const boundsHandling bounds,
+    const fileName& fName
+)
+:
+    List<Tuple2<scalar, Type> >(values),
+    boundsHandling_(bounds),
+    fileName_(fName)
+{}
+
+
+template<class Type>
+Foam::interpolationTable<Type>::interpolationTable(const fileName& fName)
 :
     List<Tuple2<scalar, Type> >(),
     boundsHandling_(interpolationTable::WARN),
-    fileName_(fn)
+    fileName_(fName)
 {
     readTable();
 }

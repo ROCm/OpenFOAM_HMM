@@ -24,7 +24,7 @@ boundaryField
     inlet
     {
         type            turbulentMixingLengthDissipationRateInlet;
-        mixingLength    0.01;
+        mixingLength    0.01;       // 1cm - half channel height
         value           uniform 1;
     }
 

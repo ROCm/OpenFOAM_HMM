@@ -153,6 +153,16 @@ void Foam::sampledIsoSurface::getIsoFields() const
             }
         }
 
+
+        // If averaging redo the volField. Can only be done now since needs the
+        // point field.
+        if (average_)
+        {
+            storedVolFieldPtr_.reset(average(fvm, *pointFieldPtr_).ptr());
+            volFieldPtr_ = storedVolFieldPtr_.operator->();
+        }
+
+
         if (debug)
         {
             Info<< "sampledIsoSurface::getIsoField() : volField "
@@ -241,6 +251,20 @@ void Foam::sampledIsoSurface::getIsoFields() const
             pointSubFieldPtr_ = storedPointSubFieldPtr_.operator->();
         }
 
+
+
+        // If averaging redo the volField. Can only be done now since needs the
+        // point field.
+        if (average_)
+        {
+            storedVolSubFieldPtr_.reset
+            (
+                average(subFvm, *pointSubFieldPtr_).ptr()
+            );
+            volSubFieldPtr_ = storedVolSubFieldPtr_.operator->();
+        }
+
+
         if (debug)
         {
             Info<< "sampledIsoSurface::getIsoField() : volSubField "
@@ -307,6 +331,48 @@ Foam::tmp<Foam::volScalarField> Foam::sampledIsoSurface::average
 }
 
 
+Foam::tmp<Foam::pointScalarField> Foam::sampledIsoSurface::average
+(
+    const pointMesh& pMesh,
+    const volScalarField& fld
+) const
+{
+    tmp<pointScalarField> tpointAvg
+    (
+        new pointScalarField
+        (
+            IOobject
+            (
+                "pointAvg",
+                fld.time().timeName(),
+                fld.db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pMesh,
+            dimensionedScalar("zero", dimless, scalar(0.0))
+        )
+    );
+    pointScalarField& pointAvg = tpointAvg();
+
+    for (label pointI = 0; pointI < fld.mesh().nPoints(); pointI++)
+    {
+        const labelList& pCells = fld.mesh().pointCells(pointI);
+
+        forAll(pCells, i)
+        {
+            pointAvg[pointI] += fld[pCells[i]];
+        }
+        pointAvg[pointI] /= pCells.size();
+    }
+    // Give value to calculatedFvPatchFields
+    pointAvg.correctBoundaryConditions();
+
+    return tpointAvg;
+}
+
+
 bool Foam::sampledIsoSurface::updateGeometry() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
@@ -352,67 +418,33 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     surfPtr_.clear();
     facesPtr_.clear();
 
-    if (average_)
+    if (subMeshPtr_.valid())
     {
-        if (subMeshPtr_.valid())
-        {
-            surfPtr_.reset
+        surfPtr_.reset
+        (
+            new isoSurface
             (
-                new isoSurface
-                (
-                    average(subMeshPtr_().subMesh(), *pointSubFieldPtr_),
-                    *pointSubFieldPtr_,
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
-        else
-        {
-            surfPtr_.reset
-            (
-                new isoSurface
-                (
-                    average(fvm, *pointFieldPtr_),
-                    *pointFieldPtr_,
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
+                *volSubFieldPtr_,
+                *pointSubFieldPtr_,
+                isoVal_,
+                regularise_,
+                mergeTol_
+            )
+        );
     }
     else
     {
-        if (subMeshPtr_.valid())
-        {
-            surfPtr_.reset
+        surfPtr_.reset
+        (
+            new isoSurface
             (
-                new isoSurface
-                (
-                    *volSubFieldPtr_,
-                    *pointSubFieldPtr_,
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
-        else
-        {
-            surfPtr_.reset
-            (
-                new isoSurface
-                (
-                    *volFieldPtr_,
-                    *pointFieldPtr_,
-                    isoVal_,
-                    regularise_,
-                    mergeTol_
-                )
-            );
-        }
+                *volFieldPtr_,
+                *pointFieldPtr_,
+                isoVal_,
+                regularise_,
+                mergeTol_
+            )
+        );
     }
 
 

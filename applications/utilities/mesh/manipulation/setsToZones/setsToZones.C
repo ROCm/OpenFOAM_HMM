@@ -48,6 +48,7 @@ Description
 #include "OFstream.H"
 #include "IFstream.H"
 #include "IOobjectList.H"
+#include "SortableList.H"
 
 using namespace Foam;
 
@@ -107,6 +108,7 @@ int main(int argc, char *argv[])
     {
         // Not in memory. Load it.
         pointSet set(*iter());
+        SortableList<label> pointLabels(set.toc());
 
         label zoneID = mesh.pointZones().findZoneID(set.name());
         if (zoneID == -1)
@@ -120,7 +122,7 @@ int main(int argc, char *argv[])
                 new pointZone
                 (
                     set.name(),             //name
-                    set.toc(),              //addressing
+                    pointLabels,            //addressing
                     sz,                     //index
                     mesh.pointZones()       //pointZoneMesh
                 )
@@ -131,7 +133,7 @@ int main(int argc, char *argv[])
         {
             Info<< "Overwriting contents of existing pointZone " << zoneID
                 << " with that of set " << set.name() << "." << endl;
-            mesh.pointZones()[zoneID] = set.toc();
+            mesh.pointZones()[zoneID] = pointLabels;
             mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
         }
     }
@@ -150,6 +152,7 @@ int main(int argc, char *argv[])
     {
         // Not in memory. Load it.
         cellSet set(*iter());
+        SortableList<label> cellLabels(set.toc());
 
         label zoneID = mesh.cellZones().findZoneID(set.name());
         if (zoneID == -1)
@@ -163,7 +166,7 @@ int main(int argc, char *argv[])
                 new cellZone
                 (
                     set.name(),             //name
-                    set.toc(),              //addressing
+                    cellLabels,             //addressing
                     sz,                     //index
                     mesh.cellZones()        //pointZoneMesh
                 )
@@ -174,7 +177,7 @@ int main(int argc, char *argv[])
         {
             Info<< "Overwriting contents of existing cellZone " << zoneID
                 << " with that of set " << set.name() << "." << endl;
-            mesh.cellZones()[zoneID] = set.toc();
+            mesh.cellZones()[zoneID] = cellLabels;
             mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
         }
     }
@@ -193,6 +196,7 @@ int main(int argc, char *argv[])
     {
         // Not in memory. Load it.
         faceSet set(*iter());
+        SortableList<label> faceLabels(set.toc());
 
         DynamicList<label> addressing(set.size());
         DynamicList<bool> flipMap(set.size());
@@ -214,9 +218,9 @@ int main(int argc, char *argv[])
             // Load corresponding cells
             cellSet cells(mesh, setName);
 
-            forAllConstIter(faceSet, set, iter)
+            forAll(faceLabels, i)
             {
-                label faceI = iter.key();
+                label faceI = faceLabels[i];
 
                 bool flip = false;
 
@@ -273,9 +277,10 @@ int main(int argc, char *argv[])
         else
         {
             // No flip map.
-            forAllConstIter(faceSet, set, iter)
+            forAll(faceLabels, i)
             {
-                addressing.append(iter.key());
+                label faceI = faceLabels[i];
+                addressing.append(faceI);
                 flipMap.append(false);
             }
         }

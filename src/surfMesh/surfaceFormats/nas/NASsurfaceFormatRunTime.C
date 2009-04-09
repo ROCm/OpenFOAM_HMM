@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,8 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
-// .bdf (Bulk Data Format)
-// .nas (Nastran)
+// read MeshedSurface - .bdf (Bulk Data Format)
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -55,6 +53,7 @@ addNamedTemplatedToRunTimeSelectionTable
     nas
 );
 
+// read MeshedSurface - .nas (Nastran)
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,

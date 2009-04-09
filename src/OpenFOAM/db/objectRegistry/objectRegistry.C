@@ -101,7 +101,7 @@ Foam::wordList Foam::objectRegistry::names() const
     wordList objectNames(size());
 
     label count=0;
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         objectNames[count++] = iter()->name();
     }
@@ -115,7 +115,7 @@ Foam::wordList Foam::objectRegistry::names(const word& ClassName) const
     wordList objectNames(size());
 
     label count=0;
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if (iter()->type() == ClassName)
         {
@@ -234,15 +234,33 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
                 << " in registry " << name()
                 << endl;
         }
+    }
+    
+    return false;
+}
 
-        return false;
+
+void Foam::objectRegistry::rename(const word& newName)
+{
+    regIOobject::rename(newName);
+
+    // adjust dbDir_ as well
+    string::size_type i = dbDir_.rfind('/');
+
+    if (i == string::npos)
+    {
+        dbDir_ = newName;
+    }
+    else
+    {
+        dbDir_.replace(i+1, string::npos, newName);
     }
 }
 
 
 bool Foam::objectRegistry::modified() const
 {
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if (iter()->modified())
         {
@@ -287,7 +305,7 @@ bool Foam::objectRegistry::writeObject
 {
     bool ok = true;
 
-    for (const_iterator iter = begin(); iter != end(); ++iter)
+    for (const_iterator iter = cbegin(); iter != cend(); ++iter)
     {
         if (objectRegistry::debug)
         {

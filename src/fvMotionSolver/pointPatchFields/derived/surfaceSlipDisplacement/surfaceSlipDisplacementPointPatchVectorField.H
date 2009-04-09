@@ -107,6 +107,9 @@ private:
 
     // Private Member Functions
 
+        //- Calculate displacement to project onto surface
+        void calcProjection(vectorField& displacement) const;
+
         //- Disallow default bitwise assignment
         void operator=(const surfaceSlipDisplacementPointPatchVectorField&);
 

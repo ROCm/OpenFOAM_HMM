@@ -403,13 +403,13 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 //
 bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
 (
-    IFstream& ifs,
+    istream& is,
     const off_t dataFileSize
 )
 {
     // Create the lexer with the approximate number of vertices in the STL
     // from the file size
-    STLASCIILexer lexer(&ifs.stdStream(), dataFileSize/400);
+    STLASCIILexer lexer(&is, dataFileSize/400);
     while (lexer.lex() != 0) {}
 
     sorted_ = lexer.sorted();

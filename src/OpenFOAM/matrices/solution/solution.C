@@ -162,10 +162,7 @@ bool Foam::solution::read()
             relaxationFactors_ = dict.subDict("relaxationFactors");
         }
 
-        if (relaxationFactors_.found("default"))
-        {
-            relaxationFactors_.lookup("default") >> defaultRelaxationFactor_;
-        }
+        relaxationFactors_.readIfPresent("default", defaultRelaxationFactor_);
 
         if (dict.found("solvers"))
         {
@@ -227,7 +224,7 @@ Foam::scalar Foam::solution::relaxationFactor(const word& name) const
     {
         FatalIOErrorIn
         (
-            "Foam::solution::relaxationFactor(const word& name)",
+            "Foam::solution::relaxationFactor(const word&)",
             relaxationFactors_
         )   << "Cannot find relaxationFactor for '" << name
             << "' or a suitable default value."
@@ -242,7 +239,7 @@ const Foam::dictionary& Foam::solution::solverDict(const word& name) const
 {
     if (debug)
     {
-        InfoIn("solution::solverDict(const word& name)")
+        InfoIn("solution::solverDict(const word&)")
             << "Lookup solver for " << name << endl;
     }
 
@@ -254,7 +251,7 @@ const Foam::dictionary& Foam::solution::solver(const word& name) const
 {
     if (debug)
     {
-        InfoIn("solution::solver(const word& name)")
+        InfoIn("solution::solver(const word&)")
             << "Lookup solver for " << name << endl;
     }
 

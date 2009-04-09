@@ -40,57 +40,50 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createEngineTime.H"
+    #include "createEngineMesh.H"
 
-#   include "setRootCase.H"
-#   include "createEngineTime.H"
-#   include "createEngineMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     scalar eps = 1.0e-10;
     scalar fullCycle = 360.0;
 
     scalar ca0 = -180.0;
     scalar ca1 = 0.0;
-    scalar ca = runTime.theta();
 
-    while (ca > ca0)
+    while (runTime.theta() > ca0)
     {
         ca0 += fullCycle;
         ca1 += fullCycle;
     }
 
-    if (mag(ca - ca0) > eps)
+    while (mag(runTime.theta() - ca0) > eps)
     {
-        while(mag(ca - ca0) > eps)
-        {
-            ca = runTime.theta();
-            scalar t0 = runTime.userTimeToTime(ca0 - ca);
-            runTime.setDeltaT(t0);
-            runTime++;
-            Info << "CA = " << ca << endl;
-            mesh.move();
-        }
+        scalar t0 = runTime.userTimeToTime(ca0 - runTime.theta());
+        runTime.setDeltaT(t0);
+        runTime++;
+        Info<< "CA = " << runTime.theta() << endl;
+        mesh.move();
     }
 
     scalar Vmax = sum(mesh.V().field());
 
-    while(mag(ca-ca1) > eps)
+    while (mag(runTime.theta()-ca1) > eps)
     {
-        ca = runTime.theta();
-        scalar t1 = runTime.userTimeToTime(ca1-ca);
+        scalar t1 = runTime.userTimeToTime(ca1-runTime.theta());
         runTime.setDeltaT(t1);
         runTime++;
-        Info << "CA = " << runTime.theta() << endl;
+        Info<< "CA = " << runTime.theta() << endl;
         mesh.move();
     }
 
     scalar Vmin = sum(mesh.V().field());
 
-    Info << "\nVmax = " << Vmax;
-    Info << ", Vmin = " << Vmin << endl;
-    Info << "Vmax/Vmin = " << Vmax/Vmin << endl;
-    Info << "\n end\n";
+    Info<< "\nVmax = " << Vmax;
+    Info<< ", Vmin = " << Vmin << endl;
+    Info<< "Vmax/Vmin = " << Vmax/Vmin << endl;
+    Info<< "\nEnd" << endl;
 
     return 0;
 }

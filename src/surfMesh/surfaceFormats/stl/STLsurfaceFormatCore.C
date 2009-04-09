@@ -28,6 +28,8 @@ License
 #include "gzstream.h"
 #include "OSspecific.H"
 #include "Map.H"
+#include "IFstream.H"
+#include "Ostream.H"
 
 #undef DEBUG_STLBINARY
 
@@ -48,8 +50,7 @@ int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
 {
     off_t dataFileSize = Foam::fileSize(filename);
 
-    IFstream ifs(filename, IOstream::BINARY);
-    istream& is = ifs.stdStream();
+    istream& is = IFstream(filename, IOstream::BINARY)().stdStream();
 
     // Read the STL header
     char header[headerSize];
@@ -89,12 +90,11 @@ int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
 
 bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
 (
-    IFstream& ifs,
+    istream& is,
     const off_t dataFileSize
 )
 {
     sorted_ = true;
-    istream& is = ifs.stdStream();
 
     // Read the STL header
     char header[headerSize];
@@ -131,7 +131,7 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
     {
         FatalErrorIn
         (
-            "fileFormats::STLsurfaceFormatCore::readBINARY(IFstream&)"
+            "fileFormats::STLsurfaceFormatCore::readBINARY(istream&)"
         )
             << "problem reading number of triangles, perhaps file is not binary"
             << exit(FatalError);
@@ -230,11 +230,19 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
     // auto-detect ascii/binary
     if (detectBINARY(filename))
     {
-        readBINARY(IFstream(filename, IOstream::BINARY)(), dataFileSize);
+        readBINARY
+        (
+            IFstream(filename, IOstream::BINARY)().stdStream(),
+            dataFileSize
+        );
     }
     else
     {
-        readASCII(IFstream(filename)(), dataFileSize);
+        readASCII
+        (
+            IFstream(filename)().stdStream(),
+            dataFileSize
+        );
     }
 }
 

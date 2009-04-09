@@ -35,8 +35,6 @@
 alias _foamAddPath 'set path=(\!* $path)'
 # prefix to LD_LIBRARY_PATH
 alias _foamAddLib 'setenv LD_LIBRARY_PATH \!*\:${LD_LIBRARY_PATH}'
-# make directory if it doesn't already exist
-alias _foamMkDir 'if ( ! -d \!* ) mkdir -p \!*'
 
 # location of the jobControl directory
 setenv FOAM_JOB_DIR $WM_PROJECT_INST_DIR/jobControl
@@ -71,12 +69,6 @@ _foamAddPath $FOAM_USER_APPBIN
 _foamAddLib  $FOAM_LIBBIN
 _foamAddLib  $FOAM_USER_LIBBIN
 
-# create these directories if necessary:
-_foamMkDir $FOAM_LIBBIN
-_foamMkDir $FOAM_APPBIN
-_foamMkDir $FOAM_USER_LIBBIN
-_foamMkDir $FOAM_USER_APPBIN
-
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -87,8 +79,8 @@ switch ("$compilerInstall")
 case OpenFOAM:
     switch ("$WM_COMPILER")
     case Gcc:
-        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH
-        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.3.2/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
+        setenv WM_COMPILER_DIR $WM_THIRD_PARTY_DIR/gcc-4.3.3/platforms/$WM_ARCH$WM_COMPILER_ARCH
+        _foamAddLib $WM_THIRD_PARTY_DIR/mpfr-2.4.1/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
         _foamAddLib $WM_THIRD_PARTY_DIR/gmp-4.2.4/platforms/$WM_ARCH$WM_COMPILER_ARCH/lib
     breaksw
     case Gcc42:
@@ -130,9 +122,6 @@ case OPENMPI:
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin
-    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -147,9 +136,6 @@ case LAM:
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin
-    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -163,9 +149,6 @@ case MPICH:
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin
-    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -180,9 +163,6 @@ case MPICH-GM:
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
     _foamAddLib  $GM_LIB_PATH
-    # before compiling, these directories may not exist:
-    _foamMkDir   $MPI_ARCH_PATH/bin
-    _foamMkDir   $MPI_ARCH_PATH/lib
 
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/mpich-gm
     breaksw
@@ -231,14 +211,21 @@ case FJMPI:
     _foamAddLib  /opt/FJSVpnidt/lib
     breaksw
 
+case QSMPI:
+    setenv MPI_ARCH_PATH /usr/lib/mpi
+    setenv FOAM_MPI_LIBBIN FOAM_LIBBIN/qsmpi
+
+    _foamAddPath $MPI_ARCH_PATH/bin
+    _foamAddLib $MPI_ARCH_PATH/lib
+
+    breaksw
+
 default:
     setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/dummy
     breaksw
 endsw
 
 _foamAddLib $FOAM_MPI_LIBBIN
-# before compiling, this directory may not exist:
-_foamMkDir  $FOAM_MPI_LIBBIN
 
 
 # Set the minimum MPI buffer size (used by all platforms except SGI MPI)
@@ -272,7 +259,6 @@ endif
 # ~~~~~~~~~~~~~~~~~~~~
 unalias _foamAddPath
 unalias _foamAddLib
-unalias _foamMkDir
 unset minBufferSize
 
 # -----------------------------------------------------------------------------

@@ -68,8 +68,7 @@ int main(int argc, char *argv[])
         mesh
     );
 
-    pointMesh pMesh(mesh);
-    volPointInterpolation pInterp(mesh, pMesh);
+    const volPointInterpolation& pInterp = volPointInterpolation::New(mesh);
 
     pointScalarField pp(pInterp.interpolate(p));
     pp.write();

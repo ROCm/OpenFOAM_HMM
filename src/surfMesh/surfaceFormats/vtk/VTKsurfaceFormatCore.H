@@ -39,7 +39,6 @@ SourceFiles
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

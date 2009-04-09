@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "VTKsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,9 +35,10 @@ namespace Foam
 namespace fileFormats
 {
 
+// write MeshedSurfaceProxy
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     VTKsurfaceFormat,
     face,
     write,
@@ -47,7 +47,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     VTKsurfaceFormat,
     triFace,
     write,
@@ -55,6 +55,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
     vtk
 );
 
+// write UnsortedMeshedSurface
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     UnsortedMeshedSurface,

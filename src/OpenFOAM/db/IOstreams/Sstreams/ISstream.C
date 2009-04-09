@@ -224,7 +224,16 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 }
                 else
                 {
-                    t = label(atol(numberBuffer));
+                    long lt = atol(numberBuffer);
+                    t = label(lt);
+
+                    // If the integer is too large to be represented as a label
+                    // return it as a scalar
+                    if (t.labelToken() != lt)
+                    {
+                        isScalar = true;
+                        t = scalar(atof(numberBuffer));
+                    }
                 }
             }
             else

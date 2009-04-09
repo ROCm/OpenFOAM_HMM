@@ -40,7 +40,10 @@ void Foam::vtkPV3Foam::updateInfoFields
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInfoFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoFields <"
+            << meshType::Mesh::typeName
+            << "> [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]"
+            << endl;
     }
 
     stringList enabledEntries;

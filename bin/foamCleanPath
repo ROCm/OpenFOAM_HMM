@@ -27,12 +27,12 @@
 #     foamCleanPath
 #
 # Description
-#     Usage: foamCleanPath path [wildcard] .. [wildcard]
+#     Usage: foamCleanPath [-strip] path [wildcard] .. [wildcard]
 #
 #     Prints its argument (which should be a ':' separated path)
 #     without all
 #         - duplicate elements
-#         - non-accessible directories
+#         - (if '-strip') non-accessible directories
 #         - elements whose start matches a wildcard
 #
 #     Note:
@@ -42,15 +42,24 @@
 if [ "$#" -lt 1 -o "$1" = "-h" -o "$1" = "-help" ]
 then
    cat <<USAGE 1>&2
-Usage: ${0##*/} path [wildcard] .. [wildcard]
+Usage: ${0##*/} [-strip] path [wildcard] .. [wildcard]
 
     Prints its argument (which should be a ':' separated list) cleansed from
       - duplicate elements
-      - non-accessible directories
       - elements whose start matches one of the wildcard(s)
+      - (if '-strip') non-accessible directories
 USAGE
    exit 1
 fi
+
+
+strip=''
+if [ "$1" = "-strip" ]
+then
+    strip=true
+    shift
+fi
+
 
 dirList="$1"
 shift
@@ -94,6 +103,10 @@ do
         then
             dirList="$dirList $dir"
         fi
+    elif [ "$strip" != "true" ]
+    then
+        # Print non-existing directories if not in 'strip' mode.
+        dirList="$dirList $dir"
     fi
 done
 

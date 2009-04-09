@@ -66,7 +66,7 @@ class turbulentHeatFluxTemperatureFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("turbulentHeatFluxTemperature");
+    TypeName("compressible::turbulentHeatFluxTemperature");
 
 
     // Constructors

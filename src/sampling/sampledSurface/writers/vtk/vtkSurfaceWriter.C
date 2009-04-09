@@ -25,9 +25,8 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "vtkSurfaceWriter.H"
-#include "fileName.H"
+
 #include "OFstream.H"
-#include "faceList.H"
 #include "OSspecific.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -35,13 +34,12 @@ License
 template<class Type>
 void Foam::vtkSurfaceWriter<Type>::writeGeometry
 (
+    Ostream& os,
     const pointField& points,
-    const faceList& faces,
-    Ostream& os
-) const
+    const faceList& faces
+)
 {
-    // Write vertex coordinates
-
+    // header
     os
         << "# vtk DataFile Version 2.0" << nl
         << "sampleSurface" << nl
@@ -57,7 +55,7 @@ void Foam::vtkSurfaceWriter<Type>::writeGeometry
             << float(pt.y()) << ' '
             << float(pt.z()) << nl;
     }
-    os  << endl;
+    os  << nl;
 
 
     // Write faces
@@ -84,193 +82,133 @@ void Foam::vtkSurfaceWriter<Type>::writeGeometry
 }
 
 
-// Write scalarField in vtk format
-template<class Type>
-void Foam::vtkSurfaceWriter<Type>::writeData
-(
-    const fileName& fieldName,
-    const pointField& points,
-    const scalarField& values,
-    Ostream& os
-) const
+namespace Foam
 {
-    // Write data
-    if (values.size() == points.size())
-    {
-        os  << "POINT_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-    else
-    {
-        os  << "CELL_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
 
-    os  << fieldName << " 1 " << values.size() << " float" << nl;
-
-    forAll(values, elemI)
+    // Write scalarField in vtk format
+    template<>
+    void Foam::vtkSurfaceWriter<Foam::scalar>::writeData
+    (
+        Ostream& os,
+        const Field<Foam::scalar>& values
+    )
     {
-        if (elemI)
+        os << "1 " << values.size() << " float" << nl;
+
+        forAll(values, elemI)
         {
-            if (elemI % 10)
+            if (elemI)
             {
-                os << ' ';
+                if (elemI % 10)
+                {
+                    os << ' ';
+                }
+                else
+                {
+                    os << nl;
+                }
             }
-            else
-            {
-                os << nl;
-            }
+
+            const scalar& v = values[elemI];
+            os << float(v);
         }
-        os << float(values[elemI]);
+        os << nl;
     }
-    os << nl;
+
+    // Write vectorField in vtk format
+    template<>
+    void Foam::vtkSurfaceWriter<Foam::vector>::writeData
+    (
+        Ostream& os,
+        const Field<Foam::vector>& values
+    )
+    {
+        os << "3 " << values.size() << " float" << nl;
+
+        forAll(values, elemI)
+        {
+            const vector& v = values[elemI];
+            os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
+                << nl;
+        }
+    }
+
+
+    // Write sphericalTensorField in vtk format
+    template<>
+    void Foam::vtkSurfaceWriter<Foam::sphericalTensor>::writeData
+    (
+        Ostream& os,
+        const Field<sphericalTensor>& values
+    )
+    {
+        os << "1 " << values.size() << " float" << nl;
+
+        forAll(values, elemI)
+        {
+            const sphericalTensor& v = values[elemI];
+            os << float(v[0]) << nl;
+        }
+    }
+
+
+    // Write symmTensorField in vtk format
+    template<>
+    void Foam::vtkSurfaceWriter<Foam::symmTensor>::writeData
+    (
+        Ostream& os,
+        const Field<symmTensor>& values
+    )
+    {
+        os << "6 " << values.size() << " float" << nl;
+
+        forAll(values, elemI)
+        {
+            const symmTensor& v = values[elemI];
+            os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
+                << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
+                << nl;
+
+        }
+    }
+
+
+    // Write tensorField in vtk format
+    template<>
+    void Foam::vtkSurfaceWriter<Foam::tensor>::writeData
+    (
+        Ostream& os,
+        const Field<tensor>& values
+    )
+    {
+        os << "9 " << values.size() << " float" << nl;
+
+        forAll(values, elemI)
+        {
+            const tensor& v = values[elemI];
+            os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
+                << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
+                << float(v[6]) << ' ' << float(v[7]) << ' ' << float(v[8])
+                << nl;
+        }
+    }
+
 }
 
 
-// Write vectorField in vtk format
+// Write generic field in vtk format
 template<class Type>
 void Foam::vtkSurfaceWriter<Type>::writeData
 (
-    const fileName& fieldName,
-    const pointField& points,
-    const vectorField& values,
-    Ostream& os
-) const
+    Ostream& os,
+    const Field<Type>& values
+)
 {
-    // Write data
-    if (values.size() == points.size())
-    {
-        os  << "POINT_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-    else
-    {
-        os  << "CELL_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-
-    os  << fieldName << " 3 " << values.size() << " float" << nl;
+    os << "1 " << values.size() << " float" << nl;
 
     forAll(values, elemI)
     {
-        const vector& v = values[elemI];
-
-        os << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2]) << nl;
-    }
-}
-
-
-// Write sphericalTensorField in vtk format
-template<class Type>
-void Foam::vtkSurfaceWriter<Type>::writeData
-(
-    const fileName& fieldName,
-    const pointField& points,
-    const sphericalTensorField& values,
-    Ostream& os
-) const
-{
-    // Write data
-    if (values.size() == points.size())
-    {
-        os  << "POINT_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-    else
-    {
-        os  << "CELL_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-
-    os  << fieldName << " 1 " << values.size() << " float" << nl;
-
-    forAll(values, elemI)
-    {
-        const sphericalTensor& v = values[elemI];
-
-        os  << float(v[0])
-            << nl;
-    }
-}
-
-
-// Write symmTensorField in vtk format
-template<class Type>
-void Foam::vtkSurfaceWriter<Type>::writeData
-(
-    const fileName& fieldName,
-    const pointField& points,
-    const symmTensorField& values,
-    Ostream& os
-) const
-{
-    // Write data
-    if (values.size() == points.size())
-    {
-        os  << "POINT_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-    else
-    {
-        os  << "CELL_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-
-    os  << fieldName << " 6 " << values.size() << " float" << nl;
-
-    forAll(values, elemI)
-    {
-        const symmTensor& v = values[elemI];
-
-        os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
-            << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
-            << nl;
-    }
-}
-
-
-// Write tensorField in vtk format
-template<class Type>
-void Foam::vtkSurfaceWriter<Type>::writeData
-(
-    const fileName& fieldName,
-    const pointField& points,
-    const tensorField& values,
-    Ostream& os
-) const
-{
-    // Write data
-    if (values.size() == points.size())
-    {
-        os  << "POINT_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-    else
-    {
-        os  << "CELL_DATA " << values.size()
-            << nl
-            << "FIELD attributes 1" << nl;
-    }
-
-    os  << fieldName << " 9 " << values.size() << " float" << nl;
-
-    forAll(values, elemI)
-    {
-        const tensor& v = values[elemI];
-
-        os  << float(v[0]) << ' ' << float(v[1]) << ' ' << float(v[2])
-            << float(v[3]) << ' ' << float(v[4]) << ' ' << float(v[5])
-            << float(v[6]) << ' ' << float(v[7]) << ' ' << float(v[8])
-            << nl;
+        os << float(0) << nl;
     }
 }
 
@@ -297,8 +235,34 @@ Foam::vtkSurfaceWriter<Type>::~vtkSurfaceWriter()
 template<class Type>
 void Foam::vtkSurfaceWriter<Type>::write
 (
-    const fileName& samplePath,
-    const fileName& timeDir,
+    const fileName& outputDir,
+    const fileName& surfaceName,
+    const pointField& points,
+    const faceList& faces,
+    const bool verbose
+) const
+{
+    if (!isDir(outputDir))
+    {
+        mkDir(outputDir);
+    }
+
+    fileName fName(outputDir/surfaceName + ".vtk");
+
+    if (verbose)
+    {
+        Info<< "Writing geometry to " << fName << endl;
+    }
+
+    OFstream os(fName);
+    writeGeometry(os, points, faces);
+}
+
+
+template<class Type>
+void Foam::vtkSurfaceWriter<Type>::write
+(
+    const fileName& outputDir,
     const fileName& surfaceName,
     const pointField& points,
     const faceList& faces,
@@ -307,24 +271,40 @@ void Foam::vtkSurfaceWriter<Type>::write
     const bool verbose
 ) const
 {
-    fileName surfaceDir(samplePath/timeDir);
-
-    if (!isDir(surfaceDir))
+    if (!isDir(outputDir))
     {
-        mkDir(surfaceDir);
+        mkDir(outputDir);
     }
 
-    fileName fName(surfaceDir/fieldName + '_' + surfaceName + ".vtk");
+    OFstream os
+    (
+        outputDir/fieldName + '_' + surfaceName + ".vtk"
+    );
 
     if (verbose)
     {
-        Info<< "Writing field " << fieldName << " to " << fName << endl;
+        Info<< "Writing field " << fieldName << " to " << os.name() << endl;
     }
 
-    OFstream os(fName);
+    writeGeometry(os, points, faces);
 
-    writeGeometry(points, faces, os);
-    writeData(fieldName, points, values, os);
+    // start writing data
+    if (values.size() == points.size())
+    {
+        os  << "POINT_DATA ";
+    }
+    else
+    {
+        os  << "CELL_DATA ";
+    }
+
+    os  << values.size() << nl
+        << "FIELD attributes 1" << nl
+        << fieldName << " ";
+
+    // Write data
+    writeData(os, values);
+
 }
 
 

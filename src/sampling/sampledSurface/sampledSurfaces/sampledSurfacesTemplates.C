@@ -31,35 +31,6 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-Foam::label Foam::sampledSurfaces::grep
-(
-    fieldGroup<Type>& fieldList,
-    const wordList& fieldTypes
-) const
-{
-    fieldList.setSize(fieldNames_.size());
-    label nFields = 0;
-
-    forAll(fieldNames_, fieldI)
-    {
-        if
-        (
-            fieldTypes[fieldI]
-         == GeometricField<Type, fvPatchField, volMesh>::typeName
-        )
-        {
-            fieldList[nFields] = fieldNames_[fieldI];
-            nFields++;
-        }
-    }
-
-    fieldList.setSize(nFields);
-
-    return nFields;
-}
-
-
-template<class Type>
 void Foam::sampledSurfaces::sampleAndWrite
 (
     const GeometricField<Type, fvPatchField, volMesh>& vField,
@@ -67,10 +38,10 @@ void Foam::sampledSurfaces::sampleAndWrite
 )
 {
     // interpolator for this field
-    autoPtr<interpolation<Type> > interpolator;
+    autoPtr< interpolation<Type> > interpolator;
 
     const word& fieldName   = vField.name();
-    const fileName& timeDir = vField.time().timeName();
+    const fileName outputDir = outputPath_/vField.time().timeName();
 
     forAll(*this, surfI)
     {
@@ -128,8 +99,7 @@ void Foam::sampledSurfaces::sampleAndWrite
                 {
                     formatter.write
                     (
-                        outputPath_,
-                        timeDir,
+                        outputDir,
                         s.name(),
                         mergeList_[surfI].points,
                         mergeList_[surfI].faces,
@@ -147,8 +117,7 @@ void Foam::sampledSurfaces::sampleAndWrite
             {
                 formatter.write
                 (
-                    outputPath_,
-                    timeDir,
+                    outputDir,
                     s.name(),
                     s.points(),
                     s.faces(),
@@ -217,7 +186,7 @@ void Foam::sampledSurfaces::sampleAndWrite
                    sampleAndWrite
                    (
                        mesh_.lookupObject
-                           <GeometricField<Type, fvPatchField, volMesh> >
+                       <GeometricField<Type, fvPatchField, volMesh> >
                        (
                            fields[fieldI]
                        ),

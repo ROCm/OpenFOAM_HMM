@@ -58,6 +58,11 @@ SourceFiles
 #ifndef vtkPV3Foam_H
 #define vtkPV3Foam_H
 
+// do not include legacy strstream headers
+#ifndef  VTK_EXCLUDE_STRSTREAM_HEADERS
+# define VTK_EXCLUDE_STRSTREAM_HEADERS
+#endif
+
 #include "className.H"
 #include "fileName.H"
 #include "stringList.H"
@@ -65,6 +70,8 @@ SourceFiles
 #include "primitivePatch.H"
 #include "PrimitivePatchInterpolation.H"
 #include "volPointInterpolation.H"
+
+#undef VTKPV3FOAM_DUALPORT
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -128,6 +135,7 @@ class vtkPV3Foam
                 return block_;
             }
 
+            //- Assign block number, return previous value
             int block(int blockNo)
             {
                 int prev = block_;
@@ -713,9 +721,11 @@ public:
         //- Remove patch names from the display
         void removePatchNames(vtkRenderer* renderer);
 
-        //- set the runTime to the requested time, returns the timeIndex
-        //  sets to "constant" on error and returns -1
-        int setTime(const double& requestedTime);
+        //- set the runTime to the first plausible request time,
+        //  returns the timeIndex
+        //  sets to "constant" on error
+        int setTime(int count, const double requestTimes[]);
+
 
         //- The current time index
         int timeIndex() const

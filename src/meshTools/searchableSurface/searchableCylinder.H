@@ -86,6 +86,8 @@ private:
             const scalar nearestDistSqr
         ) const;
 
+        scalar radius2(const point& pt) const;
+
         //- Find intersection with cylinder
         void findLineAll
         (

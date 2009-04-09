@@ -48,9 +48,9 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
     os  << "POINTS " << pointLst.size() << " float" << nl;
     forAll(pointLst, ptI)
     {
-        os  << pointLst[ptI].x() << ' '
-            << pointLst[ptI].y() << ' '
-            << pointLst[ptI].z() << nl;
+        const point& pt = pointLst[ptI];
+
+        os  << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
     }
 }
 

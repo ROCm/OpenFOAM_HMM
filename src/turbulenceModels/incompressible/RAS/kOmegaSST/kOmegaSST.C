@@ -343,7 +343,7 @@ void kOmegaSST::correct()
     }
 
     volScalarField S2 = magSqr(symm(fvc::grad(U_)));
-    volScalarField G("G", nut_*2*S2);
+    volScalarField G("RASModel::G", nut_*2*S2);
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();

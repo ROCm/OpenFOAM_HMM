@@ -36,7 +36,7 @@ if (timeDirs.size() > 1)
         runTime.path()
       / timeDirs[timeDirs.size() - 1].name()
       / regionPrefix
-      / "lagrangian",
+      / cloud::prefix,
         fileName::DIRECTORY
     );
 
@@ -55,7 +55,7 @@ if (timeDirs.size() > 1)
         (
             mesh,
             timeDirs[timeDirs.size() - 1].name(),
-            "lagrangian"/cloudName
+            cloud::prefix/cloudName
         );
 
         bool hasPositions = false;

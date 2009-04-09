@@ -88,7 +88,7 @@ void Foam::faceTriangulation::calcHalfAngle
 
     scalar sin = (e0 ^ e1) & normal;
 
-    if (sin < -SMALL)
+    if (sin < -ROOTVSMALL)
     {
         // 3rd or 4th quadrant
         cosHalfAngle = - Foam::sqrt(0.5*(1 + cos));
@@ -366,7 +366,7 @@ Foam::label Foam::faceTriangulation::findStart
         const vector& rightEdge = edges[right(size, fp)];
         const vector leftEdge = -edges[left(size, fp)];
 
-        if (((rightEdge ^ leftEdge) & normal) < SMALL)
+        if (((rightEdge ^ leftEdge) & normal) < ROOTVSMALL)
         {
             scalar cos = rightEdge & leftEdge;
             if (cos < minCos)

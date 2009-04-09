@@ -25,6 +25,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SMESHsurfaceFormat.H"
+#include "clock.H"
+#include "IFstream.H"
+#include "OFstream.H"
+#include "Ostream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -41,76 +45,98 @@ Foam::fileFormats::SMESHsurfaceFormat<Face>::SMESHsurfaceFormat()
 template<class Face>
 void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfZone>& zoneLst
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
-    writeHeader(os, pointLst, faceLst.size());
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
+
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size() > 1
+      ? surf.surfZones()
+      : oneZone(faceLst)
+    );
+
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::SMESHsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+
+    // Write header
+    os  << "# tetgen .smesh file written " << clock::dateTime().c_str() << nl
+        << "# <points count=\"" << pointLst.size() << "\">" << nl
+        << pointLst.size() << " 3" << nl;    // 3: dimensions
+
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        const point& pt = pointLst[ptI];
+
+        os  << ptI << ' ' << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
+    }
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+
+    os  << faceLst.size() << " 1" << endl;   // one attribute: zone number
+
 
     label faceIndex = 0;
-    forAll(zoneLst, zoneI)
+    forAll(zones, zoneI)
     {
-        forAll(zoneLst[zoneI], localFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
+        const surfZone& zone = zones[zoneI];
 
-            os << f.size();
-            forAll(f, fp)
+        if (useFaceMap)
+        {
+            forAll(zone, localFaceI)
             {
-                os << ' ' << f[fp];
+                const Face& f = faceLst[faceMap[faceIndex++]];
+
+                os << f.size();
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp];
+                }
+                os << ' ' << zoneI << endl;
             }
-            os << ' ' << zoneI << endl;
+        }
+        else
+        {
+            forAll(zones[zoneI], localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+
+                os << f.size();
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp];
+                }
+                os << ' ' << zoneI << endl;
+            }
         }
     }
 
-    writeTail(os);
-}
+    // write tail
 
-
-template<class Face>
-void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    write(os, surf.points(), surf.faces(), surf.zones());
-}
-
-
-template<class Face>
-void Foam::fileFormats::SMESHsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-
-    writeHeader(os, surf.points(), faceLst.size());
-
-    labelList faceMap;
-    List<surfZone> zoneLst = surf.sortedZones(faceMap);
-
-    label faceIndex = 0;
-    forAll(zoneLst, zoneI)
-    {
-        forAll(zoneLst[zoneI], localFaceI)
-        {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-
-            os << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-            os << ' ' << zoneI << endl;
-        }
-    }
-
-    writeTail(os);
+    os  << "# </faces>" << nl
+        << nl
+        << "# no holes or regions:" << nl
+        << '0' << nl        // holes
+        << '0' << endl;     // regions
 }
 
 
