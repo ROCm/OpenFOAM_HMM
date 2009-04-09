@@ -456,7 +456,7 @@ bool Foam::treeDataTriSurface::intersects
         indexedOctree<treeDataTriSurface>::perturbTol()
     );
 
-    if (inter.hit() && magSqr(inter.hitPoint()-start) <= magSqr(dir))
+    if (inter.hit() && inter.distance() <= 1)
     {
         // Note: no extra test on whether intersection is in front of us
         // since using half_ray.

@@ -73,7 +73,7 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
     const labelList& cFaces = mesh.cells()[this->celli_];
 
     point intersection(vector::zero);
-    scalar distanceSqr = VGREAT;
+    scalar trackFraction = VGREAT;
     label hitFacei = -1;
 
     const vector vec = endPosition-this->position_;
@@ -93,16 +93,11 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
                 intersection::HALF_RAY
             );
 
-            if (inter.hit())
+            if (inter.hit() && inter.distance() < trackFraction)
             {
-                scalar s = magSqr(inter.hitPoint()-this->position_);
-
-                if (s < distanceSqr)
-                {
-                    distanceSqr = s;
-                    hitFacei = facei;
-                    intersection = inter.hitPoint();
-                }
+                trackFraction = inter.distance();
+                hitFacei = facei;
+                intersection = inter.hitPoint();
             }
         }
     }
@@ -118,12 +113,10 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
         );
     }
 
-
-    scalar trackFraction = Foam::sqrt(distanceSqr/magSqr(vec));
-
     if (trackFraction >= (1.0-SMALL))
     {
         // Nearest intersection beyond endPosition so we hit endPosition.
+        trackFraction = 1.0;
         this->position_ = endPosition;
         this->facei_ = -1;
         return 1.0;

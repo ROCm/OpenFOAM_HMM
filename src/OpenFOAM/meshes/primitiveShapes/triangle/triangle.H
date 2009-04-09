@@ -166,8 +166,8 @@ public:
                 const intersection::direction dir = intersection::VECTOR
             ) const;
 
-            //- Fast intersection with a ray. Distance is normal distance
-            //  to the intersection.
+            //- Fast intersection with a ray. Distance is normalised distance
+            //  to the intersection (normalised with the vector magnitude).
             //  For a hit, the distance is signed. Positive number
             //  represents the point in front of triangle. In case of miss
             //  pointHit position is undefined.
