@@ -826,6 +826,28 @@ bool Foam::motionSmoother::scaleMesh
     const label nAllowableErrors
 )
 {
+    return scaleMesh
+    (
+        checkFaces,
+        baffles,
+        paramDict_,
+        paramDict_,
+        smoothMesh,
+        nAllowableErrors
+    );
+}
+
+
+bool Foam::motionSmoother::scaleMesh
+(
+    labelList& checkFaces,
+    const List<labelPair>& baffles,
+    const dictionary& paramDict,
+    const dictionary& meshQualityDict,
+    const bool smoothMesh,
+    const label nAllowableErrors
+)
+{
     if (!smoothMesh && adaptPatchIDs_.empty())
     {
         FatalErrorIn("motionSmoother::scaleMesh(const bool")
@@ -859,9 +881,9 @@ bool Foam::motionSmoother::scaleMesh
     }
 
     const scalar errorReduction =
-        readScalar(paramDict_.lookup("errorReduction"));
+        readScalar(paramDict.lookup("errorReduction"));
     const label nSmoothScale =
-        readLabel(paramDict_.lookup("nSmoothScale"));
+        readLabel(paramDict.lookup("nSmoothScale"));
 
 
     // Note: displacement_ should already be synced already from setDisplacement
@@ -921,7 +943,7 @@ bool Foam::motionSmoother::scaleMesh
 
     // Check. Returns parallel number of incorrect faces.
     faceSet wrongFaces(mesh_, "wrongFaces", mesh_.nFaces()/100+100);
-    checkMesh(false, mesh_, paramDict_, checkFaces, baffles, wrongFaces);
+    checkMesh(false, mesh_, meshQualityDict, checkFaces, baffles, wrongFaces);
 
     if (returnReduce(wrongFaces.size(), sumOp<label>()) <= nAllowableErrors)
     {

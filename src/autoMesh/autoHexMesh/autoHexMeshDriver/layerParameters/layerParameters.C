@@ -211,8 +211,24 @@ Foam::layerParameters::layerParameters
     (
         readLabel(dict.lookup("nBufferCellsNoExtrude"))
     ),
-    nSnap_(readLabel(dict.lookup("nSnap")))
-{}
+    nSnap_(readLabel(dict.lookup("nSnap"))),
+    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
+    nRelaxedIter_(labelMax)
+{
+    if (dict.found("nRelaxedIter"))
+    {
+        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
+    }
+
+    if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
+    {
+        FatalErrorIn("layerParameters::layerParameters(..)")
+            << "Layer iterations should be >= 0." << endl
+            << "nLayerIter:" << nLayerIter_
+            << " nRelaxedIter:" << nRelaxedIter_
+            << exit(FatalError);
+    }
+}
 
 
 // Construct from dictionary
@@ -276,8 +292,24 @@ Foam::layerParameters::layerParameters
     (
         readLabel(dict.lookup("nBufferCellsNoExtrude"))
     ),
-    nSnap_(readLabel(dict.lookup("nRelaxIter")))
+    nSnap_(readLabel(dict.lookup("nRelaxIter"))),
+    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
+    nRelaxedIter_(labelMax)
 {
+    if (dict.found("nRelaxedIter"))
+    {
+        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
+    }
+    if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
+    {
+        FatalErrorIn("layerParameters::layerParameters(..)")
+            << "Layer iterations should be >= 0." << endl
+            << "nLayerIter:" << nLayerIter_
+            << " nRelaxedIter:" << nRelaxedIter_
+            << exit(FatalError);
+    }
+
+
     const dictionary& layersDict = dict.subDict("layers");
 
     forAll(boundaryMesh, patchI)

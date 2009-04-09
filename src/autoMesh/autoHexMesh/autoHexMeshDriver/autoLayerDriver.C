@@ -2292,7 +2292,7 @@ bool Foam::autoLayerDriver::cellsUseFace
 Foam::label Foam::autoLayerDriver::checkAndUnmark
 (
     const addPatchCellLayer& addLayer,
-    const dictionary& motionDict,
+    const dictionary& meshQualityDict,
     const indirectPrimitivePatch& pp,
     const fvMesh& newMesh,
 
@@ -2304,7 +2304,7 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
     // Check the resulting mesh for errors
     Info<< nl << "Checking mesh with layer ..." << endl;
     faceSet wrongFaces(newMesh, "wrongFaces", newMesh.nFaces()/1000);
-    motionSmoother::checkMesh(false, newMesh, motionDict, wrongFaces);
+    motionSmoother::checkMesh(false, newMesh, meshQualityDict, wrongFaces);
     Info<< "Detected " << returnReduce(wrongFaces.size(), sumOp<label>())
         << " illegal faces"
         << " (concave, zero area or negative cell pyramid volume)"
@@ -2709,7 +2709,7 @@ void Foam::autoLayerDriver::addLayers
     boolList flaggedCells;
     boolList flaggedFaces;
 
-    while (true)
+    for (label iter = 0; iter < layerParams.nLayerIter(); iter++)
     {
         // Make sure displacement is equal on both sides of coupled patches.
         syncPatchDisplacement
@@ -2951,10 +2951,17 @@ void Foam::autoLayerDriver::addLayers
         }
 
         // Unset the extrusion at the pp.
+        const dictionary& meshQualityDict =
+        (
+            iter < layerParams.nRelaxedIter()
+          ? motionDict
+          : motionDict.subDict("relaxed")
+        );
+
         label nTotChanged = checkAndUnmark
         (
             addLayer,
-            motionDict,
+            meshQualityDict,
             pp,
             newMesh,
 

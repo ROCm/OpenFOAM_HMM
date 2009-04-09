@@ -274,6 +274,14 @@ addLayersControls
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
+
+
+    // Overall max number of layer addition iterations
+    nLayerIter 50;
+
+    // Max number of iterations after which relaxed meshQuality controls
+    // get used.
+    nRelaxedIter 20;
 }
 
 
@@ -335,6 +343,16 @@ meshQualityControls
     nSmoothScale 4;
     //- amount to scale back displacement at error points
     errorReduction 0.75;
+
+
+
+    // Optional : some meshing phases allow usage of relaxed rules.
+    // See e.g. addLayersControls::nRelaxedIter.
+    relaxed
+    {
+        //- Maximum non-orthogonality allowed. Set to 180 to disable.
+        maxNonOrtho 75;
+    }
 }
 
 
