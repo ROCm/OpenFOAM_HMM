@@ -585,7 +585,7 @@ inline bool triangle<Point, PointRef>::classify
 
     bool hit = false;
 
-    if (Foam::mag(u1) < SMALL)
+    if (Foam::mag(u1) < ROOTVSMALL)
     {
         beta = u0/u2;
 

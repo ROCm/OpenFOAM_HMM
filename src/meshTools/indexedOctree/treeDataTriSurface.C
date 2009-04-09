@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "treeDataTriSurface.H"
@@ -226,7 +224,7 @@ Foam::label Foam::treeDataTriSurface::getVolumeType
 
     if (!pHit.hit())
     {
-        FatalErrorIn("treeDataTriSurface::getVolumeType")
+        FatalErrorIn("treeDataTriSurface::getVolumeType(..)")
             << "treeBb:" << treeBb
             << " sample:" << sample
             << " pHit:" << pHit
@@ -238,7 +236,8 @@ Foam::label Foam::treeDataTriSurface::getVolumeType
         surface_,
         sample,
         pHit.index(),
-        pHit.hitPoint()
+        pHit.hitPoint(),
+        indexedOctree<treeDataTriSurface>::perturbTol()
     );
 
     if (t == triSurfaceTools::UNKNOWN)
@@ -255,11 +254,12 @@ Foam::label Foam::treeDataTriSurface::getVolumeType
     }
     else
     {
-        FatalErrorIn("treeDataTriSurface::getVolumeType")
+        FatalErrorIn("treeDataTriSurface::getVolumeType(..)")
             << "problem" << abort(FatalError);
         return indexedOctree<treeDataTriSurface>::UNKNOWN;
     }
 }
+
 
 // Check if any point on triangle is inside cubeBb.
 bool Foam::treeDataTriSurface::overlaps
@@ -305,6 +305,7 @@ bool Foam::treeDataTriSurface::overlaps
     // Now we have the difficult case: all points are outside but connecting
     // edges might go through cube. Use fast intersection of bounding box.
 
+    //return triangleFuncs::intersectBbExact(p0, p1, p2, cubeBb);
     return triangleFuncs::intersectBb(p0, p1, p2, cubeBb);
 }
 
@@ -445,9 +446,17 @@ bool Foam::treeDataTriSurface::intersects
 
     const vector dir(end - start);
 
-    pointHit inter = tri.intersection(start, dir, intersection::HALF_RAY);
+    // Use relative tolerance (from octree) to determine intersection.
 
-    if (inter.hit() && inter.distance() <= 1)
+    pointHit inter = tri.intersection
+    (
+        start,
+        dir,
+        intersection::HALF_RAY,
+        indexedOctree<treeDataTriSurface>::perturbTol()
+    );
+
+    if (inter.hit() && magSqr(inter.hitPoint()-start) <= magSqr(dir))
     {
         // Note: no extra test on whether intersection is in front of us
         // since using half_ray.
@@ -459,6 +468,16 @@ bool Foam::treeDataTriSurface::intersects
     {
         return false;
     }
+
+
+    //- Using exact intersections
+    //pointHit info = f.tri(points).intersectionExact(start, end);
+    //
+    //if (info.hit())
+    //{
+    //    intersectionPoint = info.hitPoint();
+    //}
+    //return info.hit();
 }
 
 

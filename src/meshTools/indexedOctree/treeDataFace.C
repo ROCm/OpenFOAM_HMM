@@ -528,7 +528,7 @@ bool Foam::treeDataFace::intersects
         intersection::HALF_RAY
     );
 
-    if (inter.hit() && inter.distance() <= 1)
+    if (inter.hit() && magSqr(inter.hitPoint()-start) <= magSqr(dir))
     {
         // Note: no extra test on whether intersection is in front of us
         // since using half_ray

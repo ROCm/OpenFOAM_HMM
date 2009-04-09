@@ -153,7 +153,7 @@ public:
             inline scalar sweptVol(const triangle& t) const;
 
             //- Return point intersection with a ray.
-            //  For a hit, the distance is signed.  Positive number
+            //  For a hit, the distance is signed. Positive number
             //  represents the point in front of triangle.
             //  In case of miss pointHit is set to nearest point
             //  on triangle and its distance to the distance between
@@ -166,12 +166,14 @@ public:
                 const intersection::direction dir = intersection::VECTOR
             ) const;
 
-            //- Fast intersection with a ray.
-            //  For a hit, the pointHit.distance() is the line parameter t :
-            //  intersection=p+t*q. Only defined for VISIBLE, FULL_RAY or
+            //- Fast intersection with a ray. Distance is normal distance
+            //  to the intersection.
+            //  For a hit, the distance is signed. Positive number
+            //  represents the point in front of triangle. In case of miss
+            //  pointHit position is undefined.
+            //  Only defined for VISIBLE, FULL_RAY or
             //  HALF_RAY. tol increases the virtual size of the triangle
-            //  by a relative factor - can be used to compensate for
-            //  limited precision.
+            //  by a relative factor.
             inline pointHit intersection
             (
                 const point& p,

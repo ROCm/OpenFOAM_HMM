@@ -73,7 +73,7 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
     const labelList& cFaces = mesh.cells()[this->celli_];
 
     point intersection(vector::zero);
-    scalar trackFraction = VGREAT;
+    scalar distanceSqr = VGREAT;
     label hitFacei = -1;
 
     const vector vec = endPosition-this->position_;
@@ -93,32 +93,21 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
                 intersection::HALF_RAY
             );
 
-            if (inter.hit() && inter.distance() < trackFraction)
+            if (inter.hit())
             {
-                trackFraction = inter.distance();
-                hitFacei = facei;
-                intersection = inter.hitPoint();
+                scalar s = magSqr(inter.hitPoint()-this->position_);
+
+                if (s < distanceSqr)
+                {
+                    distanceSqr = s;
+                    hitFacei = facei;
+                    intersection = inter.hitPoint();
+                }
             }
         }
     }
 
-
-    if (hitFacei != -1)
-    {
-        if (trackFraction > 1.0)
-        {
-            // Nearest intersection beyond endPosition so we hit endPosition.
-            this->position_ = endPosition;
-            this->facei_ = -1;
-            return 1.0;
-        }
-        else
-        {
-            this->position_ = intersection;
-            this->facei_ = hitFacei;
-        }
-    }
-    else
+    if (hitFacei == -1)
     {
         // Did not find any intersection. Fall back to original approximate
         // algorithm
@@ -130,7 +119,24 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
     }
 
 
-    // Normal situation (trackFraction 0..1)
+    scalar trackFraction = Foam::sqrt(distanceSqr/magSqr(vec));
+
+    if (trackFraction >= (1.0-SMALL))
+    {
+        // Nearest intersection beyond endPosition so we hit endPosition.
+        this->position_ = endPosition;
+        this->facei_ = -1;
+        return 1.0;
+    }
+    else
+    {
+        this->position_ = intersection;
+        this->facei_ = hitFacei;
+    }
+
+
+    // Normal situation (trackFraction 0..1). Straight copy
+    // of Particle::trackToFace.
 
     bool internalFace = this->cloud().internalFace(this->facei_);
 

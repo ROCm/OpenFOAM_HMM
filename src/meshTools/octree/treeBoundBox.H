@@ -120,12 +120,12 @@ public:
         enum faceBit
         {
             NOFACE    = 0,
-            LEFTBIT   = 0x1 << LEFT,
-            RIGHTBIT  = 0x1 << RIGHT,
-            BOTTOMBIT = 0x1 << BOTTOM,
-            TOPBIT    = 0x1 << TOP,
-            BACKBIT   = 0x1 << BACK,
-            FRONTBIT  = 0x1 << FRONT,
+            LEFTBIT   = 0x1 << LEFT,    //1
+            RIGHTBIT  = 0x1 << RIGHT,   //2
+            BOTTOMBIT = 0x1 << BOTTOM,  //4
+            TOPBIT    = 0x1 << TOP,     //8
+            BACKBIT   = 0x1 << BACK,    //16
+            FRONTBIT  = 0x1 << FRONT,   //32
         };
 
         //- Edges codes.
@@ -265,9 +265,25 @@ public:
             //- Overlaps boundingSphere (centre + sqr(radius))?
             bool overlaps(const point&, const scalar radiusSqr) const;
 
-            //- Intersects segment; set point to intersection position,
+            //- Intersects segment; set point to intersection position and face,
             //  return true if intersection found.
-            // (intPt argument used during calculation even if not intersecting)
+            //  (pt argument used during calculation even if not intersecting).
+            //  Calculates intersections from outside supplied vector
+            //  (overallStart, overallVec). This is so when
+            //  e.g. tracking through lots of consecutive boxes
+            // (typical octree) we're not accumulating truncation errors. Set
+            // to start, (end-start) if not used.
+            bool intersects
+            (
+                const point& overallStart,
+                const vector& overallVec,
+                const point& start,
+                const point& end,
+                point& pt,
+                direction& ptBits
+            ) const;
+
+            //- Like above but does not return faces point is on
             bool intersects
             (
                 const point& start,
@@ -284,6 +300,9 @@ public:
             //- Contains point (inside or on edge) and moving in direction
             //  dir would cause it to go inside.
             bool contains(const vector& dir, const point&) const;
+
+            //- Code position of pt on bounding box faces
+            direction faceBits(const point& pt) const;
 
             //- Position of point relative to bounding box
             direction posBits(const point&) const;
