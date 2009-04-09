@@ -354,17 +354,47 @@ void Foam::searchableCylinder::findLineAll
 
 Foam::boundBox Foam::searchableCylinder::calcBounds() const
 {
-    // Approximating the boundBox by the extents of spheres, centred at the
-    // endpoints, of the same radius as the cylinder
 
-    pointField bbPoints(4);
+    // Adapted from http://www.gamedev.net/community/forums/topic.asp?topic_id=338522&forum_id=20&gforum_id=0
 
-    bbPoints[0] = point1_ + radius_*vector::one;
-    bbPoints[1] = point1_ - radius_*vector::one;
-    bbPoints[2] = point2_ + radius_*vector::one;
-    bbPoints[3] = point2_ - radius_*vector::one;
+    // Let cylinder have end points A,B and radius r,
 
-    return boundBox(bbPoints);
+    // Bounds in direction X (same for Y and Z) can be found as:
+    // Let A.X<B.X (otherwise swap points)
+    // Good approximate lowest bound is A.X-r and highest is B.X+r (precise for
+    // capsule). At worst, in one direction it can be larger than needed by 2*r.
+
+    // Accurate bounds for cylinder is
+    // A.X-kx*r, B.X+kx*r
+    // where
+    // kx=sqrt(((A.Y-B.Y)^2+(A.Z-B.Z)^2)/((A.X-B.X)^2+(A.Y-B.Y)^2+(A.Z-B.Z)^2))
+
+    // similar thing for Y and Z
+    // (i.e.
+    // ky=sqrt(((A.X-B.X)^2+(A.Z-B.Z)^2)/((A.X-B.X)^2+(A.Y-B.Y)^2+(A.Z-B.Z)^2))
+    // kz=sqrt(((A.X-B.X)^2+(A.Y-B.Y)^2)/((A.X-B.X)^2+(A.Y-B.Y)^2+(A.Z-B.Z)^2))
+    // )
+
+    // How derived: geometric reasoning. Bounds of cylinder is same as for 2
+    // circles centered on A and B. This sqrt thingy gives sine of angle between
+    // axis and direction, used to find projection of radius.
+
+    vector kr
+    (
+        sqrt(sqr(unitDir_.y()) + sqr(unitDir_.z())),
+        sqrt(sqr(unitDir_.x()) + sqr(unitDir_.z())),
+        sqrt(sqr(unitDir_.x()) + sqr(unitDir_.y()))
+    );
+
+    kr *= radius_;
+
+    point min = point1_ - kr;
+    point max = point1_ + kr;
+
+    min = ::Foam::min(min, point2_ - kr);
+    max = ::Foam::max(max, point2_ + kr);
+
+    return boundBox(min, max);
 }
 
 

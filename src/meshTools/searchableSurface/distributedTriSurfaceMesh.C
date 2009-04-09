@@ -79,6 +79,23 @@ bool Foam::distributedTriSurfaceMesh::read()
     // Merge distance
     mergeDist_ = readScalar(dict_.lookup("mergeDistance"));
 
+    // Calculate the overall boundBox of the undistributed surface
+    point overallMin(VGREAT, VGREAT, VGREAT);
+    point overallMax(-VGREAT, -VGREAT, -VGREAT);
+
+    forAll(procBb_, procI)
+    {
+        const List<treeBoundBox>& bbs = procBb_[procI];
+
+        forAll(bbs, bbI)
+        {
+            overallMin = ::Foam::min(overallMin, bbs[bbI].min());
+            overallMax = ::Foam::max(overallMax, bbs[bbI].max());
+        }
+    }
+
+    bounds() = boundBox(overallMin, overallMax);
+
     return true;
 }
 
@@ -876,7 +893,7 @@ Foam::distributedTriSurfaceMesh::independentlyDistributedBbs
         bbs[procI].setSize(1);
         //bbs[procI][0] = boundBox::invertedBox;
         bbs[procI][0].min() = point( VGREAT,  VGREAT,  VGREAT);
-        bbs[procI][0].max() = point(-VGREAT, -VGREAT, -VGREAT); 
+        bbs[procI][0].max() = point(-VGREAT, -VGREAT, -VGREAT);
     }
 
     forAll (s, triI)
@@ -2172,6 +2189,23 @@ void Foam::distributedTriSurfaceMesh::distribute
         {
             procBb_.transfer(newProcBb);
             dict_.set("bounds", procBb_[Pstream::myProcNo()]);
+
+            // Calculate the overall boundBox of the undistributed surface
+            point overallMin(VGREAT, VGREAT, VGREAT);
+            point overallMax(-VGREAT, -VGREAT, -VGREAT);
+
+            forAll(procBb_, procI)
+            {
+                const List<treeBoundBox>& bbs = procBb_[procI];
+
+                forAll(bbs, bbI)
+                {
+                    overallMin = ::Foam::min(overallMin, bbs[bbI].min());
+                    overallMax = ::Foam::max(overallMax, bbs[bbI].max());
+                }
+            }
+
+            bounds() = boundBox(overallMin, overallMax);
         }
     }
 

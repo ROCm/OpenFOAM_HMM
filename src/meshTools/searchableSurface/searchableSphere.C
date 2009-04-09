@@ -136,8 +136,8 @@ Foam::searchableSphere::searchableSphere
 {
     bounds() = boundBox
     (
-        centre_ + radius_*vector::one,
-        centre_ - radius_*vector::one
+        centre_ - radius_*vector::one,
+        centre_ + radius_*vector::one
     );
 }
 
@@ -154,8 +154,8 @@ Foam::searchableSphere::searchableSphere
 {
     bounds() = boundBox
     (
-        centre_ + radius_*vector::one,
-        centre_ - radius_*vector::one
+        centre_ - radius_*vector::one,
+        centre_ + radius_*vector::one
     );
 }
 

@@ -160,6 +160,19 @@ public:
                 List<List<pointIndexHit> >& surfaceHits
             );
 
+            //Find intersections of edge nearest to both endpoints.
+            static void findNearestIntersection
+            (
+                const PtrList<searchableSurface>& allSurfaces,
+                const labelList& surfacesToTest,
+                const pointField& start,
+                const pointField& end,
+                labelList& surface1,
+                List<pointIndexHit>& hit1,
+                labelList& surface2,
+                List<pointIndexHit>& hit2
+            );
+
             //- Find nearest. Return -1 (and a miss()) or surface and nearest
             //  point.
             static void findNearest

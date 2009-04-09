@@ -67,6 +67,31 @@ Foam::pointIndexHit Foam::searchablePlane::findLine
 }
 
 
+Foam::boundBox Foam::searchablePlane::calcBounds() const
+{
+    point max(VGREAT, VGREAT, VGREAT);
+
+    if (mag(normal() & vector(1,0,0)) > 1 - SMALL)
+    {
+        max.x() = 0;
+    }
+
+    if (mag(normal() & vector(0,1,0)) > 1 - SMALL)
+    {
+        max.y() = 0;
+    }
+
+    if (mag(normal() & vector(0,0,1)) > 1 - SMALL)
+    {
+        max.z() = 0;
+    }
+
+    point min = -max;
+
+    return boundBox(min, max);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::searchablePlane::searchablePlane
@@ -78,7 +103,9 @@ Foam::searchablePlane::searchablePlane
 :
     searchableSurface(io),
     plane(basePoint, normal)
-{}
+{
+    bounds() = calcBounds();
+}
 
 
 Foam::searchablePlane::searchablePlane
@@ -89,7 +116,9 @@ Foam::searchablePlane::searchablePlane
 :
     searchableSurface(io),
     plane(dict)
-{}
+{
+    bounds() = calcBounds();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

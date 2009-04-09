@@ -70,6 +70,8 @@ private:
             const point& end
         ) const;
 
+        //- Return the boundBox of the plane
+        boundBox calcBounds() const;
 
         //- Disallow default bitwise copy construct
         searchablePlane(const searchablePlane&);

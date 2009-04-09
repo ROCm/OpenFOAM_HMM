@@ -552,93 +552,92 @@ void Foam::searchableSurfacesQueries::findAllIntersections
 }
 
 
-//// Find intersections of edge nearest to both endpoints.
-//void Foam::searchableSurfacesQueries::findNearestIntersection
-//(
-//    const PtrList<searchableSurface>& allSurfaces,
-//    const labelList& surfacesToTest,
-//    const pointField& start,
-//    const pointField& end,
-//
-//    labelList& surface1,
-//    List<pointIndexHit>& hit1,
-//    labelList& surface2,
-//    List<pointIndexHit>& hit2
-//)
-//{
-//    // 1. intersection from start to end
-//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//    // Initialize arguments
-//    surface1.setSize(start.size());
-//    surface1 = -1;
-//    hit1.setSize(start.size());
-//
-//    // Current end of segment to test.
-//    pointField nearest(end);
-//    // Work array
-//    List<pointIndexHit> nearestInfo(start.size());
-//
-//    forAll(surfacesToTest, testI)
-//    {
-//        // See if any intersection between start and current nearest
-//        allSurfaces[surfacesToTest[testI]].findLine
-//        (
-//            start,
-//            nearest,
-//            nearestInfo
-//        );
-//
-//        forAll(nearestInfo, pointI)
-//        {
-//            if (nearestInfo[pointI].hit())
-//            {
-//                hit1[pointI] = nearestInfo[pointI];
-//                surface1[pointI] = testI;
-//                nearest[pointI] = hit1[pointI].hitPoint();
-//            }
-//        }
-//    }
-//
-//
-//    // 2. intersection from end to last intersection
-//    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-//
-//    // Find the nearest intersection from end to start. Note that we
-//    // initialize to the first intersection (if any).
-//    surface2 = surface1;
-//    hit2 = hit1;
-//
-//    // Set current end of segment to test.
-//    forAll(nearest, pointI)
-//    {
-//        if (hit1[pointI].hit())
-//        {
-//            nearest[pointI] = hit1[pointI].hitPoint();
-//        }
-//        else
-//        {
-//            // Disable testing by setting to end.
-//            nearest[pointI] = end[pointI];
-//        }
-//    }
-//
-//    forAll(surfacesToTest, testI)
-//    {
-//        // See if any intersection between end and current nearest
-//        allSurfaces[surfacesToTest[i]].findLine(end, nearest, nearestInfo);
-//
-//        forAll(nearestInfo, pointI)
-//        {
-//            if (nearestInfo[pointI].hit())
-//            {
-//                hit2[pointI] = nearestInfo[pointI];
-//                surface2[pointI] = testI;
-//                nearest[pointI] = hit2[pointI].hitPoint();
-//            }
-//        }
-//    }
-//}
+//Find intersections of edge nearest to both endpoints.
+void Foam::searchableSurfacesQueries::findNearestIntersection
+(
+   const PtrList<searchableSurface>& allSurfaces,
+   const labelList& surfacesToTest,
+   const pointField& start,
+   const pointField& end,
+   labelList& surface1,
+   List<pointIndexHit>& hit1,
+   labelList& surface2,
+   List<pointIndexHit>& hit2
+)
+{
+   // 1. intersection from start to end
+   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   // Initialize arguments
+   surface1.setSize(start.size());
+   surface1 = -1;
+   hit1.setSize(start.size());
+
+   // Current end of segment to test.
+   pointField nearest(end);
+   // Work array
+   List<pointIndexHit> nearestInfo(start.size());
+
+   forAll(surfacesToTest, testI)
+   {
+       // See if any intersection between start and current nearest
+       allSurfaces[surfacesToTest[testI]].findLine
+       (
+           start,
+           nearest,
+           nearestInfo
+       );
+
+       forAll(nearestInfo, pointI)
+       {
+           if (nearestInfo[pointI].hit())
+           {
+               hit1[pointI] = nearestInfo[pointI];
+               surface1[pointI] = testI;
+               nearest[pointI] = hit1[pointI].hitPoint();
+           }
+       }
+   }
+
+
+   // 2. intersection from end to last intersection
+   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+   // Find the nearest intersection from end to start. Note that we
+   // initialize to the first intersection (if any).
+   surface2 = surface1;
+   hit2 = hit1;
+
+   // Set current end of segment to test.
+   forAll(nearest, pointI)
+   {
+       if (hit1[pointI].hit())
+       {
+           nearest[pointI] = hit1[pointI].hitPoint();
+       }
+       else
+       {
+           // Disable testing by setting to end.
+           nearest[pointI] = end[pointI];
+       }
+   }
+
+   forAll(surfacesToTest, testI)
+   {
+       // See if any intersection between end and current nearest
+       allSurfaces[surfacesToTest[testI]].findLine(end, nearest, nearestInfo);
+
+       forAll(nearestInfo, pointI)
+       {
+           if (nearestInfo[pointI].hit())
+           {
+               hit2[pointI] = nearestInfo[pointI];
+               surface2[pointI] = testI;
+               nearest[pointI] = hit2[pointI].hitPoint();
+           }
+       }
+   }
+}
 
 
 // Find nearest. Return -1 or nearest point

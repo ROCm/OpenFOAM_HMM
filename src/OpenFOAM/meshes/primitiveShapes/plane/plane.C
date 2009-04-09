@@ -128,7 +128,20 @@ Foam::plane::plane(const vector& normalVector)
 :
     unitVector_(normalVector),
     basePoint_(vector::zero)
-{}
+{
+    scalar magUnitVector(mag(unitVector_));
+
+    if (magUnitVector > VSMALL)
+    {
+        unitVector_ /= magUnitVector;
+    }
+    else
+    {
+        FatalErrorIn("plane::plane(const vector&)")
+        << "plane normal has got zero length"
+            << abort(FatalError);
+    }
+}
 
 
 // Construct from point and normal vector

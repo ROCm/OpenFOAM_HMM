@@ -83,14 +83,20 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
     Random rndGen(1735621);
     scalar pert = randomPerturbationCoeff_*cmptMin(delta);
 
-    pointField points(ni*nj*nk);
-
-    label pI = 0;
+    std::vector<Vb::Point> initialPoints;
 
     for (int i = 0; i < ni; i++)
     {
         for (int j = 0; j < nj; j++)
         {
+            // Generating, testing and adding points one line at a time to
+            // reduce the memory requirement for cases with bounding boxes that
+            // are very large in comparison to the volume to be filled
+
+            label pI = 0;
+
+            pointField points(nk);
+
             for (int k = 0; k < nk; k++)
             {
                 point p
@@ -109,24 +115,22 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
 
                 points[pI++] = p;
             }
-        }
-    }
 
-    std::vector<Vb::Point> initialPoints;
+            Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
+            (
+                points,
+                minimumSurfaceDistance_*minimumSurfaceDistance_
+            );
 
-    Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
-    (
-        points,
-        minimumSurfaceDistance_*minimumSurfaceDistance_
-    );
+            forAll(insidePoints, i)
+            {
+                if (insidePoints[i])
+                {
+                    const point& p(points[i]);
 
-    forAll(insidePoints, i)
-    {
-        if (insidePoints[i])
-        {
-            const point& p(points[i]);
-
-            initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+                    initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+                }
+            }
         }
     }
 
