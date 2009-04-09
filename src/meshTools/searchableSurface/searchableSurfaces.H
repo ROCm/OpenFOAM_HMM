@@ -154,6 +154,17 @@ public:
                 List<List<pointIndexHit> >&
             ) const;
 
+            //Find intersections of edge nearest to both endpoints.
+            void findNearestIntersection
+            (
+                const pointField& start,
+                const pointField& end,
+                labelList& surface1,
+                List<pointIndexHit>& hit1,
+                labelList& surface2,
+                List<pointIndexHit>& hit2
+            ) const;
+
             //- Find nearest. Return -1 (and a miss()) or surface and nearest
             //  point.
             void findNearest
@@ -163,6 +174,9 @@ public:
                 labelList& surfaces,
                 List<pointIndexHit>&
             ) const;
+
+            //- Calculate bounding box
+            boundBox bounds() const;
 
 
         // Single point queries

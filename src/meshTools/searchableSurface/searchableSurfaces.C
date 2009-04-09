@@ -285,7 +285,8 @@ void Foam::searchableSurfaces::findAnyIntersection
 }
 
 
-// Find intersections of edge nearest to both endpoints.
+//- Find all intersections in order from start to end. Returns for
+//  every hit the surface and the hit info.
 void Foam::searchableSurfaces::findAllIntersections
 (
     const pointField& start,
@@ -306,6 +307,31 @@ void Foam::searchableSurfaces::findAllIntersections
 }
 
 
+//Find intersections of edge nearest to both endpoints.
+void Foam::searchableSurfaces::findNearestIntersection
+(
+    const pointField& start,
+    const pointField& end,
+    labelList& surface1,
+    List<pointIndexHit>& hit1,
+    labelList& surface2,
+    List<pointIndexHit>& hit2
+) const
+{
+    searchableSurfacesQueries::findNearestIntersection
+    (
+        *this,
+        allSurfaces_,
+        start,
+        end,
+        surface1,
+        hit1,
+        surface2,
+        hit2
+    );
+}
+
+
 // Find nearest. Return -1 or nearest point
 void Foam::searchableSurfaces::findNearest
 (
@@ -315,7 +341,7 @@ void Foam::searchableSurfaces::findNearest
     List<pointIndexHit>& nearestInfo
 ) const
 {
-    return searchableSurfacesQueries::findNearest
+    searchableSurfacesQueries::findNearest
     (
         *this,
         allSurfaces_,
@@ -323,6 +349,17 @@ void Foam::searchableSurfaces::findNearest
         nearestDistSqr,
         nearestSurfaces,
         nearestInfo
+    );
+}
+
+
+//- Calculate bounding box
+Foam::boundBox Foam::searchableSurfaces::bounds() const
+{
+    return searchableSurfacesQueries::bounds
+    (
+        *this,
+        allSurfaces_
     );
 }
 

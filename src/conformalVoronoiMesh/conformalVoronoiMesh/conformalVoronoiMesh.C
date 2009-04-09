@@ -204,6 +204,60 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 void Foam::conformalVoronoiMesh::conformToSurface()
 {
     startOfSurfacePointPairs_ = number_of_vertices();
+
+    const dictionary& cvMeshDict( cvMeshControls_.cvMeshDict());
+
+    scalar defaultCellSize
+    (
+        cvMeshDict.subDict("motionControl").lookup("defaultCellSize")
+    );
+
+    scalar surfDepthCoeff
+    (
+        cvMeshDict.subDict("surfaceConformation").lookup
+        (
+            "surfacePointSearchDepthCoeff"
+        )
+    );
+
+    DynamicList<point> surfacePoints;
+    DynamicList<point> surfaceNormals;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalPoint())
+        {
+            point vert(topoint(vit->point()));
+
+            // TODO Need to have a function to recover the local cell size, use
+            // the defaultCellSize for the moment
+
+            scalar searchDistanceSqr = sqr(defaultCellSize*surfDepthCoeff);
+
+            pointIndexHit pHit = geometryToConformTo_.findNearest
+            (
+                vert,
+                searchDistanceSqr
+            );
+
+            if (pHit.hit())
+            {
+                vit->setNearBoundary();
+
+                if (dualCellSurfaceIntersection(vit))
+                {
+                    allNearSurfacePoints.append(vert);
+                    allSurfacePoints.append(pHit.hitPoint());
+                    allSurfaceTris.append(pHit.index());
+                }
+            }
+        }
+    }
 }
 
 

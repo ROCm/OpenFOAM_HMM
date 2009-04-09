@@ -253,7 +253,6 @@ bool Foam::conformationSurfaces::findAnyIntersection
     );
 
     return hitInfo[0].hit();
-
 }
 
 
