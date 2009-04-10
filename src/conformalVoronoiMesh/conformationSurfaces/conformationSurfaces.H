@@ -40,6 +40,7 @@ SourceFiles
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
 #include "featureEdgeMesh.H"
+#include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -145,6 +146,16 @@ public:
 
             // Finding if the line joining start and end intersects the surface
             bool findAnyIntersection(point start, point end) const;
+
+            //- Find the nearest point to the sample and return it to the
+            //  pointIndexHit, and the normal at the hit location, if found.
+            void findNearestAndNormal
+            (
+                const point& sample,
+                scalar nearestDistSqr,
+                pointIndexHit& pHit,
+                vector& normal
+            ) const;
 
 
     // Member Operators

@@ -48,6 +48,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "SortableList.H"
 #include "meshTools.H"
 #include "triSurfaceTools.H"
 #include "mathematicalConstants.H"
@@ -122,6 +123,16 @@ class conformalVoronoiMesh
         //- Insert a Vb (a typedef of CGAL::indexedVertex<K>)
         inline void insertVb(const Vb& v);
 
+        //- Insert pairs of points on the surface with the given normals, at the
+        //  specified spacing
+        void insertSurfacePointPairs
+        (
+            const List<scalar>& surfacePpDist,
+            const List<point>& surfacePoints,
+            const List<vector>& surfaceNormals,
+            const fileName fName = fileName::null
+        );
+
         //- Insert point groups at the feature points.
         void insertFeaturePoints();
 
@@ -138,6 +149,18 @@ class conformalVoronoiMesh
         (
             const Triangulation::Finite_vertices_iterator& vit
         ) const;
+
+        //- Dual calculation
+        void calcDualMesh
+        (
+            pointField& points,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchNames,
+            labelList& patchSizes,
+            labelList& patchStarts
+        );
 
         //- Disallow default bitwise copy construct
         conformalVoronoiMesh(const conformalVoronoiMesh&);
@@ -201,6 +224,25 @@ public:
 
             //- Write Delaunay points to .obj file
             void writePoints(const fileName& fName, bool internalOnly) const;
+
+            //- Write list of points to file
+            void writePoints
+            (
+                const fileName& fName,
+                const List<point>& points
+            ) const;
+
+            //- Write polyMesh
+            void writeMesh();
+
+            //- Write dual points and faces as .obj file
+            void writeDual
+            (
+                const pointField& points,
+                const faceList& faces,
+                const fileName& fName
+            ) const;
+
 };
 
 

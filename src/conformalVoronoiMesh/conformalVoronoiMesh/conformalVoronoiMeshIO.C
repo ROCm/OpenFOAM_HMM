@@ -55,4 +55,123 @@ void Foam::conformalVoronoiMesh::writePoints
 }
 
 
+void Foam::conformalVoronoiMesh::writePoints
+(
+    const fileName& fName,
+    const List<point>& points
+) const
+{
+    Info<< nl << "Writing " << points.size() << " points from pointList to "
+        << fName << endl;
+
+    OFstream str(fName);
+
+    forAll(points, p)
+    {
+        meshTools::writeOBJ(str, points[p]);
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::writeMesh()
+{
+    pointField points(0);
+    faceList faces(0);
+    labelList owner(0);
+    labelList neighbour(0);
+    wordList patchNames(0);
+    labelList patchSizes(0);
+    labelList patchStarts(0);
+
+    calcDualMesh
+    (
+        points,
+        faces,
+        owner,
+        neighbour,
+        patchNames,
+        patchSizes,
+        patchStarts
+    );
+
+    writeDual(points, faces, "dualMesh.obj");
+
+    IOobject io
+    (
+        Foam::polyMesh::defaultRegion,
+        runTime_.constant(),
+        runTime_,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    Info<< nl << "Writing polyMesh to constant." << endl;
+
+
+    polyMesh pMesh
+    (
+        io,
+        xferMove(points),
+        xferMove(faces),
+        xferMove(owner),
+        xferMove(neighbour)
+    );
+
+    List<polyPatch*> patches(patchStarts.size());
+
+    forAll (patches, p)
+    {
+        patches[p] = new polyPatch
+        (
+            patchNames[p],
+            patchSizes[p],
+            patchStarts[p],
+            p,
+            pMesh.boundaryMesh()
+        );
+    }
+
+    pMesh.addPatches(patches);
+
+    if (!pMesh.write())
+    {
+        FatalErrorIn("Foam::conformalVoronoiMesh::writeMesh()")
+        << "Failed writing polyMesh."
+            << exit(FatalError);
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::writeDual
+(
+    const pointField& points,
+    const faceList& faces,
+    const fileName& fName
+) const
+{
+    Info<< nl << "Writing dual points and faces to " << fName << endl;
+
+    OFstream str(fName);
+
+    forAll(points, p)
+    {
+        meshTools::writeOBJ(str, points[p]);
+    }
+
+    forAll (faces, f)
+    {
+        str<< 'f';
+
+        const face& fP = faces[f];
+
+        forAll(fP, p)
+        {
+            str<< ' ' << fP[p] + 1;
+        }
+
+        str<< nl;
+    }
+}
+
+
 // ************************************************************************* //

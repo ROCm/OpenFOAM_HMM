@@ -256,4 +256,42 @@ bool Foam::conformationSurfaces::findAnyIntersection
 }
 
 
+void Foam::conformationSurfaces::findNearestAndNormal
+(
+    const point& sample,
+    scalar nearestDistSqr,
+    pointIndexHit& pHit,
+    vector& normal
+) const
+{
+    labelList hitSurfaces;
+    List<pointIndexHit> hitInfo;
+
+    searchableSurfacesQueries::findNearest
+    (
+        allGeometry_,
+        surfaces_,
+        pointField(1, sample),
+        scalarField(1, nearestDistSqr),
+        hitSurfaces,
+        hitInfo
+    );
+
+    pHit = hitInfo[0];
+
+    if (pHit.hit())
+    {
+        vectorField normals;
+
+        // hitSurfaces has returned the index of the entry in surfaces_ that was
+        // found, not the index of the surface in allGeometry_, translating this
+        // on access to allGeometry_ for the normal lookup.
+
+        allGeometry_[surfaces_[hitSurfaces[0]]].getNormal(hitInfo, normals);
+
+        normal = normals[0];
+    }
+}
+
+
 // ************************************************************************* //
