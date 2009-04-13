@@ -350,7 +350,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
             scalar selectedPairs =
                 collisionSelectionRemainder_[celli]
-              + 0.5*nC*(nC-1)*nParticle_*sigmaTcRMax*deltaT
+              + 0.5*nC*(nC - 1)*nParticle_*sigmaTcRMax*deltaT
                /mesh_.cellVolumes()[celli];
 
             label nCandidates(selectedPairs);
@@ -859,7 +859,11 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
 {
     scalar Ei = 0.0;
 
-    if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
+    if (iDof < SMALL)
+    {
+        return Ei;
+    }
+    else if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
     {
         // Special case for iDof = 2, i.e. diatomics;
         Ei = -log(rndGen_.scalar01())*kb*temperature;
