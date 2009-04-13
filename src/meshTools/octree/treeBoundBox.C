@@ -309,12 +309,14 @@ bool Foam::treeBoundBox::overlaps
 //     This makes sure that posBits tests 'inside'
 bool Foam::treeBoundBox::intersects
 (
+    const point& overallStart,
+    const vector& overallVec,
     const point& start,
     const point& end,
-    point& pt
+    point& pt,
+    direction& ptOnFaces
 ) const
 {
-    const vector vec(end - start);
     const direction endBits = posBits(end);
     pt = start;
 
@@ -325,84 +327,122 @@ bool Foam::treeBoundBox::intersects
         if (ptBits == 0)
         {
             // pt inside bb
+            ptOnFaces = faceBits(pt);
             return true;
         }
 
         if ((ptBits & endBits) != 0)
         {
             // pt and end in same block outside of bb
+            ptOnFaces = faceBits(pt);
             return false;
         }
 
         if (ptBits & LEFTBIT)
         {
             // Intersect with plane V=min, n=-1,0,0
-            if (Foam::mag(vec.x()) > VSMALL)
+            if (Foam::mag(overallVec.x()) > VSMALL)
             {
-                scalar s = (min().x() - pt.x())/vec.x();
+                scalar s = (min().x() - overallStart.x())/overallVec.x();
                 pt.x() = min().x();
-                pt.y() = pt.y() + vec.y()*s;
-                pt.z() = pt.z() + vec.z()*s;
+                pt.y() = overallStart.y() + overallVec.y()*s;
+                pt.z() = overallStart.z() + overallVec.z()*s;
+            }
+            else
+            {
+                // Vector not in x-direction. But still intersecting bb planes.
+                // So must be close - just snap to bb.
+                pt.x() = min().x();
             }
         }
-        if (ptBits & RIGHTBIT)
+        else if (ptBits & RIGHTBIT)
         {
             // Intersect with plane V=max, n=1,0,0
-            if (Foam::mag(vec.x()) > VSMALL)
+            if (Foam::mag(overallVec.x()) > VSMALL)
             {
-                scalar s = (max().x() - pt.x())/vec.x();
+                scalar s = (max().x() - overallStart.x())/overallVec.x();
                 pt.x() = max().x();
-                pt.y() = pt.y() + vec.y()*s;
-                pt.z() = pt.z() + vec.z()*s;
+                pt.y() = overallStart.y() + overallVec.y()*s;
+                pt.z() = overallStart.z() + overallVec.z()*s;
+            }
+            else
+            {
+                pt.x() = max().x();
             }
         }
-
-        if (ptBits & BOTTOMBIT)
+        else if (ptBits & BOTTOMBIT)
         {
             // Intersect with plane V=min, n=0,-1,0
-            if (Foam::mag(vec.y()) > VSMALL)
+            if (Foam::mag(overallVec.y()) > VSMALL)
             {
-                scalar s = (min().y() - pt.y())/vec.y();
-                pt.x() = pt.x() + vec.x()*s;
+                scalar s = (min().y() - overallStart.y())/overallVec.y();
+                pt.x() = overallStart.x() + overallVec.x()*s;
                 pt.y() = min().y();
-                pt.z() = pt.z() + vec.z()*s;
+                pt.z() = overallStart.z() + overallVec.z()*s;
+            }
+            else
+            {
+                pt.x() = min().y();
             }
         }
-        if (ptBits & TOPBIT)
+        else if (ptBits & TOPBIT)
         {
             // Intersect with plane V=max, n=0,1,0
-            if (Foam::mag(vec.y()) > VSMALL)
+            if (Foam::mag(overallVec.y()) > VSMALL)
             {
-                scalar s = (max().y() - pt.y())/vec.y();
-                pt.x() = pt.x() + vec.x()*s;
+                scalar s = (max().y() - overallStart.y())/overallVec.y();
+                pt.x() = overallStart.x() + overallVec.x()*s;
                 pt.y() = max().y();
-                pt.z() = pt.z() + vec.z()*s;
+                pt.z() = overallStart.z() + overallVec.z()*s;
+            }
+            else
+            {
+                pt.y() = max().y();
             }
         }
-
-        if (ptBits & BACKBIT)
+        else if (ptBits & BACKBIT)
         {
             // Intersect with plane V=min, n=0,0,-1
-            if (Foam::mag(vec.z()) > VSMALL)
+            if (Foam::mag(overallVec.z()) > VSMALL)
             {
-                scalar s = (min().z() - pt.z())/vec.z();
-                pt.x() = pt.x() + vec.x()*s;
-                pt.y() = pt.y() + vec.y()*s;
+                scalar s = (min().z() - overallStart.z())/overallVec.z();
+                pt.x() = overallStart.x() + overallVec.x()*s;
+                pt.y() = overallStart.y() + overallVec.y()*s;
+                pt.z() = min().z();
+            }
+            else
+            {
                 pt.z() = min().z();
             }
         }
-        if (ptBits & FRONTBIT)
+        else if (ptBits & FRONTBIT)
         {
             // Intersect with plane V=max, n=0,0,1
-            if (Foam::mag(vec.z()) > VSMALL)
+            if (Foam::mag(overallVec.z()) > VSMALL)
             {
-                scalar s = (max().z() - pt.z())/vec.z();
-                pt.x() = pt.x() + vec.x()*s;
-                pt.y() = pt.y() + vec.y()*s;
+                scalar s = (max().z() - overallStart.z())/overallVec.z();
+                pt.x() = overallStart.x() + overallVec.x()*s;
+                pt.y() = overallStart.y() + overallVec.y()*s;
+                pt.z() = max().z();
+            }
+            else
+            {
                 pt.z() = max().z();
             }
         }
     }
+}
+
+
+bool Foam::treeBoundBox::intersects
+(
+    const point& start,
+    const point& end,
+    point& pt
+) const
+{
+    direction ptBits;
+    return intersects(start, end-start, start, end, pt, ptBits);
 }
 
 
@@ -452,6 +492,40 @@ bool Foam::treeBoundBox::contains(const vector& dir, const point& pt) const
 }
 
 
+// Code position of pt on bounding box faces
+Foam::direction Foam::treeBoundBox::faceBits(const point& pt) const
+{
+    direction faceBits = 0;
+    if (pt.x() == min().x())
+    {
+        faceBits |= LEFTBIT;
+    }
+    else if (pt.x() == max().x())
+    {
+        faceBits |= RIGHTBIT;
+    }
+
+    if (pt.y() == min().y())
+    {
+        faceBits |= BOTTOMBIT;
+    }
+    else if (pt.y() == max().y())
+    {
+        faceBits |= TOPBIT;
+    }
+
+    if (pt.z() == min().z())
+    {
+        faceBits |= BACKBIT;
+    }
+    else if (pt.z() == max().z())
+    {
+        faceBits |= FRONTBIT;
+    }
+    return faceBits;
+}
+
+
 // Code position of point relative to box
 Foam::direction Foam::treeBoundBox::posBits(const point& pt) const
 {
@@ -461,7 +535,7 @@ Foam::direction Foam::treeBoundBox::posBits(const point& pt) const
     {
         posBits |= LEFTBIT;
     }
-    if (pt.x() > max().x())
+    else if (pt.x() > max().x())
     {
         posBits |= RIGHTBIT;
     }
@@ -470,7 +544,7 @@ Foam::direction Foam::treeBoundBox::posBits(const point& pt) const
     {
         posBits |= BOTTOMBIT;
     }
-    if (pt.y() > max().y())
+    else if (pt.y() > max().y())
     {
         posBits |= TOPBIT;
     }
@@ -479,7 +553,7 @@ Foam::direction Foam::treeBoundBox::posBits(const point& pt) const
     {
         posBits |= BACKBIT;
     }
-    if (pt.z() > max().z())
+    else if (pt.z() > max().z())
     {
         posBits |= FRONTBIT;
     }

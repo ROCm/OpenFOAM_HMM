@@ -2292,7 +2292,7 @@ bool Foam::autoLayerDriver::cellsUseFace
 Foam::label Foam::autoLayerDriver::checkAndUnmark
 (
     const addPatchCellLayer& addLayer,
-    const dictionary& motionDict,
+    const dictionary& meshQualityDict,
     const indirectPrimitivePatch& pp,
     const fvMesh& newMesh,
 
@@ -2304,7 +2304,7 @@ Foam::label Foam::autoLayerDriver::checkAndUnmark
     // Check the resulting mesh for errors
     Info<< nl << "Checking mesh with layer ..." << endl;
     faceSet wrongFaces(newMesh, "wrongFaces", newMesh.nFaces()/1000);
-    motionSmoother::checkMesh(false, newMesh, motionDict, wrongFaces);
+    motionSmoother::checkMesh(false, newMesh, meshQualityDict, wrongFaces);
     Info<< "Detected " << returnReduce(wrongFaces.size(), sumOp<label>())
         << " illegal faces"
         << " (concave, zero area or negative cell pyramid volume)"
@@ -2474,8 +2474,8 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
         << "      (cos:" << minCos << ')' << nl
         << "    - as long as the resulting face doesn't become concave"
         << " by more than "
-        << layerParams.concaveAngle()
-        << " degrees (0=straight, 180=fully concave)" << nl
+        << layerParams.concaveAngle() << " degrees" << nl
+        << "      (0=straight, 180=fully concave)" << nl
         << endl;
 
     label nChanged = mergePatchFacesUndo(minCos, concaveCos, motionDict);
@@ -2709,8 +2709,12 @@ void Foam::autoLayerDriver::addLayers
     boolList flaggedCells;
     boolList flaggedFaces;
 
-    while (true)
+    for (label iteration = 0; iteration < layerParams.nLayerIter(); iteration++)
     {
+        Info<< nl
+            << "Layer addition iteration " << iteration << nl
+            << "--------------------------" << endl;
+
         // Make sure displacement is equal on both sides of coupled patches.
         syncPatchDisplacement
         (
@@ -2951,10 +2955,23 @@ void Foam::autoLayerDriver::addLayers
         }
 
         // Unset the extrusion at the pp.
+        const dictionary& meshQualityDict =
+        (
+            iteration < layerParams.nRelaxedIter()
+          ? motionDict
+          : motionDict.subDict("relaxed")
+        );
+
+        if (iteration >= layerParams.nRelaxedIter())
+        {
+            Info<< "Switched to relaxed meshQuality constraints." << endl;
+        }
+
+
         label nTotChanged = checkAndUnmark
         (
             addLayer,
-            motionDict,
+            meshQualityDict,
             pp,
             newMesh,
 
@@ -2976,6 +2993,8 @@ void Foam::autoLayerDriver::addLayers
         // Reset mesh points and start again
         meshMover.movePoints(oldPoints);
         meshMover.correct();
+
+        Info<< endl;
     }
 
 

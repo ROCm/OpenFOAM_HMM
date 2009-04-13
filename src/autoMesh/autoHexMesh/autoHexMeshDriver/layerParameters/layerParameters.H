@@ -105,6 +105,10 @@ class layerParameters
 
         label nSnap_;
 
+        label nLayerIter_;
+
+        label nRelaxedIter_;
+
 
     // Private Member Functions
 
@@ -196,26 +200,20 @@ public:
                 return nGrow_;
             }
 
-            // Number of smoothing iterations of surface normals 
+            //- Number of smoothing iterations of surface normals 
             label nSmoothSurfaceNormals() const
             {
                 return nSmoothSurfaceNormals_;
             }
 
-            // Number of smoothing iterations of interior mesh movement
-            // direction  
+            //- Number of smoothing iterations of interior mesh movement
+            //  direction  
             label nSmoothNormals() const
             {
                 return nSmoothNormals_;
             }
 
-            // Smooth layer thickness over surface patches
-            label nSmoothThickness() const
-            {
-                return nSmoothThickness_;
-            }
-
-            // Stop layer growth on highly warped cells 
+            //- Stop layer growth on highly warped cells 
             scalar maxFaceThicknessRatio() const
             {
                 return maxFaceThicknessRatio_;
@@ -226,20 +224,26 @@ public:
                 return layerTerminationCos_;
             }
 
-            // Reduce layer growth where ratio thickness to medial 
-            // distance is large 
+            //- Smooth layer thickness over surface patches
+            label nSmoothThickness() const
+            {
+                return nSmoothThickness_;
+            }
+
+            //- Reduce layer growth where ratio thickness to medial 
+            //  distance is large 
             scalar maxThicknessToMedialRatio() const
             {
                 return maxThicknessToMedialRatio_;
             }
 
-            // Angle used to pick up medial axis points
+            //- Angle used to pick up medial axis points
             scalar minMedianAxisAngleCos() const
             {
                 return minMedianAxisAngleCos_;
             }
 
-            // Create buffer region for new layer terminations
+            //- Create buffer region for new layer terminations
             label nBufferCellsNoExtrude() const
             {
                 return nBufferCellsNoExtrude_;
@@ -249,6 +253,24 @@ public:
             {
                 return nSnap_;
             }
+
+            // Overall
+
+                //- Number of overall layer addition iterations
+                label nLayerIter() const
+                {
+                    return nLayerIter_;
+                }
+
+                //- Number of iterations after which relaxed motion rules
+                //  are to be used.
+                label nRelaxedIter() const
+                {
+                    return nRelaxedIter_;
+                }
+
+
+
 };
 
 
