@@ -200,7 +200,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             // Absorb parcel into carrier phase
             forAll(Y_, i)
             {
-                label id = td.composition().localToGlobalGasId(0, i);
+                label id = td.cloud().composition().localToGlobalGasId(0, i);
                 td.cloud().rhoTrans(id)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
