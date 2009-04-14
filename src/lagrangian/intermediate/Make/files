@@ -76,6 +76,10 @@ submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
 IntegrationScheme/makeIntegrationSchemes.C
 
 
+/* particle forces */
+particleForces/particleForces.C
+
+
 /* phase properties */
 phaseProperties/phaseProperties/phaseProperties.C
 phaseProperties/phaseProperties/phasePropertiesIO.C

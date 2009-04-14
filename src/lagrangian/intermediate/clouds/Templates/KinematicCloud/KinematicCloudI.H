@@ -24,6 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "fvmSup.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -101,32 +103,18 @@ Foam::KinematicCloud<ParcelType>::g() const
 
 
 template<class ParcelType>
+inline const Foam::particleForces&
+Foam::KinematicCloud<ParcelType>::forces() const
+{
+    return forces_;
+}
+
+
+template<class ParcelType>
 inline const Foam::dictionary&
 Foam::KinematicCloud<ParcelType>::interpolationSchemes() const
 {
     return interpolationSchemes_;
-}
-
-
-template<class ParcelType>
-inline Foam::Switch Foam::KinematicCloud<ParcelType>::forceGravity() const
-{
-    return forceGravity_;
-}
-
-
-template<class ParcelType>
-inline Foam::Switch Foam::KinematicCloud<ParcelType>::forceVirtualMass() const
-{
-    return forceVirtualMass_;
-}
-
-
-template<class ParcelType>
-inline Foam::Switch Foam::KinematicCloud<ParcelType>::
-forcePressureGradient() const
-{
-    return forcePressureGradient_;
 }
 
 

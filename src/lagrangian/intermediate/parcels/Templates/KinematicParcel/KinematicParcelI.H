@@ -37,8 +37,7 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
     minParticleMass_
     (
         dimensionedScalar(dict_.lookup("minParticleMass")).value()
-    ),
-    Cvm_(dimensionedScalar(dict_.lookup("Cvm")).value())
+    )
 {}
 
 
@@ -113,14 +112,6 @@ inline Foam::scalar
 Foam::KinematicParcel<ParcelType>::constantProperties::minParticleMass() const
 {
     return minParticleMass_;
-}
-
-
-template <class ParcelType>
-inline Foam::scalar
-Foam::KinematicParcel<ParcelType>::constantProperties::Cvm() const
-{
-    return Cvm_;
 }
 
 

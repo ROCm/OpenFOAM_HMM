@@ -51,7 +51,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvMatrices.H"
-#include "fvm.H"
+#include "particleForces.H"
 
 #include "IntegrationSchemesFwd.H"
 
@@ -129,23 +129,11 @@ class KinematicCloud
             const dimensionedVector& g_;
 
 
+        //- Optional particle forces
+        particleForces forces_;
+
         //- Interpolation schemes dictionary
         dictionary interpolationSchemes_;
-
-
-        // Forces to include in particle motion evaluation
-
-            //- Dictionary of forces
-            dictionary forcesDict_;
-
-            //- Gravity
-            Switch forceGravity_;
-
-            //- Virtual mass
-            Switch forceVirtualMass_;
-
-            //- Pressure gradient
-            Switch forcePressureGradient_;
 
 
         // References to the cloud sub-models
@@ -259,6 +247,10 @@ public:
 
                 //- Gravity
                 inline const dimensionedVector& g() const;
+
+
+            //- Optional particle forces
+            inline const particleForces& forces() const;
 
 
             // Interpolations

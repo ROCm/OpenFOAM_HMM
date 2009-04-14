@@ -142,27 +142,8 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     // Return linearised term from drag model
     Cud = td.cloud().drag().Cu(U - Uc_, d, rhoc_, rho, muc_);
 
-    // Initialise total force (per unit mass)
-    vector Ftot = vector::zero;
-
-    // Gravity force
-    if (td.cloud().forceGravity())
-    {
-        Ftot += td.g()*(1 - rhoc_/rho);
-    }
-
-    // Virtual mass force
-    if (td.cloud().forceVirtualMass())
-    {
-//        Ftot += td.constProps().Cvm()*rhoc_/rho*d(Uc - U)/dt;
-    }
-
-    // Pressure gradient force
-    if (td.cloud().forcePressureGradient())
-    {
-//        const vector& delta = td.cloud().mesh().deltaCoeffs()[cellI];
-//        Ftot += rhoc_/rho*(U & (delta^Uc_));
-    }
+    // Calculate particle forces
+    vector Ftot = td.cloud().forces().calc(cellI, dt, rhoc_, rho, Uc_, U);
 
 
     // New particle velocity

@@ -101,11 +101,8 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     U_(U),
     mu_(mu),
     g_(g),
+    forces_(mesh_, particleProperties_, g_.value()),
     interpolationSchemes_(particleProperties_.subDict("interpolationSchemes")),
-    forcesDict_(particleProperties_.subDict("forces")),
-    forceGravity_(forcesDict_.lookup("gravity")),
-    forceVirtualMass_(forcesDict_.lookup("virtualMass")),
-    forcePressureGradient_(forcesDict_.lookup("pressureGradient")),
     dispersionModel_
     (
         DispersionModel<KinematicCloud<ParcelType> >::New
