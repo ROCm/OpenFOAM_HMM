@@ -128,6 +128,25 @@ void Foam::phaseProperties::setGlobalGasIds
                 break;
             }
         }
+        if (globalGasIds_[i] == -1)
+        {
+            wordList gasNames(YGas.size());
+            forAll(YGas, gasI)
+            {
+                gasNames[gasI] = YGas[gasI].name();
+            }
+
+            FatalErrorIn
+            (
+                "void Foam::phaseProperties::setGlobalGasIds"
+                "("
+                    "const PtrList<volScalarField>&"
+                ")"
+            )   << "Could not find gas specie " << names_[i]
+                << " in species list" <<  nl
+                << "Available species are: " << nl << gasNames << nl
+                << exit(FatalError);
+        }
     }
 }
 
@@ -195,7 +214,8 @@ Foam::phaseProperties::phaseProperties()
     stateLabel_("(unknown)"),
     names_(0),
     Y_(0),
-    globalIds_(0)
+    globalIds_(0),
+    globalGasIds_(0)
 {}
 
 
@@ -205,7 +225,8 @@ Foam::phaseProperties::phaseProperties(const phaseProperties& pp)
     stateLabel_(pp.stateLabel_),
     names_(pp.names_),
     Y_(pp.Y_),
-    globalIds_(pp.globalIds_)
+    globalIds_(pp.globalIds_),
+    globalGasIds_(pp.globalGasIds_)
 {}
 
 
