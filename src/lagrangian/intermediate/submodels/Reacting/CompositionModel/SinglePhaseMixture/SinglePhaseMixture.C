@@ -31,7 +31,14 @@ License
 template<class CloudType>
 void Foam::SinglePhaseMixture<CloudType>::constructIds()
 {
-    if (this->phaseProps().size() != 1)
+    if (this->phaseProps().size() == 0)
+    {
+        FatalErrorIn
+        (
+            "void Foam::SinglePhaseMixture<CloudType>::constructIds()"
+        )   << "Phase list is empty" << nl << exit(FatalError);
+    }
+    else if (this->phaseProps().size() > 1)
     {
         FatalErrorIn
         (
