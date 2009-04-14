@@ -42,11 +42,13 @@ Foam::phaseProperties::phaseProperties(Istream& is)
 
     dictionaryEntry phaseInfo(dictionary::null, is);
 
-    if (!phaseInfo.isDict())
+    if (phaseInfo.size() == 0)
     {
-        FatalErrorIn("Foam::phaseProperties::phaseProperties(Istream& is)")
-            << "Phase properties should be given in dictionary entries"
-            << nl << exit(FatalError);
+        FatalErrorIn
+        (
+            "Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)"
+        )   << "No phases identified. Please define each phase property as "
+            << "a dictionary entry" << nl << exit(FatalError);
     }
 
     label nComponents = phaseInfo.size();
@@ -85,16 +87,17 @@ Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
 
     dictionaryEntry phaseInfo(dictionary::null, is);
 
-    if (!phaseInfo.isDict())
+    if (phaseInfo.size() == 0)
     {
         FatalErrorIn
         (
             "Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)"
-        )   << "Phase properties should be given in dictionary entries"
-            << nl << exit(FatalError);
+        )   << "No phases identified. Please define each phase property as "
+            << "a dictionary entry" << nl << exit(FatalError);
     }
 
     label nComponents = phaseInfo.size();
+
     pp.names_.setSize(nComponents);
     pp.Y_.setSize(nComponents);
 
