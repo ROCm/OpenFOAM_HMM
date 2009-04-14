@@ -62,6 +62,7 @@ Foam::SurfaceReactionModel<CloudType>::~SurfaceReactionModel()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 template<class CloudType>
 const CloudType& Foam::SurfaceReactionModel<CloudType>::owner() const
 {
