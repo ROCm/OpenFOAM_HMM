@@ -255,9 +255,12 @@ class autoLayerDriver
                 (
                     const indirectPrimitivePatch& pp,
                     const labelList& patchIDs,
+
                     const scalarField& patchExpansionRatio,
-                    const scalarField& patchFinalLayerRatio,
-                    const scalarField& patchRelMinThickness,
+                    const bool relativeSizes,
+                    const scalarField& patchFinalLayerThickness,
+                    const scalarField& patchMinThickness,
+
                     const labelList& cellLevel,
                     const labelList& patchNLayers,
                     const scalar edge0Len,

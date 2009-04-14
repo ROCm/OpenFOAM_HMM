@@ -163,7 +163,8 @@ Foam::layerParameters::layerParameters
         numLayers_.size(),
         readScalar(dict.lookup("expansionRatio"))
     ),
-    finalLayerRatio_
+    relativeSizes_(false),
+    finalLayerThickness_
     (
         numLayers_.size(),
         readScalar(dict.lookup("finalLayerRatio"))
@@ -244,10 +245,11 @@ Foam::layerParameters::layerParameters
         boundaryMesh.size(),
         readScalar(dict.lookup("expansionRatio"))
     ),
-    finalLayerRatio_
+    relativeSizes_(dict.lookup("relativeSizes")),
+    finalLayerThickness_
     (
         boundaryMesh.size(),
-        readScalar(dict.lookup("finalLayerRatio"))
+        readScalar(dict.lookup("finalLayerThickness"))
     ),
     minThickness_
     (
@@ -323,14 +325,21 @@ Foam::layerParameters::layerParameters
             numLayers_[patchI] =
                 readLabel(layerDict.lookup("nSurfaceLayers"));
 
-            //- Patch-wise layer parameters disabled for now. Just remove
-            //  settings in initialiser list and uncomment below.
-            //expansionRatio_[patchI] =
-            //    readScalar(layerDict.lookup("expansionRatio"));
-            //finalLayerRatio_[patchI] =
-            //    readScalar(layerDict.lookup("finalLayerRatio"));
-            //minThickness_[patchI] =
-            //    readScalar(layerDict.lookup("minThickness"));
+            layerDict.readIfPresent
+            (
+                "expansionRatio",
+                expansionRatio_[patchI]
+            );
+            layerDict.readIfPresent
+            (
+                "finalLayerThickness",
+                finalLayerThickness_[patchI]
+            );
+            layerDict.readIfPresent
+            (
+                "minThickness",
+                minThickness_[patchI]
+            );
         }
     }
 
