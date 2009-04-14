@@ -29,12 +29,16 @@ License
 template <class ParcelType>
 inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& dict
+    const dictionary& parentDict
 )
 :
-    rho0_(dimensionedScalar(dict.lookup("rho0")).value()),
-    minParticleMass_(dimensionedScalar(dict.lookup("minParticleMass")).value()),
-    Cvm_(dimensionedScalar(dict.lookup("Cvm")).value())
+    dict_(parentDict.subDict("constantProperties")),
+    rho0_(dimensionedScalar(dict_.lookup("rho0")).value()),
+    minParticleMass_
+    (
+        dimensionedScalar(dict_.lookup("minParticleMass")).value()
+    ),
+    Cvm_(dimensionedScalar(dict_.lookup("Cvm")).value())
 {}
 
 
@@ -87,6 +91,14 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 
 
 // * * * * * * * * * constantProperties Member Functions * * * * * * * * * * //
+
+template <class ParcelType>
+inline const Foam::dictionary&
+Foam::KinematicParcel<ParcelType>::constantProperties::dict() const
+{
+    return dict_;
+}
+
 
 template <class ParcelType>
 inline Foam::scalar

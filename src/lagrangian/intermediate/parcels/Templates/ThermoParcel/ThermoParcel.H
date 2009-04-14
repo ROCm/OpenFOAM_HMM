@@ -98,7 +98,7 @@ public:
     public:
 
         // Constructors
-        constantProperties(const dictionary& dict);
+        constantProperties(const dictionary& parentDict);
 
         // Member functions
 

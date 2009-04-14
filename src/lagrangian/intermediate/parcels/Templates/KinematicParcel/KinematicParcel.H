@@ -86,6 +86,9 @@ public:
     {
         // Private data
 
+            //- Constant properties dictionary
+            const dictionary dict_;
+
             //- Particle density [kg/m3] (constant)
             const scalar rho0_;
 
@@ -99,9 +102,12 @@ public:
     public:
 
         //- Constructor
-        constantProperties(const dictionary& dict);
+        constantProperties(const dictionary& parentDict);
 
         // Member functions
+
+            //- Return const access to the constant properties dictionary
+            inline const dictionary& dict() const;
 
             //- Return const access to the particle density
             inline scalar rho0() const;

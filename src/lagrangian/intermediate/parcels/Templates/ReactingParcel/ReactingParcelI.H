@@ -29,13 +29,13 @@ License
 template<class ParcelType>
 inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& dict
+    const dictionary& parentDict
 )
 :
-    ThermoParcel<ParcelType>::constantProperties(dict),
-    constantVolume_(dict.lookup("constantVolume")),
-    Tbp_(dimensionedScalar(dict.lookup("Tbp")).value()),
-    Tvap_(dimensionedScalar(dict.lookup("Tvap")).value())
+    ThermoParcel<ParcelType>::constantProperties(parentDict),
+    constantVolume_(this->dict().lookup("constantVolume")),
+    Tbp_(dimensionedScalar(this->dict().lookup("Tbp")).value()),
+    Tvap_(dimensionedScalar(this->dict().lookup("Tvap")).value())
 {}
 
 

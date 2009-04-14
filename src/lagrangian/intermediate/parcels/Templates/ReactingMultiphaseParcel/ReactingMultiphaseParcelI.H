@@ -30,12 +30,15 @@ template<class ParcelType>
 inline Foam::ReactingMultiphaseParcel<ParcelType>::constantProperties::
 constantProperties
 (
-    const dictionary& dict
+    const dictionary& parentDict
 )
 :
-    ReactingParcel<ParcelType>::constantProperties(dict),
-    LDevol_(dimensionedScalar(dict.lookup("LDevol")).value()),
-    hRetentionCoeff_(dimensionedScalar(dict.lookup("hRetentionCoeff")).value())
+    ReactingParcel<ParcelType>::constantProperties(parentDict),
+    LDevol_(dimensionedScalar(this->dict().lookup("LDevol")).value()),
+    hRetentionCoeff_
+    (
+        dimensionedScalar(this->dict().lookup("hRetentionCoeff")).value()
+    )
 {}
 
 

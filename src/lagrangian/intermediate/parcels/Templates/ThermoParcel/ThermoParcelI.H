@@ -29,14 +29,14 @@ License
 template<class ParcelType>
 inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 (
-    const dictionary& dict
+    const dictionary& parentDict
 )
 :
-    KinematicParcel<ParcelType>::constantProperties(dict),
-    T0_(dimensionedScalar(dict.lookup("T0")).value()),
-    cp0_(dimensionedScalar(dict.lookup("cp0")).value()),
-    epsilon0_(dimensionedScalar(dict.lookup("epsilon0")).value()),
-    f0_(dimensionedScalar(dict.lookup("f0")).value())
+    KinematicParcel<ParcelType>::constantProperties(parentDict),
+    T0_(dimensionedScalar(this->dict().lookup("T0")).value()),
+    cp0_(dimensionedScalar(this->dict().lookup("cp0")).value()),
+    epsilon0_(dimensionedScalar(this->dict().lookup("epsilon0")).value()),
+    f0_(dimensionedScalar(this->dict().lookup("f0")).value())
 {}
 
 

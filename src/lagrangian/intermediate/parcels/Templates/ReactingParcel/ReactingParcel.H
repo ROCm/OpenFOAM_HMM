@@ -93,7 +93,7 @@ public:
     public:
 
         //- Constructor
-        constantProperties(const dictionary& dict);
+        constantProperties(const dictionary& parentDict);
 
         // Access
 
