@@ -83,6 +83,7 @@ Usage
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+#   include "addRegionOption.H"
     argList::validOptions.insert("cellDist", "");
     argList::validOptions.insert("copyUniform", "");
     argList::validOptions.insert("fields", "");
@@ -91,6 +92,16 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("ifRequired", "");
 
 #   include "setRootCase.H"
+
+    word regionName = fvMesh::defaultRegion;
+
+    if (args.options().found("region"))
+    {
+        regionName = args.options()["region"];
+
+        Info<< "Decomposing mesh " << regionName << nl << endl;
+    }
+
 
     bool writeCellDist(args.options().found("cellDist"));
     bool copyUniform(args.options().found("copyUniform"));
@@ -119,6 +130,7 @@ int main(int argc, char *argv[])
             (
                 "decomposeParDict",
                 runTime.time().system(),
+                regionName,
                 runTime,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
@@ -196,7 +208,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            domainDecomposition::defaultRegion,
+            regionName,
             runTime.timeName(),
             runTime
         )
@@ -219,7 +231,7 @@ int main(int argc, char *argv[])
             (
                 runTime.path()
               / mesh.facesInstance()
-              / polyMesh::defaultRegion
+              / regionName
               / "cellDecomposition"
             );
 
@@ -383,7 +395,12 @@ int main(int argc, char *argv[])
 
             label i = 0;
 
-            forAllIter(Cloud<indexedParticle>, lagrangianPositions[cloudI], iter)
+            forAllIter
+            (
+                Cloud<indexedParticle>,
+                lagrangianPositions[cloudI],
+                iter
+            )
             {
                 iter().index() = i++;
 
@@ -405,7 +422,8 @@ int main(int argc, char *argv[])
 
                 if (!cellParticles[cloudI][celli])
                 {
-                    cellParticles[cloudI][celli] = new SLList<indexedParticle*>();
+                    cellParticles[cloudI][celli] = new SLList<indexedParticle*>
+                    ();
                 }
 
                 cellParticles[cloudI][celli]->append(&iter());
@@ -513,7 +531,7 @@ int main(int argc, char *argv[])
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                regionName,
                 processorDb.timeName(),
                 processorDb
             )
