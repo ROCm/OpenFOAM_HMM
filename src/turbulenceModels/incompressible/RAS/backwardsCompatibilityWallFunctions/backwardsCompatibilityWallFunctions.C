@@ -63,8 +63,8 @@ tmp<volScalarField> autoCreateNut
     }
     else
     {
-        Info<< "--> Upgrading " << fieldName << " to employ run-time "
-            << "selectable wall functions" << endl;
+        Info<< "--> Creating " << fieldName
+            << " to employ run-time selectable wall functions" << endl;
 
         const fvBoundaryMesh& bm = mesh.boundary();
 
@@ -103,7 +103,7 @@ tmp<volScalarField> autoCreateNut
             )
         );
 
-        Info<< "    Writing updated " << fieldName << endl;
+        Info<< "    Writing new " << fieldName << endl;
         nut().write();
 
         return nut;

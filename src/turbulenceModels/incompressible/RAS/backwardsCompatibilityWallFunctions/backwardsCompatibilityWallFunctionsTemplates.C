@@ -26,6 +26,7 @@ License
 
 #include "backwardsCompatibilityWallFunctions.H"
 #include "Time.H"
+#include "OSspecific.H"
 
 #include "wallPolyPatch.H"
 
@@ -77,26 +78,34 @@ autoCreateWallFunctionField
     }
     else
     {
-        Info<< "--> Upgrading " << fieldName << " to employ run-time "
-            << "selectable wall functions" << endl;
+        Info<< "--> Upgrading " << fieldName
+            << " to employ run-time selectable wall functions" << endl;
 
-        // Read existing epsilon field
+        // Read existing field
+        IOobject ioObj
+        (
+            fieldName,
+            mesh.time().timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
         tmp<fieldType> fieldOrig
         (
             new fieldType
             (
-                IOobject
-                (
-                    fieldName,
-                    mesh.time().timeName(),
-                    mesh,
-                    IOobject::MUST_READ,
-                    IOobject::NO_WRITE,
-                    false
-                ),
+                ioObj,
                 mesh
             )
         );
+
+        // rename file
+        Info<< "    Backup original " << fieldName << " to "
+            << fieldName << ".old" << endl;
+        mv(ioObj.objectPath(), ioObj.objectPath() + ".old");
+
 
         PtrList<fvPatchField<Type> > newPatchFields(mesh.boundary().size());
 
@@ -144,11 +153,6 @@ autoCreateWallFunctionField
                 newPatchFields
             )
         );
-
-        Info<< "    Writing backup of original " << fieldName << " to "
-            << fieldName << ".old" << endl;
-        fieldOrig().rename(fieldName + ".old");
-        fieldOrig().write();
 
         Info<< "    Writing updated " << fieldName << endl;
         fieldNew().write();
