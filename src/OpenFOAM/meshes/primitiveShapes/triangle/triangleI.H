@@ -439,7 +439,8 @@ inline pointHit triangle<Point, PointRef>::intersection
 (
     const point& orig,
     const vector& dir,
-    const intersection::algorithm alg
+    const intersection::algorithm alg,
+    const scalar tol
 ) const
 {
     const vector edge1 = b_ - a_;
@@ -457,98 +458,60 @@ inline pointHit triangle<Point, PointRef>::intersection
     if (alg == intersection::VISIBLE)
     {
         // Culling branch
-        if (det < SMALL)
+        if (det < ROOTVSMALL)
         {
-            // return miss
+            // Ray on wrong side of triangle. Return miss
             return intersection;
         }
-        /* calculate distance from a_ to ray origin */
-        const vector tVec = orig-a_;
-
-        /* calculate U parameter and test bounds */
-        scalar u = tVec & pVec;
-
-        if (u < 0.0 || u > det)
-        {
-            // return miss
-            return intersection;
-        }
-
-        /* prepare to test V parameter */
-        const vector qVec = tVec ^ edge1;
-
-        /* calculate V parameter and test bounds */
-        scalar v = dir & qVec;
-
-        if (v < 0.0 || u + v > det)
-        {
-            // return miss
-            return intersection;
-        }
-
-        /* calculate t, scale parameters, ray intersects triangle */
-        scalar t = edge2 & qVec;
-        scalar inv_det = 1.0 / det;
-        t *= inv_det;
-        u *= inv_det;
-        v *= inv_det;
-
-        intersection.setHit();
-        intersection.setPoint(a_ + u*edge1 + v*edge2);
-        intersection.setDistance(t);
     }
     else if (alg == intersection::HALF_RAY || alg == intersection::FULL_RAY)
     {
         // Non-culling branch
-        if (det > -SMALL && det < SMALL)
+        if (det > -ROOTVSMALL && det < ROOTVSMALL)
         {
-            // return miss
+            // Ray parallel to triangle. Return miss
             return intersection;
         }
-        const scalar inv_det = 1.0 / det;
-
-        /* calculate distance from a_ to ray origin */
-        const vector tVec = orig - a_;
-        /* calculate U parameter and test bounds */
-        const scalar u = (tVec & pVec)*inv_det;
-
-        if (u < 0.0 || u > 1.0)
-        {
-            // return miss
-            return intersection;
-        }
-        /* prepare to test V parameter */
-        const vector qVec = tVec ^ edge1;
-        /* calculate V parameter and test bounds */
-        const scalar v = (dir & qVec) * inv_det;
-
-        if (v < 0.0 || u + v > 1.0)
-        {
-            // return miss
-            return intersection;
-        }
-        /* calculate t, ray intersects triangle */
-        const scalar t = (edge2 & qVec) * inv_det;
-
-        if (alg == intersection::HALF_RAY && t < 0)
-        {
-            // return miss
-            return intersection;
-        }
-
-        intersection.setHit();
-        intersection.setPoint(a_ + u*edge1 + v*edge2);
-        intersection.setDistance(t);
     }
-    else
+
+    const scalar inv_det = 1.0 / det;
+
+    /* calculate distance from a_ to ray origin */
+    const vector tVec = orig-a_;
+
+    /* calculate U parameter and test bounds */
+    const scalar u = (tVec & pVec)*inv_det;
+
+    if (u < -tol || u > 1.0+tol)
     {
-        FatalErrorIn
-        (
-            "triangle<Point, PointRef>::intersection(const point&"
-            ", const vector&, const intersection::algorithm)"
-        )   << "intersection only defined for VISIBLE, FULL_RAY or HALF_RAY"
-            << abort(FatalError);
+        // return miss
+        return intersection;
     }
+
+    /* prepare to test V parameter */
+    const vector qVec = tVec ^ edge1;
+
+    /* calculate V parameter and test bounds */
+    const scalar v = (dir & qVec) * inv_det;
+
+    if (v < -tol || u + v > 1.0+tol)
+    {
+        // return miss
+        return intersection;
+    }
+
+    /* calculate t, scale parameters, ray intersects triangle */
+    const scalar t = (edge2 & qVec) * inv_det;
+
+    if (alg == intersection::HALF_RAY && t < -tol)
+    {
+        // Wrong side of orig. Return miss
+        return intersection;
+    }
+
+    intersection.setHit();
+    intersection.setPoint(a_ + u*edge1 + v*edge2);
+    intersection.setDistance(t);
 
     return intersection;
 }
@@ -622,7 +585,7 @@ inline bool triangle<Point, PointRef>::classify
 
     bool hit = false;
 
-    if (Foam::mag(u1) < SMALL)
+    if (Foam::mag(u1) < ROOTVSMALL)
     {
         beta = u0/u2;
 

@@ -32,7 +32,5 @@ if (dieselSpray.twoD())
     gasMass0 *= 2.0*mathematicalConstant::pi/dieselSpray.angleOfWedge();
 }
 
-reduce(gasMass0, sumOp<scalar>());
-
 gasMass0 -=
     dieselSpray.injectedMass(runTime.value()) - dieselSpray.liquidMass();

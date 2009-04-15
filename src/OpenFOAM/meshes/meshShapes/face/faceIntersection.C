@@ -136,7 +136,8 @@ Foam::pointHit Foam::face::intersection
     const vector& q,
     const point& ctr,
     const pointField& meshPoints,
-    const intersection::algorithm alg
+    const intersection::algorithm alg,
+    const scalar tol
 ) const
 {
     scalar nearestHitDist = VGREAT;
@@ -154,7 +155,7 @@ Foam::pointHit Foam::face::intersection
             meshPoints[f[pI]],
             meshPoints[f[fcIndex(pI)]],
             ctr
-        ).intersection(p, q, alg);
+        ).intersection(p, q, alg, tol);
 
         if (curHit.hit())
         {

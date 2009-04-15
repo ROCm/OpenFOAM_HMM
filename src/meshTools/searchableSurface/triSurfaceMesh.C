@@ -237,6 +237,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
         )
     ),
     triSurface(s),
+    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     surfaceClosed_(-1)
 {}
 
@@ -279,6 +280,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
             searchableSurface::objectPath()
         )
     ),
+    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     surfaceClosed_(-1)
 {}
 
@@ -324,6 +326,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
             searchableSurface::objectPath()
         )
     ),
+    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     surfaceClosed_(-1)
 {
     scalar scaleFactor = 0;
@@ -332,7 +335,17 @@ Foam::triSurfaceMesh::triSurfaceMesh
     // eg, CAD geometries are often done in millimeters
     if (dict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
     {
+        Info<< searchableSurface::name() << " : using scale " << scaleFactor
+            << endl;
         triSurface::scalePoints(scaleFactor);
+    }
+
+
+    // Have optional non-standard search tolerance for gappy surfaces.
+    if (dict.readIfPresent("tolerance", tolerance_) && tolerance_ > 0)
+    {
+        Info<< searchableSurface::name() << " : using intersection tolerance "
+            << tolerance_ << endl;
     }
 }
 
@@ -380,6 +393,9 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
         bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
+        scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+        indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
         tree_.reset
         (
             new indexedOctree<treeDataTriSurface>
@@ -391,6 +407,8 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
                 3.0     // duplicity
             )
         );
+
+        indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
     }
 
     return tree_();
@@ -491,6 +509,9 @@ void Foam::triSurfaceMesh::findNearest
 
     info.setSize(samples.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(samples, i)
     {
         static_cast<pointIndexHit&>(info[i]) = octree.findNearest
@@ -499,6 +520,8 @@ void Foam::triSurfaceMesh::findNearest
             nearestDistSqr[i]
         );
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -513,6 +536,9 @@ void Foam::triSurfaceMesh::findLine
 
     info.setSize(start.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(start, i)
     {
         static_cast<pointIndexHit&>(info[i]) = octree.findLine
@@ -521,6 +547,8 @@ void Foam::triSurfaceMesh::findLine
             end[i]
         );
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -535,6 +563,9 @@ void Foam::triSurfaceMesh::findLineAny
 
     info.setSize(start.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(start, i)
     {
         static_cast<pointIndexHit&>(info[i]) = octree.findLineAny
@@ -543,6 +574,8 @@ void Foam::triSurfaceMesh::findLineAny
             end[i]
         );
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -557,6 +590,9 @@ void Foam::triSurfaceMesh::findLineAll
 
     info.setSize(start.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     // Work array
     DynamicList<pointIndexHit, 1, 1> hits;
 
@@ -570,7 +606,7 @@ void Foam::triSurfaceMesh::findLineAll
     const scalarField magSqrDirVec(magSqr(dirVec));
     const vectorField smallVec
     (
-        Foam::sqrt(SMALL)*dirVec
+        indexedOctree<treeDataTriSurface>::perturbTol()*dirVec
       + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
     );
 
@@ -613,6 +649,8 @@ void Foam::triSurfaceMesh::findLineAll
             info[pointI].clear();
         }
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -649,7 +687,13 @@ void Foam::triSurfaceMesh::getNormal
     {
         if (info[i].hit())
         {
-            normal[i] = faceNormals()[info[i].index()];
+            label triI = info[i].index();
+            //- Cached:
+            //normal[i] = faceNormals()[triI];
+
+            //- Uncached
+            normal[i] = triSurface::operator[](triI).normal(points());
+            normal[i] /= mag(normal[i]) + VSMALL;
         }
         else
         {
@@ -691,6 +735,9 @@ void Foam::triSurfaceMesh::getVolumeType
 {
     volType.setSize(points.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(points, pointI)
     {
         const point& pt = points[pointI];
@@ -699,6 +746,8 @@ void Foam::triSurfaceMesh::getVolumeType
         // - cheat conversion since same values
         volType[pointI] = static_cast<volumeType>(tree().getVolumeType(pt));
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 

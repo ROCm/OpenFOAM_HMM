@@ -47,7 +47,6 @@ SourceFiles
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "autoPtr.H"
-#include "pointIOField.H"
 #include "labelPair.H"
 #include "indirectPrimitivePatch.H"
 #include "pointFieldsFwd.H"

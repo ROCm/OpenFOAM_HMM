@@ -63,9 +63,7 @@ Foam::fixedInternalValueFvPatchField<Type>::fixedInternalValueFvPatchField
 )
 :
     zeroGradientFvPatchField<Type>(p, iF, dict)
-{
-    fvPatchField<Type>::operator=(this->patchInternalField());
-}
+{}
 
 
 template<class Type>

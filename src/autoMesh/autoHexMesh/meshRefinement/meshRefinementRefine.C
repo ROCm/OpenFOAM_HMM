@@ -328,7 +328,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     // Database to pass into trackedParticle::move
     trackedParticle::trackData td(cloud, maxFeatureLevel);
 
-    // Track all particles to their end position.
+    // Track all particles to their end position (= starting feature point)
     cloud.move(td);
 
     // Reset level

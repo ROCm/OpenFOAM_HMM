@@ -171,11 +171,11 @@ int main(int argc, char *argv[])
 
     argList::validArgs.clear();
     argList::validArgs.append("surface file");
-    argList::validOptions.insert("noSelfIntersection", "");
+    argList::validOptions.insert("checkSelfIntersection", "");
     argList::validOptions.insert("verbose", "");
     argList args(argc, argv);
 
-    bool checkSelfIntersection = !args.options().found("noSelfIntersection");
+    bool checkSelfIntersection = args.options().found("checkSelfIntersection");
     bool verbose = args.options().found("verbose");
 
     fileName surfFileName(args.additionalArgs()[0]);
