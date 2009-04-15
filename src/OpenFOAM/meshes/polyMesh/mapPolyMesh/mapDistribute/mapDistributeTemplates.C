@@ -58,7 +58,13 @@ void Foam::mapDistribute::distribute
         }
 
         // Subset myself
-        UIndirectList<T> subField(field, subMap[Pstream::myProcNo()]);
+        const labelList& mySubMap = subMap[Pstream::myProcNo()];
+
+        List<T> subField(mySubMap.size());
+        forAll(mySubMap, i)
+        {
+            subField[i] = field[mySubMap[i]];
+        }
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -355,7 +361,13 @@ void Foam::mapDistribute::distribute
         }
 
         // Subset myself
-        UIndirectList<T> subField(field, subMap[Pstream::myProcNo()]);
+        const labelList& mySubMap = subMap[Pstream::myProcNo()];
+
+        List<T> subField(mySubMap.size());
+        forAll(mySubMap, i)
+        {
+            subField[i] = field[mySubMap[i]];
+        }
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
