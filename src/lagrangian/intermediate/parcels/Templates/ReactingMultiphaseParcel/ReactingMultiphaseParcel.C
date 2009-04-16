@@ -453,7 +453,7 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
         dMassDV[i] = YVolatile[i]*dMassTot;
     }
 
-    td.cloud().addToMassDevolatilisation(dMassTot);
+    td.cloud().addToMassDevolatilisation(this->nParticle_*dMassTot);
 
     return -dMassTot*td.constProps().LDevol();
 }
@@ -515,7 +515,8 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
 
     td.cloud().addToMassSurfaceReaction
     (
-        sum(dMassSRGas) + sum(dMassSRLiquid) + sum(dMassSRSolid)
+        this->nParticle_
+       *(sum(dMassSRGas) + sum(dMassSRLiquid) + sum(dMassSRSolid))
     );
 
     // Add enthalpy of consumed components to the carrier phase enthalpy

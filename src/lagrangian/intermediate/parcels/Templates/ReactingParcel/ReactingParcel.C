@@ -274,7 +274,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     scalar dMassTot = sum(dMassPC);
 
     // Add to cumulative phase change mass
-    td.cloud().addToMassPhaseChange(dMassTot);
+    td.cloud().addToMassPhaseChange(this->nParticle_*dMassTot);
 
     // Effective latent heat of vaporisation
     scalar LEff = td.cloud().composition().L(idPhase, YComponents, pc_, T);
