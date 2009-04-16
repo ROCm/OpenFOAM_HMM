@@ -94,11 +94,12 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 
     word regionName = fvMesh::defaultRegion;
+    word regionDir = word::null;
 
     if (args.options().found("region"))
     {
         regionName = args.options()["region"];
-
+        regionDir = regionName;
         Info<< "Decomposing mesh " << regionName << nl << endl;
     }
 
@@ -116,7 +117,17 @@ int main(int argc, char *argv[])
 
     // determine the existing processor count directly
     label nProcs = 0;
-    while (isDir(runTime.path()/(word("processor") + name(nProcs))))
+    while
+    (
+        isDir
+        (
+            runTime.path()
+           /(word("processor") + name(nProcs))
+           /runTime.constant()
+           /regionDir
+           /polyMesh::meshSubDir
+        )
+    )
     {
         ++nProcs;
     }
@@ -130,7 +141,7 @@ int main(int argc, char *argv[])
             (
                 "decomposeParDict",
                 runTime.time().system(),
-                regionName,
+                regionDir,          // use region if non-standard
                 runTime,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
