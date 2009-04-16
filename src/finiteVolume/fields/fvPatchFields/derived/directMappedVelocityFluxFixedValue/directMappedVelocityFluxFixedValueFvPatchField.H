@@ -57,20 +57,6 @@ class directMappedVelocityFluxFixedValueFvPatchField
         //- Name of flux field
         word phiName_;
 
-
-   // Private member functions
-
-        // Helper function to return the new field values
-        void getNewValues
-        (
-            const directMappedPolyPatch& mpp,
-            const vectorField& sendUValues,
-            const scalarField& sendPhiValues,
-            vectorField& newUValues,
-            scalarField& newPhiValues
-        ) const;
-
-
 public:
 
     //- Runtime type information

@@ -26,7 +26,7 @@ License
 
 #include "directMappedVelocityFluxFixedValueFvPatchField.H"
 #include "fvPatchFieldMapper.H"
-#include "directMappedFvPatch.H"
+#include "directMappedPatchBase.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -62,12 +62,12 @@ directMappedVelocityFluxFixedValueFvPatchField
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_)
 {
-    if (!isType<directMappedFvPatch>(patch()))
+    if (!isType<directMappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
             "directMappedVelocityFluxFixedValueFvPatchField::"
-            "directMappedFixedValueFvPatchField\n"
+            "directMappedVelocityFluxFixedValueFvPatchField\n"
             "(\n"
             "    const directMappedVelocityFluxFixedValueFvPatchField&,\n"
             "    const fvPatch&,\n"
@@ -75,7 +75,7 @@ directMappedVelocityFluxFixedValueFvPatchField
             "    const fvPatchFieldMapper&\n"
             ")\n"
         )   << "\n    patch type '" << p.type()
-            << "' not type '" << typeName << "'"
+            << "' not type '" << directMappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
@@ -95,24 +95,31 @@ directMappedVelocityFluxFixedValueFvPatchField
     fixedValueFvPatchVectorField(p, iF, dict),
     phiName_(dict.lookup("phi"))
 {
-    if (!isType<directMappedFvPatch>(patch()))
+    if (!isType<directMappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
             "directMappedVelocityFluxFixedValueFvPatchField::"
-            "directMappedFixedValueFvPatchField\n"
+            "directMappedVelocityFluxFixedValueFvPatchField\n"
             "(\n"
             "    const fvPatch& p,\n"
             "    const DimensionedField<vector, volMesh>& iF,\n"
             "    const dictionary& dict\n"
             ")\n"
         )   << "\n    patch type '" << p.type()
-            << "' not type '" << typeName << "'"
+            << "' not type '" << directMappedPatchBase::typeName << "'"
             << "\n    for patch " << p.name()
             << " of field " << dimensionedInternalField().name()
             << " in file " << dimensionedInternalField().objectPath()
             << exit(FatalError);
     }
+
+    // Force calculation of schedule (uses parallel comms)
+    const directMappedPolyPatch& mpp = refCast<const directMappedPolyPatch>
+    (
+        patch().patch()
+    );
+    (void)mpp.map().schedule();
 }
 
 
@@ -139,85 +146,6 @@ directMappedVelocityFluxFixedValueFvPatchField
 {}
 
 
-void directMappedVelocityFluxFixedValueFvPatchField::getNewValues
-(
-    const directMappedPolyPatch& mpp,
-    const vectorField& sendUValues,
-    const scalarField& sendPhiValues,
-    vectorField& newUValues,
-    scalarField& newPhiValues
-) const
-{
-    // Get the scheduling information
-    const List<labelPair>& schedule = mpp.schedule();
-    const labelListList& sendLabels = mpp.sendLabels();
-    const labelListList& receiveFaceLabels = mpp.receiveFaceLabels();
-
-    forAll(schedule, i)
-    {
-        const labelPair& twoProcs = schedule[i];
-        label sendProc = twoProcs[0];
-        label recvProc = twoProcs[1];
-
-        if (Pstream::myProcNo() == sendProc)
-        {
-            OPstream toProc(Pstream::scheduled, recvProc);
-            toProc<< UIndirectList<vector>(sendUValues, sendLabels[recvProc])();
-            toProc<< UIndirectList<scalar>
-                (
-                    sendPhiValues,
-                    sendLabels[recvProc]
-                )();
-        }
-        else
-        {
-            // I am receiver. Receive from sendProc.
-            IPstream fromProc(Pstream::scheduled, sendProc);
-
-            vectorField fromUFld(fromProc);
-            scalarField fromPhiFld(fromProc);
-
-            // Destination faces
-            const labelList& faceLabels = receiveFaceLabels[sendProc];
-
-            forAll(fromUFld, i)
-            {
-                label patchFaceI = faceLabels[i];
-
-                newUValues[patchFaceI] = fromUFld[i];
-                newPhiValues[patchFaceI] = fromPhiFld[i];
-            }
-        }
-    }
-
-    // Do data from myself
-    {
-        UIndirectList<vector> fromUFld
-            (
-                sendUValues,
-                sendLabels[Pstream::myProcNo()]
-            );
-
-        UIndirectList<scalar> fromPhiFld
-            (
-                sendPhiValues,
-                sendLabels[Pstream::myProcNo()]
-            );
-
-        // Destination faces
-        const labelList& faceLabels = receiveFaceLabels[Pstream::myProcNo()];
-
-        forAll(fromUFld, i)
-        {
-            label patchFaceI = faceLabels[i];
-
-            newUValues[patchFaceI] = fromUFld[i];
-            newPhiValues[patchFaceI] = fromPhiFld[i];
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
@@ -227,37 +155,33 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
         return;
     }
 
-    // Get the directMappedPolyPatch
-    const directMappedPolyPatch& mpp = refCast<const directMappedPolyPatch>
+    // Get the directMappedPatchBase
+    const directMappedPatchBase& mpp = refCast<const directMappedPatchBase>
     (
         directMappedVelocityFluxFixedValueFvPatchField::patch().patch()
     );
-
-    vectorField newUValues(size());
-    scalarField newPhiValues(size());
-
+    const mapDistribute& distMap = mpp.map();
+    const fvMesh& nbrMesh = refCast<const fvMesh>(mpp.sampleMesh());
     const word& fieldName = dimensionedInternalField().name();
-    const volVectorField& UField = db().lookupObject<volVectorField>(fieldName);
+    const volVectorField& UField = nbrMesh.lookupObject<volVectorField>
+    (
+        fieldName
+    );
 
     surfaceScalarField& phiField = const_cast<surfaceScalarField&>
     (
-        db().lookupObject<surfaceScalarField>(phiName_)
+        nbrMesh.lookupObject<surfaceScalarField>(phiName_)
     );
+
+    vectorField newUValues;
+    scalarField newPhiValues;
 
     switch (mpp.mode())
     {
         case directMappedPolyPatch::NEARESTFACE:
         {
-            vectorField allUValues
-            (
-                patch().patch().boundaryMesh().mesh().nFaces(),
-                vector::zero
-            );
-            scalarField allPhiValues
-            (
-                patch().patch().boundaryMesh().mesh().nFaces(),
-                0.0
-            );
+            vectorField allUValues(nbrMesh.nFaces(), vector::zero);
+            scalarField allPhiValues(nbrMesh.nFaces(), 0.0);
 
             forAll(UField.boundaryField(), patchI)
             {
@@ -273,34 +197,58 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 }
             }
 
-            getNewValues
+            mapDistribute::distribute
             (
-                mpp,
-                allUValues,
-                allPhiValues,
-                newUValues,
+                Pstream::defaultCommsType,
+                distMap.schedule(),
+                distMap.constructSize(),
+                distMap.subMap(),
+                distMap.constructMap(),
+                allUValues
+            );
+            newUValues = patch().patchSlice(newUValues);
+            
+            mapDistribute::distribute
+            (
+                Pstream::defaultCommsType,
+                distMap.schedule(),
+                distMap.constructSize(),
+                distMap.subMap(),
+                distMap.constructMap(),
                 newPhiValues
             );
-
-            newUValues = patch().patchSlice(newUValues);
             newPhiValues = patch().patchSlice(newPhiValues);
 
             break;
         }
         case directMappedPolyPatch::NEARESTPATCHFACE:
         {
-            const label patchID =
-                patch().patch().boundaryMesh().findPatchID
-                (
-                    mpp.samplePatch()
-                );
-
-            getNewValues
+            const label nbrPatchID = nbrMesh.boundaryMesh().findPatchID
             (
-                mpp,
-                UField.boundaryField()[patchID],
-                phiField.boundaryField()[patchID],
-                newUValues,
+                mpp.samplePatch()
+            );
+
+            newUValues = UField.boundaryField()[nbrPatchID];
+
+            mapDistribute::distribute
+            (
+                Pstream::defaultCommsType,
+                distMap.schedule(),
+                distMap.constructSize(),
+                distMap.subMap(),
+                distMap.constructMap(),
+                newUValues
+            );
+
+            newPhiValues = phiField.boundaryField()[nbrPatchID];
+
+            mapDistribute::distribute
+            (
+                Pstream::defaultCommsType,
+                distMap.schedule(),
+                distMap.constructSize(),
+                distMap.subMap(),
+                distMap.constructMap(),
                 newPhiValues
             );
 

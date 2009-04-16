@@ -24,17 +24,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "directMappedPolyPatch.H"
+#include "directMappedWallPolyPatch.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTypeNameAndDebug(directMappedPolyPatch, 0);
+    defineTypeNameAndDebug(directMappedWallPolyPatch, 0);
 
-    addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, word);
-    addToRunTimeSelectionTable(polyPatch, directMappedPolyPatch, dictionary);
+    addToRunTimeSelectionTable(polyPatch, directMappedWallPolyPatch, word);
+    addToRunTimeSelectionTable
+    (
+        polyPatch,
+        directMappedWallPolyPatch,
+        dictionary
+    );
 }
 
 
@@ -43,7 +48,7 @@ namespace Foam
 
 // * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * * * * //
 
-Foam::directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 (
     const word& name,
     const label size,
@@ -52,12 +57,12 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(name, size, start, index, bm),
+    wallPolyPatch(name, size, start, index, bm),
     directMappedPatchBase(static_cast<const polyPatch&>(*this))
 {}
 
 
-Foam::directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 (
     const word& name,
     const dictionary& dict,
@@ -65,18 +70,18 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(name, dict, index, bm),
+    wallPolyPatch(name, dict, index, bm),
     directMappedPatchBase(*this, dict)
 {}
 
 
-Foam::directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 (
-    const directMappedPolyPatch& pp,
+    const directMappedWallPolyPatch& pp,
     const polyBoundaryMesh& bm
 )
 :
-    polyPatch(pp, bm),
+    wallPolyPatch(pp, bm),
     directMappedPatchBase
     (
         *this,
@@ -85,16 +90,16 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
 {}
 
 
-Foam::directMappedPolyPatch::directMappedPolyPatch
+Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 (
-    const directMappedPolyPatch& pp,
+    const directMappedWallPolyPatch& pp,
     const polyBoundaryMesh& bm,
     const label index,
     const label newSize,
     const label newStart
 )
 :
-    polyPatch(pp, bm, index, newSize, newStart),
+    wallPolyPatch(pp, bm, index, newSize, newStart),
     directMappedPatchBase
     (
         *this,
@@ -105,7 +110,7 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::directMappedPolyPatch::~directMappedPolyPatch()
+Foam::directMappedWallPolyPatch::~directMappedWallPolyPatch()
 {
     directMappedPatchBase::clearOut();
 }
@@ -114,51 +119,51 @@ Foam::directMappedPolyPatch::~directMappedPolyPatch()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 //- Initialise the calculation of the patch geometry
-void Foam::directMappedPolyPatch::initGeometry()
+void Foam::directMappedWallPolyPatch::initGeometry()
 {
-    polyPatch::initGeometry();
+    wallPolyPatch::initGeometry();
     directMappedPatchBase::clearOut();
 }
 
 //- Calculate the patch geometry
-void Foam::directMappedPolyPatch::calcGeometry()
+void Foam::directMappedWallPolyPatch::calcGeometry()
 {
-    polyPatch::calcGeometry();
+    wallPolyPatch::calcGeometry();
     directMappedPatchBase::clearOut();
 }
 
 //- Initialise the patches for moving points
-void Foam::directMappedPolyPatch::initMovePoints(const pointField& p)
+void Foam::directMappedWallPolyPatch::initMovePoints(const pointField& p)
 {
-    polyPatch::initMovePoints(p);
+    wallPolyPatch::initMovePoints(p);
     directMappedPatchBase::clearOut();
 }
 
 //- Correct patches after moving points
-void Foam::directMappedPolyPatch::movePoints(const pointField& p)
+void Foam::directMappedWallPolyPatch::movePoints(const pointField& p)
 {
-    polyPatch::movePoints(p);
+    wallPolyPatch::movePoints(p);
     directMappedPatchBase::clearOut();
 }
 
 //- Initialise the update of the patch topology
-void Foam::directMappedPolyPatch::initUpdateMesh()
+void Foam::directMappedWallPolyPatch::initUpdateMesh()
 {
-    polyPatch::initUpdateMesh();
+    wallPolyPatch::initUpdateMesh();
     directMappedPatchBase::clearOut();
 }
 
 //- Update of the patch topology
-void Foam::directMappedPolyPatch::updateMesh()
+void Foam::directMappedWallPolyPatch::updateMesh()
 {
-    polyPatch::updateMesh();
+    wallPolyPatch::updateMesh();
     directMappedPatchBase::clearOut();
 }
 
 
-void Foam::directMappedPolyPatch::write(Ostream& os) const
+void Foam::directMappedWallPolyPatch::write(Ostream& os) const
 {
-    polyPatch::write(os);
+    wallPolyPatch::write(os);
     directMappedPatchBase::write(os);
 }
 

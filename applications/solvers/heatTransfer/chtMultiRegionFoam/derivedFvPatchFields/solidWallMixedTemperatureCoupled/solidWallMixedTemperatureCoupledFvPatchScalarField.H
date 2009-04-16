@@ -103,8 +103,8 @@ public:
             const dictionary&
         );
 
-        //- Construct by mapping given solidWallMixedTemperatureCoupledFvPatchScalarField
-        //  onto a new patch
+        //- Construct by mapping given
+        //  solidWallMixedTemperatureCoupledFvPatchScalarField onto a new patch
         solidWallMixedTemperatureCoupledFvPatchScalarField
         (
             const solidWallMixedTemperatureCoupledFvPatchScalarField&,
