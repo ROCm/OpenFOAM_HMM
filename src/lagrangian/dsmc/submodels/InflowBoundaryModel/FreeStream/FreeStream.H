@@ -26,8 +26,10 @@ Class
     Foam::FreeStream
 
 Description
-    Inserting new particles across the faces of a specified patch for a free
-    stream.  Uniform values of temperature, velocity and number densities
+    Inserting new particles across the faces of a all patched of type
+    "patch" for a free stream.  Uniform values number density, temperature
+    and velocity sourced face-by-face from the boundaryT and boundaryU fields
+    of the cloud.
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,14 +54,8 @@ class FreeStream
 {
     // Private data
 
-        //- Index of patch to introduce particles across
-        label patchIndex_;
-
-        //- Temperature of the free stream
-        scalar temperature_;
-
-        //- Velocity of the free stream
-        vector velocity_;
+        //- The indices of patches to introduce molecules across
+        labelList patches_;
 
         //- The molecule types to be introduced
         List<label> moleculeTypeIds_;
@@ -67,10 +63,13 @@ class FreeStream
         //- The number density of the species in the inflow
         Field<scalar> numberDensities_;
 
-        //- A List of Fields, one Field for every species to be introduced, each
-        // field entry corresponding to a face on the patch to be injected
-        // across.
-        List<Field<scalar> > particleFluxAccumulators_;
+        //- A List of Lists of Fields specifying carry-over of mass flux from
+        // one timestep to the next
+        // + Outer List - one inner List for each patch
+        // + Inner List - one Field for every species to be introduced
+        // + Each field entry corresponding to a face to be injected across
+        //   with a particular species
+        List<List<Field<scalar> > > particleFluxAccumulators_;
 
 
 public:

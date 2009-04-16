@@ -37,6 +37,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
 template<class ParcelType>
 Foam::scalar Foam::DsmcCloud<ParcelType>::Tref = 273;
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -625,6 +626,13 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     buildConstProps();
 
     buildCellOccupancy();
+
+    // Initialise the collision selection remainder to a random value between 0
+    // and 1.
+    forAll(collisionSelectionRemainder_, i)
+    {
+        collisionSelectionRemainder_[i] = rndGen_.scalar01();
+    }
 }
 
 
@@ -813,22 +821,27 @@ void Foam::DsmcCloud<ParcelType>::info() const
 
     Info<< "Cloud name: " << this->name() << nl
         << "    Number of dsmc particles        = "
-        << nDsmcParticles << nl
-        << "    Number of molecules             = "
-        << nMol << nl
-        << "    Mass in system                  = "
-        << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << "    Average linear momentum         = "
-        << linearMomentum/nMol << nl
-        << "   |Average linear momentum|        = "
-        << mag(linearMomentum)/nMol << nl
-        << "    Average linear kinetic energy   = "
-        << linearKineticEnergy/nMol << nl
-        << "    Average internal energy         = "
-        << internalEnergy/nMol << nl
-        << "    Average total energy            = "
-        << (internalEnergy + linearKineticEnergy)/nMol << nl
+        << nDsmcParticles
         << endl;
+
+    if (nDsmcParticles)
+    {
+        Info<< "    Number of molecules             = "
+            << nMol << nl
+            << "    Mass in system                  = "
+            << returnReduce(massInSystem(), sumOp<scalar>()) << nl
+            << "    Average linear momentum         = "
+            << linearMomentum/nMol << nl
+            << "   |Average linear momentum|        = "
+            << mag(linearMomentum)/nMol << nl
+            << "    Average linear kinetic energy   = "
+            << linearKineticEnergy/nMol << nl
+            << "    Average internal energy         = "
+            << internalEnergy/nMol << nl
+            << "    Average total energy            = "
+            << (internalEnergy + linearKineticEnergy)/nMol
+            << endl;
+    }
 }
 
 
@@ -874,7 +887,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
 
         scalar energyRatio;
 
-        scalar P;
+        scalar P = -1;
 
         do
         {

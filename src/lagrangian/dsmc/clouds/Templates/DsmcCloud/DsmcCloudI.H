@@ -303,9 +303,31 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
 
 
 template<class ParcelType>
+inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
+(
+    scalarField temperature,
+    scalar mass
+) const
+{
+    return 2.0*sqrt(2.0*kb*temperature/(mathematicalConstant::pi*mass));
+}
+
+
+template<class ParcelType>
 inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianRMSSpeed
 (
     scalar temperature,
+    scalar mass
+) const
+{
+    return sqrt(3.0*kb*temperature/mass);
+}
+
+
+template<class ParcelType>
+inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianRMSSpeed
+(
+    scalarField temperature,
     scalar mass
 ) const
 {
@@ -318,6 +340,18 @@ inline Foam::scalar
 Foam::DsmcCloud<ParcelType>::maxwellianMostProbableSpeed
 (
     scalar temperature,
+    scalar mass
+) const
+{
+    return sqrt(2.0*kb*temperature/mass);
+}
+
+
+template<class ParcelType>
+inline Foam::scalarField
+Foam::DsmcCloud<ParcelType>::maxwellianMostProbableSpeed
+(
+    scalarField temperature,
     scalar mass
 ) const
 {
