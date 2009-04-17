@@ -446,15 +446,16 @@ void Foam::directMappedPatchBase::calcMapping() const
 
         forAll(magOffset, sampleI)
         {
-            if (mag(magOffset[sampleI]-avgOffset) > 0.001*avgOffset)
+            if (mag(magOffset[sampleI]-avgOffset) > max(SMALL, 0.001*avgOffset))
             {
                 WarningIn("directMappedPatchBase::calcMapping() const")
-                    << "The actual cell centres picked up using offset "
+                    << "The actual cell/face centres picked up using offset "
                     << offset_ << " are not" << endl
                     << "    on a single plane."
                     << " This might give numerical problems." << endl
                     << "    At patchface " << patchFc[sampleI]
-                    << " the sampled cell " << sampleLocations[sampleI] << endl
+                    << " the sampled cell/face " << sampleLocations[sampleI]
+                    << endl
                     << "    is not on a plane " << avgOffset
                     << " offset from the patch." << endl
                     << "    You might want to shift your plane offset."

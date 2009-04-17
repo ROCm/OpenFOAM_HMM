@@ -20,7 +20,7 @@ FoamFile
 (
 inlet
 {
-    type            directMappedPatch;
+    type            directMapped;
     nFaces          30;
     startFace       27238;
     sampleMode      nearestCell;

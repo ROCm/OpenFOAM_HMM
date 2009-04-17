@@ -82,11 +82,7 @@ Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 )
 :
     wallPolyPatch(pp, bm),
-    directMappedPatchBase
-    (
-        *this,
-        static_cast<const directMappedPatchBase&>(*this)
-    )
+    directMappedPatchBase(*this, pp)
 {}
 
 
@@ -100,11 +96,7 @@ Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 )
 :
     wallPolyPatch(pp, bm, index, newSize, newStart),
-    directMappedPatchBase
-    (
-        *this,
-        static_cast<const directMappedPatchBase&>(*this)
-    )
+    directMappedPatchBase(*this, pp)
 {}
 
 
