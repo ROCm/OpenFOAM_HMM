@@ -25,35 +25,37 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "featureEdgeMesh.H"
+#include "Random.H"
+#include "meshTools.H"
+#include "linePointRef.H"
+#include "OFstream.H"
+#include "IFstream.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
 :
-    edgeMesh(io)
+    edgeMesh(io),
+    normals_(),
+    edgeNormals_(edges().size()),
+    allEdges_(identity(edges().size()))
+
 {}
 
 
 Foam::featureEdgeMesh::featureEdgeMesh
 (
     const IOobject& io,
-    const pointField& points,
-    const edgeList& edges
+    const pointField& pts,
+    const edgeList& eds,
+    const vectorField& normals
 )
 :
-    edgeMesh(io, points, edges)
+    edgeMesh(io, pts, eds),
+    normals_(normals),
+    edgeNormals_(edges().size()),
+    allEdges_(identity(edges().size()))
 {}
-
-
-Foam::featureEdgeMesh::featureEdgeMesh
-(
-    const IOobject& io,
-    const edgeMesh& em
-)
-:
-    edgeMesh(io, em)
-{}
-
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -65,8 +67,83 @@ Foam::featureEdgeMesh::~featureEdgeMesh()
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+void Foam::featureEdgeMesh::nearestFeatureEdge
+(
+    const pointField& samples,
+    scalarField searchDistSqr,
+    labelList& edgeLabel,
+    pointField& edgePoint,
+    labelListList& adjacentNormals
+) const
+{
+    edgeLabel.setSize(samples.size());
+    edgePoint.setSize(samples.size());
+    adjacentNormals.setSize(samples.size());
+
+    forAll(samples, i)
+    {
+        const point& sample = samples[i];
+
+        pointIndexHit pHit = edgeTree().findNearest
+        (
+            sample,
+            searchDistSqr[i]
+        );
+
+        if (!pHit.hit())
+        {
+            edgeLabel[i] = -1;
+        }
+        else
+        {
+            edgeLabel[i] = allEdges_[pHit.index()];
+            edgePoint[i] = pHit.hitPoint();
+            adjacentNormals[i] = edgeNormals_[edgeLabel[i]];
+        }
+    }
+}
+
+
+const Foam::indexedOctree<Foam::treeDataEdge>&
+Foam::featureEdgeMesh::edgeTree() const
+{
+    if (edgeTree_.empty())
+    {
+        Random rndGen(17301893);
+
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points()).extend(rndGen, 1E-4)
+        );
+
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        edgeTree_.reset
+        (
+            new indexedOctree<treeDataEdge>
+            (
+                treeDataEdge
+                (
+                    false,          // cachebb
+                    edges(),        // edges
+                    points(),       // points
+                    allEdges_       // selected edges
+                ),
+                bb,     // bb
+                8,      // maxLevel
+                10,     // leafsize
+                3.0     // duplicity
+            )
+        );
+    }
+
+    return edgeTree_();
+}
 
 
 // ************************************************************************* //

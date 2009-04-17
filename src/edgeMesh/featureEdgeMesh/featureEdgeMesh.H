@@ -27,6 +27,22 @@ Class
 
 Description
 
+    Feature points are a sorted subset at the start of the overall points list:
+        0 .. concaveStart_-1                : convex points (w.r.t normals)
+        concaveStart_-1 .. mixedStart_-1    : concave points
+        mixedStart_ .. nonFeatureStart_     : mixed internal/external points
+        nonFeatureStart_ .. size-1          : non-feature points
+
+    Feature edges are the edgeList of the edgeMesh and are sorted:
+        0 .. internalStart_-1           : external edges (convex)
+        internalStart_ .. flatStart_-1  : internal edges (concave)
+        flatStart_ .. openStart_-1      : flat edges (neither concave or convex)
+                                          can arise from region interfaces on
+                                          flat surfaces
+        openStart_ .. multipleStart_-1  : open edges (e.g. from baffle surfaces)
+        multipleStart_ .. size-1        : multiply connected edges
+
+
 SourceFiles
     featureEdgeMeshI.H
     featureEdgeMesh.C
@@ -37,6 +53,9 @@ SourceFiles
 #define featureEdgeMesh_H
 
 #include "edgeMesh.H"
+#include "indexedOctree.H"
+#include "treeDataEdge.H"
+#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +70,68 @@ class featureEdgeMesh
 :
     public edgeMesh
 {
+
+public:
+
+        enum pointStatus
+        {
+            CONVEX,     // Fully convex point (w.r.t normals)
+            CONCAVE,    // Fully concave point
+            MIXED,      // A point surrounded by both convex and concave edges
+            NONFEATURE  // Not a feature point
+        };
+
+        enum edgeStatus
+        {
+            EXTERNAL,   // "Convex" edge
+            INTERNAL,   // "Concave" edge
+            FLAT,       // Neither concave or convex, on a flat surface
+            OPEN,       // i.e. only connected to one face
+            MULTIPLE,   // Multiply connected (connected to more than two faces)
+            NONE        // Not a feature edge (consistency with surfaceFeatures)
+        };
+
+private:
+
     // Private data
+
+        //- Index of the start of the concave feature points
+        label concaveStart_;
+
+        //- Index of the start of the mixed type feature points
+        label mixedStart_;
+
+        //- Index of the start of the non-feature points
+        label nonFeatureStart_;
+
+        //- Index of the start of the internal feature edges
+        label internalStart_;
+
+        //- Index of the start of the flat feature edges
+        label flatStart_;
+
+        //- Index of the start of the open feature edges
+        label openStart_;
+
+        //- Index of the start of the multiply-connected feature edges
+        label multipleStart_;
+
+        //- Normals of the features, to be referred to by index by both feature
+        //  points and edges, unsorted
+        vectorField normals_;
+
+        //- Indices of the normals that are adjacent to the feature edges
+        labelListList edgeNormals_;
+
+        //- Indices of the normals that are adjacent to the feature points
+        labelListList featurePointNormals_;
+
+        //- Indices of all edges, pre-calculated and stored
+        labelField allEdges_;
+
+        //- Search tree for edges.
+        mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
+
 
     // Private Member Functions
 
@@ -69,16 +149,15 @@ public:
         //- Construct (read) given an IOobject
         featureEdgeMesh(const IOobject&);
 
-        //- Construct from edgeMesh data
+        //- Construct from edgeMesh data and
         featureEdgeMesh
         (
-            const IOobject&,
-            const pointField&,
-            const edgeList&
+            const IOobject& io,
+            const pointField& pts,
+            const edgeList& eds,
+            const vectorField& normals
         );
 
-        //- Construct as copy
-        featureEdgeMesh(const IOobject&, const edgeMesh&);
 
     //- Destructor
     ~featureEdgeMesh();
@@ -86,7 +165,26 @@ public:
 
     // Member Functions
 
+        // Find
+
+            //- Find nearest surface edge for each sample point.
+            void nearestFeatureEdge
+            (
+                const pointField& samples,
+                scalarField searchDistSqr,
+                labelList& edgeLabel,
+                pointField& edgePoint,
+                labelListList& adjacentNormals
+            ) const;
+
         // Access
+
+            //- Return the normals of the surfaces adjacent to the feature edges
+            //  and points
+            inline const vectorField& normals() const;
+
+            //- Demand driven contruction of octree for boundary edges
+            const indexedOctree<treeDataEdge>& edgeTree() const;
 
         // Check
 
