@@ -52,24 +52,13 @@ void Foam::mapDistribute::distribute
 
             if (domain != Pstream::myProcNo() && map.size())
             {
-                List<T> subField(map.size());
-                forAll(map, i)
-                {
-                    subField[i] = field[map[i]];
-                }
                 OPstream toNbr(Pstream::blocking, domain);
-                toNbr << subField;
+                toNbr << UIndirectList<T>(field, map);
             }
         }
 
         // Subset myself
-        const labelList& mySubMap = subMap[Pstream::myProcNo()];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
-        {
-            subField[i] = field[mySubMap[i]];
-        }
+        UIndirectList<T> subField(field, subMap[Pstream::myProcNo()]);
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -126,13 +115,7 @@ void Foam::mapDistribute::distribute
         List<T> newField(constructSize);
 
         // Subset myself
-        const labelList& mySubMap = subMap[Pstream::myProcNo()];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
-        {
-            subField[i] = field[mySubMap[i]];
-        }
+        UIndirectList<T> subField(field, subMap[Pstream::myProcNo()]);
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -152,16 +135,8 @@ void Foam::mapDistribute::distribute
             if (Pstream::myProcNo() == sendProc)
             {
                 // I am sender. Send to recvProc.
-                const labelList& map = subMap[recvProc];
-
-                List<T> subField(map.size());
-                forAll(map, i)
-                {
-                    subField[i] = field[map[i]];
-                }
-
                 OPstream toNbr(Pstream::scheduled, recvProc);
-                toNbr << subField;
+                toNbr << UIndirectList<T>(field, subMap[recvProc]);
             }
             else
             {
@@ -374,24 +349,13 @@ void Foam::mapDistribute::distribute
 
             if (domain != Pstream::myProcNo() && map.size())
             {
-                List<T> subField(map.size());
-                forAll(map, i)
-                {
-                    subField[i] = field[map[i]];
-                }
                 OPstream toNbr(Pstream::blocking, domain);
-                toNbr << subField;
+                toNbr << UIndirectList<T>(field, map);
             }
         }
 
         // Subset myself
-        const labelList& mySubMap = subMap[Pstream::myProcNo()];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
-        {
-            subField[i] = field[mySubMap[i]];
-        }
+        UIndirectList<T> subField(field, subMap[Pstream::myProcNo()]);
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -449,13 +413,7 @@ void Foam::mapDistribute::distribute
         List<T> newField(constructSize, nullValue);
 
         // Subset myself
-        const labelList& mySubMap = subMap[Pstream::myProcNo()];
-
-        List<T> subField(mySubMap.size());
-        forAll(mySubMap, i)
-        {
-            subField[i] = field[mySubMap[i]];
-        }
+        UIndirectList<T> subField(field, subMap[Pstream::myProcNo()]);
 
         // Receive sub field from myself (subField)
         const labelList& map = constructMap[Pstream::myProcNo()];
@@ -475,16 +433,8 @@ void Foam::mapDistribute::distribute
             if (Pstream::myProcNo() == sendProc)
             {
                 // I am sender. Send to recvProc.
-                const labelList& map = subMap[recvProc];
-
-                List<T> subField(map.size());
-                forAll(map, i)
-                {
-                    subField[i] = field[map[i]];
-                }
-
                 OPstream toNbr(Pstream::scheduled, recvProc);
-                toNbr << subField;
+                toNbr << UIndirectList<T>(field, subMap[recvProc]);
             }
             else
             {

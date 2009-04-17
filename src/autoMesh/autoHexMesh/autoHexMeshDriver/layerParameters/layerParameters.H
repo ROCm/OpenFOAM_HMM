@@ -39,6 +39,7 @@ SourceFiles
 #include "dictionary.H"
 #include "scalarField.H"
 #include "labelList.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,14 +71,10 @@ class layerParameters
 
             scalarField expansionRatio_;
 
-            //- Wanted thickness of final added cell layer. If multiple layers
-            //  is the thickness of the layer furthest away from the wall.
-            //  Relative to undistorted size of cell outside layer.
-            scalarField finalLayerRatio_;
+            Switch relativeSizes_;
 
-            //- Minimum thickness of cell layer. If for any reason layer
-            //  cannot be above minThickness do not add layer.
-            //  Relative to undistorted size of cell outside layer.
+            scalarField finalLayerThickness_;
+
             scalarField minThickness_;
 
 
@@ -164,18 +161,27 @@ public:
                     return expansionRatio_;
                 }
 
-                //- Wanted thickness of final added cell layer. If multiple
-                //  layers
-                //  is the thickness of the layer furthest away from the wall.
-                //  Relative to undistorted size of cell outside layer.
-                const scalarField& finalLayerRatio() const
+                //- Are size parameters relative to inner cell size or
+                //  absolute distances.
+                bool relativeSizes() const
                 {
-                    return finalLayerRatio_;
+                    return relativeSizes_;
+                }
+
+                //- Wanted thickness of final added cell layer. If multiple
+                //  layers is the thickness of the layer furthest away
+                //  from the wall (i.e. nearest the original mesh)
+                //  If relativeSize() this number is relative to undistorted
+                //  size of the cell outside layer.
+                const scalarField& finalLayerThickness() const
+                {
+                    return finalLayerThickness_;
                 }
 
                 //- Minimum thickness of cell layer. If for any reason layer
                 //  cannot be above minThickness do not add layer.
-                //  Relative to undistorted size of cell outside layer.
+                //  If relativeSize() this number is relative to undistorted
+                //  size of the cell outside layer.
                 const scalarField& minThickness() const
                 {
                     return minThickness_;
