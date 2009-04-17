@@ -53,12 +53,15 @@
     );
 
     Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt =
-        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+    volScalarField DpDt
+    (
+        "DpDt",
+        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
+    );
 
     Info<< "Calculating field g.h\n" << endl;
     volScalarField gh("gh", g & mesh.C());
-    surfaceScalarField ghf("gh", g & mesh.Cf());
+    surfaceScalarField ghf("ghf", g & mesh.Cf());
 
     dimensionedScalar pRef("pRef", p.dimensions(), thermo->lookup("pRef"));
 
