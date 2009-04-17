@@ -183,7 +183,7 @@ void Foam::FreeStream<CloudType>::inflow()
             // From Bird eqn 4.22
 
             pFA[i] +=
-                mag(patch.faceAreas()) * numberDensities_[i] * deltaT
+                mag(patch.faceAreas())*numberDensities_[i]*deltaT
                *mostProbableSpeed
                *(
                    exp(-sqr(sCosTheta)) + sqrtPi*sCosTheta*(1 + erf(sCosTheta))
@@ -344,11 +344,13 @@ void Foam::FreeStream<CloudType>::inflow()
 
                         if (uNormal < 0.0)
                         {
-                            continue;
+                            P = -1;
                         }
-
-                        P = 2.0*uNormal/uNormProbCoeffA
-                           *exp(uNormProbCoeffB - sqr(uNormalThermal));
+                        else
+                        {
+                            P = 2.0*uNormal/uNormProbCoeffA
+                               *exp(uNormProbCoeffB - sqr(uNormalThermal));
+                        }
 
                     } while (P < rndGen.scalar01());
 
