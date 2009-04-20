@@ -32,6 +32,7 @@ License
 #include "OFstream.H"
 #include "surfaceIntersection.H"
 #include "SortableList.H"
+#include "PatchTools.H"
 
 using namespace Foam;
 
@@ -596,13 +597,14 @@ int main(int argc, char *argv[])
     // Check orientation
     // ~~~~~~~~~~~~~~~~~
 
-    boolList borderEdge(surf.checkOrientation(false));
+    labelHashSet borderEdge(surf.size()/1000);
+    PatchTools::checkOrientation(surf, false, &borderEdge);
 
     //
     // Colour all faces into zones using borderEdge
     //
     labelList normalZone;
-    label numNormalZones = surf.markZones(borderEdge, normalZone);
+    label numNormalZones = PatchTools::markZones(surf, borderEdge, normalZone);
 
     Pout<< endl
         << "Number of zones (connected area with consistent normal) : "
