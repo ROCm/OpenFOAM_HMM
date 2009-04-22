@@ -109,7 +109,7 @@ public:
         List(const List<T>&);
 
         //- Construct by transferring the parameter contents
-        List(const Xfer<List<T> >&);
+        List(const Xfer< List<T> >&);
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
@@ -181,6 +181,15 @@ public:
             //- Clear the list, i.e. set size to zero.
             void clear();
 
+            //- Append a List at the end of this list
+            void append(const UList<T>&);
+
+            //- Append a UIndirectList at the end of this list
+            void append(const UIndirectList<T>&);
+
+            //- Append a SLList at the end of this list
+            void append(const SLList<T>&);
+
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list.
             void transfer(List<T>&);
@@ -195,7 +204,7 @@ public:
             void transfer(SortableList<T>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<List<T> > xfer();
+            inline Xfer< List<T> > xfer();
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);

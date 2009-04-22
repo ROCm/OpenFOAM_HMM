@@ -43,31 +43,33 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    List<vector> list(IStringStream("1 ((0 1 2))")());
-    Info<< list << endl;
+    List<vector> list1(IStringStream("1 ((0 1 2))")());
+    Info<< "list1: " << list1 << endl;
 
     List<vector> list2(IStringStream("((0 1 2) (3 4 5) (6 7 8))")());
-    Info<< list2 << endl;
+    Info<< "list2: " << list2 << endl;
+
+    list1.append(list2);
+    Info<< "list1.append(list2): " << list1 << endl;
 
     Info<< findIndex(list2, vector(3, 4, 5)) << endl;
 
     list2.setSize(10, vector(1, 2, 3));
-    Info<< list2 << endl;
+    Info<< "list2: " << list2 << endl;
 
     List<vector> list3(list2.xfer());
     Info<< "Transferred via the xfer() method" << endl;
-    Info<< list2 << nl
-        << list3 << endl;
+    Info<< "list2: " << list2 << nl
+        << "list3: " << list3 << endl;
 
 
     // Subset
     const labelList map(IStringStream("2 (0 2)")());
     List<vector> subList3(list3, map);
     Info<< "Elements " << map << " out of " << list3
-        << " : " << subList3 << endl;
+        << " => " << subList3 << endl;
 
     return 0;
 }
-
 
 // ************************************************************************* //

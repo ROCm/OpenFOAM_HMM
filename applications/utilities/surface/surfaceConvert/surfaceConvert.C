@@ -115,15 +115,13 @@ int main(int argc, char *argv[])
     }
 
     Info<< "writing " << exportName;
-    if (scaleFactor <= 0)
+    if (scaleFactor > 0)
     {
-        Info<< " without scaling" << endl;
-    }
-    else
-    {
-        Info<< " with scaling " << scaleFactor << endl;
+        Info<< " with scaling " << scaleFactor;
         surf.scalePoints(scaleFactor);
     }
+    Info<< endl;
+
     surf.write(exportName, sortByRegion);
 
     Info<< "\nEnd\n" << endl;

@@ -26,7 +26,7 @@ Class
     Foam::PackedList
 
 Description
-    A Dynamically allocatable list of packed unsigned ints.
+    A dynamically allocatable list of packed unsigned integers.
 
     The list resizing is similar to DynamicList, thus the methods clear()
     and setSize() behave like their DynamicList counterparts and the methods
@@ -38,7 +38,7 @@ Note
     In a const context, the '[]' operator simply returns the stored value,
     with out-of-range elements returned as zero.
     In a non-const context, the '[]' operator returns an iteratorBase, which
-    may not have a valid reference for out-of-range elements.
+    might not have a valid reference for out-of-range elements.
     The iteratorBase class handles the assignment of new values.
 
     Using the iteratorBase as a proxy allows assignment of values
@@ -50,11 +50,11 @@ Note
     @endcode
 
     Using get() or the '[]' operator are similarly fast. Looping and reading
-    with an iterator is approx. 15% slower, but can be more flexible.
+    via an iterator is approx. 15% slower, but can be more flexible.
 
     Using the set() operator (and the '[]' operator) are marginally slower
-    (approx. 5%) than using an iterator, but the set() method has an
-    advantage that it also returns a bool if the value changed.  This can be
+    (approx. 5%) than using an iterator, but the set() method has the
+    advantage of also returning a bool if the value changed.  This can be
     useful for branching on changed values.
 
     @code
@@ -65,7 +65,7 @@ Note
 
     The lazy evaluation used means that reading an out-of-range element
     returns zero, but does not affect the list size.  Even in a non-const
-    context, only the assigment causes the element to be created.
+    context, only the assigment itself causes the element to be created.
     For example,
     @code
         list.resize(4);
@@ -171,7 +171,7 @@ public:
         inline PackedList(const PackedList<nBits>&);
 
         //- Construct by transferring the parameter contents
-        inline PackedList(const Xfer<PackedList<nBits> >&);
+        inline PackedList(const Xfer< PackedList<nBits> >&);
 
         //- Construct from a list of labels
         PackedList(const UList<label>&);
@@ -240,7 +240,6 @@ public:
 
         //- Reserve allocation space for at least this size.
         //  Never shrinks the allocated size.
-        //  Optionally provide an initialization value for new elements.
         inline void reserve(const label);
 
         //- Clear the list, i.e. set addressable size to zero.
@@ -258,7 +257,7 @@ public:
         inline void transfer(PackedList<nBits>&);
 
         //- Transfer contents to the Xfer container
-        inline Xfer<PackedList<nBits> > xfer();
+        inline Xfer< PackedList<nBits> > xfer();
 
 
     // Member operators
@@ -413,7 +412,7 @@ public:
         //- iterator set to the beginning of the PackedList
         inline iterator begin();
 
-        //- iterator set to beyond the end of the HashTable
+        //- iterator set to beyond the end of the PackedList
         inline iterator end();
 
 
