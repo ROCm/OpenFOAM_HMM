@@ -27,6 +27,9 @@ License
 #include "primitiveEdgeMesh.H"
 #include "mergePoints.H"
 #include "StaticHashTable.H"
+#include "demandDrivenData.H"
+#include "meshTools.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -95,6 +98,12 @@ Foam::primitiveEdgeMesh::primitiveEdgeMesh(const primitiveEdgeMesh& em)
     points_(em.points_),
     edges_(em.edges_),
     pointEdgesPtr_(NULL)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::primitiveEdgeMesh::~primitiveEdgeMesh()
 {}
 
 
@@ -244,13 +253,28 @@ void Foam::primitiveEdgeMesh::mergePoints(const scalar mergeDist)
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void Foam::primitiveEdgeMesh::operator=(const primitiveEdgeMesh& rhs)
+void Foam::primitiveEdgeMesh::writeObj
+(
+    const fileName& fName
+) const
 {
-    points_ = rhs.points_;
-    edges_ = rhs.edges_;
-    pointEdgesPtr_.reset(NULL);
+    Pout<< nl << "Writing points and edges to " << fName << endl;
+
+    OFstream str(fName);
+
+    forAll(points_, p)
+    {
+        meshTools::writeOBJ(str, points_[p]);
+    }
+
+    forAll (edges_, e)
+    {
+        const edge& ed = edges_[e];
+
+        str<< "l " << ed.start() + 1 << ' ' << ed.end() + 1;
+
+        str<< nl;
+    }
 }
 
 

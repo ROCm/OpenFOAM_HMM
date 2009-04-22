@@ -48,4 +48,14 @@ inline const Foam::labelListList& Foam::primitiveEdgeMesh::pointEdges() const
 }
 
 
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::primitiveEdgeMesh::operator=(const primitiveEdgeMesh& rhs)
+{
+    points_ = rhs.points_;
+    edges_ = rhs.edges_;
+    pointEdgesPtr_.reset(NULL);
+}
+
+
 // ************************************************************************* //

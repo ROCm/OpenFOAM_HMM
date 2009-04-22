@@ -85,6 +85,10 @@ public:
         primitiveEdgeMesh(const primitiveEdgeMesh&);
 
 
+    // Destructor
+
+        ~primitiveEdgeMesh();
+
 
     // Member Functions
 
@@ -100,6 +104,9 @@ public:
 
         //- Merge common points (points within mergeDist)
         void mergePoints(const scalar mergeDist);
+
+        //- Write the primitiveEdgeMesh as an obj file
+        void writeObj(const fileName& fName) const;
 
     // Member Operators
 

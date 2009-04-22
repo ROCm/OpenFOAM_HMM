@@ -30,10 +30,13 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+
 #include "triangle.H"
 #include "triSurface.H"
 #include "argList.H"
+#include "Time.H"
 #include "surfaceFeatures.H"
+#include "featureEdgeMesh.H"
 #include "treeBoundBox.H"
 #include "meshTools.H"
 #include "OFstream.H"
@@ -108,9 +111,11 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("minElem", "number of edges in feature");
     argList::validOptions.insert("subsetBox", "((x0 y0 z0)(x1 y1 z1))");
     argList::validOptions.insert("deleteBox", "((x0 y0 z0)(x1 y1 z1))");
-    argList args(argc, argv);
 
-    Pout<< "Feature line extraction is only valid on closed manifold surfaces." 
+#   include "setRootCase.H"
+#   include "createTime.H"
+
+    Pout<< "Feature line extraction is only valid on closed manifold surfaces."
         << endl;
 
 
@@ -159,7 +164,7 @@ int main(int argc, char *argv[])
 
         set = surfaceFeatures(surf, includedAngle);
 
-        Pout<< endl << "Writing initial features" << endl;    
+        Pout<< endl << "Writing initial features" << endl;
         set.write("initial.fSet");
         set.writeObj("initial");
     }
@@ -195,7 +200,7 @@ int main(int argc, char *argv[])
         minLen = readScalar(IStringStream(args.options()["minLen"])());
         Pout<< "Removing features of length < " << minLen << endl;
     }
-    
+
     label minElem = 0;
     if (args.options().found("minElem"))
     {
@@ -207,7 +212,7 @@ int main(int argc, char *argv[])
     if (minLen > 0 || minLen > 0)
     {
         set.trimFeatures(minLen, minElem);
-        Pout<< endl << "Removed small features" << endl;    
+        Pout<< endl << "Removed small features" << endl;
     }
 
 
@@ -254,10 +259,9 @@ int main(int argc, char *argv[])
 
     Pout<< endl << "Writing trimmed features to " << outFileName << endl;
     newSet.write(outFileName);
-    
+
     Pout<< endl << "Writing edge objs." << endl;
     newSet.writeObj("final");
-
 
     Pout<< nl
         << "Final feature set:" << nl
@@ -269,7 +273,22 @@ int main(int argc, char *argv[])
         << "        internal edges : " << newSet.nInternalEdges() << nl
         << endl;
 
-    Pout<< "End\n" << endl;
+    // Extracting and writing a featureEdgeMesh
+
+    Pout<< nl << "Writing featureEdgeMesh to constant/featureEdgeMesh."
+        << endl;
+
+    featureEdgeMesh feMesh
+    (
+        newSet,
+        runTime,
+        surfFileName.lessExt().name() + ".feMesh",
+        true
+    );
+
+    feMesh.write();
+
+    Pout<< nl << "End\n" << endl;
 
     return 0;
 }

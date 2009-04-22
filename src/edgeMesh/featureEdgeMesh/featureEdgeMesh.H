@@ -34,7 +34,7 @@ Description
         nonFeatureStart_ .. size-1          : non-feature points
 
     Feature edges are the edgeList of the edgeMesh and are sorted:
-        0 .. internalStart_-1           : external edges (convex)
+        0 .. internalStart_-1           : external edges (convex w.r.t normals)
         internalStart_ .. flatStart_-1  : internal edges (concave)
         flatStart_ .. openStart_-1      : flat edges (neither concave or convex)
                                           can arise from region interfaces on
@@ -42,6 +42,8 @@ Description
         openStart_ .. multipleStart_-1  : open edges (e.g. from baffle surfaces)
         multipleStart_ .. size-1        : multiply connected edges
 
+    The edge direction and feature edge and feature point adjacent normals
+    are stored.
 
 SourceFiles
     featureEdgeMeshI.H
@@ -52,7 +54,10 @@ SourceFiles
 #ifndef featureEdgeMesh_H
 #define featureEdgeMesh_H
 
-#include "edgeMesh.H"
+#include "primitiveEdgeMesh.H"
+#include "surfaceFeatures.H"
+#include "objectRegistry.H"
+#include "IOdictionary.H"
 #include "indexedOctree.H"
 #include "treeDataEdge.H"
 #include "pointIndexHit.H"
@@ -68,30 +73,40 @@ namespace Foam
 
 class featureEdgeMesh
 :
-    public edgeMesh
+    public regIOobject,
+    public primitiveEdgeMesh
 {
 
 public:
 
-        enum pointStatus
-        {
-            CONVEX,     // Fully convex point (w.r.t normals)
-            CONCAVE,    // Fully concave point
-            MIXED,      // A point surrounded by both convex and concave edges
-            NONFEATURE  // Not a feature point
-        };
+    TypeName("featureEdgeMesh");
 
-        enum edgeStatus
-        {
-            EXTERNAL,   // "Convex" edge
-            INTERNAL,   // "Concave" edge
-            FLAT,       // Neither concave or convex, on a flat surface
-            OPEN,       // i.e. only connected to one face
-            MULTIPLE,   // Multiply connected (connected to more than two faces)
-            NONE        // Not a feature edge (consistency with surfaceFeatures)
-        };
+    enum pointStatus
+    {
+        CONVEX,     // Fully convex point (w.r.t normals)
+        CONCAVE,    // Fully concave point
+        MIXED,      // A point surrounded by both convex and concave edges
+        NONFEATURE  // Not a feature point
+    };
+
+    enum edgeStatus
+    {
+        EXTERNAL,   // "Convex" edge
+        INTERNAL,   // "Concave" edge
+        FLAT,       // Neither concave or convex, on a flat surface
+        OPEN,       // i.e. only connected to one face
+        MULTIPLE,   // Multiply connected (connected to more than two faces)
+        NONE        // Not a classified feature edge (consistency with
+                    // surfaceFeatures)
+    };
 
 private:
+
+    // Static data
+
+        //- Angular closeness tolerance for treating normals as the same
+        static scalar cosNormalAngleTol_;
+
 
     // Private data
 
@@ -120,20 +135,36 @@ private:
         //  points and edges, unsorted
         vectorField normals_;
 
+        //- Flat and open edges require the direction of the edge
+        vectorField edgeDirections_;
+
         //- Indices of the normals that are adjacent to the feature edges
         labelListList edgeNormals_;
 
         //- Indices of the normals that are adjacent to the feature points
         labelListList featurePointNormals_;
 
-        //- Indices of all edges, pre-calculated and stored
-        labelField allEdges_;
+        //- Feature edges which are on the boundary between regions
+        labelList regionEdges_;
 
         //- Search tree for edges.
         mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
 
 
     // Private Member Functions
+
+        //- Classify the type of feature point.  Requires valid stored member
+        //  data for edges and normals.
+        pointStatus classifyFeaturePoint(label ptI) const;
+
+        //- Classify the type of feature edge.  Requires face centre 0 to face
+        //  centre 1 vector to distinguish internal from external
+        edgeStatus classifyEdge
+        (
+            const List<vector>& norms,
+            const labelList& edNorms,
+            const vector& fC0tofC1
+        ) const;
 
         //- Disallow default bitwise copy construct
         featureEdgeMesh(const featureEdgeMesh&);
@@ -149,13 +180,35 @@ public:
         //- Construct (read) given an IOobject
         featureEdgeMesh(const IOobject&);
 
-        //- Construct from edgeMesh data and
+         //- Construct (read) given surfaceFeatures, an objectRegistry and a
+         //  fileName to write to.  Extracts, classifies and reorders the data
+         //  from surfaceFeatures.
+        featureEdgeMesh
+        (
+            const surfaceFeatures& sFeat,
+            const objectRegistry& obr,
+            const fileName& sFeatFileName,
+            bool write = false
+        );
+
+        //- Construct from components
         featureEdgeMesh
         (
             const IOobject& io,
             const pointField& pts,
             const edgeList& eds,
-            const vectorField& normals
+            label concaveStart,
+            label mixedStart,
+            label nonFeatureStart,
+            label internalStart,
+            label flatStart,
+            label openStart,
+            label multipleStart,
+            const vectorField& normals,
+            const vectorField& edgeDirections,
+            const labelListList& edgeNormals,
+            const labelListList& featurePointNormals,
+            const labelList& regionEdges
         );
 
 
@@ -174,14 +227,47 @@ public:
                 scalarField searchDistSqr,
                 labelList& edgeLabel,
                 pointField& edgePoint,
-                labelListList& adjacentNormals
+                List<vectorField>& adjacentNormals
             ) const;
 
         // Access
 
+            //- Return whether or not the point index is a feature point
+            inline bool featurePoint(label ptI) const;
+
             //- Return the normals of the surfaces adjacent to the feature edges
             //  and points
             inline const vectorField& normals() const;
+
+            //- Return the edgeDirection vectors
+            inline const vectorField& edgeDirections() const;
+
+            //- Return the indices of the normals that are adjacent to the
+            //  feature edges
+            inline const labelListList& edgeNormals() const;
+
+            //- Return the normal vectors for a given set of normal indices
+            inline vectorField edgeNormals(const labelList& edgeNormIs) const;
+
+            //- Return the normal vectors for a given edge
+            inline vectorField edgeNormals(label edgeI) const;
+
+            //- Return the indices of the normals that are adjacent to the
+            //  feature points
+            inline const labelListList& featurePointNormals() const;
+
+            //- Return the normal vectors for a given feature point
+            inline vectorField featurePointNormals(label ptI) const;
+
+            //- Return the feature edges which are on the boundary between
+            //  regions
+            inline const labelList& regionEdges() const;
+
+            //- Return the pointStatus of a specified point
+            inline pointStatus getPointStatus(label ptI) const;
+
+            //- Return the edgeStatus of a specified edge
+            inline edgeStatus getEdgeStatus(label edgeI) const;
 
             //- Demand driven contruction of octree for boundary edges
             const indexedOctree<treeDataEdge>& edgeTree() const;
@@ -191,6 +277,15 @@ public:
         // Edit
 
         // Write
+
+            //- Write all components of the featureEdgeMesh as obj files
+            void writeObj(const fileName& fName) const;
+
+            // //- ReadData function required for regIOobject read operation
+            // virtual bool readData(Istream&);
+
+            //- WriteData function required for regIOobject write operation
+            virtual bool writeData(Ostream&) const;
 };
 
 
