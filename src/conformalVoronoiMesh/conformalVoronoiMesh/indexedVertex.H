@@ -191,6 +191,12 @@ public:
         return type_ <= INTERNAL_POINT;
     }
 
+    //- Set the point to be internal
+    inline void setInternal()
+    {
+        type_ = INTERNAL_POINT;
+    }
+
     //- Is point internal and near the boundary
     inline bool nearBoundary() const
     {

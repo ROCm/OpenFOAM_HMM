@@ -107,7 +107,6 @@ void Foam::conformalVoronoiMesh::writeMesh()
 
     Info<< nl << "Writing polyMesh to constant." << endl;
 
-
     polyMesh pMesh
     (
         io,

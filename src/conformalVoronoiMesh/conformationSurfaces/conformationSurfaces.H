@@ -65,8 +65,8 @@ class conformationSurfaces
         //- Reference to the searchableSurfaces object holding all geometry data
         const searchableSurfaces& allGeometry_;
 
-        //- Feature Edges and points
-        featureEdgeMesh features_;
+        //- A list of featureEdge meshes
+        PtrList<featureEdgeMesh> features_;
 
         //- The location in the mesh that specifies which portion of surfaces is
         //  to be meshed.
@@ -74,6 +74,10 @@ class conformationSurfaces
 
         //- Indices of surfaces in allGeometry that are to be conformed to
         labelList surfaces_;
+
+        //- A boolean value for each surface to be conformed to specifying if it
+        //  is to be treated as a baffle
+        boolList baffleSurfaces_;
 
         //- The overall boundBox of all of the surfaces to be conformed to
         boundBox bounds_;
@@ -113,6 +117,9 @@ public:
             //  of the geometry
             inline const searchableSurfaces& geometry() const;
 
+            //- Return the object holding the feature points and edges
+            inline const PtrList<featureEdgeMesh>& features() const;
+
             //- Return the surface indices
             inline const labelList& surfaces() const;
 
@@ -145,11 +152,11 @@ public:
             ) const;
 
             // Finding if the line joining start and end intersects the surface
-            bool findAnyIntersection(point start, point end) const;
+            bool findSurfaceAnyIntersection(point start, point end) const;
 
             //- Find the nearest point to the sample and return it to the
             //  pointIndexHit, and the normal at the hit location, if found.
-            void findNearestAndNormal
+            void findSurfaceNearestAndNormal
             (
                 const point& sample,
                 scalar nearestDistSqr,
@@ -157,8 +164,25 @@ public:
                 vector& normal
             ) const;
 
+            void findSurfaceNearestAndNormal
+            (
+                const pointField& sample,
+                scalarField nearestDistSqr,
+                List<pointIndexHit>& pHit,
+                vectorField& normal
+            ) const;
 
-    // Member Operators
+            //- Find the nearest point on any feature edge
+            void findEdgeNearest
+            (
+                const pointField& samples,
+                const scalarField& nearestDistSqr
+            ) const;
+
+        // Write
+
+            //- Write all components of all the featureEdgeMeshes as an obj file
+            void writeFeatureObj(const fileName& prefix) const;
 
 };
 

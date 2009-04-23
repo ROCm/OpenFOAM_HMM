@@ -28,6 +28,7 @@ License
 #include "initialPointsMethod.H"
 #include "uint.H"
 #include "ulong.H"
+#include "surfaceFeatures.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -72,7 +73,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceIntersection
         }
 
         // Check for the edge passing through a surface
-        if (geometryToConformTo_.findAnyIntersection(dE0, dE1))
+        if (geometryToConformTo_.findSurfaceAnyIntersection(dE0, dE1))
         {
             return true;
         }
@@ -132,7 +133,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         )
     );
 
-    scalar minEdgeLenSqr = Foam::sqr(defaultCellSize*minimumEdgeLengthCoeff);
+    scalar minEdgeLenSqr = sqr(defaultCellSize*minimumEdgeLengthCoeff);
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -774,7 +775,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 {
     timeCheck();
 
-    insertFeaturePoints();
+    conformToFeaturePoints();
     timeCheck();
 
     insertInitialPoints();
@@ -846,9 +847,11 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 }
 
 
-void Foam::conformalVoronoiMesh::insertFeaturePoints()
+void Foam::conformalVoronoiMesh::conformToFeaturePoints()
 {
-    Info<< nl << "Inserting feature points" << endl;
+    Info<< nl << "Conforming to feature points" << endl;
+
+
 
     Info<< "   Conforming to " << "XXX" << " feature locations" << nl
         << "   Inserting " << "YYY" << " points" << endl;
@@ -942,7 +945,11 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    for(label iterationNo = 0; iterationNo < 1; iterationNo++)
+    // Surface protrusion conformation
+
+    label nIterations = 1;
+
+    for(label iterationNo = 0; iterationNo < nIterations; iterationNo++)
     {
         DynamicList<scalar> surfacePpDist;
         DynamicList<point> surfacePoints;
@@ -963,14 +970,11 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                 // TODO Need to have a function to recover the local cell size,
                 // use the defaultCellSize for the moment
 
-                scalar searchDistanceSqr = Foam::sqr
-                (
-                    defaultCellSize*surfDepthCoeff
-                );
+                scalar searchDistanceSqr = sqr(defaultCellSize*surfDepthCoeff);
                 pointIndexHit pHit;
                 vector normal;
 
-                geometryToConformTo_.findNearestAndNormal
+                geometryToConformTo_.findSurfaceNearestAndNormal
                 (
                     vert,
                     searchDistanceSqr,
@@ -984,6 +988,10 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
                     if (dualCellSurfaceIntersection(vit))
                     {
+                        // If the point is within a given distance of a feature
+                        // edge, shift it to being an edge control point
+                        // instead, this will prevent "pits" forming.
+
                         surfacePpDist.append(defaultCellSize*ppDistCoeff);
                         surfacePoints.append(pHit.hitPoint());
                         surfaceNormals.append(normal);
@@ -992,9 +1000,9 @@ void Foam::conformalVoronoiMesh::conformToSurface()
             }
         }
 
-        Info<< nl <<iterationNo << ": "
-            << number_of_vertices() << ": "
-            << surfacePoints.size() << endl;
+        Info<< nl <<"    iterationNo " << iterationNo << nl
+            << "    number_of_vertices " << number_of_vertices() << nl
+            << "    surfacePoints.size() " << surfacePoints.size() << endl;
 
         insertSurfacePointPairs
         (
@@ -1006,6 +1014,51 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                 "surfaceConformationLocations_" + name(iterationNo) + ".obj"
             )
         );
+
+        // Feature edge conformation.
+
+        geometryToConformTo_.findEdgeNearest
+        (
+            pointField(surfacePoints),
+            scalarField
+            (
+                surfacePoints.size(),
+                sqr(defaultCellSize*surfDepthCoeff)
+            )
+        );
+
+        // After the surface conformation points are added, any points that are
+        // still protruding the surface may be protruding from edges, so
+        // identify the points and test if they are close to a feature edge
+
+        DynamicList<point> edgeGenerationPoints;
+
+        for
+        (
+            Triangulation::Finite_vertices_iterator vit =
+            finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            if (vit->nearBoundary())
+            {
+                if (dualCellSurfaceIntersection(vit))
+                {
+                    // Test to see if near to an edge, conform to the nearest
+                    // point on that edge if so.
+
+                    edgeGenerationPoints.append(topoint(vit->point()));
+                }
+            }
+        }
+
+        writePoints
+        (
+            "edgeGenerationLocations_" + name(iterationNo) + ".obj",
+            edgeGenerationPoints
+        );
+
     }
 }
 

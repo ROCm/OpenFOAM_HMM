@@ -38,22 +38,10 @@ Foam::conformationSurfaces::conformationSurfaces
 :
     cvMesh_(cvMesh),
     allGeometry_(allGeometry),
-    features_
-    (
-        IOobject
-        (
-            "features",
-            cvMesh_.time().constant(),
-            "featureEdgeMesh",
-            cvMesh_.time(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        pointField(0),
-        edgeList(0)
-    ),
+    features_(),
     locationInMesh_(surfaceConformationDict.lookup("locationInMesh")),
-    surfaces_(0),
+    surfaces_(),
+    baffleSurfaces_(),
     bounds_()
 {
     const dictionary& surfacesDict
@@ -61,13 +49,21 @@ Foam::conformationSurfaces::conformationSurfaces
         surfaceConformationDict.subDict("geometryToConformTo")
     );
 
+    Info<< nl << "Reading geometryToConformTo." << endl;
+
     surfaces_.setSize(surfacesDict.size());
+
+    baffleSurfaces_.setSize(surfacesDict.size());
+
+    features_.setSize(surfacesDict.size());
 
     label surfI = 0;
 
     forAllConstIter(dictionary, surfacesDict, iter)
     {
-        surfaces_[surfI] = allGeometry_.findSurfaceID(iter().keyword());
+        word surfaceName = iter().keyword();
+
+        surfaces_[surfI] = allGeometry_.findSurfaceID(surfaceName);
 
         if (surfaces_[surfI] < 0)
         {
@@ -77,10 +73,87 @@ Foam::conformationSurfaces::conformationSurfaces
                 << exit(FatalError);
         }
 
+        const dictionary& surfaceSubDict(surfacesDict.subDict(surfaceName));
+
+        baffleSurfaces_[surfI] = Switch
+        (
+            surfaceSubDict.lookupOrDefault("baffleSurface", false)
+        );
+
+        word featureMethod = surfaceSubDict.lookupOrDefault
+        (
+            "featureMethod",
+            word("none")
+        );
+
+        if (featureMethod == "featureEdgeMesh")
+        {
+            fileName feMeshName(surfaceSubDict.lookup("featureEdgeMesh"));
+
+            features_.set
+            (
+                surfI,
+                new featureEdgeMesh
+                (
+                    IOobject
+                    (
+                        feMeshName,
+                        cvMesh_.time().findInstance
+                        (
+                            "featureEdgeMesh", feMeshName
+                        ),
+                        "featureEdgeMesh",
+                        cvMesh_.time(),
+                        IOobject::MUST_READ,
+                        IOobject::NO_WRITE
+                    )
+                )
+            );
+        }
+        else if (featureMethod == "extractFeatures")
+        {
+            notImplemented
+            (
+                "conformationSurfaces::conformationSurfaces, "
+                "else if (featureMethod == \"extractFeatures\")"
+            );
+        }
+        else if (featureMethod == "none")
+        {
+            fileName feMeshName(surfaceSubDict.lookup("featureEdgeMesh"));
+
+            features_.set
+            (
+                surfI,
+                new featureEdgeMesh
+                (
+                    IOobject
+                    (
+                        feMeshName,
+                        cvMesh_.time().constant(),
+                        "featureEdgeMesh",
+                        cvMesh_.time(),
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
+                    )
+                )
+            );
+        }
+        else
+        {
+            FatalErrorIn("Foam::conformationSurfaces::conformationSurfaces")
+                << "No valid featureMethod found for surface " << surfaceName
+                << nl << "Use \"featureEdgeMesh\" or \"extractFeatures\"."
+                << exit(FatalError);
+        }
+
         surfI++;
     }
 
     bounds_ = searchableSurfacesQueries::bounds(allGeometry_, surfaces_);
+
+    writeFeatureObj("cvMesh");
 }
 
 
@@ -233,7 +306,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
 }
 
 
-bool Foam::conformationSurfaces::findAnyIntersection
+bool Foam::conformationSurfaces::findSurfaceAnyIntersection
 (
     point start,
     point end
@@ -256,7 +329,7 @@ bool Foam::conformationSurfaces::findAnyIntersection
 }
 
 
-void Foam::conformationSurfaces::findNearestAndNormal
+void Foam::conformationSurfaces::findSurfaceNearestAndNormal
 (
     const point& sample,
     scalar nearestDistSqr,
@@ -290,6 +363,152 @@ void Foam::conformationSurfaces::findNearestAndNormal
         allGeometry_[surfaces_[hitSurfaces[0]]].getNormal(hitInfo, normals);
 
         normal = normals[0];
+    }
+}
+
+
+void Foam::conformationSurfaces::findSurfaceNearestAndNormal
+(
+    const pointField& samples,
+    scalarField nearestDistSqr,
+    List<pointIndexHit>& hitInfo,
+    vectorField& normals
+) const
+{
+    labelList hitSurfaces;
+
+    searchableSurfacesQueries::findNearest
+    (
+        allGeometry_,
+        surfaces_,
+        samples,
+        nearestDistSqr,
+        hitSurfaces,
+        hitInfo
+    );
+
+    forAll(hitInfo, i)
+    {
+        const pointIndexHit& pHit(hitInfo[i]);
+
+        if (pHit.hit())
+        {
+            // hitSurfaces has returned the index of the entry in surfaces_ that
+            // was found, not the index of the surface in allGeometry_,
+            // translating this to the surface in allGeometry_ for the normal
+            // lookup.
+
+            hitSurfaces[i] = surfaces_[hitSurfaces[i]];
+
+            vectorField norm(1);
+
+            allGeometry_[hitSurfaces[i]].getNormal
+            (
+                List<pointIndexHit>(1, pHit),
+                norm
+            );
+
+            normals[i] = norm[0];
+        }
+    }
+}
+
+
+void Foam::conformationSurfaces::findEdgeNearest
+(
+    const pointField& samples,
+    const scalarField& nearestDistSqr
+) const
+{
+
+    labelList nearestSurfaces;
+    List<pointIndexHit> nearestInfo;
+
+    // Initialise
+    nearestSurfaces.setSize(samples.size());
+    nearestSurfaces = -1;
+    nearestInfo.setSize(samples.size());
+
+    // Work arrays
+    scalarField minDistSqr(nearestDistSqr);
+    List<pointIndexHit> hitInfo(samples.size());
+
+    forAll(features_, testI)
+    {
+        features_[testI].nearestFeatureEdge
+        (
+            samples,
+            minDistSqr,
+            hitInfo
+        );
+
+        // Update minDistSqr and arguments
+        forAll(hitInfo, pointI)
+        {
+            if (hitInfo[pointI].hit())
+            {
+                minDistSqr[pointI] = magSqr
+                (
+                    hitInfo[pointI].hitPoint()
+                  - samples[pointI]
+                );
+                nearestInfo[pointI] = hitInfo[pointI];
+                nearestSurfaces[pointI] = testI;
+            }
+        }
+    }
+
+    OFstream edgeNearestStr("testFindEdgeNearest.obj");
+    Pout<< "Writing edge nearest points to " << edgeNearestStr.name() << endl;
+
+    forAll(nearestInfo, i)
+    {
+        if (nearestInfo[i].hit())
+        {
+            meshTools::writeOBJ(edgeNearestStr, nearestInfo[i].hitPoint());
+        }
+    }
+
+    // labelList& edgeLabel;
+    // pointField& edgePoint;
+    // List<vectorField>& adjacentNormals;
+
+    // edgeLabel.setSize(samples.size());
+    // edgePoint.setSize(samples.size());
+    // adjacentNormals.setSize(samples.size());
+
+    // edgeLabel[i] = pHit.index();
+    // edgePoint[i] = pHit.hitPoint();
+    // adjacentNormals[i] = edgeNormals(edgeLabel[i]);
+}
+
+
+void Foam::conformationSurfaces::writeFeatureObj
+(
+    const fileName& prefix
+) const
+{
+    OFstream ftStr(prefix + "_allFeatures.obj");
+    Pout<< nl << "Writing all features to " << ftStr.name() << endl;
+
+    label verti = 0;
+
+    forAll(features_, i)
+    {
+        const featureEdgeMesh& fEM(features_[i]);
+        const pointField pts(fEM.points());
+        const edgeList eds(fEM.edges());
+
+        ftStr << "g " << fEM.name() << endl;
+
+        forAll(eds, j)
+        {
+            const edge& e = eds[j];
+
+            meshTools::writeOBJ(ftStr, pts[e[0]]); verti++;
+            meshTools::writeOBJ(ftStr, pts[e[1]]); verti++;
+            ftStr << "l " << verti-1 << ' ' << verti << endl;
+        }
     }
 }
 

@@ -94,7 +94,7 @@ class conformalVoronoiMesh
 
         //- Store the feature constraining points to be reinserted after a
         //- triangulation clear
-        List<Vb> featureConstrainingVertices_;
+        List<Vb> featureVertices_;
 
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
@@ -134,7 +134,7 @@ class conformalVoronoiMesh
         );
 
         //- Insert point groups at the feature points.
-        void insertFeaturePoints();
+        void conformToFeaturePoints();
 
         //- Reinsert stored feature point defining points.
         void reinsertFeaturePoints();

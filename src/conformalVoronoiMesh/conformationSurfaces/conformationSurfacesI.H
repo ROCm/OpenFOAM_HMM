@@ -26,11 +26,18 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::searchableSurfaces& Foam::conformationSurfaces::geometry() const
 {
     return allGeometry_;
+}
+
+
+const Foam::PtrList<Foam::featureEdgeMesh>&
+Foam::conformationSurfaces::features() const
+{
+    return features_;
 }
 
 
