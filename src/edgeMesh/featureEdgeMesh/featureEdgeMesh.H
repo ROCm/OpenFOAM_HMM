@@ -224,10 +224,8 @@ public:
             void nearestFeatureEdge
             (
                 const pointField& samples,
-                scalarField searchDistSqr,
-                labelList& edgeLabel,
-                pointField& edgePoint,
-                List<vectorField>& adjacentNormals
+                const scalarField& searchDistSqr,
+                List<pointIndexHit>& info
             ) const;
 
         // Access
@@ -279,7 +277,7 @@ public:
         // Write
 
             //- Write all components of the featureEdgeMesh as obj files
-            void writeObj(const fileName& fName) const;
+            void writeObj(const fileName& prefix) const;
 
             // //- ReadData function required for regIOobject read operation
             // virtual bool readData(Istream&);

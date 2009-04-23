@@ -117,6 +117,7 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
     }
 }
 
+
 Foam::featureEdgeMesh::featureEdgeMesh
 (
     const surfaceFeatures& sFeat,
@@ -618,36 +619,19 @@ Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::classifyEdge
 void Foam::featureEdgeMesh::nearestFeatureEdge
 (
     const pointField& samples,
-    scalarField searchDistSqr,
-    labelList& edgeLabel,
-    pointField& edgePoint,
-    List<vectorField>& adjacentNormals
+    const scalarField& searchDistSqr,
+    List<pointIndexHit>& info
 ) const
 {
-    edgeLabel.setSize(samples.size());
-    edgePoint.setSize(samples.size());
-    adjacentNormals.setSize(samples.size());
+    info.setSize(samples.size());
 
     forAll(samples, i)
     {
-        const point& sample = samples[i];
-
-        pointIndexHit pHit = edgeTree().findNearest
+        info[i] = edgeTree().findNearest
         (
-            sample,
+            samples[i],
             searchDistSqr[i]
         );
-
-        if (!pHit.hit())
-        {
-            edgeLabel[i] = -1;
-        }
-        else
-        {
-            edgeLabel[i] = pHit.index();
-            edgePoint[i] = pHit.hitPoint();
-            adjacentNormals[i] = edgeNormals(edgeLabel[i]);
-        }
     }
 }
 
