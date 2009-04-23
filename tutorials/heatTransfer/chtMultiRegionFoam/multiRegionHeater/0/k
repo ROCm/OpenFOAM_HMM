@@ -21,6 +21,11 @@ internalField   uniform 0.1;
 
 boundaryField
 {
+    minY
+    {
+        type            kQRWallFunction;
+        value           uniform 0.1;
+    }
     maxY
     {
         type            kQRWallFunction;
