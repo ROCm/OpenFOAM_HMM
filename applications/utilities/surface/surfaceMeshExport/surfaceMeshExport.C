@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.append("outputFile");
     argList::validOptions.insert("name",  "name");
-    argList::validOptions.insert("clean",  "scale");
+    argList::validOptions.insert("clean", "");
     argList::validOptions.insert("scaleIn",  "scale");
     argList::validOptions.insert("scaleOut", "scale");
     argList::validOptions.insert("dict", "coordinateSystemsDict");
