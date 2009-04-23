@@ -116,6 +116,13 @@ int main(int argc, char *argv[])
     {
         regionPrefix = regionName;
     }
+
+    // Set all times on processor meshes equal to reconstructed mesh
+    forAll (databases, procI)
+    {
+        databases[procI].setTime(runTime.timeName(), runTime.timeIndex());
+    }
+
     // Read all meshes and addressing to reconstructed mesh
     processorMeshes procMeshes(databases, regionName);
 
