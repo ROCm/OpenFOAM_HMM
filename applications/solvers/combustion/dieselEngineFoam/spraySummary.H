@@ -23,8 +23,6 @@
             gasMass *= 2.0*mathematicalConstant::pi/dieselSpray.angleOfWedge();
         }
 
-        reduce(gasMass, sumOp<scalar>());
-
         scalar addedMass = gasMass - gasMass0;
 
         Info<< "Added gas mass................. | " << 1e6*addedMass << " mg"

@@ -268,7 +268,7 @@ bool domainDecomposition::writeDecomposition()
         (
             IOobject
             (
-                polyMesh::defaultRegion,
+                this->polyMesh::name(),  // region name of undecomposed mesh
                 "constant",
                 processorDb
             ),

@@ -38,7 +38,6 @@ SourceFiles
 
 #include "autoPtr.H"
 #include "dictionary.H"
-#include "boolList.H"
 #include "wallPoint.H"
 #include "searchableSurfaces.H"
 #include "refinementSurfaces.H"

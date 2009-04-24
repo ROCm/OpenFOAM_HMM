@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -3 0 0 0 0 ];
+dimensions      [0 2 -3 0 0 0 0];
 
 internalField   uniform 0.01;
 
@@ -23,20 +23,18 @@ boundaryField
 {
     floor
     {
-        type            epsilonWallFunction;
-        value           uniform 0;
+        type            compressible::epsilonWallFunction;
+        value           uniform 0.01;
     }
-
     ceiling
     {
-        type            epsilonWallFunction;
-        value           uniform 0;
+        type            compressible::epsilonWallFunction;
+        value           uniform 0.01;
     }
-
     fixedWalls
     {
-        type            epsilonWallFunction;
-        value           uniform 0;
+        type            compressible::epsilonWallFunction;
+        value           uniform 0.01;
     }
 }
 

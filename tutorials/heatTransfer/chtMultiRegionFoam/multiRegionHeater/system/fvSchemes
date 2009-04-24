@@ -14,5 +14,33 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+ddtSchemes
+{
+}
+
+gradSchemes
+{
+}
+
+divSchemes
+{
+}
+
+laplacianSchemes
+{
+}
+
+interpolationSchemes
+{
+}
+
+snGradSchemes
+{
+}
+
+fluxRequired
+{
+}
+
 
 // ************************************************************************* //

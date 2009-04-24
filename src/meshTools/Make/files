@@ -141,7 +141,10 @@ triSurface/triSurfaceTools/geompack/geompack.C
 
 twoDPointCorrector/twoDPointCorrector.C
 
+directMapped/directMappedPolyPatch/directMappedPatchBase.C
 directMapped/directMappedPolyPatch/directMappedPolyPatch.C
+directMapped/directMappedPolyPatch/directMappedWallPolyPatch.C
 directMapped/directMappedPointPatch/directMappedPointPatch.C
+directMapped/directMappedPointPatch/directMappedWallPointPatch.C
 
 LIB = $(FOAM_LIBBIN)/libmeshTools

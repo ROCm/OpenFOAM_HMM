@@ -24,7 +24,7 @@ nLayers             1;
 wedgeCoeffs
 {
     axisPt          (0 0 0);
-    axisNormal      (0 -1 0);
+    axis            (0 -1 0);
     angle           2.0;
 }
 
@@ -47,4 +47,3 @@ sigmaRadialCoeffs
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-

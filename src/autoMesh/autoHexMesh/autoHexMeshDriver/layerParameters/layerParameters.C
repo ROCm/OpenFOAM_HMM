@@ -163,7 +163,8 @@ Foam::layerParameters::layerParameters
         numLayers_.size(),
         readScalar(dict.lookup("expansionRatio"))
     ),
-    finalLayerRatio_
+    relativeSizes_(false),
+    finalLayerThickness_
     (
         numLayers_.size(),
         readScalar(dict.lookup("finalLayerRatio"))
@@ -211,8 +212,24 @@ Foam::layerParameters::layerParameters
     (
         readLabel(dict.lookup("nBufferCellsNoExtrude"))
     ),
-    nSnap_(readLabel(dict.lookup("nSnap")))
-{}
+    nSnap_(readLabel(dict.lookup("nSnap"))),
+    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
+    nRelaxedIter_(labelMax)
+{
+    if (dict.found("nRelaxedIter"))
+    {
+        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
+    }
+
+    if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
+    {
+        FatalErrorIn("layerParameters::layerParameters(..)")
+            << "Layer iterations should be >= 0." << endl
+            << "nLayerIter:" << nLayerIter_
+            << " nRelaxedIter:" << nRelaxedIter_
+            << exit(FatalError);
+    }
+}
 
 
 // Construct from dictionary
@@ -228,10 +245,11 @@ Foam::layerParameters::layerParameters
         boundaryMesh.size(),
         readScalar(dict.lookup("expansionRatio"))
     ),
-    finalLayerRatio_
+    relativeSizes_(dict.lookup("relativeSizes")),
+    finalLayerThickness_
     (
         boundaryMesh.size(),
-        readScalar(dict.lookup("finalLayerRatio"))
+        readScalar(dict.lookup("finalLayerThickness"))
     ),
     minThickness_
     (
@@ -276,8 +294,24 @@ Foam::layerParameters::layerParameters
     (
         readLabel(dict.lookup("nBufferCellsNoExtrude"))
     ),
-    nSnap_(readLabel(dict.lookup("nRelaxIter")))
+    nSnap_(readLabel(dict.lookup("nRelaxIter"))),
+    nLayerIter_(readLabel(dict.lookup("nLayerIter"))),
+    nRelaxedIter_(labelMax)
 {
+    if (dict.found("nRelaxedIter"))
+    {
+        dict.lookup("nRelaxedIter") >> nRelaxedIter_;
+    }
+    if (nLayerIter_ < 0 || nRelaxedIter_ < 0)
+    {
+        FatalErrorIn("layerParameters::layerParameters(..)")
+            << "Layer iterations should be >= 0." << endl
+            << "nLayerIter:" << nLayerIter_
+            << " nRelaxedIter:" << nRelaxedIter_
+            << exit(FatalError);
+    }
+
+
     const dictionary& layersDict = dict.subDict("layers");
 
     forAll(boundaryMesh, patchI)
@@ -291,14 +325,21 @@ Foam::layerParameters::layerParameters
             numLayers_[patchI] =
                 readLabel(layerDict.lookup("nSurfaceLayers"));
 
-            //- Patch-wise layer parameters disabled for now. Just remove
-            //  settings in initialiser list and uncomment below.
-            //expansionRatio_[patchI] =
-            //    readScalar(layerDict.lookup("expansionRatio"));
-            //finalLayerRatio_[patchI] =
-            //    readScalar(layerDict.lookup("finalLayerRatio"));
-            //minThickness_[patchI] =
-            //    readScalar(layerDict.lookup("minThickness"));
+            layerDict.readIfPresent
+            (
+                "expansionRatio",
+                expansionRatio_[patchI]
+            );
+            layerDict.readIfPresent
+            (
+                "finalLayerThickness",
+                finalLayerThickness_[patchI]
+            );
+            layerDict.readIfPresent
+            (
+                "minThickness",
+                minThickness_[patchI]
+            );
         }
     }
 

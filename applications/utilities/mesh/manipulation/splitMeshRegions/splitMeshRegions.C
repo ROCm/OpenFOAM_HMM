@@ -57,6 +57,7 @@ Description
 #include "EdgeMap.H"
 #include "syncTools.H"
 #include "ReadFields.H"
+#include "directMappedWallPolyPatch.H"
 
 using namespace Foam;
 
@@ -1022,13 +1023,13 @@ EdgeMap<label> addRegionPatches
             (
                 mesh,
                 regionNames[e[0]] + "_to_" + regionNames[e[1]],
-                polyPatch::typeName
+                directMappedWallPolyPatch::typeName
             );
             addPatch
             (
                 mesh,
                 regionNames[e[1]] + "_to_" + regionNames[e[0]],
-                polyPatch::typeName
+                directMappedWallPolyPatch::typeName
             );
 
             Info<< "For interface between region " << e[0]
@@ -1100,7 +1101,6 @@ EdgeMap<label> addRegionPatches
 //}
 
 
-//XXXXXXXXX
 // Find region that covers most of cell zone
 label findCorrespondingRegion
 (
@@ -1152,7 +1152,6 @@ label findCorrespondingRegion
 
     return regionI;
 }
-//XXXXXXXXX
 
 
 //// Checks if cellZone has corresponding cellRegion.
