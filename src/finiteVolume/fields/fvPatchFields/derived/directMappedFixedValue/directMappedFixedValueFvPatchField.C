@@ -296,6 +296,16 @@ void directMappedFixedValueFvPatchField<Type>::updateCoeffs()
 
     this->operator==(newValues);
 
+    if (debug)
+    {
+        Info<< "directMapped on field:" << fldName
+            << " patch:" << this->patch().name()
+            << "  avg:" << gAverage(*this)
+            << "  min:" << gMin(*this)
+            << "  max:" << gMax(*this)
+            << endl;
+    }
+
     fixedValueFvPatchField<Type>::updateCoeffs();
 }
 
