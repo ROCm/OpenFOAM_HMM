@@ -86,7 +86,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("directMapped");
+    TypeName("directMappedPatch");
 
 
     // Constructors
