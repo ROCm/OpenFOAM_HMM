@@ -191,7 +191,7 @@ public:
             bool write = false
         );
 
-        //- Construct from components
+        //- Construct from all components
         featureEdgeMesh
         (
             const IOobject& io,
@@ -211,6 +211,13 @@ public:
             const labelList& regionEdges
         );
 
+        //- Construct from minimal primitiveEdgeMesh components
+        featureEdgeMesh
+        (
+            const IOobject& io,
+            const pointField& pts,
+            const edgeList& eds
+        );
 
     //- Destructor
     ~featureEdgeMesh();

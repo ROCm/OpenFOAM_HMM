@@ -517,6 +517,30 @@ Foam::featureEdgeMesh::featureEdgeMesh
 {}
 
 
+Foam::featureEdgeMesh::featureEdgeMesh
+(
+    const IOobject& io,
+    const pointField& pts,
+    const edgeList& eds
+)
+:
+    regIOobject(io),
+    primitiveEdgeMesh(pts, eds),
+    concaveStart_(0),
+    mixedStart_(0),
+    nonFeatureStart_(0),
+    internalStart_(0),
+    flatStart_(0),
+    openStart_(0),
+    multipleStart_(0),
+    normals_(0),
+    edgeDirections_(0),
+    edgeNormals_(0),
+    featurePointNormals_(0),
+    regionEdges_(0)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destruct or  * * * * * * * * * * * * * * * //
 
 Foam::featureEdgeMesh::~featureEdgeMesh()

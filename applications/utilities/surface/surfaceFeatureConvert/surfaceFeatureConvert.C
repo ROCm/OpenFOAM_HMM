@@ -165,7 +165,7 @@ void write
     const Time& runTime,
     const fileName& inFileName,
     const fileName& outFileName,
-    const edgeMesh& eMesh
+    const primitiveEdgeMesh& eMesh
 )
 {
     if (outFileName.ext() == "eMesh")
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
         edgeList edges;
         readNASEdges(inFileName, points, edges);
 
-        edgeMesh eMesh(points, edges);
+        primitiveEdgeMesh eMesh(points, edges);
 
         write(runTime, inFileName, outFileName, eMesh);
     }
