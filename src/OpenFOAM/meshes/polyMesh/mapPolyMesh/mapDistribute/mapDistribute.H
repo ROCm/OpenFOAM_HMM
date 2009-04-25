@@ -131,14 +131,32 @@ public:
                 return constructSize_;
             }
 
+            //- Constructed data size
+            label& constructSize()
+            {
+                return constructSize_;
+            }
+
             //- From subsetted data back to original data
             const labelListList& subMap() const
             {
                 return subMap_;
             }
 
+            //- From subsetted data back to original data
+            labelListList& subMap()
+            {
+                return subMap_;
+            }
+
             //- From subsetted data to new reconstructed data
             const labelListList& constructMap() const
+            {
+                return constructMap_;
+            }
+
+            //- From subsetted data to new reconstructed data
+            labelListList& constructMap()
             {
                 return constructMap_;
             }

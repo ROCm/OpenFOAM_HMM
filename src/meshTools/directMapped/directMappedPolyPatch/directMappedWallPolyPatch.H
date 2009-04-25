@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::directMappedPolyPatch
+    Foam::directMappedWallPolyPatch
 
 Description
     Determines a mapping between patch face centres and mesh cell or face
@@ -34,14 +34,14 @@ Note
     processors to keep the addressing calculation simple.
 
 SourceFiles
-    directMappedPolyPatch.C
+    directMappedWallPolyPatch.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedPolyPatch_H
-#define directMappedPolyPatch_H
+#ifndef directMappedWallPolyPatch_H
+#define directMappedWallPolyPatch_H
 
-#include "polyPatch.H"
+#include "wallPolyPatch.H"
 #include "directMappedPatchBase.H"
 
 
@@ -53,12 +53,12 @@ namespace Foam
 class polyMesh;
 
 /*---------------------------------------------------------------------------*\
-                      Class directMappedPolyPatch Declaration
+                      Class directMappedWallPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class directMappedPolyPatch
+class directMappedWallPolyPatch
 :
-    public polyPatch,
+    public wallPolyPatch,
     public directMappedPatchBase
 {
 
@@ -86,13 +86,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("directMappedPatch");
+    TypeName("directMappedWall");
 
 
     // Constructors
 
         //- Construct from components
-        directMappedPolyPatch
+        directMappedWallPolyPatch
         (
             const word& name,
             const label size,
@@ -102,7 +102,7 @@ public:
         );
 
         //- Construct from dictionary
-        directMappedPolyPatch
+        directMappedWallPolyPatch
         (
             const word& name,
             const dictionary& dict,
@@ -111,17 +111,17 @@ public:
         );
 
         //- Construct as copy, resetting the boundary mesh
-        directMappedPolyPatch
+        directMappedWallPolyPatch
         (
-            const directMappedPolyPatch&,
+            const directMappedWallPolyPatch&,
             const polyBoundaryMesh&
         );
 
         //- Construct given the original patch and resetting the
         //  face list and boundary mesh information
-        directMappedPolyPatch
+        directMappedWallPolyPatch
         (
-            const directMappedPolyPatch& pp,
+            const directMappedWallPolyPatch& pp,
             const polyBoundaryMesh& bm,
             const label index,
             const label newSize,
@@ -131,7 +131,7 @@ public:
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
-            return autoPtr<polyPatch>(new directMappedPolyPatch(*this, bm));
+            return autoPtr<polyPatch>(new directMappedWallPolyPatch(*this, bm));
         }
 
         //- Construct and return a clone, resetting the face list
@@ -146,14 +146,21 @@ public:
         {
             return autoPtr<polyPatch>
             (
-                new directMappedPolyPatch(*this, bm, index, newSize, newStart)
+                new directMappedWallPolyPatch
+                (
+                    *this,
+                    bm,
+                    index,
+                    newSize,
+                    newStart
+                )
             );
         }
 
 
     // Destructor
 
-        ~directMappedPolyPatch();
+        ~directMappedWallPolyPatch();
 
 
     // Member functions

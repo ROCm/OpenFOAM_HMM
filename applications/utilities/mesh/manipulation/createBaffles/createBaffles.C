@@ -48,12 +48,164 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void createBaffles
+(
+    const polyMesh& mesh,
+    const label faceI,
+    const label oldPatchI,
+    const labelList& newPatches,
+    PackedBoolList& doneFace,
+    polyTopoChange& meshMod
+)
+{
+    const polyBoundaryMesh& patches = mesh.boundaryMesh();
+    const faceZoneMesh& faceZones = mesh.faceZones();
+
+    const face& f = mesh.faces()[faceI];
+    label zoneID = faceZones.whichZone(faceI);
+    bool zoneFlip = false;
+    if (zoneID >= 0)
+    {
+        const faceZone& fZone = faceZones[zoneID];
+        zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
+    }
+    label nei = -1;
+    if (oldPatchI == -1)
+    {
+        nei = mesh.faceNeighbour()[faceI];
+    }
+
+
+    face revFace(f.reverseFace());
+
+    forAll(newPatches, i)
+    {
+        if (oldPatchI == -1)
+        {
+            // Internal face
+            if (doneFace.set(faceI))
+            {
+                // First usage of face. Modify.
+                meshMod.setAction
+                (
+                    polyModifyFace
+                    (
+                        f,                          // modified face
+                        faceI,                      // label of face
+                        mesh.faceOwner()[faceI],    // owner
+                        -1,                         // neighbour
+                        false,                      // face flip
+                        newPatches[i],              // patch for face
+                        false,                      // remove from zone
+                        zoneID,                     // zone for face
+                        zoneFlip                    // face flip in zone
+                    )
+                );
+            }
+            else
+            {
+                // Second or more usage of face. Add.
+                meshMod.setAction
+                (
+                    polyAddFace
+                    (
+                        f,                          // modified face
+                        mesh.faceOwner()[faceI],    // owner
+                        -1,                         // neighbour
+                        -1,                         // master point
+                        -1,                         // master edge
+                        faceI,                      // master face
+                        false,                      // face flip
+                        newPatches[i],              // patch for face
+                        zoneID,                     // zone for face
+                        zoneFlip                    // face flip in zone
+                    )
+                );
+            }
+
+            meshMod.setAction
+            (
+                polyAddFace
+                (
+                    revFace,                    // modified face
+                    nei,                        // owner
+                    -1,                         // neighbour
+                    -1,                         // masterPointID
+                    -1,                         // masterEdgeID
+                    faceI,                      // masterFaceID,
+                    true,                       // face flip
+                    newPatches[i],              // patch for face
+                    zoneID,                     // zone for face
+                    zoneFlip                    // face flip in zone
+                )
+            );
+        }
+        else if
+        (
+            patches[oldPatchI].coupled()
+         && patches[newPatches[i]].coupled()
+        )
+        {
+            // Do not allow coupled patches to be moved to different coupled
+            // patches.
+            //WarningIn("createBaffles()")
+            //    << "Not moving face from coupled patch "
+            //    << patches[oldPatchI].name()
+            //    << " to another coupled patch " << patches[newPatches[i]]
+            //    << endl;
+        }
+        else
+        {
+            if (doneFace.set(faceI))
+            {
+                meshMod.setAction
+                (
+                    polyModifyFace
+                    (
+                        f,                          // modified face
+                        faceI,                      // label of face
+                        mesh.faceOwner()[faceI],    // owner
+                        -1,                         // neighbour
+                        false,                      // face flip
+                        newPatches[i],              // patch for face
+                        false,                      // remove from zone
+                        zoneID,                     // zone for face
+                        zoneFlip                    // face flip in zone
+                    )
+                );
+            }
+            else
+            {
+                meshMod.setAction
+                (
+                    polyAddFace
+                    (
+                        f,                          // modified face
+                        mesh.faceOwner()[faceI],    // owner
+                        -1,                         // neighbour
+                        -1,                         // master point
+                        -1,                         // master edge
+                        faceI,                      // master face
+                        false,                      // face flip
+                        newPatches[i],              // patch for face
+                        zoneID,                     // zone for face
+                        zoneFlip                    // face flip in zone
+                    )
+                );
+            }
+        }
+    }
+}
+
+
+
 // Main program:
 
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("set");
     argList::validArgs.append("patch");
+    argList::validOptions.insert("additionalPatches", "(patch2 .. patchN)");
     argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
@@ -63,28 +215,63 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
-    const faceZoneMesh& faceZones = mesh.faceZones();
 
     // Faces to baffle
     word setName(args.additionalArgs()[0]);
     Pout<< "Reading faceSet from " << setName << nl << endl;
     faceSet facesToSplit(mesh, setName);
+    // Make sure set is synchronised across couples
+    facesToSplit.sync(mesh);
     Pout<< "Read " << facesToSplit.size() << " faces from " << setName
         << nl << endl;
 
-    // Patch to put them into
+
+    // Patches to put baffles into
+    labelList newPatches(1);
+
     word patchName(args.additionalArgs()[1]);
-    label wantedPatchI = patches.findPatchID(patchName);
+    newPatches[0] = patches.findPatchID(patchName);
+    Pout<< "Using patch " << patchName
+        << " at index " << newPatches[0] << endl;
 
-    Pout<< "Using patch " << patchName << " at index " << wantedPatchI << endl;
-
-    if (wantedPatchI == -1)
+    if (newPatches[0] == -1)
     {
         FatalErrorIn(args.executable())
-            << "Cannot find patch " << patchName << exit(FatalError);
+            << "Cannot find patch " << patchName << endl
+            << "Valid patches are " << patches.names() << exit(FatalError);
     }
 
+
+    // Additional patches
+    if (args.options().found("additionalPatches"))
+    {
+        const wordList patchNames
+        (
+            IStringStream(args.options()["additionalPatches"])()
+        );
+
+        forAll(patchNames, i)
+        {
+            label patchI = patches.findPatchID(patchNames[i]);
+            Info<< "Using additional patch " << patchNames[i]
+                << " at index " << patchI << endl;
+
+            if (patchI == -1)
+            {
+                FatalErrorIn(args.executable())
+                    << "Cannot find patch " << patchNames[i] << endl
+                    << "Valid patches are " << patches.names()
+                    << exit(FatalError);
+            }
+
+            newPatches.append(patchI);
+        }
+    }
+
+
     bool overwrite = args.options().found("overwrite");
+
+
 
     // Read objects in time directory
     IOobjectList objects(mesh, runTime.timeName());
@@ -128,107 +315,53 @@ int main(int argc, char *argv[])
     polyTopoChange meshMod(mesh);
 
 
-    // Creating baffles:
-    // - coupled boundary faces : become the patch specified
-    // - non-coupled ,,         : illegal
-    // - internal faces         : converted into boundary faces.
-
-    labelList newPatch(mesh.nFaces(), -1);
-
-    forAllConstIter(faceSet, facesToSplit, iter)
-    {
-        label faceI = iter.key();
-
-        label patchI = patches.whichPatch(faceI);
-
-        if (patchI == -1)
-        {
-            newPatch[faceI] = wantedPatchI;
-        }
-        else
-        {
-            if (patches[patchI].coupled())
-            {
-                if (patchI != wantedPatchI)
-                {
-                    newPatch[faceI] = wantedPatchI;
-                }
-            }
-            else
-            {
-                FatalErrorIn(args.executable())
-                    << "Can only create baffles from internal faces"
-                    << " or coupled boundary faces." << endl
-                    << "Face " << faceI << " is a boundary face on patch "
-                    << patches[patchI].name() << exit(FatalError);
-            }
-        }
-    }
-
-
-    // If one side of a coupled boundary is marked for baffling, make sure to
-    // also do the other side.
-
-    syncTools::syncFaceList(mesh, newPatch, maxEqOp<label>(), false);
-
+    // Do the actual changes
 
     label nBaffled = 0;
+    PackedBoolList doneFace(mesh.nFaces());
 
-    forAll(newPatch, faceI)
+    for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
     {
-        if (newPatch[faceI] != -1)
+        if (facesToSplit.found(faceI))
         {
-            const face& f = mesh.faces()[faceI];
-            label zoneID = faceZones.whichZone(faceI);
-            bool zoneFlip = false;
-            if (zoneID >= 0)
-            {
-                const faceZone& fZone = faceZones[zoneID];
-                zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
-            }
-
-            meshMod.setAction
+            createBaffles
             (
-                polyModifyFace
-                (
-                    f,                          // modified face
-                    faceI,                      // label of face
-                    mesh.faceOwner()[faceI],    // owner
-                    -1,                         // neighbour
-                    false,                      // face flip
-                    newPatch[faceI],            // patch for face
-                    false,                      // remove from zone
-                    zoneID,                     // zone for face
-                    zoneFlip                    // face flip in zone
-                )
+                mesh,
+                faceI,
+                -1,                             // oldPatchI,
+                newPatches,
+                doneFace,
+                meshMod
             );
-
-            if (mesh.isInternalFace(faceI))
-            {
-                meshMod.setAction
-                (
-                    polyAddFace
-                    (
-                        f.reverseFace(),            // modified face
-                        mesh.faceNeighbour()[faceI],// owner
-                        -1,                         // neighbour
-                        -1,                         // masterPointID
-                        -1,                         // masterEdgeID
-                        faceI,                      // masterFaceID,
-                        false,                      // face flip
-                        newPatch[faceI],            // patch for face
-                        zoneID,                     // zone for face
-                        zoneFlip                    // face flip in zone
-                    )
-                );
-            }
-
             nBaffled++;
         }
     }
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        forAll(pp, i)
+        {
+            label faceI = pp.start()+i;
+
+            if (facesToSplit.found(faceI))
+            {
+                createBaffles
+                (
+                    mesh,
+                    faceI,
+                    patchI,                     // oldPatchI,
+                    newPatches,
+                    doneFace,
+                    meshMod
+                );
+                nBaffled++;
+            }
+        }
+    }
 
 
-    Pout<< "Converted locally " << nBaffled
+    Info<< "Converted " << returnReduce(nBaffled, sumOp<label>())
         << " faces into boundary faces on patch " << patchName << nl << endl;
 
     if (!overwrite)
@@ -252,7 +385,7 @@ int main(int argc, char *argv[])
     {
         mesh.setInstance(oldInstance);
     }
-    Pout<< "Writing mesh to " << runTime.timeName() << endl;
+    Info<< "Writing mesh to " << runTime.timeName() << endl;
 
     mesh.write();
 
