@@ -19,11 +19,12 @@ FoamFile
 
 numberOfSubdomains  4;
 
-// preservePatches (inlet);
+//- Keep owner and neighbour on same processor for faces in zones:
 // preserveFaceZones (heater solid1 solid3);
 
-method          simple;
+method          scotch;
 // method          hierarchical;
+// method          simple;
 // method          metis;
 // method          manual;
 
@@ -52,6 +53,9 @@ metisCoeffs
     );
   */
 }
+
+scotchCoeffs
+{}
 
 manualCoeffs
 {

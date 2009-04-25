@@ -37,9 +37,7 @@ SourceFiles
 #ifndef treeDataCell_H
 #define treeDataCell_H
 
-#include "treeBoundBox.H"
 #include "treeBoundBoxList.H"
-#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

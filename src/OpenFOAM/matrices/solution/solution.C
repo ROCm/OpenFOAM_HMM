@@ -134,7 +134,7 @@ Foam::label Foam::solution::upgradeSolverDict
 
 
             // write out information to help people adjust to the new syntax
-            if (verbose)
+            if (verbose && Pstream::master())
             {
                 Info<< "// using new solver syntax:\n"
                     << iter().keyword() << subdict << endl;

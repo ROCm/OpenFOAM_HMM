@@ -344,6 +344,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("point", "pointI");
     argList::validOptions.insert("cellSet", "setName");
     argList::validOptions.insert("faceSet", "setName");
+#   include "addRegionOption.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -364,7 +365,7 @@ int main(int argc, char *argv[])
 
     instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "createPolyMesh.H"
+#   include "createNamedPolyMesh.H"
 
     forAll(timeDirs, timeI)
     {

@@ -29,6 +29,12 @@ License
 #include "meshTools.H"
 #include "OFstream.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class Type>
+Foam::scalar Foam::indexedOctree<Type>::perturbTol_ = 10*SMALL;
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Does bb intersect a sphere around sample? Or is any corner point of bb
@@ -203,7 +209,7 @@ Foam::indexedOctree<Type>::divide
      || bb.min()[2] >= bb.max()[2]
     )
     {
-        FatalErrorIn("indexedOctree<Type>::divide")
+        FatalErrorIn("indexedOctree<Type>::divide(..)")
             << "Badly formed bounding box:" << bb
             << abort(FatalError);
     }
@@ -674,61 +680,768 @@ void Foam::indexedOctree<Type>::findNearest
 }
 
 
+template <class Type>
+Foam::treeBoundBox Foam::indexedOctree<Type>::subBbox
+(
+    const label parentNodeI,
+    const direction octant
+) const
+{
+    // Get type of node at octant
+    const node& nod = nodes_[parentNodeI];
+    labelBits index = nod.subNodes_[octant];
+
+    if (isNode(index))
+    {
+        // Use stored bb
+        return nodes_[getNode(index)].bb_;
+    }
+    else
+    {
+        // Calculate subBb
+        return nod.bb_.subBbox(octant);
+    }
+}
+
+
+// Takes a bb and a point on/close to the edge of the bb and pushes the point
+// inside by a small fraction. 
+template <class Type>
+Foam::point Foam::indexedOctree<Type>::pushPoint
+(
+    const treeBoundBox& bb,
+    const point& pt,
+    const bool pushInside
+)
+{
+    // Get local length scale.
+    const vector perturbVec = perturbTol_*(bb.span());
+
+    point perturbedPt(pt);
+
+    // Modify all components which are close to any face of the bb to be
+    // well inside/outside them.
+
+    if (pushInside)
+    {
+        for (direction dir = 0; dir < vector::nComponents; dir++)
+        {
+            if (mag(pt[dir]-bb.min()[dir]) < mag(perturbVec[dir]))
+            {
+                // Close to 'left' side. Push well beyond left side.
+                scalar perturbDist = perturbVec[dir] + ROOTVSMALL;
+                perturbedPt[dir] = bb.min()[dir] + perturbDist;
+            }
+            else if (mag(pt[dir]-bb.max()[dir]) < mag(perturbVec[dir]))
+            {
+                // Close to 'right' side. Push well beyond right side.
+                scalar perturbDist = perturbVec[dir] + ROOTVSMALL;
+                perturbedPt[dir] = bb.max()[dir] - perturbDist;
+            }
+        }
+    }
+    else
+    {
+        for (direction dir = 0; dir < vector::nComponents; dir++)
+        {
+            if (mag(pt[dir]-bb.min()[dir]) < mag(perturbVec[dir]))
+            {
+                scalar perturbDist = perturbVec[dir] + ROOTVSMALL;
+                perturbedPt[dir] = bb.min()[dir] - perturbDist;
+            }
+            else if (mag(pt[dir]-bb.max()[dir]) < mag(perturbVec[dir]))
+            {
+                scalar perturbDist = perturbVec[dir] + ROOTVSMALL;
+                perturbedPt[dir] = bb.max()[dir] + perturbDist;
+            }
+        }
+    }
+
+    if (debug)
+    {
+        if (pushInside != bb.contains(perturbedPt))
+        {
+            FatalErrorIn("indexedOctree<Type>::pushPoint(..)")
+                << "pushed point:" << pt
+                << " to:" << perturbedPt
+                << " wanted side:" << pushInside
+                << " obtained side:" << bb.contains(perturbedPt)
+                << " of bb:" << bb
+                << abort(FatalError);
+        }
+    }
+
+    return perturbedPt;
+}
+
+
+// Takes a bb and a point on the edge of the bb and pushes the point
+// outside by a small fraction. 
+template <class Type>
+Foam::point Foam::indexedOctree<Type>::pushPoint
+(
+    const treeBoundBox& bb,
+    const direction faceID,
+    const point& pt,
+    const bool pushInside
+)
+{
+    // Get local length scale.
+    const vector perturbVec = perturbTol_*bb.span();
+
+    point perturbedPt(pt);
+
+    // Modify all components which are close to any face of the bb to be
+    // well outside them.
+
+    if (faceID == 0)
+    {
+        FatalErrorIn("indexedOctree<Type>::pushPoint(..)")
+            << abort(FatalError);
+    }
+
+    if (faceID & treeBoundBox::LEFTBIT)
+    {
+        if (pushInside)
+        {
+            perturbedPt[0] = bb.min()[0] + (perturbVec[0] + ROOTVSMALL);
+        }
+        else
+        {
+            perturbedPt[0] = bb.min()[0] - (perturbVec[0] + ROOTVSMALL);
+        }
+    }
+    else if (faceID & treeBoundBox::RIGHTBIT)
+    {
+        if (pushInside)
+        {
+            perturbedPt[0] = bb.max()[0] - (perturbVec[0] + ROOTVSMALL);
+        }
+        else
+        {
+            perturbedPt[0] = bb.max()[0] + (perturbVec[0] + ROOTVSMALL);
+        }
+    }
+
+    if (faceID & treeBoundBox::BOTTOMBIT)
+    {
+        if (pushInside)
+        {
+            perturbedPt[1] = bb.min()[1] + (perturbVec[1] + ROOTVSMALL);
+        }
+        else
+        {
+            perturbedPt[1] = bb.min()[1] - (perturbVec[1] + ROOTVSMALL);
+        }
+    }
+    else if (faceID & treeBoundBox::TOPBIT)
+    {
+        if (pushInside)
+        {
+            perturbedPt[1] = bb.max()[1] - (perturbVec[1] + ROOTVSMALL);
+        }
+        else
+        {
+            perturbedPt[1] = bb.max()[1] + (perturbVec[1] + ROOTVSMALL);
+        }
+    }
+
+    if (faceID & treeBoundBox::BACKBIT)
+    {
+        if (pushInside)
+        {
+            perturbedPt[2] = bb.min()[2] + (perturbVec[2] + ROOTVSMALL);
+        }
+        else
+        {
+            perturbedPt[2] = bb.min()[2] - (perturbVec[2] + ROOTVSMALL);
+        }
+    }
+    else if (faceID & treeBoundBox::FRONTBIT)
+    {
+        if (pushInside)
+        {
+            perturbedPt[2] = bb.max()[2] - (perturbVec[2] + ROOTVSMALL);
+        }
+        else
+        {
+            perturbedPt[2] = bb.max()[2] + (perturbVec[2] + ROOTVSMALL);
+        }
+    }
+
+    if (debug)
+    {
+        if (pushInside != bb.contains(perturbedPt))
+        {
+            FatalErrorIn("indexedOctree<Type>::pushPoint(..)")
+                << "pushed point:" << pt << " on face:" << faceString(faceID)
+                << " to:" << perturbedPt
+                << " wanted side:" << pushInside
+                << " obtained side:" << bb.contains(perturbedPt)
+                << " of bb:" << bb
+                << abort(FatalError);
+        }
+    }
+
+    return perturbedPt;
+}
+
+
+// Guarantees that if pt is on a face it gets perturbed so it is away
+// from the face edges.
+// If pt is not on a face does nothing.
+template <class Type>
+Foam::point Foam::indexedOctree<Type>::pushPointIntoFace
+(
+    const treeBoundBox& bb,
+    const vector& dir,          // end-start
+    const point& pt
+)
+{
+    if (debug)
+    {
+        if (bb.posBits(pt) != 0)
+        {
+            FatalErrorIn("indexedOctree<Type>::pushPointIntoFace(..)")
+                << " bb:" << bb << endl
+                << "does not contain point " << pt << abort(FatalError);
+        }
+    }
+
+
+    // Handle two cases:
+    // - point exactly on multiple faces. Push away from all but one.
+    // - point on a single face. Push away from edges of face.
+
+    direction ptFaceID = bb.faceBits(pt);
+
+    direction nFaces = 0;
+    FixedList<direction, 3> faceIndices;
+
+    if (ptFaceID & treeBoundBox::LEFTBIT)
+    {
+        faceIndices[nFaces++] = treeBoundBox::LEFT;
+    }
+    else if (ptFaceID & treeBoundBox::RIGHTBIT)
+    {
+        faceIndices[nFaces++] = treeBoundBox::RIGHT;
+    }
+
+    if (ptFaceID & treeBoundBox::BOTTOMBIT)
+    {
+        faceIndices[nFaces++] = treeBoundBox::BOTTOM;
+    }
+    else if (ptFaceID & treeBoundBox::TOPBIT)
+    {
+        faceIndices[nFaces++] = treeBoundBox::TOP;
+    }
+
+    if (ptFaceID & treeBoundBox::BACKBIT)
+    {
+        faceIndices[nFaces++] = treeBoundBox::BACK;
+    }
+    else if (ptFaceID & treeBoundBox::FRONTBIT)
+    {
+        faceIndices[nFaces++] = treeBoundBox::FRONT;
+    }
+
+
+    // Determine the face we want to keep the point on
+
+    direction keepFaceID;
+
+    if (nFaces == 0)
+    {
+        // Return original point
+        return pt;
+    }
+    else if (nFaces == 1)
+    {
+        keepFaceID = faceIndices[0];
+    }
+    else
+    {
+        // Determine best face out of faceIndices[0 .. nFaces-1].
+        // The best face is the one most perpendicular to the ray direction.
+
+        keepFaceID = faceIndices[0];
+        scalar maxInproduct = mag(treeBoundBox::faceNormals[keepFaceID] & dir);
+
+        for (direction i = 1; i < nFaces; i++)
+        {
+            direction face = faceIndices[i];
+            scalar s = mag(treeBoundBox::faceNormals[face] & dir);
+            if (s > maxInproduct)
+            {
+                maxInproduct = s;
+                keepFaceID = face;
+            }
+        }
+    }
+
+
+    // 1. Push point into bb, away from all corners
+
+    point facePoint(pushPoint(bb, pt, true));
+    direction faceID = 0;
+
+    // 2. Snap it back onto the preferred face
+
+    if (keepFaceID == treeBoundBox::LEFT)
+    {
+        facePoint.x() = bb.min().x();
+        faceID = treeBoundBox::LEFTBIT;
+    }
+    else if (keepFaceID == treeBoundBox::RIGHT)
+    {
+        facePoint.x() = bb.max().x();
+        faceID = treeBoundBox::RIGHTBIT;
+    }
+    else if (keepFaceID == treeBoundBox::BOTTOM)
+    {
+        facePoint.y() = bb.min().y();
+        faceID = treeBoundBox::BOTTOMBIT;
+    }
+    else if (keepFaceID == treeBoundBox::TOP)
+    {
+        facePoint.y() = bb.max().y();
+        faceID = treeBoundBox::TOPBIT;
+    }
+    else if (keepFaceID == treeBoundBox::BACK)
+    {
+        facePoint.z() = bb.min().z();
+        faceID = treeBoundBox::BACKBIT;
+    }
+    else if (keepFaceID == treeBoundBox::FRONT)
+    {
+        facePoint.z() = bb.max().z();
+        faceID = treeBoundBox::FRONTBIT;
+    }
+
+
+    if (debug)
+    {
+        if (faceID != bb.faceBits(facePoint))
+        {
+            FatalErrorIn("indexedOctree<Type>::pushPointIntoFace(..)")
+                << "Pushed point from " << pt
+                << " on face:" << ptFaceID << " of bb:" << bb << endl
+                << "onto " << facePoint
+                << " on face:" << faceID
+                << " which is not consistent with geometric face "
+                << bb.faceBits(facePoint)
+                << abort(FatalError);
+        }
+        if (bb.posBits(facePoint) != 0)
+        {
+            FatalErrorIn("indexedOctree<Type>::pushPointIntoFace(..)")
+                << " bb:" << bb << endl
+                << "does not contain perturbed point "
+                << facePoint << abort(FatalError);
+        }
+    }
+
+
+    return facePoint;   
+}
+
+
+//// Takes a bb and a point on the outside of the bb. Checks if on multiple faces
+//// and if so perturbs point so it is only on one face.
+//template <class Type>
+//void Foam::indexedOctree<Type>::checkMultipleFaces
+//(
+//    const treeBoundBox& bb,
+//    const vector& dir,          // end-start
+//    pointIndexHit& faceHitInfo,
+//    direction& faceID
+//)
+//{
+//    // Do the quick elimination of no or one face.
+//    if
+//    (
+//        (faceID == 0)
+//     || (faceID == treeBoundBox::LEFTBIT)
+//     || (faceID == treeBoundBox::RIGHTBIT)
+//     || (faceID == treeBoundBox::BOTTOMBIT)
+//     || (faceID == treeBoundBox::TOPBIT)
+//     || (faceID == treeBoundBox::BACKBIT)
+//     || (faceID == treeBoundBox::FRONTBIT)
+//    )
+//    {
+//        return;
+//    }
+//
+//
+//    // Check the direction of vector w.r.t. faces being intersected.
+//    FixedList<scalar, 6> inproducts(-GREAT);
+//
+//    direction nFaces = 0;
+//
+//    if (faceID & treeBoundBox::LEFTBIT)
+//    {
+//        inproducts[treeBoundBox::LEFT] = mag
+//        (
+//            treeBoundBox::faceNormals[treeBoundBox::LEFT]
+//          & dir
+//        );
+//        nFaces++;
+//    }
+//    if (faceID & treeBoundBox::RIGHTBIT)
+//    {
+//        inproducts[treeBoundBox::RIGHT] = mag
+//        (
+//            treeBoundBox::faceNormals[treeBoundBox::RIGHT]
+//          & dir
+//        );
+//        nFaces++;
+//    }
+//
+//    if (faceID & treeBoundBox::BOTTOMBIT)
+//    {
+//        inproducts[treeBoundBox::BOTTOM] = mag
+//        (
+//            treeBoundBox::faceNormals[treeBoundBox::BOTTOM]
+//          & dir
+//        );
+//        nFaces++;
+//    }
+//    if (faceID & treeBoundBox::TOPBIT)
+//    {
+//        inproducts[treeBoundBox::TOP] = mag
+//        (
+//            treeBoundBox::faceNormals[treeBoundBox::TOP]
+//          & dir
+//        );
+//        nFaces++;
+//    }
+//
+//    if (faceID & treeBoundBox::BACKBIT)
+//    {
+//        inproducts[treeBoundBox::BACK] = mag
+//        (
+//            treeBoundBox::faceNormals[treeBoundBox::BACK]
+//          & dir
+//        );
+//        nFaces++;
+//    }
+//    if (faceID & treeBoundBox::FRONTBIT)
+//    {
+//        inproducts[treeBoundBox::FRONT] = mag
+//        (
+//            treeBoundBox::faceNormals[treeBoundBox::FRONT]
+//          & dir
+//        );
+//        nFaces++;
+//    }
+//
+//    if (nFaces == 0 || nFaces == 1 || nFaces > 3)
+//    {
+//        FatalErrorIn("indexedOctree<Type>::checkMultipleFaces(..)")
+//            << "Problem : nFaces:" << nFaces << abort(FatalError);
+//    }
+//
+//    // Keep point on most perpendicular face; shift it away from the aligned
+//    // ones.
+//    // E.g. line hits top and left face:
+//    //     a
+//    // ----+----+
+//    //     |    |
+//    //     |    |
+//    //     +----+
+//    // Shift point down (away from top):
+//    //     
+//    //    a+----+
+//    // ----|    |
+//    //     |    |
+//    //     +----+
+//
+//    label maxIndex = -1;
+//    scalar maxInproduct = -GREAT;
+//
+//    for (direction i = 0; i < 6; i++)
+//    {
+//        if (inproducts[i] > maxInproduct)
+//        {
+//            maxInproduct = inproducts[i];
+//            maxIndex = i;
+//        }
+//    }
+//
+//    if (maxIndex == -1)
+//    {
+//        FatalErrorIn("indexedOctree<Type>::checkMultipleFaces(..)")
+//            << "Problem maxIndex:" << maxIndex << " inproducts:" << inproducts
+//            << abort(FatalError);
+//    }
+//
+//    const point oldPoint(faceHitInfo.rawPoint());
+//    const direction oldFaceID = faceID;
+//
+//    // 1. Push point into bb, away from all corners
+//
+//    faceHitInfo.rawPoint() = pushPoint(bb, oldFaceID, oldPoint, true);
+//
+//    // 2. Snap it back onto the preferred face
+//
+//    if (maxIndex == treeBoundBox::LEFT)
+//    {
+//        faceHitInfo.rawPoint().x() = bb.min().x();
+//        faceID = treeBoundBox::LEFTBIT;
+//    }
+//    else if (maxIndex == treeBoundBox::RIGHT)
+//    {
+//        faceHitInfo.rawPoint().x() = bb.max().x();
+//        faceID = treeBoundBox::RIGHTBIT;
+//    }
+//    else if (maxIndex == treeBoundBox::BOTTOM)
+//    {
+//        faceHitInfo.rawPoint().y() = bb.min().y();
+//        faceID = treeBoundBox::BOTTOMBIT;
+//    }
+//    else if (maxIndex == treeBoundBox::TOP)
+//    {
+//        faceHitInfo.rawPoint().y() = bb.max().y();
+//        faceID = treeBoundBox::TOPBIT;
+//    }
+//    else if (maxIndex == treeBoundBox::BACK)
+//    {
+//        faceHitInfo.rawPoint().z() = bb.min().z();
+//        faceID = treeBoundBox::BACKBIT;
+//    }
+//    else if (maxIndex == treeBoundBox::FRONT)
+//    {
+//        faceHitInfo.rawPoint().z() = bb.max().z();
+//        faceID = treeBoundBox::FRONTBIT;
+//    }
+//
+//    Pout<< "From ray:" << dir
+//        << " from point:" << oldPoint
+//        << " on faces:" << faceString(oldFaceID)
+//        << " of bb:" << bb
+//        << " with inprods:" << inproducts
+//        << " maxIndex:" << maxIndex << endl
+//        << "perturbed to point:" << faceHitInfo.rawPoint()
+//        << " on face:" << faceString(faceID)
+//        << endl;
+//
+//
+//    if (debug)
+//    {
+//        if (faceID != bb.faceBits(faceHitInfo.rawPoint()))
+//        {
+//            FatalErrorIn("indexedOctree<Type>::checkMultipleFaces(..)")
+//                << "Pushed point from " << oldPoint
+//                << " on face:" << oldFaceID << " of bb:" << bb << endl
+//                << "onto " << faceHitInfo.rawPoint()
+//                << " on face:" << faceID
+//                << " which is not consistent with geometric face "
+//                <<  bb.faceBits(faceHitInfo.rawPoint())
+//                << abort(FatalError);
+//        }
+//    }
+//}
+
+
+// Get parent node and octant. Return false if top of tree reached.
+template <class Type>
+bool Foam::indexedOctree<Type>::walkToParent
+(
+    const label nodeI,
+    const direction octant,
+
+    label& parentNodeI,
+    label& parentOctant
+) const
+{
+    parentNodeI = nodes_[nodeI].parent_;
+
+    if (parentNodeI == -1)
+    {
+        // Reached edge of tree
+        return false;
+    }
+
+    const node& parentNode = nodes_[parentNodeI];
+
+    // Find octant nodeI is in.
+    parentOctant = 255;
+
+    for (direction i = 0; i < parentNode.subNodes_.size(); i++)
+    {
+        labelBits index = parentNode.subNodes_[i];
+
+        if (isNode(index) && getNode(index) == nodeI)
+        {
+            parentOctant = i;
+            break;
+        }
+    }
+
+    if (parentOctant == 255)
+    {
+        FatalErrorIn("walkToParent(..)")
+            << "Problem: no parent found for octant:" << octant
+            << " node:" << nodeI
+            << abort(FatalError);
+    }
+
+    return true;
+}
+
+
 // Walk tree to neighbouring node. Gets current position as
 // node and octant in this node and walks in the direction given by
-// the faceID (one of treeBoundBox::LEFTBIT, RIGHTBIT etc.)
+// the facePointBits (combination of treeBoundBox::LEFTBIT, TOPBIT etc.)
 // Returns false if edge of tree hit.
 template <class Type>
 bool Foam::indexedOctree<Type>::walkToNeighbour
 (
     const point& facePoint,
-    const direction faceID,         // direction to walk in
+    const direction faceID,  // face(s) that facePoint is on
     label& nodeI,
     direction& octant
 ) const
 {
+    label oldNodeI = nodeI;
+    direction oldOctant = octant;
+
     // Find out how to test for octant. Say if we want to go left we need
     // to traverse up the tree until we hit a node where our octant is
     // on the right.
 
+    // Coordinate direction to test
+    const direction X = treeBoundBox::RIGHTHALF;
+    const direction Y = treeBoundBox::TOPHALF;
+    const direction Z = treeBoundBox::FRONTHALF;
+
     direction octantMask = 0;
-    direction valueMask = 0;
+    direction wantedValue = 0;
 
     if ((faceID & treeBoundBox::LEFTBIT) != 0)
     {
-        // We want to go left so check if in right octant.
-        octantMask |= treeBoundBox::RIGHTHALF;
-        valueMask |= treeBoundBox::RIGHTHALF;
+        // We want to go left so check if in right octant (i.e. x-bit is set)
+        octantMask |= X;
+        wantedValue |= X;
     }
     else if ((faceID & treeBoundBox::RIGHTBIT) != 0)
     {
-        octantMask |= treeBoundBox::RIGHTHALF;  // valueMask already 0
+        octantMask |= X;  // wantedValue already 0
     }
 
     if ((faceID & treeBoundBox::BOTTOMBIT) != 0)
     {
-        octantMask |= treeBoundBox::TOPHALF;
-        valueMask |= treeBoundBox::TOPHALF;
+        // Want to go down so check for y-bit set.
+        octantMask |= Y;
+        wantedValue |= Y;
     }
     else if ((faceID & treeBoundBox::TOPBIT) != 0)
     {
-        octantMask |= treeBoundBox::TOPHALF;
+        // Want to go up so check for y-bit not set.
+        octantMask |= Y;
     }
 
     if ((faceID & treeBoundBox::BACKBIT) != 0)
     {
-        octantMask |= treeBoundBox::FRONTHALF;
-        valueMask |= treeBoundBox::FRONTHALF;
+        octantMask |= Z;
+        wantedValue |= Z;
     }
     else if ((faceID & treeBoundBox::FRONTBIT) != 0)
     {
-        octantMask |= treeBoundBox::FRONTHALF;
+        octantMask |= Z;
     }
 
+    // So now we have the coordinate directions in the octant we need to check
+    // and the resulting value.
+
+    /*
+    // +---+---+
+    // |   |   |
+    // |   |   |
+    // |   |   |
+    // +---+-+-+
+    // |   | | |
+    // |  a+-+-+
+    // |   |\| |
+    // +---+-+-+
+    //        \ 
+    //
+    // e.g. ray is at (a) in octant 0(or 4) with faceIDs : LEFTBIT+TOPBIT.
+    // If we would be in octant 1(or 5) we could go to the correct octant
+    // in the same node by just flipping the x and y bits (exoring).
+    // But if we are not in octant 1/5 we have to go up until we are.
+    // In general for leftbit+topbit:
+    // - we have to check for x and y : octantMask  = 011
+    // - the checked bits have to be  : wantedValue = ?01
+    */
+
+    //Pout<< "For point " << facePoint << endl;
+
     // Go up until we have chance to cross to the wanted direction
-    while (valueMask != (octant & octantMask))
+    while (wantedValue != (octant & octantMask))
     {
-        label parentNodeI = nodes_[nodeI].parent_;
+        // Go up to the parent.
+
+        // Remove the directions that are not on the boundary of the parent.
+        // See diagram above
+        if (wantedValue & X)    // && octantMask&X
+        {
+            // Looking for right octant.
+            if (octant & X)
+            {
+                // My octant is one of the left ones so punch out the x check
+                octantMask &= ~X;
+                wantedValue &= ~X;
+            }
+        }
+        else
+        {
+            if (!(octant & X))
+            {
+                // My octant is right but I want to go left.
+                octantMask &= ~X;
+                wantedValue &= ~X;
+            }
+        }
+
+        if (wantedValue & Y)
+        {
+            if (octant & Y)
+            {
+                octantMask &= ~Y;
+                wantedValue &= ~Y;
+            }
+        }
+        else
+        {
+            if (!(octant & Y))
+            {
+                octantMask &= ~Y;
+                wantedValue &= ~Y;
+            }
+        }
+
+        if (wantedValue & Z)
+        {
+            if (octant & Z)
+            {
+                octantMask &= ~Z;
+                wantedValue &= ~Z;
+            }
+        }
+        else
+        {
+            if (!(octant & Z))
+            {
+                octantMask &= ~Z;
+                wantedValue &= ~Z;
+            }
+        }
+
+
+        label parentNodeI;
+        label parentOctant;
+        walkToParent(nodeI, octant, parentNodeI, parentOctant);
 
         if (parentNodeI == -1)
         {
@@ -736,38 +1449,46 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
             return false;
         }
 
-        const node& parentNode = nodes_[parentNodeI];
+        //Pout<< "    walked from node:" << nodeI << " octant:" << octant
+        //    << " bb:" << nodes_[nodeI].bb_.subBbox(octant) << endl
+        //    << "    to:" << parentNodeI << " octant:" << parentOctant
+        //    << " bb:" << nodes_[parentNodeI].bb_.subBbox(parentOctant)
+        //    << endl;
+        //
+        //Pout<< "    octantMask:" << octantMask
+        //    << " wantedValue:" << wantedValue << endl;
 
-        // Find octant nodeI is in.
-        direction parentOctant = 255;
-
-        for (direction i = 0; i < parentNode.subNodes_.size(); i++)
-        {
-            labelBits index = parentNode.subNodes_[i];
-
-            if (isNode(index) && getNode(index) == nodeI)
-            {
-                parentOctant = i;
-                break;
-            }
-        }
-
-        if (parentOctant == 255)
-        {
-            FatalErrorIn("walkToNeighbour")
-                << abort(FatalError);
-        }
         nodeI = parentNodeI;
         octant = parentOctant;
     }
 
-    // So now we hit the correct parent node. Switch to the correct octant
+    // So now we hit the correct parent node. Switch to the correct octant.
+    // Is done by jumping to the 'other half' so if e.g. in x direction in
+    // right half we now jump to the left half.
     octant ^= octantMask;
 
+    //Pout<< "    to node:" << nodeI << " octant:" << octant
+    //    << " subBb:" <<subBbox(nodeI, octant) << endl;
+
+
+    if (debug)
+    {
+        const treeBoundBox subBb(subBbox(nodeI, octant));
+
+        if (!subBb.contains(facePoint))
+        {
+            FatalErrorIn("indexedOctree<Type>::walkToNeighbour(..)")
+                << "When searching for " << facePoint
+                << " ended up in node:" << nodeI
+                << " octant:" << octant
+                << " with bb:" << subBb
+                << abort(FatalError);
+        }
+    }
+
+
     // See if we need to travel down. Note that we already go into the
-    // the first level ourselves (instead of having findNode decide) since
-    // the facePoint is now exactly on the mid of the node so there could
-    // be truncation problems.
+    // the first level ourselves (instead of having findNode decide)
     labelBits index = nodes_[nodeI].subNodes_[octant];
 
     if (isNode(index))
@@ -778,49 +1499,82 @@ bool Foam::indexedOctree<Type>::walkToNeighbour
         octant = getOctant(node);
     }
 
+
+    if (debug)
+    {
+        const treeBoundBox subBb(subBbox(nodeI, octant));
+
+        if (nodeI == oldNodeI && octant == oldOctant)
+        {
+            FatalErrorIn("indexedOctree<Type>::walkToNeighbour(..)")
+                << "Did not go to neighbour when searching for " << facePoint
+                << endl
+                << "    starting from face:" << faceString(faceID)
+                << " node:" << nodeI
+                << " octant:" << octant
+                << " bb:" << subBb
+                << abort(FatalError);
+        }
+
+        if (!subBb.contains(facePoint))
+        {
+            FatalErrorIn("indexedOctree<Type>::walkToNeighbour(..)")
+                << "When searching for " << facePoint
+                << " ended up in node:" << nodeI
+                << " octant:" << octant
+                << " bb:" << subBb
+                << abort(FatalError);
+        }
+    }
+
+
     return true;
 }
 
 
-// Return unique number for the face of a bounding box a point is on.
-// (number is single bit but not really nessecary)
-// Return 0 if point not on any face of bb.
 template <class Type>
-Foam::direction Foam::indexedOctree<Type>::getFace
+Foam::word Foam::indexedOctree<Type>::faceString
 (
-    const treeBoundBox& bb,
-    const point& pt
+    const direction faceID
 )
 {
-    direction faceID = 0;
+    word desc;
 
-    if (pt.x() <= bb.min().x())
+    if (faceID == 0)
     {
-        faceID |= treeBoundBox::LEFTBIT;
+        desc = "noFace";
     }
-    if (pt.x() >= bb.max().x())
+    if (faceID & treeBoundBox::LEFTBIT)
     {
-        faceID |= treeBoundBox::RIGHTBIT;
+        if (!desc.empty()) desc += "+";
+        desc += "left";
     }
-
-    if (pt.y() <= bb.min().y())
+    if (faceID & treeBoundBox::RIGHTBIT)
     {
-        faceID |= treeBoundBox::BOTTOMBIT;
+        if (!desc.empty()) desc += "+";
+        desc += "right";
     }
-    if (pt.y() >= bb.max().y())
+    if (faceID & treeBoundBox::BOTTOMBIT)
     {
-        faceID |= treeBoundBox::TOPBIT;
+        if (!desc.empty()) desc += "+";
+        desc += "bottom";
     }
-
-    if (pt.z() <= bb.min().z())
+    if (faceID & treeBoundBox::TOPBIT)
     {
-        faceID |= treeBoundBox::BACKBIT;
+        if (!desc.empty()) desc += "+";
+        desc += "top";
     }
-    if (pt.z() >= bb.max().z())
+    if (faceID & treeBoundBox::BACKBIT)
     {
-        faceID |= treeBoundBox::FRONTBIT;
+        if (!desc.empty()) desc += "+";
+        desc += "back";
     }
-    return faceID;
+    if (faceID & treeBoundBox::FRONTBIT)
+    {
+        if (!desc.empty()) desc += "+";
+        desc += "front";
+    }
+    return desc;
 }
 
 
@@ -829,21 +1583,37 @@ Foam::direction Foam::indexedOctree<Type>::getFace
 //  hitInfo.point = point on shape
 // Else return a miss and the bounding box face hit:
 //  hitInfo.point = coordinate of intersection of ray with bounding box
-//  faceID  = index of bounding box face
+//  hitBits  = posbits of point on bounding box
 template <class Type>
 void Foam::indexedOctree<Type>::traverseNode
 (
     const bool findAny,
+    const point& treeStart,
+    const vector& treeVec,
+
     const point& start,
     const point& end,
-    const vector& dir,
     const label nodeI,
     const direction octant,
 
     pointIndexHit& hitInfo,
-    direction& faceID
+    direction& hitBits
 ) const
 {
+    if (debug)
+    {
+        const treeBoundBox octantBb(subBbox(nodeI, octant));
+
+        if (octantBb.posBits(start) != 0)
+        {
+            FatalErrorIn("indexedOctree<Type>::traverseNode(..)")
+                << "Node:" << nodeI << " octant:" << octant
+                << " bb:" << octantBb << endl
+                << "does not contain point " << start << abort(FatalError);
+        }
+    }
+
+
     const node& nod = nodes_[nodeI];
 
     labelBits index = nod.subNodes_[octant];
@@ -909,49 +1679,72 @@ void Foam::indexedOctree<Type>::traverseNode
     // Nothing intersected in this node
     // Traverse to end of node. Do by ray tracing back from end and finding
     // intersection with bounding box of node.
+    // start point is now considered to be inside bounding box.
+
+    const treeBoundBox octantBb(subBbox(nodeI, octant));
 
     point pt;
+    bool intersected = octantBb.intersects
+    (
+        end,            //treeStart,
+        (start-end),    //treeVec,
 
-    if (isNode(index))
+        end,
+        start,
+
+        pt,
+        hitBits
+    );
+
+
+    if (intersected)
     {
-        const treeBoundBox& subBb = nodes_[getNode(index)].bb_;
-
-        if (!subBb.intersects(end, start, pt))
-        {
-            faceID = 0;
-
-            FatalErrorIn("indexedOctree<Type>::traverseNode(..)")
-                << "Did not hit side of box " << subBb
-                << " with ray from " << start << " to " << end
-                << abort(FatalError);
-        }
-        else
-        {
-            faceID = getFace(subBb, pt);
-        }
+        // Return miss. Set misspoint to face.
+        hitInfo.setPoint(pt);
     }
     else
     {
-        const treeBoundBox subBb(nod.bb_.subBbox(octant));
+        // Rare case: did not find intersection of ray with octantBb. Can
+        // happen if end is on face/edge of octantBb. Do like
+        // lagrangian and re-track with perturbed vector (slightly pushed out
+        // of bounding box)
 
-        if (!subBb.intersects(end, start, pt))
-        {
-            faceID = 0;
+        point perturbedEnd(pushPoint(octantBb, end, false));
 
-            FatalErrorIn("indexedOctree<Type>::traverseNode(..)")
-                << "Did not hit side of box " << subBb
-                << " with ray from " << start << " to " << end
-                << abort(FatalError);
-        }
-        else
+
+        //if (debug)
         {
-            faceID = getFace(subBb, pt);
+            // Dump octantBb to obj
+            writeOBJ(nodeI, octant);
+            // Dump ray to obj as well
+            {
+                OFstream str("ray.obj");
+                meshTools::writeOBJ(str, start);
+                meshTools::writeOBJ(str, end);
+                str << "l 1 2" << nl;
+            }
+            WarningIn("indexedOctree<Type>::traverseNode(..)")
+                << "Did not intersect ray from endpoint:" << end
+                << " to startpoint:" << start
+                << " with bounding box:" << octantBb << nl
+                << "Re-intersecting with perturbed endpoint:" << perturbedEnd
+                << endl;
         }
+
+        traverseNode
+        (
+            findAny,
+            treeStart,
+            treeVec,
+            start,
+            perturbedEnd,
+            nodeI,
+            octant,
+
+            hitInfo,
+            hitBits
+        );
     }
-
-
-    // Return miss. Set misspoint to face.
-    hitInfo.setPoint(pt);
 }
 
 
@@ -963,40 +1756,75 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
     const point& treeStart,
     const point& treeEnd,
     const label startNodeI,
-    const direction startOctant
+    const direction startOctant,
+    const bool verbose
 ) const
 {
-    const vector dir(treeEnd - treeStart);
+    const vector treeVec(treeEnd - treeStart);
 
     // Current node as parent+octant
     label nodeI = startNodeI;
     direction octant = startOctant;
 
+    if (verbose)
+    {
+        Pout<< "findLine : treeStart:" << treeStart
+            << " treeEnd:" << treeEnd << endl
+            << "node:" << nodeI
+            << " octant:" << octant
+            << " bb:" << subBbox(nodeI, octant) << endl;
+    }
+
     // Current position. Initialize to miss
     pointIndexHit hitInfo(false, treeStart, -1);
 
-    // Side of current bounding box current point is on
-    direction faceID = 0;
-
-    while (true)
+    //while (true)
+    label i = 0;
+    for (; i < 100000; i++)
     {
+        if (verbose)
+        {
+            Pout<< "iter:" << i
+                << " at startPoint:" << hitInfo.rawPoint() << endl
+                << "    node:" << nodeI
+                << " octant:" << octant
+                << " bb:" << subBbox(nodeI, octant) << endl;
+        }
+
+
         // Ray-trace to end of current node. Updates point (either on triangle
         // in case of hit or on node bounding box in case of miss)
 
-        point startPoint(hitInfo.rawPoint());
+        const treeBoundBox octantBb(subBbox(nodeI, octant));
+
+        // Make sure point is away from any edges/corners
+        point startPoint
+        (
+            pushPointIntoFace
+            (
+                octantBb,
+                treeVec,
+                hitInfo.rawPoint()
+            )
+        );
+
+        // Faces of current bounding box current point is on
+        direction hitFaceID = 0;
 
         traverseNode
         (
             findAny,
+            treeStart,
+            treeVec,
+
             startPoint,     // Note: pass in copy since hitInfo
                             // also used in return value.
-            treeEnd,
-            dir,
+            treeEnd,        // pass in overall end so is nicely outside bb
             nodeI,
             octant,
 
             hitInfo,
-            faceID
+            hitFaceID
         );
 
         // Did we hit a triangle?
@@ -1005,29 +1833,48 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             break;
         }
 
-        if (faceID == 0)
+        if (hitFaceID == 0)
         {
-            // Was never inside the tree. Return miss.
+            // endpoint inside the tree. Return miss.
             break;
         }
 
-        //Pout<< "findLine : treeStart:" << treeStart
-        //    << " treeEnd:" << treeEnd
-        //    << " tracked from " << startPoint << " to edge of nodeBb:"
-        //    << hitInfo.missPoint()
-        //    << " node:" << nodeI << " octant:" << octant
-        //    << " subBb:"
-        //    << nodes_[nodeI].bb_.subBbox(octant)
-        //    << endl;
+
+        if (verbose)
+        {
+            Pout<< "    iter:" << i
+                << " hit face:" << faceString(hitFaceID)
+                << " at:" << hitInfo.rawPoint() << nl
+                << "    node:" << nodeI
+                << " octant:" << octant
+                << " bb:" << subBbox(nodeI, octant) << nl
+                << "    walking to neighbour containing:"
+                <<  pushPoint
+                    (
+                        octantBb,
+                        hitFaceID,
+                        hitInfo.rawPoint(),
+                        false                   // push outside of octantBb
+                    )
+                << endl;
+        }
 
 
         // Nothing hit so we are on face of bounding box (given as node+octant+
-        // faceID). Traverse to neighbouring node.
+        // position bits). Traverse to neighbouring node. Use slightly perturbed
+        // point.
 
         bool ok = walkToNeighbour
         (
-            hitInfo.rawPoint(), // point on face
-            faceID,             // direction to walk in
+            pushPoint
+            (
+                octantBb,
+                hitFaceID,
+                hitInfo.rawPoint(),
+                false                   // push outside of octantBb
+            ),
+            hitFaceID,  // face(s) that hitInfo is on
+
             nodeI,
             octant
         );
@@ -1037,7 +1884,53 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             // Hit the edge of the tree. Return miss.
             break;
         }
+
+        if (verbose)
+        {
+            const treeBoundBox octantBb(subBbox(nodeI, octant));
+            Pout<< "    walked for point:" << hitInfo.rawPoint() << endl
+                << "    to neighbour node:" << nodeI
+                << " octant:" << octant
+                << " face:" << faceString(octantBb.faceBits(hitInfo.rawPoint()))
+                << " of octantBb:" << octantBb << endl
+                << endl;
+        }
     }
+
+    if (i == 100000)
+    {
+        // Probably in loop.
+        if (!verbose)
+        {
+            // Redo intersection but now with verbose flag switched on.
+            return findLine
+            (
+                findAny,
+                treeStart,
+                treeEnd,
+                startNodeI,
+                startOctant,
+                true            //verbose
+            );
+        }
+        if (debug)
+        {
+            FatalErrorIn("indexedOctree<Type>::findLine(..)")
+                << "Got stuck in loop raytracing from:" << treeStart
+                << " to:" << treeEnd << endl
+                << "inside top box:" << subBbox(startNodeI, startOctant)
+                << abort(FatalError);
+        }
+        else
+        {
+            WarningIn("indexedOctree<Type>::findLine(..)")
+                << "Got stuck in loop raytracing from:" << treeStart
+                << " to:" << treeEnd << endl
+                << "inside top box:" << subBbox(startNodeI, startOctant)
+                << endl;
+        }
+    }
+
     return hitInfo;
 }
 
@@ -1057,6 +1950,9 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
     {
         const treeBoundBox& treeBb = nodes_[0].bb_;
 
+        // No effort is made to deal with points which are on edge of tree
+        // bounding box for now.
+
         direction startBit = treeBb.posBits(start);
         direction endBit = treeBb.posBits(end);
 
@@ -1065,6 +1961,9 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
             // Both start and end outside domain and in same block.
             return pointIndexHit(false, vector::zero, -1);
         }
+
+
+        // Trim segment to treeBb
 
         point trackStart(start);
         point trackEnd(end);
@@ -1086,6 +1985,7 @@ Foam::pointIndexHit Foam::indexedOctree<Type>::findLine
                 return pointIndexHit(false, vector::zero, -1);
             }
         }
+
 
         // Find lowest level tree node that start is in.
         labelBits index = findNode(0, trackStart);
@@ -1234,32 +2134,6 @@ void Foam::indexedOctree<Type>::writeOBJ
 
         str<< "l " << e[0]+pointVertI+1 << ' ' << e[1]+pointVertI+1 << nl;
     }
-
-
-    //// Dump triangles
-    //if (isContent(index))
-    //{
-    //    const labelList& indices = contents_[getContent(index)];
-    //    const triSurface& surf = shapes_.surface();
-    //    const pointField& points = surf.points();
-    //
-    //    forAll(indices, i)
-    //    {
-    //        label shapeI = indices[i];
-    //
-    //        const labelledTri& f = surf[shapeI];
-    //
-    //        meshTools::writeOBJ(str, points[f[0]]);
-    //        vertI++;
-    //        meshTools::writeOBJ(str, points[f[1]]);
-    //        vertI++;
-    //        meshTools::writeOBJ(str, points[f[2]]);
-    //        vertI++;
-    //
-    //        str<< "l " << vertI-2 << ' ' << vertI-1 << ' ' << vertI << ' '
-    //            << vertI-2 << nl;
-    //    }
-    //}
 }
 
 
@@ -1305,6 +2179,14 @@ Foam::indexedOctree<Type>::indexedOctree
     contents_(0),
     nodeTypes_(0)
 {
+    if (debug)
+    {
+        Pout<< "indexedOctree<Type>::indexedOctree:" << nl
+            << "    shapes:" << shapes.size() << nl
+            << "    bb:" << bb << nl
+            << endl;
+    }
+
     if (shapes.size() == 0)
     {
         return;
@@ -1409,7 +2291,6 @@ Foam::indexedOctree<Type>::indexedOctree
     nodes_.transfer(nodes);
     nodes.clear();
 
-
     if (debug)
     {
         label nEntries = 0;
@@ -1418,14 +2299,18 @@ Foam::indexedOctree<Type>::indexedOctree
             nEntries += contents_[i].size();
         }
 
-        Pout<< "indexedOctree<Type>::indexedOctree : finished construction:"
+        Pout<< "indexedOctree<Type>::indexedOctree"
+            << " : finished construction of tree of:" << shapes.typeName
             << nl
+            << "    bb:" << this->bb() << nl
             << "    shapes:" << shapes.size() << nl
             << "    nLevels:" << nLevels << nl
             << "    treeNodes:" << nodes_.size() << nl
             << "    nEntries:" << nEntries << nl
-            << "        per treeLeaf:" << nEntries/contents.size() << nl
-            << "        per shape (duplicity):" << nEntries/shapes.size() << nl
+            << "        per treeLeaf:"
+            << scalar(nEntries)/contents.size() << nl
+            << "        per shape (duplicity):"
+            << scalar(nEntries)/shapes.size() << nl
             << endl;
     }
 }
@@ -1446,6 +2331,13 @@ Foam::indexedOctree<Type>::indexedOctree
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template <class Type>
+Foam::scalar& Foam::indexedOctree<Type>::perturbTol()
+{
+    return perturbTol_;
+}
+
 
 template <class Type>
 Foam::pointIndexHit Foam::indexedOctree<Type>::findNearest
@@ -1569,6 +2461,16 @@ Foam::labelBits Foam::indexedOctree<Type>::findNode
     }
 
     const node& nod = nodes_[nodeI];
+
+    if (debug)
+    {
+        if (!nod.bb_.contains(sample))
+        {
+            FatalErrorIn("findNode(..)")
+                << "Cannot find " << sample << " in node " << nodeI
+                << abort(FatalError);
+        }
+    }
 
     direction octant = nod.bb_.subOctant(sample);
 

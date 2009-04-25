@@ -294,9 +294,10 @@ public:
             //  - nPointLayers : number of layers per (patch)point
             //  - nFaceLayers : number of layers per (patch) face
             //  - firstDisplacement : displacement per point for first
-            //    layer of points. If zero do not add point.
+            //    layer of points (i.e. nearest to original mesh). If zero
+            //    do not add point.
             //  Layer thicknesses are calculated to constant geometric
-            //  expansion. Use expansionRatio for constant size.
+            //  expansion. Use expansionRatio 1 for constant size.
             //  Sets addedPoints_ which is per pp point a list of points
             //  added.
             //  Note: firstDisplacement has to be parallel synchronised before

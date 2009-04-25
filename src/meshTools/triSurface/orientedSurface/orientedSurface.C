@@ -121,8 +121,8 @@ Foam::labelList Foam::orientedSurface::edgeToFace
             label face0 = eFaces[0];
             label face1 = eFaces[1];
 
-            const labelledTri& f0 = s[face0];
-            const labelledTri& f1 = s[face1];
+            const labelledTri& f0 = s.localFaces()[face0];
+            const labelledTri& f1 = s.localFaces()[face1];
 
             if (flip[face0] == UNVISITED)
             {
@@ -238,7 +238,8 @@ void Foam::orientedSurface::propagateOrientation
         s,
         samplePoint,
         nearestFaceI,
-        nearestPt
+        nearestPt,
+        10*SMALL
     );
 
     if (side == triSurfaceTools::UNKNOWN)
@@ -348,7 +349,10 @@ Foam::orientedSurface::orientedSurface
 :
     triSurface(surf)
 {
-    point outsidePoint = 2 * treeBoundBox(localPoints()).span();
+    // BoundBox calculation without localPoints
+    treeBoundBox bb(surf.points(), surf.meshPoints());
+
+    point outsidePoint = bb.max() + bb.span();
 
     orient(*this, outsidePoint, orientOutside);
 }

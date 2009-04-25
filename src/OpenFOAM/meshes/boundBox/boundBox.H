@@ -174,7 +174,7 @@ public:
 
         // Query
 
-            //- Completely contains other boundingBox? (inside or on edge)
+            //- Overlaps/touches boundingBox?
             bool overlaps(const boundBox& bb) const
             {
                 return

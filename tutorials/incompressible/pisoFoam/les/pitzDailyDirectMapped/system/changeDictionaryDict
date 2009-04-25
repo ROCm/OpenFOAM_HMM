@@ -23,6 +23,7 @@ dictionaryReplacement
         {
             type            directMappedPatch;
             offset          ( 0.0495 0 0 );
+            sampleRegion    region0;
             sampleMode      nearestCell;
             samplePatch     none;
         }

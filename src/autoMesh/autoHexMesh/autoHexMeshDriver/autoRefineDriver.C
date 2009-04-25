@@ -95,7 +95,7 @@ Foam::label Foam::autoRefineDriver::readFeatureEdges
         Info<< "Refinement level " << featureLevels[i]
             << " for all cells crossed by feature " << featFileName
             << " (" << featureMeshes[i].points().size() << " points, "
-            << featureMeshes[i].edges().size() << ")." << endl;
+            << featureMeshes[i].edges().size() << " edges)." << endl;
     }
 
     Info<< "Read feature lines in = "

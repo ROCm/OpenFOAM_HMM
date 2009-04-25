@@ -70,11 +70,12 @@ int main(int argc, char *argv[])
 
         #include "UEqn.H"
 
+        #include "hEqn.H"
+
         // --- PISO loop
 
         for (int corr=0; corr<nCorr; corr++)
         {
-            #include "hEqn.H"
             #include "pEqn.H"
         }
 

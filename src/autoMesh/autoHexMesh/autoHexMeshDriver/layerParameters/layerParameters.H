@@ -39,6 +39,7 @@ SourceFiles
 #include "dictionary.H"
 #include "scalarField.H"
 #include "labelList.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,14 +71,10 @@ class layerParameters
 
             scalarField expansionRatio_;
 
-            //- Wanted thickness of final added cell layer. If multiple layers
-            //  is the thickness of the layer furthest away from the wall.
-            //  Relative to undistorted size of cell outside layer.
-            scalarField finalLayerRatio_;
+            Switch relativeSizes_;
 
-            //- Minimum thickness of cell layer. If for any reason layer
-            //  cannot be above minThickness do not add layer.
-            //  Relative to undistorted size of cell outside layer.
+            scalarField finalLayerThickness_;
+
             scalarField minThickness_;
 
 
@@ -104,6 +101,10 @@ class layerParameters
         label nBufferCellsNoExtrude_;
 
         label nSnap_;
+
+        label nLayerIter_;
+
+        label nRelaxedIter_;
 
 
     // Private Member Functions
@@ -160,18 +161,27 @@ public:
                     return expansionRatio_;
                 }
 
-                //- Wanted thickness of final added cell layer. If multiple
-                //  layers
-                //  is the thickness of the layer furthest away from the wall.
-                //  Relative to undistorted size of cell outside layer.
-                const scalarField& finalLayerRatio() const
+                //- Are size parameters relative to inner cell size or
+                //  absolute distances.
+                bool relativeSizes() const
                 {
-                    return finalLayerRatio_;
+                    return relativeSizes_;
+                }
+
+                //- Wanted thickness of final added cell layer. If multiple
+                //  layers is the thickness of the layer furthest away
+                //  from the wall (i.e. nearest the original mesh)
+                //  If relativeSize() this number is relative to undistorted
+                //  size of the cell outside layer.
+                const scalarField& finalLayerThickness() const
+                {
+                    return finalLayerThickness_;
                 }
 
                 //- Minimum thickness of cell layer. If for any reason layer
                 //  cannot be above minThickness do not add layer.
-                //  Relative to undistorted size of cell outside layer.
+                //  If relativeSize() this number is relative to undistorted
+                //  size of the cell outside layer.
                 const scalarField& minThickness() const
                 {
                     return minThickness_;
@@ -196,26 +206,20 @@ public:
                 return nGrow_;
             }
 
-            // Number of smoothing iterations of surface normals 
+            //- Number of smoothing iterations of surface normals 
             label nSmoothSurfaceNormals() const
             {
                 return nSmoothSurfaceNormals_;
             }
 
-            // Number of smoothing iterations of interior mesh movement
-            // direction  
+            //- Number of smoothing iterations of interior mesh movement
+            //  direction  
             label nSmoothNormals() const
             {
                 return nSmoothNormals_;
             }
 
-            // Smooth layer thickness over surface patches
-            label nSmoothThickness() const
-            {
-                return nSmoothThickness_;
-            }
-
-            // Stop layer growth on highly warped cells 
+            //- Stop layer growth on highly warped cells 
             scalar maxFaceThicknessRatio() const
             {
                 return maxFaceThicknessRatio_;
@@ -226,20 +230,26 @@ public:
                 return layerTerminationCos_;
             }
 
-            // Reduce layer growth where ratio thickness to medial 
-            // distance is large 
+            //- Smooth layer thickness over surface patches
+            label nSmoothThickness() const
+            {
+                return nSmoothThickness_;
+            }
+
+            //- Reduce layer growth where ratio thickness to medial 
+            //  distance is large 
             scalar maxThicknessToMedialRatio() const
             {
                 return maxThicknessToMedialRatio_;
             }
 
-            // Angle used to pick up medial axis points
+            //- Angle used to pick up medial axis points
             scalar minMedianAxisAngleCos() const
             {
                 return minMedianAxisAngleCos_;
             }
 
-            // Create buffer region for new layer terminations
+            //- Create buffer region for new layer terminations
             label nBufferCellsNoExtrude() const
             {
                 return nBufferCellsNoExtrude_;
@@ -249,6 +259,24 @@ public:
             {
                 return nSnap_;
             }
+
+            // Overall
+
+                //- Number of overall layer addition iterations
+                label nLayerIter() const
+                {
+                    return nLayerIter_;
+                }
+
+                //- Number of iterations after which relaxed motion rules
+                //  are to be used.
+                label nRelaxedIter() const
+                {
+                    return nRelaxedIter_;
+                }
+
+
+
 };
 
 
