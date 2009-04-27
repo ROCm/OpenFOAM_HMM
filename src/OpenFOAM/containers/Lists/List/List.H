@@ -182,24 +182,21 @@ public:
             void clear();
 
             //- Append a List at the end of this list
-            void append(const UList<T>&);
+            inline void append(const UList<T>&);
 
             //- Append a UIndirectList at the end of this list
-            void append(const UIndirectList<T>&);
+            inline void append(const UIndirectList<T>&);
 
-            //- Append a SLList at the end of this list
-            void append(const SLList<T>&);
-
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             void transfer(List<T>&);
 
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
             void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             void transfer(SortableList<T>&);
 

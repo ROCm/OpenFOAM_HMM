@@ -54,11 +54,11 @@ void Foam::PtrList<T>::read(Istream& is, const INew& inewt)
         setSize(s);
 
         // Read beginning of contents
-        char listDelimiter = is.readBeginList("PtrList");
+        char delimiter = is.readBeginList("PtrList");
 
         if (s)
         {
-            if (listDelimiter == token::BEGIN_LIST)
+            if (delimiter == token::BEGIN_LIST)
             {
                 forAll(*this, i)
                 {

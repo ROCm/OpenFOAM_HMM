@@ -177,7 +177,7 @@ inline Cmpt det(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Return the inverse of a symmetric tensor
+//- Return the inverse of a spherical tensor
 template <class Cmpt>
 inline SphericalTensor<Cmpt> inv(const SphericalTensor<Cmpt>& st)
 {
