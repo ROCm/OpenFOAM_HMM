@@ -37,6 +37,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
 template<class ParcelType>
 Foam::scalar Foam::DsmcCloud<ParcelType>::Tref = 273;
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -113,87 +114,161 @@ void Foam::DsmcCloud<ParcelType>::initialise
 
     numberDensities /= nParticle_;
 
-    scalar x0 = mesh_.bounds().min().x();
-    scalar xR = mesh_.bounds().max().x() - x0;
-
-    scalar y0 = mesh_.bounds().min().y();
-    scalar yR = mesh_.bounds().max().y() - y0;
-
-    scalar z0 = mesh_.bounds().min().z();
-    scalar zR = mesh_.bounds().max().z() - z0;
-
-    forAll(molecules, i)
+    forAll(mesh_.cells(), cell)
     {
-        const word& moleculeName(molecules[i]);
+        const vector& cC = mesh_.cellCentres()[cell];
+        const labelList& cellFaces = mesh_.cells()[cell];
+        const scalar cV = mesh_.cellVolumes()[cell];
 
-        label typeId(findIndex(typeIdList_, moleculeName));
+        label nTets = 0;
 
-        if (typeId == -1)
+        // Each face is split into nEdges (or nVertices) - 2 tets.
+        forAll(cellFaces, face)
         {
-            FatalErrorIn("Foam::DsmcCloud<ParcelType>::initialise")
-                << "typeId " << moleculeName << "not defined." << nl
-                << abort(FatalError);
+            nTets += mesh_.faces()[cellFaces[face]].size() - 2;
         }
 
-        const typename ParcelType::constantProperties& cP = constProps(typeId);
+        // Calculate the cumulative tet volumes circulating around the cell and
+        // record the vertex labels of each.
+        scalarList cTetVFracs(nTets, 0.0);
 
-        scalar numberDensity = numberDensities[i];
+        List<labelList> tetPtIs(nTets, labelList(3,-1));
 
-        scalar spacing = pow(numberDensity,-(1.0/3.0));
+        // Keep track of which tet this is.
+        label tet = 0;
 
-        int ni = label(xR/spacing) + 1;
-        int nj = label(yR/spacing) + 1;
-        int nk = label(zR/spacing) + 1;
-
-        vector delta(xR/ni, yR/nj, zR/nk);
-
-        scalar pert = spacing;
-
-        for (int i = 0; i < ni; i++)
+        forAll(cellFaces, face)
         {
-            for (int j = 0; j < nj; j++)
+            const labelList& facePoints = mesh_.faces()[cellFaces[face]];
+
+            label pointI = 1;
+            while ((pointI + 1) < facePoints.size())
             {
-                for (int k = 0; k < nk; k++)
+
+                const vector& pA = mesh_.points()[facePoints[0]];
+                const vector& pB = mesh_.points()[facePoints[pointI]];
+                const vector& pC = mesh_.points()[facePoints[pointI + 1]];
+
+                cTetVFracs[tet] =
+                    mag(((pA - cC) ^ (pB - cC)) & (pC - cC))/(cV*6.0)
+                  + cTetVFracs[max((tet - 1),0)];
+
+                tetPtIs[tet][0] = facePoints[0];
+                tetPtIs[tet][1] = facePoints[pointI];
+                tetPtIs[tet][2] = facePoints[pointI + 1];
+
+                pointI++;
+                tet++;
+            }
+        }
+
+        // Force the last volume fraction value to 1.0 to avoid any
+        // rounding/non-flat face errors giving a value < 1.0
+        cTetVFracs[nTets - 1] = 1.0;
+
+        forAll(molecules, i)
+        {
+            const word& moleculeName(molecules[i]);
+
+            label typeId(findIndex(typeIdList_, moleculeName));
+
+            if (typeId == -1)
+            {
+                FatalErrorIn("Foam::DsmcCloud<ParcelType>::initialise")
+                << "typeId " << moleculeName << "not defined." << nl
+                    << abort(FatalError);
+            }
+
+            const typename ParcelType::constantProperties& cP =
+                constProps(typeId);
+
+            scalar numberDensity = numberDensities[i];
+
+            // Calculate the number of particles required
+            scalar particlesRequired = numberDensity*mesh_.cellVolumes()[cell];
+
+            // Only integer numbers of particles can be inserted
+            label nParticlesToInsert = label(particlesRequired);
+
+            // Add another particle with a probability proportional to the
+            // remainder of taking the integer part of particlesRequired
+            if ((particlesRequired - nParticlesToInsert) > rndGen_.scalar01())
+            {
+                nParticlesToInsert++;
+            }
+
+            for (label pI = 0; pI < nParticlesToInsert; pI++)
+            {
+                // Choose a random point in a generic tetrahedron
+
+                scalar s = rndGen_.scalar01();
+                scalar t = rndGen_.scalar01();
+                scalar u = rndGen_.scalar01();
+
+                if (s + t > 1.0)
                 {
-                    point p
-                    (
-                        x0 + (i + 0.5)*delta.x(),
-                        y0 + (j + 0.5)*delta.y(),
-                        z0 + (k + 0.5)*delta.z()
-                    );
+                    s = 1.0 - s;
+                    t = 1.0 - t;
+                }
 
-                    p.x() += pert*(rndGen_.scalar01() - 0.5);
-                    p.y() += pert*(rndGen_.scalar01() - 0.5);
-                    p.z() += pert*(rndGen_.scalar01() - 0.5);
+                if (t + u > 1.0)
+                {
+                    scalar tmp = u;
+                    u = 1.0 - s - t;
+                    t = 1.0 - tmp;
+                }
+                else if (s + t + u > 1.0)
+                {
+                    scalar tmp = u;
+                    u = s + t + u - 1.0;
+                    s = 1.0 - t - tmp;
+                }
 
-                    label cell = mesh_.findCell(p);
+                // Choose a tetrahedron to insert in, based on their relative
+                // volumes
+                scalar tetSelection = rndGen_.scalar01();
 
-                    vector U = equipartitionLinearVelocity
-                    (
-                        temperature,
-                        cP.mass()
-                    );
+                // Selected tetrahedron
+                label sTet = -1;
 
-                    scalar Ei = equipartitionInternalEnergy
-                    (
-                        temperature,
-                        cP.internalDegreesOfFreedom()
-                    );
+                forAll(cTetVFracs, tet)
+                {
+                    sTet = tet;
 
-                    U += velocity;
-
-                    if (cell >= 0)
+                    if (cTetVFracs[tet] >= tetSelection)
                     {
-                        addNewParcel
-                        (
-                            p,
-                            U,
-                            Ei,
-                            cell,
-                            typeId
-                        );
+                        break;
                     }
                 }
+
+                vector p =
+                    (1 - s - t - u)*cC
+                  + s*mesh_.points()[tetPtIs[sTet][0]]
+                  + t*mesh_.points()[tetPtIs[sTet][1]]
+                  + u*mesh_.points()[tetPtIs[sTet][2]];
+
+                vector U = equipartitionLinearVelocity
+                (
+                    temperature,
+                    cP.mass()
+                );
+
+                scalar Ei = equipartitionInternalEnergy
+                (
+                    temperature,
+                    cP.internalDegreesOfFreedom()
+                );
+
+                U += velocity;
+
+                addNewParcel
+                (
+                    p,
+                    U,
+                    Ei,
+                    cell,
+                    typeId
+                );
             }
         }
     }
@@ -276,7 +351,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
 
             scalar selectedPairs =
                 collisionSelectionRemainder_[celli]
-              + 0.5*nC*(nC-1)*nParticle_*sigmaTcRMax*deltaT
+              + 0.5*nC*(nC - 1)*nParticle_*sigmaTcRMax*deltaT
                /mesh_.cellVolumes()[celli];
 
             label nCandidates(selectedPairs);
@@ -551,6 +626,13 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     buildConstProps();
 
     buildCellOccupancy();
+
+    // Initialise the collision selection remainder to a random value between 0
+    // and 1.
+    forAll(collisionSelectionRemainder_, i)
+    {
+        collisionSelectionRemainder_[i] = rndGen_.scalar01();
+    }
 }
 
 
@@ -739,22 +821,27 @@ void Foam::DsmcCloud<ParcelType>::info() const
 
     Info<< "Cloud name: " << this->name() << nl
         << "    Number of dsmc particles        = "
-        << nDsmcParticles << nl
-        << "    Number of molecules             = "
-        << nMol << nl
-        << "    Mass in system                  = "
-        << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << "    Average linear momentum         = "
-        << linearMomentum/nMol << nl
-        << "   |Average linear momentum|        = "
-        << mag(linearMomentum)/nMol << nl
-        << "    Average linear kinetic energy   = "
-        << linearKineticEnergy/nMol << nl
-        << "    Average internal energy         = "
-        << internalEnergy/nMol << nl
-        << "    Average total energy            = "
-        << (internalEnergy + linearKineticEnergy)/nMol << nl
+        << nDsmcParticles
         << endl;
+
+    if (nDsmcParticles)
+    {
+        Info<< "    Number of molecules             = "
+            << nMol << nl
+            << "    Mass in system                  = "
+            << returnReduce(massInSystem(), sumOp<scalar>()) << nl
+            << "    Average linear momentum         = "
+            << linearMomentum/nMol << nl
+            << "   |Average linear momentum|        = "
+            << mag(linearMomentum)/nMol << nl
+            << "    Average linear kinetic energy   = "
+            << linearKineticEnergy/nMol << nl
+            << "    Average internal energy         = "
+            << internalEnergy/nMol << nl
+            << "    Average total energy            = "
+            << (internalEnergy + linearKineticEnergy)/nMol
+            << endl;
+    }
 }
 
 
@@ -785,7 +872,11 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
 {
     scalar Ei = 0.0;
 
-    if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
+    if (iDof < SMALL)
+    {
+        return Ei;
+    }
+    else if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
     {
         // Special case for iDof = 2, i.e. diatomics;
         Ei = -log(rndGen_.scalar01())*kb*temperature;
@@ -796,7 +887,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
 
         scalar energyRatio;
 
-        scalar P;
+        scalar P = -1;
 
         do
         {

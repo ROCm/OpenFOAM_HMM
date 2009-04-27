@@ -62,18 +62,6 @@ class directMappedFixedValueFvPatchField
         //  setAverage_ is set true
         Type average_;
 
-
-   // Private member functions
-
-        // Helper function to return the new field values
-        void getNewValues
-        (
-            const directMappedPolyPatch& mpp,
-            const Field<Type>& sendValues,
-            Field<Type>& newValues
-        ) const;
-
-
 public:
 
     //- Runtime type information

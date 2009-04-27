@@ -24,6 +24,7 @@ $(constraintFvPatches)/processor/processorFvPatch.C
 derivedFvPatches = $(fvPatches)/derived
 $(derivedFvPatches)/wall/wallFvPatch.C
 $(derivedFvPatches)/directMapped/directMappedFvPatch.C
+$(derivedFvPatches)/directMapped/directMappedWallFvPatch.C
 
 wallDist = fvMesh/wallDist
 $(wallDist)/wallPointYPlus/wallPointYPlus.C

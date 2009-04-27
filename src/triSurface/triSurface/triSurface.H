@@ -326,16 +326,11 @@ public:
             //- Scale points. A non-positive factor is ignored
             virtual void scalePoints(const scalar&);
 
-            //- Check/fix duplicate/degenerate triangles
+            //- Check/remove duplicate/degenerate triangles
             void checkTriangles(const bool verbose);
 
-            //- Check triply (or more) connected edges. Return list of faces
-            //  sharing these edges.
+            //- Check triply (or more) connected edges.
             void checkEdges(const bool verbose);
-
-            //- Check orientation (normals) and normals of neighbouring
-            //  triangles
-            boolList checkOrientation(const bool verbose);
 
             //- Remove non-valid triangles
             void cleanup(const bool verbose);

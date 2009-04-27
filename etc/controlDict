@@ -360,7 +360,7 @@ DebugSwitches
     diagonal            0;
     dictionary          0;
     dimensionSet        1;
-    directMapped        0;
+    directMappedBase    0;
     directMappedPatch   0;
     directMappedVelocityFlux 0;
     directionMixed      0;

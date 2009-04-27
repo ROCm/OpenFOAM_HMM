@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
+dimensions      [0 2 -2 0 0 0 0];
 
 internalField   uniform 0.1;
 
@@ -23,20 +23,18 @@ boundaryField
 {
     floor
     {
-        type            kQRWallFunction;
-        value           uniform 0;
+        type            compressible::kQRWallFunction;
+        value           uniform 0.1;
     }
-
     ceiling
     {
-        type            kQRWallFunction;
-        value           uniform 0;
+        type            compressible::kQRWallFunction;
+        value           uniform 0.1;
     }
-
     fixedWalls
     {
-        type            kQRWallFunction;
-        value           uniform 0;
+        type            compressible::kQRWallFunction;
+        value           uniform 0.1;
     }
 }
 

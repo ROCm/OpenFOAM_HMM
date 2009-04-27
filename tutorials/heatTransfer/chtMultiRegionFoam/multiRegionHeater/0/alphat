@@ -21,6 +21,11 @@ internalField   uniform 0;
 
 boundaryField
 {
+    minY
+    {
+        type            alphatWallFunction;
+        value           uniform 0;
+    }
     maxY
     {
         type            alphatWallFunction;

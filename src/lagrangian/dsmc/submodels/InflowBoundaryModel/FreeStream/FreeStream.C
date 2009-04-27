@@ -36,31 +36,26 @@ Foam::FreeStream<CloudType>::FreeStream
 )
 :
     InflowBoundaryModel<CloudType>(dict, cloud, typeName),
-    patchIndex_(),
-    temperature_(readScalar(this->coeffDict().lookup("temperature"))),
-    velocity_(this->coeffDict().lookup("velocity")),
+    patches_(),
     moleculeTypeIds_(),
     numberDensities_(),
     particleFluxAccumulators_()
 {
-    word patchName = this->coeffDict().lookup("patch");
+    // Identify which patches to use
 
-    patchIndex_ = cloud.mesh().boundaryMesh().findPatchID(patchName);
+    DynamicList<label> patches;
 
-    const polyPatch& patch = cloud.mesh().boundaryMesh()[patchIndex_];
-
-    if (patchIndex_ == -1)
+    forAll(cloud.mesh().boundaryMesh(), p)
     {
-        FatalErrorIn
-        (
-            "Foam::FreeStream<CloudType>::FreeStream"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "patch " << patchName << " not found." << nl
-            << abort(FatalError);
+        const polyPatch& patch = cloud.mesh().boundaryMesh()[p];
+
+        if (patch.type() == polyPatch::typeName)
+        {
+            patches.append(p);
+        }
     }
+
+    patches_.transfer(patches);
 
     const dictionary& numberDensitiesDict
     (
@@ -69,9 +64,23 @@ Foam::FreeStream<CloudType>::FreeStream
 
     List<word> molecules(numberDensitiesDict.toc());
 
-    numberDensities_.setSize(molecules.size());
+    // Initialise the particleFluxAccumulators_
+    particleFluxAccumulators_.setSize(patches_.size());
+
+    forAll(patches_, p)
+    {
+        const polyPatch& patch = cloud.mesh().boundaryMesh()[patches_[p]];
+
+        particleFluxAccumulators_[p] = List<Field<scalar> >
+        (
+            molecules.size(),
+            Field<scalar>(patch.size(), 0.0)
+        );
+    }
 
     moleculeTypeIds_.setSize(molecules.size());
+
+    numberDensities_.setSize(molecules.size());
 
     forAll(molecules, i)
     {
@@ -97,12 +106,6 @@ Foam::FreeStream<CloudType>::FreeStream
     }
 
     numberDensities_ /= cloud.nParticle();
-
-    particleFluxAccumulators_.setSize
-    (
-        molecules.size(),
-        Field<scalar>(patch.size(), 0)
-    );
 }
 
 
@@ -127,144 +130,262 @@ void Foam::FreeStream<CloudType>::inflow()
 
     Random& rndGen(cloud.rndGen());
 
-    const polyPatch& patch = mesh.boundaryMesh()[patchIndex_];
+    scalar sqrtPi = sqrt(mathematicalConstant::pi);
 
     label particlesInserted = 0;
 
-    // Add mass to the accumulators.  negative face area dotted with the
-    // velocity to point flux into the domain.
+    const volScalarField::GeometricBoundaryField& boundaryT
+    (
+        cloud.T().boundaryField()
+    );
 
-    forAll(particleFluxAccumulators_, i)
+    const volVectorField::GeometricBoundaryField& boundaryU
+    (
+        cloud.U().boundaryField()
+    );
+
+    forAll(patches_, p)
     {
-        particleFluxAccumulators_[i] +=
-           -patch.faceAreas() & (velocity_*numberDensities_[i]*deltaT);
-    }
+        label patchI = patches_[p];
 
-    forAll(patch, f)
-    {
-        // Loop over all faces as the outer loop to avoid calculating
-        // geometrical properties multiple times.
+        const polyPatch& patch = mesh.boundaryMesh()[patchI];
 
-        labelList faceVertices = patch[f];
+        // Add mass to the accumulators.  negative face area dotted with the
+        // velocity to point flux into the domain.
 
-        label nVertices = faceVertices.size();
+        // Take a reference to the particleFluxAccumulator for this patch
+        List<Field<scalar> >& pFA = particleFluxAccumulators_[p];
 
-        label globalFaceIndex = f + patch.start();
-
-        label cell = mesh.faceOwner()[globalFaceIndex];
-
-        const vector& fC = patch.faceCentres()[f];
-
-        scalar fA = mag(patch.faceAreas()[f]);
-
-        // Cummulative triangle area fractions
-        List<scalar> cTriAFracs(nVertices);
-
-        for (label v = 0; v < nVertices - 1; v++)
+        forAll(pFA, i)
         {
-            const point& vA = mesh.points()[faceVertices[v]];
-
-            const point& vB = mesh.points()[faceVertices[(v + 1)]];
-
-            cTriAFracs[v] =
-                0.5*mag((vA - fC)^(vB - fC))/fA
-              + cTriAFracs[max((v - 1), 0)];
-        }
-
-        // Force the last area fraction value to 1.0 to avoid any
-        // rounding/non-flat face errors giving a value < 1.0
-        cTriAFracs[nVertices - 1] = 1.0;
-
-        // Normal unit vector *negative* so normal is pointing into the
-        // domain
-        vector nw = patch.faceAreas()[f];
-        nw /= -mag(nw);
-
-        // Wall tangential unit vector. Use the direction between the
-        // face centre and the first vertex in the list
-        vector tw1 = fC - (mesh.points()[faceVertices[0]]);
-        tw1 /= mag(tw1);
-
-        // Other tangential unit vector.  Rescaling in case face is not
-        // flat and nw and tw1 aren't perfectly orthogonal
-        vector tw2 = nw^tw1;
-        tw2 /= mag(tw2);
-
-        forAll(particleFluxAccumulators_, i)
-        {
-            scalar& faceAccumulator = particleFluxAccumulators_[i][f];
-
-            // Number of particles to insert
-            label nI = max(label(faceAccumulator), 0);
-
-            faceAccumulator -= nI;
-
             label typeId = moleculeTypeIds_[i];
 
             scalar mass = cloud.constProps(typeId).mass();
 
-            for (label n = 0; n < nI; n++)
+            scalarField mostProbableSpeed
+            (
+                cloud.maxwellianMostProbableSpeed
+                (
+                    boundaryT[patchI],
+                    mass
+                )
+            );
+
+            // Dotting boundary velocity with the face unit normal (which points
+            // out of the domain, so it must be negated), dividing by the most
+            // probable speed to form molecularSpeedRatio * cosTheta
+
+            scalarField sCosTheta =
+                boundaryU[patchI]
+              & -patch.faceAreas()/mag(patch.faceAreas())
+               /mostProbableSpeed;
+
+            // From Bird eqn 4.22
+
+            pFA[i] +=
+                mag(patch.faceAreas())*numberDensities_[i]*deltaT
+               *mostProbableSpeed
+               *(
+                   exp(-sqr(sCosTheta)) + sqrtPi*sCosTheta*(1 + erf(sCosTheta))
+                )
+               /(2.0*sqrtPi);
+        }
+
+        forAll(patch, f)
+        {
+            // Loop over all faces as the outer loop to avoid calculating
+            // geometrical properties multiple times.
+
+            labelList faceVertices = patch[f];
+
+            label nVertices = faceVertices.size();
+
+            label globalFaceIndex = f + patch.start();
+
+            label cell = mesh.faceOwner()[globalFaceIndex];
+
+            const vector& fC = patch.faceCentres()[f];
+
+            scalar fA = mag(patch.faceAreas()[f]);
+
+            // Cumulative triangle area fractions
+            List<scalar> cTriAFracs(nVertices);
+
+            for (label v = 0; v < nVertices - 1; v++)
             {
-                // Choose a triangle to insert on, based on their relative area
+                const point& vA = mesh.points()[faceVertices[v]];
 
-                scalar triSelection = rndGen.scalar01();
+                const point& vB = mesh.points()[faceVertices[(v + 1)]];
 
-                // Selected triangle
-                label sTri = -1;
+                cTriAFracs[v] =
+                    0.5*mag((vA - fC)^(vB - fC))/fA
+                  + cTriAFracs[max((v - 1), 0)];
+            }
 
-                forAll(cTriAFracs, tri)
+            // Force the last area fraction value to 1.0 to avoid any
+            // rounding/non-flat face errors giving a value < 1.0
+            cTriAFracs[nVertices - 1] = 1.0;
+
+            // Normal unit vector *negative* so normal is pointing into the
+            // domain
+            vector n = patch.faceAreas()[f];
+            n /= -mag(n);
+
+            // Wall tangential unit vector. Use the direction between the
+            // face centre and the first vertex in the list
+            vector t1 = fC - (mesh.points()[faceVertices[0]]);
+            t1 /= mag(t1);
+
+            // Other tangential unit vector.  Rescaling in case face is not
+            // flat and n and t1 aren't perfectly orthogonal
+            vector t2 = n^t1;
+            t2 /= mag(t2);
+
+            scalar faceTemperature = boundaryT[patchI][f];
+
+            const vector& faceVelocity = boundaryU[patchI][f];
+
+            forAll(pFA, i)
+            {
+                scalar& faceAccumulator = pFA[i][f];
+
+                // Number of whole particles to insert
+                label nI = max(label(faceAccumulator), 0);
+
+                // Add another particle with a probability proportional to the
+                // remainder of taking the integer part of faceAccumulator
+                if ((faceAccumulator - nI) > rndGen.scalar01())
                 {
-                    sTri = tri;
-
-                    if (cTriAFracs[tri] >= triSelection)
-                    {
-                        break;
-                    }
+                    nI++;
                 }
 
-                // Randomly distribute the points on the triangle, using the
-                // method from:
-                // Generating Random Points in Triangles
-                // by Greg Turk
-                // from "Graphics Gems", Academic Press, 1990
-                // http://tog.acm.org/GraphicsGems/gems/TriPoints.c
+                faceAccumulator -= nI;
 
-                const point& A = fC;
-                const point& B = mesh.points()[faceVertices[sTri]];
-                const point& C =
+                label typeId = moleculeTypeIds_[i];
+
+                scalar mass = cloud.constProps(typeId).mass();
+
+                for (label i = 0; i < nI; i++)
+                {
+                    // Choose a triangle to insert on, based on their relative
+                    // area
+
+                    scalar triSelection = rndGen.scalar01();
+
+                    // Selected triangle
+                    label sTri = -1;
+
+                    forAll(cTriAFracs, tri)
+                    {
+                        sTri = tri;
+
+                        if (cTriAFracs[tri] >= triSelection)
+                        {
+                            break;
+                        }
+                    }
+
+                    // Randomly distribute the points on the triangle, using the
+                    // method from:
+                    // Generating Random Points in Triangles
+                    // by Greg Turk
+                    // from "Graphics Gems", Academic Press, 1990
+                    // http://tog.acm.org/GraphicsGems/gems/TriPoints.c
+
+                    const point& A = fC;
+                    const point& B = mesh.points()[faceVertices[sTri]];
+                    const point& C =
                     mesh.points()[faceVertices[(sTri + 1) % nVertices]];
 
-                scalar s = rndGen.scalar01();
-                scalar t = sqrt(rndGen.scalar01());
+                    scalar s = rndGen.scalar01();
+                    scalar t = sqrt(rndGen.scalar01());
 
-                point p = (1 - t)*A + (1 - s)*t*B + s*t*C;
+                    point p = (1 - t)*A + (1 - s)*t*B + s*t*C;
 
-                vector U =
-                    sqrt(CloudType::kb*temperature_/mass)
-                   *(
-                        rndGen.GaussNormal()*tw1
-                      + rndGen.GaussNormal()*tw2
-                      - sqrt(-2.0*log(max(1 - rndGen.scalar01(), VSMALL)))*nw
+                    // Velocity generation
+
+                    scalar mostProbableSpeed
+                    (
+                        cloud.maxwellianMostProbableSpeed
+                        (
+                            faceTemperature,
+                            mass
+                        )
                     );
 
-                U += velocity_;
+                    scalar sCosTheta = (faceVelocity & n)/mostProbableSpeed;
 
-                scalar Ei = cloud.equipartitionInternalEnergy
-                (
-                    temperature_,
-                    cloud.constProps(typeId).internalDegreesOfFreedom()
-                );
+                    // Coefficients required for Bird eqn 12.5
+                    scalar uNormProbCoeffA =
+                        sCosTheta + sqrt(sqr(sCosTheta) + 2.0);
 
-                cloud.addNewParcel
-                (
-                    p,
-                    U,
-                    Ei,
-                    cell,
-                    typeId
-                );
+                    scalar uNormProbCoeffB =
+                        0.5*
+                        (
+                            1.0
+                          + sCosTheta*(sCosTheta - sqrt(sqr(sCosTheta) + 2.0))
+                        );
 
-                particlesInserted++;
+                    // Equivalent to the QA value in Bird's DSMC3.FOR
+                    scalar randomScaling = 3.0;
+
+                    if (sCosTheta < -3)
+                    {
+                        randomScaling = mag(sCosTheta) + 1;
+                    }
+
+                    scalar P = -1;
+
+                    // Normalised candidates for the normal direction velocity
+                    // component
+                    scalar uNormal;
+                    scalar uNormalThermal;
+
+                    // Select a velocity using Bird eqn 12.5
+                    do
+                    {
+                        uNormalThermal =
+                            randomScaling*(2.0*rndGen.scalar01() - 1);
+
+                        uNormal = uNormalThermal + sCosTheta;
+
+                        if (uNormal < 0.0)
+                        {
+                            P = -1;
+                        }
+                        else
+                        {
+                            P = 2.0*uNormal/uNormProbCoeffA
+                               *exp(uNormProbCoeffB - sqr(uNormalThermal));
+                        }
+
+                    } while (P < rndGen.scalar01());
+
+                    vector U =
+                        sqrt(CloudType::kb*faceTemperature/mass)
+                       *(
+                            rndGen.GaussNormal()*t1
+                          + rndGen.GaussNormal()*t2
+                        )
+                      + mostProbableSpeed*uNormal*n;
+
+                    scalar Ei = cloud.equipartitionInternalEnergy
+                    (
+                        faceTemperature,
+                        cloud.constProps(typeId).internalDegreesOfFreedom()
+                    );
+
+                    cloud.addNewParcel
+                    (
+                        p,
+                        U,
+                        Ei,
+                        cell,
+                        typeId
+                    );
+
+                    particlesInserted++;
+                }
             }
         }
     }

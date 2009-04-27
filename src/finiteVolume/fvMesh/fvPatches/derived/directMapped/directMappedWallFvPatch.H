@@ -23,91 +23,59 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::FreeStream
+    Foam::directMappedWallFvPatch
 
 Description
-    Inserting new particles across the faces of a all patched of type
-    "patch" for a free stream.  Uniform values number density, temperature
-    and velocity sourced face-by-face from the boundaryT and boundaryU fields
-    of the cloud.
+    Foam::directMappedWallFvPatch
+
+SourceFiles
+    directMappedWallFvPatch.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef FreeStream_H
-#define FreeStream_H
+#ifndef directMappedWallFvPatch_H
+#define directMappedWallFvPatch_H
 
-#include "InflowBoundaryModel.H"
-#include "polyMesh.H"
+#include "fvPatch.H"
+#include "directMappedWallPolyPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
-                        Class FreeStream Declaration
+                           Class directMappedWallFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class FreeStream
+class directMappedWallFvPatch
 :
-    public InflowBoundaryModel<CloudType>
+    public fvPatch
 {
-    // Private data
-
-        //- The indices of patches to introduce molecules across
-        labelList patches_;
-
-        //- The molecule types to be introduced
-        List<label> moleculeTypeIds_;
-
-        //- The number density of the species in the inflow
-        Field<scalar> numberDensities_;
-
-        //- A List of Lists of Fields specifying carry-over of mass flux from
-        // one timestep to the next
-        // + Outer List - one inner List for each patch
-        // + Inner List - one Field for every species to be introduced
-        // + Each field entry corresponding to a face to be injected across
-        //   with a particular species
-        List<List<Field<scalar> > > particleFluxAccumulators_;
-
 
 public:
 
     //- Runtime type information
-    TypeName("FreeStream");
+    TypeName(directMappedWallPolyPatch::typeName_());
 
 
     // Constructors
 
-        //- Construct from dictionary
-        FreeStream
+        //- Construct from components
+        directMappedWallFvPatch
         (
-            const dictionary& dict,
-            CloudType& cloud
-        );
-
-
-    // Destructor
-    virtual ~FreeStream();
-
-
-    // Member Functions
-
-        //- Introduce particles
-        virtual void inflow();
+            const polyPatch& patch,
+            const fvBoundaryMesh& bm
+        )
+        :
+            fvPatch(patch, bm)
+        {}
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "FreeStream.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
