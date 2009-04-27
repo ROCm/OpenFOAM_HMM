@@ -105,6 +105,14 @@ sets
         end         (2 0.51  0.005);
         nPoints     10;
     }
+
+    somePoints
+    {
+        type    cloud;
+        axis    xyz;
+        points  ((0.049 0.049 0.005)(0.051 0.049 0.005));
+    }
+
 );
 
 

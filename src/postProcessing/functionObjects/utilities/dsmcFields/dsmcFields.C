@@ -137,7 +137,7 @@ void Foam::dsmcFields::write()
             iDofMeanName
         );
 
-        if (min(rhoNMean).value() > VSMALL)
+        if (min(mag(rhoNMean)).value() > VSMALL)
         {
             Info<< "Calculating dsmcFields." << endl;
 
@@ -223,10 +223,9 @@ void Foam::dsmcFields::write()
         }
         else
         {
-            Info<< "Small or negative value (" << min(rhoNMean)
+            Info<< "Small value (" << min(mag(rhoNMean))
                 << ") found in rhoNMean field. "
-                << "Not calculating dsmcFields to avoid division by zero "
-                << "or invalid results."
+                << "Not calculating dsmcFields to avoid division by zero."
                 << endl;
         }
     }
