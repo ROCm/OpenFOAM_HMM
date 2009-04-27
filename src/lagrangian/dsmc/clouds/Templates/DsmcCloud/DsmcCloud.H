@@ -299,10 +299,22 @@ public:
                     scalar mass
                 ) const;
 
+                inline scalarField maxwellianAverageSpeed
+                (
+                    scalarField temperature,
+                    scalar mass
+                ) const;
+
                 //- RMS particle speed
                 inline scalar maxwellianRMSSpeed
                 (
                     scalar temperature,
+                    scalar mass
+                ) const;
+
+                inline scalarField maxwellianRMSSpeed
+                (
+                    scalarField temperature,
                     scalar mass
                 ) const;
 
@@ -313,6 +325,11 @@ public:
                     scalar mass
                 ) const;
 
+                inline scalarField maxwellianMostProbableSpeed
+                (
+                    scalarField temperature,
+                    scalar mass
+                ) const;
 
             // Sub-models
 
