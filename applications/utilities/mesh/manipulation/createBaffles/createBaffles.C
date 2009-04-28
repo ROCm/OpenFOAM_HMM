@@ -227,10 +227,10 @@ int main(int argc, char *argv[])
 
 
     // Patches to put baffles into
-    labelList newPatches(1);
+    DynamicList<label> newPatches(1);
 
     word patchName(args.additionalArgs()[1]);
-    newPatches[0] = patches.findPatchID(patchName);
+    newPatches.append(patches.findPatchID(patchName));
     Pout<< "Using patch " << patchName
         << " at index " << newPatches[0] << endl;
 
@@ -250,6 +250,7 @@ int main(int argc, char *argv[])
             IStringStream(args.options()["additionalPatches"])()
         );
 
+        newPatches.reserve(patchNames.size() + 1);
         forAll(patchNames, i)
         {
             label patchI = patches.findPatchID(patchNames[i]);
