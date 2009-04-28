@@ -24,40 +24,54 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "piecewiseLinearRamp.H"
+#include "addToRunTimeSelectionTable.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(piecewiseLinearRamp, 0);
+addToRunTimeSelectionTable(faceAreaWeightModel, piecewiseLinearRamp, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+piecewiseLinearRamp::piecewiseLinearRamp
+(
+    const dictionary& faceAreaWeightDict,
+    const conformalVoronoiMesh& cvMesh
+)
+:
+    faceAreaWeightModel(typeName, faceAreaWeightDict, cvMesh),
+    lAF_(readScalar(coeffDict().lookup("lowerAreaFraction"))),
+    uAF_(readScalar(coeffDict().lookup("upperAreaFraction")))
+{}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::IOdictionary& Foam::cvControls::cvMeshDict() const
+scalar piecewiseLinearRamp::faceAreaWeight(scalar faceAreaFraction) const
 {
-    return cvMeshDict_;
-}
-
-
-inline Foam::scalar Foam::cvControls::defaultCellSize() const
-{
-    return defaultCellSize_;
-}
-
-
-inline Foam::scalar Foam::cvControls::pointPairDistanceCoeff() const
-{
-    return pointPairDistanceCoeff_;
-}
-
-
-inline Foam::scalar Foam::cvControls::surfaceSearchDistanceCoeff() const
-{
-    return surfaceSearchDistanceCoeff_;
-}
-
-inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
-{
-    return minimumEdgeLengthCoeff_;
+    if (faceAreaFraction < lAF_)
+    {
+        return 0;
+    }
+    else if (faceAreaFraction < uAF_)
+    {
+        return faceAreaFraction/((uAF_ - lAF_)) - 1/((uAF_/lAF_) - 1);
+    }
+    else
+    {
+        return 1;
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
 // ************************************************************************* //

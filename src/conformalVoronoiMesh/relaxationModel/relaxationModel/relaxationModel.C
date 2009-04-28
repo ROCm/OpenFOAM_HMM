@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "initialPointsMethod.H"
+#include "relaxationModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,72 +34,65 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(initialPointsMethod, 0);
-defineRunTimeSelectionTable(initialPointsMethod, dictionary);
+defineTypeNameAndDebug(relaxationModel, 0);
+defineRunTimeSelectionTable(relaxationModel, dictionary);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-initialPointsMethod::initialPointsMethod
+relaxationModel::relaxationModel
 (
     const word& type,
-    const dictionary& initialPointsDict,
+    const dictionary& relaxationDict,
     const conformalVoronoiMesh& cvMesh
 )
 :
-    dictionary(initialPointsDict),
+    dictionary(relaxationDict),
     cvMesh_(cvMesh),
-    detailsDict_(subDict(type + "Details")),
-    minimumSurfaceDistance_
-    (
-        readScalar
-        (
-            initialPointsDict.lookup("minimumSurfaceDistance")
-        )
-    )
+    coeffDict_(subDict(type + "Coeffs"))
 {}
 
 
 // * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
 
-autoPtr<initialPointsMethod> initialPointsMethod::New
+autoPtr<relaxationModel> relaxationModel::New
 (
-    const dictionary& initialPointsDict,
+    const dictionary& relaxationDict,
     const conformalVoronoiMesh& cvMesh
 )
 {
-    word initialPointsMethodTypeName
+    word relaxationModelTypeName
     (
-        initialPointsDict.lookup("initialPointsMethod")
+        relaxationDict.lookup("relaxationModel")
     );
 
-    Info<< nl << "Selecting initialPointsMethod "
-        << initialPointsMethodTypeName << endl;
+    Info<< nl << "Selecting relaxationModel "
+        << relaxationModelTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(initialPointsMethodTypeName);
+        dictionaryConstructorTablePtr_->find(relaxationModelTypeName);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
-            "initialPointsMethod::New(dictionary&, "
+            "relaxationModel::New(const dictionary&, "
             "const conformalVoronoiMesh&)"
-        )   << "Unknown initialPointsMethod type "
-            << initialPointsMethodTypeName
+        )   << "Unknown relaxationModel type "
+            << relaxationModelTypeName
             << endl << endl
-            << "Valid initialPointsMethod types are :" << endl
+            << "Valid relaxationModel types are :" << endl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 
-    return autoPtr<initialPointsMethod>(cstrIter()(initialPointsDict, cvMesh));
+    return autoPtr<relaxationModel>(cstrIter()(relaxationDict, cvMesh));
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-initialPointsMethod::~initialPointsMethod()
+relaxationModel::~relaxationModel()
 {}
 
 

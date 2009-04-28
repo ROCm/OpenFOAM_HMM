@@ -62,6 +62,10 @@ namespace Foam
 // Forward declaration of classes
 class initialPointsMethod;
 
+class relaxationModel;
+
+class faceAreaWeightModel;
+
 
 /*---------------------------------------------------------------------------*\
                     Class conformalVoronoiMesh Declaration
@@ -99,10 +103,32 @@ class conformalVoronoiMesh
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
 
+        //- Relaxation coefficient model.  Runtime selectable
+        autoPtr<relaxationModel> relaxationModel_;
+
+        //-  Face area weight function.  Runtime selectable.
+        autoPtr<faceAreaWeightModel> faceAreaWeightModel_;
+
+
     // Private Member Functions
 
         //- Write the elapsedCpuTime
-        void timeCheck() const;
+        inline void timeCheck() const;
+
+        //- Return the local target cell size at the given location
+        inline scalar targetCellSize(const point& pt) const;
+
+        //- Return the local point pair separation at the given location
+        inline scalar pointPairDistance(const point& pt) const;
+
+        //- Return the square of the local surface search distance
+        inline scalar surfaceSearchDistanceSqr(const point& pt) const;
+
+        //- Return the local minimum allowed dual edge length
+        inline scalar minimumEdgeLength(const point& pt) const;
+
+        //- Return the required alignment directions at the given location
+        inline tensor requiredAlignment(const point& pt) const;
 
         //- Insert point and return it's index
         inline label insertPoint
@@ -135,6 +161,15 @@ class conformalVoronoiMesh
 
         //- Insert point groups at the feature points.
         void conformToFeaturePoints();
+
+        //- Insert point groups at convex feature points
+        void insertConvexFeaturesPoints();
+
+        //- Insert point groups at concave feature points
+        void insertConcaveFeaturePoints();
+
+        //- Insert point groups at mixed feature points
+        void insertMixedFeaturePoints();
 
         //- Reinsert stored feature point defining points.
         void reinsertFeaturePoints();

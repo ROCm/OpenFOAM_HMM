@@ -11,4 +11,10 @@ initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
 initialPointsMethod/pointFile/pointFile.C
 
+relaxationModel/relaxationModel/relaxationModel.C
+relaxationModel/adaptiveLinear/adaptiveLinear.C
+
+faceAreaWeightModel/faceAreaWeightModel/faceAreaWeightModel.C
+faceAreaWeightModel/piecewiseLinearRamp/piecewiseLinearRamp.C
+
 LIB = $(FOAM_LIBBIN)/libconformalVoronoiMesh

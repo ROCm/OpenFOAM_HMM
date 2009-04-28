@@ -24,40 +24,59 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "adaptiveLinear.H"
+#include "addToRunTimeSelectionTable.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(adaptiveLinear, 0);
+addToRunTimeSelectionTable(relaxationModel, adaptiveLinear, dictionary);
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+adaptiveLinear::adaptiveLinear
+(
+    const dictionary& relaxationDict,
+    const conformalVoronoiMesh& cvMesh
+)
+:
+    relaxationModel(typeName, relaxationDict, cvMesh),
+    relaxationStart_(readScalar(coeffDict().lookup("relaxationStart"))),
+    relaxationEnd_(readScalar(coeffDict().lookup("relaxationEnd"))),
+    lastTimeValue_(cvMesh_.time().timeOutputValue()),
+    relaxation_(relaxationStart_)
+{}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::IOdictionary& Foam::cvControls::cvMeshDict() const
+scalar adaptiveLinear::relaxation()
 {
-    return cvMeshDict_;
-}
+    if (cvMesh_.time().timeOutputValue() > lastTimeValue_)
+    {
+        relaxation_ -= (relaxation_ - relaxationEnd_)
+        /max
+        (
+            (
+                cvMesh_.time().endTime().value()
+              - cvMesh_.time().timeOutputValue()
+            )
+           /cvMesh_.time().deltaT().value(),
+            1
+        );
+    }
 
-
-inline Foam::scalar Foam::cvControls::defaultCellSize() const
-{
-    return defaultCellSize_;
-}
-
-
-inline Foam::scalar Foam::cvControls::pointPairDistanceCoeff() const
-{
-    return pointPairDistanceCoeff_;
-}
-
-
-inline Foam::scalar Foam::cvControls::surfaceSearchDistanceCoeff() const
-{
-    return surfaceSearchDistanceCoeff_;
-}
-
-inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
-{
-    return minimumEdgeLengthCoeff_;
+    return relaxation_;
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace Foam
 
 // ************************************************************************* //

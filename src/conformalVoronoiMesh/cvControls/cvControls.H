@@ -46,7 +46,6 @@ namespace Foam
 // Forward declaration of classes
 class conformalVoronoiMesh;
 
-
 /*---------------------------------------------------------------------------*\
                           Class cvControls Declaration
 \*---------------------------------------------------------------------------*/
@@ -60,6 +59,45 @@ class cvControls
 
         //- Reference to the cvMeshDict
         const IOdictionary& cvMeshDict_;
+
+        // Surface conformation controls
+
+            //- Point pair spacing coefficient - fraction of the local target
+            //  cell size
+            scalar pointPairDistanceCoeff_;
+
+            //- Surface search distance coefficient - faction of the local
+            //  target cell size
+            scalar surfaceSearchDistanceCoeff_;
+
+            //- Maximum quadrant angle allowed at a concave edge before
+            //  additional "mitering" lines are added
+            scalar maxQuadAngle_;
+
+    // Motion control controls
+
+        // Storing the default cell size value for the moment until a method for
+        // storing the spatially resolved size requirement is implemented
+        scalar defaultCellSize_;
+
+        // Point insertion criteria
+
+            scalar cellCentreInsertionDistCoeff_;
+
+            scalar faceAreaRatioCoeff_;
+
+            scalar alignmentAcceptanceAngle_;
+
+        // Point removal criteria
+
+            scalar cellCentreRemovalDistCoeff_;
+
+    // polyMesh filtering controls
+
+        //- Minimum edge length allowed in the polyMesh, anything shorter will
+        //  be filtered - fraction of the local target cell size
+        scalar minimumEdgeLengthCoeff_;
+
 
 public:
 
@@ -80,8 +118,20 @@ public:
 
         // Access
 
-            // Return the cvMeshDict
+            //- Return the cvMeshDict
             inline const IOdictionary& cvMeshDict() const;
+
+            //- Return the defaultCellSize
+            inline scalar defaultCellSize() const;
+
+            //- Return the pointPairDistanceCoeff
+            inline scalar pointPairDistanceCoeff() const;
+
+            //- Return the surfaceSearchDistanceCoeff
+            inline scalar surfaceSearchDistanceCoeff() const;
+
+            //- Return the minimumEdgeLengthCoeff
+            inline scalar minimumEdgeLengthCoeff() const;
 
 };
 

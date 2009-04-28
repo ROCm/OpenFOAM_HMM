@@ -28,6 +28,59 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+inline void Foam::conformalVoronoiMesh::timeCheck() const
+{
+    Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s, delta "
+        << runTime_.cpuTimeIncrement()<< "s ] --- " << endl;
+}
+
+
+inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
+(
+    const point& pt
+) const
+{
+    return cvMeshControls_.defaultCellSize();
+}
+
+
+inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
+(
+    const point& pt
+) const
+{
+    return targetCellSize(pt)*cvMeshControls_.pointPairDistanceCoeff();
+}
+
+
+inline Foam::scalar Foam::conformalVoronoiMesh::surfaceSearchDistanceSqr
+(
+    const point& pt
+) const
+{
+    return sqr(targetCellSize(pt)*cvMeshControls_.surfaceSearchDistanceCoeff());
+}
+
+
+inline Foam::scalar Foam::conformalVoronoiMesh::minimumEdgeLength
+(
+    const point& pt
+) const
+{
+    return targetCellSize(pt)*cvMeshControls_.minimumEdgeLengthCoeff();
+}
+
+
+inline Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
+(
+    const point& pt
+) const
+{
+    Info<< "STILL TO IMPLEMENT requiredAlignment." << endl;
+    return I;
+}
+
+
 inline Foam::label Foam::conformalVoronoiMesh::insertPoint
 (
     const point& p,

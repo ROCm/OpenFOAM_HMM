@@ -26,11 +26,211 @@ License
 
 #include "conformalVoronoiMesh.H"
 #include "initialPointsMethod.H"
+#include "relaxationModel.H"
+#include "faceAreaWeightModel.H"
 #include "uint.H"
 #include "ulong.H"
 #include "surfaceFeatures.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::conformalVoronoiMesh::conformalVoronoiMesh
+(
+    const Time& runTime,
+    const IOdictionary& cvMeshDict
+)
+:
+    HTriangulation(),
+    runTime_(runTime),
+    allGeometry_
+    (
+        IOobject
+        (
+            "cvSearchableSurfacesDirectory",
+            runTime_.constant(),
+            "triSurface",
+            runTime_,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        ),
+        cvMeshDict.subDict("geometry")
+    ),
+    geometryToConformTo_
+    (
+        *this,
+        allGeometry_,
+        cvMeshDict.subDict("surfaceConformation")
+    ),
+    cvMeshControls_(*this, cvMeshDict),
+    startOfInternalPoints_(0),
+    startOfSurfacePointPairs_(0),
+    initialPointsMethod_
+    (
+        initialPointsMethod::New
+        (
+            cvMeshDict.subDict("initialPoints"),
+            *this
+        )
+    ),
+    relaxationModel_
+    (
+        relaxationModel::New
+        (
+            cvMeshDict.subDict("motionControl"),
+            *this
+        )
+    ),
+    faceAreaWeightModel_
+    (
+        faceAreaWeightModel::New
+        (
+            cvMeshDict.subDict("motionControl"),
+            *this
+        )
+    )
+{
+    timeCheck();
+
+    conformToFeaturePoints();
+    timeCheck();
+
+    insertInitialPoints();
+    timeCheck();
+
+    conformToSurface();
+    timeCheck();
+
+    writePoints("allPoints.obj", false);
+    timeCheck();
+
+    writeMesh();
+    timeCheck();
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
+{}
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+
+
+void Foam::conformalVoronoiMesh::insertSurfacePointPairs
+(
+    const List<scalar>& surfacePpDist,
+    const List<point>& surfacePoints,
+    const List<vector>& surfaceNormals,
+    const fileName fName
+)
+{
+    if
+    (
+        surfacePpDist.size() != surfacePoints.size()
+     || surfacePpDist.size() != surfaceNormals.size()
+    )
+    {
+        FatalErrorIn("Foam::conformalVoronoiMesh::insertPointPairs")
+            << "surfacePpDist, surfacePoints and surfaceNormals are not "
+            << "the same size. Sizes"
+            << surfacePpDist.size() << ' '
+            << surfacePoints.size() << ' '
+            << surfaceNormals.size()
+            << exit(FatalError);
+    }
+
+    forAll(surfacePoints, p)
+    {
+        insertPointPair
+        (
+            surfacePpDist[p],
+            surfacePoints[p],
+            surfaceNormals[p]
+        );
+    }
+
+    if (fName != fileName::null)
+    {
+        writePoints(fName, surfacePoints);
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::conformToFeaturePoints()
+{
+    Info<< nl << "Conforming to feature points" << endl;
+
+    insertConvexFeaturesPoints();
+
+    insertConcaveFeaturePoints();
+
+    insertMixedFeaturePoints();
+
+    Info<< "   Conforming to " << "XXX" << " feature locations" << nl
+        << "   Inserting " << "YYY" << " points" << endl;
+}
+
+
+void Foam::conformalVoronoiMesh::insertConvexFeaturesPoints()
+{
+
+}
+
+
+void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
+{
+
+}
+
+
+void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
+{
+
+}
+
+
+void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
+{
+
+}
+
+
+void Foam::conformalVoronoiMesh::insertInitialPoints()
+{
+    startOfInternalPoints_ = number_of_vertices();
+
+    label nVert = startOfInternalPoints_;
+
+    Info<< nl << "Inserting initial points" << endl;
+
+    std::vector<Point> initialPoints = initialPointsMethod_->initialPoints();
+
+    Info<< "    " << initialPoints.size() << " points to insert..." << endl;
+
+    // using the range insert (faster than inserting points one by one)
+    insert(initialPoints.begin(), initialPoints.end());
+
+    Info<< "    " << number_of_vertices() - startOfInternalPoints_
+        << " points inserted" << endl;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->uninitialised())
+        {
+            vit->index() = nVert++;
+        }
+    }
+
+    writePoints("initialPoints.obj", true);
+}
+
 
 bool Foam::conformalVoronoiMesh::dualCellSurfaceIntersection
 (
@@ -109,31 +309,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     points.setSize(number_of_cells());
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Looking up details from a dictionary, in future the will be available
-    // from a controls class.
+    // Looking up minEdgeLenSqr with a dummy point, in future will be available
+    // as a local value to be looked up in-place.
 
-    const dictionary& cvMeshDict( cvMeshControls_.cvMeshDict());
-
-    scalar defaultCellSize
-    (
-        readScalar
-        (
-            cvMeshDict.subDict("motionControl").lookup("defaultCellSize")
-        )
-    );
-
-    scalar minimumEdgeLengthCoeff
-    (
-        readScalar
-        (
-            cvMeshDict.subDict("polyMeshFiltering").lookup
-            (
-                "minimumEdgeLengthCoeff"
-            )
-        )
-    );
-
-    scalar minEdgeLenSqr = sqr(defaultCellSize*minimumEdgeLengthCoeff);
+    scalar minEdgeLenSqr = sqr(minimumEdgeLength(vector::zero));
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -732,173 +911,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::conformalVoronoiMesh::conformalVoronoiMesh
-(
-    const Time& runTime,
-    const IOdictionary& cvMeshDict
-)
-:
-    HTriangulation(),
-    runTime_(runTime),
-    allGeometry_
-    (
-        IOobject
-        (
-            "cvSearchableSurfacesDirectory",
-            runTime_.constant(),
-            "triSurface",
-            runTime_,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        ),
-        cvMeshDict.subDict("geometry")
-    ),
-    geometryToConformTo_
-    (
-        *this,
-        allGeometry_,
-        cvMeshDict.subDict("surfaceConformation")
-    ),
-    cvMeshControls_(*this, cvMeshDict),
-    startOfInternalPoints_(0),
-    startOfSurfacePointPairs_(0),
-    initialPointsMethod_
-    (
-        initialPointsMethod::New
-        (
-            cvMeshDict.subDict("initialPoints"),
-            *this
-        )
-    )
-{
-    timeCheck();
-
-    conformToFeaturePoints();
-    timeCheck();
-
-    insertInitialPoints();
-    timeCheck();
-
-    conformToSurface();
-    timeCheck();
-
-    writePoints("allPoints.obj", false);
-    timeCheck();
-
-    writeMesh();
-    timeCheck();
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
-{}
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-void Foam::conformalVoronoiMesh::timeCheck() const
-{
-    Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s, delta "
-        << runTime_.cpuTimeIncrement()<< "s ] --- " << endl;
-}
-
-
-void Foam::conformalVoronoiMesh::insertSurfacePointPairs
-(
-    const List<scalar>& surfacePpDist,
-    const List<point>& surfacePoints,
-    const List<vector>& surfaceNormals,
-    const fileName fName
-)
-{
-    if
-    (
-        surfacePpDist.size() != surfacePoints.size()
-     || surfacePpDist.size() != surfaceNormals.size()
-    )
-    {
-        FatalErrorIn("Foam::conformalVoronoiMesh::insertPointPairs")
-            << "surfacePpDist, surfacePoints and surfaceNormals are not "
-            << "the same size. Sizes"
-            << surfacePpDist.size() << ' '
-            << surfacePoints.size() << ' '
-            << surfaceNormals.size()
-            << exit(FatalError);
-    }
-
-    forAll(surfacePoints, p)
-    {
-        insertPointPair
-        (
-            surfacePpDist[p],
-            surfacePoints[p],
-            surfaceNormals[p]
-        );
-    }
-
-    if (fName != fileName::null)
-    {
-        writePoints(fName, surfacePoints);
-    }
-}
-
-
-void Foam::conformalVoronoiMesh::conformToFeaturePoints()
-{
-    Info<< nl << "Conforming to feature points" << endl;
-
-
-
-    Info<< "   Conforming to " << "XXX" << " feature locations" << nl
-        << "   Inserting " << "YYY" << " points" << endl;
-}
-
-
-void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
-{
-
-}
-
-
-void Foam::conformalVoronoiMesh::insertInitialPoints()
-{
-    startOfInternalPoints_ = number_of_vertices();
-
-    label nVert = startOfInternalPoints_;
-
-    Info<< nl << "Inserting initial points" << endl;
-
-    std::vector<Point> initialPoints = initialPointsMethod_->initialPoints();
-
-    Info<< "    " << initialPoints.size() << " points to insert..." << endl;
-
-    // using the range insert (faster than inserting points one by one)
-    insert(initialPoints.begin(), initialPoints.end());
-
-    Info<< "    " << number_of_vertices() - startOfInternalPoints_
-        << " points inserted" << endl;
-
-    for
-    (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->uninitialised())
-        {
-            vit->index() = nVert++;
-        }
-    }
-
-    writePoints("initialPoints.obj", true);
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 void Foam::conformalVoronoiMesh::conformToSurface()
@@ -907,44 +919,6 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     startOfSurfacePointPairs_ = number_of_vertices();
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Looking up details from a dictionary, in future the will be available
-    // from a controls class.
-
-    const dictionary& cvMeshDict( cvMeshControls_.cvMeshDict());
-
-    scalar defaultCellSize
-    (
-        readScalar
-        (
-            cvMeshDict.subDict("motionControl").lookup("defaultCellSize")
-        )
-    );
-
-    scalar surfDepthCoeff
-    (
-        readScalar
-        (
-            cvMeshDict.subDict("surfaceConformation").lookup
-            (
-                "surfacePointSearchDepthCoeff"
-            )
-        )
-    );
-
-    scalar ppDistCoeff
-    (
-        readScalar
-        (
-            cvMeshDict.subDict("surfaceConformation").lookup
-            (
-                "pointPairDistanceCoeff"
-            )
-        )
-    );
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
     // Surface protrusion conformation
 
     label nIterations = 1;
@@ -952,6 +926,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
     for(label iterationNo = 0; iterationNo < nIterations; iterationNo++)
     {
         DynamicList<scalar> surfacePpDist;
+        DynamicList<scalar> surfaceSearchDistSqr;
         DynamicList<point> surfacePoints;
         DynamicList<vector> surfaceNormals;
 
@@ -966,11 +941,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
             if (vit->internalPoint())
             {
                 point vert(topoint(vit->point()));
-
-                // TODO Need to have a function to recover the local cell size,
-                // use the defaultCellSize for the moment
-
-                scalar searchDistanceSqr = sqr(defaultCellSize*surfDepthCoeff);
+                scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
                 pointIndexHit pHit;
                 vector normal;
 
@@ -992,7 +963,8 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                         // edge, shift it to being an edge control point
                         // instead, this will prevent "pits" forming.
 
-                        surfacePpDist.append(defaultCellSize*ppDistCoeff);
+                        surfacePpDist.append(pointPairDistance(vert));
+                        surfaceSearchDistSqr.append(searchDistanceSqr);
                         surfacePoints.append(pHit.hitPoint());
                         surfaceNormals.append(normal);
                     }
@@ -1020,11 +992,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         geometryToConformTo_.findEdgeNearest
         (
             pointField(surfacePoints),
-            scalarField
-            (
-                surfacePoints.size(),
-                sqr(defaultCellSize*surfDepthCoeff)
-            )
+            scalarField(surfaceSearchDistSqr)
         );
 
         // After the surface conformation points are added, any points that are

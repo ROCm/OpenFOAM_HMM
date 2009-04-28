@@ -38,7 +38,70 @@ Foam::cvControls::cvControls
     cvMesh_(cvMesh),
     cvMeshDict_(cvMeshDict)
 {
-    Info<< nl << "Reading " << cvMeshDict_.name() << endl;
+    // Surface conformation controls
+    const dictionary& surfDict(cvMeshDict_.subDict("surfaceConformation"));
+
+    pointPairDistanceCoeff_ = readScalar
+    (
+        surfDict.lookup("pointPairDistanceCoeff")
+    );
+
+    surfaceSearchDistanceCoeff_ = readScalar
+    (
+        surfDict.lookup("surfaceSearchDistanceCoeff")
+    );
+
+    maxQuadAngle_= readScalar
+    (
+        surfDict.lookup("maxQuadAngle")
+    );
+
+    // Motion control controls
+    const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
+
+    defaultCellSize_ = readScalar
+    (
+        motionDict.lookup("defaultCellSize")
+    );
+
+    const dictionary& insertionDict
+    (
+        motionDict.subDict("pointInsertionCriteria")
+    );
+
+    cellCentreInsertionDistCoeff_ = readScalar
+    (
+        insertionDict.lookup("cellCentreDistCoeff")
+    );
+
+    faceAreaRatioCoeff_ = readScalar
+    (
+        insertionDict.lookup("faceAreaRatioCoeff")
+    );
+
+    alignmentAcceptanceAngle_ = readScalar
+    (
+        insertionDict.lookup("alignmentAcceptanceAngle")
+    );
+
+    const dictionary& removalDict
+    (
+        motionDict.subDict("pointRemovalCriteria")
+    );
+
+    cellCentreRemovalDistCoeff_ = readScalar
+    (
+        removalDict.lookup("cellCentreDistCoeff")
+    );
+
+    // polyMesh filtering controls
+    const dictionary& filteringDict(cvMeshDict_.subDict("polyMeshFiltering"));
+
+    minimumEdgeLengthCoeff_ = readScalar
+    (
+        filteringDict.lookup("minimumEdgeLengthCoeff")
+    );
+
 }
 
 
