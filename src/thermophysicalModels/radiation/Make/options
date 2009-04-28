@@ -1,9 +1,8 @@
 EXE_INC = \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/combustion/lnInclude \
-    -I$(LIB_SRC)/OpenFOAM/lnInclude \
-    -I radiationModel/fvDOM/interpolationLookUpTable
+    -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude
 
 LIB_LIBS = \
-    -lfiniteVolume
+    -lfiniteVolume \
+    -lbasicThermophysicalModels \
+    -lspecie
