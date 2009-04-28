@@ -327,6 +327,8 @@ public:
             //- Patch labels that are being adapted
             const labelList& adaptPatchIDs() const;
 
+            const dictionary& paramDict() const;
+
             //- Reference to displacement field
             pointVectorField& displacement();
 

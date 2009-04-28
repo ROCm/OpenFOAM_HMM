@@ -473,6 +473,7 @@ class autoLayerDriver
                 void shrinkMeshMedialDistance
                 (
                     motionSmoother& meshMover,
+                    const dictionary& meshQualityDict,
                     const label nSmoothThickness,
                     const scalar maxThicknessToMedialRatio,
                     const label nAllowableErrors,

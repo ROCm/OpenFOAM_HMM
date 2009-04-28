@@ -390,7 +390,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     // slightly towards the cell-centre.
     if (trackFraction < SMALL)
     {
-        position_ += 1.0e-6*(mesh.cellCentres()[celli_] - position_);
+        position_ += 1.0e-3*(mesh.cellCentres()[celli_] - position_);
     }
 
     return trackFraction;
