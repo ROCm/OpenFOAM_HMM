@@ -28,32 +28,87 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::featureEdgeMesh::featurePoint(label ptI) const
+inline Foam::label Foam::featureEdgeMesh::convexStart() const
+{
+    return convexStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::concaveStart() const
+{
+	return concaveStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::mixedStart() const
+{
+	return mixedStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::nonFeatureStart() const
+{
+	return nonFeatureStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::externalStart() const
+{
+	return externalStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::internalStart() const
+{
+	return internalStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::flatStart() const
+{
+	return flatStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::openStart() const
+{
+	return openStart_;
+}
+
+
+inline Foam::label Foam::featureEdgeMesh::multipleStart() const
+{
+	return multipleStart_;
+}
+
+
+inline bool Foam::featureEdgeMesh::featurePoint(label ptI) const
 {
     return ptI < nonFeatureStart_;
 }
 
 
-const Foam::vectorField& Foam::featureEdgeMesh::normals() const
+inline const Foam::vectorField& Foam::featureEdgeMesh::normals() const
 {
     return normals_;
 }
 
-const Foam::vectorField& Foam::featureEdgeMesh::edgeDirections() const
+inline const Foam::vectorField& Foam::featureEdgeMesh::edgeDirections() const
 {
     return edgeDirections_;
 }
 
 
-const Foam::labelListList& Foam::featureEdgeMesh::edgeNormals() const
+inline const Foam::labelListList& Foam::featureEdgeMesh::edgeNormals() const
 {
     return edgeNormals_;
 }
 
 
-Foam::vectorField Foam::featureEdgeMesh::edgeNormals
+inline Foam::vectorField Foam::featureEdgeMesh::edgeNormals
 (
-    const labelList& edgeNormIs) const
+    const labelList& edgeNormIs
+) const
 {
     vectorField norms(edgeNormIs.size());
 
@@ -66,19 +121,23 @@ Foam::vectorField Foam::featureEdgeMesh::edgeNormals
 }
 
 
-Foam::vectorField Foam::featureEdgeMesh::edgeNormals(label edgeI) const
+inline Foam::vectorField Foam::featureEdgeMesh::edgeNormals(label edgeI) const
 {
     return edgeNormals(edgeNormals_[edgeI]);
 }
 
 
-const Foam::labelListList& Foam::featureEdgeMesh::featurePointNormals() const
+inline const Foam::labelListList&
+Foam::featureEdgeMesh::featurePointNormals() const
 {
     return featurePointNormals_;
 }
 
 
-Foam::vectorField Foam::featureEdgeMesh::featurePointNormals(label ptI) const
+inline Foam::vectorField Foam::featureEdgeMesh::featurePointNormals
+(
+    label ptI
+) const
 {
     if (!featurePoint(ptI))
     {
@@ -103,13 +162,13 @@ Foam::vectorField Foam::featureEdgeMesh::featurePointNormals(label ptI) const
 }
 
 
-const Foam::labelList& Foam::featureEdgeMesh::regionEdges() const
+inline const Foam::labelList& Foam::featureEdgeMesh::regionEdges() const
 {
     return regionEdges_;
 }
 
 
-Foam::featureEdgeMesh::pointStatus Foam::featureEdgeMesh::getPointStatus
+inline Foam::featureEdgeMesh::pointStatus Foam::featureEdgeMesh::getPointStatus
 (
     label ptI
 ) const
@@ -133,7 +192,7 @@ Foam::featureEdgeMesh::pointStatus Foam::featureEdgeMesh::getPointStatus
 }
 
 
-Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::getEdgeStatus
+inline Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::getEdgeStatus
 (
     label edgeI
 ) const

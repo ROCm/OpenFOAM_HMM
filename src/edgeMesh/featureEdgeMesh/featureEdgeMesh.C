@@ -50,6 +50,13 @@ Foam::scalar Foam::featureEdgeMesh::cosNormalAngleTol_ = Foam::cos
     0.1*mathematicalConstant::pi/180.0
 );
 
+
+Foam::label Foam::featureEdgeMesh::convexStart_ = 0;
+
+
+Foam::label Foam::featureEdgeMesh::externalStart_ = 0;
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
@@ -709,6 +716,8 @@ void Foam::featureEdgeMesh::writeObj
 {
     Pout<< nl << "Writing featureEdgeMesh components to " << prefix << endl;
 
+    label verti = 0;
+
     primitiveEdgeMesh::writeObj(prefix + "_edgeMesh.obj");
 
     OFstream convexFtPtStr(prefix + "_convexFeaturePts.obj");
@@ -736,10 +745,29 @@ void Foam::featureEdgeMesh::writeObj
         meshTools::writeOBJ(mixedFtPtStr, points()[i]);
     }
 
+    OFstream mixedFtPtStructureStr(prefix + "_mixedFeaturePtsStructure.obj");
+    Pout<< "Writing mixed feature point structure to "
+        << mixedFtPtStructureStr.name() << endl;
+
+    verti = 0;
+    for(label i = mixedStart_; i < nonFeatureStart_; i++)
+    {
+        const labelList& ptEds = pointEdges()[i];
+
+        forAll(ptEds, j)
+        {
+            const edge& e = edges()[ptEds[j]];
+
+            meshTools::writeOBJ(mixedFtPtStructureStr, points()[e[0]]); verti++;
+            meshTools::writeOBJ(mixedFtPtStructureStr, points()[e[1]]); verti++;
+            mixedFtPtStructureStr << "l " << verti-1 << ' ' << verti << endl;
+        }
+    }
+
     OFstream externalStr(prefix + "_externalEdges.obj");
     Pout<< "Writing external edges to " << externalStr.name() << endl;
 
-    label verti = 0;
+    verti = 0;
     for (label i = 0; i < internalStart_; i++)
     {
         const edge& e = edges()[i];

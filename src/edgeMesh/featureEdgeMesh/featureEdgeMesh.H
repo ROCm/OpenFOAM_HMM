@@ -107,6 +107,12 @@ private:
         //- Angular closeness tolerance for treating normals as the same
         static scalar cosNormalAngleTol_;
 
+        //- Index of the start of the convex feature points - static as 0
+        static label convexStart_;
+
+        //- Index of the start of the convex feature points - static as 0
+        static label externalStart_;
+
 
     // Private data
 
@@ -236,6 +242,34 @@ public:
             ) const;
 
         // Access
+
+            //- Return the index of the start of the convex feature points
+            inline label convexStart() const;
+
+            //- Return the index of the start of the concave feature points
+            inline label concaveStart() const;
+
+            //- Return the index of the start of the mixed type feature points
+            inline label mixedStart() const;
+
+            //- Return the index of the start of the non-feature points
+            inline label nonFeatureStart() const;
+
+            //- Return the index of the start of the external feature edges
+            inline label externalStart() const;
+
+            //- Return the index of the start of the internal feature edges
+            inline label internalStart() const;
+
+            //- Return the index of the start of the flat feature edges
+            inline label flatStart() const;
+
+            //- Return the index of the start of the open feature edges
+            inline label openStart() const;
+
+            //- Return the index of the start of the multiply-connected feature
+            //  edges
+            inline label multipleStart() const;
 
             //- Return whether or not the point index is a feature point
             inline bool featurePoint(label ptI) const;

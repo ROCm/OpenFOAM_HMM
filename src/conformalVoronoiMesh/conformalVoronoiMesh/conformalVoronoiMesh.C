@@ -168,20 +168,118 @@ void Foam::conformalVoronoiMesh::conformToFeaturePoints()
 
     insertMixedFeaturePoints();
 
-    Info<< "   Conforming to " << "XXX" << " feature locations" << nl
-        << "   Inserting " << "YYY" << " points" << endl;
+    Info<< "   Inserted " << number_of_vertices() << " vertices" << endl;
+
+    featureVertices_.setSize(number_of_vertices());
+
+    label featPtI = 0;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        featureVertices_[featPtI] = Vb(vit->point());
+
+        featureVertices_[featPtI].index() = vit->index();
+
+        featureVertices_[featPtI].type() = vit->type();
+
+        featPtI++;
+    }
+
+    writePoints("featureVertices.obj", false);
 }
 
 
 void Foam::conformalVoronoiMesh::insertConvexFeaturesPoints()
 {
+    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
 
+    forAll(feMeshes, i)
+    {
+        const featureEdgeMesh& feMesh(feMeshes[i]);
+
+        for
+        (
+            label pI = feMesh.convexStart();
+            pI < feMesh.concaveStart();
+            pI++
+        )
+        {
+            vectorField featPtNormals = feMesh.featurePointNormals(pI);
+
+            const point& featPt = feMesh.points()[pI];
+
+            vector cornerNormal = sum(featPtNormals);
+            cornerNormal /= mag(cornerNormal);
+
+            point internalPt =  featPt - pointPairDistance(featPt)*cornerNormal;
+
+            label internalPtIndex =
+                insertPoint(internalPt, number_of_vertices() + 1);
+
+            forAll (featPtNormals, nI)
+            {
+                const vector& n = featPtNormals[nI];
+
+                plane planeN = plane(featPt, n);
+
+                point externalPt =
+                    internalPt + 2.0 * planeN.distance(internalPt) * n;
+
+                insertPoint(externalPt, internalPtIndex);
+            }
+        }
+    }
 }
 
 
 void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 {
+    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
 
+    forAll(feMeshes, i)
+    {
+        const featureEdgeMesh& feMesh(feMeshes[i]);
+
+        for
+        (
+            label pI = feMesh.concaveStart();
+            pI < feMesh.mixedStart();
+            pI++
+        )
+        {
+            vectorField featPtNormals = feMesh.featurePointNormals(pI);
+
+            const point& featPt = feMesh.points()[pI];
+
+            vector cornerNormal = sum(featPtNormals);
+            cornerNormal /= mag(cornerNormal);
+
+            point externalPt = featPt + pointPairDistance(featPt)*cornerNormal;
+
+            label externalPtIndex = number_of_vertices() + featPtNormals.size();
+
+            label internalPtIndex = -1;
+
+            forAll (featPtNormals, nI)
+            {
+                const vector& n = featPtNormals[nI];
+
+                plane planeN = plane(featPt, n);
+
+                point internalPt =
+                    externalPt - 2.0 * planeN.distance(externalPt) * n;
+
+                internalPtIndex = insertPoint(internalPt, externalPtIndex);
+            }
+
+            insertPoint(externalPt,internalPtIndex);
+        }
+    }
 }
 
 

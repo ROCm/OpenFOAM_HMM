@@ -48,6 +48,7 @@ SourceFiles
 #include "DynamicList.H"
 #include "Time.H"
 #include "polyMesh.H"
+#include "plane.H"
 #include "SortableList.H"
 #include "meshTools.H"
 #include "triSurfaceTools.H"
