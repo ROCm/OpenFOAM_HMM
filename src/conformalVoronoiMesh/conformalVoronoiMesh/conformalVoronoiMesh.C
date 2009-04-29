@@ -285,13 +285,16 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 
 void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 {
-
+    Info<< "    Mixed feature points not implemented." << endl;
 }
 
 
 void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
 {
-
+    forAll(featureVertices_, f)
+    {
+        insertVb(featureVertices_[f]);
+    }
 }
 
 
@@ -1126,6 +1129,14 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         );
 
     }
+}
+
+
+void Foam::conformalVoronoiMesh::move()
+{
+    scalar relaxation = relaxationModel_->relaxation();
+
+    Info<< nl << "   Relaxation = " << relaxation << endl;
 }
 
 

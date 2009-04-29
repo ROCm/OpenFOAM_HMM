@@ -59,16 +59,18 @@ scalar adaptiveLinear::relaxation()
 {
     if (cvMesh_.time().timeOutputValue() > lastTimeValue_)
     {
-        relaxation_ -= (relaxation_ - relaxationEnd_)
-        /max
-        (
+        relaxation_ -=
+        (relaxation_ - relaxationEnd_)
+       /(
             (
                 cvMesh_.time().endTime().value()
               - cvMesh_.time().timeOutputValue()
             )
-           /cvMesh_.time().deltaT().value(),
-            1
+           /(cvMesh_.time().timeOutputValue() - lastTimeValue_)
+          + 1
         );
+
+        lastTimeValue_ = cvMesh_.time().timeOutputValue();
     }
 
     return relaxation_;

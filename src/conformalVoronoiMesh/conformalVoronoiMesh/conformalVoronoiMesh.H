@@ -228,6 +228,9 @@ public:
         //- Insert the necessary point pairs to conform to the surface
         void conformToSurface();
 
+        //- Move the vertices
+        void move();
+
         //- Conversion functions between point (OpenFOAM) and Point (CGAL)
 
 #       ifdef CGAL_INEXACT

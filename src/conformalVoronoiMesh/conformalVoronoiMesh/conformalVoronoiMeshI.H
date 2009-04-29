@@ -125,6 +125,28 @@ inline void Foam::conformalVoronoiMesh::insertPointPair
 }
 
 
+inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v)
+{
+    const Point& Pt(v.point());
+
+    uint nVert = number_of_vertices();
+
+    Vertex_handle vh = insert(Pt);
+
+    if (nVert == number_of_vertices())
+    {
+        FatalErrorIn("Foam::conformalVoronoiMesh::insertVb(const Vb& v")
+            << "Failed to reinsert Vb at " << topoint(Pt)
+            << endl;
+    }
+    else
+    {
+        vh->index() = v.index();
+        vh->type() = v.type();
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 #ifdef CGAL_INEXACT

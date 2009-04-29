@@ -59,10 +59,12 @@ int main(int argc, char *argv[])
 
     while (runTime.run())
     {
-        runTime++;
-
         Info<< nl << "Time = " << runTime.timeName()
             << endl;
+
+        mesh.move();
+
+        runTime++;
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
