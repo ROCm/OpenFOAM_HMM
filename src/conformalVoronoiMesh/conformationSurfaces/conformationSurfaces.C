@@ -370,7 +370,7 @@ void Foam::conformationSurfaces::findSurfaceNearestAndNormal
 void Foam::conformationSurfaces::findSurfaceNearestAndNormal
 (
     const pointField& samples,
-    scalarField nearestDistSqr,
+    const scalarField& nearestDistSqr,
     List<pointIndexHit>& hitInfo,
     vectorField& normals
 ) const
@@ -416,21 +416,46 @@ void Foam::conformationSurfaces::findSurfaceNearestAndNormal
 
 void Foam::conformationSurfaces::findEdgeNearest
 (
-    const pointField& samples,
-    const scalarField& nearestDistSqr
+    const point& sample,
+    scalar nearestDistSqr,
+    pointIndexHit& edgeHit,
+    label& featureHit
 ) const
 {
+    pointField samples(1, sample);
+    scalarField nearestDistsSqr(1, nearestDistSqr);
 
-    labelList nearestSurfaces;
-    List<pointIndexHit> nearestInfo;
+    List<pointIndexHit> edgeHits;
+    labelList featuresHit;
 
+    findEdgeNearest
+    (
+        samples,
+        nearestDistsSqr,
+        edgeHits,
+        featuresHit
+    );
+
+    edgeHit = edgeHits[0];
+    featureHit = featuresHit[0];
+}
+
+
+void Foam::conformationSurfaces::findEdgeNearest
+(
+    const pointField& samples,
+    const scalarField& nearestDistsSqr,
+    List<pointIndexHit>& edgeHits,
+    labelList& featuresHit
+) const
+{
     // Initialise
-    nearestSurfaces.setSize(samples.size());
-    nearestSurfaces = -1;
-    nearestInfo.setSize(samples.size());
+    featuresHit.setSize(samples.size());
+    featuresHit = -1;
+    edgeHits.setSize(samples.size());
 
     // Work arrays
-    scalarField minDistSqr(nearestDistSqr);
+    scalarField minDistSqr(nearestDistsSqr);
     List<pointIndexHit> hitInfo(samples.size());
 
     forAll(features_, testI)
@@ -452,34 +477,11 @@ void Foam::conformationSurfaces::findEdgeNearest
                     hitInfo[pointI].hitPoint()
                   - samples[pointI]
                 );
-                nearestInfo[pointI] = hitInfo[pointI];
-                nearestSurfaces[pointI] = testI;
+                edgeHits[pointI] = hitInfo[pointI];
+                featuresHit[pointI] = testI;
             }
         }
     }
-
-    OFstream edgeNearestStr("testFindEdgeNearest.obj");
-    Pout<< "Writing edge nearest points to " << edgeNearestStr.name() << endl;
-
-    forAll(nearestInfo, i)
-    {
-        if (nearestInfo[i].hit())
-        {
-            meshTools::writeOBJ(edgeNearestStr, nearestInfo[i].hitPoint());
-        }
-    }
-
-    // labelList& edgeLabel;
-    // pointField& edgePoint;
-    // List<vectorField>& adjacentNormals;
-
-    // edgeLabel.setSize(samples.size());
-    // edgePoint.setSize(samples.size());
-    // adjacentNormals.setSize(samples.size());
-
-    // edgeLabel[i] = pHit.index();
-    // edgePoint[i] = pHit.hitPoint();
-    // adjacentNormals[i] = edgeNormals(edgeLabel[i]);
 }
 
 

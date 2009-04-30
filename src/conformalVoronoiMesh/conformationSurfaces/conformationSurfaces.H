@@ -166,17 +166,28 @@ public:
 
             void findSurfaceNearestAndNormal
             (
-                const pointField& sample,
-                scalarField nearestDistSqr,
-                List<pointIndexHit>& pHit,
-                vectorField& normal
+                const pointField& samples,
+                const scalarField& nearestDistSqr,
+                List<pointIndexHit>& hitInfo,
+                vectorField& normals
             ) const;
+
 
             //- Find the nearest point on any feature edge
             void findEdgeNearest
             (
+                const point& sample,
+                scalar nearestDistSqr,
+                pointIndexHit& edgeHit,
+                label& featureHit
+            ) const;
+
+            void findEdgeNearest
+            (
                 const pointField& samples,
-                const scalarField& nearestDistSqr
+                const scalarField& nearestDistsSqr,
+                List<pointIndexHit>& edgeHits,
+                labelList& featuresHit
             ) const;
 
         // Write

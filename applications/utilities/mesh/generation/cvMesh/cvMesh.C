@@ -66,12 +66,12 @@ int main(int argc, char *argv[])
 
         runTime++;
 
-        Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
-            << nl << endl;
+            << endl;
     }
 
-    Info << nl << "End\n" << endl;
+    Info<< nl << "End\n" << endl;
 
     return 0;
 }

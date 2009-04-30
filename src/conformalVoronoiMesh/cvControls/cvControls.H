@@ -130,6 +130,9 @@ public:
             //- Return the surfaceSearchDistanceCoeff
             inline scalar surfaceSearchDistanceCoeff() const;
 
+            //- Return the maxQuadAngle
+            inline scalar maxQuadAngle() const;
+
             //- Return the minimumEdgeLengthCoeff
             inline scalar minimumEdgeLengthCoeff() const;
 

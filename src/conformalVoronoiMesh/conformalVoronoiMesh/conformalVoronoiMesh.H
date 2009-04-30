@@ -160,6 +160,50 @@ class conformalVoronoiMesh
             const fileName fName = fileName::null
         );
 
+        //- Insert groups of points to conform to an edge given a list of
+        //  pointIndexHits specifying the location and edge index of the point
+        //  to be conformed to on the corresponding entry in featureHit
+        void insertEdgePointGroups
+        (
+            const List<pointIndexHit>& edgeHits,
+            const labelList& featuresHit
+        );
+
+        //- Insert points to conform to an external edge
+        void insertExternalEdgePointGroup
+        (
+            const featureEdgeMesh& feMesh,
+            const pointIndexHit& edHit
+        );
+
+        //- Insert points to conform to an internal edge
+        void insertInternalEdgePointGroup
+        (
+            const featureEdgeMesh& feMesh,
+            const pointIndexHit& edHit
+        );
+
+        //- Insert points to conform to a flat edge
+        void insertFlatEdgePointGroup
+        (
+            const featureEdgeMesh& feMesh,
+            const pointIndexHit& edHit
+        );
+
+        //- Insert points to conform to an open edge
+        void insertOpenEdgePointGroup
+        (
+            const featureEdgeMesh& feMesh,
+            const pointIndexHit& edHit
+        );
+
+        //- Insert points to conform to multiply connected edge
+        void insertMultipleEdgePointGroup
+        (
+            const featureEdgeMesh& feMesh,
+            const pointIndexHit& edHit
+        );
+
         //- Insert point groups at the feature points.
         void conformToFeaturePoints();
 

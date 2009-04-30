@@ -51,6 +51,13 @@ inline Foam::scalar Foam::cvControls::surfaceSearchDistanceCoeff() const
     return surfaceSearchDistanceCoeff_;
 }
 
+
+inline Foam::scalar Foam::cvControls::maxQuadAngle() const
+{
+    return maxQuadAngle_;
+}
+
+
 inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
 {
     return minimumEdgeLengthCoeff_;

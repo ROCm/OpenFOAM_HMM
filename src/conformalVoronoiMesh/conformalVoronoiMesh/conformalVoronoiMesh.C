@@ -134,7 +134,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
     {
         FatalErrorIn("Foam::conformalVoronoiMesh::insertPointPairs")
             << "surfacePpDist, surfacePoints and surfaceNormals are not "
-            << "the same size. Sizes"
+            << "the same size. Sizes "
             << surfacePpDist.size() << ' '
             << surfacePoints.size() << ' '
             << surfaceNormals.size()
@@ -155,6 +155,189 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
     {
         writePoints(fName, surfacePoints);
     }
+}
+
+
+void Foam::conformalVoronoiMesh::insertEdgePointGroups
+(
+    const List<pointIndexHit>& edgeHits,
+    const labelList& featuresHit
+)
+{
+    if (edgeHits.size() != featuresHit.size())
+    {
+        FatalErrorIn("Foam::conformalVoronoiMesh::insertEdgePointGroups")
+            << "edgeHits and featuresHit are not the same size. Sizes "
+            << edgeHits.size() << ' '
+            << featuresHit.size()
+            << exit(FatalError);
+    }
+
+    forAll(edgeHits, i)
+    {
+        const featureEdgeMesh& feMesh
+        (
+            geometryToConformTo_.features()[featuresHit[i]]
+        );
+
+        label edgeI = edgeHits[i].index();
+
+        featureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
+
+        if (edStatus == featureEdgeMesh::EXTERNAL)
+        {
+            insertExternalEdgePointGroup(feMesh, edgeHits[i]);
+        }
+        else if (edStatus == featureEdgeMesh::INTERNAL)
+        {
+            insertInternalEdgePointGroup(feMesh, edgeHits[i]);
+        }
+        else if (edStatus == featureEdgeMesh::FLAT)
+        {
+            insertFlatEdgePointGroup(feMesh, edgeHits[i]);
+        }
+        else if (edStatus == featureEdgeMesh::OPEN)
+        {
+            insertOpenEdgePointGroup(feMesh, edgeHits[i]);
+        }
+        else if (edStatus == featureEdgeMesh::MULTIPLE)
+        {
+            insertMultipleEdgePointGroup(feMesh, edgeHits[i]);
+        }
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
+(
+    const featureEdgeMesh& feMesh,
+    const pointIndexHit& edHit
+)
+{
+    const point& edgePt = edHit.hitPoint();
+
+    scalar ppDist = pointPairDistance(edgePt);
+
+    const vectorField& feNormals = feMesh.normals();
+    const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
+
+    // As this is an external edge, there are two normals by definition
+    const vector& nA = feNormals[edNormalIs[0]];
+    const vector& nB = feNormals[edNormalIs[1]];
+
+    // Convex. So refPt will be inside domain and hence a master point
+    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB));
+
+    // Insert the master point referring the the first slave
+    label masterPtIndex = insertPoint(refPt, number_of_vertices() + 1);
+
+    // Insert the slave points by reflecting refPt in both faces.
+    // with each slave refering to the master
+
+    point reflectedA = refPt + 2*ppDist*nA;
+    insertPoint(reflectedA, masterPtIndex);
+
+    point reflectedB = refPt + 2*ppDist*nB;
+    insertPoint(reflectedB, masterPtIndex);
+}
+
+
+void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
+(
+    const featureEdgeMesh& feMesh,
+    const pointIndexHit& edHit
+)
+{
+    const point& edgePt = edHit.hitPoint();
+
+    scalar ppDist = pointPairDistance(edgePt);
+
+    const vectorField& feNormals = feMesh.normals();
+    const labelList& edNormalIs = feMesh.edgeNormals()[edHit.index()];
+
+    // As this is an external edge, there are two normals by definition
+    const vector& nA = feNormals[edNormalIs[0]];
+    const vector& nB = feNormals[edNormalIs[1]];
+
+    // Concave. master and reflected points inside the domain.
+    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB));
+
+    // Generate reflected master to be outside.
+    point reflMasterPt = edgePt + 2*(edgePt - refPt);
+
+    // Reflect reflMasterPt in both faces.
+    point reflectedA = reflMasterPt - 2*ppDist*nA;
+
+    point reflectedB = reflMasterPt - 2*ppDist*nB;
+
+    scalar totalAngle =
+        180*(mathematicalConstant::pi + acos(mag(nA & nB)))
+       /mathematicalConstant::pi;
+
+    // Number of quadrants the angle should be split into
+    int nQuads = int(totalAngle/cvMeshControls_.maxQuadAngle()) + 1;
+
+    // The number of additional master points needed to obtain the
+    // required number of quadrants.
+    int nAddPoints = min(max(nQuads - 2, 0), 2);
+
+    // index of reflMaster
+    label reflectedMaster = number_of_vertices() + 2 + nAddPoints;
+
+    // Master A is inside.
+    label reflectedAI = insertPoint(reflectedA, reflectedMaster);
+
+    // Master B is inside.
+    insertPoint(reflectedB, reflectedMaster);
+
+    if (nAddPoints == 1)
+    {
+        // One additinal point is the reflection of the slave point,
+        // i.e. the original reference point
+        insertPoint(refPt, reflectedMaster);
+    }
+    else if (nAddPoints == 2)
+    {
+        point reflectedAa = refPt + ppDist*nB;
+        insertPoint(reflectedAa, reflectedMaster);
+
+        point reflectedBb = refPt + ppDist*nA;
+        insertPoint(reflectedBb, reflectedMaster);
+    }
+
+    // Slave is outside.
+    insertPoint(reflMasterPt, reflectedAI);
+}
+
+
+void Foam::conformalVoronoiMesh::insertFlatEdgePointGroup
+(
+    const featureEdgeMesh& feMesh,
+    const pointIndexHit& edHit
+)
+{
+    Info<< "    NOT INSERTING FLAT EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
+}
+
+
+void Foam::conformalVoronoiMesh::insertOpenEdgePointGroup
+(
+    const featureEdgeMesh& feMesh,
+    const pointIndexHit& edHit
+)
+{
+    Info<< "    NOT INSERTING OPEN EDGE POINT GROUP, NOT IMPLEMENTED" << endl;
+}
+
+
+void Foam::conformalVoronoiMesh::insertMultipleEdgePointGroup
+(
+    const featureEdgeMesh& feMesh,
+    const pointIndexHit& edHit
+)
+{
+    Info<< "    NOT INSERTING MULTIPLE EDGE POINT GROUP, NOT IMPLEMENTED"
+        << endl;
 }
 
 
@@ -1020,9 +1203,13 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     startOfSurfacePointPairs_ = number_of_vertices();
 
+    Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
+    scalar edgeSearchDistCoeffSqr = sqr(1.25);
+    scalar surfacePtReplaceDistCoeffSqr = sqr(0.3);
+
     // Surface protrusion conformation
 
-    label nIterations = 1;
+    label nIterations = 2;
 
     for(label iterationNo = 0; iterationNo < nIterations; iterationNo++)
     {
@@ -1030,6 +1217,10 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         DynamicList<scalar> surfaceSearchDistSqr;
         DynamicList<point> surfacePoints;
         DynamicList<vector> surfaceNormals;
+
+        DynamicList<pointIndexHit> featureEdgeHits;
+        DynamicList<label> featureEdgeFeaturesHit;
+        DynamicList<point> tmpFeatureEdgePoints;
 
         for
         (
@@ -1043,18 +1234,18 @@ void Foam::conformalVoronoiMesh::conformToSurface()
             {
                 point vert(topoint(vit->point()));
                 scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
-                pointIndexHit pHit;
+                pointIndexHit surfHit;
                 vector normal;
 
                 geometryToConformTo_.findSurfaceNearestAndNormal
                 (
                     vert,
                     searchDistanceSqr,
-                    pHit,
+                    surfHit,
                     normal
                 );
 
-                if (pHit.hit())
+                if (surfHit.hit())
                 {
                     vit->setNearBoundary();
 
@@ -1064,10 +1255,49 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                         // edge, shift it to being an edge control point
                         // instead, this will prevent "pits" forming.
 
-                        surfacePpDist.append(pointPairDistance(vert));
-                        surfaceSearchDistSqr.append(searchDistanceSqr);
-                        surfacePoints.append(pHit.hitPoint());
-                        surfaceNormals.append(normal);
+                        pointIndexHit edHit;
+                        label featureHit;
+
+                        scalar targetCellSizeSqr = sqr(targetCellSize(vert));
+
+                        geometryToConformTo_.findEdgeNearest
+                        (
+                            surfHit.hitPoint(),
+                            edgeSearchDistCoeffSqr*targetCellSizeSqr,
+                            edHit,
+                            featureHit
+                        );
+
+                        bool keepSurfacePoint = true;
+
+                        if (edHit.hit())
+                        {
+                            // Note that edge type classification can be used
+                            // here if necessary, i.e to avoid over-populating
+                            // internal edges
+
+                            featureEdgeHits.append(edHit);
+                            featureEdgeFeaturesHit.append(featureHit);
+
+                            tmpFeatureEdgePoints.append(edHit.hitPoint());
+
+                            if
+                            (
+                                magSqr(edHit.hitPoint() - surfHit.hitPoint())
+                              < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
+                            )
+                            {
+                                keepSurfacePoint = false;
+                            }
+                        }
+
+                        if (keepSurfacePoint)
+                        {
+                            surfacePpDist.append(pointPairDistance(vert));
+                            surfaceSearchDistSqr.append(searchDistanceSqr);
+                            surfacePoints.append(surfHit.hitPoint());
+                            surfaceNormals.append(normal);
+                        }
                     }
                 }
             }
@@ -1075,7 +1305,9 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
         Info<< nl <<"    iterationNo " << iterationNo << nl
             << "    number_of_vertices " << number_of_vertices() << nl
-            << "    surfacePoints.size() " << surfacePoints.size() << endl;
+            << "    surfacePoints.size() " << surfacePoints.size() << nl
+            << "    featureEdgeHits.size() " << featureEdgeHits.size()
+            << endl;
 
         insertSurfacePointPairs
         (
@@ -1088,46 +1320,17 @@ void Foam::conformalVoronoiMesh::conformToSurface()
             )
         );
 
-        // Feature edge conformation.
-
-        geometryToConformTo_.findEdgeNearest
+        insertEdgePointGroups
         (
-            pointField(surfacePoints),
-            scalarField(surfaceSearchDistSqr)
+            featureEdgeHits,
+            featureEdgeFeaturesHit
         );
-
-        // After the surface conformation points are added, any points that are
-        // still protruding the surface may be protruding from edges, so
-        // identify the points and test if they are close to a feature edge
-
-        DynamicList<point> edgeGenerationPoints;
-
-        for
-        (
-            Triangulation::Finite_vertices_iterator vit =
-            finite_vertices_begin();
-            vit != finite_vertices_end();
-            vit++
-        )
-        {
-            if (vit->nearBoundary())
-            {
-                if (dualCellSurfaceIntersection(vit))
-                {
-                    // Test to see if near to an edge, conform to the nearest
-                    // point on that edge if so.
-
-                    edgeGenerationPoints.append(topoint(vit->point()));
-                }
-            }
-        }
 
         writePoints
         (
             "edgeGenerationLocations_" + name(iterationNo) + ".obj",
-            edgeGenerationPoints
+            tmpFeatureEdgePoints
         );
-
     }
 }
 
@@ -1137,6 +1340,8 @@ void Foam::conformalVoronoiMesh::move()
     scalar relaxation = relaxationModel_->relaxation();
 
     Info<< nl << "   Relaxation = " << relaxation << endl;
+
+    timeCheck();
 }
 
 
