@@ -29,7 +29,9 @@
 #     Makefile used to compile wmake utilities.
 #
 #------------------------------------------------------------------------------
-# Set shell the Makefile uses to the Bourne shell
+
+#------------------------------------------------------------------------------
+# The Makefile use a POSIX shell
 #------------------------------------------------------------------------------
 
 SHELL      = /bin/sh
@@ -44,6 +46,10 @@ SHELL      = /bin/sh
 RULES_DIR = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
 
 all:  $(RULES_DIR)/dirToString $(RULES_DIR)/wmkdep
+
+clean:
+	rm -f $(RULES_DIR)/dirToString $(RULES_DIR)/wmkdep 2>/dev/null
+
 
 $(RULES_DIR)/dirToString: dirToString.c
 	$(cc) $(cFLAGS) dirToString.c -o $(RULES_DIR)/dirToString
