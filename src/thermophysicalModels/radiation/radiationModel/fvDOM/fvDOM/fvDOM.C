@@ -250,6 +250,15 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             )
         );
     }
+
+    Info<< "fvDOM : Allocated " << IRay_.size()
+        << " rays with average orientation:" << nl;
+    forAll (IRay_, i)
+    {
+        Info<< '\t' << IRay_[i].I().name()
+            << '\t' << IRay_[i].dAve() << nl;
+    }
+    Info<< endl;
 }
 
 
@@ -359,7 +368,8 @@ void Foam::radiation::fvDOM::updateG()
     {
         IRay_[rayI].addIntensity();
         G_ += IRay_[rayI].I()*IRay_[rayI].omega();
-        Qr_ += IRay_[rayI].Qr();
+        //Qr_ += IRay_[rayI].Qr();
+        Qr_.boundaryField() += IRay_[rayI].Qr().boundaryField();
     }
 }
 
