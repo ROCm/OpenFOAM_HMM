@@ -132,7 +132,7 @@ bool Foam::triangleFuncs::intersectAxesBundle
         scalar beta = 0;
         bool inter = false;
 
-        if (Foam::mag(u1) < SMALL)
+        if (Foam::mag(u1) < ROOTVSMALL)
         {
             beta = u0/u2;
             if ((beta >= 0) && (beta <= 1))
