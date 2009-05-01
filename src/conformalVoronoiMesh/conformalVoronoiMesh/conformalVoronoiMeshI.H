@@ -62,6 +62,15 @@ inline Foam::scalar Foam::conformalVoronoiMesh::surfaceSearchDistanceSqr
 }
 
 
+inline Foam::scalar Foam::conformalVoronoiMesh::maxSurfaceProtrusion
+(
+    const point& pt
+) const
+{
+    return targetCellSize(pt)*cvMeshControls_.maxSurfaceProtrusionCoeff();
+}
+
+
 inline Foam::scalar Foam::conformalVoronoiMesh::minimumEdgeLength
 (
     const point& pt

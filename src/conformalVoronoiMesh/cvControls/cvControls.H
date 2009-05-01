@@ -70,6 +70,11 @@ class cvControls
             //  target cell size
             scalar surfaceSearchDistanceCoeff_;
 
+            //- Maximum allowable protrusion through the surface before
+            //  conformation points are added - fraction of the local target
+            //  cell size
+            scalar maxSurfaceProtrusionCoeff_;
+
             //- Maximum quadrant angle allowed at a concave edge before
             //  additional "mitering" lines are added
             scalar maxQuadAngle_;
@@ -129,6 +134,9 @@ public:
 
             //- Return the surfaceSearchDistanceCoeff
             inline scalar surfaceSearchDistanceCoeff() const;
+
+            //- Return the maxSurfaceProtrusionCoeff
+            inline scalar maxSurfaceProtrusionCoeff() const;
 
             //- Return the maxQuadAngle
             inline scalar maxQuadAngle() const;

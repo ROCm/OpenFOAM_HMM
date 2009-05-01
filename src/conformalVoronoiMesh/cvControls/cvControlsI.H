@@ -52,6 +52,12 @@ inline Foam::scalar Foam::cvControls::surfaceSearchDistanceCoeff() const
 }
 
 
+inline Foam::scalar Foam::cvControls::maxSurfaceProtrusionCoeff() const
+{
+    return maxSurfaceProtrusionCoeff_;
+}
+
+
 inline Foam::scalar Foam::cvControls::maxQuadAngle() const
 {
     return maxQuadAngle_;

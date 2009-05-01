@@ -154,22 +154,32 @@ public:
             // Finding if the line joining start and end intersects the surface
             bool findSurfaceAnyIntersection(point start, point end) const;
 
+            //- Finding if the line joining start and end intersects the surface
+            //  and returning the hit and surface information
+            void findSurfaceAnyIntersection
+            (
+                point start,
+                point end,
+                pointIndexHit& surfHit,
+                label& hitSurface
+            ) const;
+
             //- Find the nearest point to the sample and return it to the
             //  pointIndexHit, and the normal at the hit location, if found.
-            void findSurfaceNearestAndNormal
+            void findSurfaceNearest
             (
                 const point& sample,
                 scalar nearestDistSqr,
-                pointIndexHit& pHit,
-                vector& normal
+                pointIndexHit& surfHit,
+                label& hitSurface
             ) const;
 
-            void findSurfaceNearestAndNormal
+            void findSurfaceNearest
             (
                 const pointField& samples,
                 const scalarField& nearestDistSqr,
                 List<pointIndexHit>& hitInfo,
-                vectorField& normals
+                labelList& hitSurfaces
             ) const;
 
 

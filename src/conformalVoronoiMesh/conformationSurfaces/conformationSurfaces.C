@@ -329,16 +329,50 @@ bool Foam::conformationSurfaces::findSurfaceAnyIntersection
 }
 
 
-void Foam::conformationSurfaces::findSurfaceNearestAndNormal
+void Foam::conformationSurfaces::findSurfaceAnyIntersection
 (
-    const point& sample,
-    scalar nearestDistSqr,
-    pointIndexHit& pHit,
-    vector& normal
+    point start,
+    point end,
+    pointIndexHit& surfHit,
+    label& hitSurface
 ) const
 {
     labelList hitSurfaces;
     List<pointIndexHit> hitInfo;
+
+    searchableSurfacesQueries::findAnyIntersection
+    (
+        allGeometry_,
+        surfaces_,
+        pointField(1, start),
+        pointField(1, end),
+        hitSurfaces,
+        hitInfo
+    );
+
+    surfHit = hitInfo[0];
+
+    if (surfHit.hit())
+    {
+        // hitSurfaces has returned the index of the entry in surfaces_ that was
+        // found, not the index of the surface in allGeometry_, translating this
+        // to allGeometry_
+
+        hitSurface = surfaces_[hitSurfaces[0]];
+    }
+}
+
+
+void Foam::conformationSurfaces::findSurfaceNearest
+(
+    const point& sample,
+    scalar nearestDistSqr,
+    pointIndexHit& surfHit,
+    label& hitSurface
+) const
+{
+    labelList hitSurfaces;
+    List<pointIndexHit> surfaceHits;
 
     searchableSurfacesQueries::findNearest
     (
@@ -347,36 +381,30 @@ void Foam::conformationSurfaces::findSurfaceNearestAndNormal
         pointField(1, sample),
         scalarField(1, nearestDistSqr),
         hitSurfaces,
-        hitInfo
+        surfaceHits
     );
 
-    pHit = hitInfo[0];
+    surfHit = surfaceHits[0];
 
-    if (pHit.hit())
+    if (surfHit.hit())
     {
-        vectorField normals;
-
         // hitSurfaces has returned the index of the entry in surfaces_ that was
         // found, not the index of the surface in allGeometry_, translating this
-        // on access to allGeometry_ for the normal lookup.
+        // to allGeometry_
 
-        allGeometry_[surfaces_[hitSurfaces[0]]].getNormal(hitInfo, normals);
-
-        normal = normals[0];
+        hitSurface = surfaces_[hitSurfaces[0]];
     }
 }
 
 
-void Foam::conformationSurfaces::findSurfaceNearestAndNormal
+void Foam::conformationSurfaces::findSurfaceNearest
 (
     const pointField& samples,
     const scalarField& nearestDistSqr,
-    List<pointIndexHit>& hitInfo,
-    vectorField& normals
+    List<pointIndexHit>& surfaceHits,
+    labelList& hitSurfaces
 ) const
 {
-    labelList hitSurfaces;
-
     searchableSurfacesQueries::findNearest
     (
         allGeometry_,
@@ -384,31 +412,18 @@ void Foam::conformationSurfaces::findSurfaceNearestAndNormal
         samples,
         nearestDistSqr,
         hitSurfaces,
-        hitInfo
+        surfaceHits
     );
 
-    forAll(hitInfo, i)
+    forAll(surfaceHits, i)
     {
-        const pointIndexHit& pHit(hitInfo[i]);
-
-        if (pHit.hit())
+        if (surfaceHits[i].hit())
         {
             // hitSurfaces has returned the index of the entry in surfaces_ that
             // was found, not the index of the surface in allGeometry_,
-            // translating this to the surface in allGeometry_ for the normal
-            // lookup.
+            // translating this to the surface in allGeometry_.
 
             hitSurfaces[i] = surfaces_[hitSurfaces[i]];
-
-            vectorField norm(1);
-
-            allGeometry_[hitSurfaces[i]].getNormal
-            (
-                List<pointIndexHit>(1, pHit),
-                norm
-            );
-
-            normals[i] = norm[0];
         }
     }
 }

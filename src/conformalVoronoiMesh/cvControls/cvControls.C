@@ -51,18 +51,17 @@ Foam::cvControls::cvControls
         surfDict.lookup("surfaceSearchDistanceCoeff")
     );
 
-    maxQuadAngle_= readScalar
+    maxSurfaceProtrusionCoeff_ = readScalar
     (
-        surfDict.lookup("maxQuadAngle")
+        surfDict.lookup("maxSurfaceProtrusionCoeff")
     );
+
+    maxQuadAngle_= readScalar(surfDict.lookup("maxQuadAngle"));
 
     // Motion control controls
     const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
 
-    defaultCellSize_ = readScalar
-    (
-        motionDict.lookup("defaultCellSize")
-    );
+    defaultCellSize_ = readScalar(motionDict.lookup("defaultCellSize"));
 
     const dictionary& insertionDict
     (

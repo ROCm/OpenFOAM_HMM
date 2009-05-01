@@ -66,6 +66,8 @@ std::vector<Vb::Point> pointFile::initialPoints() const
         )
     );
 
+    Info<< "    Inserting points from file " << pointFileName_ << endl;
+
     std::vector<Vb::Point> initialPoints;
 
     Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside

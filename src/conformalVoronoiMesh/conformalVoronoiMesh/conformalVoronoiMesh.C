@@ -46,7 +46,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     (
         IOobject
         (
-            "cvSearchableSurfacesDirectory",
+            "cvSearchableSurfaces",
             runTime_.constant(),
             "triSurface",
             runTime_,
@@ -120,40 +120,52 @@ Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
 
 void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 (
-    const List<scalar>& surfacePpDist,
-    const List<point>& surfacePoints,
-    const List<vector>& surfaceNormals,
+    const List<pointIndexHit>& surfaceHits,
+    const List<label>& hitSurfaces,
     const fileName fName
 )
 {
-    if
-    (
-        surfacePpDist.size() != surfacePoints.size()
-     || surfacePpDist.size() != surfaceNormals.size()
-    )
+    if (surfaceHits.size() != hitSurfaces.size())
     {
         FatalErrorIn("Foam::conformalVoronoiMesh::insertPointPairs")
-            << "surfacePpDist, surfacePoints and surfaceNormals are not "
-            << "the same size. Sizes "
-            << surfacePpDist.size() << ' '
-            << surfacePoints.size() << ' '
-            << surfaceNormals.size()
+            << "surfaceHits and hitSurfaces are not the same size. Sizes "
+            << surfaceHits.size() << ' '
+            << hitSurfaces.size()
             << exit(FatalError);
     }
 
-    forAll(surfacePoints, p)
+    forAll(surfaceHits, i)
     {
+        vectorField norm(1);
+
+        allGeometry_[hitSurfaces[i]].getNormal
+        (
+            List<pointIndexHit>(1, surfaceHits[i]),
+            norm
+        );
+
+        const vector& normal = norm[0];
+
+        const point& surfacePt(surfaceHits[i].hitPoint());
+
         insertPointPair
         (
-            surfacePpDist[p],
-            surfacePoints[p],
-            surfaceNormals[p]
+            pointPairDistance(surfacePt),
+            surfacePt,
+            normal
         );
     }
 
     if (fName != fileName::null)
     {
-        writePoints(fName, surfacePoints);
+        List<point> surfacePts(surfaceHits.size());
+
+        forAll(surfacePts, i)
+        {
+            surfacePts[i] = surfaceHits[i].hitPoint();
+        }
+
+        writePoints(fName, surfacePts);
     }
 }
 
@@ -161,7 +173,8 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 void Foam::conformalVoronoiMesh::insertEdgePointGroups
 (
     const List<pointIndexHit>& edgeHits,
-    const labelList& featuresHit
+    const labelList& featuresHit,
+    const fileName fName
 )
 {
     if (edgeHits.size() != featuresHit.size())
@@ -205,6 +218,18 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
             insertMultipleEdgePointGroup(feMesh, edgeHits[i]);
         }
     }
+
+    if (fName != fileName::null)
+    {
+        List<point> edgePts(edgeHits.size());
+
+        forAll(edgePts, i)
+        {
+            edgePts[i] = edgeHits[i].hitPoint();
+        }
+
+        writePoints(fName, edgePts);
+    }
 }
 
 
@@ -225,8 +250,10 @@ void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
 
+
+
     // Convex. So refPt will be inside domain and hence a master point
-    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB));
+    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
 
     // Insert the master point referring the the first slave
     label masterPtIndex = insertPoint(refPt, number_of_vertices() + 1);
@@ -260,7 +287,7 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
     const vector& nB = feNormals[edNormalIs[1]];
 
     // Concave. master and reflected points inside the domain.
-    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB));
+    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL );
 
     // Generate reflected master to be outside.
     point reflMasterPt = edgePt + 2*(edgePt - refPt);
@@ -351,7 +378,7 @@ void Foam::conformalVoronoiMesh::conformToFeaturePoints()
 
     insertMixedFeaturePoints();
 
-    Info<< "   Inserted " << number_of_vertices() << " vertices" << endl;
+    Info<< "    Inserted " << number_of_vertices() << " vertices" << endl;
 
     featureVertices_.setSize(number_of_vertices());
 
@@ -516,12 +543,12 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 }
 
 
-bool Foam::conformalVoronoiMesh::dualCellSurfaceIntersection
+bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 (
     const Triangulation::Finite_vertices_iterator& vit
 ) const
 {
-    std::list<Facet>  facets;
+    std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
     for
@@ -534,7 +561,7 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceIntersection
         if
         (
             is_infinite(fit->first)
-            || is_infinite(fit->first->neighbor(fit->second))
+         || is_infinite(fit->first->neighbor(fit->second))
         )
         {
             return true;
@@ -564,6 +591,79 @@ bool Foam::conformalVoronoiMesh::dualCellSurfaceIntersection
     }
 
     return false;
+}
+
+
+void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
+(
+    const Triangulation::Finite_vertices_iterator& vit,
+    pointIndexHit& surfHitLargest,
+    label& hitSurfaceLargest
+) const
+{
+    std::list<Facet> facets;
+    incident_facets(vit, std::back_inserter(facets));
+
+    for
+    (
+        std::list<Facet>::iterator fit=facets.begin();
+        fit != facets.end();
+        ++fit
+    )
+    {
+        if
+        (
+            !is_infinite(fit->first)
+         && !is_infinite(fit->first->neighbor(fit->second))
+        )
+        {
+            point vert(topoint(vit->point()));
+
+            scalar maxProtrusionDistance = maxSurfaceProtrusion(vert);
+
+            point edgeMid =
+                0.5
+               *(
+                    topoint(dual(fit->first))
+                  + topoint(dual(fit->first->neighbor(fit->second)))
+                );
+
+            pointIndexHit surfHit;
+            label hitSurface;
+
+            geometryToConformTo_.findSurfaceAnyIntersection
+            (
+                vert,
+                edgeMid,
+                surfHit,
+                hitSurface
+           );
+
+            if (surfHit.hit())
+            {
+                vectorField norm(1);
+
+                allGeometry_[hitSurface].getNormal
+                (
+                    List<pointIndexHit>(1, surfHit),
+                    norm
+                );
+
+                const vector& n = norm[0];
+
+                scalar normalProtrusionDistance =
+                    (edgeMid - surfHit.hitPoint()) & n;
+
+                if (normalProtrusionDistance > maxProtrusionDistance)
+                {
+                    surfHitLargest = surfHit;
+                    hitSurfaceLargest = hitSurface;
+
+                    maxProtrusionDistance = normalProtrusionDistance;
+                }
+            }
+        }
+    }
 }
 
 
@@ -1203,24 +1303,17 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     startOfSurfacePointPairs_ = number_of_vertices();
 
-    Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
-    scalar edgeSearchDistCoeffSqr = sqr(1.25);
-    scalar surfacePtReplaceDistCoeffSqr = sqr(0.3);
-
-    // Surface protrusion conformation
-
-    label nIterations = 2;
-
-    for(label iterationNo = 0; iterationNo < nIterations; iterationNo++)
+    // Initial surface protrusion conformation - nearest surface point
     {
-        DynamicList<scalar> surfacePpDist;
-        DynamicList<scalar> surfaceSearchDistSqr;
-        DynamicList<point> surfacePoints;
-        DynamicList<vector> surfaceNormals;
+        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
+        scalar edgeSearchDistCoeffSqr = sqr(1.1);
+        scalar surfacePtReplaceDistCoeffSqr = sqr(0.5);
+
+        DynamicList<pointIndexHit> surfaceHits;
+        DynamicList<label> hitSurfaces;
 
         DynamicList<pointIndexHit> featureEdgeHits;
         DynamicList<label> featureEdgeFeaturesHit;
-        DynamicList<point> tmpFeatureEdgePoints;
 
         for
         (
@@ -1235,21 +1328,21 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                 point vert(topoint(vit->point()));
                 scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
                 pointIndexHit surfHit;
-                vector normal;
+                label hitSurface;
 
-                geometryToConformTo_.findSurfaceNearestAndNormal
+                geometryToConformTo_.findSurfaceNearest
                 (
                     vert,
                     searchDistanceSqr,
                     surfHit,
-                    normal
+                    hitSurface
                 );
 
                 if (surfHit.hit())
                 {
                     vit->setNearBoundary();
 
-                    if (dualCellSurfaceIntersection(vit))
+                    if (dualCellSurfaceAnyIntersection(vit))
                     {
                         // If the point is within a given distance of a feature
                         // edge, shift it to being an edge control point
@@ -1279,8 +1372,6 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                             featureEdgeHits.append(edHit);
                             featureEdgeFeaturesHit.append(featureHit);
 
-                            tmpFeatureEdgePoints.append(edHit.hitPoint());
-
                             if
                             (
                                 magSqr(edHit.hitPoint() - surfHit.hitPoint())
@@ -1293,11 +1384,115 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
                         if (keepSurfacePoint)
                         {
-                            surfacePpDist.append(pointPairDistance(vert));
-                            surfaceSearchDistSqr.append(searchDistanceSqr);
-                            surfacePoints.append(surfHit.hitPoint());
-                            surfaceNormals.append(normal);
+                            surfaceHits.append(surfHit);
+                            hitSurfaces.append(hitSurface);
                         }
+                    }
+                }
+            }
+        }
+
+        Info<< nl <<"    Initial conformation " << nl
+            << "    number_of_vertices " << number_of_vertices() << nl
+            << "    surfaceHits.size() " << surfaceHits.size() << nl
+            << "    featureEdgeHits.size() " << featureEdgeHits.size()
+            << endl;
+
+        insertSurfacePointPairs
+        (
+            surfaceHits,
+            hitSurfaces,
+            "surfaceConformationLocations_initial.obj"
+        );
+
+        insertEdgePointGroups
+        (
+            featureEdgeHits,
+            featureEdgeFeaturesHit,
+            "edgeGenerationLocations_initial.obj"
+        );
+    }
+
+    label iterationNo = 0;
+    label maxIterations = 4;
+    label totalHits = 0;
+
+    do
+    {
+        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
+        scalar edgeSearchDistCoeffSqr = sqr(1.25);
+        scalar surfacePtReplaceDistCoeffSqr = sqr(0.7);
+
+        DynamicList<pointIndexHit> surfaceHits;
+        DynamicList<label> hitSurfaces;
+
+        DynamicList<pointIndexHit> featureEdgeHits;
+        DynamicList<label> featureEdgeFeaturesHit;
+
+        for
+        (
+            Triangulation::Finite_vertices_iterator vit =
+            finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            // The initial surface conformation has already identified the
+            // nearBoundary set of vertices.  Previously inserted boundary
+            // points can also generate protrusions and must be assessed too.
+
+            if (vit->nearBoundary() || vit->ppMaster())
+            {
+                point vert(topoint(vit->point()));
+                pointIndexHit surfHit;
+                label hitSurface;
+
+                dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
+
+                if (surfHit.hit())
+                {
+                    // If the point is within a given distance of a feature
+                    // edge, shift it to being an edge control point
+                    // instead, this will prevent "pits" forming.
+
+                    pointIndexHit edHit;
+                    label featureHit;
+
+                    scalar targetCellSizeSqr = sqr(targetCellSize(vert));
+
+                    geometryToConformTo_.findEdgeNearest
+                    (
+                        surfHit.hitPoint(),
+                        edgeSearchDistCoeffSqr*targetCellSizeSqr,
+                        edHit,
+                        featureHit
+                    );
+
+                    bool keepSurfacePoint = true;
+
+                    if (edHit.hit())
+                    {
+                        // Note that edge type classification can be used
+                        // here if necessary, i.e to avoid over-populating
+                        // internal edges
+
+                        featureEdgeHits.append(edHit);
+                        featureEdgeFeaturesHit.append(featureHit);
+
+                        if
+                        (
+                            magSqr(edHit.hitPoint() - surfHit.hitPoint())
+                          < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
+                        )
+                        {
+                            keepSurfacePoint = false;
+                        }
+                    }
+
+                    if (keepSurfacePoint)
+                    {
+                        surfaceHits.append(surfHit);
+                        hitSurfaces.append(hitSurface);
                     }
                 }
             }
@@ -1305,33 +1500,35 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
         Info<< nl <<"    iterationNo " << iterationNo << nl
             << "    number_of_vertices " << number_of_vertices() << nl
-            << "    surfacePoints.size() " << surfacePoints.size() << nl
+            << "    surfaceHits.size() " << surfaceHits.size() << nl
             << "    featureEdgeHits.size() " << featureEdgeHits.size()
             << endl;
 
-        insertSurfacePointPairs
-        (
-            surfacePpDist,
-            surfacePoints,
-            surfaceNormals,
-            fileName
+        totalHits = surfaceHits.size() + featureEdgeHits.size();
+
+        if (totalHits > 0)
+        {
+            insertSurfacePointPairs
             (
-                "surfaceConformationLocations_" + name(iterationNo) + ".obj"
-            )
-        );
+                surfaceHits,
+                hitSurfaces,
+                fileName
+                (
+                    "surfaceConformationLocations_" + name(iterationNo) + ".obj"
+                )
+            );
 
-        insertEdgePointGroups
-        (
-            featureEdgeHits,
-            featureEdgeFeaturesHit
-        );
+            insertEdgePointGroups
+            (
+                featureEdgeHits,
+                featureEdgeFeaturesHit,
+                "edgeGenerationLocations_" + name(iterationNo) + ".obj"
+            );
+        }
 
-        writePoints
-        (
-            "edgeGenerationLocations_" + name(iterationNo) + ".obj",
-            tmpFeatureEdgePoints
-        );
-    }
+        iterationNo++;
+
+    } while (totalHits > 0 && iterationNo < maxIterations);
 }
 
 

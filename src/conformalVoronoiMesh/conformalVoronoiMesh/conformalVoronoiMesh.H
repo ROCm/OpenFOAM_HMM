@@ -125,6 +125,9 @@ class conformalVoronoiMesh
         //- Return the square of the local surface search distance
         inline scalar surfaceSearchDistanceSqr(const point& pt) const;
 
+        //- Return the local maximum surface protrusion distance
+        inline scalar maxSurfaceProtrusion(const point& pt) const;
+
         //- Return the local minimum allowed dual edge length
         inline scalar minimumEdgeLength(const point& pt) const;
 
@@ -154,9 +157,8 @@ class conformalVoronoiMesh
         //  specified spacing
         void insertSurfacePointPairs
         (
-            const List<scalar>& surfacePpDist,
-            const List<point>& surfacePoints,
-            const List<vector>& surfaceNormals,
+            const List<pointIndexHit>& surfaceHits,
+            const List<label>& hitSurfaces,
             const fileName fName = fileName::null
         );
 
@@ -166,7 +168,8 @@ class conformalVoronoiMesh
         void insertEdgePointGroups
         (
             const List<pointIndexHit>& edgeHits,
-            const labelList& featuresHit
+            const labelList& featuresHit,
+            const fileName fName = fileName::null
         );
 
         //- Insert points to conform to an external edge
@@ -225,9 +228,18 @@ class conformalVoronoiMesh
 
         //- Check to see if dual cell specified by given vertex iterator
         //  intersects the boundary and hence reqires a point-pair.
-        bool dualCellSurfaceIntersection
+        bool dualCellSurfaceAnyIntersection
         (
             const Triangulation::Finite_vertices_iterator& vit
+        ) const;
+
+        //- Find the "worst" protrusion of a dual cell through the surface,
+        //- subject to the tolerance
+        void dualCellLargestSurfaceProtrusion
+        (
+            const Triangulation::Finite_vertices_iterator& vit,
+            pointIndexHit& surfHit,
+            label& hitSurface
         ) const;
 
         //- Dual calculation
