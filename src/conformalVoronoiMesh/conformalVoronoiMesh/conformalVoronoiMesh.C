@@ -1414,7 +1414,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
     }
 
     label iterationNo = 0;
-    label maxIterations = 4;
+    label maxIterations = 8;
     label totalHits = 0;
 
     do

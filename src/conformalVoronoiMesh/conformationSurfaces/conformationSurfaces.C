@@ -120,7 +120,7 @@ Foam::conformationSurfaces::conformationSurfaces
         }
         else if (featureMethod == "none")
         {
-            fileName feMeshName(surfaceSubDict.lookup("featureEdgeMesh"));
+            fileName feMeshName(surfaceName + "_noFeatures");
 
             features_.set
             (
