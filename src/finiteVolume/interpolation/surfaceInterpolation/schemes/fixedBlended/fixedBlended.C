@@ -24,26 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "UpwindFitScheme.H"
-#include "cubicUpwindFitPolynomial.H"
-#include "upwindCFCStencilObject.H"
+#include "fvMesh.H"
+#include "fixedBlended.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug
-    (
-        UpwindFitData<cubicUpwindFitPolynomial>,
-        0
-    );
-
-    makeUpwindFitSurfaceInterpolationScheme
-    (
-        cubicUpwindFit,
-        cubicUpwindFitPolynomial,
-        upwindCFCStencilObject
-    );
+    makeSurfaceInterpolationScheme(fixedBlended);
 }
 
 // ************************************************************************* //
