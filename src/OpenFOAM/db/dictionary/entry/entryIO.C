@@ -73,7 +73,7 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
     {
         cerr<< "--> FOAM Warning : " << std::endl
             << "    From function "
-            << "entry::getKeyword(keyType& keyword, Istream& is)" << std::endl
+            << "entry::getKeyword(keyType&, Istream&)" << std::endl
             << "    in file " << __FILE__
             << " at line " << __LINE__ << std::endl
             << "    Reading " << is.name().c_str() << std::endl
@@ -88,7 +88,7 @@ bool Foam::entry::getKeyword(keyType& keyword, Istream& is)
 
 bool Foam::entry::New(dictionary& parentDict, Istream& is)
 {
-    is.fatalCheck("entry::New(const dictionary& parentDict, Istream& is)");
+    is.fatalCheck("entry::New(const dictionary& parentDict, Istream&)");
 
     keyType keyword;
 
@@ -97,9 +97,9 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
     {
         return false;
     }
-    else // Keyword starts entry ...
+    else  // Keyword starts entry ...
     {
-        if (keyword[0] == '#')        // ... Function entry
+        if (keyword[0] == '#')         // ... Function entry
         {
             word functionName = keyword(1, keyword.size()-1);
             return functionEntry::execute(functionName, parentDict, is);
@@ -128,9 +128,14 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
                 false,
                 false
             );
+
             if (existingPtr)
             {
-                if (functionEntries::inputModeEntry::overwrite())
+                if (functionEntries::inputModeEntry::merge())
+                {
+                    mergeEntry = true;
+                }
+                else if (functionEntries::inputModeEntry::overwrite())
                 {
                     // clear dictionary so merge acts like overwrite
                     if (existingPtr->isDict())
@@ -139,9 +144,30 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
                     }
                     mergeEntry = true;
                 }
-                else if (functionEntries::inputModeEntry::merge())
+                else if (functionEntries::inputModeEntry::protect())
                 {
-                    mergeEntry = true;
+                    // read and discard the entry
+                    if (nextToken == token::BEGIN_BLOCK)
+                    {
+                        dictionaryEntry dummy(keyword, parentDict, is);
+                    }
+                    else
+                    {
+                        primitiveEntry  dummy(keyword, parentDict, is);
+                    }
+                    return true;
+                }
+                else if (functionEntries::inputModeEntry::error())
+                {
+                    FatalIOErrorIn
+                    (
+                        "entry::New(const dictionary& parentDict, Istream&)",
+                        is
+                    )
+                        << "ERROR! duplicate entry: " << keyword
+                        << exit(FatalIOError);
+
+                    return false;
                 }
             }
 
@@ -168,7 +194,7 @@ bool Foam::entry::New(dictionary& parentDict, Istream& is)
 
 Foam::autoPtr<Foam::entry> Foam::entry::New(Istream& is)
 {
-    is.fatalCheck("entry::New(Istream& is)");
+    is.fatalCheck("entry::New(Istream&)");
 
     keyType keyword;
 

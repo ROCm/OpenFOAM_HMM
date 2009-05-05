@@ -131,7 +131,7 @@ bool Foam::functionEntries::includeEntry::execute
         FatalIOErrorIn
         (
             "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict, primitiveEntry& entry, Istream&)",
+            "(dictionary& parentDict, primitiveEntry&, Istream&)",
             is
         )   << "Cannot open include file " << ifs.name()
             << " while reading dictionary " << parentDict.name()

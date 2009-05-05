@@ -53,7 +53,8 @@ bool Foam::dictionary::findInPatterns
         {
             if
             (
-                patternMatch ? reLink()->match(Keyword)
+                patternMatch
+              ? reLink()->match(Keyword)
               : wcLink()->keyword() == Keyword
             )
             {
@@ -83,7 +84,8 @@ bool Foam::dictionary::findInPatterns
         {
             if
             (
-                patternMatch ? reLink()->match(Keyword)
+                patternMatch
+              ? reLink()->match(Keyword)
               : wcLink()->keyword() == Keyword
             )
             {

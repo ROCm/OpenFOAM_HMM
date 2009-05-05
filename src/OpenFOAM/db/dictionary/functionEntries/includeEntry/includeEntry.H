@@ -34,8 +34,8 @@ Description
         #include "includeFile"
     @endverbatim
 
-    The usual expansion of environment variables and other constructs (eg,
-    the @c ~OpenFOAM/ expansion) is retained.
+    The usual expansion of environment variables and other constructs
+    (eg, the @c ~OpenFOAM/ expansion) is retained.
 
 See Also
     fileName, string::expand()
