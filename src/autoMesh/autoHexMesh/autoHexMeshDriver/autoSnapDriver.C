@@ -29,7 +29,6 @@ Description
 
 #include "autoSnapDriver.H"
 #include "Time.H"
-#include "pointFields.H"
 #include "motionSmoother.H"
 #include "polyTopoChange.H"
 #include "OFstream.H"
@@ -1238,10 +1237,7 @@ void Foam::autoSnapDriver::smoothDisplacement
         magDisp().write();
 
         Pout<< "Writing actual patch displacement ..." << endl;
-        vectorField actualPatchDisp
-        (
-            IndirectList<point>(disp, pp.meshPoints())()
-        );
+        vectorField actualPatchDisp(disp, pp.meshPoints());
         dumpMove
         (
             mesh.time().path()/"actualPatchDisplacement.obj",
@@ -1392,11 +1388,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::repatchToSurface
             }
         }
 
-        pointField localFaceCentres(pp.size());
-        forAll(pp, i)
-        {
-            localFaceCentres[i] = mesh.faceCentres()[pp.addressing()[i]];
-        }
+        pointField localFaceCentres(mesh.faceCentres(), pp.addressing());
 
         // Get nearest surface and region
         labelList hitSurface;

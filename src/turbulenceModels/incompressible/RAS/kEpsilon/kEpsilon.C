@@ -129,7 +129,7 @@ kEpsilon::kEpsilon
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -216,7 +216,7 @@ void kEpsilon::correct()
         return;
     }
 
-    volScalarField G("G", nut_*2*magSqr(symm(fvc::grad(U_))));
+    volScalarField G("RASModel::G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
     // Update espsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
@@ -259,7 +259,7 @@ void kEpsilon::correct()
 
 
     // Re-calculate viscosity
-    nut_ == Cmu_*sqr(k_)/epsilon_;
+    nut_ = Cmu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 }
 

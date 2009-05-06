@@ -4,7 +4,7 @@
     volScalarField& rho = rhoFluid[i];
     volScalarField& K = KFluid[i];
     volVectorField& U = UFluid[i];
-    surfaceScalarField phi = phiFluid[i];
+    surfaceScalarField& phi = phiFluid[i];
     compressible::turbulenceModel& turb = turbulence[i];
     volScalarField& DpDt = DpDtFluid[i];
     const volScalarField& gh = ghFluid[i];

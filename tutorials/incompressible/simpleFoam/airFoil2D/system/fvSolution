@@ -59,6 +59,7 @@ SIMPLE
 
 relaxationFactors
 {
+    default         0;
     p               0.3;
     U               0.7;
     nuTilda         0.7;

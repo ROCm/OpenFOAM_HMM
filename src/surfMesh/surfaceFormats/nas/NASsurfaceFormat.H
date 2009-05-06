@@ -44,9 +44,8 @@ SourceFiles
 #ifndef NASsurfaceFormat_H
 #define NASsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 #include "NASsurfaceFormatCore.H"
 

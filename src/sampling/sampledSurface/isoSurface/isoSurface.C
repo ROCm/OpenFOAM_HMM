@@ -32,6 +32,8 @@ License
 #include "slicedVolFields.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "OFstream.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -963,20 +965,8 @@ void Foam::isoSurface::calcSnappedPoint
     }
 
 
-//Pout<< "**hack" << endl;
-//pointField oldCollaped(collapsedPoint);
+    // Synchronise snap location
     syncUnseparatedPoints(collapsedPoint, greatPoint);
-//forAll(collapsedPoint, pointI)
-//{
-//    if (collapsedPoint[pointI] != oldCollaped[pointI])
-//    {
-//        Pout<< "**Synced point " << pointI
-//            << " coord:" << mesh_.points()[pointI]
-//            << " from " << oldCollaped[pointI]
-//            << " to " << collapsedPoint[pointI]
-//            << endl;
-//    }
-//}
 
 
     snappedPoint.setSize(mesh_.nPoints());
@@ -1759,6 +1749,7 @@ Foam::isoSurface::isoSurface
     mesh_(cVals.mesh()),
     pVals_(pVals),
     iso_(iso),
+    regularise_(regularise),
     mergeDistance_(mergeTol*mesh_.bounds().mag())
 {
     if (debug)
@@ -1772,7 +1763,7 @@ Foam::isoSurface::isoSurface
             << min(pVals_) << " / "
             << max(pVals_) << nl
             << "    isoValue      : " << iso << nl
-            << "    regularise    : " << regularise << nl
+            << "    regularise    : " << regularise_ << nl
             << "    mergeTol      : " << mergeTol << nl
             << endl;
     }
@@ -1888,7 +1879,7 @@ Foam::isoSurface::isoSurface
 
     // Per cc -1 or a point inside snappedPoints.
     labelList snappedCc;
-    if (regularise)
+    if (regularise_)
     {
         calcSnappedCc
         (
@@ -1920,7 +1911,7 @@ Foam::isoSurface::isoSurface
 
     // Per point -1 or a point inside snappedPoints.
     labelList snappedPoint;
-    if (regularise)
+    if (regularise_)
     {
         // Determine if point is on boundary.
         PackedBoolList isBoundaryPoint(mesh_.nPoints());

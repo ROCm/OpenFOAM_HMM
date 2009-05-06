@@ -39,66 +39,16 @@ SourceFiles
 #define surfMesh_H
 
 #include "surfaceRegistry.H"
+#include "MeshedSurfaceIOAllocator.H"
 #include "PrimitivePatch.H"
-#include "pointField.H"
-#include "faceList.H"
-#include "pointIOField.H"
-#include "faceIOList.H"
-#include "labelIOList.H"
-#include "surfZoneIOList.H"
+#include "SubField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-template<class Face>
-class MeshedSurface;
-
-/*---------------------------------------------------------------------------*\
-                      Class surfMeshAllocator Declaration
-\*---------------------------------------------------------------------------*/
-
-//- A helper class for storing points and faces
-class surfMeshAllocator
-{
-protected:
-    pointIOField storedPoints_;
-    faceIOList   storedFaces_;
-
-    surfMeshAllocator(const IOobject& ioPoints, const IOobject& ioFaces)
-    :
-        storedPoints_(ioPoints),
-        storedFaces_(ioFaces)
-    {}
-
-    surfMeshAllocator
-    (
-        const IOobject& ioPoints,
-        const pointField& points,
-        const IOobject& ioFaces,
-        const faceList& faces
-    )
-    :
-        storedPoints_(ioPoints, points),
-        storedFaces_(ioFaces, faces)
-    {}
-
-    surfMeshAllocator
-    (
-        const IOobject& ioPoints,
-        const Xfer<pointField>& points,
-        const IOobject& ioFaces,
-        const Xfer<faceList>& faces
-    )
-    :
-        storedPoints_(ioPoints, points),
-        storedFaces_(ioFaces, faces)
-    {}
-
-};
-
-
+template<class Face> class MeshedSurface;
 
 /*---------------------------------------------------------------------------*\
                           Class surfMesh Declaration
@@ -106,10 +56,13 @@ protected:
 
 class surfMesh
 :
-    public surfaceRegistry,
-    public surfMeshAllocator,
-    public PrimitivePatch<face, ::Foam::UList, const pointField&, point>
+    public  surfaceRegistry,
+    private MeshedSurfaceIOAllocator,
+    public  PrimitivePatch<face, ::Foam::UList, ::Foam::SubField<point>, point>
 {
+    // friends
+    template<class Face> friend class MeshedSurface;
+    template<class Face> friend class UnsortedMeshedSurface;
 
 public:
 
@@ -117,8 +70,7 @@ public:
 
         //- Enumeration defining the state of the mesh after a read update.
         //  Used for post-processing applications, where the mesh
-        //  needs to update based on the files written in time
-        //  directores
+        //  needs to update based on the files written in time directores
         enum readUpdateState
         {
             UNCHANGED,
@@ -132,27 +84,22 @@ private:
 
     // Private typedefs
 
+        typedef MeshedSurfaceIOAllocator Allocator;
+
         typedef PrimitivePatch
         <
             face,
             ::Foam::UList,
-            const pointField&,
+            ::Foam::SubField<point>,
             point
         >
         MeshReference;
 
+
     // Permanent data
-
-        // Zoning information
-
-           //- Face zones
-           surfZoneIOList surfZones_;
 
 
     // Private member functions
-
-        //- Set a single zone
-        void oneZone();
 
         //- Disallow construct as copy
         surfMesh(const surfMesh&);
@@ -165,22 +112,32 @@ protected:
     // Protected Member Functions
 
         //- Non-const access to global points
-        pointIOField& storedPoints()
+        pointField& storedPoints()
         {
-            return surfMeshAllocator::storedPoints_;
+            return Allocator::storedIOPoints();
         }
 
         //- Non-const access to the faces
-        faceIOList& storedFaces()
+        faceList& storedFaces()
         {
-            return surfMeshAllocator::storedFaces_;
+            return Allocator::storedIOFaces();
         }
 
         //- Non-const access to the zones
-        surfZoneIOList& storedZones()
+        surfZoneList& storedZones()
         {
-            return surfZones_;
+            return Allocator::storedIOZones();
         }
+
+
+        //- Update references to storedFaces
+        virtual void updateFacesRef();
+
+        //- Update references to storedPoints
+        virtual void updatePointsRef();
+
+        //- Update references to storedPoints/storedFaces
+        virtual void updateRefs();
 
 public:
 
@@ -247,10 +204,10 @@ public:
 
         // Access
 
-            //- Return raw points
+            //- Return the number of raw points
             virtual label nPoints() const;
 
-            //- Return raw faces
+            //- Return the number of raw faces
             virtual label nFaces() const;
 
             //- Return number of faces
@@ -260,28 +217,22 @@ public:
             }
 
 
-            //- Return raw points
+            //- Return points
             virtual const pointField& points() const;
 
-            //- Return raw faces
+            //- Return faces
             virtual const faceList& faces() const;
 
             //- Return surface zones
-            const surfZoneList& surfZones() const
+            virtual const surfZoneList& surfZones() const
             {
-                return surfZones_;
-            }
-
-            //- Return non-const access to the zones
-            surfZoneList& surfZones()
-            {
-                return surfZones_;
+                return Allocator::storedIOZones();
             }
 
             //- Check the surface zone definitions
             void checkZones();
 
-            //- Add surface zones patches
+            //- Add surface zones
             void addZones
             (
                 const List<surfZone>&,
@@ -297,21 +248,28 @@ public:
             //- Remove surface zones
             void removeZones();
 
-            //- Rename surface
-            virtual void rename(const word&);
-
             //- Reset mesh primitive data.
             void resetPrimitives
             (
-                const Xfer<pointField>& points,
-                const Xfer<faceList>& faces,
-                const Xfer<surfZoneList>& zones,
+                const Xfer< pointField >& points,
+                const Xfer< faceList >& faces,
+                const Xfer< surfZoneList >& zones,
                 const bool validate = true
             );
 
 
             //- Transfer the contents of the argument and annull the argument
             void transfer(MeshedSurface<face>&);
+
+
+        //- Avoid masking the normal objectRegistry write
+        using surfaceRegistry::write;
+
+        //- Write to file
+        static void write(const fileName&, const surfMesh&);
+
+        //- Write to file
+        void write(const fileName&);
 
         //  Storage management
 

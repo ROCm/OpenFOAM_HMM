@@ -16,8 +16,9 @@ FoamFile
 
 solvers
 {
-    T PCG
+    T
     {
+        solver           PCG;
         preconditioner   DIC;
         tolerance        1E-06;
         relTol           0;

@@ -68,7 +68,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     UName_("U"),
     rhoName_("rho"),
     kName_("k"),
-    GName_("G"),
+    GName_("RASModel::G"),
     muName_("mu"),
     mutName_("mut")
 {
@@ -107,7 +107,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     UName_(dict.lookupOrDefault<word>("U", "U")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     kName_(dict.lookupOrDefault<word>("k", "k")),
-    GName_(dict.lookupOrDefault<word>("G", "G")),
+    GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
     mutName_(dict.lookupOrDefault<word>("mut", "mut"))
 {
@@ -221,7 +221,7 @@ void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "k", "k", kName_);
-    writeEntryIfDifferent<word>(os, "G", "G", GName_);
+    writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
     writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
     writeEntry("value", os);

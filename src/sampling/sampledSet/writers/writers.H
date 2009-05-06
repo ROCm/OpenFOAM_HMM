@@ -40,27 +40,27 @@ SourceFiles
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Only used internally
-#define makeTypeSetWritersTypeName(typeWriter, dataType)                     \
-                                                                             \
-    defineNamedTemplateTypeNameAndDebug(typeWriter<dataType >, 0);
+#define makeTypeSetWritersTypeName(typeWriter, dataType)                      \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug(typeWriter< dataType >, 0)
 
 // Sometimes used externally
-#define makeSetWritersTypeName(typeWriter)                                   \
-                                                                             \
-    makeTypeSetWritersTypeName(typeWriter, scalar);                          \
-    makeTypeSetWritersTypeName(typeWriter, vector);                          \
-    makeTypeSetWritersTypeName(typeWriter, sphericalTensor);                 \
-    makeTypeSetWritersTypeName(typeWriter, symmTensor);                      \
-    makeTypeSetWritersTypeName(typeWriter, tensor);
+#define makeSetWritersTypeName(typeWriter)                                    \
+                                                                              \
+    makeTypeSetWritersTypeName(typeWriter, scalar);                           \
+    makeTypeSetWritersTypeName(typeWriter, vector);                           \
+    makeTypeSetWritersTypeName(typeWriter, sphericalTensor);                  \
+    makeTypeSetWritersTypeName(typeWriter, symmTensor);                       \
+    makeTypeSetWritersTypeName(typeWriter, tensor)
 
 // Define type info for single dataType template instantiation (eg, vector)
-#define makeSetWriterType(typeWriter, dataType)                              \
-                                                                             \
-    defineNamedTemplateTypeNameAndDebug(typeWriter<dataType >, 0);           \
-    addTemplatedToRunTimeSelectionTable                                      \
-    (                                                                        \
-        writer, typeWriter, dataType, word                                   \
-    );
+#define makeSetWriterType(typeWriter, dataType)                               \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug(typeWriter< dataType >, 0);           \
+    addTemplatedToRunTimeSelectionTable                                       \
+    (                                                                         \
+        writer, typeWriter, dataType, word                                    \
+    )
 
 
 // Define type info for scalar, vector etc. instantiations
@@ -70,7 +70,7 @@ SourceFiles
     makeSetWriterType(typeWriter, vector);                                    \
     makeSetWriterType(typeWriter, sphericalTensor);                           \
     makeSetWriterType(typeWriter, symmTensor);                                \
-    makeSetWriterType(typeWriter, tensor);
+    makeSetWriterType(typeWriter, tensor)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

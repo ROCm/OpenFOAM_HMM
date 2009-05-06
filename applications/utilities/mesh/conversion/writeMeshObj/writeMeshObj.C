@@ -37,6 +37,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "OFstream.H"
@@ -336,14 +337,15 @@ void writePointCells
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
     argList::validOptions.insert("patchFaces", "");
     argList::validOptions.insert("cell", "cellI");
     argList::validOptions.insert("face", "faceI");
     argList::validOptions.insert("point", "pointI");
     argList::validOptions.insert("cellSet", "setName");
     argList::validOptions.insert("faceSet", "setName");
+#   include "addRegionOption.H"
 
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -361,31 +363,23 @@ int main(int argc, char *argv[])
         << "(for points, faces, cells) is consistent with"
         << " Foam numbering (starting from 0)." << endl << endl;
 
-    // Get times list
-    instantList Times = runTime.times();
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "checkTimeOptions.H"
+#   include "createNamedPolyMesh.H"
 
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createPolyMesh.H"
-
-    bool firstCheck = true;
-
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(timeDirs[timeI], timeI);
 
         Info<< "Time = " << runTime.timeName() << endl;
 
         polyMesh::readUpdateState state = mesh.readUpdate();
 
-        if (firstCheck || state != polyMesh::UNCHANGED)
+        if (!timeI || state != polyMesh::UNCHANGED)
         {
             if (patchFaces)
             {
                 writePatchFaces(mesh, runTime.timeName());
-
             }
             else if (doCell)
             {
@@ -487,9 +481,7 @@ int main(int argc, char *argv[])
             Info << "No mesh." << endl;
         }
 
-        firstCheck = false;
-
-        Info << endl << endl;
+        Info << nl << endl;
     }
 
 

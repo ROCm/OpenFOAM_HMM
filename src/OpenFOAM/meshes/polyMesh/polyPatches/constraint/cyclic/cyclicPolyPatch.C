@@ -188,11 +188,11 @@ void Foam::cyclicPolyPatch::calcTransforms()
                      << endl
                     << "Mesh face:" << start()+facei
                     << " vertices:"
-                    << IndirectList<point>(points, operator[](facei))()
+                    << UIndirectList<point>(points, operator[](facei))()
                     << endl
                     << "Neighbour face:" << start()+nbrFacei
                     << " vertices:"
-                    << IndirectList<point>(points, operator[](nbrFacei))()
+                    << UIndirectList<point>(points, operator[](nbrFacei))()
                     << endl
                     << "Rerun with cyclic debug flag set"
                     << " for more information." << exit(FatalError);
@@ -403,12 +403,12 @@ bool Foam::cyclicPolyPatch::getGeometricHalves
             fileName nm0(casePath/name()+"_half0_faces.obj");
             Pout<< "cyclicPolyPatch::getGeometricHalves : Writing half0"
                 << " faces to OBJ file " << nm0 << endl;
-            writeOBJ(nm0, IndirectList<face>(pp, half0ToPatch)(), pp.points());
+            writeOBJ(nm0, UIndirectList<face>(pp, half0ToPatch)(), pp.points());
 
             fileName nm1(casePath/name()+"_half1_faces.obj");
             Pout<< "cyclicPolyPatch::getGeometricHalves : Writing half1"
                 << " faces to OBJ file " << nm1 << endl;
-            writeOBJ(nm1, IndirectList<face>(pp, half1ToPatch)(), pp.points());
+            writeOBJ(nm1, UIndirectList<face>(pp, half1ToPatch)(), pp.points());
         }
 
         // Dump face centres
@@ -672,7 +672,7 @@ bool Foam::cyclicPolyPatch::matchAnchors
                 )   << "Patch:" << name() << " : "
                     << "Cannot find point on face " << f
                     << " with vertices:"
-                    << IndirectList<point>(pp.points(), f)()
+                    << UIndirectList<point>(pp.points(), f)()
                     << " that matches point " << wantedAnchor
                     << " when matching the halves of cyclic patch " << name()
                     << endl
@@ -1133,8 +1133,8 @@ bool Foam::cyclicPolyPatch::order
     half1ToPatch = half0ToPatch + halfSize;
 
     // Get faces
-    faceList half0Faces(IndirectList<face>(pp, half0ToPatch));
-    faceList half1Faces(IndirectList<face>(pp, half1ToPatch));
+    faceList half0Faces(UIndirectList<face>(pp, half0ToPatch));
+    faceList half1Faces(UIndirectList<face>(pp, half1ToPatch));
 
     // Get geometric quantities
     pointField half0Ctrs, half1Ctrs, anchors0, ppPoints;
@@ -1221,8 +1221,8 @@ bool Foam::cyclicPolyPatch::order
         }
 
         // And redo all matching
-        half0Faces = IndirectList<face>(pp, half0ToPatch);
-        half1Faces = IndirectList<face>(pp, half1ToPatch);
+        half0Faces = UIndirectList<face>(pp, half0ToPatch);
+        half1Faces = UIndirectList<face>(pp, half1ToPatch);
 
         getCentresAndAnchors
         (
@@ -1334,8 +1334,8 @@ bool Foam::cyclicPolyPatch::order
         if (baffleI == halfSize)
         {
             // And redo all matching
-            half0Faces = IndirectList<face>(pp, half0ToPatch);
-            half1Faces = IndirectList<face>(pp, half1ToPatch);
+            half0Faces = UIndirectList<face>(pp, half0ToPatch);
+            half1Faces = UIndirectList<face>(pp, half1ToPatch);
 
             getCentresAndAnchors
             (
@@ -1420,8 +1420,8 @@ bool Foam::cyclicPolyPatch::order
         }
 
         // And redo all matching
-        half0Faces = IndirectList<face>(pp, half0ToPatch);
-        half1Faces = IndirectList<face>(pp, half1ToPatch);
+        half0Faces = UIndirectList<face>(pp, half0ToPatch);
+        half1Faces = UIndirectList<face>(pp, half1ToPatch);
 
         getCentresAndAnchors
         (

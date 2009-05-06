@@ -629,7 +629,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
 
             toMaster
                 << sharedPointAddr_ 
-                << IndirectList<point>(mesh_.points(), sharedPointLabels_)();
+                << UIndirectList<point>(mesh_.points(), sharedPointLabels_)();
         }
 
         // Receive sharedPoints

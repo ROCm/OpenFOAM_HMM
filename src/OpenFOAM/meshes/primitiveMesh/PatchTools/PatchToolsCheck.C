@@ -58,7 +58,7 @@ Foam::PatchTools::checkOrientation
             {
                 Info<< "Face[" << faceI << "] " << p[faceI]
                     << " has fewer than 3 edges. Edges: " << edgeLabels
-                    << nl;
+                    << endl;
             }
             valid = false;
         }
@@ -70,10 +70,12 @@ Foam::PatchTools::checkOrientation
                 {
                     if (report)
                     {
-                        Info<< "edge number " << edgeLabels[i] << " on face " << faceI
+                        Info<< "edge number " << edgeLabels[i]
+                            << " on face " << faceI
                             << " out-of-range\n"
                             << "This usually means the input surface has "
-                            << "edges with more than 2 faces connected." << nl;
+                            << "edges with more than 2 faces connected."
+                            << endl;
                     }
                     valid = false;
                 }
@@ -91,9 +93,9 @@ Foam::PatchTools::checkOrientation
         //- Compute normal from 3 points, use the first as the origin
         // minor warpage should not be a problem
         const Face& f = p[faceI];
-        const point p0(p.points()[f[0]]);
-        const point p1(p.points()[f[1]]);
-        const point p2(p.points()[f[f.size()-1]]);
+        const point& p0 = p.points()[f[0]];
+        const point& p1 = p.points()[f[1]];
+        const point& p2 = p.points()[f[f.size()-1]];
 
         const vector pointNormal((p1 - p0) ^ (p2 - p0));
         if ((pointNormal & p.faceNormals()[faceI]) < 0)
@@ -103,12 +105,12 @@ Foam::PatchTools::checkOrientation
             if (report)
             {
                 Info
-                    << "Normal calculated from points inconsistent with faceNormal"
-                    << nl
+                    << "Normal calculated from points inconsistent"
+                    << " with faceNormal" << nl
                     << "face: " << f << nl
                     << "points: " << p0 << ' ' << p1 << ' ' << p2 << nl
                     << "pointNormal:" << pointNormal << nl
-                    << "faceNormal:" << p.faceNormals()[faceI] << nl;
+                    << "faceNormal:" << p.faceNormals()[faceI] << endl;
             }
         }
     }

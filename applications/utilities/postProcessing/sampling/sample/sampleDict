@@ -30,7 +30,10 @@ setFormat raw;
 //      dx          : DX scalar or vector format
 //      vtk         : VTK ascii format
 //      raw         : x y z value format for use with e.g. gnuplot 'splot'.
-//      stl         : ascii stl. Does not contain values!
+//
+// Note:
+// other formats such as obj, stl, etc can also be written (by proxy)
+// but without any values!
 surfaceFormat vtk;
 
 // interpolationScheme. choice of
@@ -102,6 +105,14 @@ sets
         end         (2 0.51  0.005);
         nPoints     10;
     }
+
+    somePoints
+    {
+        type    cloud;
+        axis    xyz;
+        points  ((0.049 0.049 0.005)(0.051 0.049 0.005));
+    }
+
 );
 
 

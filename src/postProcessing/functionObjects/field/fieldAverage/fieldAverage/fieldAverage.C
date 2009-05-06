@@ -259,7 +259,7 @@ void Foam::fieldAverage::readAveragingProperties()
             obr_.time().timeName(),
             "uniform",
             obr_,
-            IOobject::NO_READ,
+            IOobject::MUST_READ,
             IOobject::NO_WRITE,
             false
         );
@@ -308,6 +308,7 @@ Foam::fieldAverage::fieldAverage
     active_(true),
     prevTimeIndex_(-1),
     cleanRestart_(false),
+    resetOnOutput_(false),
     faItems_(),
     meanScalarFields_(),
     meanVectorFields_(),
@@ -355,6 +356,7 @@ void Foam::fieldAverage::read(const dictionary& dict)
     if (active_)
     {
         dict.readIfPresent("cleanRestart", cleanRestart_);
+        dict.readIfPresent("resetOnOutput", resetOnOutput_);
         dict.lookup("fields") >> faItems_;
 
         initialize();
@@ -387,6 +389,17 @@ void Foam::fieldAverage::write()
         calcAverages();
         writeAverages();
         writeAveragingProperties();
+
+        if (resetOnOutput_)
+        {
+            Info<< "fieldAverage: restarting averaging at time "
+                << obr_.time().timeName() << nl << endl;
+
+            initialize();
+
+            // ensure first averaging works unconditionally
+            prevTimeIndex_ = -1;
+        }
     }
 }
 

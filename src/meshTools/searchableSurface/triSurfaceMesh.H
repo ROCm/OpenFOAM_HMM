@@ -28,6 +28,11 @@ Class
 Description
     IOoject and searching on triSurface
 
+    Note: when constructing from dictionary has optional parameters:
+        - scale     : scaling factor.
+        - tolerance : relative tolerance for doing intersections
+                      (see triangle::intersection)
+
 SourceFiles
     triSurfaceMesh.C
 
@@ -42,6 +47,7 @@ SourceFiles
 #include "indexedOctree.H"
 #include "treeDataTriSurface.H"
 #include "treeDataEdge.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -61,6 +67,9 @@ class triSurfaceMesh
 private:
 
     // Private member data
+
+        //- Optional tolerance to use in searches
+        scalar tolerance_;
 
         //- Search tree (triangles)
         mutable autoPtr<indexedOctree<treeDataTriSurface> > tree_;
@@ -89,6 +98,13 @@ private:
         (
             const fileName& fName,
             const fileName& objectName
+        );
+
+        //- Helper function for isSurfaceClosed
+        static bool addFaceToEdge
+        (
+            const edge&,
+            EdgeMap<label>&
         );
 
         //- Check whether surface is closed without calculating any permanent

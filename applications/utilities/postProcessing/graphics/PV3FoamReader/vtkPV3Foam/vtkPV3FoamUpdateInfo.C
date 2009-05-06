@@ -34,6 +34,7 @@ License
 #include "IOPtrList.H"
 #include "polyBoundaryMeshEntries.H"
 #include "entry.H"
+#include "Cloud.H"
 #include "vtkPV3FoamReader.h"
 
 // local headers
@@ -148,16 +149,16 @@ void Foam::vtkPV3Foam::updateInfoLagrangian()
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::updateInfoLagrangian" << nl
-            << "    " << dbPtr_->timePath()/"lagrangian" << endl;
+            << "    " << dbPtr_->timePath()/cloud::prefix << endl;
     }
 
 
     // use the db directly since this might be called without a mesh,
     // but the region must get added back in
-    fileName lagrangianPrefix("lagrangian");
+    fileName lagrangianPrefix(cloud::prefix);
     if (meshRegion_ != polyMesh::defaultRegion)
     {
-        lagrangianPrefix = meshRegion_/"lagrangian";
+        lagrangianPrefix = meshRegion_/cloud::prefix;
     }
 
     // Search for list of lagrangian objects for this time
@@ -463,10 +464,10 @@ void Foam::vtkPV3Foam::updateInfoLagrangianFields()
 
     // use the db directly since this might be called without a mesh,
     // but the region must get added back in
-    fileName lagrangianPrefix("lagrangian");
+    fileName lagrangianPrefix(cloud::prefix);
     if (meshRegion_ != polyMesh::defaultRegion)
     {
-        lagrangianPrefix = meshRegion_/"lagrangian";
+        lagrangianPrefix = meshRegion_/cloud::prefix;
     }
 
     IOobjectList objects

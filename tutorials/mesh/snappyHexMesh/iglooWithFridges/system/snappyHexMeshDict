@@ -143,10 +143,10 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-//        {
-//            file "fridgeA.eMesh";
-//            level 3;
-//        }
+        {
+            file "fridgeA.eMesh";
+            level 3;
+        }
     );
 
 
@@ -308,6 +308,10 @@ addLayersControls
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
+
+
+    // Overall max number of layer addition iterations
+    nLayerIter 50;
 }
 
 

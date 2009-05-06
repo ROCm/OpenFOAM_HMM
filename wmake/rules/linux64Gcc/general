@@ -1,5 +1,5 @@
 CPP        = /lib/cpp $(GFLAGS)
-LD         = ld -A64
+LD         = ld
 
 PROJECT_LIBS = -l$(WM_PROJECT) -liberty -ldl
 

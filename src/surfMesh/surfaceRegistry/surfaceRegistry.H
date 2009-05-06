@@ -66,8 +66,8 @@ public:
     //- Runtime type information
     TypeName("surfaceRegistry");
 
-        //- The subInstance (local) to prefix: %surfaces
-        static const word subInstance;
+        //- The prefix to local: %surfaces
+        static const word prefix;
 
         //- The default surface name: %default
         static word defaultName;

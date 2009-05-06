@@ -21,6 +21,11 @@ internalField   uniform 0.01;
 
 boundaryField
 {
+    minY
+    {
+        type            epsilonWallFunction;
+        value           uniform 0.01;
+    }
     maxY
     {
         type            epsilonWallFunction;

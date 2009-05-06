@@ -545,7 +545,7 @@ Foam::label Foam::meshTools::otherEdge
         "meshTools::otherEdge(const primitiveMesh&, const labelList&"
         ", const label, const label)"
     )   << "Can not find edge in "
-        << IndirectList<edge>(mesh.edges(), edgeLabels)()
+        << UIndirectList<edge>(mesh.edges(), edgeLabels)()
         << " connected to edge "
         << thisEdgeI << " with vertices " << mesh.edges()[thisEdgeI]
         << " on side " << thisVertI << abort(FatalError);

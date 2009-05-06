@@ -25,8 +25,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "OFFsurfaceFormat.H"
+#include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
+#include "Ostream.H"
+#include "OFstream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -60,7 +63,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     {
         FatalErrorIn
         (
-            "fileFormats::OFFsurfaceFormat<Face>::read(const fileName&)"
+            "fileFormats::OFFsurfaceFormat::read(const fileName&)"
         )
             << "Cannot read file " << filename
             << exit(FatalError);
@@ -72,7 +75,7 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
     {
         FatalErrorIn
         (
-            "fileFormats::OFFsurfaceFormat<Face>::read(const fileName&)"
+            "fileFormats::OFFsurfaceFormat::read(const fileName&)"
         )
             << "OFF file " << filename << " does not start with 'OFF'"
             << exit(FatalError);
@@ -142,11 +145,9 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
         }
     }
 
-    // transfer to normal lists
-    reset(pointLst.xfer(), dynFaces.xfer());
+    // transfer to normal lists, no zone information
+    reset(pointLst.xfer(), dynFaces.xfer(), Xfer<surfZoneList>());
 
-    // no zone information
-    this->oneZone();
     return true;
 }
 
@@ -154,81 +155,97 @@ bool Foam::fileFormats::OFFsurfaceFormat<Face>::read
 template<class Face>
 void Foam::fileFormats::OFFsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const pointField& pointLst,
-    const List<Face>& faceLst,
-    const List<surfZone>& zoneLst
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
-    writeHeader(os, pointLst, faceLst.size(), zoneLst);
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
+    const List<surfZone>& zoneLst = surf.surfZones();
 
-    label faceIndex = 0;
-    forAll(zoneLst, zoneI)
+    OFstream os(filename);
+    if (!os.good())
     {
-        os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
-
-        forAll(zoneLst[zoneI], localFaceI)
-        {
-            const Face& f = faceLst[faceIndex++];
-
-            os << f.size();
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp];
-            }
-
-            // add optional zone information
-            os << ' ' << zoneI << endl;
-        }
-        os << "# </zone>" << endl;
+        FatalErrorIn
+        (
+            "fileFormats::OFFsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
     }
-    os << "# </faces>" << endl;
-}
 
+    // Write header
+    os  << "OFF" << endl
+        << "# Geomview OFF file written " << clock::dateTime().c_str() << nl
+        << nl
+        << "# points : " << pointLst.size() << nl
+        << "# faces  : " << faceLst.size() << nl
+        << "# zones  : " << zoneLst.size() << nl;
 
-template<class Face>
-void Foam::fileFormats::OFFsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const MeshedSurface<Face>& surf
-)
-{
-    write(os, surf.points(), surf.faces(), surf.zones());
-}
+    // Print zone names as comment
+    forAll(zoneLst, zoneI)
+    {
+        os  << "#   " << zoneI << "  " << zoneLst[zoneI].name()
+            << "  (nFaces: " << zoneLst[zoneI].size() << ")" << nl;
+    }
 
+    os  << nl
+        << "# nPoints  nFaces  nEdges" << nl
+        << pointLst.size() << ' ' << faceLst.size() << ' ' << 0 << nl
+        << nl
+        << "# <points count=\"" << pointLst.size() << "\">" << endl;
 
-template<class Face>
-void Foam::fileFormats::OFFsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        os  << pointLst[ptI].x() << ' '
+            << pointLst[ptI].y() << ' '
+            << pointLst[ptI].z() << " #" << ptI << endl;
+    }
 
-    labelList faceMap;
-    List<surfZone> zoneLst = surf.sortedZones(faceMap);
-
-    writeHeader(os, surf.points(), faceLst.size(), zoneLst);
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
 
     label faceIndex = 0;
     forAll(zoneLst, zoneI)
     {
         os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
 
-        forAll(zoneLst[zoneI], localFaceI)
+        if (surf.useFaceMap()) 
         {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-
-            os << f.size();
-            forAll(f, fp)
+            forAll(zoneLst[zoneI], localFaceI)
             {
-                os << ' ' << f[fp];
-            }
+                const Face& f = faceLst[faceMap[faceIndex++]];
 
-            // add optional zone information
-            os << ' ' << zoneI << endl;
+                os << f.size();
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp];
+                }
+
+                // add optional zone information
+                os << ' ' << zoneI << endl;
+            }
         }
+        else
+        {
+            forAll(zoneLst[zoneI], localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+
+                os << f.size();
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp];
+                }
+
+                // add optional zone information
+                os << ' ' << zoneI << endl;
+            }
+        }        
         os << "# </zone>" << endl;
     }
     os << "# </faces>" << endl;

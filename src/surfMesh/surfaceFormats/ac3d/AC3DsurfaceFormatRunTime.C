@@ -25,8 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "AC3DsurfaceFormat.H"
-#include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
+
 #include "addToRunTimeSelectionTable.H"
 #include "addToMemberFunctionSelectionTable.H"
 
@@ -36,6 +35,7 @@ namespace Foam
 namespace fileFormats
 {
 
+// read MeshedSurface
 addNamedTemplatedToRunTimeSelectionTable
 (
     MeshedSurface,
@@ -53,10 +53,10 @@ addNamedTemplatedToRunTimeSelectionTable
     ac
 );
 
-
+// write MeshedSurfaceProxy
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     AC3DsurfaceFormat,
     face,
     write,
@@ -65,7 +65,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 addNamedTemplatedToMemberFunctionSelectionTable
 (
-    MeshedSurface,
+    MeshedSurfaceProxy,
     AC3DsurfaceFormat,
     triFace,
     write,
@@ -74,6 +74,7 @@ addNamedTemplatedToMemberFunctionSelectionTable
 );
 
 
+// write UnsortedMeshedSurface
 addNamedTemplatedToMemberFunctionSelectionTable
 (
     UnsortedMeshedSurface,

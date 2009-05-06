@@ -67,7 +67,7 @@ class kQRWallFunctionFvPatchField
 public:
 
     //- Runtime type information
-    TypeName("kQRWallFunction");
+    TypeName("compressible::kQRWallFunction");
 
 
     // Constructors

@@ -790,7 +790,7 @@ bool Foam::primitiveMesh::checkPoints
     {
         if (debug || report)
         {
-            Info<< " ***Unsed points found in the mesh, "
+            Info<< " ***Unused points found in the mesh, "
                    "number unused by faces: " << nFaceErrors
                 << " number unused by cells: " << nCellErrors
                 << endl;

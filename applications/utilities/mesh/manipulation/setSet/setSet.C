@@ -48,8 +48,8 @@ Description
 
 
 #if READLINE != 0
-#include <readline/readline.h>
-#include <readline/history.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 #endif
 
 using namespace Foam;

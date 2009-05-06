@@ -1212,6 +1212,17 @@ void Foam::meshRefinement::findCellZoneTopo
     // by changing cell zone every time we cross a surface.
     while (true)
     {
+        // Synchronise regionToCellZone.
+        // Note:
+        // - region numbers are identical on all processors
+        // - keepRegion is identical ,,
+        // - cellZones are identical ,,
+        // This done at top of loop to account for geometric matching
+        // not being synchronised.
+        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
+        Pstream::listCombineScatter(regionToCellZone);
+
+
         bool changed = false;
 
         // Internal faces
@@ -1292,14 +1303,6 @@ void Foam::meshRefinement::findCellZoneTopo
         {
             break;
         }
-
-        // Synchronise regionToCellZone.
-        // Note:
-        // - region numbers are identical on all processors
-        // - keepRegion is identical ,,
-        // - cellZones are identical ,,
-        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-        Pstream::listCombineScatter(regionToCellZone);
     }
 
 
@@ -1519,30 +1522,6 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
         if (debug)
         {
-            //- Note: commented out since not properly parallel yet.
-            //// Dump all these faces to a faceSet.
-            //faceSet problemGeom(mesh_, "problemFacesGeom", 100);
-            //
-            //const labelList facePatchGeom
-            //(
-            //    markFacesOnProblemCellsGeometric
-            //    (
-            //        motionDict,
-            //        globalToPatch
-            //    )
-            //);
-            //forAll(facePatchGeom, faceI)
-            //{
-            //    if (facePatchGeom[faceI] != -1)
-            //    {
-            //        problemGeom.insert(faceI);
-            //    }
-            //}
-            //Pout<< "Dumping " << problemGeom.size()
-            //    << " problem faces to " << problemGeom.objectPath() << endl;
-            //problemGeom.write();
-
-
             faceSet problemTopo(mesh_, "problemFacesTopo", 100);
 
             const labelList facePatchTopo

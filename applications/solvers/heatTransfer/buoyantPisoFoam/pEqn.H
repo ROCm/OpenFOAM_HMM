@@ -12,8 +12,8 @@
     (
         fvc::interpolate(rho)
        *(
-           (fvc::interpolate(U) & mesh.Sf())
-         + fvc::ddtPhiCorr(rUA, rho, U, phi)
+            (fvc::interpolate(U) & mesh.Sf())
+          + fvc::ddtPhiCorr(rUA, rho, U, phi)
         )
     );
 

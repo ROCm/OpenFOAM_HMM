@@ -36,7 +36,7 @@ void Foam::SIBS::polyExtrapolate
     scalarField& yz,
     scalarField& dy,
     scalarField& x,
-    scalarSquareMatrix& d
+    scalarRectangularMatrix& d
 ) const
 {
     label n = yz.size();

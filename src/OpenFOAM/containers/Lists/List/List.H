@@ -66,8 +66,10 @@ template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
     class DynamicList;
 template<class T> class SortableList;
 template<class T> class IndirectList;
+template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
+typedef UList<label> unallocLabelList;
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -107,10 +109,13 @@ public:
         List(const List<T>&);
 
         //- Construct by transferring the parameter contents
-        List(const Xfer<List<T> >&);
+        List(const Xfer< List<T> >&);
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
+
+        //- Construct as subset.
+        List(const UList<T>&, const unallocLabelList& mapAddressing);
 
         //- Construct given start and end iterators.
         template<class InputIterator>
@@ -128,6 +133,9 @@ public:
 
         //- Construct as copy of IndirectList<T>
         List(const IndirectList<T>&);
+
+        //- Construct as copy of UIndirectList<T>
+        List(const UIndirectList<T>&);
 
         //- Construct as copy of BiIndirectList<T>
         List(const BiIndirectList<T>&);
@@ -173,6 +181,15 @@ public:
             //- Clear the list, i.e. set size to zero.
             void clear();
 
+            //- Append a List at the end of this list
+            void append(const UList<T>&);
+
+            //- Append a UIndirectList at the end of this list
+            void append(const UIndirectList<T>&);
+
+            //- Append a SLList at the end of this list
+            void append(const SLList<T>&);
+
             //- Transfer the contents of the argument List into this List
             //  and annull the argument list.
             void transfer(List<T>&);
@@ -187,7 +204,7 @@ public:
             void transfer(SortableList<T>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<List<T> > xfer();
+            inline Xfer< List<T> > xfer();
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
@@ -205,6 +222,9 @@ public:
 
         //- Assignment from IndirectList operator. Takes linear time.
         void operator=(const IndirectList<T>&);
+
+        //- Assignment from UIndirectList operator. Takes linear time.
+        void operator=(const UIndirectList<T>&);
 
         //- Assignment from BiIndirectList operator. Takes linear time.
         void operator=(const BiIndirectList<T>&);

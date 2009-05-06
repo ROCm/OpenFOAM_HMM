@@ -110,7 +110,7 @@ Foam::labelListList Foam::addPatchCellLayer::calcGlobalEdgeFaces
     );
 
     // Extract pp part
-    return IndirectList<labelList>(globalEdgeFaces, meshEdges)();
+    return UIndirectList<labelList>(globalEdgeFaces, meshEdges);
 }
 
 
@@ -629,7 +629,7 @@ void Foam::addPatchCellLayer::setRefinement
 
         {
             labelList n(mesh_.nPoints(), 0);
-            IndirectList<label>(n, meshPoints) = nPointLayers;
+            UIndirectList<label>(n, meshPoints) = nPointLayers;
             syncTools::syncPointList(mesh_, n, maxEqOp<label>(), 0, false);
 
             // Non-synced
@@ -706,7 +706,7 @@ void Foam::addPatchCellLayer::setRefinement
 
         {
             pointField d(mesh_.nPoints(), wallPoint::greatPoint);
-            IndirectList<point>(d, meshPoints) = firstLayerDisp;
+            UIndirectList<point>(d, meshPoints) = firstLayerDisp;
             syncTools::syncPointList
             (
                 mesh_,

@@ -32,7 +32,7 @@ License
 
 namespace Foam
 {
-    makeSetWriters(gnuplotSetWriter)
+    makeSetWriters(gnuplotSetWriter);
 }
 
 // ************************************************************************* //

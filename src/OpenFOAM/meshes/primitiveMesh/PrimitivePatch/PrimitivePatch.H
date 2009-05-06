@@ -330,7 +330,9 @@ public:
 
         // Addressing into mesh
 
-            //- Return labelList of mesh points in patch
+            //- Return labelList of mesh points in patch. They are constructed
+            //  walking through the faces in incremental order and not sorted
+            //  anymore.
             const labelList& meshPoints() const;
 
             //- Mesh point map.  Given the global point index find its

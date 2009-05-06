@@ -177,7 +177,7 @@ label mergePatchFaces
         List<faceList> allFaceSetsFaces(allFaceSets.size());
         forAll(allFaceSets, setI)
         {
-            allFaceSetsFaces[setI] = IndirectList<face>
+            allFaceSetsFaces[setI] = UIndirectList<face>
             (
                 mesh.faces(),
                 allFaceSets[setI]
