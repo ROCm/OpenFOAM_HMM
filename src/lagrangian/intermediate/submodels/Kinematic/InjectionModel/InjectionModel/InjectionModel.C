@@ -301,6 +301,12 @@ Foam::InjectionModel<CloudType>::InjectionModel
     time0_(owner.db().time().value()),
     timeStep0_(0.0)
 {
+    // Provide some info
+    // - also serves to initialise mesh dimensions - needed for parallel runs
+    //   due to lazy evaluation of valid mesh dimensions
+    Info<< "    Constructing " << owner.mesh().nGeometricD() << "-D injection"
+        << endl;
+
     word parcelBasisType = coeffDict_.lookup("parcelBasisType");
     if (parcelBasisType == "mass")
     {
@@ -341,6 +347,11 @@ template<class CloudType>
 template<class TrackData>
 void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 {
+    if (!active())
+    {
+        return;
+    }
+
     const scalar time = owner_.db().time().value();
     const scalar continuousDt = owner_.db().time().deltaT().value();
 
