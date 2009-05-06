@@ -792,7 +792,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             wallInfo,
             pointWallDist,
             edgeWallDist,
-            mesh.nPoints()  // max iterations
+            mesh.globalData().nTotalPoints()    // max iterations
         );
     }
 
@@ -897,7 +897,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
 
             pointMedialDist,
             edgeMedialDist,
-            mesh.nPoints()  // max iterations
+            mesh.globalData().nTotalPoints()    // max iterations
         );
 
         // Extract medial axis distance as pointScalarField
@@ -953,6 +953,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
 void Foam::autoLayerDriver::shrinkMeshMedialDistance
 (
     motionSmoother& meshMover,
+    const dictionary& meshQualityDict,
     const label nSmoothThickness,
     const scalar maxThicknessToMedialRatio,
     const label nAllowableErrors,
@@ -1103,7 +1104,7 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             wallInfo,
             pointWallDist,
             edgeWallDist,
-            mesh.nPoints()  // max iterations
+            mesh.globalData().nTotalPoints()    // max iterations
         );
     }
 
@@ -1138,7 +1139,18 @@ void Foam::autoLayerDriver::shrinkMeshMedialDistance
             oldErrorReduction = meshMover.setErrorReduction(0.0);
         }
 
-        if (meshMover.scaleMesh(checkFaces, true, nAllowableErrors))
+        if
+        (
+            meshMover.scaleMesh
+            (
+                checkFaces,
+                List<labelPair>(0),
+                meshMover.paramDict(),
+                meshQualityDict,
+                true,
+                nAllowableErrors
+            )
+        )
         {
             Info<< "shrinkMeshMedialDistance : Successfully moved mesh" << endl;
             break;

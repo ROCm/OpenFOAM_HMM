@@ -502,6 +502,12 @@ const Foam::labelList& Foam::motionSmoother::adaptPatchIDs() const
 }
 
 
+const Foam::dictionary& Foam::motionSmoother::paramDict() const
+{
+    return paramDict_;
+}
+
+
 Foam::pointVectorField& Foam::motionSmoother::displacement()
 {
     return displacement_;

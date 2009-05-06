@@ -230,7 +230,7 @@ Foam::List<Foam::Pstream::commsStruct> Foam::Pstream::treeCommunication_(0);
 // in accuracy
 bool Foam::Pstream::floatTransfer
 (
-    debug::optimisationSwitch("floatTransfer", 1)
+    debug::optimisationSwitch("floatTransfer", 0)
 );
 
 // Number of processors at which the reduce algorithm changes from linear to

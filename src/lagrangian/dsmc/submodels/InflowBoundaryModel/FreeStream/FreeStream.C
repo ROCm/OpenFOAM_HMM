@@ -367,6 +367,8 @@ void Foam::FreeStream<CloudType>::inflow()
                             rndGen.GaussNormal()*t1
                           + rndGen.GaussNormal()*t2
                         )
+                      + (t1 & faceVelocity)*t1
+                      + (t2 & faceVelocity)*t2
                       + mostProbableSpeed*uNormal*n;
 
                     scalar Ei = cloud.equipartitionInternalEnergy

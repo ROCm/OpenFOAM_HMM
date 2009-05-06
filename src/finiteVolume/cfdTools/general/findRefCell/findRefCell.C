@@ -90,10 +90,10 @@ void Foam::setRefCell
                      "    bool\n"
                      ")",
                     dict
-                )
-                  << "Unable to set reference cell for field " << field.name()
-                  << nl << "    Reference point " << refPointName
-                  << " found on multiple domains" << nl << exit(FatalIOError);
+                )   << "Unable to set reference cell for field " << field.name()
+                    << nl << "    Reference point " << refPointName
+                    << " found on " << sumHasRef << " domains (should be one)"
+                    << nl << exit(FatalIOError);
             }
         }
         else
@@ -108,10 +108,10 @@ void Foam::setRefCell
                  "    bool\n"
                  ")",
                 dict
-            )
-              << "Unable to set reference cell for field" << field.name() << nl
-              << "    Please supply either " << refCellName
-              << " or " << refPointName << nl << exit(FatalIOError);
+            )   << "Unable to set reference cell for field" << field.name()
+                << nl
+                << "    Please supply either " << refCellName
+                << " or " << refPointName << nl << exit(FatalIOError);
         }
 
         refValue = readScalar(dict.lookup(refValueName));

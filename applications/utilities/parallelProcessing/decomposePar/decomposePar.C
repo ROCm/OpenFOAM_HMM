@@ -37,6 +37,9 @@ Usage
     Write the cell distribution as a labelList for use with 'manual'
     decomposition method and as a volScalarField for post-processing.
 
+    @param -region regionName \n
+    Decompose named region. Does not check for existence of processor*.
+
     @param -copyUniform \n
     Copy any @a uniform directories too.
 

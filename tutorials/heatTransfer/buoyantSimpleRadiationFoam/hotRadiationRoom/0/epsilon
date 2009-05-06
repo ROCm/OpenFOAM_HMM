@@ -23,25 +23,25 @@ boundaryField
 {
     floor
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 0;
     }
 
     ceiling
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 0;
     }
 
     fixedWalls
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 0;
     }
 
     box
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 0;
     }
 }
