@@ -2804,6 +2804,22 @@ void Foam::autoLayerDriver::addLayers
             << "Layer addition iteration " << iteration << nl
             << "--------------------------" << endl;
 
+
+        // Unset the extrusion at the pp.
+        const dictionary& meshQualityDict =
+        (
+            iteration < layerParams.nRelaxedIter()
+          ? motionDict
+          : motionDict.subDict("relaxed")
+        );
+
+        if (iteration >= layerParams.nRelaxedIter())
+        {
+            Info<< "Switched to relaxed meshQuality constraints." << endl;
+        }
+
+
+
         // Make sure displacement is equal on both sides of coupled patches.
         syncPatchDisplacement
         (
@@ -2845,6 +2861,7 @@ void Foam::autoLayerDriver::addLayers
             shrinkMeshMedialDistance
             (
                 meshMover,
+                meshQualityDict,
 
                 layerParams.nSmoothThickness(),
                 layerParams.maxThicknessToMedialRatio(),
@@ -3042,19 +3059,6 @@ void Foam::autoLayerDriver::addLayers
                 << " faces inside added layer to faceSet "
                 << layerFacesSet.name() << endl;
             layerFacesSet.write();
-        }
-
-        // Unset the extrusion at the pp.
-        const dictionary& meshQualityDict =
-        (
-            iteration < layerParams.nRelaxedIter()
-          ? motionDict
-          : motionDict.subDict("relaxed")
-        );
-
-        if (iteration >= layerParams.nRelaxedIter())
-        {
-            Info<< "Switched to relaxed meshQuality constraints." << endl;
         }
 
 

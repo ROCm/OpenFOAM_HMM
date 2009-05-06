@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::LESModels::
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+    Foam::incompressible::LESModels::
+        nuSgsWallFunctionFvPatchScalarField
 
 Description
-    Spalart Allmaas wall function boundary condition for compressible flows
+    Spalart Allmaras wall function boundary condition for incompressible flows
 
 SourceFiles
-    muSgsSpalartAllmarasWallFunctionFvPatchScalarField.C
+    nuSgsWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef muSgsSpalartAllmarasWallFunctionFvPatchScalarField_H
-#define muSgsSpalartAllmarasWallFunctionFvPatchScalarField_H
+#ifndef nuSgsWallFunctionFvPatchScalarField_H
+#define nuSgsWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -43,16 +43,16 @@ SourceFiles
 
 namespace Foam
 {
-namespace compressible
+namespace incompressible
 {
 namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-     Class muSgsSpalartAllmarasWallFunctionFvPatchScalarField Declaration
+     Class nuSgsWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+class nuSgsWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
@@ -62,28 +62,20 @@ class muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("muSgsSpalartAllmarasWallFunction");
+    TypeName("nuSgsWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        nuSgsWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
-        //- Construct from patch, internal field and Istream
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
-        (
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
-            Istream&
-        );
-
         //- Construct from patch, internal field and dictionary
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        nuSgsWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -91,20 +83,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        //  nuSgsWallFunctionFvPatchScalarField
         //  onto a new patch
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        nuSgsWallFunctionFvPatchScalarField
         (
-            const muSgsSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const nuSgsWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        nuSgsWallFunctionFvPatchScalarField
         (
-            const muSgsSpalartAllmarasWallFunctionFvPatchScalarField&
+            const nuSgsWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -112,14 +104,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new muSgsSpalartAllmarasWallFunctionFvPatchScalarField(*this)
+                new nuSgsWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        nuSgsWallFunctionFvPatchScalarField
         (
-            const muSgsSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const nuSgsWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -131,7 +123,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+                new nuSgsWallFunctionFvPatchScalarField
                 (
                     *this,
                     iF
@@ -155,7 +147,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels
-} // End namespace compressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
