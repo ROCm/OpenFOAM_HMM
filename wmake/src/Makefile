@@ -4,7 +4,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -43,26 +43,30 @@ SHELL      = /bin/sh
 .SUFFIXES:
 .SUFFIXES: .o
 
-RULES_DIR = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
+UTILBIN = $(WM_DIR)/utilbin/$(WM_ARCH)$(WM_COMPILER)
 
-all:  $(RULES_DIR)/dirToString $(RULES_DIR)/wmkdep
+all:  $(UTILBIN)/dirToString $(UTILBIN)/wmkdep
 
 clean:
-	rm -f $(RULES_DIR)/dirToString $(RULES_DIR)/wmkdep 2>/dev/null
+	rm -f $(UTILBIN)/dirToString $(UTILBIN)/wmkdep 2>/dev/null
 
 
-$(RULES_DIR)/dirToString: dirToString.c
-	$(cc) $(cFLAGS) dirToString.c -o $(RULES_DIR)/dirToString
+$(UTILBIN)/dirToString: dirToString.c
+	@mkdir -p $(UTILBIN)
+	$(cc) $(cFLAGS) dirToString.c -o $(UTILBIN)/dirToString
 
-$(RULES_DIR)/wmkdep: wmkdep.l
-	flex wmkdep.l ; $(cc) $(cFLAGS) lex.yy.c -o $(RULES_DIR)/wmkdep
+$(UTILBIN)/wmkdep: wmkdep.l
+	@mkdir -p $(UTILBIN)
+	flex wmkdep.l
+	$(cc) $(cFLAGS) lex.yy.c -o $(UTILBIN)/wmkdep
+
 
 #------------------------------------------------------------------------------
 # set compilation and dependency building rules
 #------------------------------------------------------------------------------
 
 GENERAL_RULES = $(WM_DIR)/rules/General
-RULES         = $(RULES_DIR)
+RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
 
 include $(RULES)/general
 include $(RULES)/$(WM_LINK_LANGUAGE)
