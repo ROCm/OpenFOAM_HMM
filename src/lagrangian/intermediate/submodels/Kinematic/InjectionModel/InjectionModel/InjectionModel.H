@@ -114,9 +114,6 @@ protected:
             //- Number of injections counter
             label nInjections_;
 
-            //- Running counter of parcels added during each injection
-            label parcelsAdded_;
-
             //- Running counter of total number of parcels added
             label parcelsAddedTotal_;
 
@@ -178,7 +175,7 @@ protected:
         );
 
         //- Post injection checks
-        virtual void postInjectCheck();
+        virtual void postInjectCheck(const label parcelsAdded);
 
 
 public:

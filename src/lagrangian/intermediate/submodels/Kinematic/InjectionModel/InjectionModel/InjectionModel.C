@@ -230,26 +230,23 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 
 
 template<class CloudType>
-void Foam::InjectionModel<CloudType>::postInjectCheck()
+void Foam::InjectionModel<CloudType>::postInjectCheck(const label parcelsAdded)
 {
-    if (parcelsAdded_ > 0)
+    if (parcelsAdded > 0)
     {
         Pout<< "\n--> Cloud: " << owner_.name() << nl
-            << "    Added " << parcelsAdded_
+            << "    Added " << parcelsAdded
             << " new parcels" << nl << endl;
     }
 
     // Increment total number of parcels added
-    parcelsAddedTotal_ += parcelsAdded_;
+    parcelsAddedTotal_ += parcelsAdded;
 
     // Update time for start of next injection
     time0_ = owner_.db().time().value();
 
     // Increment number of injections
     nInjections_++;
-
-    // Reset added parcels counter
-    parcelsAdded_ = 0;
 
     // Write current state to properties file
     writeProps();
@@ -269,7 +266,6 @@ Foam::InjectionModel<CloudType>::InjectionModel(CloudType& owner)
     massTotal_(0.0),
     massInjected_(0.0),
     nInjections_(0),
-    parcelsAdded_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
     time0_(0.0),
@@ -295,18 +291,11 @@ Foam::InjectionModel<CloudType>::InjectionModel
     massTotal_(dimensionedScalar(coeffDict_.lookup("massTotal")).value()),
     massInjected_(0.0),
     nInjections_(0),
-    parcelsAdded_(0),
     parcelsAddedTotal_(0),
     parcelBasis_(pbNumber),
     time0_(owner.db().time().value()),
     timeStep0_(0.0)
 {
-    // Provide some info
-    // - also serves to initialise mesh dimensions - needed for parallel runs
-    //   due to lazy evaluation of valid mesh dimensions
-    Info<< "    Constructing " << owner.mesh().nGeometricD() << "-D injection"
-        << endl;
-
     word parcelBasisType = coeffDict_.lookup("parcelBasisType");
     if (parcelBasisType == "mass")
     {
@@ -347,16 +336,11 @@ template<class CloudType>
 template<class TrackData>
 void Foam::InjectionModel<CloudType>::inject(TrackData& td)
 {
-    if (!active())
-    {
-        return;
-    }
-
     const scalar time = owner_.db().time().value();
     const scalar continuousDt = owner_.db().time().deltaT().value();
+    const polyMesh& mesh = owner_.mesh();
 
     // Prepare for next time step
-    parcelsAdded_ = 0;
     label newParcels = 0;
     scalar newVolume = 0.0;
     prepareForNextTimeStep(time0_, time, newParcels, newVolume);
@@ -364,7 +348,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     // Return if no parcels are required
     if (newParcels == 0)
     {
-        postInjectCheck();
+        postInjectCheck(0);
         return;
     }
 
@@ -384,7 +368,8 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     // Pad injection time if injection starts during this timestep
     const scalar padTime = max(0.0, SOI_ - time0_);
 
-    // Introduce new parcels linearly with time
+    // Introduce new parcels linearly across carrier phase timestep
+    label parcelsAdded = 0;
     for (label parcelI=0; parcelI<newParcels; parcelI++)
     {
         // Calculate the pseudo time of injection for parcel 'parcelI'
@@ -395,7 +380,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
         vector pos = vector::zero;
         setPositionAndCell(parcelI, timeInj, pos, cellI);
 
-        if (cellI >= 0)
+        if (cellI > -1)
         {
             if (validInjection(parcelI))
             {
@@ -419,30 +404,18 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 scalar dt = time - timeInj;
 
                 // Apply corrections for 2-D cases
-                meshTools::constrainToMeshCentre(owner_.mesh(), pos);
-                meshTools::constrainDirection
-                (
-                    owner_.mesh(),
-                    owner_.mesh().solutionD(),
-                    U
-                );
+                meshTools::constrainToMeshCentre(mesh, pos);
+                meshTools::constrainDirection(mesh, mesh.solutionD(), U);
 
                 // Add the new parcel
                 td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);
                 massInjected_ += nP*rho*mathematicalConstant::pi*pow3(d)/6.0;
-                parcelsAdded_++;
+                parcelsAdded++;
             }
-        }
-        else
-        {
-            WarningIn("Foam::InjectionModel<CloudType>::inject(TrackData& td)")
-                << "Failed to inject new parcel:" << nl
-                << "    id = " << parcelI << ", position = " << pos
-                << nl << endl;
         }
     }
 
-    postInjectCheck();
+    postInjectCheck(parcelsAdded);
 }
 
 
