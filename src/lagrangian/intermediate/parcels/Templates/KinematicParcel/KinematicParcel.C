@@ -85,6 +85,8 @@ void Foam::KinematicParcel<ParcelType>::calc
     const scalar rho0 = rho_;
     const scalar mass0 = mass();
 
+    const polyMesh& mesh = this->cloud().pMesh();
+
 
     // Initialise transfer terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,6 +105,9 @@ void Foam::KinematicParcel<ParcelType>::calc
     scalar Cud = 0.0;
     vector U1 =
         calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx, Cud, dUTrans);
+
+    // Constrain the new velocity for reduced -D cases
+    meshTools::constrainDirection(mesh, mesh.solutionD(), U1);
 
 
     // Accumulate carrier phase source terms
