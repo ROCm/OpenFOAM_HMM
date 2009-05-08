@@ -162,6 +162,20 @@ Foam::dictionary::dictionary
 
 Foam::dictionary::dictionary
 (
+    const dictionary* dictPtr
+)
+:
+    parent_(dictionary::null)
+{
+    if (dictPtr)
+    {
+        operator=(*dictPtr);
+    }
+}
+
+
+Foam::dictionary::dictionary
+(
     const dictionary& parentDict,
     const Xfer<dictionary>& dict
 )

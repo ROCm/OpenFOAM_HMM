@@ -81,7 +81,7 @@ oneEqEddy::oneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.094
         )
     )

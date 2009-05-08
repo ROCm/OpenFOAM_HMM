@@ -72,7 +72,7 @@ lowReOneEqEddy::lowReOneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.07
         )
     ),
@@ -81,7 +81,7 @@ lowReOneEqEddy::lowReOneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta",
-            coeffDict(),
+            coeffDict_,
             0.01
         )
     )

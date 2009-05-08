@@ -117,12 +117,14 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const LESModel& sgsModel
-        = db().lookupObject<LESModel>("LESProperties");
+    const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
-    scalar kappa = readScalar(sgsModel.lookup("kappa"));
-
-    scalar E = readScalar(sgsModel.subDict("wallFunctionCoeffs").lookup("E"));
+    // TODO: make these lookups optional (or more robust)?
+    const scalar kappa = readScalar(lesModel.lookup("kappa"));
+    const scalar E = readScalar
+    (
+        lesModel.subDict("wallFunctionCoeffs").lookup("E")
+    );
 
     const scalarField& ry = patch().deltaCoeffs();
 

@@ -38,7 +38,7 @@ Description
     This class defines the basic interface for a compressible flow SGS model,
     and encapsulates data of value to all possible models. In particular
     this includes references to all the dependent fields (rho, U, phi),
-    the physical viscosity mu, and the turbulenceProperties dictionary
+    the physical viscosity mu, and the LESProperties dictionary,
     which contains the model selection and model coefficients.
 
 SourceFiles
@@ -160,9 +160,10 @@ public:
 
     // Member Functions
 
-        //- Access the dictionary which provides info. about choice of
-        //  models, and all related data (particularly model coefficients).
-        inline dictionary& coeffDict()
+        //- Const access to the coefficients dictionary,
+        //  which provides info. about choice of models,
+        //  and all related data (particularly model coefficients).
+        inline const dictionary& coeffDict() const
         {
             return coeffDict_;
         }
@@ -254,7 +255,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read() = 0;
 };
 

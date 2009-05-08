@@ -116,7 +116,7 @@ public:
 
     // Member Functions
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

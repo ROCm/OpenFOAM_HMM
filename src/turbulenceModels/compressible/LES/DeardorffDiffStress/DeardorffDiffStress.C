@@ -69,7 +69,7 @@ DeardorffDiffStress::DeardorffDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.094
         )
     ),
@@ -78,7 +78,7 @@ DeardorffDiffStress::DeardorffDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cm",
-            coeffDict(),
+            coeffDict_,
             4.13
         )
     )

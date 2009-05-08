@@ -80,9 +80,9 @@ RASModel::RASModel
 
     turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
-    coeffDict_(subDict(type + "Coeffs")),
+    coeffDict_(subDictPtr(type + "Coeffs")),
 
-    wallFunctionDict_(subDict("wallFunctionCoeffs")),
+    wallFunctionDict_(subDictPtr("wallFunctionCoeffs")),
     kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -130,6 +130,63 @@ RASModel::RASModel
 
     y_(mesh_)
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+autoPtr<RASModel> RASModel::New
+(
+    const volScalarField& rho,
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    const basicThermo& thermophysicalModel
+)
+{
+    word modelName;
+
+    // Enclose the creation of the dictionary to ensure it is deleted
+    // before the turbulenceModel is created otherwise the dictionary is
+    // entered in the database twice
+    {
+        IOdictionary dict
+        (
+            IOobject
+            (
+                "RASProperties",
+                U.time().constant(),
+                U.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        dict.lookup("RASModel") >> modelName;
+    }
+
+    Info<< "Selecting RAS turbulence model " << modelName << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "RASModel::New(const volScalarField&, "
+            "const volVectorField&, const surfaceScalarField&, "
+            "basicThermo&)"
+        )   << "Unknown RASModel type " << modelName
+            << endl << endl
+            << "Valid RASModel types are :" << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<RASModel>
+    (
+        cstrIter()(rho, U, phi, thermophysicalModel)
+    );
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -193,9 +250,17 @@ bool RASModel::read()
     if (regIOobject::read())
     {
         lookup("turbulence") >> turbulence_;
-        coeffDict_ = subDict(type() + "Coeffs");
 
-        wallFunctionDict_ = subDict("wallFunctionCoeffs");
+        if (const dictionary* dictPtr = subDictPtr(type() + "Coeffs"))
+        {
+            coeffDict_ <<= *dictPtr;
+        }
+
+        if (const dictionary* dictPtr = subDictPtr("wallFunctionCoeffs"))
+        {
+            wallFunctionDict_ <<= *dictPtr;
+        }
+
         kappa_.readIfPresent(wallFunctionDict_);
         E_.readIfPresent(wallFunctionDict_);
         Cmu_.readIfPresent(wallFunctionDict_);
