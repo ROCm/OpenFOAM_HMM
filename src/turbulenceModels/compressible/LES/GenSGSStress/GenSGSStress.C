@@ -88,6 +88,19 @@ GenSGSStress::GenSGSStress
             IOobject::AUTO_WRITE
         ),
         mesh_
+    ),
+
+    alphaSgs_
+    (
+        IOobject
+        (
+            "alphaSgs",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
     )
 {}
 

@@ -49,6 +49,9 @@ void SpalartAllmaras::updateSubGridScaleFields()
 {
     muSgs_.internalField() = rho()*fv1()*nuTilda_.internalField();
     muSgs_.correctBoundaryConditions();
+
+    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_.correctBoundaryConditions();
 }
 
 
@@ -227,8 +230,20 @@ SpalartAllmaras::SpalartAllmaras
             IOobject::AUTO_WRITE
         ),
         mesh_
-    )
+    ),
 
+    alphaSgs_
+    (
+        IOobject
+        (
+            "alphaSgs",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    )
 {
     updateSubGridScaleFields();
 
