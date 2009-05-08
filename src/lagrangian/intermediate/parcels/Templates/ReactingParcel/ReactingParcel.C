@@ -102,7 +102,7 @@ void Foam::ReactingParcel<ParcelType>::calc
     scalar dhTrans = 0.0;
 
     // Mass transfer due to phase change
-    scalarField dMassPC(td.cloud().gases().size(), 0.0);
+    scalarField dMassPC(Y_.size(), 0.0);
 
 
     // Phase change
@@ -172,7 +172,8 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Transfer mass lost from particle to carrier mass source
         forAll(dMassPC, i)
         {
-            td.cloud().rhoTrans(i)[cellI] += np0*dMassPC[i];
+            label id = td.cloud().composition().localToGlobalGasId(0, i);
+            td.cloud().rhoTrans(id)[cellI] += np0*dMassPC[i];
         }
 
         // Update momentum transfer
