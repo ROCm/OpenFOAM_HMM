@@ -106,9 +106,6 @@ void Foam::KinematicParcel<ParcelType>::calc
     vector U1 =
         calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx, Cud, dUTrans);
 
-    // Constrain the new velocity for reduced -D cases
-    meshTools::constrainDirection(mesh, mesh.solutionD(), U1);
-
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -144,6 +141,8 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     vector& dUTrans
 ) const
 {
+    const polyMesh& mesh = this->cloud().pMesh();
+
     // Return linearised term from drag model
     Cud = td.cloud().drag().Cu(U - Uc_, d, rhoc_, rho, muc_);
 
@@ -159,6 +158,9 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const scalar bp = Cud;
 
     vector Unew = td.cloud().UIntegrator().integrate(U, dt, ap, bp).value();
+
+    // Apply correction to velocity for reduced-D cases
+    meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
 
     // Calculate the momentum transfer to the continuous phase
     // - do not include gravity impulse
@@ -188,6 +190,9 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
 
     while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
     {
+        // Apply correction to position for reduced-D cases
+        meshTools::constrainToMeshCentre(mesh, p.position());
+
         // Set the Lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
