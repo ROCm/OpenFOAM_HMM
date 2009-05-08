@@ -58,11 +58,11 @@ class UpwindFitData
     // Private data
 
         //- For each face of the mesh store the coefficients to multiply the
-        // stencil cell values by if the flow is from the owner
+        //  stencil cell values by if the flow is from the owner
         List<scalarList> owncoeffs_;
 
         //- For each face of the mesh store the coefficients to multiply the
-        // stencil cell values by if the flow is from the neighbour
+        //  stencil cell values by if the flow is from the neighbour
         List<scalarList> neicoeffs_;
 
 

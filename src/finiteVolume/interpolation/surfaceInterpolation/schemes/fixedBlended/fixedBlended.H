@@ -125,6 +125,7 @@ public:
             }
         }
 
+
         //- Construct from mesh, faceFlux and Istream
         fixedBlended
         (
@@ -165,7 +166,8 @@ public:
     // Member Functions
 
         //- Return the interpolation weighting factors
-        tmp<surfaceScalarField> weights
+        tmp<surfaceScalarField>
+        weights
         (
             const GeometricField<Type, fvPatchField, volMesh>& vf
         ) const
@@ -175,15 +177,74 @@ public:
               + (scalar(1.0) - blendingFactor_)*tScheme2_().weights(vf);
         }
 
+
         //- Return the face-interpolate of the given cell field
         //  with explicit correction
         tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
-        interpolate(const GeometricField<Type, fvPatchField, volMesh>& vf) const
+        interpolate
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const
         {
             return
                 blendingFactor_*tScheme1_().interpolate(vf)
               + (scalar(1.0) - blendingFactor_)*tScheme2_().interpolate(vf);
         }
+
+
+        //- Return true if this scheme uses an explicit correction
+        virtual bool corrected() const
+        {
+            return tScheme1_().corrected() || tScheme2_().corrected();
+        }
+
+
+        //- Return the explicit correction to the face-interpolate
+        //  for the given field
+        virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+        correction
+        (
+            const GeometricField<Type, fvPatchField, volMesh>& vf
+        ) const
+        {
+            if (tScheme1_().corrected())
+            {
+                if (tScheme2_().corrected())
+                {
+                    return
+                    (
+                        blendingFactor_
+                      * tScheme1_().correction(vf)
+                      + (scalar(1.0) - blendingFactor_)
+                      * tScheme2_().correction(vf)
+                    );
+                }
+                else
+                {
+                    return
+                    (
+                        blendingFactor_
+                      * tScheme1_().correction(vf)
+                    );
+                }
+            }
+            else if (tScheme2_().corrected())
+            {
+                return
+                (
+                    (scalar(1.0) - blendingFactor_)
+                  * tScheme2_().correction(vf)
+                );
+            }
+            else
+            {
+                return tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
+                (
+                    NULL
+                );
+            }
+        }
+
 };
 
 

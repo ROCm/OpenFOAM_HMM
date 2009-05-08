@@ -90,7 +90,7 @@ public:
             )
         {}
 
-        //- Construct from Istream. 
+        //- Construct from Istream.
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
         linearUpwindV
@@ -142,97 +142,9 @@ public:
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         correction
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
-        ) const
-        {
-            const fvMesh& mesh = this->mesh();
+            const GeometricField<Type, fvPatchField, volMesh>&
+        ) const;
 
-            tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tsfCorr
-            (
-                new GeometricField<Type, fvsPatchField, surfaceMesh>
-                (
-                    IOobject
-                    (
-                        vf.name(),
-                        mesh.time().timeName(),
-                        mesh
-                    ),
-                    mesh,
-                    dimensioned<Type>
-                    (
-                        vf.name(),
-                        vf.dimensions(),
-                        pTraits<Type>::zero
-                    )
-                )
-            );
-
-            GeometricField<Type, fvsPatchField, surfaceMesh>& sfCorr = tsfCorr();
-
-            const surfaceScalarField& faceFlux = this->faceFlux_;
-            const surfaceScalarField& w = mesh.weights();
-
-            const labelList& own = mesh.owner();
-            const labelList& nei = mesh.neighbour();
-
-            const vectorField& C = mesh.C();
-            const vectorField& Cf = mesh.Cf();
-
-            GeometricField
-            <typename outerProduct<vector, Type>::type, fvPatchField, volMesh>
-                gradVf = gradScheme_().grad(vf);
-
-            forAll(faceFlux, facei)
-            {
-                vector maxCorr;
-
-                if (faceFlux[facei] > 0.0)
-                {
-                    maxCorr =
-                        (1.0 - w[facei])
-                       *(vf[nei[facei]] - vf[own[facei]]);
-
-                    sfCorr[facei] = 
-                        (Cf[facei] - C[own[facei]]) & gradVf[own[facei]];
-                }
-                else
-                {
-                    maxCorr =
-                        w[facei]*(vf[own[facei]] - vf[nei[facei]]);
-
-                    sfCorr[facei] = 
-                        (Cf[facei] - C[nei[facei]]) & gradVf[nei[facei]];
-                }
-
-                scalar sfCorrs = magSqr(sfCorr[facei]);
-                scalar maxCorrs = sfCorr[facei] & maxCorr;
-
-                if (sfCorrs > 0)
-                {
-                    if (maxCorrs < 0)
-                    {
-                        sfCorr[facei] = vector::zero;
-                    }
-                    else if (sfCorrs > maxCorrs)
-                    {
-                        sfCorr[facei] *= maxCorrs/(sfCorrs + VSMALL);
-                    }
-                }
-                else if (sfCorrs < 0)
-                {
-                    if (maxCorrs > 0)
-                    {
-                        sfCorr[facei] = vector::zero;
-                    }
-                    else if (sfCorrs < maxCorrs)
-                    {
-                        sfCorr[facei] *= maxCorrs/(sfCorrs - VSMALL);
-                    }
-                }
-            }
-
-            return tsfCorr;
-        }
 };
 
 
