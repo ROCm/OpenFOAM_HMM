@@ -116,34 +116,23 @@
         pd + rho*(g & mesh.C())
     );
 
-    autoPtr<probes> pRefProbe;
     label pdRefCell = 0;
     scalar pdRefValue = 0.0;
+    setRefCell(pd, mesh.solutionDict().subDict("PISO"), pdRefCell, pdRefValue);
+
     scalar pRefValue = 0.0;
 
     if (pd.needReference())
     {
-        pRefProbe.set
-        (
-            new probes
-            (
-                "pRefProbe",
-                mesh,
-                mesh.solutionDict().subDict("PISO").subDict("pRefProbe")
-            )
-        );
-
         pRefValue = readScalar
         (
             mesh.solutionDict().subDict("PISO").lookup("pRefValue")
         );
 
-        pdRefCell = pRefProbe->cells()[0];
-
         p += dimensionedScalar
         (
             "p",
             p.dimensions(),
-            pRefValue - pRefProbe->sample<scalar>("p")()[0]
+            pRefValue - getRefCellValue(p, pdRefCell)
         );
     }
