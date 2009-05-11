@@ -81,7 +81,45 @@ LESModel::LESModel
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),
 
-    delta_(LESdelta::New("delta", U.mesh(), *this))
+    delta_(LESdelta::New("delta", U.mesh(), *this)),
+
+    wallFunctionDict_(subDict("wallFunctionCoeffs")),
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa",
+            wallFunctionDict_,
+            0.4187
+        )
+    ),
+    E_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "E",
+            wallFunctionDict_,
+            9.0
+        )
+    ),
+    Cmu_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            wallFunctionDict_,
+            0.07
+        )
+    ),
+    Prt_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Prt",
+            wallFunctionDict_,
+            0.85
+        )
+    )
 {
     readIfPresent("k0", k0_);
 }
@@ -107,9 +145,15 @@ bool LESModel::read()
     {
         coeffDict_ = subDict(type() + "Coeffs");
 
+        readIfPresent("k0", k0_);
+
         delta_().read(*this);
 
-        readIfPresent("k0", k0_);
+        wallFunctionDict_ = subDict("wallFunctionCoeffs");
+        kappa_.readIfPresent(wallFunctionDict_);
+        E_.readIfPresent(wallFunctionDict_);
+        Cmu_.readIfPresent(wallFunctionDict_);
+        Prt_.readIfPresent(wallFunctionDict_);
 
         return true;
     }

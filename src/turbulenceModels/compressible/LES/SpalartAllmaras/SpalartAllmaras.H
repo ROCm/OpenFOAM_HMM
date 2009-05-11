@@ -89,6 +89,7 @@ class SpalartAllmaras
         volScalarField nuTilda_;
         volScalarField dTilda_;
         volScalarField muSgs_;
+        volScalarField alphaSgs_;
 
 
 public:
@@ -136,12 +137,18 @@ public:
             return muSgs_;
         }
 
+        //- Return SGS thermal diffusivity
+        virtual tmp<volScalarField> alphaSgs() const
+        {
+            return alphaSgs_;
+        }
+
         //- Return thermal conductivity
         virtual tmp<volScalarField> alphaEff() const
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", muSgs_ + alpha())
+                new volScalarField("alphaEff", alphaSgs_ + alpha())
             );
         }
 

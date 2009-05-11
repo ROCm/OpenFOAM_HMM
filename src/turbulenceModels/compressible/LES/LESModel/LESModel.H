@@ -87,6 +87,19 @@ protected:
 
         autoPtr<LESdelta> delta_;
 
+        // Wall function properties
+
+            //- Wall function dictionary
+            dictionary wallFunctionDict_;
+
+            dimensionedScalar kappa_;
+
+            dimensionedScalar E_;
+
+            dimensionedScalar Cmu_;
+
+            dimensionedScalar Prt_;
+
 
     // Protected Member Functions
 
@@ -167,12 +180,6 @@ public:
             return coeffDict_;
         }
 
-        //- Access function to filter width
-        inline const volScalarField& delta() const
-        {
-            return delta_();
-        }
-
         //- Return the value of k0 which k is not allowed to be less than
         const dimensionedScalar& k0() const
         {
@@ -185,6 +192,35 @@ public:
             return k0_;
         }
 
+        //- Access function to filter width
+        inline const volScalarField& delta() const
+        {
+            return delta_();
+        }
+
+        //- Return kappa for use in wall-functions
+        dimensionedScalar kappa() const
+        {
+            return kappa_;
+        }
+
+        //- Return E for use in wall-functions
+        dimensionedScalar E() const
+        {
+            return E_;
+        }
+
+        //- Return Cmu for use in wall-functions
+        dimensionedScalar Cmu() const
+        {
+            return Cmu_;
+        }
+
+        //- Return turbulent Prandtl number for use in wall-functions
+        dimensionedScalar Prt() const
+        {
+            return Prt_;
+        }
 
         //- Return the SGS turbulent kinetic energy.
         virtual tmp<volScalarField> k() const = 0;
@@ -192,7 +228,7 @@ public:
         //- Return the SGS turbulent dissipation.
         virtual tmp<volScalarField> epsilon() const = 0;
 
-        //- Return the effective viscosity
+        //- Return the SGS turbulent viscosity
         virtual tmp<volScalarField> muSgs() const = 0;
 
         //- Return the effective viscosity
@@ -203,6 +239,9 @@ public:
                 new volScalarField("muEff", muSgs() + mu())
             );
         }
+
+        //- Return the SGS turbulent thermal diffusivity
+        virtual tmp<volScalarField> alphaSgs() const = 0;
 
         //- Return the SGS thermal conductivity.
         virtual tmp<volScalarField> alphaEff() const = 0;
@@ -225,6 +264,12 @@ public:
             virtual tmp<volScalarField> mut() const
             {
                 return muSgs();
+            }
+
+            //- Return the turbulence thermal diffusivity
+            virtual tmp<volScalarField> alphat() const
+            {
+                return alphaSgs();
             }
 
             //- Return the Reynolds stress tensor
@@ -254,7 +299,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read() = 0;
 };
 

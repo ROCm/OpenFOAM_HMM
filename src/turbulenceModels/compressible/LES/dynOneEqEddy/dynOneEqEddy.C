@@ -47,6 +47,9 @@ void dynOneEqEddy::updateSubGridScaleFields(const volSymmTensorField& D)
 {
     muSgs_ = ck_(D)*rho()*sqrt(k_)*delta();
     muSgs_.correctBoundaryConditions();
+
+    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_.correctBoundaryConditions();
 }
 
 
