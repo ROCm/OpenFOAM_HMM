@@ -51,6 +51,9 @@ void lowReOneEqEddy::updateSubGridScaleFields()
     // low Re no corrected eddy viscosity
     muSgs_ -= (mu()/beta_)*(scalar(1) - exp(-beta_*muSgs_/mu()));
     muSgs_.correctBoundaryConditions();
+
+    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_.correctBoundaryConditions();
 }
 
 

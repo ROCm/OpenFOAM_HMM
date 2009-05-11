@@ -72,6 +72,7 @@ protected:
 
         volScalarField k_;
         volScalarField muSgs_;
+        volScalarField alphaSgs_;
 
 
 public:
@@ -113,12 +114,18 @@ public:
             return muSgs_;
         }
 
-        //- Return thermal conductivity
+        //- Return thermal diffusivity
+        virtual tmp<volScalarField> alphaSgs() const
+        {
+            return alphaSgs_;
+        }
+
+        //- Return thermal diffusivity
         virtual tmp<volScalarField> alphaEff() const
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", muSgs_ + alpha())
+                new volScalarField("alphaEff", alphaSgs_ + alpha())
             );
         }
 

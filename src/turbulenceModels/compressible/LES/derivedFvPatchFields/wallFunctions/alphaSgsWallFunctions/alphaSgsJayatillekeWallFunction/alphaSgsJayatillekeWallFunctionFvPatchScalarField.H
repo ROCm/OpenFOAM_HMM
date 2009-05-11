@@ -23,112 +23,133 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::kQRWallFunctionFvPatchField
+    alphaSgsJayatillekeWallFunctionFvPatchScalarField
 
 Description
-    Boundary condition for turbulence k, Q, and R when using wall functions.
-    Simply acts as a zero gradient condition.
+    Thermal wall function for turbulent thermal diffusivity based on the
+    Jayatilleke thermal wall function
 
 SourceFiles
-    kQRWallFunctionFvPatchField.C
+    alphaSgsJayatillekeWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kQRWallFunctionFvPatchField_H
-#define kQRWallFunctionFvPatchField_H
+#ifndef alphaSgsJayatillekeWallFunctionFvPatchScalarField_H
+#define alphaSgsJayatillekeWallFunctionFvPatchScalarField_H
 
-#include "zeroGradientFvPatchField.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
-namespace RASModels
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                Class kQRWallFunctionFvPatchField Declaration
+     Class alphaSgsJayatillekeWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class kQRWallFunctionFvPatchField
+class alphaSgsJayatillekeWallFunctionFvPatchScalarField
 :
-    public zeroGradientFvPatchField<Type>
+    public fixedValueFvPatchScalarField
 {
+    // Private data
+
+        static scalar maxExp_;
+        static scalar tolerance_;
+        static label maxIters_;
+
 
     // Private member functions
 
         //- Check the type of the patch
         void checkType();
 
+        //- `P' function
+        scalar Psmooth(const scalar Prat) const;
+
+        //- Calculate y+ at the edge of the thermal laminar sublayer
+        scalar yPlusTherm
+        (
+            const scalar P,
+            const scalar Prat,
+            const scalar E,
+            const scalar kappa
+        ) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("kQRWallFunction");
+    TypeName("alphaSgsJayatillekeWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        kQRWallFunctionFvPatchField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        kQRWallFunctionFvPatchField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        // kQRWallFunctionFvPatchField
+        //- Construct by mapping given an
+        //  alphaSgsJayatillekeWallFunctionFvPatchScalarField
         //  onto a new patch
-        kQRWallFunctionFvPatchField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
-            const kQRWallFunctionFvPatchField&,
+            const alphaSgsJayatillekeWallFunctionFvPatchScalarField&,
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        kQRWallFunctionFvPatchField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
-            const kQRWallFunctionFvPatchField&
+            const alphaSgsJayatillekeWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchScalarField> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchScalarField>
             (
-                new kQRWallFunctionFvPatchField(*this)
+                new alphaSgsJayatillekeWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        kQRWallFunctionFvPatchField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
-            const kQRWallFunctionFvPatchField&,
-            const DimensionedField<Type, volMesh>&
+            const alphaSgsJayatillekeWallFunctionFvPatchScalarField&,
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchScalarField> clone
         (
-            const DimensionedField<Type, volMesh>& iF
+            const DimensionedField<scalar, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchScalarField>
             (
-                new kQRWallFunctionFvPatchField(*this, iF)
+                new alphaSgsJayatillekeWallFunctionFvPatchScalarField
+                (
+                    *this,
+                    iF
+                )
             );
         }
 
@@ -142,26 +163,14 @@ public:
             (
                 const Pstream::commsTypes commsType=Pstream::Pstream::blocking
             );
-
-
-        // I-O
-
-            //- Write
-            void write(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
-} // End namespace incompressible
+} // End namespace LESModels
+} // End namespace compressible
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "kQRWallFunctionFvPatchField.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

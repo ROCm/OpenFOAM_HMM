@@ -23,41 +23,39 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::kQRWallFunctionFvPatchField
+    alphaSgsWallFunctionFvPatchScalarField
 
 Description
-    Boundary condition for turbulence k, Q, and R when using wall functions.
-    Simply acts as a zero gradient condition.
+    Boundary condition for thermal diffusivity when using wall functions
+    - replicates OpenFOAM v1.5 (and earlier) behaviour
 
 SourceFiles
-    kQRWallFunctionFvPatchField.C
+    alphaSgsWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kQRWallFunctionFvPatchField_H
-#define kQRWallFunctionFvPatchField_H
+#ifndef alphaSgsWallFunctionFvPatchScalarField_H
+#define alphaSgsWallFunctionFvPatchScalarField_H
 
-#include "zeroGradientFvPatchField.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
-namespace RASModels
+namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-                Class kQRWallFunctionFvPatchField Declaration
+           Class alphaSgsWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class Type>
-class kQRWallFunctionFvPatchField
+class alphaSgsWallFunctionFvPatchScalarField
 :
-    public zeroGradientFvPatchField<Type>
+    public fixedValueFvPatchScalarField
 {
-
     // Private member functions
 
         //- Check the type of the patch
@@ -67,68 +65,67 @@ class kQRWallFunctionFvPatchField
 public:
 
     //- Runtime type information
-    TypeName("kQRWallFunction");
+    TypeName("alphaSgsWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        kQRWallFunctionFvPatchField
+        alphaSgsWallFunctionFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        kQRWallFunctionFvPatchField
+        alphaSgsWallFunctionFvPatchScalarField
         (
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        // kQRWallFunctionFvPatchField
+        //- Construct by mapping given alphaSgsWallFunctionFvPatchScalarField
         //  onto a new patch
-        kQRWallFunctionFvPatchField
+        alphaSgsWallFunctionFvPatchScalarField
         (
-            const kQRWallFunctionFvPatchField&,
+            const alphaSgsWallFunctionFvPatchScalarField&,
             const fvPatch&,
-            const DimensionedField<Type, volMesh>&,
+            const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        kQRWallFunctionFvPatchField
+        alphaSgsWallFunctionFvPatchScalarField
         (
-            const kQRWallFunctionFvPatchField&
+            const alphaSgsWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
-        virtual tmp<fvPatchField<Type> > clone() const
+        virtual tmp<fvPatchScalarField> clone() const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchScalarField>
             (
-                new kQRWallFunctionFvPatchField(*this)
+                new alphaSgsWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        kQRWallFunctionFvPatchField
+        alphaSgsWallFunctionFvPatchScalarField
         (
-            const kQRWallFunctionFvPatchField&,
-            const DimensionedField<Type, volMesh>&
+            const alphaSgsWallFunctionFvPatchScalarField&,
+            const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct and return a clone setting internal field reference
-        virtual tmp<fvPatchField<Type> > clone
+        virtual tmp<fvPatchScalarField> clone
         (
-            const DimensionedField<Type, volMesh>& iF
+            const DimensionedField<scalar, volMesh>& iF
         ) const
         {
-            return tmp<fvPatchField<Type> >
+            return tmp<fvPatchScalarField>
             (
-                new kQRWallFunctionFvPatchField(*this, iF)
+                new alphaSgsWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
@@ -142,26 +139,14 @@ public:
             (
                 const Pstream::commsTypes commsType=Pstream::Pstream::blocking
             );
-
-
-        // I-O
-
-            //- Write
-            void write(Ostream&) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace RASModels
-} // End namespace incompressible
+} // End namespace LESModels
+} // End namespace compressible
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "kQRWallFunctionFvPatchField.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

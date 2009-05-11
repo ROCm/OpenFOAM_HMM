@@ -73,6 +73,7 @@ protected:
 
         volSymmTensorField B_;
         volScalarField muSgs_;
+        volScalarField alphaSgs_;
 
 
 public:
@@ -96,23 +97,29 @@ public:
 
     // Member Functions
 
-        //- Return the SGS turbulent kinetic energy.
+        //- Return the SGS turbulent kinetic energy
         virtual tmp<volScalarField> k() const
         {
             return 0.5*tr(B_);
         }
 
-        //- Return the SGS turbulent dissipation.
+        //- Return the SGS turbulent dissipation
         virtual tmp<volScalarField> epsilon() const
         {
             volScalarField K = k();
             return ce_*K*sqrt(K)/delta();
         }
 
-        //- Return the SGS viscosity.
+        //- Return the SGS viscosity
         virtual tmp<volScalarField> muSgs() const
         {
             return muSgs_;
+        }
+
+        //- Return the SGS thermal diffusivity
+        virtual tmp<volScalarField> alphaSgs() const
+        {
+            return alphaSgs_;
         }
 
         //- Return thermal conductivity
@@ -120,11 +127,11 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", muSgs_ + alpha())
+                new volScalarField("alphaEff", alphaSgs_ + alpha())
             );
         }
 
-        //- Return the sub-grid stress tensor.
+        //- Return the sub-grid stress tensor
         virtual tmp<volSymmTensorField> B() const
         {
             return B_;
@@ -135,7 +142,7 @@ public:
         virtual tmp<volSymmTensorField> devRhoBeff() const;
 
         //- Returns divergence of B : i.e. the additional term in the
-        //  filtered NSE.
+        //  filtered NSE
         virtual tmp<fvVectorMatrix> divDevRhoBeff(volVectorField& U) const;
 
         //- Correct Eddy-Viscosity and related properties

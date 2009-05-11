@@ -24,11 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "muSgsWallFunctionFvPatchScalarField.H"
+#include "alphaSgsWallFunctionFvPatchScalarField.H"
 #include "LESModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
+#include "wallFvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,23 +40,42 @@ namespace compressible
 namespace LESModels
 {
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void alphaSgsWallFunctionFvPatchScalarField::checkType()
+{
+    if (!isA<wallFvPatch>(patch()))
+    {
+        FatalErrorIn
+        (
+            "alphaSgsWallFunctionFvPatchScalarField::checkType()"
+        )
+            << "Patch type for patch " << patch().name() << " must be wall\n"
+            << "Current patch type is " << patch().type() << nl
+            << exit(FatalError);
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+alphaSgsWallFunctionFvPatchScalarField::
+alphaSgsWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
     fixedValueFvPatchScalarField(p, iF)
-{}
+{
+    checkType();
+}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+alphaSgsWallFunctionFvPatchScalarField::
+alphaSgsWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& ptf,
+    const alphaSgsWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -65,20 +85,8 @@ muSgsWallFunctionFvPatchScalarField
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    Istream& is
-)
-:
-    fixedValueFvPatchScalarField(p, iF, is)
-{}
-
-
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+alphaSgsWallFunctionFvPatchScalarField::
+alphaSgsWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -86,103 +94,53 @@ muSgsWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict)
-{}
+{
+    checkType();
+}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+alphaSgsWallFunctionFvPatchScalarField::
+alphaSgsWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& tppsf
+    const alphaSgsWallFunctionFvPatchScalarField& tppsf
 )
 :
     fixedValueFvPatchScalarField(tppsf)
-{}
+{
+    checkType();
+}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+alphaSgsWallFunctionFvPatchScalarField::
+alphaSgsWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& tppsf,
+    const alphaSgsWallFunctionFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
     fixedValueFvPatchScalarField(tppsf, iF)
-{}
+{
+    checkType();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void muSgsWallFunctionFvPatchScalarField::evaluate
+void alphaSgsWallFunctionFvPatchScalarField::evaluate
 (
     const Pstream::commsTypes
 )
 {
     const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
-    const scalar kappa = lesModel.kappa().value();
-    const scalar E = lesModel.E().value();
+    // Turbulent Prandtl number
+    const scalar Prt = lesModel.Prt().value();
 
-    const scalarField& ry = patch().deltaCoeffs();
+    // Get the turbulent viscosity at the wall
+    const scalarField& muSgsw =
+        lesModel.muSgs()().boundaryField()[patch().index()];
 
-    const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
-
-    scalarField magUp = mag(U.patchInternalField() - U);
-
-    const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
-
-    const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
-
-    scalarField& muSgsw = *this;
-
-    scalarField magFaceGradU = mag(U.snGrad());
-
-    forAll(muSgsw, facei)
-    {
-        scalar magUpara = magUp[facei];
-
-        scalar utau = sqrt
-        (
-            (muSgsw[facei] + muw[facei])
-            *magFaceGradU[facei]/rhow[facei]
-        );
-
-        if(utau > 0)
-        {
-            int iter = 0;
-            scalar err = GREAT;
-
-            do
-            {
-                scalar kUu = kappa*magUpara/utau;
-                scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
-
-                scalar f =
-                    - utau/(ry[facei]*muw[facei]/rhow[facei])
-                    + magUpara/utau
-                    + 1/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
-
-                scalar df =
-                    - 1.0/(ry[facei]*muw[facei]/rhow[facei])
-                    - magUpara/sqr(utau)
-                    - 1/E*kUu*fkUu/utau;
-
-                scalar utauNew = utau - f/df;
-                err = mag((utau - utauNew)/utau);
-                utau = utauNew;
-
-            } while (utau > VSMALL && err > 0.01 && ++iter < 10);
-
-            muSgsw[facei] =
-                max(rhow[facei]*sqr(utau)/magFaceGradU[facei] - muw[facei],0.0);
-        }
-        else
-        {
-            muSgsw[facei] = 0;
-        }
-    }
+    operator==(muSgsw/Prt);
 }
 
 
@@ -191,7 +149,7 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
 makePatchTypeField
 (
     fvPatchScalarField,
-    muSgsWallFunctionFvPatchScalarField
+    alphaSgsWallFunctionFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
