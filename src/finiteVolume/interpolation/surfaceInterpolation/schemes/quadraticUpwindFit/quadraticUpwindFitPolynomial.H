@@ -28,7 +28,7 @@ Class
 Description
     Quadratic polynomial for upwind biased interpolation fitting.
 
-    Can be used with the UpwindFit scheme to crate a quadratic surface
+    Can be used with the UpwindFit scheme to create a quadratic surface
     interpolation scheme
 
 \*---------------------------------------------------------------------------*/

@@ -117,7 +117,7 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
         label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char listDelimiter = is.readBeginList("StaticHashTable<T, Key, Hash>");
+        char delimiter = is.readBeginList("StaticHashTable<T, Key, Hash>");
 
         if (s)
         {
@@ -126,7 +126,7 @@ Foam::Istream& Foam::operator>>(Istream& is, StaticHashTable<T, Key, Hash>& L)
                 L.resize(2*s);
             }
 
-            if (listDelimiter == token::BEGIN_LIST)
+            if (delimiter == token::BEGIN_LIST)
             {
                 for (label i=0; i<s; i++)
                 {

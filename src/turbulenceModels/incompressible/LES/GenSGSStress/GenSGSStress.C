@@ -51,7 +51,7 @@ GenSGSStress::GenSGSStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ce",
-            coeffDict(),
+            coeffDict_,
             1.048
         )
     ),
@@ -61,7 +61,7 @@ GenSGSStress::GenSGSStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "couplingFactor",
-            coeffDict(),
+            coeffDict_,
             0.0
         )
     ),

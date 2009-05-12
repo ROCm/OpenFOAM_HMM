@@ -39,7 +39,7 @@ using namespace Foam;
 
 int main()
 {
-    HASHTABLE_CLASS<double> table1(100);
+    HASHTABLE_CLASS<double> table1(13);
 
     table1.insert("aaa", 1.0);
     table1.insert("aba", 2.0);
@@ -56,7 +56,8 @@ int main()
     table1.erase("abs");
 
     Info<< "\ntable1 toc: " << table1.toc() << endl;
-    Info<< "\ntable1 [" << table1.size() << "] " << endl;
+    table1.printInfo(Info)
+        << "table1 [" << table1.size() << "] " << endl;
     forAllIter(HASHTABLE_CLASS<double>, table1, iter)
     {
         Info<< iter.key() << " => " << iter() << nl;
@@ -97,7 +98,7 @@ int main()
         << "transfer table1 -> table3 via the xfer() method" << nl;
 
     Info<< "\ntable1" << table1 << nl
-        << "\ntable2" << table1 << nl
+        << "\ntable2" << table2 << nl
         << "\ntable3" << table3 << nl;
 
     Info<< "\nerase table2 by iterator" << nl;
@@ -113,10 +114,14 @@ int main()
         << "\ntable3" << table3 << nl;
 
     table3.resize(1);
-    Info<< "\nresize(1) table3" << table3 << nl;
+    Info<< "\nresize(1) table3" << nl;
+    table3.printInfo(Info)
+        << table3 << nl;
 
     table3.resize(10000);
-    Info<< "\nresize(10000) table3" << table3 << nl;
+    Info<< "\nresize(10000) table3" << nl;
+    table3.printInfo(Info)
+        << table3 << nl;
 
     HASHTABLE_CLASS<double> table4;
 
@@ -134,26 +139,27 @@ int main()
     table1.erase(table1.begin());
     Info<< "removed an element - test table1 != table3 : "
         << (table1 != table3) << nl;
-    
+
     // insert a few things into table2
     table2.set("ada", 14.0);
     table2.set("aeq", 15.0);
     table2.set("aaw", 16.0);
     table2.set("abs", 17.0);
     table2.set("adx", 20.0);
-    
+
     Info<< "\ntable1" << table1 << nl
         << "\ntable2" << table2 << nl;
 
     label nErased = table1.erase(table2);
-    
+
     Info<< "\nerase table2 keys from table1 (removed "
         << nErased << " elements)" << nl
         << "\ntable1" << table1 << nl
         << "\ntable2" << table2 << nl;
 
 
-    Info<< "\nclearStorage table3 ... ";
+    Info<< "\ntable3" << table3
+        << "\nclearStorage table3 ... ";
     table3.clearStorage();
     Info<< table3 << nl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -154,7 +154,7 @@ SpalartAllmarasIDDES::SpalartAllmarasIDDES
         dimensioned<scalar>::lookupOrAddToDict
         (
             "fwStar",
-            coeffDict(),
+            coeffDict_,
             0.424
         )
     ),
@@ -163,7 +163,7 @@ SpalartAllmarasIDDES::SpalartAllmarasIDDES
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cl",
-            coeffDict(),
+            coeffDict_,
             3.55
         )
     ),
@@ -172,7 +172,7 @@ SpalartAllmarasIDDES::SpalartAllmarasIDDES
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ct",
-            coeffDict(),
+            coeffDict_,
             1.63
         )
     )

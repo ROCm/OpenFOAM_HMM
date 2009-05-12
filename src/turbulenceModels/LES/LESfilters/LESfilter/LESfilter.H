@@ -102,8 +102,8 @@ public:
         //- Return a reference to the selected LES filter
         static autoPtr<LESfilter> New
         (
-            const fvMesh& mesh,
-            const dictionary& LESfilterDict
+            const fvMesh&,
+            const dictionary&
         );
 
 

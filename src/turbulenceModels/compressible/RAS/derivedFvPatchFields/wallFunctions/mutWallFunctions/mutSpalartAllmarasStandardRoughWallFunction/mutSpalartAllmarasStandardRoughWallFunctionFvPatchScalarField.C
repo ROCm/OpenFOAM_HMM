@@ -135,8 +135,7 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const RASModel& rasModel
-        = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
     const scalar kappa = rasModel.kappa().value();
     const scalar E = rasModel.E().value();
@@ -160,7 +159,7 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
 
     scalarField magFaceGradU = mag(U.snGrad());
 
-    if(roughnessHeight_ > 0.0)
+    if (roughnessHeight_ > 0.0)
     {
         // Rough Walls.
         const scalar c_1 = 1/(90 - 2.25) + roughnessConstant_;

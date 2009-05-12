@@ -36,7 +36,7 @@ Description
     only once.  This is why this program is faster than cpp.
 
 Usage
-    wmkdep [ -Idirectory ... -Idirectory] filename
+    wmkdep [ -Idirectory ... -Idirectory ] filename
 
 \*---------------------------------------------------------------------------*/
 
@@ -107,7 +107,7 @@ int main(int argc, char* argv[])
 
     sourceFile = (char*)malloc(strlen(argv[argc-1]) + 1);
     strcpy(sourceFile, argv[argc-1]);
-    fprintf(stderr,"Making dependency list for source file %s\n", sourceFile);
+    fprintf(stderr, "Making dependency list for source file %s\n", sourceFile);
 
 
     /* Get list of -I directories. */

@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class LimitedLimiter Declaration
+                       Class LimitedLimiter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class LimitedScheme>

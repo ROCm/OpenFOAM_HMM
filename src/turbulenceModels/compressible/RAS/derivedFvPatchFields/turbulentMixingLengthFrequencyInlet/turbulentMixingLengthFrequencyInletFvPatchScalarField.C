@@ -76,7 +76,7 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
     mixingLength_(readScalar(dict.lookup("mixingLength"))),
-    kName_(dict.lookup("k"))
+    kName_(dict.lookupOrDefault<word>("k", "k"))
 {}
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
@@ -113,11 +113,10 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     }
 
     // Lookup Cmu corresponding to the turbulence model selected
-    const compressible::RASModel& RAS =
-        db().lookupObject<compressible::RASModel>("RASProperties");
-    scalar Cmu = readScalar(RAS.coeffDict().lookup("Cmu"));
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    scalar Cmu25 = pow(Cmu, 0.25);
+    const scalar Cmu = readScalar(rasModel.coeffDict().lookup("Cmu"));
+    const scalar Cmu25 = pow(Cmu, 0.25);
 
     const fvPatchField<scalar>& kp =
         patch().lookupPatchField<volScalarField, scalar>(kName_);

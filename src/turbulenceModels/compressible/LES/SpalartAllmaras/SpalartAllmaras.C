@@ -117,7 +117,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaNut",
-            coeffDict(),
+            coeffDict_,
             1.5
         )
     ),
@@ -127,7 +127,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb1",
-            coeffDict(),
+            coeffDict_,
             0.1355
         )
     ),
@@ -136,7 +136,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb2",
-            coeffDict(),
+            coeffDict_,
             0.622
         )
     ),
@@ -145,7 +145,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv1",
-            coeffDict(),
+            coeffDict_,
             7.1
         )
     ),
@@ -154,7 +154,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv2",
-            coeffDict(),
+            coeffDict_,
             5.0
         )
     ),
@@ -163,7 +163,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "CDES",
-            coeffDict(),
+            coeffDict_,
             0.65
         )
     ),
@@ -172,7 +172,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.07
         )
     ),
@@ -191,7 +191,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw2",
-            coeffDict(),
+            coeffDict_,
             0.3
         )
     ),
@@ -200,7 +200,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw3",
-            coeffDict(),
+            coeffDict_,
             2.0
         )
     ),

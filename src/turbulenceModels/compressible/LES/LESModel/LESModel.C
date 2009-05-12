@@ -77,13 +77,13 @@ LESModel::LESModel
     ),
 
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
-    coeffDict_(subDict(type + "Coeffs")),
+    coeffDict_(subDictPtr(type + "Coeffs")),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),
 
     delta_(LESdelta::New("delta", U.mesh(), *this)),
 
-    wallFunctionDict_(subDict("wallFunctionCoeffs")),
+    wallFunctionDict_(subDictPtr("wallFunctionCoeffs")),
     kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -125,6 +125,59 @@ LESModel::LESModel
 }
 
 
+// * * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * //
+
+autoPtr<LESModel> LESModel::New
+(
+    const volScalarField& rho,
+    const volVectorField& U,
+    const surfaceScalarField& phi,
+    const basicThermo& thermoPhysicalModel
+)
+{
+    word modelName;
+
+    // Enclose the creation of the dictionary to ensure it is deleted
+    // before the turbulenceModel is created otherwise the dictionary is
+    // entered in the database twice
+    {
+        IOdictionary dict
+        (
+            IOobject
+            (
+                "LESProperties",
+                U.time().constant(),
+                U.db(),
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        dict.lookup("LESModel") >> modelName;
+    }
+
+    Info<< "Selecting LES turbulence model " << modelName << endl;
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(modelName);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "LESModel::New(const volVectorField& U, const "
+            "surfaceScalarField& phi, const basicThermo&)"
+        )   << "Unknown LESModel type " << modelName
+            << endl << endl
+            << "Valid LESModel types are :" << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<LESModel>(cstrIter()(rho, U, phi, thermoPhysicalModel));
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void LESModel::correct(const tmp<volTensorField>&)
@@ -143,13 +196,20 @@ bool LESModel::read()
 {
     if (regIOobject::read())
     {
-        coeffDict_ = subDict(type() + "Coeffs");
+        if (const dictionary* dictPtr = subDictPtr(type() + "Coeffs"))
+        {
+            coeffDict_ <<= *dictPtr;
+        }
+
+        if (const dictionary* dictPtr = subDictPtr("wallFunctionCoeffs"))
+        {
+            wallFunctionDict_ <<= *dictPtr;
+        }
 
         readIfPresent("k0", k0_);
 
         delta_().read(*this);
 
-        wallFunctionDict_ = subDict("wallFunctionCoeffs");
         kappa_.readIfPresent(wallFunctionDict_);
         E_.readIfPresent(wallFunctionDict_);
         Cmu_.readIfPresent(wallFunctionDict_);

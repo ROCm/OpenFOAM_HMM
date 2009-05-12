@@ -27,21 +27,24 @@
 #     wmkdir
 #
 # Description
-#     Script to make a directory that does not already exist
-#     Usage : wmkdir <dir>
+#     Script to make directories that do not already exist
+#     Usage : wmkdir <dir> [.. <dirN>]
 #
 #------------------------------------------------------------------------------
 
-if [ $# -eq 1 ]
+if [ $# -ge 1 ]
 then
     # provide help
     if [ "$1" = "-h" -o "$1" = "-help" ]
     then
-        echo "usage: ${0##*/} <dir>"
-        echo "       mkdir if directory does not already exist"
+        echo "usage: ${0##*/} <dir> [.. <dirN>]"
+        echo "       mkdir if directories do not already exist"
         echo
     else
-        [ -d "$1" ] || mkdir -p "$1"
+        for dir
+        do
+            [ -d "$dir" ] || mkdir -p "$dir"
+        done
     fi
 fi
 

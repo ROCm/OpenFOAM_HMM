@@ -55,7 +55,7 @@ GenEddyVisc::GenEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ce",
-            coeffDict(),
+            coeffDict_,
             1.048
         )
     ),

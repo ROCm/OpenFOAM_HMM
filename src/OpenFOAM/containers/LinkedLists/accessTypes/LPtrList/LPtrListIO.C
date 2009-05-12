@@ -53,11 +53,11 @@ void Foam::LPtrList<LListBase, T>::read(Istream& is, const INew& iNew)
         label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char listDelimiter = is.readBeginList("LPtrList<LListBase, T>");
+        char delimiter = is.readBeginList("LPtrList<LListBase, T>");
 
         if (s)
         {
-            if (listDelimiter == token::BEGIN_LIST)
+            if (delimiter == token::BEGIN_LIST)
             {
                 for (label i=0; i<s; i++)
                 {
