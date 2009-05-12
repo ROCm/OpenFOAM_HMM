@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -180,28 +180,27 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    // Get info from the SGS model
-    const LESModel& sgs = db().lookupObject<LESModel>("LESProperties");
+    const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
     // Wall function constants
-    const scalar E = sgs.E().value();
-    const scalar kappa = sgs.kappa().value();
-    const scalar Prt = sgs.Prt().value();
+    const scalar E = lesModel.E().value();
+    const scalar kappa = lesModel.kappa().value();
+    const scalar Prt = lesModel.Prt().value();
 
     // Field data
     const label patchI = patch().index();
 
-    const scalarField& muw = sgs.mu().boundaryField()[patchI];
-    const scalarField& muSgsw = sgs.muSgs()().boundaryField()[patchI];
+    const scalarField& muw = lesModel.mu().boundaryField()[patchI];
+    const scalarField muSgsw = lesModel.muSgs()().boundaryField()[patchI];
 
-    const scalarField& alphaw = sgs.alpha().boundaryField()[patchI];
+    const scalarField& alphaw = lesModel.alpha().boundaryField()[patchI];
     scalarField& alphaSgsw = *this;
 
-    const fvPatchVectorField& Uw = sgs.U().boundaryField()[patchI];
+    const fvPatchVectorField& Uw = lesModel.U().boundaryField()[patchI];
     const scalarField magUp = mag(Uw.patchInternalField() - Uw);
     const scalarField magGradUw = mag(Uw.snGrad());
 
-    const scalarField& rhow = sgs.rho().boundaryField()[patchI];
+    const scalarField& rhow = lesModel.rho().boundaryField()[patchI];
     const fvPatchScalarField& hw =
         patch().lookupPatchField<volScalarField, scalar>("h");
 

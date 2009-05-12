@@ -27,7 +27,8 @@ Class
 
 Description
     BiLinear polynomial for interpolation fitting.
-    Can be used with the CentredFit scheme to crate a biLinear surface
+
+    Can be used with the CentredFit scheme to create a biLinear surface
     interpolation scheme
 
 \*---------------------------------------------------------------------------*/

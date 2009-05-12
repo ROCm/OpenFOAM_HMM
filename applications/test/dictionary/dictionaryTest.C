@@ -52,10 +52,17 @@ int main(int argc, char *argv[])
 
         Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << nl
             << "dict2.toc(): " << dict2.name() << " " << dict2.toc() << endl;
-        
+
         // copy back
         dict1 = dict2;
         Info<< "dict1.toc(): " << dict1.name() << " " << dict1.toc() << endl;
+
+        dictionary dict3(dict2.subDictPtr("boundaryField"));
+        dictionary dict4(dict2.subDictPtr("NONEXISTENT"));
+
+        Info<< "dictionary construct from pointer" << nl
+            << "ok = " << dict3.name() << " " << dict3.toc() << nl
+            << "no = " << dict4.name() << " " << dict4.toc() << endl;
     }
 
 

@@ -24,46 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "LESfilter.H"
+#include "fvMesh.H"
+#include "fixedBlended.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<LESfilter> LESfilter::New
-(
-    const fvMesh& mesh,
-    const dictionary& LESfilterDict
-)
-{
-    word LESfilterType
-    (
-        LESfilterDict.lookup("filter")
-    );
-
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(LESfilterType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "LESfilter::New(const fvMesh& mesh, dictionary LESfilterDict)"
-        )   << "Unknown LESfilter type " << LESfilterType << endl << endl
-            << "Valid LESfilter types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
-            << exit(FatalError);
-    }
-
-    return autoPtr<LESfilter>(cstrIter()(mesh, LESfilterDict));
+    makeSurfaceInterpolationScheme(fixedBlended);
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -26,7 +26,7 @@ Class
     Foam::filteredLinearLimiter
 
 Description
-    Class to generate weighting factors for the filtered-linear
+    Class to generate weighting factors for the filteredLinear
     differencing scheme.
 
     The aim is to remove high-frequency modes with "staggering"

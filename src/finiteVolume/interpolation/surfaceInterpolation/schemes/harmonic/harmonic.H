@@ -26,9 +26,10 @@ Class
     Foam::harmonic
 
 Description
-    Harmonic-mean differencing scheme class.  This scheme interpolates 1/field
-    using a scheme specified at run-time and return the reciprocal of the
-    interpolate.
+    Harmonic-mean differencing scheme class.
+
+    This scheme interpolates 1/field using a scheme specified at run-time
+    and return the reciprocal of the interpolate.
 
 SourceFiles
     harmonic.C
@@ -76,7 +77,7 @@ public:
             surfaceInterpolationScheme<scalar>(mesh)
         {}
 
-        //- Construct from Istream. 
+        //- Construct from Istream.
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
         harmonic

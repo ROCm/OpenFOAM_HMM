@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,14 +131,14 @@ void alphaSgsWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    // Get reference to the SGS model
-    const LESModel& sgs = db().lookupObject<LESModel>("LESProperties");
+    const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
     // Turbulent Prandtl number
-    const scalar Prt = sgs.Prt().value();
+    const scalar Prt = lesModel.Prt().value();
 
     // Get the turbulent viscosity at the wall
-    const scalarField& muSgsw = sgs.muSgs()().boundaryField()[patch().index()];
+    const scalarField muSgsw =
+        lesModel.muSgs()().boundaryField()[patch().index()];
 
     operator==(muSgsw/Prt);
 }

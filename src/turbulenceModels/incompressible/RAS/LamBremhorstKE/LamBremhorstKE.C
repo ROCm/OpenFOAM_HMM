@@ -188,10 +188,10 @@ bool LamBremhorstKE::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
 
         return true;
     }

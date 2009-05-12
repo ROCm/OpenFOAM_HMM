@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,11 +58,11 @@ class UpwindFitData
     // Private data
 
         //- For each face of the mesh store the coefficients to multiply the
-        // stencil cell values by if the flow is from the owner
+        //  stencil cell values by if the flow is from the owner
         List<scalarList> owncoeffs_;
 
         //- For each face of the mesh store the coefficients to multiply the
-        // stencil cell values by if the flow is from the neighbour
+        //  stencil cell values by if the flow is from the neighbour
         List<scalarList> neicoeffs_;
 
 

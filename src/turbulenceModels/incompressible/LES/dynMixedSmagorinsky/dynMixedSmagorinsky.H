@@ -132,7 +132,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         bool read();
 };
 

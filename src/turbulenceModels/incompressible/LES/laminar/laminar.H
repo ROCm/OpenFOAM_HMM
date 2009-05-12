@@ -111,7 +111,7 @@ public:
         //  i.e. the additional term in the filtered NSE.
         virtual tmp<fvVectorMatrix> divDevBeff(volVectorField& U) const;
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         bool read();
 };
 

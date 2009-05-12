@@ -104,7 +104,7 @@ public:
         //- Correct the laminar viscosity
         virtual void correct();
 
-        //- Read turbulenceProperties dictionary
+        //- Read RASProperties dictionary
         virtual bool read();
 };
 

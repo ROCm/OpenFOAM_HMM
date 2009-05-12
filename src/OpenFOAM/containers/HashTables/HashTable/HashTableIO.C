@@ -81,7 +81,7 @@ Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
 
     os  << "HashTable<T,Key,Hash>"
         << " elements:" << size() << " slots:" << used << "/" << tableSize_
-        << " chaining(avg/max):" << (used ? float(avgChain/used) : 0)
+        << " chaining(avg/max):" << (used ? (float(avgChain)/used) : 0)
         << "/" << maxChain << endl;
 
     return os;
@@ -91,7 +91,11 @@ Foam::HashTable<T, Key, Hash>::printInfo(Ostream& os) const
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 template<class T, class Key, class Hash>
-Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    HashTable<T, Key, Hash>& L
+)
 {
     is.fatalCheck("operator>>(Istream&, HashTable<T, Key, Hash>&)");
 
@@ -113,7 +117,7 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
         label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char listDelimiter = is.readBeginList("HashTable<T, Key, Hash>");
+        char delimiter = is.readBeginList("HashTable<T, Key, Hash>");
 
         if (s)
         {
@@ -122,7 +126,7 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
                 L.resize(2*s);
             }
 
-            if (listDelimiter == token::BEGIN_LIST)
+            if (delimiter == token::BEGIN_LIST)
             {
                 for (label i=0; i<s; i++)
                 {
@@ -209,7 +213,11 @@ Foam::Istream& Foam::operator>>(Istream& is, HashTable<T, Key, Hash>& L)
 
 
 template<class T, class Key, class Hash>
-Foam::Ostream& Foam::operator<<(Ostream& os, const HashTable<T, Key, Hash>& L)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const HashTable<T, Key, Hash>& L
+)
 {
     // Write size and start delimiter
     os << nl << L.size() << nl << token::BEGIN_LIST << nl;

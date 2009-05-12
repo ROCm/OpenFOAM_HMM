@@ -335,20 +335,20 @@ bool LienCubicKELowRe::read()
 {
     if (RASModel::read())
     {
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        alphak_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        A1_.readIfPresent(coeffDict_);
-        A2_.readIfPresent(coeffDict_);
-        Ctau1_.readIfPresent(coeffDict_);
-        Ctau2_.readIfPresent(coeffDict_);
-        Ctau3_.readIfPresent(coeffDict_);
-        alphaKsi_.readIfPresent(coeffDict_);
-        CmuWall_.readIfPresent(coeffDict_);
-        Am_.readIfPresent(coeffDict_);
-        Aepsilon_.readIfPresent(coeffDict_);
-        Amu_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        alphak_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        A1_.readIfPresent(coeffDict());
+        A2_.readIfPresent(coeffDict());
+        Ctau1_.readIfPresent(coeffDict());
+        Ctau2_.readIfPresent(coeffDict());
+        Ctau3_.readIfPresent(coeffDict());
+        alphaKsi_.readIfPresent(coeffDict());
+        CmuWall_.readIfPresent(coeffDict());
+        Am_.readIfPresent(coeffDict());
+        Aepsilon_.readIfPresent(coeffDict());
+        Amu_.readIfPresent(coeffDict());
 
         return true;
     }
