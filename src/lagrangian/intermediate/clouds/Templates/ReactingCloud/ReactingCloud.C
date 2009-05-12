@@ -109,7 +109,9 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                    this->name() + "rhoTrans" + Foam::name(i),
+                    this->name()
+                      + "rhoTrans_"
+                      + thermo.composition().Y()[i].name(),
                     this->db().time().timeName(),
                     this->db(),
                     IOobject::NO_READ,
