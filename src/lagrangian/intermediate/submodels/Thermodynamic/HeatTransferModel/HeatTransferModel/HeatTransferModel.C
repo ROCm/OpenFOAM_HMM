@@ -118,7 +118,7 @@ Foam::scalar Foam::HeatTransferModel<CloudType>::Cu
     const scalar muc
 ) const
 {
-    const scalar Re = rhoc*mag(Ur)*dp/(muc + SMALL);
+    const scalar Re = rhoc*mag(Ur)*dp/(muc + ROOTVSMALL);
 
 //    const scalar Pr = muc/alphac;
     const scalar Pr = this->Pr();
