@@ -81,7 +81,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const scalar np0 = nParticle_;
     const scalar d0 = d_;
-    const scalar U0 = U_;
+    const vector U0 = U_;
     const scalar rho0 = rho_;
     const scalar mass0 = mass();
 
