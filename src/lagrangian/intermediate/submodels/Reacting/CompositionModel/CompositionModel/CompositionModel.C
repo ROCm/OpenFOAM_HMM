@@ -263,7 +263,7 @@ Foam::label Foam::CompositionModel<CloudType>::localToGlobalGasId
             << nl << abort(FatalError);
     }
 
-    return id;
+    return gid;
 }
 
 
