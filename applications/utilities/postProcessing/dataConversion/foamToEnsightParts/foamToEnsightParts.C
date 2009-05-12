@@ -83,23 +83,19 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("index",  "start");
     argList::validOptions.insert("noMesh", "");
 
-    const word volFieldTypes[] =
-    {
-        volScalarField::typeName,
-        volVectorField::typeName,
-        volSphericalTensorField::typeName,
-        volSymmTensorField::typeName,
-        volTensorField::typeName,
-        word::null
-    };
+    // the volume field types that we handle
+    wordHashSet volFieldTypes;
+    volFieldTypes.insert(volScalarField::typeName);
+    volFieldTypes.insert(volVectorField::typeName);
+    volFieldTypes.insert(volSphericalTensorField::typeName);
+    volFieldTypes.insert(volSymmTensorField::typeName);
+    volFieldTypes.insert(volTensorField::typeName);
 
-    const word sprayFieldTypes[] =
-    {
-        scalarIOField::typeName,
-        vectorIOField::typeName,
-        tensorIOField::typeName,
-        word::null
-    };
+    // the lagrangian field types that we handle
+    wordHashSet cloudFieldTypes;
+    cloudFieldTypes.insert(scalarIOField::typeName);
+    cloudFieldTypes.insert(vectorIOField::typeName);
+    cloudFieldTypes.insert(tensorIOField::typeName);
 
     const char* geometryName = "geometry";
 
@@ -168,7 +164,6 @@ int main(int argc, char *argv[])
 
 #   include "checkHasMovingMesh.H"
 #   include "findFields.H"
-#   include "validateFields.H"
 
     if (hasMovingMesh && optNoMesh)
     {
