@@ -291,6 +291,16 @@ inline Foam::label Foam::KinematicParcel<ParcelType>::faceInterpolation() const
 
 
 template <class ParcelType>
+inline Foam::scalar Foam::KinematicParcel<ParcelType>::massCell
+(
+    const label cellI
+) const
+{
+    return rhoc_*this->cloud().pMesh().cellVolumes()[cellI];
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::KinematicParcel<ParcelType>::mass() const
 {
     return rho_*volume();

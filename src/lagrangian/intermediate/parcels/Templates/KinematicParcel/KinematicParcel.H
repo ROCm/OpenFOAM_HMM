@@ -341,6 +341,9 @@ public:
             //  routine
             inline label faceInterpolation() const;
 
+            //- Cell owner mass
+            inline scalar massCell(const label cellI) const;
+
             //- Particle mass
             inline scalar mass() const;
 
