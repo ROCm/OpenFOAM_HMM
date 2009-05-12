@@ -137,7 +137,7 @@ void alphaSgsWallFunctionFvPatchScalarField::evaluate
     const scalar Prt = lesModel.Prt().value();
 
     // Get the turbulent viscosity at the wall
-    const scalarField& muSgsw =
+    const scalarField muSgsw =
         lesModel.muSgs()().boundaryField()[patch().index()];
 
     operator==(muSgsw/Prt);
