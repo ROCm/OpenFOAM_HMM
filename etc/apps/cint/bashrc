@@ -27,7 +27,7 @@
 #
 # Description
 #     Setup file for cint
-#     Sourced from OpenFOAM-?.?/etc/bashrc
+#     Sourced from OpenFOAM-*/etc/bashrc
 #
 #------------------------------------------------------------------------------
 

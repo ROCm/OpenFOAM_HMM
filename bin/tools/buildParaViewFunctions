@@ -53,7 +53,7 @@ addCMakeVariable()
 #
 addVerbosity()
 {
-    [ "$VERBOSE" = ON ] && addCMakeVariable  CMAKE_VERBOSE_MAKEFILE=TRUE
+    [ "$withVERBOSE" = true ] && addCMakeVariable  CMAKE_VERBOSE_MAKEFILE=TRUE
 }
 
 
@@ -62,7 +62,7 @@ addVerbosity()
 #
 addMpiSupport()
 {
-    [ "$WITH_MPI" = ON ] || return
+    [ "${withMPI:=false}" = true ] || return
     OBJ_ADD="$OBJ_ADD-mpi"
 
     addCMakeVariable  PARAVIEW_USE_MPI=ON VTK_USE_MPI=ON
@@ -78,7 +78,7 @@ addMpiSupport()
 #
 addPythonSupport()
 {
-    [ "$WITH_PYTHON" = ON ] || return
+    [ "${withPYTHON:=false}" = true ] || return
     OBJ_ADD="$OBJ_ADD-py"
 
     if pythonBin=$(which python 2>/dev/null)
@@ -105,25 +105,18 @@ addPythonSupport()
         [ -e "$PYTHON_LIBRARY" ] || {
             echo "    Please set the variable PYTHON_LIBRARY to the full"
             echo "    path to (and including) libpython, or deactivate"
-            echo "    python support by setting WITH_PYTHON=OFF"
+            echo "    python support by setting withPYTHON=false"
             exit 1
         }
 
         pythonMajor=$(echo $PYTHON_LIBRARY | sed 's/.*libpython\(.*\)\.so.*/\1/')
         pythonInclude=/usr/include/python$pythonMajor
 
-        [ -e "$PYTHON_LIBRARY" ] || {
-            echo "    Please set the variable PYTHON_LIBRARY to the full"
-            echo "    path to (and including) libpython, or deactivate"
-            echo "    python support by setting WITH_PYTHON=OFF"
-            exit 1
-        }
-
         # note - we could also allow for a PYTHON_INCLUDE variable ...
-        [ -e "$pythonInclude" ] || {
-            echo "    No python include headers found"
+        [ -d "$pythonInclude" ] || {
+            echo "    No python headers found in $pythonInclude/"
             echo "    Please install python headers or deactivate "
-            echo "    python support by setting WITH_PYTHON=OFF"
+            echo "    python support by setting withPYTHON=false"
             exit 1
         }
 
@@ -140,8 +133,8 @@ addPythonSupport()
 
         unset pythonBin pythonInclude pythonMajor
     else
-        echo "*** Error: python not installed"
-        echo "***        Deactivate python support by setting WITH_PYTHON=OFF"
+        echo "*** Error: python not found"
+        echo "***        Deactivate python support by setting withPYTHON=false"
         exit 1
     fi
 }
@@ -152,24 +145,31 @@ addPythonSupport()
 #
 addMesaSupport()
 {
-    [ "$WITH_MESA" = ON ] || return
+    [ "${withMESA:=false}" = true ] || return
 
-    if [ -d "$MESA_INCLUDE_DIR" -a -f "$MESA_LIBRARY" ]
+    if [ -d "$MESA_INCLUDE" -a -f "$MESA_LIBRARY" ]
     then
         OBJ_ADD="$OBJ_ADD-mesa"
 
         addCMakeVariable  VTK_OPENGL_HAS_OSMESA=ON
-        addCMakeVariable  OSMESA_INCLUDE_DIR=$MESA_INCLUDE_DIR
+        addCMakeVariable  OSMESA_INCLUDE_DIR=$MESA_INCLUDE
         addCMakeVariable  OSMESA_LIBRARY=$MESA_LIBRARY
 
     else
        echo "*** Error: no MESA information found"
-       echo "***        Deactivate MESA support by setting WITH_MESA=OFF, or"
-       echo "***        correct paths given by:"
-       echo "***        - MESA_INCLUDE_DIR ($MESA_INCLUDE_DIR)"
+       echo "***        Deactivate MESA support by setting withMESA=false, or"
+       echo "***        correct the paths given by:"
+       echo "***        - MESA_INCLUDE ($MESA_INCLUDE)"
        echo "***        - MESA_LIBRARY ($MESA_LIBRARY)"
        exit 1
     fi
+}
+
+addQtSupport()
+{
+    [ "${withQTSUPPORT:=false}" = true ] || return
+
+    addCMakeVariable "PARAVIEW_BUILD_QT_GUI=ON"
 }
 
 
@@ -181,23 +181,31 @@ getPaths()
     # set paraview environment
     for i in $PWD $WM_THIRD_PARTY_DIR
     do
-        ParaView_INST_DIR=$i/$PARAVIEW_SRC
+        ParaView_INST_DIR=$i/paraview-$ParaView_VERSION
         [ -d $ParaView_INST_DIR ] && break
     done
 
     if [ ! -d "$ParaView_INST_DIR" ]
     then
         # last chance: maybe already in the paraview directory
-        [ "${PWD##*/}" = $PARAVIEW_SRC ] && ParaView_INST_DIR=$PWD
+        if [ "${PWD##*/}" = "paraview-$ParaView_VERSION" ]
+        then
+            ParaView_INST_DIR=$PWD
+        fi
 
         [ -d "$ParaView_INST_DIR" ] || {
-            echo "did not find $PARAVIEW_SRC in these directories:"
+            echo "did not find paraview-$ParaView_VERSION in these directories:"
             echo "  PWD=$PWD"
             echo "  WM_THIRD_PARTY_DIR=$WM_THIRD_PARTY_DIR"
+            echo
             echo "abort build"
             exit 1
         }
     fi
+
+    # set the major version "<digits>.<digits>"
+    ParaView_MAJOR_VERSION=$(echo $ParaView_VERSION | \
+        sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
 
     # ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER$OBJ_ADD
     ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER
@@ -221,10 +229,11 @@ configParaView()
     cd $ParaView_DIR
 
     echo "----"
-    echo "Configuring $PARAVIEW_SRC"
-    echo "    MPI support    : $WITH_MPI"
-    echo "    Python support : $WITH_PYTHON"
-    echo "    MESA support   : $WITH_MESA"
+    echo "Configuring paraview-$ParaView_VERSION (major version: $ParaView_MAJOR_VERSION)"
+    echo "    MPI    support : ${withMPI:-false}"
+    echo "    Python support : ${withPYTHON:-false}"
+    echo "    MESA   support : ${withMESA:-false}"
+    echo "    Qt dev support : ${withQTSUPPORT:-false}"
     echo "    Source         : $ParaView_INST_DIR"
     echo "    Target         : $ParaView_DIR"
     echo "----"
@@ -266,10 +275,10 @@ makeParaView()
     fi
     echo "    Done make"
 
-    echo "    For quicker development, linking lib/paraview-$PARAVIEW_MAJOR_VERSION/ -> bin/"
-    rm -rf lib/paraview-$PARAVIEW_MAJOR_VERSION
+    echo "    For quicker development, linking lib/paraview-$ParaView_MAJOR_VERSION/ -> bin/"
+    rm -rf lib/paraview-$ParaView_MAJOR_VERSION
     mkdir lib 2>/dev/null
-    ( cd lib && ln -s ../bin paraview-$PARAVIEW_MAJOR_VERSION )
+    ( cd lib && ln -s ../bin paraview-$ParaView_MAJOR_VERSION )
 }
 
 
@@ -317,7 +326,7 @@ fixCMakeFiles()
     fixHardLinks ParaView_INST_DIR "$ParaView_INST_DIR" '*.cmake'
 
     # Replace path with env variable: MPI_ARCH_PATH
-    if [ "$WITH_MPI" = ON ]
+    if [ "${withMPI:=false}" = true ]
     then
         fixHardLinks MPI_ARCH_PATH "$MPI_ARCH_PATH" '*.cmake'
     fi
@@ -359,10 +368,10 @@ installParaView()
     echo "disabled 'make install' for now, just use links"
 
     # about.txt may be missing
-    paraviewLibDir="$ParaView_DIR/lib/paraview-$PARAVIEW_MAJOR_VERSION"
+    paraviewLibDir="$ParaView_DIR/lib/paraview-$ParaView_MAJOR_VERSION"
     if [ -d "$paraviewLibDir" -a ! -e "$paraviewLibDir/about.txt" ]
     then
-        echo "paraview-$PARAVIEW_MAJOR_VERSION installed - $(date)" > $paraviewLibDir/about.txt
+        echo "paraview-$ParaView_MAJOR_VERSION installed - $(date)" > $paraviewLibDir/about.txt
     fi
 
 cat<< INFO
@@ -380,9 +389,9 @@ INFO
 
 
 # clear all the variables used before using any of the functions
-unset VERBOSE
-unset WITH_MPI WITH_MESA
-unset WITH_PYTHON PYTHON_LIBRARY
+unset withMPI withQTSUPPORT withVERBOSE
+unset withMESA   MESA_INCLUDE   MESA_LIBRARY
+unset withPYTHON PYTHON_INCLUDE PYTHON_LIBRARY
 unset CMAKE_VARIABLES
 unset OBJ_ADD
 

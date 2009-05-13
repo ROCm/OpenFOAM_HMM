@@ -1,4 +1,5 @@
-#----------------------------------*-sh-*--------------------------------------
+#!/bin/sh
+#------------------------------------------------------------------------------
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
@@ -23,32 +24,43 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     ensight/cshrc
+#     engridFoam
 #
 # Description
-#     Setup file for Ensight 8.?
-#     Sourced from OpenFOAM-*/etc/cshrc
+#     start engrid using the paraview libraries from OpenFOAM
 #
 #------------------------------------------------------------------------------
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
 
-# fallback value
-if (! $?CEI_HOME) then
-    setenv CEI_HOME /usr/local/ensight/CEI
-endif
+usage: ${0##*/} [OPTION]
+options:
+  -help
 
-if ( -r $CEI_HOME ) then
+* start engrid using the paraview-$ParaView_VERSION libraries
+  passes through engrid options unmodified
 
-    # special treatment for 32bit FOAM and 64bit Ensight
-    if ($WM_ARCH == linux) then
-        setenv CEI_ARCH linux_linux_2.6_32
-    endif
+USAGE
+    exit 1
+}
 
-    set path=($path $CEI_HOME/bin)
+# report usage
+[ "$1" = "-h" -o "$1" = "-help" ] && usage
 
-    setenv ENSIGHT8_INPUT dummy
-    setenv ENSIGHT8_READER $FOAM_LIBBIN
-else
-    unsetenv CEI_HOME
-endif
+# set the major version "<digits>.<digits>"
+ParaView_MAJOR_VERSION=$(echo $ParaView_VERSION | \
+    sed -e 's/^\([0-9][0-9]*\.[0-9][0-9]*\).*$/\1/')
 
-# -----------------------------------------------------------------------------
+
+bindir=$WM_THIRD_PARTY_DIR/engrid/platforms/$WM_ARCH
+libdir="$ParaView_DIR/lib/paraview-$ParaView_MAJOR_VERSION"
+
+[ -x $bindir/engrid ] || usage "engrid executable not found in $bindir"
+[ -d $libdir ] || usage "paraview libraries not found"
+
+export LD_LIBRARY_PATH=$libdir:$LD_LIBRARY_PATH
+echo "starting $bindir/engrid $@"
+eval "exec $bindir/engrid $@ &"
+
+#------------------------------------------------------------------------------
