@@ -85,6 +85,9 @@ public:
             //- Particle initial temperature [K]
             const scalar T0_;
 
+            //- Minimum temperature [K]
+            const scalar TMin_;
+
             //- Particle specific heat capacity [J/(kg.K)]
             const scalar cp0_;
 
@@ -104,18 +107,22 @@ public:
 
             // Access
 
-                //- Return const access to particle initial temperature [K]
+                //- Return const access to the particle initial temperature [K]
                 inline scalar T0() const;
 
-                //- Return const access to particle specific heat capacity
+                //- Return const access to minimum temperature [K]
+                inline scalar TMin() const;
+
+                //- Return const access to the particle specific heat capacity
                 //  [J/(kg.K)]
                 inline scalar cp0() const;
 
-                //- Return const access to Particle emissivity [] (radiation)
+                //- Return const access to the particle emissivity []
+                //  Active for radiation only
                 inline scalar epsilon0() const;
 
-                //- Return const access to Particle scattering factor []
-                //  (radiation)
+                //- Return const access to the particle scattering factor []
+                //  Active for radiation only
                 inline scalar f0() const;
     };
 

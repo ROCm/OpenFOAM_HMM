@@ -40,7 +40,7 @@ void Foam::ReactingParcel<ParcelType>::updateCellQuantities
     ThermoParcel<ParcelType>::updateCellQuantities(td, dt, cellI);
 
     pc_ = td.pInterp().interpolate(this->position(), cellI);
-    if (pc_ < SMALL)
+    if (pc_ < td.constProps().pMin())
     {
         WarningIn
         (
@@ -50,8 +50,19 @@ void Foam::ReactingParcel<ParcelType>::updateCellQuantities
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Pressure < " << SMALL << " in cell " << cellI << nl << endl;
+        )   << "Limiting pressure in cell " << cellI << " to "
+            << td.constProps().pMin() <<  nl << endl;
+
+        pc_ = td.constProps().pMin();
     }
+
+    // Apply correction to cell density to account for mass transfer
+    scalar addedMass = 0.0;
+    forAll(td.cloud().rhoTrans(), i)
+    {
+        addedMass += td.cloud().rhoTrans(i)[cellI];
+    }
+    this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
 }
 
 
@@ -259,15 +270,16 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
         return 0.0;
     }
 
+    // Calculate mass transfer due to phase change
     td.cloud().phaseChange().calculate
     (
         dt,
         cellI,
         d,
-        min(T, td.constProps().Tbp()), // Limiting to boiling temperature
+        min(T, td.constProps().Tbp()), // Limit to boiling temperature
         pc_,
         this->Tc_,
-        this->muc_/this->rhoc_,
+        this->muc_/(this->rhoc_ + ROOTVSMALL),
         U - this->Uc_,
         dMassPC
     );

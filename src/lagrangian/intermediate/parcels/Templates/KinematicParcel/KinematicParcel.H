@@ -89,6 +89,9 @@ public:
             //- Constant properties dictionary
             const dictionary dict_;
 
+            //- Minimum density [kg/m3]
+            const scalar rhoMin_;
+
             //- Particle density [kg/m3] (constant)
             const scalar rho0_;
 
@@ -105,6 +108,9 @@ public:
 
             //- Return const access to the constant properties dictionary
             inline const dictionary& dict() const;
+
+            //- Return const access to the minimum density
+            inline scalar rhoMin() const;
 
             //- Return const access to the particle density
             inline scalar rho0() const;

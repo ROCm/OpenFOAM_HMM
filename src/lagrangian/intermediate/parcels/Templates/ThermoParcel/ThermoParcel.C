@@ -39,8 +39,15 @@ void Foam::ThermoParcel<ParcelType>::updateCellQuantities
 {
     KinematicParcel<ParcelType>::updateCellQuantities(td, dt, cellI);
 
+    cpc_ = td.cpInterp().interpolate(this->position(), cellI);
+
     Tc_ = td.TInterp().interpolate(this->position(), cellI);
-    if (Tc_ < SMALL)
+
+    // Apply correction to cell temperature to account for enthalpy transfer
+    scalar cpMean = td.cpInterp().psi()[cellI];
+    Tc_ += td.cloud().hTrans()[cellI]/(cpMean*this->massCell(cellI));
+
+    if (Tc_ < td.constProps().TMin())
     {
         WarningIn
         (
@@ -50,10 +57,11 @@ void Foam::ThermoParcel<ParcelType>::updateCellQuantities
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Temperature < " << SMALL << " in cell " << cellI << nl << endl;
-    }
+        )   << "Limiting temperature in cell " << cellI << " to "
+            << td.constProps().TMin() <<  nl << endl;
 
-    cpc_ = td.cpInterp().interpolate(this->position(), cellI);
+        Tc_ = td.constProps().TMin();
+    }
 }
 
 

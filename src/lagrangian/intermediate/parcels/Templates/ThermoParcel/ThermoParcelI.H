@@ -34,6 +34,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
 :
     KinematicParcel<ParcelType>::constantProperties(parentDict),
     T0_(dimensionedScalar(this->dict().lookup("T0")).value()),
+    TMin_(dimensionedScalar(this->dict().lookup("TMin")).value()),
     cp0_(dimensionedScalar(this->dict().lookup("cp0")).value()),
     epsilon0_(dimensionedScalar(this->dict().lookup("epsilon0")).value()),
     f0_(dimensionedScalar(this->dict().lookup("f0")).value())
@@ -107,6 +108,14 @@ inline Foam::scalar
 Foam::ThermoParcel<ParcelType>::constantProperties::T0() const
 {
     return T0_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::ThermoParcel<ParcelType>::constantProperties::TMin() const
+{
+    return TMin_;
 }
 
 

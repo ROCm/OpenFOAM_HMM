@@ -33,6 +33,7 @@ inline Foam::KinematicParcel<ParcelType>::constantProperties::constantProperties
 )
 :
     dict_(parentDict.subDict("constantProperties")),
+    rhoMin_(dimensionedScalar(dict_.lookup("rhoMin")).value()),
     rho0_(dimensionedScalar(dict_.lookup("rho0")).value()),
     minParticleMass_
     (
@@ -96,6 +97,14 @@ inline const Foam::dictionary&
 Foam::KinematicParcel<ParcelType>::constantProperties::dict() const
 {
     return dict_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::constantProperties::rhoMin() const
+{
+    return rhoMin_;
 }
 
 

@@ -80,6 +80,9 @@ public:
     {
         // Private data
 
+            //- Minimum pressure [Pa]
+            const scalar pMin_;
+
             //- Constant volume flag - e.g. during mass transfer
             Switch constantVolume_;
 
@@ -96,6 +99,9 @@ public:
         constantProperties(const dictionary& parentDict);
 
         // Access
+
+            //- Return const access to the minimum pressure
+            inline scalar pMin() const;
 
             //- Return const access to the constant volume flag
             inline Switch constantVolume() const;

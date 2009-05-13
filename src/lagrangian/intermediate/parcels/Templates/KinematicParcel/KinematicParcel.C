@@ -39,7 +39,7 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
 )
 {
     rhoc_ = td.rhoInterp().interpolate(this->position(), cellI);
-    if (rhoc_ < SMALL)
+    if (rhoc_ < td.constProps().rhoMin())
     {
         WarningIn
         (
@@ -49,10 +49,17 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Density < " << SMALL << " in cell " << cellI << nl << endl;
+        )   << "Limiting density in cell " << cellI << " to "
+            << td.constProps().rhoMin() <<  nl << endl;
+
+        rhoc_ = td.constProps().rhoMin();
     }
 
     Uc_ = td.UInterp().interpolate(this->position(), cellI);
+
+    // Apply correction to cell velocity to account for momentum transfer
+    Uc_ += td.cloud().UTrans()[cellI]/(massCell(cellI));
+
     muc_ = td.muInterp().interpolate(this->position(), cellI);
 
     // Apply dispersion components to carrier phase velocity
