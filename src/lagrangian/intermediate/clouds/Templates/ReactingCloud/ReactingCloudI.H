@@ -92,7 +92,7 @@ Foam::ReactingCloud<ParcelType>::rhoTrans()
 
 template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ReactingCloud<ParcelType>::Srho1(const label i) const
+Foam::ReactingCloud<ParcelType>::Srho(const label i) const
 {
     return rhoTrans_[i]/(this->db().time().deltaT()*this->mesh().V());
 }
@@ -100,7 +100,7 @@ Foam::ReactingCloud<ParcelType>::Srho1(const label i) const
 
 template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ReactingCloud<ParcelType>::Srho1() const
+Foam::ReactingCloud<ParcelType>::Srho() const
 {
     tmp<DimensionedField<scalar, volMesh> > trhoTrans
     (

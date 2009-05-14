@@ -165,9 +165,6 @@ class KinematicCloud
             //- Momentum
             DimensionedField<vector, volMesh> UTrans_;
 
-            //- Coefficient for carrier phase U equation
-            DimensionedField<scalar, volMesh> UCoeff_;
-
 
     // Private Member Functions
 
@@ -309,14 +306,8 @@ public:
                     //- Return reference to momentum source
                     inline DimensionedField<vector, volMesh>& UTrans();
 
-                    //- Coefficient for carrier phase U equation
-                    inline DimensionedField<scalar, volMesh>& UCoeff();
-
                     //- Return tmp momentum source term - fully explicit
-                    inline tmp<DimensionedField<vector, volMesh> > SU1() const;
-
-                    //- Return tmp momentum source term - semi-implicit
-                    inline tmp<fvVectorMatrix> SU2(volVectorField& U) const;
+                    inline tmp<DimensionedField<vector, volMesh> > SU() const;
 
 
         // Check

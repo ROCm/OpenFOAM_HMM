@@ -102,22 +102,17 @@ void Foam::ReactingParcel<ParcelType>::calc
     const scalar cp0 = this->cp_;
     const scalar mass0 = this->mass();
 
-
-    // Intialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Momentum
-    vector dUTrans = vector::zero;
-
-    // Enthalpy
-    scalar dhTrans = 0.0;
-
-    // Mass transfer due to phase change
-    scalarField dMassPC(Y_.size(), 0.0);
+    // Intial ethalpy state
+    scalar H0H = td.cloud().composition().H(0, Y_, pc_, T0);
+    scalar H0L = td.cloud().composition().L(0, Y_, pc_, T0);
+    scalar H0 = H0H - H0L;
 
 
     // Phase change
     // ~~~~~~~~~~~~
+
+    // Mass transfer due to phase change
+    scalarField dMassPC(Y_.size(), 0.0);
 
     // Return enthalpy source and calc mass transfer due to phase change
     scalar ShPC =
@@ -126,54 +121,30 @@ void Foam::ReactingParcel<ParcelType>::calc
     // Update particle component mass fractions
     updateMassFraction(mass0, dMassPC, Y_);
 
+    // Update mass
+    scalar mass1 = mass0 - sum(dMassPC);
+
 
     // Heat transfer
     // ~~~~~~~~~~~~~
 
     // Calculate new particle temperature
-    scalar htc = 0.0;
-    scalar T1 =
-        calcHeatTransfer
-        (
-            td,
-            dt,
-            cellI,
-            d0,
-            U0,
-            rho0,
-            T0,
-            cp0,
-            ShPC,
-            htc,
-            dhTrans
-        );
+    scalar T1 = calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, ShPC);
+
+    // Calculate new enthalpy state
+    scalar H1H = td.cloud().composition().H(0, Y_, pc_, T1);
+    scalar H1L = td.cloud().composition().L(0, Y_, pc_, T1);
+    scalar H1 = H1H - H1L;
 
 
     // Motion
     // ~~~~~~
 
-    // Update mass
-    scalar mass1 = mass0 - sum(dMassPC);
-
     // No additional forces
     vector Fx = vector::zero;
 
     // Calculate new particle velocity
-    scalar Cud = 0.0;
-    vector U1 =
-        calcVelocity
-        (
-            td,
-            dt,
-            cellI,
-            d0,
-            U0,
-            rho0,
-            0.5*(mass0 + mass1),
-            Fx,
-            Cud,
-            dUTrans
-        );
+    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx);
 
 
     // Accumulate carrier phase source terms
@@ -188,16 +159,10 @@ void Foam::ReactingParcel<ParcelType>::calc
         }
 
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += np0*dUTrans;
-
-        // Coefficient to be applied in carrier phase momentum coupling
-        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
+        td.cloud().UTrans()[cellI] += np0*(mass0*U0 - mass1*U1);
 
         // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*dhTrans;
-
-        // Coefficient to be applied in carrier phase enthalpy coupling
-        td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
+        td.cloud().hTrans()[cellI] += np0*(mass0*H0 - mass1*H1);
     }
 
 
@@ -216,8 +181,7 @@ void Foam::ReactingParcel<ParcelType>::calc
                 td.cloud().rhoTrans(id)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
-            scalar HEff = td.cloud().composition().H(0, Y_, pc_, T1);
-            td.cloud().hTrans()[cellI] += np0*mass1*HEff;
+            td.cloud().hTrans()[cellI] += np0*mass1*H1;
         }
     }
 

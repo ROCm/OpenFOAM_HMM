@@ -204,24 +204,16 @@ Foam::KinematicCloud<ParcelType>::UTrans()
 
 
 template<class ParcelType>
-inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::KinematicCloud<ParcelType>::UCoeff()
-{
-    return UCoeff_;
-}
-
-
-template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
-Foam::KinematicCloud<ParcelType>::SU1() const
+Foam::KinematicCloud<ParcelType>::SU() const
 {
-    tmp<DimensionedField<vector, volMesh> > tSU1
+    tmp<DimensionedField<vector, volMesh> > tSU
     (
         new DimensionedField<vector, volMesh>
         (
             IOobject
             (
-                this->name() + "SU1",
+                this->name() + "SU",
                 this->db().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -237,29 +229,10 @@ Foam::KinematicCloud<ParcelType>::SU1() const
         )
     );
 
-    vectorField& SU1 = tSU1().field();
-    SU1 = UTrans_/(mesh_.V()*this->db().time().deltaT());
+    vectorField& SU = tSU().field();
+    SU = UTrans_/(mesh_.V()*this->db().time().deltaT());
 
-    return tSU1;
-}
-
-
-template<class ParcelType>
-inline Foam::tmp<Foam::fvVectorMatrix>
-Foam::KinematicCloud<ParcelType>::SU2(volVectorField& U) const
-{
-    if (debug)
-    {
-        Info<< "UTrans min/max = "
-            << min(UTrans_) << ", " << max(UTrans_) << endl;
-        Info<< "UCoeff min/max = "
-            << min(UCoeff_) << ", " << max(UCoeff_) << endl;
-    }
-
-    return
-        UTrans_/(mesh_.V()*this->db().time().deltaT())
-      - fvm::Sp(UCoeff_/mesh_.V(), U)
-      + UCoeff_/mesh_.V()*U;
+    return tSU;
 }
 
 

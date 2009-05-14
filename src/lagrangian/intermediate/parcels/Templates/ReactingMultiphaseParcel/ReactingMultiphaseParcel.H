@@ -71,11 +71,11 @@ public:
     // IDs of phases in ReacingParcel phase list (Y)
 
         static const label GAS;
-        static const label LIQUID;
-        static const label SOLID;
+        static const label LIQ;
+        static const label SLD;
 
 
-    //- Class to hold reacting particle constant properties
+    //- Class to hold reacting multiphase particle constant properties
     class constantProperties
     :
         public ReactingParcel<ParcelType>::constantProperties
@@ -177,6 +177,18 @@ private:
             const label idS
         ) const;
 
+        //- Return the mixture effective latent heat
+        template<class TrackData>
+        scalar LEff
+        (
+            TrackData& td,
+            const scalar p,
+            const scalar T,
+            const label idG,
+            const label idL,
+            const label idS
+        ) const;
+
         //- Update the mass fractions (Y, YGas, YLiquid, YSolid)
         scalar updateMassFractions
         (
@@ -223,7 +235,7 @@ protected:
             const scalarField& YVolatile, // volatile component mass fractions
             bool& canCombust,          // 'can combust' flag
             scalarField& dMassDV       // mass transfer - local to particle
-        );
+        ) const;
 
         //- Calculate surface reactions
         template<class TrackData>
@@ -237,16 +249,15 @@ protected:
             const scalar mass,         // mass
             const bool canCombust,     // 'can combust' flag
             const scalarField& dMassVolatile, // mass transfer of volatiles
-            const scalarField& YMix,    // mixture mass fractions
+            const scalarField& YMix,   // mixture mass fractions
             const scalarField& YGas,   // gas-phase mass fractions
             const scalarField& YLiquid,// liquid-phase mass fractions
             const scalarField& YSolid, // solid-phase mass fractions
             scalarField& dMassSRGas,   // gas-phase mass transfer - local
             scalarField& dMassSRLiquid,// liquid-phase mass transfer - local
             scalarField& dMassSRSolid, // solid-phase mass transfer - local
-            scalarField& dMassSRCarrier,// carrier phase mass transfer
-            scalar& dhTrans            // enthalpy transfer to carrier phase
-        );
+            scalarField& dMassSRCarrier// carrier phase mass transfer
+        ) const;
 
 
 public:

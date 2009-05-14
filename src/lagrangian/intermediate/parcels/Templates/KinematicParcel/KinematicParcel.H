@@ -243,9 +243,7 @@ protected:
             const vector& U,           // velocity
             const scalar rho,          // density
             const scalar mass,         // mass
-            const vector& Fx,          // additional forces
-            scalar& Cud,               // linearised drag term coeff
-            vector& dUTrans            // momentum transfer to carrier phase
+            const vector& Fx           // additional forces
         ) const;
 
 

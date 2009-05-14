@@ -84,12 +84,8 @@ void Foam::ThermoParcel<ParcelType>::calc
     const scalar cp0 = this->cp_;
     const scalar mass0 = this->mass();
 
-
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    vector dUTrans = vector::zero;
-    scalar dhTrans = 0.0;
+    // Initial enthalpy state
+    scalar H0 = cp0*T0;
 
 
     // Heat transfer
@@ -99,22 +95,10 @@ void Foam::ThermoParcel<ParcelType>::calc
     scalar Sh = 0.0;
 
     // Calculate new particle velocity
-    scalar htc = 0.0;
-    scalar T1 =
-        calcHeatTransfer
-        (
-            td,
-            dt,
-            cellI,
-            d0,
-            U0,
-            rho0,
-            T0,
-            cp0,
-            Sh,
-            htc,
-            dhTrans
-        );
+    scalar T1 = calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, Sh);
+
+    // Calculate new enthalpy state
+    scalar H1 = cp0 - T1;
 
 
     // Motion
@@ -124,9 +108,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     vector Fx = vector::zero;
 
     // Calculate new particle velocity
-    scalar Cud = 0.0;
-    vector U1 =
-        calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx, Cud, dUTrans);
+    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx);
 
 
     //  Accumulate carrier phase source terms
@@ -134,16 +116,10 @@ void Foam::ThermoParcel<ParcelType>::calc
     if (td.cloud().coupled())
     {
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += np0*dUTrans;
-
-        // Coefficient to be applied in carrier phase momentum coupling
-        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
+        td.cloud().UTrans()[cellI] += np0*mass0*(U0 - U1);
 
         // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*dhTrans;
-
-        // Coefficient to be applied in carrier phase enthalpy coupling
-        td.cloud().hCoeff()[cellI] += np0*htc*this->areaS();
+        td.cloud().hTrans()[cellI] += np0*mass0*(H0 - H1);
     }
 
     // Set new particle properties
@@ -165,19 +141,16 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const scalar rho,
     const scalar T,
     const scalar cp,
-    const scalar Sh,
-    scalar& htc,
-    scalar& dhTrans
+    const scalar Sh
 )
 {
     if (!td.cloud().heatTransfer().active())
     {
-        htc = 0.0;
         return T;
     }
 
     // Calc heat transfer coefficient
-    htc = td.cloud().heatTransfer().h
+    scalar htc = td.cloud().heatTransfer().h
     (
         d,
         U - this->Uc_,
@@ -192,11 +165,8 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     // Determine new particle temperature
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    // Particle area
-    scalar Ap = this->areaS(d);
-
     // Determine ap and bp coefficients
-    scalar ap = Tc_ + Sh/(htc*Ap + ROOTVSMALL);
+    scalar ap = Tc_ + Sh/(htc*this->areaS(d) + ROOTVSMALL);
     scalar bp = 6.0*htc/(rho*d*cp);
     if (td.cloud().radiation())
     {
@@ -218,10 +188,6 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T, dt, ap, bp);
-
-    // Enthalpy transfer
-    // - Using average particle temperature
-    dhTrans = dt*Ap*htc*(Tres.average() - Tc_);
 
     return Tres.value();
 }

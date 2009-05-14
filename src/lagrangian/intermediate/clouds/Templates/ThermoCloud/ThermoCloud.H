@@ -102,9 +102,6 @@ class ThermoCloud
             //- Enthalpy transfer
             DimensionedField<scalar, volMesh> hTrans_;
 
-            //- Coefficient for carrier phase h equation
-            DimensionedField<scalar, volMesh> hCoeff_;
-
 
     // Private Member Functions
 
@@ -179,14 +176,8 @@ public:
                     //- Return reference to enthalpy source
                     inline DimensionedField<scalar, volMesh>& hTrans();
 
-                    //- Coefficient for carrier phase h equation
-                    inline DimensionedField<scalar, volMesh>& hCoeff();
-
                     //- return tmp enthalpy source term - fully explicit
-                    inline tmp<DimensionedField<scalar, volMesh> > Sh1() const;
-
-                    //- Return tmp enthalpy source term - semi-implicit
-                    inline tmp<fvScalarMatrix> Sh2(volScalarField& h) const;
+                    inline tmp<DimensionedField<scalar, volMesh> > Sh() const;
 
 
                 // Radiation - overrides thermoCloud virtual abstract members

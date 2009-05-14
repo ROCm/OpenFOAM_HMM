@@ -155,21 +155,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             false
         ),
         mesh_,
-        dimensionedVector("zero", dimensionSet(1, 1, -1, 0, 0), vector::zero)
-    ),
-    UCoeff_
-    (
-        IOobject
-        (
-            this->name() + "UCoeff",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        dimensionedScalar("zero",  dimensionSet(1, 0, -1, 0, 0), 0.0)
+        dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
     )
 {}
 
@@ -187,7 +173,6 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 {
     UTrans_.field() = vector::zero;
-    UCoeff_.field() = 0.0;
 }
 
 

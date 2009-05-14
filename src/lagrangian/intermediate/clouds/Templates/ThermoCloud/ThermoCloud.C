@@ -115,20 +115,6 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         ),
         this->mesh(),
         dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
-    ),
-    hCoeff_
-    (
-        IOobject
-        (
-            this->name() + "hCoeff",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        this->mesh(),
-        dimensionedScalar("zero", dimensionSet(1, 2, -3, -1, 0), 0.0)
     )
 {}
 
@@ -147,7 +133,6 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
     hTrans_.field() = 0.0;
-    hCoeff_.field() = 0.0;
 }
 
 

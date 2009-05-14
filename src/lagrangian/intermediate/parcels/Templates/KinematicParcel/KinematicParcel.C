@@ -92,15 +92,6 @@ void Foam::KinematicParcel<ParcelType>::calc
     const scalar rho0 = rho_;
     const scalar mass0 = mass();
 
-    const polyMesh& mesh = this->cloud().pMesh();
-
-
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Momentum
-    vector dUTrans = vector::zero;
-
 
     // Motion
     // ~~~~~~
@@ -109,9 +100,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     vector Fx = vector::zero;
 
     // Calculate new particle velocity
-    scalar Cud = 0.0;
-    vector U1 =
-        calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx, Cud, dUTrans);
+    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx);
 
 
     // Accumulate carrier phase source terms
@@ -119,10 +108,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     if (td.cloud().coupled())
     {
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += np0*dUTrans;
-
-        // Coefficient to be applied in carrier phase momentum coupling
-        td.cloud().UCoeff()[cellI] += np0*mass0*Cud;
+        td.cloud().UTrans()[cellI] += np0*mass0*(U0 - U1);
     }
 
 
@@ -143,15 +129,13 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const vector& U,
     const scalar rho,
     const scalar mass,
-    const vector& Fx,
-    scalar& Cud,
-    vector& dUTrans
+    const vector& Fx
 ) const
 {
     const polyMesh& mesh = this->cloud().pMesh();
 
     // Return linearised term from drag model
-    Cud = td.cloud().drag().Cu(U - Uc_, d, rhoc_, rho, muc_);
+    scalar Cud = td.cloud().drag().Cu(U - Uc_, d, rhoc_, rho, muc_);
 
     // Calculate particle forces
     vector Ftot = td.cloud().forces().calc(cellI, dt, rhoc_, rho, Uc_, U);
@@ -168,10 +152,6 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     // Apply correction to velocity for reduced-D cases
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
-
-    // Calculate the momentum transfer to the continuous phase
-    // - do not include gravity impulse
-    dUTrans = -mass*(Unew - U - dt*td.g());
 
     return Unew;
 }

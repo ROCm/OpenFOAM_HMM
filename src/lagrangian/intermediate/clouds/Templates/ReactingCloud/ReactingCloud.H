@@ -180,15 +180,13 @@ public:
                     inline PtrList<DimensionedField<scalar, volMesh> >&
                         rhoTrans();
 
-                    //- Return tmp mass source for field i
-                    //  Fully explicit
+                    //- Return tmp mass source for field i - fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho1(const label i) const;
+                        Srho(const label i) const;
 
                     //- Return tmp total mass source for carrier phase
-                    //  Fully explicit
-                    inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho1() const;
+                    //  - fully explicit
+                    inline tmp<DimensionedField<scalar, volMesh> > Srho() const;
 
 
         // Check

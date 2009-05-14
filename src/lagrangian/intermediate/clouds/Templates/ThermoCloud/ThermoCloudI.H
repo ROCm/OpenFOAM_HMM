@@ -84,24 +84,16 @@ Foam::ThermoCloud<ParcelType>::hTrans()
 
 
 template<class ParcelType>
-inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hCoeff()
-{
-    return hCoeff_;
-}
-
-
-template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ThermoCloud<ParcelType>::Sh1() const
+Foam::ThermoCloud<ParcelType>::Sh() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tSh1
+    tmp<DimensionedField<scalar, volMesh> > tSh
     (
         new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
-                this->name() + "Sh1",
+                this->name() + "Sh",
                 this->db().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -118,30 +110,10 @@ Foam::ThermoCloud<ParcelType>::Sh1() const
         )
     );
 
-    scalarField& Sh1 = tSh1().field();
-    Sh1 = hTrans_/(this->mesh().V()*this->db().time().deltaT());
+    scalarField& Sh = tSh().field();
+    Sh = hTrans_/(this->mesh().V()*this->db().time().deltaT());
 
-    return tSh1;
-}
-
-
-template<class ParcelType>
-inline Foam::tmp<Foam::fvScalarMatrix>
-Foam::ThermoCloud<ParcelType>::Sh2(volScalarField& h) const
-{
-    const volScalarField cp = carrierThermo_.Cp();
-
-    if (debug)
-    {
-        Info<< "hTrans min/max = "
-            << min(hTrans_) << ", " << max(hTrans_) << endl;
-        Info<< "hCoeff min/max = "
-            << min(hCoeff_) << ", " << max(hCoeff_) << endl;
-    }
-
-    return hTrans_/(this->mesh().V()*this->db().time().deltaT())
-         - fvm::Sp(hCoeff_/(cp*this->mesh().V()), h)
-         + hCoeff_/(cp*this->mesh().V())*h;
+    return tSh;
 }
 
 

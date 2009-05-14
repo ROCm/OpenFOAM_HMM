@@ -70,8 +70,8 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         // scale the mass fractions
         const scalarField& YMix = this->Y_;
         YGas_ /= YMix[GAS] + ROOTVSMALL;
-        YLiquid_ /= YMix[LIQUID] + ROOTVSMALL;
-        YSolid_ /= YMix[SOLID] + ROOTVSMALL;
+        YLiquid_ /= YMix[LIQ] + ROOTVSMALL;
+        YSolid_ /= YMix[SLD] + ROOTVSMALL;
     }
 
     // Check state of Istream
@@ -153,7 +153,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         forAllIter(typename Cloud<ParcelType>, c, iter)
         {
             ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YLiquid_[j] = YLiquid[i++]/(p.Y()[LIQUID] + ROOTVSMALL);
+            p.YLiquid_[j] = YLiquid[i++]/(p.Y()[LIQ] + ROOTVSMALL);
         }
     }
     // Populate YSolid for each parcel
@@ -172,7 +172,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::readFields
         forAllIter(typename Cloud<ParcelType>, c, iter)
         {
             ReactingMultiphaseParcel<ParcelType>& p = iter();
-            p.YSolid_[j] = YSolid[i++]/(p.Y()[SOLID] + ROOTVSMALL);
+            p.YSolid_[j] = YSolid[i++]/(p.Y()[SLD] + ROOTVSMALL);
         }
     }
 }
@@ -235,7 +235,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             forAllConstIter(typename Cloud<ParcelType>, c, iter)
             {
                 const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YLiquid[i++] = p0.YLiquid()[j]*p0.Y()[LIQUID];
+                YLiquid[i++] = p0.YLiquid()[j]*p0.Y()[LIQ];
             }
 
             YLiquid.write();
@@ -259,7 +259,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::writeFields
             forAllConstIter(typename Cloud<ParcelType>, c, iter)
             {
                 const ReactingMultiphaseParcel<ParcelType>& p0 = iter();
-                YSolid[i++] = p0.YSolid()[j]*p0.Y()[SOLID];
+                YSolid[i++] = p0.YSolid()[j]*p0.Y()[SLD];
             }
 
             YSolid.write();
