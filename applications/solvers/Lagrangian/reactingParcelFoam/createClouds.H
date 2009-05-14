@@ -1,5 +1,3 @@
-Info<< "\nConstructing interpolation" << endl;
-
 Info << "\nConstructing gas properties" << endl;
 /*
 PtrList<specieConstProperties> gasProperties(Y.size());
@@ -31,7 +29,7 @@ forAll(gasProperties, i)
 }
 
 Info<< "\nConstructing reacting cloud" << endl;
-basicReactingCloud reactingParcels
+basicReactingCloud parcels
 (
     "reactingCloud1",
     rho,

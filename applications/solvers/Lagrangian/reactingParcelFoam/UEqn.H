@@ -5,7 +5,7 @@
       + turbulence->divDevRhoReff(U)
      ==
         rho.dimensionedInternalField()*g
-      + reactingParcels.SU1()
+      + parcels.SU()
     );
 
     UEqn.relax();

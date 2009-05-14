@@ -6,7 +6,7 @@
       - fvm::laplacian(turbulence->alphaEff(), h)
      ==
         DpDt
-     +  reactingParcels.Sh1()
+     +  parcels.Sh()
      +  radiation->Sh(thermo())
     );
 

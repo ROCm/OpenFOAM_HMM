@@ -28,51 +28,6 @@
         thermo->rho()
     );
 
-// lagrangian coal density field
-/*    volScalarField rholc
-    (
-        IOobject
-        (
-            "rholc",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
-    );
-
-// lagrangian limestone density field
-    volScalarField rhols
-    (
-        IOobject
-        (
-            "rhols",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
-    );
-
-// lagrangian total density field
-    volScalarField rhol
-    (
-        IOobject
-        (
-            "rhol",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
-    );*/
-
     Info<< "\nReading field U\n" << endl;
     volVectorField U
     (
@@ -133,9 +88,3 @@
         fields.add(Y[i]);
     }
     fields.add(h);
-
-    Info<< "Creating radiation model\n" << endl;
-    autoPtr<radiation::radiationModel> radiation
-    (
-        radiation::radiationModel::New(T)
-    );

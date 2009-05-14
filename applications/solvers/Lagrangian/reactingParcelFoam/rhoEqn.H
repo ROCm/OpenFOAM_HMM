@@ -36,7 +36,7 @@ Description
         fvm::ddt(rho)
       + fvc::div(phi)
       ==
-        reactingParcels.Srho1()
+        parcels.Srho()
     );
 }
 

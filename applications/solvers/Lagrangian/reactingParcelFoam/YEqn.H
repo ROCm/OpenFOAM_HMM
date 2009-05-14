@@ -1,4 +1,3 @@
-
 tmp<fv::convectionScheme<scalar> > mvConvection
 (
     fv::convectionScheme<scalar>::New
@@ -26,7 +25,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
               ==
-                reactingParcels.Srho1(i)
+                parcels.Srho(i)
               + kappa*chemistry.RR(i)().dimensionedInternalField()
             );
 
@@ -41,5 +40,4 @@ tmp<fv::convectionScheme<scalar> > mvConvection
 
     Y[inertIndex] = scalar(1) - Yt;
     Y[inertIndex].max(0.0);
-
 }
