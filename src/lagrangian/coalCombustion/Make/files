@@ -1,0 +1,19 @@
+/* coal cloud */
+coalCloud/coalCloud.C
+
+/* coal parcel and sub-models */
+coalParcel/coalParcel.C
+coalParcel/defineCoalParcel.C
+coalParcel/submodels/makeCoalParcelCompositionModels.C
+coalParcel/submodels/makeCoalParcelDevolatilisationModels.C
+coalParcel/submodels/makeCoalParcelDragModels.C
+coalParcel/submodels/makeCoalParcelDispersionModels.C
+coalParcel/submodels/makeCoalParcelInjectionModels.C
+coalParcel/submodels/makeCoalParcelHeatTransferModels.C
+coalParcel/submodels/makeCoalParcelPhaseChangeModels.C
+coalParcel/submodels/makeCoalParcelSurfaceReactionModels.C
+coalParcel/submodels/makeCoalParcelWallInteractionModels.C
+submodels/surfaceReactionModel/COxidationMurphyShaddix/COxidationMurphyShaddix.C
+
+
+LIB = $(FOAM_USER_LIBBIN)/libcoalCombustion
