@@ -43,6 +43,64 @@ addToRunTimeSelectionTable(searchableSurface, triSurfaceMesh, dict);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+//// Special version of Time::findInstance that does not check headerOk
+//// to search for instances of raw files
+//Foam::word Foam::triSurfaceMesh::findRawInstance
+//(
+//    const Time& runTime,
+//    const fileName& dir,
+//    const word& name
+//)
+//{
+//    // Check current time first
+//    if (isFile(runTime.path()/runTime.timeName()/dir/name))
+//    {
+//        return runTime.timeName();
+//    }
+//    instantList ts = runTime.times();
+//    label instanceI;
+//
+//    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
+//    {
+//        if (ts[instanceI].value() <= runTime.timeOutputValue())
+//        {
+//            break;
+//        }
+//    }
+//
+//    // continue searching from here
+//    for (; instanceI >= 0; --instanceI)
+//    {
+//        if (isFile(runTime.path()/ts[instanceI].name()/dir/name))
+//        {
+//            return ts[instanceI].name();
+//        }
+//    }
+//
+//
+//    // not in any of the time directories, try constant
+//
+//    // Note. This needs to be a hard-coded constant, rather than the
+//    // constant function of the time, because the latter points to
+//    // the case constant directory in parallel cases
+//
+//    if (isFile(runTime.path()/runTime.constant()/dir/name))
+//    {
+//        return runTime.constant();
+//    }
+//
+//    FatalErrorIn
+//    (
+//        "searchableSurfaces::findRawInstance"
+//        "(const Time&, const fileName&, const word&)"
+//    )   << "Cannot find file \"" << name << "\" in directory "
+//        << runTime.constant()/dir
+//        << exit(FatalError);
+//
+//    return runTime.constant();
+//}
+
+
 //- Check file existence
 const Foam::fileName& Foam::triSurfaceMesh::checkFile
 (
@@ -50,7 +108,7 @@ const Foam::fileName& Foam::triSurfaceMesh::checkFile
     const fileName& objectName
 )
 {
-    if (fName == fileName::null)
+    if (fName.empty())
     {
         FatalErrorIn
         (
@@ -59,6 +117,29 @@ const Foam::fileName& Foam::triSurfaceMesh::checkFile
             << objectName << exit(FatalError);
     }
     return fName;
+}
+
+
+bool Foam::triSurfaceMesh::addFaceToEdge
+(
+    const edge& e,
+    EdgeMap<label>& facesPerEdge
+)
+{
+    EdgeMap<label>::iterator eFnd = facesPerEdge.find(e);
+    if (eFnd != facesPerEdge.end())
+    {
+        if (eFnd() == 2)
+        {
+            return false;
+        }
+        eFnd()++;
+    }
+    else
+    {
+        facesPerEdge.insert(e, 1);
+    }
+    return true;
 }
 
 
@@ -84,48 +165,41 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
             const labelledTri& f = triSurface::operator[](pFaces[i]);
             label fp = findIndex(f, pointI);
 
-            // Forward edge
-            {
-                label p1 = f[f.fcIndex(fp)];
+            // Something weird: if I expand the code of addFaceToEdge in both
+            // below instances it gives a segmentation violation on some
+            // surfaces. Compiler (4.3.2) problem?
 
-                if (p1 > pointI)
+
+            // Forward edge
+            label nextPointI = f[f.fcIndex(fp)];
+
+            if (nextPointI > pointI)
+            {
+                bool okFace = addFaceToEdge
+                (
+                    edge(pointI, nextPointI),
+                    facesPerEdge
+                );
+
+                if (!okFace)
                 {
-                    const edge e(pointI, p1);
-                    EdgeMap<label>::iterator eFnd = facesPerEdge.find(e);
-                    if (eFnd != facesPerEdge.end())
-                    {
-                        if (eFnd() == 2)
-                        {
-                            return false;
-                        }
-                        eFnd()++;
-                    }
-                    else
-                    {
-                        facesPerEdge.insert(e, 1);
-                    }
+                    return false;
                 }
             }
             // Reverse edge
-            {
-                label p1 = f[f.rcIndex(fp)];
+            label prevPointI = f[f.rcIndex(fp)];
 
-                if (p1 > pointI)
+            if (prevPointI > pointI)
+            {
+                bool okFace = addFaceToEdge
+                (
+                    edge(pointI, prevPointI),
+                    facesPerEdge
+                );
+
+                if (!okFace)
                 {
-                    const edge e(pointI, p1);
-                    EdgeMap<label>::iterator eFnd = facesPerEdge.find(e);
-                    if (eFnd != facesPerEdge.end())
-                    {
-                        if (eFnd() == 2)
-                        {
-                            return false;
-                        }
-                        eFnd()++;
-                    }
-                    else
-                    {
-                        facesPerEdge.insert(e, 1);
-                    }
+                    return false;
                 }
             }
         }
@@ -149,16 +223,55 @@ bool Foam::triSurfaceMesh::isSurfaceClosed() const
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io, const triSurface& s)
 :
     searchableSurface(io),
-    objectRegistry(io),
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            io.instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface(s),
+    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     surfaceClosed_(-1)
 {}
 
 
 Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
 :
+    // Find instance for triSurfaceMesh
     searchableSurface(io),
-    objectRegistry(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            static_cast<const searchableSurface&>(*this).instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface
     (
         checkFile
@@ -167,6 +280,7 @@ Foam::triSurfaceMesh::triSurfaceMesh(const IOobject& io)
             searchableSurface::objectPath()
         )
     ),
+    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     surfaceClosed_(-1)
 {}
 
@@ -178,7 +292,32 @@ Foam::triSurfaceMesh::triSurfaceMesh
 )
 :
     searchableSurface(io),
-    objectRegistry(io),
+    //(
+    //    IOobject
+    //    (
+    //        io.name(),
+    //        io.time().findInstance(io.local(), word::null),
+    //        io.local(),
+    //        io.db(),
+    //        io.readOpt(),
+    //        io.writeOpt(),
+    //        io.registerObject()
+    //    )
+    //),
+    // Reused found instance in objectRegistry
+    objectRegistry
+    (
+        IOobject
+        (
+            io.name(),
+            static_cast<const searchableSurface&>(*this).instance(),
+            io.local(),
+            io.db(),
+            io.readOpt(),
+            io.writeOpt(),
+            false       // searchableSurface already registered under name
+        )
+    ),
     triSurface
     (
         checkFile
@@ -187,6 +326,7 @@ Foam::triSurfaceMesh::triSurfaceMesh
             searchableSurface::objectPath()
         )
     ),
+    tolerance_(indexedOctree<treeDataTriSurface>::perturbTol()),
     surfaceClosed_(-1)
 {
     scalar scaleFactor = 0;
@@ -195,7 +335,17 @@ Foam::triSurfaceMesh::triSurfaceMesh
     // eg, CAD geometries are often done in millimeters
     if (dict.readIfPresent("scale", scaleFactor) && scaleFactor > 0)
     {
+        Info<< searchableSurface::name() << " : using scale " << scaleFactor
+            << endl;
         triSurface::scalePoints(scaleFactor);
+    }
+
+
+    // Have optional non-standard search tolerance for gappy surfaces.
+    if (dict.readIfPresent("tolerance", tolerance_) && tolerance_ > 0)
+    {
+        Info<< searchableSurface::name() << " : using intersection tolerance "
+            << tolerance_ << endl;
     }
 }
 
@@ -231,22 +381,34 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 {
     if (tree_.empty())
     {
-        treeBoundBox bb(points(), meshPoints());
-
         // Random number generator. Bit dodgy since not exactly random ;-)
         Random rndGen(65431);
+
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points(), meshPoints()).extend(rndGen, 1E-4)
+        );
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+        indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
 
         tree_.reset
         (
             new indexedOctree<treeDataTriSurface>
             (
                 treeDataTriSurface(*this),
-                bb.extend(rndGen, 1E-4),    // slightly randomize bb
+                bb,
                 10,     // maxLevel
                 10,     // leafsize
                 3.0     // duplicity
             )
         );
+
+        indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
     }
 
     return tree_();
@@ -254,12 +416,10 @@ const Foam::indexedOctree<Foam::treeDataTriSurface>&
 
 
 const Foam::indexedOctree<Foam::treeDataEdge>&
-    Foam::triSurfaceMesh::edgeTree() const
+ Foam::triSurfaceMesh::edgeTree() const
 {
     if (edgeTree_.empty())
     {
-        treeBoundBox bb(localPoints());
-
         // Boundary edges
         labelList bEdges
         (
@@ -274,6 +434,15 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
         // Random number generator. Bit dodgy since not exactly random ;-)
         Random rndGen(65431);
 
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points(), meshPoints()).extend(rndGen, 1E-4)
+        );
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
         edgeTree_.reset
         (
             new indexedOctree<treeDataEdge>
@@ -285,7 +454,7 @@ const Foam::indexedOctree<Foam::treeDataEdge>&
                     localPoints(),  // points
                     bEdges          // selected edges
                 ),
-                bb.extend(rndGen, 1E-4),    // slightly randomize bb
+                bb,     // bb
                 8,      // maxLevel
                 10,     // leafsize
                 3.0     // duplicity
@@ -340,11 +509,19 @@ void Foam::triSurfaceMesh::findNearest
 
     info.setSize(samples.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(samples, i)
     {
-        static_cast<pointIndexHit&>(info[i]) =
-            octree.findNearest(samples[i], nearestDistSqr[i]);
+        static_cast<pointIndexHit&>(info[i]) = octree.findNearest
+        (
+            samples[i],
+            nearestDistSqr[i]
+        );
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -359,6 +536,9 @@ void Foam::triSurfaceMesh::findLine
 
     info.setSize(start.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(start, i)
     {
         static_cast<pointIndexHit&>(info[i]) = octree.findLine
@@ -367,6 +547,8 @@ void Foam::triSurfaceMesh::findLine
             end[i]
         );
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -381,11 +563,19 @@ void Foam::triSurfaceMesh::findLineAny
 
     info.setSize(start.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(start, i)
     {
-        static_cast<pointIndexHit&>(info[i]) =
-            octree.findLineAny(start[i], end[i]);
+        static_cast<pointIndexHit&>(info[i]) = octree.findLineAny
+        (
+            start[i],
+            end[i]
+        );
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -400,6 +590,9 @@ void Foam::triSurfaceMesh::findLineAll
 
     info.setSize(start.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     // Work array
     DynamicList<pointIndexHit, 1, 1> hits;
 
@@ -413,7 +606,7 @@ void Foam::triSurfaceMesh::findLineAll
     const scalarField magSqrDirVec(magSqr(dirVec));
     const vectorField smallVec
     (
-        Foam::sqrt(SMALL)*dirVec
+        indexedOctree<treeDataTriSurface>::perturbTol()*dirVec
       + vector(ROOTVSMALL,ROOTVSMALL,ROOTVSMALL)
     );
 
@@ -456,6 +649,8 @@ void Foam::triSurfaceMesh::findLineAll
             info[pointI].clear();
         }
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -492,7 +687,13 @@ void Foam::triSurfaceMesh::getNormal
     {
         if (info[i].hit())
         {
-            normal[i] = faceNormals()[info[i].index()];
+            label triI = info[i].index();
+            //- Cached:
+            //normal[i] = faceNormals()[triI];
+
+            //- Uncached
+            normal[i] = triSurface::operator[](triI).normal(points());
+            normal[i] /= mag(normal[i]) + VSMALL;
         }
         else
         {
@@ -534,6 +735,9 @@ void Foam::triSurfaceMesh::getVolumeType
 {
     volType.setSize(points.size());
 
+    scalar oldTol = indexedOctree<treeDataTriSurface>::perturbTol();
+    indexedOctree<treeDataTriSurface>::perturbTol() = tolerance_;
+
     forAll(points, pointI)
     {
         const point& pt = points[pointI];
@@ -542,6 +746,8 @@ void Foam::triSurfaceMesh::getVolumeType
         // - cheat conversion since same values
         volType[pointI] = static_cast<volumeType>(tree().getVolumeType(pt));
     }
+
+    indexedOctree<treeDataTriSurface>::perturbTol() = oldTol;
 }
 
 
@@ -562,7 +768,7 @@ bool Foam::triSurfaceMesh::writeObject
 
     triSurface::write(fullPath);
 
-    if (!file(fullPath))
+    if (!isFile(fullPath))
     {
         return false;
     }

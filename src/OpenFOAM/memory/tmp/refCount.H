@@ -82,7 +82,7 @@ public:
         //- Return true if the reference count is zero
         bool okToDelete() const
         {
-            return (count_ == 0);
+            return !count_;
         }
 
 

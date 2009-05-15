@@ -46,7 +46,7 @@ int main(int argc, char *argv[])
 
     Info<< ((sf1 + sf2) & (sf1 + sf2)) << endl;
 
-    return(0);
+    return 0;
 }
 
 

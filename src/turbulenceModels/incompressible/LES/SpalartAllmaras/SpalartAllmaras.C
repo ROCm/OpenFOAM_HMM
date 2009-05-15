@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,6 +41,15 @@ namespace LESModels
 defineTypeNameAndDebug(SpalartAllmaras, 0);
 addToRunTimeSelectionTable(LESModel, SpalartAllmaras, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void SpalartAllmaras::updateSubGridScaleFields()
+{
+    nuSgs_.internalField() = fv1()*nuTilda_.internalField();
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<volScalarField> SpalartAllmaras::fv1() const
@@ -52,8 +61,7 @@ tmp<volScalarField> SpalartAllmaras::fv1() const
 
 tmp<volScalarField> SpalartAllmaras::fv2() const
 {
-    volScalarField chi = nuTilda_/nu();
-    return 1/pow3(scalar(1) + chi/Cv2_);
+    return 1/pow3(scalar(1) + nuTilda_/(Cv2_*nu()));
 }
 
 
@@ -152,7 +160,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaNut",
-            coeffDict(),
+            coeffDict_,
             1.5
         )
     ),
@@ -170,7 +178,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb1",
-            coeffDict(),
+            coeffDict_,
             0.1355
         )
     ),
@@ -179,7 +187,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb2",
-            coeffDict(),
+            coeffDict_,
             0.622
         )
     ),
@@ -188,7 +196,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv1",
-            coeffDict(),
+            coeffDict_,
             7.1
         )
     ),
@@ -197,7 +205,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv2",
-            coeffDict(),
+            coeffDict_,
             5.0
         )
     ),
@@ -206,7 +214,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "CDES",
-            coeffDict(),
+            coeffDict_,
             0.65
         )
     ),
@@ -215,7 +223,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.07
         )
     ),
@@ -225,7 +233,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw2",
-            coeffDict(),
+            coeffDict_,
             0.3
         )
     ),
@@ -234,7 +242,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw3",
-            coeffDict(),
+            coeffDict_,
             2.0
         )
     ),
@@ -266,7 +274,10 @@ SpalartAllmaras::SpalartAllmaras
         ),
         mesh_
     )
-{}
+{
+    updateSubGridScaleFields();
+}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -306,8 +317,7 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
     bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();
 
-    nuSgs_.internalField() = fv1()*nuTilda_.internalField();
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields();
 }
 
 

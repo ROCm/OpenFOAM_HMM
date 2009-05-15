@@ -25,25 +25,18 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceFormatsCore.H"
+
+#include "Time.H"
 #include "IFstream.H"
 #include "OFstream.H"
-#include "Time.H"
 #include "SortableList.H"
+#include "surfMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::word Foam::fileFormats::surfaceFormatsCore::meshSubDir("meshedSurface");
 Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
-
-//- Check if file extension corresponds to 'native' surface format
-bool
-Foam::fileFormats::surfaceFormatsCore::isNative(const word& ext)
-{
-    return (ext == nativeExt);
-}
-
 
 Foam::string
 Foam::fileFormats::surfaceFormatsCore::getLineNoComment
@@ -61,25 +54,38 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
     return line;
 }
 
+#if 0
+Foam::fileName
+Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
+{
+    const word name(surfName.size() ? surfName : surfaceRegistry::defaultName);
+
+    return fileName
+    (
+        surfaceRegistry::prefix/name/surfMesh::meshSubDir
+      / name + "." + nativeExt
+    );
+}
+
 
 Foam::fileName
 Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 (
-    const Time& d,
-    const word& subdirName
+    const Time& t,
+    const word& surfName
 )
 {
-    fileName foamName(d.caseName() + "." + nativeExt);
+    fileName localName = localMeshFileName(surfName);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
 
-    instantList ts = d.times();
-    label i;
+    instantList ts = t.times();
+    label instanceI;
 
-    for (i=ts.size()-1; i>=0; i--)
+    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[i].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= t.timeOutputValue())
         {
             break;
         }
@@ -88,13 +94,13 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
     // Noting that the current directory has already been searched
     // for mesh data, start searching from the previously stored time directory
 
-    if (i>=0)
+    if (instanceI >= 0)
     {
-        for (label j=i; j>=0; j--)
+        for (label i = instanceI; i >= 0; --i)
         {
-            if (file(d.path()/ts[j].name()/subdirName/foamName))
+            if (isFile(t.path()/ts[i].name()/localName))
             {
-                return ts[j].name();
+                return ts[i].name();
             }
         }
     }
@@ -104,23 +110,23 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 
 
 Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshName
+Foam::fileFormats::surfaceFormatsCore::findMeshFile
 (
-    const Time& d,
-    const word& subdirName
+    const Time& t,
+    const word& surfName
 )
 {
-    fileName foamName(d.caseName() + "." + nativeExt);
+    fileName localName = localMeshFileName(surfName);
 
     // Search back through the time directories list to find the time
     // closest to and lower than current time
 
-    instantList ts = d.times();
-    label i;
+    instantList ts = t.times();
+    label instanceI;
 
-    for (i=ts.size()-1; i>=0; i--)
+    for (instanceI = ts.size()-1; instanceI >= 0; --instanceI)
     {
-        if (ts[i].value() <= d.timeOutputValue())
+        if (ts[instanceI].value() <= t.timeOutputValue())
         {
             break;
         }
@@ -129,126 +135,23 @@ Foam::fileFormats::surfaceFormatsCore::findMeshName
     // Noting that the current directory has already been searched
     // for mesh data, start searching from the previously stored time directory
 
-    if (i>=0)
+    if (instanceI >= 0)
     {
-        for (label j=i; j>=0; j--)
+        for (label i = instanceI; i >= 0; --i)
         {
-            fileName testName(d.path()/ts[j].name()/subdirName/foamName);
+            fileName testName(t.path()/ts[i].name()/localName);
 
-            if (file(testName))
+            if (isFile(testName))
             {
                 return testName;
             }
         }
     }
 
-    return d.path()/"constant"/subdirName/foamName;
+    // fallback to "constant"
+    return t.path()/"constant"/localName;
 }
-
-
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshInstance
-(
-    const Time& d
-)
-{
-    return findMeshInstance(d, meshSubDir);
-}
-
-
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshName
-(
-    const Time& d
-)
-{
-    return findMeshName(d, meshSubDir);
-}
-
-
-// Returns patch info.
-// Sets faceMap to the indexing according to patch numbers.
-// Patch numbers start at 0.
-Foam::surfGroupList
-Foam::fileFormats::surfaceFormatsCore::sortedPatchRegions
-(
-    const UList<label>& regionLst,
-    const Map<word>& patchNames,
-    labelList& faceMap
-)
-{
-    // determine sort order according to region numbers
-
-    // std::sort() really seems to mix up the order.
-    // and std::stable_sort() might take too long / too much memory
-
-    // Assuming that we have relatively fewer regions compared to the
-    // number of items, just do it ourselves
-
-    // step 1: get region sizes and store (regionId => patchI)
-    Map<label> lookup;
-    forAll(regionLst, faceI)
-    {
-        const label regId = regionLst[faceI];
-
-        Map<label>::iterator fnd = lookup.find(regId);
-        if (fnd != lookup.end())
-        {
-            fnd()++;
-        }
-        else
-        {
-            lookup.insert(regId, 1);
-        }
-    }
-
-    // step 2: assign start/size (and name) to the newPatches
-    // re-use the lookup to map (regionId => patchI)
-    surfGroupList patchLst(lookup.size());
-    label start = 0;
-    label patchI = 0;
-    forAllIter(Map<label>, lookup, iter)
-    {
-        label regId = iter.key();
-
-        word name;
-        Map<word>::const_iterator fnd = patchNames.find(regId);
-        if (fnd != patchNames.end())
-        {
-            name = fnd();
-        }
-        else
-        {
-            name = word("patch") + ::Foam::name(patchI);
-        }
-
-        patchLst[patchI] = surfGroup
-        (
-            name,
-            0,           // initialize with zero size
-            start,
-            patchI
-        );
-
-        // increment the start for the next patch
-        // and save the (regionId => patchI) mapping
-        start += iter();
-        iter() = patchI++;
-    }
-
-
-    // step 3: build the re-ordering
-    faceMap.setSize(regionLst.size());
-
-    forAll(regionLst, faceI)
-    {
-        label patchI = lookup[regionLst[faceI]];
-        faceMap[faceI] = patchLst[patchI].start() + patchLst[patchI].size()++;
-    }
-
-    // with reordered faces registered in faceMap
-    return patchLst;
-}
+#endif
 
 
 bool
@@ -271,7 +174,7 @@ Foam::fileFormats::surfaceFormatsCore::checkSupport
 
         Info<<"Unknown file extension for " << functionName
             << " : " << ext << nl
-            <<"Valid types: ( " << nativeExt;
+            <<"Valid types: (";
         // compact output:
         forAll(known, i)
         {
@@ -294,6 +197,7 @@ Foam::fileFormats::surfaceFormatsCore::surfaceFormatsCore()
 
 Foam::fileFormats::surfaceFormatsCore::~surfaceFormatsCore()
 {}
+
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 

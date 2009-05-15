@@ -33,11 +33,6 @@ Description
 #include "objectHit.H"
 #include "bandCompression.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template
@@ -49,7 +44,8 @@ template
 >
 
 template <class ToPatch>
-List<objectHit> PrimitivePatch<Face, FaceList, PointField, PointType>::
+Foam::List<Foam::objectHit>
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 projectPoints
 (
     const ToPatch& targetPatch,
@@ -59,7 +55,6 @@ projectPoints
 ) const
 {
     // The current patch is slave, i.e. it is being projected onto the target
-    // 
 
     if (projectionDirection.size() != nPoints())
     {
@@ -101,8 +96,8 @@ projectPoints
     // Loop through all points of the slave side. For every point find the
     // radius for the current contact face. If the contact point falls inside
     // the face and the radius is smaller than for all neighbouring faces,
-    // the contact is found. If not, visit the neighbour closest to the 
-    // calculated contact point. If a single master face is visited more than 
+    // the contact is found. If not, visit the neighbour closest to the
+    // calculated contact point. If a single master face is visited more than
     // twice, initiate n-squared search.
 
     label curFace = 0;
@@ -177,7 +172,7 @@ projectPoints
                     // Calculate the miss point on the plane of the
                     // face.  This is cooked (illogical!) for fastest
                     // surface walk.
-                    // 
+                    //
                     PointType missPlanePoint =
                         curPoint + curProjectionDir*curHit.distance();
 
@@ -216,7 +211,7 @@ projectPoints
             } while (closer);
         }
 
-        if 
+        if
         (
             doNSquaredSearch || !foundEligible
         )
@@ -297,7 +292,8 @@ template
 >
 
 template <class ToPatch>
-List<objectHit> PrimitivePatch<Face, FaceList, PointField, PointType>::
+Foam::List<Foam::objectHit>
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
 projectFaceCentres
 (
     const ToPatch& targetPatch,
@@ -307,7 +303,6 @@ projectFaceCentres
 ) const
 {
     // The current patch is slave, i.e. it is being projected onto the target
-    // 
 
     if (projectionDirection.size() != this->size())
     {
@@ -349,8 +344,8 @@ projectFaceCentres
     // Loop through all points of the slave side. For every point find the
     // radius for the current contact face. If the contact point falls inside
     // the face and the radius is smaller than for all neighbouring faces,
-    // the contact is found. If not, visit the neighbour closest to the 
-    // calculated contact point. If a single master face is visited more than 
+    // the contact is found. If not, visit the neighbour closest to the
+    // calculated contact point. If a single master face is visited more than
     // twice, initiate n-squared search.
 
     label curFace = 0;
@@ -424,11 +419,11 @@ projectFaceCentres
 
                     // Calculate the miss point.  This is
                     // cooked (illogical!) for fastest surface walk.
-                    // 
+                    //
                     PointType missPlanePoint =
                         curFaceCentre + curProjectionDir*curHit.distance();
 
-                    sqrDistance = 
+                    sqrDistance =
                         magSqr(missPlanePoint - masterFaceCentres[curFace]);
 
                     const labelList& masterNbrs = masterFaceFaces[curFace];
@@ -531,9 +526,5 @@ projectFaceCentres
     return result;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

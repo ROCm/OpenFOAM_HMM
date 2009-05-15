@@ -27,16 +27,37 @@ License
 #include "fvSchemes.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
+
+int Foam::fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", false));
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::fvSchemes::clear()
 {
-
-int fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", false));
+    ddtSchemes_.clear();
+    defaultDdtScheme_.clear();
+    d2dt2Schemes_.clear();
+    defaultD2dt2Scheme_.clear();
+    interpolationSchemes_.clear();
+    defaultInterpolationScheme_.clear();
+    divSchemes_.clear(); // optional
+    defaultDivScheme_.clear();
+    gradSchemes_.clear(); // optional
+    defaultGradScheme_.clear();
+    snGradSchemes_.clear();
+    defaultSnGradScheme_.clear();
+    laplacianSchemes_.clear(); // optional
+    defaultLaplacianScheme_.clear();
+    fluxRequired_.clear();
+    defaultFluxRequired_ = false;
+    cacheFields_.clear();
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fvSchemes::fvSchemes(const objectRegistry& obr)
+Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
 :
     IOdictionary
     (
@@ -51,8 +72,11 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     ddtSchemes_
     (
-        ITstream(objectPath() + "::ddtSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::ddtSchemes",
+            tokenList()
+        )()
     ),
     defaultDdtScheme_
     (
@@ -61,8 +85,11 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     d2dt2Schemes_
     (
-        ITstream(objectPath() + "::d2dt2Schemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::d2dt2Schemes",
+            tokenList()
+        )()
     ),
     defaultD2dt2Scheme_
     (
@@ -71,8 +98,11 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     interpolationSchemes_
     (
-        ITstream(objectPath() + "::interpolationSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::interpolationSchemes",
+            tokenList()
+        )()
     ),
     defaultInterpolationScheme_
     (
@@ -81,8 +111,11 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     divSchemes_
     (
-        ITstream(objectPath() + "::divSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::divSchemes",
+            tokenList()
+        )()
     ),
     defaultDivScheme_
     (
@@ -91,8 +124,11 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     gradSchemes_
     (
-        ITstream(objectPath() + "::gradSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::gradSchemes",
+            tokenList()
+        )()
     ),
     defaultGradScheme_
     (
@@ -101,8 +137,11 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     snGradSchemes_
     (
-        ITstream(objectPath() + "::snGradSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::snGradSchemes",
+            tokenList()
+        )()
     ),
     defaultSnGradScheme_
     (
@@ -111,8 +150,11 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     laplacianSchemes_
     (
-        ITstream(objectPath() + "::laplacianSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::laplacianSchemes",
+            tokenList()
+        )()
     ),
     defaultLaplacianScheme_
     (
@@ -121,10 +163,21 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     fluxRequired_
     (
-        ITstream(objectPath() + "::fluxRequired",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::fluxRequired",
+            tokenList()
+        )()
     ),
-    defaultFluxRequired_(false)
+    defaultFluxRequired_(false),
+    cacheFields_
+    (
+        ITstream
+        (
+            objectPath() + "::cacheFields",
+            tokenList()
+        )()
+    )
 {
     read();
 }
@@ -132,11 +185,14 @@ fvSchemes::fvSchemes(const objectRegistry& obr)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool fvSchemes::read()
+bool Foam::fvSchemes::read()
 {
     if (regIOobject::read())
     {
         const dictionary& dict = schemesDict();
+
+        // persistent settings across reads is incorrect
+        clear();
 
         if (dict.found("ddtSchemes"))
         {
@@ -146,20 +202,23 @@ bool fvSchemes::read()
         {
             // For backward compatibility.
             // The timeScheme will be deprecated with warning or removed
+            WarningIn("fvSchemes::read()")
+                << "Using deprecated 'timeScheme' instead of 'ddtSchemes'"
+                << nl << endl;
 
-            word timeSchemeName(dict.lookup("timeScheme"));
+            word schemeName(dict.lookup("timeScheme"));
 
-            if (timeSchemeName == "EulerImplicit")
+            if (schemeName == "EulerImplicit")
             {
-                timeSchemeName = "Euler";
+                schemeName = "Euler";
             }
-            else if (timeSchemeName == "BackwardDifferencing")
+            else if (schemeName == "BackwardDifferencing")
             {
-                timeSchemeName = "backward";
+                schemeName = "backward";
             }
-            else if (timeSchemeName == "SteadyState")
+            else if (schemeName == "SteadyState")
             {
-                timeSchemeName = "steadyState";
+                schemeName = "steadyState";
             }
             else
             {
@@ -170,19 +229,14 @@ bool fvSchemes::read()
                     << exit(FatalIOError);
             }
 
-            if (ddtSchemes_.found("default"))
-            {
-                ddtSchemes_.remove("default");
-            }
-
-            ddtSchemes_.add("default", timeSchemeName);
+            ddtSchemes_.set("default", schemeName);
 
             ddtSchemes_.lookup("default")[0].lineNumber() =
                 dict.lookup("timeScheme").lineNumber();
         }
         else
         {
-            ddtSchemes_.add("default", "none");
+            ddtSchemes_.set("default", "none");
         }
 
         if
@@ -203,31 +257,29 @@ bool fvSchemes::read()
         {
             // For backward compatibility.
             // The timeScheme will be deprecated with warning or removed
+            WarningIn("fvSchemes::read()")
+                << "Using deprecated 'timeScheme' instead of 'd2dt2Schemes'"
+                << nl << endl;
 
-            word timeSchemeName(dict.lookup("timeScheme"));
+            word schemeName(dict.lookup("timeScheme"));
 
-            if (timeSchemeName == "EulerImplicit")
+            if (schemeName == "EulerImplicit")
             {
-                timeSchemeName = "Euler";
+                schemeName = "Euler";
             }
-            else if (timeSchemeName == "SteadyState")
+            else if (schemeName == "SteadyState")
             {
-                timeSchemeName = "steadyState";
-            }
-
-            if (d2dt2Schemes_.found("default"))
-            {
-                d2dt2Schemes_.remove("default");
+                schemeName = "steadyState";
             }
 
-            d2dt2Schemes_.add("default", timeSchemeName);
+            d2dt2Schemes_.set("default", schemeName);
 
             d2dt2Schemes_.lookup("default")[0].lineNumber() =
                 dict.lookup("timeScheme").lineNumber();
         }
         else
         {
-            d2dt2Schemes_.add("default", "none");
+            d2dt2Schemes_.set("default", "none");
         }
 
         if
@@ -329,6 +381,11 @@ bool fvSchemes::read()
             }
         }
 
+        if (dict.found("cacheFields"))
+        {
+            cacheFields_ = dict.subDict("cacheFields");
+        }
+
         return true;
     }
     else
@@ -338,7 +395,7 @@ bool fvSchemes::read()
 }
 
 
-const dictionary& fvSchemes::schemesDict() const
+const Foam::dictionary& Foam::fvSchemes::schemesDict() const
 {
     if (found("select"))
     {
@@ -351,7 +408,7 @@ const dictionary& fvSchemes::schemesDict() const
 }
 
 
-ITstream& fvSchemes::ddtScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::ddtScheme(const word& name) const
 {
     if (debug)
     {
@@ -370,7 +427,7 @@ ITstream& fvSchemes::ddtScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::d2dt2Scheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::d2dt2Scheme(const word& name) const
 {
     if (debug)
     {
@@ -389,7 +446,7 @@ ITstream& fvSchemes::d2dt2Scheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::interpolationScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::interpolationScheme(const word& name) const
 {
     if (debug)
     {
@@ -412,7 +469,7 @@ ITstream& fvSchemes::interpolationScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::divScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::divScheme(const word& name) const
 {
     if (debug)
     {
@@ -431,7 +488,7 @@ ITstream& fvSchemes::divScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::gradScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::gradScheme(const word& name) const
 {
     if (debug)
     {
@@ -450,7 +507,7 @@ ITstream& fvSchemes::gradScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::snGradScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::snGradScheme(const word& name) const
 {
     if (debug)
     {
@@ -469,7 +526,7 @@ ITstream& fvSchemes::snGradScheme(const word& name) const
 }
 
 
-ITstream& fvSchemes::laplacianScheme(const word& name) const
+Foam::ITstream& Foam::fvSchemes::laplacianScheme(const word& name) const
 {
     if (debug)
     {
@@ -488,7 +545,7 @@ ITstream& fvSchemes::laplacianScheme(const word& name) const
 }
 
 
-bool fvSchemes::fluxRequired(const word& name) const
+bool Foam::fvSchemes::fluxRequired(const word& name) const
 {
     if (debug)
     {
@@ -506,8 +563,22 @@ bool fvSchemes::fluxRequired(const word& name) const
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+bool Foam::fvSchemes::cache(const word& name) const
+{
+    if (debug)
+    {
+        Info<< "Lookup cache for " << name << endl;
+    }
 
-} // End namespace Foam
+    if (cacheFields_.found(name))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 // ************************************************************************* //

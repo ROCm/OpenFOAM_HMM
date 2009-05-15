@@ -328,7 +328,7 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     // Database to pass into trackedParticle::move
     trackedParticle::trackData td(cloud, maxFeatureLevel);
 
-    // Track all particles to their end position.
+    // Track all particles to their end position (= starting feature point)
     cloud.move(td);
 
     // Reset level
@@ -1242,7 +1242,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
 // Do refinement of consistent set of cells followed by truncation and
 // load balancing.
 Foam::autoPtr<Foam::mapDistributePolyMesh>
- Foam::meshRefinement::refineAndBalance
+Foam::meshRefinement::refineAndBalance
 (
     const string& msg,
     decompositionMethod& decomposer,

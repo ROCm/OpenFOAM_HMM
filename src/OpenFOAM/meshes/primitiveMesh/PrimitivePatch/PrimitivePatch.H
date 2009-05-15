@@ -28,10 +28,10 @@ Class
 Description
     A list of faces which address into the list of points.
 
-    The class is templated on the form of the face (e.g. triangle, polygon
-    etc.) and on the form of list for faces and points so that it can
-    refer to existing lists using UList and const pointField& or hold the
-    storage using List and pointField.
+    The class is templated on the face type (e.g. triangle, polygon etc.)
+    and on the list type of faces and points so that it can refer to
+    existing lists using UList and const pointField& or hold the storage
+    using List and pointField.
 
 SourceFiles
     PrimitivePatchAddressing.C
@@ -211,9 +211,12 @@ private:
         //- Calculate unit point normals
         void calcPointNormals() const;
 
+        //- Calculate edge owner
+        void calcEdgeOwner() const;
+
 
         //- Face-edge-face walk while remaining on a patch point.
-        // Used to determine if surface multiply connected through point.
+        //  Used to determine if surface multiply connected through point.
         void visitPointRegion
         (
             const label pointI,
@@ -265,175 +268,177 @@ public:
 
     // Member Functions
 
-        // Access
+    // Access
 
-            //- Return reference to global points
-            const Field<PointType>& points() const
+        //- Return reference to global points
+        const Field<PointType>& points() const
+        {
+            return points_;
+        }
+
+
+    // Access functions for demand driven data
+
+        // Topological data; no mesh required.
+
+            //- Return number of points supporting patch faces
+            label nPoints() const
             {
-                return points_;
+                return meshPoints().size();
             }
 
+            //- Return number of edges in patch
+            label nEdges() const
+            {
+                return edges().size();
+            }
 
-        // Access functions for demand driven data
+            //- Return list of edges, address into LOCAL point list
+            const edgeList& edges() const;
 
-            // Topological data; no mesh required.
+            //- Number of internal edges
+            label nInternalEdges() const;
 
-                //- Return number of points supporting patch faces
-                label nPoints() const
-                {
-                    return meshPoints().size();
-                }
+            //- Is internal edge?
+            bool isInternalEdge(const label edgeI) const
+            {
+                return edgeI < nInternalEdges();
+            }
 
-                //- Return number of edges in patch
-                label nEdges() const
-                {
-                    return edges().size();
-                }
+            //- Return list of boundary points,
+            //  address into LOCAL point list
+            const labelList& boundaryPoints() const;
 
-                //- Return list of edges, address into LOCAL point list
-                const edgeList& edges() const;
+            //- Return face-face addressing
+            const labelListList& faceFaces() const;
 
-                //- Number of internal edges
-                label nInternalEdges() const;
+            //- Return edge-face addressing
+            const labelListList& edgeFaces() const;
 
-                //- Is internal edge?
-                bool isInternalEdge(const label edgeI) const
-                {
-                    return edgeI < nInternalEdges();
-                }
+            //- Return face-edge addressing
+            const labelListList& faceEdges() const;
 
-                //- Return list of boundary points,
-                //  address into LOCAL point list
-                const labelList& boundaryPoints() const;
+            //- Return point-edge addressing
+            const labelListList& pointEdges() const;
 
-                //- Return face-face addressing
-                const labelListList& faceFaces() const;
+            //- Return point-face addressing
+            const labelListList& pointFaces() const;
 
-                //- Return edge-face addressing
-                const labelListList& edgeFaces() const;
-
-                //- Return face-edge addressing
-                const labelListList& faceEdges() const;
-
-                //- Return point-edge addressing
-                const labelListList& pointEdges() const;
-
-                //- Return point-face addressing
-                const labelListList& pointFaces() const;
-
-                //- Return patch faces addressing into local point list
-                const List<Face>& localFaces() const;
+            //- Return patch faces addressing into local point list
+            const List<Face>& localFaces() const;
 
 
-            // Addressing into mesh
+        // Addressing into mesh
 
-                //- Return labelList of mesh points in patch
-                const labelList& meshPoints() const;
+            //- Return labelList of mesh points in patch. They are constructed
+            //  walking through the faces in incremental order and not sorted
+            //  anymore.
+            const labelList& meshPoints() const;
 
-                //- Mesh point map.  Given the global point index find its
-                //  location in the patch
-                const Map<label>& meshPointMap() const;
+            //- Mesh point map.  Given the global point index find its
+            //  location in the patch
+            const Map<label>& meshPointMap() const;
 
-                //- Return pointField of points in patch
-                const Field<PointType>& localPoints() const;
+            //- Return pointField of points in patch
+            const Field<PointType>& localPoints() const;
 
-                //- Return orders the local points for most efficient search
-                const labelList& localPointOrder() const;
+            //- Return orders the local points for most efficient search
+            const labelList& localPointOrder() const;
 
-                //- Given a global point index, return the local point
-                //index.  If the point is not found, return -1
-                label whichPoint(const label gp) const;
+            //- Given a global point index, return the local point index.
+            //  If the point is not found, return -1
+            label whichPoint(const label gp) const;
 
-                //- Given an edge in local point labels, return its
-                //  index in the edge list.  If the edge is not found, return -1
-                label whichEdge(const edge& e) const;
+            //- Given an edge in local point labels, return its
+            //  index in the edge list.  If the edge is not found, return -1
+            label whichEdge(const edge&) const;
 
-                //- Return labels of patch edges in the global edge list using
-                //  cell addressing
-                labelList meshEdges
-                (
-                    const edgeList& allEdges,
-                    const labelListList& cellEdges,
-                    const labelList& faceCells
-                ) const;
-
-                //- Return labels of patch edges in the global edge list using
-                //  basic edge addressing.
-                labelList meshEdges
-                (
-                    const edgeList& allEdges,
-                    const labelListList& pointEdges
-                ) const;
-
-                //- Return face normals for patch
-                const Field<PointType>& faceNormals() const;
-
-                //- Return point normals for patch
-                const Field<PointType>& pointNormals() const;
-
-
-            // Other patch operations
-
-                //- Project vertices of patch onto another patch
-                template <class ToPatch>
-                List<objectHit> projectPoints
-                (
-                    const ToPatch& targetPatch,
-                    const Field<PointType>& projectionDirection,
-                    const intersection::algorithm alg = intersection::FULL_RAY,
-                    const intersection::direction dir = intersection::VECTOR
-                ) const;
-
-                //- Project vertices of patch onto another patch
-                template <class ToPatch>
-                List<objectHit> projectFaceCentres
-                (
-                    const ToPatch& targetPatch,
-                    const Field<PointType>& projectionDirection,
-                    const intersection::algorithm alg = intersection::FULL_RAY,
-                    const intersection::direction dir = intersection::VECTOR
-                ) const;
-
-                //- Return list of closed loops of boundary vertices.
-                //  Edge loops are given as ordered lists of vertices
-                //  in local addressing
-                const labelListList& edgeLoops() const;
-
-
-        // Check
-
-            //- Calculate surface type formed by patch.
-            //  - all edges have two neighbours (manifold)
-            //  - some edges have more than two neighbours (illegal)
-            //  - other (open)
-            surfaceTopo surfaceType() const;
-
-            //- Check surface formed by patch for manifoldness (see above).
-            //  Insert vertices of incorrect
-            //  edges set. Return true if any incorrect edge found.
-            bool checkTopology
+            //- Return labels of patch edges in the global edge list using
+            //  cell addressing
+            labelList meshEdges
             (
-                const bool report = false,
-                labelHashSet* setPtr = NULL
+                const edgeList& allEdges,
+                const labelListList& cellEdges,
+                const labelList& faceCells
             ) const;
 
-            //- Checks primitivePatch for faces sharing point but not edge.
-            //  This denotes a surface that is pinched at a single point
-            //  (test for pinched at single edge is already in PrimitivePatch)
-            //  Returns true if this situation found and puts conflicting
-            // (mesh)point in set. Based on all the checking routines in
-            // primitiveMesh.
-            bool checkPointManifold
+            //- Return labels of patch edges in the global edge list using
+            //  basic edge addressing.
+            labelList meshEdges
             (
-                const bool report = false,
-                labelHashSet* setPtr = NULL
+                const edgeList& allEdges,
+                const labelListList& pointEdges
             ) const;
 
+            //- Return face normals for patch
+            const Field<PointType>& faceNormals() const;
 
-        // Edit
+            //- Return point normals for patch
+            const Field<PointType>& pointNormals() const;
 
-            //- Correct patch after moving points
-            virtual void movePoints(const Field<PointType>&);
+
+        // Other patch operations
+
+            //- Project vertices of patch onto another patch
+            template <class ToPatch>
+            List<objectHit> projectPoints
+            (
+                const ToPatch& targetPatch,
+                const Field<PointType>& projectionDirection,
+                const intersection::algorithm = intersection::FULL_RAY,
+                const intersection::direction = intersection::VECTOR
+            ) const;
+
+            //- Project vertices of patch onto another patch
+            template <class ToPatch>
+            List<objectHit> projectFaceCentres
+            (
+                const ToPatch& targetPatch,
+                const Field<PointType>& projectionDirection,
+                const intersection::algorithm = intersection::FULL_RAY,
+                const intersection::direction = intersection::VECTOR
+            ) const;
+
+            //- Return list of closed loops of boundary vertices.
+            //  Edge loops are given as ordered lists of vertices
+            //  in local addressing
+            const labelListList& edgeLoops() const;
+
+
+    // Check
+
+        //- Calculate surface type formed by patch.
+        //  - all edges have two neighbours (manifold)
+        //  - some edges have more than two neighbours (illegal)
+        //  - other (open)
+        surfaceTopo surfaceType() const;
+
+        //- Check surface formed by patch for manifoldness (see above).
+        //  Return true if any incorrect edges are found.
+        //  Insert vertices of incorrect edges into set.
+        bool checkTopology
+        (
+            const bool report = false,
+            labelHashSet* setPtr = NULL
+        ) const;
+
+        //- Checks primitivePatch for faces sharing point but not edge.
+        //  This denotes a surface that is pinched at a single point
+        //  (test for pinched at single edge is already in PrimitivePatch)
+        //  Returns true if this situation found and puts conflicting
+        //  (mesh)point in set. Based on all the checking routines in
+        //  primitiveMesh.
+        bool checkPointManifold
+        (
+            const bool report = false,
+            labelHashSet* setPtr = NULL
+        ) const;
+
+
+    // Edit
+
+        //- Correct patch after moving points
+        virtual void movePoints(const Field<PointType>&);
 
 
     // Member operators

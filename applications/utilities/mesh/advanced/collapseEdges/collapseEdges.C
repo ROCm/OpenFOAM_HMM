@@ -74,20 +74,17 @@ labelList getSortedEdges
         const edge& e = edges[edgeI];
 
         label fp = findIndex(f, e[0]);
-
-        label fp1 = (fp+1) % f.size();
+        label fp1 = f.fcIndex(fp);
 
         if (f[fp1] == e[1])
         {
-            // Edgei in fp-fp1 order
+            // EdgeI between fp -> fp1
             faceEdges[fp] = edgeI;
         }
         else
         {
-            // Edgei between fp-1 and fp
-            label fpMin1 = (fp == 0 ? f.size()-1 : fp-1);
-
-            faceEdges[fpMin1] = edgeI;
+            // EdgeI between fp-1 -> fp
+            faceEdges[f.rcIndex(fp)] = edgeI;
         }
     }
 
@@ -464,6 +461,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     scalar minLen(readScalar(IStringStream(args.additionalArgs()[0])()));
     scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
@@ -587,8 +585,12 @@ int main(int argc, char *argv[])
         {
             runTime++;
         }
+        else
+        {
+            mesh.setInstance(oldInstance);
+        }
 
-        Info << "Writing collapsed mesh to time " << runTime.value() << endl;
+        Info<< "Writing collapsed mesh to time " << runTime.timeName() << endl;
 
         mesh.write();
     }

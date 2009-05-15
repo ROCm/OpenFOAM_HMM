@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    turbFoam
+    pisoFoam
 
 Description
     Transient solver for incompressible flow.
@@ -40,24 +40,23 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
 
         // Pressure-velocity PISO corrector
         {
@@ -120,7 +119,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-#               include "continuityErrs.H"
+                #include "continuityErrs.H"
 
                 U -= rUA*fvc::grad(p);
                 U.correctBoundaryConditions();
@@ -138,7 +137,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

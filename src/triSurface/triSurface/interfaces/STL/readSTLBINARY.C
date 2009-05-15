@@ -47,8 +47,9 @@ bool triSurface::readSTLBINARY(const fileName& STLfileName)
     (
         new ifstream(STLfileName.c_str(), std::ios::binary)
     );
+
     // If the file is compressed, decompress it before reading.
-    if (!STLfilePtr->good() && file(STLfileName + ".gz"))
+    if (!STLfilePtr->good() && isFile(STLfileName + ".gz", false))
     {
         compressed = true;
         STLfilePtr.reset(new igzstream((STLfileName + ".gz").c_str()));

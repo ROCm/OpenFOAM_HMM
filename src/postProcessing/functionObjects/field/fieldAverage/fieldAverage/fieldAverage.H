@@ -41,7 +41,12 @@ Description
         // averaging info if available
         cleanRestart true;
 
-        // Fields to be probed. runTime modifiable!
+        // Whether to reset the averaged fields after they have been written.
+        // Used to average over only the preceding write interval for transient
+        // cases.
+        resetOnOutput true;
+
+        // Fields to be averaged. runTime modifiable!
         fields
         (
             U
@@ -75,7 +80,6 @@ Description
 SourceFiles
     fieldAverage.C
     fieldAverageTemplates.C
-    IOfieldAverage.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -108,6 +112,14 @@ class fieldAverage
 {
 protected:
 
+    // File and field name extensions
+
+        //- Mean average
+        static const word EXT_MEAN;
+
+        //- Prime-squared average
+        static const word EXT_PRIME2MEAN;
+
     // Private data
 
         //- Name of this set of field averages.
@@ -119,34 +131,32 @@ protected:
         //- On/off switch
         bool active_;
 
+        //- Time at last call, prevents repeated averaging
+        label prevTimeIndex_;
+
         //- Clean restart flag
         Switch cleanRestart_;
 
-        //- List of field average items, describing waht averages to be
+        //- resetOnOutput flag
+        Switch resetOnOutput_;
+
+        //- List of field average items, describing what averages to be
         //  calculated and output
         List<fieldAverageItem> faItems_;
-
-        // File and field name extensions
-
-            //- Mean average
-            static const word EXT_MEAN;
-
-            //- Prime-squared average
-            static const word EXT_PRIME2MEAN;
-
 
         // Lists of averages
 
             // Arithmetic mean fields
-            PtrList<volScalarField> meanScalarFields_;
-            PtrList<volVectorField> meanVectorFields_;
-            PtrList<volSphericalTensorField> meanSphericalTensorFields_;
-            PtrList<volSymmTensorField> meanSymmTensorFields_;
-            PtrList<volTensorField> meanTensorFields_;
+            wordList meanScalarFields_;
+            wordList meanVectorFields_;
+            wordList meanSphericalTensorFields_;
+            wordList meanSymmTensorFields_;
+            wordList meanTensorFields_;
 
-            // Prime-squared fields - applicable to volVectorFields only
-            PtrList<volScalarField> prime2MeanScalarFields_;
-            PtrList<volSymmTensorField> prime2MeanSymmTensorFields_;
+            // Prime-squared fields
+            // Only applicable to volScalarFields / volVectorFields
+            wordList prime2MeanScalarFields_;
+            wordList prime2MeanSymmTensorFields_;
 
 
         // Counters
@@ -162,29 +172,26 @@ protected:
 
         // Initialisation routines
 
-            //- Reset size of lists (clear existing values)
-            void resetLists(const label nItems);
+            //- Checkout fields (causes deletion) from the database
+            //  and reset lists
+            void resetFields(wordList&);
 
-            //- Intitialise averaging. Check requested field averages are
-            //  valid, and populate field lists
-            void initialise();
+            //- Reset lists (clear existing values) and initialize averaging.
+            //  Check requested field averages are valid, populate field lists
+            void initialize();
 
-            //- Add mean average field to PtrList
+            //- Add mean average field to list
             template<class Type>
-            void addMeanField
-            (
-                const label,
-                PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-            );
+            void addMeanField(const label, wordList&) const;
 
-            //- Add prime-squared average field to PtrList
+            //- Add prime-squared average field to list
             template<class Type1, class Type2>
             void addPrime2MeanField
             (
                 const label,
-                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
-                PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-            );
+                const wordList&,
+                wordList&
+            ) const;
 
 
         // Calculation functions
@@ -194,40 +201,33 @@ protected:
 
             //- Calculate mean average fields
             template<class Type>
-            void calculateMeanFields
-            (
-                PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-            );
+            void calculateMeanFields(const wordList&) const;
 
             //- Add mean-squared field value to prime-squared mean field
             template<class Type1, class Type2>
             void addMeanSqrToPrime2Mean
             (
-                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
-                PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-            );
+                const wordList&,
+                const wordList&
+            ) const;
 
             //- Calculate prime-squared average fields
             template<class Type1, class Type2>
             void calculatePrime2MeanFields
             (
-                PtrList<GeometricField<Type1, fvPatchField, volMesh> >&,
-                PtrList<GeometricField<Type2, fvPatchField, volMesh> >&
-            );
+                const wordList&,
+                const wordList&
+            ) const;
 
 
-        // I-O
+        // IO
 
             //- Write averages
             virtual void writeAverages() const;
 
             //- Write fields
             template<class Type>
-            void writeFieldList
-            (
-                const PtrList<GeometricField<Type, fvPatchField, volMesh> >&
-                    fieldList
-            ) const;
+            void writeFieldList(const wordList&) const;
 
             //- Write averaging properties - steps and time
             void writeAveragingProperties() const;
@@ -289,6 +289,9 @@ public:
 
         //- Execute the averaging
         virtual void execute();
+
+        //- Execute the averaging at the final time-loop, currently does nothing
+        virtual void end();
 
         //- Calculate the field average data and write
         virtual void write();

@@ -307,17 +307,17 @@ bool kOmegaSST::read()
 {
     if (RASModel::read())
     {
-        alphaK1_.readIfPresent(coeffDict_);
-        alphaK2_.readIfPresent(coeffDict_);
-        alphaOmega1_.readIfPresent(coeffDict_);
-        alphaOmega2_.readIfPresent(coeffDict_);
-        gamma1_.readIfPresent(coeffDict_);
-        gamma2_.readIfPresent(coeffDict_);
-        beta1_.readIfPresent(coeffDict_);
-        beta2_.readIfPresent(coeffDict_);
-        betaStar_.readIfPresent(coeffDict_);
-        a1_.readIfPresent(coeffDict_);
-        c1_.readIfPresent(coeffDict_);
+        alphaK1_.readIfPresent(coeffDict());
+        alphaK2_.readIfPresent(coeffDict());
+        alphaOmega1_.readIfPresent(coeffDict());
+        alphaOmega2_.readIfPresent(coeffDict());
+        gamma1_.readIfPresent(coeffDict());
+        gamma2_.readIfPresent(coeffDict());
+        beta1_.readIfPresent(coeffDict());
+        beta2_.readIfPresent(coeffDict());
+        betaStar_.readIfPresent(coeffDict());
+        a1_.readIfPresent(coeffDict());
+        c1_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -343,7 +343,7 @@ void kOmegaSST::correct()
     }
 
     volScalarField S2 = magSqr(symm(fvc::grad(U_)));
-    volScalarField G("G", nut_*2*S2);
+    volScalarField G("RASModel::G", nut_*2*S2);
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();

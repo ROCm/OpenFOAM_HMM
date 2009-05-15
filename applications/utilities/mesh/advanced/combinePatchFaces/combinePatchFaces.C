@@ -177,7 +177,7 @@ label mergePatchFaces
         List<faceList> allFaceSetsFaces(allFaceSets.size());
         forAll(allFaceSets, setI)
         {
-            allFaceSetsFaces[setI] = IndirectList<face>
+            allFaceSetsFaces[setI] = UIndirectList<face>
             (
                 mesh.faces(),
                 allFaceSets[setI]
@@ -441,6 +441,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
@@ -502,6 +503,11 @@ int main(int argc, char *argv[])
 
     if (nChanged > 0)
     {
+        if (overwrite)
+        {
+            mesh.setInstance(oldInstance);
+        }
+
         Info<< "Writing morphed mesh to time " << runTime.timeName() << endl;
 
         mesh.write();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ Foam::extendedUpwindStencil::weightedSum
 
             forAll(pSfCorr, i)
             {
-                if (phi[faceI] > 0)
+                if (phi.boundaryField()[patchi][i] > 0)
                 {
                     // Flux out of owner. Use upwind (= owner side) stencil.
                     const List<Type>& stField = ownFld[faceI];

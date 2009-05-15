@@ -270,12 +270,12 @@ bool realizableKE::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        A0_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        alphak_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        alphah_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        A0_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        alphak_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        alphah_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -317,7 +317,7 @@ void realizableKE::correct()
     volScalarField eta = magS*k_/epsilon_;
     volScalarField C1 = max(eta/(scalar(5) + eta), scalar(0.43));
 
-    volScalarField G("G", mut_*(gradU && dev(twoSymm(gradU))));
+    volScalarField G("RASModel::G", mut_*(gradU && dev(twoSymm(gradU))));
 
     // Update espsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();

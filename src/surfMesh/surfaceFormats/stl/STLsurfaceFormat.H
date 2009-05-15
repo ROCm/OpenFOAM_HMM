@@ -29,7 +29,7 @@ Description
     Provide a means of reading/writing STL files (ASCII and binary).
 
 Note
-    For efficiency, the regions are sorted before creating the faces.
+    For efficiency, the zones are sorted before creating the faces.
     The class is thus derived from MeshedSurface.
 
 SourceFiles
@@ -43,6 +43,7 @@ SourceFiles
 
 #include "STLsurfaceFormatCore.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,38 +64,22 @@ class STLsurfaceFormat
 {
     // Private Member Functions
 
-        //- Write Face in ASCII
+        //- Write Face (ASCII)
         static inline void writeShell
         (
             Ostream&,
             const pointField&,
-            const Face&,
-            const vector& norm
+            const Face&
         );
 
-        //- Write Face in BINARY
+        //- Write Face (BINARY)
         static inline void writeShell
         (
             ostream&,
             const pointField&,
             const Face&,
-            const vector&,
-            const label patchI
+            const label zoneI
         );
-
-
-        //- Write UnsortedMeshedSurface
-        static void writeASCII(Ostream&, const UnsortedMeshedSurface<Face>&);
-
-        //- Write UnsortedMeshedSurface
-        static void writeBINARY(ostream&, const UnsortedMeshedSurface<Face>&);
-
-        //- Write MeshedSurface
-        static void writeASCII(Ostream&, const MeshedSurface<Face>&);
-
-        //- Write MeshedSurface
-        static void writeBINARY(ostream&, const MeshedSurface<Face>&);
-
 
         //- Disallow default bitwise copy construct
         STLsurfaceFormat(const STLsurfaceFormat<Face>&);
@@ -125,42 +110,50 @@ public:
 
     // Member Functions
 
-        //- Read from file
-        virtual bool read(const fileName&);
-
-        //- Write MeshedSurface (as ASCII)
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
+        //- Write surface mesh components by proxy (as ASCII)
+        static void writeAscii
         (
             const fileName&,
-            const MeshedSurface<Face>&
+            const MeshedSurfaceProxy<Face>&
         );
 
-        //- Write UnsortedMeshedSurface (as ASCII) sorted by region
-        static void write
+        //- Write surface mesh components by proxy (as BINARY)
+        static void writeBinary
         (
-            Ostream&,
+            const fileName&,
+            const MeshedSurfaceProxy<Face>&
+        );
+
+        //- Write surface mesh components by proxy
+        //  as ASCII or BINARY, depending on the extension
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+        //- Write UnsortedMeshedSurface (as ASCII) sorted by zone
+        static void writeAscii
+        (
+            const fileName&,
+            const UnsortedMeshedSurface<Face>&
+        );
+
+        //- Write UnsortedMeshedSurface (as BINARY) unsorted by zone
+        static void writeBinary
+        (
+            const fileName&,
             const UnsortedMeshedSurface<Face>&
         );
 
         //- Write UnsortedMeshedSurface
-        //  ASCII output is sorted by region; binary output is unsorted
-        static void write
-        (
-            const fileName&,
-            const UnsortedMeshedSurface<Face>&
-        );
+        //  as ASCII or BINARY, depending on the extension
+        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
-        //- Write object (only ASCII output)
-        virtual void write(Ostream& os) const
+
+        //- Read from file
+        virtual bool read(const fileName&);
+
+        //- Write object
+        virtual void write(const fileName& name) const
         {
-            write(os, *this);
+            write(name, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

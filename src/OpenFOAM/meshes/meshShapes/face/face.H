@@ -222,16 +222,16 @@ public:
         ) const;
 
         //- Fast intersection with a ray.
-        //  For a hit, the pointHit.distance() is the line parameter t :
-        //  intersection=p+t*q. Only defined for FULL_RAY or
-        //  HALF_RAY.
+        //  Does face-center decomposition and returns triangle intersection
+        //  point closest to p. See triangle::intersection for details.
         pointHit intersection
         (
             const point& p,
             const vector& q,
             const point& ctr,
             const pointField& meshPoints,
-            const intersection::algorithm alg
+            const intersection::algorithm alg,
+            const scalar tol = 0.0
         ) const;
 
         //- Return nearest point to face

@@ -26,6 +26,7 @@ License
 
 #include "fileName.H"
 #include "wordList.H"
+#include "DynamicList.H"
 #include "debug.H"
 #include "OSspecific.H"
 
@@ -47,6 +48,12 @@ Foam::fileName::fileName(const wordList& lst)
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+Foam::fileName::Type Foam::fileName::type() const
+{
+    return ::Foam::type(*this);
+}
+
 
 //  Return file name (part beyond last /)
 //
@@ -93,13 +100,13 @@ Foam::fileName Foam::fileName::path() const
     {
         return ".";
     }
-    else if (i == 0)
+    else if (i)
     {
-        return "/";
+        return substr(0, i);
     }
     else
     {
-        return substr(0, i);
+        return "/";
     }
 }
 
@@ -145,28 +152,22 @@ Foam::word Foam::fileName::ext() const
 //    -----           ------
 //    "foo"           1("foo")
 //    "/foo"          1("foo")
-//    "foo/bar"       2("foo", "foo")
-//    "/foo/bar"      2("foo", "foo")
+//    "foo/bar"       2("foo", "bar")
+//    "/foo/bar"      2("foo", "bar")
 //    "/foo/bar/"     2("foo", "bar")
 //
 Foam::wordList Foam::fileName::components(const char delimiter) const
 {
-    wordList wrdList(20);
+    DynamicList<word> wrdList(20);
 
     size_type start=0, end=0;
-    label nWords=0;
 
     while ((end = find(delimiter, start)) != npos)
     {
         // avoid empty element (caused by doubled slashes)
         if (start < end)
         {
-            wrdList[nWords++] = substr(start, end-start);
-
-            if (nWords == wrdList.size())
-            {
-                wrdList.setSize(2*wrdList.size());
-            }
+            wrdList.append(substr(start, end-start));
         }
         start = end + 1;
     }
@@ -174,12 +175,11 @@ Foam::wordList Foam::fileName::components(const char delimiter) const
     // avoid empty trailing element
     if (start < size())
     {
-        wrdList[nWords++] = substr(start, npos);
+        wrdList.append(substr(start, npos));
     }
 
-    wrdList.setSize(nWords);
-
-    return wrdList;
+    // transfer to wordList
+    return wordList(wrdList.xfer());
 }
 
 
@@ -194,44 +194,43 @@ Foam::word Foam::fileName::component
 }
 
 
-Foam::fileName::Type Foam::fileName::type() const
-{
-    return ::Foam::type(*this);
-}
-
-
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::fileName::operator=(const fileName& str)
+const Foam::fileName& Foam::fileName::operator=(const fileName& str)
 {
     string::operator=(str);
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const word& str)
+const Foam::fileName& Foam::fileName::operator=(const word& str)
 {
     string::operator=(str);
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const string& str)
+const Foam::fileName& Foam::fileName::operator=(const string& str)
 {
     string::operator=(str);
     stripInvalid();
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const std::string& str)
+const Foam::fileName& Foam::fileName::operator=(const std::string& str)
 {
     string::operator=(str);
     stripInvalid();
+    return *this;
 }
 
 
-void Foam::fileName::operator=(const char* str)
+const Foam::fileName& Foam::fileName::operator=(const char* str)
 {
     string::operator=(str);
     stripInvalid();
+    return *this;
 }
 
 

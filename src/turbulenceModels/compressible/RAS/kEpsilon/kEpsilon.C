@@ -236,13 +236,13 @@ bool kEpsilon::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        C3_.readIfPresent(coeffDict_);
-        alphak_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        alphah_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        C3_.readIfPresent(coeffDict());
+        alphak_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        alphah_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -278,7 +278,7 @@ void kEpsilon::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField G("G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
+    volScalarField G("RASModel::G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
     // Update espsilon and G at the wall

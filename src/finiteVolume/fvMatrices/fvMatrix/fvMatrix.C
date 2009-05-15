@@ -472,22 +472,18 @@ void Foam::fvMatrix<Type>::setValues
 }
 
 
-// Set reference level for solution
 template<class Type>
 void Foam::fvMatrix<Type>::setReference
 (
-    const label cell,
+    const label celli,
     const Type& value,
     const bool forceReference
 )
 {
-    if (psi_.needReference() || forceReference)
+    if (celli >= 0 && (psi_.needReference() || forceReference))
     {
-        if (cell >= 0)
-        {
-            source()[cell] += diag()[cell]*value;
-            diag()[cell] += diag()[cell];
-        }
+        source()[celli] += diag()[celli]*value;
+        diag()[celli] += diag()[celli];
     }
 }
 
@@ -713,7 +709,7 @@ Foam::fvMatrix<Type>::H() const
     (
         pow
         (
-            psi_.mesh().directions(),
+            psi_.mesh().solutionD(),
             pTraits<typename powProduct<Vector<label>, Type::rank>::type>::zero
         )
     );
@@ -1168,7 +1164,7 @@ void Foam::fvMatrix<Type>::operator*=
 }
 
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Global Functions  * * * * * * * * * * * * * //
 
 template<class Type>
 void Foam::checkMethod
@@ -1297,7 +1293,44 @@ Foam::lduMatrix::solverPerformance Foam::solve(const tmp<fvMatrix<Type> >& tfvm)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
+(
+    const fvMatrix<Type>& A
+)
+{
+    tmp<Foam::fvMatrix<Type> > tAcorr = A - (A & A.psi());
+
+    if ((A.hasUpper() || A.hasLower()) && A.mesh().fluxRequired(A.psi().name()))
+    {
+        tAcorr().faceFluxCorrectionPtr() = (-A.flux()).ptr();
+    }
+
+    return tAcorr;
+}
+
+
+template<class Type>
+Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
+(
+    const tmp<fvMatrix<Type> >& tA
+)
+{
+    tmp<Foam::fvMatrix<Type> > tAcorr = tA - (tA() & tA().psi());
+
+    // Note the matrix coefficients are still that of matrix A
+    const fvMatrix<Type>& A = tAcorr();
+
+    if ((A.hasUpper() || A.hasLower()) && A.mesh().fluxRequired(A.psi().name()))
+    {
+        tAcorr().faceFluxCorrectionPtr() = (-A.flux()).ptr();
+    }
+
+    return tAcorr;
+}
+
+
+// * * * * * * * * * * * * * * * Global Operators  * * * * * * * * * * * * * //
 
 template<class Type>
 Foam::tmp<Foam::fvMatrix<Type> > Foam::operator==

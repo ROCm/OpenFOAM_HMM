@@ -27,7 +27,7 @@ Class
 
 Description
     Provide a means of writing VTK legacy format.
-    The output is never sorted by patch.
+    The output is never sorted by zone.
 
 SourceFiles
     VTKsurfaceFormat.C
@@ -37,9 +37,8 @@ SourceFiles
 #ifndef VTKsurfaceFormat_H
 #define VTKsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 #include "VTKsurfaceFormatCore.H"
 
@@ -63,7 +62,7 @@ class VTKsurfaceFormat
     // Private Member Functions
 
         //- Write header information about number of polygon points
-        static void writeHeaderPolygons(Ostream&, const List<Face>&);
+        static void writeHeaderPolygons(Ostream&, const UList<Face>&);
 
         //- Disallow default bitwise copy construct
         VTKsurfaceFormat(const VTKsurfaceFormat<Face>&);
@@ -89,46 +88,17 @@ public:
 
         // Write
 
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& name,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
+        //- Write UnsortedMeshedSurface, the output remains unsorted
+        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
-        //- Write UnsortedMeshedSurface
-        //  The output remains unsorted
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  The output remains unsorted
-        static void write
-        (
-            const fileName& name,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
 
         //- Write object
         virtual void write(Ostream& os) const
         {
-            write(os, *this);
+            write(os, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

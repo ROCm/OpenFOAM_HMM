@@ -36,11 +36,11 @@ SourceFiles
 #ifndef surfaceFormatsCore_H
 #define surfaceFormatsCore_H
 
-#include "surfPatchIdentifierList.H"
-#include "surfGroupList.H"
-#include "labelList.H"
 #include "Map.H"
 #include "HashSet.H"
+#include "labelList.H"
+#include "surfZoneList.H"
+#include "surfZoneIdentifierList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,49 +56,37 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class surfaceFormatsCore Declaration
+                     Class surfaceFormatsCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class surfaceFormatsCore
 {
-public:
+protected:
 
-    // Static Data
-
-    //- Return the mesh sub-directory name (usually "meshedSurface")
-    static word meshSubDir;
-
-    //- The file extension corresponding to 'native' surface format
-    static word nativeExt;
-
-    // Static Member Functions
-
-        //- Check if file extension corresponds to 'native' surface format
-        static bool isNative(const word&);
+        //- Return a list with a single entry,
+        //  the size corresponds to that of the container
+        template<class Container>
+        static List<surfZone> oneZone
+        (
+            const Container& container,
+            const word& name = "zone0"
+        )
+        {
+            return List<surfZone>(1, surfZone(name, container.size(), 0, 0));
+        }
 
         //- Read non-comment line
         static string getLineNoComment(IFstream&);
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshInstance(const Time&, const word& subdirName);
+public:
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshName(const Time&, const word& subdirName);
+    // Static Data
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshInstance(const Time&);
+        //- The file extension corresponding to 'native' surface format
+        //  Normally "ofs" (mnemonic: OF = OpenFOAM, S = Surface)
+        static word nativeExt;
 
-        //- Name of UnsortedMeshedSurface directory to use.
-        static fileName findMeshName(const Time&);
-
-        //- Determine the sort order from the region list.
-        //  Returns patch list and sets faceMap to indices within faceLst
-        static surfGroupList sortedPatchRegions
-        (
-            const UList<label>& regionLst,
-            const Map<word>& patchNames,
-            labelList& faceMap
-        );
+    // Static Member Functions
 
         static bool checkSupport
         (
@@ -107,6 +95,19 @@ public:
             const bool verbose,
             const word& functionName
         );
+
+
+        //- Return the local file name (within time directory)
+        //  NEEDS FIXING
+        static fileName localMeshFileName(const word& surfName="");
+
+        //- Find instance with surfName
+        //  NEEDS FIXING
+        static fileName findMeshInstance(const Time&, const word& surfName="");
+
+        //- Find mesh file with surfName
+        //  NEEDS FIXING
+        static fileName findMeshFile(const Time&, const word& surfName="");
 
     // Constructors
 

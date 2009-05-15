@@ -80,6 +80,9 @@ class LRRDiffStress
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volScalarField& K);
+
         // Disallow default bitwise copy construct and assignment
         LRRDiffStress(const LRRDiffStress&);
         LRRDiffStress& operator=(const LRRDiffStress&);
@@ -120,7 +123,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

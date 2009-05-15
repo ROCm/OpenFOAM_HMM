@@ -39,7 +39,6 @@ SourceFiles
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +48,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class VTKsurfaceFormatCore Declaration
+                    Class VTKsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class VTKsurfaceFormatCore
@@ -64,11 +63,11 @@ protected:
         const pointField&
     );
 
-    //- Write trailing information with patch information
-    static void writeTail(Ostream&, const List<surfGroup>&);
+    //- Write trailing information with zone information
+    static void writeTail(Ostream&, const UList<surfZone>&);
 
-    //- Write trailing information with region information
-    static void writeTail(Ostream&, const List<label>& regionLst);
+    //- Write trailing information with zone Ids
+    static void writeTail(Ostream&, const UList<label>& zoneIds);
 
 };
 

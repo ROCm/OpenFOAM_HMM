@@ -26,15 +26,19 @@ Class
     Foam::MeshedSurface
 
 Description
-    A surface geometry mesh with patch information, not to be confused
-    with a similarily named surfaceMesh, which actually refers to
-    the cell faces of a volume mesh.
+    A surface geometry mesh with zone information, not to be confused with
+    the similarly named surfaceMesh, which actually refers to the cell faces
+    of a volume mesh.
 
-   The MeshedSurface is intended to surfaces from a variety of sources.
-   - A set of points and faces without any patch information.
-   - A set of points and faces with randomly sorted patch information.
-     This could arise, for example, from reading external file formats
-     such as STL, etc.
+    A MeshedSurface can have zero or more surface zones (roughly equivalent
+    to faceZones for a polyMesh). If surface zones are defined, they must
+    be contiguous and cover all of the faces.
+
+    The MeshedSurface is intended for surfaces from a variety of sources.
+    - A set of points and faces without any surface zone information.
+    - A set of points and faces with randomly ordered zone information.
+      This could arise, for example, from reading external file formats
+      such as STL, etc.
 
 SourceFiles
     MeshedSurface.C
@@ -44,8 +48,13 @@ SourceFiles
 #ifndef MeshedSurface_H
 #define MeshedSurface_H
 
-#include "BasicMeshedSurface.H"
-#include "surfGroupList.H"
+#include "PrimitivePatch.H"
+#include "PatchTools.H"
+#include "pointField.H"
+#include "face.H"
+#include "triFace.H"
+
+#include "surfZoneList.H"
 #include "surfaceFormatsCore.H"
 #include "runTimeSelectionTables.H"
 #include "memberFunctionSelectionTables.H"
@@ -59,14 +68,12 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 class Time;
-template<class Face> class MeshedSurface;
-template<class Face> class UnsortedMeshedSurface;
-
-class polyBoundaryMesh;
 class surfMesh;
+class polyBoundaryMesh;
 
-template<class Face>
-    Ostream& operator<<(Ostream&, const MeshedSurface<Face>&);
+template<class Face> class MeshedSurface;
+template<class Face> class MeshedSurfaceProxy;
+template<class Face> class UnsortedMeshedSurface;
 
 /*---------------------------------------------------------------------------*\
                       Class MeshedSurface Declaration
@@ -75,44 +82,76 @@ template<class Face>
 template<class Face>
 class MeshedSurface
 :
-    public BasicMeshedSurface<Face>,
+    public PrimitivePatch<Face, ::Foam::List, pointField, point>,
     public fileFormats::surfaceFormatsCore
 {
-    friend class UnsortedMeshedSurface<Face>;
+    // friends - despite different face representationsx
+    template<class Face2> friend class MeshedSurface;
+    template<class Face2> friend class UnsortedMeshedSurface;
+    friend class surfMesh;
 
 private:
 
     //- Private typedefs for convenience
-        typedef BasicMeshedSurface<Face> ParentType;
-        typedef UnsortedMeshedSurface<Face>  SiblingType;
+
+        typedef PrimitivePatch
+        <
+            Face,
+            ::Foam::List,
+            pointField,
+            point
+        >
+        ParentType;
+
+        typedef UnsortedMeshedSurface<Face>  FriendType;
+        typedef MeshedSurfaceProxy<Face>     ProxyType;
 
     // Private Member Data
 
-        //- Patch information (face ordering nFaces/startFace only used
-        //  during reading and writing)
-        List<surfGroup> patches_;
+        //- Zone information
+        // (face ordering nFaces/startFace only used during reading/writing)
+        List<surfZone> zones_;
+
 
     // Private member functions
-
-        //- Read OpenFOAM Surface format
-        bool read(Istream&);
 
 protected:
 
     // Protected Member functions
 
-        //- basic sanity check on patches
-        void checkPatches();
+        //- Transfer points/zones and transcribe face -> triFace
+        void transcribe(MeshedSurface<face>&);
 
-        //- sort faces by regions and store sorted faces
+        //- basic sanity check on zones
+        void checkZones();
+
+        //- Non-const access to global points
+        pointField& storedPoints()
+        {
+            return const_cast<pointField&>(ParentType::points());
+        }
+
+        //- Non-const access to the faces
+        List<Face>& storedFaces()
+        {
+            return static_cast<List<Face> &>(*this);
+        }
+
+        //- Non-const access to the zones
+        surfZoneList& storedZones()
+        {
+            return zones_;
+        }
+
+        //- sort faces by zones and store sorted faces
         void sortFacesAndStore
         (
-            const Xfer<List<Face> >& unsortedFaces,
-            const Xfer<List<label> >& regionIds,
+            const Xfer< List<Face> >& unsortedFaces,
+            const Xfer< List<label> >& zoneIds,
             const bool sorted
         );
 
-        //- Set new regions from faceMap
+        //- Set new zones from faceMap
         virtual void remapFaces(const UList<label>& faceMap);
 
 public:
@@ -121,6 +160,9 @@ public:
         ClassName("MeshedSurface");
 
     // Static
+
+        //- Face storage only handles triangulated faces
+        inline static bool isTri();
 
         //- Can we read this file format?
         static bool canRead(const fileName&, const bool verbose=false);
@@ -139,23 +181,29 @@ public:
         //- Construct null
         MeshedSurface();
 
-        //- Construct by transferring components (points, faces, patches).
+        //- Construct by transferring components (points, faces, zones).
         MeshedSurface
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face> >&,
-            const Xfer<surfGroupList>&
+            const Xfer< pointField >&,
+            const Xfer< List<Face> >&,
+            const Xfer< surfZoneList >&
         );
 
-        //- Construct by transferring points, faces.
-        //  Use patch information, or set single default patch.
+        //- Construct by transferring components (points, faces).
+        //  Use zone information if available
         MeshedSurface
         (
-            const Xfer<pointField>&,
-            const Xfer<List<Face> >&,
-            const UList<label>& patchSizes = UList<label>::null(),
-            const UList<word>& patchNames = UList<word>::null()
+            const Xfer< pointField >&,
+            const Xfer< List<Face> >&,
+            const UList<label>& zoneSizes = UList<label>(),
+            const UList<word>& zoneNames = UList<word>()
         );
+
+        //- Construct as copy
+        MeshedSurface(const MeshedSurface&);
+
+        //- Construct from a UnsortedMeshedSurface
+        MeshedSurface(const UnsortedMeshedSurface<Face>&);
 
         //- Construct from a boundary mesh with local points/faces
         MeshedSurface
@@ -163,9 +211,6 @@ public:
             const polyBoundaryMesh&,
             const bool globalPoints=false
         );
-
-        //- Construct from a UnsortedMeshedSurface
-        MeshedSurface(const UnsortedMeshedSurface<Face>&);
 
         //- Construct from a surfMesh
         MeshedSurface(const surfMesh&);
@@ -182,14 +227,8 @@ public:
         //- Construct from file name (uses extension to determine type)
         MeshedSurface(const fileName&, const word& ext);
 
-        //- Construct from Istream
-        MeshedSurface(Istream&);
-
-        //- Construct from objectRegistry
-        MeshedSurface(const Time&);
-
-        //- Construct as copy
-        MeshedSurface(const MeshedSurface&);
+        //- Construct from database
+        MeshedSurface(const Time&, const word& surfName="");
 
     // Declare run-time constructor selection table
 
@@ -226,7 +265,7 @@ public:
         declareMemberFunctionSelectionTable
         (
             void,
-            MeshedSurface,
+            UnsortedMeshedSurface,
             write,
             fileExtension,
             (
@@ -250,46 +289,103 @@ public:
             return ParentType::size();
         }
 
-        const List<surfGroup>& patches() const
+        //- Return const access to the faces
+        inline const List<Face>& faces() const
         {
-            return patches_;
+            return static_cast<const List<Face> &>(*this);
         }
 
-        //- set a single patch, optionally with a specific name
-        void onePatch(const word& name = word::null);
+        //- Const access to the surface zones.
+        //  If zones are defined, they must be contiguous and cover the entire
+        //  surface.
+        const List<surfZone>& surfZones() const
+        {
+            return zones_;
+        }
 
-        //- add patches
-        void addPatches
+        //- Add surface zones
+        virtual void addZones
         (
-            const UList<surfGroup>&,
+            const UList<surfZone>&,
             const bool cullEmpty=false
         );
 
-        //- add patches
-        void addPatches
+        //- Add surface zones
+        virtual void addZones
         (
             const UList<label>& sizes,
             const UList<word>& names,
             const bool cullEmpty=false
         );
 
-        //- add patches
-        void addPatches
+        //- Add surface zones
+        virtual void addZones
         (
             const UList<label>& sizes,
             const bool cullEmpty=false
         );
+
+        //- Remove surface zones
+        virtual void removeZones();
+
 
     // Edit
 
         //- Clear all storage
         virtual void clear();
 
+        //- Move points
+        virtual void movePoints(const pointField&);
+
+        //- Scale points. A non-positive factor is ignored
+        virtual void scalePoints(const scalar&);
+
+        //- Reset primitive data (points, faces and zones)
+        //  Note, optimized to avoid overwriting data (with Xfer::null)
+        virtual void reset
+        (
+            const Xfer< pointField >& points,
+            const Xfer< List<Face> >& faces,
+            const Xfer< surfZoneList >& zones
+        );
+
+        //- Reset primitive data (points, faces and zones)
+        //  Note, optimized to avoid overwriting data (with Xfer::null)
+        virtual void reset
+        (
+            const Xfer< List<point> >& points,
+            const Xfer< List<Face> >& faces,
+            const Xfer< surfZoneList >& zones
+        );
+
+        //- Remove invalid faces
+        virtual void cleanup(const bool verbose);
+
+        virtual bool stitchFaces
+        (
+            const scalar tol=SMALL,
+            const bool verbose=false
+        );
+
+        virtual bool checkFaces
+        (
+            const bool verbose=false
+        );
+
+        //- Triangulate in-place, returning the number of triangles added
+        virtual label triangulate();
+
+        //- Triangulate in-place, returning the number of triangles added
+        //  and setting a map of original face Ids.
+        //  The faceMap is zero-sized when no triangulation was done.
+        virtual label triangulate(List<label>& faceMap);
+
+
         //- Return new surface.
         //  Returns return pointMap, faceMap from subsetMeshMap
         MeshedSurface subsetMesh
         (
-            const UList<bool>& include,
+            const labelHashSet& include,
             labelList& pointMap,
             labelList& faceMap
         ) const;
@@ -297,7 +393,7 @@ public:
         //- Return new surface.
         MeshedSurface subsetMesh
         (
-            const UList<bool>& include
+            const labelHashSet& include
         ) const;
 
         //- Transfer the contents of the argument and annull the argument
@@ -306,6 +402,8 @@ public:
         //- Transfer the contents of the argument and annull the argument
         void transfer(UnsortedMeshedSurface<Face>&);
 
+        //- Transfer contents to the Xfer container
+        Xfer< MeshedSurface<Face> > xfer();
 
     // Read
 
@@ -318,8 +416,7 @@ public:
 
     // Write
 
-        //- Write to Ostream in simple FOAM format
-        virtual void write(Ostream&) const;
+        void writeStats(Ostream& os) const;
 
         //- Generic write routine. Chooses writer based on extension.
         virtual void write(const fileName& name) const
@@ -328,23 +425,46 @@ public:
         }
 
         //- Write to database
-        void write(const Time&) const;
+        void write(const Time&, const word& surfName="") const;
 
 
     // Member operators
 
         void operator=(const MeshedSurface<Face>&);
 
-    // Ostream Operator
+        //- Conversion operator to MeshedSurfaceProxy
+        operator MeshedSurfaceProxy<Face>() const;
 
-        friend Ostream& operator<<
-        <Face>
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
 };
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Specialization for holding triangulated information
+template<>
+inline bool MeshedSurface<triFace>::isTri()
+{
+    return true;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label MeshedSurface<triFace>::triangulate()
+{
+    return 0;
+}
+
+//- Specialization for holding triangulated information
+template<>
+inline label MeshedSurface<triFace>::triangulate(List<label>& faceMap)
+{
+    if (&faceMap)
+    {
+        faceMap.clear();
+    }
+
+    return 0;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

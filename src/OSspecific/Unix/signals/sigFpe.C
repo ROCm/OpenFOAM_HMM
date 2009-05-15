@@ -46,6 +46,7 @@ License
 
 #endif
 
+#include <stdint.h>
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -69,7 +70,7 @@ void* Foam::sigFpe::my_malloc_hook(size_t size, const void *caller)
     // initialize to signalling nan
 #   ifdef SP
 
-    const uint32_t sNAN = 0x7ff7fffflu; 
+    const uint32_t sNAN = 0x7ff7fffflu;
 
     int nScalars = size / sizeof(scalar);
 
@@ -82,7 +83,7 @@ void* Foam::sigFpe::my_malloc_hook(size_t size, const void *caller)
 
 #   else
 
-    const uint64_t sNAN = 0x7ff7ffffffffffffllu; 
+    const uint64_t sNAN = 0x7ff7ffffffffffffllu;
 
     int nScalars = size/sizeof(scalar);
 
@@ -115,7 +116,7 @@ void Foam::sigFpe::sigFpeHandler(int)
         (
             "Foam::sigSegv::sigFpeHandler()"
         )   << "Cannot reset SIGFPE trapping"
-            << abort(FatalError);    
+            << abort(FatalError);
     }
 
     // Update jobInfo file
@@ -153,7 +154,7 @@ Foam::sigFpe::~sigFpe()
             (
                 "Foam::sigFpe::~sigFpe()"
             )   << "Cannot reset SIGFPE trapping"
-                << abort(FatalError);    
+                << abort(FatalError);
         }
 
 #       endif
@@ -208,7 +209,7 @@ void Foam::sigFpe::set()
             (
                 "Foam::sigFpe::set()"
             )   << "Cannot set SIGFPE trapping"
-                << abort(FatalError);    
+                << abort(FatalError);
         }
 
 

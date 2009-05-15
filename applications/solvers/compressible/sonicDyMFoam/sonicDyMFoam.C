@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     autoPtr<Foam::motionSolver> motionPtr = motionSolver::New(mesh);
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

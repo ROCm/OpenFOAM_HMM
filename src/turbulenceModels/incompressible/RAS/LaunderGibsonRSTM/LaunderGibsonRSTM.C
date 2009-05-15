@@ -283,19 +283,19 @@ bool LaunderGibsonRSTM::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        Clg1_.readIfPresent(coeffDict_);
-        Clg2_.readIfPresent(coeffDict_);
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        Cs_.readIfPresent(coeffDict_);
-        Ceps_.readIfPresent(coeffDict_);
-        alphaR_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        C1Ref_.readIfPresent(coeffDict_);
-        C2Ref_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        Clg1_.readIfPresent(coeffDict());
+        Clg2_.readIfPresent(coeffDict());
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        Cs_.readIfPresent(coeffDict());
+        Ceps_.readIfPresent(coeffDict());
+        alphaR_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        C1Ref_.readIfPresent(coeffDict());
+        C2Ref_.readIfPresent(coeffDict());
 
-        couplingFactor_.readIfPresent(coeffDict_);
+        couplingFactor_.readIfPresent(coeffDict());
 
         if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {
@@ -329,7 +329,7 @@ void LaunderGibsonRSTM::correct()
     }
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
-    volScalarField G("G", 0.5*tr(P));
+    volScalarField G("RASModel::G", 0.5*mag(tr(P)));
 
     // Update espsilon and G at the wall
     epsilon_.boundaryField().updateCoeffs();
@@ -339,6 +339,7 @@ void LaunderGibsonRSTM::correct()
     (
         fvm::ddt(epsilon_)
       + fvm::div(phi_, epsilon_)
+      - fvm::Sp(fvc::div(phi_), epsilon_)
     //- fvm::laplacian(Ceps*(k_/epsilon_)*R_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
      ==
@@ -368,7 +369,7 @@ void LaunderGibsonRSTM::correct()
             {
                 label faceCelli = curPatch.faceCells()[facei];
                 P[faceCelli] *=
-                    min(G[faceCelli]/(0.5*tr(P[faceCelli]) + SMALL), 1.0);
+                    min(G[faceCelli]/(0.5*mag(tr(P[faceCelli])) + SMALL), 1.0);
             }
         }
     }
@@ -379,6 +380,7 @@ void LaunderGibsonRSTM::correct()
     (
         fvm::ddt(R_)
       + fvm::div(phi_, R_)
+      - fvm::Sp(fvc::div(phi_), R_)
     //- fvm::laplacian(Cs*(k_/epsilon_)*R_, R_)
       - fvm::laplacian(DREff(), R_)
       + fvm::Sp(Clg1_*epsilon_/k_, R_)

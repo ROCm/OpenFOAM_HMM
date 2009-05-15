@@ -34,12 +34,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-bool regIOobject::writeObject
+bool Foam::regIOobject::writeObject
 (
     IOstream::streamFormat fmt,
     IOstream::versionNumber ver,
@@ -91,7 +86,7 @@ bool regIOobject::writeObject
         // Try opening an OFstream for object
         OFstream os(objectPath(), fmt, ver, cmp);
 
-        // If this has failed, return (leave error handling to Ostream class)
+        // If any of these fail, return (leave error handling to Ostream class)
         if (!os.good())
         {
             return false;
@@ -108,8 +103,7 @@ bool regIOobject::writeObject
             return false;
         }
 
-        os  << "\n\n// ************************************************************************* //"
-            << endl;
+        writeEndDivider(os);
 
         osGood = os.good();
     }
@@ -130,7 +124,7 @@ bool regIOobject::writeObject
 }
 
 
-bool regIOobject::write() const
+bool Foam::regIOobject::write() const
 {
     return writeObject
     (
@@ -139,10 +133,5 @@ bool regIOobject::write() const
         time().writeCompression()
     );
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

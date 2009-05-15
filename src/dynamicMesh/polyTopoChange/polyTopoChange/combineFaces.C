@@ -69,7 +69,7 @@ bool Foam::combineFaces::convexFace
     forAll(f, fp0)
     {
         // Get vertex after fp
-        label fp1 = (fp0 + 1) % f.size();
+        label fp1 = f.fcIndex(fp0);
 
         // Normalized vector between two consecutive points
         vector e10(points[f[fp1]] - points[f[fp0]]);
@@ -565,7 +565,7 @@ void Foam::combineFaces::setRefinement
             const labelList& setFaces = faceSets[setI];
 
             masterFace_[setI] = setFaces[0];
-            faceSetsVertices_[setI] = IndirectList<face>
+            faceSetsVertices_[setI] = UIndirectList<face>
             (
                 mesh_.faces(),
                 setFaces
@@ -730,7 +730,7 @@ void Foam::combineFaces::setRefinement
     }
     else
     {
-        // Count removed points 
+        // Count removed points
         label n = 0;
         forAll(nPointFaces, pointI)
         {

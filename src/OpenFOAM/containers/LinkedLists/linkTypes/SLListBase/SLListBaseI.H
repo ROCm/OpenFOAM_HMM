@@ -73,7 +73,7 @@ inline Foam::label Foam::SLListBase::size() const
 
 inline bool Foam::SLListBase::empty() const
 {
-    return (nElmts_ == 0);
+    return !nElmts_;
 }
 
 

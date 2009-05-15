@@ -58,27 +58,21 @@ class IFstream;
 
 class triSurface
 :
-    public PrimitivePatch<labelledTri, List, pointField, point>
+    public PrimitivePatch<labelledTri, ::Foam::List, pointField, point>
 {
-protected:
-
-    // Protected Member Data
-
-        //- Typedef for similar code in keyedSurface and meshedSurface
-        typedef labelledTri FaceType;
-
-private:
-
     // Private typedefs
 
+    //- Typedefs for convenience
+        typedef labelledTri Face;
         typedef PrimitivePatch
         <
-            FaceType,
+            labelledTri,
             ::Foam::List,
             pointField,
             point
         >
-        MeshStorage;
+        ParentType;
+
 
     // Private data
 
@@ -201,16 +195,38 @@ private:
         //- helper function to print triangle info
         static void printTriangle
         (
-            Ostream& os,
+            Ostream&,
             const Foam::string& pre,
-            const labelledTri& f,
-            const pointField& points
+            const labelledTri&,
+            const pointField&
         );
 
         //- read non-comment line
         static string getLineNoComment(IFstream&);
 
+protected:
+
+    // Protected Member Functions
+
+        //- Non-const access to global points
+        pointField& storedPoints()
+        {
+            return const_cast<pointField&>(ParentType::points());
+        }
+
+        //- Non-const access to the faces
+        List<Face>& storedFaces()
+        {
+            return static_cast<List<Face>&>(*this);
+        }
+
 public:
+
+    // Public typedefs
+
+        //- Placeholder only, but do not remove - it is needed for GeoMesh
+        typedef bool BoundaryMesh;
+
 
         //- Runtime type information
         ClassName("triSurface");
@@ -310,16 +326,11 @@ public:
             //- Scale points. A non-positive factor is ignored
             virtual void scalePoints(const scalar&);
 
-            //- Check/fix duplicate/degenerate triangles
+            //- Check/remove duplicate/degenerate triangles
             void checkTriangles(const bool verbose);
 
-            //- Check triply (or more) connected edges. Return list of faces
-            //  sharing these edges.
+            //- Check triply (or more) connected edges.
             void checkEdges(const bool verbose);
-
-            //- Check orientation (normals) and normals of neighbouring
-            //  triangles
-            boolList checkOrientation(const bool verbose);
 
             //- Remove non-valid triangles
             void cleanup(const bool verbose);

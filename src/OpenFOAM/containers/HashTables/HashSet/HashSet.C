@@ -33,14 +33,14 @@ License
 
 template<class Key, class Hash>
 template<class AnyType>
-Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& ht)
+Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& h)
 :
-    HashTable<nil, Key, Hash>(ht.size())
+    HashTable<nil, Key, Hash>(h.size())
 {
     for
     (
-        typename HashTable<AnyType, Key, Hash>::const_iterator cit = ht.begin();
-        cit != ht.end();
+        typename HashTable<AnyType, Key, Hash>::const_iterator cit = h.cbegin();
+        cit != h.cend();
         ++cit
     )
     {
@@ -52,10 +52,17 @@ Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& ht)
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
+inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
+{
+    return found(key);
+}
+
+
+template<class Key, class Hash>
 bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
 {
     // Are all lhs elements in rhs?
-    for (const_iterator iter = this->begin(); iter != this->end(); ++iter)
+    for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
     {
         if (!rhs.found(iter.key()))
         {
@@ -64,7 +71,7 @@ bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
     }
 
     // Are all rhs elements in lhs?
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         if (!found(iter.key()))
         {
@@ -87,7 +94,7 @@ template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator|=(const HashSet<Key, Hash>& rhs)
 {
     // Add rhs elements into lhs
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         insert(iter.key());
     }
@@ -98,7 +105,7 @@ template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
 {
     // Remove elements not also found in rhs
-    for (iterator iter = this->begin(); iter != this->end(); ++iter)
+    for (iterator iter = this->cbegin(); iter != this->cend(); ++iter)
     {
         if (!rhs.found(iter.key()))
         {
@@ -112,7 +119,7 @@ template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
 {
     // Add missed rhs elements, remove duplicate elements
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         if (found(iter.key()))
         {
@@ -131,7 +138,7 @@ template<class Key, class Hash>
 void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
 {
     // Remove rhs elements from lhs
-    for (const_iterator iter = rhs.begin(); iter != rhs.end(); ++iter)
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         erase(iter.key());
     }

@@ -38,11 +38,9 @@ SourceFiles
 #ifndef OBJsurfaceFormat_H
 #define OBJsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
-#include "OBJsurfaceFormatCore.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,24 +50,15 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class OBJsurfaceFormat Declaration
+                      Class OBJsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
 class OBJsurfaceFormat
 :
-    public MeshedSurface<Face>,
-    public OBJsurfaceFormatCore
+    public MeshedSurface<Face>
 {
     // Private Member Functions
-
-        static void writeHead
-        (
-            Ostream&,
-            const pointField&,
-            const List<Face>&,
-            const List<surfGroup>&
-        );
 
         //- Disallow default bitwise copy construct
         OBJsurfaceFormat(const OBJsurfaceFormat<Face>&);
@@ -103,49 +92,16 @@ public:
 
     // Member Functions
 
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& name,
-            const MeshedSurface<Face>& surf
-        )
+        //- Write object file
+        virtual void write(const fileName& name) const
         {
-            write(OFstream(name)(), surf);
-        }
-
-        //- Write UnsortedMeshedSurface
-        //  The output is sorted by regions
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  The output is sorted by regions
-        static void write
-        (
-            const fileName& name,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
-        //- Write object
-        virtual void write(Ostream& os) const
-        {
-            write(os, *this);
+            write(name, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

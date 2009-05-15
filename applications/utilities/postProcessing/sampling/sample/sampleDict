@@ -30,7 +30,10 @@ setFormat raw;
 //      dx          : DX scalar or vector format
 //      vtk         : VTK ascii format
 //      raw         : x y z value format for use with e.g. gnuplot 'splot'.
-//      stl         : ascii stl. Does not contain values!
+//
+// Note:
+// other formats such as obj, stl, etc can also be written (by proxy)
+// but without any values!
 surfaceFormat vtk;
 
 // interpolationScheme. choice of
@@ -102,6 +105,14 @@ sets
         end         (2 0.51  0.005);
         nPoints     10;
     }
+
+    somePoints
+    {
+        type    cloud;
+        axis    xyz;
+        points  ((0.049 0.049 0.005)(0.051 0.049 0.005));
+    }
+
 );
 
 
@@ -161,6 +172,10 @@ surfaces
         isoField        rho;
         isoValue        0.5;
         interpolate     true;
+
+        //zone            ABC;          // Optional: zone only
+        //exposedPatchName fixedWalls;  // Optional: zone only
+
         // regularise      false;    // Optional: do not simplify
     }
     constantIso
@@ -171,8 +186,27 @@ surfaces
         isoField        rho;
         isoValue        0.5;
         interpolate     false;
+        regularise      false;              // do not simplify
+    }
+
+    triangleCut
+    {
+        // Cutingplane using iso surface
+        type            cuttingPlane;
+        planeType       pointAndNormal;
+        pointAndNormalDict
+        {
+            basePoint       (0.4 0 0.4);
+            normalVector    (1 0.2 0.2);
+        }
+        interpolate     true;
+
+        //zone            ABC;          // Optional: zone only
+        //exposedPatchName fixedWalls;  // Optional: zone only
+
         // regularise      false;    // Optional: do not simplify
     }
+
 );
 
 

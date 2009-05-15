@@ -43,5 +43,5 @@ int main()
 
     } while (wind.waitForEvent());
 
-    return(0);
+    return 0;
 }

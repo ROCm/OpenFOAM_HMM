@@ -89,34 +89,38 @@ inline bool Foam::keyType::isPattern() const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::keyType::operator=(const keyType& s)
+inline const Foam::keyType& Foam::keyType::operator=(const keyType& s)
 {
     // Bypass checking
     string::operator=(s);
     isPattern_ = s.isPattern_;
+    return *this;
 }
 
 
-inline void Foam::keyType::operator=(const word& s)
+inline const Foam::keyType& Foam::keyType::operator=(const word& s)
 {
     word::operator=(s);
     isPattern_ = false;
+    return *this;
 }
 
 
-inline void Foam::keyType::operator=(const string& s)
+inline const Foam::keyType& Foam::keyType::operator=(const string& s)
 {
     // Bypass checking
     string::operator=(s);
     isPattern_ = true;
+    return *this;
 }
 
 
-inline void Foam::keyType::operator=(const char* s)
+inline const Foam::keyType& Foam::keyType::operator=(const char* s)
 {
     // Bypass checking
     string::operator=(s);
     isPattern_ = false;
+    return *this;
 }
 
 

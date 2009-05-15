@@ -40,12 +40,11 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     const label cellTableId
 )
 {
-    os
-        << cellId                    // includes 1 offset
-        << " " << starcdShellShape_  // 3(shell) shape
-        << " " << f.size()
-        << " " << cellTableId
-        << " " << starcdShellType_;  // 4(shell)
+    os  << cellId                    // includes 1 offset
+        << ' ' << starcdShellShape_  // 3(shell) shape
+        << ' ' << f.size()
+        << ' ' << cellTableId
+        << ' ' << starcdShellType_;  // 4(shell)
 
     // primitives have <= 8 vertices, but prevent overrun anyhow
     // indent following lines for ease of reading
@@ -54,11 +53,9 @@ inline void Foam::fileFormats::STARCDsurfaceFormat<Face>::writeShell
     {
         if ((count % 8) == 0)
         {
-            os
-                << nl
-                << "  " << cellId;
+            os  << nl << "  " << cellId;
         }
-        os  << " " << f[fp] + 1;
+        os  << ' ' << f[fp] + 1;
         count++;
     }
     os  << endl;
@@ -125,14 +122,14 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
     readHeader(is, "PROSTAR_CELL");
 
     DynamicList<Face>  dynFaces;
-    DynamicList<label> dynRegions;
+    DynamicList<label> dynZones;
     DynamicList<word>  dynNames;
     DynamicList<label> dynSizes;
     Map<label> lookup;
 
     // assume the cellTableIds are not intermixed
     bool sorted = true;
-    label regionI = 0;
+    label zoneI = 0;
 
     label lineLabel, shapeId, nLabels, cellTableId, typeId;
     DynamicList<label> vertexLabels(64);
@@ -160,22 +157,22 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
 
         if (typeId == starcdShellType_)
         {
-            // Convert groupID into patchID
+            // Convert groupID into zoneID
             Map<label>::const_iterator fnd = lookup.find(cellTableId);
             if (fnd != lookup.end())
             {
-                if (regionI != fnd())
+                if (zoneI != fnd())
                 {
                     // cellTableIds are intermixed
                     sorted = false;
                 }
-                regionI = fnd();
+                zoneI = fnd();
             }
             else
             {
-                regionI = dynSizes.size();
-                lookup.insert(cellTableId, regionI);
-                dynNames.append(word("cellTable_") + ::Foam::name(regionI));
+                zoneI = dynSizes.size();
+                lookup.insert(cellTableId, zoneI);
+                dynNames.append(word("cellTable_") + ::Foam::name(zoneI));
                 dynSizes.append(0);
             }
 
@@ -198,24 +195,24 @@ bool Foam::fileFormats::STARCDsurfaceFormat<Face>::read
                             static_cast<UList<label>&>(triFaces[faceI])
                         )
                     );
-                    dynRegions.append(regionI);
-                    dynSizes[regionI]++;
+                    dynZones.append(zoneI);
+                    dynSizes[zoneI]++;
                 }
             }
             else
             {
                 dynFaces.append(Face(vertices));
-                dynRegions.append(regionI);
-                dynSizes[regionI]++;
+                dynZones.append(zoneI);
+                dynSizes[zoneI]++;
             }
         }
     }
     mapPointId.clear();
 
-    sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
+    sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-    // add patches, culling empty groups
-    this->addPatches(dynSizes, dynNames, true);
+    // add zones, culling empty ones
+    this->addZones(dynSizes, dynNames, true);
     return true;
 }
 
@@ -224,27 +221,49 @@ template<class Face>
 void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
 (
     const fileName& filename,
-    const MeshedSurface<Face>& surf
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
+
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size() > 1
+      ? surf.surfZones()
+      : oneZone(faceLst)
+    );
+
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+
     fileName baseName = filename.lessExt();
 
-    writePoints(OFstream(baseName + ".vrt")(), surf.points());
+    writePoints(OFstream(baseName + ".vrt")(), pointLst);
     OFstream os(baseName + ".cel");
     writeHeader(os, "CELL");
 
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
-
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(zones, zoneI)
     {
-        const surfGroup& patch = patchLst[patchI];
+        const surfZone& zone = zones[zoneI];
 
-        forAll(patch, patchFaceI)
+        if (useFaceMap)
         {
-            const Face& f = faceLst[faceIndex++];
-            writeShell(os, f, faceIndex, patchI + 1);
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceMap[faceIndex++]];
+                writeShell(os, f, faceIndex, zoneI + 1);
+            }
+        }
+        else
+        {
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+                writeShell(os, f, faceIndex, zoneI + 1);
+            }
         }
     }
 
@@ -252,51 +271,11 @@ void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
     writeCase
     (
         OFstream(baseName + ".inp")(),
-        surf.points(),
-        surf.size(),
-        patchLst
+        pointLst,
+        faceLst.size(),
+        zones
     );
 }
 
-
-template<class Face>
-void Foam::fileFormats::STARCDsurfaceFormat<Face>::write
-(
-    const fileName& filename,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    fileName baseName = filename.lessExt();
-
-    writePoints(OFstream(baseName + ".vrt")(), surf.points());
-
-    OFstream os(baseName + ".cel");
-    writeHeader(os, "CELL");
-
-    const List<Face>& faceLst = surf.faces();
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        const surfGroup& patch = patchLst[patchI];
-
-        forAll(patch, patchFaceI)
-        {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-            writeShell(os, f, faceIndex, patchI + 1);
-        }
-    }
-
-    // write simple .inp file
-    writeCase
-    (
-        OFstream(baseName + ".inp")(),
-        surf.points(),
-        surf.size(),
-        patchLst
-    );
-}
 
 // ************************************************************************* //

@@ -63,9 +63,8 @@ int yyFlexLexer::yywrap()
 
 
 //- A lexer for parsing STL ASCII files.
-//  Returns DynamicList(s) of points and facets (regionIds).
-//  Since the facets appear within a solid/endsolid grouping,
-//  they are always within a region
+//  Returns DynamicList(s) of points and facets (zoneIds).
+//  The facets are within a solid/endsolid grouping
 class STLASCIILexer
 :
     public yyFlexLexer
@@ -73,7 +72,7 @@ class STLASCIILexer
     // Private data
 
         bool  sorted_;
-        label groupID_;      // current region
+        label groupID_;      // current solid group
         label lineNo_;
         word  startError_;
 
@@ -110,20 +109,20 @@ public:
             return points_;
         }
 
-        //- A list of facet IDs (region IDs)
+        //- A list of facet IDs (group IDs)
         //  corresponds to the number of triangles
         DynamicList<label>& facets()
         {
             return facets_;
         }
 
-        //- region names
+        //- Names
         DynamicList<word>& names()
         {
             return names_;
         }
 
-        //- region sizes
+        //- Sizes
         DynamicList<label>& sizes()
         {
             return sizes_;
@@ -404,20 +403,20 @@ endsolid              {space}("endsolid"|"ENDSOLID")({some_space}{word})*
 //
 bool Foam::fileFormats::STLsurfaceFormatCore::readASCII
 (
-    IFstream& ifs,
+    istream& is,
     const off_t dataFileSize
 )
 {
     // Create the lexer with the approximate number of vertices in the STL
     // from the file size
-    STLASCIILexer lexer(&ifs.stdStream(), dataFileSize/400);
+    STLASCIILexer lexer(&is, dataFileSize/400);
     while (lexer.lex() != 0) {}
 
     sorted_ = lexer.sorted();
 
     // transfer to normal lists
     points_.transfer(lexer.points());
-    regions_.transfer(lexer.facets());
+    zoneIds_.transfer(lexer.facets());
     names_.transfer(lexer.names());
     sizes_.transfer(lexer.sizes());
 

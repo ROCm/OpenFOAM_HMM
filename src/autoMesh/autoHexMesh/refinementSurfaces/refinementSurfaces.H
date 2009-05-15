@@ -38,7 +38,6 @@ SourceFiles
 #ifndef refinementSurfaces_H
 #define refinementSurfaces_H
 
-#include "PackedBoolList.H"
 #include "triSurfaceGeoMesh.H"
 #include "triSurfaceFields.H"
 #include "vectorList.H"
@@ -154,7 +153,7 @@ public:
                 return cellZoneNames_;
             }
 
-            //- Get indices of named surfaces (surfaces with faceZoneName)
+            //- Get indices of unnamed surfaces (surfaces without faceZoneName)
             labelList getUnnamedSurfaces() const;
 
             //- Get indices of named surfaces (surfaces with faceZoneName)

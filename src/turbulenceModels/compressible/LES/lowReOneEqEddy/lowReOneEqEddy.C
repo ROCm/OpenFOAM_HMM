@@ -41,6 +41,22 @@ namespace LESModels
 defineTypeNameAndDebug(lowReOneEqEddy, 0);
 addToRunTimeSelectionTable(LESModel, lowReOneEqEddy, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void lowReOneEqEddy::updateSubGridScaleFields()
+{
+    // High Re eddy viscosity
+    muSgs_ = ck_*rho()*sqrt(k_)*delta();
+
+    // low Re no corrected eddy viscosity
+    muSgs_ -= (mu()/beta_)*(scalar(1) - exp(-beta_*muSgs_/mu()));
+    muSgs_.correctBoundaryConditions();
+
+    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 lowReOneEqEddy::lowReOneEqEddy
@@ -59,7 +75,7 @@ lowReOneEqEddy::lowReOneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.07
         )
     ),
@@ -68,11 +84,13 @@ lowReOneEqEddy::lowReOneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta",
-            coeffDict(),
+            coeffDict_,
             0.01
         )
     )
 {
+    updateSubGridScaleFields();
+
     printCoeffs();
 }
 
@@ -101,13 +119,7 @@ void lowReOneEqEddy::correct(const tmp<volTensorField>& tgradU)
 
     bound(k_, k0());
 
-    // High Re eddy viscosity
-    muSgs_ = ck_*rho()*sqrt(k_)*delta();
-
-    // low Re no corrected eddy viscosity
-    muSgs_ -= (mu()/beta_)*(scalar(1) - exp(-beta_*muSgs_/mu()));
-
-    muSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields();
 }
 
 

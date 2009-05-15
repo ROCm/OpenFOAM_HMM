@@ -25,8 +25,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "STLsurfaceFormatCore.H"
+#include "gzstream.h"
 #include "OSspecific.H"
 #include "Map.H"
+#include "IFstream.H"
+#include "Ostream.H"
 
 #undef DEBUG_STLBINARY
 
@@ -47,8 +50,7 @@ int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
 {
     off_t dataFileSize = Foam::fileSize(filename);
 
-    IFstream ifs(filename, IOstream::BINARY);
-    istream& is = ifs.stdStream();
+    istream& is = IFstream(filename, IOstream::BINARY)().stdStream();
 
     // Read the STL header
     char header[headerSize];
@@ -88,12 +90,11 @@ int Foam::fileFormats::STLsurfaceFormatCore::detectBINARY
 
 bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
 (
-    IFstream& ifs,
+    istream& is,
     const off_t dataFileSize
 )
 {
     sorted_ = true;
-    istream& is = ifs.stdStream();
 
     // Read the STL header
     char header[headerSize];
@@ -130,7 +131,7 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
     {
         FatalErrorIn
         (
-            "fileFormats::STLsurfaceFormatCore::readBINARY(IFstream&)"
+            "fileFormats::STLsurfaceFormatCore::readBINARY(istream&)"
         )
             << "problem reading number of triangles, perhaps file is not binary"
             << exit(FatalError);
@@ -138,18 +139,18 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
 
 #ifdef DEBUG_STLBINARY
     Info<< "# " << nTris << " facets" << endl;
-    label prevRegion = -1;
+    label prevZone = -1;
 #endif
 
     points_.setSize(3*nTris);
-    regions_.setSize(nTris);
+    zoneIds_.setSize(nTris);
 
     Map<label> lookup;
     DynamicList<label> dynSizes;
 
     label ptI = 0;
-    label regionI = -1;
-    forAll(regions_, faceI)
+    label zoneI = -1;
+    forAll(zoneIds_, faceI)
     {
         // Read an STL triangle
         STLtriangle stlTri(is);
@@ -159,39 +160,39 @@ bool Foam::fileFormats::STLsurfaceFormatCore::readBINARY
         points_[ptI++] = stlTri.b();
         points_[ptI++] = stlTri.c();
 
-        // interprete colour as a region
-        const label stlRegion = stlTri.region();
+        // interprete stl attribute as a zone
+        const label origId = stlTri.attrib();
 
-        Map<label>::const_iterator fnd = lookup.find(stlRegion);
+        Map<label>::const_iterator fnd = lookup.find(origId);
         if (fnd != lookup.end())
         {
-            if (regionI != fnd())
+            if (zoneI != fnd())
             {
                 // group appeared out of order
                 sorted_ = false;
             }
-            regionI = fnd();
+            zoneI = fnd();
         }
         else
         {
-            regionI = dynSizes.size();
-            lookup.insert(stlRegion, regionI);
+            zoneI = dynSizes.size();
+            lookup.insert(origId, zoneI);
             dynSizes.append(0);
         }
 
-        regions_[faceI] = regionI;
-        dynSizes[regionI]++;
+        zoneIds_[faceI] = zoneI;
+        dynSizes[zoneI]++;
 
 #ifdef DEBUG_STLBINARY
-        if (prevRegion != regionI)
+        if (prevZone != zoneI)
         {
-            if (prevRegion != -1)
+            if (prevZone != -1)
             {
-                Info<< "endsolid region" << prevRegion << nl;
+                Info<< "endsolid zone" << prevZone << nl;
             }
-            prevRegion = regionI;
+            prevZone = zoneI;
 
-            Info<< "solid region" << prevRegion << nl;
+            Info<< "solid zone" << prevZone << nl;
         }
 
         Info<< " facet normal " << stlTri.normal() << nl
@@ -220,7 +221,7 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
 :
     sorted_(true),
     points_(0),
-    regions_(0),
+    zoneIds_(0),
     names_(0),
     sizes_(0)
 {
@@ -229,11 +230,19 @@ Foam::fileFormats::STLsurfaceFormatCore::STLsurfaceFormatCore
     // auto-detect ascii/binary
     if (detectBINARY(filename))
     {
-        readBINARY(IFstream(filename, IOstream::BINARY)(), dataFileSize);
+        readBINARY
+        (
+            IFstream(filename, IOstream::BINARY)().stdStream(),
+            dataFileSize
+        );
     }
     else
     {
-        readASCII(IFstream(filename)(), dataFileSize);
+        readASCII
+        (
+            IFstream(filename)().stdStream(),
+            dataFileSize
+        );
     }
 }
 

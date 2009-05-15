@@ -48,8 +48,8 @@ Description
 
 
 #if READLINE != 0
-#include <readline/readline.h>
-#include <readline/history.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 #endif
 
 using namespace Foam;
@@ -746,7 +746,8 @@ int main(int argc, char *argv[])
 
         Pout<< "Reading commands from file " << batchFile << endl;
 
-        if (!exists(batchFile))
+        // we also cannot handle .gz files
+        if (!isFile(batchFile, false))
         {
             FatalErrorIn(args.executable())
                 << "Cannot open file " << batchFile << exit(FatalError);

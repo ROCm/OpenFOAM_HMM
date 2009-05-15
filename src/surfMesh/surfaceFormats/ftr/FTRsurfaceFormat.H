@@ -26,7 +26,8 @@ Class
     Foam::fileFormats::FTRsurfaceFormat
 
 Description
-    Reading of the (now deprecated) Foam Trisurface Format.
+    Reading of the (now deprecated and infrequently used)
+    Foam Trisurface Format.
 
 SourceFiles
     FTRsurfaceFormat.C
@@ -48,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class FTRsurfaceFormat Declaration
+                      Class FTRsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>

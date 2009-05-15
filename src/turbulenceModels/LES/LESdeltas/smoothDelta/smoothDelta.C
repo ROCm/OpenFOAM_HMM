@@ -138,7 +138,7 @@ void smoothDelta::calcDelta()
         changedFacesInfo,
         faceDeltaData,
         cellDeltaData,
-        mesh_.nCells()  // max iterations
+        mesh_.globalData().nTotalCells()    // max iterations
     );
 
     forAll(delta_, cellI)

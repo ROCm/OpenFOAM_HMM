@@ -41,6 +41,15 @@ namespace LESModels
 defineTypeNameAndDebug(Smagorinsky, 0);
 addToRunTimeSelectionTable(LESModel, Smagorinsky, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Smagorinsky::updateSubGridScaleFields(const volTensorField& gradU)
+{
+    nuSgs_ = ck_*delta()*sqrt(k(gradU));
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Smagorinsky::Smagorinsky
@@ -58,11 +67,13 @@ Smagorinsky::Smagorinsky
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.094
         )
     )
-{}
+{
+    updateSubGridScaleFields(fvc::grad(U));
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -70,9 +81,7 @@ Smagorinsky::Smagorinsky
 void Smagorinsky::correct(const tmp<volTensorField>& gradU)
 {
     GenEddyVisc::correct(gradU);
-
-    nuSgs_ = ck_*delta()*sqrt(k(gradU));
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(gradU());
 }
 
 

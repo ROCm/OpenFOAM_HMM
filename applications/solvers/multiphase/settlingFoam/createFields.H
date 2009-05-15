@@ -339,4 +339,4 @@
     );
 
     Info<< "Calculating field (g.h)f\n" << endl;
-    surfaceScalarField ghf = surfaceScalarField("gh", g & mesh.Cf());
+    surfaceScalarField ghf = surfaceScalarField("ghf", g & mesh.Cf());

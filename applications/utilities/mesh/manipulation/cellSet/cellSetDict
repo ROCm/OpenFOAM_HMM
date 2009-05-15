@@ -79,6 +79,22 @@ topoSetSources
        k        (10 10 10);
     }
 
+    // Cells with centre within cylinder
+    cylinderToCell
+    {
+       p1       (0.2 0.2 -10); // start point on cylinder axis
+       p2       (0.2 0.2 0);   // end point on cylinder axis
+       radius   5.0;
+    }
+
+
+    // Cells with centre within sphere
+    sphereToCell
+    {
+       centre   (0.2 0.2 -10);
+       radius   5.0;
+    }
+
     // Cells in cell zone
     zoneToCell
     {

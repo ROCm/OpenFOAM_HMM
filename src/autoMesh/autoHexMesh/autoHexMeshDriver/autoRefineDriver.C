@@ -77,10 +77,11 @@ Foam::label Foam::autoRefineDriver::readFeatureEdges
             (
                 IOobject
                 (
-                    featFileName,           // name
-                    mesh.time().constant(), // directory
-                    "triSurface",           // instance
-                    mesh.time(),            // registry
+                    featFileName,                       // name
+                    mesh.time().findInstance("triSurface", featFileName),
+                                                        // instance
+                    "triSurface",                       // local
+                    mesh.time(),                        // registry
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
                     false
@@ -94,7 +95,7 @@ Foam::label Foam::autoRefineDriver::readFeatureEdges
         Info<< "Refinement level " << featureLevels[i]
             << " for all cells crossed by feature " << featFileName
             << " (" << featureMeshes[i].points().size() << " points, "
-            << featureMeshes[i].edges().size() << ")." << endl;
+            << featureMeshes[i].edges().size() << " edges)." << endl;
     }
 
     Info<< "Read feature lines in = "

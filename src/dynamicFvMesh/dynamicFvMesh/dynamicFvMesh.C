@@ -32,6 +32,7 @@ defineTypeNameAndDebug(Foam::dynamicFvMesh, 0);
 
 defineRunTimeSelectionTable(Foam::dynamicFvMesh, IOobject);
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::dynamicFvMesh::dynamicFvMesh(const IOobject& io)
@@ -44,5 +45,6 @@ Foam::dynamicFvMesh::dynamicFvMesh(const IOobject& io)
 
 Foam::dynamicFvMesh::~dynamicFvMesh()
 {}
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,13 @@ defineTypeNameAndDebug(kOmegaSSTSAS, 0);
 addToRunTimeSelectionTable(LESModel, kOmegaSSTSAS, dictionary);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+void kOmegaSSTSAS::updateSubGridScaleFields(const volScalarField& S2)
+{
+    nuSgs_ == a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    nuSgs_.correctBoundaryConditions();
+}
+
 
 tmp<volScalarField> kOmegaSSTSAS::F1(const volScalarField& CDkOmega) const
 {
@@ -121,7 +128,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK1",
-            coeffDict(),
+            coeffDict_,
             0.85034
         )
     ),
@@ -130,7 +137,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaK2",
-            coeffDict(),
+            coeffDict_,
             1.0
         )
     ),
@@ -139,7 +146,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaOmega1",
-            coeffDict(),
+            coeffDict_,
             0.5
         )
     ),
@@ -148,7 +155,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaOmega2",
-            coeffDict(),
+            coeffDict_,
             0.85616
         )
     ),
@@ -157,7 +164,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma1",
-            coeffDict(),
+            coeffDict_,
             0.5532
         )
     ),
@@ -166,7 +173,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "gamma2",
-            coeffDict(),
+            coeffDict_,
             0.4403
         )
     ),
@@ -175,7 +182,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta1",
-            coeffDict(),
+            coeffDict_,
             0.075
         )
     ),
@@ -184,7 +191,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "beta2",
-            coeffDict(),
+            coeffDict_,
             0.0828
         )
     ),
@@ -193,7 +200,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "betaStar",
-            coeffDict(),
+            coeffDict_,
             0.09
         )
     ),
@@ -202,7 +209,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "a1",
-            coeffDict(),
+            coeffDict_,
             0.31
         )
     ),
@@ -211,7 +218,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "c1",
-            coeffDict(),
+            coeffDict_,
             10.0
         )
     ),
@@ -220,7 +227,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaPhi",
-            coeffDict(),
+            coeffDict_,
             0.666667
         )
     ),
@@ -229,7 +236,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "zetaTilda2",
-            coeffDict(),
+            coeffDict_,
             1.755
         )
     ),
@@ -238,7 +245,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "FSAS",
-            coeffDict(),
+            coeffDict_,
             1.25
         )
     ),
@@ -251,7 +258,7 @@ kOmegaSSTSAS::kOmegaSSTSAS
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cmu",
-            coeffDict(),
+            coeffDict_,
             0.09
          )
     ),
@@ -304,6 +311,8 @@ kOmegaSSTSAS::kOmegaSSTSAS
         mesh_
     )
 {
+    updateSubGridScaleFields(magSqr(symm(fvc::grad(U))));
+
     printCoeffs();
 }
 
@@ -325,7 +334,8 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
     volVectorField gradK = fvc::grad(k_);
     volVectorField gradOmega = fvc::grad(omega_);
     volScalarField L = sqrt(k_)/(pow(Cmu_, 0.25)*(omega_ + omegaSmall_));
-    volScalarField CDkOmega = (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
+    volScalarField CDkOmega =
+        (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
     volScalarField F1 = this->F1(CDkOmega);
     volScalarField G = nuSgs_*2.0*S2;
 
@@ -375,7 +385,8 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
            *max
             (
                 dimensionedScalar("zero",dimensionSet(0, 0 , -2, 0, 0),0. ),
-                zetaTilda2_*kappa_*S2*(L/Lvk2(S2))- 2.0/alphaPhi_*k_*grad_omega_k
+                zetaTilda2_*kappa_*S2*(L/Lvk2(S2))
+              - 2.0/alphaPhi_*k_*grad_omega_k
             )
         );
 
@@ -384,9 +395,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
     }
     bound(omega_, omega0_);
 
-    // Re-calculate viscosity
-    nuSgs_ == a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(S2);
 }
 
 

@@ -47,7 +47,6 @@ SourceFiles
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "autoPtr.H"
-#include "pointIOField.H"
 #include "labelPair.H"
 #include "indirectPrimitivePatch.H"
 #include "pointFieldsFwd.H"
@@ -374,11 +373,28 @@ private:
                 const labelList&
             ) const;
 
+            bool isCollapsedFace
+            (
+                const pointField&,
+                const pointField& neiCc,
+                const scalar minFaceArea,
+                const scalar maxNonOrtho,
+                const label faceI
+            ) const;
+
+            bool isCollapsedCell
+            (
+                const pointField&,
+                const scalar volFraction,
+                const label cellI
+            ) const;
+
             //- Returns list with for every internal face -1 or the patch
             //  they should be baffled into. If removeEdgeConnectedCells is set
             //  removes cells based on perpendicularAngle.
             labelList markFacesOnProblemCells
             (
+                const dictionary& motionDict,
                 const bool removeEdgeConnectedCells,
                 const scalarField& perpendicularAngle,
                 const labelList& globalToPatch
@@ -413,6 +429,16 @@ private:
                 labelList& cellToZone
             ) const;
 
+            //- Determines cell zone from cell region information.
+            bool calcRegionToZone
+            (
+                const label surfZoneI,
+                const label ownRegion,
+                const label neiRegion,
+
+                labelList& regionToCellZone
+            ) const;
+
             //- Finds zone per cell. Uses topological walk with all faces
             //  marked in namedSurfaceIndex regarded as blocked.
             void findCellZoneTopo
@@ -421,6 +447,12 @@ private:
                 const labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
+            ) const;
+
+            void makeConsistentFaceIndex
+            (
+                const labelList& cellToZone,
+                labelList& namedSurfaceIndex
             ) const;
 
 

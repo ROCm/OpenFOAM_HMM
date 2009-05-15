@@ -60,7 +60,6 @@ Description
 #include "polyTopoChanger.H"
 #include "mapPolyMesh.H"
 #include "ListOps.H"
-#include "IndirectList.H"
 #include "slidingInterface.H"
 #include "perfectInterface.H"
 #include "IOobjectList.H"
@@ -137,6 +136,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
 
     word masterPatchName(args.additionalArgs()[0]);
@@ -391,6 +391,10 @@ int main(int argc, char *argv[])
     mesh.movePoints(morphMap->preMotionPoints());
 
     // Write mesh
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     Info << nl << "Writing polyMesh to time " << runTime.timeName() << endl;
 
     IOstream::defaultPrecision(10);

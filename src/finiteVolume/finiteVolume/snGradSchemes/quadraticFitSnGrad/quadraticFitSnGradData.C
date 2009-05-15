@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -140,11 +140,11 @@ void Foam::quadraticFitSnGradData::findFaceDirs
     #ifndef SPHERICAL_GEOMETRY
         if (mesh.nGeometricD() <= 2) // find the normal direcion
         {
-            if (mesh.directions()[0] == -1)
+            if (mesh.geometricD()[0] == -1)
             {
                 kdir = vector(1, 0, 0);
             }
-            else if (mesh.directions()[1] == -1)
+            else if (mesh.geometricD()[1] == -1)
             {
                 kdir = vector(0, 1, 0);
             }
@@ -153,7 +153,7 @@ void Foam::quadraticFitSnGradData::findFaceDirs
                 kdir = vector(0, 0, 1);
             }
         }
-        else // 3D so find a direction in the place of the face
+        else // 3D so find a direction in the plane of the face
         {
             const face& f = mesh.faces()[faci];
             kdir = mesh.points()[f[0]] - mesh.points()[f[1]];

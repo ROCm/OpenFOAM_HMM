@@ -25,8 +25,11 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "OBJsurfaceFormat.H"
+#include "clock.H"
 #include "IFstream.H"
 #include "IStringStream.H"
+#include "Ostream.H"
+#include "OFstream.H"
 #include "ListOps.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -70,15 +73,15 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 
     DynamicList<point> dynPoints;
     DynamicList<Face>  dynFaces;
-    DynamicList<label> dynRegions;
+    DynamicList<label> dynZones;
     DynamicList<word>  dynNames;
     DynamicList<label> dynSizes;
     HashTable<label>   lookup;
 
-    // place faces without a group in patch0
-    label regionI = 0;
-    lookup.insert("patch0", regionI);
-    dynNames.append("patch0");
+    // place faces without a group in zone0
+    label zoneI = 0;
+    lookup.insert("zone0", zoneI);
+    dynNames.append("zone0");
     dynSizes.append(0);
 
     while (is.good())
@@ -111,17 +114,17 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
             HashTable<label>::const_iterator fnd = lookup.find(name);
             if (fnd != lookup.end())
             {
-                if (regionI != fnd())
+                if (zoneI != fnd())
                 {
                     // group appeared out of order
                     sorted = false;
                 }
-                regionI = fnd();
+                zoneI = fnd();
             }
             else
             {
-                regionI = dynSizes.size();
-                lookup.insert(name, regionI);
+                zoneI = dynSizes.size();
+                lookup.insert(name, zoneI);
                 dynNames.append(name);
                 dynSizes.append(0);
             }
@@ -182,18 +185,18 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
                 // points may be incomplete
                 for (label fp1 = 1; fp1 < f.size() - 1; fp1++)
                 {
-                    label fp2 = (fp1 + 1) % f.size();
+                    label fp2 = f.fcIndex(fp1);
 
                     dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
-                    dynRegions.append(regionI);
-                    dynSizes[regionI]++;
+                    dynZones.append(zoneI);
+                    dynSizes[zoneI]++;
                 }
             }
             else
             {
                 dynFaces.append(Face(f));
-                dynRegions.append(regionI);
-                dynSizes[regionI]++;
+                dynZones.append(zoneI);
+                dynSizes[zoneI]++;
             }
         }
     }
@@ -202,10 +205,10 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
     // transfer to normal lists
     this->storedPoints().transfer(dynPoints);
 
-    sortFacesAndStore(dynFaces.xfer(), dynRegions.xfer(), sorted);
+    sortFacesAndStore(dynFaces.xfer(), dynZones.xfer(), sorted);
 
-    // add patches, culling empty groups
-    this->addPatches(dynSizes, dynNames, true);
+    // add zones, culling empty ones
+    this->addZones(dynSizes, dynNames, true);
     return true;
 }
 
@@ -213,74 +216,108 @@ bool Foam::fileFormats::OBJsurfaceFormat<Face>::read
 template<class Face>
 void Foam::fileFormats::OBJsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const MeshedSurface<Face>& surf
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const pointField& pointLst = surf.points();
+    const List<Face>&  faceLst = surf.faces();
+    const List<label>& faceMap = surf.faceMap();
 
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
+    // for no zones, suppress the group name
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size() > 1
+      ? surf.surfZones()
+      : oneZone(faceLst, "")
+    );
+
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::OBJsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+
+    os  << "# Wavefront OBJ file written " << clock::dateTime().c_str() << nl
+        << "o " << os.name().lessExt().name() << nl
+        << nl
+        << "# points : " << pointLst.size() << nl
+        << "# faces  : " << faceLst.size() << nl
+        << "# zones  : " << zones.size() << nl;
+
+    // Print zone names as comment
+    forAll(zones, zoneI)
+    {
+        os  << "#   " << zoneI << "  " << zones[zoneI].name()
+            << "  (nFaces: " << zones[zoneI].size() << ")" << nl;
+    }
+
+    os  << nl
+        << "# <points count=\"" << pointLst.size() << "\">" << nl;
+
+    // Write vertex coords
+    forAll(pointLst, ptI)
+    {
+        const point& pt = pointLst[ptI];
+
+        os  << "v " << pt.x() << ' '  << pt.y() << ' '  << pt.z() << nl;
+    }
+
+    os  << "# </points>" << nl
+        << nl
+        << "# <faces count=\"" << faceLst.size() << "\">" << endl;
+
 
     label faceIndex = 0;
-    forAll(patchLst, patchI)
+    forAll(zones, zoneI)
     {
-        const surfGroup& patch = patchLst[patchI];
+        const surfZone& zone = zones[zoneI];
 
-        os << "g " << patch.name() << endl;
-
-        forAll(patch, patchFaceI)
+        if (zone.name().size())
         {
-            const Face& f = faceLst[faceIndex++];
+            os << "g " << zone.name() << endl;
+        }
 
-            os << 'f';
-            forAll(f, fp)
+        if (useFaceMap)
+        {
+            forAll(zone, localFaceI)
             {
-                os << ' ' << f[fp] + 1;
+                const Face& f = faceLst[faceMap[faceIndex++]];
+
+                os << 'f';
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp] + 1;
+                }
+                os << endl;
             }
-            os << endl;
+        }
+        else
+        {
+            forAll(zone, localFaceI)
+            {
+                const Face& f = faceLst[faceIndex++];
+
+                os << 'f';
+                forAll(f, fp)
+                {
+                    os << ' ' << f[fp] + 1;
+                }
+                os << endl;
+            }
         }
     }
     os << "# </faces>" << endl;
 }
 
-
-template<class Face>
-void Foam::fileFormats::OBJsurfaceFormat<Face>::write
-(
-    Ostream& os,
-    const UnsortedMeshedSurface<Face>& surf
-)
-{
-    const List<Face>& faceLst = surf.faces();
-
-    labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
-
-    writeHeader(os, surf.points(), faceLst.size(), patchLst);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
-    {
-        // Print all faces belonging to this region
-        const surfGroup& patch = patchLst[patchI];
-
-        os << "g " << patch.name() << endl;
-
-        forAll(patch, patchFaceI)
-        {
-            const Face& f = faceLst[faceMap[faceIndex++]];
-
-            os << 'f';
-            forAll(f, fp)
-            {
-                os << ' ' << f[fp] + 1;
-            }
-            os << endl;
-        }
-    }
-
-    os << "# </faces>" << endl;
-}
 
 // ************************************************************************* //

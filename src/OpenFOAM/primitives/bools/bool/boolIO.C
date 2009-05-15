@@ -39,62 +39,10 @@ Description
 
 Foam::Istream& Foam::operator>>(Istream& is, bool& b)
 {
-    // we could also process everything via Switch
-    // The error messages are the problem: they are from SwitchIO.C
-//    Switch sw(is);
-//
-//    if (is.good())
-//    {
-//        b = sw;
-//    }
-//
-//    return is;
-//
-//
-    token t(is);
-
-    if (!t.good())
+    if (is.good())
     {
-        is.setBad();
-        return is;
+        b = Switch(is);
     }
-
-    if (t.isLabel())
-    {
-        b = bool(t.labelToken());
-    }
-    else if (t.isWord())
-    {
-        // allow invalid values, but catch after for correct error message
-        Switch::switchType sw = Switch::asEnum(t.wordToken(), true);
-
-        if (sw == Switch::INVALID)
-        {
-            is.setBad();
-            FatalIOErrorIn("operator>>(Istream&, bool&)", is)
-                << "expected 'true/false', 'on/off', found " << t.wordToken()
-                << exit(FatalIOError);
-
-            return is;
-        }
-        else
-        {
-            b = Switch::asBool(sw);
-        }
-    }
-    else
-    {
-        is.setBad();
-        FatalIOErrorIn("operator>>(Istream&, bool/Switch&)", is)
-            << "wrong token type - expected bool found " << t
-            << exit(FatalIOError);
-
-        return is;
-    }
-
-
-    // Check state of Istream
-    is.check("Istream& operator>>(Istream&, bool&)");
 
     return is;
 }

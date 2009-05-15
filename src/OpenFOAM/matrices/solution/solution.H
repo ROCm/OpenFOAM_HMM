@@ -56,6 +56,9 @@ class solution
         //- Dictionary of relaxation factors for all the fields
         dictionary relaxationFactors_;
 
+        //- Optional default relaxation factor for all the fields
+        scalar defaultRelaxationFactor_;
+
         //- Dictionary of solver parameters for all the fields
         dictionary solvers_;
 

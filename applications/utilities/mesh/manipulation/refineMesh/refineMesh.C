@@ -300,6 +300,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     printEdgeStats(mesh);
 
@@ -427,6 +428,10 @@ int main(int argc, char *argv[])
 
 
     // Write resulting mesh
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     mesh.write();
 
 

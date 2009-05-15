@@ -36,10 +36,10 @@ SourceFiles
 #ifndef AC3DsurfaceFormatCore_H
 #define AC3DsurfaceFormatCore_H
 
+#include "IFstream.H"
 #include "Ostream.H"
 #include "OFstream.H"
 #include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class AC3DfileFormat Declaration
+                    Class AC3DsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class AC3DsurfaceFormatCore
@@ -77,7 +77,7 @@ protected:
     );
 
     //- Write header with materials
-    static void writeHeader(Ostream&, const List<surfGroup>&);
+    static void writeHeader(Ostream&, const UList<surfZone>&);
 
 };
 

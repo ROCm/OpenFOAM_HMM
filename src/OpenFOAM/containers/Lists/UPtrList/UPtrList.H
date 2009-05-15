@@ -124,7 +124,7 @@ public:
             //- Return the number of elements in the UPtrList
             inline label size() const;
 
-            //- Return true if the UPtrList is empty (i.e., if size() == 0).
+            //- Return true if the UPtrList is empty (ie, size() is zero).
             inline bool empty() const;
 
 

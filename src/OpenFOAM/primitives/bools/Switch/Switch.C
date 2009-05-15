@@ -38,20 +38,20 @@ const char* Foam::Switch::names[Foam::Switch::INVALID+1] =
     "off",   "on",
     "no",    "yes",
     "n",     "y",
+    "none",  "true",  // is there a reasonable counterpart to "none"?
     "invalid"
 };
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
 
-Foam::Switch::switchType Foam::Switch::asEnum(const bool val)
+Foam::Switch::switchType Foam::Switch::asEnum(const bool b)
 {
-    return val ? Switch::FALSE : Switch::TRUE;
+    return b ? Switch::TRUE : Switch::FALSE;
 }
 
 
-Foam::Switch::switchType
-Foam::Switch::asEnum
+Foam::Switch::switchType Foam::Switch::asEnum
 (
     const std::string& str,
     const bool allowInvalid
@@ -61,8 +61,8 @@ Foam::Switch::asEnum
     {
         if (str == names[sw])
         {
-            // convert y/n to yes/no (perhaps should deprecate y/n)
-            if (sw == Switch::NO_1)
+            // convert n/y to no/yes (perhaps should deprecate y/n)
+            if (sw == Switch::NO_1 || sw == Switch::NONE)
             {
                 return Switch::NO;
             }
@@ -90,6 +90,7 @@ Foam::Switch::asEnum
 
 bool Foam::Switch::asBool(const switchType sw)
 {
+    // relies on (INVALID & 0x1) evaluating to false
     return (sw & 0x1);
 }
 
@@ -103,12 +104,18 @@ bool Foam::Switch::asBool
     // allow invalid values, but catch after for correct error message
     switchType sw = asEnum(str, true);
 
-    if (sw == Switch::INVALID && !allowInvalid)
+    if (sw == Switch::INVALID)
     {
-        FatalErrorIn("Switch::asBool(const std::string&)")
-            << "unknown switch word " << str << nl
-            << abort(FatalError);
+        if (!allowInvalid)
+        {
+            FatalErrorIn("Switch::asBool(const std::string&)")
+                << "unknown switch word " << str << nl
+                << abort(FatalError);
+        }
+
+        return false;
     }
+
 
     return (sw & 0x1);
 }

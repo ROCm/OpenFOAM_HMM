@@ -69,6 +69,8 @@ namespace Foam
 // Forward declaration of friend functions and operators
 class regExp;
 class dictionary;
+class SHA1Digest;
+
 Istream& operator>>(Istream&, dictionary&);
 Ostream& operator<<(Ostream&, const dictionary&);
 
@@ -166,6 +168,10 @@ public:
         //- Construct top-level dictionary as copy
         dictionary(const dictionary&);
 
+        //- Construct top-level dictionary as copy from pointer to dictionary.
+        //  A null pointer is treated like an empty dictionary.
+        dictionary(const dictionary*);
+
         //- Construct by transferring parameter contents given parent dictionary
         dictionary(const dictionary& parentDict, const Xfer<dictionary>&);
 
@@ -209,6 +215,9 @@ public:
 
         //- Return line number of last token in dictionary
         label endLineNumber() const;
+
+        //- Return the SHA1 digest of the dictionary contents
+        SHA1Digest digest() const;
 
 
         // Search and lookup

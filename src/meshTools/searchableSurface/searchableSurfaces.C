@@ -27,6 +27,7 @@ License
 #include "searchableSurfaces.H"
 #include "searchableSurfacesQueries.H"
 #include "ListOps.H"
+#include "Time.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,8 +38,6 @@ defineTypeNameAndDebug(searchableSurfaces, 0);
 
 }
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

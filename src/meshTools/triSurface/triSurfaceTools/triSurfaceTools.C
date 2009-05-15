@@ -2203,7 +2203,8 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
     const triSurface& surf,
     const point& sample,
     const label nearestFaceI,   // nearest face
-    const point& nearestPoint   // nearest point on nearest face
+    const point& nearestPoint,  // nearest point on nearest face
+    const scalar tol
 )
 {
     const labelledTri& f = surf[nearestFaceI];
@@ -2217,7 +2218,7 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         points[f[0]],
         points[f[1]],
         points[f[2]]
-    ).classify(nearestPoint, 1E-6, nearType, nearLabel);
+    ).classify(nearestPoint, tol, nearType, nearLabel);
 
     if (nearType == triPointRef::NONE)
     {

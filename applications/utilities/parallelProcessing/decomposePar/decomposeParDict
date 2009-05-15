@@ -19,11 +19,12 @@ FoamFile
 
 numberOfSubdomains  4;
 
-// preservePatches (inlet);
+//- Keep owner and neighbour on same processor for faces in zones:
 // preserveFaceZones (heater solid1 solid3);
 
-method          simple;
+method          scotch;
 // method          hierarchical;
+// method          simple;
 // method          metis;
 // method          manual;
 
@@ -53,13 +54,16 @@ metisCoeffs
   */
 }
 
+scotchCoeffs
+{}
+
 manualCoeffs
 {
     dataFile    "decompositionData";
 }
 
 
-//// Is the case distributred
+//// Is the case distributed
 //distributed     yes;
 //// Per slave (so nProcs-1 entries) the directory above the case.
 //roots           

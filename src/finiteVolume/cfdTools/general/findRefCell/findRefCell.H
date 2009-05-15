@@ -53,7 +53,14 @@ void setRefCell
     const dictionary& dict,
     label& refCelli,
     scalar& refValue,
-    bool forceReference = false
+    const bool forceReference = false
+);
+
+//- Return the current value of field in the reference cell
+scalar getRefCellValue
+(
+    const volScalarField& field,
+    const label refCelli
 );
 
 }

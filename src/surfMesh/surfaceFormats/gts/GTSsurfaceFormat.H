@@ -27,7 +27,8 @@ Class
 
 Description
     Provide a means of reading/writing GTS format.
-    The output is never sorted by patch.
+    The output is never sorted by zone and is only written if it consists
+    entirely of triangles.
 
 SourceFiles
     GTSsurfaceFormat.C
@@ -37,9 +38,8 @@ SourceFiles
 #ifndef GTSsurfaceFormat_H
 #define GTSsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,7 +50,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class GTSsurfaceFormat Declaration
+                      Class GTSsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -90,49 +90,20 @@ public:
 
     // Member Functions
 
+        //- Write MeshedSurface
+        static void write(const fileName&, const MeshedSurface<Face>&);
+
+        //- Write UnsortedMeshedSurface, the output remains unsorted
+        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+
+
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& name,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
-        //- Write UnsortedMeshedSurface
-        //  The output remains unsorted
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  The output remains unsorted
-        static void write
-        (
-            const fileName& name,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
         //- Write object
-        virtual void write(Ostream& os) const
+        virtual void write(const fileName& name) const
         {
-            write(os, *this);
+            write(name, *this);
         }
 
 };

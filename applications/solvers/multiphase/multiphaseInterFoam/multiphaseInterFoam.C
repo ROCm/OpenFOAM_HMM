@@ -83,6 +83,16 @@ int main(int argc, char *argv[])
 
         p = pd + rho*gh;
 
+        if (pd.needReference())
+        {
+            p += dimensionedScalar
+            (
+                "p",
+                p.dimensions(),
+                pRefValue - getRefCellValue(p, pdRefCell)
+            );
+        }
+
         turbulence->correct();
 
         runTime.write();
@@ -94,7 +104,7 @@ int main(int argc, char *argv[])
 
     Info<< "\n end \n";
 
-    return(0);
+    return 0;
 }
 
 

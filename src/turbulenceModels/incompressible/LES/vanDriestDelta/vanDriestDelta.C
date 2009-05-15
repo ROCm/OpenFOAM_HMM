@@ -49,12 +49,11 @@ addToRunTimeSelectionTable(LESdelta, vanDriestDelta, dictionary);
 
 void vanDriestDelta::calcDelta()
 {
-    const LESModel& sgsModel
-        = mesh_.lookupObject<LESModel>("LESProperties");
+    const LESModel& lesModel = mesh_.lookupObject<LESModel>("LESProperties");
 
-    const volVectorField& U = sgsModel.U();
-    const volScalarField& nu = sgsModel.nu();
-    tmp<volScalarField> nuSgs = sgsModel.nuSgs();
+    const volVectorField& U = lesModel.U();
+    const volScalarField& nu = lesModel.nu();
+    tmp<volScalarField> nuSgs = lesModel.nuSgs();
 
     volScalarField ystar
     (

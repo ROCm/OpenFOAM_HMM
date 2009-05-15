@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 
     if (Pstream::master())
     {
-        if (dir(postProcPath))
+        if (isDir(postProcPath))
         {
             rmDir(postProcPath);
         }
@@ -211,7 +211,7 @@ int main(int argc, char *argv[])
 
         fileNameList cloudDirs = readDir
         (
-            runTime.timePath()/regionPrefix/"lagrangian",
+            runTime.timePath()/regionPrefix/cloud::prefix,
             fileName::DIRECTORY
         );
 
@@ -221,7 +221,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudDirs[cloudI]
+                cloud::prefix/cloudDirs[cloudI]
             );
 
             IOobject* positionsPtr = cloudObjs.lookup("positions");
@@ -266,7 +266,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudIter.key()
+                cloud::prefix/cloudIter.key()
             );
 
             forAllConstIter(IOobjectList, cloudObjs, fieldIter)
@@ -426,7 +426,7 @@ int main(int argc, char *argv[])
 
             fileNameList currentCloudDirs = readDir
             (
-                runTime.timePath()/regionPrefix/"lagrangian",
+                runTime.timePath()/regionPrefix/cloud::prefix,
                 fileName::DIRECTORY
             );
 
@@ -449,7 +449,7 @@ int main(int argc, char *argv[])
                 (
                     fieldName,
                     mesh.time().timeName(),
-                    "lagrangian"/cloudName,
+                    cloud::prefix/cloudName,
                     mesh,
                     IOobject::MUST_READ
                 );

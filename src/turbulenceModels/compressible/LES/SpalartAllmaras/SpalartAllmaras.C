@@ -45,24 +45,32 @@ addToRunTimeSelectionTable(LESModel, SpalartAllmaras, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
+void SpalartAllmaras::updateSubGridScaleFields()
+{
+    muSgs_.internalField() = rho()*fv1()*nuTilda_.internalField();
+    muSgs_.correctBoundaryConditions();
+
+    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_.correctBoundaryConditions();
+}
+
+
 tmp<volScalarField> SpalartAllmaras::fv1() const
 {
-    volScalarField chi3 = pow3(nuTilda_/(mu()/rho()));
+    volScalarField chi3 = pow3(rho()*nuTilda_/mu());
     return chi3/(chi3 + pow3(Cv1_));
 }
 
 
 tmp<volScalarField> SpalartAllmaras::fv2() const
 {
-    volScalarField chi = nuTilda_/(mu()/rho());
-    //return scalar(1) - chi/(scalar(1) + chi*fv1());
-    return 1.0/pow3(scalar(1) + chi/Cv2_);
+    return 1.0/pow3(scalar(1) + rho()*nuTilda_/(mu()*Cv2_));
 }
 
 
 tmp<volScalarField> SpalartAllmaras::fv3() const
 {
-    volScalarField chi = nuTilda_/(mu()/rho());
+    volScalarField chi = rho()*nuTilda_/mu();
     volScalarField chiByCv2 = (1/Cv2_)*chi;
 
     return
@@ -109,7 +117,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaNut",
-            coeffDict(),
+            coeffDict_,
             1.5
         )
     ),
@@ -119,7 +127,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb1",
-            coeffDict(),
+            coeffDict_,
             0.1355
         )
     ),
@@ -128,7 +136,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cb2",
-            coeffDict(),
+            coeffDict_,
             0.622
         )
     ),
@@ -137,7 +145,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv1",
-            coeffDict(),
+            coeffDict_,
             7.1
         )
     ),
@@ -146,7 +154,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cv2",
-            coeffDict(),
+            coeffDict_,
             5.0
         )
     ),
@@ -155,7 +163,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "CDES",
-            coeffDict(),
+            coeffDict_,
             0.65
         )
     ),
@@ -164,7 +172,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.07
         )
     ),
@@ -183,7 +191,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw2",
-            coeffDict(),
+            coeffDict_,
             0.3
         )
     ),
@@ -192,7 +200,7 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "Cw3",
-            coeffDict(),
+            coeffDict_,
             2.0
         )
     ),
@@ -222,9 +230,23 @@ SpalartAllmaras::SpalartAllmaras
             IOobject::AUTO_WRITE
         ),
         mesh_
-    )
+    ),
 
+    alphaSgs_
+    (
+        IOobject
+        (
+            "alphaSgs",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    )
 {
+    updateSubGridScaleFields();
+
     printCoeffs();
 }
 
@@ -288,10 +310,9 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& tgradU)
     );
 
     bound(nuTilda_, dimensionedScalar("zero", nuTilda_.dimensions(), 0.0));
-
     nuTilda_.correctBoundaryConditions();
-    muSgs_.internalField() = rho()*fv1()*nuTilda_.internalField();
-    muSgs_.correctBoundaryConditions();
+
+    updateSubGridScaleFields();
 }
 
 

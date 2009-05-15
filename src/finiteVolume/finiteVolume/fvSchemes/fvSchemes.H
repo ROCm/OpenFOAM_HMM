@@ -79,11 +79,18 @@ class fvSchemes
         dictionary fluxRequired_;
         bool defaultFluxRequired_;
 
+        dictionary cacheFields_;
+
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
+        //- Clear the dictionaries and streams before reading
+        void clear();
+
+        //- Disallow default bitwise copy construct
         fvSchemes(const fvSchemes&);
+
+        //- Disallow default bitwise assignment
         void operator=(const fvSchemes&);
 
 
@@ -120,6 +127,8 @@ public:
             ITstream& laplacianScheme(const word& name) const;
 
             bool fluxRequired(const word& name) const;
+
+            bool cache(const word& name) const;
 
 
         // Read

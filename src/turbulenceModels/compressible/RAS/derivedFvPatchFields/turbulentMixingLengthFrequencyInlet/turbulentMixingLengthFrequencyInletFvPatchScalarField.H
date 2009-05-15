@@ -76,7 +76,7 @@ class turbulentMixingLengthFrequencyInletFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("turbulentMixingLengthFrequencyInlet");
+    TypeName("compressible::turbulentMixingLengthFrequencyInlet");
 
 
     // Constructors

@@ -42,9 +42,8 @@ SourceFiles
 #ifndef STARCDsurfaceFormat_H
 #define STARCDsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 #include "STARCDsurfaceFormatCore.H"
 
@@ -56,7 +55,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class STARCDsurfaceFormat Declaration
+                     Class STARCDsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -66,6 +65,7 @@ class STARCDsurfaceFormat
     public STARCDsurfaceFormatCore
 {
     // Private Data
+
         //- STAR-CD identifier for shell shapes (2d elements)
         static const int starcdShellShape_ = 3;
 
@@ -113,28 +113,17 @@ public:
 
     // Member Functions
 
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  The output is sorted by regions
-        static void write
-        (
-            const fileName&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write to Ostream as one large file - not really useful
-        virtual void write(Ostream&) const
+        //- Write object
+        virtual void write(const fileName& name) const
         {
-            notImplemented("fileFormats::STARCDsurfaceFormat::write(Ostream&)");
+            write(name, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

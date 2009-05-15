@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,7 +67,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     fixedInternalValueFvPatchField<scalar>(p, iF),
     UName_("U"),
     kName_("k"),
-    GName_("G"),
+    GName_("RASModel::G"),
     nuName_("nu"),
     nutName_("nut")
 {
@@ -104,7 +104,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     fixedInternalValueFvPatchField<scalar>(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
     kName_(dict.lookupOrDefault<word>("k", "k")),
-    GName_(dict.lookupOrDefault<word>("G", "G")),
+    GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     nutName_(dict.lookupOrDefault<word>("nut", "nut"))
 {
@@ -149,15 +149,15 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 
 void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu = ras.Cmu().value();
+    const scalar Cmu = rasModel.Cmu().value();
     const scalar Cmu25 = pow(Cmu, 0.25);
 
-    const scalar kappa = ras.kappa().value();
-    const scalar yPlusLam = ras.yPlusLam();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar yPlusLam = rasModel.yPlusLam();
 
-    const scalarField& y = ras.y()[patch().index()];
+    const scalarField& y = rasModel.y()[patch().index()];
 
     volScalarField& G = const_cast<volScalarField&>
         (db().lookupObject<volScalarField>(GName_));
@@ -210,7 +210,7 @@ void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
     fixedInternalValueFvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "k", "k", kName_);
-    writeEntryIfDifferent<word>(os, "G", "G", GName_);
+    writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     writeEntryIfDifferent<word>(os, "nut", "nut", nutName_);
     writeEntry("value", os);

@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
     // Ensight and Ensight/data directories must exist
     // do not remove old data - we might wish to convert new results
     // or a particular time interval
-    if (dir(ensightDir))
+    if (isDir(ensightDir))
     {
         Info<<"Warning: reusing existing directory" << nl
             << "    " << ensightDir << endl;
@@ -324,7 +324,14 @@ int main(int argc, char *argv[])
         {
             const word& cloudName = cloudIter.key();
 
-            if (!dir(runTime.timePath()/regionPrefix/"lagrangian"/cloudName))
+            if
+            (
+                !isDir
+                (
+                    runTime.timePath()/regionPrefix/
+                    cloud::prefix/cloudName
+                )
+            )
             {
                 continue;
             }
@@ -333,7 +340,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudName
+                cloud::prefix/cloudName
             );
 
             // check that the positions field is present for this time
@@ -365,7 +372,8 @@ int main(int argc, char *argv[])
                 if (!fieldObject)
                 {
                     Info<< "missing "
-                        << runTime.timeName()/"lagrangian"/cloudName/fieldName
+                        << runTime.timeName()/cloud::prefix/cloudName
+                        / fieldName
                         << endl;
                     continue;
                 }

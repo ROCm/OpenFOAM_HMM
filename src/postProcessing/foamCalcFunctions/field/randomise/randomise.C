@@ -59,7 +59,7 @@ void Foam::calcTypes::randomise::init()
 {
     argList::validArgs.append("randomise");
     argList::validArgs.append("perturbation");
-    argList::validArgs.append("fieldName1 .. fieldNameN");
+    argList::validArgs.append("fieldName");
 }
 
 
@@ -69,17 +69,7 @@ void Foam::calcTypes::randomise::preCalc
     const Time& runTime,
     const fvMesh& mesh
 )
-{
-    if (args.additionalArgs().size() < 3)
-    {
-        Info<< nl
-            << "must specify perturbation magnitude and one"
-            << "or more fields"
-            << nl;
-        args.printUsage();
-        FatalError.exit();
-    }
-}
+{}
 
 
 void Foam::calcTypes::randomise::calc
@@ -91,72 +81,68 @@ void Foam::calcTypes::randomise::calc
 {
     const stringList& params = args.additionalArgs();
     const scalar pertMag = readScalar(IStringStream(params[1])());
+    const word& fieldName = params[2];
 
     Random rand(1234567);
 
-    for (label fieldi=2; fieldi<params.size(); fieldi++)
-    {
-        const word fieldName(params[fieldi]);
+    IOobject fieldHeader
+    (
+        fieldName,
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
 
-        IOobject fieldHeader
+    // Check field exists
+    if (fieldHeader.headerOk())
+    {
+        bool processed = false;
+
+        writeRandomField<vector>
         (
-            fieldName,
-            runTime.timeName(),
+            fieldHeader,
+            pertMag,
+            rand,
             mesh,
-            IOobject::MUST_READ
+            processed
+        );
+        writeRandomField<sphericalTensor>
+        (
+            fieldHeader,
+            pertMag,
+            rand,
+            mesh,
+            processed
+        );
+        writeRandomField<symmTensor>
+        (
+            fieldHeader,
+            pertMag,
+            rand,
+            mesh,
+            processed
+        );
+        writeRandomField<tensor>
+        (
+            fieldHeader,
+            pertMag,
+            rand,
+            mesh,
+            processed
         );
 
-        // Check field exists
-        if (fieldHeader.headerOk())
+        if (!processed)
         {
-            bool processed = false;
-
-            writeRandomField<vector>
-            (
-                fieldHeader,
-                pertMag,
-                rand,
-                mesh,
-                processed
-            );
-            writeRandomField<sphericalTensor>
-            (
-                fieldHeader,
-                pertMag,
-                rand,
-                mesh,
-                processed
-            );
-            writeRandomField<symmTensor>
-            (
-                fieldHeader,
-                pertMag,
-                rand,
-                mesh,
-                processed
-            );
-            writeRandomField<tensor>
-            (
-                fieldHeader,
-                pertMag,
-                rand,
-                mesh,
-                processed
-            );
-
-            if (!processed)
-            {
-                FatalError
-                    << "Unable to process " << fieldName << nl
-                    << "No call to randomise for fields of type "
-                    << fieldHeader.headerClassName() << nl << nl
-                    << exit(FatalError);
-            }
+            FatalError
+                << "Unable to process " << fieldName << nl
+                << "No call to randomise for fields of type "
+                << fieldHeader.headerClassName() << nl << nl
+                << exit(FatalError);
         }
-        else
-        {
-            Info<< "    No " << fieldName << endl;
-        }
+    }
+    else
+    {
+        Info<< "    No " << fieldName << endl;
     }
 }
 

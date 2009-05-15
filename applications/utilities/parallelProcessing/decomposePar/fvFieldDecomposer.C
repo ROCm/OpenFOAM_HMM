@@ -59,7 +59,6 @@ processorVolPatchFieldDecomposer
     addressing_(addressingSlice.size()),
     weights_(addressingSlice.size())
 {
-    const scalarField& weights = mesh.weights().internalField();
     const labelList& own = mesh.faceOwner();
     const labelList& neighb = mesh.faceNeighbour();
 
@@ -72,15 +71,22 @@ processorVolPatchFieldDecomposer
         {
             // This is a regular face. it has been an internal face
             // of the original mesh and now it has become a face
-            // on the parallel boundary
-            addressing_[i].setSize(2);
-            weights_[i].setSize(2);
+            // on the parallel boundary.
+            // Give face the value of the neighbour.
 
-            addressing_[i][0] = own[ai];
-            addressing_[i][1] = neighb[ai];
+            addressing_[i].setSize(1);
+            weights_[i].setSize(1);
+            weights_[i][0] = 1.0;
 
-            weights_[i][0] = weights[ai];
-            weights_[i][1] = 1.0 - weights[ai];
+            if (addressingSlice[i] >= 0)
+            {
+                // I have the owner so use the neighbour value
+                addressing_[i][0] = neighb[ai];
+            }
+            else
+            {
+                addressing_[i][0] = own[ai];
+            }
         }
         else
         {
@@ -89,7 +95,7 @@ processorVolPatchFieldDecomposer
             // do the interpolation properly (I would need to look
             // up the different (face) list of data), so I will
             // just grab the value from the owner cell
-            // 
+
             addressing_[i].setSize(1);
             weights_[i].setSize(1);
 

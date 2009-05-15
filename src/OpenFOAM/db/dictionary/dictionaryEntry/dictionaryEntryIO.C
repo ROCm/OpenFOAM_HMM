@@ -45,7 +45,7 @@ Foam::dictionaryEntry::dictionaryEntry
     is.fatalCheck
     (
         "dictionaryEntry::dictionaryEntry"
-        "(const dictionary& parentDict, Istream& is)"
+        "(const dictionary& parentDict, Istream&)"
     );
 }
 
@@ -65,7 +65,7 @@ Foam::dictionaryEntry::dictionaryEntry
     is.fatalCheck
     (
         "dictionaryEntry::dictionaryEntry"
-        "(const keyType& keyword, const dictionary& parentDict, Istream& is)"
+        "(const keyType&, const dictionary& parentDict, Istream&)"
     );
 }
 
@@ -74,7 +74,9 @@ Foam::dictionaryEntry::dictionaryEntry
 
 void Foam::dictionaryEntry::write(Ostream& os) const
 {
-    os.writeKeyword(keyword());
+    // write keyword with indent but without trailing spaces
+    os.indent();
+    os.write(keyword());
     dictionary::write(os);
 }
 

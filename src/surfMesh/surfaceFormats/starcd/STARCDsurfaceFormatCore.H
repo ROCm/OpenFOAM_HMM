@@ -26,7 +26,7 @@ Class
     Foam::fileFormats::STARCDsurfaceFormatCore
 
 Description
-    Internal class used by the OBJsurfaceFormat
+    Internal class used by the STARCDsurfaceFormat
 
 SourceFiles
     STARCDsurfaceFormatCore.C
@@ -38,8 +38,8 @@ SourceFiles
 
 #include "IFstream.H"
 #include "Ostream.H"
+#include "OFstream.H"
 #include "MeshedSurface.H"
-#include "UnsortedMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +49,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class STARCDsurfaceFormatCore Declaration
+                   Class STARCDsurfaceFormatCore Declaration
 \*---------------------------------------------------------------------------*/
 
 class STARCDsurfaceFormatCore
@@ -70,7 +70,7 @@ protected:
         Ostream&,
         const pointField&,
         const label nFaces,
-        const List<surfGroup>&
+        const UList<surfZone>&
     );
 
 };

@@ -77,6 +77,9 @@ class Smagorinsky
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volTensorField& gradU);
+
         // Disallow default bitwise copy construct and assignment
         Smagorinsky(const Smagorinsky&);
         Smagorinsky& operator=(const Smagorinsky&);
@@ -122,7 +125,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

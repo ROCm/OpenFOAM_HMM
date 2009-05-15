@@ -113,7 +113,7 @@ tmp<fvVectorMatrix> dynMixedSmagorinsky::divDevBeff(volVectorField& U) const
 void dynMixedSmagorinsky::correct(const tmp<volTensorField>& gradU)
 {
     scaleSimilarity::correct(gradU);
-    dynSmagorinsky::correct(gradU);
+    dynSmagorinsky::correct(gradU());
 }
 
 

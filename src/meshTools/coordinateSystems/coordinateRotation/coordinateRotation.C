@@ -45,34 +45,17 @@ void Foam::coordinateRotation::calcTransform
     const axisOrder& order
 )
 {
-    const scalar orthogonalityError = 1.0e-8;
-
     vector a = axis1 / mag(axis1);
     vector b = axis2;
 
     // Absorb minor nonorthogonality into axis2
     b = b - (b & a)*a;
 
-    if (mag(b) < orthogonalityError)
+    if (mag(b) < SMALL)
     {
-        FatalErrorIn
-        (
-            "coordinateRotation::calcTransform()"
-        )
+        FatalErrorIn("coordinateRotation::calcTransform()")
             << "axis1, axis2 appear co-linear: "
             << axis1 << ", " << axis2 << endl
-            << abort(FatalError);
-    }
-
-    // this error check is probably no longer required
-    if (mag(a & b)/(mag(a)*mag(b)) >= orthogonalityError)
-    {
-        FatalErrorIn
-        (
-            "coordinateRotation::calcTransform()"
-        )
-            << "coordinate system nonorthogonality " << nl
-            << "mag(axis1 & axis2) = " << mag(a & b)
             << abort(FatalError);
     }
 
@@ -102,10 +85,7 @@ void Foam::coordinateRotation::calcTransform
             break;
 
         default:
-            FatalErrorIn
-            (
-                "coordinateRotation::calcTransform()"
-            )
+            FatalErrorIn("coordinateRotation::calcTransform()")
                 << "programmer error" << endl
                 << abort(FatalError);
             break;
@@ -240,5 +220,6 @@ void Foam::coordinateRotation::operator=(const dictionary& rhs)
 
     calcTransform(axis1, axis2, order);
 }
+
 
 // ************************************************************************* //

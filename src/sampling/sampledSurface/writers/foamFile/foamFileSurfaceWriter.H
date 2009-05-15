@@ -72,13 +72,26 @@ public:
 
     // Member Functions
 
-        // Write
+        //- Return true if the surface format supports separate files
+        virtual bool separateFiles()
+        {
+            return true;
+        }
+
+        //- Write geometry to file.
+        virtual void write
+        (
+            const fileName& outputDir,
+            const fileName& surfaceName,
+            const pointField& points,
+            const faceList& faces,
+            const bool verbose = false
+        ) const;
 
         //- Writes single surface to file.
         virtual void write
         (
-            const fileName& samplePath,
-            const fileName& timeDir,
+            const fileName& outputDir,
             const fileName& surfaceName,
             const pointField& points,
             const faceList& faces,

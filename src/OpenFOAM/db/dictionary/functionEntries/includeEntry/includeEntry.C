@@ -62,8 +62,7 @@ namespace functionEntries
 }
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 (
@@ -73,6 +72,7 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
     fileName fName(is);
     fName.expand();
 
+    // relative name
     if (fName.size() && fName[0] != '/')
     {
         fName = fileName(is.name()).path()/fName;
@@ -82,17 +82,19 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 bool Foam::functionEntries::includeEntry::execute
 (
     dictionary& parentDict,
     Istream& is
 )
 {
-    IFstream fileStream(includeFileName(is));
+    IFstream ifs(includeFileName(is));
 
-    if (fileStream)
+    if (ifs)
     {
-        parentDict.read(fileStream);
+        parentDict.read(ifs);
         return true;
     }
     else
@@ -100,9 +102,9 @@ bool Foam::functionEntries::includeEntry::execute
         FatalIOErrorIn
         (
             "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict,Istream& is)",
+            "(dictionary& parentDict, Istream&)",
             is
-        )   << "Cannot open include file " << fileStream.name()
+        )   << "Cannot open include file " << ifs.name()
             << " while reading dictionary " << parentDict.name()
             << exit(FatalIOError);
 
@@ -117,11 +119,11 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    IFstream fileStream(includeFileName(is));
+    IFstream ifs(includeFileName(is));
 
-    if (fileStream)
+    if (ifs)
     {
-        entry.read(parentDict, fileStream);
+        entry.read(parentDict, ifs);
         return true;
     }
     else
@@ -129,9 +131,9 @@ bool Foam::functionEntries::includeEntry::execute
         FatalIOErrorIn
         (
             "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict, primitiveEntry& entry, Istream& is)",
+            "(dictionary& parentDict, primitiveEntry&, Istream&)",
             is
-        )   << "Cannot open include file " << fileStream.name()
+        )   << "Cannot open include file " << ifs.name()
             << " while reading dictionary " << parentDict.name()
             << exit(FatalIOError);
 

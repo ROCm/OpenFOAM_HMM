@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,6 +61,9 @@ class kOmegaSSTSAS
     public LESModel
 {
     // Private member functions
+
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volScalarField& D);
 
         // Disallow default bitwise copy construct and assignment
         kOmegaSSTSAS(const kOmegaSSTSAS&);
@@ -237,10 +240,11 @@ public:
         //  i.e. the additional term in the filtered NSE.
         virtual tmp<fvVectorMatrix> divDevBeff(volVectorField& U) const;
 
-        //- Solve the turbulence equations (k-w) and correct the turbulence viscosity
+        //- Solve the turbulence equations (k-w) and correct the turbulence
+        //  viscosity
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

@@ -92,7 +92,7 @@ public:
         );
 
         //- Construct from Istream setting pointsList
-        polySplineEdge(const pointField& points,Istream& is);
+        polySplineEdge(const pointField& points, Istream& is);
 
 
     // Destructor

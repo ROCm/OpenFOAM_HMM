@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,7 +76,7 @@ void Foam::meshDualiser::checkPolyTopoChange(const polyTopoChange& meshMod)
                     "meshDualiser::checkPolyTopoChange(const polyTopoChange&)"
                 )   << "duplicate verts:" << newToOld[newI]
                     << " coords:"
-                    << IndirectList<point>(points, newToOld[newI])()
+                    << UIndirectList<point>(points, newToOld[newI])()
                     << abort(FatalError);
             }
         }
@@ -226,10 +226,7 @@ Foam::label Foam::meshDualiser::addInternalFace
 
     if (debug)
     {
-        pointField facePoints
-        (
-            IndirectList<point>(meshMod.points(), newFace)()
-        );
+        pointField facePoints(meshMod.points(), newFace);
 
         labelList oldToNew;
         pointField newPoints;
@@ -289,7 +286,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //n /= mag(n);
         //Pout<< "Generated internal dualFace:" << dualFaceI
         //    << " verts:" << newFace
-        //    << " points:" << IndirectList<point>(meshMod.points(), newFace)()
+        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
         //    << " n:" << n
         //    << " between dualowner:" << dualCell0
         //    << " dualneigbour:" << dualCell1
@@ -316,7 +313,7 @@ Foam::label Foam::meshDualiser::addInternalFace
         //n /= mag(n);
         //Pout<< "Generated internal dualFace:" << dualFaceI
         //    << " verts:" << newFace
-        //    << " points:" << IndirectList<point>(meshMod.points(), newFace)()
+        //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
         //    << " n:" << n
         //    << " between dualowner:" << dualCell1
         //    << " dualneigbour:" << dualCell0
@@ -373,7 +370,7 @@ Foam::label Foam::meshDualiser::addBoundaryFace
     //n /= mag(n);
     //Pout<< "Generated boundary dualFace:" << dualFaceI
     //    << " verts:" << newFace
-    //    << " points:" << IndirectList<point>(meshMod.points(), newFace)()
+    //    << " points:" << UIndirectList<point>(meshMod.points(), newFace)()
     //    << " n:" << n
     //    << " on dualowner:" << dualCellI
     //    << endl;
@@ -568,7 +565,7 @@ void Foam::meshDualiser::createFaceFromInternalFace
 
     //Pout<< "createFaceFromInternalFace : At face:" << faceI
     //    << " verts:" << f
-    //    << " points:" << IndirectList<point>(mesh_.points(), f)()
+    //    << " points:" << UIndirectList<point>(mesh_.points(), f)()
     //    << " started walking at edge:" << fEdges[fp]
     //    << " verts:" << mesh_.edges()[fEdges[fp]]
     //    << endl;
@@ -617,7 +614,7 @@ void Foam::meshDualiser::createFaceFromInternalFace
             {
                 FatalErrorIn("createFacesFromInternalFace(..)")
                     << "face:" << faceI << " verts:" << f
-                    << " points:" << IndirectList<point>(mesh_.points(), f)()
+                    << " points:" << UIndirectList<point>(mesh_.points(), f)()
                     << " no feature edge between " << f[fp]
                     << " and " << f[nextFp] << " although have different"
                     << " dual cells." << endl

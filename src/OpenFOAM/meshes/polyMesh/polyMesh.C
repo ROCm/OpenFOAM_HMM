@@ -39,10 +39,8 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(polyMesh, 0);
-}
+defineTypeNameAndDebug(Foam::polyMesh, 0);
+
 
 Foam::word Foam::polyMesh::defaultRegion = "region0";
 Foam::word Foam::polyMesh::meshSubDir = "polyMesh";
@@ -54,40 +52,79 @@ void Foam::polyMesh::calcDirections() const
 {
     for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
     {
-        directions_[cmpt] = 1;
+        solutionD_[cmpt] = 1;
     }
 
-    label nEmptyPatches = 0;
+    // Knock out empty and wedge directions. Note:they will be present on all
+    // domains.
 
-    vector dirVec = vector::zero;
+    label nEmptyPatches = 0;
+    label nWedgePatches = 0;
+
+    vector emptyDirVec = vector::zero;
+    vector wedgeDirVec = vector::zero;
 
     forAll(boundaryMesh(), patchi)
     {
-        if (isA<emptyPolyPatch>(boundaryMesh()[patchi]))
+        if (boundaryMesh()[patchi].size())
         {
-            if (boundaryMesh()[patchi].size())
+            if (isA<emptyPolyPatch>(boundaryMesh()[patchi]))
             {
                 nEmptyPatches++;
-                dirVec += sum(cmptMag(boundaryMesh()[patchi].faceAreas()));
+                emptyDirVec += sum(cmptMag(boundaryMesh()[patchi].faceAreas()));
+            }
+            else if (isA<wedgePolyPatch>(boundaryMesh()[patchi]))
+            {
+                const wedgePolyPatch& wpp = refCast<const wedgePolyPatch>
+                (
+                    boundaryMesh()[patchi]
+                );
+
+                nWedgePatches++;
+                wedgeDirVec += cmptMag(wpp.centreNormal());
             }
         }
     }
 
     if (nEmptyPatches)
     {
-        reduce(dirVec, sumOp<vector>());
+        reduce(emptyDirVec, sumOp<vector>());
 
-        dirVec /= mag(dirVec);
+        emptyDirVec /= mag(emptyDirVec);
 
         for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
         {
-            if (dirVec[cmpt] > 1e-6)
+            if (emptyDirVec[cmpt] > 1e-6)
             {
-                directions_[cmpt] = -1;
+                solutionD_[cmpt] = -1;
             }
             else
             {
-                directions_[cmpt] = 1;
+                solutionD_[cmpt] = 1;
+            }
+        }
+    }
+
+
+    // Knock out wedge directions
+
+    geometricD_ = solutionD_;
+
+    if (nWedgePatches)
+    {
+        reduce(wedgeDirVec, sumOp<vector>());
+
+        wedgeDirVec /= mag(wedgeDirVec);
+
+        for (direction cmpt=0; cmpt<vector::nComponents; cmpt++)
+        {
+            if (wedgeDirVec[cmpt] > 1e-6)
+            {
+                geometricD_[cmpt] = -1;
+            }
+            else
+            {
+                geometricD_[cmpt] = 1;
             }
         }
     }
@@ -163,7 +200,8 @@ Foam::polyMesh::polyMesh(const IOobject& io)
         *this
     ),
     bounds_(points_),
-    directions_(Vector<label>::zero),
+    geometricD_(Vector<label>::zero),
+    solutionD_(Vector<label>::zero),
     pointZones_
     (
         IOobject
@@ -350,7 +388,8 @@ Foam::polyMesh::polyMesh
         0
     ),
     bounds_(points_, syncPar),
-    directions_(Vector<label>::zero),
+    geometricD_(Vector<label>::zero),
+    solutionD_(Vector<label>::zero),
     pointZones_
     (
         IOobject
@@ -505,7 +544,8 @@ Foam::polyMesh::polyMesh
         0
     ),
     bounds_(points_, syncPar),
-    directions_(Vector<label>::zero),
+    geometricD_(Vector<label>::zero),
+    solutionD_(Vector<label>::zero),
     pointZones_
     (
         IOobject
@@ -766,44 +806,37 @@ const Foam::fileName& Foam::polyMesh::facesInstance() const
 }
 
 
-const Foam::Vector<Foam::label>& Foam::polyMesh::directions() const
+const Foam::Vector<Foam::label>& Foam::polyMesh::geometricD() const
 {
-    if (directions_.x() == 0)
+    if (geometricD_.x() == 0)
     {
         calcDirections();
     }
 
-    return directions_;
+    return geometricD_;
 }
 
 
 Foam::label Foam::polyMesh::nGeometricD() const
 {
-    label nWedges = 0;
+    return cmptSum(geometricD() + Vector<label>::one)/2;
+}
 
-    forAll(boundary_, patchi)
+
+const Foam::Vector<Foam::label>& Foam::polyMesh::solutionD() const
+{
+    if (solutionD_.x() == 0)
     {
-        if (isA<wedgePolyPatch>(boundary_[patchi]))
-        {
-            nWedges++;
-        }
+        calcDirections();
     }
 
-    if (nWedges != 0 && nWedges != 2 && nWedges != 4)
-    {
-        FatalErrorIn("label polyMesh::nGeometricD() const")
-            << "Number of wedge patches " << nWedges << " is incorrect, "
-               "should be 0, 2 or 4"
-            << exit(FatalError);
-    }
-
-    return nSolutionD() - nWedges/2;
+    return solutionD_;
 }
 
 
 Foam::label Foam::polyMesh::nSolutionD() const
 {
-    return cmptSum(directions() + Vector<label>::one)/2;
+    return cmptSum(solutionD() + Vector<label>::one)/2;
 }
 
 
@@ -822,6 +855,10 @@ void Foam::polyMesh::addPatches
         )   << "boundary already exists"
             << abort(FatalError);
     }
+
+    // Reset valid directions
+    geometricD_ = Vector<label>::zero;
+    solutionD_ = Vector<label>::zero;
 
     boundary_.setSize(p.size());
 
@@ -1037,6 +1074,10 @@ Foam::tmp<Foam::scalarField> Foam::polyMesh::movePoints
     faceZones_.movePoints(points_);
     cellZones_.movePoints(points_);
 
+    // Reset valid directions (could change with rotation)
+    geometricD_ = Vector<label>::zero;
+    solutionD_ = Vector<label>::zero;
+
 
     // Hack until proper callbacks. Below are all the polyMeh MeshObjects with a
     // movePoints function.
@@ -1103,7 +1144,7 @@ void Foam::polyMesh::removeFiles(const fileName& instanceDir) const
     rm(meshFilesPath/"parallelData");
 
     // remove subdirectories
-    if (dir(meshFilesPath/"sets"))
+    if (isDir(meshFilesPath/"sets"))
     {
         rmDir(meshFilesPath/"sets");
     }

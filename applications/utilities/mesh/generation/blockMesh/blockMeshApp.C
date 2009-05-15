@@ -78,10 +78,10 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
+    const word dictName("blockMeshDict");
+
     word regionName;
     fileName polyMeshDir;
-    word dictName("blockMeshDict");
-    fileName dictPath(runTime.constant());
 
     if (args.options().found("region"))
     {
@@ -98,55 +98,62 @@ int main(int argc, char *argv[])
         polyMeshDir = polyMesh::meshSubDir;
     }
 
-    fileName dictLocal = polyMeshDir;
+    autoPtr<IOobject> meshDictIoPtr;
 
     if (args.options().found("dict"))
     {
-        wordList elems(fileName(args.options()["dict"]).components());
-        dictName = elems[elems.size()-1];
-        dictPath = elems[0];
-        dictLocal = "";
+        fileName dictPath(args.options()["dict"]);
 
-        if (elems.size() == 1)
-        {
-            dictPath = ".";
-        }
-        else if (elems.size() > 2)
-        {
-            dictLocal = fileName(SubList<word>(elems, elems.size()-2, 1));
-        }
+        meshDictIoPtr.set
+        (
+            new IOobject
+            (
+                (
+                    isDir(dictPath)
+                  ? dictPath/dictName 
+                  : dictPath
+                ),
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+    }
+    else
+    {
+        meshDictIoPtr.set
+        (
+            new IOobject
+            (
+                dictName,
+                runTime.constant(),
+                polyMeshDir,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
     }
 
-    bool writeTopo = args.options().found("blockTopology");
-
-    IOobject meshDictIo
-    (
-        dictName,
-        dictPath,
-        dictLocal,
-        runTime,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE,
-        false
-    );
-
-    if (!meshDictIo.headerOk())
+    if (!meshDictIoPtr->headerOk())
     {
         FatalErrorIn(args.executable())
             << "Cannot open mesh description file\n    "
-            << meshDictIo.objectPath()
+            << meshDictIoPtr->objectPath()
             << nl
             << exit(FatalError);
     }
 
     Info<< nl << "Creating block mesh from\n    "
-        << meshDictIo.objectPath() << nl << endl;
+        << meshDictIoPtr->objectPath() << nl << endl;
 
-    IOdictionary meshDict(meshDictIo);
-
+    IOdictionary meshDict(meshDictIoPtr());
     blockMesh blocks(meshDict);
 
-    if (writeTopo)
+
+    if (args.options().found("blockTopology"))
     {
         // Write mesh as edges.
         {

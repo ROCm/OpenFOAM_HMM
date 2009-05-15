@@ -202,10 +202,10 @@ bool kOmega::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        beta_.readIfPresent(coeffDict_);
-        alphaK_.readIfPresent(coeffDict_);
-        alphaOmega_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        beta_.readIfPresent(coeffDict());
+        alphaK_.readIfPresent(coeffDict());
+        alphaOmega_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -225,7 +225,7 @@ void kOmega::correct()
         return;
     }
 
-    volScalarField G("G", nut_*2*magSqr(symm(fvc::grad(U_))));
+    volScalarField G("RASModel::G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
     // Update omega and G at the wall
     omega_.boundaryField().updateCoeffs();

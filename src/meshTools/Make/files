@@ -55,14 +55,16 @@ indexedOctree/treeDataTriSurface.C
 searchableSurface = searchableSurface
 $(searchableSurface)/distributedTriSurfaceMesh.C
 $(searchableSurface)/searchableBox.C
+$(searchableSurface)/searchableCylinder.C
 $(searchableSurface)/searchablePlane.C
 $(searchableSurface)/searchablePlate.C
 $(searchableSurface)/searchableSphere.C
 $(searchableSurface)/searchableSurface.C
+$(searchableSurface)/searchableSurfaceCollection.C
 $(searchableSurface)/searchableSurfaces.C
 $(searchableSurface)/searchableSurfacesQueries.C
-$(searchableSurface)/triSurfaceMesh.C
 $(searchableSurface)/searchableSurfaceWithGaps.C
+$(searchableSurface)/triSurfaceMesh.C
 
 topoSets = sets/topoSets
 $(topoSets)/cellSet.C
@@ -139,7 +141,10 @@ triSurface/triSurfaceTools/geompack/geompack.C
 
 twoDPointCorrector/twoDPointCorrector.C
 
+directMapped/directMappedPolyPatch/directMappedPatchBase.C
 directMapped/directMappedPolyPatch/directMappedPolyPatch.C
+directMapped/directMappedPolyPatch/directMappedWallPolyPatch.C
 directMapped/directMappedPointPatch/directMappedPointPatch.C
+directMapped/directMappedPointPatch/directMappedWallPointPatch.C
 
 LIB = $(FOAM_LIBBIN)/libmeshTools

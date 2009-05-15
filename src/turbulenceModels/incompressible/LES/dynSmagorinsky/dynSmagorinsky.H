@@ -96,6 +96,9 @@ class dynSmagorinsky
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volSymmTensorField& D);
+
         //- Calculate coefficients cD, cI from filtering velocity field
         dimensionedScalar cD(const volSymmTensorField& D) const;
         dimensionedScalar cI(const volSymmTensorField& D) const;
@@ -136,7 +139,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

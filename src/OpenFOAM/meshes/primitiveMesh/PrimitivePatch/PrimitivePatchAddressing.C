@@ -39,11 +39,6 @@ Description
 #include "DynamicList.H"
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template
@@ -53,8 +48,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
- const
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcAddressing() const
 {
     if (debug)
     {
@@ -310,9 +307,5 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

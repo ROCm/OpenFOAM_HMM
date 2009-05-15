@@ -41,6 +41,25 @@ namespace LESModels
 defineTypeNameAndDebug(spectEddyVisc, 0);
 addToRunTimeSelectionTable(LESModel, spectEddyVisc, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void spectEddyVisc::updateSubGridScaleFields(const volTensorField& gradU)
+{
+    volScalarField Re = sqr(delta())*mag(symm(gradU))/nu();
+    for (label i=0; i<5; i++)
+    {
+        nuSgs_ =
+            nu()
+           /(
+                 scalar(1)
+               - exp(-cB_*pow(nu()/(nuSgs_ + nu()), 1.0/3.0)*pow(Re, -2.0/3.0))
+            );
+    }
+
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 spectEddyVisc::spectEddyVisc
@@ -59,7 +78,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cB",
-            coeffDict(),
+            coeffDict_,
             8.22
         )
     ),
@@ -68,7 +87,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK1",
-            coeffDict(),
+            coeffDict_,
             0.83
         )
     ),
@@ -77,7 +96,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK2",
-            coeffDict(),
+            coeffDict_,
             1.03
         )
     ),
@@ -86,7 +105,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK3",
-            coeffDict(),
+            coeffDict_,
             4.75
         )
     ),
@@ -95,12 +114,14 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK4",
-            coeffDict(),
+            coeffDict_,
             2.55
         )
     )
 {
     printCoeffs();
+
+    updateSubGridScaleFields(fvc::grad(U));
 }
 
 
@@ -121,20 +142,7 @@ tmp<volScalarField> spectEddyVisc::k() const
 void spectEddyVisc::correct(const tmp<volTensorField>& gradU)
 {
     GenEddyVisc::correct(gradU);
-
-    volScalarField Re = sqr(delta())*mag(symm(gradU))/nu();
-
-    for (label i=0; i<5; i++)
-    {
-        nuSgs_ =
-            nu()
-           /(
-               scalar(1)
-               - exp(-cB_*pow(nu()/(nuSgs_ + nu()), 1.0/3.0)*pow(Re, -2.0/3.0))
-            );
-    }
-
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(gradU());
 }
 
 

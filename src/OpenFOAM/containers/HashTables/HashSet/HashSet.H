@@ -72,7 +72,7 @@ public:
     // Constructors
 
         //- Construct given initial size
-        HashSet(const label size = 100)
+        HashSet(const label size = 128)
         :
             HashTable<nil, Key, Hash>(size)
         {}
@@ -133,8 +133,10 @@ public:
             return HashTable<nil, Key, Hash>::insert(key, nil());
         }
 
-
     // Member Operators
+
+        //- Return true if the entry exists, same as found()
+        inline bool operator[](const Key&) const;
 
         //- Equality. Two hashtables are equal when their contents are equal.
         //  Independent of table size or order.

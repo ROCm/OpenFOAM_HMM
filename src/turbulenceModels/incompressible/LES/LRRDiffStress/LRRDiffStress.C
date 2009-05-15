@@ -41,6 +41,15 @@ namespace LESModels
 defineTypeNameAndDebug(LRRDiffStress, 0);
 addToRunTimeSelectionTable(LESModel, LRRDiffStress, dictionary);
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void LRRDiffStress::updateSubGridScaleFields(const volScalarField& K)
+{
+    nuSgs_ = ck_*sqrt(K)*delta();
+    nuSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 LRRDiffStress::LRRDiffStress
@@ -58,7 +67,7 @@ LRRDiffStress::LRRDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.09
         )
     ),
@@ -67,7 +76,7 @@ LRRDiffStress::LRRDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "c1",
-            coeffDict(),
+            coeffDict_,
             1.8
         )
     ),
@@ -76,11 +85,13 @@ LRRDiffStress::LRRDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "c2",
-            coeffDict(),
+            coeffDict_,
             0.6
         )
     )
 {
+    updateSubGridScaleFields(0.5*tr(B_));
+
     printCoeffs();
 }
 
@@ -131,8 +142,7 @@ void LRRDiffStress::correct(const tmp<volTensorField>& tgradU)
     K = 0.5*tr(B_);
     bound(K, k0());
 
-    nuSgs_ = ck_*sqrt(K)*delta();
-    nuSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(K);
 }
 
 

@@ -330,6 +330,9 @@ public:
             inline vector& position();
 
             //- Return current cell particle is in
+            inline label& cell();
+
+            //- Return current cell particle is in
             inline label cell() const;
 
             //- Return current face particle is on otherwise -1

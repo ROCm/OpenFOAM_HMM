@@ -96,6 +96,13 @@ class locDynOneEqEddy
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields
+        (
+            const volSymmTensorField& D,
+            const volScalarField& KK
+        );
+
         //- Calculate ck, ce by filtering the velocity field U.
         volScalarField ck
         (
@@ -154,7 +161,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

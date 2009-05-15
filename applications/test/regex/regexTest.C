@@ -43,8 +43,7 @@ int main(int argc, char *argv[])
 
     List<Tuple2<string, string> > rawList(IFstream("testRegexps")());
     Info<< "input list:" << rawList << endl;
-    IOobject::writeDivider(Info);
-    Info<< endl;
+    IOobject::writeDivider(Info) << endl;
 
     List<string> groups;
 

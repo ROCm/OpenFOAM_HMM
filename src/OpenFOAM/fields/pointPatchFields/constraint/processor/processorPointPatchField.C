@@ -100,6 +100,7 @@ void processorPointPatchField<Type>::initSwapAdd(Field<Type>& pField) const
 {
     if (Pstream::parRun())
     {
+        // Get internal field into my point order
         Field<Type> pf(this->patchInternalField(pField));
 
         OPstream::write
@@ -130,11 +131,7 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
 
         if (doTransform())
         {
-            const labelList& nonGlobalPatchPoints =
-                procPatch_.nonGlobalPatchPoints();
-
             const processorPolyPatch& ppp = procPatch_.procPolyPatch();
-            const labelListList& pointFaces = ppp.pointFaces();
             const tensorField& forwardT = ppp.forwardT();
 
             if (forwardT.size() == 1)
@@ -143,6 +140,10 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
             }
             else
             {
+                const labelList& nonGlobalPatchPoints =
+                    procPatch_.nonGlobalPatchPoints();
+                const labelListList& pointFaces = ppp.pointFaces();
+
                 forAll(nonGlobalPatchPoints, pfi)
                 {
                     pnf[pfi] = transform

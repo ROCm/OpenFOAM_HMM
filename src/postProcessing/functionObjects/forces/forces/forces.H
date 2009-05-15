@@ -121,7 +121,7 @@ protected:
         //- Switch to send output to Info as well as to file
         Switch log_;
 
-        // Read from dictonary
+        // Read from dictionary
 
             //- Patches to integrate forces over
             labelHashSet patchSet_;
@@ -131,6 +131,12 @@ protected:
 
             //- Name of velocity field
             word UName_;
+
+            //- Is the force density being supplied directly?
+            Switch directForceDensity_;
+
+            //- The name of the force density (fD) field
+            word fDName_;
 
             //- Reference density needed for incompressible calculations
             scalar rhoRef_;
@@ -200,8 +206,11 @@ public:
         //- Read the forces data
         virtual void read(const dictionary&);
 
-        //- Execute
+        //- Execute, currently does nothing
         virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
 
         //- Write the forces
         virtual void write();

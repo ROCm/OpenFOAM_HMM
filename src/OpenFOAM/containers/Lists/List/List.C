@@ -31,6 +31,7 @@ License
 #include "PtrList.H"
 #include "SLList.H"
 #include "IndirectList.H"
+#include "UIndirectList.H"
 #include "BiIndirectList.H"
 #include "contiguous.H"
 
@@ -57,10 +58,6 @@ Foam::List<T>::List(const label s)
     {
         this->v_ = new T[this->size_];
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
@@ -85,10 +82,6 @@ Foam::List<T>::List(const label s, const T& a)
         List_FOR_ALL((*this), i)
             List_ELEM((*this), vp, i) = a;
         List_END_FOR_ALL
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -118,16 +111,12 @@ Foam::List<T>::List(const List<T>& a)
             List_END_FOR_ALL
         }
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
 // Construct by transferring the parameter contents
 template<class T>
-Foam::List<T>::List(const Xfer<List<T> >& lst)
+Foam::List<T>::List(const Xfer< List<T> >& lst)
 {
     transfer(lst());
 }
@@ -164,9 +153,24 @@ Foam::List<T>::List(List<T>& a, bool reUse)
             List_END_FOR_ALL
         }
     }
-    else
+}
+
+
+// Construct as subset
+template<class T>
+Foam::List<T>::List(const UList<T>& a, const unallocLabelList& map)
+:
+    UList<T>(NULL, map.size())
+{
+    if (this->size_)
     {
-        this->v_ = 0;
+        this->v_ = new T[this->size_];
+
+        List_ACCESS(T, (*this), vp);
+        List_CONST_ACCESS(T, a, ap);
+        List_FOR_ALL(map, i)
+            List_ELEM((*this), vp, i) = List_ELEM(a, ap, (map[i]));
+        List_END_FOR_ALL
     }
 }
 
@@ -205,12 +209,12 @@ Foam::List<T>::List(InputIterator first, InputIterator last)
 
 // Construct as copy of FixedList<T, Size>
 template<class T>
-template<Foam::label Size>
+template<unsigned Size>
 Foam::List<T>::List(const FixedList<T, Size>& lst)
 :
     UList<T>(NULL, Size)
 {
-    if (Size)
+    if (this->size_)
     {
         this->v_ = new T[this->size_];
 
@@ -218,10 +222,6 @@ Foam::List<T>::List(const FixedList<T, Size>& lst)
         {
             this->operator[](i) = lst[i];
         }
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -240,10 +240,6 @@ Foam::List<T>::List(const PtrList<T>& lst)
         {
             this->operator[](i) = lst[i];
         }
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -269,10 +265,6 @@ Foam::List<T>::List(const SLList<T>& lst)
             this->operator[](i++) = iter();
         }
     }
-    else
-    {
-        this->v_ = 0;
-    }
 }
 
 
@@ -291,9 +283,23 @@ Foam::List<T>::List(const IndirectList<T>& lst)
             this->operator[](i) = lst[i];
         }
     }
-    else
+}
+
+
+// Construct as copy of UIndirectList<T>
+template<class T>
+Foam::List<T>::List(const UIndirectList<T>& lst)
+:
+    UList<T>(NULL, lst.size())
+{
+    if (this->size_)
     {
-        this->v_ = 0;
+        this->v_ = new T[this->size_];
+
+        forAll(*this, i)
+        {
+            this->operator[](i) = lst[i];
+        }
     }
 }
 
@@ -312,10 +318,6 @@ Foam::List<T>::List(const BiIndirectList<T>& lst)
         {
             this->operator[](i) = lst[i];
         }
-    }
-    else
-    {
-        this->v_ = 0;
     }
 }
 
@@ -557,12 +559,28 @@ void Foam::List<T>::operator=(const IndirectList<T>& lst)
         if (this->size_) this->v_ = new T[this->size_];
     }
 
-    if (this->size_)
+    forAll(*this, i)
     {
-        forAll(*this, i)
-        {
-            this->operator[](i) = lst[i];
-        }
+        this->operator[](i) = lst[i];
+    }
+}
+
+
+// Assignment operator. Takes linear time.
+template<class T>
+void Foam::List<T>::operator=(const UIndirectList<T>& lst)
+{
+    if (lst.size() != this->size_)
+    {
+        if (this->v_) delete[] this->v_;
+        this->v_ = 0;
+        this->size_ = lst.size();
+        if (this->size_) this->v_ = new T[this->size_];
+    }
+
+    forAll(*this, i)
+    {
+        this->operator[](i) = lst[i];
     }
 }
 
@@ -579,12 +597,9 @@ void Foam::List<T>::operator=(const BiIndirectList<T>& lst)
         if (this->size_) this->v_ = new T[this->size_];
     }
 
-    if (this->size_)
+    forAll(*this, i)
     {
-        forAll(*this, i)
-        {
-            this->operator[](i) = lst[i];
-        }
+        this->operator[](i) = lst[i];
     }
 }
 

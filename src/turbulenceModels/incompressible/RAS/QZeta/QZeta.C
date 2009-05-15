@@ -241,11 +241,11 @@ bool QZeta::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        alphaZeta_.readIfPresent(coeffDict_);
-        anisotropic_.readIfPresent("anisotropic", coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        alphaZeta_.readIfPresent(coeffDict());
+        anisotropic_.readIfPresent("anisotropic", coeffDict());
 
         return true;
     }

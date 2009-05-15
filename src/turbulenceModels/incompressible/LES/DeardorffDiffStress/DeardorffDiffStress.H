@@ -81,6 +81,9 @@ class DeardorffDiffStress
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volScalarField& K);
+
         // Disallow default bitwise copy construct and assignment
         DeardorffDiffStress(const DeardorffDiffStress&);
         DeardorffDiffStress& operator=(const DeardorffDiffStress&);
@@ -121,7 +124,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

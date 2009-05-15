@@ -50,14 +50,11 @@ Description
 #include "attachDetach.H"
 #include "attachPolyTopoChanger.H"
 #include "regionSide.H"
+#include "primitiveFacePatch.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Calculation engine for set of faces in a mesh
-typedef PrimitivePatch<face, List, const pointField&> facePatch;
-
 
 // Find edge between points v0 and v1.
 label findEdge(const primitiveMesh& mesh, const label v0, const label v1)
@@ -124,6 +121,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     word setName(args.additionalArgs()[0]);
     word masterPatch(args.additionalArgs()[1]);
@@ -162,10 +160,16 @@ int main(int argc, char *argv[])
     // set of edges on side of this region. Use PrimitivePatch to find these.
     //
 
-    IndirectList<face> zoneFaces(mesh.faces(), faces);
-
     // Addressing on faces only in mesh vertices.
-    facePatch fPatch(zoneFaces(), mesh.points());
+    primitiveFacePatch fPatch
+    (
+        UIndirectList<face>
+        (
+            mesh.faces(),
+            faces
+        ),
+        mesh.points()
+    );
 
     const labelList& meshPoints = fPatch.meshPoints();
 
@@ -262,7 +266,12 @@ int main(int argc, char *argv[])
 
     splitter.attach();
 
-    Info << nl << "Writing polyMesh" << endl;
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
+
+    Info<< "Writing mesh to " << runTime.timeName() << endl;
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())

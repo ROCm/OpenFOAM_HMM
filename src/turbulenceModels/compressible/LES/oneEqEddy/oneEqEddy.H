@@ -80,6 +80,9 @@ class oneEqEddy
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields();
+
         // Disallow default bitwise copy construct and assignment
         oneEqEddy(const oneEqEddy&);
         oneEqEddy& operator=(const oneEqEddy&);
@@ -122,7 +125,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

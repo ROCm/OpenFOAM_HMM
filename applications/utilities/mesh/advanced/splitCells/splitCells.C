@@ -534,6 +534,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
@@ -693,7 +694,13 @@ int main(int argc, char *argv[])
         Info<< "Remaining:" << cellsToCut.size() << endl;
 
         // Write resulting mesh
-        Info << "Writing refined morphMesh to time " << runTime.value() << endl;
+        if (overwrite)
+        {
+            mesh.setInstance(oldInstance);
+        }
+
+        Info<< "Writing refined morphMesh to time " << runTime.timeName()
+            << endl;
 
         mesh.write();
     }

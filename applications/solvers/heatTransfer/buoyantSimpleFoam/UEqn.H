@@ -11,7 +11,15 @@
 
     eqnResidual = solve
     (
-        UEqn() == -fvc::grad(pd) - fvc::grad(rho)*gh
+        UEqn()
+     ==
+       -fvc::reconstruct
+        (
+            (
+                fvc::snGrad(pd)
+              + ghf*fvc::snGrad(rho)
+            ) * mesh.magSf()
+        )
     ).initialResidual();
 
     maxResidual = max(eqnResidual, maxResidual);

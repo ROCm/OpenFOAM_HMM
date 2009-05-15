@@ -42,9 +42,7 @@ SourceFiles
 #define directMappedPolyPatch_H
 
 #include "polyPatch.H"
-#include "labelPair.H"
-#include "Tuple2.H"
-#include "pointIndexHit.H"
+#include "directMappedPatchBase.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,148 +50,37 @@ SourceFiles
 namespace Foam
 {
 
+class polyMesh;
+
 /*---------------------------------------------------------------------------*\
                       Class directMappedPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class directMappedPolyPatch
 :
-    public polyPatch
+    public polyPatch,
+    public directMappedPatchBase
 {
-
-public:
-
-        //- Mesh items to sample
-        enum sampleMode
-        {
-            NEARESTCELL,
-            NEARESTPATCHFACE,
-            NEARESTFACE
-        };
-
-private:
-
-    // Private data
-
-        static const NamedEnum<sampleMode, 3> sampleModeNames_;
-
-        //- What to sample
-        sampleMode mode_;
-
-        //- Patch (only if NEARESTBOUNDARY)
-        const word samplePatch_;
-
-        //- Offset vector
-        const vector offset_;
-
-
-
-        // Derived information
-
-            //- Communication schedule.
-            mutable autoPtr<List<labelPair> > schedulePtr_;
-
-            //- Cells/faces to sample per processor
-            mutable autoPtr<labelListList> sendLabelsPtr_;
-
-            //- Patch faces to receive per processor
-            mutable autoPtr<labelListList> receiveFaceLabelsPtr_;
-
-
-    // Private Member Functions
-
-        //- Collect single list of samples and originating processor+face.
-        void collectSamples
-        (
-            pointField&,
-            labelList& patchFaceProcs,
-            labelList& patchFaces,
-            pointField& patchFc
-        ) const;
-
-        //- Find cells/faces containing samples
-        void findSamples
-        (
-            const pointField&,
-            labelList& sampleProcs,     // processor containing sample
-            labelList& sampleIndices,   // local index of cell/face
-            pointField& sampleLocations // actual representative location
-        ) const;
-
-        //- Calculate matching
-        void calcMapping() const;
-
-
-    // Private class
-
-        //- Private class for finding nearest
-        //  - point+local index
-        //  - sqr(distance)
-        //  - processor
-        typedef Tuple2<pointIndexHit, Tuple2<scalar, label> > nearInfo;
-
-        class nearestEqOp
-        {
-
-        public:
-
-            void operator()(nearInfo& x, const nearInfo& y) const
-            {
-                if (y.first().hit())
-                {
-                    if (!x.first().hit())
-                    {
-                        x = y;
-                    }
-                    else if (y.second().first() < x.second().first())
-                    {
-                        x = y;
-                    }
-                }
-            }
-        };
-
-
 
 protected:
 
-        void clearOut();
-
         //- Initialise the calculation of the patch geometry
-        virtual void initGeometry()
-        {
-            clearOut();
-        }
+        virtual void initGeometry();
 
         //- Calculate the patch geometry
-        virtual void calcGeometry()
-        {
-            clearOut();
-        }
+        virtual void calcGeometry();
 
         //- Initialise the patches for moving points
-        virtual void initMovePoints(const pointField&)
-        {
-            clearOut();
-        }
+        virtual void initMovePoints(const pointField&);
 
         //- Correct patches after moving points
-        virtual void movePoints(const pointField& p)
-        {
-            clearOut();
-        }
+        virtual void movePoints(const pointField&);
 
         //- Initialise the update of the patch topology
-        virtual void initUpdateMesh()
-        {
-            clearOut();
-        }
+        virtual void initUpdateMesh();
 
         //- Update of the patch topology
-        virtual void updateMesh()
-        {
-            clearOut();
-        }
+        virtual void updateMesh();
 
 
 public:
@@ -270,72 +157,6 @@ public:
 
 
     // Member functions
-
-        //- What to sample
-        const sampleMode& mode() const
-        {
-            return mode_;
-        }
-
-        //- Patch (only if NEARESTBOUNDARY)
-        const word& samplePatch() const
-        {
-            return samplePatch_;
-        }
-
-        //- Offset vector (from patch faces to destination mesh objects)
-        const vector& offset() const
-        {
-            return offset_;
-        }
-
-        //- Access to communication.
-        const List<labelPair>& schedule() const
-        {
-            if (schedulePtr_.empty())
-            {
-                calcMapping();
-            }
-            return schedulePtr_();
-        }
-
-        //- Cells/faces to sample per processor
-        const labelListList& sendLabels() const
-        {
-            if (debug)
-            {
-                Pout<< "Asking for sendLabels." << endl;
-            }
-
-            if (sendLabelsPtr_.empty())
-            {
-                if (debug)
-                {
-                    Pout<< "Calculating mapping." << endl;
-                    calcMapping();
-                }
-            }
-            return sendLabelsPtr_();
-        }
-
-        //- Patch faces to receive per processor
-        const labelListList& receiveFaceLabels() const
-        {
-            if (debug)
-            {
-                Pout<< "Asking for receiveFaceLabels." << endl;
-            }
-
-            if (receiveFaceLabelsPtr_.empty())
-            {
-                if (debug)
-                {
-                    Pout<< "Calculating mapping." << endl;
-                    calcMapping();
-                }
-            }
-            return receiveFaceLabelsPtr_();
-        }
 
         //- Write the polyPatch data as a dictionary
         virtual void write(Ostream&) const;

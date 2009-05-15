@@ -34,9 +34,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 // Return potential intersection with face with a ray starting
 // at p, direction n (does not need to be normalized)
 // Does face-center decomposition and returns triangle intersection
@@ -46,7 +43,7 @@ namespace Foam
 // face plane and the ray and the distance is the distance between the
 // intersection point and the nearest point on the face
 
-pointHit face::ray
+Foam::pointHit Foam::face::ray
 (
     const point& p,
     const vector& n,
@@ -76,7 +73,7 @@ pointHit face::ray
         nextPoint = meshPoints[f[fcIndex(pI)]];
 
         // Note: for best accuracy, centre point always comes last
-        // 
+        //
         pointHit curHit = triPointRef
         (
             meshPoints[f[pI]],
@@ -133,13 +130,14 @@ pointHit face::ray
 }
 
 
-pointHit face::intersection
+Foam::pointHit Foam::face::intersection
 (
     const point& p,
     const vector& q,
     const point& ctr,
     const pointField& meshPoints,
-    const intersection::algorithm alg
+    const intersection::algorithm alg,
+    const scalar tol
 ) const
 {
     scalar nearestHitDist = VGREAT;
@@ -157,7 +155,7 @@ pointHit face::intersection
             meshPoints[f[pI]],
             meshPoints[f[fcIndex(pI)]],
             ctr
-        ).intersection(p, q, alg);
+        ).intersection(p, q, alg, tol);
 
         if (curHit.hit())
         {
@@ -179,7 +177,7 @@ pointHit face::intersection
 }
 
 
-pointHit face::nearestPoint
+Foam::pointHit Foam::face::nearestPoint
 (
     const point& p,
     const pointField& meshPoints
@@ -200,7 +198,7 @@ pointHit face::nearestPoint
         nextPoint = meshPoints[f[fcIndex(pI)]];
 
         // Note: for best accuracy, centre point always comes last
-        // 
+        //
         triPointRef tri
         (
             meshPoints[f[pI]],
@@ -231,9 +229,5 @@ pointHit face::nearestPoint
     return nearest;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

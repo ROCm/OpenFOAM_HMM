@@ -225,8 +225,10 @@ labelList getSelectedPatches
 
 int main(int argc, char *argv[])
 {
-#   include "addTimeOptions.H"
+    timeSelector::addOptions();
+
 #   include "addRegionOption.H"
+
     argList::validOptions.insert("fields", "fields");
     argList::validOptions.insert("cellSet", "cellSet name");
     argList::validOptions.insert("faceSet", "faceSet name");
@@ -243,7 +245,6 @@ int main(int argc, char *argv[])
 
 #   include "setRootCase.H"
 #   include "createTime.H"
-
 
     bool doWriteInternal = !args.options().found("noInternal");
     bool doFaceZones = !args.options().found("noFaceZones");
@@ -312,14 +313,8 @@ int main(int argc, char *argv[])
     }
 
 
-    instantList Times = runTime.times();
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-    // Current mesh.
 #   include "createNamedMesh.H"
 
     // VTK/ directory in the case
@@ -333,7 +328,7 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
-    if (dir(fvPath))
+    if (isDir(fvPath))
     {
         if
         (
@@ -359,11 +354,11 @@ int main(int argc, char *argv[])
     // mesh wrapper; does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
 
-    for (label timeI = startTime; timeI < endTime; timeI++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[timeI], timeI);
+        runTime.setTime(timeDirs[timeI], timeI);
 
-        Info<< "Time " << Times[timeI].name() << endl;
+        Info<< "Time: " << runTime.timeName() << endl;
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
@@ -914,7 +909,7 @@ int main(int argc, char *argv[])
         (
             readDir
             (
-                runTime.timePath()/regionPrefix/"lagrangian",
+                runTime.timePath()/regionPrefix/cloud::prefix,
                 fileName::DIRECTORY
             )
         );
@@ -925,18 +920,18 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudDirs[i]
+                cloud::prefix/cloudDirs[i]
             );
 
             IOobject* positionsPtr = sprayObjs.lookup("positions");
 
             if (positionsPtr)
             {
-                mkDir(fvPath/"lagrangian"/cloudDirs[i]);
+                mkDir(fvPath/cloud::prefix/cloudDirs[i]);
 
                 fileName lagrFileName
                 (
-                    fvPath/"lagrangian"/cloudDirs[i]/cloudDirs[i]
+                    fvPath/cloud::prefix/cloudDirs[i]/cloudDirs[i]
                   + "_" + name(timeI) + ".vtk"
                 );
 

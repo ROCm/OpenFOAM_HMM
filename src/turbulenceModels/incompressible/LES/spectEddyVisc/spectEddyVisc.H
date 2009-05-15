@@ -85,6 +85,9 @@ class spectEddyVisc
 
     // Private Member Functions
 
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields(const volTensorField& gradU);
+
         // Disallow default bitwise copy construct and assignment
         spectEddyVisc(const spectEddyVisc&);
         spectEddyVisc& operator=(const spectEddyVisc&);
@@ -119,7 +122,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>&);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

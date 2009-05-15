@@ -186,7 +186,7 @@ int main(int argc, char *argv[])
 
     Info<< nl << "end" << endl;
 
-    return(0);
+    return 0;
 }
 
 

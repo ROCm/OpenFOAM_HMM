@@ -38,6 +38,7 @@ SourceFiles
 #define LList_H
 
 #include "label.H"
+#include "uLabel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

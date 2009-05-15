@@ -58,12 +58,20 @@ SourceFiles
 #ifndef vtkPV3Foam_H
 #define vtkPV3Foam_H
 
+// do not include legacy strstream headers
+#ifndef  VTK_EXCLUDE_STRSTREAM_HEADERS
+# define VTK_EXCLUDE_STRSTREAM_HEADERS
+#endif
+
 #include "className.H"
 #include "fileName.H"
-#include "volPointInterpolation.H"
 #include "stringList.H"
 #include "wordList.H"
 #include "primitivePatch.H"
+#include "PrimitivePatchInterpolation.H"
+#include "volPointInterpolation.H"
+
+#undef VTKPV3FOAM_DUALPORT
 
 // * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
 
@@ -127,6 +135,7 @@ class vtkPV3Foam
                 return block_;
             }
 
+            //- Assign block number, return previous value
             int block(int blockNo)
             {
                 int prev = block_;
@@ -156,7 +165,7 @@ class vtkPV3Foam
 
             bool empty() const
             {
-                return (size_ == 0);
+                return !size_;
             }
 
             void reset()
@@ -491,7 +500,6 @@ class vtkPV3Foam
             void convertVolFields
             (
                 const fvMesh&,
-                const volPointInterpolation&,
                 const PtrList<PrimitivePatchInterpolation<primitivePatch> >&,
                 const IOobjectList&,
                 vtkMultiBlockDataSet* output
@@ -502,7 +510,7 @@ class vtkPV3Foam
             void convertVolFieldBlock
             (
                 const GeometricField<Type, fvPatchField, volMesh>&,
-                const GeometricField<Type, pointPatchField, pointMesh>&,
+                autoPtr<GeometricField<Type, pointPatchField, pointMesh> >&,
                 vtkMultiBlockDataSet* output,
                 const partInfo& selector,
                 const List<polyDecomp>& decompLst
@@ -700,6 +708,9 @@ public:
             vtkMultiBlockDataSet* lagrangianOutput
         );
 
+        //- Clean any storage
+        void CleanUp();
+
         //- Allocate and return a list of selected times
         //  returns the count via the parameter
         double* findTimes(int& nTimeSteps);
@@ -710,9 +721,11 @@ public:
         //- Remove patch names from the display
         void removePatchNames(vtkRenderer* renderer);
 
-        //- set the runTime to the requested time, returns the timeIndex
-        //  sets to "constant" on error and returns -1
-        int setTime(const double& requestedTime);
+        //- set the runTime to the first plausible request time,
+        //  returns the timeIndex
+        //  sets to "constant" on error
+        int setTime(int count, const double requestTimes[]);
+
 
         //- The current time index
         int timeIndex() const

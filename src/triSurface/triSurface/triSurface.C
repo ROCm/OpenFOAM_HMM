@@ -67,7 +67,7 @@ Foam::fileName Foam::triSurface::triSurfInstance(const Time& d)
     {
         for (label j=i; j>=0; j--)
         {
-            if (file(d.path()/ts[j].name()/typeName/foamName))
+            if (isFile(d.path()/ts[j].name()/typeName/foamName))
             {
                 if (debug)
                 {
@@ -347,132 +347,10 @@ void Foam::triSurface::checkEdges(const bool verbose)
 }
 
 
-// Check normals and orientation
-Foam::boolList Foam::triSurface::checkOrientation(const bool verbose)
-{
-    const edgeList& es = edges();
-    const labelListList& faceEs = faceEdges();
-
-    // Check edge normals, face normals, point normals.
-    forAll(faceEs, facei)
-    {
-        const labelList& edgeLabels = faceEs[facei];
-
-        if (edgeLabels.size() != 3)
-        {
-            FatalErrorIn("triSurface::checkOrientation(bool)")
-                << "triangle " << (*this)[facei]
-                << " does not have 3 edges. Edges:" << edgeLabels
-                << exit(FatalError);
-        }
-
-        bool valid = true;
-        forAll(edgeLabels, i)
-        {
-            if (edgeLabels[i] < 0 || edgeLabels[i] >= nEdges())
-            {
-                WarningIn
-                (
-                    "triSurface::checkOrientation(bool)"
-                )   << "edge number " << edgeLabels[i] << " on face " << facei
-                    << " out-of-range\n"
-                    << "This usually means that the input surface has "
-                    << "edges with more than 2 triangles connected.\n"
-                    << endl;
-                valid = false;
-            }
-        }
-        if (! valid)
-        {
-            continue;
-        }
-
-
-        //
-        //- Compute normal from triangle points.
-        //
-
-        const labelledTri& tri = (*this)[facei];
-        const point pa(points()[tri[0]]);
-        const point pb(points()[tri[1]]);
-        const point pc(points()[tri[2]]);
-
-        const vector pointNormal((pc - pb) ^ (pa - pb));
-        if ((pointNormal & faceNormals()[facei]) < 0)
-        {
-            FatalErrorIn("triSurface::checkOrientation(bool)")
-                << "Normal calculated from points not consistent with"
-                " faceNormal" << endl
-                << "triangle:" << tri << endl
-                << "points:" << pa << ' ' << pb << ' ' << pc << endl
-                << "pointNormal:" << pointNormal << endl
-                << "faceNormal:" << faceNormals()[facei]
-                << exit(FatalError);
-        }
-    }
-
-
-    const labelListList& eFaces = edgeFaces();
-
-    // Storage for holding status of edge. True if normal flips across this
-    // edge
-    boolList borderEdge(nEdges(), false);
-
-    forAll(es, edgeI)
-    {
-        const edge& e = es[edgeI];
-        const labelList& neighbours = eFaces[edgeI];
-
-        if (neighbours.size() == 2)
-        {
-            const labelledTri& faceA = (*this)[neighbours[0]];
-            const labelledTri& faceB = (*this)[neighbours[1]];
-
-            // The edge cannot be going in the same direction if both faces
-            // are oriented counterclockwise.
-            // Thus the next face point *must* different between the faces.
-            if
-            (
-                faceA[faceA.fcIndex(findIndex(faceA, e.start()))]
-             == faceB[faceB.fcIndex(findIndex(faceB, e.start()))]
-            )
-            {
-                borderEdge[edgeI] = true;
-                if (verbose)
-                {
-                    WarningIn("PrimitivePatchExtra::checkOrientation(bool)")
-                        << "face orientation incorrect." << nl
-                        << "edge[" << edgeI << "] " << e
-                        << " between faces " << neighbours << ":" << nl
-                        << "face[" << neighbours[0] << "] " << faceA << nl
-                        << "face[" << neighbours[1] << "] " << faceB << endl;
-                }
-            }
-        }
-        else if (neighbours.size() != 1)
-        {
-            if (verbose)
-            {
-                WarningIn("triSurface::checkOrientation(bool)")
-                    << "Wrong number of edge neighbours." << endl
-                    << "edge[" << edgeI << "] " << e
-                    << "with points:" << localPoints()[e.start()]
-                    << ' ' << localPoints()[e.end()]
-                    << " has neighbours:" << neighbours << endl;
-            }
-            borderEdge[edgeI] = true;
-        }
-    }
-
-    return borderEdge;
-}
-
-
 // Read triangles, points from Istream
 bool Foam::triSurface::read(Istream& is)
 {
-    is  >> patches_ >> const_cast<pointField&>(points())
-        >> static_cast<List<labelledTri>&>(*this);
+    is  >> patches_ >> storedPoints() >> storedFaces();
 
     return true;
 }
@@ -724,7 +602,7 @@ void Foam::triSurface::setDefaultPatches()
 
 Foam::triSurface::triSurface()
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(0),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -739,7 +617,7 @@ Foam::triSurface::triSurface
     const pointField& points
 )
 :
-    MeshStorage(triangles, points),
+    ParentType(triangles, points),
     patches_(patches),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -754,7 +632,7 @@ Foam::triSurface::triSurface
     const bool reUse
 )
 :
-    MeshStorage(triangles, points, reUse),
+    ParentType(triangles, points, reUse),
     patches_(patches),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -767,7 +645,7 @@ Foam::triSurface::triSurface
     const pointField& points
 )
 :
-    MeshStorage(triangles, points),
+    ParentType(triangles, points),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -782,7 +660,7 @@ Foam::triSurface::triSurface
     const pointField& points
 )
 :
-    MeshStorage(convertToTri(triangles, 0), points),
+    ParentType(convertToTri(triangles, 0), points),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -793,7 +671,7 @@ Foam::triSurface::triSurface
 
 Foam::triSurface::triSurface(const fileName& name)
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -808,7 +686,7 @@ Foam::triSurface::triSurface(const fileName& name)
 
 Foam::triSurface::triSurface(Istream& is)
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -821,7 +699,7 @@ Foam::triSurface::triSurface(Istream& is)
 
 Foam::triSurface::triSurface(const Time& d)
 :
-    MeshStorage(List<FaceType>(), pointField()),
+    ParentType(List<Face>(), pointField()),
     patches_(),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -840,7 +718,7 @@ Foam::triSurface::triSurface(const Time& d)
 
 Foam::triSurface::triSurface(const triSurface& ts)
 :
-    MeshStorage(ts, ts.points()),
+    ParentType(ts, ts.points()),
     patches_(ts.patches()),
     sortedEdgeFacesPtr_(NULL),
     edgeOwnerPtr_(NULL)
@@ -859,7 +737,7 @@ Foam::triSurface::~triSurface()
 
 void Foam::triSurface::clearTopology()
 {
-    MeshStorage::clearTopology();
+    ParentType::clearTopology();
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
     deleteDemandDrivenData(edgeOwnerPtr_);
 }
@@ -867,13 +745,13 @@ void Foam::triSurface::clearTopology()
 
 void Foam::triSurface::clearPatchMeshAddr()
 {
-    MeshStorage::clearPatchMeshAddr();
+    ParentType::clearPatchMeshAddr();
 }
 
 
 void Foam::triSurface::clearOut()
 {
-    MeshStorage::clearOut();
+    ParentType::clearOut();
 
     clearTopology();
     clearPatchMeshAddr();
@@ -909,10 +787,10 @@ void Foam::triSurface::movePoints(const pointField& newPoints)
     deleteDemandDrivenData(sortedEdgeFacesPtr_);
 
     // Adapt for new point position
-    MeshStorage::movePoints(newPoints);
+    ParentType::movePoints(newPoints);
 
     // Copy new points
-    const_cast<pointField&>(points()) = newPoints;
+    storedPoints() = newPoints;
 }
 
 
@@ -926,9 +804,9 @@ void Foam::triSurface::scalePoints(const scalar& scaleFactor)
         clearTopology();
 
         // Adapt for new point position
-        MeshStorage::movePoints(pointField());
+        ParentType::movePoints(pointField());
 
-        const_cast<pointField&>(points()) *= scaleFactor;
+        storedPoints() *= scaleFactor;
     }
 }
 
@@ -1240,7 +1118,7 @@ void Foam::triSurface::operator=(const triSurface& ts)
 {
     List<labelledTri>::operator=(ts);
     clearOut();
-    const_cast<pointField&>(points()) = ts.points();
+    storedPoints() = ts.points();
     patches_ = ts.patches();
 }
 

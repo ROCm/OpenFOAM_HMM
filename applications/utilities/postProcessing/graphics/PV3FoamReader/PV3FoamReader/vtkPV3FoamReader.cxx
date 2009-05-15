@@ -50,21 +50,22 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 
     output0_  = NULL;
 
+#ifdef VTKPV3FOAM_DUALPORT
     // Add second output for the Lagrangian
     this->SetNumberOfOutputPorts(2);
-    vtkMultiBlockDataSet *lagrangian;
-    lagrangian = vtkMultiBlockDataSet::New();
+    vtkMultiBlockDataSet *lagrangian = vtkMultiBlockDataSet::New();
     lagrangian->ReleaseData();
 
     this->GetExecutive()->SetOutputData(1, lagrangian);
     lagrangian->Delete();
+#endif
 
     TimeStepRange[0] = 0;
     TimeStepRange[1] = 0;
 
     CacheMesh = 1;
 
-    ExtrapolateWalls = 0;
+    ExtrapolatePatches = 0;
     IncludeSets = 0;
     IncludeZones = 0;
     ShowPatchNames = 0;
@@ -204,9 +205,9 @@ int vtkPV3FoamReader::RequestInformation
         );
     }
 
-    double timeRange[2];
     if (nTimeSteps)
     {
+        double timeRange[2];
         timeRange[0] = timeSteps[0];
         timeRange[1] = timeSteps[nTimeSteps-1];
 
@@ -273,51 +274,59 @@ int vtkPV3FoamReader::RequestData
         }
     }
 
-    // take port0 as the lead for other outputs
-    vtkInformation *outInfo = outputVector->GetInformationObject(0);
+    // Get the requested time step.
+    // We only support requests for a single time step
+
+    int nRequestTime = 0;
+    double requestTime[nInfo];
+
+    // taking port0 as the lead for other outputs would be nice, but fails when
+    // a filter is added - we need to check everything
+    // but since PREVIOUS_UPDATE_TIME_STEPS() is protected, relay the logic
+    // to the vtkPV3Foam::setTime() method
+    for (int infoI = 0; infoI < nInfo; ++infoI)
+    {
+        vtkInformation *outInfo = outputVector->GetInformationObject(infoI);
+
+        if
+        (
+            outInfo->Has
+            (
+                vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()
+            )
+         && outInfo->Length
+            (
+                vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()
+            ) >= 1
+        )
+        {
+            requestTime[nRequestTime++] = outInfo->Get
+            (
+                vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()
+            )[0];
+        }
+    }
+
+    if (nRequestTime)
+    {
+        foamData_->setTime(nRequestTime, requestTime);
+    }
 
 
     vtkMultiBlockDataSet* output = vtkMultiBlockDataSet::SafeDownCast
     (
-        outInfo->Get
+        outputVector->GetInformationObject(0)->Get
         (
             vtkMultiBlockDataSet::DATA_OBJECT()
         )
     );
-
-
-    vtkMultiBlockDataSet* lagrangianOutput = vtkMultiBlockDataSet::SafeDownCast
-    (
-        outputVector->GetInformationObject(1)->Get
-        (
-            vtkMultiBlockDataSet::DATA_OBJECT()
-        )
-    );
-
-    if (outInfo->Has(vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()))
-    {
-        // Get the requested time step.
-        // We only support requests for a single time step
-        int nRequestedTimeSteps = outInfo->Length
-        (
-            vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()
-        );
-        if (nRequestedTimeSteps >= 1)
-        {
-            double *requestedTimeSteps = outInfo->Get
-            (
-                vtkStreamingDemandDrivenPipeline::UPDATE_TIME_STEPS()
-            );
-
-            foamData_->setTime(requestedTimeSteps[0]);
-        }
-    }
 
     if (Foam::vtkPV3Foam::debug)
     {
         cout<< "update output with "
             << output->GetNumberOfBlocks() << " blocks\n";
     }
+
 
 #ifdef EXPERIMENTAL_TIME_CACHING
     bool needsUpdate = false;
@@ -360,7 +369,21 @@ int vtkPV3FoamReader::RequestData
 
 #else
 
-    foamData_->Update(output, lagrangianOutput);
+#ifdef VTKPV3FOAM_DUALPORT
+    foamData_->Update
+    (
+        output,
+        vtkMultiBlockDataSet::SafeDownCast
+        (
+            outputVector->GetInformationObject(1)->Get
+            (
+                vtkMultiBlockDataSet::DATA_OBJECT()
+            )
+        );
+    );
+#else
+    foamData_->Update(output, output);
+#endif
 
     if (ShowPatchNames)
     {
@@ -372,6 +395,9 @@ int vtkPV3FoamReader::RequestData
     }
 
 #endif
+
+    // Do any cleanup on the Foam side
+    foamData_->CleanUp();
 
     return 1;
 }

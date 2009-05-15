@@ -59,15 +59,17 @@ template<class T> class List;
 
 template<class T> Istream& operator>>(Istream&, List<T>&);
 
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 template<class T> class PtrList;
 template<class T> class SLList;
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
     class DynamicList;
 template<class T> class SortableList;
 template<class T> class IndirectList;
+template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
+typedef UList<label> unallocLabelList;
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -107,17 +109,20 @@ public:
         List(const List<T>&);
 
         //- Construct by transferring the parameter contents
-        List(const Xfer<List<T> >&);
+        List(const Xfer< List<T> >&);
 
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
+
+        //- Construct as subset.
+        List(const UList<T>&, const unallocLabelList& mapAddressing);
 
         //- Construct given start and end iterators.
         template<class InputIterator>
         List(InputIterator first, InputIterator last);
 
         //- Construct as copy of FixedList<T, Size>
-        template<label Size>
+        template<unsigned Size>
         List(const FixedList<T, Size>&);
 
         //- Construct as copy of PtrList<T>
@@ -128,6 +133,9 @@ public:
 
         //- Construct as copy of IndirectList<T>
         List(const IndirectList<T>&);
+
+        //- Construct as copy of UIndirectList<T>
+        List(const UIndirectList<T>&);
 
         //- Construct as copy of BiIndirectList<T>
         List(const BiIndirectList<T>&);
@@ -173,21 +181,27 @@ public:
             //- Clear the list, i.e. set size to zero.
             void clear();
 
-            //- Transfer the contents of the argument List into this List
+            //- Append a List at the end of this list
+            inline void append(const UList<T>&);
+
+            //- Append a UIndirectList at the end of this list
+            inline void append(const UIndirectList<T>&);
+
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             void transfer(List<T>&);
 
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
             void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             void transfer(SortableList<T>&);
 
             //- Transfer contents to the Xfer container
-            inline Xfer<List<T> > xfer();
+            inline Xfer< List<T> > xfer();
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
@@ -205,6 +219,9 @@ public:
 
         //- Assignment from IndirectList operator. Takes linear time.
         void operator=(const IndirectList<T>&);
+
+        //- Assignment from UIndirectList operator. Takes linear time.
+        void operator=(const UIndirectList<T>&);
 
         //- Assignment from BiIndirectList operator. Takes linear time.
         void operator=(const BiIndirectList<T>&);

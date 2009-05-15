@@ -33,8 +33,10 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 #define defineSurfaceWriterType(dataType)                                     \
-    defineNamedTemplateTypeNameAndDebug(surfaceWriter<dataType >, 0);         \
-    defineTemplatedRunTimeSelectionTable(surfaceWriter, word, dataType);
+    defineNamedTemplateTypeNameAndDebug(surfaceWriter< dataType >, 0);        \
+    defineTemplatedRunTimeSelectionTable(surfaceWriter, word, dataType)
+
+defineSurfaceWriterType(bool);
 
 defineSurfaceWriterType(scalar);
 defineSurfaceWriterType(vector);

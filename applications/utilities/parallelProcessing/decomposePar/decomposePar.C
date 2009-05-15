@@ -37,6 +37,9 @@ Usage
     Write the cell distribution as a labelList for use with 'manual'
     decomposition method and as a volScalarField for post-processing.
 
+    @param -region regionName \n
+    Decompose named region. Does not check for existence of processor*.
+
     @param -copyUniform \n
     Copy any @a uniform directories too.
 
@@ -83,6 +86,7 @@ Usage
 int main(int argc, char *argv[])
 {
     argList::noParallel();
+#   include "addRegionOption.H"
     argList::validOptions.insert("cellDist", "");
     argList::validOptions.insert("copyUniform", "");
     argList::validOptions.insert("fields", "");
@@ -91,6 +95,17 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("ifRequired", "");
 
 #   include "setRootCase.H"
+
+    word regionName = fvMesh::defaultRegion;
+    word regionDir = word::null;
+
+    if (args.options().found("region"))
+    {
+        regionName = args.options()["region"];
+        regionDir = regionName;
+        Info<< "Decomposing mesh " << regionName << nl << endl;
+    }
+
 
     bool writeCellDist(args.options().found("cellDist"));
     bool copyUniform(args.options().found("copyUniform"));
@@ -105,7 +120,17 @@ int main(int argc, char *argv[])
 
     // determine the existing processor count directly
     label nProcs = 0;
-    while (dir(runTime.path()/(word("processor") + name(nProcs))))
+    while
+    (
+        isDir
+        (
+            runTime.path()
+           /(word("processor") + name(nProcs))
+           /runTime.constant()
+           /regionDir
+           /polyMesh::meshSubDir
+        )
+    )
     {
         ++nProcs;
     }
@@ -119,6 +144,7 @@ int main(int argc, char *argv[])
             (
                 "decomposeParDict",
                 runTime.time().system(),
+                regionDir,          // use region if non-standard
                 runTime,
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE,
@@ -196,7 +222,7 @@ int main(int argc, char *argv[])
     (
         IOobject
         (
-            domainDecomposition::defaultRegion,
+            regionName,
             runTime.timeName(),
             runTime
         )
@@ -219,7 +245,7 @@ int main(int argc, char *argv[])
             (
                 runTime.path()
               / mesh.facesInstance()
-              / polyMesh::defaultRegion
+              / regionName
               / "cellDecomposition"
             );
 
@@ -312,7 +338,7 @@ int main(int argc, char *argv[])
 
     fileNameList cloudDirs
     (
-        readDir(runTime.timePath()/"lagrangian", fileName::DIRECTORY)
+        readDir(runTime.timePath()/cloud::prefix, fileName::DIRECTORY)
     );
 
     // Particles
@@ -344,7 +370,7 @@ int main(int argc, char *argv[])
         (
             mesh,
             runTime.timeName(),
-            "lagrangian"/cloudDirs[i]
+            cloud::prefix/cloudDirs[i]
         );
 
         IOobject* positionsPtr = sprayObjs.lookup("positions");
@@ -383,7 +409,12 @@ int main(int argc, char *argv[])
 
             label i = 0;
 
-            forAllIter(Cloud<indexedParticle>, lagrangianPositions[cloudI], iter)
+            forAllIter
+            (
+                Cloud<indexedParticle>,
+                lagrangianPositions[cloudI],
+                iter
+            )
             {
                 iter().index() = i++;
 
@@ -405,7 +436,8 @@ int main(int argc, char *argv[])
 
                 if (!cellParticles[cloudI][celli])
                 {
-                    cellParticles[cloudI][celli] = new SLList<indexedParticle*>();
+                    cellParticles[cloudI][celli] = new SLList<indexedParticle*>
+                    ();
                 }
 
                 cellParticles[cloudI][celli]->append(&iter());
@@ -418,7 +450,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudDirs[cloudI]
+                cloud::prefix/cloudDirs[cloudI]
             );
 
             lagrangianFieldDecomposer::readFields
@@ -480,7 +512,7 @@ int main(int argc, char *argv[])
     // Any uniform data to copy/link?
     fileName uniformDir("uniform");
 
-    if (dir(runTime.timePath()/uniformDir))
+    if (isDir(runTime.timePath()/uniformDir))
     {
         Info<< "Detected additional non-decomposed files in "
             << runTime.timePath()/uniformDir
@@ -508,12 +540,22 @@ int main(int argc, char *argv[])
 
         processorDb.setTime(runTime);
 
+        // remove files remnants that can cause horrible problems
+        // - mut and nut are used to mark the new turbulence models,
+        //   their existence prevents old models from being upgraded
+        {
+            fileName timeDir(processorDb.path()/processorDb.timeName());
+
+            rm(timeDir/"mut");
+            rm(timeDir/"nut");
+        }
+
         // read the mesh
         fvMesh procMesh
         (
             IOobject
             (
-                fvMesh::defaultRegion,
+                regionName,
                 processorDb.timeName(),
                 processorDb
             )
@@ -723,7 +765,7 @@ int main(int argc, char *argv[])
 
     Info<< "\nEnd.\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

@@ -111,8 +111,11 @@ public:
         //  Also constructs from DynamicList with different sizing parameters.
         explicit inline DynamicList(const UList<T>&);
 
+        //- Construct from UIndirectList. Size set to UIndirectList size.
+        explicit inline DynamicList(const UIndirectList<T>&);
+
         //- Construct by transferring the parameter contents
-        explicit inline DynamicList(const Xfer<List<T> >&);
+        explicit inline DynamicList(const Xfer< List<T> >&);
 
         //- Construct from Istream. Size set to size of read list.
         explicit DynamicList(Istream&);
@@ -173,15 +176,18 @@ public:
         inline void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
         //- Transfer contents to the Xfer container as a plain List
-        inline Xfer<List<T> > xfer();
+        inline Xfer< List<T> > xfer();
 
     // Member Operators
 
         //- Append an element at the end of the list
-        inline void append(const T& e);
+        inline void append(const T&);
 
         //- Append a List at the end of this list
         inline void append(const UList<T>&);
+
+        //- Append a UIndirectList at the end of this list
+        inline void append(const UIndirectList<T>&);
 
         //- Remove and return the top element
         inline T remove();
@@ -198,7 +204,7 @@ public:
             const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
         );
 
-        //- Assignment from List<T>.
+        //- Assignment from UList
         inline void operator=(const UList<T>&);
 
     // IOstream operators

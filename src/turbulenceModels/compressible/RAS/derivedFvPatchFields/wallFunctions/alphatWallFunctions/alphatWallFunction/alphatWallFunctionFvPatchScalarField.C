@@ -107,8 +107,8 @@ alphatWallFunctionFvPatchScalarField
 
 void alphatWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
-    const scalar Prt = ras.Prt().value();
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar Prt = rasModel.Prt().value();
 
     const scalarField& mutw =
         patch().lookupPatchField<volScalarField, scalar>(mutName_);

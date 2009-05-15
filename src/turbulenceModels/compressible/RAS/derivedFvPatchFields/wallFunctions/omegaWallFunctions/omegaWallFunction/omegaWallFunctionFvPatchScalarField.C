@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     UName_("U"),
     rhoName_("rho"),
     kName_("k"),
-    GName_("G"),
+    GName_("RASModel::G"),
     muName_("mu"),
     mutName_("mut")
 {
@@ -107,7 +107,7 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     UName_(dict.lookupOrDefault<word>("U", "U")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     kName_(dict.lookupOrDefault<word>("k", "k")),
-    GName_(dict.lookupOrDefault<word>("G", "G")),
+    GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
     mutName_(dict.lookupOrDefault<word>("mut", "mut"))
 {
@@ -154,15 +154,15 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 
 void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu = ras.Cmu().value();
+    const scalar Cmu = rasModel.Cmu().value();
     const scalar Cmu25 = pow(Cmu, 0.25);
 
-    const scalar kappa = ras.kappa().value();
-    const scalar yPlusLam = ras.yPlusLam();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar yPlusLam = rasModel.yPlusLam();
 
-    const scalarField& y = ras.y()[patch().index()];
+    const scalarField& y = rasModel.y()[patch().index()];
 
     volScalarField& G = const_cast<volScalarField&>
         (db().lookupObject<volScalarField>(GName_));
@@ -221,7 +221,7 @@ void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "k", "k", kName_);
-    writeEntryIfDifferent<word>(os, "G", "G", GName_);
+    writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
     writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
     writeEntry("value", os);

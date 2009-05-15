@@ -26,7 +26,20 @@ Class
     Foam::distributedTriSurfaceMesh
 
 Description
-    IOoject and searching on triSurface
+    IOoject and searching on distributed triSurface. All processor hold
+    (possibly overlapping) part of the overall surface. All queries are
+    distributed to the processor that can answer it and the result sent back.
+
+    Can work in three modes:
+    - follow : makes sure each processor has all the triangles inside the
+    externally provided bounding box (usually the mesh bounding box).
+    Guarantees minimum amount of communication since mesh-local queries
+    should be answerable without any comms.
+    - independent : surface is decomposed according to the triangle centres
+    so the decomposition might be radically different from the mesh
+    decomposition. Guarantees best memory balance but at the expense of
+    more communication.
+    - frozen : no change
 
 SourceFiles
     distributedTriSurfaceMesh.C
@@ -47,6 +60,7 @@ namespace Foam
 {
 
 class mapDistribute;
+class decompositionMethod;
 
 // Typedefs
 typedef Pair<point> segment;
@@ -62,15 +76,28 @@ class distributedTriSurfaceMesh
 :
     public triSurfaceMesh
 {
-private:
+public:
 
     // Static data
 
-        //- Merging distance
-        static scalar mergeDist_;
+        enum distributionType
+        {
+            FOLLOW = 0,
+            INDEPENDENT = 1,
+            FROZEN = 2
+        };
 
+        static const NamedEnum<distributionType, 3> distributionTypeNames_;
+
+private:
 
     // Private member data
+
+        //- Merging distance
+        scalar mergeDist_;
+
+        //- Decomposition used when independently decomposing surface.
+        autoPtr<decompositionMethod> decomposer_;
 
         //- Bounding box settings
         IOdictionary dict_;
@@ -80,6 +107,9 @@ private:
 
         //- Global triangle numbering
         mutable autoPtr<globalIndex> globalTris_;
+
+        //- The distribution type.
+        distributionType distType_;
 
 
     // Private Member Functions
@@ -100,8 +130,22 @@ private:
             );
 
             //- Split segment into subsegments overlapping the processor
+            //  bounding box.
+            //void Foam::distributedTriSurfaceMesh::splitSegment
+            //(
+            //    const label segmentI,
+            //    const point& start,
+            //    const point& end,
+            //    const treeBoundBox& bb,
+            //
+            //    DynamicList<segment>& allSegments,
+            //    DynamicList<label>& allSegmentMap,
+            //    DynamicList<label> sendMap
+            //) const
+
+            //- Distribute segments into overlapping processor
             //  bounding boxes. Sort per processor.
-            void splitSegment
+            void distributeSegment
             (
                 const label,
                 const point& start,
@@ -114,7 +158,7 @@ private:
 
             //- Divide edges into local and remote segments. Construct map to
             //  distribute and collect data.
-            autoPtr<mapDistribute> constructSegments
+            autoPtr<mapDistribute> distributeSegments
             (
                 const pointField& start,
                 const pointField& end,
@@ -166,6 +210,12 @@ private:
 
 
         // Surface redistribution
+
+            //- Finds new bounds based on an indepedent decomposition.
+            List<List<treeBoundBox> > independentlyDistributedBbs
+            (
+                const triSurface&
+            );
 
             //- Calculate surface bounding box
             void calcBounds(boundBox& bb, label& nPoints) const;
@@ -266,10 +316,11 @@ public:
             const dictionary& dict
         );
 
-        //- Construct read
+        //- Construct read. Does findInstance to find io.local().
         distributedTriSurfaceMesh(const IOobject& io);
 
-        //- Construct from dictionary (used by searchableSurface)
+        //- Construct from dictionary (used by searchableSurface).
+        //  Does read. Does findInstance to find io.local().
         distributedTriSurfaceMesh
         (
             const IOobject& io,
@@ -286,32 +337,6 @@ public:
 
 
     // Member Functions
-
-        //- Return merge distance
-        static scalar mergeDist()
-        {
-            return mergeDist_;
-        }
-
-        //- Set the merge distance, returning the previous value
-        static scalar setMergeDist(const scalar t)
-        {
-            if (t < -VSMALL)
-            {
-                FatalErrorIn
-                (
-                    "scalar distributedTriSurfaceMesh::setMergeDist"
-                    "(const scalar t)"
-                )   << "Negative merge distance tolerance. This is not allowed."
-                    << abort(FatalError);
-            }
-
-            scalar oldTol = mergeDist_;
-            mergeDist_ = t;
-
-            return oldTol;
-        }
-
 
         //- Triangle indexing (demand driven)
         const globalIndex& globalTris() const;

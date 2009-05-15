@@ -47,6 +47,7 @@ SourceFiles
 #define string_H
 
 #include "char.H"
+#include "Hasher.H"
 
 #include <string>
 #include <cstring>
@@ -85,13 +86,14 @@ public:
         static const string null;
 
 
-    //- Hashing function class
+    //- Hashing function class, shared by all the derived classes
     class hash
     {
     public:
-        inline hash();
-        inline size_type operator()(const string&) const;
-        inline size_type operator()(const string&, const size_type) const;
+        hash()
+        {}
+
+        inline unsigned operator()(const string&, unsigned seed = 0) const;
     };
 
 
@@ -141,6 +143,9 @@ public:
         //- Return a String with quoted meta-characters from the given string
         template<class String>
         static inline string quotemeta(const string&, const char quote='\\');
+
+        //- Avoid masking the normal std::string replace
+        using std::string::replace;
 
         //- Replace first occurence of sub-string oldStr with newStr
         //  starting at start

@@ -29,7 +29,6 @@ License
 #include "volFields.H"
 #include "volPointInterpolation.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,8 +44,6 @@ void Foam::sampledIsoSurface::getIsoFields() const
 {
     const fvMesh& fvm = static_cast<const fvMesh&>(mesh());
 
-    word pointFldName = "volPointInterpolate(" + isoField_ + ')';
-
     // Get volField
     // ~~~~~~~~~~~~
 
@@ -54,7 +51,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
     {
         if (debug)
         {
-            Info<< "sampledIsoSurface::getIsoField() : lookup "
+            Info<< "sampledIsoSurface::getIsoField() : lookup volField "
                 << isoField_ << endl;
         }
         storedVolFieldPtr_.clear();
@@ -79,7 +76,7 @@ void Foam::sampledIsoSurface::getIsoFields() const
         {
             if (debug)
             {
-                Info<< "sampledIsoSurface::getIsoField() : reading "
+                Info<< "sampledIsoSurface::getIsoField() : reading volField "
                     << isoField_ << " from time " << fvm.time().timeName()
                     << endl;
             }
@@ -101,20 +98,6 @@ void Foam::sampledIsoSurface::getIsoFields() const
                 )
             );
             volFieldPtr_ = storedVolFieldPtr_.operator->();
-
-            // Interpolate to get pointField
-
-            if (debug)
-            {
-                Info<< "sampledIsoSurface::getIsoField() : interpolating "
-                    << pointFldName << endl;
-            }
-
-            storedPointFieldPtr_.reset
-            (
-                volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
-            );
-            pointFieldPtr_ = storedPointFieldPtr_.operator->();
         }
     }
 
@@ -123,56 +106,270 @@ void Foam::sampledIsoSurface::getIsoFields() const
     // Get pointField
     // ~~~~~~~~~~~~~~
 
-    if (fvm.foundObject<pointScalarField>(pointFldName))
+    if (!subMeshPtr_.valid())
     {
-        if (debug)
-        {
-            Info<< "sampledIsoSurface::getIsoField() : lookup "
-                << pointFldName << endl;
-        }
-        pointFieldPtr_ = &fvm.lookupObject<pointScalarField>(pointFldName);
-    }
-    else
-    {
-        // Not in registry. Interpolate.
+        word pointFldName = "volPointInterpolate(" + isoField_ + ')';
 
-        if (debug)
-        {
-            Info<< "sampledIsoSurface::getIsoField() : checking interpolate "
-                << isoField_ << " for same time " << fvm.time().timeName()
-                << endl;
-        }
-
-        if
-        (
-            storedPointFieldPtr_.empty()
-         || (fvm.time().timeName() != storedPointFieldPtr_().instance())
-        )
+        if (fvm.foundObject<pointScalarField>(pointFldName))
         {
             if (debug)
             {
-                Info<< "sampledIsoSurface::getIsoField() : interpolating "
+                Info<< "sampledIsoSurface::getIsoField() : lookup pointField "
                     << pointFldName << endl;
             }
+            pointFieldPtr_ = &fvm.lookupObject<pointScalarField>(pointFldName);
+        }
+        else
+        {
+            // Not in registry. Interpolate.
 
-            storedPointFieldPtr_.reset
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : checking pointField "
+                    << pointFldName << " for same time "
+                    << fvm.time().timeName() << endl;
+            }
+
+            if
             (
-                volPointInterpolation::New(fvm).interpolate(*volFieldPtr_).ptr()
-            );
-            pointFieldPtr_ = storedPointFieldPtr_.operator->();
+                storedPointFieldPtr_.empty()
+             || (fvm.time().timeName() != storedPointFieldPtr_().instance())
+            )
+            {
+                if (debug)
+                {
+                    Info<< "sampledIsoSurface::getIsoField() :"
+                        << " interpolating volField " << volFieldPtr_->name()
+                        << " to get pointField " << pointFldName << endl;
+                }
+
+                storedPointFieldPtr_.reset
+                (
+                    volPointInterpolation::New(fvm)
+                    .interpolate(*volFieldPtr_).ptr()
+                );
+                storedPointFieldPtr_->checkOut();
+                pointFieldPtr_ = storedPointFieldPtr_.operator->();
+            }
+        }
+
+
+        // If averaging redo the volField. Can only be done now since needs the
+        // point field.
+        if (average_)
+        {
+            storedVolFieldPtr_.reset(average(fvm, *pointFieldPtr_).ptr());
+            volFieldPtr_ = storedVolFieldPtr_.operator->();
+        }
+
+
+        if (debug)
+        {
+            Info<< "sampledIsoSurface::getIsoField() : volField "
+                << volFieldPtr_->name() << " min:" << min(*volFieldPtr_).value()
+                << " max:" << max(*volFieldPtr_).value() << endl;
+            Info<< "sampledIsoSurface::getIsoField() : pointField "
+                << pointFieldPtr_->name()
+                << " min:" << gMin(pointFieldPtr_->internalField())
+                << " max:" << gMax(pointFieldPtr_->internalField()) << endl;
         }
     }
-
-    if (debug)
+    else
     {
-        Info<< "sampledIsoSurface::getIsoField() : volField "
-            << volFieldPtr_->name() << " min:" << min(*volFieldPtr_).value()
-            << " max:" << max(*volFieldPtr_).value() << endl;
-        Info<< "sampledIsoSurface::getIsoField() : pointField "
-            << pointFieldPtr_->name()
-            << " min:" << gMin(pointFieldPtr_->internalField())
-            << " max:" << gMax(pointFieldPtr_->internalField()) << endl;
+        // Get subMesh variants
+        const fvMesh& subFvm = subMeshPtr_().subMesh();
+
+        // Either lookup on the submesh or subset the whole-mesh volField
+
+        if (subFvm.foundObject<volScalarField>(isoField_))
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() :"
+                    << " submesh lookup volField "
+                    << isoField_ << endl;
+            }
+            storedVolSubFieldPtr_.clear();
+            volSubFieldPtr_ = &subFvm.lookupObject<volScalarField>(isoField_);
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() : subsetting volField "
+                    << isoField_ << endl;
+            }
+            storedVolSubFieldPtr_.reset
+            (
+                subMeshPtr_().interpolate
+                (
+                    *volFieldPtr_
+                ).ptr()
+            );
+            storedVolSubFieldPtr_->checkOut();
+            volSubFieldPtr_ = storedVolSubFieldPtr_.operator->();
+        }
+
+
+        // Pointfield on submesh
+
+        word pointFldName =
+            "volPointInterpolate("
+          + volSubFieldPtr_->name()
+          + ')';
+
+        if (subFvm.foundObject<pointScalarField>(pointFldName))
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() :"
+                    << " submesh lookup pointField " << pointFldName << endl;
+            }
+            storedPointSubFieldPtr_.clear();
+            pointSubFieldPtr_ = &subFvm.lookupObject<pointScalarField>
+            (
+                pointFldName
+            );
+        }
+        else
+        {
+            if (debug)
+            {
+                Info<< "sampledIsoSurface::getIsoField() :"
+                    << " interpolating submesh volField "
+                    << volSubFieldPtr_->name()
+                    << " to get submesh pointField " << pointFldName << endl;
+            }
+            storedPointSubFieldPtr_.reset
+            (
+                volPointInterpolation::New
+                (
+                    subFvm
+                ).interpolate(*volSubFieldPtr_).ptr()
+            );
+            storedPointSubFieldPtr_->checkOut();
+            pointSubFieldPtr_ = storedPointSubFieldPtr_.operator->();
+        }
+
+
+
+        // If averaging redo the volField. Can only be done now since needs the
+        // point field.
+        if (average_)
+        {
+            storedVolSubFieldPtr_.reset
+            (
+                average(subFvm, *pointSubFieldPtr_).ptr()
+            );
+            volSubFieldPtr_ = storedVolSubFieldPtr_.operator->();
+        }
+
+
+        if (debug)
+        {
+            Info<< "sampledIsoSurface::getIsoField() : volSubField "
+                << volSubFieldPtr_->name()
+                << " min:" << min(*volSubFieldPtr_).value()
+                << " max:" << max(*volSubFieldPtr_).value() << endl;
+            Info<< "sampledIsoSurface::getIsoField() : pointSubField "
+                << pointSubFieldPtr_->name()
+                << " min:" << gMin(pointSubFieldPtr_->internalField())
+                << " max:" << gMax(pointSubFieldPtr_->internalField()) << endl;
+        }
     }
+}
+
+
+Foam::tmp<Foam::volScalarField> Foam::sampledIsoSurface::average
+(
+    const fvMesh& mesh,
+    const pointScalarField& pfld
+) const
+{
+    tmp<volScalarField> tcellAvg
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "cellAvg",
+                mesh.time().timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh,
+            dimensionedScalar("zero", dimless, scalar(0.0))
+        )
+    );
+    volScalarField& cellAvg = tcellAvg();
+
+    labelField nPointCells(mesh.nCells(), 0);
+    {
+        for (label pointI = 0; pointI < mesh.nPoints(); pointI++)
+        {
+            const labelList& pCells = mesh.pointCells(pointI);
+
+            forAll(pCells, i)
+            {
+                label cellI = pCells[i];
+
+                cellAvg[cellI] += pfld[pointI];
+                nPointCells[cellI]++;
+            }
+        }
+    }
+    forAll(cellAvg, cellI)
+    {
+        cellAvg[cellI] /= nPointCells[cellI];
+    }
+    // Give value to calculatedFvPatchFields
+    cellAvg.correctBoundaryConditions();
+
+    return tcellAvg;
+}
+
+
+Foam::tmp<Foam::pointScalarField> Foam::sampledIsoSurface::average
+(
+    const pointMesh& pMesh,
+    const volScalarField& fld
+) const
+{
+    tmp<pointScalarField> tpointAvg
+    (
+        new pointScalarField
+        (
+            IOobject
+            (
+                "pointAvg",
+                fld.time().timeName(),
+                fld.db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            pMesh,
+            dimensionedScalar("zero", dimless, scalar(0.0))
+        )
+    );
+    pointScalarField& pointAvg = tpointAvg();
+
+    for (label pointI = 0; pointI < fld.mesh().nPoints(); pointI++)
+    {
+        const labelList& pCells = fld.mesh().pointCells(pointI);
+
+        forAll(pCells, i)
+        {
+            pointAvg[pointI] += fld[pCells[i]];
+        }
+        pointAvg[pointI] /= pCells.size();
+    }
+    // Give value to calculatedFvPatchFields
+    pointAvg.correctBoundaryConditions();
+
+    return tpointAvg;
 }
 
 
@@ -186,6 +383,33 @@ bool Foam::sampledIsoSurface::updateGeometry() const
         return false;
     }
 
+    // Get any subMesh
+    if (zoneID_.index() != -1 && !subMeshPtr_.valid())
+    {
+        const polyBoundaryMesh& patches = mesh().boundaryMesh();
+
+        // Patch to put exposed internal faces into
+        label exposedPatchI = patches.findPatchID(exposedPatchName_);
+
+        if (debug)
+        {
+            Info<< "Allocating subset of size "
+                << mesh().cellZones()[zoneID_.index()].size()
+                << " with exposed faces into patch "
+                << patches[exposedPatchI].name() << endl;
+        }
+
+        subMeshPtr_.reset
+        (
+            new fvMeshSubset(fvm)
+        );
+        subMeshPtr_().setLargeCellSubset
+        (
+            labelHashSet(mesh().cellZones()[zoneID_.index()]),
+            exposedPatchI
+        );
+    }
+
 
     prevTimeIndex_ = fvm.time().timeIndex();
     getIsoFields();
@@ -194,59 +418,22 @@ bool Foam::sampledIsoSurface::updateGeometry() const
     surfPtr_.clear();
     facesPtr_.clear();
 
-    if (average_)
+    if (subMeshPtr_.valid())
     {
-        //- From point field and interpolated cell.
-        volScalarField cellAvg
-        (
-            IOobject
-            (
-                "cellAvg",
-                fvm.time().timeName(),
-                fvm.time(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            fvm,
-            dimensionedScalar("zero", dimless, scalar(0.0))
-        );
-        labelField nPointCells(fvm.nCells(), 0);
-        {
-            for (label pointI = 0; pointI < fvm.nPoints(); pointI++)
-            {
-                const labelList& pCells = fvm.pointCells(pointI);
-
-                forAll(pCells, i)
-                {
-                    label cellI = pCells[i];
-
-                    cellAvg[cellI] += (*pointFieldPtr_)[pointI];
-                    nPointCells[cellI]++;
-                }
-            }
-        }
-        forAll(cellAvg, cellI)
-        {
-            cellAvg[cellI] /= nPointCells[cellI];
-        }
-        // Give value to calculatedFvPatchFields
-        cellAvg.correctBoundaryConditions();
-
         surfPtr_.reset
         (
             new isoSurface
             (
-                cellAvg,
-                *pointFieldPtr_,
+                *volSubFieldPtr_,
+                *pointSubFieldPtr_,
                 isoVal_,
-                regularise_
+                regularise_,
+                mergeTol_
             )
         );
     }
     else
     {
-        //- Direct from cell field and point field.
         surfPtr_.reset
         (
             new isoSurface
@@ -254,7 +441,8 @@ bool Foam::sampledIsoSurface::updateGeometry() const
                 *volFieldPtr_,
                 *pointFieldPtr_,
                 isoVal_,
-                regularise_
+                regularise_,
+                mergeTol_
             )
         );
     }
@@ -267,8 +455,13 @@ bool Foam::sampledIsoSurface::updateGeometry() const
             << "    regularise     : " << regularise_ << nl
             << "    average        : " << average_ << nl
             << "    isoField       : " << isoField_ << nl
-            << "    isoValue       : " << isoVal_ << nl
-            << "    points         : " << points().size() << nl
+            << "    isoValue       : " << isoVal_ << nl;
+        if (subMeshPtr_.valid())
+        {
+            Pout<< "    zone size      : " << subMeshPtr_().subMesh().nCells()
+                << nl;
+        }
+        Pout<< "    points         : " << points().size() << nl
             << "    tris           : " << surface().size() << nl
             << "    cut cells      : " << surface().meshCells().size()
             << endl;
@@ -290,9 +483,11 @@ Foam::sampledIsoSurface::sampledIsoSurface
     sampledSurface(name, mesh, dict),
     isoField_(dict.lookup("isoField")),
     isoVal_(readScalar(dict.lookup("isoValue"))),
+    mergeTol_(dict.lookupOrDefault("mergeTol", 1E-6)),
     regularise_(dict.lookupOrDefault("regularise", true)),
     average_(dict.lookupOrDefault("average", false)),
-    zoneName_(word::null),
+    zoneID_(dict.lookupOrDefault("zone", word::null), mesh.cellZones()),
+    exposedPatchName_(word::null),
     surfPtr_(NULL),
     facesPtr_(NULL),
     prevTimeIndex_(-1),
@@ -303,24 +498,39 @@ Foam::sampledIsoSurface::sampledIsoSurface
 {
     if (!sampledSurface::interpolate())
     {
-        FatalErrorIn
+        FatalIOErrorIn
         (
             "sampledIsoSurface::sampledIsoSurface"
-            "(const word&, const polyMesh&, const dictionary&)"
+            "(const word&, const polyMesh&, const dictionary&)",
+            dict
         )   << "Non-interpolated iso surface not supported since triangles"
-            << " span across cells." << exit(FatalError);
+            << " span across cells." << exit(FatalIOError);
     }
 
-//    dict.readIfPresent("zone", zoneName_);
-//
-//    if (debug && zoneName_.size())
-//    {
-//        if (mesh.cellZones().findZoneID(zoneName_) < 0)
-//        {
-//            Info<< "cellZone \"" << zoneName_
-//                << "\" not found - using entire mesh" << endl;
-//        }
-//    }
+    if (zoneID_.index() != -1)
+    {
+        dict.lookup("exposedPatchName") >> exposedPatchName_;
+
+        if (mesh.boundaryMesh().findPatchID(exposedPatchName_) == -1)
+        {
+            FatalIOErrorIn
+            (
+                "sampledIsoSurface::sampledIsoSurface"
+                "(const word&, const polyMesh&, const dictionary&)",
+                dict
+            )   << "Cannot find patch " << exposedPatchName_
+                << " in which to put exposed faces." << endl
+                << "Valid patches are " << mesh.boundaryMesh().names()
+                << exit(FatalIOError);
+        }
+
+        if (debug && zoneID_.index() != -1)
+        {
+            Info<< "Restricting to cellZone " << zoneID_.name()
+                << " with exposed internal faces into patch "
+                << exposedPatchName_ << endl;
+        }
+    }
 }
 
 
@@ -344,6 +554,7 @@ bool Foam::sampledIsoSurface::expire()
 {
     surfPtr_.clear();
     facesPtr_.clear();
+    subMeshPtr_.clear();
 
     // already marked as expired
     if (prevTimeIndex_ == -1)
@@ -465,8 +676,8 @@ Foam::sampledIsoSurface::interpolate
 void Foam::sampledIsoSurface::print(Ostream& os) const
 {
     os  << "sampledIsoSurface: " << name() << " :"
-        << "  field:" << isoField_
-        << "  value:" << isoVal_;
+        << "  field   :" << isoField_
+        << "  value   :" << isoVal_;
         //<< "  faces:" << faces().size()       // note: possibly no geom yet
         //<< "  points:" << points().size();
 }

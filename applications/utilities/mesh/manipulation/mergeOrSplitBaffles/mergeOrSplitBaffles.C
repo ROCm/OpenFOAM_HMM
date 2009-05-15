@@ -229,6 +229,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     bool split = args.options().found("split");
     bool overwrite = args.options().found("overwrite");
@@ -338,7 +339,10 @@ int main(int argc, char *argv[])
         mesh.movePoints(map().preMotionPoints());
     }
 
-
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     Pout<< "Writing mesh to time " << runTime.timeName() << endl;
     mesh.write();
 
@@ -373,7 +377,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

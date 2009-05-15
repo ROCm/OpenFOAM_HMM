@@ -24,6 +24,7 @@ $(constraintFvPatches)/processor/processorFvPatch.C
 derivedFvPatches = $(fvPatches)/derived
 $(derivedFvPatches)/wall/wallFvPatch.C
 $(derivedFvPatches)/directMapped/directMappedFvPatch.C
+$(derivedFvPatches)/directMapped/directMappedWallFvPatch.C
 
 wallDist = fvMesh/wallDist
 $(wallDist)/wallPointYPlus/wallPointYPlus.C
@@ -93,9 +94,11 @@ $(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFiel
 $(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatchScalarField.C
+$(derivedFvPatchFields)/fixedFluxBoussinesqBuoyantPressure/fixedFluxBoussinesqBuoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C
+$(derivedFvPatchFields)/fixedPressureCompressibleDensity/fixedPressureCompressibleDensityFvPatchScalarField.C
 $(derivedFvPatchFields)/fluxCorrectedVelocity/fluxCorrectedVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/freestream/freestreamFvPatchFields.C
 $(derivedFvPatchFields)/freestreamPressure/freestreamPressureFvPatchScalarField.C
@@ -103,6 +106,7 @@ $(derivedFvPatchFields)/inletOutlet/inletOutletFvPatchFields.C
 $(derivedFvPatchFields)/inletOutletTotalTemperature/inletOutletTotalTemperatureFvPatchScalarField.C
 $(derivedFvPatchFields)/flowRateInletVelocity/flowRateInletVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/movingWallVelocity/movingWallVelocityFvPatchVectorField.C
+$(derivedFvPatchFields)/rotatingWallVelocity/rotatingWallVelocityFvPatchVectorField.C
 $(derivedFvPatchFields)/oscillatingFixedValue/oscillatingFixedValueFvPatchFields.C
 $(derivedFvPatchFields)/outletInlet/outletInletFvPatchFields.C
 $(derivedFvPatchFields)/partialSlip/partialSlipFvPatchFields.C
@@ -183,18 +187,26 @@ $(schemes)/outletStabilised/outletStabilised.C
 $(schemes)/reverseLinear/reverseLinear.C
 $(schemes)/clippedLinear/clippedLinear.C
 $(schemes)/harmonic/harmonic.C
+$(schemes)/fixedBlended/fixedBlended.C
 $(schemes)/localBlended/localBlended.C
 $(schemes)/localMax/localMax.C
 $(schemes)/localMin/localMin.C
+
 $(schemes)/linearFit/linearFit.C
+$(schemes)/biLinearFit/biLinearFit.C
 $(schemes)/quadraticLinearFit/quadraticLinearFit.C
+$(schemes)/quadraticFit/quadraticFit.C
+
+$(schemes)/quadraticLinearUpwindFit/quadraticLinearUpwindFit.C
+$(schemes)/quadraticUpwindFit/quadraticUpwindFit.C
+$(schemes)/cubicUpwindFit/cubicUpwindFit.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C
 $(limitedSchemes)/upwind/upwind.C
 $(limitedSchemes)/blended/blended.C
 $(limitedSchemes)/linearUpwind/linearUpwind.C
-$(limitedSchemes)/linearUpwindV/linearUpwindV.C
+$(limitedSchemes)/linearUpwind/linearUpwindV.C
 $(limitedSchemes)/Gamma/Gamma.C
 $(limitedSchemes)/SFCD/SFCD.C
 $(limitedSchemes)/Minmod/Minmod.C

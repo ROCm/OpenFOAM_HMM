@@ -292,16 +292,16 @@ bool LienCubicKE::read()
 {
     if (RASModel::read())
     {
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        alphak_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        A1_.readIfPresent(coeffDict_);
-        A2_.readIfPresent(coeffDict_);
-        Ctau1_.readIfPresent(coeffDict_);
-        Ctau2_.readIfPresent(coeffDict_);
-        Ctau3_.readIfPresent(coeffDict_);
-        alphaKsi_.readIfPresent(coeffDict_);
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        alphak_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        A1_.readIfPresent(coeffDict());
+        A2_.readIfPresent(coeffDict());
+        Ctau1_.readIfPresent(coeffDict());
+        Ctau2_.readIfPresent(coeffDict());
+        Ctau3_.readIfPresent(coeffDict());
+        alphaKsi_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -328,7 +328,7 @@ void LienCubicKE::correct()
 
     volScalarField G
     (
-        "G",
+        "RASModel::G",
         Cmu_*sqr(k_)/epsilon_*S2 - (nonlinearStress_ && gradU_)
     );
 

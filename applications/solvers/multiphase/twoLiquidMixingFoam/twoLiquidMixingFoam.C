@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
@@ -75,6 +75,16 @@ int main(int argc, char *argv[])
 
         p = pd + rho*gh;
 
+        if (pd.needReference())
+        {
+            p += dimensionedScalar
+            (
+                "p",
+                p.dimensions(),
+                pRefValue - getRefCellValue(p, pdRefCell)
+            );
+        }
+
         turbulence->correct();
 
         runTime.write();
@@ -86,7 +96,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

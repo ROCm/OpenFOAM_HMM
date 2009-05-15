@@ -64,8 +64,8 @@ tmp<volScalarField> autoCreateAlphat
     }
     else
     {
-        Info<< "--> Upgrading " << fieldName << " to employ run-time "
-            << "selectable wall functions" << endl;
+        Info<< "--> Creating " << fieldName
+            << " to employ run-time selectable wall functions" << endl;
 
         const fvBoundaryMesh& bm = mesh.boundary();
 
@@ -104,7 +104,7 @@ tmp<volScalarField> autoCreateAlphat
             )
         );
 
-        Info<< "    Writing updated " << fieldName << endl;
+        Info<< "    Writing new " << fieldName << endl;
         alphat().write();
 
         return alphat;
@@ -134,8 +134,8 @@ tmp<volScalarField> autoCreateMut
     }
     else
     {
-        Info<< "--> Upgrading " << fieldName << " to employ run-time "
-            << "selectable wall functions" << endl;
+        Info<< "--> Creating " << fieldName
+            << " to employ run-time selectable wall functions" << endl;
 
         const fvBoundaryMesh& bm = mesh.boundary();
 
@@ -174,7 +174,7 @@ tmp<volScalarField> autoCreateMut
             )
         );
 
-        Info<< "    Writing updated " << fieldName << endl;
+        Info<< "    Writing new " << fieldName << endl;
         mut().write();
 
         return mut;

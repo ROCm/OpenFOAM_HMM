@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,9 @@ class SpalartAllmaras
     public LESModel
 {
     // Private member functions
+
+        //- Update sub-grid scale fields
+        void updateSubGridScaleFields();
 
         // Disallow default bitwise copy construct and assignment
         SpalartAllmaras(const SpalartAllmaras&);
@@ -178,7 +181,7 @@ public:
         //- Correct nuTilda and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read();
 };
 

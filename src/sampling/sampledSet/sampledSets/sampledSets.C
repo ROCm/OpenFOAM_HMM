@@ -212,7 +212,7 @@ void Foam::sampledSets::combineSampledSets
             (
                 samplePts.name(),
                 samplePts.axis(),
-                IndirectList<point>(allPts, indexSets[seti]),
+                UIndirectList<point>(allPts, indexSets[seti]),
                 refPt
             )
         );
@@ -236,8 +236,6 @@ Foam::sampledSets::sampledSets
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
     searchEngine_(mesh_, true),
-//    pMeshPtr_(NULL),
-//    pInterpPtr_(NULL),
     fieldNames_(),
     interpolationScheme_(word::null),
     writeFormat_(word::null)
@@ -249,6 +247,10 @@ Foam::sampledSets::sampledSets
     else
     {
         outputPath_ = mesh_.time().path()/name_;
+    }
+    if (mesh_.name() != fvMesh::defaultRegion)
+    {
+        outputPath_ = outputPath_/mesh_.name();
     }
 
     read(dict);
@@ -270,6 +272,12 @@ void Foam::sampledSets::verbose(const bool verbosity)
 
 
 void Foam::sampledSets::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::sampledSets::end()
 {
     // Do nothing - only valid on write
 }

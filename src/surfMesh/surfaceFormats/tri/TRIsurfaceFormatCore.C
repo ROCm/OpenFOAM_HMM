@@ -43,7 +43,7 @@ Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
 :
     sorted_(true),
     points_(0),
-    regions_(0),
+    zoneIds_(0),
     sizes_(0)
 {
     read(filename);
@@ -79,14 +79,14 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
     // uses similar structure as STL, just some points
     // the rest of the reader resembles the STL binary reader
     DynamicList<point> dynPoints;
-    DynamicList<label> dynRegions;
+    DynamicList<label> dynZones;
     DynamicList<label> dynSizes;
     HashTable<label>   lookup;
 
-    // place faces without a group in patch0
-    label regionI = 0;
-    dynSizes.append(regionI);
-    lookup.insert("patch0", regionI);
+    // place faces without a group in zone0
+    label zoneI = 0;
+    dynSizes.append(zoneI);
+    lookup.insert("zoneI", zoneI);
 
     while (is.good())
     {
@@ -130,56 +130,56 @@ bool Foam::fileFormats::TRIsurfaceFormatCore::read
             )
         );
 
-        // Region/colour in .tri file starts with 0x. Skip.
+        // zone/colour in .tri file starts with 0x. Skip.
         // ie, instead of having 0xFF, skip 0 and leave xFF to
-        // get read as a word and name it "patchFF"
+        // get read as a word and name it "zoneFF"
 
         char zero;
         lineStream >> zero;
 
         word rawName(lineStream);
-        word name("patch" + rawName(1, rawName.size()-1));
+        word name("zone" + rawName(1, rawName.size()-1));
 
         HashTable<label>::const_iterator fnd = lookup.find(name);
         if (fnd != lookup.end())
         {
-            if (regionI != fnd())
+            if (zoneI != fnd())
             {
                 // group appeared out of order
                 sorted_ = false;
             }
-            regionI = fnd();
+            zoneI = fnd();
         }
         else
         {
-            regionI = dynSizes.size();
-            lookup.insert(name, regionI);
+            zoneI = dynSizes.size();
+            lookup.insert(name, zoneI);
             dynSizes.append(0);
         }
 
-        dynRegions.append(regionI);
-        dynSizes[regionI]++;
+        dynZones.append(zoneI);
+        dynSizes[zoneI]++;
     }
 
     // skip empty groups
-    label nPatch = 0;
-    forAll(dynSizes, patchI)
+    label nZone = 0;
+    forAll(dynSizes, zoneI)
     {
-        if (dynSizes[patchI])
+        if (dynSizes[zoneI])
         {
-            if (nPatch != patchI)
+            if (nZone != zoneI)
             {
-                dynSizes[nPatch] = dynSizes[patchI];
+                dynSizes[nZone] = dynSizes[zoneI];
             }
-            nPatch++;
+            nZone++;
         }
     }
     // truncate addressed size
-    dynSizes.setCapacity(nPatch);
+    dynSizes.setCapacity(nZone);
 
     // transfer to normal lists
     points_.transfer(dynPoints);
-    regions_.transfer(dynRegions);
+    zoneIds_.transfer(dynZones);
     sizes_.transfer(dynSizes);
 
     return true;

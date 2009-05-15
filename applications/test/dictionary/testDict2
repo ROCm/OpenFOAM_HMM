@@ -1,19 +1,18 @@
-/*-------------------------------*- C++ -*---------------------------------*\
-|    =========                                                              |
-|    \\      /     OpenFOAM                                                 |
-|     \\    /                                                               |
-|      \\  /       The Open Source CFD Toolbox                              |
-|       \\/                                        http://www.OpenFOAM.org  |
-\*-------------------------------------------------------------------------*/
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  Any                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-    class           dictionary;
-    object          testDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDict;
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 boundaryField
 {
@@ -27,4 +26,4 @@ boundaryField
 }
 
 #inputMode  overwrite
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

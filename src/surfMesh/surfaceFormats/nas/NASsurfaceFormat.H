@@ -29,7 +29,7 @@ Description
     Nastran surface reader.
 
     - Uses the Ansa "$ANSA_NAME" or the Hypermesh "$HMNAME COMP" extensions
-      to obtain patch names.
+      to obtain zone names.
     - Handles Nastran short and long formats, but not free format.
     - Properly handles the Nastran compact floating point notation: \n
     @verbatim
@@ -44,9 +44,8 @@ SourceFiles
 #ifndef NASsurfaceFormat_H
 #define NASsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 #include "NASsurfaceFormatCore.H"
 
@@ -58,7 +57,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class NASsurfaceFormat Declaration
+                      Class NASsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>

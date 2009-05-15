@@ -46,6 +46,7 @@ SourceFiles
 #include "char.H"
 #include "bool.H"
 #include "label.H"
+#include "uLabel.H"
 #include "scalar.H"
 #include "fileName.H"
 #include "InfoProxy.H"

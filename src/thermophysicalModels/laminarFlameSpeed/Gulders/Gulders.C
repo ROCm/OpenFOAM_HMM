@@ -218,7 +218,7 @@ Foam::laminarFlameSpeedModels::Gulders::operator()() const
             dimensionedScalar
             (
                 hhuCombustionThermo_.lookup("stoichiometricAirFuelMassRatio")
-            )*ft/(scalar(1) - ft)
+            )*ft/((1 + SMALL) - ft)
         );
     }
     else

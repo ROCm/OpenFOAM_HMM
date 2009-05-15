@@ -285,9 +285,9 @@ Foam::argList::argList
     // Print the banner once only for parallel runs
     if (Pstream::master() && bannerEnabled)
     {
-        IOobject::writeBanner(Info, true);
-        Info<< "Build  : " << Foam::FOAMbuild << nl
-            << "Exec   : " << argListString.c_str() << nl            
+        IOobject::writeBanner(Info, true)
+            << "Build  : " << Foam::FOAMbuild << nl
+            << "Exec   : " << argListString.c_str() << nl
             << "Date   : " << dateString.c_str() << nl
             << "Time   : " << timeString.c_str() << nl
             << "Host   : " << hostName() << nl
@@ -409,7 +409,7 @@ Foam::argList::argList
                     label nProcDirs = 0;
                     while
                     (
-                        dir
+                        isDir
                         (
                             rootPath_/globalCase_/"processor"
                           + name(++nProcDirs)
@@ -624,7 +624,7 @@ void Foam::argList::displayDoc(bool source) const
             docFile = docDirs[dirI]/executable_ + docExts[extI];
             docFile.expand();
 
-            if (exists(docFile))
+            if (isFile(docFile))
             {
                 found = true;
                 break;
@@ -697,7 +697,7 @@ bool Foam::argList::check(bool checkArgs, bool checkOpts) const
 
 bool Foam::argList::checkRootCase() const
 {
-    if (!dir(rootPath()))
+    if (!isDir(rootPath()))
     {
         FatalError
             << executable_
@@ -707,7 +707,7 @@ bool Foam::argList::checkRootCase() const
         return false;
     }
 
-    if (!dir(path()) && Pstream::master())
+    if (!isDir(path()) && Pstream::master())
     {
         // Allow slaves on non-existing processor directories, created later
         FatalError

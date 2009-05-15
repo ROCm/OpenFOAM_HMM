@@ -243,16 +243,17 @@ void Foam::uniqueOrder
 template<class T, class ListType>
 ListType Foam::subset
 (
-    const UList<T>& regions,
-    const T& region,
+    const UList<T>& select,
+    const T& value,
     const ListType& lst
 )
 {
-    if (regions.size() < lst.size())
+    // select must at least cover the list range
+    if (select.size() < lst.size())
     {
         FatalErrorIn("subset(const UList<T>&, const T&, const ListType&)")
-            << "Regions is of size " << regions.size()
-            << "; list it is supposed to index is of size " << lst.size()
+            << "select is of size " << select.size()
+            << "; but it must index a list of size " << lst.size()
             << abort(FatalError);
     }
 
@@ -261,7 +262,7 @@ ListType Foam::subset
     label nElem = 0;
     forAll(lst, elemI)
     {
-        if (regions[elemI] == region)
+        if (select[elemI] == value)
         {
             newLst[nElem++] = lst[elemI];
         }
@@ -275,23 +276,77 @@ ListType Foam::subset
 template<class T, class ListType>
 void Foam::inplaceSubset
 (
-    const UList<T>& regions,
-    const T& region,
+    const UList<T>& select,
+    const T& value,
     ListType& lst
 )
 {
-    if (regions.size() < lst.size())
+    // select must at least cover the list range
+    if (select.size() < lst.size())
     {
         FatalErrorIn("inplaceSubset(const UList<T>&, const T&, ListType&)")
-            << "Regions is of size " << regions.size()
-            << "; list it is supposed to index is of size " << lst.size()
+            << "select is of size " << select.size()
+            << "; but it must index a list of size " << lst.size()
             << abort(FatalError);
     }
 
     label nElem = 0;
     forAll(lst, elemI)
     {
-        if (regions[elemI] == region)
+        if (select[elemI] == value)
+        {
+            if (nElem != elemI)
+            {
+                lst[nElem] = lst[elemI];
+            }
+            ++nElem;
+        }
+    }
+
+    lst.setSize(nElem);
+}
+
+
+template<class BoolListType, class ListType>
+ListType Foam::subset
+(
+    const BoolListType& select,
+    const ListType& lst
+)
+{
+    // select can have a different size
+    // eg, when it is a PackedBoolList or a labelHashSet
+
+    ListType newLst(lst.size());
+
+    label nElem = 0;
+    forAll(lst, elemI)
+    {
+        if (select[elemI])
+        {
+            newLst[nElem++] = lst[elemI];
+        }
+    }
+    newLst.setSize(nElem);
+
+    return newLst;
+}
+
+
+template<class BoolListType, class ListType>
+void Foam::inplaceSubset
+(
+    const BoolListType& select,
+    ListType& lst
+)
+{
+    // select can have a different size
+    // eg, when it is a PackedBoolList or a labelHashSet
+
+    label nElem = 0;
+    forAll(lst, elemI)
+    {
+        if (select[elemI])
         {
             if (nElem != elemI)
             {

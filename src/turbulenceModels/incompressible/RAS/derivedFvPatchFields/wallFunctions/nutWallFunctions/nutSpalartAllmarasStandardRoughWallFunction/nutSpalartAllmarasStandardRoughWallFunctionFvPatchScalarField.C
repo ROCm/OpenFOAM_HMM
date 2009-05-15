@@ -130,10 +130,10 @@ void nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar kappa = ras.kappa().value();
-    const scalar E = ras.E().value();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar E = rasModel.E().value();
     const scalar yPlusLam = 11.225;
 
     // The reciprical of the distance to the adjacent cell centre.

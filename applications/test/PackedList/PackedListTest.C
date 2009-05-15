@@ -28,6 +28,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "uLabel.H"
 #include "IOstreams.H"
 #include "PackedBoolList.H"
 
@@ -38,19 +39,129 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    bool changed;
-    Info<< "PackedList max_bits() = " << PackedList<0>::max_bits() << nl;
+    Info<< "PackedList max_bits() = " << PackedList<>::max_bits() << nl;
 
     Info<< "\ntest allocation with value\n";
     PackedList<3> list1(5,1);
     list1.print(Info);
 
     Info<< "\ntest assign uniform value\n";
-    list1 = 2;
+    list1 = 3;
+    list1.print(Info);
+
+    Info<< "\ntest assign uniform value (with overflow)\n";
+    list1 = -1;
+    list1.print(Info);
+
+    Info<< "\ntest zero\n";
+    list1 = 0;
+    list1.print(Info);
+
+    Info<< "\ntest set() with default argument (max_value)\n";
+    list1.set(3);
+    list1.print(Info);
+
+    Info<< "\ntest assign between references\n";
+    list1[2] = 3;
+    list1[4] = list1[2];
+    list1.print(Info);
+
+    Info<< "\ntest assign between references, with chaining\n";
+    list1[0] = list1[4] = 1;
+    list1.print(Info);
+
+    Info<< "\ntest assign between references, with chaining and auto-vivify\n";
+    list1[1] = list1[8] = list1[10] = list1[14] = 2;
+    list1.print(Info);
+
+
+    Info<< "\ntest operator== between references\n";
+    if (list1[1] == list1[8])
+    {
+        Info<< "[1] == [8] (expected)\n";
+    }
+    else
+    {
+        Info<< "[1] != [8] (unexpected)\n";
+    }
+
+    if (list1[0] != list1[1])
+    {
+        Info<< "[0] != [1] (expected)\n";
+    }
+    else
+    {
+        Info<< "[0] == [1] (unexpected)\n";
+    }
+
+    Info<< "\ntest operator== with iterator\n";
+    {
+        PackedList<3>::iterator iter = list1[1];
+
+        if (iter != list1[8])
+        {
+            Info<< "iter != [8] (expected)\n";
+        }
+        else
+        {
+            Info<< "iter == [8] (unexpected)\n";
+        }
+
+        if (*iter != list1[8])
+        {
+            Info<< "*iter != [8] (unexpected)\n";
+        }
+        else
+        {
+            Info<< "*iter == [8] (expected)\n";
+        }
+    }
+
+
+    {
+        const PackedList<3>& constLst = list1;
+        Info<< "\ntest operator[] const with out-of-range index\n";
+        constLst.print(Info);
+        if (constLst[20])
+        {
+            Info<< "[20] is true (unexpected)\n";
+        }
+        else
+        {
+            Info<< "[20] is false (expected) list size should be unchanged (const)\n";
+        }
+        constLst.print(Info);
+
+        Info<< "\ntest operator[] non-const with out-of-range index\n";
+        if (list1[20])
+        {
+            Info<< "[20] is true (unexpected)\n";
+        }
+        else
+        {
+            Info<< "[20] is false (expected) but list was resized?? (non-const)\n";
+        }
+        list1.print(Info);
+    }
+
+
+    Info<< "\ntest operator[] with out-of-range index\n";
+    if (!list1[20])
+    {
+        Info<< "[20] is false, as expected\n";
+    }
     list1.print(Info);
 
     Info<< "\ntest resize with value (without reallocation)\n";
-    list1.resize(6, 3);
+    list1.resize(8, list1.max_value());
+    list1.print(Info);
+
+    Info<< "\ntest flip() function\n";
+    list1.flip();
+    list1.print(Info);
+
+    Info<< "\nre-flip()\n";
+    list1.flip();
     list1.print(Info);
 
     Info<< "\ntest set() function\n";
@@ -96,7 +207,7 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest setCapacity() operation\n";
-    list1.setCapacity(30);
+    list1.setCapacity(100);
     list1.print(Info);
 
     Info<< "\ntest operator[] assignment\n";
@@ -108,7 +219,15 @@ int main(int argc, char *argv[])
     list1.print(Info);
 
     Info<< "\ntest setCapacity smaller\n";
-    list1.setCapacity(32);
+    list1.setCapacity(24);
+    list1.print(Info);
+
+    Info<< "\ntest resize much smaller\n";
+    list1.resize(150);
+    list1.print(Info);
+
+    Info<< "\ntest trim\n";
+    list1.trim();
     list1.print(Info);
 
     // add in some misc values
@@ -118,36 +237,66 @@ int main(int argc, char *argv[])
 
     Info<< "\ntest iterator\n";
     PackedList<3>::iterator iter = list1.begin();
-    Info<< "iterator:" << iter() << "\n";
+    Info<< "begin():";
     iter.print(Info) << "\n";
 
-    Info<< "\ntest iterator operator=\n";
-    changed = (iter = 5);
-
     Info<< "iterator:" << iter() << "\n";
-    Info<< "changed:" << changed << "\n";
-    changed = (iter = 5);
-    Info<< "changed:" << changed << "\n";
+    iter() = 5;
+    iter.print(Info);
     list1.print(Info);
 
+    iter = list1[31];
+    Info<< "iterator:" << iter() << "\n";
+    iter.print(Info);
+
+
     Info<< "\ntest get() method\n";
-    Info<< "get(10):" << list1.get(10)
-        << " and list[10]:" << unsigned(list1[10]) << "\n";
+    Info<< "get(10):" << list1.get(10) << " and list[10]:" << list1[10] << "\n";
     list1.print(Info);
 
     Info<< "\ntest iterator indexing\n";
-    Info<< "end() ";
-    list1.end().print(Info) << "\n";
+    Info<< "cend() ";
+    list1.cend().print(Info) << "\n";
 
-    for (iter = list1[31]; iter != list1.end(); ++iter)
     {
-        iter.print(Info);
+        Info<< "\ntest assignment of iterator\n";
+        list1.print(Info);
+        Info<< "cend()\n";
+        list1.end().print(Info);
+        PackedList<3>::iterator cit = list1[100];
+        Info<< "out-of-range: ";
+        cit.print(Info);
+        cit = list1[15];
+        Info<< "in-range: ";
+        cit.print(Info);
+        Info<< "out-of-range: ";
+        cit = list1[1000];
+        cit.print(Info);
+    }
+
+
+    for
+    (
+        PackedList<3>::iterator cit = list1[30];
+        cit != list1.end();
+        ++cit
+    )
+    {
+        cit.print(Info);
     }
 
     Info<< "\ntest operator[] auto-vivify\n";
+    Info<< "size:" << list1.size() << "\n";
+
     const unsigned int val = list1[45];
 
     Info<< "list[45]:" << val << "\n";
+    Info<< "size after read:" << list1.size() << "\n";
+
+    list1[45] = list1.max_value();
+    Info<< "size after write:" << list1.size() << "\n";
+    Info<< "list[45]:" << list1[45] << "\n";
+    list1[49] = list1[100];
     list1.print(Info);
 
 
@@ -161,9 +310,33 @@ int main(int argc, char *argv[])
 
     Info<< "\ntest pattern that fills all bits\n";
     PackedList<4> list3(8, 8);
-    list3[list3.size()-2] = 0;
-    list3[list3.size()-1] = list3.max_value();
+
+    label pos = list3.size() - 1;
+
+    list3[pos--] = list3.max_value();
+    list3[pos--] = 0;
+    list3[pos--] = list3.max_value();
     list3.print(Info);
+
+    Info<< "removed final value: " << list3.remove() << endl;
+    list3.print(Info);
+
+
+    List<bool> list4(4, true);
+    {
+        const List<bool>& constLst = list4;
+        Info<< "\ntest operator[] const with out-of-range index\n";
+        Info<< constLst << endl;
+        if (constLst[20])
+        {
+            Info<< "[20] is true (unexpected)\n";
+        }
+        else
+        {
+            Info<< "[20] is false (expected) list size should be unchanged (const)\n";
+        }
+        Info<< constLst << endl;
+    }
 
     Info<< "\n\nDone.\n";
 

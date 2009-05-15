@@ -41,10 +41,9 @@ namespace Foam
 
 void Foam::IDDESDelta::calcDelta()
 {
-    const Vector<label>& directions = mesh().directions();
-    label nD = (directions.nComponents + cmptSum(directions))/2;
+    label nD = mesh().nGeometricD();
 
-    // - Init hwn as wall distant.
+    // initialise hwn as wall distance
     volScalarField hwn = wallDist(mesh()).y();
 
     scalar deltamaxTmp = 0.;

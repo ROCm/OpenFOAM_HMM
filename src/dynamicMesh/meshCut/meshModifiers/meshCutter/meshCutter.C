@@ -72,24 +72,11 @@ bool Foam::meshCutter::isIn
         return false;
     }
 
-    label nextIndex = (index + 1) % cuts.size();
-
-    if (cuts[nextIndex] == twoCuts[1])
-    {
-        return true;
-    }
-
-
-    label prevIndex = (index == 0 ? cuts.size()-1 : index - 1);
-
-    if (cuts[prevIndex] == twoCuts[1])
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return
+    (
+        cuts[cuts.fcIndex(index)] == twoCuts[1]
+     || cuts[cuts.rcIndex(index)] == twoCuts[1]
+    );
 }
 
 
@@ -459,7 +446,7 @@ Foam::face Foam::meshCutter::addEdgeCutsToFace(const label faceI) const
         newFace[newFp++] = f[fp];
 
         // Check if edge has been cut.
-        label fp1 = (fp + 1) % f.size();
+        label fp1 = f.fcIndex(fp);
 
         HashTable<label, edge, Hash<edge> >::const_iterator fnd =
             addedPoints_.find(edge(f[fp], f[fp1]));
@@ -511,7 +498,7 @@ Foam::face Foam::meshCutter::loopToFace
 
             newFace[newFaceI++] = vertI;
 
-            label nextCut = loop[(fp+1) % loop.size()];
+            label nextCut = loop[loop.fcIndex(fp)];
 
             if (!isEdge(nextCut))
             {

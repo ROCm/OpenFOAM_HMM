@@ -31,8 +31,9 @@ Description
     http://www.inivis.com/ac3d/man/ac3dfileformat.html
 
 Note
-   The faces are already organized as patches.
-   The output is always sorted by regions.
+    On input, the faces are already organized as zones.
+    The output is always sorted by zones.
+    In the absence of zones, a single zone will be assigned.
 
 SourceFiles
     AC3DsurfaceFormat.C
@@ -42,9 +43,8 @@ SourceFiles
 #ifndef AC3DsurfaceFormat_H
 #define AC3DsurfaceFormat_H
 
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 #include "AC3DsurfaceFormatCore.H"
 
@@ -56,7 +56,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class AC3DfileFormat Declaration
+                      Class AC3DsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -99,49 +99,20 @@ public:
 
     // Member Functions
 
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+        //- Write UnsortedMeshedSurface, the output is always sorted by zones.
+        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+
+
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& name,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
-        //- Write UnsortedMeshedSurface
-        //  The output is always sorted by regions.
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  The output is always sorted by regions.
-        static void write
-        (
-            const fileName& name,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
         //- Write object
-        virtual void write(Ostream& os) const
+        virtual void write(const fileName& name) const
         {
-            write(os, *this);
+            write(name, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

@@ -124,7 +124,7 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
     );
 
     // Processors involved in my schedule
-    return IndirectList<labelPair>(allComms, mySchedule);
+    return UIndirectList<labelPair>(allComms, mySchedule);
 
 
     //if (debug)
@@ -205,7 +205,7 @@ Foam::mapDistribute::mapDistribute
     const labelList& recvProcs
 )
 :
-    constructSize_(sendProcs.size()),
+    constructSize_(0),
     schedulePtr_()
 {
     if (sendProcs.size() != recvProcs.size())
@@ -266,6 +266,8 @@ Foam::mapDistribute::mapDistribute
         {
             // I am the receiver.
             constructMap_[sendProc][nRecv[sendProc]++] = sampleI;
+            // Largest entry inside constructMap
+            constructSize_ = sampleI+1;
         }
     }
 }

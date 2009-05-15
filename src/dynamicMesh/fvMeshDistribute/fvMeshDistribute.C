@@ -718,7 +718,7 @@ void Foam::fvMeshDistribute::getNeighbourData
             // Which processor they will end up on
             const labelList newProc
             (
-                IndirectList<label>(distribution, pp.faceCells())
+                UIndirectList<label>(distribution, pp.faceCells())
             );
 
             OPstream toNeighbour(Pstream::blocking, procPatch.neighbProcNo());
@@ -864,7 +864,7 @@ void Foam::fvMeshDistribute::findCouples
 {
     // Store domain neighbour as map so we can easily look for pair
     // with same face+proc.
-    HashTable<label, labelPair, labelPairHash> map(domainFace.size());
+    HashTable<label, labelPair, labelPair::Hash<> > map(domainFace.size());
 
     forAll(domainFace, bFaceI)
     {
@@ -884,8 +884,8 @@ void Foam::fvMeshDistribute::findCouples
         {
             labelPair myData(sourceFace[bFaceI], sourceProc[bFaceI]);
 
-            HashTable<label, labelPair, labelPairHash>::const_iterator iter =
-                map.find(myData);
+            HashTable<label, labelPair, labelPair::Hash<> >::const_iterator
+                iter = map.find(myData);
 
             if (iter != map.end())
             {
@@ -1192,7 +1192,7 @@ void Foam::fvMeshDistribute::sendMesh
     //
     //    forAll(cellZones, zoneI)
     //    {
-    //        IndirectList<label>(cellZoneID, cellZones[zoneI]) = zoneI;
+    //        UIndirectList<label>(cellZoneID, cellZones[zoneI]) = zoneI;
     //    }
     //}
 

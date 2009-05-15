@@ -27,7 +27,7 @@ Class
 
 Description
     A 1D vector of objects of type \<T\>, where the size of the vector is
-    known and used for subscript bounds checking, etc.
+    known and can be used for subscript bounds checking, etc.
 
     Storage is not allocated during construction or use but is supplied to
     the constructor as an argument.  This type of list is particularly useful
@@ -43,8 +43,9 @@ SourceFiles
 #ifndef UList_H
 #define UList_H
 
-#include "label.H"
 #include "bool.H"
+#include "label.H"
+#include "uLabel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -140,6 +141,17 @@ public:
             label byteSize() const;
 
 
+            //- Return a const pointer to the first data element,
+            //  similar to the STL front() method and the string::data() method
+            //  This can be used (with caution) when interfacing with C code.
+            inline const T* cdata() const;
+
+            //- Return a pointer to the first data element,
+            //  similar to the STL front() method and the string::data() method
+            //  This can be used (with caution) when interfacing with C code.
+            inline T* data();
+
+
         // Check
 
             //- Check start is within valid range (0 ... size-1).
@@ -164,10 +176,12 @@ public:
 
     // Member operators
 
-        //- Return subscript-checked element of UList.
+        //- Return element of UList.
         inline T& operator[](const label);
 
-        //- Return subscript-checked element of constant UList.
+        //- Return element of constant UList.
+        //  Note that the bool specialization adds lazy evaluation so reading
+        //  an out-of-range element returns false without any ill-effects
         inline const T& operator[](const label) const;
 
         //- Allow cast to a const List<T>&
@@ -266,7 +280,7 @@ public:
         //- Return size of the largest possible UList.
         inline label max_size() const;
 
-        //- Return true if the UList is empty (i.e., if size() == 0).
+        //- Return true if the UList is empty (ie, size() is zero).
         inline bool empty() const;
 
         //- Swap two ULists of the same type in constant time.

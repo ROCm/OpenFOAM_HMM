@@ -38,9 +38,12 @@ SourceFiles
 #ifndef FixedList_H
 #define FixedList_H
 
+#include "bool.H"
 #include "label.H"
+#include "uLabel.H"
 #include "Hash.H"
 #include "autoPtr.H"
+#include "StaticAssert.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,12 +52,12 @@ namespace Foam
 
 // Forward declaration of friend functions and operators
 
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 
-template<class T, label Size>
+template<class T, unsigned Size>
 Istream& operator>>(Istream&, FixedList<T, Size>&);
 
-template<class T, label Size>
+template<class T, unsigned Size>
 Ostream& operator<<(Ostream&, const FixedList<T, Size>&);
 
 template<class T> class UList;
@@ -65,9 +68,12 @@ template<class T> class SLList;
                            Class FixedList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class T, label Size>
+template<class T, unsigned Size>
 class FixedList
 {
+    //- Size must be positive (non-zero) and also fit as a signed value
+    StaticAssert(Size && Size <= INT_MAX);
+
     // Private data
 
         //- Vector of values of type T of size Size.
@@ -76,20 +82,19 @@ class FixedList
 
 public:
 
-    //- Hashing function class
-    //  Rotating hash from http://burtleburtle.net/bob/hash/doobs.html
-    template<class HashT=Hash<T> >
+    //- Hashing function class.
+    //  Use Hasher directly for contiguous data. Otherwise hash incrementally.
+    template< class HashT=Hash<T> >
     class Hash
-    :
-        public Foam::Hash<FixedList<T, Size> >
     {
     public:
-        inline Hash();
-        label operator()(const FixedList<T, Size>&) const;
-        label operator()
+        Hash()
+        {}
+
+        inline unsigned operator()
         (
             const FixedList<T, Size>&,
-            const label tableSize
+            unsigned seed = 0
         ) const;
     };
 
@@ -123,7 +128,7 @@ public:
         FixedList(Istream&);
 
         //- Clone
-        inline autoPtr<FixedList<T, Size> > clone() const;
+        inline autoPtr< FixedList<T, Size> > clone() const;
 
 
     // Member Functions
@@ -135,8 +140,19 @@ public:
             inline label fcIndex(const label i) const;
 
             //- Return the reverse circular index, i.e. the previous index
-            //  which returns to the last at the begining of the list
+            //  which returns to the last at the beginning of the list
             inline label rcIndex(const label i) const;
+
+
+            //- Return a const pointer to the first data element,
+            //  similar to the STL front() method and the string::data() method
+            //  This can be used (with caution) when interfacing with C code.
+            inline const T* cdata() const;
+
+            //- Return a pointer to the first data element,
+            //  similar to the STL front() method and the string::data() method
+            //  This can be used (with caution) when interfacing with C code.
+            inline T* data();
 
 
         // Check
@@ -174,10 +190,10 @@ public:
 
     // Member operators
 
-        //- Return subscript-checked element of FixedList.
+        //- Return element of FixedList.
         inline T& operator[](const label);
 
-        //- Return subscript-checked element of constant FixedList.
+        //- Return element of constant FixedList.
         inline const T& operator[](const label) const;
 
         //- Assignment from array operator. Takes linear time.
@@ -282,7 +298,7 @@ public:
         //- Return size of the largest possible FixedList.
         inline label max_size() const;
 
-        //- Return true if the FixedList is empty (i.e., if size() == 0).
+        //- Return true if the FixedList is empty (ie, size() is zero).
         inline bool empty() const;
 
         //- Swap two FixedLists of the same type in constant time.

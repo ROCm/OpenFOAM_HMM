@@ -42,9 +42,7 @@ SourceFiles
 
 #include "point.H"
 #include "label.H"
-#include "scalar.H"
 #include "tensor.H"
-#include "pTraits.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

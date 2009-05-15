@@ -323,10 +323,10 @@ void Foam::cellClassification::markCells
     MeshWave<cellInfo> cellInfoCalc
     (
         mesh_,
-        changedFaces,       // Labels of changed faces
-        changedFacesInfo,   // Information on changed faces
-        cellInfoList,       // Information on all cells
-        mesh_.nCells()      // max iterations
+        changedFaces,                       // Labels of changed faces
+        changedFacesInfo,                   // Information on changed faces
+        cellInfoList,                       // Information on all cells
+        mesh_.globalData().nTotalCells()    // max iterations
     );
 
     // Get information out of cellInfoList

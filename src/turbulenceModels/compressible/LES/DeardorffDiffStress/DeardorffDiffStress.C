@@ -41,6 +41,19 @@ namespace LESModels
 defineTypeNameAndDebug(DeardorffDiffStress, 0);
 addToRunTimeSelectionTable(LESModel, DeardorffDiffStress, dictionary);
 
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void DeardorffDiffStress::updateSubGridScaleFields(const volScalarField& K)
+{
+    muSgs_ = ck_*rho()*sqrt(K)*delta();
+    muSgs_.correctBoundaryConditions();
+
+    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_.correctBoundaryConditions();
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 DeardorffDiffStress::DeardorffDiffStress
@@ -59,7 +72,7 @@ DeardorffDiffStress::DeardorffDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.094
         )
     ),
@@ -68,11 +81,13 @@ DeardorffDiffStress::DeardorffDiffStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cm",
-            coeffDict(),
+            coeffDict_,
             4.13
         )
     )
 {
+    updateSubGridScaleFields(0.5*tr(B_));
+
     printCoeffs();
 }
 
@@ -119,8 +134,7 @@ void DeardorffDiffStress::correct(const tmp<volTensorField>& tgradU)
     K = 0.5*tr(B_);
     bound(K, k0());
 
-    muSgs_ = ck_*rho()*sqrt(K)*delta();
-    muSgs_.correctBoundaryConditions();
+    updateSubGridScaleFields(K);
 }
 
 

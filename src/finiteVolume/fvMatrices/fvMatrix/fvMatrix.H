@@ -326,7 +326,7 @@ public:
             //- Set reference level for solution
             void setReference
             (
-                const label cell,
+                const label celli,
                 const Type& value,
                 const bool forceReference = false
             );
@@ -545,6 +545,18 @@ lduMatrix::solverPerformance solve(fvMatrix<Type>&);
 //  Solver controls read fvSolution
 template<class Type>
 lduMatrix::solverPerformance solve(const tmp<fvMatrix<Type> >&);
+
+
+//- Return the correction form of the given matrix
+//  by subtracting the matrix multiplied by the current field
+template<class Type>
+tmp<fvMatrix<Type> > correction(const fvMatrix<Type>&);
+
+
+//- Return the correction form of the given temporary matrix
+//  by subtracting the matrix multiplied by the current field
+template<class Type>
+tmp<fvMatrix<Type> > correction(const tmp<fvMatrix<Type> >&);
 
 
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //

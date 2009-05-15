@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Stream>
-inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
+inline Stream& Foam::IOobject::writeBanner(Stream& os, bool noHint)
 {
     static bool spacesSet(false);
     static char spaces[40];
@@ -68,14 +68,27 @@ inline void Foam::IOobject::writeBanner(Stream& os, bool noHint)
         "|   \\\\  /    A nd           | Web:      www.OpenFOAM.org                      |\n"
         "|    \\\\/     M anipulation  |                                                 |\n"
         "\\*---------------------------------------------------------------------------*/\n";
+
+    return os;
 }
 
 
 template<class Stream>
-inline void Foam::IOobject::writeDivider(Stream& os)
+inline Stream& Foam::IOobject::writeDivider(Stream& os)
 {
     os  <<
         "// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //\n";
+
+    return os;
+}
+
+template<class Stream>
+inline Stream& Foam::IOobject::writeEndDivider(Stream& os)
+{
+    os  << "\n\n"
+        "// ************************************************************************* //\n";
+
+    return os;
 }
 
 

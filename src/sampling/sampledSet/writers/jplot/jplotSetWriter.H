@@ -54,7 +54,7 @@ class jplotSetWriter
     // Private Member Functions
 
         //- Write header
-        Ostream& writeHeader(Ostream& os) const;
+        Ostream& writeHeader(Ostream&) const;
 
 public:
 
@@ -85,7 +85,7 @@ public:
             const coordSet&,
             const wordList&,
             const List<const Field<Type>*>&,
-            Ostream& os
+            Ostream&
         ) const;
 };
 

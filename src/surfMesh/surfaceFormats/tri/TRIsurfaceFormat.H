@@ -29,7 +29,7 @@ Description
     Provide a means of reading/writing .tri format.
 
 Note
-    For efficiency, the regions are sorted before creating the faces.
+    For efficiency, the zones are sorted before creating the faces.
     The class is thus derived from MeshedSurface.
 
 SourceFiles
@@ -41,9 +41,8 @@ SourceFiles
 #define TRIsurfaceFormat_H
 
 #include "TRIsurfaceFormatCore.H"
-#include "Ostream.H"
-#include "OFstream.H"
 #include "MeshedSurface.H"
+#include "MeshedSurfaceProxy.H"
 #include "UnsortedMeshedSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -54,7 +53,7 @@ namespace fileFormats
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class TRIsurfaceFormat Declaration
+                      Class TRIsurfaceFormat Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Face>
@@ -69,7 +68,7 @@ class TRIsurfaceFormat
             Ostream&,
             const pointField&,
             const Face&,
-            const label patchI
+            const label zoneI
         );
 
         //- Disallow default bitwise copy construct
@@ -102,49 +101,21 @@ public:
 
     // Member Functions
 
+        //- Write surface mesh components by proxy
+        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+
+        //- Write UnsortedMeshedSurface,
+        //  by default the output is not sorted by zones
+        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+
+
         //- Read from file
         virtual bool read(const fileName&);
 
-        //- Write MeshedSurface
-        static void write
-        (
-            Ostream&,
-            const MeshedSurface<Face>&
-        );
-
-        //- Write MeshedSurface
-        static void write
-        (
-            const fileName& name,
-            const MeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
-        //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions
-        static void write
-        (
-            Ostream&,
-            const UnsortedMeshedSurface<Face>&
-        );
-
-        //- Write UnsortedMeshedSurface
-        //  By default, the output is not sorted by regions
-        static void write
-        (
-            const fileName& name,
-            const UnsortedMeshedSurface<Face>& surf
-        )
-        {
-            write(OFstream(name)(), surf);
-        }
-
         //- Write object
-        virtual void write(Ostream& os) const
+        virtual void write(const fileName& name) const
         {
-            write(os, *this);
+            write(name, MeshedSurfaceProxy<Face>(*this));
         }
 
 };

@@ -131,6 +131,12 @@ castellatedMeshControls
                     level (3 3);
                 }
             }
+
+            // Optional angle to detect small-large cell situation perpendicular
+            // to the surface. Is the angle of face w.r.t the local surface
+            // normal. Use on flat(ish) surfaces only. Otherwise
+            // leave out or set to negative number.
+            //perpendicularAngle 10;
         }
     }
 
@@ -268,6 +274,14 @@ addLayersControls
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
+
+
+    // Overall max number of layer addition iterations
+    nLayerIter 50;
+
+    // Max number of iterations after which relaxed meshQuality controls
+    // get used.
+    nRelaxedIter 20;
 }
 
 
@@ -316,6 +330,12 @@ meshQualityControls
     //must be >0 for Fluent compatibility
     minTriangleTwist -1;
 
+    //- if >0 : preserve single cells with all points on the surface if the
+    //  resulting volume after snapping (by approximation) is larger than
+    //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
+    //  If <0 : delete always.
+    //minVolCollapseRatio 0.5;
+
 
     // Advanced
 
@@ -323,6 +343,16 @@ meshQualityControls
     nSmoothScale 4;
     //- amount to scale back displacement at error points
     errorReduction 0.75;
+
+
+
+    // Optional : some meshing phases allow usage of relaxed rules.
+    // See e.g. addLayersControls::nRelaxedIter.
+    relaxed
+    {
+        //- Maximum non-orthogonality allowed. Set to 180 to disable.
+        maxNonOrtho 75;
+    }
 }
 
 

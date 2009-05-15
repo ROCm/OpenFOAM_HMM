@@ -37,7 +37,6 @@ SourceFiles
 #define ZoneMesh_H
 
 #include "List.H"
-#include "IndirectList.H"
 #include "regIOobject.H"
 #include "HashSet.H"
 #include "pointFieldsFwd.H"

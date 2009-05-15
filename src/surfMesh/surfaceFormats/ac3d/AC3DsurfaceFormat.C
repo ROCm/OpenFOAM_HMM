@@ -26,7 +26,6 @@ License
 
 #include "AC3DsurfaceFormat.H"
 #include "clock.H"
-#include "IFstream.H"
 #include "IStringStream.H"
 #include "tensor.H"
 #include "primitivePatch.H"
@@ -99,42 +98,42 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
             << exit(FatalError);
     }
 
-    // # of kids is the # of patches
+    // # of kids is the # of zones
     args = cueToOrDie(is, "kids");
-    label nPatches = parse<int>(args);
+    label nZones = parse<int>(args);
 
-    // Start of vertices for object/patch
-    label patchVertOffset = 0;
+    // Start of vertices for object/zones
+    label vertexOffset = 0;
 
     DynamicList<point> dynPoints;
     DynamicList<Face>  dynFaces;
-    List<word>         names(nPatches);
-    List<label>        sizes(nPatches, 0);
+    List<word>         names(nZones);
+    List<label>        sizes(nZones, 0);
 
-    for (label patchI = 0; patchI < nPatches; ++patchI)
+    for (label zoneI = 0; zoneI < nZones; ++zoneI)
     {
-        names[patchI] = word("patch") + Foam::name(patchI);
+        names[zoneI] = word("zone") + Foam::name(zoneI);
 
-        args = cueToOrDie(is, "OBJECT", "while reading " + names[patchI]);
+        args = cueToOrDie(is, "OBJECT", "while reading " + names[zoneI]);
 
-        // number of vertices for this patch
-        label  nPatchPoints = 0;
+        // number of vertices for this zone
+        label  nZonePoints = 0;
         vector location(pTraits<vector>::zero);
         // tensor rotation(I);
 
-        // Read all info for current patch
+        // Read all info for current zone
         while (is.good())
         {
             // Read line and get first word. If end of file break since
-            // patch should always end with 'kids' command ?not sure.
+            // zone should always end with 'kids' command ?not sure.
             if (!readCmd(is, cmd, args))
             {
                 FatalErrorIn
                 (
                     "fileFormats::AC3DsurfaceFormat::read(const fileName&)"
                 )
-                    << "Did not read up to \"kids 0\" while reading patch "
-                    << patchI << " from file " << filename
+                    << "Did not read up to \"kids 0\" while reading zone "
+                    << zoneI << " from file " << filename
                     << exit(FatalError);
             }
 
@@ -144,7 +143,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                 string str = parse<string>(args);
                 string::stripInvalid<word>(str);
 
-                names[patchI] = str;
+                names[zoneI] = str;
             }
             else if (cmd == "rot")
             {
@@ -164,7 +163,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                 )
                     << "rot (rotation tensor) command not implemented"
                     << "Line:" << cmd << ' ' << args << endl
-                    << "while reading patch " << patchI << endl;
+                    << "while reading zone " << zoneI << endl;
             }
             else if (cmd == "loc")
             {
@@ -179,9 +178,9 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
             else if (cmd == "numvert")
             {
                 // numvert  %d
-                nPatchPoints = parse<int>(args);
+                nZonePoints = parse<int>(args);
 
-                for (label vertI = 0; vertI < nPatchPoints; ++vertI)
+                for (label vertI = 0; vertI < nZonePoints; ++vertI)
                 {
                     is.getLine(line);
                     IStringStream lineStream(line);
@@ -202,8 +201,8 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                 {
                     static string errorMsg =
                         string(" while reading face ")
-                            + Foam::name(faceI) + " on patch "
-                            + Foam::name(patchI)
+                            + Foam::name(faceI) + " on zone "
+                            + Foam::name(zoneI)
                             + " from file " + filename;
 
                     cueToOrDie(is, "SURF", errorMsg);
@@ -216,7 +215,7 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                     forAll(verts, vertI)
                     {
                         is.getLine(line);
-                        verts[vertI] = parse<int>(line) + patchVertOffset;
+                        verts[vertI] = parse<int>(line) + vertexOffset;
                     }
 
                     UList<label>& f = static_cast<UList<label>&>(verts);
@@ -227,26 +226,26 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                         // points may be incomplete
                         for (label fp1 = 1; fp1 < f.size() - 1; ++fp1)
                         {
-                            label fp2 = (fp1 + 1) % f.size();
+                            label fp2 = f.fcIndex(fp1);
 
                             dynFaces.append(triFace(f[0], f[fp1], f[fp2]));
-                            sizes[patchI]++;
+                            sizes[zoneI]++;
                         }
                     }
                     else
                     {
                         dynFaces.append(Face(f));
-                        sizes[patchI]++;
+                        sizes[zoneI]++;
                     }
                 }
 
-                // Done the current patch.
+                // Done the current zone.
                 // Increment the offset vertices are stored at
-                patchVertOffset += nPatchPoints;
+                vertexOffset += nZonePoints;
             }
             else if (cmd == "kids")
             {
-                // 'kids' denotes the end of the current patch.
+                // 'kids' denotes the end of the current zone.
                 label nKids = parse<int>(args);
 
                 if (nKids != 0)
@@ -257,11 +256,11 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
                     )
                         << "Can only read objects without kids."
                         << " Encountered " << nKids << " kids when"
-                        << " reading patch " << patchI
+                        << " reading zone " << zoneI
                         << exit(FatalError);
                 }
 
-                // Done reading current patch
+                // Done reading current zone
                 break;
             }
         }
@@ -271,8 +270,8 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
     this->storedPoints().transfer(dynPoints);
     this->storedFaces().transfer(dynFaces);
 
-    // add patches, culling empty groups
-    this->addPatches(sizes, names, true);
+    // add zones, culling empty ones
+    this->addZones(sizes, names, true);
     this->stitchFaces(SMALL);
     return true;
 }
@@ -281,28 +280,65 @@ bool Foam::fileFormats::AC3DsurfaceFormat<Face>::read
 template<class Face>
 void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 (
-    Ostream& os,
-    const MeshedSurface<Face>& surf
+    const fileName& filename,
+    const MeshedSurfaceProxy<Face>& surf
 )
 {
     const pointField& pointLst = surf.points();
-    const List<Face>& faceLst = surf.faces();
-    const List<surfGroup>& patchLst = surf.patches();
+    const List<Face>&  faceLst = surf.faces();
 
-    writeHeader(os, patchLst);
+    const List<surfZone>& zones =
+    (
+        surf.surfZones().size()
+      ? surf.surfZones()
+      : oneZone(faceLst)
+    );
 
-    forAll(patchLst, patchI)
+    const bool useFaceMap = (surf.useFaceMap() && zones.size() > 1);
+
+    if (useFaceMap)
     {
-        const surfGroup& p = patchLst[patchI];
+        FatalErrorIn
+        (
+            "fileFormats::AC3DsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "output with faceMap is not supported " << filename
+            << exit(FatalError);
+    }
+
+
+    OFstream os(filename);
+    if (!os.good())
+    {
+        FatalErrorIn
+        (
+            "fileFormats::AC3DsurfaceFormat::write"
+            "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+        )
+            << "Cannot open file for writing " << filename
+            << exit(FatalError);
+    }
+
+    writeHeader(os, zones);
+
+    forAll(zones, zoneI)
+    {
+        const surfZone& zone = zones[zoneI];
 
         os  << "OBJECT poly" << nl
-            << "name \"" << p.name() << '"' << endl;
+            << "name \"" << zone.name() << "\"\n";
 
         // Temporary PrimitivePatch to calculate compact points & faces
         // use 'UList' to avoid allocations!
         PrimitivePatch<Face, UList, const pointField&> patch
         (
-            faceLst,
+            SubList<Face>
+            (
+                faceLst,
+                zone.size(),
+                zone.start()
+            ),
             pointLst
         );
 
@@ -312,17 +348,17 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
         {
             const point& pt = patch.localPoints()[ptI];
 
-            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << nl;
         }
 
         os << "numsurf " << patch.localFaces().size() << endl;
 
-        forAll(patch.localFaces(), faceI)
+        forAll(patch.localFaces(), localFaceI)
         {
-            const Face& f = patch.localFaces()[faceI];
+            const Face& f = patch.localFaces()[localFaceI];
 
             os  << "SURF 0x20" << nl          // polygon
-                << "mat " << patchI << nl
+                << "mat " << zoneI << nl
                 << "refs " << f.size() << nl;
 
             forAll(f, fp)
@@ -339,61 +375,89 @@ void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 template<class Face>
 void Foam::fileFormats::AC3DsurfaceFormat<Face>::write
 (
-    Ostream& os,
+    const fileName& filename,
     const UnsortedMeshedSurface<Face>& surf
 )
 {
     labelList faceMap;
-    List<surfGroup> patchLst = surf.sortedRegions(faceMap);
+    List<surfZone> zoneLst = surf.sortedZones(faceMap);
 
-    writeHeader(os, patchLst);
-
-    label faceIndex = 0;
-    forAll(patchLst, patchI)
+    if (zoneLst.size() <= 1)
     {
-        const surfGroup& p = patchLst[patchI];
-
-        os  << "OBJECT poly" << nl
-            << "name \"" << p.name() << '"' << endl;
-
-        // Create patch with only patch faces included for ease of addressing
-        boolList include(surf.size(), false);
-
-        forAll(p, patchFaceI)
+        write
+        (
+            filename,
+            MeshedSurfaceProxy<Face>
+            (
+                surf.points(),
+                surf.faces(),
+                zoneLst
+            )
+        );
+    }
+    else
+    {
+        OFstream os(filename);
+        if (!os.good())
         {
-            const label faceI = faceMap[faceIndex++];
-            include[faceI] = true;
+            FatalErrorIn
+            (
+                "fileFormats::AC3DsurfaceFormat::write"
+                "(const fileName&, const MeshedSurfaceProxy<Face>&)"
+            )
+                << "Cannot open file for writing " << filename
+                << exit(FatalError);
         }
 
-        UnsortedMeshedSurface<Face> subm = surf.subsetMesh(include);
+        writeHeader(os, zoneLst);
 
-        // Now we have isolated surface for this patch alone. Write it.
-        os << "numvert " << subm.nPoints() << endl;
-
-        forAll(subm.localPoints(), ptI)
+        label faceIndex = 0;
+        forAll(zoneLst, zoneI)
         {
-            const point& pt = subm.localPoints()[ptI];
+            const surfZone& zone = zoneLst[zoneI];
 
-            os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
-        }
+            os  << "OBJECT poly" << nl
+                << "name \"" << zone.name() << "\"\n";
 
-        os << "numsurf " << subm.localFaces().size() << endl;
+            // Create zone with only zone faces included for ease of addressing
+            labelHashSet include(surf.size());
 
-        forAll(subm.localFaces(), faceI)
-        {
-            const Face& f = subm.localFaces()[faceI];
-
-            os  << "SURF 0x20" << nl          // polygon
-                << "mat " << patchI << nl
-                << "refs " << f.size() << nl;
-
-            forAll(f, fp)
+            forAll(zone, localFaceI)
             {
-                os << f[fp] << " 0 0" << nl;
+                const label faceI = faceMap[faceIndex++];
+                include.insert(faceI);
             }
-        }
 
-        os << "kids 0" << endl;
+            UnsortedMeshedSurface<Face> subm = surf.subsetMesh(include);
+
+            // Now we have isolated surface for this patch alone. Write it.
+            os << "numvert " << subm.nPoints() << endl;
+
+            forAll(subm.localPoints(), ptI)
+            {
+                const point& pt = subm.localPoints()[ptI];
+
+                os << pt.x() << ' ' << pt.y() << ' ' << pt.z() << endl;
+            }
+
+            os << "numsurf " << subm.localFaces().size() << endl;
+
+            forAll(subm.localFaces(), localFaceI)
+            {
+                const Face& f = subm.localFaces()[localFaceI];
+
+                os  << "SURF 0x20" << nl          // polygon
+                    << "mat " << zoneI << nl
+                    << "refs " << f.size() << nl;
+
+                forAll(f, fp)
+                {
+                    os << f[fp] << " 0 0" << nl;
+                }
+            }
+
+            os << "kids 0" << endl;
+        }
     }
 }
 

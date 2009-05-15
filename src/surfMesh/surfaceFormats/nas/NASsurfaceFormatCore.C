@@ -25,14 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "NASsurfaceFormatCore.H"
-#include "IFstream.H"
 #include "IStringStream.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Do weird things to extract number
+// Do weird things to extract a floating point number
 Foam::scalar Foam::fileFormats::NASsurfaceFormatCore::parseNASCoord
 (
     const string& s
@@ -49,7 +48,7 @@ Foam::scalar Foam::fileFormats::NASsurfaceFormatCore::parseNASCoord
         {
             exponent = -exponent;
         }
-        return mantissa*pow(10, exponent);
+        return mantissa * pow(10, exponent);
     }
     else
     {

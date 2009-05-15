@@ -79,12 +79,7 @@ bool Foam::dictionary::substituteKeyword(const word& keyword)
     {
         const dictionary& addDict = ePtr->dict();
 
-        for
-        (
-            IDLList<entry>::const_iterator iter = addDict.begin();
-            iter != addDict.end();
-            ++iter
-        )
+        forAllConstIter(IDLList<entry>, addDict, iter)
         {
             add(iter());
         }
@@ -152,20 +147,23 @@ void Foam::dictionary::write(Ostream& os, bool subDict) const
         os << nl << indent << token::BEGIN_BLOCK << incrIndent << nl;
     }
 
-    for
-    (
-        IDLList<entry>::const_iterator iter = begin();
-        iter != end();
-        ++iter
-    )
+    forAllConstIter(IDLList<entry>, *this, iter)
     {
-        // Write entry & follow with carriage return.
-        os << *iter;
+        const entry& e = *iter;
+
+        // Write entry
+        os << e;
+
+        // Add extra new line between entries for "top-level" dictionaries
+        if (!subDict && parent() == dictionary::null && e != *last())
+        {
+            os << nl;
+        }
 
         // Check stream before going to next entry.
         if (!os.good())
         {
-            WarningIn("dictionary::write(Ostream& os, bool subDict)")
+            WarningIn("dictionary::write(Ostream&, bool subDict)")
                 << "Can't write entry " << iter().keyword()
                 << " for dictionary " << name()
                 << endl;

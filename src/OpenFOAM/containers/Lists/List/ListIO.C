@@ -76,11 +76,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         if (is.format() == IOstream::ASCII || !contiguous<T>())
         {
             // Read beginning of contents
-            char listDelimiter = is.readBeginList("List");
+            char delimiter = is.readBeginList("List");
 
             if (s)
             {
-                if (listDelimiter == token::BEGIN_LIST)
+                if (delimiter == token::BEGIN_LIST)
                 {
                     for (register label i=0; i<s; i++)
                     {
@@ -117,7 +117,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         {
             if (s)
             {
-                is.read(reinterpret_cast<char*>(L.begin()), s*sizeof(T));
+                is.read(reinterpret_cast<char*>(L.data()), s*sizeof(T));
 
                 is.fatalCheck
                 (

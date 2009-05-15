@@ -104,7 +104,7 @@ bool Foam::fileFormats::STARCDsurfaceFormatCore::readPoints
     {
         FatalErrorIn
         (
-            "fileFormats::STARCDsurfaceFormatCore::readPoints(const fileName&)"
+            "fileFormats::STARCDsurfaceFormatCore::readPoints(...)"
         )
             << "Cannot read file " << is.name()
             << exit(FatalError);
@@ -166,7 +166,7 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     Ostream& os,
     const pointField& pointLst,
     const label nFaces,
-    const List<surfGroup>& patchLst
+    const UList<surfZone>& zoneLst
 )
 {
     word caseName = os.name().lessExt().name();
@@ -176,10 +176,11 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
         << "! case " << caseName << nl
         << "! ------------------------------" << nl;
 
-    forAll(patchLst, patchI)
+    forAll(zoneLst, zoneI)
     {
-        os  << "ctable " << patchI + 1 << " shell" << nl
-            << "ctname " << patchI + 1 << " " << patchLst[patchI].name() << nl;
+        os  << "ctable " << zoneI + 1 << " shell" << nl
+            << "ctname " << zoneI + 1 << " "
+            << zoneLst[zoneI].name() << nl;
     }
 
     os  << "! ------------------------------" << nl
