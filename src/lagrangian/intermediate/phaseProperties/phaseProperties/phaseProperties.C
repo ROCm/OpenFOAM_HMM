@@ -171,7 +171,7 @@ void Foam::phaseProperties::checkTotalMassFraction() const
 }
 
 
-Foam::word Foam::phaseProperties::phaseToStateLabel(phaseType pt) const
+Foam::word Foam::phaseProperties::phaseToStateLabel(const phaseType pt) const
 {
     word state = "(unknown)";
     switch (pt)
@@ -267,7 +267,12 @@ void Foam::phaseProperties::initialiseGlobalIds
         case SOLID:
         {
             setGlobalIds(solidNames);
-            setGlobalGasIds(YGas);
+            WarningIn
+            (
+                "phaseProperties::initialiseGlobalIds(...)"
+            )   << "Assuming no mapping between solid and carrier species"
+                << endl;
+//            setGlobalGasIds(YGas);
             break;
         }
         default:

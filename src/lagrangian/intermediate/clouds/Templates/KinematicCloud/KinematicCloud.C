@@ -229,7 +229,7 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
-    Info<< "Cloud name: " << this->name() << nl
+    Info<< "Cloud: " << this->name() << nl
         << "    Parcels added during this run   = "
         << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
             << nl

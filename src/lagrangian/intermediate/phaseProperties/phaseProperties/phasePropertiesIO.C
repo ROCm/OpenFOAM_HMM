@@ -42,36 +42,27 @@ Foam::phaseProperties::phaseProperties(Istream& is)
 
     dictionaryEntry phaseInfo(dictionary::null, is);
 
-    if (phaseInfo.size() == 0)
-    {
-        FatalErrorIn
-        (
-            "Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)"
-        )   << "No phases identified. Please define each phase property as "
-            << "a dictionary entry" << nl << exit(FatalError);
-    }
-
-    label nComponents = phaseInfo.size();
-    names_.setSize(nComponents);
-    Y_.setSize(nComponents);
-
     phase_ = phaseTypeNames_[phaseInfo.keyword()];
-
     stateLabel_ = phaseToStateLabel(phase_);
 
-    label cmptI = 0;
-    forAllConstIter(IDLList<entry>, phaseInfo, iter)
+    if (phaseInfo.size() > 0)
     {
-        names_[cmptI] = iter().keyword();
-        Y_[cmptI] = readScalar(phaseInfo.lookup(names_[cmptI]));
-        cmptI++;
+        label nComponents = phaseInfo.size();
+        names_.setSize(nComponents, "unknownSpecie");
+        Y_.setSize(nComponents, 0.0);
+        globalIds_.setSize(nComponents, -1);
+        globalGasIds_.setSize(nComponents, -1);
+
+        label cmptI = 0;
+        forAllConstIter(IDLList<entry>, phaseInfo, iter)
+        {
+            names_[cmptI] = iter().keyword();
+            Y_[cmptI] = readScalar(phaseInfo.lookup(names_[cmptI]));
+            cmptI++;
+        }
+
+        checkTotalMassFraction();
     }
-
-    // initialise global ids to -1
-    globalIds_.setSize(nComponents, -1);
-    globalGasIds_.setSize(nComponents, -1);
-
-    checkTotalMassFraction();
 }
 
 
@@ -81,43 +72,33 @@ Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
 {
     is.check
     (
-        "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::phaseProperties&)"
+        "Foam::Istream& Foam::operator>>(Istream&, phaseProperties&)"
     );
 
     dictionaryEntry phaseInfo(dictionary::null, is);
 
-    if (phaseInfo.size() == 0)
-    {
-        FatalErrorIn
-        (
-            "Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)"
-        )   << "No phases identified. Please define each phase property as "
-            << "a dictionary entry" << nl << exit(FatalError);
-    }
-
-    label nComponents = phaseInfo.size();
-
-    pp.names_.setSize(nComponents);
-    pp.Y_.setSize(nComponents);
-
     pp.phase_ = pp.phaseTypeNames_[phaseInfo.keyword()];
-
     pp.stateLabel_ = pp.phaseToStateLabel(pp.phase_);
 
-    label cmptI = 0;
-    forAllConstIter(IDLList<entry>, phaseInfo, iter)
+    if (phaseInfo.size() > 0)
     {
-        pp.names_[cmptI] = iter().keyword();
-        pp.Y_[cmptI] = readScalar(phaseInfo.lookup(pp.names_[cmptI]));
-        cmptI++;
+        label nComponents = phaseInfo.size();
+
+        pp.names_.setSize(nComponents, "unknownSpecie");
+        pp.Y_.setSize(nComponents, 0.0);
+        pp.globalIds_.setSize(nComponents, -1);
+        pp.globalGasIds_.setSize(nComponents, -1);
+
+        label cmptI = 0;
+        forAllConstIter(IDLList<entry>, phaseInfo, iter)
+        {
+            pp.names_[cmptI] = iter().keyword();
+            pp.Y_[cmptI] = readScalar(phaseInfo.lookup(pp.names_[cmptI]));
+            cmptI++;
+        }
+
+        pp.checkTotalMassFraction();
     }
-
-    // initialise global ids to -1
-    pp.globalIds_.setSize(nComponents, -1);
-    pp.globalGasIds_.setSize(nComponents, -1);
-
-    pp.checkTotalMassFraction();
 
     return is;
 }
@@ -127,11 +108,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const phaseProperties& pp)
 {
     os.check
     (
-        "Foam::Ostream& Foam::operator<<"
-        "("
-            "Foam::Ostream&, "
-            "const Foam::phaseProperties&"
-        ")"
+        "Foam::Ostream& Foam::operator<<(Ostream&, const phaseProperties&)"
     );
 
     os  << pp.phaseTypeNames_[pp.phase_] << nl << token::BEGIN_BLOCK << nl
@@ -147,11 +124,7 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const phaseProperties& pp)
 
     os.check
     (
-        "Foam::Ostream& Foam::operator<<"
-        "("
-            "Foam::Ostream&, "
-            "const Foam::phaseProperties&"
-        ")"
+        "Foam::Ostream& Foam::operator<<(Ostream&, const phaseProperties&)"
     );
 
     return os;

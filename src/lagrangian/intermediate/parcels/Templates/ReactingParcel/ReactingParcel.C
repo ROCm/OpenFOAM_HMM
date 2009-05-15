@@ -67,19 +67,25 @@ void Foam::ReactingParcel<ParcelType>::updateCellQuantities
 
 
 template<class ParcelType>
-void Foam::ReactingParcel<ParcelType>::updateMassFraction
+Foam::scalar Foam::ReactingParcel<ParcelType>::updateMassFraction
 (
     const scalar mass0,
     const scalarField& dMass,
     scalarField& Y
-)
+) const
 {
-    scalar mass1 = mass0 + sum(dMass);
+    scalar mass1 = mass0 - sum(dMass);
 
-    forAll(Y, i)
+    // only update the mass fractions if the new particle mass is finite
+    if (mass1 > ROOTVSMALL)
     {
-        Y[i] = (Y[i]*mass0 - dMass[i])/mass1;
+        forAll(Y, i)
+        {
+            Y[i] = (Y[i]*mass0 - dMass[i])/mass1;
+        }
     }
+
+    return mass1;
 }
 
 
@@ -116,13 +122,10 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Return enthalpy source and calc mass transfer due to phase change
     scalar ShPC =
-        calcPhaseChange(td, dt, cellI, d0, T0, U0, 0, 1.0, Y_, dMassPC);
+        calcPhaseChange(td, dt, cellI, d0, T0, U0, mass0, 0, 1.0, Y_, dMassPC);
 
-    // Update particle component mass fractions
-    updateMassFraction(mass0, dMassPC, Y_);
-
-    // Update mass
-    scalar mass1 = mass0 - sum(dMassPC);
+    // Update particle component mass and mass fractions
+    scalar mass1 = updateMassFraction(mass0, dMassPC, Y_);
 
 
     // Heat transfer
@@ -218,6 +221,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const scalar d,
     const scalar T,
     const vector& U,
+    const scalar mass,
     const label idPhase,
     const scalar YPhase,
     const scalarField& YComponents,
@@ -247,6 +251,9 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
         U - this->Uc_,
         dMassPC
     );
+
+    // Limit phase change mass by availability of each specie
+    dMassPC = min(mass*YPhase*YComponents, dMassPC);
 
     scalar dMassTot = sum(dMassPC);
 

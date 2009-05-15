@@ -108,18 +108,17 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::updateMassFractions
 {
     scalarField& YMix = this->Y_;
 
-    scalar dMassGasTot = sum(dMassGas);
-    scalar dMassLiquidTot = sum(dMassLiquid);
-    scalar dMassSolidTot = sum(dMassSolid);
+    scalar massGas =
+        this->updateMassFraction(mass0*YMix[GAS], dMassGas, YGas_);
+    scalar massLiquid =
+        this->updateMassFraction(mass0*YMix[LIQ], dMassLiquid, YLiquid_);
+    scalar massSolid =
+        this->updateMassFraction(mass0*YMix[SLD], dMassSolid, YSolid_);
 
-    this->updateMassFraction(mass0*YMix[GAS], dMassGas, YGas_);
-    this->updateMassFraction(mass0*YMix[LIQ], dMassLiquid, YLiquid_);
-    this->updateMassFraction(mass0*YMix[SLD], dMassSolid, YSolid_);
+    scalar massNew = max(massGas + massLiquid + massSolid, ROOTVSMALL);
 
-    scalar massNew = mass0 - (dMassGasTot + dMassLiquidTot + dMassSolidTot);
-
-    YMix[GAS] = (mass0*YMix[GAS] - dMassGasTot)/massNew;
-    YMix[LIQ] = (mass0*YMix[LIQ] - dMassLiquidTot)/massNew;
+    YMix[GAS] = massGas/massNew;
+    YMix[LIQ] = massLiquid/massNew;
     YMix[SLD] = 1.0 - YMix[GAS] - YMix[LIQ];
 
     return massNew;
@@ -189,6 +188,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             d0,
             T0,
             U0,
+            mass0,
             idL,
             YMix[LIQ],
             YLiquid_,
@@ -239,7 +239,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             T0,
             mass0,
             canCombust_,
-            dMassPC + dMassDV, // total mass of volatiles evolved
+            dMassDV,    // assuming d(mass) due to phase change is non-volatile
             YMix,
             YGas_,
             YLiquid_,

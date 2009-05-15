@@ -465,17 +465,19 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
     {
         case phaseProperties::GAS:
         {
-            notImplemented
-            (
-                "Foam::scalar Foam::CompositionModel<CloudType>::L"
-                "("
-                    "const label, "
-                    "const scalarField&, "
-                    "const scalar, "
-                    "const scalar"
-                ") const\n"
-                "*** No support for gaseous components"
-            );
+            if (debug)
+            {
+                WarningIn
+                (
+                    "Foam::scalar Foam::CompositionModel<CloudType>::L"
+                    "("
+                        "const label, "
+                        "const scalarField&, "
+                        "const scalar, "
+                        "const scalar"
+                    ") const\n"
+                )   << "No support for gaseous components" << endl;
+            }
             break;
         }
         case phaseProperties::LIQUID:
@@ -489,17 +491,19 @@ Foam::scalar Foam::CompositionModel<CloudType>::L
         }
         case phaseProperties::SOLID:
         {
-            notImplemented
-            (
-                "Foam::scalar Foam::CompositionModel<CloudType>::L"
-                "("
-                    "const label, "
-                    "const scalarField&, "
-                    "const scalar, "
-                    "const scalar"
-                ") const\n"
-                "*** No support for solid components"
-            );
+            if (debug)
+            {
+                WarningIn
+                (
+                    "Foam::scalar Foam::CompositionModel<CloudType>::L"
+                    "("
+                        "const label, "
+                        "const scalarField&, "
+                        "const scalar, "
+                        "const scalar"
+                    ") const\n"
+                )   << "No support for solid components" << endl;
+            }
             break;
         }
         default:
