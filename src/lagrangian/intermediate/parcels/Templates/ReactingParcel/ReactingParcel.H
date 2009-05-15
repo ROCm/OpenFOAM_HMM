@@ -196,6 +196,7 @@ protected:
             const scalar d,            // diameter
             const scalar T,            // temperature
             const vector& U,           // velocity
+            const scalar mass,         // mass
             const label idPhase,       // id of phase involved in phase change
             const scalar YPhase,       // total mass fraction
             const scalarField& YComponents, // component mass fractions
@@ -203,12 +204,12 @@ protected:
         );
 
         //- Update mass fraction
-        void updateMassFraction
+        scalar updateMassFraction
         (
             const scalar mass0,
             const scalarField& dMass,
             scalarField& Y
-        );
+        ) const;
 
 
 public:
