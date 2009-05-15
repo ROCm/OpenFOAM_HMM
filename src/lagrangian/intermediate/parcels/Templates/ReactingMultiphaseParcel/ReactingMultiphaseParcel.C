@@ -239,7 +239,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             T0,
             mass0,
             canCombust_,
-            dMassPC + dMassDV, // total mass of volatiles evolved
+            dMassDV,    // assuming d(mass) due to phase change is non-volatile
             YMix,
             YGas_,
             YLiquid_,
