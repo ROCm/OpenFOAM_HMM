@@ -219,7 +219,8 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
                 (
                     min
                     (
-                        nuw[faceI]*(yPlus*kappa/log(Edash*yPlus) - 1),
+                        nuw[faceI]
+                       *(yPlus*kappa/log(max(Edash*yPlus, 1+1e-4)) - 1),
                         2*limitingNutw
                     ), 0.5*limitingNutw
                 );
