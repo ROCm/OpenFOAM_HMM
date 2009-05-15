@@ -267,7 +267,12 @@ void Foam::phaseProperties::initialiseGlobalIds
         case SOLID:
         {
             setGlobalIds(solidNames);
-            setGlobalGasIds(YGas);
+            WarningIn
+            (
+                "phaseProperties::initialiseGlobalIds(...)"
+            )   << "Assuming no mapping between solid and carrier species"
+                << endl;
+//            setGlobalGasIds(YGas);
             break;
         }
         default:
