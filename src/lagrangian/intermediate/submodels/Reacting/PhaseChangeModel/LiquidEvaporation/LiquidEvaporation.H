@@ -27,6 +27,7 @@ Class
 
 Description
     Liquid evaporation model
+    - uses ideal gas assumption
 
 \*---------------------------------------------------------------------------*/
 
