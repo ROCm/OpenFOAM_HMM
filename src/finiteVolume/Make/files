@@ -189,6 +189,7 @@ $(schemes)/outletStabilised/outletStabilised.C
 $(schemes)/reverseLinear/reverseLinear.C
 $(schemes)/clippedLinear/clippedLinear.C
 $(schemes)/harmonic/harmonic.C
+$(schemes)/fixedBlended/fixedBlended.C
 $(schemes)/localBlended/localBlended.C
 $(schemes)/localMax/localMax.C
 $(schemes)/localMin/localMin.C
@@ -207,7 +208,7 @@ $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationS
 $(limitedSchemes)/upwind/upwind.C
 $(limitedSchemes)/blended/blended.C
 $(limitedSchemes)/linearUpwind/linearUpwind.C
-$(limitedSchemes)/linearUpwindV/linearUpwindV.C
+$(limitedSchemes)/linearUpwind/linearUpwindV.C
 $(limitedSchemes)/Gamma/Gamma.C
 $(limitedSchemes)/SFCD/SFCD.C
 $(limitedSchemes)/Minmod/Minmod.C

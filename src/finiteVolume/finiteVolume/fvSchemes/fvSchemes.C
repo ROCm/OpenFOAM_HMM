@@ -27,9 +27,33 @@ License
 #include "fvSchemes.H"
 #include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 
 int Foam::fvSchemes::debug(Foam::debug::debugSwitch("fvSchemes", false));
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+void Foam::fvSchemes::clear()
+{
+    ddtSchemes_.clear();
+    defaultDdtScheme_.clear();
+    d2dt2Schemes_.clear();
+    defaultD2dt2Scheme_.clear();
+    interpolationSchemes_.clear();
+    defaultInterpolationScheme_.clear();
+    divSchemes_.clear(); // optional
+    defaultDivScheme_.clear();
+    gradSchemes_.clear(); // optional
+    defaultGradScheme_.clear();
+    snGradSchemes_.clear();
+    defaultSnGradScheme_.clear();
+    laplacianSchemes_.clear(); // optional
+    defaultLaplacianScheme_.clear();
+    fluxRequired_.clear();
+    defaultFluxRequired_ = false;
+    cacheFields_.clear();
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -48,8 +72,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     ddtSchemes_
     (
-        ITstream(objectPath() + "::ddtSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::ddtSchemes",
+            tokenList()
+        )()
     ),
     defaultDdtScheme_
     (
@@ -58,8 +85,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     d2dt2Schemes_
     (
-        ITstream(objectPath() + "::d2dt2Schemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::d2dt2Schemes",
+            tokenList()
+        )()
     ),
     defaultD2dt2Scheme_
     (
@@ -68,8 +98,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     interpolationSchemes_
     (
-        ITstream(objectPath() + "::interpolationSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::interpolationSchemes",
+            tokenList()
+        )()
     ),
     defaultInterpolationScheme_
     (
@@ -78,8 +111,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     divSchemes_
     (
-        ITstream(objectPath() + "::divSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::divSchemes",
+            tokenList()
+        )()
     ),
     defaultDivScheme_
     (
@@ -88,8 +124,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     gradSchemes_
     (
-        ITstream(objectPath() + "::gradSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::gradSchemes",
+            tokenList()
+        )()
     ),
     defaultGradScheme_
     (
@@ -98,8 +137,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     snGradSchemes_
     (
-        ITstream(objectPath() + "::snGradSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::snGradSchemes",
+            tokenList()
+        )()
     ),
     defaultSnGradScheme_
     (
@@ -108,8 +150,11 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     laplacianSchemes_
     (
-        ITstream(objectPath() + "::laplacianSchemes",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::laplacianSchemes",
+            tokenList()
+        )()
     ),
     defaultLaplacianScheme_
     (
@@ -118,14 +163,20 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
     ),
     fluxRequired_
     (
-        ITstream(objectPath() + "::fluxRequired",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::fluxRequired",
+            tokenList()
+        )()
     ),
     defaultFluxRequired_(false),
     cacheFields_
     (
-        ITstream(objectPath() + "::cacheFields",
-        tokenList())()
+        ITstream
+        (
+            objectPath() + "::cacheFields",
+            tokenList()
+        )()
     )
 {
     read();
@@ -140,6 +191,9 @@ bool Foam::fvSchemes::read()
     {
         const dictionary& dict = schemesDict();
 
+        // persistent settings across reads is incorrect
+        clear();
+
         if (dict.found("ddtSchemes"))
         {
             ddtSchemes_ = dict.subDict("ddtSchemes");
@@ -148,20 +202,23 @@ bool Foam::fvSchemes::read()
         {
             // For backward compatibility.
             // The timeScheme will be deprecated with warning or removed
+            WarningIn("fvSchemes::read()")
+                << "Using deprecated 'timeScheme' instead of 'ddtSchemes'"
+                << nl << endl;
 
-            word timeSchemeName(dict.lookup("timeScheme"));
+            word schemeName(dict.lookup("timeScheme"));
 
-            if (timeSchemeName == "EulerImplicit")
+            if (schemeName == "EulerImplicit")
             {
-                timeSchemeName = "Euler";
+                schemeName = "Euler";
             }
-            else if (timeSchemeName == "BackwardDifferencing")
+            else if (schemeName == "BackwardDifferencing")
             {
-                timeSchemeName = "backward";
+                schemeName = "backward";
             }
-            else if (timeSchemeName == "SteadyState")
+            else if (schemeName == "SteadyState")
             {
-                timeSchemeName = "steadyState";
+                schemeName = "steadyState";
             }
             else
             {
@@ -172,19 +229,14 @@ bool Foam::fvSchemes::read()
                     << exit(FatalIOError);
             }
 
-            if (ddtSchemes_.found("default"))
-            {
-                ddtSchemes_.remove("default");
-            }
-
-            ddtSchemes_.add("default", timeSchemeName);
+            ddtSchemes_.set("default", schemeName);
 
             ddtSchemes_.lookup("default")[0].lineNumber() =
                 dict.lookup("timeScheme").lineNumber();
         }
         else
         {
-            ddtSchemes_.add("default", "none");
+            ddtSchemes_.set("default", "none");
         }
 
         if
@@ -205,31 +257,29 @@ bool Foam::fvSchemes::read()
         {
             // For backward compatibility.
             // The timeScheme will be deprecated with warning or removed
+            WarningIn("fvSchemes::read()")
+                << "Using deprecated 'timeScheme' instead of 'd2dt2Schemes'"
+                << nl << endl;
 
-            word timeSchemeName(dict.lookup("timeScheme"));
+            word schemeName(dict.lookup("timeScheme"));
 
-            if (timeSchemeName == "EulerImplicit")
+            if (schemeName == "EulerImplicit")
             {
-                timeSchemeName = "Euler";
+                schemeName = "Euler";
             }
-            else if (timeSchemeName == "SteadyState")
+            else if (schemeName == "SteadyState")
             {
-                timeSchemeName = "steadyState";
-            }
-
-            if (d2dt2Schemes_.found("default"))
-            {
-                d2dt2Schemes_.remove("default");
+                schemeName = "steadyState";
             }
 
-            d2dt2Schemes_.add("default", timeSchemeName);
+            d2dt2Schemes_.set("default", schemeName);
 
             d2dt2Schemes_.lookup("default")[0].lineNumber() =
                 dict.lookup("timeScheme").lineNumber();
         }
         else
         {
-            d2dt2Schemes_.add("default", "none");
+            d2dt2Schemes_.set("default", "none");
         }
 
         if

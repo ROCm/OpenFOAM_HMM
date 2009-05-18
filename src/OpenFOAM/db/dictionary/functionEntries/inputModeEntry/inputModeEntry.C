@@ -72,6 +72,14 @@ void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
     {
         mode_ = OVERWRITE;
     }
+    else if (mode == "protect")
+    {
+        mode_ = PROTECT;
+    }
+    else if (mode == "warn")
+    {
+        mode_ = WARN;
+    }
     else if (mode == "error")
     {
         mode_ = ERROR;
@@ -79,7 +87,8 @@ void Foam::functionEntries::inputModeEntry::setMode(Istream& is)
     else
     {
         WarningIn("Foam::functionEntries::inputModeEntry::setMode(Istream&)")
-            << "unsupported input mode " << mode
+            << "unsupported input mode '" << mode
+            << "' ... defaulting to 'merge'"
             << endl;
     }
 }
@@ -113,6 +122,17 @@ bool Foam::functionEntries::inputModeEntry::merge()
 bool Foam::functionEntries::inputModeEntry::overwrite()
 {
     return mode_ == OVERWRITE;
+}
+
+
+bool Foam::functionEntries::inputModeEntry::protect()
+{
+    return mode_ == PROTECT;
+}
+
+bool Foam::functionEntries::inputModeEntry::error()
+{
+    return mode_ == ERROR;
 }
 
 

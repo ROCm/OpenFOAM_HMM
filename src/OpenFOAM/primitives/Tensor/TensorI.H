@@ -402,7 +402,7 @@ inline SymmTensor<Cmpt> symm(const Tensor<Cmpt>& t)
 }
 
 
-//- Return the twice the symmetric part of a tensor
+//- Return twice the symmetric part of a tensor
 template <class Cmpt>
 inline SymmTensor<Cmpt> twoSymm(const Tensor<Cmpt>& t)
 {
@@ -609,17 +609,9 @@ operator&(const SphericalTensor<Cmpt>& st1, const Tensor<Cmpt>& t2)
 {
     return Tensor<Cmpt>
     (
-        st1.ii()*t2.xx(),
-        st1.ii()*t2.xy(),
-        st1.ii()*t2.xz(),
-
-                          st1.ii()*t2.yx(),
-                          st1.ii()*t2.yy(),
-                          st1.ii()*t2.yz(),
-
-                                            st1.ii()*t2.zx(),
-                                            st1.ii()*t2.zy(),
-                                            st1.ii()*t2.zz()
+        st1.ii()*t2.xx(), st1.ii()*t2.xy(), st1.ii()*t2.xz(),
+        st1.ii()*t2.yx(), st1.ii()*t2.yy(), st1.ii()*t2.yz(),
+        st1.ii()*t2.zx(), st1.ii()*t2.zy(), st1.ii()*t2.zz()
     );
 }
 
@@ -631,17 +623,9 @@ operator&(const Tensor<Cmpt>& t1, const SphericalTensor<Cmpt>& st2)
 {
     return Tensor<Cmpt>
     (
-        t1.xx()*st2.ii(),
-                          t1.xy()*st2.ii(),
-                                            t1.xz()*st2.ii(),
-
-        t1.yx()*st2.ii(),
-                          t1.yy()*st2.ii(),
-                                            t1.yz()*st2.ii(),
-
-        t1.zx()*st2.ii(),
-                          t1.zy()*st2.ii(),
-                                            t1.zz()*st2.ii()
+        t1.xx()*st2.ii(), t1.xy()*st2.ii(), t1.xz()*st2.ii(),
+        t1.yx()*st2.ii(), t1.yy()*st2.ii(), t1.yz()*st2.ii(),
+        t1.zx()*st2.ii(), t1.zy()*st2.ii(), t1.zz()*st2.ii()
     );
 }
 

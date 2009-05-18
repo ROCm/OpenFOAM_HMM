@@ -115,11 +115,11 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    scalar kappa = ras.kappa().value();
-    scalar E = ras.E().value();
-    scalar yPlusLam = ras.yPlusLam();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar E = rasModel.E().value();
+    const scalar yPlusLam = rasModel.yPlusLam();
 
     const scalarField& ry = patch().deltaCoeffs();
 

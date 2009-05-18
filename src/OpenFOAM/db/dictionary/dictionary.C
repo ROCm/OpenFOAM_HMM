@@ -53,7 +53,8 @@ bool Foam::dictionary::findInPatterns
         {
             if
             (
-                patternMatch ? reLink()->match(Keyword)
+                patternMatch
+              ? reLink()->match(Keyword)
               : wcLink()->keyword() == Keyword
             )
             {
@@ -83,7 +84,8 @@ bool Foam::dictionary::findInPatterns
         {
             if
             (
-                patternMatch ? reLink()->match(Keyword)
+                patternMatch
+              ? reLink()->match(Keyword)
               : wcLink()->keyword() == Keyword
             )
             {
@@ -154,6 +156,20 @@ Foam::dictionary::dictionary
                 autoPtr<regExp>(new regExp(iter().keyword()))
             );
         }
+    }
+}
+
+
+Foam::dictionary::dictionary
+(
+    const dictionary* dictPtr
+)
+:
+    parent_(dictionary::null)
+{
+    if (dictPtr)
+    {
+        operator=(*dictPtr);
     }
 }
 

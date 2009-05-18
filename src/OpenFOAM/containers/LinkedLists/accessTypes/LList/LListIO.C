@@ -61,11 +61,11 @@ Foam::Istream& Foam::operator>>(Istream& is, LList<LListBase, T>& L)
         label s = firstToken.labelToken();
 
         // Read beginning of contents
-        char listDelimiter = is.readBeginList("LList<LListBase, T>");
+        char delimiter = is.readBeginList("LList<LListBase, T>");
 
         if (s)
         {
-            if (listDelimiter == token::BEGIN_LIST)
+            if (delimiter == token::BEGIN_LIST)
             {
                 for (register label i=0; i<s; i++)
                 {

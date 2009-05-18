@@ -169,14 +169,14 @@ bool LienLeschzinerLowRe::read()
 {
     if (RASModel::read())
     {
-        coeffDict_.readIfPresent<scalar>("C1", C1);
-        coeffDict_.readIfPresent<scalar>("C2", C2);
-        coeffDict_.readIfPresent<scalar>("alphak", alphak);
-        coeffDict_.readIfPresent<scalar>("alphaEps", alphaEps);
-        coeffDict_.readIfPresent<scalar>("Cmu", Cmu);
-        coeffDict_.readIfPresent<scalar>("Am", Am);
-        coeffDict_.readIfPresent<scalar>("Aepsilon", Aepsilon);
-        coeffDict_.readIfPresent<scalar>("Amu", Amu);
+        coeffDict().readIfPresent<scalar>("C1", C1);
+        coeffDict().readIfPresent<scalar>("C2", C2);
+        coeffDict().readIfPresent<scalar>("alphak", alphak);
+        coeffDict().readIfPresent<scalar>("alphaEps", alphaEps);
+        coeffDict().readIfPresent<scalar>("Cmu", Cmu);
+        coeffDict().readIfPresent<scalar>("Am", Am);
+        coeffDict().readIfPresent<scalar>("Aepsilon", Aepsilon);
+        coeffDict().readIfPresent<scalar>("Amu", Amu);
 
         return true;
     }

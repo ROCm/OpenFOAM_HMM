@@ -257,7 +257,7 @@ endif
 setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH"`
 
 #- Clean MANPATH
-setenv MANPATH `$cleanProg "$MANPATH"`
+setenv MANPATH `$cleanProg "$MANPATH"`:
 
 #- Clean LD_PRELOAD
 if ( $?LD_PRELOAD ) then

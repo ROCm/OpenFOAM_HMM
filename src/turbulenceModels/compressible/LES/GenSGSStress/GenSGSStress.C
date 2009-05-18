@@ -59,7 +59,7 @@ GenSGSStress::GenSGSStress
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ce",
-            coeffDict(),
+            coeffDict_,
             1.048
         )
     ),
@@ -82,6 +82,19 @@ GenSGSStress::GenSGSStress
         IOobject
         (
             "muSgs",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::MUST_READ,
+            IOobject::AUTO_WRITE
+        ),
+        mesh_
+    ),
+
+    alphaSgs_
+    (
+        IOobject
+        (
+            "alphaSgs",
             runTime_.timeName(),
             mesh_,
             IOobject::MUST_READ,

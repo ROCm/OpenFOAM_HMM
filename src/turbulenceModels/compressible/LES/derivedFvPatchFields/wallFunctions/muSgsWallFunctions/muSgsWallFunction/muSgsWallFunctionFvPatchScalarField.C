@@ -117,12 +117,10 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const LESModel& sgsModel
-        = db().lookupObject<LESModel>("LESProperties");
+    const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
-    scalar kappa = readScalar(sgsModel.lookup("kappa"));
-
-    scalar E = readScalar(sgsModel.subDict("wallFunctionCoeffs").lookup("E"));
+    const scalar kappa = lesModel.kappa().value();
+    const scalar E = lesModel.E().value();
 
     const scalarField& ry = patch().deltaCoeffs();
 

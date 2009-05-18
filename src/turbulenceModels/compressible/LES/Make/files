@@ -1,5 +1,4 @@
 LESModel/LESModel.C
-LESModel/newLESModel.C
 GenEddyVisc/GenEddyVisc.C
 GenSGSStress/GenSGSStress.C
 
@@ -15,5 +14,9 @@ wallFunctions=derivedFvPatchFields/wallFunctions
 
 muSgsWallFunctions=$(wallFunctions)/muSgsWallFunctions
 $(muSgsWallFunctions)/muSgsWallFunction/muSgsWallFunctionFvPatchScalarField.C
+
+alphaSgsWallFunctions=$(wallFunctions)/alphaSgsWallFunctions
+$(alphaSgsWallFunctions)/alphaSgsWallFunction/alphaSgsWallFunctionFvPatchScalarField.C
+$(alphaSgsWallFunctions)/alphaSgsJayatillekeWallFunction/alphaSgsJayatillekeWallFunctionFvPatchScalarField.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleLESModels

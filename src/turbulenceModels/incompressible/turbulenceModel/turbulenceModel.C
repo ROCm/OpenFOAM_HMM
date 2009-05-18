@@ -67,13 +67,13 @@ autoPtr<turbulenceModel> turbulenceModel::New
     transportModel& transport
 )
 {
-    word turbulenceModelTypeName;
+    word modelName;
 
-    // Enclose the creation of the turbulencePropertiesDict to ensure it is
-    // deleted before the turbulenceModel is created otherwise the dictionary
-    // is entered in the database twice
+    // Enclose the creation of the dictionary to ensure it is deleted
+    // before the turbulenceModel is created otherwise the dictionary is
+    // entered in the database twice
     {
-        IOdictionary turbulencePropertiesDict
+        IOdictionary dict
         (
             IOobject
             (
@@ -85,15 +85,13 @@ autoPtr<turbulenceModel> turbulenceModel::New
             )
         );
 
-        turbulencePropertiesDict.lookup("simulationType")
-            >> turbulenceModelTypeName;
+        dict.lookup("simulationType") >> modelName;
     }
 
-    Info<< "Selecting turbulence model type "
-        << turbulenceModelTypeName << endl;
+    Info<< "Selecting turbulence model type " << modelName << endl;
 
     turbulenceModelConstructorTable::iterator cstrIter =
-        turbulenceModelConstructorTablePtr_->find(turbulenceModelTypeName);
+        turbulenceModelConstructorTablePtr_->find(modelName);
 
     if (cstrIter == turbulenceModelConstructorTablePtr_->end())
     {
@@ -101,7 +99,7 @@ autoPtr<turbulenceModel> turbulenceModel::New
         (
             "turbulenceModel::New(const volVectorField&, "
             "const surfaceScalarField&, transportModel&)"
-        )   << "Unknown turbulenceModel type " << turbulenceModelTypeName
+        )   << "Unknown turbulenceModel type " << modelName
             << endl << endl
             << "Valid turbulenceModel types are :" << endl
             << turbulenceModelConstructorTablePtr_->toc()

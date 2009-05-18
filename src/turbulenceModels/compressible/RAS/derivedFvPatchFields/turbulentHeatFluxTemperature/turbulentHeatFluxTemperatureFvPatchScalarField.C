@@ -148,9 +148,9 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::updateCoeffs()
 
     const label patchI = patch().index();
 
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalarField alphaEffp = ras.alphaEff()().boundaryField()[patchI];
+    const scalarField alphaEffp = rasModel.alphaEff()().boundaryField()[patchI];
 
     const basicThermo& thermo =
         db().lookupObject<basicThermo>("thermophysicalProperties");

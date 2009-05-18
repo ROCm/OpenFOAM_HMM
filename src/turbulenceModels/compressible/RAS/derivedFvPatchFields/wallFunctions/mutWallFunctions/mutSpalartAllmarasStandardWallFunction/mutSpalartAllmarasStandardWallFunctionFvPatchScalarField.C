@@ -120,11 +120,11 @@ void mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    scalar kappa = ras.kappa().value();
-    scalar E = ras.E().value();
-    scalar yPlusLam = ras.yPlusLam();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar E = rasModel.E().value();
+    scalar yPlusLam = rasModel.yPlusLam();
 
     const scalarField& ry = patch().deltaCoeffs();
 
@@ -159,7 +159,7 @@ void mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
             yPlusLast = yPlus;
             yPlus = (kappaRe + yPlus)/(1.0 + log(E*yPlus));
 
-        } while(mag(ryPlusLam*(yPlus - yPlusLast)) > 0.01 && ++iter < 10 );
+        } while (mag(ryPlusLam*(yPlus - yPlusLast)) > 0.01 && ++iter < 10 );
 
         if (yPlus > yPlusLam)
         {

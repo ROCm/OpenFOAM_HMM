@@ -108,16 +108,15 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
     }
 
     // Lookup Cmu corresponding to the turbulence model selected
-    const compressible::RASModel& RAS =
-        db().lookupObject<compressible::RASModel>("RASProperties");
-    scalar Cmu = readScalar(RAS.coeffDict().lookup("Cmu"));
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    scalar Cmu75 = pow(Cmu, 0.75);
+    const scalar Cmu = readScalar(rasModel.coeffDict().lookup("Cmu"));
+    const scalar Cmu75 = pow(Cmu, 0.75);
 
-    const fvPatchField<scalar>& k =
+    const fvPatchField<scalar>& kp =
         patch().lookupPatchField<volScalarField, scalar>("k");
 
-    operator==(Cmu75*k*sqrt(k)/mixingLength_);
+    operator==(Cmu75*kp*sqrt(kp)/mixingLength_);
 
     fixedValueFvPatchField<scalar>::updateCoeffs();
 }
