@@ -79,10 +79,10 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& gases
+    PtrList<specieReactingProperties>& carrierSpecies
 )
 :
-    ReactingCloud<ParcelType>(cloudType, rho, U, g, thermo, gases),
+    ReactingCloud<ParcelType>(cloudType, rho, U, g, thermo, carrierSpecies),
     reactingMultiphaseCloud(),
     constProps_(this->particleProperties()),
     devolatilisationModel_

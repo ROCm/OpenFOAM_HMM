@@ -372,9 +372,18 @@ public:
 
         // Main calculation loop
 
-            //- Update cell based quantities
+            //- Set cell values
             template<class TrackData>
-            void updateCellQuantities
+            void setCellValues
+            (
+                TrackData& td,
+                const scalar dt,
+                const label cellI
+            );
+
+            //- Correct cell values using latest transfer information
+            template<class TrackData>
+            void cellValueSourceCorrection
             (
                 TrackData& td,
                 const scalar dt,

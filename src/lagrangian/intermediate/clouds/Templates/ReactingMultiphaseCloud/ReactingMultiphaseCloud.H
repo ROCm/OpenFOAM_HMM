@@ -121,7 +121,7 @@ public:
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& gases
+            PtrList<specieReactingProperties>& carrierSpecies
         );
 
 

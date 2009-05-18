@@ -30,21 +30,21 @@ License
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ReactingParcel<ParcelType>::updateCellQuantities
+void Foam::ReactingParcel<ParcelType>::setCellValues
 (
     TrackData& td,
     const scalar dt,
     const label cellI
 )
 {
-    ThermoParcel<ParcelType>::updateCellQuantities(td, dt, cellI);
+    ThermoParcel<ParcelType>::setCellValues(td, dt, cellI);
 
     pc_ = td.pInterp().interpolate(this->position(), cellI);
     if (pc_ < td.constProps().pMin())
     {
         WarningIn
         (
-            "void Foam::ReactingParcel<ParcelType>::updateCellQuantities"
+            "void Foam::ReactingParcel<ParcelType>::setCellValues"
             "("
                 "TrackData&, "
                 "const scalar, "
@@ -55,14 +55,44 @@ void Foam::ReactingParcel<ParcelType>::updateCellQuantities
 
         pc_ = td.constProps().pMin();
     }
+}
 
-    // Apply correction to cell density to account for mass transfer
+
+template<class ParcelType>
+template<class TrackData>
+void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
+(
+    TrackData& td,
+    const scalar dt,
+    const label cellI
+)
+{
+    scalar massCell = this->massCell(cellI);
+
     scalar addedMass = 0.0;
     forAll(td.cloud().rhoTrans(), i)
     {
         addedMass += td.cloud().rhoTrans(i)[cellI];
     }
+
     this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
+
+    scalar massCellNew = massCell + addedMass;
+    this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
+
+    scalar cpEff = 0;
+    if (addedMass > ROOTVSMALL)
+    {
+        forAll(td.cloud().rhoTrans(), i)
+        {
+            scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
+            cpEff += Y*td.cloud().carrierSpecies()[i].Cp(this->Tc_);
+        }
+    }
+    const scalar cpc = td.cpInterp().psi()[cellI];
+    this->cpc_ = (massCell*cpc + addedMass*cpEff)/massCellNew;
+
+    this->Tc_ += td.cloud().hsTrans()[cellI]/(this->cpc_*massCellNew);
 }
 
 
@@ -164,8 +194,8 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*(mass0*U0 - mass1*U1);
 
-        // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*(mass0*H0 - mass1*H1);
+        // Update sensible enthalpy transfer
+        td.cloud().hsTrans()[cellI] += np0*(mass0*H0 - mass1*H1);
     }
 
 
@@ -184,7 +214,7 @@ void Foam::ReactingParcel<ParcelType>::calc
                 td.cloud().rhoTrans(id)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
-            td.cloud().hTrans()[cellI] += np0*mass1*H1;
+            td.cloud().hsTrans()[cellI] += np0*mass1*H1;
         }
     }
 

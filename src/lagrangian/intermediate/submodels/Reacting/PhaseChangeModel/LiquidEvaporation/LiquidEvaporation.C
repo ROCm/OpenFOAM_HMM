@@ -41,8 +41,8 @@ Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
     forAll(Xc, i)
     {
         scalar Y = this->owner().carrierThermo().composition().Y()[i][cellI];
-        Winv += Y/this->owner().gases()[i].W();
-        Xc[i] = Y/this->owner().gases()[i].W();
+        Winv += Y/this->owner().carrierSpecies()[i].W();
+        Xc[i] = Y/this->owner().carrierSpecies()[i].W();
     }
 
     return Xc/Winv;
@@ -153,6 +153,9 @@ void Foam::LiquidEvaporation<CloudType>::calculate
     // Reynolds number
     scalar Re = mag(Ur)*d/(nuc + ROOTVSMALL);
 
+    // film temperature evaluated using the 1/3 rule
+    scalar Tf = (2.0*T + Tc)/3.0;
+
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)
     {
@@ -160,10 +163,12 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         label lid = liqToLiqMap_[i];
 
         // vapour diffusivity [m2/s]
-        scalar Dab = liquids_->properties()[lid].D(pc, T);
+        scalar Dab = liquids_->properties()[lid].D(pc, Tf);
 
         // saturation pressure for species i [pa]
-        scalar pSat = liquids_->properties()[lid].pv(pc, T);
+        // - carrier phase pressure assumed equal to the liquid vapour pressure
+        //   close to the surface
+        scalar pSat = liquids_->properties()[lid].pv(pc, Tf);
 
         // Schmidt number
         scalar Sc = nuc/(Dab + ROOTVSMALL);
@@ -175,7 +180,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         scalar kc = Sh*Dab/(d + ROOTVSMALL);
 
         // vapour concentration at droplet surface [kgmol/m3]
-        scalar Cs = pSat/(specie::RR*T);
+        scalar Cs = pSat/(specie::RR*Tf);
 
         // vapour concentration in bulk gas [kgmol/m3]
         scalar Cinf = Xc[gid]*pc/(specie::RR*Tc);

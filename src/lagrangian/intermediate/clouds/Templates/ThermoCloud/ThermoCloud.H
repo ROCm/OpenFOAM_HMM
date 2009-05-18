@@ -99,8 +99,14 @@ class ThermoCloud
 
         // Sources
 
-            //- Enthalpy transfer
-            DimensionedField<scalar, volMesh> hTrans_;
+            //- Sensible enthalpy transfer
+            DimensionedField<scalar, volMesh> hsTrans_;
+
+            //- Chemical enthalpy transfer
+            // - If solving for total enthalpy, the carrier phase enthalpy will
+            //   receive the full enthalpy of reaction via creation of reaction
+            //   products
+            DimensionedField<scalar, volMesh> hcTrans_;
 
 
     // Private Member Functions
@@ -173,10 +179,19 @@ public:
 
                 // Enthalpy
 
-                    //- Return reference to enthalpy source
-                    inline DimensionedField<scalar, volMesh>& hTrans();
+                    //- Return reference to sensible enthalpy source
+                    inline DimensionedField<scalar, volMesh>& hsTrans();
 
-                    //- return tmp enthalpy source term - fully explicit
+                    //- Return tmp total sensible enthalpy source term
+                    inline tmp<DimensionedField<scalar, volMesh> > Shs() const;
+
+                    //- Return reference to chemical enthalpy source
+                    inline DimensionedField<scalar, volMesh>& hcTrans();
+
+                    //- Return tmp chemical enthalpy source term
+                    inline tmp<DimensionedField<scalar, volMesh> > Shc() const;
+
+                    //- Return tmp total enthalpy source term
                     inline tmp<DimensionedField<scalar, volMesh> > Sh() const;
 
 

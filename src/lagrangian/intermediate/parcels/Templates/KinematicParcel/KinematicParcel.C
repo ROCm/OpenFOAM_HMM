@@ -31,7 +31,7 @@ License
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::KinematicParcel<ParcelType>::updateCellQuantities
+void Foam::KinematicParcel<ParcelType>::setCellValues
 (
     TrackData& td,
     const scalar dt,
@@ -43,7 +43,7 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
     {
         WarningIn
         (
-            "void Foam::KinematicParcel<ParcelType>::updateCellQuantities"
+            "void Foam::KinematicParcel<ParcelType>::setCellValues"
             "("
                 "TrackData&, "
                 "const scalar, "
@@ -57,9 +57,6 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
 
     Uc_ = td.UInterp().interpolate(this->position(), cellI);
 
-    // Apply correction to cell velocity to account for momentum transfer
-    Uc_ += td.cloud().UTrans()[cellI]/(massCell(cellI));
-
     muc_ = td.muInterp().interpolate(this->position(), cellI);
 
     // Apply dispersion components to carrier phase velocity
@@ -72,6 +69,19 @@ void Foam::KinematicParcel<ParcelType>::updateCellQuantities
         UTurb_,
         tTurb_
     );
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+void Foam::KinematicParcel<ParcelType>::cellValueSourceCorrection
+(
+    TrackData& td,
+    const scalar dt,
+    const label cellI
+)
+{
+    Uc_ += td.cloud().UTrans()[cellI]/massCell(cellI);
 }
 
 
@@ -183,8 +193,8 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
         // Set the Lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
-        // Remember which cell the Parcel is in
-        // since this will change if a face is hit
+        // Remember which cell the Parcel is in since this will change if a
+        // face is hit
         label cellI = p.cell();
 
         dt *= p.trackToFace(p.position() + dt*U_, td);
@@ -192,12 +202,17 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
         tEnd -= dt;
         p.stepFraction() = 1.0 - tEnd/deltaT;
 
-        // Update cell based properties
-        p.updateCellQuantities(td, dt, cellI);
-
         // Avoid problems with extremely small timesteps
         if (dt > ROOTVSMALL)
         {
+            // Update cell based properties
+            p.setCellValues(td, dt, cellI);
+
+            if (td.cloud().cellValueSourceCorrection())
+            {
+                p.cellValueSourceCorrection(td, dt, cellI);
+            }
+
             p.calc(td, dt, cellI);
         }
 

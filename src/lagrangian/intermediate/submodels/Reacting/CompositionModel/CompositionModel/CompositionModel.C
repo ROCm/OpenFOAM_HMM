@@ -40,7 +40,7 @@ Foam::CompositionModel<CloudType>::CompositionModel
     owner_(owner),
     coeffDict_(dict.subDict(type + "Coeffs")),
     carrierThermo_(owner.carrierThermo()),
-    gases_(owner.gases()),
+    carrierSpecies_(owner.carrierSpecies()),
     liquids_
     (
         liquidMixture::New
@@ -111,9 +111,9 @@ Foam::CompositionModel<CloudType>::carrierThermo() const
 
 template<class CloudType>
 const Foam::PtrList<Foam::specieReactingProperties>&
-Foam::CompositionModel<CloudType>::gases() const
+Foam::CompositionModel<CloudType>::carrierSpecies() const
 {
-    return gases_;
+    return carrierSpecies_;
 }
 
 
@@ -294,8 +294,8 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                WInv += Y[i]/this->gases()[gid].W();
-                X[i] = Y[i]/this->gases()[gid].W();
+                WInv += Y[i]/this->carrierSpecies()[gid].W();
+                X[i] = Y[i]/this->carrierSpecies()[gid].W();
             }
             break;
         }
@@ -345,7 +345,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HMixture += Y[i]*this->gases()[gid].H(T);
+                HMixture += Y[i]*this->carrierSpecies()[gid].H(T);
             }
             break;
         }
@@ -409,7 +409,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*this->gases()[gid].Cp(T);
+                cpMixture += Y[i]*this->carrierSpecies()[gid].Cp(T);
             }
             break;
         }

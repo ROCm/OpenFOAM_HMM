@@ -80,7 +80,7 @@ class ReactingCloud
         hCombustionThermo& carrierThermo_;
 
         //- Gas phase properties
-        PtrList<specieReactingProperties>& gases_;
+        PtrList<specieReactingProperties>& carrierSpecies_;
 
 
         // References to the cloud sub-models
@@ -127,7 +127,7 @@ public:
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& gases
+            PtrList<specieReactingProperties>& carrierSpecies
         );
 
 
@@ -154,7 +154,7 @@ public:
             inline hCombustionThermo& carrierThermo();
 
             //- Gas phase properties
-            inline const PtrList<specieReactingProperties>& gases() const;
+            inline const PtrList<specieReactingProperties>& carrierSpecies() const;
 
 
             // Sub-models

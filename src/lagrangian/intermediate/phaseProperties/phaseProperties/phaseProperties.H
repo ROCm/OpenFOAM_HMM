@@ -100,7 +100,8 @@ private:
         //- Set global ids - liquid and solid phases
         void setGlobalIds(const wordList& globalNames);
 
-        //- Set global gas ids - attempts to map component names to global gases
+        //- Set global gas ids - attempts to map component names to global
+        //  carrier species
         void setGlobalGasIds(const PtrList<volScalarField>& YGas);
 
         //- Check the total mass fraction

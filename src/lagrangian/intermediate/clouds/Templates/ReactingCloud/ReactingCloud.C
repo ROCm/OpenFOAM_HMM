@@ -72,14 +72,14 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& gases
+    PtrList<specieReactingProperties>& carrierSpecies
 )
 :
     ThermoCloud<ParcelType>(cloudType, rho, U, g, thermo),
     reactingCloud(),
     constProps_(this->particleProperties()),
     carrierThermo_(thermo),
-    gases_(gases),
+    carrierSpecies_(carrierSpecies),
     compositionModel_
     (
         CompositionModel<ReactingCloud<ParcelType> >::New

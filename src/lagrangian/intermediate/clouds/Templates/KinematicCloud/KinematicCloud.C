@@ -96,6 +96,10 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     constProps_(particleProperties_),
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     coupled_(particleProperties_.lookup("coupled")),
+    cellValueSourceCorrection_
+    (
+        particleProperties_.lookup("cellValueSourceCorrection")
+    ),
     rndGen_(label(0)),
     rho_(rho),
     U_(U),

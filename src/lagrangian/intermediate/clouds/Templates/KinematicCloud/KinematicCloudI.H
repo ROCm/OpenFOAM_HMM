@@ -72,6 +72,14 @@ inline const Foam::Switch Foam::KinematicCloud<ParcelType>::coupled() const
 }
 
 
+template <class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cellValueSourceCorrection() const
+{
+    return cellValueSourceCorrection_;
+}
+
+
 template<class ParcelType>
 inline const Foam::volScalarField&
 Foam::KinematicCloud<ParcelType>::rho() const

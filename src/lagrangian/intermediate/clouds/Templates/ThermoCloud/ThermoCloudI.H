@@ -77,9 +77,85 @@ inline bool Foam::ThermoCloud<ParcelType>::radiation() const
 
 template<class ParcelType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hTrans()
+Foam::ThermoCloud<ParcelType>::hsTrans()
 {
-    return hTrans_;
+    return hsTrans_;
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::ThermoCloud<ParcelType>::Shs() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tShs
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "Shs",
+                this->db().time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            this->mesh(),
+            dimensionedScalar
+            (
+                "zero",
+                dimMass/dimLength/pow3(dimTime),
+                0.0
+            )
+        )
+    );
+
+    scalarField& Shs = tShs().field();
+    Shs = hsTrans_/(this->mesh().V()*this->db().time().deltaT());
+
+    return tShs;
+}
+
+
+template<class ParcelType>
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hcTrans()
+{
+    return hcTrans_;
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::ThermoCloud<ParcelType>::Shc() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tShc
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "Shc",
+                this->db().time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            this->mesh(),
+            dimensionedScalar
+            (
+                "zero",
+                dimMass/dimLength/pow3(dimTime),
+                0.0
+            )
+        )
+    );
+
+    scalarField& Shc = tShc().field();
+    Shc = hcTrans_/(this->mesh().V()*this->db().time().deltaT());
+
+    return tShc;
 }
 
 
@@ -111,7 +187,7 @@ Foam::ThermoCloud<ParcelType>::Sh() const
     );
 
     scalarField& Sh = tSh().field();
-    Sh = hTrans_/(this->mesh().V()*this->db().time().deltaT());
+    Sh = (hsTrans_ + hcTrans_)/(this->mesh().V()*this->db().time().deltaT());
 
     return tSh;
 }
