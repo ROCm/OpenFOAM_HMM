@@ -105,7 +105,11 @@ class KinematicCloud
 
         //- Flag to indicate whether parcels are coupled to the carrier phase
         //  i.e. whether or not to generate source terms for carrier phase
-        Switch coupled_;
+        const Switch coupled_;
+
+        //- Flag to correct cell values with latest transfer information
+        //  during the lagrangian timestep
+        const Switch cellValueSourceCorrection_;
 
         //- Random number generator - used by some injection routines
         Random rndGen_;
@@ -223,6 +227,9 @@ public:
 
             //- Return coupled flag
             inline const Switch coupled() const;
+
+            //- Return cell value correction flag
+            inline const Switch cellValueSourceCorrection() const;
 
             //- Return refernce to the random object
             inline Random& rndGen();

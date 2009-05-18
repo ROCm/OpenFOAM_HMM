@@ -102,11 +102,25 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         )
     ),
     radiation_(this->particleProperties().lookup("radiation")),
-    hTrans_
+    hsTrans_
     (
         IOobject
         (
-            this->name() + "hTrans",
+            this->name() + "hsTrans",
+            this->db().time().timeName(),
+            this->db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->mesh(),
+        dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
+    ),
+    hcTrans_
+    (
+        IOobject
+        (
+            this->name() + "hcTrans",
             this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
@@ -132,7 +146,8 @@ template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
-    hTrans_.field() = 0.0;
+    hsTrans_.field() = 0.0;
+    hcTrans_.field() = 0.0;
 }
 
 

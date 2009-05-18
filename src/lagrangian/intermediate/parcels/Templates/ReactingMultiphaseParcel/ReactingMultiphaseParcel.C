@@ -129,14 +129,54 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::updateMassFractions
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ReactingMultiphaseParcel<ParcelType>::updateCellQuantities
+void Foam::ReactingMultiphaseParcel<ParcelType>::setCellValues
 (
     TrackData& td,
     const scalar dt,
     const label cellI
 )
 {
-    ReactingParcel<ParcelType>::updateCellQuantities(td, dt, cellI);
+    ReactingParcel<ParcelType>::setCellValues(td, dt, cellI);
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
+(
+    TrackData& td,
+    const scalar dt,
+    const label cellI
+)
+{
+    scalar massCell = this->massCell(cellI);
+
+    scalar addedMass = 0.0;
+    forAll(td.cloud().rhoTrans(), i)
+    {
+        addedMass += td.cloud().rhoTrans(i)[cellI];
+    }
+
+    this->rhoc_ += addedMass/td.cloud().pMesh().cellVolumes()[cellI];
+
+    scalar massCellNew = massCell + addedMass;
+    this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
+
+    scalar cpEff = 0;
+    forAll(td.cloud().rhoTrans(), i)
+    {
+        scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
+        cpEff += Y*td.cloud().gases()[i].Cp(this->Tc_);
+    }
+
+    const scalar cpc = td.cpInterp().psi()[cellI];
+    this->cpc_ = (massCell*cpc + addedMass*cpEff)/massCellNew;
+
+    const scalar fCarrier = -1.0/td.constProps().hRetentionCoeff();
+    const scalar dh =
+        td.cloud().hsTrans()[cellI] + fCarrier*td.cloud().hcTrans[cellI];
+
+    this->Tc_ += dh/(this->cpc_*massCellNew);
 }
 
 
@@ -229,7 +269,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     scalarField dMassSRCarrier(td.cloud().gases().size(), 0.0);
 
     // Return enthalpy source and calc mass transfer(s) due to surface reaction
-    scalar HReaction =
+    scalar hReaction =
         calcSurfaceReactions
         (
             td,
@@ -250,11 +290,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             dMassSRCarrier
         );
 
-    // Heat of reaction split between component retained by particle
-    const scalar ShSR = td.constProps().hRetentionCoeff()*HReaction;
-
-    // ...and component added to the carrier phase
-    const scalar ShSRc = (1.0 - td.constProps().hRetentionCoeff())*HReaction;
+    // Heat of reaction retained by particle
+    const scalar ShSR = td.constProps().hRetentionCoeff()*hReaction;
 
 
     // Update component mass fractions
@@ -310,12 +347,14 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             label id = td.cloud().composition().localToGlobalGasId(LIQ, i);
             td.cloud().rhoTrans(id)[cellI] += np0*dMassLiquid[i];
         }
-//        // No mapping between solid components and carrier phase
-//        forAll(YSolid_, i)
-//        {
-//            label id = td.cloud().composition().localToGlobalGasId(SLD, i);
-//            td.cloud().rhoTrans(id)[cellI] += np0*dMassSolid[i];
-//        }
+/*
+        // No mapping between solid components and carrier phase
+        forAll(YSolid_, i)
+        {
+            label id = td.cloud().composition().localToGlobalGasId(SLD, i);
+            td.cloud().rhoTrans(id)[cellI] += np0*dMassSolid[i];
+        }
+*/
         forAll(dMassSRCarrier, i)
         {
             td.cloud().rhoTrans(i)[cellI] += np0*dMassSRCarrier[i];
@@ -324,8 +363,11 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*(mass0*U0 - mass1*U1);
 
-        // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*(mass0*H0 - (mass1*H1 + ShSRc));
+        // Update sensible enthalpy transfer
+        td.cloud().hsTrans()[cellI] += np0*(mass0*H0 - mass1*H1);
+
+        // Update chemical enthalpy transfer
+        td.cloud().hcTrans()[cellI] -= np0*ShSR;
     }
 
 
@@ -346,21 +388,20 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             }
             forAll(YLiquid_, i)
             {
-                label id =
-                    td.cloud().composition().localToGlobalGasId(LIQ, i);
+                label id = td.cloud().composition().localToGlobalGasId(LIQ, i);
                 td.cloud().rhoTrans(id)[cellI] +=
                     np0*mass1*YMix[LIQ]*YLiquid_[i];
             }
-//            // No mapping between solid components and carrier phase
-//            forAll(YSolid_, i)
-//            {
-//                label id =
-//                    td.cloud().composition().localToGlobalGasId(SLD, i);
-//                td.cloud().rhoTrans(id)[cellI] +=
-//                    np0*mass1*YMix[SLD]*YSolid_[i];
-//            }
-
-            td.cloud().hTrans()[cellI] += np0*mass1*H1;
+/*
+            // No mapping between solid components and carrier phase
+            forAll(YSolid_, i)
+            {
+                label id = td.cloud().composition().localToGlobalGasId(SLD, i);
+                td.cloud().rhoTrans(id)[cellI] +=
+                    np0*mass1*YMix[SLD]*YSolid_[i];
+            }
+*/
+            td.cloud().hsTrans()[cellI] += np0*mass1*H1;
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
         }
     }
@@ -466,7 +507,7 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     }
 
     // Update surface reactions
-    const scalar HReaction = td.cloud().surfaceReaction().calculate
+    const scalar hReaction = td.cloud().surfaceReaction().calculate
     (
         dt,
         cellI,
@@ -493,7 +534,7 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
        *(sum(dMassSRGas) + sum(dMassSRLiquid) + sum(dMassSRSolid))
     );
 
-    return HReaction;
+    return hReaction;
 }
 
 
@@ -502,4 +543,3 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
 #include "ReactingMultiphaseParcelIO.C"
 
 // ************************************************************************* //
-

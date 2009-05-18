@@ -30,28 +30,24 @@ License
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ThermoParcel<ParcelType>::updateCellQuantities
+void Foam::ThermoParcel<ParcelType>::setCellValues
 (
     TrackData& td,
     const scalar dt,
     const label cellI
 )
 {
-    KinematicParcel<ParcelType>::updateCellQuantities(td, dt, cellI);
+    KinematicParcel<ParcelType>::setCellValues(td, dt, cellI);
 
     cpc_ = td.cpInterp().interpolate(this->position(), cellI);
 
     Tc_ = td.TInterp().interpolate(this->position(), cellI);
 
-    // Apply correction to cell temperature to account for enthalpy transfer
-    scalar cpMean = td.cpInterp().psi()[cellI];
-    Tc_ += td.cloud().hTrans()[cellI]/(cpMean*this->massCell(cellI));
-
     if (Tc_ < td.constProps().TMin())
     {
         WarningIn
         (
-            "void Foam::ThermoParcel<ParcelType>::updateCellQuantities"
+            "void Foam::ThermoParcel<ParcelType>::setCellValues"
             "("
                 "TrackData&, "
                 "const scalar, "
@@ -62,6 +58,22 @@ void Foam::ThermoParcel<ParcelType>::updateCellQuantities
 
         Tc_ = td.constProps().TMin();
     }
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
+(
+    TrackData& td,
+    const scalar dt,
+    const label cellI
+)
+{
+    this->Uc_ += td.cloud().UTrans()[cellI]/this->massCell(cellI);
+
+    scalar cpMean = td.cpInterp().psi()[cellI];
+    Tc_ += td.cloud().hsTrans()[cellI]/(cpMean*this->massCell(cellI));
 }
 
 
@@ -118,8 +130,8 @@ void Foam::ThermoParcel<ParcelType>::calc
         // Update momentum transfer
         td.cloud().UTrans()[cellI] += np0*mass0*(U0 - U1);
 
-        // Update enthalpy transfer
-        td.cloud().hTrans()[cellI] += np0*mass0*(H0 - H1);
+        // Update sensible enthalpy transfer
+        td.cloud().hsTrans()[cellI] += np0*mass0*(H0 - H1);
     }
 
     // Set new particle properties
@@ -198,4 +210,3 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 #include "ThermoParcelIO.C"
 
 // ************************************************************************* //
-
