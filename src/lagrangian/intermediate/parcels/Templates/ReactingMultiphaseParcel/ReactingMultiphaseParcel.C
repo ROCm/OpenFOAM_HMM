@@ -176,7 +176,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
 
     const scalar fCarrier = -1.0/td.constProps().hRetentionCoeff();
     const scalar dh =
-        td.cloud().hsTrans()[cellI] + fCarrier*td.cloud().hcTrans[cellI];
+        td.cloud().hsTrans()[cellI] + fCarrier*td.cloud().hcTrans()[cellI];
 
     this->Tc_ += dh/(this->cpc_*massCellNew);
 }
