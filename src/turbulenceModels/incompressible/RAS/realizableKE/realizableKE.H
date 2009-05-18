@@ -41,7 +41,7 @@ Description
 
     The default model coefficients correspond to the following:
     @verbatim
-        realizableKE
+        realizableKECoeffs
         {
             Cmu         0.09;
             A0          4.0;
@@ -174,7 +174,7 @@ public:
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
 
-        //- Read turbulenceProperties dictionary
+        //- Read RASProperties dictionary
         virtual bool read();
 };
 

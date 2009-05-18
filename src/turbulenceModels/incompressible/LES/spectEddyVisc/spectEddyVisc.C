@@ -78,7 +78,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cB",
-            coeffDict(),
+            coeffDict_,
             8.22
         )
     ),
@@ -87,7 +87,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK1",
-            coeffDict(),
+            coeffDict_,
             0.83
         )
     ),
@@ -96,7 +96,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK2",
-            coeffDict(),
+            coeffDict_,
             1.03
         )
     ),
@@ -105,7 +105,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK3",
-            coeffDict(),
+            coeffDict_,
             4.75
         )
     ),
@@ -114,7 +114,7 @@ spectEddyVisc::spectEddyVisc
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cK4",
-            coeffDict(),
+            coeffDict_,
             2.55
         )
     )

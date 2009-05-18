@@ -38,7 +38,7 @@ Description
     This class defines the basic interface for a compressible flow SGS model,
     and encapsulates data of value to all possible models. In particular
     this includes references to all the dependent fields (rho, U, phi),
-    the physical viscosity mu, and the turbulenceProperties dictionary
+    the physical viscosity mu, and the LESProperties dictionary,
     which contains the model selection and model coefficients.
 
 SourceFiles
@@ -86,6 +86,19 @@ protected:
         dimensionedScalar k0_;
 
         autoPtr<LESdelta> delta_;
+
+        // Wall function properties
+
+            //- Wall function dictionary
+            dictionary wallFunctionDict_;
+
+            dimensionedScalar kappa_;
+
+            dimensionedScalar E_;
+
+            dimensionedScalar Cmu_;
+
+            dimensionedScalar Prt_;
 
 
     // Protected Member Functions
@@ -160,17 +173,12 @@ public:
 
     // Member Functions
 
-        //- Access the dictionary which provides info. about choice of
-        //  models, and all related data (particularly model coefficients).
-        inline dictionary& coeffDict()
+        //- Const access to the coefficients dictionary,
+        //  which provides info. about choice of models,
+        //  and all related data (particularly model coefficients).
+        inline const dictionary& coeffDict() const
         {
             return coeffDict_;
-        }
-
-        //- Access function to filter width
-        inline const volScalarField& delta() const
-        {
-            return delta_();
         }
 
         //- Return the value of k0 which k is not allowed to be less than
@@ -185,6 +193,35 @@ public:
             return k0_;
         }
 
+        //- Access function to filter width
+        inline const volScalarField& delta() const
+        {
+            return delta_();
+        }
+
+        //- Return kappa for use in wall-functions
+        dimensionedScalar kappa() const
+        {
+            return kappa_;
+        }
+
+        //- Return E for use in wall-functions
+        dimensionedScalar E() const
+        {
+            return E_;
+        }
+
+        //- Return Cmu for use in wall-functions
+        dimensionedScalar Cmu() const
+        {
+            return Cmu_;
+        }
+
+        //- Return turbulent Prandtl number for use in wall-functions
+        dimensionedScalar Prt() const
+        {
+            return Prt_;
+        }
 
         //- Return the SGS turbulent kinetic energy.
         virtual tmp<volScalarField> k() const = 0;
@@ -192,7 +229,7 @@ public:
         //- Return the SGS turbulent dissipation.
         virtual tmp<volScalarField> epsilon() const = 0;
 
-        //- Return the effective viscosity
+        //- Return the SGS turbulent viscosity
         virtual tmp<volScalarField> muSgs() const = 0;
 
         //- Return the effective viscosity
@@ -203,6 +240,9 @@ public:
                 new volScalarField("muEff", muSgs() + mu())
             );
         }
+
+        //- Return the SGS turbulent thermal diffusivity
+        virtual tmp<volScalarField> alphaSgs() const = 0;
 
         //- Return the SGS thermal conductivity.
         virtual tmp<volScalarField> alphaEff() const = 0;
@@ -225,6 +265,12 @@ public:
             virtual tmp<volScalarField> mut() const
             {
                 return muSgs();
+            }
+
+            //- Return the turbulence thermal diffusivity
+            virtual tmp<volScalarField> alphat() const
+            {
+                return alphaSgs();
             }
 
             //- Return the Reynolds stress tensor
@@ -254,7 +300,7 @@ public:
         //- Correct Eddy-Viscosity and related properties
         virtual void correct(const tmp<volTensorField>& gradU);
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read() = 0;
 };
 

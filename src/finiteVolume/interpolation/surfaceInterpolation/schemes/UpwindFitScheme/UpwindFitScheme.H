@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
     Foam::UpwindFitScheme
 
 Description
-    Upwind biased fit surface interpolation scheme which applies an explicit
+    Upwind biased fit surface interpolation scheme that applies an explicit
     correction to linear.
 
 \*---------------------------------------------------------------------------*/
@@ -159,25 +159,25 @@ public:
 
 #define makeUpwindFitSurfaceInterpolationTypeScheme(SS, POLYNOMIAL, STENCIL, TYPE) \
                                                                               \
-typedef UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL>                           \
-    UpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                           \
+typedef UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL>                            \
+    UpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                            \
 defineTemplateTypeNameAndDebugWithName                                        \
-    (UpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_, #SS, 0);                 \
+    (UpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_, #SS, 0);                  \
                                                                               \
 surfaceInterpolationScheme<TYPE>::addMeshConstructorToTable                   \
-<UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                \
+<UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                 \
     add##SS##STENCIL##TYPE##MeshConstructorToTable_;                          \
                                                                               \
 surfaceInterpolationScheme<TYPE>::addMeshFluxConstructorToTable               \
-<UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                \
+<UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                 \
     add##SS##STENCIL##TYPE##MeshFluxConstructorToTable_;
 
-#define makeUpwindFitSurfaceInterpolationScheme(SS, POLYNOMIAL, STENCIL)     \
+#define makeUpwindFitSurfaceInterpolationScheme(SS, POLYNOMIAL, STENCIL)      \
                                                                               \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)    \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)    \
+makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)     \
+makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)     \
 makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,sphericalTensor) \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor)\
+makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor) \
 makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,tensor)
 
 

@@ -90,7 +90,7 @@ public:
             )
         {}
 
-        //- Construct from Istream. 
+        //- Construct from Istream.
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
         linearUpwind
@@ -142,8 +142,9 @@ public:
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         correction
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
+            const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
+
 };
 
 

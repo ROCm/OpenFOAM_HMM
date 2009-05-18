@@ -279,16 +279,16 @@ bool SpalartAllmaras::read()
 {
     if (RASModel::read())
     {
-        alphaNut_.readIfPresent(coeffDict_);
-        alphah_.readIfPresent(coeffDict_);
+        alphaNut_.readIfPresent(coeffDict());
+        alphah_.readIfPresent(coeffDict());
 
-        Cb1_.readIfPresent(coeffDict_);
-        Cb2_.readIfPresent(coeffDict_);
+        Cb1_.readIfPresent(coeffDict());
+        Cb2_.readIfPresent(coeffDict());
         Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
-        Cw2_.readIfPresent(coeffDict_);
-        Cw3_.readIfPresent(coeffDict_);
-        Cv1_.readIfPresent(coeffDict_);
-        Cv2_.readIfPresent(coeffDict_);
+        Cw2_.readIfPresent(coeffDict());
+        Cw3_.readIfPresent(coeffDict());
+        Cv1_.readIfPresent(coeffDict());
+        Cv2_.readIfPresent(coeffDict());
 
         return true;
     }
