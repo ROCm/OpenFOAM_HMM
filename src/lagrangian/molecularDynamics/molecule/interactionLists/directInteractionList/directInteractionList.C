@@ -119,8 +119,6 @@ void Foam::directInteractionList::buildDirectInteractionList
 
                     const label cellO(mesh.faceOwner()[f]);
 
-                    const label cellN(mesh.faceNeighbour()[f]);
-
                     forAll(pCells, pC)
                     {
                         const label cellI(pCells[pC]);
@@ -155,6 +153,8 @@ void Foam::directInteractionList::buildDirectInteractionList
                         {
                             // boundary faces will not have neighbour
                             // information
+
+                            const label cellN(mesh.faceNeighbour()[f]);
 
                             if (cellN > cellI)
                             {
