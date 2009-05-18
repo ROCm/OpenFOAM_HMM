@@ -6,10 +6,10 @@ set -x
 wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
 
 wmakeLnInclude -f OpenFOAM
-wmakeLnInclude -f OSspecific/$WM_OS
+wmakeLnInclude -f OSspecific/$WM_OSTYPE
 Pstream/Allwmake
 
-wmake libo  OSspecific/$WM_OS
+wmake libo  OSspecific/$WM_OSTYPE
 wmake libso OpenFOAM
 
 wmake libso lagrangian/basic

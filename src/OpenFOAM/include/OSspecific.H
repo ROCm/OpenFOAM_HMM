@@ -26,11 +26,11 @@ InNamespace
     Foam
 
 Description
-    Functions used by OpenFOAM that are specific to the UNIX operating system
-    and need to be replaced or emulated on other systems.
+    Functions used by OpenFOAM that are specific to POSIX compliant
+    operating systems and need to be replaced or emulated on other systems.
 
 SourceFiles
-    Unix.C
+    POSIX.C
 
 \*---------------------------------------------------------------------------*/
 

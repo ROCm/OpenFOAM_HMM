@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    UNIX versions of the functions declared in OSspecific.H
+    POSIX versions of the functions declared in OSspecific.H
 
 \*---------------------------------------------------------------------------*/
 
@@ -32,7 +32,7 @@ Description
 #endif
 
 #include "OSspecific.H"
-#include "Unix.H"
+#include "POSIX.H"
 #include "foamVersion.H"
 #include "fileName.H"
 #include "fileStat.H"
@@ -56,7 +56,7 @@ Description
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::Unix, 0);
+defineTypeNameAndDebug(Foam::POSIX, 0);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -536,7 +536,7 @@ Foam::fileNameList Foam::readDir
     // also used as increment if initial size found to be insufficient
     static const int maxNnames = 100;
 
-    if (Unix::debug)
+    if (POSIX::debug)
     {
         Info<< "readDir(const fileName&, const fileType, const bool filtergz)"
             << " : reading directory " << directory << endl;
@@ -557,7 +557,7 @@ Foam::fileNameList Foam::readDir
     {
         dirEntries.setSize(0);
 
-        if (Unix::debug)
+        if (POSIX::debug)
         {
             Info<< "readDir(const fileName&, const fileType, "
                    "const bool filtergz) : cannot open directory "
@@ -690,7 +690,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         fileNameList contents = readDir(src, fileName::FILE, false);
         forAll(contents, i)
         {
-            if (Unix::debug)
+            if (POSIX::debug)
             {
                 Info<< "Copying : " << src/contents[i]
                     << " to " << destFile/contents[i] << endl;
@@ -704,7 +704,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
         fileNameList subdirs = readDir(src, fileName::DIRECTORY);
         forAll(subdirs, i)
         {
-            if (Unix::debug)
+            if (POSIX::debug)
             {
                 Info<< "Copying : " << src/subdirs[i]
                     << " to " << destFile << endl;
@@ -722,7 +722,7 @@ bool Foam::cp(const fileName& src, const fileName& dest)
 // Create a softlink. dst should not exist. Returns true if successful.
 bool Foam::ln(const fileName& src, const fileName& dst)
 {
-    if (Unix::debug)
+    if (POSIX::debug)
     {
         Info<< "Create softlink from : " << src << " to " << dst
             << endl;
@@ -759,7 +759,7 @@ bool Foam::ln(const fileName& src, const fileName& dst)
 // Rename srcFile dstFile
 bool Foam::mv(const fileName& srcFile, const fileName& dstFile)
 {
-    if (Unix::debug)
+    if (POSIX::debug)
     {
         Info<< "Move : " << srcFile << " to " << dstFile << endl;
     }
@@ -784,7 +784,7 @@ bool Foam::mv(const fileName& srcFile, const fileName& dstFile)
 // Remove a file returning true if successful otherwise false
 bool Foam::rm(const fileName& file)
 {
-    if (Unix::debug)
+    if (POSIX::debug)
     {
         Info<< "Removing : " << file << endl;
     }
@@ -804,7 +804,7 @@ bool Foam::rm(const fileName& file)
 // Remove a dirctory and its contents
 bool Foam::rmDir(const fileName& directory)
 {
-    if (Unix::debug)
+    if (POSIX::debug)
     {
         Info<< "rmDir(const fileName&) : "
             << "removing directory " << directory << endl;
