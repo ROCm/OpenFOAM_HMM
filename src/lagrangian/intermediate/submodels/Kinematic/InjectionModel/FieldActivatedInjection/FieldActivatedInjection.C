@@ -75,6 +75,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
 )
 :
     InjectionModel<CloudType>(dict, owner, typeName),
+    factor_(readScalar(this->coeffDict().lookup("factor"))),
     referenceField_
     (
         owner.db().objectRegistry::lookupObject<volScalarField>
@@ -212,7 +213,7 @@ bool Foam::FieldActivatedInjection<CloudType>::validInjection
     if
     (
          nParcelsInjected_[parcelI] < nParcelsPerInjector_
-      && referenceField_[cellI] > thresholdField_[cellI]
+      && factor_*referenceField_[cellI] > thresholdField_[cellI]
     )
     {
         nParcelsInjected_[parcelI]++;
