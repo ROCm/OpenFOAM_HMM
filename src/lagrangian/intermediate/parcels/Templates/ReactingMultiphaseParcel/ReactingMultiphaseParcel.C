@@ -163,12 +163,14 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
     this->Uc_ += td.cloud().UTrans()[cellI]/massCellNew;
 
     scalar cpEff = 0;
-    forAll(td.cloud().rhoTrans(), i)
+    if (addedMass > ROOTVSMALL)
     {
-        scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-        cpEff += Y*td.cloud().gases()[i].Cp(this->Tc_);
+        forAll(td.cloud().rhoTrans(), i)
+        {
+            scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
+            cpEff += Y*td.cloud().gases()[i].Cp(this->Tc_);
+        }
     }
-
     const scalar cpc = td.cpInterp().psi()[cellI];
     this->cpc_ = (massCell*cpc + addedMass*cpEff)/massCellNew;
 
