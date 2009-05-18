@@ -1014,8 +1014,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                 cc2++;
             } while (cc1 != ccStart);
 
-            verticesOnFace.shrink();
-
             if (verticesOnFace.size() >= 3)
             {
                 face newDualFace(verticesOnFace);
@@ -1196,8 +1194,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
-    ownerCellJumps.shrink();
-
     forAll(ownerCellJumps, oCJ)
     {
         label start = ownerCellJumps[oCJ];
@@ -1265,10 +1261,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     forAll(patchFaces, p)
     {
-        patchFaces[p].shrink();
-
-        patchOwners[p].shrink();
-
         patchSizes[p] = patchFaces[p].size();
 
         patchStarts[p] = nInternalFaces + nBoundaryFaces;
