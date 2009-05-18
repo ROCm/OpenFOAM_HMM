@@ -60,9 +60,9 @@ void Foam::pairPotentialList::readPairPotentialDict
                 else
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
-                            << "Pair pairPotential specification subDict "
-                            << idA << "-" << idB << " not found"
-                            << nl << abort(FatalError);
+                        << "Pair pairPotential specification subDict "
+                        << idA << "-" << idB << " not found"
+                        << nl << abort(FatalError);
                 }
             }
             else
@@ -80,10 +80,10 @@ void Foam::pairPotentialList::readPairPotentialDict
                 else
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
-                            << "Pair pairPotential specification subDict "
-                            << idA << "-" << idB << " or "
-                            << idB << "-" << idA << " not found"
-                            << nl << abort(FatalError);
+                        << "Pair pairPotential specification subDict "
+                        << idA << "-" << idB << " or "
+                        << idB << "-" << idA << " not found"
+                        << nl << abort(FatalError);
                 }
 
                 if
@@ -93,10 +93,10 @@ void Foam::pairPotentialList::readPairPotentialDict
                 )
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
-                            << "Pair pairPotential specification subDict "
-                            << idA << "-" << idB << " and "
-                            << idB << "-" << idA << " found multiple definition"
-                            << nl << abort(FatalError);
+                        << "Pair pairPotential specification subDict "
+                        << idA << "-" << idB << " and "
+                        << idB << "-" << idA << " found multiple definition"
+                        << nl << abort(FatalError);
                 }
             }
 
@@ -219,7 +219,7 @@ const Foam::pairPotential& Foam::pairPotentialList::pairPotentialFunction
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)];
+    return (*this)[pairPotentialIndex(a, b)];
 }
 
 
@@ -243,7 +243,7 @@ bool Foam::pairPotentialList::rCutSqr
     const scalar rIJMagSqr
 ) const
 {
-    if (rIJMagSqr < rCutSqr (a, b))
+    if (rIJMagSqr < rCutSqr(a, b))
     {
         return true;
     }
@@ -260,7 +260,7 @@ Foam::scalar Foam::pairPotentialList::rMin
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].rMin();
+    return (*this)[pairPotentialIndex(a, b)].rMin();
 }
 
 
@@ -270,7 +270,7 @@ Foam::scalar Foam::pairPotentialList::dr
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].dr();
+    return (*this)[pairPotentialIndex(a, b)].dr();
 }
 
 
@@ -280,7 +280,7 @@ Foam::scalar Foam::pairPotentialList::rCutSqr
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].rCutSqr();
+    return (*this)[pairPotentialIndex(a, b)].rCutSqr();
 }
 
 
@@ -290,7 +290,7 @@ Foam::scalar Foam::pairPotentialList::rCut
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].rCut();
+    return (*this)[pairPotentialIndex(a, b)].rCut();
 }
 
 
@@ -301,7 +301,7 @@ Foam::scalar Foam::pairPotentialList::force
     const scalar rIJMag
 ) const
 {
-    scalar f = (*this)[pairPotentialIndex (a, b)].force(rIJMag);
+    scalar f = (*this)[pairPotentialIndex(a, b)].force(rIJMag);
 
     return f;
 }
@@ -314,7 +314,7 @@ Foam::scalar Foam::pairPotentialList::energy
     const scalar rIJMag
 ) const
 {
-    scalar e = (*this)[pairPotentialIndex (a, b)].energy(rIJMag);
+    scalar e = (*this)[pairPotentialIndex(a, b)].energy(rIJMag);
 
     return e;
 }

@@ -131,7 +131,7 @@ const Foam::tetherPotential& Foam::tetherPotentialList::tetherPotentialFunction
     const label a
 ) const
 {
-    return (*this)[tetherPotentialIndex (a)];
+    return (*this)[tetherPotentialIndex(a)];
 }
 
 
@@ -141,7 +141,7 @@ Foam::vector Foam::tetherPotentialList::force
     const vector rIT
 ) const
 {
-    return (*this)[tetherPotentialIndex (a)].force(rIT);
+    return (*this)[tetherPotentialIndex(a)].force(rIT);
 }
 
 
@@ -151,7 +151,7 @@ Foam::scalar Foam::tetherPotentialList::energy
     const vector rIT
 ) const
 {
-    return (*this)[tetherPotentialIndex (a)].energy(rIT);
+    return (*this)[tetherPotentialIndex(a)].energy(rIT);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
