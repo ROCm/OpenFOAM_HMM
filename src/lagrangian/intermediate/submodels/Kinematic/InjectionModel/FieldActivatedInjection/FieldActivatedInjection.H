@@ -26,15 +26,18 @@ Class
     Foam::FieldActivatedInjection
 
 Description
-    Injection at specified positions, with the condition that for injection
-    to be allowed
+    Injection at specified positions, with the conditions:
 
-        referenceField[cellI] >= thresholdField[cellI]
+    - for injection to be allowed
 
-    where:
-      - referenceField is the field used to supply the look-up values
-      - thresholdField supplies the values beyond which the injection is
-        permitted
+        factor*referenceField[cellI] >= thresholdField[cellI]
+
+        where:
+          - referenceField is the field used to supply the look-up values
+          - thresholdField supplies the values beyond which the injection is
+            permitted
+
+    - limited to a user-supllied number of injections per injector location
 
 SourceFiles
     FieldActivatedInjection.C
@@ -65,6 +68,9 @@ class FieldActivatedInjection
     // Private data
 
         // Model parameters
+
+            //- Factor to apply to reference field
+            const scalar factor_;
 
             //- Reference field
             const volScalarField& referenceField_;
