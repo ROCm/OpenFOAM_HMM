@@ -222,14 +222,14 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     {
         // Check for user file in ~/.OpenFOAM/VERSION
         fileName fullName = searchDir/FOAMversion/name;
-        if (exists(fullName))
+        if (isFile(fullName))
         {
             return fullName;
         }
 
         // Check for version-independent user file in ~/.OpenFOAM
         fullName = searchDir/name;
-        if (exists(fullName))
+        if (isFile(fullName))
         {
             return fullName;
         }
@@ -243,14 +243,14 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     {
         // Check for site file in $WM_PROJECT_INST_DIR/site/VERSION
         fileName fullName = searchDir/"site"/FOAMversion/name;
-        if (exists(fullName))
+        if (isFile(fullName))
         {
             return fullName;
         }
 
         // Check for version-independent site file in $WM_PROJECT_INST_DIR/site
         fullName = searchDir/"site"/name;
-        if (exists(fullName))
+        if (isFile(fullName))
         {
             return fullName;
         }
@@ -263,7 +263,7 @@ Foam::fileName Foam::findEtcFile(const fileName& name, bool mandatory)
     {
         // Check for shipped OpenFOAM file in $WM_PROJECT_DIR/etc
         fileName fullName = searchDir/"etc"/name;
-        if (exists(fullName))
+        if (isFile(fullName))
         {
             return fullName;
         }
