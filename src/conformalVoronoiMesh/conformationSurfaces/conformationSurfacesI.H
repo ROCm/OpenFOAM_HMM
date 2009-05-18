@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::searchableSurfaces& Foam::conformationSurfaces::geometry() const
@@ -51,9 +49,6 @@ const Foam::boundBox& Foam::conformationSurfaces::bounds() const
 {
     return bounds_;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

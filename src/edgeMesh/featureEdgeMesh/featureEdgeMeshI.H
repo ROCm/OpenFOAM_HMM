@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline Foam::label Foam::featureEdgeMesh::convexStart() const
@@ -218,9 +216,6 @@ inline Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::getEdgeStatus
         return MULTIPLE;
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

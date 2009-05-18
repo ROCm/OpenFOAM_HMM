@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline const Foam::IOdictionary& Foam::cvControls::cvMeshDict() const
@@ -68,9 +66,6 @@ inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
 {
     return minimumEdgeLengthCoeff_;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //
