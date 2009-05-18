@@ -62,10 +62,10 @@ COxidationKineticDiffusionLimitedRate
     CsLocalId_ = owner.composition().localId(idSolid, "C");
 
     // Set local copies of thermo properties
-    WO2_ = owner().composition().gases()[O2GlobalId_].W();
-    scalar WCO2 = owner().composition().gases()[CO2GlobalId_].W();
+    WO2_ = owner().composition().carrierSpecies()[O2GlobalId_].W();
+    scalar WCO2 = owner().composition().carrierSpecies()[CO2GlobalId_].W();
     WC_ = WCO2 - WO2_;
-    HcCO2_ = owner().composition().gases()[CO2GlobalId_].Hc();
+    HcCO2_ = owner().composition().carrierSpecies()[CO2GlobalId_].Hc();
 
     if (Sb_ < 0)
     {
@@ -150,7 +150,7 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate::calculate
     const scalar dmO2 = dmC/WC_*Sb_*WO2_;
 
     // Mass of newly created CO2 [kg]
-    const scalar dmCO2 = dmC + dmO2; 
+    const scalar dmCO2 = dmC + dmO2;
 
     // Update local particle C mass
     dMassSolid[CsLocalId_] += dmC;

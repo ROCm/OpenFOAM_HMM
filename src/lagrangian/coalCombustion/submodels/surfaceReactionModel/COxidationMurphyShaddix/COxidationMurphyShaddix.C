@@ -47,17 +47,16 @@ Foam::COxidationMurphyShaddix::COxidationMurphyShaddix
         owner,
         typeName
     ),
-    coeffDict_(dict.subDict(typeName + "Coeffs")),
-    D0_(dimensionedScalar(coeffDict_.lookup("D0")).value()),
-    rho0_(dimensionedScalar(coeffDict_.lookup("rho0")).value()),
-    T0_(dimensionedScalar(coeffDict_.lookup("T0")).value()),
-    Dn_(dimensionedScalar(coeffDict_.lookup("Dn")).value()),
-    A_(dimensionedScalar(coeffDict_.lookup("A")).value()),
-    E_(dimensionedScalar(coeffDict_.lookup("E")).value()),
-    n_(dimensionedScalar(coeffDict_.lookup("n")).value()),
-    WVol_(dimensionedScalar(coeffDict_.lookup("WVol")).value()),
-    dH0_(dimensionedScalar(coeffDict_.lookup("dH0")).value()),
-    TMaxdH_(dimensionedScalar(coeffDict_.lookup("TmaxdH")).value()),
+    D0_(dimensionedScalar(this->coeffDict().lookup("D0")).value()),
+    rho0_(dimensionedScalar(this->coeffDict().lookup("rho0")).value()),
+    T0_(dimensionedScalar(this->coeffDict().lookup("T0")).value()),
+    Dn_(dimensionedScalar(this->coeffDict().lookup("Dn")).value()),
+    A_(dimensionedScalar(this->coeffDict().lookup("A")).value()),
+    E_(dimensionedScalar(this->coeffDict().lookup("E")).value()),
+    n_(dimensionedScalar(this->coeffDict().lookup("n")).value()),
+    WVol_(dimensionedScalar(this->coeffDict().lookup("WVol")).value()),
+    dH0_(dimensionedScalar(this->coeffDict().lookup("dH0")).value()),
+    TMaxdH_(dimensionedScalar(this->coeffDict().lookup("TmaxdH")).value()),
     CsLocalId_(-1),
     O2GlobalId_(-1),
     CO2GlobalId_(-1)
@@ -138,16 +137,17 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
     const scalar D = D0_*(rho0_/rhoc)*pow(Tc/T0_, Dn_);
 
     // Molecular weight of O2 [kg/kmol]
-    const scalar WO2 = owner().composition().gases()[O2GlobalId_].W();
+    const scalar WO2 = owner().composition().carrierSpecies()[O2GlobalId_].W();
 
     // Molecular weight of CO2 [kg/kmol]
-    const scalar WCO2 = owner().composition().gases()[CO2GlobalId_].W();
+    const scalar WCO2 =
+        owner().composition().carrierSpecies()[CO2GlobalId_].W();
 
     // Molecular weight of C [kg/kmol]
     const scalar WC = WCO2 - WO2;
 
     // Far field partial pressure O2 [Pa]
-    const scalar PO2 = rhoO2/WO2*specie::RR*Tc;
+    const scalar ppO2 = rhoO2/WO2*specie::RR*Tc;
 
     // Molar emission rate of volatiles per unit surface area
     const scalar qVol = sum(dMassVolatile)/(WVol_*Ap);
@@ -157,22 +157,18 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
 
     if (debug)
     {
-        Pout << "   C = " << C << endl;
+        Pout<< "mass  = " << mass << nl
+            << "fComb = " << fComb << nl
+            << "WC    = " << WC << nl
+            << "Ap    = " << Ap << nl
+            << "dt    = " << dt << nl
+            << "C     = " << C << nl
+            << endl;
     }
 
     // Molar reaction rate per unit surface area [kmol/(m^2.s)]
     scalar qCsOld = 0;
     scalar qCs = 1;
-
-    if (debug)
-    {
-        Pout<< "mass  = " << mass << nl
-            << "fComb = " << fComb << nl
-            << "WC    = " << WC << nl
-            << "Ap    = " << Ap << nl
-            << "dt    = " << dt
-            << nl << endl;
-    }
 
     const scalar qCsLim = mass*fComb/(WC*Ap*dt);
 
@@ -182,10 +178,10 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
     }
 
     label iter = 0;
-    while ((fabs(qCs - qCsOld)/qCs>tolerance_) && (iter<=maxIters_))
+    while ((mag(qCs - qCsOld)/qCs > tolerance_) && (iter <= maxIters_))
     {
         qCsOld = qCs;
-        const scalar PO2Surface = PO2*exp(-(qCs + qVol)*d/(2*C*D));
+        const scalar PO2Surface = ppO2*exp(-(qCs + qVol)*d/(2*C*D));
         qCs = A_*exp(-E_/(specie::RR*T))*pow(PO2Surface, n_);
         qCs = (100.0*qCs + iter*qCsOld)/(100.0 + iter);
         qCs = min(qCs, qCsLim);

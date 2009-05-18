@@ -51,10 +51,6 @@ class COxidationMurphyShaddix
 {
     // Private data
 
-        //- Coefficients dictionary
-        const dictionary& coeffDict_;
-
-
         // Model constants
 
             //- Reference diffusion constant
