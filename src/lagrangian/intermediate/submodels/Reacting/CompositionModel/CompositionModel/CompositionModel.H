@@ -27,7 +27,8 @@ Class
 
 Description
     Templated reacting parcel composition model class
-    Consists of gases (via thermo package), liquids and solids
+    Consists of carrier species (via thermo package), and additional liquids
+    and solids
 
 SourceFiles
     CompositionModel.C
@@ -77,12 +78,12 @@ class CompositionModel
         hCombustionThermo& carrierThermo_;
 
         //- Reference to the carrier phase species
-        const PtrList<specieReactingProperties>& gases_;
+        const PtrList<specieReactingProperties>& carrierSpecies_;
 
-        //- Global liquid properties data
+        //- Global (additional) liquid properties data
         autoPtr<liquidMixture> liquids_;
 
-        //- Global solid properties data
+        //- Global (additional) solid properties data
         autoPtr<solidMixture> solids_;
 
         //- List of phase properties
@@ -150,13 +151,13 @@ public:
 
             // Composition lists
 
-                //- Return the gases
-                const PtrList<specieReactingProperties>& gases() const;
+                //- Return the carrier species
+                const PtrList<specieReactingProperties>& carrierSpecies() const;
 
-                //- Return the global liquids
+                //- Return the global (additional) liquids
                 const liquidMixture& liquids() const;
 
-                //- Return the global solids
+                //- Return the global (additional) solids
                 const solidMixture& solids() const;
 
                 //- Return the list of phase properties

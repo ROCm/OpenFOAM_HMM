@@ -43,7 +43,7 @@ Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& gases
+    PtrList<specieReactingProperties>& carrierSpecies
 )
 :
     ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
@@ -53,7 +53,7 @@ Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
         U,
         g,
         thermo,
-        gases
+        carrierSpecies
     )
 {
     basicReactingMultiphaseParcel::readFields(*this);

@@ -86,7 +86,7 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().gases()[i].Cp(this->Tc_);
+            cpEff += Y*td.cloud().carrierSpecies()[i].Cp(this->Tc_);
         }
     }
     const scalar cpc = td.cpInterp().psi()[cellI];

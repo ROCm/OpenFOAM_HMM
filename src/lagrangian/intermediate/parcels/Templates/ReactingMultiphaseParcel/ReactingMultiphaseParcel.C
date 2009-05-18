@@ -168,7 +168,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().gases()[i].Cp(this->Tc_);
+            cpEff += Y*td.cloud().carrierSpecies()[i].Cp(this->Tc_);
         }
     }
     const scalar cpc = td.cpInterp().psi()[cellI];
@@ -268,7 +268,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     scalarField dMassSRGas(YGas_.size(), 0.0);
     scalarField dMassSRLiquid(YLiquid_.size(), 0.0);
     scalarField dMassSRSolid(YSolid_.size(), 0.0);
-    scalarField dMassSRCarrier(td.cloud().gases().size(), 0.0);
+    scalarField dMassSRCarrier(td.cloud().carrierSpecies().size(), 0.0);
 
     // Return enthalpy source and calc mass transfer(s) due to surface reaction
     scalar hReaction =

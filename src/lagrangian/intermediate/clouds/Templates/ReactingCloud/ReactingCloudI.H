@@ -52,9 +52,9 @@ Foam::ReactingCloud<ParcelType>::carrierThermo()
 
 template<class ParcelType>
 inline const Foam::PtrList<Foam::specieReactingProperties>&
-Foam::ReactingCloud<ParcelType>::gases() const
+Foam::ReactingCloud<ParcelType>::carrierSpecies() const
 {
-    return gases_;
+    return carrierSpecies_;
 }
 
 

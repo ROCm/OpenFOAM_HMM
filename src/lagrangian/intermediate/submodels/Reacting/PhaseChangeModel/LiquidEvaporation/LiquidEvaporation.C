@@ -41,8 +41,8 @@ Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
     forAll(Xc, i)
     {
         scalar Y = this->owner().carrierThermo().composition().Y()[i][cellI];
-        Winv += Y/this->owner().gases()[i].W();
-        Xc[i] = Y/this->owner().gases()[i].W();
+        Winv += Y/this->owner().carrierSpecies()[i].W();
+        Xc[i] = Y/this->owner().carrierSpecies()[i].W();
     }
 
     return Xc/Winv;
