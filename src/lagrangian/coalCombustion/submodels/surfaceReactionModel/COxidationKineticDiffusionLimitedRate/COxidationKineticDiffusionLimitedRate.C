@@ -62,10 +62,10 @@ COxidationKineticDiffusionLimitedRate
     CsLocalId_ = owner.composition().localId(idSolid, "C");
 
     // Set local copies of thermo properties
-    WO2_ = owner().composition().carrierSpecies()[O2GlobalId_].W();
-    scalar WCO2 = owner().composition().carrierSpecies()[CO2GlobalId_].W();
+    WO2_ = owner.composition().carrierSpecies()[O2GlobalId_].W();
+    scalar WCO2 = owner.composition().carrierSpecies()[CO2GlobalId_].W();
     WC_ = WCO2 - WO2_;
-    HcCO2_ = owner().composition().carrierSpecies()[CO2GlobalId_].Hc();
+    HcCO2_ = owner.composition().carrierSpecies()[CO2GlobalId_].Hc();
 
     if (Sb_ < 0)
     {

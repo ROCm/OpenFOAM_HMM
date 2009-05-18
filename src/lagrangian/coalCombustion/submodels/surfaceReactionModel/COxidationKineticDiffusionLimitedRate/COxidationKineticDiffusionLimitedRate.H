@@ -70,18 +70,6 @@ class COxidationKineticDiffusionLimitedRate
             const scalar E_;
 
 
-        // Local copies of thermo properties
-
-            //- Molecular weight of C [kg/kmol]
-            scalar WC_;
-
-            //- Molecular weight of O2 [kg/kmol]
-            scalar WO2_;
-
-            //- Chemical enthalpy of CO2 [J/kg]
-            scalar HcCO2_;
-
-
         // Addressing
 
             //- Cs positions in global/local lists
@@ -92,6 +80,18 @@ class COxidationKineticDiffusionLimitedRate
 
             //- CO2 positions in global list
             label CO2GlobalId_;
+
+
+        // Local copies of thermo properties
+
+            //- Molecular weight of C [kg/kmol]
+            scalar WC_;
+
+            //- Molecular weight of O2 [kg/kmol]
+            scalar WO2_;
+
+            //- Chemical enthalpy of CO2 [J/kg]
+            scalar HcCO2_;
 
 
 public:

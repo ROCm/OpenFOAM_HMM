@@ -13,6 +13,9 @@ coalParcel/submodels/makeCoalParcelHeatTransferModels.C
 coalParcel/submodels/makeCoalParcelPhaseChangeModels.C
 coalParcel/submodels/makeCoalParcelSurfaceReactionModels.C
 coalParcel/submodels/makeCoalParcelWallInteractionModels.C
+
+submodels/surfaceReactionModel/COxidationDiffusionLimitedRate/COxidationDiffusionLimitedRate.C
+submodels/surfaceReactionModel/COxidationKineticDiffusionLimitedRate/COxidationKineticDiffusionLimitedRate.C
 submodels/surfaceReactionModel/COxidationMurphyShaddix/COxidationMurphyShaddix.C
 
 
