@@ -312,20 +312,20 @@ bool LaunderGibsonRSTM::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        Clg1_.readIfPresent(coeffDict_);
-        Clg2_.readIfPresent(coeffDict_);
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        Cs_.readIfPresent(coeffDict_);
-        Ceps_.readIfPresent(coeffDict_);
-        C1Ref_.readIfPresent(coeffDict_);
-        C2Ref_.readIfPresent(coeffDict_);
-        alphaR_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        alphah_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        Clg1_.readIfPresent(coeffDict());
+        Clg2_.readIfPresent(coeffDict());
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        Cs_.readIfPresent(coeffDict());
+        Ceps_.readIfPresent(coeffDict());
+        C1Ref_.readIfPresent(coeffDict());
+        C2Ref_.readIfPresent(coeffDict());
+        alphaR_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        alphah_.readIfPresent(coeffDict());
 
-        couplingFactor_.readIfPresent(coeffDict_);
+        couplingFactor_.readIfPresent(coeffDict());
 
         if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
         {

@@ -62,7 +62,7 @@ directMappedVelocityFluxFixedValueFvPatchField
     fixedValueFvPatchVectorField(ptf, p, iF, mapper),
     phiName_(ptf.phiName_)
 {
-    if (!isType<directMappedPatchBase>(this->patch().patch()))
+    if (!isA<directMappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
@@ -95,7 +95,7 @@ directMappedVelocityFluxFixedValueFvPatchField
     fixedValueFvPatchVectorField(p, iF, dict),
     phiName_(dict.lookup("phi"))
 {
-    if (!isType<directMappedPatchBase>(this->patch().patch()))
+    if (!isA<directMappedPatchBase>(this->patch().patch()))
     {
         FatalErrorIn
         (
@@ -207,7 +207,7 @@ void directMappedVelocityFluxFixedValueFvPatchField::updateCoeffs()
                 allUValues
             );
             newUValues = patch().patchSlice(newUValues);
-            
+
             mapDistribute::distribute
             (
                 Pstream::defaultCommsType,

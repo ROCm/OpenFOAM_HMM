@@ -30,7 +30,7 @@ Description
         quadratic normal to the face,
         linear in the plane of the face for consistency with 2nd-order Gauss.
 
-    Can be used with the CentredFit scheme to crate a quadratic surface
+    Can be used with the CentredFit scheme to create a quadratic surface
     interpolation scheme
 
 \*---------------------------------------------------------------------------*/

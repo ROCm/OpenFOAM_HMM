@@ -270,12 +270,12 @@ bool realizableKE::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        A0_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        alphak_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        alphah_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        A0_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        alphak_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        alphah_.readIfPresent(coeffDict());
 
         return true;
     }

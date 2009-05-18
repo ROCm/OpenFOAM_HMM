@@ -37,7 +37,7 @@ Description
     This class defines the basic interface for an incompressible flow SGS
     model, and encapsulates data of value to all possible models. In
     particular this includes references to all the dependent fields (U,
-    phi), the physical viscosity nu, and the turbulenceProperties
+    phi), the physical viscosity nu, and the LESProperties
     dictionary which contains the model selection and model coefficients.
 
 SourceFiles
@@ -157,9 +157,10 @@ public:
 
     // Member Functions
 
-        //- Access the dictionary which provides info. about choice of
-        //  models, and all related data (particularly model coefficients).
-        inline dictionary& coeffDict()
+        //- Const access to the coefficients dictionary,
+        //  which provides info. about choice of models,
+        //  and all related data (particularly model coefficients).
+        inline const dictionary& coeffDict() const
         {
             return coeffDict_;
         }
@@ -248,7 +249,7 @@ public:
         //  gradU calculated locally.
         void correct();
 
-        //- Read turbulenceProperties dictionary
+        //- Read LESProperties dictionary
         virtual bool read() = 0;
 };
 

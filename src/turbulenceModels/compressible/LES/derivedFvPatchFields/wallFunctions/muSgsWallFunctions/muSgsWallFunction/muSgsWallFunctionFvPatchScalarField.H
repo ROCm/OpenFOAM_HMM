@@ -24,18 +24,18 @@ License
 
 Class
     Foam::compressible::LESModels::
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        muSgsWallFunctionFvPatchScalarField
 
 Description
     Spalart Allmaas wall function boundary condition for compressible flows
 
 SourceFiles
-    muSgsSpalartAllmarasWallFunctionFvPatchScalarField.C
+    muSgsWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef muSgsSpalartAllmarasWallFunctionFvPatchScalarField_H
-#define muSgsSpalartAllmarasWallFunctionFvPatchScalarField_H
+#ifndef muSgsWallFunctionFvPatchScalarField_H
+#define muSgsWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -49,10 +49,10 @@ namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-     Class muSgsSpalartAllmarasWallFunctionFvPatchScalarField Declaration
+     Class muSgsWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+class muSgsWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
@@ -62,20 +62,20 @@ class muSgsSpalartAllmarasWallFunctionFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("muSgsSpalartAllmarasWallFunction");
+    TypeName("muSgsWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        muSgsWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and Istream
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        muSgsWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -83,7 +83,7 @@ public:
         );
 
         //- Construct from patch, internal field and dictionary
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        muSgsWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -91,20 +91,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        //  muSgsWallFunctionFvPatchScalarField
         //  onto a new patch
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        muSgsWallFunctionFvPatchScalarField
         (
-            const muSgsSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const muSgsWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        muSgsWallFunctionFvPatchScalarField
         (
-            const muSgsSpalartAllmarasWallFunctionFvPatchScalarField&
+            const muSgsWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -112,14 +112,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new muSgsSpalartAllmarasWallFunctionFvPatchScalarField(*this)
+                new muSgsWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        muSgsWallFunctionFvPatchScalarField
         (
-            const muSgsSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const muSgsWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -131,7 +131,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new muSgsSpalartAllmarasWallFunctionFvPatchScalarField
+                new muSgsWallFunctionFvPatchScalarField
                 (
                     *this,
                     iF

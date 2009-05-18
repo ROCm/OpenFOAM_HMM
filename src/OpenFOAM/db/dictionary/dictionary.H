@@ -168,6 +168,10 @@ public:
         //- Construct top-level dictionary as copy
         dictionary(const dictionary&);
 
+        //- Construct top-level dictionary as copy from pointer to dictionary.
+        //  A null pointer is treated like an empty dictionary.
+        dictionary(const dictionary*);
+
         //- Construct by transferring parameter contents given parent dictionary
         dictionary(const dictionary& parentDict, const Xfer<dictionary>&);
 

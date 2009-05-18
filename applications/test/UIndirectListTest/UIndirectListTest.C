@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "UIndirectList.H"
+#include "DynamicList.H"
 #include "IOstreams.H"
 #include "ListOps.H"
 #include "OFstream.H"
@@ -58,11 +59,11 @@ int main(int argc, char *argv[])
 
     idl[1] = -666;
 
-    Info<< "idl[1] changed:" << idl << endl;
+    Info<< "idl[1] changed: " << idl << endl;
 
     idl = -999;
 
-    Info<< "idl changed:" << idl << endl;
+    Info<< "idl changed: " << idl << endl;
 
     UIndirectList<double> idl2(idl);
 
@@ -79,16 +80,25 @@ int main(int argc, char *argv[])
         idl = ident;
     }
 
-    Info<< "idl assigned from UList:" << idl << endl;
+    Info<< "idl assigned from UList: " << idl << endl;
 
-    List<double> realList = UIndirectList<double>(completeList, addresses);
+    // test List operations
 
-    Info<< "realList:" << realList << endl;
+    List<double> flatList = UIndirectList<double>(completeList, addresses);
+    Info<< "List assigned from UIndirectList: " << flatList << endl;
 
-    List<double> realList2(UIndirectList<double>(completeList, addresses));
+    List<double> flatList2(UIndirectList<double>(completeList, addresses));
+    Info<< "List constructed from UIndirectList: " << flatList2 << endl;
 
-    Info<< "realList2:" << realList2 << endl;
+    flatList.append(UIndirectList<double>(completeList, addresses));
+    Info<< "List::append(UIndirectList): " << flatList << endl;
 
+
+    DynamicList<double> dynList(UIndirectList<double>(completeList, addresses));
+    Info<< "DynamicList constructed from UIndirectList: " << dynList << endl;
+
+    dynList.append(UIndirectList<double>(completeList, addresses));
+    Info<< "DynamicList::append(UIndirectList): " << dynList << endl;
 
     Info << "\nEnd\n" << endl;
 

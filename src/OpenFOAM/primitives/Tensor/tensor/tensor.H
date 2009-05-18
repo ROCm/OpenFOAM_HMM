@@ -51,13 +51,13 @@ namespace Foam
 
 typedef Tensor<scalar> tensor;
 
-vector eigenValues(const tensor& t);
-vector eigenVector(const tensor& t, const scalar lambda);
-tensor eigenVectors(const tensor& t);
+vector eigenValues(const tensor&);
+vector eigenVector(const tensor&, const scalar lambda);
+tensor eigenVectors(const tensor&);
 
-vector eigenValues(const symmTensor& t);
-vector eigenVector(const symmTensor& t, const scalar lambda);
-tensor eigenVectors(const symmTensor& t);
+vector eigenValues(const symmTensor&);
+vector eigenVector(const symmTensor&, const scalar lambda);
+tensor eigenVectors(const symmTensor&);
 
 //- Data associated with tensor type are contiguous
 template<>

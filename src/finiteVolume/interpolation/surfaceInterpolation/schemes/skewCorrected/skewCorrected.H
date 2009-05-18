@@ -26,7 +26,7 @@ Class
     Foam::skewCorrected
 
 Description
-    Skewness-corrected interpolation scheme which applies an explicit
+    Skewness-corrected interpolation scheme that applies an explicit
     correction to given scheme.
 
 SourceFiles

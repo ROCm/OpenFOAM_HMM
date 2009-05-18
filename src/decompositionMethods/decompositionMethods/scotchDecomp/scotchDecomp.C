@@ -208,7 +208,7 @@ Foam::label Foam::scotchDecomp::decompose
     //SCOTCH_graphMapCompute(&grafdat, &mapdat, &stradat); /* Perform mapping */
     //SCOTCH_graphMapExit(&grafdat, &mapdat);
 
-    
+
     finalDecomp.setSize(xadj.size()-1);
     finalDecomp = 0;
     check
@@ -217,7 +217,7 @@ Foam::label Foam::scotchDecomp::decompose
         (
             &grafdat,
             &archdat,
-            &stradat,           // const SCOTCH_Strat * 
+            &stradat,           // const SCOTCH_Strat *
             finalDecomp.begin() // parttab
         ),
         "SCOTCH_graphMap"
@@ -231,7 +231,7 @@ Foam::label Foam::scotchDecomp::decompose
     //    (
     //        &grafdat,
     //        nProcessors_,       // partnbr
-    //        &stradat,           // const SCOTCH_Strat * 
+    //        &stradat,           // const SCOTCH_Strat *
     //        finalDecomp.begin() // parttab
     //    ),
     //    "SCOTCH_graphPart"

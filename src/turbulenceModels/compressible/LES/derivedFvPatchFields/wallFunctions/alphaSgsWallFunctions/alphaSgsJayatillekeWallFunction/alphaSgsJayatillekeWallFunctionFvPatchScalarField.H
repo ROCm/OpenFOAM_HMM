@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LESModels::
-        nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+    alphaSgsJayatillekeWallFunctionFvPatchScalarField
 
 Description
-    Spalart Allmaras wall function boundary condition for incompressible flows
+    Thermal wall function for turbulent thermal diffusivity based on the
+    Jayatilleke thermal wall function
 
 SourceFiles
-    nuSgsSpalartAllmarasWallFunctionFvPatchScalarField.C
+    alphaSgsJayatillekeWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nuSgsSpalartAllmarasWallFunctionFvPatchScalarField_H
-#define nuSgsSpalartAllmarasWallFunctionFvPatchScalarField_H
+#ifndef alphaSgsJayatillekeWallFunctionFvPatchScalarField_H
+#define alphaSgsJayatillekeWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -43,60 +43,82 @@ SourceFiles
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-     Class nuSgsSpalartAllmarasWallFunctionFvPatchScalarField Declaration
+     Class alphaSgsJayatillekeWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+class alphaSgsJayatillekeWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
     // Private data
 
+        static scalar maxExp_;
+        static scalar tolerance_;
+        static label maxIters_;
+
+
+    // Private member functions
+
+        //- Check the type of the patch
+        void checkType();
+
+        //- `P' function
+        scalar Psmooth(const scalar Prat) const;
+
+        //- Calculate y+ at the edge of the thermal laminar sublayer
+        scalar yPlusTherm
+        (
+            const scalar P,
+            const scalar Prat,
+            const scalar E,
+            const scalar kappa
+        ) const;
+
 
 public:
 
     //- Runtime type information
-    TypeName("nuSgsSpalartAllmarasWallFunction");
+    TypeName("alphaSgsJayatillekeWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const dictionary&
         );
 
-        //- Construct by mapping given
-        //  nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        //- Construct by mapping given an
+        //  alphaSgsJayatillekeWallFunctionFvPatchScalarField
         //  onto a new patch
-        nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
-            const nuSgsSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const alphaSgsJayatillekeWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
-            const nuSgsSpalartAllmarasWallFunctionFvPatchScalarField&
+            const alphaSgsJayatillekeWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -104,14 +126,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nuSgsSpalartAllmarasWallFunctionFvPatchScalarField(*this)
+                new alphaSgsJayatillekeWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+        alphaSgsJayatillekeWallFunctionFvPatchScalarField
         (
-            const nuSgsSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const alphaSgsJayatillekeWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -123,7 +145,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+                new alphaSgsJayatillekeWallFunctionFvPatchScalarField
                 (
                     *this,
                     iF
@@ -139,7 +161,7 @@ public:
             //- Evaluate the patchField
             virtual void evaluate
             (
-                const Pstream::commsTypes commsType=Pstream::blocking
+                const Pstream::commsTypes commsType=Pstream::Pstream::blocking
             );
 };
 
@@ -147,7 +169,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

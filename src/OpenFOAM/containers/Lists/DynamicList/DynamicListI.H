@@ -75,6 +75,17 @@ inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
 inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
 (
+    const UIndirectList<T>& lst
+)
+:
+    List<T>(lst),
+    capacity_(lst.size())
+{}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::DynamicList
+(
     const Xfer<List<T> >& lst
 )
 :
@@ -287,10 +298,10 @@ Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::transfer
 
 
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
-inline Foam::Xfer<Foam::List<T> >
+inline Foam::Xfer< Foam::List<T> >
 Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::xfer()
 {
-    return xferMoveTo<List<T> >(*this);
+    return xferMoveTo< List<T> >(*this);
 }
 
 
@@ -313,8 +324,6 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
     const UList<T>& lst
 )
 {
-    label nextFree = List<T>::size();
-
     if (this == &lst)
     {
         FatalErrorIn
@@ -324,6 +333,23 @@ inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
         )   << "attempted appending to self" << abort(FatalError);
     }
 
+    label nextFree = List<T>::size();
+    setSize(nextFree + lst.size());
+
+    forAll(lst, elemI)
+    {
+        this->operator[](nextFree++) = lst[elemI];
+    }
+}
+
+
+template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
+inline void Foam::DynamicList<T, SizeInc, SizeMult, SizeDiv>::append
+(
+    const UIndirectList<T>& lst
+)
+{
+    label nextFree = List<T>::size();
     setSize(nextFree + lst.size());
 
     forAll(lst, elemI)

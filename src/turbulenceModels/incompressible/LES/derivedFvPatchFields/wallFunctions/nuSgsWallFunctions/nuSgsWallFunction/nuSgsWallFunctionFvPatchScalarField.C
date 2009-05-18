@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nuSgsSpalartAllmarasWallFunctionFvPatchScalarField.H"
+#include "nuSgsWallFunctionFvPatchScalarField.H"
 #include "LESModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -41,8 +41,8 @@ namespace LESModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+nuSgsWallFunctionFvPatchScalarField::
+nuSgsWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -52,10 +52,10 @@ nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
 {}
 
 
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+nuSgsWallFunctionFvPatchScalarField::
+nuSgsWallFunctionFvPatchScalarField
 (
-    const nuSgsSpalartAllmarasWallFunctionFvPatchScalarField& ptf,
+    const nuSgsWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -65,8 +65,8 @@ nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
 {}
 
 
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+nuSgsWallFunctionFvPatchScalarField::
+nuSgsWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -77,20 +77,20 @@ nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
 {}
 
 
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+nuSgsWallFunctionFvPatchScalarField::
+nuSgsWallFunctionFvPatchScalarField
 (
-    const nuSgsSpalartAllmarasWallFunctionFvPatchScalarField& tppsf
+    const nuSgsWallFunctionFvPatchScalarField& tppsf
 )
 :
     fixedValueFvPatchScalarField(tppsf)
 {}
 
 
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::
-nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+nuSgsWallFunctionFvPatchScalarField::
+nuSgsWallFunctionFvPatchScalarField
 (
-    const nuSgsSpalartAllmarasWallFunctionFvPatchScalarField& tppsf,
+    const nuSgsWallFunctionFvPatchScalarField& tppsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -100,17 +100,19 @@ nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
+void nuSgsWallFunctionFvPatchScalarField::evaluate
 (
     const Pstream::commsTypes
 )
 {
-    const LESModel& sgsModel
-        = db().lookupObject<LESModel>("LESProperties");
+    const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
-    scalar kappa = readScalar(sgsModel.lookup("kappa"));
-
-    scalar E = readScalar(sgsModel.subDict("wallFunctionCoeffs").lookup("E"));
+    // TODO: make these lookups optional (or more robust)?
+    const scalar kappa = readScalar(lesModel.lookup("kappa"));
+    const scalar E = readScalar
+    (
+        lesModel.subDict("wallFunctionCoeffs").lookup("E")
+    );
 
     const scalarField& ry = patch().deltaCoeffs();
 
@@ -174,7 +176,7 @@ void nuSgsSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
 makePatchTypeField
 (
     fvPatchScalarField,
-    nuSgsSpalartAllmarasWallFunctionFvPatchScalarField
+    nuSgsWallFunctionFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

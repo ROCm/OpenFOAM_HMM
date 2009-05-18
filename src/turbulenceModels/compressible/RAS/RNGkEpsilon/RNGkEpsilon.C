@@ -253,15 +253,15 @@ bool RNGkEpsilon::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        C1_.readIfPresent(coeffDict_);
-        C2_.readIfPresent(coeffDict_);
-        C3_.readIfPresent(coeffDict_);
-        alphak_.readIfPresent(coeffDict_);
-        alphaEps_.readIfPresent(coeffDict_);
-        alphah_.readIfPresent(coeffDict_);
-        eta0_.readIfPresent(coeffDict_);
-        beta_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        C3_.readIfPresent(coeffDict());
+        alphak_.readIfPresent(coeffDict());
+        alphaEps_.readIfPresent(coeffDict());
+        alphah_.readIfPresent(coeffDict());
+        eta0_.readIfPresent(coeffDict());
+        beta_.readIfPresent(coeffDict());
 
         return true;
     }

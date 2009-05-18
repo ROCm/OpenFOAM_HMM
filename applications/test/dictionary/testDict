@@ -1,22 +1,27 @@
-/*-------------------------------*- C++ -*---------------------------------*\
-|    =========                                                              |
-|    \\      /     OpenFOAM                                                 |
-|     \\    /                                                               |
-|      \\  /       The Open Source CFD Toolbox                              |
-|       \\/                                        http://www.OpenFOAM.org  |
-\*-------------------------------------------------------------------------*/
+/*--------------------------------*- C++ -*----------------------------------*\
+| =========                 |                                                 |
+| \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
+|  \\    /   O peration     | Version:  Any                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|    \\/     M anipulation  |                                                 |
+\*---------------------------------------------------------------------------*/
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-    class           dictionary;
-    object          testDict;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      testDict;
 }
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #inputMode  merge
 
-dimensions      [ 0 2 -2 0 0 0 0 ];
 internalField   uniform 1;
+
+// use 'protect' to supply defaults
+#inputMode  protect
+internalField   uniform 10;
+dimensions      [ 0 2 -2 0 0 0 0 ];
+#inputMode  merge
 
 active
 {
@@ -30,6 +35,7 @@ inactive
 {
     type            zeroGradient;
 }
+
 
 boundaryField
 {
@@ -101,4 +107,4 @@ baz
 // this should work too
 #remove ( bar baz )
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

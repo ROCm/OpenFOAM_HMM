@@ -77,11 +77,11 @@ int main(int argc, char *argv[])
 
 
     // Patches to put baffles into
-    labelList newPatches(1);
+    DynamicList<label> newPatches(1);
 
     word patchName(args.additionalArgs()[1]);
-    newPatches[0] = patches.findPatchID(patchName);
-    Info<< "Using patch " << patchName
+    newPatches.append(patches.findPatchID(patchName));
+    Pout<< "Using patch " << patchName
         << " at index " << newPatches[0] << endl;
 
     if (newPatches[0] == -1)
@@ -100,6 +100,7 @@ int main(int argc, char *argv[])
             IStringStream(args.options()["additionalPatches"])()
         );
 
+        newPatches.reserve(patchNames.size() + 1);
         forAll(patchNames, i)
         {
             label patchI = patches.findPatchID(patchNames[i]);
@@ -171,7 +172,7 @@ int main(int argc, char *argv[])
     // since otherwise it will have trouble matching baffles.
 
     label nBaffled = 0;
- 
+
     forAll(newPatches, i)
     {
         label newPatchI = newPatches[i];

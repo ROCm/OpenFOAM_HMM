@@ -47,6 +47,9 @@ void oneEqEddy::updateSubGridScaleFields()
 {
     muSgs_ = ck_*rho()*sqrt(k_)*delta();
     muSgs_.correctBoundaryConditions();
+
+    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_.correctBoundaryConditions();
 }
 
 
@@ -68,7 +71,7 @@ oneEqEddy::oneEqEddy
         dimensioned<scalar>::lookupOrAddToDict
         (
             "ck",
-            coeffDict(),
+            coeffDict_,
             0.094
         )
     )
