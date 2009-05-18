@@ -28,6 +28,8 @@ License
 #include "ReactingMultiphaseCloud.H"
 
 #include "NoSurfaceReaction.H"
+#include "COxidationDiffusionLimitedRate.H"
+#include "COxidationKineticDiffusionLimitedRate.H"
 #include "COxidationMurphyShaddix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,6 +42,18 @@ namespace Foam
     makeSurfaceReactionModelType
     (
         NoSurfaceReaction,
+        ReactingMultiphaseCloud,
+        coalParcel
+    );
+    makeSurfaceReactionModelTypeInstance
+    (
+        COxidationDiffusionLimitedRate,
+        ReactingMultiphaseCloud,
+        coalParcel
+    );
+    makeSurfaceReactionModelTypeInstance
+    (
+        COxidationKineticDiffusionLimitedRate,
         ReactingMultiphaseCloud,
         coalParcel
     );
