@@ -28,50 +28,36 @@
         thermo->rho()
     );
 
-// lagrangian coal density field
-/*    volScalarField rholc
+    // lagrangian effective density field - used externally (optional)
+    volScalarField rhoEffLagrangian
     (
         IOobject
         (
-            "rholc",
+            "rhoEffLagrangian",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
+        dimensionedScalar("zero", dimDensity, 0.0)
     );
 
-// lagrangian limestone density field
-    volScalarField rhols
+    // dynamic pressure field - used externally (optional)
+    volScalarField pDyn
     (
         IOobject
         (
-            "rhols",
+            "injectionIndicator",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
         mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
+        dimensionedScalar("zero", dimPressure, 0.0)
     );
 
-// lagrangian total density field
-    volScalarField rhol
-    (
-        IOobject
-        (
-            "rhol",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
-    );*/
 
     Info<< "\nReading field U\n" << endl;
     volVectorField U
