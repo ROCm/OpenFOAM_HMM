@@ -63,22 +63,22 @@ void Foam::phaseProperties::setGlobalIds
         }
         if (globalIds_[i] == -1)
         {
-            wordList globalGasNames(YGas.size());
+            wordList globalCarrierNames(YGas.size());
 
             forAll (YGas, k)
             {
-                globalGasNames[k] = YGas[k].name();
+                globalCarrierNames[k] = YGas[k].name();
             }
 
             FatalErrorIn
             (
-                "void phaseProperties::setGlobalGasIds"
+                "void phaseProperties::setGlobalIds"
                 "("
                     "const PtrList<volScalarField>&"
                 ")"
-            )   << "Could not find gas species " << names_[i]
+            )   << "Could not find carrier species " << names_[i]
                 << " in species list" <<  nl
-                << "Available species are: " << nl << globalGasNames << nl
+                << "Available species are: " << nl << globalCarrierNames << nl
                 << exit(FatalError);
         }
     }
@@ -111,11 +111,13 @@ void Foam::phaseProperties::setGlobalIds(const wordList& globalNames)
 }
 
 
-void Foam::phaseProperties::setGlobalGasIds
+void Foam::phaseProperties::setGlobalCarrierIds
 (
     const PtrList<volScalarField>& YGas
 )
 {
+    globalCarrierIds_ = -1;
+
     forAll(names_, i)
     {
         forAll (YGas, j)
@@ -124,11 +126,11 @@ void Foam::phaseProperties::setGlobalGasIds
 
             if (specieName == names_[i])
             {
-                globalGasIds_[i] = j;
+                globalCarrierIds_[i] = j;
                 break;
             }
         }
-        if (globalGasIds_[i] == -1)
+        if (globalCarrierIds_[i] == -1)
         {
             wordList gasNames(YGas.size());
             forAll(YGas, gasI)
@@ -138,7 +140,7 @@ void Foam::phaseProperties::setGlobalGasIds
 
             FatalErrorIn
             (
-                "void Foam::phaseProperties::setGlobalGasIds"
+                "void Foam::phaseProperties::setGlobalCarrierIds"
                 "("
                     "const PtrList<volScalarField>&"
                 ")"
@@ -215,7 +217,7 @@ Foam::phaseProperties::phaseProperties()
     names_(0),
     Y_(0),
     globalIds_(0),
-    globalGasIds_(0)
+    globalCarrierIds_(0)
 {}
 
 
@@ -226,7 +228,7 @@ Foam::phaseProperties::phaseProperties(const phaseProperties& pp)
     names_(pp.names_),
     Y_(pp.Y_),
     globalIds_(pp.globalIds_),
-    globalGasIds_(pp.globalGasIds_)
+    globalCarrierIds_(pp.globalCarrierIds_)
 {}
 
 
@@ -252,16 +254,16 @@ void Foam::phaseProperties::initialiseGlobalIds
         case GAS:
         {
             setGlobalIds(YGas);
-            forAll(globalGasIds_, i)
+            forAll(globalCarrierIds_, i)
             {
-                globalGasIds_[i] = globalIds_[i];
+                globalCarrierIds_[i] = globalIds_[i];
             }
             break;
         }
         case LIQUID:
         {
             setGlobalIds(liquidNames);
-            setGlobalGasIds(YGas);
+            setGlobalCarrierIds(YGas);
             break;
         }
         case SOLID:
@@ -272,7 +274,7 @@ void Foam::phaseProperties::initialiseGlobalIds
                 "phaseProperties::initialiseGlobalIds(...)"
             )   << "Assuming no mapping between solid and carrier species"
                 << endl;
-//            setGlobalGasIds(YGas);
+//            setGlobalCarrierIds(YGas);
             break;
         }
         default:
@@ -383,9 +385,9 @@ const Foam::labelList& Foam::phaseProperties::globalIds() const
 }
 
 
-const Foam::labelList& Foam::phaseProperties::globalGasIds() const
+const Foam::labelList& Foam::phaseProperties::globalCarrierIds() const
 {
-    return globalGasIds_;
+    return globalCarrierIds_;
 }
 
 

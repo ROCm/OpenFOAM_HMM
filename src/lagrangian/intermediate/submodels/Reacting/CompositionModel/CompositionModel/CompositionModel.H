@@ -179,6 +179,9 @@ public:
                 //- Return the list of component names for phaseI
                 const wordList& componentNames(const label phaseI) const;
 
+                //- Return global id of component cmptName in carrier thermo
+                label globalCarrierId(const word& cmptName) const;
+
                 //- Return global id of component cmptName in phase phaseI
                 label globalId(const label phaseI, const word& cmptName) const;
 
@@ -188,8 +191,8 @@ public:
                 //- Return local id of component cmptName in phase phaseI
                 label localId(const label phaseI, const word& cmptName) const;
 
-                //- Return global gas id of component given local id
-                label localToGlobalGasId
+                //- Return global carrier id of component given local id
+                label localToGlobalCarrierId
                 (
                     const label phaseI,
                     const label id

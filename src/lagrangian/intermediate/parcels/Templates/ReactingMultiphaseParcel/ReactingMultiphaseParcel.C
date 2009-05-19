@@ -341,19 +341,19 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         // Transfer mass lost from particle to carrier mass source
         forAll(YGas_, i)
         {
-            label id = td.cloud().composition().localToGlobalGasId(GAS, i);
+            label id = td.cloud().composition().localToGlobalCarrierId(GAS, i);
             td.cloud().rhoTrans(id)[cellI] += np0*dMassGas[i];
         }
         forAll(YLiquid_, i)
         {
-            label id = td.cloud().composition().localToGlobalGasId(LIQ, i);
+            label id = td.cloud().composition().localToGlobalCarrierId(LIQ, i);
             td.cloud().rhoTrans(id)[cellI] += np0*dMassLiquid[i];
         }
 /*
         // No mapping between solid components and carrier phase
         forAll(YSolid_, i)
         {
-            label id = td.cloud().composition().localToGlobalGasId(SLD, i);
+            label id = td.cloud().composition().localToGlobalCarrierId(SLD, i);
             td.cloud().rhoTrans(id)[cellI] += np0*dMassSolid[i];
         }
 */
@@ -385,12 +385,14 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             // Absorb parcel into carrier phase
             forAll(YGas_, i)
             {
-                label id = td.cloud().composition().localToGlobalGasId(GAS, i);
+                label id =
+                    td.cloud().composition().localToGlobalCarrierId(GAS, i);
                 td.cloud().rhoTrans(id)[cellI] += np0*mass1*YMix[GAS]*YGas_[i];
             }
             forAll(YLiquid_, i)
             {
-                label id = td.cloud().composition().localToGlobalGasId(LIQ, i);
+                label id =
+                    td.cloud().composition().localToGlobalCarrierId(LIQ, i);
                 td.cloud().rhoTrans(id)[cellI] +=
                     np0*mass1*YMix[LIQ]*YLiquid_[i];
             }
@@ -398,13 +400,14 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             // No mapping between solid components and carrier phase
             forAll(YSolid_, i)
             {
-                label id = td.cloud().composition().localToGlobalGasId(SLD, i);
+                label id =
+                    td.cloud().composition().localToGlobalCarrierId(SLD, i);
                 td.cloud().rhoTrans(id)[cellI] +=
                     np0*mass1*YMix[SLD]*YSolid_[i];
             }
 */
-            td.cloud().hsTrans()[cellI] += np0*mass1*H1;
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
+            td.cloud().hsTrans()[cellI] += np0*mass1*H1;
         }
     }
 
