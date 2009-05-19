@@ -100,11 +100,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 
     // Check options
-    bool binary = true;
-    if (args.options().found("ascii"))
-    {
-        binary = false;
-    }
+    bool binary = !args.optionFound("ascii");
 
 #   include "createTime.H"
 

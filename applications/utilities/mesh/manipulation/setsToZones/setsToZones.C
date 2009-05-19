@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 
 
-    bool noFlipMap = args.options().found("noFlipMap");
+    bool noFlipMap = args.optionFound("noFlipMap");
 
     // Get times list
     instantList Times = runTime.times();

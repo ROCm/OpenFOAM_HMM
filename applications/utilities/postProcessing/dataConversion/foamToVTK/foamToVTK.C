@@ -246,11 +246,10 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    bool doWriteInternal = !args.options().found("noInternal");
-    bool doFaceZones = !args.options().found("noFaceZones");
-    bool doLinks = !args.options().found("noLinks");
-
-    bool binary = !args.options().found("ascii");
+    bool doWriteInternal = !args.optionFound("noInternal");
+    bool doFaceZones     = !args.optionFound("noFaceZones");
+    bool doLinks         = !args.optionFound("noLinks");
+    bool binary          = !args.optionFound("ascii");
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
@@ -260,7 +259,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    bool nearCellValue = args.options().found("nearCellValue");
+    bool nearCellValue = args.optionFound("nearCellValue");
 
     if (nearCellValue)
     {
@@ -269,7 +268,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    bool noPointValues = args.options().found("noPointValues");
+    bool noPointValues = args.optionFound("noPointValues");
 
     if (noPointValues)
     {
@@ -277,12 +276,12 @@ int main(int argc, char *argv[])
             << "Outputting cell values only" << nl << endl;
     }
 
-    bool allPatches = args.options().found("allPatches");
+    bool allPatches = args.optionFound("allPatches");
 
     HashSet<word> excludePatches;
-    if (args.options().found("excludePatches"))
+    if (args.optionFound("excludePatches"))
     {
-        IStringStream(args.options()["excludePatches"])() >> excludePatches;
+        args.optionLookup("excludePatches")() >> excludePatches;
 
         Info<< "Not including patches " << excludePatches << nl << endl;
     }
@@ -290,9 +289,9 @@ int main(int argc, char *argv[])
     word cellSetName;
     string vtkName;
 
-    if (args.options().found("cellSet"))
+    if (args.optionFound("cellSet"))
     {
-        cellSetName = args.options()["cellSet"];
+        cellSetName = args.option("cellSet");
         vtkName = cellSetName;
     }
     else if (Pstream::parRun())
@@ -332,8 +331,8 @@ int main(int argc, char *argv[])
     {
         if
         (
-            args.options().found("time")
-         || args.options().found("latestTime")
+            args.optionFound("time")
+         || args.optionFound("latestTime")
          || cellSetName.size()
          || regionName != polyMesh::defaultRegion
         )
@@ -377,10 +376,10 @@ int main(int argc, char *argv[])
 
 
         // If faceSet: write faceSet only (as polydata)
-        if (args.options().found("faceSet"))
+        if (args.optionFound("faceSet"))
         {
             // Load the faceSet
-            faceSet set(mesh, args.options()["faceSet"]);
+            faceSet set(mesh, args.option("faceSet"));
 
             // Filename as if patch with same name.
             mkDir(fvPath/set.name());
@@ -400,10 +399,10 @@ int main(int argc, char *argv[])
             continue;
         }
         // If pointSet: write pointSet only (as polydata)
-        if (args.options().found("pointSet"))
+        if (args.optionFound("pointSet"))
         {
             // Load the pointSet
-            pointSet set(mesh, args.options()["pointSet"]);
+            pointSet set(mesh, args.option("pointSet"));
 
             // Filename as if patch with same name.
             mkDir(fvPath/set.name());
@@ -428,9 +427,9 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
         HashSet<word> selectedFields;
-        if (args.options().found("fields"))
+        if (args.optionFound("fields"))
         {
-            IStringStream(args.options()["fields"])() >> selectedFields;
+            args.optionLookup("fields")() >> selectedFields;
         }
 
         // Construct the vol fields (on the original mesh if subsetted)
@@ -608,7 +607,7 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        if (args.options().found("surfaceFields"))
+        if (args.optionFound("surfaceFields"))
         {
             PtrList<surfaceScalarField> ssf;
             readFields

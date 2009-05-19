@@ -307,7 +307,7 @@ int main(int argc, char *argv[])
                 new fieldviewTopology
                 (
                     mesh,
-                    !args.options().found("noWall")
+                    !args.optionFound("noWall")
                 )
             );
 

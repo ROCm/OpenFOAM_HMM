@@ -177,12 +177,12 @@ int main(int argc, char *argv[])
 
     Info<< "Reading surface from " << surfName << " ..." << endl;
 
-    bool readSet = args.options().found("faceSet");
+    bool readSet = args.optionFound("faceSet");
     word setName;
 
     if (readSet)
     {
-        setName = args.options()["faceSet"];
+        setName = args.option("faceSet");
 
         Info<< "Repatching only the faces in faceSet " << setName
             << " according to nearest surface triangle ..." << endl;
@@ -194,11 +194,7 @@ int main(int argc, char *argv[])
     }
 
     scalar searchTol = 1E-3;
-
-    if (args.options().found("tol"))
-    {
-        searchTol =  readScalar(IStringStream(args.options()["tol"])());
-    }
+    args.optionReadIfPresent("tol", searchTol);
 
     // Get search box. Anything not within this box will not be considered.
     const boundBox& meshBb = mesh.globalData().bb();

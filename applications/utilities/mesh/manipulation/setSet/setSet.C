@@ -723,7 +723,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    bool writeVTK = !args.options().found("noVTK");
+    bool writeVTK = !args.optionFound("noVTK");
 
     // Get times list
     instantList Times = runTime.times();
@@ -740,9 +740,9 @@ int main(int argc, char *argv[])
 
     std::ifstream* fileStreamPtr(NULL);
 
-    if (args.options().found("batch"))
+    if (args.optionFound("batch"))
     {
-        fileName batchFile(args.options()["batch"]);
+        fileName batchFile(args.option("batch"));
 
         Pout<< "Reading commands from file " << batchFile << endl;
 

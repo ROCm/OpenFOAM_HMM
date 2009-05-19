@@ -692,7 +692,7 @@ int main(int argc, char *argv[])
 
     fileName inSurfName(args.additionalArgs()[0]);
     fileName outSurfName(args.additionalArgs()[1]);
-    bool debug = args.options().found("debug");
+    bool debug = args.optionFound("debug");
 
 
     Info<< "Reading surface from " << inSurfName << endl;

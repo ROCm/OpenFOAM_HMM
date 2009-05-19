@@ -1,8 +1,4 @@
-    if
-    (
-        !args.options().found("constant")
-     && Times.size() > 1
-    )
-    {    
+    if (Times.size() > 1 && !args.optionFound("constant"))
+    {
         startTime = 1;
     }

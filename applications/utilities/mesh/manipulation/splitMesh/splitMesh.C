@@ -126,7 +126,7 @@ int main(int argc, char *argv[])
     word setName(args.additionalArgs()[0]);
     word masterPatch(args.additionalArgs()[1]);
     word slavePatch(args.additionalArgs()[2]);
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     // List of faces to split
     faceSet facesSet(mesh, setName);

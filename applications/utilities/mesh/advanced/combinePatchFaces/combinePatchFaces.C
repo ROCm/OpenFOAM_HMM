@@ -448,19 +448,12 @@ int main(int argc, char *argv[])
     scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.0);
 
     scalar concaveAngle = defaultConcaveAngle;
-
-    if (args.options().found("concaveAngle"))
-    {
-        concaveAngle = readScalar
-        (
-            IStringStream(args.options()["concaveAngle"])()
-        );
-    }
+    args.optionReadIfPresent("concaveAngle", concaveAngle);
 
     scalar concaveSin = Foam::sin(concaveAngle*mathematicalConstant::pi/180.0);
 
-    bool snapMeshDict = args.options().found("snapMesh");
-    bool overwrite = args.options().found("overwrite");
+    bool snapMeshDict = args.optionFound("snapMesh");
+    bool overwrite = args.optionFound("overwrite");
 
     Info<< "Merging all faces of a cell" << nl
         << "    - which are on the same patch" << nl

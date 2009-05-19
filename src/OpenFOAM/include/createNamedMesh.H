@@ -1,16 +1,13 @@
     word regionName;
 
-    if (args.options().found("region"))
+    if (args.optionReadIfPresent("region", regionName))
     {
-        regionName = args.options()["region"];
-
         Info<< "Create mesh " << regionName << " for time = "
             << runTime.timeName() << nl << endl;
     }
     else
     {
         regionName = fvMesh::defaultRegion;
-
         Info<< "Create mesh for time = "
             << runTime.timeName() << nl << endl;
     }

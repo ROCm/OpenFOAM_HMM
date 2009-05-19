@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 
     // default to binary output, unless otherwise specified
     IOstream::streamFormat format = IOstream::BINARY;
-    if (args.options().found("ascii"))
+    if (args.optionFound("ascii"))
     {
         format = IOstream::ASCII;
     }
@@ -115,14 +115,14 @@ int main(int argc, char *argv[])
     // control for renumbering iterations
     bool optIndex = false;
     label indexingNumber = 0;
-    if (args.options().found("index"))
+    if (args.optionFound("index"))
     {
         optIndex = true;
-        indexingNumber = readLabel(IStringStream(args.options()["index"])());
+        indexingNumber = args.optionRead<label>("index");
     }
 
     // always write the geometry, unless the -noMesh option is specified
-    bool optNoMesh = args.options().found("noMesh");
+    bool optNoMesh = args.optionFound("noMesh");
 
     fileName ensightDir = args.rootPath()/args.globalCaseName()/"Ensight";
     fileName dataDir = ensightDir/"data";

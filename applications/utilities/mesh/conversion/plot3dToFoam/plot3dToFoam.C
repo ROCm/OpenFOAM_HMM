@@ -71,18 +71,14 @@ int main(int argc, char *argv[])
     }
 
     scalar scaleFactor = 1.0;
-    if (args.options().found("scale"))
-    {
-        scaleFactor = atof(args.options()["scale"].c_str());
-    }
+    args.optionReadIfPresent("scale", scaleFactor);
 
-    bool readBlank = !args.options().found("noBlank");
-    bool singleBlock = args.options().found("singleBlock");
-    scalar twoDThicknes = -1;
-    if (args.options().found("2D"))
+    bool readBlank = !args.optionFound("noBlank");
+    bool singleBlock = args.optionFound("singleBlock");
+    scalar twoDThickness = -1;
+    if (args.optionReadIfPresent("2D", twoDThickness))
     {
-        twoDThicknes = readScalar(IStringStream(args.options()["2D"])());
-        Info<< "Reading 2D case by extruding points by " << twoDThicknes
+        Info<< "Reading 2D case by extruding points by " << twoDThickness
             << " in z direction." << nl << endl;
     }
 
@@ -114,7 +110,7 @@ int main(int argc, char *argv[])
 
         forAll (blocks, blockI)
         {
-            if (twoDThicknes > 0)
+            if (twoDThickness > 0)
             {
                 // Fake second set of points (done in readPoints below)
                 plot3dFile >> nx >> ny;
@@ -139,7 +135,7 @@ int main(int argc, char *argv[])
     forAll (blocks, blockI)
     {
         Info<< "block " << blockI << ":" << nl;
-        blocks[blockI].readPoints(readBlank, twoDThicknes, plot3dFile);
+        blocks[blockI].readPoints(readBlank, twoDThickness, plot3dFile);
         sumPoints += blocks[blockI].nBlockPoints();
         nMeshCells += blocks[blockI].nBlockCells();
         Info<< nl;

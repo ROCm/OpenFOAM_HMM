@@ -1,15 +1,14 @@
     instantList sourceTimes = runTimeSource.times();
     label sourceTimeIndex = runTimeSource.timeIndex();
-    if (args.options().found("sourceTime"))
+    if (args.optionFound("sourceTime"))
     {
-        if ((args.options()["sourceTime"]) == "latestTime")
+        if (args.option("sourceTime") == "latestTime")
         {
             sourceTimeIndex = sourceTimes.size() - 1;
         }
         else
         {
-            scalar sourceTime =
-                readScalar(IStringStream(args.options()["sourceTime"])());
+            scalar sourceTime = args.optionRead<scalar>("sourceTime");
             sourceTimeIndex = getTimeIndex(sourceTimes, sourceTime);
         }
     }

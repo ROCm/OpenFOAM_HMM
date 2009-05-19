@@ -381,9 +381,9 @@ int main(int argc, char *argv[])
         << endl;
 
 
-    const bool splitAllFaces = args.options().found("splitAllFaces");
-    const bool overwrite = args.options().found("overwrite");
-    const bool doNotPreserveFaceZones = args.options().found
+    const bool splitAllFaces = args.optionFound("splitAllFaces");
+    const bool overwrite = args.optionFound("overwrite");
+    const bool doNotPreserveFaceZones = args.optionFound
     (
         "doNotPreserveFaceZones"
     );

@@ -1,4 +1,4 @@
-    if (args.options().found("latestTime"))
+    if (args.optionFound("latestTime"))
     {
         startTime = Times.size() - 1;
     }

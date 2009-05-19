@@ -78,7 +78,7 @@ int main(int argc, char *argv[])
     Info<< nChanged << " solver settings changed" << nl << endl;
     if (nChanged)
     {
-        if (args.options().found("test"))
+        if (args.optionFound("test"))
         {
             Info<< "-test option: no changes made" << nl << endl;
         }

@@ -107,7 +107,7 @@ Foam::ensightMesh::ensightMesh
     const cellModel& wedge = *(cellModeller::lookup("wedge"));
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
-    if (!args.options().found("noPatches"))
+    if (!args.optionFound("noPatches"))
     {
         forAll (mesh_.boundaryMesh(), patchI)
         {
@@ -136,9 +136,9 @@ Foam::ensightMesh::ensightMesh
 
         combineReduce(allPatchNames_, concatPatchNames());
 
-        if (args.options().found("patches"))
+        if (args.optionFound("patches"))
         {
-            wordList patchNameList(IStringStream(args.options()["patches"])());
+            wordList patchNameList(args.optionLookup("patches")());
 
             if (patchNameList.empty())
             {
@@ -228,7 +228,7 @@ Foam::ensightMesh::ensightMesh
         reduce(meshCellSets_.nPolys, sumOp<label>());
     }
 
-    if (!args.options().found("noPatches"))
+    if (!args.optionFound("noPatches"))
     {
         forAll (mesh.boundary(), patchI)
         {
