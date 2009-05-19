@@ -330,6 +330,9 @@ public:
                 inline T& operator*();
                 inline T& operator()();
 
+                inline const T& operator*() const;
+                inline const T& operator()() const;
+
                 inline iterator& operator++();
                 inline iterator operator++(int);
 
@@ -389,8 +392,8 @@ public:
                 inline bool operator==(const iterator&) const;
                 inline bool operator!=(const iterator&) const;
 
-                inline const T& operator*();
-                inline const T& operator()();
+                inline const T& operator*() const;
+                inline const T& operator()() const;
 
                 inline const_iterator& operator++();
                 inline const_iterator operator++(int);
