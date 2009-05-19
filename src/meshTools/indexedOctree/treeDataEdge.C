@@ -134,7 +134,7 @@ void Foam::treeDataEdge::findNearest
     {
         label index = indices[i];
 
-        const edge& e = edges_[index];
+        const edge& e = edges_[edgeLabels_[index]];
 
         pointHit nearHit = e.line(points_).nearestDist(sample);
 
@@ -170,7 +170,7 @@ void Foam::treeDataEdge::findNearest
     {
         label index = indices[i];
 
-        const edge& e = edges_[index];
+        const edge& e = edges_[edgeLabels_[index]];
 
         // Note: could do bb test ? Worthwhile?
 

@@ -191,7 +191,7 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
     const label patchI = patch().index();
 
     const scalarField& muw = lesModel.mu().boundaryField()[patchI];
-    const scalarField& muSgsw = lesModel.muSgs()().boundaryField()[patchI];
+    const scalarField muSgsw = lesModel.muSgs()().boundaryField()[patchI];
 
     const scalarField& alphaw = lesModel.alpha().boundaryField()[patchI];
     scalarField& alphaSgsw = *this;

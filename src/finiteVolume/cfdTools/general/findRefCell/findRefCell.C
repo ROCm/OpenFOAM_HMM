@@ -34,7 +34,7 @@ void Foam::setRefCell
     const dictionary& dict,
     label& refCelli,
     scalar& refValue,
-    bool forceReference
+    const bool forceReference
 )
 {
     if (field.needReference() || forceReference)
@@ -116,6 +116,17 @@ void Foam::setRefCell
 
         refValue = readScalar(dict.lookup(refValueName));
     }
+}
+
+
+Foam::scalar Foam::getRefCellValue
+(
+    const volScalarField& field,
+    const label refCelli
+)
+{
+    scalar refCellValue = (refCelli >= 0 ? field[refCelli] : 0.0);
+    return returnReduce<label>(refCellValue, sumOp<scalar>());
 }
 
 

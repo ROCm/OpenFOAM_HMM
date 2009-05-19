@@ -49,21 +49,20 @@ scalar nutRoughWallFunctionFvPatchScalarField::fnRough
     const scalar kappa
 ) const
 {
-    // Set deltaB based on non-dimensional roughness height
-    scalar deltaB = 0.0;
+    // Return fn based on non-dimensional roughness height
+
     if (KsPlus < 90.0)
     {
-        deltaB =
-            1.0/kappa
-            *log((KsPlus - 2.25)/87.75 + Cs*KsPlus)
-            *sin(0.4258*(log(KsPlus) - 0.811));
+        return pow
+        (
+            (KsPlus - 2.25)/87.75 + Cs*KsPlus,
+            sin(0.4258*(log(KsPlus) - 0.811))
+        );
     }
     else
     {
-        deltaB = 1.0/kappa*log(1.0 + Cs*KsPlus);
+        return (1.0 + Cs*KsPlus);
     }
-
-    return exp(min(deltaB*kappa, 50.0));
 }
 
 
@@ -177,15 +176,15 @@ void nutRoughWallFunctionFvPatchScalarField::rmap
 
 void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu = rasModel.Cmu().value();
+    const scalar Cmu = ras.Cmu().value();
     const scalar Cmu25 = pow(Cmu, 0.25);
-    const scalar kappa = rasModel.kappa().value();
-    const scalar E = rasModel.E().value();
-    scalar yPlusLam = rasModel.yPlusLam();
+    const scalar kappa = ras.kappa().value();
+    const scalar E = ras.E().value();
+    const scalar yPlusLam = ras.yPlusLam();
 
-    const scalarField& y = rasModel.y()[patch().index()];
+    const scalarField& y = ras.y()[patch().index()];
 
     const scalarField& k = db().lookupObject<volScalarField>(kName_);
 
@@ -199,17 +198,36 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
         label faceCellI = patch().faceCells()[faceI];
 
         scalar uStar = Cmu25*sqrt(k[faceCellI]);
-
         scalar yPlus = uStar*y[faceI]/nuw[faceI];
-
         scalar KsPlus = uStar*Ks_[faceI]/nuw[faceI];
 
         scalar Edash = E;
-        scalar yPlusLamNew = yPlusLam;
+
         if (KsPlus > 2.25)
         {
             Edash = E/fnRough(KsPlus, Cs_[faceI], kappa);
-            yPlusLam = rasModel.yPlusLam(kappa, Edash);
+        }
+
+        if (yPlus > yPlusLam)
+        {
+            scalar limitingNutw = max(nutw[faceI], nuw[faceI]);
+
+            // To avoid oscillations limit the change in the wall viscosity
+            // which is particularly important if it temporarily becomes zero
+            nutw[faceI] =
+                max
+                (
+                    min
+                    (
+                        nuw[faceI]
+                       *(yPlus*kappa/log(max(Edash*yPlus, 1+1e-4)) - 1),
+                        2*limitingNutw
+                    ), 0.5*limitingNutw
+                );
+        }
+        else
+        {
+            nutw[faceI] = 0.0;
         }
 
         if (debug)
@@ -217,17 +235,8 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
             Info<< "yPlus = " << yPlus
                 << ", KsPlus = " << KsPlus
                 << ", Edash = " << Edash
-                << ", yPlusLam = " << yPlusLam
+                << ", nutw = " << nutw[faceI]
                 << endl;
-        }
-
-        if (yPlus > yPlusLamNew)
-        {
-            nutw[faceI] = nuw[faceI]*(yPlus*kappa/log(Edash*yPlus) - 1);
-        }
-        else
-        {
-            nutw[faceI] = 0.0;
         }
     }
 }

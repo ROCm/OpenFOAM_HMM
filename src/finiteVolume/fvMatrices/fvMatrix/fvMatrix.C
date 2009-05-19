@@ -472,22 +472,18 @@ void Foam::fvMatrix<Type>::setValues
 }
 
 
-// Set reference level for solution
 template<class Type>
 void Foam::fvMatrix<Type>::setReference
 (
-    const label cell,
+    const label celli,
     const Type& value,
     const bool forceReference
 )
 {
-    if (psi_.needReference() || forceReference)
+    if (celli >= 0 && (psi_.needReference() || forceReference))
     {
-        if (cell >= 0)
-        {
-            source()[cell] += diag()[cell]*value;
-            diag()[cell] += diag()[cell];
-        }
+        source()[celli] += diag()[celli]*value;
+        diag()[celli] += diag()[celli];
     }
 }
 

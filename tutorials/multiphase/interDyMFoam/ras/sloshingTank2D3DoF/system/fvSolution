@@ -98,19 +98,10 @@ PISO
     nAlphaSubCycles 3;
     cAlpha          1.5;
     correctPhi      no;
-    pRefProbe
-    {
-        fields
-        (
-            p
-        );
-        probeLocations
-        (
-            ( 0 0 0.15 )
-        );
-    }
 
-    pRefValue       100000;
+    pdRefPoint      (0 0 0.15);
+    pdRefValue      0;
+    pRefValue       1e5;
 }
 
 relaxationFactors
