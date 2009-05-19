@@ -110,7 +110,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     scalar T1 = calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, Sh);
 
     // Calculate new enthalpy state
-    scalar H1 = cp0 - T1;
+    scalar H1 = cp0*T1;
 
 
     // Motion
