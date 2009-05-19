@@ -50,6 +50,8 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("reList", "reList");
     argList::validOptions.insert("wordList", "wordList");
     argList::validOptions.insert("stringList", "stringList");
+    argList::validOptions.insert("float", "xx");
+    argList::validOptions.insert("flag", "");
 
 #   include "setRootCase.H"
 
@@ -84,19 +86,31 @@ int main(int argc, char *argv[])
     stringList sLst;
 
 
-    if (args.options().found("reList"))
+    scalar xxx(-1);
+
+    if (args.optionFound("flag"))
     {
-        reLst = readList<wordRe>(IStringStream(args.options()["reList"])());
+        Info<<"-flag:" << args.option("flag") << endl;
     }
 
-    if (args.options().found("wordList"))
+    if (args.optionReadIfPresent<scalar>("float", xxx))
     {
-        wLst = readList<word>(IStringStream(args.options()["wordList"])());
+        Info<<"read float " << xxx << endl;
     }
 
-    if (args.options().found("stringList"))
+    if (args.optionFound("reList"))
     {
-        sLst = readList<string>(IStringStream(args.options()["stringList"])());
+        reLst = args.optionReadList<wordRe>("reList");
+    }
+
+    if (args.optionFound("wordList"))
+    {
+        wLst = args.optionReadList<word>("wordList");
+    }
+
+    if (args.optionFound("stringList"))
+    {
+        sLst = args.optionReadList<string>("stringList");
     }
 
     Info<< nl
