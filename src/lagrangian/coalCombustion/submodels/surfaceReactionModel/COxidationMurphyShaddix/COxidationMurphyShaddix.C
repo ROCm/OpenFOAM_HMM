@@ -55,20 +55,22 @@ Foam::COxidationMurphyShaddix::COxidationMurphyShaddix
     E_(dimensionedScalar(this->coeffDict().lookup("E")).value()),
     n_(dimensionedScalar(this->coeffDict().lookup("n")).value()),
     WVol_(dimensionedScalar(this->coeffDict().lookup("WVol")).value()),
-    dH0_(dimensionedScalar(this->coeffDict().lookup("dH0")).value()),
-    TMaxdH_(dimensionedScalar(this->coeffDict().lookup("TmaxdH")).value()),
     CsLocalId_(-1),
-    O2GlobalId_(-1),
-    CO2GlobalId_(-1)
+    O2GlobalId_(owner.composition().globalCarrierId("O2")),
+    CO2GlobalId_(owner.composition().globalCarrierId("CO2")),
+    WC_(0.0),
+    WO2_(0.0),
+    HcCO2_(0.0)
 {
-    // Determine carrier phase Ids of reactants/products
-    label idGas = owner.composition().idGas();
-    O2GlobalId_ = owner.composition().globalId(idGas, "O2");
-    CO2GlobalId_ = owner.composition().globalId(idGas, "CO2");
-
     // Determine Cs ids
     label idSolid = owner.composition().idSolid();
     CsLocalId_ = owner.composition().localId(idSolid, "Cs");
+
+    // Set local copies of thermo properties
+    WO2_ = owner.composition().carrierSpecies()[O2GlobalId_].W();
+    scalar WCO2 = owner.composition().carrierSpecies()[CO2GlobalId_].W();
+    WC_ = WCO2 - WO2_;
+    HcCO2_ = owner.composition().carrierSpecies()[CO2GlobalId_].Hc();
 }
 
 
@@ -118,8 +120,7 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
 
     // Cell carrier phase O2 species density [kg/m^3]
     const scalar rhoO2 =
-        owner().carrierThermo().composition().Y(O2GlobalId_)[cellI]
-       *rhoc;
+        rhoc*owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
 
     if (rhoO2 < SMALL)
     {
@@ -129,25 +130,12 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
     // Particle surface area [m^2]
     const scalar Ap = mathematicalConstant::pi*sqr(d);
 
-//    // Film temperature [K]
-//    const scalar Tf = (T + Tc)/2;
-
     // Calculate diffision constant at continuous phase temperature
     // and density [m^2/s]
     const scalar D = D0_*(rho0_/rhoc)*pow(Tc/T0_, Dn_);
 
-    // Molecular weight of O2 [kg/kmol]
-    const scalar WO2 = owner().composition().carrierSpecies()[O2GlobalId_].W();
-
-    // Molecular weight of CO2 [kg/kmol]
-    const scalar WCO2 =
-        owner().composition().carrierSpecies()[CO2GlobalId_].W();
-
-    // Molecular weight of C [kg/kmol]
-    const scalar WC = WCO2 - WO2;
-
     // Far field partial pressure O2 [Pa]
-    const scalar ppO2 = rhoO2/WO2*specie::RR*Tc;
+    const scalar ppO2 = rhoO2/WO2_*specie::RR*Tc;
 
     // Molar emission rate of volatiles per unit surface area
     const scalar qVol = sum(dMassVolatile)/(WVol_*Ap);
@@ -159,7 +147,6 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
     {
         Pout<< "mass  = " << mass << nl
             << "fComb = " << fComb << nl
-            << "WC    = " << WC << nl
             << "Ap    = " << Ap << nl
             << "dt    = " << dt << nl
             << "C     = " << C << nl
@@ -170,7 +157,7 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
     scalar qCsOld = 0;
     scalar qCs = 1;
 
-    const scalar qCsLim = mass*fComb/(WC*Ap*dt);
+    const scalar qCsLim = mass*fComb/(WC_*Ap*dt);
 
     if (debug)
     {
@@ -207,14 +194,14 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
     scalar dOmega = qCs*Ap*dt;
 
     // Add to carrier phase mass transfer
-    dMassSRCarrier[O2GlobalId_] += -dOmega*WO2;
-    dMassSRCarrier[CO2GlobalId_] += dOmega*WCO2;
+    dMassSRCarrier[O2GlobalId_] += -dOmega*WO2_;
+    dMassSRCarrier[CO2GlobalId_] += dOmega*(WC_ + WO2_);
 
     // Add to particle mass transfer
-    dMassSolid[CsLocalId_] = dOmega*WC;
+    dMassSolid[CsLocalId_] += dOmega*WC_;
 
     // Heat of reaction
-    return dOmega*dH0_*cos(mathematicalConstant::pi/2*T/TMaxdH_);
+    return HcCO2_*dOmega*WC_;
 }
 
 

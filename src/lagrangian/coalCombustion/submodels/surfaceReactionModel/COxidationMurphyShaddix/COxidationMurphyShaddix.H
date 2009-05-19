@@ -26,7 +26,6 @@ Class
     COxidationMurphyShaddix
 
 Description
-    Kinetics/diffusion limited rate surface reaction model for coal parcel
     Limited to C(s) + O2 -> CO2
 
 \*---------------------------------------------------------------------------*/
@@ -77,12 +76,6 @@ class COxidationMurphyShaddix
             //- Effective molecular weight of gaseous volatiles
             const scalar WVol_;
 
-            //- Enthalpy retained by particle during surface combustion
-            const scalar dH0_;
-
-            //- TdHMax: dH = dH0_*cos(pi/2*Tp/TMaxdH_)
-            const scalar TMaxdH_;
-
 
         // Static constants
 
@@ -103,6 +96,18 @@ class COxidationMurphyShaddix
 
             //- CO2 positions in global list
             label CO2GlobalId_;
+
+
+        // Local copies of thermo properties
+
+            //- Molecular weight of C [kg/kmol]
+            scalar WC_;
+
+            //- Molecular weight of O2 [kg/kmol]
+            scalar WO2_;
+
+            //- Chemical enthalpy of CO2 [J/kg]
+            scalar HcCO2_;
 
 
 public:

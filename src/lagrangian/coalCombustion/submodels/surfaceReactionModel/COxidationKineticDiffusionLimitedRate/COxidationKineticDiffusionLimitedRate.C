@@ -46,17 +46,12 @@ COxidationKineticDiffusionLimitedRate
     C2_(dimensionedScalar(this->coeffDict().lookup("C2")).value()),
     E_(dimensionedScalar(this->coeffDict().lookup("E")).value()),
     CsLocalId_(-1),
-    O2GlobalId_(-1),
-    CO2GlobalId_(-1),
+    O2GlobalId_(owner.composition().globalCarrierId("O2")),
+    CO2GlobalId_(owner.composition().globalCarrierId("CO2")),
     WC_(0.0),
     WO2_(0.0),
     HcCO2_(0.0)
 {
-    // Determine carrier phase Ids of reactants/products
-    label idGas = owner.composition().idGas();
-    O2GlobalId_ = owner.composition().globalId(idGas, "O2");
-    CO2GlobalId_ = owner.composition().globalId(idGas, "CO2");
-
     // Determine Cs ids
     label idSolid = owner.composition().idSolid();
     CsLocalId_ = owner.composition().localId(idSolid, "C");
@@ -76,7 +71,7 @@ COxidationKineticDiffusionLimitedRate
                 "const dictionary&, "
                 "ReactingMultiphaseCloud<coalParcel>&"
             ")"
-        )   << "Stoichiometry, Sb, must be greater than zero" << nl
+        )   << "Stoichiometry of reaction, Sb, must be greater than zero" << nl
             << exit(FatalError);
     }
 }
