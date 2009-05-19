@@ -33,11 +33,11 @@ Description
 template<class CloudType>
 Foam::NoDispersion<CloudType>::NoDispersion
 (
-    const dictionary& dict,
+    const dictionary&,
     CloudType& owner
 )
 :
-    DispersionModel<CloudType>(dict, owner)
+    DispersionModel<CloudType>(owner)
 {}
 
 
