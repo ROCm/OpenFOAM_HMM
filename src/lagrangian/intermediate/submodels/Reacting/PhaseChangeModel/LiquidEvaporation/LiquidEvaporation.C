@@ -81,7 +81,7 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
         )
     ),
     activeLiquids_(this->coeffDict().lookup("activeLiquids")),
-    liqToGasMap_(activeLiquids_.size(), -1),
+    liqToCarrierMap_(activeLiquids_.size(), -1),
     liqToLiqMap_(activeLiquids_.size(), -1)
 {
     if (activeLiquids_.size() == 0)
@@ -98,14 +98,14 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
     }
 
     // Determine mapping between liquid and carrier phase species
-    label idLiquid = owner.composition().idLiquid();
     forAll(activeLiquids_, i)
     {
-        liqToGasMap_[i] =
-            owner.composition().globalId(idLiquid, activeLiquids_[i]);
+        liqToCarrierMap_[i] =
+            owner.composition().globalCarrierId(activeLiquids_[i]);
     }
 
     // Determine mapping between local and global liquids
+    label idLiquid = owner.composition().idLiquid();
     forAll(activeLiquids_, i)
     {
         liqToLiqMap_[i] =
@@ -159,7 +159,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)
     {
-        label gid = liqToGasMap_[i];
+        label gid = liqToCarrierMap_[i];
         label lid = liqToLiqMap_[i];
 
         // vapour diffusivity [m2/s]

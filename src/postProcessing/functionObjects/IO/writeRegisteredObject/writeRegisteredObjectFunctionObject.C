@@ -22,55 +22,26 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "NoDispersion.H"
+#include "writeRegisteredObjectFunctionObject.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::NoDispersion<CloudType>::NoDispersion
-(
-    const dictionary&,
-    CloudType& owner
-)
-:
-    DispersionModel<CloudType>(owner)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoDispersion<CloudType>::~NoDispersion()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoDispersion<CloudType>::active() const
+namespace Foam
 {
-    return false;
+    defineNamedTemplateTypeNameAndDebug
+    (
+        writeRegisteredObjectFunctionObject,
+        0
+    );
+
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        writeRegisteredObjectFunctionObject,
+        dictionary
+    );
 }
-
-
-template<class CloudType>
-Foam::vector Foam::NoDispersion<CloudType>::update
-(
-    const scalar,
-    const label,
-    const vector&,
-    const vector& Uc,
-    vector&,
-    scalar&
-)
-{
-    // Do nothing
-    return Uc;
-}
-
 
 // ************************************************************************* //

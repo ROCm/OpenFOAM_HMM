@@ -81,6 +81,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        DispersionModel(CloudType& owner);
+
         //- Construct from components
         DispersionModel
         (

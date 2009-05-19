@@ -22,55 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::IOwriteRegisteredObject
+
 Description
+    Instance of the generic IOOutputFilter for writeRegisteredObject.
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoDispersion.H"
+#ifndef IOwriteRegisteredObject_H
+#define IOwriteRegisteredObject_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "writeRegisteredObject.H"
+#include "IOOutputFilter.H"
 
-template<class CloudType>
-Foam::NoDispersion<CloudType>::NoDispersion
-(
-    const dictionary&,
-    CloudType& owner
-)
-:
-    DispersionModel<CloudType>(owner)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoDispersion<CloudType>::~NoDispersion()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoDispersion<CloudType>::active() const
+namespace Foam
 {
-    return false;
+    typedef IOOutputFilter<writeRegisteredObject> IOwriteRegisteredObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::vector Foam::NoDispersion<CloudType>::update
-(
-    const scalar,
-    const label,
-    const vector&,
-    const vector& Uc,
-    vector&,
-    scalar&
-)
-{
-    // Do nothing
-    return Uc;
-}
-
+#endif
 
 // ************************************************************************* //

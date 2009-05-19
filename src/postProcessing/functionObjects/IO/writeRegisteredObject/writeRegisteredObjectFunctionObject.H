@@ -22,55 +22,34 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::writeRegisteredObjectFunctionObject
+
 Description
+    FunctionObject wrapper around writeRegisteredObject to allow them to be
+    created via the functions list within controlDict.
+
+SourceFiles
+    writeRegisteredObjectFunctionObject.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "NoDispersion.H"
+#ifndef writeRegisteredObjectFunctionObject_H
+#define writeRegisteredObjectFunctionObject_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "writeRegisteredObject.H"
+#include "OutputFilterFunctionObject.H"
 
-template<class CloudType>
-Foam::NoDispersion<CloudType>::NoDispersion
-(
-    const dictionary&,
-    CloudType& owner
-)
-:
-    DispersionModel<CloudType>(owner)
-{}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::NoDispersion<CloudType>::~NoDispersion()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::NoDispersion<CloudType>::active() const
+namespace Foam
 {
-    return false;
+    typedef OutputFilterFunctionObject<writeRegisteredObject>
+        writeRegisteredObjectFunctionObject;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::vector Foam::NoDispersion<CloudType>::update
-(
-    const scalar,
-    const label,
-    const vector&,
-    const vector& Uc,
-    vector&,
-    scalar&
-)
-{
-    // Do nothing
-    return Uc;
-}
-
+#endif
 
 // ************************************************************************* //
