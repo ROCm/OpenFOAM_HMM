@@ -79,17 +79,17 @@ int main(int argc, char *argv[])
         rhoEffLagrangian = coalParcels.rhoEff() + limestoneParcels.rhoEff();
         pDyn = 0.5*rho*magSqr(U);
 
-        Info << "Evolving coal cloud" << endl;
-
         coalParcels.evolve();
 
         coalParcels.info();
 
-        Info << "Evolving limestone cloud" << endl;
+        Info<< endl;
 
         limestoneParcels.evolve();
 
         limestoneParcels.info();
+
+        Info<< endl;
 
         #include "chemistry.H"
         #include "rhoEqn.H"
@@ -99,11 +99,11 @@ int main(int argc, char *argv[])
         {
             #include "UEqn.H"
             #include "YEqn.H"
+            #include "hEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
-                #include "hEqn.H"
                 #include "pEqn.H"
             }
 
