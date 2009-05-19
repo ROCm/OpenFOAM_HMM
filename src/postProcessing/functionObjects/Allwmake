@@ -4,6 +4,7 @@ set -x
 
 wmake libso field
 wmake libso forces
+wmake libso IO
 wmake libso utilities
 wmake libso systemCall
 
