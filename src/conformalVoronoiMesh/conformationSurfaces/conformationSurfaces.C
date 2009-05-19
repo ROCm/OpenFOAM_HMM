@@ -500,6 +500,46 @@ void Foam::conformationSurfaces::findEdgeNearest
 }
 
 
+void Foam::conformationSurfaces::findEdgeNearestByType
+(
+    const point& sample,
+    scalar nearestDistSqr,
+    List<pointIndexHit>& edgeHits,
+    List<label>& featuresHit
+) const
+{
+    // Initialise
+    featuresHit.setSize(featureEdgeMesh::nEdgeTypes);
+    featuresHit = -1;
+    edgeHits.setSize(featureEdgeMesh::nEdgeTypes);
+
+    // Work arrays
+    scalarField minDistSqr(featureEdgeMesh::nEdgeTypes, nearestDistSqr);
+    List<pointIndexHit> hitInfo(featureEdgeMesh::nEdgeTypes);
+
+    forAll(features_, testI)
+    {
+        features_[testI].nearestFeatureEdgeByType
+        (
+            sample,
+            minDistSqr,
+            hitInfo
+        );
+
+        // Update minDistSqr and arguments
+        forAll(hitInfo, typeI)
+        {
+            if (hitInfo[typeI].hit())
+            {
+                minDistSqr[typeI] = magSqr(hitInfo[typeI].hitPoint() - sample);
+                edgeHits[typeI] = hitInfo[typeI];
+                featuresHit[typeI] = testI;
+            }
+        }
+    }
+}
+
+
 void Foam::conformationSurfaces::writeFeatureObj
 (
     const fileName& prefix

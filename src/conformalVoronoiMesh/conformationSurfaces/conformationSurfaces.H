@@ -200,6 +200,15 @@ public:
                 labelList& featuresHit
             ) const;
 
+            //- Find the nearest point on each type of feature edge
+            void findEdgeNearestByType
+            (
+                const point& sample,
+                scalar nearestDistSqr,
+                List<pointIndexHit>& edgeHit,
+                List<label>& featureHit
+            ) const;
+
         // Write
 
             //- Write all components of all the featureEdgeMeshes as an obj file

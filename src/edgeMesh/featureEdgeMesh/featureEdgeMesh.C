@@ -57,6 +57,12 @@ Foam::label Foam::featureEdgeMesh::convexStart_ = 0;
 Foam::label Foam::featureEdgeMesh::externalStart_ = 0;
 
 
+Foam::label Foam::featureEdgeMesh::nPointTypes = 4;
+
+
+Foam::label Foam::featureEdgeMesh::nEdgeTypes = 5;
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
@@ -74,7 +80,9 @@ Foam::featureEdgeMesh::featureEdgeMesh(const IOobject& io)
     edgeDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
-    regionEdges_(0)
+    regionEdges_(0),
+    edgeTree_(),
+    edgeTreesByType_()
 {
     if
     (
@@ -157,7 +165,9 @@ Foam::featureEdgeMesh::featureEdgeMesh
     edgeDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
-    regionEdges_(0)
+    regionEdges_(0),
+    edgeTree_(),
+    edgeTreesByType_()
 {
     // Extract and reorder the data from surfaceFeatures
 
@@ -266,7 +276,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
 
     // Reorder the edges by classification
 
-    List<DynamicList<label> > allEds(5);
+    List<DynamicList<label> > allEds(nEdgeTypes);
 
     DynamicList<label>& externalEds(allEds[0]);
     DynamicList<label>& internalEds(allEds[1]);
@@ -519,8 +529,9 @@ Foam::featureEdgeMesh::featureEdgeMesh
     edgeDirections_(edgeDirections),
     edgeNormals_(edgeNormals),
     featurePointNormals_(featurePointNormals),
-    regionEdges_(regionEdges)
-
+    regionEdges_(regionEdges),
+    edgeTree_(),
+    edgeTreesByType_()
 {}
 
 
@@ -544,7 +555,9 @@ Foam::featureEdgeMesh::featureEdgeMesh
     edgeDirections_(0),
     edgeNormals_(0),
     featurePointNormals_(0),
-    regionEdges_(0)
+    regionEdges_(0),
+    edgeTree_(),
+    edgeTreesByType_()
 {}
 
 
@@ -649,6 +662,21 @@ Foam::featureEdgeMesh::edgeStatus Foam::featureEdgeMesh::classifyEdge
 
 void Foam::featureEdgeMesh::nearestFeatureEdge
 (
+    const point& sample,
+    scalar searchDistSqr,
+    pointIndexHit& info
+) const
+{
+    info = edgeTree().findNearest
+    (
+        sample,
+        searchDistSqr
+    );
+}
+
+
+void Foam::featureEdgeMesh::nearestFeatureEdge
+(
     const pointField& samples,
     const scalarField& searchDistSqr,
     List<pointIndexHit>& info
@@ -658,11 +686,48 @@ void Foam::featureEdgeMesh::nearestFeatureEdge
 
     forAll(samples, i)
     {
-        info[i] = edgeTree().findNearest
+        nearestFeatureEdge
         (
             samples[i],
+            searchDistSqr[i],
+            info[i]
+        );
+    }
+}
+
+
+void Foam::featureEdgeMesh::nearestFeatureEdgeByType
+(
+    const point& sample,
+    const scalarField& searchDistSqr,
+    List<pointIndexHit>& info
+) const
+{
+    const PtrList<indexedOctree<treeDataEdge> >& edgeTrees = edgeTreesByType();
+
+    info.setSize(edgeTrees.size());
+
+    labelList sliceStarts(edgeTrees.size());
+
+    sliceStarts[0] = externalStart_;
+    sliceStarts[1] = internalStart_;
+    sliceStarts[2] = flatStart_;
+    sliceStarts[3] = openStart_;
+    sliceStarts[4] = multipleStart_;
+
+    forAll(edgeTrees, i)
+    {
+        info[i] = edgeTrees[i].findNearest
+        (
+            sample,
             searchDistSqr[i]
         );
+
+        // The index returned by the indexedOctree is local to the slice of
+        // edges it was supplied with, return the index to the value in the
+        // complete edge list
+
+        info[i].setIndex(info[i].index() + sliceStarts[i]);
     }
 }
 
@@ -695,7 +760,7 @@ Foam::featureEdgeMesh::edgeTree() const
                     false,          // cachebb
                     edges(),        // edges
                     points(),       // points
-                    allEdges       // selected edges
+                    allEdges        // selected edges
                 ),
                 bb,     // bb
                 8,      // maxLevel
@@ -706,6 +771,71 @@ Foam::featureEdgeMesh::edgeTree() const
     }
 
     return edgeTree_();
+}
+
+
+const Foam::PtrList<Foam::indexedOctree<Foam::treeDataEdge> >&
+Foam::featureEdgeMesh::edgeTreesByType() const
+{
+    if (edgeTreesByType_.size() == 0)
+    {
+        edgeTreesByType_.setSize(nEdgeTypes);
+
+        Random rndGen(872141);
+
+        // Slightly extended bb. Slightly off-centred just so on symmetric
+        // geometry there are less face/edge aligned items.
+        treeBoundBox bb
+        (
+            treeBoundBox(points()).extend(rndGen, 1E-4)
+        );
+
+        bb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        bb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        labelListList sliceEdges(nEdgeTypes);
+
+        // External edges
+        sliceEdges[0] =
+            identity(internalStart_ - externalStart_) + externalStart_;
+
+        // Internal edges
+        sliceEdges[1] = identity(flatStart_ - internalStart_) + internalStart_;
+
+        // Flat edges
+        sliceEdges[2] = identity(openStart_ - flatStart_) + flatStart_;
+
+        // Open edges
+        sliceEdges[3] = identity(multipleStart_ - openStart_) + openStart_;
+
+        // Multiple edges
+        sliceEdges[4] =
+            identity(edges().size() - multipleStart_) + multipleStart_;
+
+        forAll(edgeTreesByType_, i)
+        {
+            edgeTreesByType_.set
+            (
+                i,
+                new indexedOctree<treeDataEdge>
+                (
+                    treeDataEdge
+                    (
+                        false,          // cachebb
+                        edges(),        // edges
+                        points(),       // points
+                        sliceEdges[i]   // selected edges
+                    ),
+                    bb,     // bb
+                    8,      // maxLevel
+                    10,     // leafsize
+                    3.0     // duplicity
+                )
+            );
+        }
+    }
+
+    return edgeTreesByType_;
 }
 
 
@@ -768,7 +898,7 @@ void Foam::featureEdgeMesh::writeObj
     Pout<< "Writing external edges to " << externalStr.name() << endl;
 
     verti = 0;
-    for (label i = 0; i < internalStart_; i++)
+    for (label i = externalStart_; i < internalStart_; i++)
     {
         const edge& e = edges()[i];
 

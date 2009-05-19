@@ -117,7 +117,6 @@ Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 
-
 void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 (
     const List<pointIndexHit>& surfaceHits,
@@ -249,8 +248,6 @@ void Foam::conformalVoronoiMesh::insertExternalEdgePointGroup
     // As this is an external edge, there are two normals by definition
     const vector& nA = feNormals[edNormalIs[0]];
     const vector& nB = feNormals[edNormalIs[1]];
-
-
 
     // Convex. So refPt will be inside domain and hence a master point
     point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
@@ -1340,37 +1337,47 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                         // edge, shift it to being an edge control point
                         // instead, this will prevent "pits" forming.
 
-                        pointIndexHit edHit;
-                        label featureHit;
+                        List<pointIndexHit> edHits;
+                        labelList featuresHit;
 
                         scalar targetCellSizeSqr = sqr(targetCellSize(vert));
 
-                        geometryToConformTo_.findEdgeNearest
+                        geometryToConformTo_.findEdgeNearestByType
                         (
                             surfHit.hitPoint(),
                             edgeSearchDistCoeffSqr*targetCellSizeSqr,
-                            edHit,
-                            featureHit
+                            edHits,
+                            featuresHit
                         );
 
                         bool keepSurfacePoint = true;
 
-                        if (edHit.hit())
+                        forAll(edHits, i)
                         {
-                            // Note that edge type classification can be used
-                            // here if necessary, i.e to avoid over-populating
-                            // internal edges
+                            const pointIndexHit& edHit(edHits[i]);
+                            label featureHit = featuresHit[i];
 
-                            featureEdgeHits.append(edHit);
-                            featureEdgeFeaturesHit.append(featureHit);
-
-                            if
-                            (
-                                magSqr(edHit.hitPoint() - surfHit.hitPoint())
-                              < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
-                            )
+                            if (edHit.hit())
                             {
-                                keepSurfacePoint = false;
+                                // Note that edge type classification can be
+                                // used here if necessary, i.e to avoid
+                                // over-populating internal edges
+
+                                featureEdgeHits.append(edHit);
+                                featureEdgeFeaturesHit.append(featureHit);
+
+                                if
+                                (
+                                    magSqr
+                                    (
+                                        edHit.hitPoint() - surfHit.hitPoint()
+                                    )
+                                  < surfacePtReplaceDistCoeffSqr
+                                   *targetCellSizeSqr
+                                )
+                                {
+                                    keepSurfacePoint = false;
+                                }
                             }
                         }
 
@@ -1406,7 +1413,10 @@ void Foam::conformalVoronoiMesh::conformToSurface()
     }
 
     label iterationNo = 0;
+
     label maxIterations = 8;
+    Info << "    MAX INTERATIONS HARD CODED TO "<< maxIterations << endl;
+
     label totalHits = 0;
 
     do
@@ -1447,37 +1457,47 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                     // edge, shift it to being an edge control point
                     // instead, this will prevent "pits" forming.
 
-                    pointIndexHit edHit;
-                    label featureHit;
+                    List<pointIndexHit> edHits;
+                    labelList featuresHit;
 
                     scalar targetCellSizeSqr = sqr(targetCellSize(vert));
 
-                    geometryToConformTo_.findEdgeNearest
+                    geometryToConformTo_.findEdgeNearestByType
                     (
                         surfHit.hitPoint(),
                         edgeSearchDistCoeffSqr*targetCellSizeSqr,
-                        edHit,
-                        featureHit
+                        edHits,
+                        featuresHit
                     );
 
                     bool keepSurfacePoint = true;
 
-                    if (edHit.hit())
+                    forAll(edHits, i)
                     {
-                        // Note that edge type classification can be used
-                        // here if necessary, i.e to avoid over-populating
-                        // internal edges
+                        const pointIndexHit& edHit(edHits[i]);
+                        label featureHit = featuresHit[i];
 
-                        featureEdgeHits.append(edHit);
-                        featureEdgeFeaturesHit.append(featureHit);
-
-                        if
-                        (
-                            magSqr(edHit.hitPoint() - surfHit.hitPoint())
-                          < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
-                        )
+                        if (edHit.hit())
                         {
-                            keepSurfacePoint = false;
+                            // Note that edge type classification can be
+                            // used here if necessary, i.e to avoid
+                            // over-populating internal edges
+
+                            featureEdgeHits.append(edHit);
+                            featureEdgeFeaturesHit.append(featureHit);
+
+                            if
+                            (
+                                magSqr
+                                (
+                                    edHit.hitPoint() - surfHit.hitPoint()
+                                )
+                              < surfacePtReplaceDistCoeffSqr
+                               *targetCellSizeSqr
+                            )
+                            {
+                                keepSurfacePoint = false;
+                            }
                         }
                     }
 

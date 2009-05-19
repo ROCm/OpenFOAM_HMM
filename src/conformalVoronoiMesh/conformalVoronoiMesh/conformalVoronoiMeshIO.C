@@ -61,14 +61,17 @@ void Foam::conformalVoronoiMesh::writePoints
     const List<point>& points
 ) const
 {
-    Info<< nl << "Writing " << points.size() << " points from pointList to "
-        << fName << endl;
-
-    OFstream str(fName);
-
-    forAll(points, p)
+    if (points.size())
     {
-        meshTools::writeOBJ(str, points[p]);
+        Info<< nl << "Writing " << points.size() << " points from pointList to "
+            << fName << endl;
+
+        OFstream str(fName);
+
+        forAll(points, p)
+        {
+            meshTools::writeOBJ(str, points[p]);
+        }
     }
 }
 

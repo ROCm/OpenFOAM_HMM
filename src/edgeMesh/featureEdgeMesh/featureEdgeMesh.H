@@ -153,8 +153,11 @@ private:
         //- Feature edges which are on the boundary between regions
         labelList regionEdges_;
 
-        //- Search tree for edges.
+        //- Search tree for all edges
         mutable autoPtr<indexedOctree<treeDataEdge> > edgeTree_;
+
+        //- Individual search trees for each type of edge
+        mutable PtrList<indexedOctree<treeDataEdge> > edgeTreesByType_;
 
 
     // Private Member Functions
@@ -180,6 +183,14 @@ private:
 
 
 public:
+
+    // Static data
+
+        //- Number of possible point types (i.e. number of slices)
+        static label nPointTypes;
+
+        //- Number of possible feature edge types (i.e. number of slices)
+        static label nEdgeTypes;
 
     // Constructors
 
@@ -233,10 +244,26 @@ public:
 
         // Find
 
+            //- Find nearest surface edge for the sample point.
+            void nearestFeatureEdge
+            (
+                const point& sample,
+                scalar searchDistSqr,
+                pointIndexHit& info
+            ) const;
+
             //- Find nearest surface edge for each sample point.
             void nearestFeatureEdge
             (
                 const pointField& samples,
+                const scalarField& searchDistSqr,
+                List<pointIndexHit>& info
+            ) const;
+
+            //- Find the nearest point on each type of feature edge
+            void nearestFeatureEdgeByType
+            (
+                const point& sample,
                 const scalarField& searchDistSqr,
                 List<pointIndexHit>& info
             ) const;
@@ -310,6 +337,10 @@ public:
 
             //- Demand driven contruction of octree for boundary edges
             const indexedOctree<treeDataEdge>& edgeTree() const;
+
+            //- Demand driven contruction of octree for boundary edges by type
+            const PtrList<indexedOctree<treeDataEdge> >&
+            edgeTreesByType() const;
 
         // Check
 
