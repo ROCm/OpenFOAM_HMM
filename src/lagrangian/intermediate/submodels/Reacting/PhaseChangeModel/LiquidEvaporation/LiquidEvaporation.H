@@ -60,8 +60,8 @@ protected:
         //- List of active liquid names
         List<word> activeLiquids_;
 
-        //- Mapping between liquid and carrier gas species
-        List<label> liqToGasMap_;
+        //- Mapping between liquid and carrier species
+        List<label> liqToCarrierMap_;
 
         //- Mapping between local and global liquid species
         List<label> liqToLiqMap_;
