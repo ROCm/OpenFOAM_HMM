@@ -104,7 +104,8 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ),
     YGas_(YGas0),
     YLiquid_(YLiquid0),
-    YSolid_(YSolid0)
+    YSolid_(YSolid0),
+    canCombust_(false)
 {}
 
 

@@ -36,7 +36,7 @@ Foam::phaseProperties::phaseProperties(Istream& is)
     names_(0),
     Y_(0),
     globalIds_(0),
-    globalGasIds_(0)
+    globalCarrierIds_(0)
 {
     is.check("Foam::phaseProperties::phaseProperties(Istream& is)");
 
@@ -51,7 +51,7 @@ Foam::phaseProperties::phaseProperties(Istream& is)
         names_.setSize(nComponents, "unknownSpecie");
         Y_.setSize(nComponents, 0.0);
         globalIds_.setSize(nComponents, -1);
-        globalGasIds_.setSize(nComponents, -1);
+        globalCarrierIds_.setSize(nComponents, -1);
 
         label cmptI = 0;
         forAllConstIter(IDLList<entry>, phaseInfo, iter)
@@ -87,7 +87,7 @@ Foam::Istream& Foam::operator>>(Istream& is, phaseProperties& pp)
         pp.names_.setSize(nComponents, "unknownSpecie");
         pp.Y_.setSize(nComponents, 0.0);
         pp.globalIds_.setSize(nComponents, -1);
-        pp.globalGasIds_.setSize(nComponents, -1);
+        pp.globalCarrierIds_.setSize(nComponents, -1);
 
         label cmptI = 0;
         forAllConstIter(IDLList<entry>, phaseInfo, iter)

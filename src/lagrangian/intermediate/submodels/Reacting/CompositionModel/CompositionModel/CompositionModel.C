@@ -179,6 +179,34 @@ Foam::CompositionModel<CloudType>::componentNames(const label phaseI) const
 
 
 template<class CloudType>
+Foam::label Foam::CompositionModel<CloudType>::globalCarrierId
+(
+    const word& cmptName
+) const
+{
+    forAll(carrierThermo_.composition().Y(), i)
+    {
+        word carrierSpecieName = carrierThermo_.composition().Y()[i].name();
+        if (cmptName == carrierSpecieName)
+        {
+            return i;
+        }
+    }
+
+    FatalErrorIn
+    (
+        "Foam::label Foam::CompositionModel<CloudType>::globalCarrierId"
+        "("
+            "const word&"
+        ") const"
+    )   << "Unable to determine global id for requested component "
+        << cmptName << nl << abort(FatalError);
+
+    return -1;
+}
+
+
+template<class CloudType>
 Foam::label Foam::CompositionModel<CloudType>::globalId
 (
     const label phaseI,
@@ -241,24 +269,25 @@ Foam::label Foam::CompositionModel<CloudType>::localId
 
 
 template<class CloudType>
-Foam::label Foam::CompositionModel<CloudType>::localToGlobalGasId
+Foam::label Foam::CompositionModel<CloudType>::localToGlobalCarrierId
 (
     const label phaseI,
     const label id
 ) const
 {
-    label gid = phaseProps_[phaseI].globalGasIds()[id];
+    label gid = phaseProps_[phaseI].globalCarrierIds()[id];
 
     if (gid < 0)
     {
         FatalErrorIn
         (
-            "Foam::label Foam::CompositionModel<CloudType>::localToGlobalGasId"
+            "Foam::label "
+            "Foam::CompositionModel<CloudType>::localToGlobalCarrierId"
             "("
                 "const label, "
                 "const label"
             ") const"
-        )   << "Unable to determine global gas id for phase "
+        )   << "Unable to determine global carrier id for phase "
             << phaseI << " with local id " << id
             << nl << abort(FatalError);
     }

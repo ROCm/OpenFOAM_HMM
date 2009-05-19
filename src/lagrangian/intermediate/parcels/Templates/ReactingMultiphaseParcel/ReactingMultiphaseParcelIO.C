@@ -40,7 +40,8 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
     ReactingParcel<ParcelType>(cloud, is, readFields),
     YGas_(0),
     YLiquid_(0),
-    YSolid_(0)
+    YSolid_(0),
+    canCombust_(false)
 {
     if (readFields)
     {
@@ -58,14 +59,7 @@ Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
         YLiquid_.setSize(nLiquid);
         YSolid_.setSize(nSolid);
 
-        if (is.format() == IOstream::ASCII)
-        {
-            is >> YGas_ >> YLiquid_ >> YSolid_;
-        }
-        else
-        {
-            is >> YGas_ >> YLiquid_ >> YSolid_;
-        }
+        is >> YGas_ >> YLiquid_ >> YSolid_;
 
         // scale the mass fractions
         const scalarField& YMix = this->Y_;
