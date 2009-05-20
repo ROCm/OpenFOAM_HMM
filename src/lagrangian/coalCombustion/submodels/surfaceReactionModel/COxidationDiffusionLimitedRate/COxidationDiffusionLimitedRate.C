@@ -143,7 +143,7 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate::calculate
     dMassSRCarrier[CO2GlobalId_] += dmCO2;
 
     // Heat of reaction [J]
-    return HcCO2_*dmCO2;
+    return -HcCO2_*dmCO2;
 }
 
 

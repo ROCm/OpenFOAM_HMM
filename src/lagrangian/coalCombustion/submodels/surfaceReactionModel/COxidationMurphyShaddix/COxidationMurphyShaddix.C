@@ -201,7 +201,7 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
     dMassSolid[CsLocalId_] += dOmega*WC_;
 
     // Heat of reaction
-    return HcCO2_*dOmega*WC_;
+    return -HcCO2_*dOmega*WC_;
 }
 
 
