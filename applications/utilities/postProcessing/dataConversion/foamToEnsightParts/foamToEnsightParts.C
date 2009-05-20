@@ -83,23 +83,19 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("index",  "start");
     argList::validOptions.insert("noMesh", "");
 
-    const word volFieldTypes[] =
-    {
-        volScalarField::typeName,
-        volVectorField::typeName,
-        volSphericalTensorField::typeName,
-        volSymmTensorField::typeName,
-        volTensorField::typeName,
-        word::null
-    };
+    // the volume field types that we handle
+    wordHashSet volFieldTypes;
+    volFieldTypes.insert(volScalarField::typeName);
+    volFieldTypes.insert(volVectorField::typeName);
+    volFieldTypes.insert(volSphericalTensorField::typeName);
+    volFieldTypes.insert(volSymmTensorField::typeName);
+    volFieldTypes.insert(volTensorField::typeName);
 
-    const word sprayFieldTypes[] =
-    {
-        scalarIOField::typeName,
-        vectorIOField::typeName,
-        tensorIOField::typeName,
-        word::null
-    };
+    // the lagrangian field types that we handle
+    wordHashSet cloudFieldTypes;
+    cloudFieldTypes.insert(scalarIOField::typeName);
+    cloudFieldTypes.insert(vectorIOField::typeName);
+    cloudFieldTypes.insert(tensorIOField::typeName);
 
     const char* geometryName = "geometry";
 
@@ -111,7 +107,7 @@ int main(int argc, char *argv[])
 
     // default to binary output, unless otherwise specified
     IOstream::streamFormat format = IOstream::BINARY;
-    if (args.options().found("ascii"))
+    if (args.optionFound("ascii"))
     {
         format = IOstream::ASCII;
     }
@@ -119,14 +115,14 @@ int main(int argc, char *argv[])
     // control for renumbering iterations
     bool optIndex = false;
     label indexingNumber = 0;
-    if (args.options().found("index"))
+    if (args.optionFound("index"))
     {
         optIndex = true;
-        indexingNumber = readLabel(IStringStream(args.options()["index"])());
+        indexingNumber = args.optionRead<label>("index");
     }
 
     // always write the geometry, unless the -noMesh option is specified
-    bool optNoMesh = args.options().found("noMesh");
+    bool optNoMesh = args.optionFound("noMesh");
 
     fileName ensightDir = args.rootPath()/args.globalCaseName()/"Ensight";
     fileName dataDir = ensightDir/"data";
@@ -168,7 +164,6 @@ int main(int argc, char *argv[])
 
 #   include "checkHasMovingMesh.H"
 #   include "findFields.H"
-#   include "validateFields.H"
 
     if (hasMovingMesh && optNoMesh)
     {

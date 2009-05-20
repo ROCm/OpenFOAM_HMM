@@ -24,35 +24,37 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     buildParaView3.3-cvs
+#     buildParaView
 #
 # Description
-#     Build and install ParaView
-#     - run from folder above ParaView source folder or place the
-#       ParaView source under $WM_THIRD_PARTY_DIR
+#     Build and install paraview
+#     - run from folder above paraview source folder or place the
+#       paraview source under $WM_THIRD_PARTY_DIR
 #
 #------------------------------------------------------------------------------
 . $WM_PROJECT_DIR/bin/tools/buildParaViewFunctions
-
-PARAVIEW_SRC=paraview-3.4
-PARAVIEW_MAJOR_VERSION=3.4
 
 # User options:
 # ~~~~~~~~~~~~~
 
 # MPI support:
-WITH_MPI=OFF
+withMPI=false
 MPI_MAX_PROCS=32
 
 # Python support:
 # note: script will try to determine the appropriate python library.
 #       If it fails, specify the path using the PYTHON_LIBRARY variable
-WITH_PYTHON=OFF
+withPYTHON=false
 PYTHON_LIBRARY=""
-# PYTHON_LIBRARY="/usr/lib64/libpython2.5.so.1.0"
+# PYTHON_LIBRARY="/usr/lib64/libpython2.6.so.1.0"
 
 # MESA graphics support:
-WITH_MESA=OFF
+withMESA=false
+MESA_INCLUDE="/usr/include/GL"
+MESA_LIBRARY="/usr/lib64/libOSMesa.so"
+
+# extra QT gui support (useful for re-using the installation for engrid)
+withQTSUPPORT=true
 
 #
 # No further editing below this line
@@ -63,13 +65,15 @@ usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: ${0##*/} [OPTION]
+usage: $Script [OPTION]
 options:
-  -fast      for repeated builds (-make -install) *use with caution*
-  -mpi       with mpi (if not already enabled)
-  -python    with python (if not already enabled)
-  -mesa      with mesa (if not already enabled)
-  -verbose   verbose output in Makefiles
+  -rebuild      for repeated builds (-make -install) *use with caution*
+  -mpi          with mpi (if not already enabled)
+  -python       with python (if not already enabled)
+  -mesa         with mesa (if not already enabled)
+  -qt           with extra Qt gui support (if not already enabled)
+  -verbose      verbose output in Makefiles
+  -version VER  specify an alternative version (default: $ParaView_VERSION)
   -help
 
 For finer control, the build stages can be also selected individually
@@ -80,24 +84,33 @@ For finer control, the build stages can be also selected individually
   -install
   [-envpath]    alter absolute paths in CMake files to use env variables
 
-Build and install $PARAVIEW_SRC
-  - run from folder above the ParaView source folder or place the
-    ParaView source under \$WM_THIRD_PARTY_DIR
+Build and install paraview-$ParaView_VERSION
+  - run from folder above the ParaView source folder or place the ParaView
+    source under \$WM_THIRD_PARTY_DIR ($WM_THIRD_PARTY_DIR)
 
 USAGE
    exit 1
 }
 
-# add options based on script name:
-case "$Script" in *-mpi*)    WITH_MPI=ON;; esac
-case "$Script" in *-python*) WITH_PYTHON=ON;; esac
-case "$Script" in *-mesa*)   WITH_MESA=ON;; esac
+#------------------------------------------------------------------------------
 
+#
+# add options based on script name:
+#
+case "$Script" in *-mpi*)    withMPI=true;; esac
+case "$Script" in *-python*) withPYTHON=true;; esac
+case "$Script" in *-mesa*)   withMESA=true;; esac
+case "$Script" in *-qt*)     withQTSUPPORT=true;; esac
+
+#
+# various building stages
+#
 runCONFIG=true
 runMAKE=true
 runMAKEDOC=true
 runINSTALL=true
 runENVPATH=false
+
 
 # parse options
 while [ "$#" -gt 0 ]
@@ -142,7 +155,7 @@ do
         runENVPATH=true
         shift
         ;;
-    -fast)               # shortcut for rebuild
+    -rebuild)            # shortcut for rebuilding
         runCONFIG=false
         runMAKE=true
         runMAKEDOC=false
@@ -150,20 +163,29 @@ do
         shift
         ;;
     -mpi)
-        WITH_MPI=ON
+        withMPI=true
         shift
         ;;
     -python)
-        WITH_PYTHON=ON
+        withPYTHON=true
         shift
         ;;
     -mesa)
-        WITH_MESA=ON
+        withMESA=true
+        shift
+        ;;
+    -qt)
+        withQTSUPPORT=true
         shift
         ;;
     -verbose)
-        VERBOSE=ON
+        withVERBOSE=true
         shift
+        ;;
+    -version)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        export ParaView_VERSION=$2
+        shift 2
         ;;
     *)
         usage "unknown option/argument: '$*'"
@@ -171,22 +193,25 @@ do
     esac
 done
 
+
 # Set configure options
 #~~~~~~~~~~~~~~~~~~~~~~
 addVerbosity        # verbose makefiles
 addMpiSupport       # set MPI-specific options
 addPythonSupport    # set Python-specific options
 addMesaSupport      # set MESA-specific options
+addQtSupport        # add extra Qt support
 
 getPaths            # discover where things are or should be put
+
 
 # Build and install
 # ~~~~~~~~~~~~~~~~~
 [ $runCONFIG  = true ] && configParaView
 [ $runMAKE    = true ] && makeParaView
-[ $runENVPATH = true ] && fixCMakeFiles
 [ $runMAKEDOC = true ] && makeDocs
 [ $runINSTALL = true ] && installParaView
+[ $runENVPATH = true ] && fixCMakeFiles
 
 echo "done"
 #------------------------------------------------------------------------------

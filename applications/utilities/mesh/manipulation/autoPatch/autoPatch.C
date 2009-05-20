@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     boundaryMesh bMesh;
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     scalar minCos = Foam::cos(featureAngle * mathematicalConstant::pi/180.0);
 

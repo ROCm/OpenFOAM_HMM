@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::Unix
+    Foam::POSIX
 
 Description
-    UNIX versions of OS-specific functions.
+    OS-specific functions implemented in POSIX.
 
 SourceFiles
-    Unix.C
+    POSIX.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef Unix_H
-#define Unix_H
+#ifndef POSIX_H
+#define POSIX_H
 
 #include "className.H"
 
@@ -45,10 +45,10 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Unix
+namespace POSIX
 {
     //- Declare name of the class and its debug switch
-    NamespaceName("Unix");
+    NamespaceName("POSIX");
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

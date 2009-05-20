@@ -26,8 +26,8 @@
 #     cint/cshrc
 #
 # Description
-#     Startup File for cint
-#     Sourced from OpenFOAM-?.?/etc/cshrc
+#     Setup file for cint
+#     Sourced from OpenFOAM-*/etc/cshrc
 #
 #------------------------------------------------------------------------------
 

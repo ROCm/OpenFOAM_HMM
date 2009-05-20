@@ -45,6 +45,7 @@ Description
 
 #include "argList.H"
 #include "Time.H"
+#include "timeSelector.H"
 #include "fvMesh.H"
 #include "mathematicalConstants.H"
 #include "polyTopoChange.H"
@@ -340,7 +341,8 @@ void dumpFeatures
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-#   include "addTimeOptions.H"
+    timeSelector::addOptions(true, false);
+
     argList::validArgs.append("feature angle[0-180]");
     argList::validOptions.insert("splitAllFaces", "");
     argList::validOptions.insert("doNotPreserveFaceZones", "");
@@ -349,13 +351,10 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    // Get times list
-    instantList Times = runTime.times();
-
-#   include "checkTimeOptions.H"
-    runTime.setTime(Times[startTime], startTime);
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
 #   include "createMesh.H"
+
     const word oldInstance = mesh.pointsInstance();
 
     // Mark boundary edges and points.
@@ -381,9 +380,9 @@ int main(int argc, char *argv[])
         << endl;
 
 
-    const bool splitAllFaces = args.options().found("splitAllFaces");
-    const bool overwrite = args.options().found("overwrite");
-    const bool doNotPreserveFaceZones = args.options().found
+    const bool splitAllFaces = args.optionFound("splitAllFaces");
+    const bool overwrite = args.optionFound("overwrite");
+    const bool doNotPreserveFaceZones = args.optionFound
     (
         "doNotPreserveFaceZones"
     );

@@ -47,11 +47,7 @@
     );
 
     word kinematicCloudName("kinematicCloud");
-
-    if (args.options().found("cloudName"))
-    {
-        kinematicCloudName = args.options()["cloudName"];
-    }
+    args.optionReadIfPresent("cloudName", kinematicCloudName);
 
     Info<< "Constructing kinematicCloud " << kinematicCloudName << endl;
     basicKinematicCloud kinematicCloud

@@ -465,7 +465,7 @@ int main(int argc, char *argv[])
 
     scalar minLen(readScalar(IStringStream(args.additionalArgs()[0])()));
     scalar angle(readScalar(IStringStream(args.additionalArgs()[1])()));
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     scalar maxCos = Foam::cos(angle*180/mathematicalConstant::pi);
 

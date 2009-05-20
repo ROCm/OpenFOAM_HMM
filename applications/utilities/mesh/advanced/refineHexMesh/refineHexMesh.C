@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     pointMesh pMesh(mesh);
 
     word cellSetName(args.args()[1]);
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     Info<< "Reading cells to refine from cellSet " << cellSetName
         << nl << endl;

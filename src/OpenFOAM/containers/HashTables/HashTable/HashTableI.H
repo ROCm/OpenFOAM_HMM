@@ -220,16 +220,34 @@ inline bool Foam::HashTable<T, Key, Hash>::iterator::operator!=
 
 
 template<class T, class Key, class Hash>
-inline T& Foam::HashTable<T, Key, Hash>::iterator::operator*()
+inline T&
+Foam::HashTable<T, Key, Hash>::iterator::operator*()
 {
     return elmtPtr_->obj_;
 }
 
 
 template<class T, class Key, class Hash>
-inline T& Foam::HashTable<T, Key, Hash>::iterator::operator()()
+inline T&
+Foam::HashTable<T, Key, Hash>::iterator::operator()()
 {
-    return operator*();
+    return elmtPtr_->obj_;
+}
+
+
+template<class T, class Key, class Hash>
+inline const T&
+Foam::HashTable<T, Key, Hash>::iterator::operator*() const
+{
+    return elmtPtr_->obj_;
+}
+
+
+template<class T, class Key, class Hash>
+inline const T&
+Foam::HashTable<T, Key, Hash>::iterator::operator()() const
+{
+    return elmtPtr_->obj_;
 }
 
 
@@ -410,16 +428,18 @@ inline bool Foam::HashTable<T, Key, Hash>::const_iterator::operator!=
 
 
 template<class T, class Key, class Hash>
-inline const T& Foam::HashTable<T, Key, Hash>::const_iterator::operator*()
+inline const T& 
+Foam::HashTable<T, Key, Hash>::const_iterator::operator*() const
 {
     return elmtPtr_->obj_;
 }
 
 #ifndef __CINT__
 template<class T, class Key, class Hash>
-inline const T& Foam::HashTable<T, Key, Hash>::const_iterator::operator()()
+inline const T&
+Foam::HashTable<T, Key, Hash>::const_iterator::operator()() const
 {
-    return operator*();
+    return elmtPtr_->obj_;
 }
 #endif
 

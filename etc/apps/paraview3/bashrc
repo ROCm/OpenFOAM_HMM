@@ -27,7 +27,7 @@
 #
 # Description
 #     Setup file for paraview-3.x
-#     Sourced from OpenFOAM-?.?/etc/bashrc
+#     Sourced from OpenFOAM-*/etc/bashrc
 #
 # Note
 #     The env. variable 'ParaView_DIR' is required for building plugins
@@ -35,7 +35,7 @@
 
 # determine the cmake to be used
 unset CMAKE_HOME
-for cmake in cmake-2.6.2 cmake-2.4.6
+for cmake in cmake-2.6.4 cmake-2.6.2 cmake-2.4.6
 do
     cmake=$WM_THIRD_PARTY_DIR/$cmake/platforms/$WM_ARCH
     if [ -r $cmake ]

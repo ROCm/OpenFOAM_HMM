@@ -879,13 +879,10 @@ int main(int argc, char *argv[])
     }
 
     scalar scaleFactor = 1.0;
-    if (args.options().found("scale"))
-    {
-        scaleFactor = atof(args.options()["scale"].c_str());
-    }
+    args.optionReadIfPresent("scale", scaleFactor);
 
-    bool writeSets = args.options().found("writeSets");
-    bool writeZones = args.options().found("writeZones");
+    bool writeSets  = args.optionFound("writeSets");
+    bool writeZones = args.optionFound("writeZones");
 
 #   include "createTime.H"
 

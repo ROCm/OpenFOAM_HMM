@@ -240,10 +240,7 @@ scalar getMergeDistance
 )
 {
     scalar mergeTol = defaultMergeTol;
-    if (args.options().found("mergeTol"))
-    {
-        mergeTol = readScalar(IStringStream(args.options()["mergeTol"])());
-    }
+    args.optionReadIfPresent("mergeTol", mergeTol);
 
     scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));

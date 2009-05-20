@@ -109,20 +109,20 @@ void Foam::Time::setControls()
     else
     {
         // Search directory for valid time directories
-        instantList Times = findTimes(path());
+        instantList timeDirs = findTimes(path());
 
         if (startFrom == "firstTime")
         {
-            if (Times.size())
+            if (timeDirs.size())
             {
-                startTime_ = Times[0].value();
+                startTime_ = timeDirs[0].value();
             }
         }
         else if (startFrom == "latestTime")
         {
-            if (Times.size())
+            if (timeDirs.size())
             {
-                startTime_ = Times[Times.size()-1].value();
+                startTime_ = timeDirs[timeDirs.size()-1].value();
             }
         }
         else
@@ -385,13 +385,13 @@ Foam::instantList Foam::Time::times() const
 
 Foam::word Foam::Time::findInstancePath(const instant& t) const
 {
-    instantList times = Time::findTimes(path());
+    instantList timeDirs = findTimes(path());
 
-    forAllReverse(times, i)
+    forAllReverse(timeDirs, timeI)
     {
-        if (times[i] == t)
+        if (timeDirs[timeI] == t)
         {
-            return times[i].name();
+            return timeDirs[timeI].name();
         }
     }
 
@@ -401,37 +401,37 @@ Foam::word Foam::Time::findInstancePath(const instant& t) const
 
 Foam::instant Foam::Time::findClosestTime(const scalar t) const
 {
-    instantList times = Time::findTimes(path());
+    instantList timeDirs = findTimes(path());
 
-    // If there is only one time it is "constant" so return it
-    if (times.size() == 1)
+    // there is only one time (likely "constant") so return it
+    if (timeDirs.size() == 1)
     {
-        return times[0];
+        return timeDirs[0];
     }
 
-    if (t < times[1].value())
+    if (t < timeDirs[1].value())
     {
-        return times[1];
+        return timeDirs[1];
     }
-    else if (t > times[times.size() - 1].value())
+    else if (t > timeDirs[timeDirs.size()-1].value())
     {
-        return times[times.size() - 1];
+        return timeDirs[timeDirs.size()-1];
     }
 
     label nearestIndex = -1;
     scalar deltaT = GREAT;
 
-    for (label i=1; i < times.size(); i++)
+    for (label timeI=1; timeI < timeDirs.size(); ++timeI)
     {
-        scalar diff = mag(times[i].value() - t);
+        scalar diff = mag(timeDirs[timeI].value() - t);
         if (diff < deltaT)
         {
             deltaT = diff;
-            nearestIndex = i;
+            nearestIndex = timeI;
         }
     }
 
-    return times[nearestIndex];
+    return timeDirs[nearestIndex];
 }
 
 
@@ -440,29 +440,29 @@ Foam::instant Foam::Time::findClosestTime(const scalar t) const
 //
 // Foam::instant Foam::Time::findClosestTime(const scalar t) const
 // {
-//     instantList times = Time::findTimes(path());
-//     label timeIndex = min(findClosestTimeIndex(times, t), 0);
-//     return times[timeIndex];
+//     instantList timeDirs = findTimes(path());
+//     label timeIndex = min(findClosestTimeIndex(timeDirs, t), 0);
+//     return timeDirs[timeIndex];
 // }
 
 Foam::label Foam::Time::findClosestTimeIndex
 (
-    const instantList& times,
+    const instantList& timeDirs,
     const scalar t
 )
 {
     label nearestIndex = -1;
     scalar deltaT = GREAT;
 
-    forAll (times, i)
+    forAll(timeDirs, timeI)
     {
-        if (times[i].name() == "constant") continue;
+        if (timeDirs[timeI].name() == "constant") continue;
 
-        scalar diff = fabs(times[i].value() - t);
+        scalar diff = mag(timeDirs[timeI].value() - t);
         if (diff < deltaT)
         {
             deltaT = diff;
-            nearestIndex = i;
+            nearestIndex = timeI;
         }
     }
 
