@@ -87,7 +87,7 @@ public:
 
             //- Fraction of enthalpy retained by parcel due to surface
             //  reactions
-            const scalar hRetentionCoeff_;
+            scalar hRetentionCoeff_;
 
 
     public:
