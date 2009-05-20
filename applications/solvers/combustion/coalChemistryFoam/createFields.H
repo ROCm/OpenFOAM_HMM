@@ -48,7 +48,7 @@
     (
         IOobject
         (
-            "injectionIndicator",
+            "pDyn",
             runTime.timeName(),
             mesh,
             IOobject::NO_READ,
