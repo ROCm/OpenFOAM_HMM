@@ -39,7 +39,19 @@ constantProperties
     (
         dimensionedScalar(this->dict().lookup("hRetentionCoeff")).value()
     )
-{}
+{
+    if ((hRetentionCoeff_ < 0) || (hRetentionCoeff_ > 1))
+    {
+        FatalErrorIn
+        (
+            "ReactingMultiphaseParcel<ParcelType>::constantProperties::"
+            "constantProperties"
+        )   << "hRetentionCoeff must be in the range 0 to 1" << nl
+            << exit(FatalError) << endl;
+    }
+
+    hRetentionCoeff_ = max(1e-06, hRetentionCoeff_);
+}
 
 
 template<class ParcelType>
