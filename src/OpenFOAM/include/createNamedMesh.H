@@ -1,24 +1,30 @@
-    word regionName;
+//
+// createNamedMesh.H
+// ~~~~~~~~~~~~~~~~~
+
+    Foam::word regionName;
 
     if (args.optionReadIfPresent("region", regionName))
     {
-        Info<< "Create mesh " << regionName << " for time = "
-            << runTime.timeName() << nl << endl;
+        Foam::Info
+            << "Create mesh " << regionName << " for time = "
+            << runTime.timeName() << Foam::nl << Foam::endl;
     }
     else
     {
-        regionName = fvMesh::defaultRegion;
-        Info<< "Create mesh for time = "
-            << runTime.timeName() << nl << endl;
+        regionName = Foam::fvMesh::defaultRegion;
+        Foam::Info
+            << "Create mesh for time = "
+            << runTime.timeName() << Foam::nl << Foam::endl;
     }
 
-    fvMesh mesh
+    Foam::fvMesh mesh
     (
-        IOobject
+        Foam::IOobject
         (
             regionName,
             runTime.timeName(),
             runTime,
-            IOobject::MUST_READ
+            Foam::IOobject::MUST_READ
         )
     );

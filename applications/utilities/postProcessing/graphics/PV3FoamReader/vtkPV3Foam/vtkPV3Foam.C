@@ -113,18 +113,15 @@ int Foam::vtkPV3Foam::setTime(int nRequest, const double requestTimes[])
     instantList Times = runTime.times();
 
     int nearestIndex = timeIndex_;
-
     for (int requestI = 0; requestI < nRequest; ++requestI)
     {
         int index = Time::findClosestTimeIndex(Times, requestTimes[requestI]);
-
         if (index >= 0 && index != timeIndex_)
         {
             nearestIndex = index;
             break;
         }
     }
-
 
     if (nearestIndex < 0)
     {

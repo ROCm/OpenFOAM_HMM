@@ -170,7 +170,7 @@ Foam::List<Foam::instant> Foam::timeSelector::select
         // determine latestTime selection (if any)
         // this must appear before the -time option processing
         label latestIdx = -1;
-        if (args.options().found("latestTime"))
+        if (args.optionFound("latestTime"))
         {
             selectTimes = false;
             latestIdx = timeDirs.size() - 1;
@@ -182,12 +182,12 @@ Foam::List<Foam::instant> Foam::timeSelector::select
             }
         }
 
-        if (args.options().found("time"))
+        if (args.optionFound("time"))
         {
             // can match 0/, but can never match constant/
             selectTimes = timeSelector
             (
-                IStringStream(args.options()["time"])()
+                args.optionLookup("time")()
             ).selected(timeDirs);
         }
 
@@ -201,13 +201,13 @@ Foam::List<Foam::instant> Foam::timeSelector::select
         if (constantIdx >= 0)
         {
             // only add constant/ if specifically requested
-            selectTimes[constantIdx] = args.options().found("constant");
+            selectTimes[constantIdx] = args.optionFound("constant");
         }
 
         // special treatment for 0/
         if (zeroIdx >= 0)
         {
-            if (args.options().found("noZero"))
+            if (args.optionFound("noZero"))
             {
                 // exclude 0/ if specifically requested
                 selectTimes[zeroIdx] = false;
@@ -215,7 +215,7 @@ Foam::List<Foam::instant> Foam::timeSelector::select
             else if (argList::validOptions.found("zeroTime"))
             {
                 // with -zeroTime enabled, drop 0/ unless specifically requested
-                selectTimes[zeroIdx] = args.options().found("zeroTime");
+                selectTimes[zeroIdx] = args.optionFound("zeroTime");
             }
         }
 

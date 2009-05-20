@@ -387,7 +387,6 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     const bool blockOrder = args.optionFound("blockOrder");
-
     if (blockOrder)
     {
         Info<< "Ordering cells into regions (using decomposition);"
@@ -396,7 +395,6 @@ int main(int argc, char *argv[])
     }
 
     const bool orderPoints = args.optionFound("orderPoints");
-
     if (orderPoints)
     {
         Info<< "Ordering points into internal and boundary points." << nl

@@ -48,6 +48,7 @@ Note
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "IOobjectList.H"
 #include "IOmanip.H"
 #include "OFstream.H"

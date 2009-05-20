@@ -8,12 +8,18 @@
         }
         else
         {
-            scalar sourceTime = args.optionRead<scalar>("sourceTime");
-            sourceTimeIndex = getTimeIndex(sourceTimes, sourceTime);
+            sourceTimeIndex = Time::findClosestTimeIndex
+            (
+                sourceTimes,
+                args.optionRead<scalar>("sourceTime")
+            );
         }
     }
     else
     {
-        scalar sourceTime = runTimeTarget.time().value();
-        sourceTimeIndex = getTimeIndex(sourceTimes, sourceTime);
+        sourceTimeIndex = Time::findClosestTimeIndex
+        (
+            sourceTimes,
+            runTimeTarget.time().value()
+        );
     }

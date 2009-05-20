@@ -59,11 +59,10 @@ int main(int argc, char *argv[])
 
     pointField zeroPoints(mesh.points());
 
-    runTime.setTime(Times[0], 0);
-
-    for (int i = 1; i<Times.size(); i++)
+    // skip "constant" time
+    for (label timeI = 1; timeI < Times.size(); ++timeI)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(Times[timeI], timeI);
 
         Info<< "Time = " << runTime.timeName() << endl;
 

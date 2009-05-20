@@ -232,14 +232,14 @@ void Foam::calcTypes::addSubtract::preCalc
             << exit(FatalError);
     }
 
-    if (args.options().found("field"))
+    if (args.optionFound("field"))
     {
-        addSubtractFieldName_ = args.options()["field"];
+        addSubtractFieldName_ = args.option("field");
         calcType_ = FIELD;
     }
-    else if (args.options().found("value"))
+    else if (args.optionFound("value"))
     {
-        addSubtractValueStr_ = args.options()["value"];
+        addSubtractValueStr_ = args.option("value");
         calcType_ = VALUE;
     }
     else
@@ -249,9 +249,9 @@ void Foam::calcTypes::addSubtract::preCalc
             << nl << exit(FatalError);
     }
 
-    if (args.options().found("resultName"))
+    if (args.optionFound("resultName"))
     {
-        resultName_ = args.options()["resultName"];
+        resultName_ = args.option("resultName");
     }
 }
 

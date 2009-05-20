@@ -2,7 +2,7 @@
 // addTimeOptions.H
 // ~~~~~~~~~~~~~~~~
 
-    argList::validOptions.insert("constant", "");
-    argList::validOptions.insert("latestTime", "");
-    argList::validOptions.insert("noZero", "");
-    argList::validOptions.insert("time", "time");
+    Foam::argList::validOptions.insert("constant", "");
+    Foam::argList::validOptions.insert("latestTime", "");
+    Foam::argList::validOptions.insert("noZero", "");
+    Foam::argList::validOptions.insert("time", "time");

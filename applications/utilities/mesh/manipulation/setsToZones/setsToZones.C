@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-
     bool noFlipMap = args.optionFound("noFlipMap");
 
     // Get times list
@@ -73,9 +72,8 @@ int main(int argc, char *argv[])
     label startTime = Times.size()-1;
     label endTime = Times.size();
 
+    // check -time and -latestTime options
 #   include "checkTimeOption.H"
-#   include "checkLatestTimeOption.H"
-
 
     runTime.setTime(Times[startTime], startTime);
 
