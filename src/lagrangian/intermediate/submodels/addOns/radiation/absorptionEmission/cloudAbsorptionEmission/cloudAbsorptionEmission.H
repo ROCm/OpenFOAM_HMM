@@ -85,19 +85,19 @@ public:
             // Absorption coefficient
 
                 //- Absorption coefficient for dispersed phase
-                tmp<volScalarField> aDisp() const;
+                virtual tmp<volScalarField> aDisp(const label bandI = 0) const;
 
 
             // Emission coefficient
 
                 //- Emission coefficient for dispersed phase
-                tmp<volScalarField> eDisp() const;
+                virtual tmp<volScalarField> eDisp(const label bandI = 0) const;
 
 
             // Emission contribution
 
                 //- Return emission contribution for dispersed phase
-                tmp<volScalarField> EDisp() const;
+                virtual tmp<volScalarField> EDisp(const label bandI = 0) const;
 };
 
 
