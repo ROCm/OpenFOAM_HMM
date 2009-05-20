@@ -192,30 +192,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
             geometryToConformTo_.features()[featuresHit[i]]
         );
 
-        label edgeI = edgeHits[i].index();
-
-        featureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
-
-        if (edStatus == featureEdgeMesh::EXTERNAL)
-        {
-            insertExternalEdgePointGroup(feMesh, edgeHits[i]);
-        }
-        else if (edStatus == featureEdgeMesh::INTERNAL)
-        {
-            insertInternalEdgePointGroup(feMesh, edgeHits[i]);
-        }
-        else if (edStatus == featureEdgeMesh::FLAT)
-        {
-            insertFlatEdgePointGroup(feMesh, edgeHits[i]);
-        }
-        else if (edStatus == featureEdgeMesh::OPEN)
-        {
-            insertOpenEdgePointGroup(feMesh, edgeHits[i]);
-        }
-        else if (edStatus == featureEdgeMesh::MULTIPLE)
-        {
-            insertMultipleEdgePointGroup(feMesh, edgeHits[i]);
-        }
+        insertEdgePointGroup(feMesh, edgeHits[i]);
     }
 
     if (fName != fileName::null)
@@ -228,6 +205,39 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
         }
 
         writePoints(fName, edgePts);
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::insertEdgePointGroup
+(
+    const featureEdgeMesh& feMesh,
+    const pointIndexHit& edHit
+)
+{
+    label edgeI = edHit.index();
+
+    featureEdgeMesh::edgeStatus edStatus = feMesh.getEdgeStatus(edgeI);
+
+    if (edStatus == featureEdgeMesh::EXTERNAL)
+    {
+        insertExternalEdgePointGroup(feMesh, edHit);
+    }
+    else if (edStatus == featureEdgeMesh::INTERNAL)
+    {
+        insertInternalEdgePointGroup(feMesh, edHit);
+    }
+    else if (edStatus == featureEdgeMesh::FLAT)
+    {
+        insertFlatEdgePointGroup(feMesh, edHit);
+    }
+    else if (edStatus == featureEdgeMesh::OPEN)
+    {
+        insertOpenEdgePointGroup(feMesh, edHit);
+    }
+    else if (edStatus == featureEdgeMesh::MULTIPLE)
+    {
+        insertMultipleEdgePointGroup(feMesh, edHit);
     }
 }
 
@@ -287,7 +297,7 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
     point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL );
 
     // Generate reflected master to be outside.
-    point reflMasterPt = edgePt + 2*(edgePt - refPt);
+    point reflMasterPt = refPt + 2*(edgePt - refPt);
 
     // Reflect reflMasterPt in both faces.
     point reflectedA = reflMasterPt - 2*ppDist*nA;
@@ -493,6 +503,23 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 {
     Info<< "    Mixed feature points not implemented." << endl;
+
+    // const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
+
+    // forAll(feMeshes, i)
+    // {
+    //     const featureEdgeMesh& feMesh(feMeshes[i]);
+
+    //     for
+    //     (
+    //         label pI = feMesh.mixedStart();
+    //         pI < feMesh.nonFeatureStart();
+    //         pI++
+    //     )
+    //     {
+
+    //     }
+    // }
 }
 
 
@@ -1414,12 +1441,14 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     label iterationNo = 0;
 
-    label maxIterations = 8;
-    Info << "    MAX INTERATIONS HARD CODED TO "<< maxIterations << endl;
+    label maxIterations = 5;
+    Info << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
-    label totalHits = 0;
+    // Set totalHits to a positive value to enter the while loop on the first
+    // iteration
+    label totalHits = 1;
 
-    do
+    while (totalHits > 0 && iterationNo < maxIterations)
     {
         Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
         scalar edgeSearchDistCoeffSqr = sqr(1.25);
@@ -1539,8 +1568,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         }
 
         iterationNo++;
-
-    } while (totalHits > 0 && iterationNo < maxIterations);
+    }
 }
 
 

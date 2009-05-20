@@ -172,6 +172,13 @@ class conformalVoronoiMesh
             const fileName fName = fileName::null
         );
 
+        //- Call the appropriate function to conform to an edge
+        void insertEdgePointGroup
+        (
+            const featureEdgeMesh& feMesh,
+            const pointIndexHit& edHit
+        );
+
         //- Insert points to conform to an external edge
         void insertExternalEdgePointGroup
         (
