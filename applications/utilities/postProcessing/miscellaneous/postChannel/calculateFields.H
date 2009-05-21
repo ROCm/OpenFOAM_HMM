@@ -12,7 +12,7 @@
             IOobject
             (
                 "txx",
-                Times[i].name(),
+                runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -28,7 +28,7 @@
             IOobject
             (
                 "tyy",
-                Times[i].name(),
+                runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -44,7 +44,7 @@
             IOobject
             (
                 "tzz",
-                Times[i].name(),
+                runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
@@ -60,7 +60,7 @@
             IOobject
             (
                 "txy",
-                Times[i].name(),
+                runTime.timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE

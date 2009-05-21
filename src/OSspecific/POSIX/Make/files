@@ -5,14 +5,14 @@ signals/sigQuit.C
 regExp.C
 timer.C
 fileStat.C
-Unix.C
+POSIX.C
 cpuTime/cpuTime.C
 clockTime/clockTime.C
 
-#ifndef SunOS64
-printStack.C
-#else
+#ifdef SunOS64
 dummyPrintStack.C
+#else
+printStack.C
 #endif
 
 LIB = $(FOAM_LIBBIN)/libOSspecific

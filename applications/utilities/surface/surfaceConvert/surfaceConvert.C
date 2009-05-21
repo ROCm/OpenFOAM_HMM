@@ -70,12 +70,6 @@ int main(int argc, char *argv[])
     argList args(argc, argv);
     const stringList& params = args.additionalArgs();
 
-    scalar scaleFactor = 0;
-    if (args.options().found("scale"))
-    {
-        IStringStream(args.options()["scale"])() >> scaleFactor;
-    }
-
     fileName importName(params[0]);
     fileName exportName(params[1]);
 
@@ -93,7 +87,7 @@ int main(int argc, char *argv[])
     surf.writeStats(Info);
     Info<< endl;
 
-    if (args.options().found("clean"))
+    if (args.optionFound("clean"))
     {
         Info<< "Cleaning up surface" << endl;
         surf.cleanup(true);
@@ -103,7 +97,7 @@ int main(int argc, char *argv[])
         Info<< endl;
     }
 
-    bool sortByRegion = args.options().found("group");
+    bool sortByRegion = args.optionFound("group");
 
     if (sortByRegion)
     {
@@ -115,7 +109,9 @@ int main(int argc, char *argv[])
     }
 
     Info<< "writing " << exportName;
-    if (scaleFactor > 0)
+
+    scalar scaleFactor = 0;
+    if (args.optionReadIfPresent("scale", scaleFactor) && scaleFactor > 0)
     {
         Info<< " with scaling " << scaleFactor;
         surf.scalePoints(scaleFactor);

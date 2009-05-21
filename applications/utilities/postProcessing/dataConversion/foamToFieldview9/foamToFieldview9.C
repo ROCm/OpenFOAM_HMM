@@ -23,7 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Write out the FOAM mesh in Version 3.0  Fieldview-UNS format (binary).
+    Write out the OpenFOAM mesh in Version 3.0 Fieldview-UNS format (binary).
+
     See Fieldview Release 9 Reference Manual - Appendix D
     (Unstructured Data Format)
     Borrows various from uns/write_binary_uns.c from FieldView dist.
@@ -31,6 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "volFields.H"
 #include "surfaceFields.H"
 #include "pointFields.H"
@@ -176,19 +178,14 @@ int main(int argc, char *argv[])
 {
     argList::noParallel();
     argList::validOptions.insert("noWall", "");
+    timeSelector::addOptions(true, false);
 
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    instantList Times = runTime.times();
-
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
 #   include "createMesh.H"
-
 
     // Initialize name mapping table
     FieldviewNames.insert("alpha", "aalpha");
@@ -285,17 +282,16 @@ int main(int argc, char *argv[])
 
     label fieldViewTime = 0;
 
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
-
-        Info<< "Time " << Times[i].name() << endl;
+        runTime.setTime(timeDirs[timeI], timeI);
+        Info<< "Time: " << runTime.timeName() << endl;
 
         fvMesh::readUpdateState state = mesh.readUpdate();
 
         if
         (
-            i == startTime
+            timeI == 0
          || state == fvMesh::TOPO_CHANGE
          || state == fvMesh::TOPO_PATCH_CHANGE
         )
@@ -307,7 +303,7 @@ int main(int argc, char *argv[])
                 new fieldviewTopology
                 (
                     mesh,
-                    !args.options().found("noWall")
+                    !args.optionFound("noWall")
                 )
             );
 
@@ -334,7 +330,7 @@ int main(int argc, char *argv[])
 
         fileName fvFileName
         (
-            fvPath/runTime.caseName() + "_" + Foam::name(i) + ".uns"
+            fvPath/runTime.caseName() + "_" + Foam::name(timeI) + ".uns"
         );
 
         Info<< "    file:" << fvFileName.c_str() << endl;
@@ -364,7 +360,7 @@ int main(int argc, char *argv[])
 
         // Output constants for time, fsmach, alpha and re.
         float fBuf[4];
-        fBuf[0] = Times[i].value();
+        fBuf[0] = runTime.value();
         fBuf[1] = 0.0;
         fBuf[2] = 0.0;
         fBuf[3] = 1.0;
@@ -892,7 +888,7 @@ int main(int argc, char *argv[])
             writeInt(fvParticleFile, fieldViewTime + 1);
 
             // Time value
-            writeFloat(fvParticleFile, Times[i].value());
+            writeFloat(fvParticleFile, runTime.value());
 
             // Read particles
             Cloud<passiveParticle> parcels(mesh);

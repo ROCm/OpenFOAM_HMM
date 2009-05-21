@@ -41,7 +41,7 @@ static word pointPrepend           = "point_";
 static fileName rootDir;
 static fileName caseDir;
 
-static instantList TimeList;
+static instantList timeDirs;
 
 static List<word> fieldNames;
 static List<word> lagrangianScalarNames;

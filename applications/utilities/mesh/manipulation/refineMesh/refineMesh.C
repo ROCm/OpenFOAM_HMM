@@ -309,8 +309,8 @@ int main(int argc, char *argv[])
     // Read/construct control dictionary
     //
 
-    bool readDict = args.options().found("dict");
-    bool overwrite = args.options().found("overwrite");
+    bool readDict = args.optionFound("dict");
+    bool overwrite = args.optionFound("overwrite");
 
     // List of cells to refine
     labelList refCells;

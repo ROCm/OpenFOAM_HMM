@@ -53,15 +53,13 @@ namespace Foam
 {
     void execFlowFunctionObjects(const argList& args, const Time& runTime)
     {
-        if (args.options().found("dict"))
+        if (args.optionFound("dict"))
         {
-            fileName dictName(args.options()["dict"]);
-
             IOdictionary dict
             (
                 IOobject
                 (
-                    dictName,
+                    args.option("dict"),
                     runTime.system(),
                     runTime,
                     IOobject::MUST_READ

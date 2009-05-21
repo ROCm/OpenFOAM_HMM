@@ -103,6 +103,7 @@ int main(int argc, char *argv[])
 
     fileName importName(params[0]);
     word exportName("default");
+    args.optionReadIfPresent("name", exportName);
 
     // check that reading is supported
     if (!MeshedSurface<face>::canRead(importName, true))
@@ -110,23 +111,18 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    if (args.options().found("name"))
-    {
-        exportName = args.options()["name"];
-    }
-
 
     // get the coordinate transformations
     autoPtr<coordinateSystem> fromCsys;
     autoPtr<coordinateSystem> toCsys;
 
-    if (args.options().found("from") || args.options().found("to"))
+    if (args.optionFound("from") || args.optionFound("to"))
     {
         autoPtr<IOobject> ioPtr;
 
-        if (args.options().found("dict"))
+        if (args.optionFound("dict"))
         {
-            fileName dictPath(args.options()["dict"]);
+            fileName dictPath(args.option("dict"));
 
             ioPtr.set
             (
@@ -171,9 +167,9 @@ int main(int argc, char *argv[])
 
         coordinateSystems csLst(ioPtr());
 
-        if (args.options().found("from"))
+        if (args.optionFound("from"))
         {
-            const word csName(args.options()["from"]);
+            const word csName(args.option("from"));
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -187,9 +183,9 @@ int main(int argc, char *argv[])
             fromCsys.reset(new coordinateSystem(csLst[csId]));
         }
 
-        if (args.options().found("to"))
+        if (args.optionFound("to"))
         {
-            const word csName(args.options()["to"]);
+            const word csName(args.option("to"));
 
             label csId = csLst.find(csName);
             if (csId < 0)
@@ -217,25 +213,14 @@ int main(int argc, char *argv[])
 
     MeshedSurface<face> surf(importName);
 
-    if (args.options().found("clean"))
+    if (args.optionFound("clean"))
     {
         surf.cleanup(true);
     }
 
 
     scalar scaleIn = 0;
-    scalar scaleOut = 0;
-    if (args.options().found("scaleIn"))
-    {
-        IStringStream(args.options()["scaleIn"])() >> scaleIn;
-    }
-    if (args.options().found("scaleOut"))
-    {
-        IStringStream(args.options()["scaleOut"])() >> scaleOut;
-    }
-
-
-    if (scaleIn > 0)
+    if (args.optionReadIfPresent("scaleIn", scaleIn) && scaleIn > 0)
     {
         Info<< " -scaleIn " << scaleIn << endl;
         surf.scalePoints(scaleIn);
@@ -255,7 +240,8 @@ int main(int argc, char *argv[])
         surf.movePoints(tpf());
     }
 
-    if (scaleOut > 0)
+    scalar scaleOut = 0;
+    if (args.optionReadIfPresent("scaleOut", scaleOut) && scaleOut > 0)
     {
         Info<< " -scaleOut " << scaleOut << endl;
         surf.scalePoints(scaleOut);

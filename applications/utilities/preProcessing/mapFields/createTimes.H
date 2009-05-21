@@ -1,4 +1,4 @@
-    Info<< nl << "Create databases as time" << endl;
+    Info << "\nCreate databases as time" << endl;
 
     Time runTimeSource
     (

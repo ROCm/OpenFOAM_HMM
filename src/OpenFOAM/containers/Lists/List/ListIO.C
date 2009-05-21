@@ -131,7 +131,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
             FatalIOErrorIn("operator>>(Istream&, List<T>&)", is)
-                << "incorrect first token, expected '(' or '{', found "
+                << "incorrect first token, expected '(', found "
                 << firstToken.info()
                 << exit(FatalIOError);
         }
@@ -155,5 +155,38 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
 
     return is;
 }
+
+
+template<class T>
+Foam::List<T> Foam::readList(Istream& is)
+{
+    List<T> L;
+    token firstToken(is);
+    is.putBack(firstToken);
+
+    if (firstToken.isPunctuation())
+    {
+        if (firstToken.pToken() != token::BEGIN_LIST)
+        {
+            FatalIOErrorIn("readList<T>(Istream&)", is)
+                << "incorrect first token, expected '(', found "
+                << firstToken.info()
+                << exit(FatalIOError);
+        }
+
+        // read via a singly-linked list
+        L = SLList<T>(is);
+    }
+    else
+    {
+        // create list with a single item
+        L.setSize(1);
+
+        is >> L[0];
+    }
+
+    return L;
+}
+
 
 // ************************************************************************* //

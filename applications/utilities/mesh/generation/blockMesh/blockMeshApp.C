@@ -83,10 +83,10 @@ int main(int argc, char *argv[])
     word regionName;
     fileName polyMeshDir;
 
-    if (args.options().found("region"))
+    if (args.optionFound("region"))
     {
         // constant/<region>/polyMesh/blockMeshDict
-        regionName  = args.options()["region"];
+        regionName  = args.option("region");
         polyMeshDir = regionName/polyMesh::meshSubDir;
 
         Info<< nl << "Generating mesh for region " << regionName << endl;
@@ -100,9 +100,9 @@ int main(int argc, char *argv[])
 
     autoPtr<IOobject> meshDictIoPtr;
 
-    if (args.options().found("dict"))
+    if (args.optionFound("dict"))
     {
-        fileName dictPath(args.options()["dict"]);
+        fileName dictPath(args.option("dict"));
 
         meshDictIoPtr.set
         (
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
             (
                 (
                     isDir(dictPath)
-                  ? dictPath/dictName 
+                  ? dictPath/dictName
                   : dictPath
                 ),
                 runTime,
@@ -153,7 +153,7 @@ int main(int argc, char *argv[])
     blockMesh blocks(meshDict);
 
 
-    if (args.options().found("blockTopology"))
+    if (args.optionFound("blockTopology"))
     {
         // Write mesh as edges.
         {

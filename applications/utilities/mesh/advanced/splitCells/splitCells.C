@@ -542,23 +542,19 @@ int main(int argc, char *argv[])
     scalar minCos = Foam::cos(radAngle);
     scalar minSin = Foam::sin(radAngle);
 
-    bool readSet = args.options().found("set");
-    bool geometry = args.options().found("geometry");
-    bool overwrite = args.options().found("overwrite");
+    bool readSet   = args.optionFound("set");
+    bool geometry  = args.optionFound("geometry");
+    bool overwrite = args.optionFound("overwrite");
 
     scalar edgeTol = 0.2;
-
-    if (args.options().found("tol"))
-    {
-        edgeTol = readScalar(IStringStream(args.options()["tol"])());
-    }
+    args.optionReadIfPresent("tol", edgeTol);
 
     Info<< "Trying to split cells with internal angles > feature angle\n" << nl
         << "featureAngle      : " << featureAngle << nl
         << "edge snapping tol : " << edgeTol << nl;
     if (readSet)
     {
-        Info<< "candidate cells   : cellSet " << args.options()["set"] << nl;
+        Info<< "candidate cells   : cellSet " << args.option("set") << nl;
     }
     else
     {
@@ -586,7 +582,7 @@ int main(int argc, char *argv[])
     if (readSet)
     {
         // Read cells to cut from cellSet
-        cellSet cells(mesh, args.options()["set"]);
+        cellSet cells(mesh, args.option("set"));
 
         cellsToCut = cells;
     }

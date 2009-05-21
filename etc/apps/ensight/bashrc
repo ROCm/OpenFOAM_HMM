@@ -23,11 +23,11 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     ensightFoam/bashrc
+#     ensight/bashrc
 #
 # Description
 #     Setup file for Ensight 8.?
-#     Sourced from OpenFOAM-?.?/etc/bashrc
+#     Sourced from OpenFOAM-*/etc/bashrc
 #
 #------------------------------------------------------------------------------
 

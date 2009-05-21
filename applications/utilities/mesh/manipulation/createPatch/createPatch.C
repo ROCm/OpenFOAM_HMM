@@ -539,7 +539,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 
-    const bool overwrite = args.options().found("overwrite");
+    const bool overwrite = args.optionFound("overwrite");
 
     Info<< "Reading createPatchDict." << nl << endl;
 

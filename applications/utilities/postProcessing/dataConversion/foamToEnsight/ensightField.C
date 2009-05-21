@@ -275,8 +275,8 @@ template<class Type>
 bool writePatchField
 (
     const Foam::Field<Type>& pf,
-    const Foam::label patchi,
-    const Foam::label ensightPatchi,
+    const Foam::label patchI,
+    const Foam::label ensightPatchI,
     const Foam::faceSets& boundaryFaceSet,
     const Foam::ensightMesh::nFacePrimitives& nfp,
     const Foam::labelList& patchProcessors,
@@ -289,7 +289,7 @@ bool writePatchField
         {
             ensightFile
                 << "part" << nl
-                << setw(10) << ensightPatchi << nl;
+                << setw(10) << ensightPatchI << nl;
         }
 
         writeAllFaceData
@@ -335,8 +335,8 @@ template<class Type>
 bool writePatchFieldBinary
 (
     const Foam::Field<Type>& pf,
-    const Foam::label patchi,
-    const Foam::label ensightPatchi,
+    const Foam::label patchI,
+    const Foam::label ensightPatchI,
     const Foam::faceSets& boundaryFaceSet,
     const Foam::ensightMesh::nFacePrimitives& nfp,
     const Foam::labelList& patchProcessors,
@@ -348,7 +348,7 @@ bool writePatchFieldBinary
         if (Pstream::master())
         {
             writeEnsDataBinary("part",ensightFile);
-            writeEnsDataBinary(ensightPatchi,ensightFile);
+            writeEnsDataBinary(ensightPatchI,ensightFile);
         }
 
         writeAllFaceDataBinary
@@ -411,14 +411,14 @@ void writePatchField
     const HashTable<ensightMesh::nFacePrimitives>&
         nPatchPrims = eMesh.nPatchPrims();
 
-    label patchi = -1;
+    label patchI = -1;
 
     if (patchIndices.found(patchName))
     {
-        patchi = patchIndices.find(patchName)();
+        patchI = patchIndices.find(patchName)();
     }
 
-    label ensightPatchi = 2;
+    label ensightPatchI = eMesh.patchPartOffset();
 
     for
     (
@@ -429,7 +429,7 @@ void writePatchField
     )
     {
         if (iter.key() == patchName) break;
-        ensightPatchi++;
+        ensightPatchI++;
     }
 
 
@@ -472,14 +472,14 @@ void writePatchField
         ensightFile << pTraits<Type>::typeName << nl;
     }
 
-    if (patchi >= 0)
+    if (patchI >= 0)
     {
         writePatchField
         (
             pf,
-            patchi,
-            ensightPatchi,
-            boundaryFaceSets[patchi],
+            patchI,
+            ensightPatchI,
+            boundaryFaceSets[patchI],
             nPatchPrims.find(patchName)(),
             patchProcessors,
             ensightFile
@@ -493,7 +493,7 @@ void writePatchField
         (
             Field<Type>(),
             -1,
-            ensightPatchi,
+            ensightPatchI,
             nullFaceSets,
             nPatchPrims.find(patchName)(),
             patchProcessors,
@@ -621,7 +621,7 @@ void ensightFieldAscii
         writeAllData("nfaced", vf, polys, meshCellSets.nPolys, ensightFile);
     }
 
-    label ensightPatchi = 2;
+    label ensightPatchI = eMesh.patchPartOffset();
 
     for
     (
@@ -637,23 +637,23 @@ void ensightFieldAscii
         {
             if (patchIndices.found(patchName))
             {
-                label patchi = patchIndices.find(patchName)();
+                label patchI = patchIndices.find(patchName)();
 
                 if
                 (
                     writePatchField
                     (
-                        vf.boundaryField()[patchi],
-                        patchi,
-                        ensightPatchi,
-                        boundaryFaceSets[patchi],
+                        vf.boundaryField()[patchI],
+                        patchI,
+                        ensightPatchI,
+                        boundaryFaceSets[patchI],
                         nPatchPrims.find(patchName)(),
                         patchProcessors,
                         ensightFile
                     )
                 )
                 {
-                    ensightPatchi++;
+                    ensightPatchI++;
                 }
 
             }
@@ -667,7 +667,7 @@ void ensightFieldAscii
                     (
                         Field<Type>(),
                         -1,
-                        ensightPatchi,
+                        ensightPatchI,
                         nullFaceSet,
                         nPatchPrims.find(patchName)(),
                         patchProcessors,
@@ -675,7 +675,7 @@ void ensightFieldAscii
                     )
                 )
                 {
-                    ensightPatchi++;
+                    ensightPatchI++;
                 }
             }
         }
@@ -793,7 +793,7 @@ void ensightFieldBinary
         writeAllDataBinary("nfaced", vf, polys, meshCellSets.nPolys, ensightFile);
     }
 
-    label ensightPatchi = 2;
+    label ensightPatchI = eMesh.patchPartOffset();
 
     for
     (
@@ -809,23 +809,23 @@ void ensightFieldBinary
         {
             if (patchIndices.found(patchName))
             {
-                label patchi = patchIndices.find(patchName)();
+                label patchI = patchIndices.find(patchName)();
 
                 if
                 (
                     writePatchFieldBinary
                     (
-                        vf.boundaryField()[patchi],
-                        patchi,
-                        ensightPatchi,
-                        boundaryFaceSets[patchi],
+                        vf.boundaryField()[patchI],
+                        patchI,
+                        ensightPatchI,
+                        boundaryFaceSets[patchI],
                         nPatchPrims.find(patchName)(),
                         patchProcessors,
                         ensightFile
                     )
                 )
                 {
-                    ensightPatchi++;
+                    ensightPatchI++;
                 }
 
             }
@@ -839,7 +839,7 @@ void ensightFieldBinary
                     (
                         Field<Type>(),
                         -1,
-                        ensightPatchi,
+                        ensightPatchI,
                         nullFaceSet,
                         nPatchPrims.find(patchName)(),
                         patchProcessors,
@@ -847,7 +847,7 @@ void ensightFieldBinary
                     )
                 )
                 {
-                    ensightPatchi++;
+                    ensightPatchI++;
                 }
             }
         }

@@ -78,11 +78,14 @@ class ensightMesh
 
     // Private data
 
+        //- Reference to the OpenFOAM mesh
+        const fvMesh& mesh_;
+
         //- Set binary file output
         bool binary_;
 
-        //- Reference to the OpenFOAM mesh
-        const fvMesh& mesh_;
+        //- The ensight part id for the first patch
+        label patchPartOffset_;
 
         cellSets meshCellSets_;
 
@@ -284,6 +287,12 @@ public:
             const HashTable<nFacePrimitives>& nPatchPrims() const
             {
                 return nPatchPrims_;
+            }
+
+            //- The ensight part id for the first patch
+            label patchPartOffset() const
+            {
+                return patchPartOffset_;
             }
 
 

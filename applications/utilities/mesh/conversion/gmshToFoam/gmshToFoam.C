@@ -689,7 +689,7 @@ int main(int argc, char *argv[])
 
     fileName mshName(args.additionalArgs()[0]);
 
-    bool keepOrientation = args.options().found("keepOrientation");
+    bool keepOrientation = args.optionFound("keepOrientation");
 
     // Storage for points
     pointField points;

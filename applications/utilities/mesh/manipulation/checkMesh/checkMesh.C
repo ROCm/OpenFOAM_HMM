@@ -58,9 +58,9 @@ int main(int argc, char *argv[])
     instantList timeDirs = timeSelector::select0(runTime, args);
 #   include "createNamedPolyMesh.H"
 
-    const bool noTopology  = args.options().found("noTopology");
-    const bool allGeometry = args.options().found("allGeometry");
-    const bool allTopology = args.options().found("allTopology");
+    const bool noTopology  = args.optionFound("noTopology");
+    const bool allGeometry = args.optionFound("allGeometry");
+    const bool allTopology = args.optionFound("allTopology");
 
     forAll(timeDirs, timeI)
     {

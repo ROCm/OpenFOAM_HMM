@@ -57,12 +57,12 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 
     HashSet<word> selectedFields;
-    if (args.options().found("fields"))
+    if (args.optionFound("fields"))
     {
-        IStringStream(args.options()["fields"])() >> selectedFields;
+        args.optionLookup("fields")() >> selectedFields;
     }
 
-    bool noLagrangian = args.options().found("noLagrangian");
+    bool noLagrangian = args.optionFound("noLagrangian");
 
     // determine the processor count directly
     label nProcs = 0;

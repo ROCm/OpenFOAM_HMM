@@ -176,8 +176,8 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("verbose", "");
     argList args(argc, argv);
 
-    bool checkSelfIntersection = args.options().found("checkSelfIntersection");
-    bool verbose = args.options().found("verbose");
+    bool checkSelfIntersection = args.optionFound("checkSelfIntersection");
+    bool verbose = args.optionFound("verbose");
 
     fileName surfFileName(args.additionalArgs()[0]);
     Pout<< "Reading surface from " << surfFileName << " ..." << nl << endl;
