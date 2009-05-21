@@ -170,6 +170,11 @@ addQtSupport()
     [ "${withQTSUPPORT:=false}" = true ] || return
 
     addCMakeVariable "PARAVIEW_BUILD_QT_GUI=ON"
+
+    if [ -n "$QMAKE_PATH" ]
+    then
+        addCMakeVariable QT_QMAKE_EXECUTABLE:FILEPATH=$QMAKE_PATH
+    fi
 }
 
 

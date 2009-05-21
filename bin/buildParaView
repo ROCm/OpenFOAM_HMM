@@ -56,6 +56,9 @@ MESA_LIBRARY="/usr/lib64/libOSMesa.so"
 # extra QT gui support (useful for re-using the installation for engrid)
 withQTSUPPORT=true
 
+# Set the path to the Qt-4.3.? qmake if the system Qt is other than this version
+#QMAKE_PATH=/usr/local/Trolltech/Qt-4.3.4/bin/qmake
+
 #
 # No further editing below this line
 #------------------------------------------------------------------------------
