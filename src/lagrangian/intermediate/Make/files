@@ -70,6 +70,19 @@ $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelSurfaceReactionMo
 $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelWallInteractionModels.C
 
 
+/* tracked reacting parcel sub-models */
+TRACKEDREACTINGPARCEL=$(DERIVEDPARCELS)/trackedReactingParcel
+$(TRACKEDREACTINGPARCEL)/defineTrackedReactingParcel.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelCompositionModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelDispersionModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelDragModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelHeatTransferModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelInjectionModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPhaseChangeModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPostProcessingModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelWallInteractionModels.C
+
+
 /* bolt-on models */
 submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
 submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
@@ -92,6 +105,10 @@ phaseProperties/phasePropertiesList/phasePropertiesList.C
 /* data entries */
 submodels/IO/DataEntry/makeDataEntries.C
 submodels/IO/DataEntry/polynomial/polynomial.C
+
+
+/* IOLists */
+submodels/IO/IOList/makeParcelIOLists.C
 
 
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate
