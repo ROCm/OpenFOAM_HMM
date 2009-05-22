@@ -215,6 +215,8 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
 }
 
 

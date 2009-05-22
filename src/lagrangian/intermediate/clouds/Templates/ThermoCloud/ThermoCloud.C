@@ -212,6 +212,8 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
 }
 
 

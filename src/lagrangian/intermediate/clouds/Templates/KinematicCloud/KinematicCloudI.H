@@ -167,6 +167,14 @@ Foam::KinematicCloud<ParcelType>::injection()
 
 
 template<class ParcelType>
+inline Foam::PostProcessingModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::postProcessing()
+{
+    return postProcessingModel_();
+}
+
+
+template<class ParcelType>
 inline const Foam::WallInteractionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::wallInteraction() const
 {

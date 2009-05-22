@@ -72,6 +72,9 @@ template<class CloudType>
 class InjectionModel;
 
 template<class CloudType>
+class PostProcessingModel;
+
+template<class CloudType>
 class WallInteractionModel;
 
 /*---------------------------------------------------------------------------*\
@@ -152,6 +155,10 @@ class KinematicCloud
             //- Injector model
             autoPtr<InjectionModel<KinematicCloud<ParcelType> > >
                 injectionModel_;
+
+            //- Post-processing model
+            autoPtr<PostProcessingModel<KinematicCloud<ParcelType> > >
+                postProcessingModel_;
 
             //- Wall interaction model
             autoPtr<WallInteractionModel<KinematicCloud<ParcelType> > >
@@ -294,6 +301,10 @@ public:
 
                 inline InjectionModel<KinematicCloud<ParcelType> >&
                     injection();
+
+                //- Return reference to post-processing model
+                inline PostProcessingModel<KinematicCloud<ParcelType> >&
+                    postProcessing();
 
                 //- Return reference to wall interaction model
                 inline const WallInteractionModel<KinematicCloud<ParcelType> >&

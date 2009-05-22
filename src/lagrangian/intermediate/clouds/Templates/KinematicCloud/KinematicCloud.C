@@ -31,6 +31,7 @@ License
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
+#include "PostProcessingModel.H"
 #include "WallInteractionModel.H"
 
 
@@ -131,6 +132,14 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
+    postProcessingModel_
+    (
+        PostProcessingModel<KinematicCloud<ParcelType> >::New
+        (
+            this->particleProperties_,
+            *this
+        )
+    ),
     wallInteractionModel_
     (
         WallInteractionModel<KinematicCloud<ParcelType> >::New
@@ -227,6 +236,8 @@ void Foam::KinematicCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
 }
 
 

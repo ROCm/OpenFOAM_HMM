@@ -190,6 +190,8 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
 }
 
 
