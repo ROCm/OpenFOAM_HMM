@@ -75,6 +75,15 @@ Foam::basicKinematicParcel::basicKinematicParcel
 {}
 
 
+Foam::basicKinematicParcel::basicKinematicParcel
+(
+    const basicKinematicParcel& p
+)
+:
+    KinematicParcel<basicKinematicParcel>(p)
+{}
+
+
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
 Foam::basicKinematicParcel::~basicKinematicParcel()

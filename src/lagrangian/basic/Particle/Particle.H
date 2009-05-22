@@ -278,6 +278,16 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        Particle(const Particle& p);
+
+        //- Construct a clone
+        autoPtr<ParticleType> clone() const
+        {
+            return autoPtr<Particle>(new Particle(*this));
+        }
+
+
         //- Factory class to read-construct particles used for
         //  parallel transfer
         class iNew

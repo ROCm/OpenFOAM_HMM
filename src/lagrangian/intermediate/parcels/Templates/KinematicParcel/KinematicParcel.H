@@ -278,10 +278,13 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        KinematicParcel(const KinematicParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<KinematicParcel> clone() const
         {
-            return autoPtr<ParcelType>(new KinematicParcel<ParcelType>(*this));
+            return autoPtr<KinematicParcel>(new KinematicParcel(*this));
         }
 
 

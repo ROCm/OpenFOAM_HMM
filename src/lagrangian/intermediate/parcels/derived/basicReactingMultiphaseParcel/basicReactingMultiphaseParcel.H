@@ -85,11 +85,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        basicReactingMultiphaseParcel(const basicReactingMultiphaseParcel& p);
+
         //- Construct and return a clone
         autoPtr<basicReactingMultiphaseParcel> clone() const
         {
-            return autoPtr<basicReactingMultiphaseParcel>
-                (new basicReactingMultiphaseParcel(*this));
+            return
+                autoPtr<basicReactingMultiphaseParcel>
+                (
+                    new basicReactingMultiphaseParcel(*this)
+                );
         }
 
 

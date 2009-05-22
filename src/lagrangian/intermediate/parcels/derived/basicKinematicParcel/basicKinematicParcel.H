@@ -81,11 +81,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        basicKinematicParcel(const basicKinematicParcel& p);
+
         //- Construct and return a clone
         autoPtr<basicKinematicParcel> clone() const
         {
-            return autoPtr<basicKinematicParcel>
-                (new basicKinematicParcel(*this));
+            return
+                autoPtr<basicKinematicParcel>
+                (
+                    new basicKinematicParcel(*this)
+                );
         }
 
 

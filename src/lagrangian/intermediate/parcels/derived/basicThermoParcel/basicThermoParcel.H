@@ -80,10 +80,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        basicThermoParcel(const basicThermoParcel& p);
+
         //- Construct and return a clone
         autoPtr<basicThermoParcel> clone() const
         {
-            return autoPtr<basicThermoParcel>(new basicThermoParcel(*this));
+            return
+                autoPtr<basicThermoParcel>
+                (
+                    new basicThermoParcel(*this)
+                );
         }
 
 

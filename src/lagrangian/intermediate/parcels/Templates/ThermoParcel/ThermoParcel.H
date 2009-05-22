@@ -257,10 +257,13 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        ThermoParcel(const ThermoParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<ThermoParcel> clone() const
         {
-            return autoPtr<ParcelType>(new ThermoParcel<ParcelType>(*this));
+            return autoPtr<ThermoParcel>(new ThermoParcel(*this));
         }
 
 

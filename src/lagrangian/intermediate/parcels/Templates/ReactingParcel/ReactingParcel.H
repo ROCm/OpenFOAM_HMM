@@ -244,10 +244,13 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        ReactingParcel(const ReactingParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<ReactingParcel> clone() const
         {
-            return autoPtr<ParcelType>(new ReactingParcel<ParcelType>(*this));
+            return autoPtr<ReactingParcel>(new ReactingParcel(*this));
         }
 
 

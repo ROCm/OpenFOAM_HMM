@@ -82,10 +82,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        basicReactingParcel(const basicReactingParcel& p);
+
         //- Construct and return a clone
         autoPtr<basicReactingParcel> clone() const
         {
-            return autoPtr<basicReactingParcel>(new basicReactingParcel(*this));
+            return
+                autoPtr<basicReactingParcel>
+                (
+                    new basicReactingParcel(*this)
+                );
         }
 
 

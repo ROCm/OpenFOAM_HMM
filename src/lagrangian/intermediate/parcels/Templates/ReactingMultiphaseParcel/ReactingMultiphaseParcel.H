@@ -295,13 +295,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        ReactingMultiphaseParcel(const ReactingMultiphaseParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<ReactingMultiphaseParcel> clone() const
         {
-            return autoPtr<ParcelType>
-            (
-                new ReactingMultiphaseParcel<ParcelType>(*this)
-            );
+            return
+                autoPtr<ReactingMultiphaseParcel>
+                (
+                    new ReactingMultiphaseParcel(*this)
+                );
         }
 
 

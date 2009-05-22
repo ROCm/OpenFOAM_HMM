@@ -88,6 +88,15 @@ Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
 {}
 
 
+Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
+(
+    const basicReactingMultiphaseParcel& p
+)
+:
+    ReactingMultiphaseParcel<basicReactingMultiphaseParcel>(p)
+{}
+
+
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
 Foam::basicReactingMultiphaseParcel::~basicReactingMultiphaseParcel()
