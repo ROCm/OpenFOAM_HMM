@@ -98,6 +98,24 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
 }
 
 
+void Foam::solidParticle::hitPatch
+(
+    const polyPatch&,
+    solidParticle::trackData&,
+    const label
+)
+{}
+
+
+void Foam::solidParticle::hitPatch
+(
+    const polyPatch&,
+    int&,
+    const label
+)
+{}
+
+
 void Foam::solidParticle::hitProcessorPatch
 (
     const processorPolyPatch&,

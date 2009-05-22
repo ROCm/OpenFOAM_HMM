@@ -80,6 +80,17 @@ bool Foam::DsmcParcel<ParcelType>::move
 
 template<class ParcelType>
 template<class TrackData>
+void Foam::DsmcParcel<ParcelType>::hitPatch
+(
+    const polyPatch&,
+    TrackData& td,
+    const label patchI
+)
+{}
+
+
+template<class ParcelType>
+template<class TrackData>
 void Foam::DsmcParcel<ParcelType>::hitProcessorPatch
 (
     const processorPolyPatch&,

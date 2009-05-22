@@ -256,7 +256,8 @@ public:
 
     // Member Functions
 
-        //- Tracking
+        // Tracking
+
             bool move(trackData&);
 
             void transformProperties(const tensor& T);
@@ -266,6 +267,7 @@ public:
             void setSitePositions(const constantProperties& constProps);
 
             void setSiteSizes(label size);
+
 
         // Access
 
@@ -305,7 +307,26 @@ public:
 
             inline label id() const;
 
+
     // Member Operators
+
+        //- Overridable function to handle the particle hitting a patch
+        //  Executed before other patch-hitting functions
+        void hitPatch
+        (
+            const polyPatch&,
+            molecule::trackData& td,
+            const label patchI
+        );
+
+        //- Overridable function to handle the particle hitting a patch
+        //  Executed before other patch-hitting functions without trackData
+        void hitPatch
+        (
+            const polyPatch& p,
+            int& td,
+            const label patchI
+        );
 
         //- Overridable function to handle the particle hitting a processorPatch
         void hitProcessorPatch
