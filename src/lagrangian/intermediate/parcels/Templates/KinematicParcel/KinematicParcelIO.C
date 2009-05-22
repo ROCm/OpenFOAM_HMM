@@ -29,6 +29,20 @@ License
 #include "IOField.H"
 #include "Cloud.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
+    Particle<ParcelType>::propHeader
+  + " typeId"
+  + " nParticle"
+  + " d"
+  + " (Ux Uy Uz)"
+  + " rho"
+  + " tTurb"
+  + " UTurb";
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class ParcelType>

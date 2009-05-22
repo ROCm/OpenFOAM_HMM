@@ -214,8 +214,14 @@ protected:
 
 public:
 
-    //- Runtime type information
-    TypeName("ReactingParcel");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("ReactingParcel");
+
 
     friend class Cloud<ParcelType>;
 

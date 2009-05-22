@@ -27,6 +27,15 @@ License
 #include "ReactingParcel.H"
 #include "IOstreams.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::string Foam::ReactingParcel<ParcelType>::propHeader =
+    ThermoParcel<ParcelType>::propHeader
+  + " mass0"
+  + " nPhases(Y1..YN)";
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>

@@ -28,6 +28,12 @@ License
 #include "IOstreams.H"
 #include "IOPosition.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class ParticleType>
+Foam::string Foam::Particle<ParticleType>::propHeader = "(Px Py Pz) cellI";
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from Istream

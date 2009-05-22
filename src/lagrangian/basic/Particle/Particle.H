@@ -256,8 +256,13 @@ public:
     friend class Cloud<ParticleType>;
 
 
-    //- Runtime type information
-    TypeName("Particle");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("Particle");
 
 
     // Constructors
