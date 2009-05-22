@@ -73,7 +73,7 @@ private:
         //- The cloud dictionary
         const dictionary& dict_;
 
-        // Reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
         //- The coefficients dictionary
@@ -255,7 +255,7 @@ public:
             //- Return mass of particles to introduce
             inline scalar massTotal() const;
 
-            //- Return mass of particles injected (cummulative)
+            //- Return mass of particles injected (cumulative)
             inline scalar massInjected() const;
 
             //- Return the end-of-injection time
@@ -309,10 +309,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "InjectionModelI.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -332,6 +328,10 @@ public:
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "InjectionModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

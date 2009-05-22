@@ -61,7 +61,7 @@ class HeatTransferModel
         //- Reference to the owner cloud class
         CloudType& owner_;
 
-        //- The coefficents dictionary
+        //- The coefficients dictionary
         const dictionary coeffDict_;
 
 
