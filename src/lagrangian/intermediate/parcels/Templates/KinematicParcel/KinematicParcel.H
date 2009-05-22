@@ -502,7 +502,7 @@ public:
             //- Read
             static void readFields(KinematicCloud<ParcelType>& c);
 
-            //- write
+            //- Write
             static void writeFields(const KinematicCloud<ParcelType>& c);
 
 

@@ -72,7 +72,7 @@ protected:
         //- Sherwood number as a function of Reynolds and Schmidt numbers
         scalar Sh(const scalar Re, const scalar Sc) const;
 
-        //- Calculate the carrier phase comonent volume fractions at cellI
+        //- Calculate the carrier phase component volume fractions at cellI
         scalarField calcXc(const label cellI) const;
 
 

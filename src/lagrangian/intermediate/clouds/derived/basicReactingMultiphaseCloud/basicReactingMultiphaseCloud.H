@@ -26,7 +26,7 @@ Class
     Foam::basicReactingMultiphaseCloud
 
 Description
-    Reacting cloud templated on the reacting multiphase parcel
+    Reacting multiphase cloud templated on the reacting multiphase parcel
 
 SourceFiles
     basicReactingMultiphaseCloud.C

@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "StandardWallInteraction.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

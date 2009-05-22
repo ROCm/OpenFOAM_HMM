@@ -60,7 +60,7 @@ class SurfaceReactionModel
         //- The cloud dictionary
         const dictionary& dict_;
 
-        // reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
         //- The coefficients dictionary

@@ -89,7 +89,7 @@ public:
             //- Boiling point [K]
             const scalar Tbp_;
 
-            //- Vapourisation temperature [K]
+            //- Vaporisation temperature [K]
             const scalar Tvap_;
 
 
@@ -109,7 +109,7 @@ public:
             //- Return const access to the boiling point
             inline scalar Tbp() const;
 
-            //- Return const access to the vapourisation temperature
+            //- Return const access to the vaporisation temperature
             inline scalar Tvap() const;
     };
 
@@ -159,7 +159,7 @@ public:
             //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
 
-            //- Return conat access to the interpolator for continuous
+            //- Return const access to the interpolator for continuous
             //  phase pressure field
             inline const interpolation<scalar>& pInterp() const;
     };

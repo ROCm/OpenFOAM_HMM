@@ -87,7 +87,7 @@ class FieldActivatedInjection
             //- Field of injector (x,y,z) positions
             vectorIOField positions_;
 
-            //- Field of cell labels corresoponding to injector positions
+            //- Field of cell labels corresponding to injector positions
             labelField injectorCells_;
 
             //- Number of parcels per injector

@@ -433,7 +433,6 @@ void Foam::Particle<ParticleType>::transformProperties(const vector&)
 {}
 
 
-
 template<class ParticleType>
 template<class TrackData>
 void Foam::Particle<ParticleType>::hitPatch

@@ -163,10 +163,10 @@ public:
             //- Return non-const access to a component mass fraction
             scalar& Y(const label cmptI);
 
-            //- Return const acccess to the global ids
+            //- Return const access to the global ids
             const labelList& globalIds() const;
 
-            //- Return const acccess to the map to the carrier global ids
+            //- Return const access to the map to the carrier global ids
             const labelList& globalCarrierIds() const;
 
             //- Return the global id of a component in the local list by name

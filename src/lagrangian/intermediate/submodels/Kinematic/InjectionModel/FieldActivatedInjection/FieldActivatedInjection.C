@@ -131,7 +131,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
         *sum(pow3(diameters_))
         *mathematicalConstant::pi/6.0;
 
-    // Set/cahce the injector cells
+    // Set/cache the injector cells
     forAll(positions_, i)
     {
         this->findCellAtPosition

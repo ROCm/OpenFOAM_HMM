@@ -98,10 +98,7 @@ public:
 
         // Constructors
 
-            inline trackData
-            (
-                Cloud<ParticleType>& cloud
-            );
+            inline trackData(Cloud<ParticleType>& cloud);
 
 
         // Member functions
@@ -307,10 +304,10 @@ public:
         //  parallel transfer
         class iNew
         {
-
             // Private data
 
-            const Cloud<ParticleType>& cloud_;
+                //- Reference to the cloud
+                const Cloud<ParticleType>& cloud_;
 
 
         public:
@@ -328,9 +325,8 @@ public:
 
 
     //- Destructor
-
-        virtual ~Particle()
-        {}
+    virtual ~Particle()
+    {}
 
 
     // Member Functions
@@ -439,10 +435,7 @@ public:
     // I-O
 
         //- Write the fields associated with the owner cloud
-        static void writeFields
-        (
-            const Cloud<ParticleType>& c
-        );
+        static void writeFields(const Cloud<ParticleType>& c);
 
 
     // Ostream Operator

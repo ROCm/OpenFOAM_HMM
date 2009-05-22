@@ -54,7 +54,7 @@ class DispersionModel
         //- Cloud dictionary
         const dictionary& dict_;
 
-        // Reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
 

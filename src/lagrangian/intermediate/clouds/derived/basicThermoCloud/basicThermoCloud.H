@@ -26,6 +26,7 @@ Class
     Foam::basicThermoCloud
 
 Description
+    Thermodynamic cloud templated on the thermodynamic parcel
 
 SourceFiles
     basicThermoCloud.C

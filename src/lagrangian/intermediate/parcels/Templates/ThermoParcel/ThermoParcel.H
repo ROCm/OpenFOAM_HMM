@@ -146,7 +146,7 @@ public:
                 //- Temperature field interpolator
                 const interpolation<scalar>& TInterp_;
 
-                //- Scpecific heat capacity field interpolator
+                //- Specific heat capacity field interpolator
                 const interpolation<scalar>& cpInterp_;
 
 
@@ -176,11 +176,11 @@ public:
             //- Return const access to the owner cloud
             inline const constantProperties& constProps() const;
 
-            //- Return conat access to the interpolator for continuous
+            //- Return const access to the interpolator for continuous
             //  phase temperature field
             inline const interpolation<scalar>& TInterp() const;
 
-            //- Return conat access to the interpolator for continuous
+            //- Return const access to the interpolator for continuous
             //  phase specific heat capacity field
             inline const interpolation<scalar>& cpInterp() const;
     };

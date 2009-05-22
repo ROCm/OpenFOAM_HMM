@@ -58,7 +58,7 @@ class DragModel
         //- The cloud dictionary
         const dictionary& dict_;
 
-        // reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
 
