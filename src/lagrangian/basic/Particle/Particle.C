@@ -45,7 +45,7 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
     const labelList& faces = mesh.cells()[celli_];
     const vector& C = mesh.cellCentres()[celli_];
 
-    labelList faceList(0);
+    DynamicList<label> faceList(10);
     forAll(faces, i)
     {
         label facei = faces[i];
@@ -53,11 +53,11 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
 
         if ((lam > 0) && (lam < 1.0))
         {
-            label n = faceList.size();
-            faceList.setSize(n+1);
-            faceList[n] = facei;
+            faceList.append(facei);
         }
     }
+
+    faceList.shrink();
 
     return faceList;
 }
@@ -75,7 +75,7 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
     const labelList& faces = mesh.cells()[celli];
     const vector& C = mesh.cellCentres()[celli];
 
-    labelList faceList(0);
+    DynamicList<label> faceList(10);
     forAll(faces, i)
     {
         label facei = faces[i];
@@ -83,11 +83,11 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
 
         if ((lam > 0) && (lam < 1.0))
         {
-            label n = faceList.size();
-            faceList.setSize(n+1);
-            faceList[n] = facei;
+            faceList.append(facei);
         }
     }
+
+    faceList.shrink();
 
     return faceList;
 }
