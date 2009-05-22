@@ -365,6 +365,9 @@ public:
             //- Return the impact model to be used, soft or hard (default).
             inline bool softImpact() const;
 
+            //- Return the particle current time
+            inline scalar currentTime() const;
+
 
         // Check
 
