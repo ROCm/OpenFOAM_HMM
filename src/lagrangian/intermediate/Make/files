@@ -28,6 +28,7 @@ $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDispersionModels.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDragModels.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelInjectionModels.C
+$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelPostProcessingModels.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelWallInteractionModels.C
 
 
@@ -38,6 +39,7 @@ $(THERMOPARCEL)/submodels/makeBasicThermoParcelDispersionModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelDragModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelHeatTransferModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelInjectionModels.C
+$(THERMOPARCEL)/submodels/makeBasicThermoParcelPostProcessingModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelWallInteractionModels.C
 
 
@@ -50,6 +52,7 @@ $(REACTINGPARCEL)/submodels/makeBasicReactingParcelDragModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelHeatTransferModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelInjectionModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelPhaseChangeModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelPostProcessingModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelWallInteractionModels.C
 
 
