@@ -167,6 +167,28 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::KinematicParcel<ParcelType>::KinematicParcel
+(
+    const KinematicParcel<ParcelType>& p
+)
+:
+    Particle<ParcelType>(p),
+    typeId_(p.typeId_),
+    nParticle_(p.nParticle_),
+    d_(p.d_),
+    U_(p.U_),
+    rho_(p.rho_),
+    tTurb_(p.tTurb_),
+    UTurb_(p.UTurb_),
+    rhoc_(p.rhoc_),
+    Uc_(p.Uc_),
+    muc_(p.muc_)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>

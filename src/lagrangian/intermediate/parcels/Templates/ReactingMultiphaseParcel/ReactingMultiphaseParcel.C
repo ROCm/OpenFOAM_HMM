@@ -546,6 +546,21 @@ Foam::scalar Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
+(
+    const ReactingMultiphaseParcel<ParcelType>& p
+)
+:
+    ReactingParcel<ParcelType>(p),
+    YGas_(p.YGas_),
+    YLiquid_(p.YLiquid_),
+    YSolid_(p.YSolid_)
+{}
+
+
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ReactingMultiphaseParcelIO.C"

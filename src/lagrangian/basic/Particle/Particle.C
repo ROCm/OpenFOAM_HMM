@@ -186,6 +186,17 @@ Foam::Particle<ParticleType>::Particle
 {}
 
 
+template<class ParticleType>
+Foam::Particle<ParticleType>::Particle(const Particle<ParticleType>& p)
+:
+    cloud_(p.cloud_),
+    position_(p.position_),
+    celli_(p.celli_),
+    facei_(p.facei_),
+    stepFraction_(p.stepFraction_)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>

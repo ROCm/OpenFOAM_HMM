@@ -205,6 +205,22 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 }
 
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::ThermoParcel<ParcelType>::ThermoParcel
+(
+    const ThermoParcel<ParcelType>& p
+)
+:
+    KinematicParcel<ParcelType>(p),
+    T_(p.T_),
+    cp_(p.cp_),
+    Tc_(p.Tc_),
+    cpc_(p.cpc_)
+{}
+
+
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ThermoParcelIO.C"
