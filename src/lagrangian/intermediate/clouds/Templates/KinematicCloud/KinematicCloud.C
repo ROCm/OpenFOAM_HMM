@@ -81,7 +81,6 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
 :
     Cloud<ParcelType>(rho.mesh(), cloudName, false),
     kinematicCloud(),
-    cloudName_(cloudName),
     mesh_(rho.mesh()),
     particleProperties_
     (

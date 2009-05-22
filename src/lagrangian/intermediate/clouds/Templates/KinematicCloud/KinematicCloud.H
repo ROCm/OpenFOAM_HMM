@@ -89,10 +89,6 @@ class KinematicCloud
 {
     // Private data
 
-        //- Cloud type - used to set the name of the parcel properties
-        //  dictionary by appending "Properties"
-        const word cloudName_;
-
         //- References to the mesh and time databases
         const fvMesh& mesh_;
 
@@ -214,9 +210,6 @@ public:
         // Access
 
             // References to the mesh and databases
-
-                //- Return the cloud type
-                inline const word& cloudName() const;
 
                 //- Return the parcel type id
                 inline label parcelTypeId() const;
