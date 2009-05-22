@@ -240,12 +240,9 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
 
         if (p.onBoundary() && td.keepParticle)
         {
-            if (p.face() > -1)
+            if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
             {
-                if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
-                {
-                    td.switchProcessor = true;
-                }
+                td.switchProcessor = true;
             }
         }
     }
