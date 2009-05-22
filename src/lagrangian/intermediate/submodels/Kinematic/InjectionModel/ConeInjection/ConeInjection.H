@@ -67,9 +67,6 @@ class ConeInjection
 {
     // Private data
 
-        //- Coefficients dictionary
-        dictionary coeffDict_;
-
         //- Injection duration [s]
         const scalar duration_;
 

@@ -62,9 +62,6 @@ class ManualInjection
 {
     // Private data
 
-        //- Coefficients dictionary
-        dictionary coeffDict_;
-
         //- Name of file containing positions data
         const word positionsFile_;
 
