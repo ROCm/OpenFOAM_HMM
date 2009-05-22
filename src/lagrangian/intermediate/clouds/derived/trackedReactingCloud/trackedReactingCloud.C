@@ -38,7 +38,7 @@ namespace Foam
 
 Foam::trackedReactingCloud::trackedReactingCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -48,7 +48,7 @@ Foam::trackedReactingCloud::trackedReactingCloud
 :
     ReactingCloud<trackedReactingParcel>
     (
-        cloudType,
+        cloudName,
         rho,
         U,
         g,

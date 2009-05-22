@@ -72,22 +72,22 @@ void Foam::KinematicCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::KinematicCloud<ParcelType>::KinematicCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const volScalarField& mu,
     const dimensionedVector& g
 )
 :
-    Cloud<ParcelType>(rho.mesh(), cloudType, false),
+    Cloud<ParcelType>(rho.mesh(), cloudName, false),
     kinematicCloud(),
-    cloudType_(cloudType),
+    cloudName_(cloudName),
     mesh_(rho.mesh()),
     particleProperties_
     (
         IOobject
         (
-            cloudType + "Properties",
+            cloudName + "Properties",
             rho.mesh().time().constant(),
             rho.mesh(),
             IOobject::MUST_READ,

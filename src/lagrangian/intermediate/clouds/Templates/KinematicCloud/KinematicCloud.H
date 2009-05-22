@@ -91,7 +91,7 @@ class KinematicCloud
 
         //- Cloud type - used to set the name of the parcel properties
         //  dictionary by appending "Properties"
-        const word cloudType_;
+        const word cloudName_;
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
@@ -193,7 +193,7 @@ public:
         //- Construct given carrier gas fields
         KinematicCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const volScalarField& mu,
@@ -216,7 +216,7 @@ public:
             // References to the mesh and databases
 
                 //- Return the cloud type
-                inline const word& cloudType() const;
+                inline const word& cloudName() const;
 
                 //- Return the parcel type id
                 inline label parcelTypeId() const;

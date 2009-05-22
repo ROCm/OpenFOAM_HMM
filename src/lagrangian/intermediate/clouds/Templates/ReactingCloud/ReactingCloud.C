@@ -67,7 +67,7 @@ void Foam::ReactingCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::ReactingCloud<ParcelType>::ReactingCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -75,7 +75,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     PtrList<specieReactingProperties>& carrierSpecies
 )
 :
-    ThermoCloud<ParcelType>(cloudType, rho, U, g, thermo),
+    ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo),
     reactingCloud(),
     constProps_(this->particleProperties()),
     carrierThermo_(thermo),

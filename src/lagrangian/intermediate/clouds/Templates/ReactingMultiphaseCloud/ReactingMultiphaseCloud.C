@@ -74,7 +74,7 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -82,7 +82,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     PtrList<specieReactingProperties>& carrierSpecies
 )
 :
-    ReactingCloud<ParcelType>(cloudType, rho, U, g, thermo, carrierSpecies),
+    ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo, carrierSpecies),
     reactingMultiphaseCloud(),
     constProps_(this->particleProperties()),
     devolatilisationModel_

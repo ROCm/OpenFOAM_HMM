@@ -38,7 +38,7 @@ namespace Foam
 
 Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -48,7 +48,7 @@ Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
 :
     ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
     (
-        cloudType,
+        cloudName,
         rho,
         U,
         g,

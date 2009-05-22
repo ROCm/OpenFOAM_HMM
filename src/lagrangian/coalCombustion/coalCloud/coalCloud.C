@@ -38,7 +38,7 @@ namespace Foam
 
 Foam::coalCloud::coalCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -48,7 +48,7 @@ Foam::coalCloud::coalCloud
 :
     ReactingMultiphaseCloud<coalParcel>
     (
-        cloudType,
+        cloudName,
         rho,
         U,
         g,

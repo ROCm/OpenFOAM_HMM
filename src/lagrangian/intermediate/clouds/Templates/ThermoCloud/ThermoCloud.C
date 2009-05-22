@@ -67,7 +67,7 @@ void Foam::ThermoCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::ThermoCloud<ParcelType>::ThermoCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -76,7 +76,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
 :
     KinematicCloud<ParcelType>
     (
-        cloudType,
+        cloudName,
         rho,
         U,
         thermo.mu(),

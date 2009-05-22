@@ -72,7 +72,7 @@ public:
         //- Construct given carrier gas fields
         basicReactingCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,

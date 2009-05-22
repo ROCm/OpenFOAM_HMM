@@ -29,9 +29,9 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const Foam::word& Foam::KinematicCloud<ParcelType>::cloudType() const
+inline const Foam::word& Foam::KinematicCloud<ParcelType>::cloudName() const
 {
-    return cloudType_;
+    return cloudName_;
 }
 
 
