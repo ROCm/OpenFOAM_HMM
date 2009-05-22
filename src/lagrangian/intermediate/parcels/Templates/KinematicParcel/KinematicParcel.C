@@ -256,6 +256,30 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
 
 template<class ParcelType>
 template<class TrackData>
+void Foam::KinematicParcel<ParcelType>::hitPatch
+(
+    const polyPatch& pp,
+    TrackData& td,
+    const label patchI
+)
+{
+    ParcelType& p = static_cast<ParcelType&>(*this);
+    td.cloud().postProcessing().postPatch(p, patchI);
+}
+
+
+template<class ParcelType>
+void Foam::KinematicParcel<ParcelType>::hitPatch
+(
+    const polyPatch& pp,
+    int& td,
+    const label patchI
+)
+{}
+
+
+template<class ParcelType>
+template<class TrackData>
 void Foam::KinematicParcel<ParcelType>::hitProcessorPatch
 (
     const processorPolyPatch&,

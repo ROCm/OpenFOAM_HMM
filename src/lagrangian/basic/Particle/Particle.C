@@ -339,6 +339,8 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             label patchi = patch(facei_);
             const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
+            p.hitPatch(patch, td, patchi);
+
             if (isA<wedgePolyPatch>(patch))
             {
                 p.hitWedgePatch
@@ -376,10 +378,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             }
             else if (isA<polyPatch>(patch))
             {
-                p.hitPatch
-                (
-                    static_cast<const polyPatch&>(patch), td
-                );
+                p.hitPatch(patch, td);
             }
             else
             {
@@ -431,6 +430,18 @@ void Foam::Particle<ParticleType>::transformProperties(const tensor&)
 
 template<class ParticleType>
 void Foam::Particle<ParticleType>::transformProperties(const vector&)
+{}
+
+
+
+template<class ParticleType>
+template<class TrackData>
+void Foam::Particle<ParticleType>::hitPatch
+(
+    const polyPatch&,
+    TrackData&,
+    const label
+)
 {}
 
 

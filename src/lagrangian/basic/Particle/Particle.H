@@ -171,6 +171,16 @@ protected:
 
     // Patch interactions
 
+        //- Overridable function to handle the particle hitting a patch
+        //  Executed before other patch-hitting functions
+        template<class TrackData>
+        void hitPatch
+        (
+            const polyPatch&,
+            TrackData& td,
+            const label patchI
+        );
+
         //- Overridable function to handle the particle hitting a wedgePatch
         template<class TrackData>
         void hitWedgePatch
