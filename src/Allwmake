@@ -15,7 +15,6 @@ wmake libso OpenFOAM
 wmake libso lagrangian/basic
 
 wmake libso triSurface
-wmake libso edgeMesh
 wmake libso surfMesh
 
 # Decomposition methods needed by meshTools
@@ -23,6 +22,8 @@ decompositionMethods/Allwmake
 
 wmake libso meshTools
 wmake libso finiteVolume
+
+wmake libso edgeMesh
 
 wmake libso sampling
 
@@ -44,6 +45,8 @@ conversion/Allwmake
 
 wmake libso autoMesh
 wmake libso errorEstimation
+
+wmake libso conformalVoronoiMesh
 
 fvAgglomerationMethods/Allwmake
 
