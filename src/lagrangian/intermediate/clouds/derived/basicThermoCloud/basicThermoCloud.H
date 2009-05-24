@@ -51,7 +51,6 @@ class basicThermoCloud
 :
     public ThermoCloud<basicThermoParcel>
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -84,8 +83,7 @@ public:
 
 
     //- Destructor
-
-        ~basicThermoCloud();
+    ~basicThermoCloud();
 
 
     // Member Functions

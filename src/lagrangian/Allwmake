@@ -7,6 +7,7 @@ wmake libso solidParticle
 wmake libso intermediate
 wmake libso dieselSpray
 wmake libso dsmc
+wmake libso coalCombustion
 
 molecularDynamics/Allwmake
 

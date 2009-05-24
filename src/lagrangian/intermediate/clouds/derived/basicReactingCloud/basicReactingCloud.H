@@ -26,6 +26,7 @@ Class
     Foam::basicReactingCloud
 
 Description
+    Reacting cloud templated on the reacting parcel
 
 SourceFiles
     basicReactingCloud.C
@@ -51,7 +52,6 @@ class basicReactingCloud
 :
     public ReactingCloud<basicReactingParcel>
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -77,13 +77,12 @@ public:
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& gases
+            PtrList<specieReactingProperties>& carrierSpecies
         );
 
 
     //- Destructor
-
-        ~basicReactingCloud();
+    ~basicReactingCloud();
 
 
     // Member Functions

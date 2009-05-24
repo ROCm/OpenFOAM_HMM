@@ -48,7 +48,6 @@ class RanzMarshall
 :
     public HeatTransferModel<CloudType>
 {
-
     // Private data
 
         // Prandtl number
@@ -71,9 +70,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~RanzMarshall();
+    //- Destructor
+    virtual ~RanzMarshall();
 
 
     // Member Functions

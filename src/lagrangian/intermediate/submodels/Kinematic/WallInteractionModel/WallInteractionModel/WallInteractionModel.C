@@ -35,7 +35,8 @@ Foam::WallInteractionModel<CloudType>::WallInteractionModel
     CloudType& owner,
     const word& type
 )
-:   dict_(dict),
+:
+    dict_(dict),
     owner_(owner),
     coeffDict_(dict.subDict(type + "Coeffs"))
 {}

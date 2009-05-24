@@ -30,121 +30,114 @@ License
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ThermoParcel<ParcelType>::updateCellQuantities
+void Foam::ThermoParcel<ParcelType>::setCellValues
 (
     TrackData& td,
     const scalar dt,
-    const label celli
+    const label cellI
 )
 {
-    KinematicParcel<ParcelType>::updateCellQuantities(td, dt, celli);
+    KinematicParcel<ParcelType>::setCellValues(td, dt, cellI);
 
-    Tc_ = td.TInterp().interpolate(this->position(), celli);
-    cpc_ = td.cpInterp().interpolate(this->position(), celli);
+    cpc_ = td.cpInterp().interpolate(this->position(), cellI);
+
+    Tc_ = td.TInterp().interpolate(this->position(), cellI);
+
+    if (Tc_ < td.constProps().TMin())
+    {
+        WarningIn
+        (
+            "void Foam::ThermoParcel<ParcelType>::setCellValues"
+            "("
+                "TrackData&, "
+                "const scalar, "
+                "const label"
+            ")"
+        )   << "Limiting temperature in cell " << cellI << " to "
+            << td.constProps().TMin() <<  nl << endl;
+
+        Tc_ = td.constProps().TMin();
+    }
 }
 
 
 template<class ParcelType>
 template<class TrackData>
-void Foam::ThermoParcel<ParcelType>::calcCoupled
+void Foam::ThermoParcel<ParcelType>::cellValueSourceCorrection
 (
     TrackData& td,
     const scalar dt,
-    const label celli
+    const label cellI
 )
 {
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Define local properties at beginning of timestep
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    const vector U0 = this->U_;
-    const scalar mass0 = this->mass();
+    this->Uc_ += td.cloud().UTrans()[cellI]/this->massCell(cellI);
+
+    scalar cpMean = td.cpInterp().psi()[cellI];
+    Tc_ += td.cloud().hsTrans()[cellI]/(cpMean*this->massCell(cellI));
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+void Foam::ThermoParcel<ParcelType>::calc
+(
+    TrackData& td,
+    const scalar dt,
+    const label cellI
+)
+{
+    // Define local properties at beginning of time step
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     const scalar np0 = this->nParticle_;
-//    const scalar T0 = T_;
-//    const scalar cp0 = cp_;
+    const scalar d0 = this->d_;
+    const vector U0 = this->U_;
+    const scalar rho0 = this->rho_;
+    const scalar T0 = this->T_;
+    const scalar cp0 = this->cp_;
+    const scalar mass0 = this->mass();
+
+    // Initial enthalpy state
+    scalar H0 = cp0*T0;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Heat transfer
+    // ~~~~~~~~~~~~~
 
-    // Momentum transfer from the particle to the carrier phase
-    vector dUTrans = vector::zero;
+    // No additional enthalpy sources
+    scalar Sh = 0.0;
 
-    // Enthalpy transfer from the particle to the carrier phase
-    scalar dhTrans = 0.0;
+    // Calculate new particle velocity
+    scalar T1 = calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, Sh);
 
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Cud = 0.0;
-    const vector U1 = calcVelocity(td, dt, Cud, dUTrans);
+    // Calculate new enthalpy state
+    scalar H1 = cp0*T1;
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate heat transfer - update T
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar htc = 0.0;
-    const scalar T1 = calcHeatTransfer(td, dt, celli, htc, dhTrans);
+    // Motion
+    // ~~~~~~
+
+    // No additional forces
+    vector Fx = vector::zero;
+
+    // Calculate new particle velocity
+    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx);
 
 
-    // ~~~~~~~~~~~~~~~~~~~~~~~
-    // Accumulate source terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~
+    //  Accumulate carrier phase source terms
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    if (td.cloud().coupled())
+    {
+        // Update momentum transfer
+        td.cloud().UTrans()[cellI] += np0*mass0*(U0 - U1);
 
-    // Update momentum transfer
-    td.cloud().UTrans()[celli] += np0*dUTrans;
+        // Update sensible enthalpy transfer
+        td.cloud().hsTrans()[cellI] += np0*mass0*(H0 - H1);
+    }
 
-    // Accumulate coefficient to be applied in carrier phase momentum coupling
-    td.cloud().UCoeff()[celli] += np0*mass0*Cud;
-
-    // Update enthalpy transfer
-    td.cloud().hTrans()[celli] += np0*dhTrans;
-
-    // Accumulate coefficient to be applied in carrier phase enthalpy coupling
-    td.cloud().hCoeff()[celli] += np0*htc*this->areaS();
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // Set new particle properties
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    this->U() = U1;
-    this->T() = T1;
-}
-
-
-template<class ParcelType>
-template<class TrackData>
-void Foam::ThermoParcel<ParcelType>::calcUncoupled
-(
-    TrackData& td,
-    const scalar dt,
-    const label celli
-)
-{
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Initialise transfer terms
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Momentum transfer from the particle to the carrier phase
-    vector dUTrans = vector::zero;
-
-    // Enthalpy transfer from the particle to the carrier phase
-    scalar dhTrans = 0.0;
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate velocity - update U
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar Cud = 0.0;
-    this->U_ = calcVelocity(td, dt, Cud, dUTrans);
-
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Calculate heat transfer - update T
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    scalar htc = 0.0;
-    T_ = calcHeatTransfer(td, dt, celli, htc, dhTrans);
+    this->U_ = U1;
+    T_ = T1;
 }
 
 
@@ -154,33 +147,39 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 (
     TrackData& td,
     const scalar dt,
-    const label celli,
-    scalar& htc,
-    scalar& dhTrans
+    const label cellI,
+    const scalar d,
+    const vector& U,
+    const scalar rho,
+    const scalar T,
+    const scalar cp,
+    const scalar Sh
 )
 {
     if (!td.cloud().heatTransfer().active())
     {
-        htc = 0.0;
-        dhTrans = 0.0;
-        return T_;
+        return T;
     }
 
     // Calc heat transfer coefficient
-    htc = td.cloud().heatTransfer().h
+    scalar htc = td.cloud().heatTransfer().h
     (
-        this->d_,
-        this->U_ - this->Uc_,
+        d,
+        U - this->Uc_,
         this->rhoc_,
-        this->rho_,
+        rho,
         cpc_,
-        cp_,
+        cp,
         this->muc_
     );
 
+
+    // Determine new particle temperature
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     // Determine ap and bp coefficients
-    scalar ap = Tc_;
-    scalar bp = htc;
+    scalar ap = Tc_ + Sh/(htc*this->areaS(d) + ROOTVSMALL);
+    scalar bp = 6.0*htc/(rho*d*cp);
     if (td.cloud().radiation())
     {
         // Carrier phase incident radiation field
@@ -192,31 +191,22 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         // Helper variables
         const scalar sigma = radiation::sigmaSB.value();
         const scalar epsilon = td.constProps().epsilon0();
-        const scalar epsilonSigmaT3 = epsilon*sigma*pow3(T_);
-        ap = (htc*Tc_ + 0.25*epsilon*G[celli])/(htc + epsilonSigmaT3);
-        bp += epsilonSigmaT3;
+        const scalar D = epsilon*sigma*pow3(T)/(htc + ROOTVSMALL) + 1.0;
+        ap += 0.25*epsilon*G[cellI]/(htc + ROOTVSMALL);
+        ap /= D;
+        bp *= D;
     }
-    bp *= 6.0/(this->rho_*this->d_*cp_);
-
-
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Set new particle temperature
-    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
-        td.cloud().TIntegrator().integrate(T_, dt, ap, bp);
-
-    // Using average parcel temperature for enthalpy transfer calculation
-    dhTrans = dt*this->areaS()*htc*(Tres.average() - Tc_);
+        td.cloud().TIntegrator().integrate(T, dt, ap, bp);
 
     return Tres.value();
 }
 
 
-// * * * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * //
+// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
 #include "ThermoParcelIO.C"
 
 // ************************************************************************* //
-

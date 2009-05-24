@@ -71,9 +71,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~Rebound();
+    //- Destructor
+    virtual ~Rebound();
 
 
     // Member Functions

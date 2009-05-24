@@ -48,7 +48,6 @@ class StandardWallInteraction
 :
     public WallInteractionModel<CloudType>
 {
-
     // Private data
 
         //- Elasticity
@@ -74,9 +73,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~StandardWallInteraction();
+    //- Destructor
+    virtual ~StandardWallInteraction();
 
 
     // Member Functions

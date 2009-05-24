@@ -41,32 +41,26 @@ namespace Foam
 Foam::basicReactingParcel::basicReactingParcel
 (
     ReactingCloud<basicReactingParcel>& owner,
-    const label typeId,
     const vector& position,
-    const label celli,
+    const label cellI,
+    const label typeId,
+    const scalar nParticle0,
     const scalar d0,
     const vector& U0,
-    const scalar nParticle0,
-    const scalarField& YGas0,
-    const scalarField& YLiquid0,
-    const scalarField& YSolid0,
-    const scalarField& YMixture0,
+    const scalarField& Y0,
     const constantProperties& constProps
 )
 :
     ReactingParcel<basicReactingParcel>
     (
         owner,
-        typeId,
         position,
-        celli,
+        cellI,
+        typeId,
+        nParticle0,
         d0,
         U0,
-        nParticle0,
-        YGas0,
-        YLiquid0,
-        YSolid0,
-        YMixture0,
+        Y0,
         constProps
     )
 {}

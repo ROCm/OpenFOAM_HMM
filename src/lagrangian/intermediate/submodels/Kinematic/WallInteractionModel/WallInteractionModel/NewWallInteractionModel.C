@@ -36,10 +36,7 @@ Foam::WallInteractionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word WallInteractionModelType
-    (
-        dict.lookup("WallInteractionModel")
-    );
+    word WallInteractionModelType(dict.lookup("WallInteractionModel"));
 
     Info<< "Selecting WallInteractionModel " << WallInteractionModelType
         << endl;
@@ -52,12 +49,14 @@ Foam::WallInteractionModel<CloudType>::New
         FatalErrorIn
         (
             "WallInteractionModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
-        )
-            << "Unknown WallInteractionModelType type "
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown WallInteractionModelType type "
             << WallInteractionModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid WallInteractionModel types are :" << nl
+            << "    Valid WallInteractionModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

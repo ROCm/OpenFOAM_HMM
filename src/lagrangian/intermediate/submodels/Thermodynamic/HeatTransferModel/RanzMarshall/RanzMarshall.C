@@ -65,7 +65,7 @@ Foam::scalar Foam::RanzMarshall<CloudType>::Nu
     const scalar Pr
 ) const
 {
-    return 2.0 + 0.6*pow(Re, 1.0/2.0)*pow(Pr, 1.0/3.0);
+    return 2.0 + 0.6*pow(Re, 0.5)*pow(Pr, 0.333);
 }
 
 

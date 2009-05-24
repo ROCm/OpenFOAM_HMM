@@ -43,7 +43,7 @@ Foam::basicReactingCloud::basicReactingCloud
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& gases
+    PtrList<specieReactingProperties>& carrierSpecies
 )
 :
     ReactingCloud<basicReactingParcel>
@@ -53,7 +53,7 @@ Foam::basicReactingCloud::basicReactingCloud
         U,
         g,
         thermo,
-        gases
+        carrierSpecies
     )
 {
     basicReactingParcel::readFields(*this);

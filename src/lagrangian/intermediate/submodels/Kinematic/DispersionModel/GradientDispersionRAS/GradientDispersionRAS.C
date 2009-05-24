@@ -111,7 +111,7 @@ Foam::vector Foam::GradientDispersionRAS<CloudType>::update
             // away from the axis of symmetry
             // This creates a 'hole' in the spray and to
             // prevent this we let x1 be both negative/positive
-            if (this->owner().meshInfo().caseIs2d())
+            if (this->owner().mesh().nSolutionD() == 2)
             {
                 fac *= x1;
             }

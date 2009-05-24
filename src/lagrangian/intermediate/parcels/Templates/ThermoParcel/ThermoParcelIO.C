@@ -140,13 +140,13 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const KinematicParcel<ParcelType>& >(p)
+        os  << static_cast<const KinematicParcel<ParcelType>&>(p)
             << token::SPACE << p.T()
             << token::SPACE << p.cp();
     }
     else
     {
-        os  << static_cast<const KinematicParcel<ParcelType>& >(p);
+        os  << static_cast<const KinematicParcel<ParcelType>&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.T_),

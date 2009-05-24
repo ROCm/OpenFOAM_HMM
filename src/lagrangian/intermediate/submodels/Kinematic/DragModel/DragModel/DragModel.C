@@ -34,7 +34,8 @@ Foam::DragModel<CloudType>::DragModel
     const dictionary& dict,
     CloudType& owner
 )
-:   dict_(dict),
+:
+    dict_(dict),
     owner_(owner)
 {}
 
@@ -74,11 +75,11 @@ Foam::scalar Foam::DragModel<CloudType>::Cu
 {
     const scalar magUr = mag(Ur);
 
-    const scalar Re = rhoc*magUr*d/(mu + SMALL);
+    const scalar Re = rhoc*magUr*d/(mu + ROOTVSMALL);
 
-    const scalar cd = Cd(Re);
+    const scalar Cd = this->Cd(Re);
 
-    return 3.0*cd*rhoc*magUr/(4.0*d*rhop);
+    return 3.0*Cd*rhoc*magUr/(4.0*d*rhop);
 }
 
 

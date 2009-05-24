@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::ConeInjection<CloudType>::nParcelsToInject
+Foam::label Foam::ConeInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
@@ -172,36 +172,16 @@ Foam::scalar Foam::ConeInjection<CloudType>::timeEnd() const
 
 
 template<class CloudType>
-Foam::vector Foam::ConeInjection<CloudType>::position
+void Foam::ConeInjection<CloudType>::setPositionAndCell
 (
     const label,
     const scalar,
-    const polyMeshInfo& meshInfo
+    vector& position,
+    label& cellOwner
 )
 {
-    vector pos = position_;
-    if (meshInfo.caseIs2d())
-    {
-        if (meshInfo.caseIs2dWedge())
-        {
-            pos.component(meshInfo.emptyComponent()) = 0.0;
-        }
-        else if (meshInfo.caseIs2dSlab())
-        {
-            pos.component(meshInfo.emptyComponent()) =
-                meshInfo.centrePoint().component(meshInfo.emptyComponent());
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "Foam::vector Foam::ConeInjection<CloudType>::position"
-            )   << "Could not determine 2-D case geometry" << nl
-                << abort(FatalError);
-        }
-    }
-
-    return pos;
+    position = position_;
+    this->findCellAtPosition(cellOwner, position);
 }
 
 
@@ -209,8 +189,7 @@ template<class CloudType>
 Foam::vector Foam::ConeInjection<CloudType>::velocity
 (
     const label,
-    const scalar time,
-    const polyMeshInfo& meshInfo
+    const scalar time
 )
 {
     const scalar deg2Rad = mathematicalConstant::pi/180.0;
@@ -229,13 +208,6 @@ Foam::vector Foam::ConeInjection<CloudType>::velocity
     vector normal = alpha*(tanVec1_*cos(beta) + tanVec2_*sin(beta));
     vector dirVec = dcorr*direction_;
     dirVec += normal;
-
-    // Remove empty component of velocity for slab cases
-    if (meshInfo.caseIs2dSlab())
-    {
-        dirVec.component(meshInfo.emptyComponent()) = 0.0;
-    }
-
     dirVec /= mag(dirVec);
 
     return Umag_().value(t)*dirVec;
@@ -250,6 +222,13 @@ Foam::scalar Foam::ConeInjection<CloudType>::d0
 ) const
 {
     return parcelPDF_().sample();
+}
+
+
+template<class CloudType>
+bool Foam::ConeInjection<CloudType>::validInjection(const label parcelI)
+{
+    return true;
 }
 
 

@@ -29,13 +29,23 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
+:
+    dict_(dictionary::null),
+    owner_(owner),
+    coeffDict_(dictionary::null)
+{}
+
+
+template<class CloudType>
 Foam::HeatTransferModel<CloudType>::HeatTransferModel
 (
     const dictionary& dict,
     CloudType& owner,
     const word& type
 )
-:   dict_(dict),
+:
+    dict_(dict),
     owner_(owner),
     coeffDict_(dict.subDict(type + "Coeffs"))
 {}
@@ -83,7 +93,7 @@ Foam::scalar Foam::HeatTransferModel<CloudType>::h
     const scalar muc
 ) const
 {
-    const scalar Re = rhoc*mag(Ur)*dp/(muc + SMALL);
+    const scalar Re = rhoc*mag(Ur)*dp/(muc + ROOTVSMALL);
 
 //    const scalar Pr = muc/alphac;
     const scalar Pr = this->Pr();
@@ -108,7 +118,7 @@ Foam::scalar Foam::HeatTransferModel<CloudType>::Cu
     const scalar muc
 ) const
 {
-    const scalar Re = rhoc*mag(Ur)*dp/(muc + SMALL);
+    const scalar Re = rhoc*mag(Ur)*dp/(muc + ROOTVSMALL);
 
 //    const scalar Pr = muc/alphac;
     const scalar Pr = this->Pr();

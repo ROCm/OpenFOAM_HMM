@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::NoInjection<CloudType>::nParcelsToInject
+Foam::label Foam::NoInjection<CloudType>::parcelsToInject
 (
     const scalar,
     const scalar
@@ -56,11 +56,11 @@ Foam::scalar Foam::NoInjection<CloudType>::volumeToInject
 template<class CloudType>
 Foam::NoInjection<CloudType>::NoInjection
 (
-    const dictionary& dict,
+    const dictionary&,
     CloudType& owner
 )
 :
-    InjectionModel<CloudType>(dict, owner, typeName)
+    InjectionModel<CloudType>(owner)
 {}
 
 
@@ -88,23 +88,21 @@ Foam::scalar Foam::NoInjection<CloudType>::timeEnd() const
 
 
 template<class CloudType>
-Foam::vector Foam::NoInjection<CloudType>::position
+void Foam::NoInjection<CloudType>::setPositionAndCell
 (
     const label,
     const scalar,
-    const polyMeshInfo&
+    vector&,
+    label&
 )
-{
-    return vector::zero;
-}
+{}
 
 
 template<class CloudType>
 Foam::vector Foam::NoInjection<CloudType>::velocity
 (
     const label,
-    const scalar,
-    const polyMeshInfo&
+    const scalar
 )
 {
     return vector::zero;
@@ -119,6 +117,13 @@ Foam::scalar Foam::NoInjection<CloudType>::d0
 ) const
 {
     return 0.0;
+}
+
+
+template<class CloudType>
+bool Foam::NoInjection<CloudType>::validInjection(const label)
+{
+    return false;
 }
 
 

@@ -51,7 +51,6 @@ class StochasticDispersionRAS
 :
     public DispersionRASModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -68,9 +67,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~StochasticDispersionRAS();
+    //- Destructor
+    virtual ~StochasticDispersionRAS();
 
 
     // Member Functions

@@ -66,7 +66,6 @@ class ThermoCloud
     public KinematicCloud<ParcelType>,
     public thermoCloud
 {
-
     // Private data
 
         //- Thermo parcel constant properties
@@ -100,11 +99,14 @@ class ThermoCloud
 
         // Sources
 
-            //- Enthalpy transfer
-            DimensionedField<scalar, volMesh> hTrans_;
+            //- Sensible enthalpy transfer
+            DimensionedField<scalar, volMesh> hsTrans_;
 
-            //- Coefficient for carrier phase h equation
-            DimensionedField<scalar, volMesh> hCoeff_;
+            //- Chemical enthalpy transfer
+            // - If solving for total enthalpy, the carrier phase enthalpy will
+            //   receive the full enthalpy of reaction via creation of reaction
+            //   products
+            DimensionedField<scalar, volMesh> hcTrans_;
 
 
     // Private Member Functions
@@ -117,10 +119,6 @@ class ThermoCloud
 
 
 public:
-
-    //- Runtime type information
-//    TypeName("ThermoCloud");
-
 
     // Constructors
 
@@ -135,14 +133,21 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~ThermoCloud();
 
-        virtual ~ThermoCloud();
+
+    //- Type of parcel the cloud was instantiated for
+    typedef ParcelType parcelType;
 
 
     // Member Functions
 
         // Access
+
+            //- Return the constant properties
+            inline const typename ParcelType::constantProperties&
+                constProps() const;
 
             //- Return const access to thermo package
             inline const basicThermo& carrierThermo() const;
@@ -174,17 +179,20 @@ public:
 
                 // Enthalpy
 
-                    //- Return reference to enthalpy source
-                    inline DimensionedField<scalar, volMesh>& hTrans();
+                    //- Return reference to sensible enthalpy source
+                    inline DimensionedField<scalar, volMesh>& hsTrans();
 
-                    //- Coefficient for carrier phase h equation
-                    inline DimensionedField<scalar, volMesh>& hCoeff();
+                    //- Return tmp total sensible enthalpy source term
+                    inline tmp<DimensionedField<scalar, volMesh> > Shs() const;
 
-                    //- return tmp enthalpy source term - fully explicit
-                    inline tmp<DimensionedField<scalar, volMesh> > Sh1() const;
+                    //- Return reference to chemical enthalpy source
+                    inline DimensionedField<scalar, volMesh>& hcTrans();
 
-                    //- Return tmp enthalpy source term - semi-implicit
-                    inline tmp<fvScalarMatrix> Sh2(volScalarField& h) const;
+                    //- Return tmp chemical enthalpy source term
+                    inline tmp<DimensionedField<scalar, volMesh> > Shc() const;
+
+                    //- Return tmp total enthalpy source term
+                    inline tmp<DimensionedField<scalar, volMesh> > Sh() const;
 
 
                 // Radiation - overrides thermoCloud virtual abstract members
@@ -197,6 +205,12 @@ public:
 
                     //- Return tmp equivalent particulate scattering factor
                     inline tmp<volScalarField> sigmap() const;
+
+
+        // Check
+
+            //- Print cloud information
+            void info() const;
 
 
         // Cloud evolution functions

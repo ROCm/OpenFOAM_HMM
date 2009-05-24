@@ -25,12 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "KinematicCloud.H"
+#include "IntegrationScheme.H"
+#include "interpolation.H"
+
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
 #include "WallInteractionModel.H"
-#include "IntegrationScheme.H"
-#include "interpolation.H"
 
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
@@ -49,12 +50,12 @@ void Foam::KinematicCloud<ParcelType>::addNewParcel
     ParcelType* pPtr = new ParcelType
     (
         *this,
-        parcelTypeId_,
         position,
         cellId,
+        parcelTypeId_,
+        nParticles,
         d,
         U,
-        nParticles,
         constProps_
     );
 
@@ -95,11 +96,16 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     constProps_(particleProperties_),
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     coupled_(particleProperties_.lookup("coupled")),
+    cellValueSourceCorrection_
+    (
+        particleProperties_.lookup("cellValueSourceCorrection")
+    ),
     rndGen_(label(0)),
     rho_(rho),
     U_(U),
     mu_(mu),
     g_(g),
+    forces_(mesh_, particleProperties_, g_.value()),
     interpolationSchemes_(particleProperties_.subDict("interpolationSchemes")),
     dispersionModel_
     (
@@ -153,21 +159,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             false
         ),
         mesh_,
-        dimensionedVector("zero", dimensionSet(1, 1, -1, 0, 0), vector::zero)
-    ),
-    UCoeff_
-    (
-        IOobject
-        (
-            this->name() + "UCoeff",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        dimensionedScalar("zero",  dimensionSet(1, 0, -1, 0, 0), 0.0)
+        dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
     )
 {}
 
@@ -185,7 +177,6 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 {
     UTrans_.field() = vector::zero;
-    UCoeff_.field() = 0.0;
 }
 
 
@@ -227,7 +218,7 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
     if (debug)
     {
-        this->dumpParticlePositions();
+        this->writePositions();
     }
 
     if (coupled_)
@@ -242,9 +233,9 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
-    Info<< "Cloud name: " << this->name() << nl
+    Info<< "Cloud: " << this->name() << nl
         << "    Parcels added during this run   = "
-        << returnReduce(this->injection().nParcelsAddedTotal(), sumOp<label>())
+        << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
             << nl
         << "    Mass introduced during this run = "
         << returnReduce(this->injection().massInjected(), sumOp<scalar>())
@@ -252,29 +243,7 @@ void Foam::KinematicCloud<ParcelType>::info() const
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
-        << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << endl;
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::dumpParticlePositions() const
-{
-    OFstream pObj
-    (
-        this->db().time().path()/"parcelPositions_"
-      + this->name() + "_"
-      + name(this->injection().nInjections()) + ".obj"
-    );
-
-    forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        pObj<< "v " << p.position().x() << " " << p.position().y() << " "
-            << p.position().z() << nl;
-    }
-
-    pObj.flush();
+        << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
 }
 
 

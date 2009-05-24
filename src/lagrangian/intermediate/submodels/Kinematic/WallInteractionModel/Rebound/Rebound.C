@@ -76,7 +76,6 @@ void Foam::Rebound<CloudType>::correct
     }
 
     U -= Ut;
-
 }
 
 

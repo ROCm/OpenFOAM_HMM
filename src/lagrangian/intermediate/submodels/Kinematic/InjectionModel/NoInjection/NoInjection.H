@@ -26,7 +26,7 @@ Class
     Foam::NoInjection
 
 Description
-    Place holder for 'no injection' option
+    Place holder for 'none' option
 
 SourceFiles
     NoInjection.C
@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class NoInjection Declaration
+                       Class NoInjection Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -52,13 +52,12 @@ class NoInjection
 :
     public InjectionModel<CloudType>
 {
-
 protected:
 
     // Protected member functions
 
         //- Number of parcels to introduce over the time step
-        label nParcelsToInject
+        label parcelsToInject
         (
             const scalar,
             const scalar
@@ -75,7 +74,7 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("NoInjection");
+    TypeName("none");
 
 
     // Constructors
@@ -83,14 +82,13 @@ public:
         //- Construct from components
         NoInjection
         (
-            const dictionary& dict,
-            CloudType& owner
+            const dictionary&,
+            CloudType&
         );
 
 
-    // Destructor
-
-        ~NoInjection();
+    //- Destructor
+    virtual ~NoInjection();
 
 
     // Member Functions
@@ -104,28 +102,32 @@ public:
 
         // Injection geometry
 
-            //- Return the injection position
-            vector position
+            //- Set the injection position and owner cell
+            void setPositionAndCell
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time,
-                const polyMeshInfo& meshInfo
+                vector& position,
+                label& cellOwner
             );
 
             //- Return the velocity of the parcel to introduce at a time
             vector velocity
             (
-                const label,
-                const scalar time,
-                const polyMeshInfo& meshInfo
+                const label parcelI,
+                const scalar time
             );
 
             //- Return the diameter of the parcel to introduce at a time
             scalar d0
             (
-                const label,
-                const scalar
+                const label parcelI,
+                const scalar time
             ) const;
+
+            //- Return flag to identify whether or not injection in cellI is
+            //  permitted
+            bool validInjection(const label cellI);
 };
 
 
