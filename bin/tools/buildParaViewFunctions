@@ -173,7 +173,16 @@ addQtSupport()
 
     if [ -n "$QMAKE_PATH" ]
     then
-        addCMakeVariable QT_QMAKE_EXECUTABLE:FILEPATH=$QMAKE_PATH
+        if [ -x "$QMAKE_PATH" ]
+        then
+            addCMakeVariable QT_QMAKE_EXECUTABLE:FILEPATH=$QMAKE_PATH
+        else
+            echo
+            echo "specified QMAKE_PATH does not exist on this machine"
+            echo "    QMAKE_PATH=$QMAKE_PATH"
+            echo "leaving unspecified"
+            echo
+        fi
     fi
 }
 
