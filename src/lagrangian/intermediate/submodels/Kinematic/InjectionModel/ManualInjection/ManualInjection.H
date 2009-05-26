@@ -85,14 +85,14 @@ protected:
 
     // Protected member functions
 
-        //- Number of parcels to introduce over the time step
+        //- Number of parcels to introduce over the time step relative to SOI
         label parcelsToInject
         (
             const scalar time0,
             const scalar time1
         ) const;
 
-        //- Volume of parcels to introduce over the time step
+        //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar time0,
@@ -132,7 +132,7 @@ public:
         // Injection geometry
 
             //- Set the injection position and owner cell
-            void setPositionAndCell
+            virtual void setPositionAndCell
             (
                 const label parcelI,
                 const scalar time,
@@ -140,23 +140,21 @@ public:
                 label& cellOwner
             );
 
-            //- Return the velocity of the parcel to introduce at a time
-            vector velocity
+            virtual void setProperties
             (
                 const label parcelI,
-                const scalar time
+                const scalar time,
+                typename CloudType::parcelType* pPtr
             );
 
-            //- Return the diameter of the parcel to introduce at a time
-            scalar d0
-            (
-                const label parcelI,
-                const scalar time
-            ) const;
+            virtual bool fullyDescribed() const
+            {
+                return false;
+            }
 
             //- Return flag to identify whether or not injection in cellI is
             //  permitted
-            bool validInjection(const label parcelI);
+            virtual bool validInjection(const label parcelI);
 };
 
 

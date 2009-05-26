@@ -181,24 +181,18 @@ void Foam::FieldActivatedInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-Foam::vector Foam::FieldActivatedInjection<CloudType>::velocity
-(
-    const label,
-    const scalar
-)
-{
-    return U0_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::FieldActivatedInjection<CloudType>::d0
+void Foam::FieldActivatedInjection<CloudType>::setProperties
 (
     const label parcelI,
-    const scalar
-) const
+    const scalar,
+    typename CloudType::parcelType* pPtr
+)
 {
-    return diameters_[parcelI];
+    // set particle velocity
+    pPtr->U() = U0_;
+
+    // set particle diameter
+    pPtr->d() = diameters_[parcelI];
 }
 
 

@@ -93,6 +93,9 @@ protected:
 
     // Protected data
 
+        //- Convenience typedef for parcel type
+        typedef typename CloudType::parcelType parcelType;
+
         // Global injection properties
 
             //- Start of injection [s]
@@ -132,14 +135,14 @@ protected:
 
     // Protected member functions
 
-        //- Number of parcels to introduce over the time step
+        //- Number of parcels to introduce over the time step relative to SOI
         virtual label parcelsToInject
         (
             const scalar time0,
             const scalar time1
         ) const = 0;
 
-        //- Volume of parcels to introduce over the time step
+        //- Volume of parcels to introduce over the time step relative to SOI
         virtual scalar volumeToInject
         (
             const scalar time0,
@@ -153,8 +156,7 @@ protected:
         //- Determine properties for next time step/injection interval
         virtual void prepareForNextTimeStep
         (
-            const scalar time0,
-            const scalar time1,
+            const scalar time,
             label& newParcels,
             scalar& newVolume
         );
@@ -291,6 +293,15 @@ public:
                 label& cellOwner
             ) = 0;
 
+            virtual void setProperties
+            (
+                const label parcelI,
+                const scalar time,
+                typename CloudType::parcelType* pPtr
+            ) = 0;
+
+            virtual bool fullyDescribed() const = 0;
+/*
             //- Return the velocity of the parcel to introduce at a time
             virtual vector velocity
             (
@@ -304,6 +315,7 @@ public:
                 const label parcelI,
                 const scalar time
             ) const = 0;
+*/
 };
 
 

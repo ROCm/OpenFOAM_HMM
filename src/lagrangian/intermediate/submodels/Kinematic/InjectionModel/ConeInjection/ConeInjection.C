@@ -186,12 +186,14 @@ void Foam::ConeInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-Foam::vector Foam::ConeInjection<CloudType>::velocity
+void Foam::ConeInjection<CloudType>::setProperties
 (
-    const label,
-    const scalar time
+    const label parcelI,
+    const scalar time,
+    typename CloudType::parcelType* pPtr
 )
 {
+    // set particle velocity
     const scalar deg2Rad = mathematicalConstant::pi/180.0;
 
     scalar t = time - this->SOI_;
@@ -210,23 +212,15 @@ Foam::vector Foam::ConeInjection<CloudType>::velocity
     dirVec += normal;
     dirVec /= mag(dirVec);
 
-    return Umag_().value(t)*dirVec;
+    pPtr->U() = Umag_().value(t)*dirVec;
+
+    // set particle diameter
+    pPtr->d() = parcelPDF_().sample();
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::ConeInjection<CloudType>::d0
-(
-    const label,
-    const scalar
-) const
-{
-    return parcelPDF_().sample();
-}
-
-
-template<class CloudType>
-bool Foam::ConeInjection<CloudType>::validInjection(const label parcelI)
+bool Foam::ConeInjection<CloudType>::validInjection(const label)
 {
     return true;
 }

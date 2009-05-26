@@ -99,24 +99,18 @@ void Foam::NoInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-Foam::vector Foam::NoInjection<CloudType>::velocity
+void Foam::NoInjection<CloudType>::setProperties
 (
-    const label,
-    const scalar
+    const label parcelI,
+    const scalar,
+    typename CloudType::parcelType* pPtr
 )
 {
-    return vector::zero;
-}
+    // set particle velocity
+    pPtr->U() = vector::zero;
 
-
-template<class CloudType>
-Foam::scalar Foam::NoInjection<CloudType>::d0
-(
-    const label,
-    const scalar
-) const
-{
-    return 0.0;
+    // set particle diameter
+    pPtr->d() = 0.0;
 }
 
 
