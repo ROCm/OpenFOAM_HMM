@@ -81,6 +81,15 @@ public:
 
     // Constructors
 
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        inline TrackedReactingParcel
+        (
+            ReactingCloud<ParcelType>& owner,
+            const vector& position,
+            const label cellI
+        );
+
         //- Construct from components
         inline TrackedReactingParcel
         (

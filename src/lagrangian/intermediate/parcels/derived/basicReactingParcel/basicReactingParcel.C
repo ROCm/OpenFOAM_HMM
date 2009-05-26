@@ -42,6 +42,17 @@ Foam::basicReactingParcel::basicReactingParcel
 (
     ReactingCloud<basicReactingParcel>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    ReactingParcel<basicReactingParcel>(owner, position, cellI)
+{}
+
+
+Foam::basicReactingParcel::basicReactingParcel
+(
+    ReactingCloud<basicReactingParcel>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

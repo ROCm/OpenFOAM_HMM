@@ -31,6 +31,19 @@ inline Foam::TrackedReactingParcel<ParcelType>::TrackedReactingParcel
 (
     ReactingCloud<ParcelType>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    ReactingParcel<ParcelType>(owner, position, cellI),
+    ParticleTrackingData<ParcelType>(owner)
+{}
+
+
+template <class ParcelType>
+inline Foam::TrackedReactingParcel<ParcelType>::TrackedReactingParcel
+(
+    ReactingCloud<ParcelType>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

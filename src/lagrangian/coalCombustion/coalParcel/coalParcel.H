@@ -59,12 +59,21 @@ public:
 
     // Constructors
 
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        coalParcel
+        (
+             ReactingMultiphaseCloud<coalParcel>& owner,
+             const vector& position,
+             const label cellI
+        );
+
         //- Construct from components
         coalParcel
         (
              ReactingMultiphaseCloud<coalParcel>& owner,
              const vector& position,
-             const label celli,
+             const label cellI,
              const label typeId,
              const scalar nParticle0,
              const scalar d0,

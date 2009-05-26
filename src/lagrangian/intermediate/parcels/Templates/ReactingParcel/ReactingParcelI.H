@@ -76,6 +76,21 @@ inline Foam::ReactingParcel<ParcelType>::ReactingParcel
 (
     ReactingCloud<ParcelType>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    ThermoParcel<ParcelType>(owner, position, cellI),
+    mass0_(0.0),
+    Y_(0),
+    pc_(0.0)
+{}
+
+
+template<class ParcelType>
+inline Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    ReactingCloud<ParcelType>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

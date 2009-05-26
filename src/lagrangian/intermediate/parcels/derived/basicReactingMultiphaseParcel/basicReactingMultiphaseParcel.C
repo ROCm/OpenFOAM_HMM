@@ -42,6 +42,22 @@ Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
 (
     ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    ReactingMultiphaseParcel<basicReactingMultiphaseParcel>
+    (
+        owner,
+        position,
+        cellI
+    )
+{}
+
+
+Foam::basicReactingMultiphaseParcel::basicReactingMultiphaseParcel
+(
+    ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

@@ -276,6 +276,16 @@ public:
 
     // Constructors
 
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        inline ReactingMultiphaseParcel
+        (
+            ReactingMultiphaseCloud<ParcelType>& owner,
+            const vector& position,
+            const label cellI
+        );
+
+
         //- Construct from components
         inline ReactingMultiphaseParcel
         (
@@ -328,6 +338,9 @@ public:
             //- Return const access to mass fractions of solids
             inline const scalarField& YSolid() const;
 
+            //- Return const access to the canCombust flag
+            inline bool canCombust() const;
+
 
         // Edit
 
@@ -339,6 +352,9 @@ public:
 
             //- Return access to mass fractions of solids
             inline scalarField& YSolid();
+
+            //- Return access to the canCombust flag
+            inline bool& canCombust();
 
 
         // Main calculation loop

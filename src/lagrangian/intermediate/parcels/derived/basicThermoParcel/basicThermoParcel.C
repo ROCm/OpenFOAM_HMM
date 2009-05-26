@@ -42,6 +42,17 @@ Foam::basicThermoParcel::basicThermoParcel
 (
     ThermoCloud<basicThermoParcel>& owner,
     const vector position,
+    const label cellI
+)
+:
+    ThermoParcel<basicThermoParcel>(owner, position, cellI)
+{}
+
+
+Foam::basicThermoParcel::basicThermoParcel
+(
+    ThermoCloud<basicThermoParcel>& owner,
+    const vector position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

@@ -60,6 +60,15 @@ public:
 
     // Constructors
 
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        basicReactingParcel
+        (
+            ReactingCloud<basicReactingParcel>& owner,
+            const vector& position,
+            const label cellI
+        );
+
         //- Construct from components
         basicReactingParcel
         (

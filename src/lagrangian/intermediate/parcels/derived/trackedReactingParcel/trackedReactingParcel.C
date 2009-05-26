@@ -42,6 +42,17 @@ Foam::trackedReactingParcel::trackedReactingParcel
 (
     ReactingCloud<trackedReactingParcel>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    TrackedReactingParcel<trackedReactingParcel>(owner, position, cellI)
+{}
+
+
+Foam::trackedReactingParcel::trackedReactingParcel
+(
+    ReactingCloud<trackedReactingParcel>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

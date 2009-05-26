@@ -42,6 +42,17 @@ Foam::basicKinematicParcel::basicKinematicParcel
 (
     KinematicCloud<basicKinematicParcel>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    KinematicParcel<basicKinematicParcel>(owner, position, cellI)
+{}
+
+
+Foam::basicKinematicParcel::basicKinematicParcel
+(
+    KinematicCloud<basicKinematicParcel>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,
