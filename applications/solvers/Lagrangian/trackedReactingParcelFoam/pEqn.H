@@ -1,7 +1,13 @@
 rho = thermo->rho();
 
-volScalarField rUA = 1.0/UEqn.A();
-U = rUA*UEqn.H();
+if (pressureImplicitPorosity)
+{
+    U = trTU()&UEqn.H();
+}
+else
+{
+    U = trAU()*UEqn.H();
+}
 
 if (transonic)
 {
@@ -11,17 +17,28 @@ if (transonic)
         fvc::interpolate(thermo->psi())
        *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+//          + fvc::ddtPhiCorr(rUA, rho, U, phi)
         )
     );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
+        tmp<fvScalarMatrix> lapTerm;
+
+        if (pressureImplicitPorosity)
+        {
+            lapTerm = fvm::laplacian(rho*trTU(), p);
+        }
+        else
+        {
+            lapTerm = fvm::laplacian(rho*trAU(), p);
+        }
+
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
           + fvm::div(phid, p)
-          - fvm::laplacian(rho*rUA, p)
+          - lapTerm()
          ==
             reactingParcels.Srho()
         );
@@ -37,19 +54,30 @@ if (transonic)
 else
 {
     phi =
-        fvc::interpolate(rho)*
-        (
+        fvc::interpolate(rho)
+       *(
             (fvc::interpolate(U) & mesh.Sf())
-          + fvc::ddtPhiCorr(rUA, rho, U, phi)
+          + fvc::ddtPhiCorr(trAU(), rho, U, phi)
         );
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
+        tmp<fvScalarMatrix> lapTerm;
+
+        if (pressureImplicitPorosity)
+        {
+            lapTerm = fvm::laplacian(rho*trTU(), p);
+        }
+        else
+        {
+            lapTerm = fvm::laplacian(rho*trAU(), p);
+        }
+
         fvScalarMatrix pEqn
         (
             fvm::ddt(psi, p)
           + fvc::div(phi)
-          - fvm::laplacian(rho*rUA, p)
+          - lapTerm()
          ==
             reactingParcels.Srho()
         );
@@ -66,7 +94,15 @@ else
 #include "rhoEqn.H"
 #include "compressibleContinuityErrs.H"
 
-U -= rUA*fvc::grad(p);
+if (pressureImplicitPorosity)
+{
+    U -= trTU()&fvc::grad(p);
+}
+else
+{
+    U -= trAU()*fvc::grad(p);
+}
 U.correctBoundaryConditions();
 
 DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
+

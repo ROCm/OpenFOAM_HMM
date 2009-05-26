@@ -36,60 +36,60 @@ Description
 #include "chemistrySolver.H"
 #include "ReactingCloudThermoTypes.H"
 #include "radiationModel.H"
+#include "porousZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readChemistryProperties.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "createClouds.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readChemistryProperties.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "createRadiationModel.H"
+    #include "createClouds.H"
+    #include "readPISOControls.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        Info << "Evolving reacting cloud" << endl;
-
         reactingParcels.evolve();
 
         reactingParcels.info();
 
-#       include "chemistry.H"
-#       include "rhoEqn.H"
+        #include "chemistry.H"
+        #include "rhoEqn.H"
 
         // --- PIMPLE loop
         for (int ocorr=1; ocorr<=nOuterCorr; ocorr++)
         {
-#           include "UEqn.H"
-#           include "YEqn.H"
+            #include "UEqn.H"
+            #include "YEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
-#               include "hEqn.H"
-#               include "pEqn.H"
+                #include "hEqn.H"
+                #include "pEqn.H"
             }
 
             Info<< "T gas min/max   = " << min(T).value() << ", "
@@ -102,7 +102,7 @@ int main(int argc, char *argv[])
 
         if (runTime.write())
         {
-#           include "additionalOutput.H"
+            #include "additionalOutput.H"
         }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"

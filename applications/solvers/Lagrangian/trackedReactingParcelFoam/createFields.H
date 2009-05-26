@@ -1,4 +1,4 @@
-    Info<< "Reading thermophysical properties\n" << endl;
+    Info<< "Reading thermophysical properties" << nl << endl;
 
     autoPtr<hCombustionThermo> thermo
     (
@@ -28,52 +28,7 @@
         thermo->rho()
     );
 
-// lagrangian coal density field
-/*    volScalarField rholc
-    (
-        IOobject
-        (
-            "rholc",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
-    );
-
-// lagrangian limestone density field
-    volScalarField rhols
-    (
-        IOobject
-        (
-            "rhols",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
-    );
-
-// lagrangian total density field
-    volScalarField rhol
-    (
-        IOobject
-        (
-            "rhol",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh,
-        dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0, 0, 0), 0.0)
-    );*/
-
-    Info<< "\nReading field U\n" << endl;
+    Info<< "Reading field U" << nl << endl;
     volVectorField U
     (
         IOobject
@@ -103,7 +58,7 @@
         dimensionedScalar("zero", dimless, 0.0)
     );
 
-    Info<< "Creating turbulence model\n" << endl;
+    Info<< "Creating turbulence model" << nl << endl;
     autoPtr<compressible::turbulenceModel> turbulence
     (
         compressible::turbulenceModel::New
@@ -115,11 +70,11 @@
         )
     );
 
-    Info<< "Creating field DpDt\n" << endl;
+    Info<< "Creating field DpDt" << nl << endl;
     volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
-    Info << "Constructing chemical mechanism" << endl;
+    Info << "Constructing chemical mechanism" << nl << endl;
     chemistryModel chemistry
     (
         thermo(),
@@ -134,8 +89,23 @@
     }
     fields.add(h);
 
-    Info<< "Creating radiation model\n" << endl;
-    autoPtr<radiation::radiationModel> radiation
-    (
-        radiation::radiationModel::New(T)
-    );
+    Info<< "Creating porous zones" << nl << endl;
+    porousZones pZones(mesh);
+    Switch pressureImplicitPorosity(false);
+
+    label nUCorr = 0;
+    if (pZones.size())
+    {
+        // nUCorrectors for pressureImplicitPorosity
+        if (mesh.solutionDict().subDict("PISO").found("nUCorrectors"))
+        {
+            mesh.solutionDict().subDict("PISO").lookup("nUCorrectors")
+                >> nUCorr;
+        }
+
+        if (nUCorr > 0)
+        {
+            pressureImplicitPorosity = true;
+        }
+    }
+
