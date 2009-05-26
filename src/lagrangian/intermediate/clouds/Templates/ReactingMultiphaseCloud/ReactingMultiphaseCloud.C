@@ -29,46 +29,6 @@ License
 #include "DevolatilisationModel.H"
 #include "SurfaceReactionModel.H"
 
-// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::addNewParcel
-(
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
-)
-{
-    label idGas = this->composition().idGas();
-    label idLiquid = this->composition().idLiquid();
-    label idSolid = this->composition().idSolid();
-
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        position,
-        cellId,
-        this->parcelTypeId(),
-        nParticles,
-        d,
-        U,
-        this->composition().YMixture0(),
-        this->composition().Y0(idGas),
-        this->composition().Y0(idLiquid),
-        this->composition().Y0(idSolid),
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -113,6 +73,55 @@ Foam::ReactingMultiphaseCloud<ParcelType>::~ReactingMultiphaseCloud()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType* pPtr,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    ReactingCloud<ParcelType>::checkParcelProperties
+    (
+        pPtr,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    label idGas = this->composition().idGas();
+    label idLiquid = this->composition().idLiquid();
+    label idSolid = this->composition().idSolid();
+
+    if (!fullyDescribed)
+    {
+        pPtr->YGas() = this->composition().Y0(idGas);
+        pPtr->YLiquid() = this->composition().Y0(idLiquid);
+        pPtr->YSolid() = this->composition().Y0(idSolid);
+    }
+    else
+    {
+        this->checkSuppliedComposition
+        (
+            pPtr->YGas(),
+            this->composition().Y0(idGas),
+            "YGas"
+        );
+        this->checkSuppliedComposition
+        (
+            pPtr->YLiquid(),
+            this->composition().Y0(idLiquid),
+            "YLiquid"
+        );
+        this->checkSuppliedComposition
+        (
+            pPtr->YSolid(),
+            this->composition().Y0(idSolid),
+            "YSolid"
+        );
+    }
+}
+
 
 template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::resetSourceTerms()

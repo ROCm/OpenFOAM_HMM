@@ -30,38 +30,6 @@ License
 
 #include "HeatTransferModel.H"
 
-// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::ThermoCloud<ParcelType>::addNewParcel
-(
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
-)
-{
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        position,
-        cellId,
-        this->parcelTypeId(),
-        nParticles,
-        d,
-        U,
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -141,6 +109,29 @@ Foam::ThermoCloud<ParcelType>::~ThermoCloud()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType* pPtr,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    KinematicCloud<ParcelType>::checkParcelProperties
+    (
+        pPtr,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    if (!fullyDescribed)
+    {
+        pPtr->T() = constProps_.T0();
+        pPtr->cp() = constProps_.cp0();
+    }
+}
+
 
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()

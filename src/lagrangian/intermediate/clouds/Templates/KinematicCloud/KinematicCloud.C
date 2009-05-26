@@ -34,39 +34,6 @@ License
 #include "PostProcessingModel.H"
 #include "WallInteractionModel.H"
 
-
-// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::addNewParcel
-(
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
-)
-{
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        position,
-        cellId,
-        parcelTypeId_,
-        nParticles,
-        d,
-        U,
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -180,6 +147,24 @@ Foam::KinematicCloud<ParcelType>::~KinematicCloud()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType* pPtr,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    if (!fullyDescribed)
+    {
+        pPtr->rho() = constProps_.rho0();
+    }
+
+    scalar carrierDt = this->db().time().deltaT().value();
+    pPtr->stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
+}
+
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()

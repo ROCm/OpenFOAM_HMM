@@ -68,7 +68,18 @@ class ReactingMultiphaseCloud
     public ReactingCloud<ParcelType>,
     public reactingMultiphaseCloud
 {
-    // Private data
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ReactingMultiphaseCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
@@ -99,15 +110,6 @@ class ReactingMultiphaseCloud
             //- Total mass transferred to continuous phase via surface
             //  reactions
             scalar dMassSurfaceReaction_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const ReactingMultiphaseCloud&);
 
 
 public:
@@ -174,15 +176,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType* pPtr,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

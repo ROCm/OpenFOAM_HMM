@@ -32,33 +32,29 @@ License
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::addNewParcel
+void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
 (
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
+    const scalarField& YSupplied,
+    const scalarField& Y,
+    const word& YName
 )
 {
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        position,
-        cellId,
-        this->parcelTypeId(),
-        nParticles,
-        d,
-        U,
-        composition().YMixture0(),
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
+    if (YSupplied.size() != Y.size())
+    {
+        FatalErrorIn
+        (
+            "ReactingCloud<ParcelType>::checkSuppliedComposition"
+            "("
+                "const scalarField&, "
+                "const scalarField&, "
+                "const word&"
+            ")"
+        )   << YName << " supplied, but size is not compatible with "
+            << "parcel composition: " << nl << "    "
+            << YName << "(" << YSupplied.size() << ") vs required composition "
+            << YName << "(" << Y.size() << ")" << nl
+            << abort(FatalError);
+    }
 }
 
 
@@ -134,6 +130,40 @@ Foam::ReactingCloud<ParcelType>::~ReactingCloud()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType* pPtr,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    ThermoCloud<ParcelType>::checkParcelProperties
+    (
+        pPtr,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    if (!fullyDescribed)
+    {
+        pPtr->Y() = composition().YMixture0();
+    }
+    else
+    {
+        checkSuppliedComposition
+        (
+            pPtr->Y(),
+            composition().YMixture0(),
+            "YMixture"
+        );
+    }
+
+    // derived information - store initial mass
+    pPtr->mass0() = pPtr->mass();
+}
+
 
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::resetSourceTerms()

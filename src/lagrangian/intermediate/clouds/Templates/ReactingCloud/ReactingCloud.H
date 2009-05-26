@@ -72,7 +72,18 @@ class ReactingCloud
     public ThermoCloud<ParcelType>,
     public reactingCloud
 {
-    // Private data
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ReactingCloud(const ReactingCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ReactingCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
@@ -107,13 +118,17 @@ class ReactingCloud
             scalar dMassPhaseChange_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
-        ReactingCloud(const ReactingCloud&);
+        // New parcel helper functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const ReactingCloud&);
+            //- Check that size of a composition field is valid
+            void checkSuppliedComposition
+            (
+                const scalarField& YSupplied,
+                const scalarField& Y,
+                const word& YName
+            );
 
 
 public:
@@ -201,15 +216,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType* pPtr,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

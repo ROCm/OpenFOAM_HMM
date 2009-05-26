@@ -87,7 +87,18 @@ class KinematicCloud
     public Cloud<ParcelType>,
     public kinematicCloud
 {
-    // Private data
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        KinematicCloud(const KinematicCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const KinematicCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
@@ -171,15 +182,6 @@ class KinematicCloud
 
             //- Momentum
             DimensionedField<vector, volMesh> UTrans_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        KinematicCloud(const KinematicCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const KinematicCloud&);
 
 
 public:
@@ -350,15 +352,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType* pPtr,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

@@ -46,7 +46,6 @@ SourceFiles
 #include "KinematicCloud.H"
 #include "thermoCloud.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -67,7 +66,18 @@ class ThermoCloud
     public KinematicCloud<ParcelType>,
     public thermoCloud
 {
-    // Private data
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ThermoCloud(const ThermoCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ThermoCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- Thermo parcel constant properties
         typename ParcelType::constantProperties constProps_;
@@ -108,15 +118,6 @@ class ThermoCloud
             //   receive the full enthalpy of reaction via creation of reaction
             //   products
             DimensionedField<scalar, volMesh> hcTrans_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        ThermoCloud(const ThermoCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const ThermoCloud&);
 
 
 public:
@@ -216,15 +217,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType* pPtr,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms
