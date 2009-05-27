@@ -33,6 +33,8 @@ DevolatilisationModel ConstantRateDevolatilisation;
 
 SurfaceReactionModel COxidationDiffusionLimitedRate;
 
+PostProcessingModel none;
+
 radiation       on;
 
 coupled         true;
