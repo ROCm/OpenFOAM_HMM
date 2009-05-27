@@ -116,15 +116,15 @@ void Foam::KinematicParcel<ParcelType>::readFields
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::MUST_READ));
     c.checkFieldIOobject(c, typeId);
 
+    IOField<scalar>
+        nParticle(c.fieldIOobject("nParticle", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, nParticle);
+
     IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d);
 
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
-
-    IOField<scalar>
-        nParticle(c.fieldIOobject("nParticle", IOobject::MUST_READ));
-    c.checkFieldIOobject(c, nParticle);
 
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
