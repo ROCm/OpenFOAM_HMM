@@ -26,6 +26,8 @@ Application
     particleTracks
 
 Description
+    Generates a VTK file of particle tracks for cases that were computed using
+    a tracked-parcel-type cloud
 
 \*---------------------------------------------------------------------------*/
 
@@ -53,6 +55,8 @@ int main(int argc, char *argv[])
 #   include "createFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    Info<< "Scanning times to determine track data" << nl << endl;
 
     labelList maxIds(Pstream::nProcs(), -1);
     forAll(timeDirs, timeI)
@@ -89,8 +93,6 @@ int main(int argc, char *argv[])
     Pstream::listCombineGather(maxIds, maxOp<label>());
     Pstream::listCombineScatter(maxIds);
     labelList numIds = maxIds + 1;
-
-    Info<< "numIds = " << numIds << endl;
 
     // calc starting ids for particles on each processor
     List<label> startIds(numIds.size(), 0);
@@ -155,17 +157,20 @@ int main(int argc, char *argv[])
             Info<< "    Reading particle positions" << endl;
             Cloud<passiveParticle> myCloud(mesh, cloudName, false);
 
-            pointField positions(myCloud.size(), vector::zero);
-            label i = 0;
-            forAllConstIter(Cloud<passiveParticle>, myCloud, iter)
-            {
-                positions[i++] = iter().position();
-            }
+            Info<< "    Reading particle id" << endl;
             IOField<label> id(idHeader);
+
+            Info<< "    Reading particle origProc" << endl;
             IOField<label> origProc(origProcHeader);
 
+            // collect the track data on the master processor
+            label i = 0;
             List<pointField> allPositions(Pstream::nProcs());
-            allPositions[Pstream::myProcNo()] = positions;
+            allPositions[Pstream::myProcNo()].setSize(myCloud.size());
+            forAllConstIter(Cloud<passiveParticle>, myCloud, iter)
+            {
+                allPositions[Pstream::myProcNo()][i++] = iter().position();
+            }
             Pstream::gatherList(allPositions);
 
             List<labelList> allIds(Pstream::nProcs());
@@ -176,6 +181,7 @@ int main(int argc, char *argv[])
             allOrigProcs[Pstream::myProcNo()] = origProc;
             Pstream::gatherList(allOrigProcs);
 
+            Info<< "    Constructing tracks" << nl << endl;
             if (Pstream::master())
             {
                 forAll(allPositions, procI)
@@ -200,16 +206,16 @@ int main(int argc, char *argv[])
                     }
                 }
             }
-            else
-            {
-                Info<< "    No particles read" << nl << endl;
-            }
+        }
+        else
+        {
+            Info<< "    No particles read" << nl << endl;
         }
     }
 
     if (Pstream::master())
     {
-        Info<< "Writing particle tracks" << nl << endl;
+        Info<< "\nWriting particle tracks" << nl << endl;
 
         OFstream vtkTracks("particleTracks.vtk");
 
@@ -221,11 +227,11 @@ int main(int argc, char *argv[])
         }
 
         vtkTracks
-            << "# vtk DataFile Version 2.0\n"
+            << "# vtk DataFile Version 2.0" << nl
             << "particleTracks" << nl
-            << "ASCII\n"
-            << "DATASET POLYDATA\n"
-            << "POINTS " << nPoints << " float\n";
+            << "ASCII" << nl
+            << "DATASET POLYDATA" << nl
+            << "POINTS " << nPoints << " float" << nl;
 
         // Write track points to file
         forAll(allTracks, trackI)
