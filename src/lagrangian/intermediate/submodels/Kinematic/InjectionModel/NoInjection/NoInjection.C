@@ -91,6 +91,7 @@ template<class CloudType>
 void Foam::NoInjection<CloudType>::setPositionAndCell
 (
     const label,
+    const label,
     const scalar,
     vector&,
     label&
@@ -101,7 +102,8 @@ void Foam::NoInjection<CloudType>::setPositionAndCell
 template<class CloudType>
 void Foam::NoInjection<CloudType>::setProperties
 (
-    const label parcelI,
+    const label,
+    const label,
     const scalar,
     typename CloudType::parcelType* pPtr
 )

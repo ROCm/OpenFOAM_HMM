@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef manualInjection_H
-#define manualInjection_H
+#ifndef ManualInjection_H
+#define ManualInjection_H
 
 #include "InjectionModel.H"
 #include "pdf.H"
@@ -135,6 +135,7 @@ public:
             virtual void setPositionAndCell
             (
                 const label parcelI,
+                const label nParcels,
                 const scalar time,
                 vector& position,
                 label& cellOwner
@@ -143,6 +144,7 @@ public:
             virtual void setProperties
             (
                 const label parcelI,
+                const label nParcels,
                 const scalar time,
                 typename CloudType::parcelType* pPtr
             );

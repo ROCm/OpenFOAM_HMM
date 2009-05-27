@@ -375,7 +375,8 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     const scalar volFraction = volumeFraction(newVolume);
 
     // Duration of injection period during this timestep
-    const scalar deltaT = min(carrierDt, min(time - SOI_, timeEnd() - time0_));
+    const scalar deltaT =
+        max(0.0, min(carrierDt, min(time - SOI_, timeEnd() - time0_)));
 
     // Pad injection time if injection starts during this timestep
     const scalar padTime = max(0.0, SOI_ - time0_);
@@ -392,7 +393,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
             // Determine the injection position and owner cell
             label cellI = -1;
             vector pos = vector::zero;
-            setPositionAndCell(parcelI, timeInj, pos, cellI);
+            setPositionAndCell(parcelI, newParcels, timeInj, pos, cellI);
 
             if (cellI > -1)
             {
@@ -406,7 +407,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 parcelType* pPtr = new parcelType(td.cloud(), pos, cellI);
 
                 // Assign new parcel properties in injection model
-                setProperties(parcelI, timeInj, pPtr);
+                setProperties(parcelI, newParcels, timeInj, pPtr);
 
                 // Check new parcel properties
                 td.cloud().checkParcelProperties(pPtr, dt, fullyDescribed());

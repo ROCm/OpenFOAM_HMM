@@ -170,6 +170,7 @@ template<class CloudType>
 void Foam::FieldActivatedInjection<CloudType>::setPositionAndCell
 (
     const label parcelI,
+    const label,
     const scalar,
     vector& position,
     label& cellOwner
@@ -184,6 +185,7 @@ template<class CloudType>
 void Foam::FieldActivatedInjection<CloudType>::setProperties
 (
     const label parcelI,
+    const label,
     const scalar,
     typename CloudType::parcelType* pPtr
 )
@@ -206,8 +208,8 @@ bool Foam::FieldActivatedInjection<CloudType>::validInjection
 
     if
     (
-         nParcelsInjected_[parcelI] < nParcelsPerInjector_
-      && factor_*referenceField_[cellI] > thresholdField_[cellI]
+        nParcelsInjected_[parcelI] < nParcelsPerInjector_
+     && factor_*referenceField_[cellI] > thresholdField_[cellI]
     )
     {
         nParcelsInjected_[parcelI]++;

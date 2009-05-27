@@ -158,6 +158,7 @@ public:
             virtual void setPositionAndCell
             (
                 const label parcelI,
+                const label nParcels,
                 const scalar time,
                 vector& position,
                 label& cellOwner
@@ -166,6 +167,7 @@ public:
             virtual void setProperties
             (
                 const label parcelI,
+                const label nParcels,
                 const scalar time,
                 typename CloudType::parcelType* pPtr
             );

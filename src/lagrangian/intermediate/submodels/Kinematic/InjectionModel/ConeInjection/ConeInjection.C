@@ -175,6 +175,7 @@ template<class CloudType>
 void Foam::ConeInjection<CloudType>::setPositionAndCell
 (
     const label,
+    const label,
     const scalar,
     vector& position,
     label& cellOwner
@@ -189,6 +190,7 @@ template<class CloudType>
 void Foam::ConeInjection<CloudType>::setProperties
 (
     const label parcelI,
+    const label,
     const scalar time,
     typename CloudType::parcelType* pPtr
 )
