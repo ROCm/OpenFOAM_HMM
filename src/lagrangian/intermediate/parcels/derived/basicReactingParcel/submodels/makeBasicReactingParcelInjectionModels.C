@@ -31,6 +31,7 @@ License
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
+#include "ReactingLookupTableInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,6 +61,12 @@ namespace Foam
     makeInjectionModelType
     (
         NoInjection,
+        KinematicCloud,
+        basicReactingParcel
+    );
+    makeInjectionModelType
+    (
+        ReactingLookupTableInjection,
         KinematicCloud,
         basicReactingParcel
     );

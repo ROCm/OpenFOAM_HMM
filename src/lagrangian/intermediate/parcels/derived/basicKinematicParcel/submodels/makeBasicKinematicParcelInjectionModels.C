@@ -29,6 +29,7 @@ License
 
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
+#include "KinematicLookupTableInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
 
@@ -48,6 +49,12 @@ namespace Foam
     makeInjectionModelType
     (
         FieldActivatedInjection,
+        KinematicCloud,
+        basicKinematicParcel
+    );
+    makeInjectionModelType
+    (
+        KinematicLookupTableInjection,
         KinematicCloud,
         basicKinematicParcel
     );
