@@ -566,7 +566,7 @@ int main(int argc, char *argv[])
             IOobject
             (
                 "cellProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::MUST_READ,
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
             IOobject
             (
                 "boundaryProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::MUST_READ,
@@ -603,7 +603,7 @@ int main(int argc, char *argv[])
                 IOobject
                 (
                     "faceProcAddressing",
-                    "constant",
+                    procMesh.facesInstance(),
                     procMesh.meshSubDir,
                     procMesh,
                     IOobject::MUST_READ,
@@ -645,7 +645,7 @@ int main(int argc, char *argv[])
                 IOobject
                 (
                     "pointProcAddressing",
-                    "constant",
+                    procMesh.facesInstance(),
                     procMesh.meshSubDir,
                     procMesh,
                     IOobject::MUST_READ,
