@@ -17,11 +17,7 @@ EXE_INC = \
     -I$(LIB_SRC)/triSurface/lnInclude
 
 EXE_LIBS = \
-    -L$(BOOST_ROOT)/lib \
-    -L$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1/platforms/$(WM_ARCH)$(WM_COMPILER_ARCH)/lib \
     -lmeshTools \
     -ledgeMesh \
     -ltriSurface \
-    -ldynamicMesh \
-    -lboost_thread-gcc43-mt-1_38 \
-    -lmpfr
+    -ldynamicMesh
