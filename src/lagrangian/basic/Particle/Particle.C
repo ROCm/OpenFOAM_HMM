@@ -376,18 +376,9 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                     static_cast<const wallPolyPatch&>(patch), td
                 );
             }
-            else if (isA<polyPatch>(patch))
-            {
-                p.hitPatch(patch, td);
-            }
             else
             {
-                FatalErrorIn
-                (
-                    "Particle::trackToFace"
-                    "(const vector& endPosition, scalar& trackFraction)"
-                )<< "patch type " << patch.type() << " not suported" << nl
-                 << abort(FatalError);
+                p.hitPatch(patch, td);
             }
         }
     }
