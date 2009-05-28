@@ -305,7 +305,9 @@ void Foam::KinematicParcel<ParcelType>::hitWallPatch
     const wallPolyPatch& wpp,
     TrackData& td
 )
-{}
+{
+    // Wall interactions handled by generic hitPatch function
+}
 
 
 template<class ParcelType>
