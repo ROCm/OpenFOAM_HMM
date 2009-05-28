@@ -18,7 +18,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     -L$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1/platforms/$(WM_ARCH)$(WM_COMPILER_ARCH)/lib \
-    -L$(BOOST_ROOT)/lib \
+    -L$(BOOST_ROOT)/platforms/$(WM_OPTIONS)/lib \
     -lconformalVoronoiMesh \
     -lmeshTools \
     -ledgeMesh \

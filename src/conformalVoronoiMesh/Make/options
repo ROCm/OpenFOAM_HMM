@@ -3,7 +3,7 @@ EXE_FROUNDING_MATH = -frounding-math
 EXE_NDEBUG = -DNDEBUG
 
 include $(GENERAL_RULES)/CGAL
-FFLAGS = -DCGAL_FILES='"${CGAL_PATH}/CGAL/files"'
+FFLAGS = -DCGAL_FILES='"${CGAL_SRC}/src/CGAL/files"'
 
 EXE_INC = \
     ${EXE_FROUNDING_MATH} \
