@@ -25,6 +25,8 @@ PatchInteractionModel StandardWallInteraction;
 
 HeatTransferModel RanzMarshall;
 
+PostProcessingModel none;
+
 radiation       on;
 
 coupled         true;
