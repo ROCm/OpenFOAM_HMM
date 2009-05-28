@@ -1,0 +1,117 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+\*---------------------------------------------------------------------------*/
+
+#include "LocalInteraction.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template <class CloudType>
+bool Foam::LocalInteraction<CloudType>::applyToPatch(const polyPatch& pp) const
+{
+    forAll(patchIds_, patchI)
+    {
+        if (patchIds_[patchI] == pp.index())
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class CloudType>
+Foam::LocalInteraction<CloudType>::LocalInteraction
+(
+    const dictionary& dict,
+    CloudType& cloud
+)
+:
+    PatchInteractionModel<CloudType>(dict, cloud, typeName),
+    patchData_(this->coeffDict().lookup("patches")),
+    patchIds_(patchData_.size())
+{
+    const polyMesh& mesh = cloud.mesh();
+
+    forAll(patchData_, patchI)
+    {
+        const word& patchName = patchData_[patchI].patchName();
+        patchIds_[patchI] = mesh.boundaryMesh().findPatchID(patchName);
+        if (patchIds_[patchI] < 0)
+        {
+            FatalErrorIn("LocalInteraction(const dictionary&, CloudType&)")
+                << "Patch " << patchName << " not found. Available patches "
+                << "are: " << mesh.boundaryMesh().names() << endl;
+        }
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template <class CloudType>
+Foam::LocalInteraction<CloudType>::~LocalInteraction()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::LocalInteraction<CloudType>::active() const
+{
+    return true;
+}
+
+
+template <class CloudType>
+void Foam::LocalInteraction<CloudType>::correct
+(
+    const polyPatch& pp,
+    const label faceId,
+    vector& U
+) const
+{
+    if (applyToPatch(pp))
+    {
+        vector nw = pp.faceAreas()[pp.whichFace(faceId)];
+        nw /= mag(nw);
+
+        scalar Un = U & nw;
+        vector Ut = U - Un*nw;
+
+        if (Un > 0)
+        {
+            U -= (1.0 + patchData_[pp.index()].e())*Un*nw;
+        }
+
+        U -= patchData_[pp.index()].mu()*Ut;
+    }
+}
+
+
+// ************************************************************************* //
