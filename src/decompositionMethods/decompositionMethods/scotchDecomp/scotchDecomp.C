@@ -153,37 +153,40 @@ Foam::label Foam::scotchDecomp::decompose
         const dictionary& scotchCoeffs =
             decompositionDict_.subDict("scotchCoeffs");
 
-        Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
-
-        if (writeGraph)
+        if (scotchCoeffs.found("writeGraph"))
         {
-            OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
+            Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
 
-            Info<< "Dumping Scotch graph file to " << str.name() << endl
-                << "Use this in combination with gpart." << endl;
-
-            label version = 0;
-            str << version << nl;
-            // Numer of vertices
-            str << xadj.size()-1 << ' ' << adjncy.size() << nl;
-            // Numbering starts from 0
-            label baseval = 0;
-            // Has weights?
-            label hasEdgeWeights = 0;
-            label hasVertexWeights = 0;
-            label numericflag = 10*hasEdgeWeights+hasVertexWeights;
-            str << baseval << ' ' << numericflag << nl;
-            for (label cellI = 0; cellI < xadj.size()-1; cellI++)
+            if (writeGraph)
             {
-                label start = xadj[cellI];
-                label end = xadj[cellI+1];
-                str << end-start;
+                OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
 
-                for (label i = start; i < end; i++)
+                Info<< "Dumping Scotch graph file to " << str.name() << endl
+                    << "Use this in combination with gpart." << endl;
+
+                label version = 0;
+                str << version << nl;
+                // Numer of vertices
+                str << xadj.size()-1 << ' ' << adjncy.size() << nl;
+                // Numbering starts from 0
+                label baseval = 0;
+                // Has weights?
+                label hasEdgeWeights = 0;
+                label hasVertexWeights = 0;
+                label numericflag = 10*hasEdgeWeights+hasVertexWeights;
+                str << baseval << ' ' << numericflag << nl;
+                for (label cellI = 0; cellI < xadj.size()-1; cellI++)
                 {
-                    str << ' ' << adjncy[i];
+                    label start = xadj[cellI];
+                    label end = xadj[cellI+1];
+                    str << end-start;
+
+                    for (label i = start; i < end; i++)
+                    {
+                        str << ' ' << adjncy[i];
+                    }
+                    str << nl;
                 }
-                str << nl;
             }
         }
     }
