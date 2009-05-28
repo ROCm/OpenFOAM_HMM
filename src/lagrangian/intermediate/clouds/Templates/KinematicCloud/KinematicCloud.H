@@ -75,7 +75,7 @@ template<class CloudType>
 class PostProcessingModel;
 
 template<class CloudType>
-class WallInteractionModel;
+class PatchInteractionModel;
 
 /*---------------------------------------------------------------------------*\
                        Class KinematicCloud Declaration
@@ -163,13 +163,13 @@ protected:
             autoPtr<InjectionModel<KinematicCloud<ParcelType> > >
                 injectionModel_;
 
+            //- Patch interaction model
+            autoPtr<PatchInteractionModel<KinematicCloud<ParcelType> > >
+                patchInteractionModel_;
+
             //- Post-processing model
             autoPtr<PostProcessingModel<KinematicCloud<ParcelType> > >
                 postProcessingModel_;
-
-            //- Wall interaction model
-            autoPtr<WallInteractionModel<KinematicCloud<ParcelType> > >
-                wallInteractionModel_;
 
 
         // Reference to the particle integration schemes
@@ -279,31 +279,33 @@ public:
 
             // Sub-models
 
-                //- Return reference to dispersion model
+                //- Return const-access to the dispersion model
                 inline const DispersionModel<KinematicCloud<ParcelType> >&
                     dispersion() const;
 
+                //- Return reference to the dispersion model
                 inline DispersionModel<KinematicCloud<ParcelType> >&
                     dispersion();
 
-                //- Return reference to drag model
+                //- Return const-access to the drag model
                 inline const DragModel<KinematicCloud<ParcelType> >&
                     drag() const;
 
-                //- Return reference to injection model
+                //- Return const access to the injection model
                 inline const InjectionModel<KinematicCloud<ParcelType> >&
                     injection() const;
 
+                //- Return reference to the injection model
                 inline InjectionModel<KinematicCloud<ParcelType> >&
                     injection();
+
+                //- Return const-access to the patch interaction model
+                inline const PatchInteractionModel<KinematicCloud<ParcelType> >&
+                    patchInteraction() const;
 
                 //- Return reference to post-processing model
                 inline PostProcessingModel<KinematicCloud<ParcelType> >&
                     postProcessing();
-
-                //- Return reference to wall interaction model
-                inline const WallInteractionModel<KinematicCloud<ParcelType> >&
-                    wallInteraction() const;
 
 
             // Integration schemes

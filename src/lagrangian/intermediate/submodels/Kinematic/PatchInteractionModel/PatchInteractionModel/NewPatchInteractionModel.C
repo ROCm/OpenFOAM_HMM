@@ -24,32 +24,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "KinematicCloud.H"
-
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
+#include "PatchInteractionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CloudType>
+Foam::autoPtr<Foam::PatchInteractionModel<CloudType> >
+Foam::PatchInteractionModel<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner
+)
 {
-    makeWallInteractionModel(KinematicCloud<basicReactingParcel>);
+    word PatchInteractionModelType(dict.lookup("PatchInteractionModel"));
 
-    // Add instances of wall interaction model to the table
-    makeWallInteractionModelType
-    (
-        Rebound,
-        KinematicCloud,
-        basicReactingParcel
-    );
-    makeWallInteractionModelType
-    (
-        StandardWallInteraction,
-        KinematicCloud,
-        basicReactingParcel
-    );
-};
+    Info<< "Selecting PatchInteractionModel " << PatchInteractionModelType
+        << endl;
+
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(PatchInteractionModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "PatchInteractionModel<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown PatchInteractionModelType type "
+            << PatchInteractionModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid PatchInteractionModel types are:" << nl
+            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+    }
+
+    return autoPtr<PatchInteractionModel<CloudType> >(cstrIter()(dict, owner));
+}
 
 
 // ************************************************************************* //

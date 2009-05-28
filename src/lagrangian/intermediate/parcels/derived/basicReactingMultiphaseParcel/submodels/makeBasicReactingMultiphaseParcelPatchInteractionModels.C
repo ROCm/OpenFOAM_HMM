@@ -24,59 +24,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "WallInteractionModel.H"
+#include "basicReactingMultiphaseParcel.H"
+#include "KinematicCloud.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::WallInteractionModel<CloudType>::WallInteractionModel
-(
-    const dictionary& dict,
-    CloudType& owner,
-    const word& type
-)
-:
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::WallInteractionModel<CloudType>::~WallInteractionModel()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-const CloudType&
-Foam::WallInteractionModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::WallInteractionModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary&
-Foam::WallInteractionModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewWallInteractionModel.C"
+namespace Foam
+{
+    makePatchInteractionModel(KinematicCloud<basicReactingMultiphaseParcel>);
+
+    // Add instances of wall interaction model to the table
+    makePatchInteractionModelType
+    (
+        Rebound,
+        KinematicCloud,
+        basicReactingMultiphaseParcel
+    );
+    makePatchInteractionModelType
+    (
+        StandardWallInteraction,
+        KinematicCloud,
+        basicReactingMultiphaseParcel
+    );
+};
+
 
 // ************************************************************************* //
-

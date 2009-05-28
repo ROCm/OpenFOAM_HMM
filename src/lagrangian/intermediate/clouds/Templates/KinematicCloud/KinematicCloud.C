@@ -31,8 +31,8 @@ License
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
+#include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
-#include "WallInteractionModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -98,19 +98,19 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
+    patchInteractionModel_
+    (
+        PatchInteractionModel<KinematicCloud<ParcelType> >::New
+        (
+            particleProperties_,
+            *this
+        )
+    ),
     postProcessingModel_
     (
         PostProcessingModel<KinematicCloud<ParcelType> >::New
         (
             this->particleProperties_,
-            *this
-        )
-    ),
-    wallInteractionModel_
-    (
-        WallInteractionModel<KinematicCloud<ParcelType> >::New
-        (
-            particleProperties_,
             *this
         )
     ),

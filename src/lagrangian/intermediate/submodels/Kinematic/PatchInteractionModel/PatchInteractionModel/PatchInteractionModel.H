@@ -23,20 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::WallInteractionModel
-
+    Foam::PatchInteractionModel
 
 Description
-    Templated wall interaction model class
+    Templated patch interaction model class
 
 SourceFiles
-    WallInteractionModel.C
-    NewWallInteractionModel.C
+    PatchInteractionModel.C
+    NewPatchInteractionModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef WallInteractionModel_H
-#define WallInteractionModel_H
+#ifndef PatchInteractionModel_H
+#define PatchInteractionModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -48,18 +47,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class WallInteractionModel Declaration
+                   Class PatchInteractionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class WallInteractionModel
+class PatchInteractionModel
 {
     // Private data
 
         //- The cloud dictionary
         const dictionary& dict_;
 
-        // reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
         //- The coefficients dictionary
@@ -69,13 +68,13 @@ class WallInteractionModel
 public:
 
     //- Runtime type information
-    TypeName("WallInteractionModel");
+    TypeName("PatchInteractionModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        WallInteractionModel,
+        PatchInteractionModel,
         dictionary,
         (
             const dictionary& dict,
@@ -88,7 +87,7 @@ public:
     // Constructors
 
         //- Construct from components
-        WallInteractionModel
+        PatchInteractionModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -97,11 +96,11 @@ public:
 
 
     //- Destructor
-    virtual ~WallInteractionModel();
+    virtual ~PatchInteractionModel();
 
 
     //- Selector
-    static autoPtr<WallInteractionModel<CloudType> > New
+    static autoPtr<PatchInteractionModel<CloudType> > New
     (
         const dictionary& dict,
         CloudType& owner
@@ -122,13 +121,13 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
+        //- Flag to indicate whether model activates patch interaction model
         virtual bool active() const = 0;
 
-        //- Apply wall correction
+        //- Apply velocity correction
         virtual void correct
         (
-            const wallPolyPatch& wpp,
+            const polyPatch& pp,
             const label faceId,
             vector& U
         ) const = 0;
@@ -141,22 +140,22 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeWallInteractionModel(CloudType)                                   \
+#define makePatchInteractionModel(CloudType)                                  \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(WallInteractionModel<CloudType>, 0);  \
+    defineNamedTemplateTypeNameAndDebug(PatchInteractionModel<CloudType>, 0); \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        WallInteractionModel<CloudType>,                                      \
+        PatchInteractionModel<CloudType>,                                     \
         dictionary                                                            \
     );
 
 
-#define makeWallInteractionModelType(SS, CloudType, ParcelType)               \
+#define makePatchInteractionModelType(SS, CloudType, ParcelType)              \
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    WallInteractionModel<CloudType<ParcelType> >::                            \
+    PatchInteractionModel<CloudType<ParcelType> >::                           \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
@@ -164,7 +163,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "WallInteractionModel.C"
+#   include "PatchInteractionModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

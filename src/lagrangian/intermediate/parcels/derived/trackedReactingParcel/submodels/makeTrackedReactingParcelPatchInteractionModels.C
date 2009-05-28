@@ -24,8 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
+#include "trackedReactingParcel.H"
 #include "KinematicCloud.H"
+
 #include "Rebound.H"
 #include "StandardWallInteraction.H"
 
@@ -33,22 +34,22 @@ License
 
 namespace Foam
 {
-    makeWallInteractionModel(KinematicCloud<basicThermoParcel>);
+    makePatchInteractionModel(KinematicCloud<trackedReactingParcel>);
 
     // Add instances of wall interaction model to the table
-    makeWallInteractionModelType
+    makePatchInteractionModelType
     (
         Rebound,
         KinematicCloud,
-        basicThermoParcel
+        trackedReactingParcel
     );
-    makeWallInteractionModelType
+    makePatchInteractionModelType
     (
         StandardWallInteraction,
         KinematicCloud,
-        basicThermoParcel
+        trackedReactingParcel
     );
-};
+}
 
 
 // ************************************************************************* //

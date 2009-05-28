@@ -24,44 +24,59 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "WallInteractionModel.H"
+#include "PatchInteractionModel.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::autoPtr<Foam::WallInteractionModel<CloudType> >
-Foam::WallInteractionModel<CloudType>::New
+Foam::PatchInteractionModel<CloudType>::PatchInteractionModel
 (
     const dictionary& dict,
-    CloudType& owner
+    CloudType& owner,
+    const word& type
 )
+:
+    dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::PatchInteractionModel<CloudType>::~PatchInteractionModel()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+const CloudType&
+Foam::PatchInteractionModel<CloudType>::owner() const
 {
-    word WallInteractionModelType(dict.lookup("WallInteractionModel"));
-
-    Info<< "Selecting WallInteractionModel " << WallInteractionModelType
-        << endl;
-
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(WallInteractionModelType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "WallInteractionModel<CloudType>::New"
-            "("
-                "const dictionary&, "
-                "CloudType&"
-            ")"
-        )   << "Unknown WallInteractionModelType type "
-            << WallInteractionModelType
-            << ", constructor not in hash table" << nl << nl
-            << "    Valid WallInteractionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
-    }
-
-    return autoPtr<WallInteractionModel<CloudType> >(cstrIter()(dict, owner));
+    return owner_;
 }
 
 
+template<class CloudType>
+const Foam::dictionary& Foam::PatchInteractionModel<CloudType>::dict() const
+{
+    return dict_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary&
+Foam::PatchInteractionModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "NewPatchInteractionModel.C"
+
 // ************************************************************************* //
+

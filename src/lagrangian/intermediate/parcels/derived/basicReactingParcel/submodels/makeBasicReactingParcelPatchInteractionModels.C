@@ -24,59 +24,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "basicReactingParcel.H"
+#include "KinematicCloud.H"
+
 #include "Rebound.H"
+#include "StandardWallInteraction.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::Rebound<CloudType>::Rebound
-(
-    const dictionary& dict,
-    CloudType& cloud
-)
-:
-    WallInteractionModel<CloudType>(dict, cloud, typeName),
-    UFactor_(readScalar(this->coeffDict().lookup("UFactor")))
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::Rebound<CloudType>::~Rebound()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-bool Foam::Rebound<CloudType>::active() const
+namespace Foam
 {
-    return true;
-}
+    makePatchInteractionModel(KinematicCloud<basicReactingParcel>);
 
-
-template<class CloudType>
-void Foam::Rebound<CloudType>::correct
-(
-    const wallPolyPatch& wpp,
-    const label faceId,
-    vector& U
-) const
-{
-    vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
-    nw /= mag(nw);
-
-    scalar Un = U & nw;
-    vector Ut = U - Un*nw;
-
-    if (Un > 0.0)
-    {
-        U -= UFactor_*2.0*Un*nw;
-    }
-
-    U -= Ut;
-}
+    // Add instances of wall interaction model to the table
+    makePatchInteractionModelType
+    (
+        Rebound,
+        KinematicCloud,
+        basicReactingParcel
+    );
+    makePatchInteractionModelType
+    (
+        StandardWallInteraction,
+        KinematicCloud,
+        basicReactingParcel
+    );
+};
 
 
 // ************************************************************************* //

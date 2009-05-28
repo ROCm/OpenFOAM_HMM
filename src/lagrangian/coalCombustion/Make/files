@@ -11,9 +11,9 @@ coalParcel/submodels/makeCoalParcelDispersionModels.C
 coalParcel/submodels/makeCoalParcelInjectionModels.C
 coalParcel/submodels/makeCoalParcelHeatTransferModels.C
 coalParcel/submodels/makeCoalParcelPhaseChangeModels.C
+coalParcel/submodels/makeCoalParcelPatchInteractionModels.C
 coalParcel/submodels/makeCoalParcelPostProcessingModels.C
 coalParcel/submodels/makeCoalParcelSurfaceReactionModels.C
-coalParcel/submodels/makeCoalParcelWallInteractionModels.C
 
 submodels/surfaceReactionModel/COxidationDiffusionLimitedRate/COxidationDiffusionLimitedRate.C
 submodels/surfaceReactionModel/COxidationKineticDiffusionLimitedRate/COxidationKineticDiffusionLimitedRate.C
@@ -22,4 +22,4 @@ submodels/surfaceReactionModel/COxidationMurphyShaddix/COxidationMurphyShaddix.C
 /* IOLists */
 coalParcel/submodels/makeCoalParcelIOList.C
 
-LIB = $(FOAM_USER_LIBBIN)/libcoalCombustion
+LIB = $(FOAM_LIBBIN)/libcoalCombustion

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,8 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
-#include "KinematicCloud.H"
+#include "coalParcel.H"
+#include "ReactingCloud.H"
 
 #include "Rebound.H"
 #include "StandardWallInteraction.H"
@@ -34,20 +34,20 @@ License
 
 namespace Foam
 {
-    makeWallInteractionModel(KinematicCloud<basicReactingMultiphaseParcel>);
+    makePatchInteractionModel(KinematicCloud<coalParcel>);
 
-    // Add instances of wall interaction model to the table
-    makeWallInteractionModelType
+    // Add instances of patch interaction model to the table
+    makePatchInteractionModelType
     (
         Rebound,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        coalParcel
     );
-    makeWallInteractionModelType
+    makePatchInteractionModelType
     (
         StandardWallInteraction,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        coalParcel
     );
 };
 

@@ -260,6 +260,8 @@ void Foam::KinematicParcel<ParcelType>::hitPatch
     const label patchI
 )
 {
+    td.cloud().patchInteraction().correct(pp, this->face(), U_);
+
     ParcelType& p = static_cast<ParcelType&>(*this);
     td.cloud().postProcessing().postPatch(p, patchI);
 }
@@ -303,9 +305,7 @@ void Foam::KinematicParcel<ParcelType>::hitWallPatch
     const wallPolyPatch& wpp,
     TrackData& td
 )
-{
-    td.cloud().wallInteraction().correct(wpp, this->face(), U_);
-}
+{}
 
 
 template<class ParcelType>

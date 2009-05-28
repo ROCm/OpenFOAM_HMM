@@ -24,59 +24,58 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "StandardWallInteraction.H"
+#include "Rebound.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
+template<class CloudType>
+Foam::Rebound<CloudType>::Rebound
 (
     const dictionary& dict,
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud, typeName),
-    e_(dimensionedScalar(this->coeffDict().lookup("e")).value()),
-    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value())
+    PatchInteractionModel<CloudType>(dict, cloud, typeName),
+    UFactor_(readScalar(this->coeffDict().lookup("UFactor")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template <class CloudType>
-Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
+template<class CloudType>
+Foam::Rebound<CloudType>::~Rebound()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::StandardWallInteraction<CloudType>::active() const
+bool Foam::Rebound<CloudType>::active() const
 {
     return true;
 }
 
 
-template <class CloudType>
-void Foam::StandardWallInteraction<CloudType>::correct
+template<class CloudType>
+void Foam::Rebound<CloudType>::correct
 (
-    const wallPolyPatch& wpp,
+    const polyPatch& pp,
     const label faceId,
     vector& U
 ) const
 {
-    vector nw = wpp.faceAreas()[wpp.whichFace(faceId)];
+    vector nw = pp.faceAreas()[pp.whichFace(faceId)];
     nw /= mag(nw);
 
     scalar Un = U & nw;
     vector Ut = U - Un*nw;
 
-    if (Un > 0)
+    if (Un > 0.0)
     {
-        U -= (1.0 + e_)*Un*nw;
+        U -= UFactor_*2.0*Un*nw;
     }
 
-    U -= mu_*Ut;
+    U -= Ut;
 }
 
 

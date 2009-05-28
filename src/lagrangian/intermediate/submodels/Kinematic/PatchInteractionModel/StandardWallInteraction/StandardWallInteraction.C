@@ -24,32 +24,63 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicKinematicParcel.H"
-#include "KinematicCloud.H"
-
-#include "Rebound.H"
 #include "StandardWallInteraction.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
+template <class CloudType>
+Foam::StandardWallInteraction<CloudType>::StandardWallInteraction
+(
+    const dictionary& dict,
+    CloudType& cloud
+)
+:
+    PatchInteractionModel<CloudType>(dict, cloud, typeName),
+    e_(dimensionedScalar(this->coeffDict().lookup("e")).value()),
+    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value())
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template <class CloudType>
+Foam::StandardWallInteraction<CloudType>::~StandardWallInteraction()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::StandardWallInteraction<CloudType>::active() const
 {
-    makeWallInteractionModel(KinematicCloud<basicKinematicParcel>);
+    return true;
+}
 
-    // Add instances of wall interaction model to the table
-    makeWallInteractionModelType
-    (
-        Rebound,
-        KinematicCloud,
-        basicKinematicParcel
-    );
-    makeWallInteractionModelType
-    (
-        StandardWallInteraction,
-        KinematicCloud,
-        basicKinematicParcel
-    );
-};
+
+template <class CloudType>
+void Foam::StandardWallInteraction<CloudType>::correct
+(
+    const polyPatch& pp,
+    const label faceId,
+    vector& U
+) const
+{
+    if (isA<wallPolyPatch>(pp))
+    {
+        vector nw = pp.faceAreas()[pp.whichFace(faceId)];
+        nw /= mag(nw);
+
+        scalar Un = U & nw;
+        vector Ut = U - Un*nw;
+
+        if (Un > 0)
+        {
+            U -= (1.0 + e_)*Un*nw;
+        }
+
+        U -= mu_*Ut;
+    }
+}
 
 
 // ************************************************************************* //

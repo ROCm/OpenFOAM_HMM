@@ -23,69 +23,63 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::StandardWallInteraction
+    Foam::Rebound
 
 Description
-    Wall interaction based on restitution and elasticity coefficients
+    Simple rebound patch interaction model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef StandardWallInteraction_H
-#define StandardWallInteraction_H
+#ifndef Rebound_H
+#define Rebound_H
 
-#include "WallInteractionModel.H"
+#include "PatchInteractionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class StandardWallInteraction Declaration
+                           Class Rebound Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class StandardWallInteraction
+class Rebound
 :
-    public WallInteractionModel<CloudType>
+    public PatchInteractionModel<CloudType>
 {
     // Private data
 
-        //- Elasticity
-        const scalar e_;
-
-        //-Restitution coefficient
-        const scalar mu_;
+       //- Factor applied to velocity on rebound
+       //  Normal rebound = 1
+       scalar UFactor_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("StandardWallInteraction");
+    TypeName("Rebound");
 
 
     // Constructors
 
         //- Construct from dictionary
-        StandardWallInteraction
-        (
-            const dictionary& dict,
-            CloudType& cloud
-        );
+        Rebound(const dictionary& dict, CloudType& cloud);
 
 
     //- Destructor
-    virtual ~StandardWallInteraction();
+    virtual ~Rebound();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
+        //- Flag to indicate whether model activates patch interaction model
         bool active() const;
 
-        //- Apply wall correction
+        //- Apply velocity correction
         virtual void correct
         (
-            const wallPolyPatch& wpp,
+            const polyPatch& pp,
             const label faceId,
             vector& U
         ) const;
@@ -99,7 +93,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "StandardWallInteraction.C"
+#   include "Rebound.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

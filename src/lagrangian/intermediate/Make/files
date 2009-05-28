@@ -30,8 +30,8 @@ $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDispersionModels.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDragModels.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelInjectionModels.C
+$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelPatchInteractionModels.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelPostProcessingModels.C
-$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelWallInteractionModels.C
 
 
 /* thermo parcel sub-models */
@@ -41,8 +41,8 @@ $(THERMOPARCEL)/submodels/makeBasicThermoParcelDispersionModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelDragModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelHeatTransferModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelInjectionModels.C
+$(THERMOPARCEL)/submodels/makeBasicThermoParcelPatchInteractionModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelPostProcessingModels.C
-$(THERMOPARCEL)/submodels/makeBasicThermoParcelWallInteractionModels.C
 
 
 /* reacting parcel sub-models */
@@ -53,9 +53,9 @@ $(REACTINGPARCEL)/submodels/makeBasicReactingParcelDispersionModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelDragModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelHeatTransferModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelInjectionModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelPatchInteractionModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelPhaseChangeModels.C
 $(REACTINGPARCEL)/submodels/makeBasicReactingParcelPostProcessingModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelWallInteractionModels.C
 
 
 /* reacting multiphase parcel sub-models */
@@ -67,10 +67,10 @@ $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDispersionModels.
 $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDragModels.C
 $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelHeatTransferModels.C
 $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelInjectionModels.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelPatchInteractionModels.C
 $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelPhaseChangeModels.C
 $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelPostProcessingModels.C
 $(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelSurfaceReactionModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelWallInteractionModels.C
 
 
 /* tracked reacting parcel sub-models */
@@ -81,9 +81,9 @@ $(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelDispersionModels.C
 $(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelDragModels.C
 $(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelHeatTransferModels.C
 $(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelInjectionModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPatchInteractionModels.C
 $(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPhaseChangeModels.C
 $(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPostProcessingModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelWallInteractionModels.C
 
 
 /* bolt-on models */
