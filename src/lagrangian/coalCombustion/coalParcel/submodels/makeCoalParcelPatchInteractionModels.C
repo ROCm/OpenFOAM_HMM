@@ -27,6 +27,7 @@ License
 #include "coalParcel.H"
 #include "ReactingCloud.H"
 
+#include "LocalInteraction.H"
 #include "Rebound.H"
 #include "StandardWallInteraction.H"
 
@@ -37,6 +38,12 @@ namespace Foam
     makePatchInteractionModel(KinematicCloud<coalParcel>);
 
     // Add instances of patch interaction model to the table
+    makePatchInteractionModelType
+    (
+        LocalInteraction,
+        KinematicCloud,
+        coalParcel
+    );
     makePatchInteractionModelType
     (
         Rebound,
