@@ -45,25 +45,23 @@ namespace RASModels
 scalar mutRoughWallFunctionFvPatchScalarField::fnRough
 (
     const scalar KsPlus,
-    const scalar Cs,
-    const scalar kappa
+    const scalar Cs
 ) const
 {
-    // Set deltaB based on non-dimensional roughness height
-    scalar deltaB = 0.0;
+    // Return fn based on non-dimensional roughness height
+
     if (KsPlus < 90.0)
     {
-        deltaB =
-            1.0/kappa
-            *log((KsPlus - 2.25)/87.75 + Cs*KsPlus)
-            *sin(0.4258*(log(KsPlus) - 0.811));
+        return pow
+        (
+            (KsPlus - 2.25)/87.75 + Cs*KsPlus,
+            sin(0.4258*(log(KsPlus) - 0.811))
+        );
     }
     else
     {
-        deltaB = 1.0/kappa*log(1.0 + Cs*KsPlus);
+        return (1.0 + Cs*KsPlus);
     }
-
-    return exp(min(deltaB*kappa, 50.0));
 }
 
 
@@ -216,8 +214,8 @@ void mutRoughWallFunctionFvPatchScalarField::updateCoeffs()
         scalar yPlusLamNew = yPlusLam;
         if (KsPlus > 2.25)
         {
-            Edash = E/fnRough(KsPlus, Cs_[faceI], kappa);
-            yPlusLam = rasModel.yPlusLam(kappa, Edash);
+            Edash = E/fnRough(KsPlus, Cs_[faceI]);
+            yPlusLamNew = rasModel.yPlusLam(kappa, Edash);
         }
 
         if (debug)
@@ -231,7 +229,9 @@ void mutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 
         if (yPlus > yPlusLamNew)
         {
-            mutw[faceI] = muw[faceI]*(yPlus*kappa/log(Edash*yPlus) - 1);
+            mutw[faceI] =
+                muw[faceI]
+               *(yPlus*kappa/log(max(Edash*yPlus, 1+1e-4)) - 1);
         }
         else
         {

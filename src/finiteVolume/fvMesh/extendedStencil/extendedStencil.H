@@ -75,13 +75,6 @@ protected:
 
     // Protected Member Functions
 
-        //- Collect cell neighbours into extended stencil
-        void calcFaceStencil
-        (
-            const labelListList& globalCellCells,
-            labelListList& faceStencil
-        );
-
         //- Calculate distribute map
         autoPtr<mapDistribute> calcDistributeMap
         (
