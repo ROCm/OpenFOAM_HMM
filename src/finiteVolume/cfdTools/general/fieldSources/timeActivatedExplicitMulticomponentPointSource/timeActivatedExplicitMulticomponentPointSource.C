@@ -67,6 +67,8 @@ void Foam::timeActivatedExplicitMulticomponentPointSource::updateAddressing()
         {
             cellOwners_[sourceI] = cid;
         }
+
+        fieldIds_[sourceI].setSize(psp.fieldData().size());
         forAll(psp.fieldData(), fieldI)
         {
             const word& fieldName = psp.fieldData()[fieldI].first();
@@ -85,7 +87,7 @@ void Foam::timeActivatedExplicitMulticomponentPointSource::updateAddressing()
             {
                 fieldIds_[sourceI][fieldI] = cfid;
             }
-        }
+       }
     }
 }
 
