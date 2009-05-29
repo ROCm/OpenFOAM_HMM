@@ -37,6 +37,7 @@ Description
 #include "ReactingCloudThermoTypes.H"
 #include "radiationModel.H"
 #include "porousZones.H"
+#include "timeActivatedExplicitMulticomponentPointSource.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,6 +52,7 @@ int main(int argc, char *argv[])
     #include "createFields.H"
     #include "createRadiationModel.H"
     #include "createClouds.H"
+    #include "createMulticomponentPointSources.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"

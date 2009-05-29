@@ -28,6 +28,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               ==
                 reactingParcels.Srho(i)
               + kappa*chemistry.RR(i)().dimensionedInternalField()
+              + pointMassSources.Su(i)
             );
 
             Yi.max(0.0);
