@@ -57,17 +57,36 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     patchIds_(patchData_.size())
 {
     const polyMesh& mesh = cloud.mesh();
+    const polyBoundaryMesh& bMesh = mesh.boundaryMesh();
 
     forAll(patchData_, patchI)
     {
         const word& patchName = patchData_[patchI].patchName();
-        patchIds_[patchI] = mesh.boundaryMesh().findPatchID(patchName);
+        patchIds_[patchI] = bMesh.findPatchID(patchName);
         if (patchIds_[patchI] < 0)
         {
             FatalErrorIn("LocalInteraction(const dictionary&, CloudType&)")
                 << "Patch " << patchName << " not found. Available patches "
-                << "are: " << mesh.boundaryMesh().names() << endl;
+                << "are: " << bMesh.names() << exit(FatalError);
         }
+    }
+
+    // check that all walls are specified
+    DynamicList<word> badWalls;
+    forAll(bMesh, patchI)
+    {
+        if (isA<wallPolyPatch>(bMesh[patchI]) && !applyToPatch(bMesh[patchI]))
+        {
+            badWalls.append(bMesh[patchI].name());
+        }
+    }
+
+    if (badWalls.size() > 0)
+    {
+        FatalErrorIn("LocalInteraction(const dictionary&, CloudType&)")
+            << "All wall patches must be specified when employing local patch "
+            << "interaction. Please specify data for patches:" << nl
+            << badWalls << nl << exit(FatalError);
     }
 }
 
