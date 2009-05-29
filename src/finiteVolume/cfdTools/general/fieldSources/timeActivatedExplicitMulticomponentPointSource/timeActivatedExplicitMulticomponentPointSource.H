@@ -165,9 +165,6 @@ public:
 
         //- Read properties dictionary
         virtual bool read();
-
-        //- Update
-        virtual void update();
 };
 
 
