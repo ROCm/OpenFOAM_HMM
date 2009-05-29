@@ -297,18 +297,31 @@ $(laplacianSchemes)/gaussLaplacianScheme/gaussLaplacianSchemes.C
 
 finiteVolume/fvc/fvcMeshPhi.C
 
-cfdTools/general/findRefCell/findRefCell.C
-cfdTools/general/adjustPhi/adjustPhi.C
-cfdTools/general/bound/bound.C
-cfdTools/general/porousMedia/porousZone.C
-cfdTools/general/porousMedia/porousZones.C
-cfdTools/general/MRF/MRFZone.C
-cfdTools/general/MRF/MRFZones.C
-cfdTools/general/fieldSources/pressureGradientExplicitSource/pressureGradientExplicitSource.C
-cfdTools/general/fieldSources/timeActivatedExplicitSource/timeActivatedExplicitSource.C
-cfdTools/general/SRF/SRFModel/SRFModel/SRFModel.C
-cfdTools/general/SRF/SRFModel/SRFModel/newSRFModel.C
-cfdTools/general/SRF/SRFModel/rpm/rpm.C
-cfdTools/general/SRF/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
+general = cfdTools/general
+$(general)/findRefCell/findRefCell.C
+$(general)/adjustPhi/adjustPhi.C
+$(general)/bound/bound.C
+
+porousMedia = $(general)/porousMedia
+$(porousMedia)/porousZone.C
+$(porousMedia)/porousZones.C
+
+MRF = $(general)/MRF
+$(MRF)/MRFZone.C
+$(MRF)/MRFZones.C
+
+SRF = $(general)/SRF
+$(SRF)/SRFModel/SRFModel/SRFModel.C
+$(SRF)/SRFModel/SRFModel/newSRFModel.C
+$(SRF)/SRFModel/rpm/rpm.C
+$(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
+
+fieldSources = $(general)/fieldSources
+$(fieldSources)/pressureGradientExplicitSource/pressureGradientExplicitSource.C
+$(fieldSources)/timeActivatedExplicitSource/timeActivatedExplicitSource.C
+
+$(fieldSources)/timeActivatedExplicitMulticomponentPointSource/timeActivatedExplicitMulticomponentPointSource.C
+$(fieldSources)/timeActivatedExplicitMulticomponentPointSource/pointSourceProperties/pointSourceProperties.C
+$(fieldSources)/timeActivatedExplicitMulticomponentPointSource/pointSourceProperties/pointSourcePropertiesIO.C
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume
