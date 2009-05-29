@@ -52,7 +52,21 @@ void Foam::timeActivatedExplicitMulticomponentPointSource::updateAddressing()
     forAll(pointSources_, sourceI)
     {
         const pointSourceProperties& psp = pointSources_[sourceI];
-        cellOwners_[sourceI] = mesh_.findCell(psp.location());
+        label cid = mesh_.findCell(psp.location());
+        if (cid < 0)
+        {
+            FatalErrorIn
+            (
+                "timeActivatedExplicitMulticomponentPointSource::"
+                "updateAddressing()"
+            )   << "Unable to find location " << psp.location() << " in mesh "
+                << "for source " << psp.name() << nl
+                << exit(FatalError);
+        }
+        else
+        {
+            cellOwners_[sourceI] = cid;
+        }
         forAll(psp.fieldData(), fieldI)
         {
             const word& fieldName = psp.fieldData()[fieldI].first();
