@@ -80,12 +80,7 @@ class nutRoughWallFunctionFvPatchScalarField
     // Private member functions
 
         //- Compute the roughness function
-        scalar fnRough
-        (
-            const scalar KsPlus,
-            const scalar Cs,
-            const scalar kappa
-        ) const;
+        scalar fnRough(const scalar KsPlus, const scalar Cs) const;
 
 
 public:

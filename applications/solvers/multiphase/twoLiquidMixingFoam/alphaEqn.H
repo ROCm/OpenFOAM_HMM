@@ -3,7 +3,11 @@
     (
         fvm::ddt(alpha1)
       + fvm::div(phi, alpha1)
-      - fvm::laplacian(Dab, alpha1)
+      - fvm::laplacian
+        (
+            Dab + alphatab*turbulence->nut(), alpha1,
+            "laplacian(Dab,alpha1)"
+        )
     );
 
     alpha1Eqn.solve();
