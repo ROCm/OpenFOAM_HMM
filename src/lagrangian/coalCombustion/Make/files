@@ -19,4 +19,4 @@ submodels/surfaceReactionModel/COxidationKineticDiffusionLimitedRate/COxidationK
 submodels/surfaceReactionModel/COxidationMurphyShaddix/COxidationMurphyShaddix.C
 
 
-LIB = $(FOAM_USER_LIBBIN)/libcoalCombustion
+LIB = $(FOAM_LIBBIN)/libcoalCombustion
