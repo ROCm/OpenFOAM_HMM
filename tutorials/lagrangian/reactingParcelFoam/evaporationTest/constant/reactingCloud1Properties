@@ -29,6 +29,8 @@ CompositionModel SinglePhaseMixture;
 
 PhaseChangeModel LiquidEvaporation;
 
+PostProcessingModel none;
+
 radiation       off;
 
 coupled         true;
