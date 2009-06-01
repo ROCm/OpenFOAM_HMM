@@ -38,7 +38,6 @@ SourceFiles
 #define BasicReactingParcel_H
 
 #include "ReactingParcel.H"
-#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +55,6 @@ class BasicReactingParcel;
 template<class ThermoType>
 class BasicReactingParcel
 :
-    public reactingParcel,
     public ReactingParcel<BasicReactingParcel<ThermoType> >
 {
 

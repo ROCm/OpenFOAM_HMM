@@ -46,6 +46,7 @@ SourceFiles
 
 #include "ThermoParcel.H"
 #include "ReactingCloud.H"
+#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,6 +70,7 @@ Ostream& operator<<
 template<class ParcelType>
 class ReactingParcel
 :
+    public reactingParcel,
     public ThermoParcel<ParcelType>
 {
 public:

@@ -38,7 +38,6 @@ SourceFiles
 #define BasicTrackedReactingParcel_H
 
 #include "TrackedReactingParcel.H"
-#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -56,7 +55,6 @@ class BasicTrackedReactingParcel;
 template<class ThermoType>
 class BasicTrackedReactingParcel
 :
-    public reactingParcel,
     public TrackedReactingParcel<BasicTrackedReactingParcel<ThermoType> >
 {
 

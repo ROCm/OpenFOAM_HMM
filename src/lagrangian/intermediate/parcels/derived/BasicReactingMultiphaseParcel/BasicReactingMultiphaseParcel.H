@@ -38,7 +38,6 @@ SourceFiles
 #define BasicReactingMultiphaseParcel_H
 
 #include "ReactingMultiphaseParcel.H"
-#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,7 +56,6 @@ class BasicReactingMultiphaseParcel;
 template<class ThermoType>
 class BasicReactingMultiphaseParcel
 :
-    public reactingParcel,
     public ReactingMultiphaseParcel<BasicReactingMultiphaseParcel<ThermoType> >
 {
 
