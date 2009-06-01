@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
+#include "basicTrackedReactingParcelTypes.H"
 #include "ReactingCloud.H"
 
 #include "ConeInjection.H"
@@ -37,38 +37,38 @@ License
 
 namespace Foam
 {
-    makeInjectionModel(KinematicCloud<trackedReactingParcel>);
+    makeInjectionModel(KinematicCloud<bTrackedReactingParcel>);
 
     // Add instances of injection model to the table
     makeInjectionModelType
     (
         ConeInjection,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makeInjectionModelType
     (
         FieldActivatedInjection,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makeInjectionModelType
     (
         ManualInjection,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makeInjectionModelType
     (
         NoInjection,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makeInjectionModelType
     (
         ReactingLookupTableInjection,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
 }
 

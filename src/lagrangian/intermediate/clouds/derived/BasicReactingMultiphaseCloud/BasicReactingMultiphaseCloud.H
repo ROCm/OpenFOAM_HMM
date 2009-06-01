@@ -23,66 +23,71 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::basicReactingMultiphaseCloud
+    Foam::BasicReactingMultiphaseCloud
 
 Description
     Reacting multiphase cloud templated on the reacting multiphase parcel
 
 SourceFiles
-    basicReactingMultiphaseCloud.C
+    BasicReactingMultiphaseCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicReactingMultiphaseCloud_H
-#define basicReactingMultiphaseCloud_H
+#ifndef BasicReactingMultiphaseCloud_H
+#define BasicReactingMultiphaseCloud_H
 
 #include "ReactingMultiphaseCloud.H"
-#include "basicReactingMultiphaseParcel.H"
+#include "BasicReactingMultiphaseParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ThermoType>
+class BasicReactingMultiphaseCloud;
+
 /*---------------------------------------------------------------------------*\
-                Class basicReactingMultiphaseCloud Declaration
+                Class BasicReactingMultiphaseCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicReactingMultiphaseCloud
+template<class ThermoType>
+class BasicReactingMultiphaseCloud
 :
-    public ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
+    public ReactingMultiphaseCloud<BasicReactingMultiphaseParcel>
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        basicReactingMultiphaseCloud(const basicReactingMultiphaseCloud&);
+        BasicReactingMultiphaseCloud(const BasicReactingMultiphaseCloud&);
 
         //- Disallow default bitwise assignment
-        void operator=(const basicReactingMultiphaseCloud&);
+        void operator=(const BasicReactingMultiphaseCloud&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("basicReactingMultiphaseCloud");
+    TypeName("BasicReactingMultiphaseCloud");
 
 
     // Constructors
 
         //- Construct given carrier gas fields
-        basicReactingMultiphaseCloud
+        BasicReactingMultiphaseCloud
         (
             const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& carrierSpecies
+            PtrList<ThermoType>& carrierSpecies
         );
 
 
     //- Destructor
-    ~basicReactingMultiphaseCloud();
+    ~BasicReactingMultiphaseCloud();
 
 
     // Member Functions
@@ -95,6 +100,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "BasicReactingMultiphaseCloud.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

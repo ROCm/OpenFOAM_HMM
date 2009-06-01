@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcelTypes.H"
 #include "ReactingCloud.H"
 
 #include "SingleMixtureFraction.H"
@@ -35,7 +35,7 @@ namespace Foam
 {
     makeCompositionModel
     (
-        ReactingCloud<basicReactingMultiphaseParcel>
+        ReactingCloud<bReactingMultiphaseParcel>
     );
 
     // Add instances of composition model to the table
@@ -43,7 +43,7 @@ namespace Foam
     (
         SingleMixtureFraction,
         ReactingCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
 };
 

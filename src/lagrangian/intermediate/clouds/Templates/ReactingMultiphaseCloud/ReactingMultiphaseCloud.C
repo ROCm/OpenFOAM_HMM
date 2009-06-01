@@ -39,7 +39,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& carrierSpecies
+    PtrList<typename ReactingCloud<ParcelType>::thermoType>& carrierSpecies
 )
 :
     ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo, carrierSpecies),

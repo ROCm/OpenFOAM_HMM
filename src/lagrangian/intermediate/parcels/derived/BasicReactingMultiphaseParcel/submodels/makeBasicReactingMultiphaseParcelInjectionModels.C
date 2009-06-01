@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcelTypes.H"
 #include "ReactingCloud.H"
 
 #include "ConeInjection.H"
@@ -36,32 +36,32 @@ License
 
 namespace Foam
 {
-    makeInjectionModel(KinematicCloud<basicReactingMultiphaseParcel>);
+    makeInjectionModel(KinematicCloud<bReactingMultiphaseParcel>);
 
     // Add instances of injection model to the table
     makeInjectionModelType
     (
         ConeInjection,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeInjectionModelType
     (
         FieldActivatedInjection,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeInjectionModelType
     (
         ManualInjection,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeInjectionModelType
     (
         NoInjection,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
 };
 

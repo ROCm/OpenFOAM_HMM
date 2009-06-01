@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcelTypes.H"
 #include "KinematicCloud.H"
 
 #include "NoDispersion.H"
@@ -35,11 +35,11 @@ License
 
 namespace Foam
 {
-    makeDispersionModel(KinematicCloud<basicReactingMultiphaseParcel>);
+    makeDispersionModel(KinematicCloud<bReactingMultiphaseParcel>);
 
     defineNamedTemplateTypeNameAndDebug
     (
-        DispersionRASModel<KinematicCloud<basicReactingMultiphaseParcel> >,
+        DispersionRASModel<KinematicCloud<bReactingMultiphaseParcel> >,
         0
     );
 
@@ -48,19 +48,19 @@ namespace Foam
     (
         NoDispersion,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeDispersionModelType
     (
         GradientDispersionRAS,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeDispersionModelType
     (
         StochasticDispersionRAS,
         KinematicCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
 };
 

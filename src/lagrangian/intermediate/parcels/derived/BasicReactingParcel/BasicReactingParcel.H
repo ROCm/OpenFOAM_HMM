@@ -23,56 +23,66 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::basicReactingParcel
+    Foam::BasicReactingParcel
 
 Description
 
 
 SourceFiles
-    basicReactingParcel.C
-    basicReactingParcelIO.C
+    BasicReactingParcel.C
+    BasicReactingParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicReactingParcel_H
-#define basicReactingParcel_H
+#ifndef BasicReactingParcel_H
+#define BasicReactingParcel_H
 
 #include "ReactingParcel.H"
+#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ThermoType>
+class BasicReactingParcel;
+
 /*---------------------------------------------------------------------------*\
-                    Class basicReactingParcel Declaration
+                    Class BasicReactingParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicReactingParcel
+template<class ThermoType>
+class BasicReactingParcel
 :
-    public ReactingParcel<basicReactingParcel>
+    public reactingParcel,
+    public ReactingParcel<BasicReactingParcel<ThermoType> >
 {
 
 public:
 
+    //- The type of thermodynamics this parcel was instantiated for
+    typedef ThermoType thermoType;
+
     //- Run-time type information
-    TypeName("basicReactingParcel");
+    TypeName("BasicReactingParcel");
 
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
-        basicReactingParcel
+        BasicReactingParcel
         (
-            ReactingCloud<basicReactingParcel>& owner,
+            ReactingCloud<BasicReactingParcel>& owner,
             const vector& position,
             const label cellI
         );
 
         //- Construct from components
-        basicReactingParcel
+        BasicReactingParcel
         (
-            ReactingCloud<basicReactingParcel>& owner,
+            ReactingCloud<BasicReactingParcel>& owner,
             const vector& position,
             const label cellI,
             const label typeId,
@@ -80,46 +90,46 @@ public:
             const scalar d0,
             const vector& U0,
             const scalarField& Y0,
-            const constantProperties& constProps
+            const typename ReactingParcel<BasicReactingParcel>::
+                constantProperties& constProps
         );
 
         //- Construct from Istream
-        basicReactingParcel
+        BasicReactingParcel
         (
-            const Cloud<basicReactingParcel>& c,
+            const Cloud<BasicReactingParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct as a copy
-        basicReactingParcel(const basicReactingParcel& p);
+        BasicReactingParcel(const BasicReactingParcel& p);
 
         //- Construct and return a clone
-        autoPtr<basicReactingParcel> clone() const
+        autoPtr<BasicReactingParcel> clone() const
         {
             return
-                autoPtr<basicReactingParcel>
+                autoPtr<BasicReactingParcel>
                 (
-                    new basicReactingParcel(*this)
+                    new BasicReactingParcel(*this)
                 );
         }
 
 
     //- Destructor
-    virtual ~basicReactingParcel();
+    virtual ~BasicReactingParcel();
 };
-
-
-template<>
-inline bool contiguous<basicReactingParcel>()
-{
-    return false; // Now have scalar lists/fields (mass fractions)
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "BasicReactingParcel.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

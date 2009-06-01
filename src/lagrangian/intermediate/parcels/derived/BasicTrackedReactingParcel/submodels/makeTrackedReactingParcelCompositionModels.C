@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
+#include "basicTrackedReactingParcelTypes.H"
 #include "ReactingCloud.H"
 
 #include "SinglePhaseMixture.H"
@@ -33,14 +33,14 @@ License
 
 namespace Foam
 {
-    makeCompositionModel(ReactingCloud<trackedReactingParcel>);
+    makeCompositionModel(ReactingCloud<bTrackedReactingParcel>);
 
     // Add instances of composition model to the table
     makeCompositionModelType
     (
         SinglePhaseMixture,
         ReactingCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
 }
 

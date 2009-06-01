@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcelTypes.H"
 #include "ReactingMultiphaseCloud.H"
 
 #include "NoDevolatilisation.H"
@@ -37,7 +37,7 @@ namespace Foam
 {
     makeDevolatilisationModel
     (
-        ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
+        ReactingMultiphaseCloud<bReactingMultiphaseParcel>
     );
 
     // Add instances of devolatilisation model to the table
@@ -45,19 +45,19 @@ namespace Foam
     (
         NoDevolatilisation,
         ReactingMultiphaseCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeDevolatilisationModelType
     (
         ConstantRateDevolatilisation,
         ReactingMultiphaseCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeDevolatilisationModelType
     (
         SingleKineticRateDevolatilisation,
         ReactingMultiphaseCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
 };
 

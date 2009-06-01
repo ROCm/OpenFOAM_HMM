@@ -23,56 +23,67 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::basicReactingMultiphaseParcel
+    Foam::BasicReactingMultiphaseParcel
 
 Description
 
 
 SourceFiles
-    basicReactingMultiphaseParcel.C
-    basicReactingMultiphaseParcelIO.C
+    BasicReactingMultiphaseParcel.C
+    BasicReactingMultiphaseParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicReactingMultiphaseParcel_H
-#define basicReactingMultiphaseParcel_H
+#ifndef BasicReactingMultiphaseParcel_H
+#define BasicReactingMultiphaseParcel_H
 
 #include "ReactingMultiphaseParcel.H"
+#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ThermoType>
+class BasicReactingMultiphaseParcel;
+
 /*---------------------------------------------------------------------------*\
-               Class basicReactingMultiphaseParcel Declaration
+               Class BasicReactingMultiphaseParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicReactingMultiphaseParcel
+template<class ThermoType>
+class BasicReactingMultiphaseParcel
 :
-    public ReactingMultiphaseParcel<basicReactingMultiphaseParcel>
+    public reactingParcel,
+    public ReactingMultiphaseParcel<BasicReactingMultiphaseParcel<ThermoType> >
 {
 
 public:
 
+    //- The type of thermodynamics this parcel was instantiated for
+    typedef ThermoType thermoType;
+
     //- Run-time type information
-    TypeName("basicReactingMultiphaseParcel");
+    TypeName("BasicReactingMultiphaseParcel");
 
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
-        basicReactingMultiphaseParcel
+        BasicReactingMultiphaseParcel
         (
-             ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
+             ReactingMultiphaseCloud<BasicReactingMultiphaseParcel>& owner,
              const vector& position,
              const label cellI
         );
 
         //- Construct from components
-        basicReactingMultiphaseParcel
+        BasicReactingMultiphaseParcel
         (
-             ReactingMultiphaseCloud<basicReactingMultiphaseParcel>& owner,
+             ReactingMultiphaseCloud<BasicReactingMultiphaseParcel>& owner,
              const vector& position,
              const label cellI,
              const label typeId,
@@ -83,46 +94,47 @@ public:
              const scalarField& YLiquid0,
              const scalarField& YSolid0,
              const scalarField& Y0,
-             const constantProperties& constProps
+             const typename
+                ReactingMultiphaseParcel<BasicReactingMultiphaseParcel>::
+                constantProperties& constProps
         );
 
         //- Construct from Istream
-        basicReactingMultiphaseParcel
+        BasicReactingMultiphaseParcel
         (
-            const Cloud<basicReactingMultiphaseParcel>& c,
+            const Cloud<BasicReactingMultiphaseParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct as a copy
-        basicReactingMultiphaseParcel(const basicReactingMultiphaseParcel& p);
+        BasicReactingMultiphaseParcel(const BasicReactingMultiphaseParcel& p);
 
         //- Construct and return a clone
-        autoPtr<basicReactingMultiphaseParcel> clone() const
+        autoPtr<BasicReactingMultiphaseParcel> clone() const
         {
             return
-                autoPtr<basicReactingMultiphaseParcel>
+                autoPtr<BasicReactingMultiphaseParcel>
                 (
-                    new basicReactingMultiphaseParcel(*this)
+                    new BasicReactingMultiphaseParcel(*this)
                 );
         }
 
 
     //- Destructor
-    virtual ~basicReactingMultiphaseParcel();
+    virtual ~BasicReactingMultiphaseParcel();
 };
-
-
-template<>
-inline bool contiguous<basicReactingMultiphaseParcel>()
-{
-    return false; // Now have scalar lists/fields (mass fractions)
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "BasicReactingMultiphaseParcel.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -22,33 +22,57 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedefs
-    Foam::ReactingCloudThermoTypes
+Class
+    Foam::basicReactingParcel
 
 Description
+    Base class for reacting parcel - simply used to set the contiguous flag
+
+SourceFiles
+    reactingParcel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ReactingCloudThermoTypes_H
-#define ReactingCloudThermoTypes_H
+#ifndef reactingParcel_H
+#define reactingParcel_H
 
-#include "sutherlandTransport.H"
-#include "constTransport.H"
-#include "specieThermo.H"
-#include "hConstThermo.H"
-#include "janafThermo.H"
-#include "perfectGas.H"
+#include "typeInfo.H"
+#include "contiguous.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
-        specieReactingProperties;
 
-    typedef constTransport<specieThermo<hConstThermo<perfectGas> > >
-        specieConstProperties;
+/*---------------------------------------------------------------------------*\
+                       Class reactingParcel Declaration
+\*---------------------------------------------------------------------------*/
+
+class reactingParcel
+{
+public:
+
+    //- Run-time type information
+    TypeName("reactingParcel");
+
+    //- Construct null
+    reactingParcel();
+
+    //- Destructor
+    virtual ~reactingParcel();
+};
+
+
+template<>
+inline bool contiguous<reactingParcel>()
+{
+    return false; // Derived classes include scalar lists/fields
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

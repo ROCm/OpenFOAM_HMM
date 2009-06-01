@@ -23,66 +23,71 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::basicReactingCloud
+    Foam::BasicReactingCloud
 
 Description
     Reacting cloud templated on the reacting parcel
 
 SourceFiles
-    basicReactingCloud.C
+    BasicReactingCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicReactingCloud_H
-#define basicReactingCloud_H
+#ifndef BasicReactingCloud_H
+#define BasicReactingCloud_H
 
 #include "ReactingCloud.H"
-#include "basicReactingParcel.H"
+#include "BasicReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ThermoType>
+class BasicReactingCloud;
+
 /*---------------------------------------------------------------------------*\
-                        Class basicReactingCloud Declaration
+                        Class BasicReactingCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicReactingCloud
+template<class ThermoType>
+class BasicReactingCloud
 :
-    public ReactingCloud<basicReactingParcel>
+    public ReactingCloud<BasicReactingParcel<ThermoType> >
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        basicReactingCloud(const basicReactingCloud&);
+        BasicReactingCloud(const BasicReactingCloud&);
 
         //- Disallow default bitwise assignment
-        void operator=(const basicReactingCloud&);
+        void operator=(const BasicReactingCloud&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("basicReactingCloud");
+    TypeName("BasicReactingCloud");
 
 
     // Constructors
 
         //- Construct given carrier gas fields
-        basicReactingCloud
+        BasicReactingCloud
         (
             const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& carrierSpecies
+            PtrList<ThermoType>& carrierSpecies
         );
 
 
     //- Destructor
-    ~basicReactingCloud();
+    ~BasicReactingCloud();
 
 
     // Member Functions
@@ -95,6 +100,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "BasicReactingCloud.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

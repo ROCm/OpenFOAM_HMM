@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcelTypes.H"
 #include "ThermoCloud.H"
 
 #include "NoHeatTransfer.H"
@@ -34,20 +34,20 @@ License
 
 namespace Foam
 {
-    makeHeatTransferModel(ThermoCloud<basicReactingMultiphaseParcel>);
+    makeHeatTransferModel(ThermoCloud<bReactingMultiphaseParcel>);
 
     // Add instances of heat transfer model to the table
     makeHeatTransferModelType
     (
         NoHeatTransfer,
         ThermoCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makeHeatTransferModelType
     (
         RanzMarshall,
         ThermoCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
 };
 

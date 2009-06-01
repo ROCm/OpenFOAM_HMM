@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcelTypes.H"
 #include "ReactingCloud.H"
 
 #include "NoPhaseChange.H"
@@ -36,7 +36,7 @@ namespace Foam
 {
     makePhaseChangeModel
     (
-        ReactingCloud<basicReactingMultiphaseParcel>
+        ReactingCloud<bReactingMultiphaseParcel>
     );
 
     // Add instances of phase change model to the table
@@ -44,13 +44,13 @@ namespace Foam
     (
         NoPhaseChange,
         ReactingCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
     makePhaseChangeModelType
     (
         LiquidEvaporation,
         ReactingCloud,
-        basicReactingMultiphaseParcel
+        bReactingMultiphaseParcel
     );
 };
 

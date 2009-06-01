@@ -72,6 +72,14 @@ class ReactingCloud
     public ThermoCloud<ParcelType>,
     public reactingCloud
 {
+public:
+
+    //- Type of thermodynamics the cloud was instantiated for
+    typedef typename ParcelType::thermoType thermoType;
+
+
+private:
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -92,7 +100,7 @@ protected:
         hCombustionThermo& carrierThermo_;
 
         //- Gas phase properties
-        PtrList<specieReactingProperties>& carrierSpecies_;
+        PtrList<thermoType>& carrierSpecies_;
 
 
         // References to the cloud sub-models
@@ -143,7 +151,7 @@ public:
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& carrierSpecies
+            PtrList<thermoType>& carrierSpecies
         );
 
 
@@ -170,7 +178,7 @@ public:
             inline hCombustionThermo& carrierThermo();
 
             //- Gas phase properties
-            inline const PtrList<specieReactingProperties>& carrierSpecies() const;
+            inline const PtrList<thermoType>& carrierSpecies() const;
 
 
             // Sub-models

@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
+#include "basicReactingParcelTypes.H"
 #include "KinematicCloud.H"
 
 #include "LocalInteraction.H"
@@ -35,26 +35,26 @@ License
 
 namespace Foam
 {
-    makePatchInteractionModel(KinematicCloud<basicReactingParcel>);
+    makePatchInteractionModel(KinematicCloud<bReactingParcel>);
 
     // Add instances of patch interaction model to the table
     makePatchInteractionModelType
     (
         LocalInteraction,
         KinematicCloud,
-        basicReactingParcel
+        bReactingParcel
     );
     makePatchInteractionModelType
     (
         Rebound,
         KinematicCloud,
-        basicReactingParcel
+        bReactingParcel
     );
     makePatchInteractionModelType
     (
         StandardWallInteraction,
         KinematicCloud,
-        basicReactingParcel
+        bReactingParcel
     );
 };
 

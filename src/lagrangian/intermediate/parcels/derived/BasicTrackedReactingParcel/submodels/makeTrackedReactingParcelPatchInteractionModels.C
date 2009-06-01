@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
+#include "basicTrackedReactingParcelTypes.H"
 #include "KinematicCloud.H"
 
 #include "LocalInteraction.H"
@@ -35,26 +35,26 @@ License
 
 namespace Foam
 {
-    makePatchInteractionModel(KinematicCloud<trackedReactingParcel>);
+    makePatchInteractionModel(KinematicCloud<bTrackedReactingParcel>);
 
     // Add instances of patch interaction model to the table
     makePatchInteractionModelType
     (
         LocalInteraction,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makePatchInteractionModelType
     (
         Rebound,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makePatchInteractionModelType
     (
         StandardWallInteraction,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
 }
 

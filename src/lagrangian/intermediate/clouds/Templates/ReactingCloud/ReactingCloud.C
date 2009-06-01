@@ -68,7 +68,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& carrierSpecies
+    PtrList<thermoType>& carrierSpecies
 )
 :
     ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo),

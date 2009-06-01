@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
+#include "basicTrackedReactingParcelTypes.H"
 #include "ReactingCloud.H"
 
 #include "NoPhaseChange.H"
@@ -34,20 +34,20 @@ License
 
 namespace Foam
 {
-    makePhaseChangeModel(ReactingCloud<trackedReactingParcel>);
+    makePhaseChangeModel(ReactingCloud<bTrackedReactingParcel>);
 
     // Add instances of phase change model to the table
     makePhaseChangeModelType
     (
         NoPhaseChange,
         ReactingCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makePhaseChangeModelType
     (
         LiquidEvaporation,
         ReactingCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
 }
 

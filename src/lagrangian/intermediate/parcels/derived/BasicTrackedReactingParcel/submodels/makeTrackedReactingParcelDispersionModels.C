@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
+#include "basicTrackedReactingParcelTypes.H"
 #include "KinematicCloud.H"
 
 #include "NoDispersion.H"
@@ -35,11 +35,11 @@ License
 
 namespace Foam
 {
-    makeDispersionModel(KinematicCloud<trackedReactingParcel>);
+    makeDispersionModel(KinematicCloud<bTrackedReactingParcel>);
 
     defineNamedTemplateTypeNameAndDebug
     (
-        DispersionRASModel<KinematicCloud<trackedReactingParcel> >,
+        DispersionRASModel<KinematicCloud<bTrackedReactingParcel> >,
         0
     );
 
@@ -48,19 +48,19 @@ namespace Foam
     (
         NoDispersion,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makeDispersionModelType
     (
         GradientDispersionRAS,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makeDispersionModelType
     (
         StochasticDispersionRAS,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
 }
 

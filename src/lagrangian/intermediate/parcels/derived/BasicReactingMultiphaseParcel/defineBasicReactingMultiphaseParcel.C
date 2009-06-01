@@ -24,72 +24,76 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcel.H"
+#include "basicReactingMultiphaseParcelTypes.H"
 #include "ReactingMultiphaseCloud.H"
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(Cloud<basicReactingMultiphaseParcel>, 0);
+    defineTemplateTypeNameAndDebug(bReactingMultiphaseParcel, 0);
+
+    defineTemplateTypeNameAndDebug(Particle<bReactingMultiphaseParcel>, 0);
+
+    defineTemplateTypeNameAndDebug(Cloud<bReactingMultiphaseParcel>, 0);
 
     defineParcelTypeNameAndDebug
     (
-        KinematicParcel<basicReactingMultiphaseParcel>,
-        0
-    );
-//    defineTemplateTypeNameAndDebug
-//    (
-//        KinematicParcel<basicReactingMultiphaseParcel>,
-//        0
-//    );
-    defineParcelTypeNameAndDebug
-    (
-        ThermoParcel<basicReactingMultiphaseParcel>,
+        KinematicParcel<bReactingMultiphaseParcel>,
         0
     );
     defineTemplateTypeNameAndDebug
     (
-        ThermoParcel<basicReactingMultiphaseParcel>,
+        KinematicParcel<bReactingMultiphaseParcel>,
         0
     );
     defineParcelTypeNameAndDebug
     (
-        ReactingParcel<basicReactingMultiphaseParcel>,
+        ThermoParcel<bReactingMultiphaseParcel>,
         0
     );
     defineTemplateTypeNameAndDebug
     (
-        ReactingParcel<basicReactingMultiphaseParcel>,
+        ThermoParcel<bReactingMultiphaseParcel>,
         0
     );
     defineParcelTypeNameAndDebug
     (
-        ReactingMultiphaseParcel<basicReactingMultiphaseParcel>,
+        ReactingParcel<bReactingMultiphaseParcel>,
         0
     );
     defineTemplateTypeNameAndDebug
     (
-        ReactingMultiphaseParcel<basicReactingMultiphaseParcel>,
+        ReactingParcel<bReactingMultiphaseParcel>,
+        0
+    );
+    defineParcelTypeNameAndDebug
+    (
+        ReactingMultiphaseParcel<bReactingMultiphaseParcel>,
+        0
+    );
+    defineTemplateTypeNameAndDebug
+    (
+        ReactingMultiphaseParcel<bReactingMultiphaseParcel>,
         0
     );
 
     defineParcelTypeNameAndDebug
     (
-        KinematicCloud<basicReactingMultiphaseParcel>,
+        KinematicCloud<bReactingMultiphaseParcel>,
         0
     );
     defineParcelTypeNameAndDebug
     (
-        ThermoCloud<basicReactingMultiphaseParcel>,
+        ThermoCloud<bReactingMultiphaseParcel>,
         0
     );
     defineParcelTypeNameAndDebug
     (
-        ReactingCloud<basicReactingMultiphaseParcel>,
+        ReactingCloud<bReactingMultiphaseParcel>,
         0
     );
     defineParcelTypeNameAndDebug
     (
-        ReactingMultiphaseCloud<basicReactingMultiphaseParcel>,
+        ReactingMultiphaseCloud<bReactingMultiphaseParcel>,
         0
     );
 

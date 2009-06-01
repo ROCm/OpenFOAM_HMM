@@ -29,7 +29,7 @@ forAll(gasProperties, i)
 }
 
 Info<< "\nConstructing reacting cloud" << endl;
-basicReactingCloud parcels
+BasicReactingCloud<specieReactingProperties> parcels
 (
     "reactingCloud1",
     rho,

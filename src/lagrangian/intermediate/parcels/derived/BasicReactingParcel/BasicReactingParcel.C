@@ -24,34 +24,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(basicReactingParcel, 0);
-    defineParticleTypeNameAndDebug(basicReactingParcel, 0);
-    defineParcelTypeNameAndDebug(basicReactingParcel, 0);
-};
-
+#include "BasicReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicReactingParcel::basicReactingParcel
+template<class ThermoType>
+Foam::BasicReactingParcel<ThermoType>::BasicReactingParcel
 (
-    ReactingCloud<basicReactingParcel>& owner,
+    ReactingCloud<BasicReactingParcel<ThermoType> >& owner,
     const vector& position,
     const label cellI
 )
 :
-    ReactingParcel<basicReactingParcel>(owner, position, cellI)
+    ReactingParcel<BasicReactingParcel<ThermoType> >(owner, position, cellI)
 {}
 
 
-Foam::basicReactingParcel::basicReactingParcel
+template<class ThermoType>
+Foam::BasicReactingParcel<ThermoType>::BasicReactingParcel
 (
-    ReactingCloud<basicReactingParcel>& owner,
+    ReactingCloud<BasicReactingParcel<ThermoType> >& owner,
     const vector& position,
     const label cellI,
     const label typeId,
@@ -59,10 +51,11 @@ Foam::basicReactingParcel::basicReactingParcel
     const scalar d0,
     const vector& U0,
     const scalarField& Y0,
-    const constantProperties& constProps
+    const typename ReactingParcel<BasicReactingParcel<ThermoType> >::
+        constantProperties& constProps
 )
 :
-    ReactingParcel<basicReactingParcel>
+    ReactingParcel<BasicReactingParcel<ThermoType> >
     (
         owner,
         position,
@@ -77,29 +70,32 @@ Foam::basicReactingParcel::basicReactingParcel
 {}
 
 
-Foam::basicReactingParcel::basicReactingParcel
+template<class ThermoType>
+Foam::BasicReactingParcel<ThermoType>::BasicReactingParcel
 (
-    const Cloud<basicReactingParcel>& cloud,
+    const Cloud<BasicReactingParcel<ThermoType> >& cloud,
     Istream& is,
     bool readFields
 )
 :
-    ReactingParcel<basicReactingParcel>(cloud, is, readFields)
+    ReactingParcel<BasicReactingParcel<ThermoType> >(cloud, is, readFields)
 {}
 
 
-Foam::basicReactingParcel::basicReactingParcel
+template<class ThermoType>
+Foam::BasicReactingParcel<ThermoType>::BasicReactingParcel
 (
-    const basicReactingParcel& p
+    const BasicReactingParcel<ThermoType>& p
 )
 :
-    ReactingParcel<basicReactingParcel>(p)
+    ReactingParcel<BasicReactingParcel>(p)
 {}
 
 
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
-Foam::basicReactingParcel::~basicReactingParcel()
+template<class ThermoType>
+Foam::BasicReactingParcel<ThermoType>::~BasicReactingParcel()
 {}
 
 

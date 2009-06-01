@@ -26,27 +26,20 @@ License
 
 #include "trackedReactingCloud.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(trackedReactingCloud, 0);
-};
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::trackedReactingCloud::trackedReactingCloud
+template<class ThermoType>
+Foam::trackedReactingCloud<ThermoType>::trackedReactingCloud
 (
     const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& gases
+    PtrList<ThermoType>& gases
 )
 :
-    ReactingCloud<trackedReactingParcel>
+    ReactingCloud<BasicTrackedReactingParcel<ThermoType> >
     (
         cloudName,
         rho,
@@ -56,21 +49,23 @@ Foam::trackedReactingCloud::trackedReactingCloud
         gases
     )
 {
-    trackedReactingParcel::readFields(*this);
+    BasicTrackedReactingParcel<ThermoType>::readFields(*this);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::trackedReactingCloud::~trackedReactingCloud()
+template<class ThermoType>
+Foam::trackedReactingCloud<ThermoType>::~trackedReactingCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::trackedReactingCloud::writeFields() const
+template<class ThermoType>
+void Foam::trackedReactingCloud<ThermoType>::writeFields() const
 {
-    trackedReactingParcel::writeFields(*this);
+    BasicTrackedReactingParcel<ThermoType>::writeFields(*this);
 }
 
 

@@ -22,33 +22,21 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedefs
-    Foam::ReactingCloudThermoTypes
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef ReactingCloudThermoTypes_H
-#define ReactingCloudThermoTypes_H
+#ifndef basicTrackedReactingParcelTypes_H
+#define basicTrackedReactingParcelTypes_H
 
-#include "sutherlandTransport.H"
-#include "constTransport.H"
-#include "specieThermo.H"
-#include "hConstThermo.H"
-#include "janafThermo.H"
-#include "perfectGas.H"
+#include "BasicTrackedReactingParcel.H"
+#include "ReactingCloudThermoTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
-        specieReactingProperties;
-
-    typedef constTransport<specieThermo<hConstThermo<perfectGas> > >
-        specieConstProperties;
-}
+    typedef BasicTrackedReactingParcel<specieReactingProperties>
+        bTrackedReactingParcel;
+};
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

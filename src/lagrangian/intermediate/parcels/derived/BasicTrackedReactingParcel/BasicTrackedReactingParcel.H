@@ -23,56 +23,66 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::trackedReactingParcel
+    Foam::BasicTrackedReactingParcel
 
 Description
 
 
 SourceFiles
-    trackedReactingParcel.C
-    trackedReactingParcelIO.C
+    BasicTrackedReactingParcel.C
+    BasicTrackedReactingParcelIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef trackedReactingParcel_H
-#define trackedReactingParcel_H
+#ifndef BasicTrackedReactingParcel_H
+#define BasicTrackedReactingParcel_H
 
 #include "TrackedReactingParcel.H"
+#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ThermoType>
+class BasicTrackedReactingParcel;
+
 /*---------------------------------------------------------------------------*\
-                    Class trackedReactingParcel Declaration
+                 Class BasicTrackedReactingParcel Declaration
 \*---------------------------------------------------------------------------*/
 
-class trackedReactingParcel
+template<class ThermoType>
+class BasicTrackedReactingParcel
 :
-    public TrackedReactingParcel<trackedReactingParcel>
+    public reactingParcel,
+    public TrackedReactingParcel<BasicTrackedReactingParcel<ThermoType> >
 {
 
 public:
 
+    //- The type of thermodynamics this parcel was instantiated for
+    typedef ThermoType thermoType;
+
     //- Run-time type information
-    TypeName("trackedReactingParcel");
+    TypeName("BasicTrackedReactingParcel");
 
     // Constructors
 
         //- Construct from owner, position, and cloud owner
         //  Other properties initialised as null
-        trackedReactingParcel
+        BasicTrackedReactingParcel
         (
-            ReactingCloud<trackedReactingParcel>& owner,
+            ReactingCloud<BasicTrackedReactingParcel>& owner,
             const vector& position,
             const label cellI
         );
 
         //- Construct from components
-        trackedReactingParcel
+        BasicTrackedReactingParcel
         (
-            ReactingCloud<trackedReactingParcel>& owner,
+            ReactingCloud<BasicTrackedReactingParcel>& owner,
             const vector& position,
             const label cellI,
             const label typeId,
@@ -80,46 +90,47 @@ public:
             const scalar d0,
             const vector& U0,
             const scalarField& Y0,
-            const constantProperties& constProps
+            const typename
+                TrackedReactingParcel<BasicTrackedReactingParcel>::
+                constantProperties& constProps
         );
 
         //- Construct from Istream
-        trackedReactingParcel
+        BasicTrackedReactingParcel
         (
-            const Cloud<trackedReactingParcel>& c,
+            const Cloud<BasicTrackedReactingParcel>& c,
             Istream& is,
             bool readFields = true
         );
 
         //- Construct as a copy
-        trackedReactingParcel(const trackedReactingParcel& p);
+        BasicTrackedReactingParcel(const BasicTrackedReactingParcel& p);
 
         //- Construct and return a clone
-        autoPtr<trackedReactingParcel> clone() const
+        autoPtr<BasicTrackedReactingParcel> clone() const
         {
             return
-                autoPtr<trackedReactingParcel>
+                autoPtr<BasicTrackedReactingParcel>
                 (
-                    new trackedReactingParcel(*this)
+                    new BasicTrackedReactingParcel(*this)
                 );
         }
 
 
     //- Destructor
-    virtual ~trackedReactingParcel();
+    virtual ~BasicTrackedReactingParcel();
 };
-
-
-template<>
-inline bool contiguous<trackedReactingParcel>()
-{
-    return false; // Now have scalar lists/fields (mass fractions)
-}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "BasicTrackedReactingParcel.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

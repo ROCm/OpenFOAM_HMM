@@ -24,29 +24,22 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseCloud.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(basicReactingMultiphaseCloud, 0);
-};
-
+#include "BasicReactingMultiphaseCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
+template<class ThermoType>
+Foam::BasicReactingMultiphaseCloud<ThermoType>::BasicReactingMultiphaseCloud
 (
     const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
     hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& carrierSpecies
+    PtrList<ThermoType>& carrierSpecies
 )
 :
-    ReactingMultiphaseCloud<basicReactingMultiphaseParcel>
+    ReactingMultiphaseCloud<BasicReactingMultiphaseParcel<ThermoType> >
     (
         cloudName,
         rho,
@@ -56,21 +49,23 @@ Foam::basicReactingMultiphaseCloud::basicReactingMultiphaseCloud
         carrierSpecies
     )
 {
-    basicReactingMultiphaseParcel::readFields(*this);
+    BasicReactingMultiphaseParcel<ThermoType>::readFields(*this);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::basicReactingMultiphaseCloud::~basicReactingMultiphaseCloud()
+template<class ThermoType>
+Foam::BasicReactingMultiphaseCloud<ThermoType>::~BasicReactingMultiphaseCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::basicReactingMultiphaseCloud::writeFields() const
+template<class ThermoType>
+void Foam::BasicReactingMultiphaseCloud<ThermoType>::writeFields() const
 {
-    basicReactingMultiphaseParcel::writeFields(*this);
+    BasicReactingMultiphaseParcel<ThermoType>::writeFields(*this);
 }
 
 

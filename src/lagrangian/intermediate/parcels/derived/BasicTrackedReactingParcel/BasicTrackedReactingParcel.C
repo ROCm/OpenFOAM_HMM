@@ -24,34 +24,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(trackedReactingParcel, 0);
-    defineParticleTypeNameAndDebug(trackedReactingParcel, 0);
-    defineParcelTypeNameAndDebug(trackedReactingParcel, 0);
-}
-
+#include "BasicTrackedReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::trackedReactingParcel::trackedReactingParcel
+template<class ThermoType>
+Foam::BasicTrackedReactingParcel<ThermoType>::BasicTrackedReactingParcel
 (
-    ReactingCloud<trackedReactingParcel>& owner,
+    ReactingCloud<BasicTrackedReactingParcel<ThermoType> >& owner,
     const vector& position,
     const label cellI
 )
 :
-    TrackedReactingParcel<trackedReactingParcel>(owner, position, cellI)
+    TrackedReactingParcel<BasicTrackedReactingParcel<ThermoType> >
+    (
+        owner,
+        position,
+        cellI
+    )
 {}
 
 
-Foam::trackedReactingParcel::trackedReactingParcel
+template<class ThermoType>
+Foam::BasicTrackedReactingParcel<ThermoType>::BasicTrackedReactingParcel
 (
-    ReactingCloud<trackedReactingParcel>& owner,
+    ReactingCloud<BasicTrackedReactingParcel<ThermoType> >& owner,
     const vector& position,
     const label cellI,
     const label typeId,
@@ -59,10 +56,12 @@ Foam::trackedReactingParcel::trackedReactingParcel
     const scalar d0,
     const vector& U0,
     const scalarField& Y0,
-    const constantProperties& constProps
+    const typename
+        TrackedReactingParcel<BasicTrackedReactingParcel<ThermoType> >::
+        constantProperties& constProps
 )
 :
-    TrackedReactingParcel<trackedReactingParcel>
+    TrackedReactingParcel<BasicTrackedReactingParcel<ThermoType> >
     (
         owner,
         position,
@@ -77,29 +76,37 @@ Foam::trackedReactingParcel::trackedReactingParcel
 {}
 
 
-Foam::trackedReactingParcel::trackedReactingParcel
+template<class ThermoType>
+Foam::BasicTrackedReactingParcel<ThermoType>::BasicTrackedReactingParcel
 (
-    const Cloud<trackedReactingParcel>& cloud,
+    const Cloud<BasicTrackedReactingParcel<ThermoType> >& cloud,
     Istream& is,
     bool readFields
 )
 :
-    TrackedReactingParcel<trackedReactingParcel>(cloud, is, readFields)
+    TrackedReactingParcel<BasicTrackedReactingParcel<ThermoType> >
+    (
+        cloud,
+        is,
+        readFields
+    )
 {}
 
 
-Foam::trackedReactingParcel::trackedReactingParcel
+template<class ThermoType>
+Foam::BasicTrackedReactingParcel<ThermoType>::BasicTrackedReactingParcel
 (
-    const trackedReactingParcel& p
+    const BasicTrackedReactingParcel<ThermoType>& p
 )
 :
-    TrackedReactingParcel<trackedReactingParcel>(p)
+    TrackedReactingParcel<BasicTrackedReactingParcel<ThermoType> >(p)
 {}
 
 
 // * * * * * * * * * * * * * * * *  Destructors  * * * * * * * * * * * * * * //
 
-Foam::trackedReactingParcel::~trackedReactingParcel()
+template<class ThermoType>
+Foam::BasicTrackedReactingParcel<ThermoType>::~BasicTrackedReactingParcel()
 {}
 
 

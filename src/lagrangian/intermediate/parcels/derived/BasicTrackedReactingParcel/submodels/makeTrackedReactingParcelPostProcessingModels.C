@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
+#include "basicTrackedReactingParcelTypes.H"
 #include "KinematicCloud.H"
 
 #include "NoPostProcessing.H"
@@ -34,20 +34,20 @@ License
 
 namespace Foam
 {
-    makePostProcessingModel(KinematicCloud<trackedReactingParcel>);
+    makePostProcessingModel(KinematicCloud<bTrackedReactingParcel>);
 
     // Add instances of post-processing model to the table
     makePostProcessingModelType
     (
         NoPostProcessing,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
     makePostProcessingModelType
     (
         StandardPostProcessing,
         KinematicCloud,
-        trackedReactingParcel
+        bTrackedReactingParcel
     );
 }
 

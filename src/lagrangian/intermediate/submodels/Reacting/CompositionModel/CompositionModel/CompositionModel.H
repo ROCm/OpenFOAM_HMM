@@ -78,7 +78,7 @@ class CompositionModel
         hCombustionThermo& carrierThermo_;
 
         //- Reference to the carrier phase species
-        const PtrList<specieReactingProperties>& carrierSpecies_;
+        const PtrList<typename CloudType::thermoType>& carrierSpecies_;
 
         //- Global (additional) liquid properties data
         autoPtr<liquidMixture> liquids_;
@@ -152,7 +152,8 @@ public:
             // Composition lists
 
                 //- Return the carrier species
-                const PtrList<specieReactingProperties>& carrierSpecies() const;
+                const PtrList<typename CloudType::thermoType>&
+                    carrierSpecies() const;
 
                 //- Return the global (additional) liquids
                 const liquidMixture& liquids() const;

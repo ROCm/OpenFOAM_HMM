@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingParcel.H"
+#include "basicTrackedReactingParcelTypes.H"
 #include "KinematicCloud.H"
 
 #include "NoDrag.H"
@@ -34,11 +34,11 @@ License
 
 namespace Foam
 {
-    makeDragModel(KinematicCloud<trackedReactingParcel>);
+    makeDragModel(KinematicCloud<bTrackedReactingParcel>);
 
     // Add instances of drag model to the table
-    makeDragModelType(NoDrag, KinematicCloud, trackedReactingParcel);
-    makeDragModelType(SphereDrag, KinematicCloud, trackedReactingParcel);
+    makeDragModelType(NoDrag, KinematicCloud, bTrackedReactingParcel);
+    makeDragModelType(SphereDrag, KinematicCloud, bTrackedReactingParcel);
 }
 
 

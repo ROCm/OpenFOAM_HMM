@@ -37,20 +37,25 @@ SourceFiles
 #define trackedReactingCloud_H
 
 #include "ReactingCloud.H"
-#include "trackedReactingParcel.H"
+#include "BasicTrackedReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ThermoType>
+class trackedReactingCloud;
+
 /*---------------------------------------------------------------------------*\
                     Class trackedReactingCloud Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ThermoType>
 class trackedReactingCloud
 :
-    public ReactingCloud<trackedReactingParcel>
+    public ReactingCloud<BasicTrackedReactingParcel<ThermoType> >
 {
     // Private Member Functions
 
@@ -77,7 +82,7 @@ public:
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& gases
+            PtrList<ThermoType>& gases
         );
 
 
@@ -95,6 +100,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "trackedReactingCloud.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

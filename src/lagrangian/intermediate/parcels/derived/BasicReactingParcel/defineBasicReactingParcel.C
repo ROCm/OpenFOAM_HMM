@@ -24,29 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcel.H"
-#include "ReactingCloud.H"
+#include "basicReactingParcelTypes.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(Cloud<basicReactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(KinematicParcel<basicReactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicParcel<basicReactingParcel>, 0);
-    defineParcelTypeNameAndDebug(ThermoParcel<basicReactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(ThermoParcel<basicReactingParcel>, 0);
-    defineParcelTypeNameAndDebug(ReactingParcel<basicReactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(ReactingParcel<basicReactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(KinematicCloud<basicReactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicCloud<basicReactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(ThermoCloud<basicReactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(ThermoCloud<basicReactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(ReactingCloud<basicReactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(ReactingCloud<basicReactingParcel>, 0);
-
+    createReactingParcelType(BasicReactingParcel);
 };
 
 

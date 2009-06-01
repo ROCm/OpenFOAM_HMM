@@ -124,7 +124,8 @@ public:
             const volVectorField& U,
             const dimensionedVector& g,
             hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& carrierSpecies
+            PtrList<typename ReactingCloud<ParcelType>::thermoType>&
+                carrierSpecies
         );
 
 

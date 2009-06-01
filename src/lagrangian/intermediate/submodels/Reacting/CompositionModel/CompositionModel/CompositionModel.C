@@ -110,7 +110,7 @@ Foam::CompositionModel<CloudType>::carrierThermo() const
 
 
 template<class CloudType>
-const Foam::PtrList<Foam::specieReactingProperties>&
+const Foam::PtrList<typename CloudType::thermoType>&
 Foam::CompositionModel<CloudType>::carrierSpecies() const
 {
     return carrierSpecies_;
