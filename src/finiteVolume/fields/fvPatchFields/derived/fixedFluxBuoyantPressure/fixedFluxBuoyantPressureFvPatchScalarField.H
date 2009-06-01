@@ -26,7 +26,10 @@ Class
     Foam::fixedFluxBuoyantPressureFvPatchScalarField
 
 Description
-    Foam::fixedFluxBuoyantPressureFvPatchScalarField
+    Set the pressure gradient boundary condition appropriately for buoyant flow.
+
+    If the variable name is "pd" assume it is p - rho*g.h and set the gradient
+    appropriately.  Otherwise assume the variable is the static pressure.
 
 SourceFiles
     fixedFluxBuoyantPressureFvPatchScalarField.C

@@ -55,7 +55,17 @@ metisCoeffs
 }
 
 scotchCoeffs
-{}
+{
+    //processorWeights
+    //(
+    //    1
+    //    1
+    //    1
+    //    1
+    //);
+    //writeGraph  true;
+    //strategy "b";
+}
 
 manualCoeffs
 {

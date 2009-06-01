@@ -34,6 +34,17 @@ inline const Foam::labelList& Foam::globalIndex::offsets() const
 }
 
 
+inline Foam::label Foam::globalIndex::localSize() const
+{
+    return
+    (
+        Pstream::myProcNo() == 0
+      ? offsets_[Pstream::myProcNo()]
+      : offsets_[Pstream::myProcNo()] - offsets_[Pstream::myProcNo()-1]
+    );
+}
+
+
 inline Foam::label Foam::globalIndex::size() const
 {
     return offsets_[Pstream::nProcs()-1];
