@@ -169,6 +169,21 @@ public:
             bool move(trackData&);
 
 
+            //- Overridable function to handle the particle hitting a patch
+            //  Executed before other patch-hitting functions
+            void hitPatch
+            (
+                const polyPatch&,
+                trackedParticle::trackData& td,
+                const label patchI
+            );
+            void hitPatch
+            (
+                const polyPatch&,
+                int&,
+                const label patchI
+           );
+
             //- Overridable function to handle the particle hitting a wedge
             void hitWedgePatch
             (
