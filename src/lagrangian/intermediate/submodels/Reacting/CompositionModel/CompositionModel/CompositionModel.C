@@ -64,7 +64,7 @@ Foam::CompositionModel<CloudType>::CompositionModel
     phaseProps_
     (
         coeffDict_.lookup("phases"),
-        carrierThermo_.composition().Y(),
+        carrierThermo_.composition().species(),
         liquids_().components(),
         solids_().components()
     )

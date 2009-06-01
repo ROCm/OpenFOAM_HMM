@@ -94,15 +94,12 @@ private:
 
     // Private member functions
 
-        //- Set global ids - specialisation for carrier phases
-        void setGlobalIds(const PtrList<volScalarField>& YGas);
-
-        //- Set global ids - liquid and solid phases
+        //- Set global ids
         void setGlobalIds(const wordList& globalNames);
 
         //- Set global carrier ids - attempts to map component names to global
         //  carrier species
-        void setGlobalCarrierIds(const PtrList<volScalarField>& YGas);
+        void setGlobalCarrierIds(const wordList& carrierNames);
 
         //- Check the total mass fraction
         void checkTotalMassFraction() const;
@@ -134,7 +131,7 @@ public:
         //- Initialise the global ids
         void initialiseGlobalIds
         (
-            const PtrList<volScalarField>& YGas,
+            const wordList& gasNames,
             const wordList& liquidNames,
             const wordList& solidNames
         );

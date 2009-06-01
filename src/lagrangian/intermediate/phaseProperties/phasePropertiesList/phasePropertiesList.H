@@ -70,7 +70,7 @@ public:
     phasePropertiesList
     (
         Istream& is,
-        const PtrList<volScalarField>& YGas,
+        const wordList& gasNames,
         const wordList& liquidNames,
         const wordList& solidNames
     );
