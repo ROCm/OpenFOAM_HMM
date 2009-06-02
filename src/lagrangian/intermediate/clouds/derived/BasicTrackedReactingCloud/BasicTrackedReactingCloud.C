@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "trackedReactingCloud.H"
+#include "BasicTrackedReactingCloud.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ThermoType>
-Foam::trackedReactingCloud<ThermoType>::trackedReactingCloud
+Foam::BasicTrackedReactingCloud<ThermoType>::BasicTrackedReactingCloud
 (
     const word& cloudName,
     const volScalarField& rho,
@@ -56,14 +56,14 @@ Foam::trackedReactingCloud<ThermoType>::trackedReactingCloud
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ThermoType>
-Foam::trackedReactingCloud<ThermoType>::~trackedReactingCloud()
+Foam::BasicTrackedReactingCloud<ThermoType>::~BasicTrackedReactingCloud()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ThermoType>
-void Foam::trackedReactingCloud<ThermoType>::writeFields() const
+void Foam::BasicTrackedReactingCloud<ThermoType>::writeFields() const
 {
     BasicTrackedReactingParcel<ThermoType>::writeFields(*this);
 }

@@ -24,7 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingParcelTypes.H"
+#include "createReactingParcelTypes.H"
+#include "BasicReactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

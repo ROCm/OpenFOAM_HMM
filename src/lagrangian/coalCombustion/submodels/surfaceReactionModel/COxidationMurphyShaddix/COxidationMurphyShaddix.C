@@ -28,20 +28,23 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-Foam::label Foam::COxidationMurphyShaddix::maxIters_ = 1000;
+template<class CloudType>
+Foam::label Foam::COxidationMurphyShaddix<CloudType>::maxIters_ = 1000;
 
-Foam::scalar Foam::COxidationMurphyShaddix::tolerance_ = 1e-06;
+template<class CloudType>
+Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::tolerance_ = 1e-06;
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::COxidationMurphyShaddix::COxidationMurphyShaddix
+template<class CloudType>
+Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
 (
     const dictionary& dict,
-    ReactingMultiphaseCloud<coalParcel>& owner
+    CloudType& owner
 )
 :
-    SurfaceReactionModel<ReactingMultiphaseCloud<coalParcel> >
+    SurfaceReactionModel<CloudType>
     (
         dict,
         owner,
@@ -76,19 +79,22 @@ Foam::COxidationMurphyShaddix::COxidationMurphyShaddix
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::COxidationMurphyShaddix::~COxidationMurphyShaddix()
+template<class CloudType>
+Foam::COxidationMurphyShaddix<CloudType>::~COxidationMurphyShaddix()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::COxidationMurphyShaddix::active() const
+template<class CloudType>
+bool Foam::COxidationMurphyShaddix<CloudType>::active() const
 {
     return true;
 }
 
 
-Foam::scalar Foam::COxidationMurphyShaddix::calculate
+template<class CloudType>
+Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
 (
     const scalar dt,
     const label cellI,
@@ -110,7 +116,8 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
 ) const
 {
     // Fraction of remaining combustible material
-    const scalar fComb = YMixture[coalParcel::SLD]*YSolid[CsLocalId_];
+    const label idSolid = CloudType::parcelType::SLD;
+    const scalar fComb = YMixture[idSolid]*YSolid[CsLocalId_];
 
     // Surface combustion until combustible fraction is consumed
     if (fComb < SMALL)
@@ -120,7 +127,7 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
 
     // Cell carrier phase O2 species density [kg/m^3]
     const scalar rhoO2 =
-        rhoc*owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
+        rhoc*this->owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
 
     if (rhoO2 < SMALL)
     {
@@ -186,8 +193,10 @@ Foam::scalar Foam::COxidationMurphyShaddix::calculate
 
     if (iter > maxIters_)
     {
-        WarningIn("scalar Foam::COxidationMurphyShaddix::calculate(...)")
-            << "iter limit reached (" << maxIters_ << ")" << nl << endl;
+        WarningIn
+        (
+            "scalar Foam::COxidationMurphyShaddix<CloudType>::calculate(...)"
+        )   << "iter limit reached (" << maxIters_ << ")" << nl << endl;
     }
 
     // Calculate the number of molar units reacted

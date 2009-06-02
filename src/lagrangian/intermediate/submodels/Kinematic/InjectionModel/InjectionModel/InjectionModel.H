@@ -303,21 +303,6 @@ public:
             ) = 0;
 
             virtual bool fullyDescribed() const = 0;
-/*
-            //- Return the velocity of the parcel to introduce at a time
-            virtual vector velocity
-            (
-                const label parcelI,
-                const scalar time
-            ) = 0;
-
-            //- Return the diameter of the parcel to introduce at a time
-            virtual scalar d0
-            (
-                const label parcelI,
-                const scalar time
-            ) const = 0;
-*/
 };
 
 
@@ -341,6 +326,21 @@ public:
     InjectionModel<CloudType<ParcelType> >::                                  \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
+
+
+#define makeInjectionModelThermoType(SS, CloudType, ParcelType, ThermoType)   \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    InjectionModel<CloudType<ParcelType<ThermoType> > >::                     \
+        adddictionaryConstructorToTable                                       \
+        <SS<CloudType<ParcelType<ThermoType> > > >                            \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

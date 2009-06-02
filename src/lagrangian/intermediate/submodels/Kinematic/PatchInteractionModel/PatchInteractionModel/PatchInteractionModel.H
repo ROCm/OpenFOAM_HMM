@@ -160,6 +160,20 @@ public:
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
+#define makePatchInteractionModelThermoType(SS, CloudType, ParcelType, ThermoType)\
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    PatchInteractionModel<CloudType<ParcelType<ThermoType> > >::              \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository

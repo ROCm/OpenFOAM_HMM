@@ -55,7 +55,7 @@ class BasicReactingMultiphaseCloud;
 template<class ThermoType>
 class BasicReactingMultiphaseCloud
 :
-    public ReactingMultiphaseCloud<BasicReactingMultiphaseParcel>
+    public ReactingMultiphaseCloud<BasicReactingMultiphaseParcel<ThermoType> >
 {
     // Private Member Functions
 

@@ -34,19 +34,24 @@ Description
 #define COxidationMurphyShaddix_H
 
 #include "SurfaceReactionModel.H"
-#include "coalParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward class declarations
+template<class CloudType>
+class COxidationMurphyShaddix;
+
 /*---------------------------------------------------------------------------*\
                   Class COxidationMurphyShaddix Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class CloudType>
 class COxidationMurphyShaddix
 :
-    public SurfaceReactionModel<ReactingMultiphaseCloud<coalParcel> >
+    public SurfaceReactionModel<CloudType>
 {
     // Private data
 
@@ -122,7 +127,7 @@ public:
         COxidationMurphyShaddix
         (
             const dictionary& dict,
-            ReactingMultiphaseCloud<coalParcel>& owner
+            CloudType& owner
         );
 
 
@@ -162,6 +167,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "COxidationMurphyShaddix.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

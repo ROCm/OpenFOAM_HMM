@@ -35,10 +35,10 @@ Description
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
 #include "basicThermoCloud.H"
-#include "coalCloud.H"
+#include "CoalCloud.H"
 #include "chemistryModel.H"
 #include "chemistrySolver.H"
-#include "ReactingCloudThermoTypes.H"
+#include "reactingThermoTypes.H"
 #include "timeActivatedExplicitSource.H"
 #include "radiationModel.H"
 

@@ -47,8 +47,6 @@ SourceFiles
 #include "ThermoCloud.H"
 #include "reactingCloud.H"
 
-#include "ReactingCloudThermoTypes.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam

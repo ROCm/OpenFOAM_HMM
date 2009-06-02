@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::trackedReactingCloud
+    Foam::BasicTrackedReactingCloud
 
 Description
     Reacting cloud templated on the reacting parcel
 
 SourceFiles
-    trackedReactingCloud.C
+    BasicTrackedReactingCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef trackedReactingCloud_H
-#define trackedReactingCloud_H
+#ifndef BasicTrackedReactingCloud_H
+#define BasicTrackedReactingCloud_H
 
 #include "ReactingCloud.H"
 #include "BasicTrackedReactingParcel.H"
@@ -46,36 +46,36 @@ namespace Foam
 
 // Forward declaration of classes
 template<class ThermoType>
-class trackedReactingCloud;
+class BasicTrackedReactingCloud;
 
 /*---------------------------------------------------------------------------*\
-                    Class trackedReactingCloud Declaration
+                 Class BasicTrackedReactingCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ThermoType>
-class trackedReactingCloud
+class BasicTrackedReactingCloud
 :
     public ReactingCloud<BasicTrackedReactingParcel<ThermoType> >
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        trackedReactingCloud(const trackedReactingCloud&);
+        BasicTrackedReactingCloud(const BasicTrackedReactingCloud&);
 
         //- Disallow default bitwise assignment
-        void operator=(const trackedReactingCloud&);
+        void operator=(const BasicTrackedReactingCloud&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("trackedReactingCloud");
+    TypeName("BasicTrackedReactingCloud");
 
 
     // Constructors
 
         //- Construct given carrier gas fields
-        trackedReactingCloud
+        BasicTrackedReactingCloud
         (
             const word& cloudName,
             const volScalarField& rho,
@@ -87,7 +87,7 @@ public:
 
 
     //- Destructor
-    ~trackedReactingCloud();
+    ~BasicTrackedReactingCloud();
 
 
     // Member Functions
@@ -104,7 +104,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-    #include "trackedReactingCloud.C"
+    #include "BasicTrackedReactingCloud.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

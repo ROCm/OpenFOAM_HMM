@@ -2,32 +2,33 @@ PARCELS=parcels
 DERIVEDPARCELS=$(PARCELS)/derived
 BASEPARCELS=$(PARCELS)/baseClasses
 
-/* Parcels */
-$(DERIVEDPARCELS)/basicKinematicParcel/basicKinematicParcel.C
-$(DERIVEDPARCELS)/basicThermoParcel/basicThermoParcel.C
-/* $(DERIVEDPARCELS)/basicReactingParcel/basicReactingParcel.C */
-/* $(DERIVEDPARCELS)/basicReactingMultiphaseParcel/basicReactingMultiphaseParcel.C */
-/* $(DERIVEDPARCELS)/trackedReactingParcel/trackedReactingParcel.C */
+CLOUDS=clouds
+DERIVEDCLOUDS=$(CLOUDS)/derived
+BASECLOUDS=$(CLOUDS)/baseClasses
 
+
+/* Parcels */
 $(BASEPARCELS)/reactingParcel/reactingParcel.C
 
+
 /* Cloud base classes */
-clouds/baseClasses/kinematicCloud/kinematicCloud.C
-clouds/baseClasses/thermoCloud/thermoCloud.C
-clouds/baseClasses/reactingCloud/reactingCloud.C
-clouds/baseClasses/reactingMultiphaseCloud/reactingMultiphaseCloud.C
+$(BASECLOUDS)/kinematicCloud/kinematicCloud.C
+$(BASECLOUDS)/thermoCloud/thermoCloud.C
+$(BASECLOUDS)/reactingCloud/reactingCloud.C
+$(BASECLOUDS)/reactingMultiphaseCloud/reactingMultiphaseCloud.C
 
 
 /* Cloud container/injection mechanisms */
-clouds/derived/basicKinematicCloud/basicKinematicCloud.C
-clouds/derived/basicThermoCloud/basicThermoCloud.C
-/* clouds/derived/basicReactingCloud/basicReactingCloud.C */
-/* clouds/derived/basicReactingMultiphaseCloud/basicReactingMultiphaseCloud.C */
-/* clouds/derived/trackedReactingCloud/trackedReactingCloud.C */
+$(DERIVEDCLOUDS)/basicKinematicCloud/basicKinematicCloud.C
+$(DERIVEDCLOUDS)/basicThermoCloud/basicThermoCloud.C
+$(DERIVEDCLOUDS)/BasicReactingCloud/defineBasicReactingCloud.C
+$(DERIVEDCLOUDS)/BasicReactingMultiphaseCloud/defineBasicReactingMultiphaseCloud.C
+$(DERIVEDCLOUDS)/BasicTrackedReactingCloud/defineBasicTrackedReactingCloud.C
 
 
 /* kinematic parcel sub-models */
 KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
+$(KINEMATICPARCEL)/basicKinematicParcel.C
 $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDispersionModels.C
 $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDragModels.C
@@ -38,6 +39,7 @@ $(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelPostProcessingModels.C
 
 /* thermo parcel sub-models */
 THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel
+$(THERMOPARCEL)/basicThermoParcel.C
 $(THERMOPARCEL)/defineBasicThermoParcel.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelDispersionModels.C
 $(THERMOPARCEL)/submodels/makeBasicThermoParcelDragModels.C
@@ -50,42 +52,19 @@ $(THERMOPARCEL)/submodels/makeBasicThermoParcelPostProcessingModels.C
 /* reacting parcel sub-models */
 REACTINGPARCEL=$(DERIVEDPARCELS)/BasicReactingParcel
 $(REACTINGPARCEL)/defineBasicReactingParcel.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelCompositionModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelDispersionModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelDragModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelHeatTransferModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelInjectionModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelPatchInteractionModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelPhaseChangeModels.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelPostProcessingModels.C
-
-
-/* reacting multiphase parcel sub-models */
-REACTINGMPPARCEL=$(DERIVEDPARCELS)/BasicReactingMultiphaseParcel
-$(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelCompositionModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDevolatilisationModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDispersionModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelDragModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelHeatTransferModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelInjectionModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelPatchInteractionModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelPhaseChangeModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelPostProcessingModels.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseParcelSurfaceReactionModels.C
+$(REACTINGPARCEL)/submodels/makeBasicReactingParcelSubmodels.C
 
 
 /* tracked reacting parcel sub-models */
 TRACKEDREACTINGPARCEL=$(DERIVEDPARCELS)/BasicTrackedReactingParcel
 $(TRACKEDREACTINGPARCEL)/defineTrackedReactingParcel.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelCompositionModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelDispersionModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelDragModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelHeatTransferModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelInjectionModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPatchInteractionModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPhaseChangeModels.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeTrackedReactingParcelPostProcessingModels.C
+$(TRACKEDREACTINGPARCEL)/submodels/makeBasicTrackedReactingParcelSubmodels.C
+
+
+/* reacting multiphase parcel sub-models */
+/*REACTINGMPPARCEL=$(DERIVEDPARCELS)/BasicReactingMultiphaseParcel
+$(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
+$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseSubmodels.C
 
 
 /* bolt-on models */

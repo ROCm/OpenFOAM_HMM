@@ -28,9 +28,6 @@ License
 
 #include "basicKinematicParcel.H"
 #include "basicThermoParcel.H"
-#include "basicReactingMultiphaseParcelTypes.H"
-
-#include "basicTrackedReactingParcelTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,9 +35,6 @@ namespace Foam
 {
     makeParcelIOList(basicKinematicParcel);
     makeParcelIOList(basicThermoParcel);
-    makeParcelIOList(bReactingMultiphaseParcel);
-
-    makeParcelIOList(bTrackedReactingParcel);
 };
 
 

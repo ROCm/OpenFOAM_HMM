@@ -31,7 +31,7 @@ forAll(gasProperties, i)
 }
 
 Info<< "\nConstructing coal cloud" << endl;
-coalCloud coalParcels
+CoalCloud<specieReactingProperties> coalParcels
 (
     "coalCloud1",
     rho,

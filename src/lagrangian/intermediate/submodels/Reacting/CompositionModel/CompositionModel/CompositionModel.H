@@ -282,13 +282,18 @@ public:
     );
 
 
-#define makeCompositionModelType(SS, CloudType, ParcelType)                   \
+#define makeCompositionModelThermoType(SS, CloudType, ParcelType, ThermoType) \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
                                                                               \
-    CompositionModel<CloudType<ParcelType> >::                                \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    CompositionModel<CloudType<ParcelType<ThermoType> > >::                   \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

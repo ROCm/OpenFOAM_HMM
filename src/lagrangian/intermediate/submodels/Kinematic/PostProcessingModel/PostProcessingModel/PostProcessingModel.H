@@ -178,6 +178,20 @@ public:
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
+#define makePostProcessingModelThermoType(SS, CloudType, ParcelType, ThermoType)\
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    PostProcessingModel<CloudType<ParcelType<ThermoType> > >::                \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "PostProcessingModelI.H"

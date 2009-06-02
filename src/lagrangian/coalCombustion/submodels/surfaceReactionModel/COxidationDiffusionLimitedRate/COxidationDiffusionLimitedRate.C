@@ -28,18 +28,14 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::COxidationDiffusionLimitedRate::COxidationDiffusionLimitedRate
+template<class CloudType>
+Foam::COxidationDiffusionLimitedRate<CloudType>::COxidationDiffusionLimitedRate
 (
     const dictionary& dict,
-    ReactingMultiphaseCloud<coalParcel>& owner
+    CloudType& owner
 )
 :
-    SurfaceReactionModel<ReactingMultiphaseCloud<coalParcel> >
-    (
-        dict,
-        owner,
-        typeName
-    ),
+    SurfaceReactionModel<CloudType>(dict, owner, typeName),
     Sb_(dimensionedScalar(this->coeffDict().lookup("Sb")).value()),
     D_(dimensionedScalar(this->coeffDict().lookup("D")).value()),
     CsLocalId_(-1),
@@ -63,10 +59,10 @@ Foam::COxidationDiffusionLimitedRate::COxidationDiffusionLimitedRate
     {
         FatalErrorIn
         (
-            "COxidationDiffusionLimitedRate"
+            "COxidationDiffusionLimitedRate<CloudType>"
             "("
                 "const dictionary&, "
-                "ReactingMultiphaseCloud<coalParcel>&"
+                "CloudType&"
             ")"
         )   << "Stoichiometry of reaction, Sb, must be greater than zero" << nl
             << exit(FatalError);
@@ -76,19 +72,23 @@ Foam::COxidationDiffusionLimitedRate::COxidationDiffusionLimitedRate
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::COxidationDiffusionLimitedRate::~COxidationDiffusionLimitedRate()
+template<class CloudType>
+Foam::COxidationDiffusionLimitedRate<CloudType>::
+~COxidationDiffusionLimitedRate()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::COxidationDiffusionLimitedRate::active() const
+template<class CloudType>
+bool Foam::COxidationDiffusionLimitedRate<CloudType>::active() const
 {
     return true;
 }
 
 
-Foam::scalar Foam::COxidationDiffusionLimitedRate::calculate
+template<class CloudType>
+Foam::scalar Foam::COxidationDiffusionLimitedRate<CloudType>::calculate
 (
     const scalar dt,
     const label cellI,
@@ -110,7 +110,8 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate::calculate
 ) const
 {
     // Fraction of remaining combustible material
-    const scalar fComb = YMixture[coalParcel::SLD]*YSolid[CsLocalId_];
+    const label idSolid = CloudType::parcelType::SLD;
+    const scalar fComb = YMixture[idSolid]*YSolid[CsLocalId_];
 
     // Surface combustion active combustible fraction is consumed
     if (fComb < SMALL)
@@ -120,7 +121,7 @@ Foam::scalar Foam::COxidationDiffusionLimitedRate::calculate
 
     // Local mass fraction of O2 in the carrier phase
     const scalar YO2 =
-        owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
+        this->owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
 
     // Change in C mass [kg]
     scalar dmC =

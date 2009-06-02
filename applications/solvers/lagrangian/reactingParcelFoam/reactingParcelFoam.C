@@ -37,7 +37,7 @@ Description
 #include "BasicReactingCloud.H"
 #include "chemistryModel.H"
 #include "chemistrySolver.H"
-#include "ReactingCloudThermoTypes.H"
+#include "reactingThermoTypes.H"
 #include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

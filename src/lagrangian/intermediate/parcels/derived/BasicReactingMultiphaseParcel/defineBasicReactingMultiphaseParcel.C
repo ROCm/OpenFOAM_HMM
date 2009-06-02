@@ -24,79 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicReactingMultiphaseParcelTypes.H"
-#include "ReactingMultiphaseCloud.H"
+#include "createReactingMultiphaseParcelTypes.H"
+#include "BasicReactingMultiphaseParcel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(bReactingMultiphaseParcel, 0);
-
-    defineTemplateTypeNameAndDebug(Particle<bReactingMultiphaseParcel>, 0);
-
-    defineTemplateTypeNameAndDebug(Cloud<bReactingMultiphaseParcel>, 0);
-
-    defineParcelTypeNameAndDebug
-    (
-        KinematicParcel<bReactingMultiphaseParcel>,
-        0
-    );
-    defineTemplateTypeNameAndDebug
-    (
-        KinematicParcel<bReactingMultiphaseParcel>,
-        0
-    );
-    defineParcelTypeNameAndDebug
-    (
-        ThermoParcel<bReactingMultiphaseParcel>,
-        0
-    );
-    defineTemplateTypeNameAndDebug
-    (
-        ThermoParcel<bReactingMultiphaseParcel>,
-        0
-    );
-    defineParcelTypeNameAndDebug
-    (
-        ReactingParcel<bReactingMultiphaseParcel>,
-        0
-    );
-    defineTemplateTypeNameAndDebug
-    (
-        ReactingParcel<bReactingMultiphaseParcel>,
-        0
-    );
-    defineParcelTypeNameAndDebug
-    (
-        ReactingMultiphaseParcel<bReactingMultiphaseParcel>,
-        0
-    );
-    defineTemplateTypeNameAndDebug
-    (
-        ReactingMultiphaseParcel<bReactingMultiphaseParcel>,
-        0
-    );
-
-    defineParcelTypeNameAndDebug
-    (
-        KinematicCloud<bReactingMultiphaseParcel>,
-        0
-    );
-    defineParcelTypeNameAndDebug
-    (
-        ThermoCloud<bReactingMultiphaseParcel>,
-        0
-    );
-    defineParcelTypeNameAndDebug
-    (
-        ReactingCloud<bReactingMultiphaseParcel>,
-        0
-    );
-    defineParcelTypeNameAndDebug
-    (
-        ReactingMultiphaseCloud<bReactingMultiphaseParcel>,
-        0
-    );
-
+    createReactingMultiphaseParcelType(BasicReactingMultiphaseParcel);
 };
 
 

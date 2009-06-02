@@ -24,35 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicTrackedReactingParcelTypes.H"
-#include "BasicReactingCloud.H"
+#include "createTrackedReactingParcelTypes.H"
+#include "BasicTrackedReactingParcel.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug(bTrackedReactingParcel, 0);
-    defineTemplateTypeNameAndDebug(Particle<bTrackedReactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(Cloud<bTrackedReactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(KinematicParcel<bTrackedReactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(KinematicParcel<bTrackedReactingParcel>, 0);
-    defineParcelTypeNameAndDebug(ThermoParcel<bTrackedReactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(ThermoParcel<bTrackedReactingParcel>, 0);
-    defineParcelTypeNameAndDebug(ReactingParcel<bTrackedReactingParcel>, 0);
-    defineTemplateTypeNameAndDebug(ReactingParcel<bTrackedReactingParcel>, 0);
-    defineTemplateTypeNameAndDebug
-    (
-        TrackedReactingParcel<bTrackedReactingParcel>,
-        0
-    );
-
-    defineParcelTypeNameAndDebug(KinematicCloud<bTrackedReactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(KinematicCloud<bTrackedReactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(ThermoCloud<bTrackedReactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(ThermoCloud<bTrackedReactingParcel>, 0);
-
-    defineParcelTypeNameAndDebug(ReactingCloud<bTrackedReactingParcel>, 0);
-//    defineTemplateTypeNameAndDebug(ReactingCloud<bTrackedReactingParcel>, 0);
+    createTrackedReactingParcelType(BasicTrackedReactingParcel);
 }
 
 

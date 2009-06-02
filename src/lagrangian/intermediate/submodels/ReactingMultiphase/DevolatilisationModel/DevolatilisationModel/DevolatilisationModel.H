@@ -160,13 +160,18 @@ public:
     );
 
 
-#define makeDevolatilisationModelType(SS, CloudType, ParcelType)              \
+#define makeDevolatilisationModelThermoType(SS, CloudType, ParcelType, ThermoType)\
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
                                                                               \
-    DevolatilisationModel<CloudType<ParcelType> >::                           \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    DevolatilisationModel<CloudType<ParcelType<ThermoType> > >::              \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
