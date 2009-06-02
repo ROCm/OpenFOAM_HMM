@@ -276,15 +276,15 @@ Foam::Ostream& Foam::operator<<
     scalarField YSolidLoc = p.YSolid()*p.Y()[2];
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>&>(p)
+        os  << static_cast<const ReactingParcel<ParcelType>&>(p)
             << token::SPACE << YGasLoc
             << token::SPACE << YLiquidLoc
             << token::SPACE << YSolidLoc;
     }
     else
     {
-        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>&>(p);
-        os << YGasLoc << YLiquidLoc << YSolidLoc;
+        os  << static_cast<const ReactingParcel<ParcelType>&>(p);
+        os  << YGasLoc << YLiquidLoc << YSolidLoc;
     }
 
     // Check state of Ostream
