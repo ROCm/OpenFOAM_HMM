@@ -44,18 +44,14 @@ Description
 
     Needs to be on underlying directMapped(Wall)FvPatch.
 
+    Note: runs in parallel with arbitrary decomposition. Uses directMapped
+    functionality to calculate exchange.
 
     Note: lags interface data so both sides use same data.
-    Old scheme:
-    - last-to-solve calculates harmonic average
-    - gets used next time on both regions.
-
-    New scheme:
     - problem: schedule to calculate average would interfere
     with standard processor swaps.
     - so: updateCoeffs sets both to same Twall. Only need to do
     this for last outer iteration but don't have access to this.
-
 
 SourceFiles
     solidWallMixedTemperatureCoupledFvPatchScalarField.C
