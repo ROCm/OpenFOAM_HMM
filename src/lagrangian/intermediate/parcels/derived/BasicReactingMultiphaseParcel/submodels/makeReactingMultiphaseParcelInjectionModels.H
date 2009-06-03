@@ -24,70 +24,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeCoalParcelSurfaceReactionModels_H
-#define makeCoalParcelSurfaceReactionModels_H
+#ifndef makeReactingMultiphaseParcelInjectionModels_H
+#define makeReactingMultiphaseParcelInjectionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
-#include "ReactingMultiphaseCloud.H"
+#include "KinematicCloud.H"
 
-#include "NoSurfaceReaction.H"
-#include "COxidationDiffusionLimitedRate.H"
-#include "COxidationKineticDiffusionLimitedRate.H"
-#include "COxidationMurphyShaddix.H"
+#include "ConeInjection.H"
+#include "FieldActivatedInjection.H"
+#include "ManualInjection.H"
+#include "NoInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createCoalSurfaceReactionModelType(ParcelType)                        \
+#define createReactingMultiphaseInjectionModelType(ParcelType)                \
                                                                               \
-    createCoalSurfaceReactionModelThermoType                                  \
+    createReactingMultiphaseInjectionModelThermoType                          \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createCoalSurfaceReactionModelThermoType                                  \
+                                                                              \
+    createReactingMultiphaseInjectionModelThermoType                          \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createCoalSurfaceReactionModelThermoType(ParcelType, ThermoType)      \
+#define createReactingMultiphaseInjectionModelThermoType(ParcelType, ThermoType)\
                                                                               \
-    makeSurfaceReactionModel                                                  \
-    (                                                                         \
-        ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
-    );                                                                        \
+    makeInjectionModel(KinematicCloud<ParcelType<ThermoType> >);              \
                                                                               \
-    makeSurfaceReactionModelThermoType                                        \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        NoSurfaceReaction,                                                    \
-        ReactingMultiphaseCloud,                                              \
+        ConeInjection,                                                        \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeSurfaceReactionModelThermoType                                        \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        COxidationDiffusionLimitedRate,                                       \
-        ReactingMultiphaseCloud,                                              \
+        FieldActivatedInjection,                                              \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeSurfaceReactionModelThermoType                                        \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        COxidationKineticDiffusionLimitedRate,                                \
-        ReactingMultiphaseCloud,                                              \
+        ManualInjection,                                                      \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeSurfaceReactionModelThermoType                                        \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        COxidationMurphyShaddix,                                              \
-        ReactingMultiphaseCloud,                                              \
+        NoInjection,                                                          \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
-    );
+    );                                                                        \
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

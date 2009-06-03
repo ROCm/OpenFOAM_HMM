@@ -26,17 +26,21 @@ License
 
 #include "CoalParcel.H"
 
+// Kinematic
 #include "makeReactingParcelDispersionModels.H"
 #include "makeReactingParcelDragModels.H"
-#include "makeReactingParcelInjectionModels.H"
+#include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
 #include "makeReactingParcelPatchInteractionModels.H"
 #include "makeReactingParcelPostProcessingModels.H"
 
+// Thermodynamic
 #include "makeReactingParcelHeatTransferModels.H"
 
-#include "makeReactingMultiphaseParcelCompositionModels.H"
+// Reacting
+#include "makeReactingMultiphaseParcelCompositionModels.H" // MP variant
 #include "makeReactingParcelPhaseChangeModels.H"
 
+// Reacting multiphase
 #include "makeReactingMultiphaseParcelDevolatilisationModels.H"
 #include "makeCoalParcelSurfaceReactionModels.H"
 
@@ -47,7 +51,7 @@ namespace Foam
     // Kinematic sub-models
     createReactingDispersionModelType(CoalParcel);
     createReactingDragModelType(CoalParcel);
-    createReactingInjectionModelType(CoalParcel);
+    createReactingMultiphaseInjectionModelType(CoalParcel);
     createReactingPatchInteractionModelType(CoalParcel);
     createReactingPostProcessingModelType(CoalParcel);
 
