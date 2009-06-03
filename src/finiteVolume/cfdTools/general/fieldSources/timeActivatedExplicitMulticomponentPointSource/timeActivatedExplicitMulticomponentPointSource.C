@@ -97,7 +97,7 @@ void Foam::timeActivatedExplicitMulticomponentPointSource::updateAddressing()
 Foam::timeActivatedExplicitMulticomponentPointSource::
 timeActivatedExplicitMulticomponentPointSource
 (
-    const word& sourceName,
+    const word& name,
     const fvMesh& mesh,
     const PtrList<volScalarField>& carrierFields,
     const dimensionSet& dims
@@ -107,14 +107,14 @@ timeActivatedExplicitMulticomponentPointSource
     (
         IOobject
         (
-            sourceName + "Properties",
+            name + "Properties",
             mesh.time().constant(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
-    sourceName_(sourceName),
+    name_(name),
     mesh_(mesh),
     runTime_(mesh.time()),
     dimensions_(dims),
@@ -148,7 +148,7 @@ Foam::timeActivatedExplicitMulticomponentPointSource::Su
         (
             IOobject
             (
-                sourceName_ + carrierFields_[fieldI].name() + "Su",
+                name_ + carrierFields_[fieldI].name() + "Su",
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
@@ -159,23 +159,84 @@ Foam::timeActivatedExplicitMulticomponentPointSource::Su
         )
     );
 
-    DimensionedField<scalar, volMesh>& sourceField = tSource();
-
-    forAll(pointSources_, sourceI)
+    if (active_)
     {
-        const pointSourceProperties& psp = pointSources_[sourceI];
+        DimensionedField<scalar, volMesh>& sourceField = tSource();
 
-        forAll(fieldIds_[sourceI], i)
+        const scalarField& V = mesh_.V();
+        const scalar dt = runTime_.deltaT().value();
+
+        forAll(pointSources_, sourceI)
         {
-            if
-            (
-                fieldIds_[sourceI][i] == fieldI
-             && (runTime_.time().value() >= psp.timeStart())
-             && (runTime_.time().value() <= psp.timeEnd())
-            )
+            const pointSourceProperties& psp = pointSources_[sourceI];
+
+            forAll(fieldIds_[sourceI], i)
             {
-                const label cid = cellOwners_[sourceI];
-                sourceField[cid] += psp.fieldData()[i].second();
+                if
+                (
+                    fieldIds_[sourceI][i] == fieldI
+                && (runTime_.time().value() >= psp.timeStart())
+                && (runTime_.time().value() <= psp.timeEnd())
+                )
+                {
+                    const label cid = cellOwners_[sourceI];
+                    sourceField[cid] += dt*psp.fieldData()[i].second()/V[cid];
+                }
+            }
+        }
+    }
+
+    return tSource;
+}
+
+
+Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::timeActivatedExplicitMulticomponentPointSource::Su()
+{
+    if (mesh_.changing())
+    {
+        updateAddressing();
+    }
+
+    tmp<DimensionedField<scalar, volMesh> > tSource
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                name_ + "TotalSu",
+                runTime_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimensions_, 0.0)
+        )
+    );
+
+    if (active_)
+    {
+        DimensionedField<scalar, volMesh>& sourceField = tSource();
+
+        const scalarField& V = mesh_.V();
+        const scalar dt = runTime_.deltaT().value();
+
+        forAll(pointSources_, sourceI)
+        {
+            const pointSourceProperties& psp = pointSources_[sourceI];
+
+            forAll(fieldIds_[sourceI], i)
+            {
+                if
+                (
+                   (runTime_.time().value() >= psp.timeStart())
+                && (runTime_.time().value() <= psp.timeEnd())
+                )
+                {
+                    const label cid = cellOwners_[sourceI];
+                    sourceField[cid] += dt*psp.fieldData()[i].second()/V[cid];
+                }
             }
         }
     }

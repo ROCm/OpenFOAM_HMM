@@ -30,7 +30,10 @@ Description
     Carrier fields are supplied on consruction, and interrogated to provide the
     field indices of the sources.
 
-    Properties are described in a <sourceName>Properties dictionary, e.g.:
+    Source values are assumed to be in <quantity>/s, and divided through by the
+    cell volumes before being returned, e.g. for a kg/s source
+
+    Properties are described in a <name>Properties dictionary
 
     active          true;       // are sources active (true/false)
 
@@ -43,8 +46,8 @@ Description
             location            (0 0 0);
             fieldData
             (
-                (H2O            0.1)
-                (O2             0.05)
+                (H2O            0.1)               // kg/s
+                (O2             0.05)              // kg/s
             );
         }
         source2                 // source name
@@ -54,9 +57,9 @@ Description
             location            (1 1 1);
             fieldData
             (
-                (NO             0.1)
-                (CO2            0.05)
-                (H2             0.001)
+                (NO             0.1)               // kg/s
+                (CO2            0.05)              // kg/s
+                (H2             0.001)             // kg/s
             );
         }
     );
@@ -93,7 +96,7 @@ protected:
     // Protected data
 
         //- Name of the source
-        word sourceName_;
+        word name_;
 
         //- Reference to the mesh
         const fvMesh& mesh_;
@@ -156,11 +159,14 @@ public:
 
         // Access
 
-            //- Return a tmp field of the source
+            //- Return a tmp field of the source for field fieldI
             virtual tmp<DimensionedField<scalar, volMesh> > Su
             (
                 const label fieldI
             );
+
+            //- Return a tmp field of the total source
+            virtual tmp<DimensionedField<scalar, volMesh> > Su();
 
 
         //- Read properties dictionary

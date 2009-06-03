@@ -23,31 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::timeActivatedExplicitSource
+    Foam::timeActivatedExplicitSourceNew
 
 Description
-    Base class for field sources. Provides:
-    - name
-    - references to mesh and time
-    - dimensions
-    - volume type
-    - startTime
-    - duration
-    - read (from <sourceName>Properties dictionary)
+    Creates a cell set source that is activated at a given time, and remains
+    active for a specified duration. The source value is either in specific
+    (XX/m3) or absolute (XX) units.
 
 SourceFiles
-    timeActivatedExplicitSource.C
+    timeActivatedExplicitCellSource.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef timeActivatedExplicitSource_H
-#define timeActivatedExplicitSource_H
+#ifndef timeActivatedExplicitCellSource_H
+#define timeActivatedExplicitCellSource_H
 
-#include "IOdictionary.H"
-#include "autoPtr.H"
-#include "fvMesh.H"
-#include "Time.H"
-#include "NamedEnum.H"
+#include "timeActivatedExplicitSource.H"
+#include "topoSetSource.H"
+#include "cellSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,65 +48,56 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class timeActivatedExplicitSource Declaration
+              Class timeActivatedExplicitCellSource Declaration
 \*---------------------------------------------------------------------------*/
 
-class timeActivatedExplicitSource
+class timeActivatedExplicitCellSource
 :
-    public IOdictionary
+    public timeActivatedExplicitSource
 {
-public:
-
-    enum volumeType
-    {
-        vtSpecific,
-        vtAbsolute
-    };
-
-    static const NamedEnum<volumeType, 2> volumeTypeNames_;
-
-
 private:
+
+    // Private member functions
+
+        //- Update the cell set that the source is acting on
+        void updateCellSet();
+
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        timeActivatedExplicitSource(const timeActivatedExplicitSource&);
+        timeActivatedExplicitCellSource(const timeActivatedExplicitCellSource&);
 
         //- Disallow default bitwise assignment
-        void operator=(const timeActivatedExplicitSource&);
+        void operator=(const timeActivatedExplicitCellSource&);
 
 
 protected:
 
     // Protected data
 
-        //- Reference to the mesh
-        const fvMesh& mesh_;
-
-        //- Reference to time database
-        const Time& runTime_;
-
-
         // Source properties
 
-            //- Name of the source
-            word name_;
+            //- Value when "on"
+            scalar onValue_;
 
-            //- Active flag
-            Switch active_;
+            //- Value when "off"
+            scalar offValue_;
 
-            //- Dimensions
-            const dimensionSet dimensions_;
 
-            //- Volume type
-            volumeType volumeType_;
+        // Cell set
 
-            //- Time start [s]
-            scalar timeStart_;
+            //- Cell volumes
+            scalarList V_;
 
-            //- Duration [s]
-            scalar duration_;
+            //- Name of cell source (XXXToCell)
+            word cellSource_;
+
+            //- Method by which the cells will be selected
+            autoPtr<topoSetSource> cellSelector_;
+
+            //- Set of selected cells
+            cellSet selectedCellSet_;
 
 
 public:
@@ -121,7 +105,7 @@ public:
     // Constructors
 
         //- Construct from explicit source name and mesh
-        timeActivatedExplicitSource
+        timeActivatedExplicitCellSource
         (
             const word&,
             const fvMesh&,
@@ -133,29 +117,14 @@ public:
 
         // Access
 
-            //- Return the reference to the mesh
-            virtual const fvMesh& mesh() const;
+            //- Return the "on" value
+            virtual scalar onValue() const;
 
-            //- Return the reference to the time database
-            virtual const Time& runTime() const;
+            //- Return the "off" value
+            virtual scalar offValue() const;
 
-            //- Return the source name
-            virtual const word& name() const;
-
-            //- Return the active flag
-            virtual const Switch& active() const;
-
-            //- Return the dimensions
-            virtual const dimensionSet& dimensions() const;
-
-            //- Return the volume type
-            virtual const volumeType& volume() const;
-
-            //- Return the start time
-            virtual scalar timeStart() const;
-
-            //- Return the duration
-            virtual scalar duration() const;
+            //- Return a tmp field of the source
+            virtual tmp<DimensionedField<scalar, volMesh> > Su();
 
 
         //- Read properties dictionary

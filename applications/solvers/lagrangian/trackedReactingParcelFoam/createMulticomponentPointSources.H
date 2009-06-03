@@ -4,5 +4,5 @@ timeActivatedExplicitMulticomponentPointSource pointMassSources
     "pointMassSources",
     mesh,
     Y,
-    dimMass/dimTime/dimVolume
+    dimMass/dimVolume/dimTime
 );
