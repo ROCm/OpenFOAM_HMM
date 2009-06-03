@@ -57,7 +57,7 @@ bool Foam::Rebound<CloudType>::active() const
 
 
 template<class CloudType>
-void Foam::Rebound<CloudType>::correct
+bool Foam::Rebound<CloudType>::correct
 (
     const polyPatch& pp,
     const label faceId,
@@ -76,6 +76,8 @@ void Foam::Rebound<CloudType>::correct
     }
 
     U -= Ut;
+
+    return true;
 }
 
 

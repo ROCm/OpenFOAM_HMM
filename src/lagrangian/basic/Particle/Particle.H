@@ -171,7 +171,7 @@ protected:
         //- Overridable function to handle the particle hitting a patch
         //  Executed before other patch-hitting functions
         template<class TrackData>
-        void hitPatch
+        bool hitPatch
         (
             const polyPatch&,
             TrackData& td,

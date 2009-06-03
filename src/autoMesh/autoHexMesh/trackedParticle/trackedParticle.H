@@ -171,13 +171,13 @@ public:
 
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions
-            void hitPatch
+            bool hitPatch
             (
                 const polyPatch&,
                 trackedParticle::trackData& td,
                 const label patchI
             );
-            void hitPatch
+            bool hitPatch
             (
                 const polyPatch&,
                 int&,

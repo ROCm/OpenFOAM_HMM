@@ -58,7 +58,7 @@ bool Foam::StandardWallInteraction<CloudType>::active() const
 
 
 template <class CloudType>
-void Foam::StandardWallInteraction<CloudType>::correct
+bool Foam::StandardWallInteraction<CloudType>::correct
 (
     const polyPatch& pp,
     const label faceId,
@@ -79,7 +79,11 @@ void Foam::StandardWallInteraction<CloudType>::correct
         }
 
         U -= mu_*Ut;
+
+        return true;
     }
+
+    return false;
 }
 
 

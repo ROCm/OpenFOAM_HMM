@@ -108,7 +108,7 @@ bool Foam::LocalInteraction<CloudType>::active() const
 
 
 template <class CloudType>
-void Foam::LocalInteraction<CloudType>::correct
+bool Foam::LocalInteraction<CloudType>::correct
 (
     const polyPatch& pp,
     const label faceId,
@@ -129,7 +129,11 @@ void Foam::LocalInteraction<CloudType>::correct
         }
 
         U -= patchData_[pp.index()].mu()*Ut;
+
+        return true;
     }
+
+    return false;
 }
 
 

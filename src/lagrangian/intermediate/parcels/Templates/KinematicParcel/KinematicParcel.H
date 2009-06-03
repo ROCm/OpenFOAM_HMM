@@ -430,7 +430,7 @@ public:
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions
             template<class TrackData>
-            void hitPatch
+            bool hitPatch
             (
                 const polyPatch& p,
                 TrackData& td,
@@ -440,7 +440,7 @@ public:
 
             //- Overridable function to handle the particle hitting a patch
             //  Executed before other patch-hitting functions without trackData
-            void hitPatch
+            bool hitPatch
             (
                 const polyPatch& p,
                 int& td,

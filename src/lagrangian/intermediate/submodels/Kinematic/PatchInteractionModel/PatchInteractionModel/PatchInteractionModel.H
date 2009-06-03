@@ -125,7 +125,8 @@ public:
         virtual bool active() const = 0;
 
         //- Apply velocity correction
-        virtual void correct
+        //  Returns true if particle remains in same cell
+        virtual bool correct
         (
             const polyPatch& pp,
             const label faceId,

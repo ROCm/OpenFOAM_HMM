@@ -339,46 +339,47 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             label patchi = patch(facei_);
             const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
-            p.hitPatch(patch, td, patchi);
-
-            if (isA<wedgePolyPatch>(patch))
+            if (!p.hitPatch(patch, td, patchi))
             {
-                p.hitWedgePatch
-                (
-                    static_cast<const wedgePolyPatch&>(patch), td
-                );
-            }
-            else if (isA<symmetryPolyPatch>(patch))
-            {
-                p.hitSymmetryPatch
-                (
-                    static_cast<const symmetryPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<cyclicPolyPatch>(patch))
-            {
-                p.hitCyclicPatch
-                (
-                    static_cast<const cyclicPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<processorPolyPatch>(patch))
-            {
-                p.hitProcessorPatch
-                (
-                    static_cast<const processorPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<wallPolyPatch>(patch))
-            {
-                p.hitWallPatch
-                (
-                    static_cast<const wallPolyPatch&>(patch), td
-                );
-            }
-            else
-            {
-                p.hitPatch(patch, td);
+                if (isA<wedgePolyPatch>(patch))
+                {
+                    p.hitWedgePatch
+                    (
+                        static_cast<const wedgePolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<symmetryPolyPatch>(patch))
+                {
+                    p.hitSymmetryPatch
+                    (
+                        static_cast<const symmetryPolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<cyclicPolyPatch>(patch))
+                {
+                    p.hitCyclicPatch
+                    (
+                        static_cast<const cyclicPolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<processorPolyPatch>(patch))
+                {
+                    p.hitProcessorPatch
+                    (
+                        static_cast<const processorPolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<wallPolyPatch>(patch))
+                {
+                    p.hitWallPatch
+                    (
+                        static_cast<const wallPolyPatch&>(patch), td
+                    );
+                }
+                else
+                {
+                    p.hitPatch(patch, td);
+                }
             }
         }
     }
@@ -426,13 +427,15 @@ void Foam::Particle<ParticleType>::transformProperties(const vector&)
 
 template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::hitPatch
+bool Foam::Particle<ParticleType>::hitPatch
 (
     const polyPatch&,
     TrackData&,
     const label
 )
-{}
+{
+    return false;
+}
 
 
 template<class ParticleType>
