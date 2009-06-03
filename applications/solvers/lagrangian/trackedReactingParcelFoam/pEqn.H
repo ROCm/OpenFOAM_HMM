@@ -41,6 +41,7 @@ if (transonic)
           - lapTerm()
          ==
             reactingParcels.Srho()
+          + pointMassSources.Su()
         );
 
         pEqn.solve();
@@ -80,6 +81,7 @@ else
           - lapTerm()
          ==
             reactingParcels.Srho()
+          + pointMassSources.Su()
         );
 
         pEqn.solve();

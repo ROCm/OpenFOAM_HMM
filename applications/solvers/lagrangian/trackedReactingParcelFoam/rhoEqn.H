@@ -37,6 +37,7 @@ Description
       + fvc::div(phi)
       ==
         reactingParcels.Srho()
+      + pointMassSources.Su()
     );
 }
 
