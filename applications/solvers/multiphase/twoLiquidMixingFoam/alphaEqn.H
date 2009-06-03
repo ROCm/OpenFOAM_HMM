@@ -3,6 +3,7 @@
     (
         fvm::ddt(alpha1)
       + fvm::div(phi, alpha1)
+      //- fvm::Sp(fvc::div(phi), alpha1)
       - fvm::laplacian
         (
             Dab + alphatab*turbulence->nut(), alpha1,
