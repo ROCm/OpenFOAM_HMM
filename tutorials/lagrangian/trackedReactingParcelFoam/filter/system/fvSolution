@@ -33,11 +33,21 @@ solvers
     }
     p
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0;
-    }
+        solver           GAMG;
+
+        tolerance        1e-6;
+        relTol           0;
+
+        smoother         GaussSeidel;
+        nPreSweeps       0;
+        nPostSweeps      2;
+
+        cacheAgglomeration true;
+
+        nCellsInCoarsestLevel 10;
+        agglomerator     faceAreaPair;
+        mergeLevels      1;
+    };
     G
     {
         solver          PCG;
@@ -133,7 +143,8 @@ solvers
 
 PISO
 {
-    transonic       yes;
+    transonic       no;
+    nOuterCorrectors 2;
     nCorrectors     2;
     nNonOrthogonalCorrectors 0;
     momentumPredictor yes;
