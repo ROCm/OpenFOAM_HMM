@@ -16,6 +16,31 @@ FoamFile
 
 dictionaryReplacement
 {
+    boundary
+    {
+        rightSolid_to_heater
+        {
+            offset          ( 0 0 0 );
+            sampleMode      nearestPatchFace;
+            sampleRegion    heater;
+            samplePatch     heater_to_rightSolid;
+        }
+        rightSolid_to_bottomAir
+        {
+            offset          ( 0 0 0 );
+            sampleMode      nearestPatchFace;
+            sampleRegion    bottomAir;
+            samplePatch     bottomAir_to_rightSolid;
+        }
+        rightSolid_to_topAir
+        {
+            offset          ( 0 0 0 );
+            sampleMode      nearestPatchFace;
+            sampleRegion    topAir;
+            samplePatch     topAir_to_rightSolid;
+        }
+    }
+
     T
     {
         internalField   uniform 300;
@@ -37,8 +62,6 @@ dictionaryReplacement
             rightSolid_to_heater
             {
                 type            solidWallMixedTemperatureCoupled;
-                neighbourRegionName heater;
-                neighbourPatchName heater_to_rightSolid;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
@@ -46,8 +69,6 @@ dictionaryReplacement
             rightSolid_to_bottomAir
             {
                 type            solidWallMixedTemperatureCoupled;
-                neighbourRegionName bottomAir;
-                neighbourPatchName bottomAir_to_rightSolid;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
@@ -55,8 +76,6 @@ dictionaryReplacement
             rightSolid_to_topAir
             {
                 type            solidWallMixedTemperatureCoupled;
-                neighbourRegionName topAir;
-                neighbourPatchName topAir_to_rightSolid;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;

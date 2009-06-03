@@ -40,6 +40,7 @@ SourceFiles
 #include "treeBoundBox.H"
 #include "coordinateSystem.H"
 #include "UPtrList.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,6 +73,8 @@ private:
             PtrList<coordinateSystem> transform_;
 
             UPtrList<searchableSurface> subGeom_;
+
+            Switch mergeSubRegions_;
 
         //- Region names
         mutable wordList regions_;
