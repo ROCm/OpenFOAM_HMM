@@ -33,7 +33,7 @@ License
 #include "KinematicCloud.H"
 
 #include "NoPostProcessing.H"
-#include "StandardPostProcessing.H"
+#include "PatchPostProcessing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +65,7 @@ License
     );                                                                        \
     makePostProcessingModelThermoType                                         \
     (                                                                         \
-        StandardPostProcessing,                                               \
+        PatchPostProcessing,                                                  \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \

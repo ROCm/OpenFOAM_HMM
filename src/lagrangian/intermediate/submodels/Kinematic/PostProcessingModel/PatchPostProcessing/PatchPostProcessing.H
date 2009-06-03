@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::StandardPostProcessing
+    Foam::PatchPostProcessing
 
 Description
     Standard post-processing
 
 SourceFiles
-    StandardPostProcessing.C
+    PatchPostProcessing.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef StandardPostProcessing_H
-#define StandardPostProcessing_H
+#ifndef PatchPostProcessing_H
+#define PatchPostProcessing_H
 
 #include "PostProcessingModel.H"
 
@@ -44,11 +44,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class StandardPostProcessing Declaration
+                   Class PatchPostProcessing Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class StandardPostProcessing
+class PatchPostProcessing
 :
     public PostProcessingModel<CloudType>
 {
@@ -77,17 +77,17 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("StandardPostProcessing");
+    TypeName("PatchPostProcessing");
 
 
     // Constructors
 
         //- Construct from dictionary
-        StandardPostProcessing(const dictionary& dict, CloudType& owner);
+        PatchPostProcessing(const dictionary& dict, CloudType& owner);
 
 
     //- Destructor
-    virtual ~StandardPostProcessing();
+    virtual ~PatchPostProcessing();
 
 
     // Member Functions
@@ -122,12 +122,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "StandardPostProcessingI.H"
+#include "PatchPostProcessingI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "StandardPostProcessing.C"
+#   include "PatchPostProcessing.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

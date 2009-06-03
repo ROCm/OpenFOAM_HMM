@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-const Foam::polyMesh& Foam::StandardPostProcessing<CloudType>::mesh() const
+const Foam::polyMesh& Foam::PatchPostProcessing<CloudType>::mesh() const
 {
     return mesh_;
 }
@@ -33,7 +33,7 @@ const Foam::polyMesh& Foam::StandardPostProcessing<CloudType>::mesh() const
 
 template<class CloudType>
 const Foam::wordList&
-Foam::StandardPostProcessing<CloudType>::patchNames() const
+Foam::PatchPostProcessing<CloudType>::patchNames() const
 {
     return patchNames_;
 }

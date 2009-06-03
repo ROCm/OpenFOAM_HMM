@@ -24,13 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "StandardPostProcessing.H"
+#include "PatchPostProcessing.H"
 #include "IOPtrList.H"
 
 // * * * * * * * * * * * * * protected Member Functions  * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::StandardPostProcessing<CloudType>::write()
+void Foam::PatchPostProcessing<CloudType>::write()
 {
     forAll(patchData_, patchI)
     {
@@ -70,7 +70,7 @@ void Foam::StandardPostProcessing<CloudType>::write()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::StandardPostProcessing<CloudType>::StandardPostProcessing
+Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
 (
     const dictionary& dict,
     CloudType& owner
@@ -88,7 +88,7 @@ Foam::StandardPostProcessing<CloudType>::StandardPostProcessing
         {
             FatalErrorIn
             (
-                "StandardPostProcessing<CloudType>::StandardPostProcessing"
+                "PatchPostProcessing<CloudType>::PatchPostProcessing"
                 "("
                     "const dictionary&, "
                     "CloudType& owner"
@@ -104,21 +104,21 @@ Foam::StandardPostProcessing<CloudType>::StandardPostProcessing
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::StandardPostProcessing<CloudType>::~StandardPostProcessing()
+Foam::PatchPostProcessing<CloudType>::~PatchPostProcessing()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::StandardPostProcessing<CloudType>::active() const
+bool Foam::PatchPostProcessing<CloudType>::active() const
 {
     return true;
 }
 
 
 template<class CloudType>
-void Foam::StandardPostProcessing<CloudType>::postPatch
+void Foam::PatchPostProcessing<CloudType>::postPatch
 (
     const parcelType& p,
     const label patchI

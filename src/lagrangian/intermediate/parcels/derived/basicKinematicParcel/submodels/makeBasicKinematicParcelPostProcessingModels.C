@@ -28,7 +28,7 @@ License
 #include "KinematicCloud.H"
 
 #include "NoPostProcessing.H"
-#include "StandardPostProcessing.H"
+#include "PatchPostProcessing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +45,7 @@ namespace Foam
     );
     makePostProcessingModelType
     (
-        StandardPostProcessing,
+        PatchPostProcessing,
         KinematicCloud,
         basicKinematicParcel
     );
