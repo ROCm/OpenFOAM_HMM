@@ -35,8 +35,7 @@ Foam::CoalCloud<ThermoType>::CoalCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo,
-    PtrList<ThermoType>& carrierSpecies
+    hCombustionThermo& thermo
 )
 :
     ReactingMultiphaseCloud<CoalParcel<ThermoType> >
@@ -45,8 +44,7 @@ Foam::CoalCloud<ThermoType>::CoalCloud
         rho,
         U,
         g,
-        thermo,
-        carrierSpecies
+        thermo
     )
 {
     CoalParcel<ThermoType>::readFields(*this);

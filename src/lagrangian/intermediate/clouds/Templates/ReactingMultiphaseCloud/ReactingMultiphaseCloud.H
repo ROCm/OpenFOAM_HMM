@@ -123,9 +123,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo,
-            PtrList<typename ReactingCloud<ParcelType>::thermoType>&
-                carrierSpecies
+            hCombustionThermo& thermo
         );
 
 

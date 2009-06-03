@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class CoalCloud Declaration
+                          Class CoalCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ThermoType>
@@ -76,8 +76,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo,
-            PtrList<ThermoType>& gases
+            hCombustionThermo& thermo
         );
 
 

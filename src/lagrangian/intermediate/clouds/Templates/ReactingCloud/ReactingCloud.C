@@ -28,6 +28,7 @@ License
 
 #include "CompositionModel.H"
 #include "PhaseChangeModel.H"
+#include "multiComponentMixture.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -67,15 +68,14 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo,
-    PtrList<thermoType>& carrierSpecies
+    hCombustionThermo& thermo
 )
 :
     ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo),
     reactingCloud(),
     constProps_(this->particleProperties()),
     carrierThermo_(thermo),
-    carrierSpecies_(carrierSpecies),
+    carrierSpecies_(thermo.composition().Y().size()),
     compositionModel_
     (
         CompositionModel<ReactingCloud<ParcelType> >::New
@@ -95,6 +95,20 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     rhoTrans_(thermo.composition().Y().size()),
     dMassPhaseChange_(0.0)
 {
+    // Create the carrier species
+    forAll(carrierSpecies_, specieI)
+    {
+        carrierSpecies_.set
+        (
+            specieI,
+            new thermoType
+            (
+                dynamic_cast<const multiComponentMixture<thermoType>&>
+                    (thermo).speciesData()[specieI]
+            )
+        );
+    }
+
     // Set storage for mass source fields and initialise to zero
     forAll(rhoTrans_, i)
     {

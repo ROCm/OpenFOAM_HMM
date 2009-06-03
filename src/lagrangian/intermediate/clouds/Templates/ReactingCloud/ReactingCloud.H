@@ -98,7 +98,7 @@ protected:
         hCombustionThermo& carrierThermo_;
 
         //- Gas phase properties
-        PtrList<thermoType>& carrierSpecies_;
+        PtrList<thermoType> carrierSpecies_;
 
 
         // References to the cloud sub-models
@@ -148,8 +148,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo,
-            PtrList<thermoType>& carrierSpecies
+            hCombustionThermo& thermo
         );
 
 

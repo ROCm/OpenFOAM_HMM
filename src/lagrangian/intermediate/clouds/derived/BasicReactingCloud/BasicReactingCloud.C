@@ -35,8 +35,7 @@ Foam::BasicReactingCloud<ThermoType>::BasicReactingCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo,
-    PtrList<ThermoType>& carrierSpecies
+    hCombustionThermo& thermo
 )
 :
     ReactingCloud<BasicReactingParcel<ThermoType> >
@@ -45,8 +44,7 @@ Foam::BasicReactingCloud<ThermoType>::BasicReactingCloud
         rho,
         U,
         g,
-        thermo,
-        carrierSpecies
+        thermo
     )
 {
     BasicReactingParcel<ThermoType>::readFields(*this);
