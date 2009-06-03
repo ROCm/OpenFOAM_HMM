@@ -24,66 +24,68 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelDispersionModels_H
-#define makeReactingParcelDispersionModels_H
+#ifndef makeReactingMultiphaseParcelInjectionModels_H
+#define makeReactingMultiphaseParcelInjectionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
 #include "KinematicCloud.H"
 
-#include "NoDispersion.H"
-#include "GradientDispersionRAS.H"
-#include "StochasticDispersionRAS.H"
+#include "ConeInjection.H"
+#include "FieldActivatedInjection.H"
+#include "ManualInjection.H"
+#include "NoInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingDispersionModelType(ParcelType)                         \
+#define makeReactingMultiphaseInjectionModels(ParcelType)                     \
                                                                               \
-    createReactingDispersionModelThermoType                                   \
+    makeReactingMultiphaseInjectionModelThermoType                            \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
                                                                               \
-    createReactingDispersionModelThermoType                                   \
+    makeReactingMultiphaseInjectionModelThermoType                            \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingDispersionModelThermoType(ParcelType, ThermoType)       \
+#define makeReactingMultiphaseInjectionModelThermoType(ParcelType, ThermoType)\
                                                                               \
-    makeDispersionModel(KinematicCloud<ParcelType<ThermoType> >);             \
+    makeInjectionModel(KinematicCloud<ParcelType<ThermoType> >);              \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug                                       \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        DispersionRASModel<KinematicCloud<ParcelType<ThermoType> > >,         \
-        0                                                                     \
-    );                                                                        \
-                                                                              \
-    makeDispersionModelThermoType                                             \
-    (                                                                         \
-        NoDispersion,                                                         \
+        ConeInjection,                                                        \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeDispersionModelThermoType                                             \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        GradientDispersionRAS,                                                \
+        FieldActivatedInjection,                                              \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeDispersionModelThermoType                                             \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        StochasticDispersionRAS,                                              \
+        ManualInjection,                                                      \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
-    );
+    );                                                                        \
+    makeInjectionModelThermoType                                              \
+    (                                                                         \
+        NoInjection,                                                          \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

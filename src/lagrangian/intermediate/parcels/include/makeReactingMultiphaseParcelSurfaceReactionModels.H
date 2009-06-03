@@ -24,40 +24,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelCompositionModels_H
-#define makeReactingParcelCompositionModels_H
+#ifndef makeReactingMultiphaseParcelSurfaceReactionModels_H
+#define makeReactingMultiphaseParcelSurfaceReactionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
-#include "ReactingCloud.H"
+#include "ReactingMultiphaseCloud.H"
 
-#include "SinglePhaseMixture.H"
+#include "NoSurfaceReaction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingCompositionModelType(ParcelType)                        \
+#define makeReactingMultiphaseSurfaceReactionModels(ParcelType)               \
                                                                               \
-    createReactingCompositionModelThermoType                                  \
+    makeReactingMultiphaseSurfaceReactionModelThermoType                      \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createReactingCompositionModelThermoType                                  \
+    makeReactingMultiphaseSurfaceReactionModelThermoType                      \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingCompositionModelThermoType(ParcelType, ThermoType)      \
+#define makeReactingMultiphaseSurfaceReactionModelThermoType(ParcelType, ThermoType)\
                                                                               \
-    makeCompositionModel(ReactingCloud<ParcelType<ThermoType> >);             \
-                                                                              \
-    makeCompositionModelThermoType                                            \
+    makeSurfaceReactionModel                                                  \
     (                                                                         \
-        SinglePhaseMixture,                                                   \
-        ReactingCloud,                                                        \
+        ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
+    );                                                                        \
+                                                                              \
+    makeSurfaceReactionModelThermoType                                        \
+    (                                                                         \
+        NoSurfaceReaction,                                                    \
+        ReactingMultiphaseCloud,                                              \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

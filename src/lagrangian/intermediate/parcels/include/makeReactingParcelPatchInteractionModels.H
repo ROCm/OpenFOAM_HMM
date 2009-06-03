@@ -24,48 +24,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelPostProcessingModels_H
-#define makeReactingParcelPostProcessingModels_H
+#ifndef makeReactingParcelPatchInteractionModels_H
+#define makeReactingParcelPatchInteractionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
 #include "KinematicCloud.H"
 
-#include "NoPostProcessing.H"
-#include "PatchPostProcessing.H"
+#include "LocalInteraction.H"
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingPostProcessingModelType(ParcelType)                     \
+#define makeReactingPatchInteractionModels(ParcelType)                        \
                                                                               \
-    createReactingPostProcessingModelThermoType                               \
+    makeReactingPatchInteractionModelThermoType                               \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
                                                                               \
-    createReactingPostProcessingModelThermoType                               \
+    makeReactingPatchInteractionModelThermoType                               \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingPostProcessingModelThermoType(ParcelType, ThermoType)   \
+#define makeReactingPatchInteractionModelThermoType(ParcelType, ThermoType)   \
                                                                               \
-    makePostProcessingModel(KinematicCloud<ParcelType<ThermoType> >);         \
+    makePatchInteractionModel(KinematicCloud<ParcelType<ThermoType> >);       \
                                                                               \
-    makePostProcessingModelThermoType                                         \
+    makePatchInteractionModelThermoType                                       \
     (                                                                         \
-        NoPostProcessing,                                                     \
+        LocalInteraction,                                                     \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makePostProcessingModelThermoType                                         \
+    makePatchInteractionModelThermoType                                       \
     (                                                                         \
-        PatchPostProcessing,                                                  \
+        Rebound,                                                     \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makePatchInteractionModelThermoType                                       \
+    (                                                                         \
+        StandardWallInteraction,                                              \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \

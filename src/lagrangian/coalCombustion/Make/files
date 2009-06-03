@@ -3,6 +3,6 @@ CoalCloud/defineCoalCloud.C
 
 /* Coal parcel and sub-models */
 CoalParcel/defineCoalParcel.C
-CoalParcel/submodels/makeCoalParcelSubmodels.C
+CoalParcel/makeCoalParcelSubmodels.C
 
 LIB = $(FOAM_LIBBIN)/libcoalCombustion

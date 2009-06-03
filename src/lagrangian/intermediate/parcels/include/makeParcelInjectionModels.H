@@ -24,75 +24,54 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelInjectionModels_H
-#define makeReactingParcelInjectionModels_H
+#ifndef makeParcelInjectionModels_H
+#define makeParcelInjectionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
 #include "KinematicCloud.H"
 
 #include "ConeInjection.H"
 #include "FieldActivatedInjection.H"
+#include "KinematicLookupTableInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
-#include "ReactingLookupTableInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingInjectionModelType(ParcelType)                          \
+#define makeParcelInjectionModels(ParcelType)                                  \
                                                                               \
-    createReactingInjectionModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        specieConstProperties                                                 \
-    );                                                                        \
+    makeInjectionModel(KinematicCloud<ParcelType>);                           \
                                                                               \
-    createReactingInjectionModelThermoType                                    \
-    (                                                                         \
-        ParcelType,                                                           \
-        specieReactingProperties                                              \
-    );
-
-
-#define createReactingInjectionModelThermoType(ParcelType, ThermoType)        \
-                                                                              \
-    makeInjectionModel(KinematicCloud<ParcelType<ThermoType> >);              \
-                                                                              \
-    makeInjectionModelThermoType                                              \
+    makeInjectionModelType                                                    \
     (                                                                         \
         ConeInjection,                                                        \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makeInjectionModelThermoType                                              \
+    makeInjectionModelType                                                    \
     (                                                                         \
         FieldActivatedInjection,                                              \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makeInjectionModelThermoType                                              \
+    makeInjectionModelType                                                    \
+    (                                                                         \
+        KinematicLookupTableInjection,                                        \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );                                                                        \
+    makeInjectionModelType                                                    \
     (                                                                         \
         ManualInjection,                                                      \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makeInjectionModelThermoType                                              \
+    makeInjectionModelType                                                    \
     (                                                                         \
         NoInjection,                                                          \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        ReactingLookupTableInjection,                                         \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );
 
 

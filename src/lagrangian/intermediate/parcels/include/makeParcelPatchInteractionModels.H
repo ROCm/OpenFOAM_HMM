@@ -24,42 +24,40 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingMultiphaseParcelCompositionModels_H
-#define makeReactingMultiphaseParcelCompositionModels_H
+#ifndef makeParcelPatchInteractionModels_H
+#define makeParcelPatchInteractionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
-#include "ReactingCloud.H"
+#include "KinematicCloud.H"
 
-#include "SingleMixtureFraction.H"
+#include "LocalInteraction.H"
+#include "Rebound.H"
+#include "StandardWallInteraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingMultiphaseCompositionModelType(ParcelType)              \
+#define makeParcelPatchInteractionModels(ParcelType)                          \
                                                                               \
-    createReactingMultiphaseCompositionModelThermoType                        \
+    makePatchInteractionModel(KinematicCloud<ParcelType>);                    \
+                                                                              \
+    makePatchInteractionModelType                                             \
     (                                                                         \
-        ParcelType,                                                           \
-        specieConstProperties                                                 \
+        LocalInteraction,                                                     \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
     );                                                                        \
-    createReactingMultiphaseCompositionModelThermoType                        \
+    makePatchInteractionModelType                                             \
     (                                                                         \
-        ParcelType,                                                           \
-        specieReactingProperties                                              \
-    );
-
-
-#define createReactingMultiphaseCompositionModelThermoType(ParcelType, ThermoType)\
-                                                                              \
-    makeCompositionModel(ReactingCloud<ParcelType<ThermoType> >);             \
-                                                                              \
-    makeCompositionModelThermoType                                            \
+        Rebound,                                                              \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );                                                                        \
+    makePatchInteractionModelType                                             \
     (                                                                         \
-        SingleMixtureFraction,                                                \
-        ReactingCloud,                                                        \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        StandardWallInteraction,                                              \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
     );
 
 

@@ -24,68 +24,62 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingMultiphaseParcelInjectionModels_H
-#define makeReactingMultiphaseParcelInjectionModels_H
+#ifndef makeReactingMultiphaseParcelDevolatilisationModels_H
+#define makeReactingMultiphaseParcelDevolatilisationModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
-#include "KinematicCloud.H"
+#include "ReactingMultiphaseCloud.H"
 
-#include "ConeInjection.H"
-#include "FieldActivatedInjection.H"
-#include "ManualInjection.H"
-#include "NoInjection.H"
+#include "ConstantRateDevolatilisation.H"
+#include "NoDevolatilisation.H"
+#include "SingleKineticRateDevolatilisation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingMultiphaseInjectionModelType(ParcelType)                \
+#define makeReactingMultiphaseDevolatilisationModels(ParcelType)              \
                                                                               \
-    createReactingMultiphaseInjectionModelThermoType                          \
+    makeReactingMultiphaseDevolatilisationModelThermoType                     \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-                                                                              \
-    createReactingMultiphaseInjectionModelThermoType                          \
+    makeReactingMultiphaseDevolatilisationModelThermoType                     \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingMultiphaseInjectionModelThermoType(ParcelType, ThermoType)\
+#define makeReactingMultiphaseDevolatilisationModelThermoType(ParcelType, ThermoType)\
                                                                               \
-    makeInjectionModel(KinematicCloud<ParcelType<ThermoType> >);              \
+    makeDevolatilisationModel                                                 \
+    (                                                                         \
+        ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
+    );                                                                        \
                                                                               \
-    makeInjectionModelThermoType                                              \
+    makeDevolatilisationModelThermoType                                       \
     (                                                                         \
-        ConeInjection,                                                        \
-        KinematicCloud,                                                       \
+        ConstantRateDevolatilisation,                                         \
+        ReactingMultiphaseCloud,                                              \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeInjectionModelThermoType                                              \
+    makeDevolatilisationModelThermoType                                       \
     (                                                                         \
-        FieldActivatedInjection,                                              \
-        KinematicCloud,                                                       \
+        NoDevolatilisation,                                                   \
+        ReactingMultiphaseCloud,                                              \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeInjectionModelThermoType                                              \
+    makeDevolatilisationModelThermoType                                       \
     (                                                                         \
-        ManualInjection,                                                      \
-        KinematicCloud,                                                       \
+        SingleKineticRateDevolatilisation,                                    \
+        ReactingMultiphaseCloud,                                              \
         ParcelType,                                                           \
         ThermoType                                                            \
-    );                                                                        \
-    makeInjectionModelThermoType                                              \
-    (                                                                         \
-        NoInjection,                                                          \
-        KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
+    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

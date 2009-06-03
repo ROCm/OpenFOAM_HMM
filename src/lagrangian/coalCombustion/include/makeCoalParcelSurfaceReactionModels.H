@@ -24,58 +24,66 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingMultiphaseParcelDevolatilisationModels_H
-#define makeReactingMultiphaseParcelDevolatilisationModels_H
+#ifndef makeCoalParcelSurfaceReactionModels_H
+#define makeCoalParcelSurfaceReactionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
 #include "ReactingMultiphaseCloud.H"
 
-#include "ConstantRateDevolatilisation.H"
-#include "NoDevolatilisation.H"
-#include "SingleKineticRateDevolatilisation.H"
+#include "NoSurfaceReaction.H"
+#include "COxidationDiffusionLimitedRate.H"
+#include "COxidationKineticDiffusionLimitedRate.H"
+#include "COxidationMurphyShaddix.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingMultiphaseDevolatilisationModelType(ParcelType)          \
+#define makeCoalSurfaceReactionModels(ParcelType)                             \
                                                                               \
-    createReactingMultiphaseDevolatilisationModelThermoType                    \
+    makeCoalSurfaceReactionModelThermoType                                    \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createReactingMultiphaseDevolatilisationModelThermoType                    \
+    makeCoalSurfaceReactionModelThermoType                                    \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingMultiphaseDevolatilisationModelThermoType(ParcelType, ThermoType)\
+#define makeCoalSurfaceReactionModelThermoType(ParcelType, ThermoType)        \
                                                                               \
-    makeDevolatilisationModel                                                 \
+    makeSurfaceReactionModel                                                  \
     (                                                                         \
         ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
     );                                                                        \
                                                                               \
-    makeDevolatilisationModelThermoType                                       \
+    makeSurfaceReactionModelThermoType                                        \
     (                                                                         \
-        ConstantRateDevolatilisation,                                         \
+        NoSurfaceReaction,                                                    \
         ReactingMultiphaseCloud,                                              \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeDevolatilisationModelThermoType                                       \
+    makeSurfaceReactionModelThermoType                                        \
     (                                                                         \
-        NoDevolatilisation,                                                   \
+        COxidationDiffusionLimitedRate,                                       \
         ReactingMultiphaseCloud,                                              \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeDevolatilisationModelThermoType                                       \
+    makeSurfaceReactionModelThermoType                                        \
     (                                                                         \
-        SingleKineticRateDevolatilisation,                                    \
+        COxidationKineticDiffusionLimitedRate,                                \
+        ReactingMultiphaseCloud,                                              \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makeSurfaceReactionModelThermoType                                        \
+    (                                                                         \
+        COxidationMurphyShaddix,                                              \
         ReactingMultiphaseCloud,                                              \
         ParcelType,                                                           \
         ThermoType                                                            \

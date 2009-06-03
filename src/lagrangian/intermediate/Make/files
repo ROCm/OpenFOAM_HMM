@@ -1,10 +1,10 @@
 PARCELS=parcels
-DERIVEDPARCELS=$(PARCELS)/derived
 BASEPARCELS=$(PARCELS)/baseClasses
+DERIVEDPARCELS=$(PARCELS)/derived
 
 CLOUDS=clouds
-DERIVEDCLOUDS=$(CLOUDS)/derived
 BASECLOUDS=$(CLOUDS)/baseClasses
+DERIVEDCLOUDS=$(CLOUDS)/derived
 
 
 /* Parcels */
@@ -30,46 +30,42 @@ $(DERIVEDCLOUDS)/BasicTrackedReactingCloud/defineBasicTrackedReactingCloud.C
 KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
 $(KINEMATICPARCEL)/basicKinematicParcel.C
 $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
-$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDispersionModels.C
-$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelDragModels.C
-$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelInjectionModels.C
-$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelPatchInteractionModels.C
-$(KINEMATICPARCEL)/submodels/makeBasicKinematicParcelPostProcessingModels.C
+$(KINEMATICPARCEL)/makeBasicKinematicParcelSubmodels.C
 
 
 /* thermo parcel sub-models */
 THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel
 $(THERMOPARCEL)/basicThermoParcel.C
 $(THERMOPARCEL)/defineBasicThermoParcel.C
-$(THERMOPARCEL)/submodels/makeBasicThermoParcelDispersionModels.C
-$(THERMOPARCEL)/submodels/makeBasicThermoParcelDragModels.C
-$(THERMOPARCEL)/submodels/makeBasicThermoParcelHeatTransferModels.C
-$(THERMOPARCEL)/submodels/makeBasicThermoParcelInjectionModels.C
-$(THERMOPARCEL)/submodels/makeBasicThermoParcelPatchInteractionModels.C
-$(THERMOPARCEL)/submodels/makeBasicThermoParcelPostProcessingModels.C
+$(THERMOPARCEL)/makeBasicThermoParcelSubmodels.C
 
 
 /* reacting parcel sub-models */
 REACTINGPARCEL=$(DERIVEDPARCELS)/BasicReactingParcel
 $(REACTINGPARCEL)/defineBasicReactingParcel.C
-$(REACTINGPARCEL)/submodels/makeBasicReactingParcelSubmodels.C
+$(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
 
 
 /* tracked reacting parcel sub-models */
 TRACKEDREACTINGPARCEL=$(DERIVEDPARCELS)/BasicTrackedReactingParcel
 $(TRACKEDREACTINGPARCEL)/defineTrackedReactingParcel.C
-$(TRACKEDREACTINGPARCEL)/submodels/makeBasicTrackedReactingParcelSubmodels.C
+$(TRACKEDREACTINGPARCEL)/makeBasicTrackedReactingParcelSubmodels.C
 
 
 /* reacting multiphase parcel sub-models */
-/*REACTINGMPPARCEL=$(DERIVEDPARCELS)/BasicReactingMultiphaseParcel
+REACTINGMPPARCEL=$(DERIVEDPARCELS)/BasicReactingMultiphaseParcel
 $(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
-$(REACTINGMPPARCEL)/submodels/makeBasicReactingMultiphaseSubmodels.C
+$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
 
 
 /* bolt-on models */
 submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
 submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
+
+
+/* data entries */
+submodels/IO/DataEntry/makeDataEntries.C
+submodels/IO/DataEntry/polynomial/polynomial.C
 
 
 /* integration schemes */
@@ -84,15 +80,6 @@ particleForces/particleForces.C
 phaseProperties/phaseProperties/phaseProperties.C
 phaseProperties/phaseProperties/phasePropertiesIO.C
 phaseProperties/phasePropertiesList/phasePropertiesList.C
-
-
-/* data entries */
-submodels/IO/DataEntry/makeDataEntries.C
-submodels/IO/DataEntry/polynomial/polynomial.C
-
-
-/* IOLists */
-submodels/IO/IOList/makeParcelIOLists.C
 
 
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate

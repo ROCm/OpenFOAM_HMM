@@ -24,17 +24,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeParcelIOList.H"
-
 #include "basicKinematicParcel.H"
-#include "basicThermoParcel.H"
+
+// Kinematic
+#include "makeParcelDispersionModels.H"
+#include "makeParcelDragModels.H"
+#include "makeParcelInjectionModels.H"
+#include "makeParcelPatchInteractionModels.H"
+#include "makeParcelPostProcessingModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeParcelIOList(basicKinematicParcel);
-    makeParcelIOList(basicThermoParcel);
+    // Kinematic sub-models
+    makeParcelDispersionModels(basicKinematicParcel);
+    makeParcelDragModels(basicKinematicParcel);
+    makeParcelInjectionModels(basicKinematicParcel);
+    makeParcelPatchInteractionModels(basicKinematicParcel);
+    makeParcelPostProcessingModels(basicKinematicParcel);
 };
 
 

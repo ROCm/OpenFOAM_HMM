@@ -49,22 +49,22 @@ License
 namespace Foam
 {
     // Kinematic sub-models
-    createReactingDispersionModelType(CoalParcel);
-    createReactingDragModelType(CoalParcel);
-    createReactingMultiphaseInjectionModelType(CoalParcel);
-    createReactingPatchInteractionModelType(CoalParcel);
-    createReactingPostProcessingModelType(CoalParcel);
+    makeReactingDispersionModels(CoalParcel);
+    makeReactingDragModels(CoalParcel);
+    makeReactingMultiphaseInjectionModels(CoalParcel);
+    makeReactingPatchInteractionModels(CoalParcel);
+    makeReactingPostProcessingModels(CoalParcel);
 
     // Thermo sub-models
-    createReactingHeatTransferModelType(CoalParcel);
+    makeReactingHeatTransferModels(CoalParcel);
 
     // Reacting sub-models
-    createReactingMultiphaseCompositionModelType(CoalParcel);
-    createReactingPhaseChangeModelType(CoalParcel);
+    makeReactingMultiphaseCompositionModels(CoalParcel);
+    makeReactingPhaseChangeModels(CoalParcel);
 
     // Reacting multiphase sub-models
-    createReactingMultiphaseDevolatilisationModelType(CoalParcel);
-    createCoalSurfaceReactionModelType(CoalParcel);
+    makeReactingMultiphaseDevolatilisationModels(CoalParcel);
+    makeCoalSurfaceReactionModels(CoalParcel);
 };
 
 

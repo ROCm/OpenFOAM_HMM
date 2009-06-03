@@ -24,31 +24,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
+#ifndef makeParcelPostProcessingModels_H
+#define makeParcelPostProcessingModels_H
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #include "KinematicCloud.H"
+
 #include "NoPostProcessing.H"
 #include "PatchPostProcessing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    makePostProcessingModel(KinematicCloud<basicThermoParcel>);
-
-    // Add instances of post-processing model to the table
-    makePostProcessingModelType
-    (
-        NoPostProcessing,
-        KinematicCloud,
-        basicThermoParcel
+#define makeParcelPostProcessingModels(ParcelType)                            \
+                                                                              \
+    makePostProcessingModel(KinematicCloud<ParcelType>);                      \
+                                                                              \
+    makePostProcessingModelType                                               \
+    (                                                                         \
+        NoPostProcessing,                                                     \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );                                                                        \
+    makePostProcessingModelType                                               \
+    (                                                                         \
+        PatchPostProcessing,                                                  \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
     );
-    makePostProcessingModelType
-    (
-        PatchPostProcessing,
-        KinematicCloud,
-        basicThermoParcel
-    );
-};
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -24,66 +24,65 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef createReactingMultiphaseParcelTypes_H
-#define createReactingMultiphaseParcelTypes_H
-
-#include "makeParcelIOList.H"
-#include "reactingThermoTypes.H"
+#ifndef makeReactingParcelDispersionModels_H
+#define makeReactingParcelDispersionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingMultiphaseParcelType(ParcelType)                        \
+#include "reactingThermoTypes.H"
+#include "KinematicCloud.H"
+
+#include "NoDispersion.H"
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeReactingDispersionModels(ParcelType)                              \
                                                                               \
-    createReactingMultiphaseParcelThermoType                                  \
+    makeReactingDispersionModelThermoType                                     \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createReactingMultiphaseParcelThermoType                                  \
+                                                                              \
+    makeReactingDispersionModelThermoType                                     \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingMultiphaseParcelThermoType(ParcelType, ThermoType)      \
+#define makeReactingDispersionModelThermoType(ParcelType, ThermoType)         \
                                                                               \
-    typedef ParcelType<ThermoType> ParcelType##ThermoType;                    \
+    makeDispersionModel(KinematicCloud<ParcelType<ThermoType> >);             \
                                                                               \
-    makeParcelIOList(ParcelType##ThermoType);                                 \
-                                                                              \
-    defineTemplateTypeNameAndDebug(ParcelType##ThermoType, 0);                \
-    defineTemplateTypeNameAndDebug(Particle<ParcelType##ThermoType>, 0);      \
-    defineTemplateTypeNameAndDebug(Cloud<ParcelType##ThermoType>, 0);         \
-                                                                              \
-    defineParcelTypeNameAndDebug(KinematicParcel<ParcelType##ThermoType>, 0); \
-    defineTemplateTypeNameAndDebug                                            \
+    defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        KinematicParcel<ParcelType##ThermoType>,                              \
-        0                                                                     \
-    );                                                                        \
-    defineParcelTypeNameAndDebug(ThermoParcel<ParcelType##ThermoType>, 0);    \
-    defineTemplateTypeNameAndDebug(ThermoParcel<ParcelType##ThermoType>, 0);  \
-    defineParcelTypeNameAndDebug(ReactingParcel<ParcelType##ThermoType>, 0);  \
-    defineTemplateTypeNameAndDebug(ReactingParcel<ParcelType##ThermoType>, 0);\
-    defineParcelTypeNameAndDebug                                              \
-    (                                                                         \
-        ReactingMultiphaseParcel<ParcelType##ThermoType>,                     \
-        0                                                                     \
-    );                                                                        \
-    defineTemplateTypeNameAndDebug                                            \
-    (                                                                         \
-        ReactingMultiphaseParcel<ParcelType##ThermoType>,                     \
+        DispersionRASModel<KinematicCloud<ParcelType<ThermoType> > >,         \
         0                                                                     \
     );                                                                        \
                                                                               \
-    defineParcelTypeNameAndDebug(KinematicCloud<ParcelType##ThermoType>, 0);  \
-    defineParcelTypeNameAndDebug(ThermoCloud<ParcelType##ThermoType>, 0);     \
-    defineParcelTypeNameAndDebug(ReactingCloud<ParcelType##ThermoType>, 0);   \
-    defineParcelTypeNameAndDebug                                              \
+    makeDispersionModelThermoType                                             \
     (                                                                         \
-        ReactingMultiphaseCloud<ParcelType##ThermoType>,                      \
-        0                                                                     \
+        NoDispersion,                                                         \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makeDispersionModelThermoType                                             \
+    (                                                                         \
+        GradientDispersionRAS,                                                \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makeDispersionModelThermoType                                             \
+    (                                                                         \
+        StochasticDispersionRAS,                                              \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
     );
 
 

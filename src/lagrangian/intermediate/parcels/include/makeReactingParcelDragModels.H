@@ -24,67 +24,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeCoalParcelSurfaceReactionModels_H
-#define makeCoalParcelSurfaceReactionModels_H
+#ifndef makeReactingParcelDragModels_H
+#define makeReactingParcelDragModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
-#include "ReactingMultiphaseCloud.H"
+#include "KinematicCloud.H"
 
-#include "NoSurfaceReaction.H"
-#include "COxidationDiffusionLimitedRate.H"
-#include "COxidationKineticDiffusionLimitedRate.H"
-#include "COxidationMurphyShaddix.H"
+#include "NoDrag.H"
+#include "SphereDrag.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createCoalSurfaceReactionModelType(ParcelType)                        \
+#define makeReactingDragModels(ParcelType)                                    \
                                                                               \
-    createCoalSurfaceReactionModelThermoType                                  \
+    makeReactingDragModelThermoType                                           \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createCoalSurfaceReactionModelThermoType                                  \
+    makeReactingDragModelThermoType                                           \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createCoalSurfaceReactionModelThermoType(ParcelType, ThermoType)      \
+#define makeReactingDragModelThermoType(ParcelType, ThermoType)               \
                                                                               \
-    makeSurfaceReactionModel                                                  \
-    (                                                                         \
-        ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
-    );                                                                        \
+    makeDragModel(KinematicCloud<ParcelType<ThermoType> >);                   \
                                                                               \
-    makeSurfaceReactionModelThermoType                                        \
+    makeDragModelThermoType                                                   \
     (                                                                         \
-        NoSurfaceReaction,                                                    \
-        ReactingMultiphaseCloud,                                              \
+        NoDrag,                                                               \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeSurfaceReactionModelThermoType                                        \
+    makeDragModelThermoType                                                   \
     (                                                                         \
-        COxidationDiffusionLimitedRate,                                       \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeSurfaceReactionModelThermoType                                        \
-    (                                                                         \
-        COxidationKineticDiffusionLimitedRate,                                \
-        ReactingMultiphaseCloud,                                              \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeSurfaceReactionModelThermoType                                        \
-    (                                                                         \
-        COxidationMurphyShaddix,                                              \
-        ReactingMultiphaseCloud,                                              \
+        SphereDrag,                                                           \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

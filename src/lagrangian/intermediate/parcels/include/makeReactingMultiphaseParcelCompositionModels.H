@@ -24,48 +24,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelPhaseChangeModels_H
-#define makeReactingParcelPhaseChangeModels_H
+#ifndef makeReactingMultiphaseParcelCompositionModels_H
+#define makeReactingMultiphaseParcelCompositionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
 #include "ReactingCloud.H"
 
-#include "NoPhaseChange.H"
-#include "LiquidEvaporation.H"
+#include "SingleMixtureFraction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingPhaseChangeModelType(ParcelType)                        \
+#define makeReactingMultiphaseCompositionModels(ParcelType)                   \
                                                                               \
-    createReactingPhaseChangeModelThermoType                                  \
+    makeReactingMultiphaseCompositionModelThermoType                          \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-                                                                              \
-    createReactingPhaseChangeModelThermoType                                  \
+    makeReactingMultiphaseCompositionModelThermoType                          \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingPhaseChangeModelThermoType(ParcelType, ThermoType)      \
+#define makeReactingMultiphaseCompositionModelThermoType(ParcelType, ThermoType)\
                                                                               \
-    makePhaseChangeModel(ReactingCloud<ParcelType<ThermoType> >);             \
+    makeCompositionModel(ReactingCloud<ParcelType<ThermoType> >);             \
                                                                               \
-    makePhaseChangeModelThermoType                                            \
+    makeCompositionModelThermoType                                            \
     (                                                                         \
-        NoPhaseChange,                                                        \
-        ReactingCloud,                                                        \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makePhaseChangeModelThermoType                                            \
-    (                                                                         \
-        LiquidEvaporation,                                                    \
+        SingleMixtureFraction,                                                \
         ReactingCloud,                                                        \
         ParcelType,                                                           \
         ThermoType                                                            \

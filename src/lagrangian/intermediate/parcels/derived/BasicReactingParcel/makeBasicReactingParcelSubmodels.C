@@ -24,38 +24,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
-#include "KinematicCloud.H"
+#include "BasicReactingParcel.H"
 
-#include "LocalInteraction.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
+// Kinematic
+#include "makeReactingParcelDispersionModels.H"
+#include "makeReactingParcelDragModels.H"
+#include "makeReactingParcelInjectionModels.H"
+#include "makeReactingParcelPatchInteractionModels.H"
+#include "makeReactingParcelPostProcessingModels.H"
+
+// Thermodynamic
+#include "makeReactingParcelHeatTransferModels.H"
+
+// Reacting
+#include "makeReactingParcelCompositionModels.H"
+#include "makeReactingParcelPhaseChangeModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makePatchInteractionModel(KinematicCloud<basicThermoParcel>);
+    // Kinematic sub-models
+    makeReactingDispersionModels(BasicReactingParcel);
+    makeReactingDragModels(BasicReactingParcel);
+    makeReactingInjectionModels(BasicReactingParcel);
+    makeReactingPatchInteractionModels(BasicReactingParcel);
+    makeReactingPostProcessingModels(BasicReactingParcel);
 
-    // Add instances of patch interaction model to the table
-    makePatchInteractionModelType
-    (
-        LocalInteraction,
-        KinematicCloud,
-        basicThermoParcel
-    );
-    makePatchInteractionModelType
-    (
-        Rebound,
-        KinematicCloud,
-        basicThermoParcel
-    );
-    makePatchInteractionModelType
-    (
-        StandardWallInteraction,
-        KinematicCloud,
-        basicThermoParcel
-    );
+    // Thermo sub-models
+    makeReactingHeatTransferModels(BasicReactingParcel);
+
+    // Reacting sub-models
+    makeReactingCompositionModels(BasicReactingParcel);
+    makeReactingPhaseChangeModels(BasicReactingParcel);
 };
 
 

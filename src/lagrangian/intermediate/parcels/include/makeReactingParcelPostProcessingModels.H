@@ -24,43 +24,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingMultiphaseParcelSurfaceReactionModels_H
-#define makeReactingMultiphaseParcelSurfaceReactionModels_H
+#ifndef makeReactingParcelPostProcessingModels_H
+#define makeReactingParcelPostProcessingModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
-#include "ReactingMultiphaseCloud.H"
+#include "KinematicCloud.H"
 
-#include "NoSurfaceReaction.H"
+#include "NoPostProcessing.H"
+#include "PatchPostProcessing.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingMultiphaseSurfaceReactionModelType(ParcelType)          \
+#define makeReactingPostProcessingModels(ParcelType)                          \
                                                                               \
-    createReactingMultiphaseSurfaceReactionModelThermoType                    \
+    makeReactingPostProcessingModelThermoType                                 \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createReactingMultiphaseSurfaceReactionModelThermoType                    \
+                                                                              \
+    makeReactingPostProcessingModelThermoType                                 \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingMultiphaseSurfaceReactionModelThermoType(ParcelType, ThermoType)\
+#define makeReactingPostProcessingModelThermoType(ParcelType, ThermoType)     \
                                                                               \
-    makeSurfaceReactionModel                                                  \
+    makePostProcessingModel(KinematicCloud<ParcelType<ThermoType> >);         \
+                                                                              \
+    makePostProcessingModelThermoType                                         \
     (                                                                         \
-        ReactingMultiphaseCloud<ParcelType<ThermoType> >                      \
+        NoPostProcessing,                                                     \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
     );                                                                        \
-                                                                              \
-    makeSurfaceReactionModelThermoType                                        \
+    makePostProcessingModelThermoType                                         \
     (                                                                         \
-        NoSurfaceReaction,                                                    \
-        ReactingMultiphaseCloud,                                              \
+        PatchPostProcessing,                                                  \
+        KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

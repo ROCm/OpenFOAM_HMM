@@ -24,53 +24,39 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "BasicReactingMultiphaseParcel.H"
+#include "BasicTrackedReactingParcel.H"
 
 // Kinematic
 #include "makeReactingParcelDispersionModels.H"
 #include "makeReactingParcelDragModels.H"
-#include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
+#include "makeReactingParcelInjectionModels.H"
 #include "makeReactingParcelPatchInteractionModels.H"
 #include "makeReactingParcelPostProcessingModels.H"
 
-// Thermodynamic
+// Thermo
 #include "makeReactingParcelHeatTransferModels.H"
 
 // Reacting
-#include "makeReactingMultiphaseParcelCompositionModels.H" // MP variant
+#include "makeReactingParcelCompositionModels.H"
 #include "makeReactingParcelPhaseChangeModels.H"
-
-// Reacting multiphase
-#include "makeReactingMultiphaseParcelDevolatilisationModels.H"
-#include "makeReactingMultiphaseParcelSurfaceReactionModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
     // Kinematic sub-models
-    createReactingDispersionModelType(BasicReactingMultiphaseParcel);
-    createReactingDragModelType(BasicReactingMultiphaseParcel);
-    createReactingMultiphaseInjectionModelType(BasicReactingMultiphaseParcel);
-    createReactingPatchInteractionModelType(BasicReactingMultiphaseParcel);
-    createReactingPostProcessingModelType(BasicReactingMultiphaseParcel);
+    makeReactingDispersionModels(BasicTrackedReactingParcel);
+    makeReactingDragModels(BasicTrackedReactingParcel);
+    makeReactingInjectionModels(BasicTrackedReactingParcel);
+    makeReactingPatchInteractionModels(BasicTrackedReactingParcel);
+    makeReactingPostProcessingModels(BasicTrackedReactingParcel);
 
     // Thermo sub-models
-    createReactingHeatTransferModelType(BasicReactingMultiphaseParcel);
+    makeReactingHeatTransferModels(BasicTrackedReactingParcel);
 
     // Reacting sub-models
-    createReactingMultiphaseCompositionModelType(BasicReactingMultiphaseParcel);
-    createReactingPhaseChangeModelType(BasicReactingMultiphaseParcel);
-
-    // Reacting multiphase sub-models
-    createReactingMultiphaseDevolatilisationModelType
-    (
-        BasicReactingMultiphaseParcel
-    );
-    createReactingMultiphaseSurfaceReactionModelType
-    (
-        BasicReactingMultiphaseParcel
-    );
+    makeReactingCompositionModels(BasicTrackedReactingParcel);
+    makeReactingPhaseChangeModels(BasicTrackedReactingParcel);
 };
 
 

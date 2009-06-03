@@ -24,59 +24,46 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelPatchInteractionModels_H
-#define makeReactingParcelPatchInteractionModels_H
+#ifndef makeParcelDispersionModels_h
+#define makeParcelDispersionModels_h
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
 #include "KinematicCloud.H"
 
-#include "LocalInteraction.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
+#include "NoDispersion.H"
+#include "GradientDispersionRAS.H"
+#include "StochasticDispersionRAS.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingPatchInteractionModelType(ParcelType)                   \
+#define makeParcelDispersionModels(ParcelType)                                \
                                                                               \
-    createReactingPatchInteractionModelThermoType                             \
+    makeDispersionModel(KinematicCloud<ParcelType>);                          \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        ParcelType,                                                           \
-        specieConstProperties                                                 \
+        DispersionRASModel<KinematicCloud<ParcelType> >,                      \
+        0                                                                     \
     );                                                                        \
                                                                               \
-    createReactingPatchInteractionModelThermoType                             \
+    makeDispersionModelType                                                   \
     (                                                                         \
-        ParcelType,                                                           \
-        specieReactingProperties                                              \
-    );
-
-
-#define createReactingPatchInteractionModelThermoType(ParcelType, ThermoType) \
-                                                                              \
-    makePatchInteractionModel(KinematicCloud<ParcelType<ThermoType> >);       \
-                                                                              \
-    makePatchInteractionModelThermoType                                       \
-    (                                                                         \
-        LocalInteraction,                                                     \
+        NoDispersion,                                                         \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makePatchInteractionModelThermoType                                       \
+    makeDispersionModelType                                                   \
     (                                                                         \
-        Rebound,                                                     \
+        GradientDispersionRAS,                                                \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );                                                                        \
-    makePatchInteractionModelThermoType                                       \
+    makeDispersionModelType                                                   \
     (                                                                         \
-        StandardWallInteraction,                                              \
+        StochasticDispersionRAS,                                              \
         KinematicCloud,                                                       \
-        ParcelType,                                                           \
-        ThermoType                                                            \
+        ParcelType                                                            \
     );
 
 

@@ -37,21 +37,21 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingHeatTransferModelType(ParcelType)                       \
+#define makeReactingHeatTransferModels(ParcelType)                            \
                                                                               \
-    createReactingHeatTransferModelThermoType                                 \
+    makeReactingHeatTransferModelThermoType                                   \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createReactingHeatTransferModelThermoType                                 \
+    makeReactingHeatTransferModelThermoType                                   \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingHeatTransferModelThermoType(ParcelType, ThermoType)     \
+#define makeReactingHeatTransferModelThermoType(ParcelType, ThermoType)       \
                                                                               \
     makeHeatTransferModel(ThermoCloud<ParcelType<ThermoType> >);              \
                                                                               \

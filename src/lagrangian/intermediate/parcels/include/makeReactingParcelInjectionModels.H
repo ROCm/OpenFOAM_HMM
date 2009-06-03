@@ -24,47 +24,72 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelDragModels_H
-#define makeReactingParcelDragModels_H
+#ifndef makeReactingParcelInjectionModels_H
+#define makeReactingParcelInjectionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "reactingThermoTypes.H"
 #include "KinematicCloud.H"
 
-#include "NoDrag.H"
-#include "SphereDrag.H"
+#include "ConeInjection.H"
+#include "FieldActivatedInjection.H"
+#include "ManualInjection.H"
+#include "NoInjection.H"
+#include "ReactingLookupTableInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define createReactingDragModelType(ParcelType)                               \
+#define makeReactingInjectionModels(ParcelType)                               \
                                                                               \
-    createReactingDragModelThermoType                                         \
+    makeReactingInjectionModelThermoType                                      \
     (                                                                         \
         ParcelType,                                                           \
         specieConstProperties                                                 \
     );                                                                        \
-    createReactingDragModelThermoType                                         \
+                                                                              \
+    makeReactingInjectionModelThermoType                                      \
     (                                                                         \
         ParcelType,                                                           \
         specieReactingProperties                                              \
     );
 
 
-#define createReactingDragModelThermoType(ParcelType, ThermoType)             \
+#define makeReactingInjectionModelThermoType(ParcelType, ThermoType)          \
                                                                               \
-    makeDragModel(KinematicCloud<ParcelType<ThermoType> >);                   \
+    makeInjectionModel(KinematicCloud<ParcelType<ThermoType> >);              \
                                                                               \
-    makeDragModelThermoType                                                   \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        NoDrag,                                                               \
+        ConeInjection,                                                        \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeDragModelThermoType                                                   \
+    makeInjectionModelThermoType                                              \
     (                                                                         \
-        SphereDrag,                                                           \
+        FieldActivatedInjection,                                              \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makeInjectionModelThermoType                                              \
+    (                                                                         \
+        ManualInjection,                                                      \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makeInjectionModelThermoType                                              \
+    (                                                                         \
+        NoInjection,                                                          \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makeInjectionModelThermoType                                              \
+    (                                                                         \
+        ReactingLookupTableInjection,                                         \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \

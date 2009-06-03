@@ -25,53 +25,30 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "basicThermoParcel.H"
-#include "ThermoCloud.H"
 
-#include "ConeInjection.H"
-#include "FieldActivatedInjection.H"
-#include "ManualInjection.H"
-#include "NoInjection.H"
-#include "ThermoLookupTableInjection.H"
+// Kinematic
+#include "makeParcelDispersionModels.H"
+#include "makeParcelDragModels.H"
+#include "makeParcelInjectionModels.H"
+#include "makeParcelPatchInteractionModels.H"
+#include "makeParcelPostProcessingModels.H"
+
+// Thermodynamic
+#include "makeParcelHeatTransferModels.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    makeInjectionModel(KinematicCloud<basicThermoParcel>);
+    // Kinematic sub-models
+    makeParcelDispersionModels(basicThermoParcel);
+    makeParcelDragModels(basicThermoParcel);
+    makeParcelInjectionModels(basicThermoParcel);
+    makeParcelPatchInteractionModels(basicThermoParcel);
+    makeParcelPostProcessingModels(basicThermoParcel);
 
-    // Add instances of injection model to the table
-
-    makeInjectionModelType
-    (
-        ConeInjection,
-        KinematicCloud,
-        basicThermoParcel
-    );
-    makeInjectionModelType
-    (
-        FieldActivatedInjection,
-        KinematicCloud,
-        basicThermoParcel
-    );
-    makeInjectionModelType
-    (
-        ManualInjection,
-        KinematicCloud,
-        basicThermoParcel
-    );
-    makeInjectionModelType
-    (
-        NoInjection,
-        KinematicCloud,
-        basicThermoParcel
-    );
-    makeInjectionModelType
-    (
-        ThermoLookupTableInjection,
-        KinematicCloud,
-        basicThermoParcel
-    );
-
+    // Thermo sub-models
+    makeParcelHeatTransferModels(basicThermoParcel);
 };
 
 

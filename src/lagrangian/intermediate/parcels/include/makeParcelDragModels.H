@@ -24,39 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicKinematicParcel.H"
-#include "KinematicCloud.H"
-
-#include "LocalInteraction.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
+#ifndef makeParcelDragModels_H
+#define makeParcelDragModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    makePatchInteractionModel(KinematicCloud<basicKinematicParcel>);
+#include "KinematicCloud.H"
 
-    // Add instances of patch interaction model to the table
-    makePatchInteractionModelType
-    (
-        LocalInteraction,
-        KinematicCloud,
-        basicKinematicParcel
-    );
-    makePatchInteractionModelType
-    (
-        Rebound,
-        KinematicCloud,
-        basicKinematicParcel
-    );
-    makePatchInteractionModelType
-    (
-        StandardWallInteraction,
-        KinematicCloud,
-        basicKinematicParcel
-    );
-};
+#include "NoDrag.H"
+#include "SphereDrag.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeParcelDragModels(ParcelType)                                     \
+                                                                             \
+    makeDragModel(KinematicCloud<ParcelType>);                               \
+                                                                             \
+    makeDragModelType(NoDrag, KinematicCloud, ParcelType);                   \
+    makeDragModelType(SphereDrag, KinematicCloud, ParcelType);
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
