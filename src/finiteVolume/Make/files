@@ -39,26 +39,40 @@ fvMeshMapper = fvMesh/fvMeshMapper
 $(fvMeshMapper)/fvPatchMapper.C
 $(fvMeshMapper)/fvSurfaceMapper.C
 
+
 extendedStencil = fvMesh/extendedStencil
-$(extendedStencil)/extendedStencil.C
-$(extendedStencil)/extendedUpwindStencil.C
-$(extendedStencil)/extendedCentredStencil.C
 
-$(extendedStencil)/faceStencil/faceStencil.C
-$(extendedStencil)/faceStencil/faceEdgeCellStencil.C
-$(extendedStencil)/faceStencil/cellFaceCellStencil.C
-$(extendedStencil)/faceStencil/cellPointCellStencil.C
-$(extendedStencil)/faceStencil/cellEdgeCellStencil.C
+cellToCell = $(extendedStencil)/cellToCell
+$(cellToCell)/fullStencils/cellToCellStencil.C
+$(cellToCell)/fullStencils/CFCCellToCellStencil.C
+$(cellToCell)/fullStencils/CPCCellToCellStencil.C
+$(cellToCell)/fullStencils/CECCellToCellStencil.C
 
-$(extendedStencil)/extendedStencilMeshObjects/centredCECStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/centredCFCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/centredCPCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/centredFECStencilObject.C
+cellToFace = $(extendedStencil)/cellToFace
+$(cellToFace)/fullStencils/cellToFaceStencil.C
+$(cellToFace)/fullStencils/CFCCellToFaceStencil.C
+$(cellToFace)/fullStencils/CECCellToFaceStencil.C
+$(cellToFace)/fullStencils/CPCCellToFaceStencil.C
+$(cellToFace)/fullStencils/FECCellToFaceStencil.C
+$(cellToFace)/extendedCellToFaceStencil.C
+$(cellToFace)/extendedCentredCellToFaceStencil.C
+$(cellToFace)/extendedUpwindCellToFaceStencil.C
+$(cellToFace)/MeshObjects/centredCECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/centredCFCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/centredCPCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/centredFECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindCECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindCFCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindCPCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindFECCellToFaceStencilObject.C
 
-$(extendedStencil)/extendedStencilMeshObjects/upwindCECStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/upwindCFCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/upwindCPCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/upwindFECStencilObject.C
+faceToCell = $(extendedStencil)/faceToCell
+$(faceToCell)/fullStencils/faceToCellStencil.C
+$(faceToCell)/fullStencils/CFCFaceToCellStencil.C
+$(faceToCell)/extendedFaceToCellStencil.C
+$(faceToCell)/extendedCentredFaceToCellStencil.C
+$(faceToCell)/MeshObjects/centredCFCFaceToCellStencilObject.C
+
 
 fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
