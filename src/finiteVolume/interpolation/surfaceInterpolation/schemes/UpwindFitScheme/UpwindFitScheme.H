@@ -126,7 +126,7 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
-            const extendedUpwindStencil& stencil = Stencil::New
+            const extendedUpwindCellToFaceStencil& stencil = Stencil::New
             (
                 mesh,
                 scalar(0.5)

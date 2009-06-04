@@ -47,14 +47,17 @@ License
 #include "quadraticLinearFitPolynomial.H"
 #include "skewCorrectionVectors.H"
 
-#include "centredCECStencilObject.H"
-#include "centredCFCStencilObject.H"
-#include "centredCPCStencilObject.H"
-#include "centredFECStencilObject.H"
-#include "upwindCECStencilObject.H"
-#include "upwindCFCStencilObject.H"
-#include "upwindCPCStencilObject.H"
-#include "upwindFECStencilObject.H"
+
+#include "centredCECCellToFaceStencilObject.H"
+#include "centredCFCCellToFaceStencilObject.H"
+#include "centredCPCCellToFaceStencilObject.H"
+#include "centredFECCellToFaceStencilObject.H"
+#include "upwindCECCellToFaceStencilObject.H"
+#include "upwindCFCCellToFaceStencilObject.H"
+#include "upwindCPCCellToFaceStencilObject.H"
+#include "upwindFECCellToFaceStencilObject.H"
+
+#include "centredCFCFaceToCellStencilObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -111,14 +114,16 @@ void Foam::fvMesh::clearAddressing()
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
 
-    centredCECStencilObject::Delete(*this);
-    centredCFCStencilObject::Delete(*this);
-    centredCPCStencilObject::Delete(*this);
-    centredFECStencilObject::Delete(*this);
-    upwindCECStencilObject::Delete(*this);
-    upwindCFCStencilObject::Delete(*this);
-    upwindCPCStencilObject::Delete(*this);
-    upwindFECStencilObject::Delete(*this);
+    centredCECCellToFaceStencilObject::Delete(*this);
+    centredCFCCellToFaceStencilObject::Delete(*this);
+    centredCPCCellToFaceStencilObject::Delete(*this);
+    centredFECCellToFaceStencilObject::Delete(*this);
+    upwindCECCellToFaceStencilObject::Delete(*this);
+    upwindCFCCellToFaceStencilObject::Delete(*this);
+    upwindCPCCellToFaceStencilObject::Delete(*this);
+    upwindFECCellToFaceStencilObject::Delete(*this);
+
+    centredCFCFaceToCellStencilObject::Delete(*this);
 }
 
 
