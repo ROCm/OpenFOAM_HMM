@@ -40,52 +40,51 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "readPIMPLEControls.H"
+    #include "initContinuityErrs.H"
+    #include "createFields.H"
+    #include "readTimeControls.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "initContinuityErrs.H"
-#   include "createFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (runTime.run())
     {
+        #include "readPIMPLEControls.H"
+        #include "readTimeControls.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
-
-        twoPhaseProperties.correct();
-
-#       include "alphaEqn.H"
-
-#       include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=0; corr<nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
-#           include "pEqn.H"
+            twoPhaseProperties.correct();
+
+            #include "alphaEqn.H"
+
+            #include "UEqn.H"
+
+            // --- PISO loop
+            for (int corr=0; corr<nCorr; corr++)
+            {
+                #include "pEqn.H"
+            }
+
+            #include "continuityErrs.H"
+
+            turbulence->correct();
         }
-
-#       include "continuityErrs.H"
-
-        p = pd + rho*gh;
-
-        if (pd.needReference())
-        {
-            p += dimensionedScalar
-            (
-                "p",
-                p.dimensions(),
-                pRefValue - getRefCellValue(p, pdRefCell)
-            );
-        }
-
-        turbulence->correct();
 
         runTime.write();
 
