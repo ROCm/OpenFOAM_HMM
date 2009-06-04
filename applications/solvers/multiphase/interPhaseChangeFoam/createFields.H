@@ -1,9 +1,9 @@
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -66,26 +66,9 @@
     rho.oldTime();
 
 
-    label pdRefCell = 0;
-    scalar pdRefValue = 0.0;
-    setRefCell(pd, mesh.solutionDict().subDict("PISO"), pdRefCell, pdRefValue);
-
-    Info<< "Calculating field g.h" << endl;
-    volScalarField gh("gh", g & mesh.C());
-    surfaceScalarField ghf("ghf", g & mesh.Cf());
-
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pd + rho*gh
-    );
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
+    setRefCell(p, mesh.solutionDict().subDict("PISO"), pRefCell, pRefValue);
 
 
     // Construct interface from alpha1 distribution

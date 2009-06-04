@@ -12,9 +12,9 @@
 
     phi = phiU +
         (
-            mixture.surfaceTensionForce()
+            mixture.surfaceTensionForce()*mesh.magSf()
           + fvc::interpolate(rho)*(g & mesh.Sf())
-        )*rUAf*mesh.magSf();
+        )*rUAf;
 
     adjustPhi(phi, U, p);
 
