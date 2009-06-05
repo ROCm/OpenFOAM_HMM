@@ -26,7 +26,7 @@ Class
     Foam::BasicReactingCloud
 
 Description
-    Reacting cloud templated on the reacting parcel
+    Reacting cloud templated on the type of carrier phase thermodynamics
 
 SourceFiles
     BasicReactingCloud.C

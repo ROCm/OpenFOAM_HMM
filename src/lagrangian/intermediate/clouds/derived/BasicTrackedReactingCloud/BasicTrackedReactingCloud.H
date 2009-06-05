@@ -26,7 +26,7 @@ Class
     Foam::BasicTrackedReactingCloud
 
 Description
-    Reacting cloud templated on the reacting parcel
+    Tracked racting cloud templated on the type of carrier phase thermodynamics
 
 SourceFiles
     BasicTrackedReactingCloud.C

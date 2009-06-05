@@ -26,7 +26,7 @@ Class
     Foam::basicKinematicCloud
 
 Description
-    Kinematic cloud templated on the kinematic parcel
+    Cloud class to introduce kinematic parcels
 
 SourceFiles
     basicKinematicCloud.C
