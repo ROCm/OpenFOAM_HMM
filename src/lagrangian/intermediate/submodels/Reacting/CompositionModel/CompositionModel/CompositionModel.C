@@ -184,9 +184,9 @@ Foam::label Foam::CompositionModel<CloudType>::globalCarrierId
     const word& cmptName
 ) const
 {
-    forAll(carrierThermo_.composition().Y(), i)
+    forAll(carrierThermo_.composition().species(), i)
     {
-        word carrierSpecieName = carrierThermo_.composition().Y()[i].name();
+        word carrierSpecieName = carrierThermo_.composition().species()[i];
         if (cmptName == carrierSpecieName)
         {
             return i;
