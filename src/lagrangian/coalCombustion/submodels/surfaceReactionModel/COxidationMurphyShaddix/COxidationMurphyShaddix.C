@@ -62,18 +62,16 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     O2GlobalId_(owner.composition().globalCarrierId("O2")),
     CO2GlobalId_(owner.composition().globalCarrierId("CO2")),
     WC_(0.0),
-    WO2_(0.0),
-    HcCO2_(0.0)
+    WO2_(0.0)
 {
     // Determine Cs ids
     label idSolid = owner.composition().idSolid();
-    CsLocalId_ = owner.composition().localId(idSolid, "Cs");
+    CsLocalId_ = owner.composition().localId(idSolid, "C");
 
     // Set local copies of thermo properties
     WO2_ = owner.composition().carrierSpecies()[O2GlobalId_].W();
     scalar WCO2 = owner.composition().carrierSpecies()[CO2GlobalId_].W();
     WC_ = WCO2 - WO2_;
-    HcCO2_ = owner.composition().carrierSpecies()[CO2GlobalId_].Hc();
 }
 
 
@@ -209,8 +207,16 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
     // Add to particle mass transfer
     dMassSolid[CsLocalId_] += dOmega*WC_;
 
+    const scalar HC =
+        this->owner().composition().solids().properties()[CsLocalId_].Hf()
+      + this->owner().composition().solids().properties()[CsLocalId_].cp()*T;
+    const scalar HCO2 =
+        this->owner().composition().carrierSpecies()[CO2GlobalId_].H(T);
+    const scalar HO2 =
+        this->owner().composition().carrierSpecies()[O2GlobalId_].H(T);
+
     // Heat of reaction
-    return -HcCO2_*dOmega*WC_;
+    return dOmega*(WC_*HC + WO2_*HO2 - (WC_ + WO2_)*HCO2);
 }
 
 

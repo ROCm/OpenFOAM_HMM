@@ -111,9 +111,6 @@ class COxidationMurphyShaddix
             //- Molecular weight of O2 [kg/kmol]
             scalar WO2_;
 
-            //- Chemical enthalpy of CO2 [J/kg]
-            scalar HcCO2_;
-
 
 public:
 
