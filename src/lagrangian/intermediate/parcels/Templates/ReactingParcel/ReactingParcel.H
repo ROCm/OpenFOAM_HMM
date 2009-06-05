@@ -190,7 +190,7 @@ protected:
 
         //- Calculate Phase change
         template<class TrackData>
-        scalar calcPhaseChange
+        void calcPhaseChange
         (
             TrackData& td,
             const scalar dt,           // timestep
@@ -202,7 +202,9 @@ protected:
             const label idPhase,       // id of phase involved in phase change
             const scalar YPhase,       // total mass fraction
             const scalarField& YComponents, // component mass fractions
-            scalarField& dMassPC       // mass transfer - local to particle
+            scalarField& dMassPC,      // mass transfer - local to particle
+            scalar& Sh,                // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         );
 
         //- Update mass fraction

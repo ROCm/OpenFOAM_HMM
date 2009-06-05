@@ -222,7 +222,8 @@ protected:
             const scalar rho,          // density
             const scalar T,            // temperature
             const scalar cp,           // specific heat capacity
-            const scalar Sh            // additional enthalpy sources
+            const scalar Sh,           // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         );
 
 

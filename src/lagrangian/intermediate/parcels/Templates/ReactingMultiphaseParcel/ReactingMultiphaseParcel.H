@@ -223,7 +223,7 @@ protected:
 
         //- Calculate Devolatilisation
         template<class TrackData>
-        scalar calcDevolatilisation
+        void calcDevolatilisation
         (
             TrackData& td,
             const scalar dt,           // timestep
@@ -234,12 +234,14 @@ protected:
             const scalar YVolatileTot, // total volatile mass fraction
             const scalarField& YVolatile, // volatile component mass fractions
             bool& canCombust,          // 'can combust' flag
-            scalarField& dMassDV       // mass transfer - local to particle
+            scalarField& dMassDV,      // mass transfer - local to particle
+            scalar& Sh,                // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         ) const;
 
         //- Calculate surface reactions
         template<class TrackData>
-        scalar calcSurfaceReactions
+        void calcSurfaceReactions
         (
             TrackData& td,
             const scalar dt,           // timestep
@@ -256,7 +258,9 @@ protected:
             scalarField& dMassSRGas,   // gas-phase mass transfer - local
             scalarField& dMassSRLiquid,// liquid-phase mass transfer - local
             scalarField& dMassSRSolid, // solid-phase mass transfer - local
-            scalarField& dMassSRCarrier// carrier phase mass transfer
+            scalarField& dMassSRCarrier, // carrier phase mass transfer
+            scalar& Sh,                // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         ) const;
 
 

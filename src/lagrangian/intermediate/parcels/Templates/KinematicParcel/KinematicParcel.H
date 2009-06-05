@@ -243,7 +243,8 @@ protected:
             const vector& U,           // velocity
             const scalar rho,          // density
             const scalar mass,         // mass
-            const vector& Fx           // additional forces
+            const vector& Su,          // explicit particle momentum source
+            vector& dUTrans            // momentum transfer to carrier
         ) const;
 
 
