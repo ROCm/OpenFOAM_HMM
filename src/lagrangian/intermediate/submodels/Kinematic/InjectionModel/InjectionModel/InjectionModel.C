@@ -347,15 +347,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = owner_.db().time().value();
-/*
-    // Return if not started injection event
-    if (time < SOI_)
-    {
-        timeStep0_ = time;
-        postInjectCheck(0);
-        return;
-    }
-*/
     const scalar carrierDt = owner_.db().time().deltaT().value();
     const polyMesh& mesh = owner_.mesh();
 
