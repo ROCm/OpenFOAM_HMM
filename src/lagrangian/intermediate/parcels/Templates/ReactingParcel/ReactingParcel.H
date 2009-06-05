@@ -88,9 +88,6 @@ public:
             //- Constant volume flag - e.g. during mass transfer
             Switch constantVolume_;
 
-            //- Boiling point [K]
-            const scalar Tbp_;
-
             //- Vaporisation temperature [K]
             const scalar Tvap_;
 
@@ -107,9 +104,6 @@ public:
 
             //- Return const access to the constant volume flag
             inline Switch constantVolume() const;
-
-            //- Return const access to the boiling point
-            inline scalar Tbp() const;
 
             //- Return const access to the vaporisation temperature
             inline scalar Tvap() const;

@@ -466,7 +466,6 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcDevolatilisation
     (
         !td.cloud().devolatilisation().active()
      || T < td.constProps().Tvap()
-     || T < td.constProps().Tbp()
     )
     {
         return;
