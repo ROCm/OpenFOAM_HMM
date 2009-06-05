@@ -39,7 +39,7 @@ Description
 #include "chemistryModel.H"
 #include "chemistrySolver.H"
 #include "reactingThermoTypes.H"
-#include "timeActivatedExplicitSource.H"
+#include "timeActivatedExplicitCellSource.H"
 #include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -112,8 +112,6 @@ int main(int argc, char *argv[])
         }
 
         turbulence->correct();
-
-        enthalpySource.update();
 
         rho = thermo->rho();
 
