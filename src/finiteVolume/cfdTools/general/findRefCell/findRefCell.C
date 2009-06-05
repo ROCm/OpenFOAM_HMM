@@ -108,7 +108,7 @@ void Foam::setRefCell
                  "    bool\n"
                  ")",
                 dict
-            )   << "Unable to set reference cell for field" << field.name()
+            )   << "Unable to set reference cell for field " << field.name()
                 << nl
                 << "    Please supply either " << refCellName
                 << " or " << refPointName << nl << exit(FatalIOError);

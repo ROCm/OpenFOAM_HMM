@@ -113,7 +113,17 @@ void fixedFluxBuoyantPressureFvPatchScalarField::updateCoeffs()
     const fvPatchField<scalar>& rho =
         patch().lookupPatchField<volScalarField, scalar>("rho");
 
-    gradient() = -rho.snGrad()*(g.value() & patch().Cf());
+    // If the variable name is "pd" assume it is p - rho*g.h
+    // and set the gradient appropriately.
+    // Otherwise assume the variable is the static pressure.
+    if (dimensionedInternalField().name() == "pd")
+    {
+        gradient() = -rho.snGrad()*(g.value() & patch().Cf());
+    }
+    else
+    {
+        gradient() = rho*(g.value() & patch().nf());
+    }
 
     fixedGradientFvPatchScalarField::updateCoeffs();
 }

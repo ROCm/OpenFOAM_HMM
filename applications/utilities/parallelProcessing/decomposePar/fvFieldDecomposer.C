@@ -56,13 +56,12 @@ processorVolPatchFieldDecomposer
     const unallocLabelList& addressingSlice
 )
 :
-    addressing_(addressingSlice.size()),
-    weights_(addressingSlice.size())
+    directAddressing_(addressingSlice.size())
 {
     const labelList& own = mesh.faceOwner();
     const labelList& neighb = mesh.faceNeighbour();
 
-    forAll (addressing_, i)
+    forAll (directAddressing_, i)
     {
         // Subtract one to align addressing.  
         label ai = mag(addressingSlice[i]) - 1;
@@ -74,18 +73,14 @@ processorVolPatchFieldDecomposer
             // on the parallel boundary.
             // Give face the value of the neighbour.
 
-            addressing_[i].setSize(1);
-            weights_[i].setSize(1);
-            weights_[i][0] = 1.0;
-
             if (addressingSlice[i] >= 0)
             {
                 // I have the owner so use the neighbour value
-                addressing_[i][0] = neighb[ai];
+                directAddressing_[i] = neighb[ai];
             }
             else
             {
-                addressing_[i][0] = own[ai];
+                directAddressing_[i] = own[ai];
             }
         }
         else
@@ -96,12 +91,7 @@ processorVolPatchFieldDecomposer
             // up the different (face) list of data), so I will
             // just grab the value from the owner cell
 
-            addressing_[i].setSize(1);
-            weights_[i].setSize(1);
-
-            addressing_[i][0] = own[ai];
-
-            weights_[i][0] = 1.0;
+            directAddressing_[i] = own[ai];
         }
     }
 }

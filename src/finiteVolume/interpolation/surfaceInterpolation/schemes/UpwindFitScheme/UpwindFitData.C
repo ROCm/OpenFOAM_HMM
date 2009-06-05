@@ -29,7 +29,7 @@ License
 #include "volFields.H"
 #include "SVD.H"
 #include "syncTools.H"
-#include "extendedUpwindStencil.H"
+#include "extendedUpwindCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
@@ -37,12 +37,17 @@ template<class Polynomial>
 Foam::UpwindFitData<Polynomial>::UpwindFitData
 (
     const fvMesh& mesh,
-    const extendedUpwindStencil& stencil,
+    const extendedUpwindCellToFaceStencil& stencil,
     const scalar linearLimitFactor,
     const scalar centralWeight
 )
 :
-    FitData<UpwindFitData<Polynomial>, extendedUpwindStencil, Polynomial>
+    FitData
+    <
+        UpwindFitData<Polynomial>,
+        extendedUpwindCellToFaceStencil,
+        Polynomial
+    >
     (
         mesh, stencil, linearLimitFactor, centralWeight
     ),
@@ -98,10 +103,18 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
 
     for(label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
-        FitData<UpwindFitData<Polynomial>, extendedUpwindStencil, Polynomial>::
-           calcFit(owncoeffs_[facei], ownStencilPoints[facei], w[facei], facei);
-        FitData<UpwindFitData<Polynomial>, extendedUpwindStencil, Polynomial>::
-           calcFit(neicoeffs_[facei], neiStencilPoints[facei], w[facei], facei);
+        FitData
+        <
+            UpwindFitData<Polynomial>,
+            extendedUpwindCellToFaceStencil,
+            Polynomial
+        >::calcFit(owncoeffs_[facei], ownStencilPoints[facei], w[facei], facei);
+        FitData
+        <
+            UpwindFitData<Polynomial>,
+            extendedUpwindCellToFaceStencil,
+            Polynomial
+        >::calcFit(neicoeffs_[facei], neiStencilPoints[facei], w[facei], facei);
     }
 
     const surfaceScalarField::GeometricBoundaryField& bw = w.boundaryField();
@@ -118,14 +131,18 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
             {
                 FitData
                 <
-                    UpwindFitData<Polynomial>, extendedUpwindStencil, Polynomial
+                    UpwindFitData<Polynomial>,
+                    extendedUpwindCellToFaceStencil,
+                    Polynomial
                 >::calcFit
                 (
                     owncoeffs_[facei], ownStencilPoints[facei], pw[i], facei
                 );
                 FitData
                 <
-                    UpwindFitData<Polynomial>, extendedUpwindStencil, Polynomial
+                    UpwindFitData<Polynomial>,
+                    extendedUpwindCellToFaceStencil,
+                    Polynomial
                 >::calcFit
                 (
                     neicoeffs_[facei], neiStencilPoints[facei], pw[i], facei

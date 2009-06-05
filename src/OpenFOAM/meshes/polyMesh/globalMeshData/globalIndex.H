@@ -84,6 +84,9 @@ public:
         //- Start of procI+1 data
         inline const labelList& offsets() const;
 
+        //- my local size
+        inline label localSize() const;
+
         //- Global sum of localSizes
         inline label size() const;
 

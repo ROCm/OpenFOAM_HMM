@@ -28,16 +28,14 @@ License
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "SVD.H"
-#include "syncTools.H"
-#include "extendedStencil.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-template<class Form, class extendedStencil, class Polynomial>
-Foam::FitData<Form, extendedStencil, Polynomial>::FitData
+template<class Form, class ExtendedStencil, class Polynomial>
+Foam::FitData<Form, ExtendedStencil, Polynomial>::FitData
 (
     const fvMesh& mesh,
-    const extendedStencil& stencil,
+    const ExtendedStencil& stencil,
     const scalar linearLimitFactor,
     const scalar centralWeight
 )
@@ -191,6 +189,13 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
         );
     }
 
+    // Additional weighting for constant and linear terms
+    for(label i = 0; i < B.n(); i++)
+    {
+        B[i][0] *= wts[0];
+        B[i][1] *= wts[0];
+    }
+
     // Set the fit
     label stencilSize = C.size();
     coeffsi.setSize(stencilSize);
@@ -205,7 +210,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
 
         for(label i=0; i<stencilSize; i++)
         {
-            coeffsi[i] = wts[i]*svd.VSinvUt()[0][i];
+            coeffsi[i] = wts[0]*wts[i]*svd.VSinvUt()[0][i];
             if (mag(coeffsi[i]) > maxCoeff)
             {
                 maxCoeff = mag(coeffsi[i]);
@@ -229,7 +234,8 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
             //     << "    sing vals " << svd.S() << endl;
         // }
 
-        if (!goodFit) // (not good fit so increase weight in the centre)
+        if (!goodFit) // (not good fit so increase weight in the centre and weight
+                      //  for constant and linear terms)
         {
             // if (iIt == 7)
             // {
@@ -237,7 +243,10 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
             //     (
             //         "FitData<Polynomial>::calcFit"
             //         "(const List<point>& C, const label facei"
-            //     )   << "Cannot fit face " << facei
+            //     )   << "Cannot fit face " << facei << " iteration " << iIt
+            //         << " with sum of weights " << sum(coeffsi) << nl
+            //         << "    Weights " << coeffsi << nl
+            //         << "    Linear weights " << wLin << " " << 1 - wLin << nl
             //         << "    sing vals " << svd.S() << endl;
             // }
 
@@ -248,6 +257,12 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
             {
                 B[0][j] *= 10;
                 B[1][j] *= 10;
+            }
+
+            for(label i = 0; i < B.n(); i++)
+            {
+                B[i][0] *= 10;
+                B[i][1] *= 10;
             }
         }
     }

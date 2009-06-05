@@ -15,7 +15,7 @@ phi =
     );
 
 surfaceScalarField phiU("phiU", phi);
-phi -= ghf*fvc::snGrad(rho)*rUAf*mesh.magSf();
+phi += fvc::interpolate(rho)*(g & mesh.Sf())*rUAf;
 
 for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
 {
