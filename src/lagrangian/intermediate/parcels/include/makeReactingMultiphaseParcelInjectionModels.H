@@ -33,6 +33,7 @@ License
 #include "KinematicCloud.H"
 
 #include "ConeInjection.H"
+#include "ConeInjectionMP.H"
 #include "FieldActivatedInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
@@ -61,6 +62,13 @@ License
     makeInjectionModelThermoType                                              \
     (                                                                         \
         ConeInjection,                                                        \
+        KinematicCloud,                                                       \
+        ParcelType,                                                           \
+        ThermoType                                                            \
+    );                                                                        \
+    makeInjectionModelThermoType                                              \
+    (                                                                         \
+        ConeInjectionMP,                                                      \
         KinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
