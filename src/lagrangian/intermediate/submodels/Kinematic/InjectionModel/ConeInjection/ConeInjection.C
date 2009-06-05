@@ -77,6 +77,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     InjectionModel<CloudType>(dict, owner, typeName),
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     position_(this->coeffDict().lookup("position")),
+    injectorCell_(-1),
     direction_(this->coeffDict().lookup("direction")),
     parcelsPerSecond_
     (
@@ -145,6 +146,9 @@ Foam::ConeInjection<CloudType>::ConeInjection
 
     // Set total volume to inject
     this->volumeTotal_ = volumeFlowRate_().integrate(0.0, duration_);
+
+    // Set/cache the injector cell
+    this->findCellAtPosition(injectorCell_, position_);
 }
 
 
@@ -182,7 +186,7 @@ void Foam::ConeInjection<CloudType>::setPositionAndCell
 )
 {
     position = position_;
-    this->findCellAtPosition(cellOwner, position);
+    cellOwner = injectorCell_;
 }
 
 

@@ -53,6 +53,8 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+
 template<class Type>
 class DataEntry;
 
@@ -71,7 +73,10 @@ class ConeInjection
         const scalar duration_;
 
         //- Injector position [m]
-        const vector position_;
+        vector position_;
+
+        //- Cell containing injector position []
+        label injectorCell_;
 
         //- Injector direction []
         vector direction_;
