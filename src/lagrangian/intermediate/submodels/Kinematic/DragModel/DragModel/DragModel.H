@@ -120,14 +120,13 @@ public:
         //- Return drag coefficient
         virtual scalar Cd(const scalar Re) const = 0;
 
-        //- Return linearised coefficient for velocity equation
-        //  Drag force per unit particle mass = Cu(U - Up)
-        scalar Cu
+        //- Return momentum transfer coefficient
+        //  Drag force per unit particle surface area = ptc(U - Up)
+        scalar ptc
         (
             const vector& Ur,
             const scalar d,
             const scalar rhoc,
-            const scalar rhop,
             const scalar mu
         ) const;
 };
