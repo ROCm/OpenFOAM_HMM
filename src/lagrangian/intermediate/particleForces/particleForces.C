@@ -115,7 +115,38 @@ const Foam::word& Foam::particleForces::gradUName() const
 }
 
 
-Foam::vector Foam::particleForces::calc
+Foam::vector Foam::particleForces::calcCoupled
+(
+    const label cellI,
+    const scalar dt,
+    const scalar rhoc,
+    const scalar rho,
+    const vector& Uc,
+    const vector& U
+) const
+{
+    vector Ftot = vector::zero;
+
+    // Virtual mass force
+    if (virtualMass_)
+    {
+        notImplemented("Foam::particleForces::calc(...) - virtualMass force");
+//        Ftot += Cvm_*rhoc/rho*d(Uc - U)/dt;
+    }
+
+    // Pressure gradient force
+    if (pressureGradient_)
+    {
+        const volSymmTensorField& gradU =
+            mesh_.lookupObject<volSymmTensorField>(gradUName_);
+        Ftot += rhoc/rho*(U & gradU[cellI]);
+    }
+
+    return Ftot;
+}
+
+
+Foam::vector Foam::particleForces::calcNonCoupled
 (
     const label cellI,
     const scalar dt,
@@ -131,21 +162,6 @@ Foam::vector Foam::particleForces::calc
     if (gravity_)
     {
         Ftot += g_*(1.0 - rhoc/rho);
-    }
-
-    // Virtual mass force
-    if (virtualMass_)
-    {
-        notImplemented("Foam::particleForces::calc(...) - virtualMass force");
-//        Ftot += Cvm_*rhoc/rho*d(Uc - U)/dt;
-    }
-
-    // Pressure gradient force
-    if (pressureGradient_)
-    {
-        const volSymmTensorField& gradU =
-            mesh_.lookupObject<volSymmTensorField>(gradUName_);
-        Ftot += rhoc/rho*(U & gradU[cellI]);
     }
 
     return Ftot;

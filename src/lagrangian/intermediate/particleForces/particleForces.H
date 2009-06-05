@@ -132,8 +132,19 @@ public:
 
        // Evaluation
 
-            //- Calculate the net particle force
-            vector calc
+            //- Calculate action/reaction forces between carrier and particles
+            vector calcCoupled
+            (
+                const label cellI,
+                const scalar dt,
+                const scalar rhoc,
+                const scalar rho,
+                const vector& Uc,
+                const vector& U
+            ) const;
+
+            //- Calculate external forces applied to the particles
+            vector calcNonCoupled
             (
                 const label cellI,
                 const scalar dt,
