@@ -75,7 +75,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
     labelHashSet boundaryCells(mesh.nFaces()-mesh.nInternalFaces());
 
     {
-        labelList patchIDs(meshRefinement::addedPatches(globalToPatch_));
+        labelList patchIDs(meshRefiner_.meshedPatches());
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -2446,14 +2446,9 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoLayerDriver::autoLayerDriver
-(
-    meshRefinement& meshRefiner,
-    const labelList& globalToPatch
-)
+Foam::autoLayerDriver::autoLayerDriver(meshRefinement& meshRefiner)
 :
-    meshRefiner_(meshRefiner),
-    globalToPatch_(globalToPatch)
+    meshRefiner_(meshRefiner)
 {}
 
 

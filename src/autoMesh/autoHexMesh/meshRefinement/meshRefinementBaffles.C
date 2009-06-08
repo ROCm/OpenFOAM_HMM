@@ -1511,11 +1511,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                 perpendicularAngle,
                 globalToPatch
             )
-            //markFacesOnProblemCellsGeometric
-            //(
-            //    motionDict,
-            //    globalToPatch
-            //)
+            //markFacesOnProblemCellsGeometric(motionDict)
         );
         Info<< "Analyzed problem cells in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
@@ -1665,7 +1661,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
 
 // Split off (with optional buffer layers) unreachable areas of mesh.
-Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 (
     const label nBufferLayers,
     const labelList& globalToPatch,
