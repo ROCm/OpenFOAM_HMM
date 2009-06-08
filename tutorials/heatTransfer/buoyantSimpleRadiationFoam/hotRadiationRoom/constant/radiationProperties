@@ -27,6 +27,9 @@ P1Coeffs
 {
 }
 
+// Number of flow iterations per radiation iteration
+solverFreq 1;
+
 absorptionEmissionModel constantAbsorptionEmission;
 
 constantAbsorptionEmissionCoeffs
