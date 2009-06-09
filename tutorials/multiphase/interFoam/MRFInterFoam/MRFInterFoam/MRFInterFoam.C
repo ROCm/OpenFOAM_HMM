@@ -23,17 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    MRFSimpleFoam
+    MRFInterFoam
 
 Description
-    Steady-state solver for incompressible, turbulent flow of non-Newtonian
-    fluids with MRF regions.
+    Solver for 2 incompressible, isothermal immiscible fluids using a VOF
+    (volume of fluid) phase-fraction based interface capturing approach.
+    The momentum and other fluid properties are of the "mixture" and a single
+    momentum equation is solved.
+
+    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
+
+    For a two-fluid approach see twoPhaseEulerFoam.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "singlePhaseTransportModel.H"
-#include "RASModel.H"
+#include "MULES.H"
+#include "subCycle.H"
+#include "interfaceProperties.H"
+#include "twoPhaseMixture.H"
+#include "turbulenceModel.H"
 #include "MRFZones.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -41,74 +50,46 @@ Description
 int main(int argc, char *argv[])
 {
     #include "setRootCase.H"
-
     #include "createTime.H"
     #include "createMesh.H"
-    #include "createFields.H"
+    #include "readEnvironmentalProperties.H"
+    #include "readPISOControls.H"
     #include "initContinuityErrs.H"
+    #include "createFields.H"
+    #include "createMRFZones.H"
+    #include "readTimeControls.H"
+    #include "correctPhi.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    while (runTime.loop())
+    while (runTime.run())
     {
+        #include "readPISOControls.H"
+        #include "readTimeControls.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
+
+        runTime++;
+
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "readSIMPLEControls.H"
+        twoPhaseProperties.correct();
 
-        p.storePrevIter();
+        #include "alphaEqnSubCycle.H"
 
-        // Pressure-velocity SIMPLE corrector
+        #include "UEqn.H"
+
+        // --- PISO loop
+        for (int corr=0; corr<nCorr; corr++)
         {
-            // Momentum predictor
-            tmp<fvVectorMatrix> UEqn
-            (
-                fvm::div(phi, U)
-              - fvm::Sp(fvc::div(phi), U)
-              + turbulence->divDevReff(U)
-            );
-            mrfZones.addCoriolis(UEqn());
-
-            UEqn().relax();
-
-            solve(UEqn() == -fvc::grad(p));
-
-            p.boundaryField().updateCoeffs();
-            volScalarField rAU = 1.0/UEqn().A();
-            U = rAU*UEqn().H();
-            UEqn.clear();
-
-            phi = fvc::interpolate(U, "interpolate(HbyA)") & mesh.Sf();
-            mrfZones.relativeFlux(phi);
-            adjustPhi(phi, U, p);
-
-            // Non-orthogonal pressure corrector loop
-            for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
-            {
-                fvScalarMatrix pEqn
-                (
-                    fvm::laplacian(rAU, p) == fvc::div(phi)
-                );
-
-                pEqn.setReference(pRefCell, pRefValue);
-                pEqn.solve();
-
-                if (nonOrth == nNonOrthCorr)
-                {
-                    phi -= pEqn.flux();
-                }
-            }
-
-            #include "continuityErrs.H"
-
-            // Explicitly relax pressure for momentum corrector
-            p.relax();
-
-            // Momentum corrector
-            U -= rAU*fvc::grad(p);
-            U.correctBoundaryConditions();
+            #include "pEqn.H"
         }
+
+        #include "continuityErrs.H"
 
         turbulence->correct();
 
