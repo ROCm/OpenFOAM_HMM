@@ -46,6 +46,7 @@ License
 #include "linearFitPolynomial.H"
 #include "quadraticFitPolynomial.H"
 #include "quadraticLinearFitPolynomial.H"
+#include "quadraticFitSnGradData.H"
 #include "skewCorrectionVectors.H"
 
 
