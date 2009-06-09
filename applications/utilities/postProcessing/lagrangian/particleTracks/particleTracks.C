@@ -39,7 +39,6 @@ Description
 #include "timeSelector.H"
 #include "OFstream.H"
 #include "passiveParticle.H"
-#include "SortableList.H"
 
 using namespace Foam;
 
