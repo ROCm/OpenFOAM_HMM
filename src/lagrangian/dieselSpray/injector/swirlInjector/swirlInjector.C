@@ -66,9 +66,9 @@ Foam::swirlInjector::swirlInjector
     X_(propsDict_.lookup("X")),
     massFlowRateProfile_(propsDict_.lookup("massFlowRateProfile")),
     injectionPressureProfile_(propsDict_.lookup("injectionPressureProfile")),
-    velocityProfile_(injectionPressureProfile_),
-    CdProfile_(injectionPressureProfile_),
-    TProfile_(injectionPressureProfile_),
+    velocityProfile_(massFlowRateProfile_),
+    CdProfile_(massFlowRateProfile_),
+    TProfile_(massFlowRateProfile_),
     averageParcelMass_(mass_/nParcels_),
     pressureIndependentVelocity_(false)
 {
