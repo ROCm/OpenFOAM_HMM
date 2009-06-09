@@ -11,41 +11,15 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      radiationProperties;
+    object      thermophysicalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+thermoType      hThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>;
 
-radiationModel  P1;
+mixture         air 1 28.9 1000 0 1.8e-05 0.7;
 
-noRadiation
-{
-}
-
-P1Coeffs
-{
-}
-
-// Number of flow iterations per radiation iteration
-solverFreq 1;
-
-absorptionEmissionModel constantAbsorptionEmission;
-
-constantAbsorptionEmissionCoeffs
-{
-    a               a [ 0 -1 0 0 0 0 0 ] 0.5;
-    e               e [ 0 -1 0 0 0 0 0 ] 0.5;
-    E               E [ 1 -1 -3 0 0 0 0 ] 0;
-}
-
-scatterModel    constantScatter;
-
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
+pRef            100000;
 
 
 // ************************************************************************* //

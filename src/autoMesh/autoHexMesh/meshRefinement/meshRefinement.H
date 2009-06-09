@@ -125,6 +125,10 @@ private:
         //- user supplied face based data.
         List<Tuple2<mapType, labelList> > userFaceData_;
 
+        //- Meshed patches - are treated differently. Stored as wordList since
+        //  order changes.
+        wordList meshedPatches_;
+
 
     // Private Member Functions
 
@@ -400,12 +404,11 @@ private:
                 const labelList& globalToPatch
             ) const;
 
-            //- Initial test of marking faces using geometric information.
-            labelList markFacesOnProblemCellsGeometric
-            (
-                const dictionary& motionDict,
-                const labelList& globalToPatch
-            ) const;
+            ////- Initial test of marking faces using geometric information.
+            //labelList markFacesOnProblemCellsGeometric
+            //(
+            //    const dictionary& motionDict
+            //) const;
 
 
         // Baffle merging
@@ -578,9 +581,6 @@ public:
             //- Get points on surfaces with intersection and boundary faces.
             labelList intersectedPoints() const;
 
-            //- Get added patches (inverse of globalToPatch)
-            static labelList addedPatches(const labelList& globalToPatch);
-
             //- Create patch from set of patches
             static autoPtr<indirectPrimitivePatch> makePatch
             (
@@ -688,8 +688,15 @@ public:
 
         // Other topo changes
 
-            //- Helper function to add patch to mesh
+            //- Helper:add patch to mesh. Update all registered fields.
+            //  Use addMeshedPatch to add patches originating from surfaces.
             static label addPatch(fvMesh&, const word& name, const word& type);
+
+            //- Add patch originating from meshing. Update meshedPatches_.
+            label addMeshedPatch(const word& name, const word& type);
+
+            //- Get patchIDs for patches added in addMeshedPatch.
+            labelList meshedPatches() const;
 
             //- Split mesh. Keep part containing point.
             autoPtr<mapPolyMesh> splitMeshRegions(const point& keepPoint);
@@ -699,7 +706,11 @@ public:
 
             //- Update for external change to mesh. changedFaces are in new mesh
             //  face labels.
-            void updateMesh(const mapPolyMesh&, const labelList& changedFaces);
+            void updateMesh
+            (
+                const mapPolyMesh&,
+                const labelList& changedFaces
+            );
 
 
             // Restoring : is where other processes delete and reinsert data.

@@ -10,42 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "constant";
-    object      radiationProperties;
+    location    "system";
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+startFrom       latestTime;
 
-radiationModel  P1;
+startTime       0;
 
-noRadiation
-{
-}
+stopAt          endTime;
 
-P1Coeffs
-{
-}
+endTime         1000;
 
-// Number of flow iterations per radiation iteration
-solverFreq 1;
+deltaT          1;
 
-absorptionEmissionModel constantAbsorptionEmission;
+writeControl    timeStep;
 
-constantAbsorptionEmissionCoeffs
-{
-    a               a [ 0 -1 0 0 0 0 0 ] 0.5;
-    e               e [ 0 -1 0 0 0 0 0 ] 0.5;
-    E               E [ 1 -1 -3 0 0 0 0 ] 0;
-}
+writeInterval   100;
 
-scatterModel    constantScatter;
+purgeWrite      0;
 
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
+writeFormat     binary;
+
+writePrecision  6;
+
+writeCompression uncompressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
 
 
 // ************************************************************************* //

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -9,42 +9,41 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      radiationProperties;
+    class       volScalarField;
+    location    "0";
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+dimensions      [ 0 2 -2 0 0 0 0 ];
 
-radiationModel  P1;
+internalField   uniform 0.1;
 
-noRadiation
+boundaryField
 {
-}
+    floor
+    {
+        type            compressible::kQRWallFunction;
+        value           uniform 0;
+    }
 
-P1Coeffs
-{
-}
+    ceiling
+    {
+        type            compressible::kQRWallFunction;
+        value           uniform 0;
+    }
 
-// Number of flow iterations per radiation iteration
-solverFreq 1;
+    fixedWalls
+    {
+        type            compressible::kQRWallFunction;
+        value           uniform 0;
+    }
 
-absorptionEmissionModel constantAbsorptionEmission;
-
-constantAbsorptionEmissionCoeffs
-{
-    a               a [ 0 -1 0 0 0 0 0 ] 0.5;
-    e               e [ 0 -1 0 0 0 0 0 ] 0.5;
-    E               E [ 1 -1 -3 0 0 0 0 ] 0;
-}
-
-scatterModel    constantScatter;
-
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
+    box
+    {
+        type            compressible::kQRWallFunction;
+        value           uniform 0;
+    }
 }
 
 

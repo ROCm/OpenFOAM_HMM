@@ -11,41 +11,11 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      radiationProperties;
+    object      environmentalProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
-
-radiationModel  P1;
-
-noRadiation
-{
-}
-
-P1Coeffs
-{
-}
-
-// Number of flow iterations per radiation iteration
-solverFreq 1;
-
-absorptionEmissionModel constantAbsorptionEmission;
-
-constantAbsorptionEmissionCoeffs
-{
-    a               a [ 0 -1 0 0 0 0 0 ] 0.5;
-    e               e [ 0 -1 0 0 0 0 0 ] 0.5;
-    E               E [ 1 -1 -3 0 0 0 0 ] 0;
-}
-
-scatterModel    constantScatter;
-
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
+g               g [ 0 1 -2 0 0 0 0 ] ( 0 0 -9.81 );
 
 
 // ************************************************************************* //

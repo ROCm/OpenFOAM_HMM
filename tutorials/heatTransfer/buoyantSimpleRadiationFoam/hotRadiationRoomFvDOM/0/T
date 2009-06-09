@@ -2,50 +2,46 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "constant";
-    object      radiationProperties;
+    class       volScalarField;
+    object      T;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-radiation       on;
+dimensions      [0 0 0 1 0 0 0];
 
-radiationModel  P1;
+internalField   uniform 300;
 
-noRadiation
+boundaryField
 {
+    floor
+    {
+        type            fixedValue;
+        value           uniform 300.0;
+    }
+
+    ceiling
+    {
+        type            fixedValue;
+        value           uniform 300.0;
+    }
+
+    fixedWalls
+    {
+        type            zeroGradient;
+    }
+
+    box
+    {
+        type            fixedValue;
+        value           uniform 500.0;
+    }
 }
-
-P1Coeffs
-{
-}
-
-// Number of flow iterations per radiation iteration
-solverFreq 1;
-
-absorptionEmissionModel constantAbsorptionEmission;
-
-constantAbsorptionEmissionCoeffs
-{
-    a               a [ 0 -1 0 0 0 0 0 ] 0.5;
-    e               e [ 0 -1 0 0 0 0 0 ] 0.5;
-    E               E [ 1 -1 -3 0 0 0 0 ] 0;
-}
-
-scatterModel    constantScatter;
-
-constantScatterCoeffs
-{
-    sigma           sigma [ 0 -1 0 0 0 0 0 ] 0;
-    C               C [ 0 0 0 0 0 0 0 ] 0;
-}
-
 
 // ************************************************************************* //

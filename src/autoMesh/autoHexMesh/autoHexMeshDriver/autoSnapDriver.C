@@ -830,35 +830,6 @@ Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
 }
 
 
-//// Invert globalToPatch_ to get the patches related to surfaces.
-//Foam::labelList Foam::autoSnapDriver::getSurfacePatches() const
-//{
-//    // Set of patches originating from surface
-//    labelHashSet surfacePatchSet(globalToPatch_.size());
-//
-//    forAll(globalToPatch_, i)
-//    {
-//        if (globalToPatch_[i] != -1)
-//        {
-//            surfacePatchSet.insert(globalToPatch_[i]);
-//        }
-//    }
-//
-//    const fvMesh& mesh = meshRefiner_.mesh();
-//
-//    DynamicList<label> surfacePatches(surfacePatchSet.size());
-//
-//    for (label patchI = 0; patchI < mesh.boundaryMesh().size(); patchI++)
-//    {
-//        if (surfacePatchSet.found(patchI))
-//        {
-//            surfacePatches.append(patchI);
-//        }
-//    }
-//    return surfacePatches.shrink();
-//}
-
-
 void Foam::autoSnapDriver::preSmoothPatch
 (
     const snapParameters& snapParams,
@@ -1479,7 +1450,7 @@ void Foam::autoSnapDriver::doSnap
     const_cast<Time&>(mesh.time())++;
 
     // Get the labels of added patches.
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch_));
+    labelList adaptPatchIDs(meshRefiner_.meshedPatches());
 
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.

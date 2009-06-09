@@ -292,6 +292,40 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     meshRefinement::checkCoupledFaceZones(mesh_);
 
 
+    // Refinement engine
+    // ~~~~~~~~~~~~~~~~~
+
+    {
+        Info<< nl
+            << "Determining initial surface intersections" << nl
+            << "-----------------------------------------" << nl
+            << endl;
+
+        // Main refinement engine
+        meshRefinerPtr_.reset
+        (
+            new meshRefinement
+            (
+                mesh,
+                mergeDist_,         // tolerance used in sorting coordinates
+                surfaces(),
+                shells()
+            )
+        );
+        Info<< "Calculated surface intersections in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        // Some stats
+        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
+
+        meshRefinerPtr_().write
+        (
+            debug_&meshRefinement::OBJINTERSECTIONS,
+            mesh_.time().path()/mesh_.time().timeName()
+        );
+    }
+
+
     // Add all the surface regions as patches
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -319,9 +353,8 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 
             forAll(regNames, i)
             {
-                label patchI = meshRefinement::addPatch
+                label patchI = meshRefinerPtr_().addMeshedPatch
                 (
-                    mesh,
                     regNames[i],
                     wallPolyPatch::typeName
                 );
@@ -403,40 +436,6 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 
         // Mesh distribution engine (uses tolerance to reconstruct meshes)
         distributorPtr_.reset(new fvMeshDistribute(mesh_, mergeDist_));
-    }
-
-
-    // Refinement engine
-    // ~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< nl
-            << "Determining initial surface intersections" << nl
-            << "-----------------------------------------" << nl
-            << endl;
-
-        // Main refinement engine
-        meshRefinerPtr_.reset
-        (
-            new meshRefinement
-            (
-                mesh,
-                mergeDist_,         // tolerance used in sorting coordinates
-                surfaces(),
-                shells()
-            )
-        );
-        Info<< "Calculated surface intersections in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        // Some stats
-        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
-
-        meshRefinerPtr_().write
-        (
-            debug_&meshRefinement::OBJINTERSECTIONS,
-            mesh_.time().path()/mesh_.time().timeName()
-        );
     }
 }
 
@@ -522,11 +521,7 @@ void Foam::autoHexMeshDriver::doMesh()
         const dictionary& shrinkDict = dict_.subDict("shrinkDict");
         PtrList<dictionary> surfaceDicts(dict_.lookup("surfaces"));
 
-        autoLayerDriver layerDriver
-        (
-            meshRefinerPtr_(),
-            globalToPatch_
-        );
+        autoLayerDriver layerDriver(meshRefinerPtr_());
 
         // Get all the layer specific params
         layerParameters layerParams
