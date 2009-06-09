@@ -62,7 +62,7 @@ void Foam::PatchPostProcessing<CloudType>::write()
             mesh_.time().writeCompression()
         );
 
-        patchData_[patchI].clear();
+        patchData_[patchI].clearStorage();
     }
 }
 
@@ -79,8 +79,10 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     PostProcessingModel<CloudType>(dict, owner, typeName),
     mesh_(owner.mesh()),
     patchNames_(this->coeffDict().lookup("patches")),
-    patchData_(patchNames_.size())
+    patchData_(patchNames_.size()),
+    globalToLocalPatchIds_(patchNames_.size())
 {
+    labelList localToGlobal(patchNames_.size());
     forAll(patchNames_, patchI)
     {
         label id = mesh_.boundaryMesh().findPatchID(patchNames_[patchI]);
@@ -97,6 +99,12 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
              << "Available patches are: " << mesh_.boundaryMesh().names() << nl
              << exit(FatalError);
         }
+        localToGlobal[patchI] = id;
+    }
+
+    forAll(localToGlobal, patchI)
+    {
+        globalToLocalPatchIds_[localToGlobal[patchI]] = patchI;
     }
 }
 
@@ -124,14 +132,10 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
     const label patchI
 )
 {
-    const word& patchName = mesh_.boundaryMesh()[patchI].name();
-    forAll(patchNames_, i)
+    label localPatchI = globalToLocalPatchIds_[patchI];
+    if (patchData_[localPatchI].size() < maxStoredParcels_)
     {
-        if (patchNames_[i] == patchName)
-        {
-            patchData_[i].append(p.clone());
-            break;
-        }
+        patchData_[localPatchI].append(p.clone());
     }
 }
 

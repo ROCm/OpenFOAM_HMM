@@ -32,10 +32,24 @@ const Foam::polyMesh& Foam::PatchPostProcessing<CloudType>::mesh() const
 
 
 template<class CloudType>
-const Foam::wordList&
-Foam::PatchPostProcessing<CloudType>::patchNames() const
+Foam::label Foam::PatchPostProcessing<CloudType>::maxStoredParcels() const
+{
+    return maxStoredParcels_;
+}
+
+
+template<class CloudType>
+const Foam::wordList& Foam::PatchPostProcessing<CloudType>::patchNames() const
 {
     return patchNames_;
+}
+
+
+template<class CloudType>
+const Foam::labelList&
+Foam::PatchPostProcessing<CloudType>::globalToLocalPatchIds() const
+{
+    return globalToLocalPatchIds_;
 }
 
 

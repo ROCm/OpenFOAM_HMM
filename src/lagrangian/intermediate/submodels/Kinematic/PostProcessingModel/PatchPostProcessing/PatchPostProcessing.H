@@ -59,11 +59,17 @@ class PatchPostProcessing
         //- Reference to the mesh
         const polyMesh& mesh_;
 
+        //- Maximum number of parcels to store per patch
+        label maxStoredParcels_;
+
         //- List of patch names
         wordList patchNames_;
 
         //- List of parcel data per patch
         List<DynamicList<autoPtr<parcelType> > > patchData_;
+
+        //- Mapping from global to local patch ids
+        labelList globalToLocalPatchIds_;
 
 
 protected:
@@ -97,9 +103,14 @@ public:
             //- Return const access to the mesh
             inline const polyMesh& mesh() const;
 
+            //- Return maximum number of parcels to store per patch
+            inline label maxStoredParcels() const;
 
             //- Return const access to the list of patch names
             inline const wordList& patchNames() const;
+
+            //- Return const mapping from global to local patch ids
+            inline const labelList& globalToLocalPatchIds() const;
 
 
         // Evaluation
