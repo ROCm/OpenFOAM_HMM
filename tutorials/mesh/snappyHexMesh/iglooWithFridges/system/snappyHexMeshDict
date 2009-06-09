@@ -45,6 +45,8 @@ geometry
     fridgeFreezer
     {
         type searchableSurfaceCollection;
+
+        mergeSubRegions true;
     
         freezer
         {
@@ -74,6 +76,8 @@ geometry
     twoFridgeFreezers
     {
         type searchableSurfaceCollection;
+    
+        mergeSubRegions true;
     
         seal
         {
