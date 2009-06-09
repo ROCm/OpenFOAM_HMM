@@ -110,6 +110,12 @@ private:
         //- tolerance used for sorting coordinates (used in 'less' routine)
         const scalar mergeDistance_;
 
+        //- overwrite the mesh?
+        const bool overwrite_;
+
+        //- Instance of mesh upon construction. Used when in overwrite_ mode.
+        const word oldInstance_;
+
         //- All surface-intersection interaction
         const refinementSurfaces& surfaces_;
 
@@ -166,9 +172,6 @@ private:
 
         //- Find any intersection of surface. Store in surfaceIndex_.
         void updateIntersections(const labelList& changedFaces);
-
-        //- Set instance of all local IOobjects
-        void setInstance(const fileName&);
 
         //- Remove cells. Put exposedFaces into exposedPatchIDs.
         autoPtr<mapPolyMesh> doRemoveCells
@@ -478,6 +481,7 @@ public:
         (
             fvMesh& mesh,
             const scalar mergeDistance,
+            const bool overwrite,
             const refinementSurfaces&,
             const shellSurfaces&
         );
@@ -500,6 +504,18 @@ public:
             scalar mergeDistance() const
             {
                 return mergeDistance_;
+            }
+
+            //- Overwrite the mesh?
+            bool overwrite() const
+            {
+                return overwrite_;
+            }
+
+            //- (points)instance of mesh upon construction
+            const word& oldInstance() const
+            {
+                return oldInstance_;
             }
 
             //- reference to surface search engines
@@ -767,6 +783,13 @@ public:
 
             //- Print some mesh stats.
             void printMeshInfo(const bool, const string&) const;
+
+            //- Replacement for Time::timeName() : return oldInstance (if
+            //  overwrite_)
+            word timeName() const;
+
+            //- Set instance of all local IOobjects
+            void setInstance(const fileName&);
 
             //- Write mesh and all data
             bool write() const;

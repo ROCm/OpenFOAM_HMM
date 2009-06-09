@@ -96,7 +96,7 @@ void writeMesh
     const fvMesh& mesh = meshRefiner.mesh();
 
     meshRefiner.printMeshInfo(debug, msg);
-    Info<< "Writing mesh to time " << mesh.time().timeName() << endl;
+    Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
     meshRefiner.write(meshRefinement::MESH|meshRefinement::SCALARLEVELS, "");
     if (debug & meshRefinement::OBJINTERSECTIONS)
@@ -104,7 +104,7 @@ void writeMesh
         meshRefiner.write
         (
             meshRefinement::OBJINTERSECTIONS,
-            mesh.time().path()/mesh.time().timeName()
+            mesh.time().path()/meshRefiner.timeName()
         );
     }
     Info<< "Written mesh in = "
@@ -115,6 +115,7 @@ void writeMesh
 
 int main(int argc, char *argv[])
 {
+    argList::validOptions.insert("overwrite", "");
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -122,6 +123,9 @@ int main(int argc, char *argv[])
 
     Info<< "Read mesh in = "
         << runTime.cpuTimeIncrement() << " s" << endl;
+
+    const bool overwrite = args.optionFound("overwrite");
+
 
     // Check patches and faceZones are synchronised
     mesh.boundaryMesh().checkParallelSync(true);
@@ -256,6 +260,7 @@ int main(int argc, char *argv[])
     (
         mesh,
         mergeDist,          // tolerance used in sorting coordinates
+        overwrite,          // overwrite mesh files?
         surfaces,           // for surface intersection refinement
         shells              // for volume (inside/outside) refinement
     );
@@ -268,7 +273,7 @@ int main(int argc, char *argv[])
     meshRefiner.write
     (
         debug&meshRefinement::OBJINTERSECTIONS,
-        mesh.time().path()/mesh.time().timeName()
+        mesh.time().path()/meshRefiner.timeName()
     );
 
 
@@ -369,6 +374,11 @@ int main(int argc, char *argv[])
         // Refinement parameters
         refinementParameters refineParams(refineDict);
 
+        if (!overwrite)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+
         refineDriver.doRefine(refineDict, refineParams, wantSnap, motionDict);
 
         writeMesh
@@ -390,6 +400,11 @@ int main(int argc, char *argv[])
         // Snap parameters
         snapParameters snapParams(snapDict);
 
+        if (!overwrite)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+
         snapDriver.doSnap(snapDict, motionDict, snapParams);
 
         writeMesh
@@ -406,6 +421,11 @@ int main(int argc, char *argv[])
 
         // Layer addition parameters
         layerParameters layerParams(layerDict, mesh.boundaryMesh());
+
+        if (!overwrite)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
 
         layerDriver.doLayers
         (

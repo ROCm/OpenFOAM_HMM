@@ -465,6 +465,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
         mesh_.clearOut();
     }
 
+    if (overwrite_)
+    {
+        mesh_.setInstance(oldInstance_);
+    }
+
     // Update local mesh data
     cellRemover.updateMesh(map);
 
@@ -817,12 +822,15 @@ Foam::meshRefinement::meshRefinement
 (
     fvMesh& mesh,
     const scalar mergeDistance,
+    const bool overwrite,
     const refinementSurfaces& surfaces,
     const shellSurfaces& shells
 )
 :
     mesh_(mesh),
     mergeDistance_(mergeDistance),
+    overwrite_(overwrite),
+    oldInstance_(mesh.pointsInstance()),
     surfaces_(surfaces),
     shells_(shells),
     meshCutter_
@@ -1199,8 +1207,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 // Helper function to get intersected faces
 Foam::labelList Foam::meshRefinement::intersectedFaces() const
 {
-    // Mark all faces that will become baffles
-
     label nBoundaryFaces = 0;
 
     forAll(surfaceIndex_, faceI)
@@ -1226,9 +1232,7 @@ Foam::labelList Foam::meshRefinement::intersectedFaces() const
 
 
 // Helper function to get points used by faces
-Foam::labelList Foam::meshRefinement::intersectedPoints
-(
-) const
+Foam::labelList Foam::meshRefinement::intersectedPoints() const
 {
     const faceList& faces = mesh_.faces();
 
@@ -1384,7 +1388,7 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
             IOobject
             (
                 "pointDisplacement",
-                mesh.time().timeName(),
+                mesh.time().timeName(), //timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
@@ -2059,6 +2063,20 @@ void Foam::meshRefinement::printMeshInfo(const bool debug, const string& msg)
 }
 
 
+//- Return either time().constant() or oldInstance
+Foam::word Foam::meshRefinement::timeName() const
+{
+    if (overwrite_ && mesh_.time().timeIndex() == 0)
+    {
+        return oldInstance_;
+    }
+    else
+    {
+        return mesh_.time().timeName();
+    }
+}
+
+
 void Foam::meshRefinement::dumpRefinementLevel() const
 {
     volScalarField volRefLevel
@@ -2066,7 +2084,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
         IOobject
         (
             "cellLevel",
-            mesh_.time().timeName(),
+            timeName(),
             mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE,
@@ -2093,7 +2111,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
         IOobject
         (
             "pointLevel",
-            mesh_.time().timeName(),
+            timeName(),
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
