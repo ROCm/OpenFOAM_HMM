@@ -117,13 +117,13 @@ void Foam::meshRefinement::calcNeighbourData
                 // Extrapolate the face centre.
                 vector fn = faceAreas[i];
                 fn /= mag(fn)+VSMALL;
-                // Normal distance from face centre to cell centre
-                scalar d = ((faceCentres[i] - cellCentres[i]) & fn);
 
                 label own = faceCells[i];
                 label ownLevel = cellLevel[own];
                 label faceLevel = meshCutter_.getAnchorLevel(pp.start()+i);
 
+                // Normal distance from face centre to cell centre
+                scalar d = ((faceCentres[i] - cellCentres[own]) & fn);
                 if (faceLevel > ownLevel)
                 {
                     // Other cell more refined. Adjust normal distance
