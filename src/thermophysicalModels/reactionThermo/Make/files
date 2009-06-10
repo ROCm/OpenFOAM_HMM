@@ -4,13 +4,13 @@ chemistryReaders/chemistryReader/makeChemistryReaders.C
 
 mixtures/basicMultiComponentMixture/basicMultiComponentMixture.C
 
-combustion/hCombustionThermo/hCombustionThermo.C
-combustion/hCombustionThermo/newhCombustionThermo.C
-combustion/hCombustionThermo/hCombustionThermos.C
+combustionThermo/hCombustionThermo/hCombustionThermo.C
+combustionThermo/hCombustionThermo/newhCombustionThermo.C
+combustionThermo/hCombustionThermo/hCombustionThermos.C
 
-combustion/hhuCombustionThermo/hhuCombustionThermo.C
-combustion/hhuCombustionThermo/newhhuCombustionThermo.C
-combustion/hhuCombustionThermo/hhuCombustionThermos.C
+combustionThermo/hhuCombustionThermo/hhuCombustionThermo.C
+combustionThermo/hhuCombustionThermo/newhhuCombustionThermo.C
+combustionThermo/hhuCombustionThermo/hhuCombustionThermos.C
 
 reactionThermo/hReactionThermo/hReactionThermo.C
 reactionThermo/hReactionThermo/newhReactionThermo.C
