@@ -1,13 +1,15 @@
-basicMixture = mixtures/basicMixture
-basicThermo = basicThermo
+mixtures/basicMixture/basicMixture.C
+mixtures/basicMixture/basicMixtures.C
 
-$(basicMixture)/basicMixture.C
-$(basicMixture)/basicMixtures.C
-$(basicThermo)/basicThermo.C
-$(basicThermo)/newBasicThermo.C
+basicThermo/basicThermo.C
+basicThermo/newBasicThermo.C
 
-hThermo/hThermos.C
-eThermo/eThermos.C
+psiThermo/basicPsiThermo/basicPsiThermo.C
+psiThermo/hPsiThermo/hPsiThermos.C
+psiThermo/ePsiThermo/ePsiThermos.C
+
+rhoThermo/basicRhoThermo/basicRhoThermo.C
+rhoThermo/hRhoThermo/hRhoThermos.C
 
 derivedFvPatchFields/fixedEnthalpy/fixedEnthalpyFvPatchScalarField.C
 derivedFvPatchFields/gradientEnthalpy/gradientEnthalpyFvPatchScalarField.C
