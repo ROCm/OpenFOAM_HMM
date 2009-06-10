@@ -26,33 +26,33 @@ License
 
 #include "chemistrySolver.H"
 
-
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::chemistrySolver> Foam::chemistrySolver::New
+template<class ThermoType>
+Foam::autoPtr<Foam::chemistrySolver<ThermoType> >
+Foam::chemistrySolver<ThermoType>::New
 (
-    const dictionary& dict,
-    chemistryModel& chemistry
+    ODEChemistryModel<ThermoType>& model
 )
 {
-    word chemistrySolverType(dict.lookup("chemistrySolver"));
+    word chemistrySolverType(model.chemistryModel::lookup("chemistrySolver"));
 
-    dictionaryConstructorTable::iterator cstrIter =
+    typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(chemistrySolverType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
-            "chemistrySolver::New(const dictionary&, const chemistryModel&)"
-        )   << "Unknown chemistrySolverType type " << chemistrySolverType
-            << endl << endl
-            << "Valid chemistrySolverType types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            "chemistrySolver::New(const dictionary&, const ODEChemistryModel&)"
+        )   << "Unknown chemistrySolver type " << chemistrySolverType
+            << nl << nl
+            << "Valid chemistrySolver types are:" << nl
+            << dictionaryConstructorTablePtr_->toc() << nl
             << exit(FatalError);
     }
 
-    return autoPtr<chemistrySolver>(cstrIter()(dict, chemistry));
+    return autoPtr<chemistrySolver<ThermoType> >(cstrIter()(model));
 }
 
 

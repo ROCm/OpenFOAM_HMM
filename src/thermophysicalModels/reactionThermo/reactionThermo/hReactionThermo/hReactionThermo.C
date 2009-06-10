@@ -24,43 +24,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingMixture.H"
+#include "hReactionThermo.H"
 #include "fvMesh.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTypeNameAndDebug(hReactionThermo, 0);
+    defineRunTimeSelectionTable(hReactionThermo, fvMesh);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::reactingMixture<ThermoType>::reactingMixture
-(
-    const dictionary& thermoDict,
-    const fvMesh& mesh
-)
+Foam::hReactionThermo::hReactionThermo(const fvMesh& mesh)
 :
-    autoPtr<chemistryReader<ThermoType> >
+    basicRhoThermo(mesh),
+
+    h_
     (
-        chemistryReader<ThermoType>::New(thermoDict)
-    ),
-    multiComponentMixture<ThermoType>
-    (
-        thermoDict,
-        autoPtr<chemistryReader<ThermoType> >::operator()().species(),
-        autoPtr<chemistryReader<ThermoType> >::operator()().speciesThermo(),
-        mesh
-    ),
-    PtrList<Reaction<ThermoType> >
-    (
-        autoPtr<chemistryReader<ThermoType> >::operator()().reactions(),
-        this->species_
+        IOobject
+        (
+            "h",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(0, 2, -2, 0, 0),
+        this->hBoundaryTypes()
     )
-{
-    autoPtr<chemistryReader<ThermoType> >::clear();
-}
+{}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-void Foam::reactingMixture<ThermoType>::read(const dictionary& thermoDict)
+Foam::hReactionThermo::~hReactionThermo()
 {}
 
 

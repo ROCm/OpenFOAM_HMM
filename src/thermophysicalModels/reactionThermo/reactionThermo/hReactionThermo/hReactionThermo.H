@@ -23,20 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::EulerImplicit
+    Foam::hReactionThermo
 
 Description
-    An Euler implicit solver for chemistry
+    Foam::hReactionThermo
 
 SourceFiles
-    EulerImplicit.C
+    hReactionThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EulerImplicit_H
-#define EulerImplicit_H
+#ifndef hReactionThermo_H
+#define hReactionThermo_H
 
-#include "chemistrySolver.H"
+#include "basicRhoThermo.H"
+#include "basicMultiComponentMixture.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,63 +47,92 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class EulerImplicit Declaration
+                     Class hReactionThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
-class EulerImplicit
+class hReactionThermo
 :
-    public chemistrySolver<ThermoType>
+    public basicRhoThermo
 {
-    // Private data
 
-        dictionary coeffsDict_;
+protected:
 
-        // Model constants
+    // Protected data
 
-            scalar cTauChem_;
-            Switch equil_;
+        //- Enthalpy field
+        volScalarField h_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("EulerImplicit");
+    TypeName("hReactionThermo");
+
+
+    //- Declare run-time constructor selection tables
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        hReactionThermo,
+        fvMesh,
+        (const fvMesh& mesh),
+        (mesh)
+    );
 
 
     // Constructors
 
-        //- Construct from components
-        EulerImplicit(ODEChemistryModel<ThermoType>& chemistry);
+        //- Construct from dictionary and mesh
+        hReactionThermo(const fvMesh&);
+
+
+    //- Selector
+    static autoPtr<hReactionThermo> New(const fvMesh&);
 
 
     //- Destructor
-    virtual ~EulerImplicit();
+    virtual ~hReactionThermo();
 
 
-    // Member Functions
+    // Member functions
 
-        //- Update the concentrations and return the chemical time
-        scalar solve
-        (
-            scalarField &c,
-            const scalar T,
-            const scalar p,
-            const scalar t0,
-            const scalar dt
-        ) const;
+        //- Return the composition of the multi-component mixture
+        virtual basicMultiComponentMixture& composition() = 0;
+
+        //- Return the composition of the multi-component mixture
+        virtual const basicMultiComponentMixture& composition() const = 0;
+
+
+        // Access to thermodynamic state variables
+
+            //- Enthalpy [J/kg]
+            //  Non-const access allowed for transport equations
+            virtual volScalarField& h()
+            {
+                return h_;
+            }
+
+            //- Enthalpy [J/kg]
+            virtual const volScalarField& h() const
+            {
+                return h_;
+            }
+
+
+        //- Sensible enthalpy [J/kg]
+        virtual tmp<volScalarField> hs() const = 0;
+
+        //- Chemical enthalpy [J/kg]
+        virtual tmp<volScalarField> hc() const = 0;
+
+        //- Update properties
+        virtual void correct() = 0;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "EulerImplicit.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

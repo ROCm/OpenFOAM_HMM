@@ -24,44 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingMixture.H"
-#include "fvMesh.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class ThermoType>
-Foam::reactingMixture<ThermoType>::reactingMixture
-(
-    const dictionary& thermoDict,
-    const fvMesh& mesh
-)
-:
-    autoPtr<chemistryReader<ThermoType> >
-    (
-        chemistryReader<ThermoType>::New(thermoDict)
-    ),
-    multiComponentMixture<ThermoType>
-    (
-        thermoDict,
-        autoPtr<chemistryReader<ThermoType> >::operator()().species(),
-        autoPtr<chemistryReader<ThermoType> >::operator()().speciesThermo(),
-        mesh
-    ),
-    PtrList<Reaction<ThermoType> >
-    (
-        autoPtr<chemistryReader<ThermoType> >::operator()().reactions(),
-        this->species_
-    )
+inline const Foam::fvMesh& Foam::chemistryModel::mesh() const
 {
-    autoPtr<chemistryReader<ThermoType> >::clear();
+    return mesh_;
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+inline Foam::hCombustionThermo& Foam::chemistryModel::thermo()
+{
+    return thermo_();
+}
 
-template<class ThermoType>
-void Foam::reactingMixture<ThermoType>::read(const dictionary& thermoDict)
-{}
+
+inline const Foam::hCombustionThermo& Foam::chemistryModel::thermo() const
+{
+    return thermo_();
+}
+
+
+inline Foam::Switch Foam::chemistryModel::chemistry() const
+{
+    return chemistry_;
+}
+
+
+inline const Foam::scalarField& Foam::chemistryModel::deltaTChem() const
+{
+    return deltaTChem_;
+}
+
+
+inline Foam::scalarField& Foam::chemistryModel::deltaTChem()
+{
+    return deltaTChem_;
+}
 
 
 // ************************************************************************* //

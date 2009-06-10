@@ -51,21 +51,22 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class foamChemistry Declaration
+                       Class foamChemistry Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ThermoType>
 class foamChemistryReader
 :
-    public chemistryReader
+    public chemistryReader<ThermoType>
 {
         //- Table of the thermodynamic data given in the foamChemistry file
-        HashPtrTable<reactionThermo> speciesThermo_;
+        HashPtrTable<ThermoType> speciesThermo_;
 
         //- Table of species
         speciesTable speciesTable_;
 
         //- List of the reactions
-        SLPtrList<reaction> reactions_;
+        SLPtrList<Reaction<ThermoType> > reactions_;
 
 
     // Private Member Functions
@@ -97,10 +98,9 @@ public:
         foamChemistryReader(const dictionary& thermoDict);
 
 
-    // Destructor
-
-        virtual ~foamChemistryReader()
-        {}
+    //- Destructor
+    virtual ~foamChemistryReader()
+    {}
 
 
     // Member functions
@@ -112,13 +112,13 @@ public:
         }
 
         //- Table of the thermodynamic data given in the foamChemistry file
-        const HashPtrTable<reactionThermo>& speciesThermo() const
+        const HashPtrTable<ThermoType>& speciesThermo() const
         {
             return speciesThermo_;
         }
 
         //- List of the reactions
-        const SLPtrList<reaction>& reactions() const
+        const SLPtrList<Reaction<ThermoType> >& reactions() const
         {
             return reactions_;
         }
@@ -128,6 +128,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "foamChemistryReader.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

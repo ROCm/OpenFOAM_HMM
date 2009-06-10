@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::hMixtureThermo
+    Foam::hRhoMixtureThermo
 
 Description
-    Foam::hMixtureThermo
+    Foam::hRhoMixtureThermo
 
 SourceFiles
-    hMixtureThermo.C
+    hRhoMixtureThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hMixtureThermo_H
-#define hMixtureThermo_H
+#ifndef hRhoMixtureThermo_H
+#define hRhoMixtureThermo_H
 
-#include "hCombustionThermo.H"
+#include "hReactionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,13 +44,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class hMixtureThermo Declaration
+                      Class hRhoMixtureThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class MixtureType>
-class hMixtureThermo
+class hRhoMixtureThermo
 :
-    public hCombustionThermo,
+    public hReactionThermo,
     public MixtureType
 {
     // Private member functions
@@ -58,23 +58,23 @@ class hMixtureThermo
         void calculate();
 
         //- Construct as copy (not implemented)
-        hMixtureThermo(const hMixtureThermo<MixtureType>&);
+        hRhoMixtureThermo(const hRhoMixtureThermo<MixtureType>&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("hMixtureThermo");
+    TypeName("hRhoMixtureThermo");
 
 
     // Constructors
 
         //- Construct from mesh
-        hMixtureThermo(const fvMesh&);
+        hRhoMixtureThermo(const fvMesh&);
 
 
     //- Destructor
-    virtual ~hMixtureThermo();
+    virtual ~hRhoMixtureThermo();
 
 
     // Member functions
@@ -140,7 +140,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "hMixtureThermo.C"
+#   include "hRhoMixtureThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

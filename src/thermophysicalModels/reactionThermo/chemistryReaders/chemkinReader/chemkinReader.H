@@ -47,6 +47,8 @@ SourceFiles
 #include "speciesTable.H"
 #include "atomicWeights.H"
 
+#include "reactionTypes.H"
+
 #include <FlexLexer.h>
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -55,12 +57,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class chemkin Declaration
+                       Class chemkinReader Declaration
 \*---------------------------------------------------------------------------*/
 
 class chemkinReader
 :
-    public chemistryReader,
+    public chemistryReader<gasThermoPhysics>,
     public yyFlexLexer
 {
 
@@ -198,13 +200,13 @@ private:
         HashTable<phase> speciePhase_;
 
         //- Table of the thermodynamic data given in the CHEMKIN file
-        HashPtrTable<reactionThermo> speciesThermo_;
+        HashPtrTable<gasThermoPhysics> speciesThermo_;
 
         //- Table of species composition
         HashTable<List<specieElement> > specieComposition_;
 
         //- List of the reactions
-        SLPtrList<reaction> reactions_;
+        SLPtrList<gasReaction> reactions_;
 
 
     // Private Member Functions
@@ -256,8 +258,8 @@ private:
         void addReactionType
         (
             const reactionType rType,
-            DynamicList<reaction::specieCoeffs>& lhs,
-            DynamicList<reaction::specieCoeffs>& rhs,
+            DynamicList<gasReaction::specieCoeffs>& lhs,
+            DynamicList<gasReaction::specieCoeffs>& rhs,
             const ReactionRateType& rr
         );
 
@@ -266,8 +268,8 @@ private:
         (
             const reactionType rType,
             const fallOffFunctionType fofType,
-            DynamicList<reaction::specieCoeffs>& lhs,
-            DynamicList<reaction::specieCoeffs>& rhs,
+            DynamicList<gasReaction::specieCoeffs>& lhs,
+            DynamicList<gasReaction::specieCoeffs>& rhs,
             const scalarList& thirdBodyEfficiencies,
             const scalarList& k0Coeffs,
             const scalarList& kInfCoeffs,
@@ -279,8 +281,8 @@ private:
 
         void addReaction
         (
-            DynamicList<reaction::specieCoeffs>& lhs,
-            DynamicList<reaction::specieCoeffs>& rhs,
+            DynamicList<gasReaction::specieCoeffs>& lhs,
+            DynamicList<gasReaction::specieCoeffs>& rhs,
             const scalarList& thirdBodyEfficiencies,
             const reactionType rType,
             const reactionRateType rrType,
@@ -363,7 +365,7 @@ public:
         }
 
         //- Table of the thermodynamic data given in the CHEMKIN file
-        const HashPtrTable<reactionThermo>& speciesThermo() const
+        const HashPtrTable<gasThermoPhysics>& speciesThermo() const
         {
             return speciesThermo_;
         }
@@ -375,7 +377,7 @@ public:
         }
 
         //- List of the reactions
-        const SLPtrList<reaction>& reactions() const
+        const SLPtrList<gasReaction>& reactions() const
         {
             return reactions_;
         }

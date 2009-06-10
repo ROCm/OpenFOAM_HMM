@@ -1,4 +1,4 @@
-/*--------------------------------*- C++ -*----------------------------------*\
+/*---------------------------------------------------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -306,13 +306,13 @@ List<specieElement> currentSpecieComposition(5);
 scalar currentLowT = 0;
 scalar currentHighT = 0;
 scalar currentCommonT = 0;
-reactionThermo::coeffArray highCpCoeffs;
-reactionThermo::coeffArray lowCpCoeffs;
+gasThermoPhysics::coeffArray highCpCoeffs;
+gasThermoPhysics::coeffArray lowCpCoeffs;
 
-reaction::specieCoeffs currentSpecieCoeff;
+gasReaction::specieCoeffs currentSpecieCoeff;
 
-DynamicList<reaction::specieCoeffs> lhs;
-DynamicList<reaction::specieCoeffs> rhs;
+DynamicList<gasReaction::specieCoeffs> lhs;
+DynamicList<gasReaction::specieCoeffs> rhs;
 
 scalarList ArrheniusCoeffs(3);
 DynamicList<scalar> reactionCoeffs;
@@ -322,7 +322,7 @@ label currentThirdBodyIndex = -1;
 word reactionCoeffsName = word::null;
 HashTable<scalarList> reactionCoeffsTable;
 
-DynamicList<reaction::specieCoeffs> *lrhsPtr = &lhs;
+DynamicList<gasReaction::specieCoeffs> *lrhsPtr = &lhs;
 
 reactionType rType = unknownReactionType;
 reactionRateType rrType = Arrhenius;
@@ -614,7 +614,7 @@ bool finishReaction = false;
 
 <readThermoLineLabel4>{thermoLineLabel4} {
 
-        HashPtrTable<reactionThermo>::iterator specieThermoIter
+        HashPtrTable<gasThermoPhysics>::iterator specieThermoIter
         (
             speciesThermo_.find(currentSpecieName)
         );
@@ -627,7 +627,7 @@ bool finishReaction = false;
         speciesThermo_.insert
         (
             currentSpecieName,
-            new reactionThermo
+            new gasThermoPhysics
             (
                 janafThermo<perfectGas>
                 (
@@ -863,7 +863,7 @@ bool finishReaction = false;
             {
                 case unimolecularFallOffReactionType:
                 {
-                    if (pDependentSpecieName.empty())
+                    if (!pDependentSpecieName.size())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "LOW keyword given for a unimolecular fall-off"
@@ -898,7 +898,7 @@ bool finishReaction = false;
 
                 case chemicallyActivatedBimolecularReactionType:
                 {
-                    if (pDependentSpecieName.empty())
+                    if (!pDependentSpecieName.size())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "HIGH keyword given for a chemically"
@@ -935,7 +935,7 @@ bool finishReaction = false;
 
                 case TroeReactionType:
                 {
-                    if (pDependentSpecieName.empty())
+                    if (!pDependentSpecieName.size())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "TROE keyword given for a"
@@ -969,7 +969,7 @@ bool finishReaction = false;
 
                 case SRIReactionType:
                 {
-                    if (pDependentSpecieName.empty())
+                    if (!pDependentSpecieName.size())
                     {
                         FatalErrorIn("chemkinReader::lex()")
                             << "SRI keyword given for a"
@@ -1434,7 +1434,7 @@ bool finishReaction = false;
 
 <readReactionOrder>{reactionCoeff}{endReactionCoeffs} {
 
-        DynamicList<reaction::specieCoeffs>& lrhs = *lrhsPtr;
+        DynamicList<gasReaction::specieCoeffs>& lrhs = *lrhsPtr;
 
         bool found = false;
 
@@ -1535,5 +1535,5 @@ bool finishReaction = false;
 %%
 
  /* ------------------------------------------------------------------------- *\
-    ------ End of STLToFoam.L
+    ------ End of chemkinLexer.L
  \* ------------------------------------------------------------------------- */

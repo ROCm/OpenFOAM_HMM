@@ -24,43 +24,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingMixture.H"
+#include "chemistryModel.H"
 #include "fvMesh.H"
+#include "Time.H"
+
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+
+namespace Foam
+{
+    defineTypeNameAndDebug(chemistryModel, 0);
+    defineRunTimeSelectionTable(chemistryModel, fvMesh);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::reactingMixture<ThermoType>::reactingMixture
-(
-    const dictionary& thermoDict,
-    const fvMesh& mesh
-)
+Foam::chemistryModel::chemistryModel(const fvMesh& mesh)
 :
-    autoPtr<chemistryReader<ThermoType> >
+    IOdictionary
     (
-        chemistryReader<ThermoType>::New(thermoDict)
+        IOobject
+        (
+            "chemistryProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
     ),
-    multiComponentMixture<ThermoType>
+    mesh_(mesh),
+    thermo_(hCombustionThermo::New(mesh)),
+    chemistry_(lookup("chemistry")),
+    deltaTChem_
     (
-        thermoDict,
-        autoPtr<chemistryReader<ThermoType> >::operator()().species(),
-        autoPtr<chemistryReader<ThermoType> >::operator()().speciesThermo(),
-        mesh
-    ),
-    PtrList<Reaction<ThermoType> >
-    (
-        autoPtr<chemistryReader<ThermoType> >::operator()().reactions(),
-        this->species_
+        mesh.nCells(),
+        readScalar(lookup("initialChemicalTimeStep"))
     )
 {
-    autoPtr<chemistryReader<ThermoType> >::clear();
+    Info<< "chemistryModel(const fvMesh&)" << endl;
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-void Foam::reactingMixture<ThermoType>::read(const dictionary& thermoDict)
+Foam::chemistryModel::~chemistryModel()
 {}
 
 

@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::hhuMixtureThermo
+    Foam::hPsiMixtureThermo
 
 Description
-    Foam::hhuMixtureThermo
+    Foam::hPsiMixtureThermo
 
 SourceFiles
-    hhuMixtureThermo.C
+    hPsiMixtureThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef hhuMixtureThermo_H
-#define hhuMixtureThermo_H
+#ifndef hPsiMixtureThermo_H
+#define hPsiMixtureThermo_H
 
-//#include "hPsiMixtureThermo.H"
+#include "hCombustionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,13 +44,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class hhuMixtureThermo Declaration
+                      Class hPsiMixtureThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class MixtureType>
-class hhuMixtureThermo
+class hPsiMixtureThermo
 :
-    public hhuCombustionThermo,
+    public hCombustionThermo,
     public MixtureType
 {
     // Private member functions
@@ -58,23 +58,23 @@ class hhuMixtureThermo
         void calculate();
 
         //- Construct as copy (not implemented)
-        hhuMixtureThermo(const hhuMixtureThermo<MixtureType>&);
+        hPsiMixtureThermo(const hPsiMixtureThermo<MixtureType>&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("hhuMixtureThermo");
+    TypeName("hPsiMixtureThermo");
 
 
     // Constructors
 
         //- Construct from mesh
-        hhuMixtureThermo(const fvMesh&);
+        hPsiMixtureThermo(const fvMesh&);
 
 
     //- Destructor
-    virtual ~hhuMixtureThermo();
+    virtual ~hPsiMixtureThermo();
 
 
     // Member functions
@@ -127,39 +127,6 @@ public:
             //- Heat capacity at constant pressure [J/kg/K]
             virtual tmp<volScalarField> Cp() const;
 
-            //- Unburnt gas enthalpy for cell-set [J/kg]
-            virtual tmp<scalarField> hu
-            (
-                const scalarField& T,
-                const labelList& cells
-            ) const;
-
-            //- Unburnt gas enthalpy for patch [J/kg]
-            virtual tmp<scalarField> hu
-            (
-                const scalarField& T,
-                const label patchi
-            ) const;
-
-
-            //- Burnt gas temperature [K]
-            virtual tmp<volScalarField> Tb() const;
-
-            //- Unburnt gas compressibility [s^2/m^2]
-            virtual tmp<volScalarField> psiu() const;
-
-            //- Burnt gas compressibility [s^2/m^2]
-            virtual tmp<volScalarField> psib() const;
-
-
-        // Access to transport variables
-
-            //- Dynamic viscosity of unburnt gas [kg/ms]
-            virtual tmp<volScalarField> muu() const;
-
-            //- Dynamic viscosity of burnt gas [kg/ms]
-            virtual tmp<volScalarField> mub() const;
-
 
         //- Read thermophysicalProperties dictionary
         virtual bool read();
@@ -170,10 +137,10 @@ public:
 
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "hhuMixtureThermo.C"
+#   include "hPsiMixtureThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

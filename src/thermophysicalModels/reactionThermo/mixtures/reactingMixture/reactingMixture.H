@@ -48,21 +48,13 @@ namespace Foam
                       Class reactingMixture Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ThermoType>
 class reactingMixture
 :
-    public autoPtr<chemistryReader>,
-    public multiComponentMixture<chemistryReader::reactionThermo>,
-    public PtrList<chemistryReader::reaction>
+    public autoPtr<chemistryReader<ThermoType> >,
+    public multiComponentMixture<ThermoType>,
+    public PtrList<Reaction<ThermoType> >
 {
-
-public:
-
-    typedef chemistryReader::reaction reaction;
-    typedef chemistryReader::reactionThermo reactionThermo;
-
-
-private:
-
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -73,6 +65,10 @@ private:
 
 
 public:
+
+    //- The type of thermo package this mixture is instantiated for
+    typedef ThermoType thermoType;
+
 
     // Constructors
 
@@ -95,6 +91,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "reactingMixture.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -24,44 +24,26 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reactingMixture.H"
-#include "fvMesh.H"
+#include "thermoPhysicsTypes.H"
+#include "chemistrySolver.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "EulerImplicit.H"
+#include "ode.H"
+#include "sequential.H"
 
-template<class ThermoType>
-Foam::reactingMixture<ThermoType>::reactingMixture
-(
-    const dictionary& thermoDict,
-    const fvMesh& mesh
-)
-:
-    autoPtr<chemistryReader<ThermoType> >
-    (
-        chemistryReader<ThermoType>::New(thermoDict)
-    ),
-    multiComponentMixture<ThermoType>
-    (
-        thermoDict,
-        autoPtr<chemistryReader<ThermoType> >::operator()().species(),
-        autoPtr<chemistryReader<ThermoType> >::operator()().speciesThermo(),
-        mesh
-    ),
-    PtrList<Reaction<ThermoType> >
-    (
-        autoPtr<chemistryReader<ThermoType> >::operator()().reactions(),
-        this->species_
-    )
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    autoPtr<chemistryReader<ThermoType> >::clear();
+    makeChemistrySolver(gasThermoPhysics)
+    makeChemistrySolverType(EulerImplicit, gasThermoPhysics)
+    makeChemistrySolverType(ode, gasThermoPhysics)
+    makeChemistrySolverType(sequential, gasThermoPhysics)
+
+    makeChemistrySolver(icoPoly8ThermoPhysics)
+    makeChemistrySolverType(EulerImplicit, icoPoly8ThermoPhysics)
+    makeChemistrySolverType(ode, icoPoly8ThermoPhysics)
+    makeChemistrySolverType(sequential, icoPoly8ThermoPhysics)
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class ThermoType>
-void Foam::reactingMixture<ThermoType>::read(const dictionary& thermoDict)
-{}
-
-
-// ************************************************************************* //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

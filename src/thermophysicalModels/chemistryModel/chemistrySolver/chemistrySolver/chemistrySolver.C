@@ -29,29 +29,22 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(chemistrySolver, 0);
-defineRunTimeSelectionTable(chemistrySolver, dictionary);
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-Foam::chemistrySolver::chemistrySolver
+template<class ThermoType>
+Foam::chemistrySolver<ThermoType>::chemistrySolver
 (
-    const Foam::dictionary& dict,
-    Foam::chemistryModel& chemistry
+    ODEChemistryModel<ThermoType>& model
 )
 :
-    dict_(dict),
-    chemistry_(chemistry)
+    model_(model)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::chemistrySolver::~chemistrySolver()
+template<class ThermoType>
+Foam::chemistrySolver<ThermoType>::~chemistrySolver()
 {}
 
 

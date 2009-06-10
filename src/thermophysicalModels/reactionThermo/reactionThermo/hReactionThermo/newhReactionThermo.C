@@ -22,38 +22,57 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedefs
-    Foam::reactionTypes
-
-Description
-    Type definitions for reactions
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef reactionTypes_H
-#define reactionTypes_H
-
-#include "thermoPhysicsTypes.H"
-#include "Reaction.H"
-
-#include "icoPolynomial.H"
-#include "polynomialThermo.H"
-#include "polynomialTransport.H"
+#include "hReactionThermo.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::hReactionThermo> Foam::hReactionThermo::New
+(
+    const fvMesh& mesh
+)
 {
-    typedef Reaction<gasThermoPhysics> gasReaction;
+    word hReactionThermoTypeName;
 
-    typedef Reaction<constGasThermoPhysics> constGasReaction;
+    // Enclose the creation of the thermophysicalProperties to ensure it is
+    // deleted before the turbulenceModel is created otherwise the dictionary
+    // is entered in the database twice
+    {
+        IOdictionary thermoDict
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
 
-    typedef Reaction<icoPoly8ThermoPhysics> icoPoly8Reaction;
+        thermoDict.lookup("thermoType") >> hReactionThermoTypeName;
+    }
+
+    Info<< "Selecting thermodynamics package " << hReactionThermoTypeName
+        << endl;
+
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(hReactionThermoTypeName);
+
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("hReactionThermo::New(const fvMesh&)")
+            << "Unknown hReactionThermo type "
+            << hReactionThermoTypeName << nl << nl
+            << "Valid hReactionThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
+
+    return autoPtr<hReactionThermo>(cstrIter()(mesh));
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
-

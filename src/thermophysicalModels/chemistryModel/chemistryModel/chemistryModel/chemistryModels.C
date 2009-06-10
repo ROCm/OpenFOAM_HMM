@@ -22,56 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedefs
-    Foam::transportTypes
+InClass
+    Foam::chemistryModel
 
 Description
-    Type definitions for reacting transport models
+    Creates chemistry model instances templated on the type of thermodynamics
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef transportTypes_H
-#define transportTypes_H
-
-#include "perfectGas.H"
-#include "hConstThermo.H"
-#include "janafThermo.H"
-#include "specieThermo.H"
-#include "sutherlandTransport.H"
-#include "constTransport.H"
-
-#include "icoPolynomial.H"
-#include "polynomialThermo.H"
-#include "polynomialTransport.H"
+#include "thermoPhysicsTypes.H"
+#include "makeChemistryModel.H"
+#include "ODEChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
-        gasTransport;
-
-    typedef constTransport<specieThermo<hConstThermo<perfectGas> > >
-        constGasTransport;
-
-    typedef polynomialTransport
-        <
-            specieThermo
-            <
-                polynomialThermo
-                <
-                    icoPolynomial<8>,
-                    8
-                >
-            >,
-            8
-        >
-        icoPoly8Transport;
+    makeChemistryModel(ODEChemistryModel, gasThermoPhysics);
+    makeChemistryModel(ODEChemistryModel, icoPoly8ThermoPhysics);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
-
 // ************************************************************************* //
-

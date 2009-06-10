@@ -39,10 +39,6 @@ SourceFiles
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "Reaction.H"
-#include "sutherlandTransport.H"
-#include "specieThermo.H"
-#include "janafThermo.H"
-#include "perfectGas.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,23 +46,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class chemistryReader Declaration
+                      Class chemistryReader Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ThermoType>
 class chemistryReader
 {
-
-public:
-
-    // Public data types
-
-        typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
-            reactionThermo;
-
-        typedef Reaction<reactionThermo> reaction;
-
-private:
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -80,6 +65,9 @@ public:
 
     //- Runtime type information
     TypeName("chemistryReader");
+
+    //- The type of thermo package the reader was instantiated for
+    typedef ThermoType thermoType;
 
 
     // Constructors
@@ -109,23 +97,59 @@ public:
         static autoPtr<chemistryReader> New(const dictionary& thermoDict);
 
 
-    // Destructor
-
-        virtual ~chemistryReader()
-        {}
+    //- Destructor
+    virtual ~chemistryReader()
+    {}
 
 
     // Member Functions
 
         virtual const speciesTable& species() const = 0;
-        virtual const HashPtrTable<reactionThermo>& speciesThermo() const = 0;
-        virtual const SLPtrList<reaction>& reactions() const = 0;
+
+        virtual const HashPtrTable<ThermoType>& speciesThermo() const = 0;
+
+        virtual const SLPtrList<Reaction<ThermoType> >& reactions() const = 0;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeChemistryReader(Thermo)                                           \
+                                                                              \
+defineTemplateTypeNameAndDebug                                                \
+(                                                                             \
+    chemistryReader<Thermo>,                                                  \
+    0                                                                         \
+);                                                                            \
+                                                                              \
+defineTemplateRunTimeSelectionTable(chemistryReader<Thermo>, dictionary);
+
+
+#define makeChemistryReaderType(SS, Thermo)                                   \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug(SS<Thermo>, 0);                       \
+                                                                              \
+    chemistryReader<Thermo>::adddictionaryConstructorToTable<SS<Thermo> >     \
+        add##SS##Thermo##ConstructorToTable_;
+
+
+#define addChemistryReaderType(SS, Thermo)                                    \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug(SS, 0);                               \
+                                                                              \
+    chemistryReader<Thermo>::adddictionaryConstructorToTable<SS>              \
+        add##SS##Thermo##ConstructorToTable_;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "chemistryReader.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

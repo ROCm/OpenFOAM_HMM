@@ -24,44 +24,48 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "hReactionThermo.H"
+#include "hRhoMixtureThermo.H"
+
+#include "makeReactionThermo.H"
+#include "addToRunTimeSelectionTable.H"
+
+#include "multiComponentMixture.H"
 #include "reactingMixture.H"
-#include "fvMesh.H"
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "thermoPhysicsTypes.H"
 
-template<class ThermoType>
-Foam::reactingMixture<ThermoType>::reactingMixture
-(
-    const dictionary& thermoDict,
-    const fvMesh& mesh
-)
-:
-    autoPtr<chemistryReader<ThermoType> >
-    (
-        chemistryReader<ThermoType>::New(thermoDict)
-    ),
-    multiComponentMixture<ThermoType>
-    (
-        thermoDict,
-        autoPtr<chemistryReader<ThermoType> >::operator()().species(),
-        autoPtr<chemistryReader<ThermoType> >::operator()().speciesThermo(),
-        mesh
-    ),
-    PtrList<Reaction<ThermoType> >
-    (
-        autoPtr<chemistryReader<ThermoType> >::operator()().reactions(),
-        this->species_
-    )
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    autoPtr<chemistryReader<ThermoType> >::clear();
-}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Multi-component thermo
+
+makeReactionMixtureThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    multiComponentMixture,
+    icoPoly8ThermoPhysics
+);
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// Multi-component reaction thermo
 
-template<class ThermoType>
-void Foam::reactingMixture<ThermoType>::read(const dictionary& thermoDict)
-{}
+makeReactionMixtureThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    reactingMixture,
+    icoPoly8ThermoPhysics
+);
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // ************************************************************************* //

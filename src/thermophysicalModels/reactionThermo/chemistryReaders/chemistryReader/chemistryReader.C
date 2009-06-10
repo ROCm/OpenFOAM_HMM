@@ -26,17 +26,11 @@ License
 
 #include "chemistryReader.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(chemistryReader, 0);
-    defineRunTimeSelectionTable(chemistryReader, dictionary);
-};
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::chemistryReader> Foam::chemistryReader::New
+template<class ThermoType>
+Foam::autoPtr<Foam::chemistryReader<ThermoType> >
+Foam::chemistryReader<ThermoType>::New
 (
     const dictionary& thermoDict
 )
@@ -50,9 +44,8 @@ Foam::autoPtr<Foam::chemistryReader> Foam::chemistryReader::New
 
     Info<< "Selecting chemistryReader " << chemistryReaderTypeName << endl;
 
-    dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_
-        ->find(chemistryReaderTypeName);
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(chemistryReaderTypeName);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -60,13 +53,13 @@ Foam::autoPtr<Foam::chemistryReader> Foam::chemistryReader::New
         (
             "chemistryReader::New(const dictionary& thermoDict)"
         )   << "Unknown chemistryReader type "
-            << chemistryReaderTypeName << endl << endl
-            << "Valid  chemistryReaders are : " << endl
+            << chemistryReaderTypeName << nl << nl
+            << "Valid  chemistryReaders are: " << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
 
-    return autoPtr<chemistryReader>(cstrIter()(thermoDict));
+    return autoPtr<chemistryReader<ThermoType> >(cstrIter()(thermoDict));
 }
 
 

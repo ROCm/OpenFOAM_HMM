@@ -28,36 +28,33 @@ License
 #include "IFstream.H"
 #include "addToRunTimeSelectionTable.H"
 
-/* * * * * * * * * * * * * * * * * Static data * * * * * * * * * * * * * * * */
-
-namespace Foam
-{
-    defineTypeNameAndDebug(foamChemistryReader, 0);
-    addToRunTimeSelectionTable(chemistryReader, foamChemistryReader, dictionary);
-};
-
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
-// Construct from components
-Foam::foamChemistryReader::foamChemistryReader
+template<class ThermoType>
+Foam::foamChemistryReader<ThermoType>::foamChemistryReader
 (
     const fileName& reactionsFileName,
     const fileName& thermoFileName
 )
 :
+    chemistryReader<ThermoType>(),
     speciesThermo_(IFstream(thermoFileName)()),
     speciesTable_(dictionary(IFstream(reactionsFileName)()).lookup("species")),
     reactions_
     (
         dictionary(IFstream(reactionsFileName)()).lookup("reactions"),
-        reaction::iNew(speciesTable_, speciesThermo_)
+        Reaction<ThermoType>::iNew(speciesTable_, speciesThermo_)
     )
 {}
 
 
-// Construct from components
-Foam::foamChemistryReader::foamChemistryReader(const dictionary& thermoDict)
+template<class ThermoType>
+Foam::foamChemistryReader<ThermoType>::foamChemistryReader
+(
+    const dictionary& thermoDict
+)
 :
+    chemistryReader<ThermoType>(),
     speciesThermo_
     (
         IFstream
@@ -84,7 +81,7 @@ Foam::foamChemistryReader::foamChemistryReader(const dictionary& thermoDict)
                 fileName(thermoDict.lookup("foamChemistryFile")).expand()
             )()
         ).lookup("reactions"),
-        reaction::iNew(speciesTable_, speciesThermo_)
+        typename Reaction<ThermoType>::iNew(speciesTable_, speciesThermo_)
     )
 {}
 

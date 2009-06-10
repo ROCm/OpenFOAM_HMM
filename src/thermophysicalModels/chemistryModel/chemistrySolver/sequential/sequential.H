@@ -46,18 +46,19 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class sequential Declaration
+                         Class sequential Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ThermoType>
 class sequential
 :
-    public chemistrySolver
+    public chemistrySolver<ThermoType>
 {
     // Private data
 
         dictionary coeffsDict_;
 
-        // model constants
+        // Model constants
 
             scalar cTauChem_;
             Switch equil_;
@@ -73,16 +74,11 @@ public:
 
 
         //- Construct from components
-        sequential
-        (
-            const dictionary& dict,
-            chemistryModel& chemistry
-        );
+        sequential(ODEChemistryModel<ThermoType>& model);
 
 
-    // Destructor
-
-        ~sequential();
+    //- Destructor
+    virtual ~sequential();
 
 
     // Member Functions
@@ -102,6 +98,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "sequential.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

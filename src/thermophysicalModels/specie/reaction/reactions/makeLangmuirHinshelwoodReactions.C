@@ -26,17 +26,15 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeReactionJanaf.H"
+#include "makeReactionThermo.H"
+#include "reactionTypes.H"
 #include "LangmuirHinshelwoodReactionRate.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-    makeIRReactions(LangmuirHinshelwoodReactionRate)
-
+    makeIRReactions(gasThermoPhysics, LangmuirHinshelwoodReactionRate)
 }
 
 // ************************************************************************* //

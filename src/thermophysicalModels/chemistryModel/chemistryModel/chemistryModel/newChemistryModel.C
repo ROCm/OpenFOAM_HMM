@@ -24,39 +24,53 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "zeroGradientFvPatchFields.H"
+#include "chemistryModel.H"
+#include "fvMesh.H"
+#include "Time.H"
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-inline Foam::tmp<Foam::volScalarField> Foam::chemistryModel::RR
+Foam::autoPtr<Foam::chemistryModel> Foam::chemistryModel::New
 (
-    const label i
-) const
+    const fvMesh& mesh
+)
 {
-    tmp<volScalarField> tRR
-    (
-        new volScalarField
+    word chemistryModelType;
+
+    // Enclose the creation of the chemistrtyProperties to ensure it is
+    // deleted before the chemistrtyProperties is created otherwise the
+    // dictionary is entered in the database twice
+    {
+        IOdictionary chemistryPropertiesDict
         (
             IOobject
             (
-                "RR(" + Y_[i].name() + ')',
-                rho_.time().timeName(),
-                rho_.db(),
-                IOobject::NO_READ,
+                "chemistryProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ,
                 IOobject::NO_WRITE
-            ),
-            rho_.mesh(),
-            dimensionedScalar("zero", dimensionSet(1, -3, -1, 0, 0), 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
+            )
+        );
 
-    if (chemistry_)
-    {
-        tRR().internalField() = RR_[i];
-        tRR().correctBoundaryConditions();
+        chemistryPropertiesDict.lookup("chemistryModel") >> chemistryModelType;
     }
-    return tRR;
+
+    Info<< "Selecting chemistryModel " << chemistryModelType << endl;
+
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(chemistryModelType);
+
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("chemistryModelBase::New(const mesh&)")
+            << "Unknown chemistryModel type " << chemistryModelType << nl << nl
+            << "Valid chemistryModel types are:" << nl
+            << fvMeshConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
+
+    return autoPtr<chemistryModel>(cstrIter()(mesh));
 }
 
 

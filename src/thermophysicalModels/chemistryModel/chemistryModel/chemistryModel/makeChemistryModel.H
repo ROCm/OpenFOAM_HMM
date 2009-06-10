@@ -22,85 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::EulerImplicit
+InClass
+    Foam::chemistryModel
 
 Description
-    An Euler implicit solver for chemistry
-
-SourceFiles
-    EulerImplicit.C
+    Macros for instantiating chemistry models based on transport type
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef EulerImplicit_H
-#define EulerImplicit_H
+#ifndef makeChemistryModel_H
+#define makeChemistryModel_H
 
-#include "chemistrySolver.H"
+#include "chemistryModel.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/*---------------------------------------------------------------------------*\
-                       Class EulerImplicit Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-class EulerImplicit
-:
-    public chemistrySolver<ThermoType>
-{
-    // Private data
-
-        dictionary coeffsDict_;
-
-        // Model constants
-
-            scalar cTauChem_;
-            Switch equil_;
-
-
-public:
-
-    //- Runtime type information
-    TypeName("EulerImplicit");
-
-
-    // Constructors
-
-        //- Construct from components
-        EulerImplicit(ODEChemistryModel<ThermoType>& chemistry);
-
-
-    //- Destructor
-    virtual ~EulerImplicit();
-
-
-    // Member Functions
-
-        //- Update the concentrations and return the chemical time
-        scalar solve
-        (
-            scalarField &c,
-            const scalar T,
-            const scalar p,
-            const scalar t0,
-            const scalar dt
-        ) const;
-};
-
+#define makeChemistryModel(SS, Transport)                                     \
+                                                                              \
+typedef SS<Transport> SS##Transport;                                          \
+                                                                              \
+defineTemplateTypeNameAndDebugWithName                                        \
+(                                                                             \
+    SS##Transport,                                                            \
+    #SS"<"#Transport">",                                                      \
+    0                                                                         \
+);                                                                            \
+                                                                              \
+addToRunTimeSelectionTable                                                    \
+(                                                                             \
+    chemistryModel,                                                           \
+    SS##Transport,                                                            \
+    fvMesh                                                                    \
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "EulerImplicit.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "hCombustionThermo.H"
-#include "hMixtureThermo.H"
+#include "hPsiMixtureThermo.H"
 
 #include "makeCombustionThermo.H"
 #include "addToRunTimeSelectionTable.H"
@@ -46,7 +46,7 @@ License
 #include "multiComponentMixture.H"
 #include "reactingMixture.H"
 
-#include "transportTypes.H"
+#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ namespace Foam
 makeCombustionThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     homogeneousMixture,
     constTransport,
     hConstThermo,
@@ -68,7 +68,7 @@ makeCombustionThermo
 makeCombustionThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     inhomogeneousMixture,
     constTransport,
     hConstThermo,
@@ -78,7 +78,7 @@ makeCombustionThermo
 makeCombustionThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     veryInhomogeneousMixture,
     constTransport,
     hConstThermo,
@@ -88,7 +88,7 @@ makeCombustionThermo
 makeCombustionThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     homogeneousMixture,
     sutherlandTransport,
     janafThermo,
@@ -98,7 +98,7 @@ makeCombustionThermo
 makeCombustionThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     inhomogeneousMixture,
     sutherlandTransport,
     janafThermo,
@@ -108,7 +108,7 @@ makeCombustionThermo
 makeCombustionThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     veryInhomogeneousMixture,
     sutherlandTransport,
     janafThermo,
@@ -118,32 +118,21 @@ makeCombustionThermo
 makeCombustionThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     dieselMixture,
     sutherlandTransport,
     janafThermo,
     perfectGas
 );
 
-makeCombustionThermo
-(
-    hCombustionThermo,
-    hMixtureThermo,
-    multiComponentMixture,
-    sutherlandTransport,
-    janafThermo,
-    perfectGas
-);
-
-
 // Multi-component thermo
 
 makeCombustionMixtureThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     multiComponentMixture,
-    gasTransport
+    gasThermoPhysics
 );
 
 
@@ -152,9 +141,9 @@ makeCombustionMixtureThermo
 makeCombustionMixtureThermo
 (
     hCombustionThermo,
-    hMixtureThermo,
+    hPsiMixtureThermo,
     reactingMixture,
-    gasTransport
+    gasThermoPhysics
 );
 
 

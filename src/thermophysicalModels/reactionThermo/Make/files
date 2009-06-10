@@ -1,10 +1,8 @@
-chemistryReaders/chemistryReader/chemistryReader.C
-chemistryReaders/foamChemistryReader/foamChemistryReader.C
 chemistryReaders/chemkinReader/chemkinReader.C
-chemistryReaders/chemkinReader/chemkinLexer.L
+chemistryReaders/chemkinReader/chemkinLexer.C
+chemistryReaders/chemistryReader/makeChemistryReaders.C
 
-/* mixtures/basicMultiComponentMixture/basicMultiComponentMixture.C */
-mixtures/reactingMixture/reactingMixture.C
+mixtures/basicMultiComponentMixture/basicMultiComponentMixture.C
 
 combustion/hCombustionThermo/hCombustionThermo.C
 combustion/hCombustionThermo/newhCombustionThermo.C
@@ -13,6 +11,11 @@ combustion/hCombustionThermo/hCombustionThermos.C
 combustion/hhuCombustionThermo/hhuCombustionThermo.C
 combustion/hhuCombustionThermo/newhhuCombustionThermo.C
 combustion/hhuCombustionThermo/hhuCombustionThermos.C
+
+reactionThermo/hReactionThermo/hReactionThermo.C
+reactionThermo/hReactionThermo/newhReactionThermo.C
+reactionThermo/hReactionThermo/hReactionThermos.C
+
 
 derivedFvPatchFields/fixedUnburntEnthalpy/fixedUnburntEnthalpyFvPatchScalarField.C
 derivedFvPatchFields/gradientUnburntEnthalpy/gradientUnburntEnthalpyFvPatchScalarField.C

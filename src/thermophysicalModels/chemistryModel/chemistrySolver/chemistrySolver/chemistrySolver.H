@@ -36,7 +36,7 @@ SourceFiles
 #ifndef chemistrySolver_H
 #define chemistrySolver_H
 
-#include "chemistryModel.H"
+#include "ODEChemistryModel.H"
 #include "IOdictionary.H"
 #include "scalarField.H"
 #include "autoPtr.H"
@@ -48,16 +48,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class chemistrySolver Declaration
+                      Class chemistrySolver Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ThermoType>
 class chemistrySolver
 {
-
 protected:
 
-        const dictionary& dict_;
-        chemistryModel& chemistry_;
+    // Protected data
+
+        //- Reference to the chemistry model
+        ODEChemistryModel<ThermoType>& model_;
 
 
 public:
@@ -73,35 +75,27 @@ public:
             chemistrySolver,
             dictionary,
             (
-                const dictionary& dict,
-                chemistryModel& chemistry
+                ODEChemistryModel<ThermoType>& model
             ),
-            (dict, chemistry)
+            (model)
         );
 
 
     // Constructors
 
         //- Construct from components
-        chemistrySolver
-        (
-            const dictionary& dict,
-            chemistryModel& chemistry
-        );
+        chemistrySolver(ODEChemistryModel<ThermoType>& model);
 
 
-    // Selectors
-
-        static autoPtr<chemistrySolver> New
-        (
-            const dictionary& dict,
-            chemistryModel& chemistry
-        );
+    //- Selector
+    static autoPtr<chemistrySolver> New
+    (
+        ODEChemistryModel<ThermoType>& model
+    );
 
 
-    // Destructor
-
-        virtual ~chemistrySolver();
+    //- Destructor
+    virtual ~chemistrySolver();
 
 
     // Member Functions
@@ -121,6 +115,34 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#define makeChemistrySolver(Thermo)                                           \
+                                                                              \
+defineTemplateTypeNameAndDebug                                                \
+(                                                                             \
+    chemistrySolver<Thermo>,                                                  \
+    0                                                                         \
+);                                                                            \
+                                                                              \
+defineTemplateRunTimeSelectionTable(chemistrySolver<Thermo>, dictionary);
+
+
+#define makeChemistrySolverType(SS, Thermo)                                   \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug(SS<Thermo>, 0);                       \
+                                                                              \
+    chemistrySolver<Thermo>::adddictionaryConstructorToTable<SS<Thermo> >     \
+        add##SS##Thermo##ConstructorToTable_;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "chemistrySolver.C"
+#   include "newChemistrySolver.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

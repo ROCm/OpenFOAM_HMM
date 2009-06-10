@@ -22,46 +22,56 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedefs
+    Foam::thermoPhysicsTypes
+
+Description
+    Type definitions for thermo-physics models
+
 \*---------------------------------------------------------------------------*/
 
-#include "reactingMixture.H"
-#include "fvMesh.H"
+#ifndef thermoPhysicsTypes_H
+#define thermoPhysicsTypes_H
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+#include "perfectGas.H"
+#include "hConstThermo.H"
+#include "janafThermo.H"
+#include "specieThermo.H"
+#include "sutherlandTransport.H"
+#include "constTransport.H"
 
-template<class ThermoType>
-Foam::reactingMixture<ThermoType>::reactingMixture
-(
-    const dictionary& thermoDict,
-    const fvMesh& mesh
-)
-:
-    autoPtr<chemistryReader<ThermoType> >
-    (
-        chemistryReader<ThermoType>::New(thermoDict)
-    ),
-    multiComponentMixture<ThermoType>
-    (
-        thermoDict,
-        autoPtr<chemistryReader<ThermoType> >::operator()().species(),
-        autoPtr<chemistryReader<ThermoType> >::operator()().speciesThermo(),
-        mesh
-    ),
-    PtrList<Reaction<ThermoType> >
-    (
-        autoPtr<chemistryReader<ThermoType> >::operator()().reactions(),
-        this->species_
-    )
+#include "icoPolynomial.H"
+#include "polynomialThermo.H"
+#include "polynomialTransport.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    autoPtr<chemistryReader<ThermoType> >::clear();
+    typedef sutherlandTransport<specieThermo<janafThermo<perfectGas> > >
+        gasThermoPhysics;
+
+    typedef constTransport<specieThermo<hConstThermo<perfectGas> > >
+        constGasThermoPhysics;
+
+    typedef polynomialTransport
+        <
+            specieThermo
+            <
+                polynomialThermo
+                <
+                    icoPolynomial<8>,
+                    8
+                >
+            >,
+            8
+        >
+        icoPoly8ThermoPhysics;
 }
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class ThermoType>
-void Foam::reactingMixture<ThermoType>::read(const dictionary& thermoDict)
-{}
-
+#endif
 
 // ************************************************************************* //
+

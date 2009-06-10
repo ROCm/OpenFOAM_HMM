@@ -1,12 +1,7 @@
-chemistryModel = chemistryModel
-chemistrySolver = chemistrySolver
+chemistryModel/chemistryModel/chemistryModel.C
+chemistryModel/chemistryModel/newChemistryModel.C
+chemistryModel/chemistryModel/chemistryModels.C
 
-$(chemistryModel)/chemistryModel.C
-
-$(chemistrySolver)/chemistrySolver/chemistrySolver.C
-$(chemistrySolver)/chemistrySolver/newChemistrySolver.C
-$(chemistrySolver)/sequential/sequential.C
-$(chemistrySolver)/EulerImplicit/EulerImplicit.C
-$(chemistrySolver)/ode/ode.C
+chemistrySolver/chemistrySolver/makeChemistrySolvers.C
 
 LIB = $(FOAM_LIBBIN)/libchemistryModel

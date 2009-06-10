@@ -45,23 +45,22 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ode Declaration
+                            Class ode Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class ThermoType>
 class ode
 :
-    public chemistrySolver
+    public chemistrySolver<ThermoType>
 {
     // Private data
-
-        chemistryModel& chemistry_;
 
         dictionary coeffsDict_;
         const word solverName_;
         autoPtr<ODESolver> odeSolver_;
 
-        // model constants
-    
+        // Model constants
+
             scalar eps_;
             scalar scale_;
 
@@ -75,16 +74,11 @@ public:
     // Constructors
 
         //- Construct from components
-        ode
-        (
-            const dictionary& dict,
-            chemistryModel& chemistry
-        );
+        ode(ODEChemistryModel<ThermoType>& model);
 
 
-    // Destructor
-
-        ~ode();
+    //- Destructor
+    virtual ~ode();
 
 
     // Member Functions
@@ -103,6 +97,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "ode.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
