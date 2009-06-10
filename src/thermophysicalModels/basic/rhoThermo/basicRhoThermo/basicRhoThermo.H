@@ -22,40 +22,82 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::basicRhoThermo
+
+Description
+    Basic thermodynamic properties based in density
+
+SourceFiles
+    basicRhoThermo.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#ifndef basicRhoThermo_H
+#define basicRhoThermo_H
 
-#include "basicMixture.H"
-#include "fvMesh.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                        Class basicRhoThermo Declaration
+\*---------------------------------------------------------------------------*/
 
-defineTypeNameAndDebug(basicMixture, 0);
+class basicRhoThermo
+:
+    public basicThermo
+{
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+protected:
 
-basicMixture::basicMixture
-(
-    const dictionary&,
-    const fvMesh&
-)
-{}
+    // Protected data
+
+        //- Density field [kg/m^3]
+        //  Named 'rhoThermo' to avoid (potential) conflict with solver density
+        volScalarField rho_;
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+    // Protected member functions
 
-basicMixture::~basicMixture()
-{}
+        //- Construct as copy (not implemented)
+        basicRhoThermo(const basicRhoThermo&);
+
+
+public:
+
+    //- Runtime type information
+    TypeName("basicRhoThermo");
+
+
+    // Constructors
+
+        //- Construct from mesh
+        basicRhoThermo(const fvMesh&);
+
+
+    //- Destructor
+    virtual ~basicRhoThermo();
+
+
+    // Member functions
+
+        // Fields derived from thermodynamic state variables
+
+            //- Density [kg/m^3]
+            virtual tmp<volScalarField> rho() const;
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

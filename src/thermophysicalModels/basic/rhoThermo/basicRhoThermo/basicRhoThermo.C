@@ -24,38 +24,49 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicMixture.H"
-#include "fvMesh.H"
+#include "basicRhoThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(basicRhoThermo, 0);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(basicMixture, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-basicMixture::basicMixture
-(
-    const dictionary&,
-    const fvMesh&
-)
+Foam::basicRhoThermo::basicRhoThermo(const fvMesh& mesh)
+:
+    basicThermo(mesh),
+    rho_
+    (
+        IOobject
+        (
+            "rhoThermo",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimDensity
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-basicMixture::~basicMixture()
+Foam::basicRhoThermo::~basicRhoThermo()
 {}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::tmp<Foam::volScalarField> Foam::basicRhoThermo::rho() const
+{
+    return rho_;
+}
+
 
 // ************************************************************************* //

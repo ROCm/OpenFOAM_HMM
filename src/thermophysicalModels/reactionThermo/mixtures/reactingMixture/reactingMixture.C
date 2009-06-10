@@ -24,38 +24,38 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicMixture.H"
+#include "reactingMixture.H"
 #include "fvMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(basicMixture, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-basicMixture::basicMixture
+Foam::reactingMixture::reactingMixture
 (
-    const dictionary&,
-    const fvMesh&
+    const dictionary& thermoDict,
+    const fvMesh& mesh
 )
+:
+    autoPtr<chemistryReader>(chemistryReader::New(thermoDict)),
+    multiComponentMixture<chemistryReader::reactionThermo>
+    (
+        thermoDict,
+        autoPtr<chemistryReader>::operator()().species(),
+        autoPtr<chemistryReader>::operator()().speciesThermo(),
+        mesh
+    ),
+    PtrList<chemistryReader::reaction>
+    (
+        autoPtr<chemistryReader>::operator()().reactions(), species_
+    )
+{
+    autoPtr<chemistryReader>::clear();
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::reactingMixture::read(const dictionary& thermoDict)
 {}
 
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-basicMixture::~basicMixture()
-{}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

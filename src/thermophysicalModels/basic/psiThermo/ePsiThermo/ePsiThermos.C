@@ -22,37 +22,59 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+    Selection function for internal energy based thermodynamics package.
+
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#include "makeBasicThermo.H"
 
-#include "basicMixture.H"
-#include "fvMesh.H"
+#include "perfectGas.H"
+
+#include "hConstThermo.H"
+#include "janafThermo.H"
+#include "specieThermo.H"
+
+#include "constTransport.H"
+#include "sutherlandTransport.H"
+
+#include "ePsiThermo.H"
+#include "pureMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-defineTypeNameAndDebug(basicMixture, 0);
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-basicMixture::basicMixture
+makeBasicThermo
 (
-    const dictionary&,
-    const fvMesh&
-)
-{}
+    ePsiThermo,
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
 
+makeBasicThermo
+(
+    ePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    hConstThermo,
+    perfectGas
+);
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-basicMixture::~basicMixture()
-{}
-
+makeBasicThermo
+(
+    ePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

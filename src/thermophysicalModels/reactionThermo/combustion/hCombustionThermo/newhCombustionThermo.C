@@ -24,38 +24,55 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicMixture.H"
+#include "hCombustionThermo.H"
 #include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(basicMixture, 0);
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-basicMixture::basicMixture
+Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::New
 (
-    const dictionary&,
-    const fvMesh&
+    const fvMesh& mesh
 )
-{}
+{
+    word hCombustionThermoTypeName;
 
+    // Enclose the creation of the thermophysicalProperties to ensure it is
+    // deleted before the turbulenceModel is created otherwise the dictionary
+    // is entered in the database twice
+    {
+        IOdictionary thermoDict
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+        thermoDict.lookup("thermoType") >> hCombustionThermoTypeName;
+    }
 
-basicMixture::~basicMixture()
-{}
+    Info<< "Selecting thermodynamics package " << hCombustionThermoTypeName
+        << endl;
 
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(hCombustionThermoTypeName);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("hCombustionThermo::New(const fvMesh&)")
+            << "Unknown hCombustionThermo type "
+            << hCombustionThermoTypeName << nl << nl
+            << "Valid hCombustionThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
 
-} // End namespace Foam
+    return autoPtr<hCombustionThermo>(cstrIter()(mesh));
+}
+
 
 // ************************************************************************* //

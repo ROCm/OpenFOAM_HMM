@@ -22,40 +22,82 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::reactingMixture
+
+Description
+    Foam::reactingMixture
+
+SourceFiles
+    reactingMixture.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#ifndef reactingMixture_H
+#define reactingMixture_H
 
-#include "basicMixture.H"
-#include "fvMesh.H"
+#include "chemistryReader.H"
+#include "multiComponentMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                      Class reactingMixture Declaration
+\*---------------------------------------------------------------------------*/
 
-defineTypeNameAndDebug(basicMixture, 0);
+class reactingMixture
+:
+    public autoPtr<chemistryReader>,
+    public multiComponentMixture<chemistryReader::reactionThermo>,
+    public PtrList<chemistryReader::reaction>
+{
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+public:
 
-basicMixture::basicMixture
-(
-    const dictionary&,
-    const fvMesh&
-)
-{}
+    typedef chemistryReader::reaction reaction;
+    typedef chemistryReader::reactionThermo reactionThermo;
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+private:
 
-basicMixture::~basicMixture()
-{}
+    // Private member functions
+
+        //- Disallow default bitwise copy construct
+        reactingMixture(const reactingMixture&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const reactingMixture&);
+
+
+public:
+
+    // Constructors
+
+        //- Construct from dictionary and mesh
+        reactingMixture(const dictionary&, const fvMesh&);
+
+
+    //- Destructor
+    virtual ~reactingMixture()
+    {}
+
+
+    // Member functions
+
+        //- Read dictionary
+        void read(const dictionary&);
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

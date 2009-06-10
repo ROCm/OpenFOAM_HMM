@@ -22,36 +22,63 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+    Selection function for enthalpy based thermodynamics package.
+
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
 
-#include "basicMixture.H"
-#include "fvMesh.H"
+#include "basicThermo.H"
+#include "makeBasicThermo.H"
+
+#include "perfectGas.H"
+
+#include "hConstThermo.H"
+#include "janafThermo.H"
+#include "specieThermo.H"
+
+#include "constTransport.H"
+#include "sutherlandTransport.H"
+
+#include "hThermo.H"
+#include "pureMixture.H"
+
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-defineTypeNameAndDebug(basicMixture, 0);
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-basicMixture::basicMixture
+makeBasicThermo
 (
-    const dictionary&,
-    const fvMesh&
-)
-{}
+    hThermo,
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
 
+makeBasicThermo
+(
+    hThermo,
+    pureMixture,
+    sutherlandTransport,
+    hConstThermo,
+    perfectGas
+);
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-basicMixture::~basicMixture()
-{}
+makeBasicThermo
+(
+    hThermo,
+    pureMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

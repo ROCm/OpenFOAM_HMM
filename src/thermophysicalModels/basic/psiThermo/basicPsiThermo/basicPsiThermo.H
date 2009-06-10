@@ -22,40 +22,78 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::basicPsiThermo
+
+Description
+    Basic thermodynamic properties based in compressibility
+
+SourceFiles
+    basicRhoThermo.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#ifndef basicPsiThermo_H
+#define basicPsiThermo_H
 
-#include "basicMixture.H"
-#include "fvMesh.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                         Class basicPsiThermo Declaration
+\*---------------------------------------------------------------------------*/
 
-defineTypeNameAndDebug(basicMixture, 0);
+class basicPsiThermo
+:
+    public basicThermo
+{
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+protected:
 
-basicMixture::basicMixture
-(
-    const dictionary&,
-    const fvMesh&
-)
-{}
+    // Protected member functions
+
+        //- Construct as copy (not implemented)
+        basicPsiThermo(const basicPsiThermo&);
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+public:
 
-basicMixture::~basicMixture()
-{}
+    //- Runtime type information
+    TypeName("basicPsiThermo");
+
+
+    // Constructors
+
+        //- Construct from mesh
+        basicPsiThermo(const fvMesh&);
+
+
+    //- Destructor
+    virtual ~basicPsiThermo();
+
+
+    // Member functions
+
+        // Fields derived from thermodynamic state variables
+
+            //- Density [kg/m^3]
+            virtual tmp<volScalarField> rho() const
+            {
+                return p_*psi();
+            }
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

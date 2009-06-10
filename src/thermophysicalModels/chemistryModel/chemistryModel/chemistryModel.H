@@ -67,32 +67,37 @@ private:
 
     // Private data
 
+        //- Reference to the thermo package
         const hCombustionThermo& thermo_;
 
+        //- Reference to the field of specie mass fractions
         PtrList<volScalarField>& Y_;
+
+        //- Reference to the density field
         const volScalarField& rho_;
 
+        //- Chemistry properties dictionary
         IOdictionary chemistryProperties_;
 
-        //- Do the chemistry or not.
+        //- Flag to activate the chemistry (or not)
         Switch chemistry_;
 
-        //- The reactions
+        //- List of reactions
         const PtrList<reaction>& reactions_;
 
-        //- thermodynamic data of the species
+        //- Thermodynamic data of the species
         const PtrList<reactionThermo>& specieThermo_;
 
-        //- The number of species
+        //- Number of species
         label Ns_;
 
-        //- The number of reactions
+        //- Number of reactions
         label Nr_;
 
-        //- chemistry solver
+        //- Chemistry solver
         autoPtr<chemistrySolver> solver_;
 
-        //- the chemical source term
+        //- Chemical source term
         PtrList<scalarField> RR_;
 
         //- Latest estimation of integration step
@@ -103,6 +108,7 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const chemistryModel&);
+
 
 protected:
 
@@ -147,7 +153,7 @@ public:
             return thermo_;
         }
 
-        //- Access the fractions of the species
+        //- Access the mass fractions of the species
         const PtrList<volScalarField>& Y() const
         {
             return Y_;

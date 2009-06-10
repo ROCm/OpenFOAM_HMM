@@ -24,38 +24,70 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicMixture.H"
+#include "homogeneousMixture.H"
 #include "fvMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(basicMixture, 0);
+template<class ThermoType>
+const char* Foam::homogeneousMixture<ThermoType>::specieNames_[1] = {"b"};
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-basicMixture::basicMixture
+template<class ThermoType>
+Foam::homogeneousMixture<ThermoType>::homogeneousMixture
 (
-    const dictionary&,
-    const fvMesh&
+    const dictionary& thermoDict,
+    const fvMesh& mesh
 )
+:
+    basicMultiComponentMixture
+    (
+        thermoDict,
+        speciesTable(nSpecies_, specieNames_),
+        mesh
+    ),
+
+    reactants_(thermoDict.lookup("reactants")),
+    products_(thermoDict.lookup("products")),
+    mixture_("mixture", reactants_),
+    b_(Y("b"))
 {}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-basicMixture::~basicMixture()
-{}
+template<class ThermoType>
+const ThermoType& Foam::homogeneousMixture<ThermoType>::mixture
+(
+    const scalar b
+) const
+{
+    if (b > 0.999)
+    {
+        return reactants_;
+    }
+    else if (b < 0.001)
+    {
+        return products_;
+    }
+    else
+    {
+        mixture_ = b/reactants_.W()*reactants_;
+        mixture_ += (1 - b)/products_.W()*products_;
+
+        return mixture_;
+    }
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class ThermoType>
+void Foam::homogeneousMixture<ThermoType>::read(const dictionary& thermoDict)
+{
+    reactants_ = ThermoType(thermoDict.lookup("reactants"));
+    products_ = ThermoType(thermoDict.lookup("products"));
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Selection function for internal energy based thermodynamics package.
+    Selection function for 'basic' thermodynamics package.
 
 \*---------------------------------------------------------------------------*/
 
@@ -32,12 +32,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-autoPtr<basicThermo> basicThermo::New(const fvMesh& mesh)
+Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New(const fvMesh& mesh)
 {
     word basicThermoTypeName;
 
@@ -68,19 +63,14 @@ autoPtr<basicThermo> basicThermo::New(const fvMesh& mesh)
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
         FatalErrorIn("basicThermo::New(const fvMesh&)")
-            << "Unknown basicThermo type " << basicThermoTypeName
-            << endl << endl
-            << "Valid basicThermo types are :" << endl
-            << fvMeshConstructorTablePtr_->toc()
+            << "Unknown basicThermo type " << basicThermoTypeName << nl << nl
+            << "Valid basicThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->toc() << nl
             << exit(FatalError);
     }
 
     return autoPtr<basicThermo>(cstrIter()(mesh));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

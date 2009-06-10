@@ -22,15 +22,13 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Mixture instantiation
-
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
+#include "hCombustionThermo.H"
+#include "hMixtureThermo.H"
 
-#include "basicMixture.H"
-#include "makeBasicMixture.H"
+#include "makeCombustionThermo.H"
+#include "addToRunTimeSelectionTable.H"
 
 #include "perfectGas.H"
 
@@ -41,40 +39,124 @@ Description
 #include "constTransport.H"
 #include "sutherlandTransport.H"
 
-#include "pureMixture.H"
+#include "homogeneousMixture.H"
+#include "inhomogeneousMixture.H"
+#include "veryInhomogeneousMixture.H"
+#include "dieselMixture.H"
+#include "multiComponentMixture.H"
+#include "reactingMixture.H"
 
-#include "addToRunTimeSelectionTable.H"
+#include "transportTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makeBasicMixture
+makeCombustionThermo
 (
-    pureMixture,
+    hCombustionThermo,
+    hMixtureThermo,
+    homogeneousMixture,
     constTransport,
     hConstThermo,
     perfectGas
 );
 
-makeBasicMixture
+makeCombustionThermo
 (
-    pureMixture,
-    sutherlandTransport,
+    hCombustionThermo,
+    hMixtureThermo,
+    inhomogeneousMixture,
+    constTransport,
     hConstThermo,
     perfectGas
 );
 
-makeBasicMixture
+makeCombustionThermo
 (
-    pureMixture,
+    hCombustionThermo,
+    hMixtureThermo,
+    veryInhomogeneousMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hMixtureThermo,
+    homogeneousMixture,
     sutherlandTransport,
     janafThermo,
     perfectGas
 );
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hMixtureThermo,
+    inhomogeneousMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hMixtureThermo,
+    veryInhomogeneousMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hMixtureThermo,
+    dieselMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+makeCombustionThermo
+(
+    hCombustionThermo,
+    hMixtureThermo,
+    multiComponentMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+
+// Multi-component thermo
+
+makeCombustionMixtureThermo
+(
+    hCombustionThermo,
+    hMixtureThermo,
+    multiComponentMixture,
+    gasTransport
+);
+
+
+// Multi-component reaction thermo
+
+makeCombustionMixtureThermo
+(
+    hCombustionThermo,
+    hMixtureThermo,
+    reactingMixture,
+    gasTransport
+);
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

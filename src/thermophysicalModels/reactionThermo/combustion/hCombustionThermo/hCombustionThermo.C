@@ -24,38 +24,44 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicMixture.H"
+#include "hCombustionThermo.H"
 #include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(basicMixture, 0);
+    defineTypeNameAndDebug(hCombustionThermo, 0);
+    defineRunTimeSelectionTable(hCombustionThermo, fvMesh);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-basicMixture::basicMixture
-(
-    const dictionary&,
-    const fvMesh&
-)
+Foam::hCombustionThermo::hCombustionThermo(const fvMesh& mesh)
+:
+    basicPsiThermo(mesh),
+
+    h_
+    (
+        IOobject
+        (
+            "h",
+            mesh.time().timeName(),
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh,
+        dimensionSet(0, 2, -2, 0, 0),
+        this->hBoundaryTypes()
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-basicMixture::~basicMixture()
+Foam::hCombustionThermo::~hCombustionThermo()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

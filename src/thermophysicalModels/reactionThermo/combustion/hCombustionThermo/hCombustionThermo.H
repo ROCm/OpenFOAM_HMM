@@ -23,50 +23,110 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::basicMixture
+    Foam::hCombustionThermo
 
 Description
-    Foam::basicMixture
+    Foam::hCombustionThermo
 
 SourceFiles
-    basicMixture.C
+    hCombustionThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef basicMixture_H
-#define basicMixture_H
+#ifndef hCombustionThermo_H
+#define hCombustionThermo_H
 
-#include "typeInfo.H"
+#include "basicPsiThermo.H"
+#include "basicMultiComponentMixture.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-class fvMesh;
-class dictionary;
-
 /*---------------------------------------------------------------------------*\
-                        Class basicMixture Declaration
+                     Class hCombustionThermo Declaration
 \*---------------------------------------------------------------------------*/
 
-class basicMixture
+class hCombustionThermo
+:
+    public basicPsiThermo
 {
+
+protected:
+
+    // Protected data
+
+        //- Enthalpy field
+        volScalarField h_;
+
 
 public:
 
-    // Runtime type information
-    TypeName("basicMixture");
+    //- Runtime type information
+    TypeName("hCombustionThermo");
+
+
+    //- Declare run-time constructor selection tables
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        hCombustionThermo,
+        fvMesh,
+        (const fvMesh& mesh),
+        (mesh)
+    );
 
 
     // Constructors
 
         //- Construct from dictionary and mesh
-        basicMixture(const dictionary&, const fvMesh&);
+        hCombustionThermo(const fvMesh&);
+
+
+    //- Selector
+    static autoPtr<hCombustionThermo> New(const fvMesh&);
 
 
     //- Destructor
-    virtual ~basicMixture();
+    virtual ~hCombustionThermo();
+
+
+    // Member functions
+
+        //- Return the composition of the multi-component mixture
+        virtual basicMultiComponentMixture& composition() = 0;
+
+        //- Return the composition of the multi-component mixture
+        virtual const basicMultiComponentMixture& composition() const = 0;
+
+
+        // Access to thermodynamic state variables
+
+            //- Enthalpy [J/kg]
+            //  Non-const access allowed for transport equations
+            virtual volScalarField& h()
+            {
+                return h_;
+            }
+
+            //- Enthalpy [J/kg]
+            virtual const volScalarField& h() const
+            {
+                return h_;
+            }
+
+
+        //- Sensible enthalpy [J/kg]
+        virtual tmp<volScalarField> hs() const = 0;
+
+        //- Chemical enthalpy [J/kg]
+        virtual tmp<volScalarField> hc() const = 0;
+
+        //- Update properties
+        virtual void correct() = 0;
 };
 
 

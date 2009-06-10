@@ -26,6 +26,7 @@ InClass
     Foam::basicThermo
 
 Description
+    Macros for creating 'basic' thermo packages
 
 \*---------------------------------------------------------------------------*/
 
@@ -33,6 +34,7 @@ Description
 #define makeBasicThermo_H
 
 #include "basicThermo.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,9 +44,12 @@ typedef Cthermo<Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >     \
     Cthermo##Mixture##Transport##Thermo##EqnOfState;                          \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
-    (Cthermo##Mixture##Transport##Thermo##EqnOfState,                         \
+(                                                                             \
+    Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
     #Cthermo                                                                  \
-    "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", 0); \
+        "<"#Mixture"<"#Transport"<specieThermo<"#Thermo"<"#EqnOfState">>>>>", \
+    0                                                                         \
+);                                                                            \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \

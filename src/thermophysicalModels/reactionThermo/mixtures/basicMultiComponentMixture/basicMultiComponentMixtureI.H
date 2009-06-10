@@ -24,38 +24,80 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicMixture.H"
-#include "fvMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+inline Foam::PtrList<Foam::volScalarField>&
+Foam::basicMultiComponentMixture::Y()
 {
+    return Y_;
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(basicMixture, 0);
+inline const Foam::PtrList<Foam::volScalarField>&
+Foam::basicMultiComponentMixture::Y() const
+{
+    return Y_;
+}
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-basicMixture::basicMixture
+inline Foam::volScalarField& Foam::basicMultiComponentMixture::Y(const label i)
+{
+    return Y_[i];
+}
+
+
+inline const Foam::volScalarField& Foam::basicMultiComponentMixture::Y
 (
-    const dictionary&,
-    const fvMesh&
+    const label i
+) const
+{
+    return Y_[i];
+}
+
+
+inline Foam::volScalarField& Foam::basicMultiComponentMixture::Y
+(
+    const word& specieName
 )
-{}
+{
+    return Y_[species_[specieName]];
+}
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+inline const Foam::volScalarField& Foam::basicMultiComponentMixture::Y
+(
+    const word& specieName
+) const
+{
+    return Y_[species_[specieName]];
+}
 
-basicMixture::~basicMixture()
-{}
+
+inline bool Foam::basicMultiComponentMixture::contains
+(
+    const word& specieName
+) const
+{
+    return species_.contains(specieName);
+}
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+inline Foam::scalar Foam::basicMultiComponentMixture::fres
+(
+    const scalar ft,
+    const scalar stoicRatio
+) const
+{
+    return max(ft - (1.0 - ft)/stoicRatio, 0.0);
+}
 
-} // End namespace Foam
+
+inline Foam::tmp<Foam::volScalarField> Foam::basicMultiComponentMixture::fres
+(
+    const volScalarField& ft,
+    const dimensionedScalar& stoicRatio
+) const
+{
+    return max(ft - (scalar(1) - ft)/stoicRatio.value(), scalar(0));
+}
+
 
 // ************************************************************************* //

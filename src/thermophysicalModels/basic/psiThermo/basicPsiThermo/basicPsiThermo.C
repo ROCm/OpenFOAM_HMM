@@ -24,38 +24,28 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicMixture.H"
-#include "fvMesh.H"
+#include "basicPsiThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(basicPsiThermo, 0);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(basicMixture, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-basicMixture::basicMixture
-(
-    const dictionary&,
-    const fvMesh&
-)
+Foam::basicPsiThermo::basicPsiThermo(const fvMesh& mesh)
+:
+    basicThermo(mesh)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-basicMixture::~basicMixture()
+Foam::basicPsiThermo::~basicPsiThermo()
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
