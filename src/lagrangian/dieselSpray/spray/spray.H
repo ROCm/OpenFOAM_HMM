@@ -58,7 +58,7 @@ class injectorModel;
 class heatTransferModel;
 class wallModel;
 
-class combustionMixture;
+class basicMultiComponentMixture;
 
 /*---------------------------------------------------------------------------*\
                         Class spray Declaration
@@ -128,7 +128,7 @@ class spray
         // Composition properties
 
             const PtrList<specieProperties>& gasProperties_;
-            const combustionMixture& composition_;
+            const basicMultiComponentMixture& composition_;
 
             List<label> liquidToGasIndex_;
             List<label> gasToLiquidIndex_;
@@ -192,7 +192,7 @@ public:
             const volScalarField& rho,
             const volScalarField& p,
             const volScalarField& T,
-            const combustionMixture& composition,
+            const basicMultiComponentMixture& composition,
             const PtrList<specieProperties>& gasProperties,
             const dictionary& thermophysicalProperties,
             const dictionary& environmentalProperties
@@ -258,7 +258,7 @@ public:
 
             inline const liquidMixture& fuels() const;
             inline const PtrList<specieProperties>& gasProperties() const;
-            inline const combustionMixture& composition() const;
+            inline const basicMultiComponentMixture& composition() const;
 
             inline const List<label>& liquidToGasIndex() const;
             inline const List<label>& gasToLiquidIndex() const;

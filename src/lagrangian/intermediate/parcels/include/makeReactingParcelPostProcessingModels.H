@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "KinematicCloud.H"
 
 #include "NoPostProcessing.H"
@@ -42,13 +42,13 @@ License
     makeReactingPostProcessingModelThermoType                                 \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
                                                                               \
     makeReactingPostProcessingModelThermoType                                 \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
     );
 
 

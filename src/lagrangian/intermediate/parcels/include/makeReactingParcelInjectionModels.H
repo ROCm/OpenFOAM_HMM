@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "KinematicCloud.H"
 
 #include "ConeInjection.H"
@@ -46,13 +46,13 @@ License
     makeReactingInjectionModelThermoType                                      \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
                                                                               \
     makeReactingInjectionModelThermoType                                      \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
     );
 
 

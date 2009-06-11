@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "ReactingMultiphaseCloud.H"
 
 #include "NoSurfaceReaction.H"
@@ -41,12 +41,12 @@ License
     makeReactingMultiphaseSurfaceReactionModelThermoType                      \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
     makeReactingMultiphaseSurfaceReactionModelThermoType                      \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
     );
 
 

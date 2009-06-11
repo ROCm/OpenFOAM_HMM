@@ -36,12 +36,12 @@ License
     createTrackedReactingParcelThermoType                                     \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
     createTrackedReactingParcelThermoType                                     \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
     );
 
 

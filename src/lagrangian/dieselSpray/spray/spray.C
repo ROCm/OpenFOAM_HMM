@@ -36,7 +36,7 @@ License
 #include "injectorModel.H"
 #include "wallModel.H"
 
-#include "combustionMixture.H"
+#include "basicMultiComponentMixture.H"
 
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
@@ -56,7 +56,7 @@ Foam::spray::spray
     const volScalarField& rho,
     const volScalarField& p,
     const volScalarField& T,
-    const combustionMixture& composition,
+    const basicMultiComponentMixture& composition,
     const PtrList<specieProperties>& gasProperties,
     const dictionary&,
     const dictionary& environmentalProperties

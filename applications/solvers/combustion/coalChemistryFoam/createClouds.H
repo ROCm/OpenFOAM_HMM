@@ -1,11 +1,11 @@
 Info<< "\nConstructing coal cloud" << endl;
-CoalCloud<specieReactingProperties> coalParcels
+CoalCloud<gasThermoPhysics> coalParcels
 (
     "coalCloud1",
     rho,
     U,
     g,
-    thermo()
+    thermo
 );
 
 Info<< "\nConstructing limestone cloud" << endl;
@@ -15,5 +15,5 @@ basicThermoCloud limestoneParcels
     rho,
     U,
     g,
-    thermo()
+    thermo
 );

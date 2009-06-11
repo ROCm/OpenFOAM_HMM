@@ -28,7 +28,7 @@ License
 #define createCoalParcelTypes_H
 
 #include "makeParcelIOList.H"
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "CoalCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,12 +38,12 @@ License
     createCoalParcelThermoType                                                \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
     createCoalParcelThermoType                                                \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
     );
 
 

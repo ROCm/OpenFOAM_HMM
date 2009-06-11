@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "ReactingMultiphaseCloud.H"
 
 #include "ConstantRateDevolatilisation.H"
@@ -43,12 +43,12 @@ License
     makeReactingMultiphaseDevolatilisationModelThermoType                     \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
     makeReactingMultiphaseDevolatilisationModelThermoType                     \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
     );
 
 

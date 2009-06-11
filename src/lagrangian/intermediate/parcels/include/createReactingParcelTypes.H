@@ -28,14 +28,14 @@ License
 #define createReactingParcelTypes_H
 
 #include "makeParcelIOList.H"
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define createReactingParcelType(ParcelType)                                  \
                                                                               \
-    createReactingParcelThermoType(ParcelType, specieConstProperties);        \
-    createReactingParcelThermoType(ParcelType, specieReactingProperties);
+    createReactingParcelThermoType(ParcelType, constGasThermoPhysics);        \
+    createReactingParcelThermoType(ParcelType, gasThermoPhysics);
 
 
 #define createReactingParcelThermoType(ParcelType, ThermoType)                \
