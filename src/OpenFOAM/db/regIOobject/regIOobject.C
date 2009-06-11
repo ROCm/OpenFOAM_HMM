@@ -140,7 +140,7 @@ bool Foam::regIOobject::checkIn()
         {
             WarningIn("regIOobject::checkIn()")
                 << "failed to register object " << objectPath()
-                    << " the name already exists in the objectRegistry"
+                << " the name already exists in the objectRegistry"
                 << endl;
         }
     }
