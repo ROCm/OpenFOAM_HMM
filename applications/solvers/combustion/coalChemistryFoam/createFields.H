@@ -1,19 +1,30 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<hCombustionThermo> thermo
+    autoPtr<psiChemistryModel> pChemistry
     (
-        hCombustionThermo::New(mesh)
+        psiChemistryModel::New(mesh)
     );
+    psiChemistryModel& chemistry = pChemistry();
 
-    combustionMixture& composition = thermo->composition();
+    hCombustionThermo& thermo = chemistry.thermo();
+
+    basicMultiComponentMixture& composition = thermo.composition();
     PtrList<volScalarField>& Y = composition.Y();
 
-    word inertSpecie(thermo->lookup("inertSpecie"));
+    word inertSpecie(thermo.lookup("inertSpecie"));
 
-    volScalarField& p = thermo->p();
-    volScalarField& h = thermo->h();
-    const volScalarField& T = thermo->T();
-    const volScalarField& psi = thermo->psi();
+    volScalarField& p = thermo.p();
+    volScalarField& h = thermo.h();
+    const volScalarField& T = thermo.T();
+    const volScalarField& psi = thermo.psi();
+
+    multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
+
+    forAll (Y, i)
+    {
+        fields.add(Y[i]);
+    }
+    fields.add(h);
 
     volScalarField rho
     (
@@ -25,7 +36,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        thermo->rho()
+        thermo.rho()
     );
 
     // lagrangian effective density field - used externally (optional)
@@ -97,7 +108,7 @@
             rho,
             U,
             phi,
-            thermo()
+            thermo
         )
     );
 
@@ -112,18 +123,3 @@
         mesh,
         h.dimensions()*phi.dimensions()/mesh.V().dimensions()
     );
-
-    Info << "Constructing chemical mechanism" << endl;
-    chemistryModel chemistry
-    (
-        thermo(),
-        rho
-    );
-
-    multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
-
-    forAll (Y, i)
-    {
-        fields.add(Y[i]);
-    }
-    fields.add(h);

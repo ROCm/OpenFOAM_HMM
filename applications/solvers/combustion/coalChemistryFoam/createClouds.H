@@ -17,15 +17,15 @@ forAll(gasProperties, i)
     );
 }
 */
-PtrList<specieReactingProperties> gasProperties(Y.size());
+PtrList<gasThermoPhysics> gasProperties(Y.size());
 forAll(gasProperties, i)
 {
     gasProperties.set
     (
         i,
-        new specieReactingProperties
+        new gasThermoPhysics
         (
-            dynamic_cast<const reactingMixture&>(thermo()).speciesData()[i]
+            dynamic_cast<const reactingMixture<gasThermoPhysics>&>(thermo).speciesData()[i]
         )
     );
 }
@@ -37,7 +37,7 @@ coalCloud coalParcels
     rho,
     U,
     g,
-    thermo(),
+    thermo,
     gasProperties
 );
 
@@ -48,5 +48,5 @@ basicThermoCloud limestoneParcels
     rho,
     U,
     g,
-    thermo()
+    thermo
 );

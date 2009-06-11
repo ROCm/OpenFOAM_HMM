@@ -36,9 +36,10 @@ Description
 #include "turbulenceModel.H"
 #include "basicThermoCloud.H"
 #include "coalCloud.H"
-#include "chemistryModel.H"
+#include "psiChemistryModel.H"
 #include "chemistrySolver.H"
-#include "ReactingCloudThermoTypes.H"
+#include "thermoPhysicsTypes.H"
+//#include "ReactingCloudThermoTypes.H"
 #include "timeActivatedExplicitSource.H"
 #include "radiationModel.H"
 
@@ -115,12 +116,9 @@ int main(int argc, char *argv[])
 
         enthalpySource.update();
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
-        if (runTime.write())
-        {
-            #include "additionalOutput.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

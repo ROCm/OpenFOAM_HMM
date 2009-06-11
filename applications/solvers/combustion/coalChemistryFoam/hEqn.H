@@ -9,14 +9,14 @@
      +  coalParcels.Sh()
      +  limestoneParcels.Sh()
      +  enthalpySource.Su()
-     +  radiation->Sh(thermo())
+     +  radiation->Sh(thermo)
     );
 
     hEqn.relax();
 
     hEqn.solve();
 
-    thermo->correct();
+    thermo.correct();
 
     radiation->correct();
 }

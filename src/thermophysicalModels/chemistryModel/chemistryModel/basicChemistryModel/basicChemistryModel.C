@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,13 @@ License
 #include "basicChemistryModel.H"
 #include "fvMesh.H"
 #include "Time.H"
+
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+
+namespace Foam
+{
+    defineTypeNameAndDebug(basicChemistryModel, 0);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
