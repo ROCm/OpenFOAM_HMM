@@ -23,31 +23,31 @@ boundaryField
 {
     front
     {
-        type            epsilonWallFunction;
-        value           uniform 0;
+        type            compressible::epsilonWallFunction;
+        value           uniform 200;
     }
 
     back
     {
-        type            epsilonWallFunction;
-        value           uniform 0;
+        type            compressible::epsilonWallFunction;
+        value           uniform 200;
     }
 
     wall
     {
-        type            epsilonWallFunction;
-        value           uniform 0;
+        type            compressible::epsilonWallFunction;
+        value           uniform 200;
     }
 
     porosityWall
     {
-        type            epsilonWallFunction;
-        value           uniform 0;
+        type            compressible::epsilonWallFunction;
+        value           uniform 200;
     }
 
     inlet
     {
-        type            turbulentMixingLengthDissipationRateInlet;
+        type            compressible::turbulentMixingLengthDissipationRateInlet;
         mixingLength    0.005;
         value           uniform 200;
     }

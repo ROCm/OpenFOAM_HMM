@@ -243,19 +243,35 @@ protected:
             const vector& U,           // velocity
             const scalar rho,          // density
             const scalar mass,         // mass
-            const vector& Fx           // additional forces
+            const vector& Su,          // explicit particle momentum source
+            vector& dUTrans            // momentum transfer to carrier
         ) const;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("KinematicParcel");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("KinematicParcel");
+
 
     friend class Cloud<ParcelType>;
 
 
     // Constructors
+
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        inline KinematicParcel
+        (
+            KinematicCloud<ParcelType>& owner,
+            const vector& position,
+            const label cellI
+        );
 
         //- Construct from components
         inline KinematicParcel
@@ -278,10 +294,13 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        KinematicParcel(const KinematicParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<KinematicParcel> clone() const
         {
-            return autoPtr<ParcelType>(new KinematicParcel<ParcelType>(*this));
+            return autoPtr<KinematicParcel>(new KinematicParcel(*this));
         }
 
 
@@ -409,6 +428,27 @@ public:
 
         // Patch interactions
 
+            //- Overridable function to handle the particle hitting a patch
+            //  Executed before other patch-hitting functions
+            template<class TrackData>
+            bool hitPatch
+            (
+                const polyPatch& p,
+                TrackData& td,
+                const label patchI
+            );
+
+
+            //- Overridable function to handle the particle hitting a patch
+            //  Executed before other patch-hitting functions without trackData
+            bool hitPatch
+            (
+                const polyPatch& p,
+                int& td,
+                const label patchI
+            );
+
+
             //- Overridable function to handle the particle hitting a
             //  processorPatch
             template<class TrackData>
@@ -472,7 +512,7 @@ public:
             //- Read
             static void readFields(KinematicCloud<ParcelType>& c);
 
-            //- write
+            //- Write
             static void writeFields(const KinematicCloud<ParcelType>& c);
 
 

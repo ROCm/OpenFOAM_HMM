@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,19 +38,23 @@ Description
 #define COxidationDiffusionLimitedRate_H
 
 #include "SurfaceReactionModel.H"
-#include "coalParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// Forward class declarations
+template<class CloudType>
+class COxidationDiffusionLimitedRate;
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                  Class COxidationDiffusionLimitedRate Declaration
+              Class COxidationDiffusionLimitedRate Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class CloudType>
 class COxidationDiffusionLimitedRate
 :
-    public SurfaceReactionModel<ReactingMultiphaseCloud<coalParcel> >
+    public SurfaceReactionModel<CloudType>
 {
     // Private data
 
@@ -99,7 +103,7 @@ public:
         COxidationDiffusionLimitedRate
         (
             const dictionary& dict,
-            ReactingMultiphaseCloud<coalParcel>& owner
+            CloudType& owner
         );
 
 
@@ -139,6 +143,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "COxidationDiffusionLimitedRate.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

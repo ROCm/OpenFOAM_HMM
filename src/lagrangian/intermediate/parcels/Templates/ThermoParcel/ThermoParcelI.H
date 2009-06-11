@@ -75,6 +75,22 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
 (
     ThermoCloud<ParcelType>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    KinematicParcel<ParcelType>(owner, position, cellI),
+    T_(0.0),
+    cp_(0.0),
+    Tc_(0.0),
+    cpc_(0.0)
+{}
+
+
+template<class ParcelType>
+inline Foam::ThermoParcel<ParcelType>::ThermoParcel
+(
+    ThermoCloud<ParcelType>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

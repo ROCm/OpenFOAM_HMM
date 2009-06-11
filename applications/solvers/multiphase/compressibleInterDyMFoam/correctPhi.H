@@ -12,7 +12,7 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("pcorr", pd.dimensions(), 0.0),
+        dimensionedScalar("pcorr", p.dimensions(), 0.0),
         pcorrTypes
     );
 

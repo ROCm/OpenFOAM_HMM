@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,16 @@ License
 
 #include "ReactingMultiphaseParcel.H"
 #include "IOstreams.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::string Foam::ReactingMultiphaseParcel<ParcelType>::propHeader =
+    ReactingParcel<ParcelType>::propHeader
+  + " nGas(Y1..YN)"
+  + " nLiquid(Y1..YN)"
+  + " nSolid(Y1..YN)";
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

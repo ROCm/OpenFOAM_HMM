@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,6 @@ Description
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "thermoPhysicsTypes.H"
-//#include "ReactingCloudThermoTypes.H"
 #include "timeActivatedExplicitSource.H"
 #include "radiationModel.H"
 
@@ -114,9 +113,7 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        enthalpySource.update();
-
-        rho = thermo.rho();
+        rho = thermo->rho();
 
         runTime.write();
 

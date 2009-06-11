@@ -170,7 +170,20 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(bb)
-{}
+{
+    if (!contains(midpoint()))
+    {
+        FatalErrorIn
+        (
+            "Foam::searchableBox::searchableBox\n"
+            "(\n"
+            "    const IOobject& io,\n"
+            "    const treeBoundBox& bb\n"
+            ")\n"
+        )   << "Illegal bounding box specification : "
+            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+    }
+}
 
 
 Foam::searchableBox::searchableBox
@@ -181,7 +194,20 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(dict.lookup("min"), dict.lookup("max"))
-{}
+{
+    if (!contains(midpoint()))
+    {
+        FatalErrorIn
+        (
+            "Foam::searchableBox::searchableBox\n"
+            "(\n"
+            "    const IOobject& io,\n"
+            "    const treeBoundBox& bb\n"
+            ")\n"
+        )   << "Illegal bounding box specification : "
+            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

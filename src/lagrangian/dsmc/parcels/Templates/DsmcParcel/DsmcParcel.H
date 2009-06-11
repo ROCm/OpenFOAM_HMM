@@ -239,6 +239,16 @@ public:
 
         // Patch interactions
 
+            //- Overridable function to handle the particle hitting a patch
+            //  Executed before other patch-hitting functions
+            template<class TrackData>
+            bool hitPatch
+            (
+                const polyPatch&,
+                TrackData& td,
+                const label patchI
+            );
+
             //- Overridable function to handle the particle hitting a
             //  processorPatch
             template<class TrackData>

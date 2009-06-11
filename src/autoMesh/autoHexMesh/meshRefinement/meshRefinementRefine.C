@@ -1232,6 +1232,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
         mesh_.clearOut();
     }
 
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
+
     // Update intersection info
     updateMesh(map, getChangedFaces(map, cellsToRefine));
 
@@ -1256,12 +1261,12 @@ Foam::meshRefinement::refineAndBalance
     if (debug)
     {
         Pout<< "Writing refined but unbalanced " << msg
-            << " mesh to time " << mesh_.time().timeName() << endl;
+            << " mesh to time " << timeName() << endl;
         write
         (
             debug,
             mesh_.time().path()
-           /mesh_.time().timeName()
+           /timeName()
         );
         Pout<< "Dumped debug data in = "
             << mesh_.time().cpuTimeIncrement() << " s" << endl;
@@ -1299,12 +1304,11 @@ Foam::meshRefinement::refineAndBalance
         if (debug)
         {
             Pout<< "Writing balanced " << msg
-                << " mesh to time " << mesh_.time().timeName() << endl;
+                << " mesh to time " << timeName() << endl;
             write
             (
                 debug,
-                mesh_.time().path()
-               /mesh_.time().timeName()
+                mesh_.time().path()/timeName()
             );
             Pout<< "Dumped debug data in = "
                 << mesh_.time().cpuTimeIncrement() << " s" << endl;

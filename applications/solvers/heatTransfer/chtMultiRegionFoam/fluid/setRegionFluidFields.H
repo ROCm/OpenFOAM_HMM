@@ -7,12 +7,15 @@
     surfaceScalarField& phi = phiFluid[i];
     compressible::turbulenceModel& turb = turbulence[i];
     volScalarField& DpDt = DpDtFluid[i];
-    const volScalarField& gh = ghFluid[i];
-    const surfaceScalarField& ghf = ghfFluid[i];
-    volScalarField& pd = pdFluid[i];
 
     volScalarField& p = thermo.p();
     const volScalarField& psi = thermo.psi();
     volScalarField& h = thermo.h();
 
     const dimensionedScalar massIni("massIni", dimMass, initialMassFluid[i]);
+
+    const dictionary& environmentalProperties =
+        fluidRegions[i].lookupObject<IOdictionary>
+        ("environmentalProperties");
+
+    const dimensionedVector g(environmentalProperties.lookup("g"));

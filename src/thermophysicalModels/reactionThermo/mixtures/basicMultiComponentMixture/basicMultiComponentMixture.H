@@ -89,6 +89,12 @@ public:
 
     // Member functions
 
+        //- Return the table of species
+        const speciesTable& species() const
+        {
+            return species_;
+        }
+
         //- Return the mass-fraction fields
         inline PtrList<volScalarField>& Y();
 
