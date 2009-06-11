@@ -24,11 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "makeCombustionThermo.H"
+
 #include "hCombustionThermo.H"
 #include "hPsiMixtureThermo.H"
-
-#include "makeCombustionThermo.H"
-#include "addToRunTimeSelectionTable.H"
 
 #include "perfectGas.H"
 

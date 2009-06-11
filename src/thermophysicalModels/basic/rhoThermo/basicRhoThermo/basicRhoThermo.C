@@ -31,6 +31,7 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(basicRhoThermo, 0);
+    defineRunTimeSelectionTable(basicRhoThermo, fvMesh);
 }
 
 

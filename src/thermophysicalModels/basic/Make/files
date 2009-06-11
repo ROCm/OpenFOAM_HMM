@@ -2,13 +2,14 @@ mixtures/basicMixture/basicMixture.C
 mixtures/basicMixture/basicMixtures.C
 
 basicThermo/basicThermo.C
-basicThermo/newBasicThermo.C
 
 psiThermo/basicPsiThermo/basicPsiThermo.C
+psiThermo/basicPsiThermo/newBasicPsiThermo.C
 psiThermo/hPsiThermo/hPsiThermos.C
 psiThermo/ePsiThermo/ePsiThermos.C
 
 rhoThermo/basicRhoThermo/basicRhoThermo.C
+rhoThermo/basicRhoThermo/newBasicRhoThermo.C
 rhoThermo/hRhoThermo/hRhoThermos.C
 
 derivedFvPatchFields/fixedEnthalpy/fixedEnthalpyFvPatchScalarField.C

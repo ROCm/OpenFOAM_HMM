@@ -23,18 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Selection function for 'basic' thermodynamics package.
+    Selection function for 'basic' density-based thermodynamics
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermo.H"
-#include "fvMesh.H"
+#include "basicRhoThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New(const fvMesh& mesh)
+Foam::autoPtr<Foam::basicRhoThermo> Foam::basicRhoThermo::New
+(
+    const fvMesh& mesh
+)
 {
-    word basicThermoTypeName;
+    word thermoTypeName;
 
     // Enclose the creation of the thermophysicalProperties to ensure it is
     // deleted before the turbulenceModel is created otherwise the dictionary
@@ -52,24 +54,24 @@ Foam::autoPtr<Foam::basicThermo> Foam::basicThermo::New(const fvMesh& mesh)
             )
         );
 
-        thermoDict.lookup("thermoType") >> basicThermoTypeName;
+        thermoDict.lookup("thermoType") >> thermoTypeName;
     }
 
-    Info<< "Selecting thermodynamics package " << basicThermoTypeName << endl;
+    Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(basicThermoTypeName);
+        fvMeshConstructorTablePtr_->find(thermoTypeName);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
-        FatalErrorIn("basicThermo::New(const fvMesh&)")
-            << "Unknown basicThermo type " << basicThermoTypeName << nl << nl
-            << "Valid basicThermo types are:" << nl
+        FatalErrorIn("basicRhoThermo::New(const fvMesh&)")
+            << "Unknown basicRhoThermo type " << thermoTypeName << nl << nl
+            << "Valid basicRhoThermo types are:" << nl
             << fvMeshConstructorTablePtr_->toc() << nl
             << exit(FatalError);
     }
 
-    return autoPtr<basicThermo>(cstrIter()(mesh));
+    return autoPtr<basicRhoThermo>(cstrIter()(mesh));
 }
 
 

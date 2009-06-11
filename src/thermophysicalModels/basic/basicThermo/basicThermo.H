@@ -41,7 +41,6 @@ SourceFiles
 #include "typeInfo.H"
 #include "IOdictionary.H"
 #include "autoPtr.H"
-#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -111,25 +110,10 @@ public:
     TypeName("basicThermo");
 
 
-    //- Declare run-time constructor selection table
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        basicThermo,
-        fvMesh,
-        (const fvMesh& mesh),
-        (mesh)
-    );
-
-
     // Constructors
 
         //- Construct from mesh
         basicThermo(const fvMesh&);
-
-
-    //- Selector
-    static autoPtr<basicThermo> New(const fvMesh&);
 
 
     //- Destructor

@@ -23,22 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InClass
-    Foam::basicThermo
+    Foam::basicPsiThermo
 
 Description
-    Macros for creating 'basic' thermo packages
+    Macros for creating 'basic' compresibility-based thermo packages
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeBasicThermo_H
-#define makeBasicThermo_H
+#ifndef makeBasicPsiThermo_H
+#define makeBasicPsiThermo_H
 
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBasicThermo(Cthermo,Mixture,Transport,Thermo,EqnOfState)          \
+#define makeBasicPsiThermo(Cthermo,Mixture,Transport,Thermo,EqnOfState)       \
                                                                               \
 typedef Cthermo<Mixture<Transport<specieThermo<Thermo<EqnOfState> > > > >     \
     Cthermo##Mixture##Transport##Thermo##EqnOfState;                          \
@@ -53,10 +53,11 @@ defineTemplateTypeNameAndDebugWithName                                        \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicThermo,                                                              \
+    basicPsiThermo,                                                           \
     Cthermo##Mixture##Transport##Thermo##EqnOfState,                          \
     fvMesh                                                                    \
 )
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

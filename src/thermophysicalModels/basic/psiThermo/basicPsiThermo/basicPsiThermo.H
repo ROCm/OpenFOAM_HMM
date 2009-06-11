@@ -26,10 +26,11 @@ Class
     Foam::basicPsiThermo
 
 Description
-    Basic thermodynamic properties based in compressibility
+    Basic thermodynamic properties based on compressibility
 
 SourceFiles
-    basicRhoThermo.C
+    basicPsiThermo.C
+    newBasicPsiThermo.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,6 +38,7 @@ SourceFiles
 #define basicPsiThermo_H
 
 #include "basicThermo.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,11 +68,24 @@ public:
     TypeName("basicPsiThermo");
 
 
+    //- Declare run-time constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        basicPsiThermo,
+        fvMesh,
+        (const fvMesh& mesh),
+        (mesh)
+    );
+
     // Constructors
 
         //- Construct from mesh
         basicPsiThermo(const fvMesh&);
 
+
+    //- Selector
+    static autoPtr<basicPsiThermo> New(const fvMesh&);
 
     //- Destructor
     virtual ~basicPsiThermo();
@@ -80,7 +95,7 @@ public:
 
         // Fields derived from thermodynamic state variables
 
-            //- Density [kg/m^3]
+            //- Density [kg/m^3] - uses current value of pressure
             virtual tmp<volScalarField> rho() const
             {
                 return p_*psi();

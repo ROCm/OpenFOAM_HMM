@@ -26,10 +26,11 @@ Class
     Foam::basicRhoThermo
 
 Description
-    Basic thermodynamic properties based in density
+    Basic thermodynamic properties based on density
 
 SourceFiles
     basicRhoThermo.C
+    newBasicRhoThermo.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -37,6 +38,7 @@ SourceFiles
 #define basicRhoThermo_H
 
 #include "basicThermo.H"
+#include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -73,10 +75,25 @@ public:
     TypeName("basicRhoThermo");
 
 
+    //- Declare run-time constructor selection table
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        basicRhoThermo,
+        fvMesh,
+        (const fvMesh& mesh),
+        (mesh)
+    );
+
+
     // Constructors
 
         //- Construct from mesh
         basicRhoThermo(const fvMesh&);
+
+
+    //- Selector
+    static autoPtr<basicRhoThermo> New(const fvMesh&);
 
 
     //- Destructor

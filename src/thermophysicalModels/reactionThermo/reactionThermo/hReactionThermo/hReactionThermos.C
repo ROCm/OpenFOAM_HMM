@@ -24,12 +24,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "makeReactionThermo.H"
+
 #include "hReactionThermo.H"
 #include "hRhoMixtureThermo.H"
 
-#include "makeReactionThermo.H"
-#include "addToRunTimeSelectionTable.H"
+#include "perfectGas.H"
 
+#include "hConstThermo.H"
+#include "janafThermo.H"
+#include "specieThermo.H"
+
+#include "constTransport.H"
+#include "sutherlandTransport.H"
+
+#include "homogeneousMixture.H"
+#include "inhomogeneousMixture.H"
+#include "veryInhomogeneousMixture.H"
+#include "dieselMixture.H"
 #include "multiComponentMixture.H"
 #include "reactingMixture.H"
 
@@ -41,6 +53,77 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+makeReactionThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    homogeneousMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeReactionThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    inhomogeneousMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeReactionThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    veryInhomogeneousMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeReactionThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    homogeneousMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+makeReactionThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    inhomogeneousMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+makeReactionThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    veryInhomogeneousMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
+makeReactionThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    dieselMixture,
+    sutherlandTransport,
+    janafThermo,
+    perfectGas
+);
+
 
 // Multi-component thermo
 

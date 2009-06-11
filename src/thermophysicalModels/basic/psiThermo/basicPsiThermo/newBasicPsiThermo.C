@@ -22,67 +22,54 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Selection function for enthalpy based thermodynamics package.
-
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
-#include "basicThermo.H"
-#include "makeBasicThermo.H"
-
-#include "perfectGas.H"
-
-#include "hConstThermo.H"
-#include "janafThermo.H"
-#include "specieThermo.H"
-
-#include "constTransport.H"
-#include "sutherlandTransport.H"
-
-#include "hThermo.H"
-#include "pureMixture.H"
-
-#include "addToRunTimeSelectionTable.H"
+#include "basicPsiThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::autoPtr<Foam::basicPsiThermo> Foam::basicPsiThermo::New
+(
+    const fvMesh& mesh
+)
 {
+    word thermoTypeName;
 
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+    // Enclose the creation of the thermophysicalProperties to ensure it is
+    // deleted before the turbulenceModel is created otherwise the dictionary
+    // is entered in the database twice
+    {
+        IOdictionary thermoDict
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
 
-makeBasicThermo
-(
-    hThermo,
-    pureMixture,
-    constTransport,
-    hConstThermo,
-    perfectGas
-);
+        thermoDict.lookup("thermoType") >> thermoTypeName;
+    }
 
-makeBasicThermo
-(
-    hThermo,
-    pureMixture,
-    sutherlandTransport,
-    hConstThermo,
-    perfectGas
-);
+    Info<< "Selecting thermodynamics package " << thermoTypeName << endl;
 
-makeBasicThermo
-(
-    hThermo,
-    pureMixture,
-    sutherlandTransport,
-    janafThermo,
-    perfectGas
-);
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(thermoTypeName);
 
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("basicPsiThermo::New(const fvMesh&)")
+            << "Unknown basicPsiThermo type " << thermoTypeName << nl << nl
+            << "Valid basicPsiThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    return autoPtr<basicPsiThermo>(cstrIter()(mesh));
+}
 
-} // End namespace Foam
 
 // ************************************************************************* //

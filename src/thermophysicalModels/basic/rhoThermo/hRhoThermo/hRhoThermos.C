@@ -22,12 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Selection function for enthalpy thermodynamics package.
-
 \*---------------------------------------------------------------------------*/
 
-#include "makeBasicThermo.H"
+#include "makeBasicRhoThermo.H"
 
 #include "perfectGas.H"
 
@@ -48,8 +45,7 @@ namespace Foam
 
 /* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
 
-
-makeBasicThermo
+makeBasicRhoThermo
 (
     hRhoThermo,
     pureMixture,
@@ -58,7 +54,7 @@ makeBasicThermo
     perfectGas
 );
 
-makeBasicThermo
+makeBasicRhoThermo
 (
     hRhoThermo,
     pureMixture,
@@ -67,7 +63,7 @@ makeBasicThermo
     perfectGas
 );
 
-makeBasicThermo
+makeBasicRhoThermo
 (
     hRhoThermo,
     pureMixture,
@@ -75,6 +71,7 @@ makeBasicThermo
     janafThermo,
     perfectGas
 );
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

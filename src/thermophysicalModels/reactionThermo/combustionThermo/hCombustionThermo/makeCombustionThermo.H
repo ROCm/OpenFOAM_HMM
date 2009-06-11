@@ -32,6 +32,9 @@ Description
 #ifndef makeCombustionThermo_H
 #define makeCombustionThermo_H
 
+#include "addToRunTimeSelectionTable.H"
+#include "basicPsiThermo.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define makeCombustionThermo(CThermo,MixtureThermo,Mixture,Transport,Thermo,EqnOfState) \
@@ -50,7 +53,7 @@ defineTemplateTypeNameAndDebugWithName                                        \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicThermo,                                                              \
+    basicPsiThermo,                                                           \
     MixtureThermo##Mixture##Transport##Thermo##EqnOfState,                    \
     fvMesh                                                                    \
 );                                                                            \
@@ -63,28 +66,29 @@ addToRunTimeSelectionTable                                                    \
 )
 
 
-#define makeCombustionMixtureThermo(CThermo,MixtureThermo,Mixture,Transport)  \
+#define makeCombustionMixtureThermo(CThermo,MixtureThermo,Mixture,ThermoPhys) \
                                                                               \
-typedef MixtureThermo<Mixture<Transport> > MixtureThermo##Mixture##Transport; \
+typedef MixtureThermo<Mixture<ThermoPhys> >                                   \
+    MixtureThermo##Mixture##ThermoPhys;                                       \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
-    MixtureThermo##Mixture##Transport,                                        \
-    #MixtureThermo"<"#Mixture"<"#Transport">>",                               \
+    MixtureThermo##Mixture##ThermoPhys,                                       \
+    #MixtureThermo"<"#Mixture"<"#ThermoPhys">>",                              \
     0                                                                         \
 );                                                                            \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    basicThermo,                                                              \
-    MixtureThermo##Mixture##Transport,                                        \
+    basicPsiThermo,                                                           \
+    MixtureThermo##Mixture##ThermoPhys,                                       \
     fvMesh                                                                    \
 );                                                                            \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
     CThermo,                                                                  \
-    MixtureThermo##Mixture##Transport,                                        \
+    MixtureThermo##Mixture##ThermoPhys,                                       \
     fvMesh                                                                    \
 );
 
