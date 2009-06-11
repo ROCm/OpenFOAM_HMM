@@ -22,24 +22,43 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InClass
-    Foam::chemistryModel
-
-Description
-    Creates chemistry model instances templated on the type of thermodynamics
-
 \*---------------------------------------------------------------------------*/
 
-#include "thermoPhysicsTypes.H"
-#include "makeChemistryModel.H"
-#include "ODEChemistryModel.H"
+#include "basicChemistryModel.H"
+#include "fvMesh.H"
+#include "Time.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
+Foam::basicChemistryModel::basicChemistryModel(const fvMesh& mesh)
+:
+    IOdictionary
+    (
+        IOobject
+        (
+            "chemistryProperties",
+            mesh.time().constant(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    mesh_(mesh),
+    chemistry_(lookup("chemistry")),
+    deltaTChem_
+    (
+        mesh.nCells(),
+        readScalar(lookup("initialChemicalTimeStep"))
+    )
 {
-    makeChemistryModel(ODEChemistryModel, gasThermoPhysics);
-    makeChemistryModel(ODEChemistryModel, icoPoly8ThermoPhysics);
+    Info<< "basicChemistryModel(const fvMesh&)" << endl;
 }
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::basicChemistryModel::~basicChemistryModel()
+{}
+
 
 // ************************************************************************* //

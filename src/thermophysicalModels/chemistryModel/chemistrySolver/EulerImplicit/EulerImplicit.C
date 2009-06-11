@@ -30,13 +30,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::EulerImplicit<ThermoType>::EulerImplicit
+template<class CompType, class ThermoType>
+Foam::EulerImplicit<CompType, ThermoType>::EulerImplicit
 (
-    ODEChemistryModel<ThermoType>& model
+    ODEChemistryModel<CompType, ThermoType>& model
 )
 :
-    chemistrySolver<ThermoType>(model),
+    chemistrySolver<CompType, ThermoType>(model),
     coeffsDict_(model.subDict(typeName + "Coeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
     equil_(coeffsDict_.lookup("equilibriumRateLimiter"))
@@ -45,15 +45,15 @@ Foam::EulerImplicit<ThermoType>::EulerImplicit
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::EulerImplicit<ThermoType>::~EulerImplicit()
+template<class CompType, class ThermoType>
+Foam::EulerImplicit<CompType, ThermoType>::~EulerImplicit()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::scalar Foam::EulerImplicit<ThermoType>::solve
+template<class CompType, class ThermoType>
+Foam::scalar Foam::EulerImplicit<CompType, ThermoType>::solve
 (
     scalarField &c,
     const scalar T,

@@ -22,38 +22,36 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+InClass
+    Foam::psiChemistryModel
+
+Description
+    Creates chemistry model instances templated on the type of thermodynamics
+
 \*---------------------------------------------------------------------------*/
 
-#include "chemistrySolver.H"
+#include "makeChemistryModel.H"
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+#include "psiChemistryModel.H"
+#include "ODEChemistryModel.H"
+#include "thermoPhysicsTypes.H"
 
-template<class CompType, class ThermoType>
-Foam::autoPtr<Foam::chemistrySolver<CompType, ThermoType> >
-Foam::chemistrySolver<CompType, ThermoType>::New
-(
-    ODEChemistryModel<CompType, ThermoType>& model
-)
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    word chemistrySolverType(model.CompType::lookup("chemistrySolver"));
-
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(chemistrySolverType);
-
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "chemistrySolver::New(const dictionary&, const ODEChemistryModel&)"
-        )   << "Unknown chemistrySolver type " << chemistrySolverType
-            << nl << nl
-            << "Valid chemistrySolver types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << nl
-            << exit(FatalError);
-    }
-
-    return autoPtr<chemistrySolver<CompType, ThermoType> >(cstrIter()(model));
+    makeChemistryModel
+    (
+        ODEChemistryModel,
+        psiChemistryModel,
+        gasThermoPhysics
+    );
+    makeChemistryModel
+    (
+        ODEChemistryModel,
+        psiChemistryModel,
+        icoPoly8ThermoPhysics
+    );
 }
-
 
 // ************************************************************************* //

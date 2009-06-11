@@ -31,10 +31,10 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::chemistrySolver<ThermoType>::chemistrySolver
+template<class CompType, class ThermoType>
+Foam::chemistrySolver<CompType, ThermoType>::chemistrySolver
 (
-    ODEChemistryModel<ThermoType>& model
+    ODEChemistryModel<CompType, ThermoType>& model
 )
 :
     model_(model)
@@ -43,8 +43,8 @@ Foam::chemistrySolver<ThermoType>::chemistrySolver
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::chemistrySolver<ThermoType>::~chemistrySolver()
+template<class CompType, class ThermoType>
+Foam::chemistrySolver<CompType, ThermoType>::~chemistrySolver()
 {}
 
 

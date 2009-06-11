@@ -26,7 +26,7 @@ Class
     Foam::chemistrySolver
 
 Description
-    An abstract class for solving chemistry
+    An abstract base class for solving chemistry
 
 SourceFiles
     chemistrySolver.C
@@ -47,11 +47,15 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class CompType, class ThermoType>
+class chemistrySolver;
+
 /*---------------------------------------------------------------------------*\
                       Class chemistrySolver Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 class chemistrySolver
 {
 protected:
@@ -59,7 +63,7 @@ protected:
     // Protected data
 
         //- Reference to the chemistry model
-        ODEChemistryModel<ThermoType>& model_;
+        ODEChemistryModel<CompType, ThermoType>& model_;
 
 
 public:
@@ -75,7 +79,7 @@ public:
             chemistrySolver,
             dictionary,
             (
-                ODEChemistryModel<ThermoType>& model
+                ODEChemistryModel<CompType, ThermoType>& model
             ),
             (model)
         );
@@ -84,13 +88,13 @@ public:
     // Constructors
 
         //- Construct from components
-        chemistrySolver(ODEChemistryModel<ThermoType>& model);
+        chemistrySolver(ODEChemistryModel<CompType, ThermoType>& model);
 
 
     //- Selector
     static autoPtr<chemistrySolver> New
     (
-        ODEChemistryModel<ThermoType>& model
+        ODEChemistryModel<CompType, ThermoType>& model
     );
 
 
@@ -118,23 +122,39 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeChemistrySolver(Thermo)                                           \
+#define makeChemistrySolver(Comp, Thermo)                                     \
                                                                               \
-defineTemplateTypeNameAndDebug                                                \
-(                                                                             \
-    chemistrySolver<Thermo>,                                                  \
-    0                                                                         \
-);                                                                            \
+    typedef chemistrySolver<Comp, Thermo>                                     \
+        chemistrySolver##Comp##Thermo;                                        \
                                                                               \
-defineTemplateRunTimeSelectionTable(chemistrySolver<Thermo>, dictionary);
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        chemistrySolver##Comp##Thermo,                                        \
+        "chemistryModel<"#Comp","#Thermo">",                                  \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    defineTemplateRunTimeSelectionTable                                       \
+    (                                                                         \
+        chemistrySolver##Comp##Thermo,                                        \
+        dictionary                                                            \
+    );
 
 
-#define makeChemistrySolverType(SS, Thermo)                                   \
+#define makeChemistrySolverType(SS, Comp, Thermo)                             \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<Thermo>, 0);                       \
+    typedef SS<Comp, Thermo> SS##Comp##Thermo;                                \
                                                                               \
-    chemistrySolver<Thermo>::adddictionaryConstructorToTable<SS<Thermo> >     \
-        add##SS##Thermo##ConstructorToTable_;
+    defineTemplateTypeNameAndDebugWithName                                    \
+    (                                                                         \
+        SS##Comp##Thermo,                                                     \
+        #SS"<"#Comp","#Thermo">",                                             \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    chemistrySolver<Comp, Thermo>::                                           \
+        adddictionaryConstructorToTable<SS<Comp, Thermo> >                    \
+            add##SS##Comp##Thermo##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

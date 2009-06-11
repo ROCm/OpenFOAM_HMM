@@ -43,14 +43,18 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class CompType, class ThermoType>
+class EulerImplicit;
+
 /*---------------------------------------------------------------------------*\
                        Class EulerImplicit Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 class EulerImplicit
 :
-    public chemistrySolver<ThermoType>
+    public chemistrySolver<CompType, ThermoType>
 {
     // Private data
 
@@ -71,7 +75,7 @@ public:
     // Constructors
 
         //- Construct from components
-        EulerImplicit(ODEChemistryModel<ThermoType>& chemistry);
+        EulerImplicit(ODEChemistryModel<CompType, ThermoType>& chemistry);
 
 
     //- Destructor

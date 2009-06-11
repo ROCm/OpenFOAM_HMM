@@ -29,10 +29,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::ode<ThermoType>::ode(ODEChemistryModel<ThermoType>& model)
+template<class CompType, class ThermoType>
+Foam::ode<CompType, ThermoType>::ode
+(
+    ODEChemistryModel<CompType, ThermoType>& model
+)
 :
-    chemistrySolver<ThermoType>(model),
+    chemistrySolver<CompType, ThermoType>(model),
     coeffsDict_(model.subDict(typeName + "Coeffs")),
     solverName_(coeffsDict_.lookup("ODESolver")),
     odeSolver_(ODESolver::New(solverName_, model)),
@@ -43,15 +46,15 @@ Foam::ode<ThermoType>::ode(ODEChemistryModel<ThermoType>& model)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::ode<ThermoType>::~ode()
+template<class CompType, class ThermoType>
+Foam::ode<CompType, ThermoType>::~ode()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::scalar Foam::ode<ThermoType>::solve
+template<class CompType, class ThermoType>
+Foam::scalar Foam::ode<CompType, ThermoType>::solve
 (
     scalarField& c,
     const scalar T,

@@ -1,6 +1,7 @@
-chemistryModel/chemistryModel/chemistryModel.C
-chemistryModel/chemistryModel/newChemistryModel.C
-chemistryModel/chemistryModel/chemistryModels.C
+chemistryModel/basicChemistryModel/basicChemistryModel.C
+chemistryModel/psiChemistryModel/psiChemistryModel.C
+chemistryModel/psiChemistryModel/newPsiChemistryModel.C
+chemistryModel/psiChemistryModel/psiChemistryModels.C
 
 chemistrySolver/chemistrySolver/makeChemistrySolvers.C
 

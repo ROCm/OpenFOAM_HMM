@@ -30,10 +30,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::ODEChemistryModel<ThermoType>::ODEChemistryModel(const fvMesh& mesh)
+template<class CompType, class ThermoType>
+Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
+(
+    const fvMesh& mesh
+)
 :
-    chemistryModel(mesh),
+    CompType(mesh),
 
     ODE(),
 
@@ -52,7 +55,7 @@ Foam::ODEChemistryModel<ThermoType>::ODEChemistryModel(const fvMesh& mesh)
     nSpecie_(Y_.size()),
     nReaction_(reactions_.size()),
 
-    solver_(chemistrySolver<ThermoType>::New(*this)),
+    solver_(chemistrySolver<CompType, ThermoType>::New(*this)),
 
     RR_(nSpecie_)
 {
@@ -73,15 +76,15 @@ Foam::ODEChemistryModel<ThermoType>::ODEChemistryModel(const fvMesh& mesh)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::ODEChemistryModel<ThermoType>::~ODEChemistryModel()
+template<class CompType, class ThermoType>
+Foam::ODEChemistryModel<CompType, ThermoType>::~ODEChemistryModel()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::scalarField Foam::ODEChemistryModel<ThermoType>::omega
+template<class CompType, class ThermoType>
+Foam::scalarField Foam::ODEChemistryModel<CompType, ThermoType>::omega
 (
     const scalarField& c,
     const scalar T,
@@ -121,8 +124,8 @@ Foam::scalarField Foam::ODEChemistryModel<ThermoType>::omega
 }
 
 
-template<class ThermoType>
-Foam::scalar Foam::ODEChemistryModel<ThermoType>::omega
+template<class CompType, class ThermoType>
+Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omega
 (
     const Reaction<ThermoType>& R,
     const scalarField& c,
@@ -241,8 +244,8 @@ Foam::scalar Foam::ODEChemistryModel<ThermoType>::omega
 }
 
 
-template<class ThermoType>
-void Foam::ODEChemistryModel<ThermoType>::derivatives
+template<class CompType, class ThermoType>
+void Foam::ODEChemistryModel<CompType, ThermoType>::derivatives
 (
     const scalar time,
     const scalarField &c,
@@ -292,8 +295,8 @@ void Foam::ODEChemistryModel<ThermoType>::derivatives
 }
 
 
-template<class ThermoType>
-void Foam::ODEChemistryModel<ThermoType>::jacobian
+template<class CompType, class ThermoType>
+void Foam::ODEChemistryModel<CompType, ThermoType>::jacobian
 (
     const scalar t,
     const scalarField& c,
@@ -434,9 +437,9 @@ void Foam::ODEChemistryModel<ThermoType>::jacobian
 }
 
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 Foam::tmp<Foam::volScalarField>
-Foam::ODEChemistryModel<ThermoType>::tc() const
+Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
 {
     scalar pf,cf,pr,cr;
     label lRef, rRef;
@@ -446,7 +449,7 @@ Foam::ODEChemistryModel<ThermoType>::tc() const
 
     scalarField t(nCells, SMALL);
 
-    if (chemistry_)
+    if (this->chemistry_)
     {
         for (label celli=0; celli<nCells; celli++)
         {
@@ -507,9 +510,9 @@ Foam::ODEChemistryModel<ThermoType>::tc() const
 }
 
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 Foam::tmp<Foam::volScalarField>
-Foam::ODEChemistryModel<ThermoType>::dQ() const
+Foam::ODEChemistryModel<CompType, ThermoType>::dQ() const
 {
     tmp<volScalarField> tdQ
     (
@@ -533,7 +536,7 @@ Foam::ODEChemistryModel<ThermoType>::dQ() const
         )
     );
 
-    if (chemistry_)
+    if (this->chemistry_)
     {
         scalarField& dQ = tdQ();
 
@@ -557,23 +560,23 @@ Foam::ODEChemistryModel<ThermoType>::dQ() const
 }
 
 
-template<class ThermoType>
-Foam::label Foam::ODEChemistryModel<ThermoType>::nEqns() const
+template<class CompType, class ThermoType>
+Foam::label Foam::ODEChemistryModel<CompType, ThermoType>::nEqns() const
 {
     // nEqns = number of species + temperature + pressure
     return nSpecie_ + 2;
 }
 
 
-template<class ThermoType>
-void Foam::ODEChemistryModel<ThermoType>::calculate()
+template<class CompType, class ThermoType>
+void Foam::ODEChemistryModel<CompType, ThermoType>::calculate()
 {
     for (label i=0; i<nSpecie_; i++)
     {
         RR_[i].setSize(this->thermo().rho()().size());
     }
 
-    if (chemistry_)
+    if (this->chemistry_)
     {
         forAll(this->thermo().rho()(), celli)
         {
@@ -606,8 +609,8 @@ void Foam::ODEChemistryModel<ThermoType>::calculate()
 }
 
 
-template<class ThermoType>
-Foam::scalar Foam::ODEChemistryModel<ThermoType>::solve
+template<class CompType, class ThermoType>
+Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
 (
     const scalar t0,
     const scalar deltaT
@@ -618,7 +621,7 @@ Foam::scalar Foam::ODEChemistryModel<ThermoType>::solve
         RR_[i].setSize(this->thermo().rho()().size());
     }
 
-    if (!chemistry_)
+    if (!this->chemistry_)
     {
         return GREAT;
     }
@@ -648,7 +651,7 @@ Foam::scalar Foam::ODEChemistryModel<ThermoType>::solve
         c0 = c;
 
         scalar t = t0;
-        scalar tauC = deltaTChem_[celli];
+        scalar tauC = this->deltaTChem_[celli];
         scalar dt = min(deltaT, tauC);
         scalar timeLeft = deltaT;
 
@@ -670,7 +673,7 @@ Foam::scalar Foam::ODEChemistryModel<ThermoType>::solve
             Ti = mixture.TH(hi, Ti);
 
             timeLeft -= dt;
-            deltaTChem_[celli] = tauC;
+            this->deltaTChem_[celli] = tauC;
             dt = min(timeLeft, tauC);
             dt = max(dt, SMALL);
         }

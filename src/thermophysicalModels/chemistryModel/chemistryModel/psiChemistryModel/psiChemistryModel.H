@@ -23,22 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sequential
+    Foam::psiChemistryModel
 
 Description
-    Foam::sequential
+    Chemistry model for compressibility-based thermodynamics
 
 SourceFiles
-    sequentialI.H
-    sequential.C
-    sequentialIO.C
+    psiChemistryModelI.H
+    psiChemistryModel.C
+    newChemistryModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sequential_H
-#define sequential_H
+#ifndef psiChemistryModel_H
+#define psiChemistryModel_H
 
-#include "chemistrySolver.H"
+#include "basicChemistryModel.H"
+#include "autoPtr.H"
+#include "runTimeSelectionTables.H"
+#include "hCombustionThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,56 +49,73 @@ namespace Foam
 {
 
 // Forward declaration of classes
-template<class CompType, class ThermoType>
-class sequential;
+class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                         Class sequential Declaration
+                     class psiChemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CompType, class ThermoType>
-class sequential
+class psiChemistryModel
 :
-    public chemistrySolver<CompType, ThermoType>
+    public basicChemistryModel
 {
-    // Private data
+    // Private Member Functions
 
-        dictionary coeffsDict_;
+        //- Construct as copy (not implemented)
+        psiChemistryModel(const psiChemistryModel&);
 
-        // Model constants
+        //- Disallow default bitwise assignment
+        void operator=(const psiChemistryModel&);
 
-            scalar cTauChem_;
-            Switch equil_;
+
+protected:
+
+    // Protected data
+
+        //- Thermo package
+        autoPtr<hCombustionThermo> thermo_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("sequential");
+    TypeName("psiChemistryModel");
+
+
+    //- Declare run-time constructor selection tables
+    declareRunTimeSelectionTable
+    (
+        autoPtr,
+        psiChemistryModel,
+        fvMesh,
+        (
+            const fvMesh& mesh
+        ),
+        (mesh)
+    );
 
 
     // Constructors
 
+        //- Construct from mesh
+        psiChemistryModel(const fvMesh& mesh);
 
-        //- Construct from components
-        sequential(ODEChemistryModel<CompType, ThermoType>& model);
+
+    //- Selector
+    static autoPtr<psiChemistryModel> New(const fvMesh& mesh);
 
 
     //- Destructor
-    virtual ~sequential();
+    virtual ~psiChemistryModel();
 
 
     // Member Functions
 
-        //- Update the concentrations and return the chemical time
-        scalar solve
-        (
-            scalarField &c,
-            const scalar T,
-            const scalar p,
-            const scalar t0,
-            const scalar dt
-        ) const;
+        //- Return access to the thermo package
+        inline hCombustionThermo& thermo();
+
+        //- Return const access to the thermo package
+        inline const hCombustionThermo& thermo() const;
 };
 
 
@@ -105,9 +125,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "sequential.C"
-#endif
+#include "psiChemistryModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -23,28 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::chemistryModel
+    Foam::basicChemistryModel
 
 Description
-    Foam::chemistryModel
+    Base class for chemistry models
 
 SourceFiles
-    chemistryModelI.H
-    chemistryModel.C
-    newChemistryModel.C
+    basicChemistryModelI.H
+    basicChemistryModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef chemistryModel_H
-#define chemistryModel_H
+#ifndef basicChemistryModel_H
+#define basicChemistryModel_H
 
 #include "IOdictionary.H"
 #include "Switch.H"
 #include "scalarField.H"
-#include "autoPtr.H"
-#include "runTimeSelectionTables.H"
-#include "hCombustionThermo.H"
-//#include "basicMultiComponentMixture.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,20 +51,20 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                       class chemistryModel Declaration
+                   class basicChemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
-class chemistryModel
+class basicChemistryModel
 :
     public IOdictionary
 {
     // Private Member Functions
 
         //- Construct as copy (not implemented)
-        chemistryModel(const chemistryModel&);
+        basicChemistryModel(const basicChemistryModel&);
 
         //- Disallow default bitwise assignment
-        void operator=(const chemistryModel&);
+        void operator=(const basicChemistryModel&);
 
 
 protected:
@@ -77,9 +73,6 @@ protected:
 
         //- Reference to the mesh database
         const fvMesh& mesh_;
-
-        //- Thermo package
-        autoPtr<hCombustionThermo> thermo_;
 
         //- Chemistry activation switch
         Switch chemistry_;
@@ -98,45 +91,23 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("chemistryModel");
-
-
-    //- Declare run-time constructor selection tables
-    declareRunTimeSelectionTable
-    (
-        autoPtr,
-        chemistryModel,
-        fvMesh,
-        (
-            const fvMesh& mesh
-        ),
-        (mesh)
-    );
+    TypeName("basicChemistryModel");
 
 
     // Constructors
 
         //- Construct from mesh
-        chemistryModel(const fvMesh& mesh);
+        basicChemistryModel(const fvMesh& mesh);
 
-
-    //- Selector
-    static autoPtr<chemistryModel> New(const fvMesh& mesh);
 
     //- Destructor
-    virtual ~chemistryModel();
+    virtual ~basicChemistryModel();
 
 
     // Member Functions
 
         //- Return const access to the mesh database
         inline const fvMesh& mesh() const;
-
-        //- Return access to the thermo package
-        inline hCombustionThermo& thermo();
-
-        //- Return const access to the thermo package
-        inline const hCombustionThermo& thermo() const;
 
         //- Chemistry activation switch
         inline Switch chemistry() const;
@@ -173,7 +144,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "chemistryModelI.H"
+#include "basicChemistryModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

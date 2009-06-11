@@ -29,10 +29,13 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::sequential<ThermoType>::sequential(ODEChemistryModel<ThermoType>& model)
+template<class CompType, class ThermoType>
+Foam::sequential<CompType, ThermoType>::sequential
+(
+    ODEChemistryModel<CompType, ThermoType>& model
+)
 :
-    chemistrySolver<ThermoType>(model),
+    chemistrySolver<CompType, ThermoType>(model),
     coeffsDict_(model.subDict(typeName + "Coeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
     equil_(coeffsDict_.lookup("equilibriumRateLimiter"))
@@ -41,15 +44,15 @@ Foam::sequential<ThermoType>::sequential(ODEChemistryModel<ThermoType>& model)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::sequential<ThermoType>::~sequential()
+template<class CompType, class ThermoType>
+Foam::sequential<CompType, ThermoType>::~sequential()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class ThermoType>
-Foam::scalar Foam::sequential<ThermoType>::solve
+template<class CompType, class ThermoType>
+Foam::scalar Foam::sequential<CompType, ThermoType>::solve
 (
     scalarField &c,
     const scalar T,

@@ -24,18 +24,16 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "chemistryModel.H"
-#include "fvMesh.H"
-#include "Time.H"
+#include "psiChemistryModel.H"
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::chemistryModel> Foam::chemistryModel::New
+Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
 (
     const fvMesh& mesh
 )
 {
-    word chemistryModelType;
+    word psiChemistryModelType;
 
     // Enclose the creation of the chemistrtyProperties to ensure it is
     // deleted before the chemistrtyProperties is created otherwise the
@@ -53,24 +51,25 @@ Foam::autoPtr<Foam::chemistryModel> Foam::chemistryModel::New
             )
         );
 
-        chemistryPropertiesDict.lookup("chemistryModel") >> chemistryModelType;
+        chemistryPropertiesDict.lookup("psiChemistryModel") >>
+            psiChemistryModelType;
     }
 
-    Info<< "Selecting chemistryModel " << chemistryModelType << endl;
+    Info<< "Selecting psiChemistryModel " << psiChemistryModelType << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
-        fvMeshConstructorTablePtr_->find(chemistryModelType);
+        fvMeshConstructorTablePtr_->find(psiChemistryModelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
-        FatalErrorIn("chemistryModelBase::New(const mesh&)")
-            << "Unknown chemistryModel type " << chemistryModelType << nl << nl
-            << "Valid chemistryModel types are:" << nl
+        FatalErrorIn("psiChemistryModelBase::New(const mesh&)")
+            << "Unknown psiChemistryModel type " << psiChemistryModelType
+            << nl << nl << "Valid psiChemistryModel types are:" << nl
             << fvMeshConstructorTablePtr_->toc() << nl
             << exit(FatalError);
     }
 
-    return autoPtr<chemistryModel>(cstrIter()(mesh));
+    return autoPtr<psiChemistryModel>(cstrIter()(mesh));
 }
 
 

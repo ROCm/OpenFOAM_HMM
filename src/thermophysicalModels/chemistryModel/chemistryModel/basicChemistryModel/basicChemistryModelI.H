@@ -24,50 +24,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "chemistryModel.H"
-#include "fvMesh.H"
-#include "Time.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
-
-namespace Foam
+inline const Foam::fvMesh& Foam::basicChemistryModel::mesh() const
 {
-    defineTypeNameAndDebug(chemistryModel, 0);
-    defineRunTimeSelectionTable(chemistryModel, fvMesh);
-}
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::chemistryModel::chemistryModel(const fvMesh& mesh)
-:
-    IOdictionary
-    (
-        IOobject
-        (
-            "chemistryProperties",
-            mesh.time().constant(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    ),
-    mesh_(mesh),
-    thermo_(hCombustionThermo::New(mesh)),
-    chemistry_(lookup("chemistry")),
-    deltaTChem_
-    (
-        mesh.nCells(),
-        readScalar(lookup("initialChemicalTimeStep"))
-    )
-{
-    Info<< "chemistryModel(const fvMesh&)" << endl;
+    return mesh_;
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+inline Foam::Switch Foam::basicChemistryModel::chemistry() const
+{
+    return chemistry_;
+}
 
-Foam::chemistryModel::~chemistryModel()
-{}
+
+inline const Foam::scalarField& Foam::basicChemistryModel::deltaTChem() const
+{
+    return deltaTChem_;
+}
+
+
+inline Foam::scalarField& Foam::basicChemistryModel::deltaTChem()
+{
+    return deltaTChem_;
+}
 
 
 // ************************************************************************* //

@@ -24,42 +24,31 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+#include "psiChemistryModel.H"
+#include "fvMesh.H"
+#include "Time.H"
 
-inline const Foam::fvMesh& Foam::chemistryModel::mesh() const
+/* * * * * * * * * * * * * * * private static data * * * * * * * * * * * * * */
+
+namespace Foam
 {
-    return mesh_;
+    defineTypeNameAndDebug(psiChemistryModel, 0);
+    defineRunTimeSelectionTable(psiChemistryModel, fvMesh);
 }
 
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-inline Foam::hCombustionThermo& Foam::chemistryModel::thermo()
-{
-    return thermo_();
-}
-
-
-inline const Foam::hCombustionThermo& Foam::chemistryModel::thermo() const
-{
-    return thermo_();
-}
+Foam::psiChemistryModel::psiChemistryModel(const fvMesh& mesh)
+:
+    basicChemistryModel(mesh),
+    thermo_(hCombustionThermo::New(mesh))
+{}
 
 
-inline Foam::Switch Foam::chemistryModel::chemistry() const
-{
-    return chemistry_;
-}
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-
-inline const Foam::scalarField& Foam::chemistryModel::deltaTChem() const
-{
-    return deltaTChem_;
-}
-
-
-inline Foam::scalarField& Foam::chemistryModel::deltaTChem()
-{
-    return deltaTChem_;
-}
+Foam::psiChemistryModel::~psiChemistryModel()
+{}
 
 
 // ************************************************************************* //

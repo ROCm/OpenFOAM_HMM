@@ -41,7 +41,6 @@ SourceFiles
 
 #include "hCombustionThermo.H"
 #include "Reaction.H"
-#include "chemistryModel.H"
 #include "ODE.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -50,17 +49,17 @@ namespace Foam
 {
 
 // Forward declaration of classes
-template<class ThermoType>
+template<class CompType, class ThermoType>
 class chemistrySolver;
 
 /*---------------------------------------------------------------------------*\
                       Class ODEChemistryModel Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 class ODEChemistryModel
 :
-    public chemistryModel,
+    public CompType,
     public ODE
 {
     // Private Member Functions
@@ -89,7 +88,7 @@ protected:
         label nReaction_;
 
         //- Chemistry solver
-        autoPtr<chemistrySolver<ThermoType> > solver_;
+        autoPtr<chemistrySolver<CompType, ThermoType> > solver_;
 
         //- Chemical source term
         PtrList<scalarField> RR_;
@@ -133,7 +132,7 @@ public:
         inline label nReaction() const;
 
         //- Return the chemisty solver
-        inline const chemistrySolver<ThermoType>& solver() const;
+        inline const chemistrySolver<CompType, ThermoType>& solver() const;
 
         //- dc/dt = omega, rate of change in concentration, for each species
         virtual scalarField omega

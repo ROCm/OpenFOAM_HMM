@@ -26,57 +26,59 @@ License
 
 #include "zeroGradientFvPatchFields.H"
 
-template<class ThermoType>
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CompType, class ThermoType>
 inline Foam::PtrList<Foam::scalarField>&
-Foam::ODEChemistryModel<ThermoType>::RR()
+Foam::ODEChemistryModel<CompType, ThermoType>::RR()
 {
     return RR_;
 }
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class ThermoType>
+template<class CompType, class ThermoType>
 inline const Foam::PtrList<Foam::Reaction<ThermoType> >&
-Foam::ODEChemistryModel<ThermoType>::reactions() const
+Foam::ODEChemistryModel<CompType, ThermoType>::reactions() const
 {
     return reactions_;
 }
 
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 inline const Foam::PtrList<ThermoType>&
-Foam::ODEChemistryModel<ThermoType>::specieThermo() const
+Foam::ODEChemistryModel<CompType, ThermoType>::specieThermo() const
 {
     return specieThermo_;
 }
 
 
-template<class ThermoType>
-inline Foam::label Foam::ODEChemistryModel<ThermoType>::nSpecie() const
+template<class CompType, class ThermoType>
+inline Foam::label
+Foam::ODEChemistryModel<CompType, ThermoType>::nSpecie() const
 {
     return nSpecie_;
 }
 
 
-template<class ThermoType>
-inline Foam::label Foam::ODEChemistryModel<ThermoType>::nReaction() const
+template<class CompType, class ThermoType>
+inline Foam::label
+Foam::ODEChemistryModel<CompType, ThermoType>::nReaction() const
 {
     return nReaction_;
 }
 
 
-template<class ThermoType>
-inline const Foam::chemistrySolver<ThermoType>&
-Foam::ODEChemistryModel<ThermoType>::solver() const
+template<class CompType, class ThermoType>
+inline const Foam::chemistrySolver<CompType, ThermoType>&
+Foam::ODEChemistryModel<CompType, ThermoType>::solver() const
 {
     return solver_;
 }
 
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 inline Foam::tmp<Foam::volScalarField>
-Foam::ODEChemistryModel<ThermoType>::RR
+Foam::ODEChemistryModel<CompType, ThermoType>::RR
 (
     const label i
 ) const
@@ -99,7 +101,7 @@ Foam::ODEChemistryModel<ThermoType>::RR
         )
     );
 
-    if (chemistry_)
+    if (this->chemistry_)
     {
         tRR().internalField() = RR_[i];
         tRR().correctBoundaryConditions();

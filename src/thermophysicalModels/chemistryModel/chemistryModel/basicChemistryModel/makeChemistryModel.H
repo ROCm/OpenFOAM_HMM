@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InClass
-    Foam::chemistryModel
+    Foam::psiChemistryModel
 
 Description
-    Macros for instantiating chemistry models based on transport type
+    Macros for instantiating chemistry models based on compressibility and
+    transport types
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef makeChemistryModel_H
 #define makeChemistryModel_H
 
-#include "chemistryModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,21 +43,21 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeChemistryModel(SS, Transport)                                     \
+#define makeChemistryModel(SS, Comp, Thermo)                                  \
                                                                               \
-typedef SS<Transport> SS##Transport;                                          \
+typedef SS<Comp, Thermo> SS##Comp##Thermo;                                    \
                                                                               \
 defineTemplateTypeNameAndDebugWithName                                        \
 (                                                                             \
-    SS##Transport,                                                            \
-    #SS"<"#Transport">",                                                      \
+    SS##Comp##Thermo,                                                         \
+    #SS"<"#Comp","#Thermo">",                                                 \
     0                                                                         \
 );                                                                            \
                                                                               \
 addToRunTimeSelectionTable                                                    \
 (                                                                             \
-    chemistryModel,                                                           \
-    SS##Transport,                                                            \
+    Comp,                                                                     \
+    SS##Comp##Thermo,                                                         \
     fvMesh                                                                    \
 );
 

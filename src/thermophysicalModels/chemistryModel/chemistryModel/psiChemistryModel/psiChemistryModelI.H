@@ -24,35 +24,17 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "chemistrySolver.H"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
-
-template<class CompType, class ThermoType>
-Foam::autoPtr<Foam::chemistrySolver<CompType, ThermoType> >
-Foam::chemistrySolver<CompType, ThermoType>::New
-(
-    ODEChemistryModel<CompType, ThermoType>& model
-)
+inline Foam::hCombustionThermo& Foam::psiChemistryModel::thermo()
 {
-    word chemistrySolverType(model.CompType::lookup("chemistrySolver"));
+    return thermo_();
+}
 
-    typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(chemistrySolverType);
 
-    if (cstrIter == dictionaryConstructorTablePtr_->end())
-    {
-        FatalErrorIn
-        (
-            "chemistrySolver::New(const dictionary&, const ODEChemistryModel&)"
-        )   << "Unknown chemistrySolver type " << chemistrySolverType
-            << nl << nl
-            << "Valid chemistrySolver types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << nl
-            << exit(FatalError);
-    }
-
-    return autoPtr<chemistrySolver<CompType, ThermoType> >(cstrIter()(model));
+inline const Foam::hCombustionThermo& Foam::psiChemistryModel::thermo() const
+{
+    return thermo_();
 }
 
 

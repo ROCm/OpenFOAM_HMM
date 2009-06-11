@@ -44,14 +44,18 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class CompType, class ThermoType>
+class ode;
+
 /*---------------------------------------------------------------------------*\
                             Class ode Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
+template<class CompType, class ThermoType>
 class ode
 :
-    public chemistrySolver<ThermoType>
+    public chemistrySolver<CompType, ThermoType>
 {
     // Private data
 
@@ -74,7 +78,7 @@ public:
     // Constructors
 
         //- Construct from components
-        ode(ODEChemistryModel<ThermoType>& model);
+        ode(ODEChemistryModel<CompType, ThermoType>& model);
 
 
     //- Destructor
