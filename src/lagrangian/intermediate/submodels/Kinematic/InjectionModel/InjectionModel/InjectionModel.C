@@ -398,7 +398,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 parcelType* pPtr = new parcelType(td.cloud(), pos, cellI);
 
                 // Assign new parcel properties in injection model
-                setProperties(parcelI, newParcels, timeInj, pPtr);
+                setProperties(parcelI, newParcels, timeInj, &pPtr);
 
                 // Check new parcel properties
                 td.cloud().checkParcelProperties(pPtr, dt, fullyDescribed());

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,13 +88,13 @@ class FieldActivatedInjection
             vectorIOField positions_;
 
             //- Field of cell labels corresponding to injector positions
-            labelField injectorCells_;
+            labelList injectorCells_;
 
             //- Number of parcels per injector
             const label nParcelsPerInjector_;
 
             //- Field of number of parcels injected for each injector
-            labelField nParcelsInjected_;
+            labelList nParcelsInjected_;
 
 
         // Parcel properties
@@ -103,7 +103,7 @@ class FieldActivatedInjection
             const vector U0_;
 
             //- Field of parcel diameters
-            scalarField diameters_;
+            scalarList diameters_;
 
             //- Parcel size PDF model
             const autoPtr<pdf> parcelPDF_;
@@ -169,18 +169,17 @@ public:
                 label& cellOwner
             );
 
+            //- Set the parcel properties
             virtual void setProperties
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
-                typename CloudType::parcelType* pPtr
+                typename CloudType::parcelType& parcel
             );
 
-            virtual bool fullyDescribed() const
-            {
-                return false;
-            }
+            //- Flag to identify whether model fully describes the parcel
+            virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection in cellI is
             //  permitted

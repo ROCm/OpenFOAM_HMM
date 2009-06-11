@@ -29,6 +29,7 @@ Description
     Virtual abstract base class for templated KinematicCloud
 
 SourceFiles
+    kinematicCloud.H
 
 \*---------------------------------------------------------------------------*/
 

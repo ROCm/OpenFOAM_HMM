@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -85,10 +85,10 @@ public:
     // Member Functions
 
         //- Flag to indicate whether model activates devolatilisation model
-        bool active() const;
+        virtual bool active() const;
 
         //- Update model
-        scalar calculate
+        virtual scalar calculate
         (
             const scalar dt,
             const scalar mass0,

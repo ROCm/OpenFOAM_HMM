@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,7 @@ public:
     // Member Functions
 
         //- Flag to indicate whether model activates patch interaction model
-        bool active() const;
+        virtual bool active() const;
 
         //- Apply velocity correction
         //  Returns true if particle remains in same cell

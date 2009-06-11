@@ -26,7 +26,19 @@ Class
     Foam::InjectionModel
 
 Description
-    Templated injection model class
+    Templated injection model class.
+
+    The injection model nominally describes the parcel:
+    - position
+    - diameter
+    - velocity
+    In this case, the fullyDescribed() flag should be set to 0 (false). When
+    the parcel is then added to the cloud, the remaining properties are
+    populated using values supplied in the constant properties.
+
+    If, however, all of a parcel's properties are described in the model, the
+    fullDescribed() flag should be set to 1 (true).
+
 
 SourceFiles
     InjectionModel.C
@@ -294,14 +306,16 @@ public:
                 label& cellOwner
             ) = 0;
 
+            //- Set the parcel properties
             virtual void setProperties
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
-                typename CloudType::parcelType* pPtr
+                typename CloudType::parcelType& parcel
             ) = 0;
 
+            //- Flag to identify whether model fully describes the parcel
             virtual bool fullyDescribed() const = 0;
 };
 

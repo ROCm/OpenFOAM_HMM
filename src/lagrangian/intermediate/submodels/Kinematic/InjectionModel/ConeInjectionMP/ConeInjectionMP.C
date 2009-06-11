@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -240,7 +240,7 @@ void Foam::ConeInjectionMP<CloudType>::setProperties
     const label parcelI,
     const label,
     const scalar time,
-    typename CloudType::parcelType* pPtr
+    typename CloudType::parcelType& parcel
 )
 {
     // set particle velocity
@@ -265,10 +265,17 @@ void Foam::ConeInjectionMP<CloudType>::setProperties
 
     dirVec /= mag(dirVec);
 
-    pPtr->U() = Umag_().value(t)*dirVec;
+    parcel.U() = Umag_().value(t)*dirVec;
 
     // set particle diameter
-    pPtr->d() = parcelPDF_().sample();
+    parcel.d() = parcelPDF_().sample();
+}
+
+
+template<class CloudType>
+bool Foam::ConeInjectionMP<CloudType>::fullyDescribed() const
+{
+    return false;
 }
 
 

@@ -99,10 +99,10 @@ public:
     // Member Functions
 
         //- Flag to indicate whether model activates phase change model
-        bool active() const;
+        virtual bool active() const;
 
         //- Update model
-        void calculate
+        virtual void calculate
         (
             const scalar dt,
             const label cellI,

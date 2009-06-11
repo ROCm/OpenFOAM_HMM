@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -166,14 +166,16 @@ public:
                 label& cellOwner
             );
 
+            //- Set the parcel properties
             virtual void setProperties
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
-                typename CloudType::parcelType* pPtr
+                typename CloudType::parcelType& parcel
             );
 
+            //- Flag to identify whether model fully describes the parcel
             virtual bool fullyDescribed() const
             {
                 return true;

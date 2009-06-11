@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,7 @@ SourceFiles
 
 #include "InjectionModel.H"
 #include "pdf.H"
+#include "vectorList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,9 +70,6 @@ class ConeInjectionMP
 {
     // Private data
 
-        //- Coefficients dictionary
-        dictionary coeffDict_;
-
         //- Name of file containing positions data
         const word positionsFile_;
 
@@ -79,7 +77,7 @@ class ConeInjectionMP
         vectorIOField positions_;
 
         //- Field of cell labels corresoponding to injector positions
-        labelField injectorCells_;
+        labelList injectorCells_;
 
         //- Name of file containing axes data
         const word axesFile_;
@@ -115,10 +113,10 @@ class ConeInjectionMP
         // Tangential vectors to the direction vector
 
             //- First tangential vector
-            vectorField tanVec1_;
+            vectorList tanVec1_;
 
             //- Second tangential vector
-            vectorField tanVec2_;
+            vectorList tanVec2_;
 
 
 protected:
@@ -181,18 +179,17 @@ public:
                 label& cellOwner
             );
 
+            //- Set the parcel properties
             virtual void setProperties
             (
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
-                typename CloudType::parcelType* pPtr
+                typename CloudType::parcelType& parcel
             );
 
-            virtual bool fullyDescribed() const
-            {
-                return false;
-            }
+            //- Flag to identify whether model fully describes the parcel
+            virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection in cellI is
             //  permitted

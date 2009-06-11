@@ -155,14 +155,21 @@ void Foam::ManualInjection<CloudType>::setProperties
     const label parcelI,
     const label,
     const scalar,
-    typename CloudType::parcelType* pPtr
+    typename CloudType::parcelType& parcel
 )
 {
     // set particle velocity
-    pPtr->U() = U0_;
+    parcel.U() = U0_;
 
     // set particle diameter
-    pPtr->d() = diameters_[parcelI];
+    parcel.d() = diameters_[parcelI];
+}
+
+
+template<class CloudType>
+bool Foam::ManualInjection<CloudType>::fullyDescribed() const
+{
+    return false;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -137,11 +137,11 @@ public:
 
         // Evaluation
 
+            //- Main post-processing function
+            virtual void post();
+
             //- Flag to indicate whether model activates post-processing model
             virtual bool active() const = 0;
-
-            //- Main post-processing function
-            void post();
 
             //- Gather post-processing info on patch
             virtual void postPatch

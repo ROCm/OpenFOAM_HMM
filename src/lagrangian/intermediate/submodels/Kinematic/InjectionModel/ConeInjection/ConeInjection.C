@@ -196,7 +196,7 @@ void Foam::ConeInjection<CloudType>::setProperties
     const label parcelI,
     const label,
     const scalar time,
-    typename CloudType::parcelType* pPtr
+    typename CloudType::parcelType& parcel
 )
 {
     // set particle velocity
@@ -218,10 +218,17 @@ void Foam::ConeInjection<CloudType>::setProperties
     dirVec += normal;
     dirVec /= mag(dirVec);
 
-    pPtr->U() = Umag_().value(t)*dirVec;
+    parcel.U() = Umag_().value(t)*dirVec;
 
     // set particle diameter
-    pPtr->d() = parcelPDF_().sample();
+    parcel.d() = parcelPDF_().sample();
+}
+
+
+template<class CloudType>
+bool Foam::ConeInjection<CloudType>::fullyDescribed() const
+{
+    return false;
 }
 
 

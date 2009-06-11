@@ -117,17 +117,15 @@ public:
                 const label parcelI,
                 const label nParcels,
                 const scalar time,
-                typename CloudType::parcelType* pPtr
+                typename CloudType::parcelType& parcel
             );
 
-            virtual bool fullyDescribed() const
-            {
-                return false;
-            }
+            //- Flag to identify whether model fully describes the parcel
+            virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection in cellI is
             //  permitted
-            bool validInjection(const label cellI);
+            virtual bool validInjection(const label cellI);
 };
 
 
