@@ -11,11 +11,15 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      turbulenceProperties;
+    object      particleTrackProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-simulationType  RASModel;
+cloudName       reactingCloud1;
+
+sampleFrequency 1;
+
+maxPositions    1000000;
 
 
 // ************************************************************************* //
