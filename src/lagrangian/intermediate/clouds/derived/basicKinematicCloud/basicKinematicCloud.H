@@ -72,7 +72,7 @@ public:
         //- Construct from components
         basicKinematicCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const volScalarField& mu,

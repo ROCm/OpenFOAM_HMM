@@ -344,8 +344,8 @@ void Foam::autoRefineDriver::removeInsideCells
     if (debug)
     {
         Pout<< "Writing subsetted mesh to time "
-            << mesh.time().timeName() << '.' << endl;
-        meshRefiner_.write(debug, mesh.time().path()/mesh.time().timeName());
+            << meshRefiner_.timeName() << '.' << endl;
+        meshRefiner_.write(debug, mesh.time().path()/meshRefiner_.timeName());
         Pout<< "Dumped mesh in = "
             << mesh.time().cpuTimeIncrement() << " s\n" << nl << endl;
     }
@@ -561,11 +561,11 @@ void Foam::autoRefineDriver::zonify
         if (debug)
         {
             Pout<< "Writing zoned mesh to time "
-                << mesh.time().timeName() << '.' << endl;
+                << meshRefiner_.timeName() << '.' << endl;
             meshRefiner_.write
             (
                 debug,
-                mesh.time().path()/mesh.time().timeName()
+                mesh.time().path()/meshRefiner_.timeName()
             );
         }
 
@@ -653,8 +653,8 @@ void Foam::autoRefineDriver::splitAndMergeBaffles
     if (debug)
     {
         Pout<< "Writing handleProblemCells mesh to time "
-            << mesh.time().timeName() << '.' << endl;
-        meshRefiner_.write(debug, mesh.time().path()/mesh.time().timeName());
+            << meshRefiner_.timeName() << '.' << endl;
+        meshRefiner_.write(debug, mesh.time().path()/meshRefiner_.timeName());
     }
 }
 
@@ -680,7 +680,7 @@ void Foam::autoRefineDriver::mergePatchFaces
     (
         Foam::cos(45*mathematicalConstant::pi/180.0),
         Foam::cos(45*mathematicalConstant::pi/180.0),
-        meshRefinement::addedPatches(globalToPatch_)
+        meshRefiner_.meshedPatches()
     );
 
     if (debug)
@@ -711,9 +711,6 @@ void Foam::autoRefineDriver::doRefine
         << endl;
 
     const fvMesh& mesh = meshRefiner_.mesh();
-
-    const_cast<Time&>(mesh.time())++;
-
 
     // Check that all the keep points are inside the mesh.
     refineParams.findCells(mesh);

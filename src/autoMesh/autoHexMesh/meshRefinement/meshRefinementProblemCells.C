@@ -136,15 +136,13 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
     const labelList& globalToPatch
 ) const
 {
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
-
-    // Construct addressing engine.
+    // Construct addressing engine from all patches added for meshing.
     autoPtr<indirectPrimitivePatch> ppPtr
     (
         meshRefinement::makePatch
         (
             mesh_,
-            adaptPatchIDs
+            meshedPatches()
         )
     );
     const indirectPrimitivePatch& pp = ppPtr();
@@ -386,11 +384,6 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
     const labelList& pointLevel = meshCutter_.pointLevel();
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // Swap neighbouring cell centres and cell level
-    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
-    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
-    calcNeighbourData(neiLevel, neiCc);
-
     // Per internal face (boundary faces not used) the patch that the
     // baffle should get (or -1)
     labelList facePatch(mesh_.nFaces(), -1);
@@ -403,7 +396,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 
     // Fill boundary data. All elements on meshed patches get marked.
     // Get the labels of added patches.
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
+    labelList adaptPatchIDs(meshedPatches());
 
     forAll(adaptPatchIDs, i)
     {
@@ -426,6 +419,12 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
             faceI++;
         }
     }
+
+    // Swap neighbouring cell centres and cell level
+    labelList neiLevel(mesh_.nFaces()-mesh_.nInternalFaces());
+    pointField neiCc(mesh_.nFaces()-mesh_.nInternalFaces());
+    calcNeighbourData(neiLevel, neiCc);
+
 
     // Count of faces marked for baffling
     label nBaffleFaces = 0;
@@ -961,20 +960,16 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
 //// test to find nearest surface and checks which faces would get squashed.
 //Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
 //(
-//    const dictionary& motionDict,
-//    const labelList& globalToPatch
+//    const dictionary& motionDict
 //) const
 //{
-//    // Get the labels of added patches.
-//    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
-//
 //    // Construct addressing engine.
 //    autoPtr<indirectPrimitivePatch> ppPtr
 //    (
 //        meshRefinement::makePatch
 //        (
 //            mesh_,
-//            adaptPatchIDs
+//            meshedPatches()
 //        )
 //    );
 //    const indirectPrimitivePatch& pp = ppPtr();

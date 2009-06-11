@@ -28,16 +28,14 @@ License
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "SVD.H"
-#include "syncTools.H"
-#include "extendedStencil.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-template<class Form, class extendedStencil, class Polynomial>
-Foam::FitData<Form, extendedStencil, Polynomial>::FitData
+template<class Form, class ExtendedStencil, class Polynomial>
+Foam::FitData<Form, ExtendedStencil, Polynomial>::FitData
 (
     const fvMesh& mesh,
-    const extendedStencil& stencil,
+    const ExtendedStencil& stencil,
     const scalar linearLimitFactor,
     const scalar centralWeight
 )

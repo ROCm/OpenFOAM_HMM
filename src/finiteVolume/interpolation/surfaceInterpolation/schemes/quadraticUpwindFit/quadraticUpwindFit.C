@@ -26,7 +26,7 @@ License
 
 #include "UpwindFitScheme.H"
 #include "quadraticUpwindFitPolynomial.H"
-#include "upwindFECStencilObject.H"
+#include "upwindFECCellToFaceStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,7 +42,7 @@ namespace Foam
     (
         quadraticUpwindFit,
         quadraticUpwindFitPolynomial,
-        upwindFECStencilObject
+        upwindFECCellToFaceStencilObject
     );
 }
 

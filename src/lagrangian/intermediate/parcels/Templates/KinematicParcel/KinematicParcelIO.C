@@ -29,6 +29,20 @@ License
 #include "IOField.H"
 #include "Cloud.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::string Foam::KinematicParcel<ParcelType>::propHeader =
+    Particle<ParcelType>::propHeader
+  + " typeId"
+  + " nParticle"
+  + " d"
+  + " (Ux Uy Uz)"
+  + " rho"
+  + " tTurb"
+  + " UTurb";
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class ParcelType>
@@ -102,15 +116,15 @@ void Foam::KinematicParcel<ParcelType>::readFields
     IOField<label> typeId(c.fieldIOobject("typeId", IOobject::MUST_READ));
     c.checkFieldIOobject(c, typeId);
 
+    IOField<scalar>
+        nParticle(c.fieldIOobject("nParticle", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, nParticle);
+
     IOField<scalar> d(c.fieldIOobject("d", IOobject::MUST_READ));
     c.checkFieldIOobject(c, d);
 
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
-
-    IOField<scalar>
-        nParticle(c.fieldIOobject("nParticle", IOobject::MUST_READ));
-    c.checkFieldIOobject(c, nParticle);
 
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);

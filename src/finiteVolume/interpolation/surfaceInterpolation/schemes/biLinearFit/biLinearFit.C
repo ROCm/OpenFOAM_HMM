@@ -26,7 +26,7 @@ License
 
 #include "CentredFitScheme.H"
 #include "biLinearFitPolynomial.H"
-#include "centredCFCStencilObject.H"
+#include "centredCFCCellToFaceStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,7 +42,7 @@ namespace Foam
     (
         biLinearFit,
         biLinearFitPolynomial,
-        centredCFCStencilObject
+        centredCFCCellToFaceStencilObject
     );
 }
 

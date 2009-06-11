@@ -1,5 +1,5 @@
 {
-    bool closedVolume = pd.needReference();
+    bool closedVolume = p.needReference();
 
     rho = thermo.rho();
 
@@ -17,31 +17,34 @@
         )
     );
 
-    phi = phiU - ghf*fvc::snGrad(rho)*rhorUAf*mesh.magSf();
+    phi = phiU + fvc::interpolate(rho)*(g & mesh.Sf())*rhorUAf;
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pdEqn
+        fvScalarMatrix pEqn
         (
-            fvm::ddt(psi, pd)
-          + fvc::ddt(psi)*pRef
-          + fvc::ddt(psi, rho)*gh
+            fvm::ddt(psi, p)
           + fvc::div(phi)
-          - fvm::laplacian(rho*rUA, pd)
+          - fvm::laplacian(rhorUAf, p)
         );
 
-        if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
+        if
+        (
+            oCorr == nOuterCorr-1
+         && corr == nCorr-1
+         && nonOrth == nNonOrthCorr
+        )
         {
-            pdEqn.solve(mesh.solver(pd.name() + "Final"));
+            pEqn.solve(mesh.solver(p.name() + "Final"));
         }
         else
         {
-            pdEqn.solve(mesh.solver(pd.name()));
+            pEqn.solve(mesh.solver(p.name()));
         }
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi += pdEqn.flux();
+            phi += pEqn.flux();
         }
     }
 
@@ -49,27 +52,24 @@
     U += rUA*fvc::reconstruct((phi - phiU)/rhorUAf);
     U.correctBoundaryConditions();
 
-    // Update pressure field (including bc)
-    p == pd + rho*gh + pRef;
+    // Update pressure substantive derivative
     DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
     // Solve continuity
-#   include "rhoEqn.H"
+    #include "rhoEqn.H"
 
     // Update continuity errors
-#   include "compressibleContinuityErrors.H"
+    #include "compressibleContinuityErrors.H"
 
     // For closed-volume cases adjust the pressure and density levels
     // to obey overall mass continuity
     if (closedVolume)
     {
-        p += (massIni - fvc::domainIntegrate(psi*p))/fvc::domainIntegrate(psi);
+        p += (massIni - fvc::domainIntegrate(psi*p))
+            /fvc::domainIntegrate(psi);
         rho = thermo.rho();
     }
 
     // Update thermal conductivity
     K = thermoFluid[i].Cp()*turb.alphaEff();
-
-    // Update pd (including bc)
-    pd == p - (rho*gh + pRef);
 }

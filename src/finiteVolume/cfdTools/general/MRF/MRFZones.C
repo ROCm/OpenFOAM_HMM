@@ -65,6 +65,19 @@ void Foam::MRFZones::addCoriolis(fvVectorMatrix& UEqn) const
 }
 
 
+void Foam::MRFZones::addCoriolis
+(
+    const volScalarField& rho,
+    fvVectorMatrix& UEqn
+) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).addCoriolis(rho, UEqn);
+    }
+}
+
+
 void Foam::MRFZones::relativeVelocity(volVectorField& U) const
 {
     forAll(*this, i)

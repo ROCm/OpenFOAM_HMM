@@ -51,7 +51,7 @@ Foam::ReactingCloud<ParcelType>::carrierThermo()
 
 
 template<class ParcelType>
-inline const Foam::PtrList<Foam::specieReactingProperties>&
+inline const Foam::PtrList<typename ParcelType::thermoType>&
 Foam::ReactingCloud<ParcelType>::carrierSpecies() const
 {
     return carrierSpecies_;

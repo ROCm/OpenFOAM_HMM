@@ -241,6 +241,28 @@ void Foam::molecule::setSiteSizes(label size)
 }
 
 
+bool Foam::molecule::hitPatch
+(
+    const polyPatch&,
+    molecule::trackData&,
+    const label
+)
+{
+    return false;
+}
+
+
+bool Foam::molecule::hitPatch
+(
+    const polyPatch&,
+    int&,
+    const label
+)
+{
+    return false;
+}
+
+
 void Foam::molecule::hitProcessorPatch
 (
     const processorPolyPatch&,

@@ -110,6 +110,12 @@ private:
         //- tolerance used for sorting coordinates (used in 'less' routine)
         const scalar mergeDistance_;
 
+        //- overwrite the mesh?
+        const bool overwrite_;
+
+        //- Instance of mesh upon construction. Used when in overwrite_ mode.
+        const word oldInstance_;
+
         //- All surface-intersection interaction
         const refinementSurfaces& surfaces_;
 
@@ -124,6 +130,10 @@ private:
 
         //- user supplied face based data.
         List<Tuple2<mapType, labelList> > userFaceData_;
+
+        //- Meshed patches - are treated differently. Stored as wordList since
+        //  order changes.
+        wordList meshedPatches_;
 
 
     // Private Member Functions
@@ -162,9 +172,6 @@ private:
 
         //- Find any intersection of surface. Store in surfaceIndex_.
         void updateIntersections(const labelList& changedFaces);
-
-        //- Set instance of all local IOobjects
-        void setInstance(const fileName&);
 
         //- Remove cells. Put exposedFaces into exposedPatchIDs.
         autoPtr<mapPolyMesh> doRemoveCells
@@ -400,12 +407,11 @@ private:
                 const labelList& globalToPatch
             ) const;
 
-            //- Initial test of marking faces using geometric information.
-            labelList markFacesOnProblemCellsGeometric
-            (
-                const dictionary& motionDict,
-                const labelList& globalToPatch
-            ) const;
+            ////- Initial test of marking faces using geometric information.
+            //labelList markFacesOnProblemCellsGeometric
+            //(
+            //    const dictionary& motionDict
+            //) const;
 
 
         // Baffle merging
@@ -475,6 +481,7 @@ public:
         (
             fvMesh& mesh,
             const scalar mergeDistance,
+            const bool overwrite,
             const refinementSurfaces&,
             const shellSurfaces&
         );
@@ -497,6 +504,18 @@ public:
             scalar mergeDistance() const
             {
                 return mergeDistance_;
+            }
+
+            //- Overwrite the mesh?
+            bool overwrite() const
+            {
+                return overwrite_;
+            }
+
+            //- (points)instance of mesh upon construction
+            const word& oldInstance() const
+            {
+                return oldInstance_;
             }
 
             //- reference to surface search engines
@@ -577,9 +596,6 @@ public:
 
             //- Get points on surfaces with intersection and boundary faces.
             labelList intersectedPoints() const;
-
-            //- Get added patches (inverse of globalToPatch)
-            static labelList addedPatches(const labelList& globalToPatch);
 
             //- Create patch from set of patches
             static autoPtr<indirectPrimitivePatch> makePatch
@@ -688,8 +704,15 @@ public:
 
         // Other topo changes
 
-            //- Helper function to add patch to mesh
+            //- Helper:add patch to mesh. Update all registered fields.
+            //  Use addMeshedPatch to add patches originating from surfaces.
             static label addPatch(fvMesh&, const word& name, const word& type);
+
+            //- Add patch originating from meshing. Update meshedPatches_.
+            label addMeshedPatch(const word& name, const word& type);
+
+            //- Get patchIDs for patches added in addMeshedPatch.
+            labelList meshedPatches() const;
 
             //- Split mesh. Keep part containing point.
             autoPtr<mapPolyMesh> splitMeshRegions(const point& keepPoint);
@@ -699,7 +722,11 @@ public:
 
             //- Update for external change to mesh. changedFaces are in new mesh
             //  face labels.
-            void updateMesh(const mapPolyMesh&, const labelList& changedFaces);
+            void updateMesh
+            (
+                const mapPolyMesh&,
+                const labelList& changedFaces
+            );
 
 
             // Restoring : is where other processes delete and reinsert data.
@@ -756,6 +783,13 @@ public:
 
             //- Print some mesh stats.
             void printMeshInfo(const bool, const string&) const;
+
+            //- Replacement for Time::timeName() : return oldInstance (if
+            //  overwrite_)
+            word timeName() const;
+
+            //- Set instance of all local IOobjects
+            void setInstance(const fileName&);
 
             //- Write mesh and all data
             bool write() const;

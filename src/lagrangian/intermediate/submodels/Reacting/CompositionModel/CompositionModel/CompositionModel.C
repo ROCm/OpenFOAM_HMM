@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ Foam::CompositionModel<CloudType>::CompositionModel
     phaseProps_
     (
         coeffDict_.lookup("phases"),
-        carrierThermo_.composition().Y(),
+        carrierThermo_.composition().species(),
         liquids_().components(),
         solids_().components()
     )
@@ -110,7 +110,7 @@ Foam::CompositionModel<CloudType>::carrierThermo() const
 
 
 template<class CloudType>
-const Foam::PtrList<Foam::specieReactingProperties>&
+const Foam::PtrList<typename CloudType::thermoType>&
 Foam::CompositionModel<CloudType>::carrierSpecies() const
 {
     return carrierSpecies_;
@@ -184,9 +184,9 @@ Foam::label Foam::CompositionModel<CloudType>::globalCarrierId
     const word& cmptName
 ) const
 {
-    forAll(carrierThermo_.composition().Y(), i)
+    forAll(carrierThermo_.composition().species(), i)
     {
-        word carrierSpecieName = carrierThermo_.composition().Y()[i].name();
+        word carrierSpecieName = carrierThermo_.composition().species()[i];
         if (cmptName == carrierSpecieName)
         {
             return i;

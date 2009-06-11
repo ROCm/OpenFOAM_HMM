@@ -38,14 +38,14 @@ namespace Foam
 
 Foam::basicThermoCloud::basicThermoCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
     basicThermo& thermo
 )
 :
-    ThermoCloud<basicThermoParcel>(cloudType, rho, U, g, thermo)
+    ThermoCloud<basicThermoParcel>(cloudName, rho, U, g, thermo)
 {
     basicThermoParcel::readFields(*this);
 }
