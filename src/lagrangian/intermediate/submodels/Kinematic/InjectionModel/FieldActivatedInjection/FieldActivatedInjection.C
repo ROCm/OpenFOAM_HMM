@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -131,7 +131,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
         *sum(pow3(diameters_))
         *mathematicalConstant::pi/6.0;
 
-    // Set/cahce the injector cells
+    // Set/cache the injector cells
     forAll(positions_, i)
     {
         this->findCellAtPosition
@@ -170,6 +170,7 @@ template<class CloudType>
 void Foam::FieldActivatedInjection<CloudType>::setPositionAndCell
 (
     const label parcelI,
+    const label,
     const scalar,
     vector& position,
     label& cellOwner
@@ -181,24 +182,26 @@ void Foam::FieldActivatedInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-Foam::vector Foam::FieldActivatedInjection<CloudType>::velocity
+void Foam::FieldActivatedInjection<CloudType>::setProperties
 (
+    const label parcelI,
     const label,
-    const scalar
+    const scalar,
+    typename CloudType::parcelType& parcel
 )
 {
-    return U0_;
+    // set particle velocity
+    parcel.U() = U0_;
+
+    // set particle diameter
+    parcel.d() = diameters_[parcelI];
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::FieldActivatedInjection<CloudType>::d0
-(
-    const label parcelI,
-    const scalar
-) const
+bool Foam::FieldActivatedInjection<CloudType>::fullyDescribed() const
 {
-    return diameters_[parcelI];
+    return false;
 }
 
 
@@ -212,8 +215,8 @@ bool Foam::FieldActivatedInjection<CloudType>::validInjection
 
     if
     (
-         nParcelsInjected_[parcelI] < nParcelsPerInjector_
-      && factor_*referenceField_[cellI] > thresholdField_[cellI]
+        nParcelsInjected_[parcelI] < nParcelsPerInjector_
+     && factor_*referenceField_[cellI] > thresholdField_[cellI]
     )
     {
         nParcelsInjected_[parcelI]++;

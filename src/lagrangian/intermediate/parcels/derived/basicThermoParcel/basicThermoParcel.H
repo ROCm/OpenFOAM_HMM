@@ -59,6 +59,15 @@ public:
 
     // Constructors
 
+       //- Construct from owner, position, and cloud owner
+       //  Other properties initialised as null
+       basicThermoParcel
+       (
+            ThermoCloud<basicThermoParcel>& owner,
+            const vector position,
+            const label cellI
+       );
+
        //- Construct from components
        basicThermoParcel
        (
@@ -80,10 +89,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        basicThermoParcel(const basicThermoParcel& p);
+
         //- Construct and return a clone
         autoPtr<basicThermoParcel> clone() const
         {
-            return autoPtr<basicThermoParcel>(new basicThermoParcel(*this));
+            return
+                autoPtr<basicThermoParcel>
+                (
+                    new basicThermoParcel(*this)
+                );
         }
 
 

@@ -346,6 +346,15 @@ inline bool Particle<ParticleType>::softImpact() const
 
 
 template<class ParticleType>
+inline scalar Particle<ParticleType>::currentTime() const
+{
+    return
+        cloud_.pMesh().time().value()
+      + stepFraction_*cloud_.pMesh().time().deltaT().value();
+}
+
+
+template<class ParticleType>
 inline label Particle<ParticleType>::patch(const label facei) const
 {
     return cloud_.facePatch(facei);
