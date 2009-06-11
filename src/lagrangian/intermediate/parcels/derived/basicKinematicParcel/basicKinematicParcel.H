@@ -60,6 +60,15 @@ public:
 
     // Constructors
 
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        basicKinematicParcel
+        (
+            KinematicCloud<basicKinematicParcel>& owner,
+            const vector& position,
+            const label cellI
+        );
+
         //- Construct from components
         basicKinematicParcel
         (
@@ -81,11 +90,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        basicKinematicParcel(const basicKinematicParcel& p);
+
         //- Construct and return a clone
         autoPtr<basicKinematicParcel> clone() const
         {
-            return autoPtr<basicKinematicParcel>
-                (new basicKinematicParcel(*this));
+            return
+                autoPtr<basicKinematicParcel>
+                (
+                    new basicKinematicParcel(*this)
+                );
         }
 
 

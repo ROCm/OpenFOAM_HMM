@@ -115,6 +115,28 @@ bool Foam::trackedParticle::move(trackedParticle::trackData& td)
 }
 
 
+bool Foam::trackedParticle::hitPatch
+(
+    const polyPatch&,
+    trackedParticle::trackData& td,
+    const label patchI
+)
+{
+    return false;
+}
+
+
+bool Foam::trackedParticle::hitPatch
+(
+    const polyPatch&,
+    int&,
+    const label
+)
+{
+    return false;
+}
+
+
 void Foam::trackedParticle::hitWedgePatch
 (
     const wedgePolyPatch&,

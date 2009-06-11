@@ -29,13 +29,14 @@ Description
     Virtual abstract base class for templated ReactingCloud
 
 SourceFiles
+    reactingCloud.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef reactingCloud_H
 #define reactingCloud_H
 
-#include "volFields.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

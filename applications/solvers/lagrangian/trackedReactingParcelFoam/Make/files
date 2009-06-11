@@ -1,0 +1,3 @@
+trackedReactingParcelFoam.C
+
+EXE = $(FOAM_APPBIN)/trackedReactingParcelFoam

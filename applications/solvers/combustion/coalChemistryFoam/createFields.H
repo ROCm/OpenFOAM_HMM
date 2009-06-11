@@ -105,8 +105,8 @@
     volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
-    Info<< "\nConstructing explicit enthalpy source" << endl;
-    timeActivatedExplicitSource enthalpySource
+    Info<< "\nConstructing explicit enthalpy cell source" << endl;
+    timeActivatedExplicitCellSource enthalpySource
     (
         "enthalpySource",
         mesh,

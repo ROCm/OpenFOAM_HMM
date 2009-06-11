@@ -60,7 +60,7 @@ class SurfaceReactionModel
         //- The cloud dictionary
         const dictionary& dict_;
 
-        // reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
         //- The coefficients dictionary
@@ -172,22 +172,18 @@ public:
     );
 
 
-#define makeSurfaceReactionModelType(SS, CloudType, ParcelType)               \
+#define makeSurfaceReactionModelThermoType(SS, CloudType, ParcelType, ThermoType)\
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
                                                                               \
-    SurfaceReactionModel<CloudType<ParcelType> >::                            \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
-
-
-#define makeSurfaceReactionModelTypeInstance(SS, CloudType, ParcelType)       \
-                                                                              \
-    defineNamedTemplateTypeNameAndDebug(SS, 0);                               \
-                                                                              \
-    SurfaceReactionModel<CloudType<ParcelType> >::                            \
-        adddictionaryConstructorToTable<SS>                                   \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    SurfaceReactionModel<CloudType<ParcelType<ThermoType> > >::               \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

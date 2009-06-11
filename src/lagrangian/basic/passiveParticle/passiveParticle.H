@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class passiveParticle Declaration
+                      Class passiveParticle Declaration
 \*---------------------------------------------------------------------------*/
 
 class passiveParticle
@@ -79,6 +79,12 @@ public:
         )
         :
             Particle<passiveParticle>(c, is)
+        {}
+
+        //- Construct as copy
+        passiveParticle(const passiveParticle& p)
+        :
+            Particle<passiveParticle>(p)
         {}
 
         //- Construct and return a clone

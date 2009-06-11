@@ -61,7 +61,7 @@ class HeatTransferModel
         //- Reference to the owner cloud class
         CloudType& owner_;
 
-        //- The coefficents dictionary
+        //- The coefficients dictionary
         const dictionary coeffDict_;
 
 
@@ -138,7 +138,7 @@ public:
         virtual scalar Pr() const = 0;
 
         //- Return heat transfer coefficient
-        scalar h
+        virtual scalar h
         (
             const scalar dp,
             const vector& Ur,
@@ -150,7 +150,7 @@ public:
         ) const;
 
         //- Return linearised coefficient for temperature equation
-        scalar Cu
+        virtual scalar Cu
         (
             const scalar dp,
             const vector& Ur,
@@ -187,6 +187,20 @@ public:
     HeatTransferModel<CloudType<ParcelType> >::                               \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
+
+
+#define makeHeatTransferModelThermoType(SS, CloudType, ParcelType, ThermoType)\
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    HeatTransferModel<CloudType<ParcelType<ThermoType> > >::                  \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
