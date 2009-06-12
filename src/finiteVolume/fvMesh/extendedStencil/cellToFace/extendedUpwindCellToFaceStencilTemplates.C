@@ -54,7 +54,10 @@ Foam::extendedUpwindCellToFaceStencil::weightedSum
             (
                 fld.name(),
                 mesh.time().timeName(),
-                mesh
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
             ),
             mesh,
             dimensioned<Type>

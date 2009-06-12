@@ -65,6 +65,7 @@ $(cellToFace)/MeshObjects/upwindCECCellToFaceStencilObject.C
 $(cellToFace)/MeshObjects/upwindCFCCellToFaceStencilObject.C
 $(cellToFace)/MeshObjects/upwindCPCCellToFaceStencilObject.C
 $(cellToFace)/MeshObjects/upwindFECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/pureUpwindCFCCellToFaceStencilObject.C
 
 faceToCell = $(extendedStencil)/faceToCell
 $(faceToCell)/fullStencils/faceToCellStencil.C
@@ -216,6 +217,10 @@ $(schemes)/quadraticFit/quadraticFit.C
 $(schemes)/quadraticLinearUpwindFit/quadraticLinearUpwindFit.C
 $(schemes)/quadraticUpwindFit/quadraticUpwindFit.C
 $(schemes)/cubicUpwindFit/cubicUpwindFit.C
+/*
+$(schemes)/quadraticLinearPureUpwindFit/quadraticLinearPureUpwindFit.C
+*/
+$(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C

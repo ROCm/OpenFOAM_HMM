@@ -88,7 +88,21 @@ private:
         void operator=(const extendedCellToFaceStencil&);
 
 
+protected:
+
+        //- Write some statistics about stencil
+        static void writeStencilStats
+        (
+            Ostream& os,
+            const labelListList& stencil,
+            const mapDistribute& map
+        );
+
 public:
+
+    // Declare name of the class and its debug switch
+    ClassName("extendedCellToFaceStencil");
+
 
     // Constructors
 

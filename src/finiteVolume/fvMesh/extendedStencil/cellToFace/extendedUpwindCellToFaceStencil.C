@@ -375,10 +375,12 @@ void Foam::extendedUpwindCellToFaceStencil::transportStencils
 Foam::extendedUpwindCellToFaceStencil::extendedUpwindCellToFaceStencil
 (
     const cellToFaceStencil& stencil,
+    const bool pureUpwind,
     const scalar minOpposedness
 )
 :
-    extendedCellToFaceStencil(stencil.mesh())
+    extendedCellToFaceStencil(stencil.mesh()),
+    pureUpwind_(pureUpwind)
 {
     //forAll(stencil, faceI)
     //{
@@ -430,6 +432,134 @@ Foam::extendedUpwindCellToFaceStencil::extendedUpwindCellToFaceStencil
         stencil.globalNumbering(),
         neiStencil_
     );
+
+    // stencil now in compact form
+    if (pureUpwind_)
+    {
+        const fvMesh& mesh = dynamic_cast<const fvMesh&>(stencil.mesh());
+
+        List<List<point> > stencilPoints(ownStencil_.size());
+
+        // Owner stencil
+        // ~~~~~~~~~~~~~
+
+        collectData(ownMapPtr_(), ownStencil_, mesh.C(), stencilPoints);
+
+        // Mask off all stencil points on wrong side of face
+        forAll(stencilPoints, faceI)
+        {
+            const point& fc = mesh.faceCentres()[faceI];
+            const vector& fArea = mesh.faceAreas()[faceI];
+
+            const List<point>& points = stencilPoints[faceI];
+            const labelList& stencil = ownStencil_[faceI];
+
+            DynamicList<label> newStencil(stencil.size());
+            forAll(points, i)
+            {
+                if (((points[i]-fc) & fArea) < 0)
+                {
+                    newStencil.append(stencil[i]);
+                }
+            }
+            if (newStencil.size() != stencil.size())
+            {
+                ownStencil_[faceI].transfer(newStencil);
+            }
+        }
+
+
+        // Neighbour stencil
+        // ~~~~~~~~~~~~~~~~~
+
+        collectData(neiMapPtr_(), neiStencil_, mesh.C(), stencilPoints);
+
+        // Mask off all stencil points on wrong side of face
+        forAll(stencilPoints, faceI)
+        {
+            const point& fc = mesh.faceCentres()[faceI];
+            const vector& fArea = mesh.faceAreas()[faceI];
+
+            const List<point>& points = stencilPoints[faceI];
+            const labelList& stencil = neiStencil_[faceI];
+
+            DynamicList<label> newStencil(stencil.size());
+            forAll(points, i)
+            {
+                if (((points[i]-fc) & fArea) > 0)
+                {
+                    newStencil.append(stencil[i]);
+                }
+            }
+            if (newStencil.size() != stencil.size())
+            {
+                neiStencil_[faceI].transfer(newStencil);
+            }
+        }
+
+        // Note: could compact schedule as well. for if cells are not needed
+        // across any boundary anymore. However relatively rare.
+    }
+}
+
+
+Foam::extendedUpwindCellToFaceStencil::extendedUpwindCellToFaceStencil
+(
+    const cellToFaceStencil& stencil
+)
+:
+    extendedCellToFaceStencil(stencil.mesh()),
+    pureUpwind_(true)
+{
+    // Calculate stencil points with full stencil
+
+    ownStencil_ = stencil;
+
+    ownMapPtr_ = calcDistributeMap
+    (
+        stencil.mesh(),
+        stencil.globalNumbering(),
+        ownStencil_
+    );
+
+    const fvMesh& mesh = dynamic_cast<const fvMesh&>(stencil.mesh());
+
+    List<List<point> > stencilPoints(ownStencil_.size());
+    collectData(ownMapPtr_(), ownStencil_, mesh.C(), stencilPoints);
+
+    // Split stencil into owner and neighbour
+    neiStencil_.setSize(ownStencil_.size());
+
+    forAll(stencilPoints, faceI)
+    {
+        const point& fc = mesh.faceCentres()[faceI];
+        const vector& fArea = mesh.faceAreas()[faceI];
+
+        const List<point>& points = stencilPoints[faceI];
+        const labelList& stencil = ownStencil_[faceI];
+
+        DynamicList<label> newOwnStencil(stencil.size());
+        DynamicList<label> newNeiStencil(stencil.size());
+        forAll(points, i)
+        {
+            if (((points[i]-fc) & fArea) > 0)
+            {
+                newNeiStencil.append(stencil[i]);
+            }
+            else
+            {
+                newOwnStencil.append(stencil[i]);
+            }
+        }
+        if (newNeiStencil.size() > 0)
+        {
+            ownStencil_[faceI].transfer(newOwnStencil);
+            neiStencil_[faceI].transfer(newNeiStencil);
+        }
+    }
+
+    // Should compact schedule. Or have both return the same schedule.
+    neiMapPtr_.reset(new mapDistribute(ownMapPtr_()));
 }
 
 

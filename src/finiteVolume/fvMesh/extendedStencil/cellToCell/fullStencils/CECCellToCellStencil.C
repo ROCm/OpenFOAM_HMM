@@ -26,9 +26,6 @@ License
 
 #include "CECCellToCellStencil.H"
 #include "syncTools.H"
-//#include "meshTools.H"
-//#include "OFstream.H"
-//#include "Time.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

@@ -49,7 +49,7 @@ Foam::CentredFitData<Polynomial>::CentredFitData
         Polynomial
     >
     (
-        mesh, stencil, linearLimitFactor, centralWeight
+        mesh, stencil, true, linearLimitFactor, centralWeight
     ),
     coeffs_(mesh.nFaces())
 {

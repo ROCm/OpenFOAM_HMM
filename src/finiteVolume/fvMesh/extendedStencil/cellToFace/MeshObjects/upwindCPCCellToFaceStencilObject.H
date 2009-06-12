@@ -63,6 +63,7 @@ public:
         explicit upwindCPCCellToFaceStencilObject
         (
             const fvMesh& mesh,
+            const bool pureUpwind,
             const scalar minOpposedness
         )
         :
@@ -70,9 +71,17 @@ public:
             extendedUpwindCellToFaceStencil
             (
                 CPCCellToFaceStencil(mesh),
+                pureUpwind,
                 minOpposedness
             )
-        {}
+        {
+            if (extendedCellToFaceStencil::debug)
+            {
+                Info<< "Generated off-centred stencil " << type()
+                    << nl << endl;
+                writeStencilStats(Info, ownStencil(), ownMap());
+            }
+        }
 
 
     // Destructor

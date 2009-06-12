@@ -67,7 +67,14 @@ public:
         :
             MeshObject<fvMesh, centredCPCCellToFaceStencilObject>(mesh),
             extendedCentredCellToFaceStencil(CPCCellToFaceStencil(mesh))
-        {}
+        {
+            if (extendedCellToFaceStencil::debug)
+            {
+                Info<< "Generated centred stencil " << type()
+                    << nl << endl;
+                writeStencilStats(Info, stencil(), map());
+            }
+        }
 
 
     // Destructor

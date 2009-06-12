@@ -23,19 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::UpwindFitScheme
+    Foam::PureUpwindFitScheme
 
 Description
     Upwind biased fit surface interpolation scheme that applies an explicit
-    correction to linear.
+    correction to upwind.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef UpwindFitScheme_H
-#define UpwindFitScheme_H
+#ifndef PureUpwindFitScheme_H
+#define PureUpwindFitScheme_H
 
 #include "UpwindFitData.H"
-#include "linear.H"
+#include "upwind.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -43,18 +44,15 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class UpwindFitScheme Declaration
+                           Class PureUpwindFitScheme Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type, class Polynomial, class Stencil>
-class UpwindFitScheme
+class PureUpwindFitScheme
 :
-    public linear<Type>
+    public upwind<Type>
 {
     // Private Data
-
-        //- Reference to the surface flux used to choose upwind direction
-        const surfaceScalarField& faceFlux_;
 
         //- Factor the fit is allowed to deviate from linear.
         //  This limits the amount of high-order correction and increases
@@ -68,16 +66,16 @@ class UpwindFitScheme
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        UpwindFitScheme(const UpwindFitScheme&);
+        PureUpwindFitScheme(const PureUpwindFitScheme&);
 
         //- Disallow default bitwise assignment
-        void operator=(const UpwindFitScheme&);
+        void operator=(const PureUpwindFitScheme&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("UpwindFitScheme");
+    TypeName("PureUpwindFitScheme");
 
 
     // Constructors
@@ -85,25 +83,27 @@ public:
         //- Construct from mesh and Istream
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
-        UpwindFitScheme(const fvMesh& mesh, Istream& is)
+        PureUpwindFitScheme(const fvMesh& mesh, Istream& is)
         :
-            linear<Type>(mesh),
-            faceFlux_(mesh.lookupObject<surfaceScalarField>(word(is))),
+            upwind<Type>
+            (
+                mesh,
+                mesh.lookupObject<surfaceScalarField>(word(is))
+            ),
             linearLimitFactor_(readScalar(is)),
             centralWeight_(1000)
         {}
 
 
         //- Construct from mesh, faceFlux and Istream
-        UpwindFitScheme
+        PureUpwindFitScheme
         (
             const fvMesh& mesh,
             const surfaceScalarField& faceFlux,
             Istream& is
         )
         :
-            linear<Type>(mesh),
-            faceFlux_(faceFlux),
+            upwind<Type>(mesh, faceFlux),
             linearLimitFactor_(readScalar(is)),
             centralWeight_(1000)
         {}
@@ -126,19 +126,15 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
-            const extendedUpwindCellToFaceStencil& stencil = Stencil::New
-            (
-                mesh,
-                false,          //pureUpwind
-                scalar(0.5)
-            );
+            // Use the owner/neighbour splitting constructor
+            const extendedUpwindCellToFaceStencil& stencil = Stencil::New(mesh);
 
             const UpwindFitData<Polynomial>& ufd =
             UpwindFitData<Polynomial>::New
             (
                 mesh,
                 stencil,
-                true,           //calculate as offset to linear
+                false,              //offset to upwind
                 linearLimitFactor_,
                 centralWeight_
             );
@@ -146,7 +142,7 @@ public:
             const List<scalarList>& fo = ufd.owncoeffs();
             const List<scalarList>& fn = ufd.neicoeffs();
 
-            return stencil.weightedSum(faceFlux_, vf, fo, fn);
+            return stencil.weightedSum(this->faceFlux_, vf, fo, fn);
         }
 };
 
@@ -159,28 +155,28 @@ public:
 
 // Add the patch constructor functions to the hash tables
 
-#define makeUpwindFitSurfaceInterpolationTypeScheme(SS, POLYNOMIAL, STENCIL, TYPE) \
+#define makePureUpwindFitSurfaceInterpolationTypeScheme(SS, POLYNOMIAL, STENCIL, TYPE) \
                                                                               \
-typedef UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL>                            \
-    UpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                            \
+typedef PureUpwindFitScheme<TYPE, POLYNOMIAL, STENCIL>                            \
+    PureUpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_;                            \
 defineTemplateTypeNameAndDebugWithName                                        \
-    (UpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_, #SS, 0);                  \
+    (PureUpwindFitScheme##TYPE##POLYNOMIAL##STENCIL##_, #SS, 0);                  \
                                                                               \
 surfaceInterpolationScheme<TYPE>::addMeshConstructorToTable                   \
-<UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                 \
+<PureUpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                 \
     add##SS##STENCIL##TYPE##MeshConstructorToTable_;                          \
                                                                               \
 surfaceInterpolationScheme<TYPE>::addMeshFluxConstructorToTable               \
-<UpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                 \
+<PureUpwindFitScheme<TYPE, POLYNOMIAL, STENCIL> >                                 \
     add##SS##STENCIL##TYPE##MeshFluxConstructorToTable_;
 
-#define makeUpwindFitSurfaceInterpolationScheme(SS, POLYNOMIAL, STENCIL)      \
+#define makePureUpwindFitSurfaceInterpolationScheme(SS, POLYNOMIAL, STENCIL)      \
                                                                               \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)     \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)     \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,sphericalTensor) \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor) \
-makeUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,tensor)
+makePureUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,scalar)     \
+makePureUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,vector)     \
+makePureUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,sphericalTensor) \
+makePureUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,symmTensor) \
+makePureUpwindFitSurfaceInterpolationTypeScheme(SS,POLYNOMIAL,STENCIL,tensor)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

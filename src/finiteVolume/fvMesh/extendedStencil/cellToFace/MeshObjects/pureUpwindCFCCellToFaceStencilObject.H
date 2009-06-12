@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::centredFECCellToFaceStencilObject
+    Foam::upwindCFCCellToFaceStencilObject
 
 Description
 
@@ -31,11 +31,11 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef centredFECCellToFaceStencilObject_H
-#define centredFECCellToFaceStencilObject_H
+#ifndef pureUpwindCFCCellToFaceStencilObject_H
+#define pureUpwindCFCCellToFaceStencilObject_H
 
-#include "extendedCentredCellToFaceStencil.H"
-#include "FECCellToFaceStencil.H"
+#include "extendedUpwindCellToFaceStencil.H"
+#include "CFCCellToFaceStencil.H"
 #include "MeshObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -44,42 +44,42 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class centredFECCellToFaceStencilObject Declaration
+            Class pureUpwindCFCCellToFaceStencilObject Declaration
 \*---------------------------------------------------------------------------*/
 
-class centredFECCellToFaceStencilObject
+class pureUpwindCFCCellToFaceStencilObject
 :
-    public MeshObject<fvMesh, centredFECCellToFaceStencilObject>,
-    public extendedCentredCellToFaceStencil
+    public MeshObject<fvMesh, pureUpwindCFCCellToFaceStencilObject>,
+    public extendedUpwindCellToFaceStencil
 {
 
 public:
 
-    TypeName("centredCFCCellToFaceStencil");
+    TypeName("pureUpwindCFCCellToFaceStencil");
 
     // Constructors
 
         //- Construct from uncompacted face stencil
-        explicit centredFECCellToFaceStencilObject
+        explicit pureUpwindCFCCellToFaceStencilObject
         (
             const fvMesh& mesh
         )
         :
-            MeshObject<fvMesh, centredFECCellToFaceStencilObject>(mesh),
-            extendedCentredCellToFaceStencil(FECCellToFaceStencil(mesh))
+            MeshObject<fvMesh, pureUpwindCFCCellToFaceStencilObject>(mesh),
+            extendedUpwindCellToFaceStencil(CFCCellToFaceStencil(mesh))
         {
             if (extendedCellToFaceStencil::debug)
             {
-                Info<< "Generated centred stencil " << type()
+                Info<< "Generated pure upwind stencil " << type()
                     << nl << endl;
-                writeStencilStats(Info, stencil(), map());
+                writeStencilStats(Info, ownStencil(), ownMap());
             }
         }
 
 
     // Destructor
 
-        virtual ~centredFECCellToFaceStencilObject()
+        virtual ~pureUpwindCFCCellToFaceStencilObject()
         {}
 };
 

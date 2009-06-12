@@ -27,7 +27,14 @@ Class
 
 Description
     Creates upwind stencil by shifting a centred stencil to upwind and downwind
-    faces.
+    faces and optionally removing all non-(up/down)wind faces ('pureUpwind').
+
+    Note: the minOpposedness parameter is to decide which upwind and
+    downwind faces to combine the stencils from. If myArea is the
+    local area and upwindArea
+    the area of the possible upwind candidate it will be included if
+        (upwindArea & myArea)/magSqr(myArea) > minOpposedness
+    so this includes both cosine and area. WIP.
 
 SourceFiles
     extendedUpwindCellToFaceStencil.C
@@ -56,6 +63,9 @@ class extendedUpwindCellToFaceStencil
     public extendedCellToFaceStencil
 {
     // Private data
+
+        //- Does stencil contain upwind points only
+        const bool pureUpwind_;
 
         //- Swap map for getting neigbouring data
         autoPtr<mapDistribute> ownMapPtr_;
@@ -115,15 +125,30 @@ public:
 
     // Constructors
 
-        //- Construct from mesh and uncompacted face stencil
+        //- Construct from mesh and uncompacted centred face stencil.
+        //  Transports facestencil to create owner and neighbour versions.
+        //  pureUpwind to remove any remaining downwind cells.
         extendedUpwindCellToFaceStencil
         (
             const cellToFaceStencil&,
+            const bool pureUpwind,
             const scalar minOpposedness
+        );
+
+        //- Construct from mesh and uncompacted centred face stencil. Splits
+        //  stencil into owner and neighbour (so always pure upwind)
+        extendedUpwindCellToFaceStencil
+        (
+            const cellToFaceStencil&
         );
 
 
     // Member Functions
+
+        bool pureUpwind() const
+        {
+            return pureUpwind_;
+        }
 
         //- Return reference to the parallel distribution map
         const mapDistribute& ownMap() const

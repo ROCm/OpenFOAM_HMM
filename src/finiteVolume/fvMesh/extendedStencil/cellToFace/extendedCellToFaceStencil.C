@@ -29,7 +29,69 @@ License
 #include "syncTools.H"
 #include "SortableList.H"
 
+/* * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * */
+
+defineTypeNameAndDebug(Foam::extendedCellToFaceStencil, 0);
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::extendedCellToFaceStencil::writeStencilStats
+(
+    Ostream& os,
+    const labelListList& stencil,
+    const mapDistribute& map
+)
+{
+    label sumSize = 0;
+    label nSum = 0;
+    label minSize = labelMax;
+    label maxSize = labelMin;
+
+    forAll(stencil, i)
+    {
+        const labelList& sCells = stencil[i];
+
+        if (sCells.size() > 0)
+        {
+            sumSize += sCells.size();
+            nSum++;
+            minSize = min(minSize, sCells.size());
+            maxSize = max(maxSize, sCells.size());
+        }
+    }
+    reduce(sumSize, sumOp<label>());
+    reduce(nSum, sumOp<label>());
+
+    reduce(minSize, minOp<label>());
+    reduce(maxSize, maxOp<label>());
+
+    os  << "Stencil size :" << nl
+        << "    average : " << scalar(sumSize)/nSum << nl
+        << "    min     : " << minSize << nl
+        << "    max     : " << maxSize << nl
+        << endl;
+
+    // Sum all sent data
+    label nSent = 0;
+    label nLocal = 0;
+    forAll(map.subMap(), procI)
+    {
+        if (procI != Pstream::myProcNo())
+        {
+            nSent += map.subMap()[procI].size();
+        }
+        else
+        {
+            nLocal += map.subMap()[procI].size();
+        }
+    }
+
+    os  << "Local data size : " << returnReduce(nLocal, sumOp<label>()) << nl
+        << "Sent data size  : " << returnReduce(nSent, sumOp<label>()) << nl
+        << endl;
+}
+
 
 Foam::autoPtr<Foam::mapDistribute>
 Foam::extendedCellToFaceStencil::calcDistributeMap
@@ -211,8 +273,9 @@ Foam::extendedCellToFaceStencil::calcDistributeMap
         }
     }
 
+
     // Constuct map for distribution of compact data.
-    return autoPtr<mapDistribute>
+    autoPtr<mapDistribute> mapPtr
     (
         new mapDistribute
         (
@@ -222,6 +285,8 @@ Foam::extendedCellToFaceStencil::calcDistributeMap
             true            // reuse send/recv maps.
         )
     );
+
+    return mapPtr;
 }
 
 

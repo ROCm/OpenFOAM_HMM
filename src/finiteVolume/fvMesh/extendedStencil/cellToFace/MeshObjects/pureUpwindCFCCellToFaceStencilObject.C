@@ -24,26 +24,15 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "UpwindFitScheme.H"
-#include "quadraticLinearUpwindFitPolynomial.H"
-#include "upwindFECCellToFaceStencilObject.H"
+#include "pureUpwindCFCCellToFaceStencilObject.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    defineTemplateTypeNameAndDebug
-    (
-        UpwindFitData<quadraticLinearUpwindFitPolynomial>,
-        0
-    );
-
-    makeUpwindFitSurfaceInterpolationScheme
-    (
-        quadraticLinearUpwindFit,
-        quadraticLinearUpwindFitPolynomial,
-        upwindFECCellToFaceStencilObject
-    );
+    defineTypeNameAndDebug(pureUpwindCFCCellToFaceStencilObject, 0);
 }
+
 
 // ************************************************************************* //

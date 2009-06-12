@@ -35,7 +35,7 @@ SourceFiles
 #define upwindCFCCellToFaceStencilObject_H
 
 #include "extendedUpwindCellToFaceStencil.H"
-#include "FECCellToFaceStencil.H"
+#include "CFCCellToFaceStencil.H"
 #include "MeshObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,16 +63,25 @@ public:
         explicit upwindCFCCellToFaceStencilObject
         (
             const fvMesh& mesh,
+            const bool pureUpwind,
             const scalar minOpposedness
         )
         :
             MeshObject<fvMesh, upwindCFCCellToFaceStencilObject>(mesh),
             extendedUpwindCellToFaceStencil
             (
-                FECCellToFaceStencil(mesh),
+                CFCCellToFaceStencil(mesh),
+                pureUpwind,
                 minOpposedness
             )
-        {}
+        {
+            if (extendedCellToFaceStencil::debug)
+            {
+                Info<< "Generated off-centred stencil " << type()
+                    << nl << endl;
+                writeStencilStats(Info, ownStencil(), ownMap());
+            }
+        }
 
 
     // Destructor
