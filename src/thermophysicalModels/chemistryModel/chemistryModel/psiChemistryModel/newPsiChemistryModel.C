@@ -34,6 +34,8 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
 )
 {
     word psiChemistryModelType;
+    word thermoTypeName;
+    word userSel;
 
     // Enclose the creation of the chemistrtyProperties to ensure it is
     // deleted before the chemistrtyProperties is created otherwise the
@@ -51,25 +53,41 @@ Foam::autoPtr<Foam::psiChemistryModel> Foam::psiChemistryModel::New
             )
         );
 
-        chemistryPropertiesDict.lookup("psiChemistryModel") >>
-            psiChemistryModelType;
+        chemistryPropertiesDict.lookup("psiChemistryModel") >> userSel;
+
+        // construct chemistry model type name by inserting first template
+        // argument
+        label tempOpen = userSel.find('<');
+        label tempClose = userSel.find('>');
+
+        word className = userSel(0, tempOpen);
+        thermoTypeName = userSel(tempOpen + 1, tempClose - tempOpen - 1);
+
+        psiChemistryModelType =
+            className + '<' + typeName + ',' + thermoTypeName + '>';
     }
 
-    Info<< "Selecting psiChemistryModel " << psiChemistryModelType << endl;
+    Info<< "Selecting psiChemistryModel " << userSel << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
         fvMeshConstructorTablePtr_->find(psiChemistryModelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
+        wordList models = fvMeshConstructorTablePtr_->toc();
+        forAll(models, i)
+        {
+            models[i] = models[i].replace(typeName + ',', "");
+        }
+
         FatalErrorIn("psiChemistryModelBase::New(const mesh&)")
-            << "Unknown psiChemistryModel type " << psiChemistryModelType
+            << "Unknown psiChemistryModel type " << userSel
             << nl << nl << "Valid psiChemistryModel types are:" << nl
-            << fvMeshConstructorTablePtr_->toc() << nl
-            << exit(FatalError);
+            << models << nl << exit(FatalError);
     }
 
-    return autoPtr<psiChemistryModel>(cstrIter()(mesh));
+    return autoPtr<psiChemistryModel>
+        (cstrIter()(mesh, typeName, thermoTypeName));
 }
 
 

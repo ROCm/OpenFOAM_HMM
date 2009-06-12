@@ -65,6 +65,9 @@ protected:
         //- Reference to the chemistry model
         ODEChemistryModel<CompType, ThermoType>& model_;
 
+        //- Name of the chemistry solver
+        const word name_;
+
 
 public:
 
@@ -79,22 +82,29 @@ public:
             chemistrySolver,
             dictionary,
             (
-                ODEChemistryModel<CompType, ThermoType>& model
+                ODEChemistryModel<CompType, ThermoType>& model,
+                const word& modelName
             ),
-            (model)
+            (model, modelName)
         );
 
 
     // Constructors
 
         //- Construct from components
-        chemistrySolver(ODEChemistryModel<CompType, ThermoType>& model);
+        chemistrySolver
+        (
+            ODEChemistryModel<CompType, ThermoType>& model,
+            const word& modelName
+        );
 
 
     //- Selector
     static autoPtr<chemistrySolver> New
     (
-        ODEChemistryModel<CompType, ThermoType>& model
+        ODEChemistryModel<CompType, ThermoType>& model,
+        const word& compTypeName,
+        const word& thermoTypeName
     );
 
 

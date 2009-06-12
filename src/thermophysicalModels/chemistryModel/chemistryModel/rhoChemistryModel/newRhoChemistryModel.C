@@ -34,6 +34,8 @@ Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
 )
 {
     word rhoChemistryModelType;
+    word thermoTypeName;
+    word userSel;
 
     // Enclose the creation of the chemistrtyProperties to ensure it is
     // deleted before the chemistrtyProperties is created otherwise the
@@ -51,25 +53,41 @@ Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
             )
         );
 
-        chemistryPropertiesDict.lookup("rhoChemistryModel") >>
-            rhoChemistryModelType;
+        chemistryPropertiesDict.lookup("rhoChemistryModelType") >> userSel;
+
+        // construct chemistry model type name by inserting first template
+        // argument
+        label tempOpen = userSel.find('<');
+        label tempClose = userSel.find('>');
+
+        word className = userSel(0, tempOpen);
+        thermoTypeName = userSel(tempOpen + 1, tempClose - tempOpen - 1);
+
+        rhoChemistryModelType =
+            className + '<' + typeName + ',' + thermoTypeName + '>';
     }
 
-    Info<< "Selecting rhoChemistryModel " << rhoChemistryModelType << endl;
+    Info<< "Selecting rhoChemistryModel " << userSel << endl;
 
     fvMeshConstructorTable::iterator cstrIter =
         fvMeshConstructorTablePtr_->find(rhoChemistryModelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
+        wordList models = fvMeshConstructorTablePtr_->toc();
+        forAll(models, i)
+        {
+            models[i] = models[i].replace(typeName + ',', "");
+        }
+
         FatalErrorIn("rhoChemistryModelBase::New(const mesh&)")
-            << "Unknown rhoChemistryModel type " << rhoChemistryModelType
+            << "Unknown rhoChemistryModel type " << userSel
             << nl << nl << "Valid rhoChemistryModel types are:" << nl
-            << fvMeshConstructorTablePtr_->toc() << nl
-            << exit(FatalError);
+            << models << nl << exit(FatalError);
     }
 
-    return autoPtr<rhoChemistryModel>(cstrIter()(mesh));
+    return autoPtr<rhoChemistryModel>
+        (cstrIter()(mesh, typeName, thermoTypeName));
 }
 
 

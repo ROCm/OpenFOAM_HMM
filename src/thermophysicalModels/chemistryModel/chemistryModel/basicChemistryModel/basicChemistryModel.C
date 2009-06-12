@@ -57,9 +57,7 @@ Foam::basicChemistryModel::basicChemistryModel(const fvMesh& mesh)
         mesh.nCells(),
         readScalar(lookup("initialChemicalTimeStep"))
     )
-{
-    Info<< "basicChemistryModel(const fvMesh&)" << endl;
-}
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

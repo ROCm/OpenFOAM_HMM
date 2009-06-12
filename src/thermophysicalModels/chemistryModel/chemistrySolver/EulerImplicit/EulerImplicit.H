@@ -75,7 +75,11 @@ public:
     // Constructors
 
         //- Construct from components
-        EulerImplicit(ODEChemistryModel<CompType, ThermoType>& chemistry);
+        EulerImplicit
+        (
+            ODEChemistryModel<CompType, ThermoType>& model,
+            const word& modelName
+        );
 
 
     //- Destructor

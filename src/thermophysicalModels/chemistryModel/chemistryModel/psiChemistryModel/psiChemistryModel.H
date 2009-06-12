@@ -89,16 +89,18 @@ public:
         psiChemistryModel,
         fvMesh,
         (
-            const fvMesh& mesh
+            const fvMesh& mesh,
+            const word& compTypeName,
+            const word& thermoTypeName
         ),
-        (mesh)
+        (mesh, compTypeName, thermoTypeName)
     );
 
 
     // Constructors
 
         //- Construct from mesh
-        psiChemistryModel(const fvMesh& mesh);
+        psiChemistryModel(const fvMesh& mesh, const word& thermoTypeName);
 
 
     //- Selector

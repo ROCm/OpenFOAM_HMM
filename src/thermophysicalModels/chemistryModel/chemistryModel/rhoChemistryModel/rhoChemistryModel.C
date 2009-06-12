@@ -38,10 +38,14 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::rhoChemistryModel::rhoChemistryModel(const fvMesh& mesh)
+Foam::rhoChemistryModel::rhoChemistryModel
+(
+    const fvMesh& mesh,
+    const word& thermoTypeName
+)
 :
     basicChemistryModel(mesh),
-    thermo_(hReactionThermo::New(mesh))
+    thermo_(hReactionThermo::NewType(mesh, thermoTypeName))
 {}
 
 

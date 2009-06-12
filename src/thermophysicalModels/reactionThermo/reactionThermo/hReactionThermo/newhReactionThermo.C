@@ -75,4 +75,66 @@ Foam::autoPtr<Foam::hReactionThermo> Foam::hReactionThermo::New
 }
 
 
+Foam::autoPtr<Foam::hReactionThermo> Foam::hReactionThermo::NewType
+(
+    const fvMesh& mesh,
+    const word& thermoType
+)
+{
+    word hReactionThermoTypeName;
+
+    // Enclose the creation of the thermophysicalProperties to ensure it is
+    // deleted before the turbulenceModel is created otherwise the dictionary
+    // is entered in the database twice
+    {
+        IOdictionary thermoDict
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        thermoDict.lookup("thermoType") >> hReactionThermoTypeName;
+
+        if (hReactionThermoTypeName.find(thermoType) == string::npos)
+        {
+            FatalErrorIn
+            (
+                "autoPtr<hReactionThermo> hReactionThermo::NewType"
+                "("
+                    "const fvMesh&, "
+                    "const word&"
+                ")"
+            )   << "Inconsistent thermo package selected:" << nl << nl
+                << hReactionThermoTypeName << nl << nl << "Please select a "
+                << "thermo package based on " << thermoType << nl << nl
+                << exit(FatalError);
+        }
+    }
+
+    Info<< "Selecting thermodynamics package " << hReactionThermoTypeName
+        << endl;
+
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(hReactionThermoTypeName);
+
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("hReactionThermo::New(const fvMesh&)")
+            << "Unknown hReactionThermo type "
+            << hReactionThermoTypeName << nl << nl
+            << "Valid hReactionThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
+
+    return autoPtr<hReactionThermo>(cstrIter()(mesh));
+}
+
+
 // ************************************************************************* //

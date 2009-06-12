@@ -78,7 +78,11 @@ public:
 
 
         //- Construct from components
-        sequential(ODEChemistryModel<CompType, ThermoType>& model);
+        sequential
+        (
+            ODEChemistryModel<CompType, ThermoType>& model,
+            const word& modelName
+        );
 
 
     //- Destructor

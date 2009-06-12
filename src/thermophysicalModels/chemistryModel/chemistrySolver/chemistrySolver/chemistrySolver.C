@@ -34,10 +34,12 @@ namespace Foam
 template<class CompType, class ThermoType>
 Foam::chemistrySolver<CompType, ThermoType>::chemistrySolver
 (
-    ODEChemistryModel<CompType, ThermoType>& model
+    ODEChemistryModel<CompType, ThermoType>& model,
+    const word& modelName
 )
 :
-    model_(model)
+    model_(model),
+    name_(modelName)
 {}
 
 

@@ -32,11 +32,12 @@ License
 template<class CompType, class ThermoType>
 Foam::ode<CompType, ThermoType>::ode
 (
-    ODEChemistryModel<CompType, ThermoType>& model
+    ODEChemistryModel<CompType, ThermoType>& model,
+    const word& modelName
 )
 :
-    chemistrySolver<CompType, ThermoType>(model),
-    coeffsDict_(model.subDict(typeName + "Coeffs")),
+    chemistrySolver<CompType, ThermoType>(model, modelName),
+    coeffsDict_(model.subDict(modelName + "Coeffs")),
     solverName_(coeffsDict_.lookup("ODESolver")),
     odeSolver_(ODESolver::New(solverName_, model)),
     eps_(readScalar(coeffsDict_.lookup("eps"))),

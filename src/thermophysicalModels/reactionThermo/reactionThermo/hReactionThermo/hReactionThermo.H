@@ -86,8 +86,17 @@ public:
         hReactionThermo(const fvMesh&);
 
 
-    //- Selector
-    static autoPtr<hReactionThermo> New(const fvMesh&);
+    // Selectors
+
+        //- Standard selection based on fvMesh
+        static autoPtr<hReactionThermo> New(const fvMesh&);
+
+        //- Select and check that package contains 'thermoType'
+        static autoPtr<hReactionThermo> NewType
+        (
+            const fvMesh&,
+            const word& thermoType
+        );
 
 
     //- Destructor

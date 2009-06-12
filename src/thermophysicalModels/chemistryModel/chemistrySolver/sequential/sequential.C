@@ -32,11 +32,12 @@ License
 template<class CompType, class ThermoType>
 Foam::sequential<CompType, ThermoType>::sequential
 (
-    ODEChemistryModel<CompType, ThermoType>& model
+    ODEChemistryModel<CompType, ThermoType>& model,
+    const word& modelName
 )
 :
-    chemistrySolver<CompType, ThermoType>(model),
-    coeffsDict_(model.subDict(typeName + "Coeffs")),
+    chemistrySolver<CompType, ThermoType>(model, modelName),
+    coeffsDict_(model.subDict(modelName + "Coeffs")),
     cTauChem_(readScalar(coeffsDict_.lookup("cTauChem"))),
     equil_(coeffsDict_.lookup("equilibriumRateLimiter"))
 {}

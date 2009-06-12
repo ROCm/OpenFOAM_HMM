@@ -32,27 +32,48 @@ template<class CompType, class ThermoType>
 Foam::autoPtr<Foam::chemistrySolver<CompType, ThermoType> >
 Foam::chemistrySolver<CompType, ThermoType>::New
 (
-    ODEChemistryModel<CompType, ThermoType>& model
+    ODEChemistryModel<CompType, ThermoType>& model,
+    const word& compTypeName,
+    const word& thermoTypeName
 )
 {
-    word chemistrySolverType(model.CompType::lookup("chemistrySolver"));
+    word modelName(model.lookup("chemistrySolver"));
+
+    word chemistrySolverType =
+        modelName + '<' + compTypeName + ',' + thermoTypeName + '>';
+
+    Info<< "Selecting chemistrySolver " << modelName << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(chemistrySolverType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
+        wordList models = dictionaryConstructorTablePtr_->toc();
+        forAll(models, i)
+        {
+            models[i] = models[i].replace
+            (
+                '<' + compTypeName + ',' + thermoTypeName + '>',
+                ""
+            );
+        }
+
         FatalErrorIn
         (
-            "chemistrySolver::New(const dictionary&, const ODEChemistryModel&)"
-        )   << "Unknown chemistrySolver type " << chemistrySolverType
-            << nl << nl
-            << "Valid chemistrySolver types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << nl
-            << exit(FatalError);
+            "chemistrySolver::New"
+            "("
+                "const ODEChemistryModel&, "
+                "const word&, "
+                "const word&"
+            ")"
+        )   << "Unknown chemistrySolver type " << modelName
+            << nl << nl << "Valid chemistrySolver types are:" << nl
+            << models << nl << exit(FatalError);
     }
 
-    return autoPtr<chemistrySolver<CompType, ThermoType> >(cstrIter()(model));
+    return autoPtr<chemistrySolver<CompType, ThermoType> >
+        (cstrIter()(model, modelName));
 }
 
 

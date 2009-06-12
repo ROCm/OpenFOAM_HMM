@@ -33,10 +33,12 @@ License
 template<class CompType, class ThermoType>
 Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
 (
-    const fvMesh& mesh
+    const fvMesh& mesh,
+    const word& compTypeName,
+    const word& thermoTypeName
 )
 :
-    CompType(mesh),
+    CompType(mesh, thermoTypeName),
 
     ODE(),
 
@@ -46,7 +48,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
     (
         dynamic_cast<const reactingMixture<ThermoType>&>(this->thermo())
     ),
-        specieThermo_
+    specieThermo_
     (
         dynamic_cast<const reactingMixture<ThermoType>&>
             (this->thermo()).speciesData()
@@ -55,7 +57,15 @@ Foam::ODEChemistryModel<CompType, ThermoType>::ODEChemistryModel
     nSpecie_(Y_.size()),
     nReaction_(reactions_.size()),
 
-    solver_(chemistrySolver<CompType, ThermoType>::New(*this)),
+    solver_
+    (
+        chemistrySolver<CompType, ThermoType>::New
+        (
+            *this,
+            compTypeName,
+            thermoTypeName
+        )
+    ),
 
     RR_(nSpecie_)
 {

@@ -78,7 +78,11 @@ public:
     // Constructors
 
         //- Construct from components
-        ode(ODEChemistryModel<CompType, ThermoType>& model);
+        ode
+        (
+            ODEChemistryModel<CompType, ThermoType>& model,
+            const word& modelName
+        );
 
 
     //- Destructor

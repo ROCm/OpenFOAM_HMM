@@ -75,4 +75,66 @@ Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::New
 }
 
 
+Foam::autoPtr<Foam::hCombustionThermo> Foam::hCombustionThermo::NewType
+(
+    const fvMesh& mesh,
+    const word& thermoType
+)
+{
+    word hCombustionThermoTypeName;
+
+    // Enclose the creation of the thermophysicalProperties to ensure it is
+    // deleted before the turbulenceModel is created otherwise the dictionary
+    // is entered in the database twice
+    {
+        IOdictionary thermoDict
+        (
+            IOobject
+            (
+                "thermophysicalProperties",
+                mesh.time().constant(),
+                mesh,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE
+            )
+        );
+
+        thermoDict.lookup("thermoType") >> hCombustionThermoTypeName;
+
+        if (hCombustionThermoTypeName.find(thermoType) == string::npos)
+        {
+            FatalErrorIn
+            (
+                "autoPtr<hCombustionThermo> hCombustionThermo::NewType"
+                "("
+                    "const fvMesh&, "
+                    "const word&"
+                ")"
+            )   << "Inconsistent thermo package selected:" << nl << nl
+                << hCombustionThermoTypeName << nl << nl << "Please select a "
+                << "thermo package based on " << thermoType << nl << nl
+                << exit(FatalError);
+        }
+    }
+
+    Info<< "Selecting thermodynamics package " << hCombustionThermoTypeName
+        << endl;
+
+    fvMeshConstructorTable::iterator cstrIter =
+        fvMeshConstructorTablePtr_->find(hCombustionThermoTypeName);
+
+    if (cstrIter == fvMeshConstructorTablePtr_->end())
+    {
+        FatalErrorIn("hCombustionThermo::New(const fvMesh&)")
+            << "Unknown hCombustionThermo type "
+            << hCombustionThermoTypeName << nl << nl
+            << "Valid hCombustionThermo types are:" << nl
+            << fvMeshConstructorTablePtr_->toc() << nl
+            << exit(FatalError);
+    }
+
+    return autoPtr<hCombustionThermo>(cstrIter()(mesh));
+}
+
+
 // ************************************************************************* //
