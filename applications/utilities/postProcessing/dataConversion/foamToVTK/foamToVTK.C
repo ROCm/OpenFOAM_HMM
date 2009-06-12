@@ -90,6 +90,9 @@ Usage
     The quoting is required to avoid shell expansions and to pass the
     information as a single argument.
 
+    @param -useTimeName \n
+    use the time index in the VTK file name instead of the time index
+
 Note
     mesh subset is handled by vtkMesh. Slight inconsistency in
     interpolation: on the internal field it interpolates the whole volfield
@@ -242,6 +245,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("excludePatches","patches to exclude");
     argList::validOptions.insert("noFaceZones","");
     argList::validOptions.insert("noLinks","");
+    argList::validOptions.insert("useTimeName","");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
@@ -250,6 +254,7 @@ int main(int argc, char *argv[])
     bool doFaceZones     = !args.optionFound("noFaceZones");
     bool doLinks         = !args.optionFound("noLinks");
     bool binary          = !args.optionFound("ascii");
+    bool useTimeName     = args.optionFound("useTimeName");
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
@@ -359,6 +364,16 @@ int main(int argc, char *argv[])
 
         Info<< "Time: " << runTime.timeName() << endl;
 
+        word timeDesc = "";
+        if (useTimeName)
+        {
+            timeDesc = runTime.timeName();
+        }
+        else
+        {
+            timeDesc = name(runTime.timeIndex());
+        }
+
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
         polyMesh::readUpdateState meshState = vMesh.readUpdate();
@@ -388,7 +403,7 @@ int main(int argc, char *argv[])
             (
                 fvPath/set.name()/set.name()
               + "_"
-              + name(timeI)
+              + timeDesc
               + ".vtk"
             );
 
@@ -411,7 +426,7 @@ int main(int argc, char *argv[])
             (
                 fvPath/set.name()/set.name()
               + "_"
-              + name(timeI)
+              + timeDesc
               + ".vtk"
             );
 
@@ -548,7 +563,7 @@ int main(int argc, char *argv[])
             (
                 fvPath/vtkName
               + "_"
-              + name(timeI)
+              + timeDesc
               + ".vtk"
             );
 
@@ -654,8 +669,8 @@ int main(int argc, char *argv[])
                     fvPath
                    /"surfaceFields"
                    /"surfaceFields"
-	           + "_"
-                   + name(timeI)
+                   + "_"
+                   + timeDesc
                    + ".vtk"
                 );
 
@@ -689,7 +704,7 @@ int main(int argc, char *argv[])
                 patchFileName =
                     fvPath/"allPatches"/cellSetName
                   + "_"
-                  + name(timeI)
+                  + timeDesc
                   + ".vtk";
             }
             else
@@ -697,7 +712,7 @@ int main(int argc, char *argv[])
                 patchFileName =
                     fvPath/"allPatches"/"allPatches"
                   + "_"
-                  + name(timeI)
+                  + timeDesc
                   + ".vtk";
             }
 
@@ -767,7 +782,7 @@ int main(int argc, char *argv[])
                         patchFileName =
                             fvPath/pp.name()/cellSetName
                           + "_"
-                          + name(timeI)
+                          + timeDesc
                           + ".vtk";
                     }
                     else
@@ -775,7 +790,7 @@ int main(int argc, char *argv[])
                         patchFileName =
                             fvPath/pp.name()/pp.name()
                           + "_"
-                          + name(timeI)
+                          + timeDesc
                           + ".vtk";
                     }
 
@@ -867,7 +882,7 @@ int main(int argc, char *argv[])
                     patchFileName =
                         fvPath/pp.name()/cellSetName
                       + "_"
-                      + name(timeI)
+                      + timeDesc
                       + ".vtk";
                 }
                 else
@@ -875,7 +890,7 @@ int main(int argc, char *argv[])
                     patchFileName =
                         fvPath/pp.name()/pp.name()
                       + "_"
-                      + name(timeI)
+                      + timeDesc
                       + ".vtk";
                 }
 
@@ -931,7 +946,7 @@ int main(int argc, char *argv[])
                 fileName lagrFileName
                 (
                     fvPath/cloud::prefix/cloudDirs[i]/cloudDirs[i]
-                  + "_" + name(timeI) + ".vtk"
+                  + "_" + timeDesc + ".vtk"
                 );
 
                 Info<< "    Lagrangian: " << lagrFileName << endl;

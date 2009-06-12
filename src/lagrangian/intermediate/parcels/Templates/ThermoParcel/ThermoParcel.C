@@ -96,31 +96,31 @@ void Foam::ThermoParcel<ParcelType>::calc
     const scalar cp0 = this->cp_;
     const scalar mass0 = this->mass();
 
-    // Initial enthalpy state
-    scalar H0 = cp0*T0;
+    // Explicit momentum source for particle
+    vector Su = vector::zero;
 
+    // Momentum transfer from the particle to the carrier phase
+    vector dUTrans = vector::zero;
+
+    // Explicit enthalpy source for particle
+    scalar Sh = 0.0;
+
+    // Sensible enthalpy transfer from the particle to the carrier phase
+    scalar dhsTrans = 0.0;
 
     // Heat transfer
     // ~~~~~~~~~~~~~
 
-    // No additional enthalpy sources
-    scalar Sh = 0.0;
-
     // Calculate new particle velocity
-    scalar T1 = calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, Sh);
-
-    // Calculate new enthalpy state
-    scalar H1 = cp0*T1;
+    scalar T1 =
+        calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, Sh, dhsTrans);
 
 
     // Motion
     // ~~~~~~
 
-    // No additional forces
-    vector Fx = vector::zero;
-
     // Calculate new particle velocity
-    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx);
+    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Su, dUTrans);
 
 
     //  Accumulate carrier phase source terms
@@ -128,10 +128,10 @@ void Foam::ThermoParcel<ParcelType>::calc
     if (td.cloud().coupled())
     {
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += np0*mass0*(U0 - U1);
+        td.cloud().UTrans()[cellI] += np0*dUTrans;
 
         // Update sensible enthalpy transfer
-        td.cloud().hsTrans()[cellI] += np0*mass0*(H0 - H1);
+        td.cloud().hsTrans()[cellI] += np0*dhsTrans;
     }
 
     // Set new particle properties
@@ -153,7 +153,8 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     const scalar rho,
     const scalar T,
     const scalar cp,
-    const scalar Sh
+    const scalar Sh,
+    scalar& dhsTrans
 )
 {
     if (!td.cloud().heatTransfer().active())
@@ -173,36 +174,62 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
         this->muc_
     );
 
+    const scalar As = this->areaS(d);
 
-    // Determine new particle temperature
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Determine ap and bp coefficients
-    scalar ap = Tc_ + Sh/(htc*this->areaS(d) + ROOTVSMALL);
-    scalar bp = 6.0*htc/(rho*d*cp);
-    if (td.cloud().radiation())
+    if (mag(htc) < ROOTVSMALL && !td.cloud().radiation())
     {
-        // Carrier phase incident radiation field
-        // - The G field is not interpolated to the parcel position
-        //   Instead, the cell centre value is applied directly
-        const scalarField& G = td.cloud().mesh().objectRegistry
-            ::lookupObject<volScalarField>("G");
+        return  T + dt*Sh/(this->mass()*cp);
+    }
 
-        // Helper variables
+    scalar ap;
+    scalar bp;
+
+    if(td.cloud().radiation())
+    {
+        const scalarField& G =
+            td.cloud().mesh().objectRegistry::lookupObject<volScalarField>("G");
         const scalar sigma = radiation::sigmaSB.value();
         const scalar epsilon = td.constProps().epsilon0();
-        const scalar D = epsilon*sigma*pow3(T)/(htc + ROOTVSMALL) + 1.0;
-        ap += 0.25*epsilon*G[cellI]/(htc + ROOTVSMALL);
-        ap /= D;
-        bp *= D;
+
+        ap =
+            (Sh/As + htc*Tc_ + epsilon*G[cellI]/4.0)
+           /(htc + epsilon*sigma*pow3(T));
+
+        bp =
+            6.0
+           *(Sh/As + htc*(Tc_ - T) + epsilon*(G[cellI]/4.0 - sigma*pow4(T)))
+           /(rho*d*cp*(ap - T));
+    }
+    else
+    {
+        ap = Tc_ + Sh/As/htc;
+        bp = 6.0*(Sh/As + htc*(Tc_ - T))/(rho*d*cp*(ap - T));
     }
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
         td.cloud().TIntegrator().integrate(T, dt, ap, bp);
 
+    dhsTrans += dt*htc*As*(Tres.average() - Tc_);
+
     return Tres.value();
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::ThermoParcel<ParcelType>::ThermoParcel
+(
+    const ThermoParcel<ParcelType>& p
+)
+:
+    KinematicParcel<ParcelType>(p),
+    T_(p.T_),
+    cp_(p.cp_),
+    Tc_(p.Tc_),
+    cpc_(p.cpc_)
+{}
 
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //

@@ -84,17 +84,36 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
 
         if (onBoundary() && td.keepParticle)
         {
-            if (face() > -1)
+            if (isType<processorPolyPatch>(pbMesh[patch(face())]))
             {
-                if (isType<processorPolyPatch>(pbMesh[patch(face())]))
-                {
-                    td.switchProcessor = true;
-                }
+                td.switchProcessor = true;
             }
         }
     }
 
     return td.keepParticle;
+}
+
+
+bool Foam::solidParticle::hitPatch
+(
+    const polyPatch&,
+    solidParticle::trackData&,
+    const label
+)
+{
+    return false;
+}
+
+
+bool Foam::solidParticle::hitPatch
+(
+    const polyPatch&,
+    int&,
+    const label
+)
+{
+    return false;
 }
 
 

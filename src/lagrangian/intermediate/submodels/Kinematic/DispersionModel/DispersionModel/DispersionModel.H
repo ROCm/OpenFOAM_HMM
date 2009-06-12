@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class DispersionModel Declaration
+                        Class DispersionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -54,7 +54,7 @@ class DispersionModel
         //- Cloud dictionary
         const dictionary& dict_;
 
-        // Reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
 
@@ -158,6 +158,20 @@ public:
     DispersionModel<CloudType<ParcelType> >::                                 \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
+
+
+#define makeDispersionModelThermoType(SS, CloudType, ParcelType, ThermoType)  \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    DispersionModel<CloudType<ParcelType<ThermoType> > >::                    \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -130,7 +130,7 @@ template<class CloudType>
 Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
 {
     // Not used
-    return 0.0;
+    return this->SOI_;
 }
 
 
@@ -138,6 +138,7 @@ template<class CloudType>
 void Foam::ManualInjection<CloudType>::setPositionAndCell
 (
     const label parcelI,
+    const label,
     const scalar time,
     vector& position,
     label& cellOwner
@@ -149,24 +150,26 @@ void Foam::ManualInjection<CloudType>::setPositionAndCell
 
 
 template<class CloudType>
-Foam::vector Foam::ManualInjection<CloudType>::velocity
+void Foam::ManualInjection<CloudType>::setProperties
 (
+    const label parcelI,
     const label,
-    const scalar
+    const scalar,
+    typename CloudType::parcelType& parcel
 )
 {
-    return U0_;
+    // set particle velocity
+    parcel.U() = U0_;
+
+    // set particle diameter
+    parcel.d() = diameters_[parcelI];
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::d0
-(
-    const label parcelI,
-    const scalar
-) const
+bool Foam::ManualInjection<CloudType>::fullyDescribed() const
 {
-    return diameters_[parcelI];
+    return false;
 }
 
 

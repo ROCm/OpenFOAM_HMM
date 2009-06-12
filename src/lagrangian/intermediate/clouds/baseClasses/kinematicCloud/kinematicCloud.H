@@ -29,13 +29,14 @@ Description
     Virtual abstract base class for templated KinematicCloud
 
 SourceFiles
+    kinematicCloud.H
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef kinematicCloud_H
 #define kinematicCloud_H
 
-#include "volFields.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

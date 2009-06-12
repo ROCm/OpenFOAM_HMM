@@ -27,9 +27,9 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const Foam::word& Foam::DsmcCloud<ParcelType>::cloudType() const
+inline const Foam::word& Foam::DsmcCloud<ParcelType>::cloudName() const
 {
-    return cloudType_;
+    return cloudName_;
 }
 
 

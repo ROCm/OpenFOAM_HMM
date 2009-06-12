@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,14 +28,15 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::COxidationKineticDiffusionLimitedRate::
+template<class CloudType>
+Foam::COxidationKineticDiffusionLimitedRate<CloudType>::
 COxidationKineticDiffusionLimitedRate
 (
     const dictionary& dict,
-    ReactingMultiphaseCloud<coalParcel>& owner
+    CloudType& owner
 )
 :
-    SurfaceReactionModel<ReactingMultiphaseCloud<coalParcel> >
+    SurfaceReactionModel<CloudType>
     (
         dict,
         owner,
@@ -69,7 +70,7 @@ COxidationKineticDiffusionLimitedRate
             "COxidationKineticDiffusionLimitedRate"
             "("
                 "const dictionary&, "
-                "ReactingMultiphaseCloud<coalParcel>&"
+                "CloudType&"
             ")"
         )   << "Stoichiometry of reaction, Sb, must be greater than zero" << nl
             << exit(FatalError);
@@ -79,20 +80,23 @@ COxidationKineticDiffusionLimitedRate
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::COxidationKineticDiffusionLimitedRate::
+template<class CloudType>
+Foam::COxidationKineticDiffusionLimitedRate<CloudType>::
 ~COxidationKineticDiffusionLimitedRate()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::COxidationKineticDiffusionLimitedRate::active() const
+template<class CloudType>
+bool Foam::COxidationKineticDiffusionLimitedRate<CloudType>::active() const
 {
     return true;
 }
 
 
-Foam::scalar Foam::COxidationKineticDiffusionLimitedRate::calculate
+template<class CloudType>
+Foam::scalar Foam::COxidationKineticDiffusionLimitedRate<CloudType>::calculate
 (
     const scalar dt,
     const label cellI,
@@ -114,7 +118,8 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate::calculate
 ) const
 {
     // Fraction of remaining combustible material
-    const scalar fComb = YMixture[coalParcel::SLD]*YSolid[CsLocalId_];
+    const label idSolid = CloudType::parcelType::SLD;
+    const scalar fComb = YMixture[idSolid]*YSolid[CsLocalId_];
 
     // Surface combustion active combustible fraction is consumed
     if (fComb < SMALL)
@@ -124,7 +129,7 @@ Foam::scalar Foam::COxidationKineticDiffusionLimitedRate::calculate
 
     // Local mass fraction of O2 in the carrier phase
     const scalar YO2 =
-        owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
+        this->owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
 
     // Diffusion rate coefficient
     const scalar D0 = C1_/d*pow(0.5*(T + Tc), 0.75);
