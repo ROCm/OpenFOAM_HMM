@@ -96,7 +96,7 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
 
     // find the fit coefficients for every owner
 
-    Pout<< "-- Owner --" << endl;
+    //Pout<< "-- Owner --" << endl;
     for(label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
         FitData
@@ -106,14 +106,14 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
             Polynomial
         >::calcFit(owncoeffs_[facei], stencilPoints[facei], w[facei], facei);
 
-        Pout<< "    facei:" << facei
-            << " at:" << mesh.faceCentres()[facei] << endl;
-        forAll(owncoeffs_[facei], i)
-        {
-            Pout<< "    point:" << stencilPoints[facei][i]
-                << "\tweight:" << owncoeffs_[facei][i]
-                << endl;
-        }
+        //Pout<< "    facei:" << facei
+        //    << " at:" << mesh.faceCentres()[facei] << endl;
+        //forAll(owncoeffs_[facei], i)
+        //{
+        //    Pout<< "    point:" << stencilPoints[facei][i]
+        //        << "\tweight:" << owncoeffs_[facei][i]
+        //        << endl;
+        //}
     }
 
     forAll(bw, patchi)
@@ -155,7 +155,7 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
 
     // find the fit coefficients for every neighbour
 
-    Pout<< "-- Neighbour --" << endl;
+    //Pout<< "-- Neighbour --" << endl;
     for(label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
         FitData
@@ -165,14 +165,14 @@ void Foam::UpwindFitData<Polynomial>::calcFit()
             Polynomial
         >::calcFit(neicoeffs_[facei], stencilPoints[facei], w[facei], facei);
 
-        Pout<< "    facei:" << facei
-            << " at:" << mesh.faceCentres()[facei] << endl;
-        forAll(neicoeffs_[facei], i)
-        {
-            Pout<< "    point:" << stencilPoints[facei][i]
-                << "\tweight:" << neicoeffs_[facei][i]
-                << endl;
-        }
+        //Pout<< "    facei:" << facei
+        //    << " at:" << mesh.faceCentres()[facei] << endl;
+        //forAll(neicoeffs_[facei], i)
+        //{
+        //    Pout<< "    point:" << stencilPoints[facei][i]
+        //        << "\tweight:" << neicoeffs_[facei][i]
+        //        << endl;
+        //}
     }
 
     forAll(bw, patchi)
