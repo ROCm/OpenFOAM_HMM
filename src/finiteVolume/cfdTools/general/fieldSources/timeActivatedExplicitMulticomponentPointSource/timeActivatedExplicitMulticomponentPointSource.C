@@ -52,8 +52,24 @@ void Foam::timeActivatedExplicitMulticomponentPointSource::updateAddressing()
     forAll(pointSources_, sourceI)
     {
         const pointSourceProperties& psp = pointSources_[sourceI];
+        bool foundCell = false;
         label cid = mesh_.findCell(psp.location());
-        if (cid < 0)
+        if (cid >= 0)
+        {
+            foundCell = mesh_.pointInCell(psp.location(), cid);
+        }
+        reduce(foundCell, orOp<bool>());
+        if (!foundCell)
+        {
+            label cid = mesh_.findNearestCell(psp.location());
+            if (cid >= 0)
+            {
+                foundCell = mesh_.pointInCell(psp.location(), cid);
+            }
+        }
+        reduce(foundCell, orOp<bool>());
+
+        if (!foundCell)
         {
             FatalErrorIn
             (
@@ -180,7 +196,11 @@ Foam::timeActivatedExplicitMulticomponentPointSource::Su
                 )
                 {
                     const label cid = cellOwners_[sourceI];
-                    sourceField[cid] += dt*psp.fieldData()[i].second()/V[cid];
+                    if (cid >= 0)
+                    {
+                        sourceField[cid] +=
+                            dt*psp.fieldData()[i].second()/V[cid];
+                    }
                 }
             }
         }
@@ -235,7 +255,11 @@ Foam::timeActivatedExplicitMulticomponentPointSource::Su()
                 )
                 {
                     const label cid = cellOwners_[sourceI];
-                    sourceField[cid] += dt*psp.fieldData()[i].second()/V[cid];
+                    if (cid >= 0)
+                    {
+                        sourceField[cid] +=
+                            dt*psp.fieldData()[i].second()/V[cid];
+                    }
                 }
             }
         }
