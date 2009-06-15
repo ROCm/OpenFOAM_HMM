@@ -1,8 +1,8 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<basicThermo> thermo
+    autoPtr<basicRhoThermo> thermo
     (
-        basicThermo::New(mesh)
+        basicRhoThermo::New(mesh)
     );
 
     volScalarField rho
@@ -62,3 +62,6 @@
     thermo->correct();
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);
+
+    dimensionedScalar totalVolume = sum(mesh.V());
+
