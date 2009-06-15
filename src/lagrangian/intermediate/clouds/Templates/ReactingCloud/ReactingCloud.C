@@ -28,7 +28,6 @@ License
 
 #include "CompositionModel.H"
 #include "PhaseChangeModel.H"
-#include "multiComponentMixture.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -68,14 +67,16 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo
+    basicThermo& thermo
 )
 :
     ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo),
     reactingCloud(),
     constProps_(this->particleProperties()),
-    carrierThermo_(thermo),
-    carrierSpecies_(thermo.composition().Y().size()),
+    mcCarrierThermo_
+    (
+        dynamic_cast<multiComponentMixture<thermoType>&>(thermo)
+    ),
     compositionModel_
     (
         CompositionModel<ReactingCloud<ParcelType> >::New
@@ -92,23 +93,9 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             *this
         )
     ),
-    rhoTrans_(thermo.composition().Y().size()),
+    rhoTrans_(mcCarrierThermo_.species().size()),
     dMassPhaseChange_(0.0)
 {
-    // Create the carrier species
-    forAll(carrierSpecies_, specieI)
-    {
-        carrierSpecies_.set
-        (
-            specieI,
-            new thermoType
-            (
-                dynamic_cast<const multiComponentMixture<thermoType>&>
-                    (thermo).speciesData()[specieI]
-            )
-        );
-    }
-
     // Set storage for mass source fields and initialise to zero
     forAll(rhoTrans_, i)
     {
@@ -119,9 +106,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                    this->name()
-                      + "rhoTrans_"
-                      + thermo.composition().Y()[i].name(),
+                    this->name() + "rhoTrans_" + mcCarrierThermo_.species()[i],
                     this->db().time().timeName(),
                     this->db(),
                     IOobject::NO_READ,
@@ -193,9 +178,9 @@ void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolve()
 {
-    const volScalarField& T = carrierThermo_.T();
-    const volScalarField cp = carrierThermo_.Cp();
-    const volScalarField& p = carrierThermo_.p();
+    const volScalarField& T = this->carrierThermo().T();
+    const volScalarField cp = this->carrierThermo().Cp();
+    const volScalarField& p = this->carrierThermo().p();
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (

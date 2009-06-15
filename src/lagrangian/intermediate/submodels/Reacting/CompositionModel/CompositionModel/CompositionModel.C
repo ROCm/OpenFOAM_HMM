@@ -39,15 +39,14 @@ Foam::CompositionModel<CloudType>::CompositionModel
     dict_(dict),
     owner_(owner),
     coeffDict_(dict.subDict(type + "Coeffs")),
-    carrierThermo_(owner.carrierThermo()),
-    carrierSpecies_(owner.carrierSpecies()),
+    mcCarrierThermo_(owner.mcCarrierThermo()),
     liquids_
     (
         liquidMixture::New
         (
             owner.mesh().objectRegistry::lookupObject<dictionary>
             (
-                carrierThermo_.name()
+                owner.carrierThermo().name()
             )
         )
     ),
@@ -57,14 +56,14 @@ Foam::CompositionModel<CloudType>::CompositionModel
         (
             owner.mesh().objectRegistry::lookupObject<dictionary>
             (
-                carrierThermo_.name()
+                owner.carrierThermo().name()
             )
         )
     ),
     phaseProps_
     (
         coeffDict_.lookup("phases"),
-        carrierThermo_.composition().species(),
+        mcCarrierThermo_.species(),
         liquids_().components(),
         solids_().components()
     )
@@ -102,18 +101,10 @@ const Foam::dictionary& Foam::CompositionModel<CloudType>::coeffDict() const
 
 
 template<class CloudType>
-const Foam::hCombustionThermo&
-Foam::CompositionModel<CloudType>::carrierThermo() const
+const Foam::multiComponentMixture<typename CloudType::thermoType>&
+Foam::CompositionModel<CloudType>::mcCarrierThermo() const
 {
-    return carrierThermo_;
-}
-
-
-template<class CloudType>
-const Foam::PtrList<typename CloudType::thermoType>&
-Foam::CompositionModel<CloudType>::carrierSpecies() const
-{
-    return carrierSpecies_;
+    return mcCarrierThermo_;
 }
 
 
@@ -184,11 +175,9 @@ Foam::label Foam::CompositionModel<CloudType>::globalCarrierId
     const word& cmptName
 ) const
 {
-    forAll(carrierThermo_.composition().species(), i)
+    forAll(mcCarrierThermo_.species(), i)
     {
-        const word& carrierSpecieName =
-            carrierThermo_.composition().species()[i];
-        if (cmptName == carrierSpecieName)
+        if (cmptName == mcCarrierThermo_.species()[i])
         {
             return i;
         }
@@ -324,8 +313,8 @@ Foam::scalarField Foam::CompositionModel<CloudType>::X
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                WInv += Y[i]/this->carrierSpecies()[gid].W();
-                X[i] = Y[i]/this->carrierSpecies()[gid].W();
+                WInv += Y[i]/mcCarrierThermo_.speciesData()[gid].W();
+                X[i] = Y[i]/mcCarrierThermo_.speciesData()[gid].W();
             }
             break;
         }
@@ -375,7 +364,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::H
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                HMixture += Y[i]*this->carrierSpecies()[gid].H(T);
+                HMixture += Y[i]*mcCarrierThermo_.speciesData()[gid].H(T);
             }
             break;
         }
@@ -439,7 +428,7 @@ Foam::scalar Foam::CompositionModel<CloudType>::cp
             forAll(Y, i)
             {
                 label gid = props.globalIds()[i];
-                cpMixture += Y[i]*this->carrierSpecies()[gid].Cp(T);
+                cpMixture += Y[i]*mcCarrierThermo_.speciesData()[gid].Cp(T);
             }
             break;
         }

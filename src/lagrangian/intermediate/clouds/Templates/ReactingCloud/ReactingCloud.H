@@ -41,11 +41,9 @@ SourceFiles
 #ifndef ReactingCloud_H
 #define ReactingCloud_H
 
-#include "autoPtr.H"
-#include "hCombustionThermo.H"
-
 #include "ThermoCloud.H"
 #include "reactingCloud.H"
+#include "multiComponentMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -94,11 +92,8 @@ protected:
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
 
-        //- Thermodynamics package (combustion)
-        hCombustionThermo& carrierThermo_;
-
-        //- Gas phase properties
-        PtrList<thermoType> carrierSpecies_;
+        //- Multi-component carrier phase thermo
+        multiComponentMixture<thermoType>& mcCarrierThermo_;
 
 
         // References to the cloud sub-models
@@ -148,7 +143,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo
+            basicThermo& thermo
         );
 
 
@@ -168,14 +163,12 @@ public:
             inline const typename ParcelType::constantProperties&
                 constProps() const;
 
-            //- Return const access to carrier phase thermo package
-            inline const hCombustionThermo& carrierThermo() const;
+            //- Return const access to multi-component carrier phase thermo
+            inline const multiComponentMixture<thermoType>&
+                mcCarrierThermo() const;
 
-            //- Return access to carrier phase thermo package
-            inline hCombustionThermo& carrierThermo();
-
-            //- Gas phase properties
-            inline const PtrList<thermoType>& carrierSpecies() const;
+            //- Return access to multi-component carrier phase thermo
+            inline multiComponentMixture<thermoType>& mcCarrierThermo();
 
 
             // Sub-models

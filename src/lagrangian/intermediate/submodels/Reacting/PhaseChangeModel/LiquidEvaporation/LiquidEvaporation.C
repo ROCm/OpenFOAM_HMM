@@ -35,14 +35,14 @@ Foam::scalarField Foam::LiquidEvaporation<CloudType>::calcXc
     const label cellI
 ) const
 {
-    scalarField Xc(this->owner().carrierThermo().composition().Y().size());
+    scalarField Xc(this->owner().mcCarrierThermo().Y().size());
 
     scalar Winv = 0.0;
     forAll(Xc, i)
     {
-        scalar Y = this->owner().carrierThermo().composition().Y()[i][cellI];
-        Winv += Y/this->owner().carrierSpecies()[i].W();
-        Xc[i] = Y/this->owner().carrierSpecies()[i].W();
+        scalar Y = this->owner().mcCarrierThermo().Y()[i][cellI];
+        Winv += Y/this->owner().mcCarrierThermo().speciesData()[i].W();
+        Xc[i] = Y/this->owner().mcCarrierThermo().speciesData()[i].W();
     }
 
     return Xc/Winv;
@@ -76,7 +76,7 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
         (
             owner.mesh().objectRegistry::lookupObject<dictionary>
             (
-                owner.carrierThermo().name()
+                "thermophysicalProperties"
             )
         )
     ),
@@ -104,7 +104,7 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
             owner.composition().globalCarrierId(activeLiquids_[i]);
     }
 
-    // Determine mapping between local and global liquids
+    // Determine mapping between model active liquids and global liquids
     label idLiquid = owner.composition().idLiquid();
     forAll(activeLiquids_, i)
     {

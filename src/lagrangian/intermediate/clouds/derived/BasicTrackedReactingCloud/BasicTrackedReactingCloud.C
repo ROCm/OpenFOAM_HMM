@@ -35,7 +35,7 @@ Foam::BasicTrackedReactingCloud<ThermoType>::BasicTrackedReactingCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo
+    basicThermo& thermo
 )
 :
     ReactingCloud<BasicTrackedReactingParcel<ThermoType> >

@@ -86,7 +86,8 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().carrierSpecies()[i].Cp(this->Tc_);
+            cpEff +=
+                Y*td.cloud().mcCarrierThermo().speciesData()[i].Cp(this->Tc_);
         }
     }
     const scalar cpc = td.cpInterp().psi()[cellI];
@@ -190,9 +191,6 @@ void Foam::ReactingParcel<ParcelType>::calc
     // Motion
     // ~~~~~~
 
-    // No additional forces
-    vector Fx = vector::zero;
-
     // Calculate new particle velocity
     vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Su, dUTrans);
 
@@ -210,7 +208,7 @@ void Foam::ReactingParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassPC[i]
-               *td.cloud().composition().carrierSpecies()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
         }
 
         // Update momentum transfer
@@ -317,16 +315,15 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     td.cloud().addToMassPhaseChange(this->nParticle_*dMassTot);
 
     // Enthalphy transfer to carrier phase
+    label id;
     forAll(YComponents, i)
     {
-        label gid;
+        id = td.cloud().composition().localToGlobalCarrierId(idPhase, i);
+        const scalar hv = td.cloud().mcCarrierThermo().speciesData()[id].H(T);
 
-        gid = td.cloud().composition().localToGlobalCarrierId(idPhase, i);
-        const scalar hv = td.cloud().composition().carrierSpecies()[gid].H(T);
-
-        gid = td.cloud().composition().globalIds(idPhase)[i];
+        id = td.cloud().composition().globalIds(idPhase)[i];
         const scalar hl =
-            td.cloud().composition().liquids().properties()[gid].h(pc_, T);
+            td.cloud().composition().liquids().properties()[id].h(pc_, T);
 
         Sh += dMassPC[i]*(hl - hv)/dt;
     }

@@ -15,11 +15,13 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+psiChemistryModel ODEChemistryModel<gasThermoPhysics>;
+
 chemistry       off;
 
 turbulentReaction off;
 
-chemistrySolver ODE;
+chemistrySolver ode;
 
 initialChemicalTimeStep 1e-07;
 
@@ -34,7 +36,7 @@ EulerImplicitCoeffs
     equilibriumRateLimiter off;
 }
 
-ODECoeffs
+odeCoeffs
 {
     ODESolver       RK;
     eps             0.05;

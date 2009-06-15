@@ -103,6 +103,16 @@ Foam::autoPtr<Foam::hReactionThermo> Foam::hReactionThermo::NewType
 
         if (hReactionThermoTypeName.find(thermoType) == string::npos)
         {
+            wordList allModels = fvMeshConstructorTablePtr_->toc();
+            DynamicList<word> validModels;
+            forAll(allModels, i)
+            {
+                if (allModels[i].find(thermoType) != string::npos)
+                {
+                    validModels.append(allModels[i]);
+                }
+            }
+
             FatalErrorIn
             (
                 "autoPtr<hReactionThermo> hReactionThermo::NewType"
@@ -112,7 +122,8 @@ Foam::autoPtr<Foam::hReactionThermo> Foam::hReactionThermo::NewType
                 ")"
             )   << "Inconsistent thermo package selected:" << nl << nl
                 << hReactionThermoTypeName << nl << nl << "Please select a "
-                << "thermo package based on " << thermoType << nl << nl
+                << "thermo package based on " << thermoType
+                << ". Valid options include:" << nl << validModels << nl
                 << exit(FatalError);
         }
     }
