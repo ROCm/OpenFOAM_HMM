@@ -454,16 +454,17 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
     scalar pf,cf,pr,cr;
     label lRef, rRef;
 
-    label nCells = this->thermo().rho()().size();
+    const volScalarField rho = this->thermo().rho();
+    label nCells = rho.size();
     label nReaction = reactions_.size();
 
     scalarField t(nCells, SMALL);
 
     if (this->chemistry_)
     {
-        for (label celli=0; celli<nCells; celli++)
+        forAll(rho, celli)
         {
-            scalar rhoi = this->thermo().rho()()[celli];
+            scalar rhoi = rho[celli];
             scalar Ti = this->thermo().T()[celli];
             scalar pi = this->thermo().p()[celli];
             scalarField c(nSpecie_);
@@ -581,21 +582,23 @@ Foam::label Foam::ODEChemistryModel<CompType, ThermoType>::nEqns() const
 template<class CompType, class ThermoType>
 void Foam::ODEChemistryModel<CompType, ThermoType>::calculate()
 {
+    const volScalarField rho = this->thermo().rho();
+
     for (label i=0; i<nSpecie_; i++)
     {
-        RR_[i].setSize(this->thermo().rho()().size());
+        RR_[i].setSize(rho.size());
     }
 
     if (this->chemistry_)
     {
-        forAll(this->thermo().rho()(), celli)
+        forAll(rho, celli)
         {
             for (label i=0; i<nSpecie_; i++)
             {
                 RR_[i][celli] = 0.0;
             }
 
-            scalar rhoi = this->thermo().rho()()[celli];
+            scalar rhoi = rho[celli];
             scalar Ti = this->thermo().T()[celli];
             scalar pi = this->thermo().p()[celli];
 
@@ -626,9 +629,11 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
     const scalar deltaT
 )
 {
+    const volScalarField rho = this->thermo().rho();
+
     for (label i=0; i<nSpecie_; i++)
     {
-        RR_[i].setSize(this->thermo().rho()().size());
+        RR_[i].setSize(rho.size());
     }
 
     if (!this->chemistry_)
@@ -638,14 +643,14 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
 
     scalar deltaTMin = GREAT;
 
-    forAll(this->thermo().rho()(), celli)
+    forAll(rho, celli)
     {
         for (label i=0; i<nSpecie(); i++)
         {
             RR_[i][celli] = 0.0;
         }
 
-        scalar rhoi = this->thermo().rho()()[celli];
+        scalar rhoi = rho[celli];
         scalar Ti = this->thermo().T()[celli];
         scalar hi = this->thermo().h()[celli];
         scalar pi = this->thermo().p()[celli];
