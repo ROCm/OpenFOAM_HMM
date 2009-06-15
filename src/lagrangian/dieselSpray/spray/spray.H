@@ -38,10 +38,10 @@ Description
 #include "IOPtrList.H"
 #include "interpolation.H"
 #include "liquid.H"
-#include "sprayThermoTypes.H"
 #include "autoPtr.H"
 #include "liquidMixture.H"
 #include "Random.H"
+#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -127,7 +127,7 @@ class spray
 
         // Composition properties
 
-            const PtrList<specieProperties>& gasProperties_;
+            const PtrList<gasThermoPhysics>& gasProperties_;
             const basicMultiComponentMixture& composition_;
 
             List<label> liquidToGasIndex_;
@@ -193,7 +193,7 @@ public:
             const volScalarField& p,
             const volScalarField& T,
             const basicMultiComponentMixture& composition,
-            const PtrList<specieProperties>& gasProperties,
+            const PtrList<gasThermoPhysics>& gasProperties,
             const dictionary& thermophysicalProperties,
             const dictionary& environmentalProperties
         );
@@ -257,7 +257,7 @@ public:
             inline const vector& g() const;
 
             inline const liquidMixture& fuels() const;
-            inline const PtrList<specieProperties>& gasProperties() const;
+            inline const PtrList<gasThermoPhysics>& gasProperties() const;
             inline const basicMultiComponentMixture& composition() const;
 
             inline const List<label>& liquidToGasIndex() const;

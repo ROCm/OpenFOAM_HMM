@@ -1,11 +1,11 @@
 {
     bool closedVolume = p.needReference();
 
-    rho = thermo->rho();
+    rho = thermo.rho();
 
     // Thermodynamic density needs to be updated by psi*d(p) after the
     // pressure solution - done in 2 parts. Part 1:
-    thermo->rho() -= psi*p;
+    thermo.rho() -= psi*p;
 
     volScalarField rUA = 1.0/UEqn.A();
     surfaceScalarField rhorUAf("(rho*(1|A(U)))", fvc::interpolate(rho*rUA));
@@ -48,7 +48,7 @@
     }
 
     // Second part of thermodynamic density update
-    thermo->rho() += psi*p;
+    thermo.rho() += psi*p;
 
     U += rUA*fvc::reconstruct((phi - phiU)/rhorUAf);
     U.correctBoundaryConditions();
@@ -65,7 +65,7 @@
         p +=
             (initialMass - fvc::domainIntegrate(psi*p))
             /fvc::domainIntegrate(psi);
-        thermo->rho() = psi*p;
+        thermo.rho() = psi*p;
         rho += (initialMass - fvc::domainIntegrate(rho))/totalVolume;
     }
 }

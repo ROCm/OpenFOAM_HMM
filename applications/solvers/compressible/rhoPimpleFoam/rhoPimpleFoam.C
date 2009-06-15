@@ -35,7 +35,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 #include "bound.H"
 

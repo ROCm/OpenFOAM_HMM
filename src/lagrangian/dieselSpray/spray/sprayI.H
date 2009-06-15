@@ -246,7 +246,7 @@ inline const liquidMixture& spray::fuels() const
 }
 
 
-inline const PtrList<specieProperties>& spray::gasProperties() const
+inline const PtrList<gasThermoPhysics>& spray::gasProperties() const
 {
     return gasProperties_;
 }

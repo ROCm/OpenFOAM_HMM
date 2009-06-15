@@ -57,7 +57,7 @@ Foam::spray::spray
     const volScalarField& p,
     const volScalarField& T,
     const basicMultiComponentMixture& composition,
-    const PtrList<specieProperties>& gasProperties,
+    const PtrList<gasThermoPhysics>& gasProperties,
     const dictionary&,
     const dictionary& environmentalProperties
 )
@@ -264,7 +264,7 @@ Foam::spray::spray
                 "spray::spray(const volVectorField& U, "
                 "const volScalarField& rho, const volScalarField& p, "
                 "const volScalarField& T, const combustionMixture& composition,"
-                "const PtrList<specieProperties>& gaseousFuelProperties, "
+                "const PtrList<gasThermoPhsyics>& gaseousFuelProperties, "
                 "const dictionary& thermophysicalProperties, "
                 "const dictionary& environmentalProperties)"
             )   << "spray::(...) only one wedgePolyPatch found. "

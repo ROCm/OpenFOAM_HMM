@@ -26,7 +26,7 @@ tmp<fv::convectionScheme<scalar> > mvConvection
               + mvConvection->fvmDiv(phi, Yi)
               - fvm::laplacian(turbulence->muEff(), Yi)
               ==
-                reactingParcels.Srho(i)
+                parcels.Srho(i)
               + kappa*chemistry.RR(i)().dimensionedInternalField()
               + pointMassSources.Su(i)
             );

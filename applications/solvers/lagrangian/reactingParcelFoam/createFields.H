@@ -1,19 +1,22 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<hCombustionThermo> thermo
+    autoPtr<psiChemistryModel> pChemistry
     (
-        hCombustionThermo::New(mesh)
+        psiChemistryModel::New(mesh)
     );
+    psiChemistryModel& chemistry = pChemistry();
 
-    combustionMixture& composition = thermo->composition();
+    hCombustionThermo& thermo = chemistry.thermo();
+
+    basicMultiComponentMixture& composition = thermo.composition();
     PtrList<volScalarField>& Y = composition.Y();
 
-    word inertSpecie(thermo->lookup("inertSpecie"));
+    word inertSpecie(thermo.lookup("inertSpecie"));
 
-    volScalarField& p = thermo->p();
-    volScalarField& h = thermo->h();
-    const volScalarField& T = thermo->T();
-    const volScalarField& psi = thermo->psi();
+    volScalarField& p = thermo.p();
+    volScalarField& h = thermo.h();
+    const volScalarField& T = thermo.T();
+    const volScalarField& psi = thermo.psi();
 
     volScalarField rho
     (
@@ -25,7 +28,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        thermo->rho()
+        thermo.rho()
     );
 
     Info<< "\nReading field U\n" << endl;
@@ -42,7 +45,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
     DimensionedField<scalar, volMesh> kappa
     (
@@ -66,20 +69,13 @@
             rho,
             U,
             phi,
-            thermo()
+            thermo
         )
     );
 
     Info<< "Creating field DpDt\n" << endl;
     volScalarField DpDt =
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
-
-    Info << "Constructing chemical mechanism" << endl;
-    chemistryModel chemistry
-    (
-        thermo(),
-        rho
-    );
 
     multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 

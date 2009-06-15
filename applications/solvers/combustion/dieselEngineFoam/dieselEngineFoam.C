@@ -36,40 +36,41 @@ Description
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
 #include "spray.H"
-#include "chemistryModel.H"
+#include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "multivariateScheme.H"
 #include "Switch.H"
 #include "OFstream.H"
 #include "volPointInterpolation.H"
+#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
-#   include "createEngineTime.H"
-#   include "createEngineMesh.H"
-#   include "createFields.H"
-#   include "readEnvironmentalProperties.H"
-#   include "readCombustionProperties.H"
-#   include "createSpray.H"
-#   include "initContinuityErrs.H"
-#   include "readEngineTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
-#   include "startSummary.H"
+    #include "setRootCase.H"
+    #include "createEngineTime.H"
+    #include "createEngineMesh.H"
+    #include "createFields.H"
+    #include "readEnvironmentalProperties.H"
+    #include "readCombustionProperties.H"
+    #include "createSpray.H"
+    #include "initContinuityErrs.H"
+    #include "readEngineTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
+    #include "startSummary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info << "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readPISOControls.H"
-#       include "readEngineTimeControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readPISOControls.H"
+        #include "readEngineTimeControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
@@ -101,27 +102,27 @@ int main(int argc, char *argv[])
             kappa = (runTime.deltaT() + tc)/(runTime.deltaT() + tc + tk);
         }
 
-#       include "rhoEqn.H"
-#       include "UEqn.H"
+        #include "rhoEqn.H"
+        #include "UEqn.H"
 
         for (label ocorr=1; ocorr <= nOuterCorr; ocorr++)
         {
-#           include "YEqn.H"
-#           include "hEqn.H"
+            #include "YEqn.H"
+            #include "hEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
-#               include "pEqn.H"
+                #include "pEqn.H"
             }
         }
 
         turbulence->correct();
 
-#       include "logSummary.H"
-#       include "spraySummary.H"
+        #include "logSummary.H"
+        #include "spraySummary.H"
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
         runTime.write();
 

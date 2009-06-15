@@ -84,7 +84,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
     DimensionedField<scalar, volMesh> kappa
     (

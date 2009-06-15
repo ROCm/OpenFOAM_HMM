@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
         runTime.write();
 

@@ -7,14 +7,14 @@
      ==
         DpDt
      +  parcels.Sh()
-     +  radiation->Sh(thermo())
+     +  radiation->Sh(thermo)
     );
 
     hEqn.relax();
 
     hEqn.solve();
 
-    thermo->correct();
+    thermo.correct();
 
     radiation->correct();
 }

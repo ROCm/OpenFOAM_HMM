@@ -1,4 +1,4 @@
-rho = thermo->rho();
+rho = thermo.rho();
 
 if (pressureImplicitPorosity)
 {
@@ -14,7 +14,7 @@ if (transonic)
     surfaceScalarField phid
     (
         "phid",
-        fvc::interpolate(thermo->psi())
+        fvc::interpolate(psi)
        *(
             (fvc::interpolate(U) & mesh.Sf())
 //          + fvc::ddtPhiCorr(rUA, rho, U, phi)
@@ -40,7 +40,7 @@ if (transonic)
           + fvm::div(phid, p)
           - lapTerm()
          ==
-            reactingParcels.Srho()
+            parcels.Srho()
           + pointMassSources.Su()
         );
 
@@ -80,7 +80,7 @@ else
           + fvc::div(phi)
           - lapTerm()
          ==
-            reactingParcels.Srho()
+            parcels.Srho()
           + pointMassSources.Su()
         );
 

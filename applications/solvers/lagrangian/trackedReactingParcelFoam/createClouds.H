@@ -1,9 +1,9 @@
 Info<< "\nConstructing reacting cloud" << endl;
-BasicTrackedReactingCloud<specieReactingProperties> reactingParcels
+BasicTrackedReactingCloud<gasThermoPhysics> parcels
 (
     "reactingCloud1",
     rho,
     U,
     g,
-    thermo()
+    thermo
 );

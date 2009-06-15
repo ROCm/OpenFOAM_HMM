@@ -32,9 +32,9 @@ Description
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
 #include "BasicTrackedReactingCloud.H"
-#include "chemistryModel.H"
+#include "psiChemistryModel.H"
 #include "chemistrySolver.H"
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "timeActivatedExplicitMulticomponentPointSource.H"
@@ -53,6 +53,7 @@ int main(int argc, char *argv[])
     #include "createRadiationModel.H"
     #include "createClouds.H"
     #include "createMulticomponentPointSources.H"
+    #include "createPorousZones.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
@@ -74,9 +75,9 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        reactingParcels.evolve();
+        parcels.evolve();
 
-        reactingParcels.info();
+        parcels.info();
 
         #include "chemistry.H"
         #include "rhoEqn.H"
@@ -100,12 +101,9 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
-        if (runTime.write())
-        {
-            #include "additionalOutput.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

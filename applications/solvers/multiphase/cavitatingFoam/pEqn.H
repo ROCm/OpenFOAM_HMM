@@ -24,7 +24,7 @@
 
     phiv -= phiGradp/rhof;
 
-#   include "resetPhivPatches.H"
+    #include "resetPhivPatches.H"
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
@@ -82,6 +82,5 @@
     Info<< "max-min rho: " << max(rho).value()
         << " " << min(rho).value() << endl;
 
-#   include "gammaPsi.H"
-
+    #include "gammaPsi.H"
 }

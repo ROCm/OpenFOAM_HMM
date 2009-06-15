@@ -35,9 +35,9 @@ Description
 #include "hCombustionThermo.H"
 #include "turbulenceModel.H"
 #include "BasicReactingCloud.H"
-#include "chemistryModel.H"
+#include "psiChemistryModel.H"
 #include "chemistrySolver.H"
-#include "thermoPhsyicsTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -100,12 +100,9 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
-        if (runTime.write())
-        {
-            #include "additionalOutput.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
