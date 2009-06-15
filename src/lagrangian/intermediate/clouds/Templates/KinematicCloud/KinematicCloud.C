@@ -151,18 +151,18 @@ Foam::KinematicCloud<ParcelType>::~KinematicCloud()
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::checkParcelProperties
 (
-    ParcelType* pPtr,
+    ParcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
     if (!fullyDescribed)
     {
-        pPtr->rho() = constProps_.rho0();
+        parcel.rho() = constProps_.rho0();
     }
 
     scalar carrierDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
+    parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
 }
 
 

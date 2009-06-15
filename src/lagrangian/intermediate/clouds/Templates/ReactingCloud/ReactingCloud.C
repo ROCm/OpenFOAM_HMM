@@ -148,34 +148,34 @@ Foam::ReactingCloud<ParcelType>::~ReactingCloud()
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::checkParcelProperties
 (
-    ParcelType* pPtr,
+    ParcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
     ThermoCloud<ParcelType>::checkParcelProperties
     (
-        pPtr,
+        parcel,
         lagrangianDt,
         fullyDescribed
     );
 
     if (!fullyDescribed)
     {
-        pPtr->Y() = composition().YMixture0();
+        parcel.Y() = composition().YMixture0();
     }
     else
     {
         checkSuppliedComposition
         (
-            pPtr->Y(),
+            parcel.Y(),
             composition().YMixture0(),
             "YMixture"
         );
     }
 
     // derived information - store initial mass
-    pPtr->mass0() = pPtr->mass();
+    parcel.mass0() = parcel.mass();
 }
 
 
