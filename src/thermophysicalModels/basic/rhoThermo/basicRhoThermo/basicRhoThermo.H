@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class basicRhoThermo Declaration
+                       Class basicRhoThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicRhoThermo
@@ -106,6 +106,9 @@ public:
 
             //- Density [kg/m^3]
             virtual tmp<volScalarField> rho() const;
+
+            //- Return non-const access to the local density field [kg/m^3]
+            virtual volScalarField& rho();
 };
 
 

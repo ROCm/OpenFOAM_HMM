@@ -70,4 +70,10 @@ Foam::tmp<Foam::volScalarField> Foam::basicRhoThermo::rho() const
 }
 
 
+Foam::volScalarField& Foam::basicRhoThermo::rho()
+{
+    return rho_;
+}
+
+
 // ************************************************************************* //
