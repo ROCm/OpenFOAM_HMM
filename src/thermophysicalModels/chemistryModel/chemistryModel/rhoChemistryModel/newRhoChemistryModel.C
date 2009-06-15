@@ -35,7 +35,7 @@ Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
 {
     word rhoChemistryModelType;
     word thermoTypeName;
-    word userSel;
+    word userModel;
 
     // Enclose the creation of the chemistrtyProperties to ensure it is
     // deleted before the chemistrtyProperties is created otherwise the
@@ -53,37 +53,54 @@ Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
             )
         );
 
-        chemistryPropertiesDict.lookup("rhoChemistryModelType") >> userSel;
+        chemistryPropertiesDict.lookup("rhoChemistryModelType") >> userModel;
 
         // construct chemistry model type name by inserting first template
         // argument
-        label tempOpen = userSel.find('<');
-        label tempClose = userSel.find('>');
+        label tempOpen = userModel.find('<');
+        label tempClose = userModel.find('>');
 
-        word className = userSel(0, tempOpen);
-        thermoTypeName = userSel(tempOpen + 1, tempClose - tempOpen - 1);
+        word className = userModel(0, tempOpen);
+        thermoTypeName = userModel(tempOpen + 1, tempClose - tempOpen - 1);
 
         rhoChemistryModelType =
             className + '<' + typeName + ',' + thermoTypeName + '>';
     }
 
-    Info<< "Selecting rhoChemistryModel " << userSel << endl;
+    if (debug)
+    {
+        Info<< "Selecting rhoChemistryModel " << rhoChemistryModelType << endl;
+    }
+    else
+    {
+        Info<< "Selecting rhoChemistryModel " << userModel << endl;
+    }
 
     fvMeshConstructorTable::iterator cstrIter =
         fvMeshConstructorTablePtr_->find(rhoChemistryModelType);
 
     if (cstrIter == fvMeshConstructorTablePtr_->end())
     {
-        wordList models = fvMeshConstructorTablePtr_->toc();
-        forAll(models, i)
+        if (debug)
         {
-            models[i] = models[i].replace(typeName + ',', "");
+            FatalErrorIn("rhoChemistryModelBase::New(const mesh&)")
+                << "Unknown rhoChemistryModel type " << rhoChemistryModelType
+                << nl << nl << "Valid rhoChemistryModel types are:" << nl
+                << fvMeshConstructorTablePtr_->toc() << nl << exit(FatalError);
         }
+        else
+        {
+            wordList models = fvMeshConstructorTablePtr_->toc();
+            forAll(models, i)
+            {
+                models[i] = models[i].replace(typeName + ',', "");
+            }
 
-        FatalErrorIn("rhoChemistryModelBase::New(const mesh&)")
-            << "Unknown rhoChemistryModel type " << userSel
-            << nl << nl << "Valid rhoChemistryModel types are:" << nl
-            << models << nl << exit(FatalError);
+            FatalErrorIn("rhoChemistryModelBase::New(const mesh&)")
+                << "Unknown rhoChemistryModel type " << userModel
+                << nl << nl << "Valid rhoChemistryModel types are:" << nl
+                << models << nl << exit(FatalError);
+        }
     }
 
     return autoPtr<rhoChemistryModel>
