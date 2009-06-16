@@ -76,7 +76,7 @@ Foam::LiquidEvaporation<CloudType>::LiquidEvaporation
         (
             owner.mesh().objectRegistry::lookupObject<dictionary>
             (
-                "thermophysicalProperties"
+                owner.carrierThermo().name()
             )
         )
     ),
@@ -153,8 +153,8 @@ void Foam::LiquidEvaporation<CloudType>::calculate
     // Reynolds number
     scalar Re = mag(Ur)*d/(nuc + ROOTVSMALL);
 
-    // film temperature evaluated using the particle temperature
-    scalar Tf = T;
+    // film temperature evaluated using the 2/3 rule
+    scalar Tf = (2.0*T + Tc)/3.0;
 
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)
@@ -162,12 +162,13 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         label gid = liqToCarrierMap_[i];
         label lid = liqToLiqMap_[i];
 
-        // vapour diffusivity [m2/s]
+        // vapour diffusivity at film temperature and cell pressure [m2/s]
         scalar Dab = liquids_->properties()[lid].D(pc, Tf);
 
-        // saturation pressure for species i [pa]
-        // - carrier phase pressure assumed equal to the liquid vapour pressure
-        //   close to the surface
+        // saturation pressure for species i at film temperature and cell
+        // pressure [pa] - carrier phase pressure assumed equal to the liquid
+        // vapour pressure close to the surface
+        // - limited to pc if pSat > pc
         scalar pSat = min(liquids_->properties()[lid].pv(pc, Tf), pc);
 
         // Schmidt number
@@ -179,11 +180,11 @@ void Foam::LiquidEvaporation<CloudType>::calculate
         // mass transfer coefficient [m/s]
         scalar kc = Sh*Dab/(d + ROOTVSMALL);
 
-        // vapour concentration at droplet surface [kmol/m3]
+        // vapour concentration at droplet surface at film temperature [kmol/m3]
         scalar Cs = pSat/(specie::RR*Tf);
 
-        // vapour concentration in bulk gas [kmol/m3]
-        scalar Cinf = Xc[gid]*pc/(specie::RR*Tc);
+        // vapour concentration in bulk gas at film temperature [kmol/m3]
+        scalar Cinf = Xc[gid]*pc/(specie::RR*Tf);
 
         // molar flux of vapour [kmol/m2/s]
         scalar Ni = max(kc*(Cs - Cinf), 0.0);
