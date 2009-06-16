@@ -49,6 +49,11 @@ License
     (                                                                         \
         ParcelType,                                                           \
         gasThermoPhysics                                                      \
+    );                                                                        \
+    makeReactingMultiphaseDevolatilisationModelThermoType                     \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

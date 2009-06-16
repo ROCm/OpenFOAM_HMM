@@ -50,6 +50,11 @@ License
     (                                                                         \
         ParcelType,                                                           \
         gasThermoPhysics                                                      \
+    );                                                                        \
+    makeCoalSurfaceReactionModelThermoType                                    \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

@@ -49,6 +49,12 @@ License
     (                                                                         \
         ParcelType,                                                           \
         gasThermoPhysics                                                      \
+    );                                                                        \
+                                                                              \
+    makeReactingPhaseChangeModelThermoType                                    \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

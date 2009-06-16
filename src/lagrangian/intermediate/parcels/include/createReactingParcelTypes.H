@@ -35,7 +35,8 @@ License
 #define createReactingParcelType(ParcelType)                                  \
                                                                               \
     createReactingParcelThermoType(ParcelType, constGasThermoPhysics);        \
-    createReactingParcelThermoType(ParcelType, gasThermoPhysics);
+    createReactingParcelThermoType(ParcelType, gasThermoPhysics);             \
+    createReactingParcelThermoType(ParcelType, icoPoly8ThermoPhysics);
 
 
 #define createReactingParcelThermoType(ParcelType, ThermoType)                \

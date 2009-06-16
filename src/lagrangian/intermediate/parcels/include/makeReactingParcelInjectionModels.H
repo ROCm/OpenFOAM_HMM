@@ -53,6 +53,12 @@ License
     (                                                                         \
         ParcelType,                                                           \
         gasThermoPhysics                                                      \
+    );                                                                        \
+                                                                              \
+    makeReactingInjectionModelThermoType                                      \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

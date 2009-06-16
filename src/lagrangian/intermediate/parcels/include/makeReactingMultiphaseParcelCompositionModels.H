@@ -47,6 +47,11 @@ License
     (                                                                         \
         ParcelType,                                                           \
         gasThermoPhysics                                                      \
+    );                                                                        \
+    makeReactingMultiphaseCompositionModelThermoType                          \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

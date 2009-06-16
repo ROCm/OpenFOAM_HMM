@@ -34,7 +34,8 @@ License
 #define createReactingCloudType(CloudType)                                    \
                                                                               \
     createReactingCloudThermoType(CloudType, constGasThermoPhysics);          \
-    createReactingCloudThermoType(CloudType, gasThermoPhysics);
+    createReactingCloudThermoType(CloudType, gasThermoPhysics);               \
+    createReactingCloudThermoType(CloudType, icoPoly8ThermoPhysics);
 
 
 #define createReactingCloudThermoType(CloudType, ThermoType)                  \
