@@ -23,16 +23,23 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
+    trackedReactingParcelFoam
 
 Description
+    - reacting parcel cloud tracking
+    - porous media
+    - point mass sources
+    - polynomial based, incompressible thermodynamics (f(T))
+
+    Note: ddtPhiCorr not used here - not well defined for porous calcs
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hCombustionThermo.H"
+#include "hReactionThermo.H"
 #include "turbulenceModel.H"
 #include "BasicTrackedReactingCloud.H"
-#include "psiChemistryModel.H"
+#include "rhoChemistryModel.H"
 #include "chemistrySolver.H"
 #include "thermoPhysicsTypes.H"
 #include "radiationModel.H"
@@ -81,17 +88,17 @@ int main(int argc, char *argv[])
 
         #include "chemistry.H"
         #include "rhoEqn.H"
+        #include "UEqn.H"
 
         // --- PIMPLE loop
-        for (int ocorr=1; ocorr<=nOuterCorr; ocorr++)
+        for (int oCorr=1; oCorr<=nOuterCorr; oCorr++)
         {
-            #include "UEqn.H"
             #include "YEqn.H"
+            #include "hEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
-                #include "hEqn.H"
                 #include "pEqn.H"
             }
 

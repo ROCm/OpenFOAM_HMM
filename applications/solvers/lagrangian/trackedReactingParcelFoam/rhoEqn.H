@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 {
-    solve
+    fvScalarMatrix rhoEqn
     (
         fvm::ddt(rho)
       + fvc::div(phi)
@@ -39,6 +39,10 @@ Description
         parcels.Srho()
       + pointMassSources.Su()
     );
+
+    rhoEqn.relax();
+
+    rhoEqn.solve();
 }
 
 // ************************************************************************* //
