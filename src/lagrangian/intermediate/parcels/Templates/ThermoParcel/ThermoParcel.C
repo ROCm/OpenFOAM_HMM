@@ -178,7 +178,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
 
     if (mag(htc) < ROOTVSMALL && !td.cloud().radiation())
     {
-        return  T + dt*Sh/(this->mass()*cp);
+        return  T + dt*Sh/(this->volume(d)*rho*cp);
     }
 
     scalar ap;
