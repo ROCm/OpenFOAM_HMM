@@ -383,6 +383,35 @@ void Foam::polyTopoChange::checkFace
             << " own:" << own << " nei:" << nei
             << " patchI:" << patchI << abort(FatalError);
     }
+    if (faceI >= 0 && faceI < faces_.size() && faceRemoved(faceI))
+    {
+        FatalErrorIn
+        (
+            "polyTopoChange::checkFace(const face&, const label"
+            ", const label, const label, const label)"
+        )   << "Face already marked for removal"
+            << nl
+            << "f:" << f
+            << " faceI(-1 if added face):" << faceI
+            << " own:" << own << " nei:" << nei
+            << " patchI:" << patchI << abort(FatalError);
+    }
+    forAll(f, fp)
+    {
+        if (f[fp] < points_.size() && pointRemoved(f[fp]))
+        {
+            FatalErrorIn
+            (
+                "polyTopoChange::checkFace(const face&, const label"
+                ", const label, const label, const label)"
+            )   << "Face uses removed vertices"
+                << nl
+                << "f:" << f
+                << " faceI(-1 if added face):" << faceI
+                << " own:" << own << " nei:" << nei
+                << " patchI:" << patchI << abort(FatalError);
+        }
+    }
 }
 
 
