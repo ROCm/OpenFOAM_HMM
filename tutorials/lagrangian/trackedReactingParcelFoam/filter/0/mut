@@ -11,39 +11,40 @@ FoamFile
     format      ascii;
     class       volScalarField;
     location    "0";
-    object      epsilon;
+    object      mut;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [0 2 -3 0 0 0 0];
+dimensions      [1 -1 -1 0 0 0 0];
 
-internalField   uniform 0.0449;
+internalField   uniform 0;
 
 boundaryField
 {
     walls
     {
-        type            compressible::epsilonWallFunction;
-        value           uniform 0.0449;
+        type            mutWallFunction;
+        value           uniform 0;
     }
     inlet
     {
-        type            fixedValue;
-        value           uniform 0.0449;
+        type            calculated;
+        value           uniform 0;
     }
     outlet
     {
-        type            zeroGradient;
+        type            calculated;
+        value           uniform 0;
     }
     cycLeft
     {
         type            cyclic;
-        value           uniform 0.0449;
+        value           uniform 0;
     }
     cycRight
     {
         type            cyclic;
-        value           uniform 0.0449;
+        value           uniform 0;
     }
     frontAndBack
     {

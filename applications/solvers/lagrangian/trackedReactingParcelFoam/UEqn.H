@@ -41,8 +41,3 @@
             UEqn == -fvc::grad(p)
         );
     }
-
-    if (momentumPredictor)
-    {
-        solve(UEqn == -fvc::grad(p));
-    }
