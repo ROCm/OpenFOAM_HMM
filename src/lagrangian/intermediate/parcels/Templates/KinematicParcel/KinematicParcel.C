@@ -113,9 +113,6 @@ void Foam::KinematicParcel<ParcelType>::calc
     // Motion
     // ~~~~~~
 
-    // No additional forces
-    vector Fx = vector::zero;
-
     // Calculate new particle velocity
     vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Su, dUTrans);
 
