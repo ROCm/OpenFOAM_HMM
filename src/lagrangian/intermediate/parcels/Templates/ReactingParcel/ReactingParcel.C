@@ -50,7 +50,7 @@ void Foam::ReactingParcel<ParcelType>::setCellValues
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Limiting pressure in cell " << cellI << " to "
+        )   << "Limiting observed pressure in cell " << cellI << " to "
             << td.constProps().pMin() <<  nl << endl;
 
         pc_ = td.constProps().pMin();

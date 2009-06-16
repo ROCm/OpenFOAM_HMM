@@ -53,7 +53,7 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Limiting temperature in cell " << cellI << " to "
+        )   << "Limiting observed temperature in cell " << cellI << " to "
             << td.constProps().TMin() <<  nl << endl;
 
         Tc_ = td.constProps().TMin();
@@ -184,7 +184,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     scalar ap;
     scalar bp;
 
-    if(td.cloud().radiation())
+    if (td.cloud().radiation())
     {
         const scalarField& G =
             td.cloud().mesh().objectRegistry::lookupObject<volScalarField>("G");

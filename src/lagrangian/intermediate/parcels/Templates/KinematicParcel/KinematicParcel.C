@@ -49,7 +49,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Limiting density in cell " << cellI << " to "
+        )   << "Limiting observed density in cell " << cellI << " to "
             << td.constProps().rhoMin() <<  nl << endl;
 
         rhoc_ = td.constProps().rhoMin();
