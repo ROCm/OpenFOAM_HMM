@@ -66,7 +66,7 @@ class noRadiation
 public:
 
     //- Runtime type information
-    TypeName("noRadiation");
+    TypeName("none");
 
 
     // Constructors
