@@ -47,6 +47,12 @@ class VariableHardSphere
 :
     public BinaryCollisionModel<CloudType>
 {
+    // Private data
+
+        //- Reference temperature
+        const scalar Tref_;
+
+
 public:
 
     //- Runtime type information

@@ -172,9 +172,6 @@ public:
         //- Boltzmann constant
         static scalar kb;
 
-        //- Reference temperature for all models
-        static scalar Tref;
-
 
     // Constructors
 

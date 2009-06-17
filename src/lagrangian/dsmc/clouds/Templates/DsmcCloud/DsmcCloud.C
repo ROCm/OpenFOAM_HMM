@@ -34,9 +34,6 @@ License
 template<class ParcelType>
 Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
 
-template<class ParcelType>
-Foam::scalar Foam::DsmcCloud<ParcelType>::Tref = 273;
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

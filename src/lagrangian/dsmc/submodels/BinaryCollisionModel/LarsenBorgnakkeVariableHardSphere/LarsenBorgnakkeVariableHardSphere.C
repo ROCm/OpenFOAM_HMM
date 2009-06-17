@@ -97,6 +97,7 @@ Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::LarsenBorgnakkeVariableHardS
 )
 :
     BinaryCollisionModel<CloudType>(dict, cloud, typeName),
+    Tref_(readScalar(this->coeffDict().lookup("Tref"))),
     relaxationCollisionNumber_
     (
         readScalar(this->coeffDict().lookup("relaxationCollisionNumber"))
@@ -156,7 +157,7 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::sigmaTcR
     // calculating cross section = pi*dPQ^2, where dPQ is from Bird, eq. 4.79
     scalar sigmaTPQ =
         mathematicalConstant::pi*dPQ*dPQ
-       *pow(2.0*CloudType::kb*CloudType::Tref/(mR*cR*cR), omegaPQ - 0.5)
+       *pow(2.0*CloudType::kb*Tref_/(mR*cR*cR), omegaPQ - 0.5)
        /exp(Foam::lgamma(2.5 - omegaPQ));
 
     return sigmaTPQ*cR;
