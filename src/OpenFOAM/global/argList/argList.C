@@ -526,10 +526,10 @@ Foam::argList::argList
 
     // Switch on signal trapping. We have to wait until after Pstream::init
     // since this sets up its own ones.
-    sigFpe_.set();
-    sigInt_.set();
-    sigQuit_.set();
-    sigSegv_.set();
+    sigFpe_.set(bannerEnabled);
+    sigInt_.set(bannerEnabled);
+    sigQuit_.set(bannerEnabled);
+    sigSegv_.set(bannerEnabled);
 
     if (Pstream::master() && bannerEnabled)
     {

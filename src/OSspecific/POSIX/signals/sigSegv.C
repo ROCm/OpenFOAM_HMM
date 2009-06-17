@@ -83,7 +83,7 @@ Foam::sigSegv::~sigSegv()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigSegv::set()
+void Foam::sigSegv::set(const bool verbose)
 {
     if (oldAction_.sa_handler)
     {
