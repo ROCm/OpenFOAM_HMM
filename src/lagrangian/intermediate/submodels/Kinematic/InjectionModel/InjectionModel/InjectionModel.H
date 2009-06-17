@@ -25,7 +25,6 @@ License
 Class
     Foam::InjectionModel
 
-
 Description
     Templated injection model class
 
@@ -54,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class InjectionModel
 {
-
 public:
 
     // Enumerations
@@ -82,6 +80,15 @@ private:
         const dictionary coeffDict_;
 
 
+    // Private member functions
+
+        //- Read injector properties from previous run (if applicable)
+        void readProps();
+
+        //- Write injector properties
+        void writeProps();
+
+
 protected:
 
     // Protected data
@@ -107,22 +114,14 @@ protected:
             //- Number of injections counter
             label nInjections_;
 
-            //- Running counter of parcels added during each injection
-            label nParcelsAdded_;
-
             //- Running counter of total number of parcels added
-            label nParcelsAddedTotal_;
+            label parcelsAddedTotal_;
 
 
         // Injection properties per Lagrangian time step
 
-            // Parcel basis
-
-                //- Parcel basis name
-                const word parcelBasisType_;
-
-                //- Parcel basis enumeration
-                parcelBasis parcelBasis_;
+            //- Parcel basis enumeration
+            parcelBasis parcelBasis_;
 
             //- Continuous phase time at start of injection time step [s]
             scalar time0_;
@@ -134,7 +133,7 @@ protected:
     // Protected member functions
 
         //- Number of parcels to introduce over the time step
-        virtual label nParcelsToInject
+        virtual label parcelsToInject
         (
             const scalar time0,
             const scalar time1
@@ -147,36 +146,36 @@ protected:
             const scalar time1
         ) const = 0;
 
+        //- Additional flag to identify whether or not injection in cellI is
+        //  permitted
+        virtual bool validInjection(const label parcelI) = 0;
 
         //- Determine properties for next time step/injection interval
-        void prepareForNextTimeStep
+        virtual void prepareForNextTimeStep
         (
             const scalar time0,
             const scalar time1,
-            label& nParcels,
-            scalar& volume
+            label& newParcels,
+            scalar& newVolume
         );
 
-        //- Find the cell that contains the injector position
-        //  Will modify position slightly towards the owner cell centroid
-        virtual void findInjectorCellAndPosition
-        (
-            label& cellI,
-            vector& position
-        );
+        //- Find the cell that contains the supplied position
+        //  Will modify position slightly towards the owner cell centroid to
+        //  ensure that it lies in a cell and not edge/face
+        virtual void findCellAtPosition(label& cellI, vector& position);
 
         //- Set number of particles to inject given parcel properties
-        scalar setNumberOfParticles
+        virtual scalar setNumberOfParticles
         (
-            const label nParcels,
-            const scalar diameter,
+            const label parcels,
+            const scalar volume,
             const scalar volumeFraction,
-            const scalar rho,
-            const scalar volume
+            const scalar diameter,
+            const scalar rho
         );
 
         //- Post injection checks
-        void postInjectCheck();
+        virtual void postInjectCheck(const label parcelsAdded);
 
 
 public:
@@ -199,6 +198,9 @@ public:
 
 
     // Constructors
+
+        //- Construct null from owner
+        InjectionModel(CloudType& owner);
 
         //- Construct from dictionary
         InjectionModel
@@ -265,7 +267,7 @@ public:
                 inline label nInjections() const;
 
                 //- Return the total number parcels added
-                inline label nParcelsAddedTotal() const;
+                inline label parcelsAddedTotal() const;
 
 
         // Per-injection event functions
@@ -280,26 +282,26 @@ public:
 
         // Injection geometry
 
-            //- Return the injection position
-            virtual vector position
+            //- Set the injection position and owner cell
+            virtual void setPositionAndCell
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time,
-                const polyMeshInfo& meshInfo
+                vector& position,
+                label& cellOwner
             ) = 0;
 
             //- Return the velocity of the parcel to introduce at a time
             virtual vector velocity
             (
-                const label iParcel,
-                const scalar time,
-                const polyMeshInfo& meshInfo
+                const label parcelI,
+                const scalar time
             ) = 0;
 
             //- Return the diameter of the parcel to introduce at a time
             virtual scalar d0
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time
             ) const = 0;
 };

@@ -33,11 +33,11 @@ Description
 template<class CloudType>
 Foam::NoDispersion<CloudType>::NoDispersion
 (
-    const dictionary& dict,
+    const dictionary&,
     CloudType& owner
 )
 :
-    DispersionModel<CloudType>(dict, owner)
+    DispersionModel<CloudType>(owner)
 {}
 
 
@@ -60,12 +60,12 @@ bool Foam::NoDispersion<CloudType>::active() const
 template<class CloudType>
 Foam::vector Foam::NoDispersion<CloudType>::update
 (
-    const scalar dt,
-    const label celli,
-    const vector& U,
+    const scalar,
+    const label,
+    const vector&,
     const vector& Uc,
-    vector& UTurb,
-    scalar& tTurb
+    vector&,
+    scalar&
 )
 {
     // Do nothing

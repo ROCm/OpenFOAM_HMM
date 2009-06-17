@@ -67,7 +67,7 @@ class cellLimitedGrad
         tmp<fv::gradScheme<Type> > basicGradScheme_;
 
         //- Limiter coefficient
-        scalar k_;
+        const scalar k_;
 
 
     // Private Member Functions
@@ -98,7 +98,7 @@ public:
             {
                 FatalIOErrorIn
                 (
-                    "cellLimitedGrad(const fvMesh& mesh, Istream& schemeData)",
+                    "cellLimitedGrad(const fvMesh&, Istream& schemeData)",
                     schemeData
                 )   << "coefficient = " << k_
                     << " should be >= 0 and <= 1"

@@ -852,7 +852,7 @@ int main(int argc, char *argv[])
 
 
     // For debugging: dump boundary faces as triSurface
-    if (args.options().found("dump"))
+    if (args.optionFound("dump"))
     {
         DynamicList<labelledTri> triangles(boundaryFaces.size());
 

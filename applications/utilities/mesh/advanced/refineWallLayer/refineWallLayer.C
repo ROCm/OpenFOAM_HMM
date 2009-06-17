@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
     word patchName(args.additionalArgs()[0]);
 
     scalar weight(readScalar(IStringStream(args.additionalArgs()[1])()));
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
 
     label patchID = mesh.boundaryMesh().findPatchID(patchName);
@@ -101,11 +101,11 @@ int main(int argc, char *argv[])
     // List of cells to refine
     //
 
-    bool useSet = args.options().found("useSet");
+    bool useSet = args.optionFound("useSet");
 
     if (useSet)
     {
-        word setName(args.options()["useSet"]);
+        word setName(args.option("useSet"));
 
         Info<< "Subsetting cells to cut based on cellSet" << setName << endl
             << endl;

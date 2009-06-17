@@ -43,31 +43,6 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int getTimeIndex
-(
-    const instantList& times,
-    const scalar t
-)
-{
-    int nearestIndex = -1;
-    scalar nearestDiff = Foam::GREAT;
-
-    forAll(times, timeIndex)
-    {
-        if (times[timeIndex].name() == "constant") continue;
-
-        scalar diff = fabs(times[timeIndex].value() - t);
-        if (diff < nearestDiff)
-        {
-            nearestDiff = diff;
-            nearestIndex = timeIndex;
-        }
-    }
-
-    return nearestIndex;
-}
-
-
 void mapConsistentMesh
 (
     const fvMesh& meshSource,
@@ -254,9 +229,7 @@ wordList addProcessorPatches
 int main(int argc, char *argv[])
 {
 #   include "setRoots.H"
-
 #   include "createTimes.H"
-
 #   include "setTimeIndex.H"
 
     runTimeSource.setTime(sourceTimes[sourceTimeIndex], sourceTimeIndex);
@@ -357,7 +330,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    else if(!parallelSource && parallelTarget)
+    else if (!parallelSource && parallelTarget)
     {
         IOdictionary decompositionDict
         (
@@ -426,7 +399,7 @@ int main(int argc, char *argv[])
             }
         }
     }
-    else if(parallelSource && parallelTarget)
+    else if (parallelSource && parallelTarget)
     {
         IOdictionary decompositionDictSource
         (

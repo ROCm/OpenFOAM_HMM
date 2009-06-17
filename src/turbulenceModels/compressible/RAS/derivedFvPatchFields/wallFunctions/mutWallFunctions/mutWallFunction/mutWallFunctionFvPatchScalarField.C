@@ -117,15 +117,15 @@ mutWallFunctionFvPatchScalarField
 
 void mutWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu = ras.Cmu().value();
+    const scalar Cmu = rasModel.Cmu().value();
     const scalar Cmu25 = pow(Cmu, 0.25);
-    const scalar kappa = ras.kappa().value();
-    const scalar E = ras.E().value();
-    const scalar yPlusLam = ras.yPlusLam();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar E = rasModel.E().value();
+    const scalar yPlusLam = rasModel.yPlusLam();
 
-    const scalarField& y = ras.y()[patch().index()];
+    const scalarField& y = rasModel.y()[patch().index()];
 
     const scalarField& rhow =
         patch().lookupPatchField<volScalarField, scalar>(rhoName_);

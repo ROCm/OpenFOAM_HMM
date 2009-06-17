@@ -68,6 +68,23 @@
     scalar pdRefValue = 0.0;
     setRefCell(pd, mesh.solutionDict().subDict("PISO"), pdRefCell, pdRefValue);
 
+    scalar pRefValue = 0.0;
+
+    if (pd.needReference())
+    {
+        pRefValue = readScalar
+        (
+            mesh.solutionDict().subDict("PISO").lookup("pRefValue")
+        );
+
+        p += dimensionedScalar
+        (
+            "p",
+            p.dimensions(),
+            pRefValue - getRefCellValue(p, pdRefCell)
+        );
+    }
+
 
     // Construct incompressible turbulence model
     autoPtr<incompressible::turbulenceModel> turbulence

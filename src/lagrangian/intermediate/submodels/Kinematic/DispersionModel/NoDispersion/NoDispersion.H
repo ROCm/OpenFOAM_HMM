@@ -26,7 +26,7 @@ Class
     Foam::NoDispersion
 
 Description
-    No turbulent dispersion of the parcels
+    Place holder for 'none' option
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class NoDispersion Declaration
+                       Class NoDispersion Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -49,11 +49,10 @@ class NoDispersion
 :
     public DispersionModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("NoDispersion");
+    TypeName("none");
 
 
     // Constructors
@@ -66,9 +65,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoDispersion();
+    //- Destructor
+    virtual ~NoDispersion();
 
 
     // Member Functions

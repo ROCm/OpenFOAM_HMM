@@ -22,7 +22,40 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-S       Strat=b{job=t,map=t,poli=S,sep=(m{asc=b{bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},org=f{move=80,pass=-1,bal=0.005},width=3},low=h{pass=10}f{move=80,pass=-1,bal=0.0005},type=h,vert=80,rat=0.8}|m{asc=b{bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},org=f{move=80,pass=-1,bal=0.005},width=3},low=h{pass=10}f{move=80,pass=-1,bal=0.0005},type=h,vert=80,rat=0.8})}
+    Default strategy:
+        Strat=b
+        {
+            job=t,
+            map=t,
+            poli=S,
+            sep=
+            (
+                m
+                {
+                    asc=b
+                    {
+                        bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
+                        org=f{move=80,pass=-1,bal=0.005},width=3
+                    },
+                    low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
+                    type=h,
+                    vert=80,
+                    rat=0.8
+                }
+              | m
+                {
+                    asc=b
+                    {
+                        bnd=d{pass=40,dif=1,rem=1}f{move=80,pass=-1,bal=0.005},
+                        org=f{move=80,pass=-1,bal=0.005},
+                        width=3},
+                        low=h{pass=10}f{move=80,pass=-1,bal=0.0005},
+                        type=h,
+                        vert=80,
+                        rat=0.8
+                }
+            )
+        }
 \*---------------------------------------------------------------------------*/
 
 #include "scotchDecomp.H"
@@ -31,6 +64,7 @@ S       Strat=b{job=t,map=t,poli=S,sep=(m{asc=b{bnd=d{pass=40,dif=1,rem=1}f{move
 #include "IFstream.H"
 #include "Time.H"
 #include "cyclicPolyPatch.H"
+#include "OFstream.H"
 
 extern "C"
 {
@@ -113,46 +147,102 @@ Foam::label Foam::scotchDecomp::decompose
     check(SCOTCH_graphCheck(&grafdat), "SCOTCH_graphCheck");
 
 
+    // Dump graph
+    if (decompositionDict_.found("scotchCoeffs"))
+    {
+        const dictionary& scotchCoeffs =
+            decompositionDict_.subDict("scotchCoeffs");
 
-    //// Architecture
-    //// ~~~~~~~~~~~~
-    //// (fully connected network topology since using switch)
-    //
-    //SCOTCH_Arch archdat;
-    //check(SCOTCH_archInit(&archdat), "SCOTCH_archInit");
-    //check
-    //(
-    //    // SCOTCH_archCmpltw for weighted.
-    //    SCOTCH_archCmplt(&archdat, nProcessors_),
-    //    "SCOTCH_archCmplt"
-    //);
+        Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
+
+        if (writeGraph)
+        {
+            OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
+
+            Info<< "Dumping Scotch graph file to " << str.name() << endl
+                << "Use this in combination with gpart." << endl;
+
+            label version = 0;
+            str << version << nl;
+            // Numer of vertices
+            str << xadj.size()-1 << ' ' << adjncy.size() << nl;
+            // Numbering starts from 0
+            label baseval = 0;
+            // Has weights?
+            label hasEdgeWeights = 0;
+            label hasVertexWeights = 0;
+            label numericflag = 10*hasEdgeWeights+hasVertexWeights;
+            str << baseval << ' ' << numericflag << nl;
+            for (label cellI = 0; cellI < xadj.size()-1; cellI++)
+            {
+                label start = xadj[cellI];
+                label end = xadj[cellI+1];
+                str << end-start;
+
+                for (label i = start; i < end; i++)
+                {
+                    str << ' ' << adjncy[i];
+                }
+                str << nl;
+            }
+        }
+    }
 
 
+    // Architecture
+    // ~~~~~~~~~~~~
+    // (fully connected network topology since using switch)
+
+    SCOTCH_Arch archdat;
+    check(SCOTCH_archInit(&archdat), "SCOTCH_archInit");
+    check
+    (
+        // SCOTCH_archCmpltw for weighted.
+        SCOTCH_archCmplt(&archdat, nProcessors_),
+        "SCOTCH_archCmplt"
+    );
 
 
     //SCOTCH_Mapping mapdat;
     //SCOTCH_graphMapInit(&grafdat, &mapdat, &archdat, NULL);
     //SCOTCH_graphMapCompute(&grafdat, &mapdat, &stradat); /* Perform mapping */
+    //SCOTCH_graphMapExit(&grafdat, &mapdat);
 
 
     finalDecomp.setSize(xadj.size()-1);
+    finalDecomp = 0;
     check
     (
-        SCOTCH_graphPart
+        SCOTCH_graphMap
         (
             &grafdat,
-            nProcessors_,       // partnbr
-            &stradat,           // const SCOTCH_Strat * 
+            &archdat,
+            &stradat,           // const SCOTCH_Strat *
             finalDecomp.begin() // parttab
         ),
-        "SCOTCH_graphPart"
+        "SCOTCH_graphMap"
     );
+
+
+    //finalDecomp.setSize(xadj.size()-1);
+    //check
+    //(
+    //    SCOTCH_graphPart
+    //    (
+    //        &grafdat,
+    //        nProcessors_,       // partnbr
+    //        &stradat,           // const SCOTCH_Strat *
+    //        finalDecomp.begin() // parttab
+    //    ),
+    //    "SCOTCH_graphPart"
+    //);
 
     // Release storage for graph
     SCOTCH_graphExit(&grafdat);
+    // Release storage for strategy
     SCOTCH_stratExit(&stradat);
-    //// Release storage for network topology
-    //SCOTCH_archExit(&archdat);
+    // Release storage for network topology
+    SCOTCH_archExit(&archdat);
 
     return 0;
 }

@@ -35,7 +35,12 @@ divSchemes
     div(phi,k)      Gauss limitedLinear 1;
     div(phi,epsilon) Gauss limitedLinear 1;
     div(phi,Yi_h)   Gauss upwind;
-    div(phi,fu_ft_h) Gauss multivariateSelection { fu limitedLinear 1 ; ft limitedLinear 1 ; h limitedLinear 1 ; };
+    div(phi,fu_ft_h) Gauss multivariateSelection
+    {
+        fu limitedLinear 1;
+        ft limitedLinear 1;
+        h limitedLinear 1;
+    };
     div((muEff*dev2(grad(U).T()))) Gauss linear;
 }
 
@@ -64,7 +69,8 @@ snGradSchemes
 
 fluxRequired
 {
-    p               ;
+    default         no;
+    p;
 }
 
 

@@ -160,18 +160,33 @@ int main(int argc, char *argv[])
         << " " << lstB.size() << endl;
     Info<< "<dlD>" << dlD << "</dlD>" << nl << "sizes: "
         << " " << dlD.size() << "/" << dlD.capacity() << endl;
-    
+
     DynamicList<label,10> dlE1(10);
-    DynamicList<label> dlE2(dlE1);
+    DynamicList<label> dlE2(dlE1);   // construct dissimilar
 
     Info<< "<dlE1>" << dlE1 << "</dlE1>" << nl << "sizes: "
         << " " << dlE1.size() << "/" << dlE1.capacity() << endl;
     Info<< "<dlE2>" << dlE2 << "</dlE2>" << nl << "sizes: "
         << " " << dlE2.size() << "/" << dlE2.capacity() << endl;
 
-    dlE2.append(100);
+    for (label elemI=0; elemI < 5; ++elemI)
+    {
+        dlE1.append(4 - elemI);
+        dlE2.append(elemI);
+    }
+
     Info<< "<dlE2>" << dlE2 << "</dlE2>" << endl;
-    
+
+    DynamicList<label> dlE3(dlE2);   // construct identical
+    Info<< "<dlE3>" << dlE3 << "</dlE3>" << endl;
+
+    dlE3 = dlE1;   // assign dissimilar
+    Info<< "<dlE3>" << dlE3 << "</dlE3>" << endl;
+
+    dlE3 = dlE2;   // assign identical
+    Info<< "<dlE3>" << dlE3 << "</dlE3>" << endl;
+
+
     Info<< "\nEnd\n";
 
     return 0;

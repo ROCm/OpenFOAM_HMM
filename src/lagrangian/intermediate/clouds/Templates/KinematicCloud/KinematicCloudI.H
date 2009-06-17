@@ -24,6 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "fvmSup.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -56,9 +58,25 @@ Foam::KinematicCloud<ParcelType>::particleProperties() const
 
 
 template<class ParcelType>
+inline const typename ParcelType::constantProperties&
+Foam::KinematicCloud<ParcelType>::constProps() const
+{
+    return constProps_;
+}
+
+
+template<class ParcelType>
 inline const Foam::Switch Foam::KinematicCloud<ParcelType>::coupled() const
 {
     return coupled_;
+}
+
+
+template <class ParcelType>
+inline const Foam::Switch
+Foam::KinematicCloud<ParcelType>::cellValueSourceCorrection() const
+{
+    return cellValueSourceCorrection_;
 }
 
 
@@ -90,6 +108,15 @@ Foam::KinematicCloud<ParcelType>::g() const
 {
     return g_;
 }
+
+
+template<class ParcelType>
+inline const Foam::particleForces&
+Foam::KinematicCloud<ParcelType>::forces() const
+{
+    return forces_;
+}
+
 
 template<class ParcelType>
 inline const Foam::dictionary&
@@ -185,24 +212,16 @@ Foam::KinematicCloud<ParcelType>::UTrans()
 
 
 template<class ParcelType>
-inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::KinematicCloud<ParcelType>::UCoeff()
-{
-    return UCoeff_;
-}
-
-
-template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::vector, Foam::volMesh> >
-Foam::KinematicCloud<ParcelType>::SU1() const
+Foam::KinematicCloud<ParcelType>::SU() const
 {
-    tmp<DimensionedField<vector, volMesh> > tSU1
+    tmp<DimensionedField<vector, volMesh> > tSU
     (
         new DimensionedField<vector, volMesh>
         (
             IOobject
             (
-                this->name() + "SU1",
+                this->name() + "SU",
                 this->db().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -212,34 +231,16 @@ Foam::KinematicCloud<ParcelType>::SU1() const
             dimensionedVector
             (
                  "zero",
-                 dimensionSet(1, -2, -2, 0, 0),
+                 dimDensity*dimVelocity/dimTime,
                  vector::zero
             )
         )
     );
 
-    vectorField& SU1 = tSU1().field();
-    SU1 = UTrans_/(mesh_.V()*this->db().time().deltaT());
+    vectorField& SU = tSU().field();
+    SU = UTrans_/(mesh_.V()*this->db().time().deltaT());
 
-    return tSU1;
-}
-
-
-template<class ParcelType>
-inline Foam::tmp<Foam::fvVectorMatrix>
-Foam::KinematicCloud<ParcelType>::SU2(volVectorField& U) const
-{
-    if (debug)
-    {
-        Info<< "UTrans min/max = "
-            << min(UTrans_) << ", " << max(UTrans_) << endl;
-        Info<< "UCoeff min/max = "
-            << min(UCoeff_) << ", " << max(UCoeff_) << endl;
-    }
-
-    return UTrans_/(mesh_.V()*this->db().time().deltaT())
-         - fvm::Sp(UCoeff_/mesh_.V(), U)
-         + UCoeff_/mesh_.V()*U;
+    return tSU;
 }
 
 
@@ -261,7 +262,7 @@ Foam::KinematicCloud<ParcelType>::theta() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimensionSet(0, 0, 0, 0, 0), 0.0)
+            dimensionedScalar("zero", dimless, 0.0)
         )
     );
 
@@ -274,7 +275,7 @@ Foam::KinematicCloud<ParcelType>::theta() const
         theta[cellI] += p.nParticle()*p.volume();
     }
 
-    theta /= mesh().cellVolumes();
+    theta /= mesh().V();
 
     return ttheta;
 }
@@ -298,7 +299,7 @@ Foam::KinematicCloud<ParcelType>::alpha() const
                 false
             ),
             mesh_,
-            dimensionedScalar("zero", dimensionSet(0, 0, 0, 0, 0), 0.0)
+            dimensionedScalar("zero", dimless, 0.0)
         )
     );
 
@@ -311,9 +312,46 @@ Foam::KinematicCloud<ParcelType>::alpha() const
         alpha[cellI] += p.nParticle()*p.mass();
     }
 
-    alpha /= (mesh().cellVolumes()*rho_);
+    alpha /= (mesh().V()*rho_);
 
     return talpha;
+}
+
+
+template<class ParcelType>
+inline const Foam::tmp<Foam::volScalarField>
+Foam::KinematicCloud<ParcelType>::rhoEff() const
+{
+    tmp<volScalarField> trhoEff
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                this->name() + "RhoEff",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimDensity, 0.0)
+        )
+    );
+
+    scalarField& rhoEff = trhoEff().internalField();
+    forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        rhoEff[cellI] += p.nParticle()*p.mass();
+    }
+
+    rhoEff /= mesh().V();
+
+    return trhoEff;
 }
 
 

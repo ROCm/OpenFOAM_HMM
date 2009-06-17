@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -154,15 +154,15 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
 
 void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu = ras.Cmu().value();
+    const scalar Cmu = rasModel.Cmu().value();
     const scalar Cmu25 = pow(Cmu, 0.25);
     const scalar Cmu75 = pow(Cmu, 0.75);
-    const scalar kappa = ras.kappa().value();
-    const scalar yPlusLam = ras.yPlusLam();
+    const scalar kappa = rasModel.kappa().value();
+    const scalar yPlusLam = rasModel.yPlusLam();
 
-    const scalarField& y = ras.y()[patch().index()];
+    const scalarField& y = rasModel.y()[patch().index()];
 
     volScalarField& G = const_cast<volScalarField&>
         (db().lookupObject<volScalarField>(GName_));

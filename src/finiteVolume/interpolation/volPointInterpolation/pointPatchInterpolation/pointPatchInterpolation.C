@@ -213,13 +213,12 @@ void pointPatchInterpolation::makePatchPatchWeights()
 
                 if (!isA<emptyFvPatch>(bm[patchi]) && !bm[patchi].coupled())
                 {
-                    pw[nFacesAroundPoint] =
-                        1.0/mag
-                        (
-                            pointLoc
-                          - centres.boundaryField()[patchi]
-                                [bm[patchi].patch().whichFace(curFaces[facei])]
-                        );
+                    vector d =
+                        pointLoc
+                      - centres.boundaryField()[patchi]
+                            [bm[patchi].patch().whichFace(curFaces[facei])];
+
+                    pw[nFacesAroundPoint] = 1.0/(mag(d)+VSMALL);
 
                     nFacesAroundPoint++;
                 }

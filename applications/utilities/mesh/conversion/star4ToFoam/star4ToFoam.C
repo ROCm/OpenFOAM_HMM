@@ -68,27 +68,26 @@ int main(int argc, char *argv[])
 
     argList args(argc, argv);
     Time runTime(args.rootPath(), args.caseName());
-    stringList const& params = args.additionalArgs();
+    const stringList& params = args.additionalArgs();
 
     // default rescale from [mm] to [m]
     scalar scaleFactor = 0.001;
-    if (args.options().found("scale"))
+    if (args.optionReadIfPresent("scale", scaleFactor))
     {
-        scaleFactor = readScalar(IStringStream(args.options()["scale"])());
         if (scaleFactor <= 0)
         {
             scaleFactor = 1;
         }
     }
-
-    if (args.options().found("solids"))
+    
+    if (args.optionFound("solids"))
     {
         meshReaders::STARCD::keepSolids = true;
     }
 
     // default to binary output, unless otherwise specified
     IOstream::streamFormat format = IOstream::BINARY;
-    if (args.options().found("ascii"))
+    if (args.optionFound("ascii"))
     {
         format = IOstream::ASCII;
     }

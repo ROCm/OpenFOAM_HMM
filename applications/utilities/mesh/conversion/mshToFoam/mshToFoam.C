@@ -62,14 +62,12 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    bool readHex(args.options().found("hex"));
+    bool readHex = args.optionFound("hex");
 
     fileName mshFile(args.additionalArgs()[0]);
-
     IFstream mshStream(mshFile);
 
     label nCells;
-
     mshStream >> nCells;
 
     if (readHex)

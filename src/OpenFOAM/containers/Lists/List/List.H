@@ -182,24 +182,21 @@ public:
             void clear();
 
             //- Append a List at the end of this list
-            void append(const UList<T>&);
+            inline void append(const UList<T>&);
 
             //- Append a UIndirectList at the end of this list
-            void append(const UIndirectList<T>&);
+            inline void append(const UIndirectList<T>&);
 
-            //- Append a SLList at the end of this list
-            void append(const SLList<T>&);
-
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             void transfer(List<T>&);
 
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
             void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
 
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             void transfer(SortableList<T>&);
 
@@ -244,17 +241,27 @@ public:
 };
 
 
+//- Read a bracket-delimited list, or handle a single value as list of size 1.
+//  For example,
+//  @code
+//      wList = readList<word>(IStringStream("(patch1 patch2 patch3)")());
+//      wList = readList<word>(IStringStream("patch0")());
+//  @endcode
+//  Mostly useful for handling command-line arguments.
 template<class T>
-void sort(List<T>& a);
+List<T> readList(Istream&);
+
+template<class T>
+void sort(List<T>&);
 
 template<class T, class Cmp>
-void sort(List<T>& a, const Cmp&);
+void sort(List<T>&, const Cmp&);
 
 template<class T>
-void stableSort(List<T>& a);
+void stableSort(List<T>&);
 
 template<class T, class Cmp>
-void stableSort(List<T>& a, const Cmp&);
+void stableSort(List<T>&, const Cmp&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

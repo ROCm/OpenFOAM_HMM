@@ -72,7 +72,6 @@ class ThermoParcel
 :
     public KinematicParcel<ParcelType>
 {
-
 public:
 
     //- Class to hold thermo particle constant properties
@@ -85,6 +84,9 @@ public:
 
             //- Particle initial temperature [K]
             const scalar T0_;
+
+            //- Minimum temperature [K]
+            const scalar TMin_;
 
             //- Particle specific heat capacity [J/(kg.K)]
             const scalar cp0_;
@@ -99,24 +101,28 @@ public:
     public:
 
         // Constructors
-        constantProperties(const dictionary& dict);
+        constantProperties(const dictionary& parentDict);
 
         // Member functions
 
             // Access
 
-                //- Return const access to particle initial temperature [K]
+                //- Return const access to the particle initial temperature [K]
                 inline scalar T0() const;
 
-                //- Return const access to particle specific heat capacity
+                //- Return const access to minimum temperature [K]
+                inline scalar TMin() const;
+
+                //- Return const access to the particle specific heat capacity
                 //  [J/(kg.K)]
                 inline scalar cp0() const;
 
-                //- Return const access to Particle emissivity [] (radiation)
+                //- Return const access to the particle emissivity []
+                //  Active for radiation only
                 inline scalar epsilon0() const;
 
-                //- Return const access to Particle scattering factor []
-                //  (radiation)
+                //- Return const access to the particle scattering factor []
+                //  Active for radiation only
                 inline scalar f0() const;
     };
 
@@ -209,10 +215,14 @@ protected:
         scalar calcHeatTransfer
         (
             TrackData& td,
-            const scalar dt,
-            const label celli,
-            scalar& htc,
-            scalar& dhTrans
+            const scalar dt,           // timestep
+            const label cellI,         // owner cell
+            const scalar d,            // diameter
+            const vector& U,           // velocity
+            const scalar rho,          // density
+            const scalar T,            // temperature
+            const scalar cp,           // specific heat capacity
+            const scalar Sh            // additional enthalpy sources
         );
 
 
@@ -230,12 +240,12 @@ public:
         inline ThermoParcel
         (
             ThermoCloud<ParcelType>& owner,
-            const label typeId,
             const vector& position,
-            const label celli,
+            const label cellI,
+            const label typeId,
+            const scalar nParticle0,
             const scalar d0,
             const vector& U0,
-            const scalar nParticle0,
             const constantProperties& constProps
         );
 
@@ -276,38 +286,40 @@ public:
 
         // Main calculation loop
 
-            //- Update cell based quantities
+            //- Set cell values
             template<class TrackData>
-            void updateCellQuantities
+            void setCellValues
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Coupled calculation with the continuous phase
+            //- Correct cell values using latest transfer information
             template<class TrackData>
-            void calcCoupled
+            void cellValueSourceCorrection
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Uncoupled calculation with the continuous phase
+            //- Update parcel properties over the time interval
             template<class TrackData>
-            void calcUncoupled
+            void calc
             (
                 TrackData& td,
                 const scalar dt,
-                const label
+                const label cellI
             );
 
 
         // I-O
 
+            //- Read
             static void readFields(ThermoCloud<ParcelType>& c);
 
+            //- Write
             static void writeFields(const ThermoCloud<ParcelType>& c);
 
 
@@ -340,4 +352,3 @@ public:
 #endif
 
 // ************************************************************************* //
-

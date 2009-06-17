@@ -73,8 +73,8 @@ setenv WM_THIRD_PARTY_DIR $WM_PROJECT_INST_DIR/ThirdParty
 
 # Operating System/Platform
 # ~~~~~~~~~~~~~~~~~~~~~~~~~
-# WM_OS = Unix | ????
-if ( ! $?WM_OS ) setenv WM_OS Unix
+# WM_OSTYPE = POSIX | ????
+if ( ! $?WM_OSTYPE ) setenv WM_OSTYPE POSIX
 
 
 # Compiler: set to Gcc, Gcc43 or Icc (for Intel's icc)
@@ -257,7 +257,7 @@ endif
 setenv LD_LIBRARY_PATH `$cleanProg "$LD_LIBRARY_PATH"`
 
 #- Clean MANPATH
-setenv MANPATH `$cleanProg "$MANPATH"`
+setenv MANPATH `$cleanProg "$MANPATH"`:
 
 #- Clean LD_PRELOAD
 if ( $?LD_PRELOAD ) then

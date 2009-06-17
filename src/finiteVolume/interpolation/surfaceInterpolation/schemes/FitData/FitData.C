@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ Foam::FitData<Form, extendedStencil, Polynomial>::FitData
     // Check input
     if (linearLimitFactor <= SMALL || linearLimitFactor > 3)
     {
-        FatalErrorIn("FitData<Polynomial>::FitData")
+        FatalErrorIn("FitData<Polynomial>::FitData(..)")
             << "linearLimitFactor requested = " << linearLimitFactor
             << " should be between zero and 3"
             << exit(FatalError);
@@ -264,8 +264,7 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
         // {
             WarningIn
             (
-                "FitData<Polynomial>::calcFit"
-                "(const List<point>& C, const label facei"
+                "FitData<Polynomial>::calcFit(..)"
             )   << "Could not fit face " << facei
                 << "    Weights = " << coeffsi
                 << ", reverting to linear." << nl

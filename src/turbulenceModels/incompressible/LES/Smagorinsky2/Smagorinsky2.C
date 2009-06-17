@@ -58,7 +58,7 @@ Smagorinsky2::Smagorinsky2
         dimensioned<scalar>::lookupOrAddToDict
         (
             "cD2",
-            coeffDict(),
+            coeffDict_,
             0.02
         )
     )

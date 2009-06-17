@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     wordList currInfo(debug::infoSwitches().toc());
     wordList currOpt(debug::optimisationSwitches().toc());
 
-    if (args.options().found("old") || args.options().found("new"))
+    if (args.optionFound("old") || args.optionFound("new"))
     {
         dictionary controlDict(IFstream(findEtcFile("controlDict", true))());
 
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
         //  1. run without any options (get complete list)
         //  2. comment out DebugSwitches, run again with -new to find new ones
         //     and do a diff
-        if (args.options().found("old"))
+        if (args.optionFound("old"))
         {
             IOobject::writeDivider(Info);
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
         }
 
         // list new switches
-        if (args.options().found("new"))
+        if (args.optionFound("new"))
         {
             IOobject::writeDivider(Info);
 

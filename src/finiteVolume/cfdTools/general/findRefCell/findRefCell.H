@@ -49,11 +49,18 @@ namespace Foam
 //  but which is not on a cyclic, symmetry or processor patch.
 void setRefCell
 (
-    const volScalarField&,
-    const dictionary&,
-    label& refCellI,
+    const volScalarField& field,
+    const dictionary& dict,
+    label& refCelli,
     scalar& refValue,
-    bool forceReference = false
+    const bool forceReference = false
+);
+
+//- Return the current value of field in the reference cell
+scalar getRefCellValue
+(
+    const volScalarField& field,
+    const label refCelli
 );
 
 }

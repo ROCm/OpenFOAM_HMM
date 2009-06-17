@@ -84,8 +84,13 @@ class fvSchemes
 
     // Private Member Functions
 
-        //- Disallow default bitwise copy construct and assignment
+        //- Clear the dictionaries and streams before reading
+        void clear();
+
+        //- Disallow default bitwise copy construct
         fvSchemes(const fvSchemes&);
+
+        //- Disallow default bitwise assignment
         void operator=(const fvSchemes&);
 
 

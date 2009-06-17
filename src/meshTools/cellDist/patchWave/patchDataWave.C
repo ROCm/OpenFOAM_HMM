@@ -226,7 +226,7 @@ void Foam::patchDataWave<TransferType>::correct()
         mesh(),
         changedFaces,
         faceDist,
-        mesh().nCells() // max iterations
+        mesh().globalData().nTotalCells() // max iterations
     );
 
 

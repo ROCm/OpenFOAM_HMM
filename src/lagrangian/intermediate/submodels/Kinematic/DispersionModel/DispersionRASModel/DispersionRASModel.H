@@ -50,7 +50,6 @@ class DispersionRASModel
 :
     public DispersionModel<CloudType>
 {
-
     // Private data
 
         //- Reference to the compressible turbulence model
@@ -73,9 +72,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~DispersionRASModel();
+    //- Destructor
+    virtual ~DispersionRASModel();
 
 
     // Member Functions

@@ -202,10 +202,10 @@ bool kOmega::read()
 {
     if (RASModel::read())
     {
-        Cmu_.readIfPresent(coeffDict_);
-        beta_.readIfPresent(coeffDict_);
-        alphaK_.readIfPresent(coeffDict_);
-        alphaOmega_.readIfPresent(coeffDict_);
+        Cmu_.readIfPresent(coeffDict());
+        beta_.readIfPresent(coeffDict());
+        alphaK_.readIfPresent(coeffDict());
+        alphaOmega_.readIfPresent(coeffDict());
 
         return true;
     }

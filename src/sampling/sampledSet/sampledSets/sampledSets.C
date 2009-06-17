@@ -236,8 +236,6 @@ Foam::sampledSets::sampledSets
     loadFromFiles_(loadFromFiles),
     outputPath_(fileName::null),
     searchEngine_(mesh_, true),
-//    pMeshPtr_(NULL),
-//    pInterpPtr_(NULL),
     fieldNames_(),
     interpolationScheme_(word::null),
     writeFormat_(word::null)
@@ -249,6 +247,10 @@ Foam::sampledSets::sampledSets
     else
     {
         outputPath_ = mesh_.time().path()/name_;
+    }
+    if (mesh_.name() != fvMesh::defaultRegion)
+    {
+        outputPath_ = outputPath_/mesh_.name();
     }
 
     read(dict);

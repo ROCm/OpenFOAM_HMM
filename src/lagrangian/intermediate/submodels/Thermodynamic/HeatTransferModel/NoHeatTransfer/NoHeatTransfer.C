@@ -31,11 +31,11 @@ License
 template <class CloudType>
 Foam::NoHeatTransfer<CloudType>::NoHeatTransfer
 (
-    const dictionary& dict,
-    CloudType& cloud
+    const dictionary&,
+    CloudType& owner
 )
 :
-    HeatTransferModel<CloudType>(dict, cloud, typeName)
+    HeatTransferModel<CloudType>(owner)
 {}
 
 

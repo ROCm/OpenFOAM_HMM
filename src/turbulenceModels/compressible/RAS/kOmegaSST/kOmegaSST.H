@@ -54,7 +54,7 @@ Description
 
     The default model coefficients correspond to the following:
     @verbatim
-        kOmegaSST
+        kOmegaSSTCoeffs
         {
             alphaK1     0.85034;
             alphaK2     1.0;
@@ -285,7 +285,7 @@ public:
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct();
 
-        //- Read turbulenceProperties dictionary
+        //- Read RASProperties dictionary
         virtual bool read();
 };
 

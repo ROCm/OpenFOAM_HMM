@@ -5,9 +5,9 @@ HashSet<word> surfVectorHash;
 HashSet<word> sprayScalarHash;
 HashSet<word> sprayVectorHash;
 
-forAll(Times, timeI)
+forAll(timeDirs, timeI)
 {
-    runTime.setTime(Times[timeI], timeI);
+    runTime.setTime(timeDirs[timeI], timeI);
 
     // Add all fields to hashtable
     IOobjectList objects(mesh, runTime.timeName());

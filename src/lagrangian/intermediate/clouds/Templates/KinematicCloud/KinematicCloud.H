@@ -51,7 +51,7 @@ SourceFiles
 #include "fvMesh.H"
 #include "volFields.H"
 #include "fvMatrices.H"
-#include "fvm.H"
+#include "particleForces.H"
 
 #include "IntegrationSchemesFwd.H"
 
@@ -84,9 +84,6 @@ class KinematicCloud
     public Cloud<ParcelType>,
     public kinematicCloud
 {
-
-private:
-
     // Private data
 
         //- Cloud type - used to set the name of the parcel properties
@@ -108,7 +105,11 @@ private:
 
         //- Flag to indicate whether parcels are coupled to the carrier phase
         //  i.e. whether or not to generate source terms for carrier phase
-        Switch coupled_;
+        const Switch coupled_;
+
+        //- Flag to correct cell values with latest transfer information
+        //  during the lagrangian timestep
+        const Switch cellValueSourceCorrection_;
 
         //- Random number generator - used by some injection routines
         Random rndGen_;
@@ -131,6 +132,9 @@ private:
             //- Gravity
             const dimensionedVector& g_;
 
+
+        //- Optional particle forces
+        particleForces forces_;
 
         //- Interpolation schemes dictionary
         dictionary interpolationSchemes_;
@@ -165,9 +169,6 @@ private:
             //- Momentum
             DimensionedField<vector, volMesh> UTrans_;
 
-            //- Coefficient for carrier phase U equation
-            DimensionedField<scalar, volMesh> UCoeff_;
-
 
     // Private Member Functions
 
@@ -197,6 +198,10 @@ public:
     virtual ~KinematicCloud();
 
 
+    //- Type of parcel the cloud was instantiated for
+    typedef ParcelType parcelType;
+
+
     // Member Functions
 
         // Access
@@ -215,8 +220,16 @@ public:
                 //- Return particle properties dictionary
                 inline const IOdictionary& particleProperties() const;
 
+                //- Return the constant properties
+                inline const typename ParcelType::constantProperties&
+                    constProps() const;
+
+
             //- Return coupled flag
             inline const Switch coupled() const;
+
+            //- Return cell value correction flag
+            inline const Switch cellValueSourceCorrection() const;
 
             //- Return refernce to the random object
             inline Random& rndGen();
@@ -240,10 +253,26 @@ public:
                 inline const dimensionedVector& g() const;
 
 
+            //- Optional particle forces
+            inline const particleForces& forces() const;
+
+
             // Interpolations
 
                 //- Return reference to the interpolation dictionary
                 inline const dictionary& interpolationSchemes() const;
+
+
+            // Forces to include in particle motion evaluation
+
+                //- Return reference to the gravity force flag
+                inline Switch forceGravity() const;
+
+                //- Return reference to the virtual mass force flag
+                inline Switch forceVirtualMass() const;
+
+                //- Return reference to the pressure gradient force flag
+                inline Switch forcePressureGradient() const;
 
 
             // Sub-models
@@ -284,14 +313,8 @@ public:
                     //- Return reference to momentum source
                     inline DimensionedField<vector, volMesh>& UTrans();
 
-                    //- Coefficient for carrier phase U equation
-                    inline DimensionedField<scalar, volMesh>& UCoeff();
-
                     //- Return tmp momentum source term - fully explicit
-                    inline tmp<DimensionedField<vector, volMesh> > SU1() const;
-
-                    //- Return tmp momentum source term - semi-implicit
-                    inline tmp<fvVectorMatrix> SU2(volVectorField& U) const;
+                    inline tmp<DimensionedField<vector, volMesh> > SU() const;
 
 
         // Check
@@ -305,9 +328,6 @@ public:
             //- Print cloud information
             void info() const;
 
-            //- Dump particle positions to .obj file
-            void dumpParticlePositions() const;
-
 
             // Fields
 
@@ -318,6 +338,10 @@ public:
                 //- Return the particle mass fraction field
                 //  Note: for particles belonging to this cloud only
                 inline const tmp<volScalarField> alpha() const;
+
+                //- Return the particle effective density field
+                //  Note: for particles belonging to this cloud only
+                inline const tmp<volScalarField> rhoEff() const;
 
 
         // Cloud evolution functions

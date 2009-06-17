@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -760,21 +760,18 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    if (args.options().found("scale"))
-    {
-        scaleFactor = atof(args.options()["scale"].c_str());
-    }
+    args.optionReadIfPresent("scale", scaleFactor);
 
     HashSet<word> ignoreCellGroups;
-    if (args.options().found("ignoreCellGroups"))
+    if (args.optionFound("ignoreCellGroups"))
     {
-        IStringStream(args.options()["ignoreCellGroups"])() >> ignoreCellGroups;
+        args.optionLookup("ignoreCellGroups")() >> ignoreCellGroups;
     }
 
     HashSet<word> ignoreFaceGroups;
-    if (args.options().found("ignoreFaceGroups"))
+    if (args.optionFound("ignoreFaceGroups"))
     {
-        IStringStream(args.options()["ignoreFaceGroups"])() >> ignoreFaceGroups;
+        args.optionLookup("ignoreFaceGroups")() >> ignoreFaceGroups;
     }
 
 #   include "createTime.H"

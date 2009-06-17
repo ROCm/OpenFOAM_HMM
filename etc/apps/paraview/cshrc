@@ -26,21 +26,27 @@
 #     paraview/cshrc
 #
 # Description
-#     Startup File for Paraview.
-#     Sourced from OpenFOAM-?.?/etc/cshrc
+#     Setup file for paraview-2.x
+#     Sourced from OpenFOAM-*/etc/cshrc
 #
 #------------------------------------------------------------------------------
 
-setenv CMAKE_HOME $WM_THIRD_PARTY_DIR/cmake-2.4.6/platforms/$WM_ARCH
+# determine the cmake to be used
+unsetenv CMAKE_HOME
+foreach cmake ( cmake-2.6.4 cmake-2.6.2 cmake-2.4.6 )
+    set cmake=$WM_THIRD_PARTY_DIR/$cmake/platforms/$WM_ARCH
+    if ( -r $cmake ) then
+        setenv CMAKE_HOME $cmake
+        set path=($CMAKE_HOME/bin $path)
+        break
+    endif
+end
 
-if ( -r $CMAKE_HOME ) then
-    set path=($CMAKE_HOME/bin $path)
-endif
-
+set paraviewMajor=paraview-2.4
 setenv ParaView_VERSION 2.4.4
 
 setenv ParaView_INST_DIR $WM_THIRD_PARTY_DIR/ParaView$ParaView_VERSION
-setenv ParaView_DIR $ParaView_INST_DIR/lib/paraview-2.4
+setenv ParaView_DIR $ParaView_INST_DIR/lib/$paraviewMajor
 
 if ( -r $ParaView_INST_DIR ) then
     setenv PV_INTERFACE_PATH $FOAM_UTILITIES/postProcessing/graphics/PVFoamReader/PVFoamReader/Make
@@ -53,4 +59,5 @@ if ( -r $ParaView_DIR ) then
     setenv VTK_DIR $ParaView_DIR/VTK
 endif
 
+unset cmake paraviewMajor
 # -----------------------------------------------------------------------------

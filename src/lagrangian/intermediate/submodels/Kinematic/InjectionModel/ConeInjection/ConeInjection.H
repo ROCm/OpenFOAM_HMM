@@ -65,7 +65,6 @@ class ConeInjection
 :
     public InjectionModel<CloudType>
 {
-
     // Private data
 
         //- Coefficients dictionary
@@ -113,7 +112,7 @@ protected:
     // Protected member functions
 
         //- Number of parcels to introduce over the time step
-        label nParcelsToInject
+        label parcelsToInject
         (
             const scalar time0,
             const scalar time1
@@ -143,9 +142,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~ConeInjection();
+    //- Destructor
+    virtual ~ConeInjection();
 
 
     // Member Functions
@@ -159,28 +157,32 @@ public:
 
         // Injection geometry
 
-            //- Return the injection position
-            vector position
+            //- Set the injection position and owner cell
+            void setPositionAndCell
             (
-                const label iParcel,
+                const label parcelI,
                 const scalar time,
-                const polyMeshInfo& meshInfo
+                vector& position,
+                label& cellOwner
             );
 
             //- Return the velocity of the parcel to introduce at a time
             vector velocity
             (
-                const label,
-                const scalar time,
-                const polyMeshInfo& meshInfo
+                const label parcelI,
+                const scalar time
             );
 
             //- Return the diameter of the parcel to introduce at a time
             scalar d0
             (
-                const label,
-                const scalar
+                const label parcelI,
+                const scalar time
             ) const;
+
+            //- Return flag to identify whether or not injection in cellI is
+            //  permitted
+            bool validInjection(const label parcelI);
 };
 
 

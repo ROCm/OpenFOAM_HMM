@@ -31,6 +31,14 @@ Description
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::DispersionModel<CloudType>::DispersionModel(CloudType& owner)
+:
+    dict_(dictionary::null),
+    owner_(owner)
+{}
+
+
+template<class CloudType>
 Foam::DispersionModel<CloudType>::DispersionModel
 (
     const dictionary& dict,

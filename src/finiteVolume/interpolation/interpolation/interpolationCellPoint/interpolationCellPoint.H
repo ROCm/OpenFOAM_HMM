@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class interpolationCellPoint Declaration
+                   Class interpolationCellPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -50,7 +50,9 @@ class interpolationCellPoint
 :
     public interpolation<Type>
 {
-    // Private data
+protected:
+
+    // Protected data
 
         //- Interpolated volfield
         const GeometricField<Type, pointPatchField, pointMesh> psip_;
@@ -79,7 +81,7 @@ public:
         //- Interpolate field to the given point in the given cell
         inline Type interpolate
         (
-            const vector& position, 
+            const vector& position,
             const label nCell,
             const label facei = -1
         ) const;

@@ -14,11 +14,10 @@
   General Public License terms under which you can copy the files.
 
 * System requirements
-  OpenFOAM is developed and tested on Linux, but should work with other Unix
-  style systems.  To check your system setup, execute the foamSystemCheck script
-  in the bin/ directory of the OpenFOAM installation. If no problems are
-  reported, proceed to "3. Installation"; otherwise contact your system
-  administrator.
+  OpenFOAM is developed and tested on Linux, but should work with other POSIX
+  systems.  To check your system setup, execute the foamSystemCheck script in
+  the bin/ directory of the OpenFOAM installation. If no problems are reported,
+  proceed to "3. Installation"; otherwise contact your system administrator.
 
   If the user wishes to run OpenFOAM in 32/64-bit mode they should consult the
   section "Running OpenFOAM in 32-bit mode".

@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
         << " to allow for some truncation error."
         << nl << endl;
 
-    bool readLevel = args.options().found("readLevel");
+    bool readLevel = args.optionFound("readLevel");
 
     const scalarField& vols = mesh.cellVolumes();
 

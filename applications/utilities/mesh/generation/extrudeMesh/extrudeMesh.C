@@ -55,7 +55,7 @@ int main(int argc, char *argv[])
     #include "setRoots.H"
     #include "createTimeExtruded.H"
 
-    if (args.options().found("sourceCase") == args.options().found("surface"))
+    if (args.optionFound("sourceCase") == args.optionFound("surface"))
     {
         FatalErrorIn(args.executable())
             << "Specify either -sourceCase and -sourcePatch"
@@ -83,12 +83,12 @@ int main(int argc, char *argv[])
         )
     );
 
-    if (args.options().found("sourceCase"))
+    if (args.optionFound("sourceCase"))
     {
-        fileName sourceCasePath(args.options()["sourceCase"]);
+        fileName sourceCasePath(args.option("sourceCase"));
         fileName sourceRootDir = sourceCasePath.path();
         fileName sourceCaseDir = sourceCasePath.name();
-        word patchName(args.options()["sourcePatch"]);
+        word patchName(args.option("sourcePatch"));
 
         Info<< "Extruding patch " << patchName
             << " on mesh " << sourceCasePath << nl
@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
     else
     {
         // Read from surface
-        fileName surfName(args.options()["surface"]);
+        fileName surfName(args.option("surface"));
 
         Info<< "Extruding surfaceMesh read from file " << surfName << nl
             << endl;
@@ -250,7 +250,7 @@ int main(int argc, char *argv[])
     // Merging front and back patch faces
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (args.options().found("mergeFaces"))
+    if (args.optionFound("mergeFaces"))
     {
         Info<< "Assuming full 360 degree axisymmetric case;"
             << " stitching faces on patches "

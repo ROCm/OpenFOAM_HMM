@@ -81,6 +81,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        DispersionModel(CloudType& owner);
+
         //- Construct from components
         DispersionModel
         (
@@ -89,18 +92,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~DispersionModel();
 
-        virtual ~DispersionModel();
 
-
-    // Selector
-
-        static autoPtr<DispersionModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<DispersionModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access

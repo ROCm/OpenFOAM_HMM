@@ -4,7 +4,7 @@
 #  \\    /   O peration     |
 #   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -63,9 +63,12 @@ CLASSES_DIR        = $(MAKE_DIR)/classes
 SYS_INC            =
 SYS_LIBS           =
 
-PROJECT_INC        = -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude -I$(LIB_SRC)/OSspecific/$(WM_OS)/lnInclude
+PROJECT_INC        = -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude -I$(LIB_SRC)/OSspecific/$(WM_OSTYPE)/lnInclude
 PROJECT_LIBS       = -l$(WM_PROJECT)
-PROJECT_VERSION    = $(shell printf -- "-DPROJECT_VERSION=%d%03d%03d" $$(echo $(WM_PROJECT_VERSION) | sed -e 's/\./ /g'))
+##
+## unused:
+## PROJECT_VERSION    = $(shell printf -- "-DPROJECT_VERSION=%d%03d%03d" $$(echo $(WM_PROJECT_VERSION) | sed -e 's/\./ /g'))
+##
 
 EXE_INC            =
 EXE_LIBS           =
@@ -103,6 +106,7 @@ SEXE            = a.out
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
+UTILBIN       = $(WM_DIR)/utilbin/$(WM_ARCH)$(WM_COMPILER)
 
 include $(GENERAL_RULES)/general
 include $(RULES)/general
@@ -197,7 +201,7 @@ $(LIB).jar: $(OBJECTS)
 #------------------------------------------------------------------------------
 
 lnInclude/uptodate: $(MAKE_DIR)/files $(MAKE_DIR)/options
-	     @rm -rf lnInclude ; wmakeLnInclude `pwd` ; touch lnInclude/uptodate
+	     @rm -rf lnInclude ; wmakeLnInclude . ; touch lnInclude/uptodate
 
 
 #------------------------------------------------------------------------------

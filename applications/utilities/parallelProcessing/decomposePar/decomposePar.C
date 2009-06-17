@@ -37,6 +37,9 @@ Usage
     Write the cell distribution as a labelList for use with 'manual'
     decomposition method and as a volScalarField for post-processing.
 
+    @param -region regionName \n
+    Decompose named region. Does not check for existence of processor*.
+
     @param -copyUniform \n
     Copy any @a uniform directories too.
 
@@ -96,20 +99,20 @@ int main(int argc, char *argv[])
     word regionName = fvMesh::defaultRegion;
     word regionDir = word::null;
 
-    if (args.options().found("region"))
+    if (args.optionFound("region"))
     {
-        regionName = args.options()["region"];
+        regionName = args.option("region");
         regionDir = regionName;
         Info<< "Decomposing mesh " << regionName << nl << endl;
     }
 
 
-    bool writeCellDist(args.options().found("cellDist"));
-    bool copyUniform(args.options().found("copyUniform"));
-    bool decomposeFieldsOnly(args.options().found("fields"));
-    bool filterPatches(args.options().found("filterPatches"));
-    bool forceOverwrite(args.options().found("force"));
-    bool ifRequiredDecomposition(args.options().found("ifRequired"));
+    bool writeCellDist           = args.optionFound("cellDist");
+    bool copyUniform             = args.optionFound("copyUniform");
+    bool decomposeFieldsOnly     = args.optionFound("fields");
+    bool filterPatches           = args.optionFound("filterPatches");
+    bool forceOverwrite          = args.optionFound("force");
+    bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
 #   include "createTime.H"
 
@@ -536,6 +539,16 @@ int main(int argc, char *argv[])
         );
 
         processorDb.setTime(runTime);
+
+        // remove files remnants that can cause horrible problems
+        // - mut and nut are used to mark the new turbulence models,
+        //   their existence prevents old models from being upgraded
+        {
+            fileName timeDir(processorDb.path()/processorDb.timeName());
+
+            rm(timeDir/"mut");
+            rm(timeDir/"nut");
+        }
 
         // read the mesh
         fvMesh procMesh

@@ -25,10 +25,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ThermoCloud.H"
-#include "HeatTransferModel.H"
-
 #include "interpolationCellPoint.H"
 #include "ThermoParcel.H"
+
+#include "HeatTransferModel.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -46,12 +46,12 @@ void Foam::ThermoCloud<ParcelType>::addNewParcel
     ParcelType* pPtr = new ParcelType
     (
         *this,
-        this->parcelTypeId(),
         position,
         cellId,
+        this->parcelTypeId(),
+        nParticles,
         d,
         U,
-        nParticles,
         constProps_
     );
 
@@ -102,11 +102,11 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         )
     ),
     radiation_(this->particleProperties().lookup("radiation")),
-    hTrans_
+    hsTrans_
     (
         IOobject
         (
-            this->name() + "hTrans",
+            this->name() + "hsTrans",
             this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
@@ -116,11 +116,11 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         this->mesh(),
         dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
     ),
-    hCoeff_
+    hcTrans_
     (
         IOobject
         (
-            this->name() + "hCoeff",
+            this->name() + "hcTrans",
             this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
@@ -128,7 +128,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             false
         ),
         this->mesh(),
-        dimensionedScalar("zero", dimensionSet(1, 2, -3, -1, 0), 0.0)
+        dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
     )
 {}
 
@@ -146,8 +146,8 @@ template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
-    hTrans_.field() = 0.0;
-    hCoeff_.field() = 0.0;
+    hsTrans_.field() = 0.0;
+    hcTrans_.field() = 0.0;
 }
 
 
@@ -157,31 +157,31 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     const volScalarField& T = carrierThermo_.T();
     const volScalarField cp = carrierThermo_.Cp();
 
-    autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         this->rho()
     );
 
-    autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
+    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
     (
         this->interpolationSchemes(),
         this->U()
     );
 
-    autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         this->mu()
     );
 
-    autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         T
     );
 
-    autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         cp
@@ -191,11 +191,11 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     (
         *this,
         constProps_,
-        rhoInterpolator(),
-        UInterpolator(),
-        muInterpolator(),
-        TInterpolator(),
-        cpInterpolator(),
+        rhoInterp(),
+        UInterp(),
+        muInterp(),
+        TInterp(),
+        cpInterp(),
         this->g().value()
     );
 
@@ -203,7 +203,7 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 
     if (debug)
     {
-        this->dumpParticlePositions();
+        this->writePositions();
     }
 
     if (this->coupled())
@@ -212,6 +212,13 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::info() const
+{
+    KinematicCloud<ParcelType>::info();
 }
 
 

@@ -27,7 +27,7 @@
 #
 # Description
 #     Setup file for cint
-#     Sourced from OpenFOAM-?.?/etc/bashrc
+#     Sourced from OpenFOAM-*/etc/bashrc
 #
 #------------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ do
         export CINTSYSDIR
         export PATH=$PATH:$CINTSYSDIR/bin
         export MANPATH=$MANPATH:$CINTSYSDIR/doc
-        export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$CINTSYSDIR/lib
+        export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$CINTSYSDIR/lib
         break
     fi
 done

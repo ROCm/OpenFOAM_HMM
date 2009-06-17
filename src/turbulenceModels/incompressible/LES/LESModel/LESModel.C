@@ -77,7 +77,7 @@ LESModel::LESModel
 
     turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
-    coeffDict_(subDict(type + "Coeffs")),
+    coeffDict_(subDictPtr(type + "Coeffs")),
 
     k0_("k0", dimVelocity*dimVelocity, SMALL),
     delta_(LESdelta::New("delta", U.mesh(), *this))
@@ -95,13 +95,13 @@ autoPtr<LESModel> LESModel::New
     transportModel& transport
 )
 {
-    word LESModelTypeName;
+    word modelName;
 
-    // Enclose the creation of the turbulencePropertiesDict to ensure it is
-    // deleted before the turbulenceModel is created otherwise the dictionary
-    // is entered in the database twice
+    // Enclose the creation of the dictionary to ensure it is deleted
+    // before the turbulenceModel is created otherwise the dictionary is
+    // entered in the database twice
     {
-        IOdictionary turbulencePropertiesDict
+        IOdictionary dict
         (
             IOobject
             (
@@ -113,13 +113,13 @@ autoPtr<LESModel> LESModel::New
             )
         );
 
-        turbulencePropertiesDict.lookup("LESModel") >> LESModelTypeName;
+        dict.lookup("LESModel") >> modelName;
     }
 
-    Info<< "Selecting LES turbulence model " << LESModelTypeName << endl;
+    Info<< "Selecting LES turbulence model " << modelName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(LESModelTypeName);
+        dictionaryConstructorTablePtr_->find(modelName);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
@@ -127,7 +127,7 @@ autoPtr<LESModel> LESModel::New
         (
             "LESModel::select(const volVectorField&, const "
             "surfaceScalarField&, transportModel&)"
-        )   << "Unknown LESModel type " << LESModelTypeName
+        )   << "Unknown LESModel type " << modelName
             << endl << endl
             << "Valid LESModel types are :" << endl
             << dictionaryConstructorTablePtr_->toc()
@@ -163,7 +163,10 @@ bool LESModel::read()
 {
     if (regIOobject::read())
     {
-        coeffDict_ = subDict(type() + "Coeffs");
+        if (const dictionary* dictPtr = subDictPtr(type() + "Coeffs"))
+        {
+            coeffDict_ <<= *dictPtr;
+        }
 
         delta_().read(*this);
 
