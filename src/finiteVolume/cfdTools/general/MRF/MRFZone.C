@@ -312,6 +312,31 @@ void Foam::MRFZone::addCoriolis(fvVectorMatrix& UEqn) const
 }
 
 
+void Foam::MRFZone::addCoriolis
+(
+    const volScalarField& rho,
+    fvVectorMatrix& UEqn
+) const
+{
+    if (cellZoneID_ == -1)
+    {
+        return;
+    }
+
+    const labelList& cells = mesh_.cellZones()[cellZoneID_];
+    const scalarField& V = mesh_.V();
+    vectorField& Usource = UEqn.source();
+    const vectorField& U = UEqn.psi();
+    const vector& Omega = Omega_.value();
+
+    forAll(cells, i)
+    {
+        label celli = cells[i];
+        Usource[celli] -= V[celli]*rho[celli]*(Omega ^ U[celli]);
+    }
+}
+
+
 void Foam::MRFZone::relativeVelocity(volVectorField& U) const
 {
     const volVectorField& C = mesh_.C();

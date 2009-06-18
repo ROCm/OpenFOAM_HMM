@@ -273,6 +273,15 @@ Foam::mapDistribute::mapDistribute
 }
 
 
+Foam::mapDistribute::mapDistribute(const mapDistribute& map)
+:
+    constructSize_(map.constructSize_),
+    subMap_(map.subMap_),
+    constructMap_(map.constructMap_),
+    schedulePtr_()
+{}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::mapDistribute::compact(const boolList& elemIsUsed)
@@ -409,6 +418,26 @@ void Foam::mapDistribute::compact(const boolList& elemIsUsed)
     constructSize_ = maxConstructIndex+1;
 
     // Clear the schedule (note:not necessary if nothing changed)
+    schedulePtr_.clear();
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::mapDistribute::operator=(const mapDistribute& rhs)
+{
+    // Check for assignment to self
+    if (this == &rhs)
+    {
+        FatalErrorIn
+        (
+            "Foam::mapDistribute::operator=(const Foam::mapDistribute&)"
+        )   << "Attempted assignment to self"
+            << abort(FatalError);
+    }
+    constructSize_ = rhs.constructSize_;
+    subMap_ = rhs.subMap_;
+    constructMap_ = rhs.constructMap_;
     schedulePtr_.clear();
 }
 

@@ -101,9 +101,6 @@ class autoLayerDriver
         //- Mesh+surface
         meshRefinement& meshRefiner_;
 
-        //- From surface region to patch
-        const labelList globalToPatch_;
-
 
 
     // Private Member Functions
@@ -509,11 +506,7 @@ public:
     // Constructors
 
         //- Construct from components
-        autoLayerDriver
-        (
-            meshRefinement& meshRefiner,
-            const labelList& globalToPatch
-        );
+        autoLayerDriver(meshRefinement& meshRefiner);
 
 
     // Member Functions

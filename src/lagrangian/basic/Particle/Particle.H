@@ -98,10 +98,7 @@ public:
 
         // Constructors
 
-            inline trackData
-            (
-                Cloud<ParticleType>& cloud
-            );
+            inline trackData(Cloud<ParticleType>& cloud);
 
 
         // Member functions
@@ -170,6 +167,16 @@ protected:
 
 
     // Patch interactions
+
+        //- Overridable function to handle the particle hitting a patch
+        //  Executed before other patch-hitting functions
+        template<class TrackData>
+        bool hitPatch
+        (
+            const polyPatch&,
+            TrackData& td,
+            const label patchI
+        );
 
         //- Overridable function to handle the particle hitting a wedgePatch
         template<class TrackData>
@@ -256,8 +263,13 @@ public:
     friend class Cloud<ParticleType>;
 
 
-    //- Runtime type information
-    TypeName("Particle");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("Particle");
 
 
     // Constructors
@@ -278,14 +290,24 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        Particle(const Particle& p);
+
+        //- Construct a clone
+        autoPtr<ParticleType> clone() const
+        {
+            return autoPtr<Particle>(new Particle(*this));
+        }
+
+
         //- Factory class to read-construct particles used for
         //  parallel transfer
         class iNew
         {
-
             // Private data
 
-            const Cloud<ParticleType>& cloud_;
+                //- Reference to the cloud
+                const Cloud<ParticleType>& cloud_;
 
 
         public:
@@ -303,9 +325,8 @@ public:
 
 
     //- Destructor
-
-        virtual ~Particle()
-        {}
+    virtual ~Particle()
+    {}
 
 
     // Member Functions
@@ -343,6 +364,9 @@ public:
 
             //- Return the impact model to be used, soft or hard (default).
             inline bool softImpact() const;
+
+            //- Return the particle current time
+            inline scalar currentTime() const;
 
 
         // Check
@@ -414,10 +438,7 @@ public:
     // I-O
 
         //- Write the fields associated with the owner cloud
-        static void writeFields
-        (
-            const Cloud<ParticleType>& c
-        );
+        static void writeFields(const Cloud<ParticleType>& c);
 
 
     // Ostream Operator

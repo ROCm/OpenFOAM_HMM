@@ -96,7 +96,7 @@ void writeMesh
     const fvMesh& mesh = meshRefiner.mesh();
 
     meshRefiner.printMeshInfo(debug, msg);
-    Info<< "Writing mesh to time " << mesh.time().timeName() << endl;
+    Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
     meshRefiner.write(meshRefinement::MESH|meshRefinement::SCALARLEVELS, "");
     if (debug & meshRefinement::OBJINTERSECTIONS)
@@ -104,7 +104,7 @@ void writeMesh
         meshRefiner.write
         (
             meshRefinement::OBJINTERSECTIONS,
-            mesh.time().path()/mesh.time().timeName()
+            mesh.time().path()/meshRefiner.timeName()
         );
     }
     Info<< "Written mesh in = "
@@ -115,6 +115,7 @@ void writeMesh
 
 int main(int argc, char *argv[])
 {
+    argList::validOptions.insert("overwrite", "");
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
@@ -122,6 +123,9 @@ int main(int argc, char *argv[])
 
     Info<< "Read mesh in = "
         << runTime.cpuTimeIncrement() << " s" << endl;
+
+    const bool overwrite = args.optionFound("overwrite");
+
 
     // Check patches and faceZones are synchronised
     mesh.boundaryMesh().checkParallelSync(true);
@@ -170,6 +174,13 @@ int main(int argc, char *argv[])
     const dictionary& layerDict = meshDict.subDict("addLayersControls");
 
 
+    const scalar mergeDist = getMergeDistance
+    (
+        mesh,
+        readScalar(meshDict.lookup("mergeTolerance"))
+    );
+
+
 
     // Debug
     // ~~~~~
@@ -192,8 +203,9 @@ int main(int argc, char *argv[])
         IOobject
         (
             "abc",                      // dummy name
-            mesh.time().constant(),     // directory
-            "triSurface",               // instance
+            //mesh.time().constant(),     // instance
+            mesh.time().findInstance("triSurface", word::null),// instance
+            "triSurface",               // local
             mesh.time(),                // registry
             IOobject::MUST_READ,
             IOobject::NO_WRITE
@@ -235,6 +247,34 @@ int main(int argc, char *argv[])
         << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
 
 
+    // Refinement engine
+    // ~~~~~~~~~~~~~~~~~
+
+    Info<< nl
+        << "Determining initial surface intersections" << nl
+        << "-----------------------------------------" << nl
+        << endl;
+
+    // Main refinement engine
+    meshRefinement meshRefiner
+    (
+        mesh,
+        mergeDist,          // tolerance used in sorting coordinates
+        overwrite,          // overwrite mesh files?
+        surfaces,           // for surface intersection refinement
+        shells              // for volume (inside/outside) refinement
+    );
+    Info<< "Calculated surface intersections in = "
+        << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
+
+    // Some stats
+    meshRefiner.printMeshInfo(debug, "Initial mesh");
+
+    meshRefiner.write
+    (
+        debug&meshRefinement::OBJINTERSECTIONS,
+        mesh.time().path()/meshRefiner.timeName()
+    );
 
 
     // Add all the surface regions as patches
@@ -265,9 +305,8 @@ int main(int argc, char *argv[])
 
             forAll(regNames, i)
             {
-                label patchI = meshRefinement::addPatch
+                label patchI = meshRefiner.addMeshedPatch
                 (
-                    mesh,
                     regNames[i],
                     wallPolyPatch::typeName
                 );
@@ -308,44 +347,9 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    const scalar mergeDist = getMergeDistance
-    (
-        mesh,
-        readScalar(meshDict.lookup("mergeTolerance"))
-    );
-
-
     // Mesh distribution engine (uses tolerance to reconstruct meshes)
     fvMeshDistribute distributor(mesh, mergeDist);
 
-
-    // Refinement engine
-    // ~~~~~~~~~~~~~~~~~
-
-    Info<< nl
-        << "Determining initial surface intersections" << nl
-        << "-----------------------------------------" << nl
-        << endl;
-
-    // Main refinement engine
-    meshRefinement meshRefiner
-    (
-        mesh,
-        mergeDist,          // tolerance used in sorting coordinates
-        surfaces,           // for surface intersection refinement
-        shells              // for volume (inside/outside) refinement
-    );
-    Info<< "Calculated surface intersections in = "
-        << mesh.time().cpuTimeIncrement() << " s" << nl << endl;
-
-    // Some stats
-    meshRefiner.printMeshInfo(debug, "Initial mesh");
-
-    meshRefiner.write
-    (
-        debug&meshRefinement::OBJINTERSECTIONS,
-        mesh.time().path()/mesh.time().timeName()
-    );
 
 
 
@@ -370,6 +374,11 @@ int main(int argc, char *argv[])
         // Refinement parameters
         refinementParameters refineParams(refineDict);
 
+        if (!overwrite)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+
         refineDriver.doRefine(refineDict, refineParams, wantSnap, motionDict);
 
         writeMesh
@@ -391,6 +400,11 @@ int main(int argc, char *argv[])
         // Snap parameters
         snapParameters snapParams(snapDict);
 
+        if (!overwrite)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
+
         snapDriver.doSnap(snapDict, motionDict, snapParams);
 
         writeMesh
@@ -403,14 +417,15 @@ int main(int argc, char *argv[])
 
     if (wantLayers)
     {
-        autoLayerDriver layerDriver
-        (
-            meshRefiner,
-            globalToPatch
-        );
+        autoLayerDriver layerDriver(meshRefiner);
 
         // Layer addition parameters
         layerParameters layerParams(layerDict, mesh.boundaryMesh());
+
+        if (!overwrite)
+        {
+            const_cast<Time&>(mesh.time())++;
+        }
 
         layerDriver.doLayers
         (
@@ -435,7 +450,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return 0;
+    return(0);
 }
 
 

@@ -117,7 +117,7 @@ Foam::Xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
             quad[2] = surfaceEdges[i][0] + nextLayerOffset;
             quad[3] = surfaceEdges[i][1] + nextLayerOffset;
 
-            eFaces[facei++] = face(quad);
+            eFaces[facei++] = face(quad).reverseFace();
         }
 
         // Faces between layer and layer+1
@@ -130,7 +130,7 @@ Foam::Xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
                     (
                         surfaceFaces[i].reverseFace()
                       + nextLayerOffset
-                    );
+                    ).reverseFace();
             }
         }
     }
@@ -152,7 +152,7 @@ Foam::Xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
 
             label ownerFace = extrudePatch.edgeFaces()[i][0];
 
-            if (!sameOrder(surfaceFaces[ownerFace], e))
+            if (sameOrder(surfaceFaces[ownerFace], e))
             {
                 reverse(quad);
             }
@@ -164,7 +164,7 @@ Foam::Xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
     // Top faces
     forAll(surfaceFaces, i)
     {
-        eFaces[facei++] = face(surfaceFaces[i]);
+        eFaces[facei++] = face(surfaceFaces[i]).reverseFace();
     }
 
     // Bottom faces
@@ -175,7 +175,7 @@ Foam::Xfer<Foam::faceList> Foam::extrudedMesh::extrudedFaces
             (
                 surfaceFaces[i].reverseFace()
               + nLayers*surfacePoints.size()
-            );
+            ).reverseFace();
     }
 
     // return points for transferring

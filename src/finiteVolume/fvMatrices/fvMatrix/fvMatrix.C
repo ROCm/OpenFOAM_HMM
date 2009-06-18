@@ -480,7 +480,7 @@ void Foam::fvMatrix<Type>::setReference
     const bool forceReference
 )
 {
-    if (celli >= 0 && (psi_.needReference() || forceReference))
+    if ((forceReference || psi_.needReference()) && celli >= 0)
     {
         source()[celli] += diag()[celli]*value;
         diag()[celli] += diag()[celli];

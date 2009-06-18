@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,19 +34,24 @@ Description
 #define COxidationMurphyShaddix_H
 
 #include "SurfaceReactionModel.H"
-#include "coalParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+// Forward class declarations
+template<class CloudType>
+class COxidationMurphyShaddix;
+
 /*---------------------------------------------------------------------------*\
                   Class COxidationMurphyShaddix Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class CloudType>
 class COxidationMurphyShaddix
 :
-    public SurfaceReactionModel<ReactingMultiphaseCloud<coalParcel> >
+    public SurfaceReactionModel<CloudType>
 {
     // Private data
 
@@ -106,9 +111,6 @@ class COxidationMurphyShaddix
             //- Molecular weight of O2 [kg/kmol]
             scalar WO2_;
 
-            //- Chemical enthalpy of CO2 [J/kg]
-            scalar HcCO2_;
-
 
 public:
 
@@ -122,7 +124,7 @@ public:
         COxidationMurphyShaddix
         (
             const dictionary& dict,
-            ReactingMultiphaseCloud<coalParcel>& owner
+            CloudType& owner
         );
 
 
@@ -162,6 +164,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+    #include "COxidationMurphyShaddix.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

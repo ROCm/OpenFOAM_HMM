@@ -226,7 +226,13 @@ void Foam::meshRefinement::getBafflePatches
     label vertI = 0;
     if (debug&OBJINTERSECTIONS)
     {
-        str.reset(new OFstream(mesh_.time().timePath()/"intersections.obj"));
+        str.reset
+        (
+            new OFstream
+            (
+                mesh_.time().path()/timeName()/"intersections.obj"
+            )
+        );
 
         Pout<< "getBafflePatches : Writing surface intersections to file "
             << str().name() << nl << endl;
@@ -459,6 +465,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     {
         // Delete mesh volumes.
         mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
     }
 
     //- Redo the intersections on the newly create baffle faces. Note that
@@ -818,6 +829,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
     {
         // Delete mesh volumes.
         mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
     }
 
     // Update intersections. Recalculate intersections on merged faces since
@@ -1482,7 +1498,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        Pout<< "Writing baffled mesh to time " << mesh_.time().timeName()
+        Pout<< "Writing baffled mesh to time " << timeName()
             << endl;
         write(debug, runTime.path()/"baffles");
         Pout<< "Dumped debug data in = "
@@ -1511,11 +1527,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                 perpendicularAngle,
                 globalToPatch
             )
-            //markFacesOnProblemCellsGeometric
-            //(
-            //    motionDict,
-            //    globalToPatch
-            //)
+            //markFacesOnProblemCellsGeometric(motionDict)
         );
         Info<< "Analyzed problem cells in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
@@ -1569,7 +1581,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         if (debug)
         {
             Pout<< "Writing extra baffled mesh to time "
-                << mesh_.time().timeName() << endl;
+                << timeName() << endl;
             write(debug, runTime.path()/"extraBaffles");
             Pout<< "Dumped debug data in = "
                 << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
@@ -1604,9 +1616,9 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        Pout<< "Writing subsetted mesh to time " << mesh_.time().timeName()
+        Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;
-        write(debug, runTime.timePath());
+        write(debug, runTime.path()/timeName());
         Pout<< "Dumped debug data in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
     }
@@ -1665,7 +1677,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
 
 // Split off (with optional buffer layers) unreachable areas of mesh.
-Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 (
     const label nBufferLayers,
     const labelList& globalToPatch,
@@ -1996,6 +2008,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
     {
         // Delete mesh volumes.
         mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
     }
 
     // Update intersections. Is mapping only (no faces created, positions stay
@@ -2427,6 +2444,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     {
         // Delete mesh volumes.
         mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
     }
 
     // None of the faces has changed, only the zones. Still...

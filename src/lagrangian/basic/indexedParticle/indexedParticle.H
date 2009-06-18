@@ -87,6 +87,12 @@ public:
             Particle<indexedParticle>(c, is)
         {}
 
+        //- Construct as a copy
+        indexedParticle(const indexedParticle& p)
+        :
+            Particle<indexedParticle>(p)
+        {}
+
         //- Construct and return a clone
         autoPtr<indexedParticle> clone() const
         {

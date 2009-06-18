@@ -1077,7 +1077,7 @@ void Foam::meshDualiser::setRefinement
     {
         label pointI = multiCellFeaturePoints[i];
 
-        if (pointToDualCells_[pointI].size())
+        if (pointToDualCells_[pointI].size() > 0)
         {
             FatalErrorIn
             (

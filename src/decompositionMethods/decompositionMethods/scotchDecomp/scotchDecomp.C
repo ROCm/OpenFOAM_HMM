@@ -75,6 +75,24 @@ extern "C"
 }
 
 
+// Hack: scotch generates floating point errors so need to switch of error
+//       trapping!
+#if defined(linux) || defined(linuxAMD64) || defined(linuxIA64)
+#    define LINUX
+#endif
+
+#if defined(LINUX) && defined(__GNUC__)
+#    define LINUX_GNUC
+#endif
+
+#ifdef LINUX_GNUC
+#   ifndef __USE_GNU
+#       define __USE_GNU
+#   endif
+#   include <fenv.h>
+#endif
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -113,13 +131,30 @@ Foam::label Foam::scotchDecomp::decompose
 {
     // Strategy
     // ~~~~~~~~
+
     // Default.
     SCOTCH_Strat stradat;
     check(SCOTCH_stratInit(&stradat), "SCOTCH_stratInit");
-    //SCOTCH_stratGraphMap(&stradat, &argv[i][2]);
-    //fprintf(stdout, "S\tStrat=");
-    //SCOTCH_stratSave(&stradat, stdout);
-    //fprintf(stdout, "\n");
+
+    if (decompositionDict_.found("scotchCoeffs"))
+    {
+        const dictionary& scotchCoeffs =
+            decompositionDict_.subDict("scotchCoeffs");
+
+
+        string strategy;
+        if (scotchCoeffs.readIfPresent("strategy", strategy))
+        {
+            if (debug)
+            {
+                Info<< "scotchDecomp : Using strategy " << strategy << endl;
+            }
+            SCOTCH_stratGraphMap(&stradat, strategy.c_str());
+            //fprintf(stdout, "S\tStrat=");
+            //SCOTCH_stratSave(&stradat, stdout);
+            //fprintf(stdout, "\n");
+        }
+    }
 
 
     // Graph
@@ -153,37 +188,40 @@ Foam::label Foam::scotchDecomp::decompose
         const dictionary& scotchCoeffs =
             decompositionDict_.subDict("scotchCoeffs");
 
-        Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
-
-        if (writeGraph)
+        if (scotchCoeffs.found("writeGraph"))
         {
-            OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
+            Switch writeGraph(scotchCoeffs.lookup("writeGraph"));
 
-            Info<< "Dumping Scotch graph file to " << str.name() << endl
-                << "Use this in combination with gpart." << endl;
-
-            label version = 0;
-            str << version << nl;
-            // Numer of vertices
-            str << xadj.size()-1 << ' ' << adjncy.size() << nl;
-            // Numbering starts from 0
-            label baseval = 0;
-            // Has weights?
-            label hasEdgeWeights = 0;
-            label hasVertexWeights = 0;
-            label numericflag = 10*hasEdgeWeights+hasVertexWeights;
-            str << baseval << ' ' << numericflag << nl;
-            for (label cellI = 0; cellI < xadj.size()-1; cellI++)
+            if (writeGraph)
             {
-                label start = xadj[cellI];
-                label end = xadj[cellI+1];
-                str << end-start;
+                OFstream str(mesh_.time().path() / mesh_.name() + ".grf");
 
-                for (label i = start; i < end; i++)
+                Info<< "Dumping Scotch graph file to " << str.name() << endl
+                    << "Use this in combination with gpart." << endl;
+
+                label version = 0;
+                str << version << nl;
+                // Numer of vertices
+                str << xadj.size()-1 << ' ' << adjncy.size() << nl;
+                // Numbering starts from 0
+                label baseval = 0;
+                // Has weights?
+                label hasEdgeWeights = 0;
+                label hasVertexWeights = 0;
+                label numericflag = 10*hasEdgeWeights+hasVertexWeights;
+                str << baseval << ' ' << numericflag << nl;
+                for (label cellI = 0; cellI < xadj.size()-1; cellI++)
                 {
-                    str << ' ' << adjncy[i];
+                    label start = xadj[cellI];
+                    label end = xadj[cellI+1];
+                    str << end-start;
+
+                    for (label i = start; i < end; i++)
+                    {
+                        str << ' ' << adjncy[i];
+                    }
+                    str << nl;
                 }
-                str << nl;
             }
         }
     }
@@ -195,12 +233,36 @@ Foam::label Foam::scotchDecomp::decompose
 
     SCOTCH_Arch archdat;
     check(SCOTCH_archInit(&archdat), "SCOTCH_archInit");
-    check
-    (
-        // SCOTCH_archCmpltw for weighted.
-        SCOTCH_archCmplt(&archdat, nProcessors_),
-        "SCOTCH_archCmplt"
-    );
+
+    List<label> processorWeights;
+    if (decompositionDict_.found("scotchCoeffs"))
+    {
+        const dictionary& scotchCoeffs =
+            decompositionDict_.subDict("scotchCoeffs");
+
+        scotchCoeffs.readIfPresent("processorWeights", processorWeights);
+    }
+    if (processorWeights.size())
+    {
+        if (debug)
+        {
+            Info<< "scotchDecomp : Using procesor weights " << processorWeights
+                << endl;
+        }
+        check
+        (
+            SCOTCH_archCmpltw(&archdat, nProcessors_, processorWeights.begin()),
+            "SCOTCH_archCmpltw"
+        );
+    }
+    else
+    {
+        check
+        (
+            SCOTCH_archCmplt(&archdat, nProcessors_),
+            "SCOTCH_archCmplt"
+        );
+    }
 
 
     //SCOTCH_Mapping mapdat;
@@ -208,6 +270,16 @@ Foam::label Foam::scotchDecomp::decompose
     //SCOTCH_graphMapCompute(&grafdat, &mapdat, &stradat); /* Perform mapping */
     //SCOTCH_graphMapExit(&grafdat, &mapdat);
 
+
+    // Hack:switch off fpu error trapping
+#   ifdef LINUX_GNUC
+    int oldExcepts = fedisableexcept
+    (
+        FE_DIVBYZERO
+      | FE_INVALID
+      | FE_OVERFLOW
+    );
+#   endif
 
     finalDecomp.setSize(xadj.size()-1);
     finalDecomp = 0;
@@ -222,6 +294,11 @@ Foam::label Foam::scotchDecomp::decompose
         ),
         "SCOTCH_graphMap"
     );
+
+#   ifdef LINUX_GNUC
+    feenableexcept(oldExcepts);
+#   endif
+
 
 
     //finalDecomp.setSize(xadj.size()-1);

@@ -68,6 +68,28 @@ inline Foam::KinematicParcel<ParcelType>::KinematicParcel
 (
     KinematicCloud<ParcelType>& owner,
     const vector& position,
+    const label cellI
+)
+:
+    Particle<ParcelType>(owner, position, cellI),
+    typeId_(owner.parcelTypeId()),
+    nParticle_(0),
+    d_(0.0),
+    U_(vector::zero),
+    rho_(0.0),
+    tTurb_(0.0),
+    UTurb_(vector::zero),
+    rhoc_(0.0),
+    Uc_(vector::zero),
+    muc_(0.0)
+{}
+
+
+template <class ParcelType>
+inline Foam::KinematicParcel<ParcelType>::KinematicParcel
+(
+    KinematicCloud<ParcelType>& owner,
+    const vector& position,
     const label cellI,
     const label typeId,
     const scalar nParticle0,

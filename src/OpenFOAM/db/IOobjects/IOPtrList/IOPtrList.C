@@ -64,6 +64,21 @@ Foam::IOPtrList<T>::IOPtrList(const IOobject& io)
 
 
 template<class T>
+Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const label s)
+:
+    regIOobject(io),
+    PtrList<T>(s)
+{
+    if (io.readOpt() != IOobject::NO_READ)
+    {
+        FatalErrorIn("IOPtrList<T>::IOPtrList(const IOobject&, const label)")
+            << "NO_READ must be set if specifying size" << nl
+            << exit(FatalError);
+    }
+}
+
+
+template<class T>
 Foam::IOPtrList<T>::IOPtrList(const IOobject& io, const PtrList<T>& list)
 :
     regIOobject(io)

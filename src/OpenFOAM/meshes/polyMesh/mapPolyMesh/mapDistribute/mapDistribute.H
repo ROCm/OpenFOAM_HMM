@@ -81,16 +81,6 @@ class mapDistribute
         mutable autoPtr<List<labelPair> > schedulePtr_;
 
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        mapDistribute(const mapDistribute&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const mapDistribute&);
-
-
-
 public:
 
     // Constructors
@@ -119,6 +109,9 @@ public:
             const labelList& sendProcs,
             const labelList& recvProcs
         );
+
+        //- Construct copy
+        mapDistribute(const mapDistribute&);
 
 
     // Member Functions
@@ -262,6 +255,11 @@ public:
                     "mapDistribute::updateMesh(const mapPolyMesh&)"
                 );
             }
+
+    // Member Operators
+
+        void operator=(const mapDistribute&);
+
 };
 
 

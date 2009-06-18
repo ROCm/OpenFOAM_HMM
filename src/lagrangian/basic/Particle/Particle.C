@@ -45,7 +45,7 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
     const labelList& faces = mesh.cells()[celli_];
     const vector& C = mesh.cellCentres()[celli_];
 
-    labelList faceList(0);
+    DynamicList<label> faceList(10);
     forAll(faces, i)
     {
         label facei = faces[i];
@@ -53,11 +53,11 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
 
         if ((lam > 0) && (lam < 1.0))
         {
-            label n = faceList.size();
-            faceList.setSize(n+1);
-            faceList[n] = facei;
+            faceList.append(facei);
         }
     }
+
+    faceList.shrink();
 
     return faceList;
 }
@@ -75,7 +75,7 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
     const labelList& faces = mesh.cells()[celli];
     const vector& C = mesh.cellCentres()[celli];
 
-    labelList faceList(0);
+    DynamicList<label> faceList(10);
     forAll(faces, i)
     {
         label facei = faces[i];
@@ -83,11 +83,11 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
 
         if ((lam > 0) && (lam < 1.0))
         {
-            label n = faceList.size();
-            faceList.setSize(n+1);
-            faceList[n] = facei;
+            faceList.append(facei);
         }
     }
+
+    faceList.shrink();
 
     return faceList;
 }
@@ -183,6 +183,17 @@ Foam::Particle<ParticleType>::Particle
     celli_(celli),
     facei_(-1),
     stepFraction_(0.0)
+{}
+
+
+template<class ParticleType>
+Foam::Particle<ParticleType>::Particle(const Particle<ParticleType>& p)
+:
+    cloud_(p.cloud_),
+    position_(p.position_),
+    celli_(p.celli_),
+    facei_(p.facei_),
+    stepFraction_(p.stepFraction_)
 {}
 
 
@@ -328,56 +339,47 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             label patchi = patch(facei_);
             const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
-            if (isA<wedgePolyPatch>(patch))
+            if (!p.hitPatch(patch, td, patchi))
             {
-                p.hitWedgePatch
-                (
-                    static_cast<const wedgePolyPatch&>(patch), td
-                );
-            }
-            else if (isA<symmetryPolyPatch>(patch))
-            {
-                p.hitSymmetryPatch
-                (
-                    static_cast<const symmetryPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<cyclicPolyPatch>(patch))
-            {
-                p.hitCyclicPatch
-                (
-                    static_cast<const cyclicPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<processorPolyPatch>(patch))
-            {
-                p.hitProcessorPatch
-                (
-                    static_cast<const processorPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<wallPolyPatch>(patch))
-            {
-                p.hitWallPatch
-                (
-                    static_cast<const wallPolyPatch&>(patch), td
-                );
-            }
-            else if (isA<polyPatch>(patch))
-            {
-                p.hitPatch
-                (
-                    static_cast<const polyPatch&>(patch), td
-                );
-            }
-            else
-            {
-                FatalErrorIn
-                (
-                    "Particle::trackToFace"
-                    "(const vector& endPosition, scalar& trackFraction)"
-                )<< "patch type " << patch.type() << " not suported" << nl
-                 << abort(FatalError);
+                if (isA<wedgePolyPatch>(patch))
+                {
+                    p.hitWedgePatch
+                    (
+                        static_cast<const wedgePolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<symmetryPolyPatch>(patch))
+                {
+                    p.hitSymmetryPatch
+                    (
+                        static_cast<const symmetryPolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<cyclicPolyPatch>(patch))
+                {
+                    p.hitCyclicPatch
+                    (
+                        static_cast<const cyclicPolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<processorPolyPatch>(patch))
+                {
+                    p.hitProcessorPatch
+                    (
+                        static_cast<const processorPolyPatch&>(patch), td
+                    );
+                }
+                else if (isA<wallPolyPatch>(patch))
+                {
+                    p.hitWallPatch
+                    (
+                        static_cast<const wallPolyPatch&>(patch), td
+                    );
+                }
+                else
+                {
+                    p.hitPatch(patch, td);
+                }
             }
         }
     }
@@ -421,6 +423,19 @@ void Foam::Particle<ParticleType>::transformProperties(const tensor&)
 template<class ParticleType>
 void Foam::Particle<ParticleType>::transformProperties(const vector&)
 {}
+
+
+template<class ParticleType>
+template<class TrackData>
+bool Foam::Particle<ParticleType>::hitPatch
+(
+    const polyPatch&,
+    TrackData&,
+    const label
+)
+{
+    return false;
+}
 
 
 template<class ParticleType>

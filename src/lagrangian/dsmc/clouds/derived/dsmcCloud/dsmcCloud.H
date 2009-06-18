@@ -72,7 +72,7 @@ public:
         //- Construct from components
         dsmcCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& T,
             const volVectorField& U
         );
@@ -80,7 +80,7 @@ public:
         //- Construct from name and mesh, used to initialise.
         dsmcCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const fvMesh& mesh
         );
 

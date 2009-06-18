@@ -46,6 +46,7 @@ SourceFiles
 
 #include "ThermoParcel.H"
 #include "ReactingCloud.H"
+#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,6 +70,7 @@ Ostream& operator<<
 template<class ParcelType>
 class ReactingParcel
 :
+    public reactingParcel,
     public ThermoParcel<ParcelType>
 {
 public:
@@ -86,10 +88,7 @@ public:
             //- Constant volume flag - e.g. during mass transfer
             Switch constantVolume_;
 
-            //- Boiling point [K]
-            const scalar Tbp_;
-
-            //- Vapourisation temperature [K]
+            //- Vaporisation temperature [K]
             const scalar Tvap_;
 
 
@@ -106,10 +105,7 @@ public:
             //- Return const access to the constant volume flag
             inline Switch constantVolume() const;
 
-            //- Return const access to the boiling point
-            inline scalar Tbp() const;
-
-            //- Return const access to the vapourisation temperature
+            //- Return const access to the vaporisation temperature
             inline scalar Tvap() const;
     };
 
@@ -159,7 +155,7 @@ public:
             //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
 
-            //- Return conat access to the interpolator for continuous
+            //- Return const access to the interpolator for continuous
             //  phase pressure field
             inline const interpolation<scalar>& pInterp() const;
     };
@@ -188,7 +184,7 @@ protected:
 
         //- Calculate Phase change
         template<class TrackData>
-        scalar calcPhaseChange
+        void calcPhaseChange
         (
             TrackData& td,
             const scalar dt,           // timestep
@@ -200,7 +196,9 @@ protected:
             const label idPhase,       // id of phase involved in phase change
             const scalar YPhase,       // total mass fraction
             const scalarField& YComponents, // component mass fractions
-            scalarField& dMassPC       // mass transfer - local to particle
+            scalarField& dMassPC,      // mass transfer - local to particle
+            scalar& Sh,                // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         );
 
         //- Update mass fraction
@@ -214,13 +212,28 @@ protected:
 
 public:
 
-    //- Runtime type information
-    TypeName("ReactingParcel");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("ReactingParcel");
+
 
     friend class Cloud<ParcelType>;
 
 
     // Constructors
+
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        inline ReactingParcel
+        (
+            ReactingCloud<ParcelType>& owner,
+            const vector& position,
+            const label cellI
+        );
 
         //- Construct from components
         inline ReactingParcel
@@ -244,10 +257,13 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        ReactingParcel(const ReactingParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<ReactingParcel> clone() const
         {
-            return autoPtr<ParcelType>(new ReactingParcel<ParcelType>(*this));
+            return autoPtr<ReactingParcel>(new ReactingParcel(*this));
         }
 
 

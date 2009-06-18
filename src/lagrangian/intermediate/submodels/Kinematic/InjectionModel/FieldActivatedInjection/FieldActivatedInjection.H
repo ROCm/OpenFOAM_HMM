@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,14 +87,14 @@ class FieldActivatedInjection
             //- Field of injector (x,y,z) positions
             vectorIOField positions_;
 
-            //- Field of cell labels corresoponding to injector positions
-            labelField injectorCells_;
+            //- Field of cell labels corresponding to injector positions
+            labelList injectorCells_;
 
             //- Number of parcels per injector
             const label nParcelsPerInjector_;
 
             //- Field of number of parcels injected for each injector
-            labelField nParcelsInjected_;
+            labelList nParcelsInjected_;
 
 
         // Parcel properties
@@ -103,7 +103,7 @@ class FieldActivatedInjection
             const vector U0_;
 
             //- Field of parcel diameters
-            scalarField diameters_;
+            scalarList diameters_;
 
             //- Parcel size PDF model
             const autoPtr<pdf> parcelPDF_;
@@ -113,14 +113,14 @@ protected:
 
     // Protected member functions
 
-        //- Number of parcels to introduce over the time step
+        //- Number of parcels to introduce over the time step relative to SOI
         label parcelsToInject
         (
             const scalar time0,
             const scalar time1
         ) const;
 
-        //- Volume of parcels to introduce over the time step
+        //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar time0,
@@ -160,31 +160,30 @@ public:
         // Injection geometry
 
             //- Set the injection position and owner cell
-            void setPositionAndCell
+            virtual void setPositionAndCell
             (
                 const label parcelI,
+                const label nParcels,
                 const scalar time,
                 vector& position,
                 label& cellOwner
             );
 
-            //- Return the velocity of the parcel to introduce at a time
-            vector velocity
+            //- Set the parcel properties
+            virtual void setProperties
             (
                 const label parcelI,
-                const scalar time
+                const label nParcels,
+                const scalar time,
+                typename CloudType::parcelType& parcel
             );
 
-            //- Return the diameter of the parcel to introduce at a time
-            scalar d0
-            (
-                const label parcelI,
-                const scalar time
-            ) const;
+            //- Flag to identify whether model fully describes the parcel
+            virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection in cellI is
             //  permitted
-            bool validInjection(const label parcelI);
+            virtual bool validInjection(const label parcelI);
 };
 
 

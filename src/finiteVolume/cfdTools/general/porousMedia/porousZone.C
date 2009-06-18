@@ -79,6 +79,8 @@ Foam::porousZone::porousZone
     D_("D", dimensionSet(0, -2, 0, 0, 0), tensor::zero),
     F_("F", dimensionSet(0, -1, 0, 0, 0), tensor::zero)
 {
+    Info<< "Creating porous zone: " << name_ << endl;
+
     if (cellZoneID_ == -1 && !Pstream::parRun())
     {
         FatalErrorIn

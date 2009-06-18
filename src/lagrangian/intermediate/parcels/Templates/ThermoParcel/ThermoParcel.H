@@ -146,7 +146,7 @@ public:
                 //- Temperature field interpolator
                 const interpolation<scalar>& TInterp_;
 
-                //- Scpecific heat capacity field interpolator
+                //- Specific heat capacity field interpolator
                 const interpolation<scalar>& cpInterp_;
 
 
@@ -176,11 +176,11 @@ public:
             //- Return const access to the owner cloud
             inline const constantProperties& constProps() const;
 
-            //- Return conat access to the interpolator for continuous
+            //- Return const access to the interpolator for continuous
             //  phase temperature field
             inline const interpolation<scalar>& TInterp() const;
 
-            //- Return conat access to the interpolator for continuous
+            //- Return const access to the interpolator for continuous
             //  phase specific heat capacity field
             inline const interpolation<scalar>& cpInterp() const;
     };
@@ -222,19 +222,35 @@ protected:
             const scalar rho,          // density
             const scalar T,            // temperature
             const scalar cp,           // specific heat capacity
-            const scalar Sh            // additional enthalpy sources
+            const scalar Sh,           // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         );
 
 
 public:
 
-    //- Runtime type information
-    TypeName("ThermoParcel");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("ThermoParcel");
+
 
     friend class Cloud<ParcelType>;
 
 
     // Constructors
+
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        inline ThermoParcel
+        (
+            ThermoCloud<ParcelType>& owner,
+            const vector& position,
+            const label cellI
+        );
 
         //- Construct from components
         inline ThermoParcel
@@ -257,10 +273,13 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        ThermoParcel(const ThermoParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<ThermoParcel> clone() const
         {
-            return autoPtr<ParcelType>(new ThermoParcel<ParcelType>(*this));
+            return autoPtr<ThermoParcel>(new ThermoParcel(*this));
         }
 
 

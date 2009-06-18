@@ -27,6 +27,7 @@ Class
 
 Description
     Templated base class for reacting cloud
+
     - Adds to thermodynamic cloud
       - Variable composition (single phase)
       - Phase change
@@ -45,8 +46,6 @@ SourceFiles
 
 #include "ThermoCloud.H"
 #include "reactingCloud.H"
-
-#include "ReactingCloudThermoTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,7 +70,26 @@ class ReactingCloud
     public ThermoCloud<ParcelType>,
     public reactingCloud
 {
-    // Private data
+public:
+
+    //- Type of thermodynamics the cloud was instantiated for
+    typedef typename ParcelType::thermoType thermoType;
+
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ReactingCloud(const ReactingCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ReactingCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
@@ -80,7 +98,7 @@ class ReactingCloud
         hCombustionThermo& carrierThermo_;
 
         //- Gas phase properties
-        PtrList<specieReactingProperties>& carrierSpecies_;
+        PtrList<thermoType> carrierSpecies_;
 
 
         // References to the cloud sub-models
@@ -106,13 +124,17 @@ class ReactingCloud
             scalar dMassPhaseChange_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
-        ReactingCloud(const ReactingCloud&);
+        // New parcel helper functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const ReactingCloud&);
+            //- Check that size of a composition field is valid
+            void checkSuppliedComposition
+            (
+                const scalarField& YSupplied,
+                const scalarField& Y,
+                const word& YName
+            );
 
 
 public:
@@ -122,12 +144,11 @@ public:
         //- Construct given carrier gas fields
         ReactingCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& carrierSpecies
+            hCombustionThermo& thermo
         );
 
 
@@ -154,7 +175,7 @@ public:
             inline hCombustionThermo& carrierThermo();
 
             //- Gas phase properties
-            inline const PtrList<specieReactingProperties>& carrierSpecies() const;
+            inline const PtrList<thermoType>& carrierSpecies() const;
 
 
             // Sub-models
@@ -200,15 +221,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType* pPtr,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

@@ -269,7 +269,7 @@ bool domainDecomposition::writeDecomposition()
             IOobject
             (
                 this->polyMesh::name(),  // region name of undecomposed mesh
-                "constant",
+                pointsInstance(),
                 processorDb
             ),
             xferMove(procPoints),
@@ -620,7 +620,7 @@ bool domainDecomposition::writeDecomposition()
             IOobject
             (
                 "pointProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,
@@ -635,7 +635,7 @@ bool domainDecomposition::writeDecomposition()
             IOobject
             (
                 "faceProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,
@@ -650,7 +650,7 @@ bool domainDecomposition::writeDecomposition()
             IOobject
             (
                 "cellProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,
@@ -665,7 +665,7 @@ bool domainDecomposition::writeDecomposition()
             IOobject
             (
                 "boundaryProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,

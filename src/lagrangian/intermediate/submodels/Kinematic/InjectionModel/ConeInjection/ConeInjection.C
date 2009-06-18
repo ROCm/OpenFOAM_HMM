@@ -77,6 +77,7 @@ Foam::ConeInjection<CloudType>::ConeInjection
     InjectionModel<CloudType>(dict, owner, typeName),
     duration_(readScalar(this->coeffDict().lookup("duration"))),
     position_(this->coeffDict().lookup("position")),
+    injectorCell_(-1),
     direction_(this->coeffDict().lookup("direction")),
     parcelsPerSecond_
     (
@@ -145,6 +146,9 @@ Foam::ConeInjection<CloudType>::ConeInjection
 
     // Set total volume to inject
     this->volumeTotal_ = volumeFlowRate_().integrate(0.0, duration_);
+
+    // Set/cache the injector cell
+    this->findCellAtPosition(injectorCell_, position_);
 }
 
 
@@ -175,23 +179,27 @@ template<class CloudType>
 void Foam::ConeInjection<CloudType>::setPositionAndCell
 (
     const label,
+    const label,
     const scalar,
     vector& position,
     label& cellOwner
 )
 {
     position = position_;
-    this->findCellAtPosition(cellOwner, position);
+    cellOwner = injectorCell_;
 }
 
 
 template<class CloudType>
-Foam::vector Foam::ConeInjection<CloudType>::velocity
+void Foam::ConeInjection<CloudType>::setProperties
 (
+    const label parcelI,
     const label,
-    const scalar time
+    const scalar time,
+    typename CloudType::parcelType& parcel
 )
 {
+    // set particle velocity
     const scalar deg2Rad = mathematicalConstant::pi/180.0;
 
     scalar t = time - this->SOI_;
@@ -210,23 +218,22 @@ Foam::vector Foam::ConeInjection<CloudType>::velocity
     dirVec += normal;
     dirVec /= mag(dirVec);
 
-    return Umag_().value(t)*dirVec;
+    parcel.U() = Umag_().value(t)*dirVec;
+
+    // set particle diameter
+    parcel.d() = parcelPDF_().sample();
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::ConeInjection<CloudType>::d0
-(
-    const label,
-    const scalar
-) const
+bool Foam::ConeInjection<CloudType>::fullyDescribed() const
 {
-    return parcelPDF_().sample();
+    return false;
 }
 
 
 template<class CloudType>
-bool Foam::ConeInjection<CloudType>::validInjection(const label parcelI)
+bool Foam::ConeInjection<CloudType>::validInjection(const label)
 {
     return true;
 }

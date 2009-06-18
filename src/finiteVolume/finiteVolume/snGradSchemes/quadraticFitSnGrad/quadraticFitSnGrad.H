@@ -39,7 +39,7 @@ SourceFiles
 
 #include "snGradScheme.H"
 #include "quadraticFitSnGradData.H"
-#include "extendedStencil.H"
+#include "extendedCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -133,7 +133,7 @@ public:
                 centralWeight_
             );
 
-            const extendedStencil& stencil = qfd.stencil();
+            const extendedCellToFaceStencil& stencil = qfd.stencil();
             const List<scalarList>& f = qfd.fit();
 
             tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > sft
