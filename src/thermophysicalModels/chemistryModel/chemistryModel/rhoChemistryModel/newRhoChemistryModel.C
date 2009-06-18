@@ -53,7 +53,7 @@ Foam::autoPtr<Foam::rhoChemistryModel> Foam::rhoChemistryModel::New
             )
         );
 
-        chemistryPropertiesDict.lookup("rhoChemistryModelType") >> userModel;
+        chemistryPropertiesDict.lookup("rhoChemistryModel") >> userModel;
 
         // construct chemistry model type name by inserting first template
         // argument
