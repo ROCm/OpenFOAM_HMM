@@ -26,7 +26,7 @@ License
 
 #include "CentredFitScheme.H"
 #include "quadraticLinearFitPolynomial.H"
-#include "centredCFCStencilObject.H"
+#include "centredCFCCellToFaceStencilObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -42,7 +42,7 @@ namespace Foam
     (
         quadraticLinearFit,
         quadraticLinearFitPolynomial,
-        centredCFCStencilObject
+        centredCFCCellToFaceStencilObject
     );
 }
 

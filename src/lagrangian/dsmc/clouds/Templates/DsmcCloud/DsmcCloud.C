@@ -524,20 +524,20 @@ void Foam::DsmcCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::DsmcCloud<ParcelType>::DsmcCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& T,
     const volVectorField& U
 )
 :
-    Cloud<ParcelType>(T.mesh(), cloudType, false),
+    Cloud<ParcelType>(T.mesh(), cloudName, false),
     DsmcBaseCloud(),
-    cloudType_(cloudType),
+    cloudName_(cloudName),
     mesh_(T.mesh()),
     particleProperties_
     (
         IOobject
         (
-            cloudType + "Properties",
+            cloudName + "Properties",
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,
@@ -636,19 +636,19 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
 template<class ParcelType>
 Foam::DsmcCloud<ParcelType>::DsmcCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const fvMesh& mesh
 )
     :
-    Cloud<ParcelType>(mesh, cloudType, false),
+    Cloud<ParcelType>(mesh, cloudName, false),
     DsmcBaseCloud(),
-    cloudType_(cloudType),
+    cloudName_(cloudName),
     mesh_(mesh),
     particleProperties_
     (
         IOobject
         (
-            cloudType + "Properties",
+            cloudName + "Properties",
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,

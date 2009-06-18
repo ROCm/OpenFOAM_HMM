@@ -26,7 +26,19 @@ Class
     Foam::InjectionModel
 
 Description
-    Templated injection model class
+    Templated injection model class.
+
+    The injection model nominally describes the parcel:
+    - position
+    - diameter
+    - velocity
+    In this case, the fullyDescribed() flag should be set to 0 (false). When
+    the parcel is then added to the cloud, the remaining properties are
+    populated using values supplied in the constant properties.
+
+    If, however, all of a parcel's properties are described in the model, the
+    fullDescribed() flag should be set to 1 (true).
+
 
 SourceFiles
     InjectionModel.C
@@ -73,7 +85,7 @@ private:
         //- The cloud dictionary
         const dictionary& dict_;
 
-        // Reference to the owner cloud class
+        //- Reference to the owner cloud class
         CloudType& owner_;
 
         //- The coefficients dictionary
@@ -92,6 +104,9 @@ private:
 protected:
 
     // Protected data
+
+        //- Convenience typedef for parcel type
+        typedef typename CloudType::parcelType parcelType;
 
         // Global injection properties
 
@@ -132,14 +147,14 @@ protected:
 
     // Protected member functions
 
-        //- Number of parcels to introduce over the time step
+        //- Number of parcels to introduce over the time step relative to SOI
         virtual label parcelsToInject
         (
             const scalar time0,
             const scalar time1
         ) const = 0;
 
-        //- Volume of parcels to introduce over the time step
+        //- Volume of parcels to introduce over the time step relative to SOI
         virtual scalar volumeToInject
         (
             const scalar time0,
@@ -153,8 +168,7 @@ protected:
         //- Determine properties for next time step/injection interval
         virtual void prepareForNextTimeStep
         (
-            const scalar time0,
-            const scalar time1,
+            const scalar time,
             label& newParcels,
             scalar& newVolume
         );
@@ -255,7 +269,7 @@ public:
             //- Return mass of particles to introduce
             inline scalar massTotal() const;
 
-            //- Return mass of particles injected (cummulative)
+            //- Return mass of particles injected (cumulative)
             inline scalar massInjected() const;
 
             //- Return the end-of-injection time
@@ -286,30 +300,25 @@ public:
             virtual void setPositionAndCell
             (
                 const label parcelI,
+                const label nParcels,
                 const scalar time,
                 vector& position,
                 label& cellOwner
             ) = 0;
 
-            //- Return the velocity of the parcel to introduce at a time
-            virtual vector velocity
+            //- Set the parcel properties
+            virtual void setProperties
             (
                 const label parcelI,
-                const scalar time
+                const label nParcels,
+                const scalar time,
+                typename CloudType::parcelType& parcel
             ) = 0;
 
-            //- Return the diameter of the parcel to introduce at a time
-            virtual scalar d0
-            (
-                const label parcelI,
-                const scalar time
-            ) const = 0;
+            //- Flag to identify whether model fully describes the parcel
+            virtual bool fullyDescribed() const = 0;
 };
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "InjectionModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -332,6 +341,25 @@ public:
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
+
+#define makeInjectionModelThermoType(SS, CloudType, ParcelType, ThermoType)   \
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    InjectionModel<CloudType<ParcelType<ThermoType> > >::                     \
+        adddictionaryConstructorToTable                                       \
+        <SS<CloudType<ParcelType<ThermoType> > > >                            \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
+
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "InjectionModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

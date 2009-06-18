@@ -19,7 +19,4 @@ fluidRegionNames ( bottomAir topAir );
 
 solidRegionNames ( heater leftSolid rightSolid );
 
-pRef            100000;
-
-
 // ************************************************************************* //

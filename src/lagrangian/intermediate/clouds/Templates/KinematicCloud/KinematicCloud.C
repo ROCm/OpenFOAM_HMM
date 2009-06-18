@@ -31,62 +31,29 @@ License
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
-#include "WallInteractionModel.H"
-
-
-// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::addNewParcel
-(
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
-)
-{
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        position,
-        cellId,
-        parcelTypeId_,
-        nParticles,
-        d,
-        U,
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
-}
-
+#include "PatchInteractionModel.H"
+#include "PostProcessingModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
 Foam::KinematicCloud<ParcelType>::KinematicCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const volScalarField& mu,
     const dimensionedVector& g
 )
 :
-    Cloud<ParcelType>(rho.mesh(), cloudType, false),
+    Cloud<ParcelType>(rho.mesh(), cloudName, false),
     kinematicCloud(),
-    cloudType_(cloudType),
     mesh_(rho.mesh()),
     particleProperties_
     (
         IOobject
         (
-            cloudType + "Properties",
+            cloudName + "Properties",
             rho.mesh().time().constant(),
             rho.mesh(),
             IOobject::MUST_READ,
@@ -131,11 +98,19 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
-    wallInteractionModel_
+    patchInteractionModel_
     (
-        WallInteractionModel<KinematicCloud<ParcelType> >::New
+        PatchInteractionModel<KinematicCloud<ParcelType> >::New
         (
             particleProperties_,
+            *this
+        )
+    ),
+    postProcessingModel_
+    (
+        PostProcessingModel<KinematicCloud<ParcelType> >::New
+        (
+            this->particleProperties_,
             *this
         )
     ),
@@ -172,6 +147,24 @@ Foam::KinematicCloud<ParcelType>::~KinematicCloud()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType* pPtr,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    if (!fullyDescribed)
+    {
+        pPtr->rho() = constProps_.rho0();
+    }
+
+    scalar carrierDt = this->db().time().deltaT().value();
+    pPtr->stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
+}
+
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
@@ -227,6 +220,8 @@ void Foam::KinematicCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
 }
 
 

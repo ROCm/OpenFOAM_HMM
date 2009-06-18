@@ -37,12 +37,21 @@ Description
         myInterfacePatchName
         {
             type                solidWallMixedTemperatureCoupled;
-            neighbourRegionName fluid;
-            neighbourPatchName  fluidSolidInterface;
             neighbourFieldName  T;
             K                   K;
             value               uniform 300;
         }
+
+    Needs to be on underlying directMapped(Wall)FvPatch.
+
+    Note: runs in parallel with arbitrary decomposition. Uses directMapped
+    functionality to calculate exchange.
+
+    Note: lags interface data so both sides use same data.
+    - problem: schedule to calculate average would interfere
+    with standard processor swaps.
+    - so: updateCoeffs sets both to same Twall. Only need to do
+    this for last outer iteration but don't have access to this.
 
 SourceFiles
     solidWallMixedTemperatureCoupledFvPatchScalarField.C
@@ -54,7 +63,6 @@ SourceFiles
 
 #include "fvPatchFields.H"
 #include "mixedFvPatchFields.H"
-#include "coupleManager.H"
 #include "fvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -72,13 +80,20 @@ class solidWallMixedTemperatureCoupledFvPatchScalarField
 {
     // Private data
 
-        //- Couple manager object
-        coupleManager coupleManager_;
-
+        //- Name of field on the neighbour region
+        const word neighbourFieldName_;
+        
         //- Name of thermal conductivity field
-        word KName_;
+        const word KName_;
 
         bool fixesValue_;
+
+
+    // Private Member Functions
+
+        //- Am I or neighbour owner of interface
+        bool interfaceOwner(const polyMesh& nbrRegion) const;
+
 
 public:
 
@@ -161,12 +176,6 @@ public:
 
         //- Update the coefficients associated with the patch field
         virtual void updateCoeffs();
-
-        //- Evaluate the patch field
-        virtual void evaluate
-        (
-            const Pstream::commsTypes commsType=Pstream::blocking
-        );
 
         //- Write
         virtual void write(Ostream&) const;

@@ -30,7 +30,26 @@ do
    rm -f 0*/$i/{cp,K}
 done
 
-runApplication chtMultiRegionFoam
+
+#-- Run on single processor
+#runApplication chtMultiRegionFoam
+
+# Decompose
+for i in bottomAir topAir heater leftSolid rightSolid
+do
+   decomposePar -region $i
+done
+
+# Run
+hostname > system/machines
+runParallel chtMultiRegionFoam 4 system/machines
+
+# Reconstruct
+for i in bottomAir topAir heater leftSolid rightSolid
+do
+   reconstructPar -region $i
+done
+
 
 echo
 echo "creating files for paraview post-processing"

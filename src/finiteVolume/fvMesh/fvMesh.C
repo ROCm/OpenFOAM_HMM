@@ -44,17 +44,22 @@ License
 #include "leastSquaresVectors.H"
 #include "CentredFitData.H"
 #include "linearFitPolynomial.H"
+#include "quadraticFitPolynomial.H"
 #include "quadraticLinearFitPolynomial.H"
+//#include "quadraticFitSnGradData.H"
 #include "skewCorrectionVectors.H"
 
-#include "centredCECStencilObject.H"
-#include "centredCFCStencilObject.H"
-#include "centredCPCStencilObject.H"
-#include "centredFECStencilObject.H"
-#include "upwindCECStencilObject.H"
-#include "upwindCFCStencilObject.H"
-#include "upwindCPCStencilObject.H"
-#include "upwindFECStencilObject.H"
+
+#include "centredCECCellToFaceStencilObject.H"
+#include "centredCFCCellToFaceStencilObject.H"
+#include "centredCPCCellToFaceStencilObject.H"
+#include "centredFECCellToFaceStencilObject.H"
+#include "upwindCECCellToFaceStencilObject.H"
+#include "upwindCFCCellToFaceStencilObject.H"
+#include "upwindCPCCellToFaceStencilObject.H"
+#include "upwindFECCellToFaceStencilObject.H"
+
+#include "centredCFCFaceToCellStencilObject.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -89,11 +94,12 @@ void Foam::fvMesh::clearGeom()
     // Things geometry dependent that are not updated.
     volPointInterpolation::Delete(*this);
     extendedLeastSquaresVectors::Delete(*this);
-    extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     CentredFitData<linearFitPolynomial>::Delete(*this);
+    CentredFitData<quadraticFitPolynomial>::Delete(*this);
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
+    //quadraticFitSnGradData::Delete(*this);
 }
 
 
@@ -105,20 +111,24 @@ void Foam::fvMesh::clearAddressing()
 
     volPointInterpolation::Delete(*this);
     extendedLeastSquaresVectors::Delete(*this);
-    extendedLeastSquaresVectors::Delete(*this);
     leastSquaresVectors::Delete(*this);
     CentredFitData<linearFitPolynomial>::Delete(*this);
+    CentredFitData<quadraticFitPolynomial>::Delete(*this);
     CentredFitData<quadraticLinearFitPolynomial>::Delete(*this);
     skewCorrectionVectors::Delete(*this);
+    //quadraticFitSnGradData::Delete(*this);
 
-    centredCECStencilObject::Delete(*this);
-    centredCFCStencilObject::Delete(*this);
-    centredCPCStencilObject::Delete(*this);
-    centredFECStencilObject::Delete(*this);
-    upwindCECStencilObject::Delete(*this);
-    upwindCFCStencilObject::Delete(*this);
-    upwindCPCStencilObject::Delete(*this);
-    upwindFECStencilObject::Delete(*this);
+    centredCECCellToFaceStencilObject::Delete(*this);
+    centredCFCCellToFaceStencilObject::Delete(*this);
+    centredCPCCellToFaceStencilObject::Delete(*this);
+    centredFECCellToFaceStencilObject::Delete(*this);
+    // Is this geometry related - cells distorting to upwind direction?
+    upwindCECCellToFaceStencilObject::Delete(*this);
+    upwindCFCCellToFaceStencilObject::Delete(*this);
+    upwindCPCCellToFaceStencilObject::Delete(*this);
+    upwindFECCellToFaceStencilObject::Delete(*this);
+
+    centredCFCFaceToCellStencilObject::Delete(*this);
 }
 
 
@@ -592,8 +602,10 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
     MeshObjectMovePoints<extendedLeastSquaresVectors>(*this);
     MeshObjectMovePoints<leastSquaresVectors>(*this);
     MeshObjectMovePoints<CentredFitData<linearFitPolynomial> >(*this);
+    MeshObjectMovePoints<CentredFitData<quadraticFitPolynomial> >(*this);
     MeshObjectMovePoints<CentredFitData<quadraticLinearFitPolynomial> >(*this);
     MeshObjectMovePoints<skewCorrectionVectors>(*this);
+    //MeshObjectMovePoints<quadraticFitSnGradData>(*this);
 
     return tsweptVols;
 }

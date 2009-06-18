@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef noInjection_H
-#define noInjection_H
+#ifndef NoInjection_H
+#define NoInjection_H
 
 #include "InjectionModel.H"
 
@@ -56,14 +56,14 @@ protected:
 
     // Protected member functions
 
-        //- Number of parcels to introduce over the time step
+        //- Number of parcels to introduce over the time step relative to SOI
         label parcelsToInject
         (
             const scalar,
             const scalar
         ) const;
 
-        //- Volume of parcels to introduce over the time step
+        //- Volume of parcels to introduce over the time step relative to SOI
         scalar volumeToInject
         (
             const scalar,
@@ -103,31 +103,29 @@ public:
         // Injection geometry
 
             //- Set the injection position and owner cell
-            void setPositionAndCell
+            virtual void setPositionAndCell
             (
                 const label parcelI,
+                const label nParcels,
                 const scalar time,
                 vector& position,
                 label& cellOwner
             );
 
-            //- Return the velocity of the parcel to introduce at a time
-            vector velocity
+            virtual void setProperties
             (
                 const label parcelI,
-                const scalar time
+                const label nParcels,
+                const scalar time,
+                typename CloudType::parcelType& parcel
             );
 
-            //- Return the diameter of the parcel to introduce at a time
-            scalar d0
-            (
-                const label parcelI,
-                const scalar time
-            ) const;
+            //- Flag to identify whether model fully describes the parcel
+            virtual bool fullyDescribed() const;
 
             //- Return flag to identify whether or not injection in cellI is
             //  permitted
-            bool validInjection(const label cellI);
+            virtual bool validInjection(const label cellI);
 };
 
 

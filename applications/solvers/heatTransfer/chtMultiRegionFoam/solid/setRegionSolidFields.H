@@ -1,4 +1,4 @@
-//    fvMesh& mesh = solidRegions[i];
+    fvMesh& mesh = solidRegions[i];
 
     volScalarField& rho = rhos[i];
     volScalarField& cp = cps[i];

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,16 @@ License
 
 #include "ReactingMultiphaseParcel.H"
 #include "IOstreams.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::string Foam::ReactingMultiphaseParcel<ParcelType>::propHeader =
+    ReactingParcel<ParcelType>::propHeader
+  + " nGas(Y1..YN)"
+  + " nLiquid(Y1..YN)"
+  + " nSolid(Y1..YN)";
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -276,15 +286,15 @@ Foam::Ostream& Foam::operator<<
     scalarField YSolidLoc = p.YSolid()*p.Y()[2];
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>&>(p)
+        os  << static_cast<const ReactingParcel<ParcelType>&>(p)
             << token::SPACE << YGasLoc
             << token::SPACE << YLiquidLoc
             << token::SPACE << YSolidLoc;
     }
     else
     {
-        os  << static_cast<const ReactingMultiphaseParcel<ParcelType>&>(p);
-        os << YGasLoc << YLiquidLoc << YSolidLoc;
+        os  << static_cast<const ReactingParcel<ParcelType>&>(p);
+        os  << YGasLoc << YLiquidLoc << YSolidLoc;
     }
 
     // Check state of Ostream

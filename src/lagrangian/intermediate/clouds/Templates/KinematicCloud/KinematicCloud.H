@@ -72,7 +72,10 @@ template<class CloudType>
 class InjectionModel;
 
 template<class CloudType>
-class WallInteractionModel;
+class PostProcessingModel;
+
+template<class CloudType>
+class PatchInteractionModel;
 
 /*---------------------------------------------------------------------------*\
                        Class KinematicCloud Declaration
@@ -84,11 +87,18 @@ class KinematicCloud
     public Cloud<ParcelType>,
     public kinematicCloud
 {
-    // Private data
+    // Private Member Functions
 
-        //- Cloud type - used to set the name of the parcel properties
-        //  dictionary by appending "Properties"
-        const word cloudType_;
+        //- Disallow default bitwise copy construct
+        KinematicCloud(const KinematicCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const KinematicCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
@@ -153,9 +163,13 @@ class KinematicCloud
             autoPtr<InjectionModel<KinematicCloud<ParcelType> > >
                 injectionModel_;
 
-            //- Wall interaction model
-            autoPtr<WallInteractionModel<KinematicCloud<ParcelType> > >
-                wallInteractionModel_;
+            //- Patch interaction model
+            autoPtr<PatchInteractionModel<KinematicCloud<ParcelType> > >
+                patchInteractionModel_;
+
+            //- Post-processing model
+            autoPtr<PostProcessingModel<KinematicCloud<ParcelType> > >
+                postProcessingModel_;
 
 
         // Reference to the particle integration schemes
@@ -170,15 +184,6 @@ class KinematicCloud
             DimensionedField<vector, volMesh> UTrans_;
 
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        KinematicCloud(const KinematicCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const KinematicCloud&);
-
-
 public:
 
     // Constructors
@@ -186,7 +191,7 @@ public:
         //- Construct given carrier gas fields
         KinematicCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const volScalarField& mu,
@@ -207,9 +212,6 @@ public:
         // Access
 
             // References to the mesh and databases
-
-                //- Return the cloud type
-                inline const word& cloudType() const;
 
                 //- Return the parcel type id
                 inline label parcelTypeId() const;
@@ -277,27 +279,33 @@ public:
 
             // Sub-models
 
-                //- Return reference to dispersion model
+                //- Return const-access to the dispersion model
                 inline const DispersionModel<KinematicCloud<ParcelType> >&
                     dispersion() const;
 
+                //- Return reference to the dispersion model
                 inline DispersionModel<KinematicCloud<ParcelType> >&
                     dispersion();
 
-                //- Return reference to drag model
+                //- Return const-access to the drag model
                 inline const DragModel<KinematicCloud<ParcelType> >&
                     drag() const;
 
-                //- Return reference to injection model
+                //- Return const access to the injection model
                 inline const InjectionModel<KinematicCloud<ParcelType> >&
                     injection() const;
 
+                //- Return reference to the injection model
                 inline InjectionModel<KinematicCloud<ParcelType> >&
                     injection();
 
-                //- Return reference to wall interaction model
-                inline const WallInteractionModel<KinematicCloud<ParcelType> >&
-                    wallInteraction() const;
+                //- Return const-access to the patch interaction model
+                inline const PatchInteractionModel<KinematicCloud<ParcelType> >&
+                    patchInteraction() const;
+
+                //- Return reference to post-processing model
+                inline PostProcessingModel<KinematicCloud<ParcelType> >&
+                    postProcessing();
 
 
             // Integration schemes
@@ -346,15 +354,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType* pPtr,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

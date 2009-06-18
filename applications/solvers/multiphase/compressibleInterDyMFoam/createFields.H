@@ -1,9 +1,9 @@
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -88,24 +88,6 @@
 
     dimensionedScalar pMin(twoPhaseProperties.lookup("pMin"));
 
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        max
-        (
-            (pd + gh*(alpha1*rho10 + alpha2*rho20))
-           /(1.0 - gh*(alpha1*psi1 + alpha2*psi2)),
-            pMin
-        )
-    );
-
     volScalarField rho1 = rho10 + psi1*p;
     volScalarField rho2 = rho20 + psi2*p;
 
@@ -152,11 +134,11 @@
     );
 
 
-    wordList pcorrTypes(pd.boundaryField().types());
+    wordList pcorrTypes(p.boundaryField().types());
 
-    for (label i=0; i<pd.boundaryField().size(); i++)
+    for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if (pd.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }

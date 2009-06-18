@@ -27,6 +27,15 @@ License
 #include "ThermoParcel.H"
 #include "IOstreams.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
+    KinematicParcel<ParcelType>::propHeader
+  + " T"
+  + " cp";
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>

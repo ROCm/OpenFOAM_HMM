@@ -177,7 +177,7 @@ Foam::sigFpe::~sigFpe()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigFpe::set()
+void Foam::sigFpe::set(const bool verbose)
 {
     if (oldAction_.sa_handler)
     {
@@ -190,6 +190,12 @@ void Foam::sigFpe::set()
 
     if (env("FOAM_SIGFPE"))
     {
+        if (verbose)
+        {
+            Info<< "SigFpe : Enabling floating point exception trapping"
+                << " (FOAM_SIGFPE)." << endl;
+        }
+
 #       ifdef LINUX_GNUC
 
         feenableexcept
@@ -240,6 +246,12 @@ void Foam::sigFpe::set()
 
     if (env("FOAM_SETNAN"))
     {
+        if (verbose)
+        {
+            Info<< "SetNaN : Initialising allocated memory to NaN"
+                << " (FOAM_SETNAN)." << endl;
+        }
+
 #       ifdef LINUX_GNUC
 
         // Set our malloc

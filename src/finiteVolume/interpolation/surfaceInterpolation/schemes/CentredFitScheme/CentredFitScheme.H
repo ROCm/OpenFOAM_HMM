@@ -119,7 +119,7 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
-            const extendedCentredStencil& stencil = Stencil::New
+            const extendedCentredCellToFaceStencil& stencil = Stencil::New
             (
                 mesh
             );

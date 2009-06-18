@@ -13,14 +13,11 @@
     (
         UEqn()
      ==
-       -fvc::reconstruct
+        fvc::reconstruct
         (
-            (
-                fvc::snGrad(pd)
-              + ghf*fvc::snGrad(rho)
-            ) * mesh.magSf()
+            fvc::interpolate(rho)*(g & mesh.Sf())
+          - fvc::snGrad(p)*mesh.magSf()
         )
     ).initialResidual();
 
     maxResidual = max(eqnResidual, maxResidual);
-

@@ -1,5 +1,5 @@
 {
-    bool closedVolume = pd.needReference();
+    bool closedVolume = p.needReference();
 
     rho = thermo->rho();
 
@@ -17,38 +17,35 @@
         )
     );
 
-    phi = phiU - ghf*fvc::snGrad(rho)*rhorUAf*mesh.magSf();
+    phi = phiU + rhorUAf*fvc::interpolate(rho)*(g & mesh.Sf());
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pdEqn
+        fvScalarMatrix pEqn
         (
-            fvm::ddt(psi, pd)
-          + fvc::ddt(psi)*pRef
-          + fvc::ddt(psi, rho)*gh
+            fvm::ddt(psi, p)
           + fvc::div(phi)
-          - fvm::laplacian(rhorUAf, pd)
+          - fvm::laplacian(rhorUAf, p)
         );
 
         if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
         {
-            pdEqn.solve(mesh.solver(pd.name() + "Final"));
+            pEqn.solve(mesh.solver(p.name() + "Final"));
         }
         else
         {
-            pdEqn.solve(mesh.solver(pd.name()));
+            pEqn.solve(mesh.solver(p.name()));
         }
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi += pdEqn.flux();
+            phi += pEqn.flux();
         }
     }
 
     U += rUA*fvc::reconstruct((phi - phiU)/rhorUAf);
     U.correctBoundaryConditions();
 
-    p == pd + rho*gh + pRef;
     DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
     #include "rhoEqn.H"
@@ -62,6 +59,4 @@
             /fvc::domainIntegrate(thermo->psi());
         rho = thermo->rho();
     }
-
-    pd == p - (rho*gh + pRef);
 }
