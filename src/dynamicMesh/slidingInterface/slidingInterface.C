@@ -664,14 +664,15 @@ void Foam::slidingInterface::updateMesh(const mapPolyMesh& m)
     masterPatchID_.update(mesh.boundaryMesh());
     slavePatchID_.update(mesh.boundaryMesh());
 
-    if (!attached())
-    {
-        calcAttachedAddressing();
-    }
-    else
-    {
-        renumberAttachedAddressing(m);
-    }
+//MJ:Disabled updating
+//    if (!attached())
+//    {
+//        calcAttachedAddressing();
+//    }
+//    else
+//    {
+//        renumberAttachedAddressing(m);
+//    }
 }
 
 
