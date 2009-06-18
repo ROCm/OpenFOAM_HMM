@@ -107,6 +107,9 @@ class polynomialThermo
         //- Enthalpy - derived from cp
         typename Polynomial<PolySize>::intPolyType dhPolynomial_;
 
+        //- Entropy - derived from cp
+        Polynomial<PolySize> sPolynomial_;
+
 
     // Private member functions
 
@@ -116,7 +119,8 @@ class polynomialThermo
             const EquationOfState& pt,
             const scalar Hf,
             const Polynomial<PolySize>& cpPoly,
-            const typename Polynomial<PolySize>::intPolyType& hPoly
+            const typename Polynomial<PolySize>::intPolyType& hPoly,
+            const Polynomial<PolySize>& sPoly
         );
 
 

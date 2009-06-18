@@ -34,13 +34,15 @@ inline Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo
     const EquationOfState& pt,
     const scalar Hf,
     const Polynomial<PolySize>& cpPoly,
-    const typename Polynomial<PolySize>::intPolyType& dhPoly
+    const typename Polynomial<PolySize>::intPolyType& dhPoly,
+    const Polynomial<PolySize>& sPoly
 )
 :
     EquationOfState(pt),
     Hf_(Hf),
     cpPolynomial_(cpPoly),
-    dhPolynomial_(dhPoly)
+    dhPolynomial_(dhPoly),
+    sPolynomial_(sPoly)
 {}
 
 
@@ -56,7 +58,8 @@ inline Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo
     EquationOfState(name, pt),
     Hf_(pt.Hf_),
     cpPolynomial_(pt.cpPolynomial_),
-    dhPolynomial_(pt.dhPolynomial_)
+    dhPolynomial_(pt.dhPolynomial_),
+    sPolynomial_(pt.sPolynomial_)
 {}
 
 
@@ -106,9 +109,13 @@ inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::s
     const scalar T
 ) const
 {
-    notImplemented("scalar polynomialThermo<EquationOfState>::s");
+    WarningIn("scalar polynomialThermo<EquationOfState>::s(const scalar)")
+        << "Standard entropy of formation currently set to zero"
+        << endl;
 
-    return 0.0;
+    scalar Sf = 0.0;
+
+    return (sPolynomial_.evaluate(T) + Sf)*this->W();
 }
 
 
@@ -130,6 +137,7 @@ inline void Foam::polynomialThermo<EquationOfState, PolySize>::operator+=
     Hf_ = molr1*Hf_ + molr2*pt.Hf_;
     cpPolynomial_ = molr1*cpPolynomial_ + molr2*pt.cpPolynomial_;
     dhPolynomial_ = molr1*dhPolynomial_ + molr2*pt.dhPolynomial_;
+    sPolynomial_ = molr1*sPolynomial_ + molr2*pt.sPolynomial_;
 }
 
 
@@ -149,6 +157,7 @@ inline void Foam::polynomialThermo<EquationOfState, PolySize>::operator-=
     Hf_ = molr1*Hf_ - molr2*pt.Hf_;
     cpPolynomial_ = molr1*cpPolynomial_ - molr2*pt.cpPolynomial_;
     dhPolynomial_ = molr1*dhPolynomial_ - molr2*pt.dhPolynomial_;
+    sPolynomial_ = molr1*sPolynomial_ - molr2*pt.sPolynomial_;
 }
 
 
@@ -174,7 +183,8 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator+
         eofs,
         molr1*pt1.Hf_ + molr2*pt2.Hf_,
         molr1*pt1.cpPolynomial_ + molr2*pt2.cpPolynomial_,
-        molr1*pt1.dhPolynomial_ + molr2*pt2.dhPolynomial_
+        molr1*pt1.dhPolynomial_ + molr2*pt2.dhPolynomial_,
+        molr1*pt1.sPolynomial_ + molr2*pt2.sPolynomial_
     );
 }
 
@@ -199,7 +209,8 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator-
         eofs,
         molr1*pt1.Hf_ - molr2*pt2.Hf_,
         molr1*pt1.cpPolynomial_ - molr2*pt2.cpPolynomial_,
-        molr1*pt1.dhPolynomial_ - molr2*pt2.dhPolynomial_
+        molr1*pt1.dhPolynomial_ - molr2*pt2.dhPolynomial_,
+        molr1*pt1.sPolynomial_ - molr2*pt2.sPolynomial_
     );
 }
 
@@ -216,7 +227,8 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator*
         s*static_cast<const EquationOfState&>(pt),
         pt.Hf_,
         pt.cpPolynomial_,
-        pt.dhPolynomial_
+        pt.dhPolynomial_,
+        pt.sPolynomial_
     );
 }
 
