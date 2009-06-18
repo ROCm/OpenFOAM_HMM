@@ -88,7 +88,8 @@ point wedge::operator()
     }
     else
     {
-        sliceAngle = angle_*(layer + 1)/nLayers_;
+        //sliceAngle = angle_*(layer + 1)/nLayers_;
+        sliceAngle = angle_*layer/nLayers_;
     }
 
     // Find projection onto axis (or rather decompose surfacePoint

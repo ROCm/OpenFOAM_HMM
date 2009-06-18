@@ -103,7 +103,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 
 
-    bool readFaceFile = !args.options().found("noFaceFile");
+    bool readFaceFile = !args.optionFound("noFaceFile");
 
     fileName prefix(args.additionalArgs()[0]);
 

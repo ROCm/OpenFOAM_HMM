@@ -26,9 +26,11 @@ Class
     Foam::ReactingCloud
 
 Description
-    Templated base class for reactive cloud
-    - Adds to kinematic cloud
-      - Heat transfer
+    Templated base class for reacting cloud
+
+    - Adds to thermodynamic cloud
+      - Variable composition (single phase)
+      - Phase change
 
 SourceFiles
     ReactingCloudI.H
@@ -45,8 +47,6 @@ SourceFiles
 #include "ThermoCloud.H"
 #include "reactingCloud.H"
 
-#include "ReactingCloudThermoTypes.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -58,13 +58,10 @@ template<class CloudType>
 class CompositionModel;
 
 template<class CloudType>
-class MassTransferModel;
-
-template<class CloudType>
-class SurfaceReactionModel;
+class PhaseChangeModel;
 
 /*---------------------------------------------------------------------------*\
-                        Class ReactingCloud Declaration
+                      Class ReactingCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParcelType>
@@ -73,37 +70,13 @@ class ReactingCloud
     public ThermoCloud<ParcelType>,
     public reactingCloud
 {
+public:
 
-    // Private data
+    //- Type of thermodynamics the cloud was instantiated for
+    typedef typename ParcelType::thermoType thermoType;
 
-        //- Parcel constant properties
-        typename ParcelType::constantProperties constProps_;
 
-        //- Thermodynamics package (combustion)
-        hCombustionThermo& carrierThermo_;
-
-        //- Gas phase properties
-        PtrList<specieReactingProperties>& gases_;
-
-        // References to the cloud sub-models
-
-            //- Reacting composition model
-            autoPtr<CompositionModel<ReactingCloud<ParcelType> > >
-                compositionModel_;
-
-            //- Mass transfer model
-            autoPtr<MassTransferModel<ReactingCloud<ParcelType> > >
-                massTransferModel_;
-
-            //- Surface reaction model
-            autoPtr<SurfaceReactionModel<ReactingCloud<ParcelType> > >
-                surfaceReactionModel_;
-
-        // Sources
-
-            //- Mass transfer fields - one per carrier phase specie
-            PtrList<DimensionedField<scalar, volMesh> > rhoTrans_;
-
+private:
 
     // Private Member Functions
 
@@ -114,34 +87,86 @@ class ReactingCloud
         void operator=(const ReactingCloud&);
 
 
+protected:
+
+    // Protected data
+
+        //- Parcel constant properties
+        typename ParcelType::constantProperties constProps_;
+
+        //- Thermodynamics package (combustion)
+        hCombustionThermo& carrierThermo_;
+
+        //- Gas phase properties
+        PtrList<thermoType> carrierSpecies_;
+
+
+        // References to the cloud sub-models
+
+            //- Reacting composition model
+            autoPtr<CompositionModel<ReactingCloud<ParcelType> > >
+                compositionModel_;
+
+            //- Reacting phase change model
+            autoPtr<PhaseChangeModel<ReactingCloud<ParcelType> > >
+                phaseChangeModel_;
+
+
+        // Sources
+
+            //- Mass transfer fields - one per carrier phase specie
+            PtrList<DimensionedField<scalar, volMesh> > rhoTrans_;
+
+
+        // Check
+
+            //- Total mass transferred to continuous phase via phase change
+            scalar dMassPhaseChange_;
+
+
+    // Protected Member Functions
+
+        // New parcel helper functions
+
+            //- Check that size of a composition field is valid
+            void checkSuppliedComposition
+            (
+                const scalarField& YSupplied,
+                const scalarField& Y,
+                const word& YName
+            );
+
+
 public:
-
-    //- Runtime type information
-//    TypeName("ReactingCloud");
-
 
     // Constructors
 
         //- Construct given carrier gas fields
         ReactingCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& gases
+            hCombustionThermo& thermo
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~ReactingCloud();
 
-        virtual ~ReactingCloud();
+
+    //- Type of parcel the cloud was instantiated for
+    typedef ParcelType parcelType;
 
 
     // Member Functions
 
         // Access
+
+            //- Return the constant properties
+            inline const typename ParcelType::constantProperties&
+                constProps() const;
 
             //- Return const access to carrier phase thermo package
             inline const hCombustionThermo& carrierThermo() const;
@@ -150,7 +175,7 @@ public:
             inline hCombustionThermo& carrierThermo();
 
             //- Gas phase properties
-            inline const PtrList<specieReactingProperties>& gases() const;
+            inline const PtrList<thermoType>& carrierSpecies() const;
 
 
             // Sub-models
@@ -159,13 +184,9 @@ public:
                 inline const CompositionModel<ReactingCloud<ParcelType> >&
                     composition() const;
 
-                //- Return reference to mass transfer model
-                inline const MassTransferModel<ReactingCloud<ParcelType> >&
-                    massTransfer() const;
-
-                //- Return reference to surface reaction model
-                inline const SurfaceReactionModel<ReactingCloud<ParcelType> >&
-                    surfaceReaction() const;
+                //- Return reference to reacting phase change model
+                inline const PhaseChangeModel<ReactingCloud<ParcelType> >&
+                    phaseChange() const;
 
 
             // Sources
@@ -180,28 +201,32 @@ public:
                     inline PtrList<DimensionedField<scalar, volMesh> >&
                         rhoTrans();
 
-                    //- Return tmp mass source for field i
-                    //  Fully explicit
+                    //- Return tmp mass source for field i - fully explicit
                     inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho1(const label i) const;
+                        Srho(const label i) const;
 
                     //- Return tmp total mass source for carrier phase
-                    //  Fully explicit
-                    inline tmp<DimensionedField<scalar, volMesh> >
-                        Srho1() const;
+                    //  - fully explicit
+                    inline tmp<DimensionedField<scalar, volMesh> > Srho() const;
+
+
+        // Check
+
+            //- Print cloud information
+            void info() const;
+
+            //- Add to cumulative phase change mass transfer
+            void addToMassPhaseChange(const scalar dMass);
 
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType* pPtr,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

@@ -61,20 +61,27 @@ bool Foam::DsmcParcel<ParcelType>::move
 
         if (p.onBoundary() && td.keepParticle)
         {
-            if (p.face() > -1)
+            if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
             {
-                if
-                (
-                    isType<processorPolyPatch>(pbMesh[p.patch(p.face())])
-                )
-                {
-                    td.switchProcessor = true;
-                }
+                td.switchProcessor = true;
             }
         }
     }
 
     return td.keepParticle;
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+bool Foam::DsmcParcel<ParcelType>::hitPatch
+(
+    const polyPatch&,
+    TrackData& td,
+    const label patchI
+)
+{
+    return false;
 }
 
 

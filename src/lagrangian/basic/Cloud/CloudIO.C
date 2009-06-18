@@ -72,8 +72,7 @@ Foam::Cloud<ParticleType>::Cloud
     cellFaces_(pMesh.cells()),
     allFaceCentres_(pMesh.faceCentres()),
     owner_(pMesh.faceOwner()),
-    neighbour_(pMesh.faceNeighbour()),
-    meshInfo_(polyMesh_)
+    neighbour_(pMesh.faceNeighbour())
 {
     initCloud(checkClass);
 }
@@ -94,8 +93,7 @@ Foam::Cloud<ParticleType>::Cloud
     cellFaces_(pMesh.cells()),
     allFaceCentres_(pMesh.faceCentres()),
     owner_(pMesh.faceOwner()),
-    neighbour_(pMesh.faceNeighbour()),
-    meshInfo_(polyMesh_)
+    neighbour_(pMesh.faceNeighbour())
 {
     initCloud(checkClass);
 }

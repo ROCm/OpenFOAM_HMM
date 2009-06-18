@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::label Foam::ManualInjection<CloudType>::nParcelsToInject
+Foam::label Foam::ManualInjection<CloudType>::parcelsToInject
 (
     const scalar time0,
     const scalar time1
@@ -130,71 +130,53 @@ template<class CloudType>
 Foam::scalar Foam::ManualInjection<CloudType>::timeEnd() const
 {
     // Not used
-    return 0.0;
+    return this->SOI_;
 }
 
 
 template<class CloudType>
-Foam::vector Foam::ManualInjection<CloudType>::position
+void Foam::ManualInjection<CloudType>::setPositionAndCell
 (
-    const label iParcel,
+    const label parcelI,
+    const label,
     const scalar time,
-    const polyMeshInfo& meshInfo
+    vector& position,
+    label& cellOwner
 )
 {
-    vector pos = positions_[iParcel];
-    if (meshInfo.caseIs2d())
-    {
-        if (meshInfo.caseIs2dWedge())
-        {
-            pos.component(meshInfo.emptyComponent()) = 0.0;
-        }
-        else if (meshInfo.caseIs2dSlab())
-        {
-            pos.component(meshInfo.emptyComponent()) =
-                meshInfo.centrePoint().component(meshInfo.emptyComponent());
-        }
-        else
-        {
-            FatalErrorIn
-            (
-                "Foam::vector Foam::ManualInjection<CloudType>::position"
-            )   << "Could not determine 2-D case geometry" << nl
-                << abort(FatalError);
-        }
-    }
-
-    return pos;
+    position = positions_[parcelI];
+    this->findCellAtPosition(cellOwner, position);
 }
 
 
 template<class CloudType>
-Foam::vector Foam::ManualInjection<CloudType>::velocity
+void Foam::ManualInjection<CloudType>::setProperties
 (
+    const label parcelI,
     const label,
     const scalar,
-    const polyMeshInfo& meshInfo
+    typename CloudType::parcelType& parcel
 )
 {
-    vector vel = U0_;
-    if (meshInfo.caseIs2dSlab())
-    {
-        vel.component(meshInfo.emptyComponent()) =
-            meshInfo.centrePoint().component(meshInfo.emptyComponent());
-    }
+    // set particle velocity
+    parcel.U() = U0_;
 
-    return vel;
+    // set particle diameter
+    parcel.d() = diameters_[parcelI];
 }
 
 
 template<class CloudType>
-Foam::scalar Foam::ManualInjection<CloudType>::d0
-(
-    const label iParcel,
-    const scalar
-) const
+bool Foam::ManualInjection<CloudType>::fullyDescribed() const
 {
-    return diameters_[iParcel];
+    return false;
+}
+
+
+template<class CloudType>
+bool Foam::ManualInjection<CloudType>::validInjection(const label)
+{
+    return true;
 }
 
 

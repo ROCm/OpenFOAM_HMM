@@ -93,11 +93,11 @@ int main(int argc, char *argv[])
 
 
     // Additional patches
-    if (args.options().found("additionalPatches"))
+    if (args.optionFound("additionalPatches"))
     {
         const wordList patchNames
         (
-            IStringStream(args.options()["additionalPatches"])()
+            args.optionLookup("additionalPatches")()
         );
 
         newPatches.reserve(patchNames.size() + 1);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[])
     }
 
 
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
 
 

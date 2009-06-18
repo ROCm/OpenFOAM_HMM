@@ -23,15 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::timeActivatedExplicitSourceNew
+    Foam::timeActivatedExplicitSource
 
 Description
-    Creates a cell set source that is activated at a given time, and remains
-    active for a specified duration. The source value is either in specific
-    (XX/m3) or absolute (XX) units.
+    Base class for field sources. Provides:
+    - name
+    - references to mesh and time
+    - dimensions
+    - volume type
+    - startTime
+    - duration
+    - read (from <sourceName>Properties dictionary)
 
 SourceFiles
-    timeActivatedExplicitSourceNew.C
+    timeActivatedExplicitSource.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -40,8 +45,6 @@ SourceFiles
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
-#include "topoSetSource.H"
-#include "cellSet.H"
 #include "fvMesh.H"
 #include "Time.H"
 #include "NamedEnum.H"
@@ -72,18 +75,18 @@ public:
 
 private:
 
-    // Private member functions
+    // Private Member Functions
 
-        //- Update the cell set that the source is acting on
-        void updateCellSet();
+        //- Disallow default bitwise copy construct
+        timeActivatedExplicitSource(const timeActivatedExplicitSource&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const timeActivatedExplicitSource&);
 
 
 protected:
 
     // Protected data
-
-        //- Name of the source
-        word sourceName_;
 
         //- Reference to the mesh
         const fvMesh& mesh_;
@@ -93,6 +96,12 @@ protected:
 
 
         // Source properties
+
+            //- Name of the source
+            word name_;
+
+            //- Active flag
+            Switch active_;
 
             //- Dimensions
             const dimensionSet dimensions_;
@@ -105,39 +114,6 @@ protected:
 
             //- Duration [s]
             scalar duration_;
-
-            //- Value when "on"
-            scalar onValue_;
-
-            //- Value when "off"
-            scalar offValue_;
-
-            //- Current source value
-            scalar currentValue_;
-
-
-        // Cell set
-
-            //- Cell volumes
-            scalarList V_;
-
-            //- Name of cell source (XXXToCell)
-            word cellSource_;
-
-            //- Method by which the cells will be selected
-            autoPtr<topoSetSource> cellSelector_;
-
-            //- Set of selected cells
-            cellSet selectedCellSet_;
-
-
-    // Protected Member Functions
-
-        //- Disallow default bitwise copy construct
-        timeActivatedExplicitSource(const timeActivatedExplicitSource&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const timeActivatedExplicitSource&);
 
 
 public:
@@ -157,24 +133,33 @@ public:
 
         // Access
 
+            //- Return the reference to the mesh
+            virtual const fvMesh& mesh() const;
+
+            //- Return the reference to the time database
+            virtual const Time& runTime() const;
+
+            //- Return the source name
+            virtual const word& name() const;
+
+            //- Return the active flag
+            virtual const Switch& active() const;
+
+            //- Return the dimensions
+            virtual const dimensionSet& dimensions() const;
+
+            //- Return the volume type
+            virtual const volumeType& volume() const;
+
             //- Return the start time
-            scalar timeStart() const;
+            virtual scalar timeStart() const;
 
             //- Return the duration
-            scalar duration() const;
-
-            //- Return the current value of the source
-            const dimensionedScalar currentValue() const;
-
-            //- Return a tmp field of the source
-            virtual tmp<DimensionedField<scalar, volMesh> > Su() const;
+            virtual scalar duration() const;
 
 
         //- Read properties dictionary
         virtual bool read();
-
-        //- Update
-        virtual void update();
 };
 
 

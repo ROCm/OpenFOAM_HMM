@@ -26,8 +26,8 @@
 #     paraview3/cshrc
 #
 # Description
-#     Startup File for paraview-3.x
-#     Sourced from OpenFOAM-?.?/etc/cshrc
+#     Setup file for paraview-3.x
+#     Sourced from OpenFOAM-*/etc/cshrc
 #
 # Note
 #     The env. variable 'ParaView_DIR' is required for building plugins
@@ -35,7 +35,7 @@
 
 # determine the cmake to be used
 unsetenv CMAKE_HOME
-foreach cmake ( cmake-2.6.2 cmake-2.4.6 )
+foreach cmake ( cmake-2.6.4 cmake-2.6.2 cmake-2.4.6 )
     set cmake=$WM_THIRD_PARTY_DIR/$cmake/platforms/$WM_ARCH
     if ( -r $cmake ) then
         setenv CMAKE_HOME $cmake
@@ -44,8 +44,8 @@ foreach cmake ( cmake-2.6.2 cmake-2.4.6 )
     endif
 end
 
-set paraviewMajor=paraview-3.5
-setenv ParaView_VERSION 3.5-cvs
+set paraviewMajor=paraview-3.6
+setenv ParaView_VERSION 3.6
 
 setenv ParaView_INST_DIR $WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
 setenv ParaView_DIR $ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER

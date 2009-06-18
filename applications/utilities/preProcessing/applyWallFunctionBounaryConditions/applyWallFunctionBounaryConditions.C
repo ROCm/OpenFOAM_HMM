@@ -240,7 +240,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 #   include "createMesh.H"
 
-    bool compressible = args.options().found("compressible");
+    bool compressible = args.optionFound("compressible");
 
     Info<< "Updating turbulence fields to operate using new run time "
         << "selectable" << nl << "wall functions"

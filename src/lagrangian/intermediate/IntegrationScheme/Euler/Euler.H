@@ -49,7 +49,6 @@ class Euler
 :
     public IntegrationScheme<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -59,16 +58,11 @@ public:
     // Constructors
 
         //- Construct from components
-        Euler
-        (
-            const word& phiName,
-            const dictionary& dict
-        );
+        Euler(const word& phiName, const dictionary& dict);
 
 
     //- Destructor
-
-        virtual ~Euler();
+    virtual ~Euler();
 
 
     // Member Functions

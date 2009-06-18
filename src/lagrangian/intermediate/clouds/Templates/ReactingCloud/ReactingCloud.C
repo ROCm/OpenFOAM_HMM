@@ -25,43 +25,37 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactingCloud.H"
+
 #include "CompositionModel.H"
-#include "MassTransferModel.H"
-#include "SurfaceReactionModel.H"
+#include "PhaseChangeModel.H"
+#include "multiComponentMixture.H"
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::addNewParcel
+void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
 (
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
+    const scalarField& YSupplied,
+    const scalarField& Y,
+    const word& YName
 )
 {
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        this->parcelTypeId(),
-        position,
-        cellId,
-        d,
-        U,
-        nParticles,
-        composition().YGas0(),
-        composition().YLiquid0(),
-        composition().YSolid0(),
-        composition().YMixture0(),
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
+    if (YSupplied.size() != Y.size())
+    {
+        FatalErrorIn
+        (
+            "ReactingCloud<ParcelType>::checkSuppliedComposition"
+            "("
+                "const scalarField&, "
+                "const scalarField&, "
+                "const word&"
+            ")"
+        )   << YName << " supplied, but size is not compatible with "
+            << "parcel composition: " << nl << "    "
+            << YName << "(" << YSupplied.size() << ") vs required composition "
+            << YName << "(" << Y.size() << ")" << nl
+            << abort(FatalError);
+    }
 }
 
 
@@ -70,19 +64,18 @@ void Foam::ReactingCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::ReactingCloud<ParcelType>::ReactingCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& gases
+    hCombustionThermo& thermo
 )
 :
-    ThermoCloud<ParcelType>(cloudType, rho, U, g, thermo),
+    ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo),
     reactingCloud(),
     constProps_(this->particleProperties()),
     carrierThermo_(thermo),
-    gases_(gases),
+    carrierSpecies_(thermo.composition().Y().size()),
     compositionModel_
     (
         CompositionModel<ReactingCloud<ParcelType> >::New
@@ -91,24 +84,31 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             *this
         )
     ),
-    massTransferModel_
+    phaseChangeModel_
     (
-        MassTransferModel<ReactingCloud<ParcelType> >::New
+        PhaseChangeModel<ReactingCloud<ParcelType> >::New
         (
             this->particleProperties(),
             *this
         )
     ),
-    surfaceReactionModel_
-    (
-        SurfaceReactionModel<ReactingCloud<ParcelType> >::New
-        (
-            this->particleProperties(),
-            *this
-        )
-    ),
-    rhoTrans_(thermo.composition().Y().size())
+    rhoTrans_(thermo.composition().Y().size()),
+    dMassPhaseChange_(0.0)
 {
+    // Create the carrier species
+    forAll(carrierSpecies_, specieI)
+    {
+        carrierSpecies_.set
+        (
+            specieI,
+            new thermoType
+            (
+                dynamic_cast<const multiComponentMixture<thermoType>&>
+                    (thermo).speciesData()[specieI]
+            )
+        );
+    }
+
     // Set storage for mass source fields and initialise to zero
     forAll(rhoTrans_, i)
     {
@@ -119,12 +119,14 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                     this->name() + "rhoTrans" + Foam::name(i),
-                     this->db().time().timeName(),
-                     this->db(),
-                     IOobject::NO_READ,
-                     IOobject::NO_WRITE,
-                     false
+                    this->name()
+                      + "rhoTrans_"
+                      + thermo.composition().Y()[i].name(),
+                    this->db().time().timeName(),
+                    this->db(),
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE,
+                    false
                 ),
                 this->mesh(),
                 dimensionedScalar("zero", dimMass, 0.0)
@@ -144,6 +146,40 @@ Foam::ReactingCloud<ParcelType>::~ReactingCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType* pPtr,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    ThermoCloud<ParcelType>::checkParcelProperties
+    (
+        pPtr,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    if (!fullyDescribed)
+    {
+        pPtr->Y() = composition().YMixture0();
+    }
+    else
+    {
+        checkSuppliedComposition
+        (
+            pPtr->Y(),
+            composition().YMixture0(),
+            "YMixture"
+        );
+    }
+
+    // derived information - store initial mass
+    pPtr->mass0() = pPtr->mass();
+}
+
+
+template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 {
     ThermoCloud<ParcelType>::resetSourceTerms();
@@ -161,37 +197,37 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     const volScalarField cp = carrierThermo_.Cp();
     const volScalarField& p = carrierThermo_.p();
 
-    autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         this->rho()
     );
 
-    autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
+    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
     (
         this->interpolationSchemes(),
         this->U()
     );
 
-    autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         this->mu()
     );
 
-    autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         T
     );
 
-    autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         cp
     );
 
-    autoPtr<interpolation<scalar> > pInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > pInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
         p
@@ -201,12 +237,12 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     (
         *this,
         constProps_,
-        rhoInterpolator(),
-        UInterpolator(),
-        muInterpolator(),
-        TInterpolator(),
-        cpInterpolator(),
-        pInterpolator(),
+        rhoInterp(),
+        UInterp(),
+        muInterp(),
+        TInterp(),
+        cpInterp(),
+        pInterp(),
         this->g().value()
     );
 
@@ -214,7 +250,7 @@ void Foam::ReactingCloud<ParcelType>::evolve()
 
     if (debug)
     {
-        this->dumpParticlePositions();
+        this->writePositions();
     }
 
     if (this->coupled())
@@ -223,6 +259,25 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::info() const
+{
+    ThermoCloud<ParcelType>::info();
+
+    Info<< "    Mass transfer phase change      = "
+        << returnReduce(dMassPhaseChange_, sumOp<scalar>()) << nl;
+}
+
+
+template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::addToMassPhaseChange(const scalar dMass)
+{
+    dMassPhaseChange_ += dMass;
 }
 
 

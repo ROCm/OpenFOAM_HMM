@@ -27,7 +27,9 @@ Class
 
 Description
     Data for the quadratic fit correction interpolation scheme to be used with
-    upwind biased stencil
+    upwind biased stencil.
+    - linearCorrection = true : fit calculated for corrected linear scheme
+    - linearCorrection = false : fit calculated for corrected upwind scheme
 
 SourceFiles
     UpwindFitData.C
@@ -44,7 +46,7 @@ SourceFiles
 namespace Foam
 {
 
-class extendedUpwindStencil;
+class extendedUpwindCellToFaceStencil;
 
 /*---------------------------------------------------------------------------*\
                     Class UpwindFitData Declaration
@@ -53,7 +55,12 @@ class extendedUpwindStencil;
 template<class Polynomial>
 class UpwindFitData
 :
-    public FitData<UpwindFitData<Polynomial>, extendedUpwindStencil, Polynomial>
+    public FitData
+    <
+        UpwindFitData<Polynomial>,
+        extendedUpwindCellToFaceStencil,
+        Polynomial
+    >
 {
     // Private data
 
@@ -84,7 +91,8 @@ public:
         UpwindFitData
         (
             const fvMesh& mesh,
-            const extendedUpwindStencil& stencil,
+            const extendedUpwindCellToFaceStencil& stencil,
+            const bool linearCorrection,
             const scalar linearLimitFactor,
             const scalar centralWeight
         );

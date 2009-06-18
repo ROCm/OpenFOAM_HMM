@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -760,21 +760,18 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    if (args.options().found("scale"))
-    {
-        scaleFactor = atof(args.options()["scale"].c_str());
-    }
+    args.optionReadIfPresent("scale", scaleFactor);
 
     HashSet<word> ignoreCellGroups;
-    if (args.options().found("ignoreCellGroups"))
+    if (args.optionFound("ignoreCellGroups"))
     {
-        IStringStream(args.options()["ignoreCellGroups"])() >> ignoreCellGroups;
+        args.optionLookup("ignoreCellGroups")() >> ignoreCellGroups;
     }
 
     HashSet<word> ignoreFaceGroups;
-    if (args.options().found("ignoreFaceGroups"))
+    if (args.optionFound("ignoreFaceGroups"))
     {
-        IStringStream(args.options()["ignoreFaceGroups"])() >> ignoreFaceGroups;
+        args.optionLookup("ignoreFaceGroups")() >> ignoreFaceGroups;
     }
 
 #   include "createTime.H"
@@ -819,6 +816,8 @@ int main(int argc, char *argv[])
 
     // Pre-filtering: flip "owner" boundary or wrong oriented internal
     // faces and move to neighbour
+
+    boolList fm(faces.size(), false);
     forAll (faces, facei)
     {
         if
@@ -827,6 +826,7 @@ int main(int argc, char *argv[])
          || (neighbour[facei] != -1 && owner[facei] > neighbour[facei])
         )
         {
+            fm[facei] = true;
             faces[facei] = faces[facei].reverseFace();
             Swap(owner[facei], neighbour[facei]);
         }
@@ -1178,7 +1178,7 @@ int main(int argc, char *argv[])
                     false,              // flipFaceFlux
                     -1,                 // patchID
                     faceZonei,          // zoneID
-                    false               // zoneFlip
+                    fm[facei]           // zoneFlip
                 );
             }
 

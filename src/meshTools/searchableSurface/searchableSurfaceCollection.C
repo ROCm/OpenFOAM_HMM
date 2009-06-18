@@ -36,7 +36,12 @@ namespace Foam
 {
 
 defineTypeNameAndDebug(searchableSurfaceCollection, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableSurfaceCollection, dict);
+addToRunTimeSelectionTable
+(
+    searchableSurface,
+    searchableSurfaceCollection,
+    dict
+);
 
 }
 
@@ -63,14 +68,16 @@ void Foam::searchableSurfaceCollection::findNearest
 
     forAll(subGeom_, surfI)
     {
-        // Transform then divide
-        tmp<pointField> localSamples = cmptDivide
+        subGeom_[surfI].findNearest
         (
-            transform_[surfI].localPosition(samples),
-            scale_[surfI]
+            cmptDivide  // Transform then divide
+            (
+                transform_[surfI].localPosition(samples),
+                scale_[surfI]
+            ),
+            localMinDistSqr,
+            hitInfo
         );
-
-        subGeom_[surfI].findNearest(localSamples, localMinDistSqr, hitInfo);
 
         forAll(hitInfo, pointI)
         {
@@ -115,7 +122,8 @@ Foam::searchableSurfaceCollection::searchableSurfaceCollection
     instance_(dict.size()),
     scale_(dict.size()),
     transform_(dict.size()),
-    subGeom_(dict.size())
+    subGeom_(dict.size()),
+    mergeSubRegions_(dict.lookup("mergeSubRegions"))
 {
     Info<< "SearchableCollection : " << name() << endl;
 
@@ -181,12 +189,19 @@ const Foam::wordList& Foam::searchableSurfaceCollection::regions() const
         {
             regionOffset_[surfI] = allRegions.size();
 
-            const wordList& subRegions = subGeom_[surfI].regions();
-
-            forAll(subRegions, i)
+            if (mergeSubRegions_)
             {
-                //allRegions.append(subRegions[i] + "_" + Foam::name(surfI));
-                allRegions.append(instance_[surfI] + "_" + subRegions[i]);
+                // Single name regardless how many regions subsurface has
+                allRegions.append(instance_[surfI] + "_" + Foam::name(surfI));
+            }
+            else
+            {
+                const wordList& subRegions = subGeom_[surfI].regions();
+
+                forAll(subRegions, i)
+                {
+                    allRegions.append(instance_[surfI] + "_" + subRegions[i]);
+                }
             }
         }
         regions_.transfer(allRegions.shrink());
@@ -370,7 +385,15 @@ void Foam::searchableSurfaceCollection::getRegion
     {}
     else if (subGeom_.size() == 1)
     {
-        subGeom_[0].getRegion(info, region);
+        if (mergeSubRegions_)
+        {
+            region.setSize(info.size());
+            region = regionOffset_[0];
+        }
+        else
+        {
+            subGeom_[0].getRegion(info, region);
+        }
     }
     else
     {
@@ -429,15 +452,25 @@ void Foam::searchableSurfaceCollection::getRegion
             // Collect points from my surface
             labelList indices(findIndices(nearestSurf, surfI));
 
-            labelList surfRegion;
-            subGeom_[surfI].getRegion
-            (
-                UIndirectList<pointIndexHit>(info, indices),
-                surfRegion
-            );
-            forAll(indices, i)
+            if (mergeSubRegions_)
             {
-                region[indices[i]] = regionOffset_[surfI] + surfRegion[i];
+                forAll(indices, i)
+                {
+                    region[indices[i]] = regionOffset_[surfI];
+                }
+            }
+            else
+            {
+                labelList surfRegion;
+                subGeom_[surfI].getRegion
+                (
+                    UIndirectList<pointIndexHit>(info, indices),
+                    surfRegion
+                );
+                forAll(indices, i)
+                {
+                    region[indices[i]] = regionOffset_[surfI] + surfRegion[i];
+                }
             }
         }
     }

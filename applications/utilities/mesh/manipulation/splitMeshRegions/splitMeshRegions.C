@@ -1239,20 +1239,20 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     word blockedFacesName;
-    if (args.options().found("blockedFaces"))
+    if (args.optionFound("blockedFaces"))
     {
-        blockedFacesName = args.options()["blockedFaces"];
+        blockedFacesName = args.option("blockedFaces");
         Info<< "Reading blocked internal faces from faceSet "
             << blockedFacesName << nl << endl;
     }
 
-    bool makeCellZones = args.options().found("makeCellZones");
-    bool largestOnly = args.options().found("largestOnly");
-    bool insidePoint = args.options().found("insidePoint");
-    bool useCellZones = args.options().found("cellZones");
-    bool overwrite = args.options().found("overwrite");
-    bool detectOnly = args.options().found("detectOnly");
-    bool sloppyCellZones = args.options().found("sloppyCellZones");
+    bool makeCellZones   = args.optionFound("makeCellZones");
+    bool largestOnly     = args.optionFound("largestOnly");
+    bool insidePoint     = args.optionFound("insidePoint");
+    bool useCellZones    = args.optionFound("cellZones");
+    bool overwrite       = args.optionFound("overwrite");
+    bool detectOnly      = args.optionFound("detectOnly");
+    bool sloppyCellZones = args.optionFound("sloppyCellZones");
 
     if (insidePoint && largestOnly)
     {
@@ -1771,7 +1771,7 @@ int main(int argc, char *argv[])
 
         if (insidePoint)
         {
-            point insidePoint(IStringStream(args.options()["insidePoint"])());
+            point insidePoint(args.optionLookup("insidePoint")());
 
             label regionI = -1;
 

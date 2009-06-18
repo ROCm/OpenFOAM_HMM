@@ -28,6 +28,7 @@ License
 #include "Time.H"
 #include "ensightMesh.H"
 #include "fvMesh.H"
+#include "globalMeshData.H"
 #include "PstreamCombineReduceOps.H"
 #include "processorPolyPatch.H"
 #include "cellModeller.H"
@@ -40,43 +41,37 @@ License
 
 namespace Foam
 {
-
-class concatPatchNames
-{
-
-public:
-
-    void operator()
-    (
-        HashTable<labelList>& x,
-        const HashTable<labelList>& y
-    ) const
+    //- Proxy-class to hold the patch processor list combination operator
+    class concatPatchProcs
     {
-        forAllConstIter(HashTable<labelList>, y, iter)
+
+    public:
+
+        void operator()
+        (
+            List<labelList>& x,
+            const List<labelList>& y
+        ) const
         {
-            HashTable<labelList>::iterator xiter = x.find(iter.key());
-
-            if (xiter == x.end())
+            forAll(y, i)
             {
-                x.insert(iter.key(), iter());
-            }
-            else
-            {
-                labelList& xPatches = xiter();
-                const labelList& yPatches = iter();
+                const labelList& yPatches = y[i];
 
-                label offset = xPatches.size();
-                xPatches.setSize(offset + yPatches.size());
-
-                forAll(yPatches, i)
+                if (yPatches.size())
                 {
-                    xPatches[i + offset] = yPatches[i];
+                    labelList& xPatches = x[i];
+
+                    label offset = xPatches.size();
+                    xPatches.setSize(offset + yPatches.size());
+
+                    forAll(yPatches, i)
+                    {
+                        xPatches[i + offset] = yPatches[i];
+                    }
                 }
             }
         }
-    }
-};
-
+    };
 } // End namespace Foam
 
 
@@ -89,57 +84,16 @@ Foam::ensightMesh::ensightMesh
     const bool binary
 )
 :
-    binary_(binary),
     mesh_(mesh),
+    binary_(binary),
+    patchPartOffset_(2),
     meshCellSets_(mesh_.nCells()),
     boundaryFaceSets_(mesh_.boundary().size()),
     allPatchNames_(0),
-    patchIndices_(0),
+    allPatchProcs_(0),
     patchNames_(0),
     nPatchPrims_(0)
 {
-    forAll (mesh_.boundaryMesh(), patchi)
-    {
-        if
-        (
-            typeid(mesh_.boundaryMesh()[patchi])
-         != typeid(processorPolyPatch)
-        )
-        {
-            if (!allPatchNames_.found(mesh_.boundaryMesh()[patchi].name()))
-            {
-                allPatchNames_.insert
-                (
-                    mesh_.boundaryMesh()[patchi].name(),
-                    labelList(1, Pstream::myProcNo())
-                );
-
-                patchIndices_.insert
-                (
-                    mesh_.boundaryMesh()[patchi].name(),
-                    patchi
-                );
-            }
-        }
-    }
-
-    combineReduce(allPatchNames_, concatPatchNames());
-
-    if (args.options().found("patches"))
-    {
-        wordList patchNameList(IStringStream(args.options()["patches"])());
-
-        if (patchNameList.empty())
-        {
-            patchNameList = allPatchNames_.toc();
-        }
-
-        forAll (patchNameList, i)
-        {
-            patchNames_.insert(patchNameList[i]);
-        }
-    }
-
     const cellShapeList& cellShapes = mesh.cellShapes();
 
     const cellModel& tet = *(cellModeller::lookup("tet"));
@@ -148,51 +102,93 @@ Foam::ensightMesh::ensightMesh
     const cellModel& wedge = *(cellModeller::lookup("wedge"));
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
-    labelList& tets = meshCellSets_.tets;
-    labelList& pyrs = meshCellSets_.pyrs;
-    labelList& prisms = meshCellSets_.prisms;
-    labelList& wedges = meshCellSets_.wedges;
-    labelList& hexes = meshCellSets_.hexes;
-    labelList& polys = meshCellSets_.polys;
-
-    // Count the shapes
-    label nTets = 0;
-    label nPyrs = 0;
-    label nPrisms = 0;
-    label nWedges = 0;
-    label nHexes = 0;
-    label nPolys = 0;
-
-    if (patchNames_.empty())
+    if (!args.optionFound("noPatches"))
     {
-        forAll(cellShapes, celli)
+        allPatchNames_ = wordList::subList
+        (
+            mesh_.boundaryMesh().names(), mesh_.boundary().size()
+          - mesh_.globalData().processorPatches().size()
+        );
+
+        allPatchProcs_.setSize(allPatchNames_.size());
+
+        forAll (allPatchProcs_, patchi)
         {
-            const cellShape& cellShape = cellShapes[celli];
+            if (mesh_.boundary()[patchi].size())
+            {
+                allPatchProcs_[patchi].setSize(1);
+                allPatchProcs_[patchi][0] = Pstream::myProcNo();
+            }
+        }
+
+        combineReduce(allPatchProcs_, concatPatchProcs());
+
+        if (args.optionFound("patches"))
+        {
+            wordList patchNameList(args.optionLookup("patches")());
+
+            if (patchNameList.empty())
+            {
+                patchNameList = allPatchNames_;
+            }
+
+            forAll (patchNameList, i)
+            {
+                patchNames_.insert(patchNameList[i]);
+            }
+        }
+    }
+
+    if (patchNames_.size())
+    {
+        // no internalMesh
+        patchPartOffset_ = 1;
+    }
+    else
+    {
+        // Count the shapes
+        labelList& tets = meshCellSets_.tets;
+        labelList& pyrs = meshCellSets_.pyrs;
+        labelList& prisms = meshCellSets_.prisms;
+        labelList& wedges = meshCellSets_.wedges;
+        labelList& hexes = meshCellSets_.hexes;
+        labelList& polys = meshCellSets_.polys;
+
+        label nTets = 0;
+        label nPyrs = 0;
+        label nPrisms = 0;
+        label nWedges = 0;
+        label nHexes = 0;
+        label nPolys = 0;
+
+        forAll(cellShapes, cellI)
+        {
+            const cellShape& cellShape = cellShapes[cellI];
             const cellModel& cellModel = cellShape.model();
 
             if (cellModel == tet)
             {
-                tets[nTets++] = celli;
+                tets[nTets++] = cellI;
             }
             else if (cellModel == pyr)
             {
-                pyrs[nPyrs++] = celli;
+                pyrs[nPyrs++] = cellI;
             }
             else if (cellModel == prism)
             {
-                prisms[nPrisms++] = celli;
+                prisms[nPrisms++] = cellI;
             }
             else if (cellModel == wedge)
             {
-                wedges[nWedges++] = celli;
+                wedges[nWedges++] = cellI;
             }
             else if (cellModel == hex)
             {
-                hexes[nHexes++] = celli;
+                hexes[nHexes++] = cellI;
             }
             else
             {
-                polys[nPolys++] = celli;
+                polys[nPolys++] = cellI;
             }
         }
 
@@ -219,64 +215,65 @@ Foam::ensightMesh::ensightMesh
         reduce(meshCellSets_.nPolys, sumOp<label>());
     }
 
-
-    forAll (mesh.boundary(), patchi)
+    if (!args.optionFound("noPatches"))
     {
-        if (mesh.boundary()[patchi].size())
+        forAll (mesh.boundary(), patchi)
         {
-            const polyPatch& p = mesh.boundaryMesh()[patchi];
-
-            labelList& tris = boundaryFaceSets_[patchi].tris;
-            labelList& quads = boundaryFaceSets_[patchi].quads;
-            labelList& polys = boundaryFaceSets_[patchi].polys;
-
-            tris.setSize(p.size());
-            quads.setSize(p.size());
-            polys.setSize(p.size());
-
-            label nTris = 0;
-            label nQuads = 0;
-            label nPolys = 0;
-
-            forAll(p, facei)
+            if (mesh.boundary()[patchi].size())
             {
-                const face& f = p[facei];
+                const polyPatch& p = mesh.boundaryMesh()[patchi];
 
-                if (f.size() == 3)
+                labelList& tris = boundaryFaceSets_[patchi].tris;
+                labelList& quads = boundaryFaceSets_[patchi].quads;
+                labelList& polys = boundaryFaceSets_[patchi].polys;
+
+                tris.setSize(p.size());
+                quads.setSize(p.size());
+                polys.setSize(p.size());
+
+                label nTris = 0;
+                label nQuads = 0;
+                label nPolys = 0;
+
+                forAll(p, faceI)
                 {
-                    tris[nTris++] = facei;
+                    const face& f = p[faceI];
+
+                    if (f.size() == 3)
+                    {
+                        tris[nTris++] = faceI;
+                    }
+                    else if (f.size() == 4)
+                    {
+                        quads[nQuads++] = faceI;
+                    }
+                    else
+                    {
+                        polys[nPolys++] = faceI;
+                    }
                 }
-                else if (f.size() == 4)
-                {
-                    quads[nQuads++] = facei;
-                }
-                else
-                {
-                    polys[nPolys++] = facei;
-                }
+
+                tris.setSize(nTris);
+                quads.setSize(nQuads);
+                polys.setSize(nPolys);
             }
-
-            tris.setSize(nTris);
-            quads.setSize(nQuads);
-            polys.setSize(nPolys);
         }
     }
 
-    forAllConstIter(HashTable<labelList>, allPatchNames_, iter)
+
+    forAll(allPatchNames_, patchi)
     {
-        const word& patchName = iter.key();
+        const word& patchName = allPatchNames_[patchi];
         nFacePrimitives nfp;
 
         if (patchNames_.empty() || patchNames_.found(patchName))
         {
-            if (patchIndices_.found(patchName))
+            if (mesh.boundary()[patchi].size())
             {
-                label patchi = patchIndices_.find(patchName)();
-
                 nfp.nPoints = mesh.boundaryMesh()[patchi].localPoints().size();
-                nfp.nTris = boundaryFaceSets_[patchi].tris.size();
-                nfp.nQuads = boundaryFaceSets_[patchi].quads.size();
-                nfp.nPolys = boundaryFaceSets_[patchi].polys.size();
+                nfp.nTris   = boundaryFaceSets_[patchi].tris.size();
+                nfp.nQuads  = boundaryFaceSets_[patchi].quads.size();
+                nfp.nPolys  = boundaryFaceSets_[patchi].polys.size();
             }
         }
 
@@ -304,9 +301,9 @@ void Foam::ensightMesh::writePoints
     OFstream& ensightGeometryFile
 ) const
 {
-    forAll(pointsComponent, pointi)
+    forAll(pointsComponent, pointI)
     {
-        ensightGeometryFile<< setw(12) << float(pointsComponent[pointi]) << nl;
+        ensightGeometryFile<< setw(12) << float(pointsComponent[pointI]) << nl;
     }
 }
 
@@ -380,9 +377,9 @@ void Foam::ensightMesh::writePrims
     {
         const cellShape& cellPoints = cellShapes[i];
 
-        forAll(cellPoints, pointi)
+        forAll(cellPoints, pointI)
         {
-            ensightGeometryFile<< setw(10) << cellPoints[pointi] + po;
+            ensightGeometryFile<< setw(10) << cellPoints[pointI] + po;
         }
         ensightGeometryFile << nl;
     }
@@ -415,9 +412,9 @@ void Foam::ensightMesh::writePrimsBinary
         {
             const cellShape& cellPoints = cellShapes[i];
 
-            forAll(cellPoints, pointi)
+            forAll(cellPoints, pointI)
             {
-                temp[n] = cellPoints[pointi] + po;
+                temp[n] = cellPoints[pointI] + po;
                 n++;
             }
         }
@@ -457,10 +454,10 @@ void Foam::ensightMesh::writePolys
         {
             const labelList& cf = cellFaces[polys[i]];
 
-            forAll(cf, facei)
+            forAll(cf, faceI)
             {
                 ensightGeometryFile
-                    << setw(10) << faces[cf[facei]].size() << nl;
+                    << setw(10) << faces[cf[faceI]].size() << nl;
             }
         }
 
@@ -468,13 +465,13 @@ void Foam::ensightMesh::writePolys
         {
             const labelList& cf = cellFaces[polys[i]];
 
-            forAll(cf, facei)
+            forAll(cf, faceI)
             {
-                const face& f = faces[cf[facei]];
+                const face& f = faces[cf[faceI]];
 
-                forAll(f, pointi)
+                forAll(f, pointI)
                 {
-                    ensightGeometryFile << setw(10) << f[pointi] + po;
+                    ensightGeometryFile << setw(10) << f[pointI] + po;
                 }
                 ensightGeometryFile << nl;
             }
@@ -513,11 +510,11 @@ void Foam::ensightMesh::writePolysBinary
         {
             const labelList& cf = cellFaces[polys[i]];
 
-            forAll(cf, facei)
+            forAll(cf, faceI)
             {
                 writeEnsDataBinary
                 (
-                    faces[cf[facei]].size(),
+                    faces[cf[faceI]].size(),
                     ensightGeometryFile
                 );
             }
@@ -527,13 +524,13 @@ void Foam::ensightMesh::writePolysBinary
         {
             const labelList& cf = cellFaces[polys[i]];
 
-            forAll(cf, facei)
+            forAll(cf, faceI)
             {
-                const face& f = faces[cf[facei]];
+                const face& f = faces[cf[faceI]];
 
-                forAll(f, pointi)
+                forAll(f, pointI)
                 {
-                    writeEnsDataBinary(f[pointi] + po,ensightGeometryFile);
+                    writeEnsDataBinary(f[pointI] + po,ensightGeometryFile);
                 }
             }
         }
@@ -648,9 +645,9 @@ void Foam::ensightMesh::writeFacePrims
         {
             const face& patchFace = patchFaces[i];
 
-            forAll(patchFace, pointi)
+            forAll(patchFace, pointI)
             {
-                ensightGeometryFile << setw(10) << patchFace[pointi] + po;
+                ensightGeometryFile << setw(10) << patchFace[pointI] + po;
             }
             ensightGeometryFile << nl;
         }
@@ -690,11 +687,11 @@ void Foam::ensightMesh::writeFacePrimsBinary
         {
             const face& patchFace = patchFaces[i];
 
-            forAll(patchFace, pointi)
+            forAll(patchFace, pointI)
             {
                 writeEnsDataBinary
                 (
-                    patchFace[pointi] + po,
+                    patchFace[pointI] + po,
                     ensightGeometryFile
                 );
             }
@@ -892,7 +889,7 @@ void Foam::ensightMesh::writeAscii
             postProcPath/ensightGeometryFileName,
             runTime.writeFormat(),
             runTime.writeVersion(),
-            runTime.writeCompression()
+            IOstream::UNCOMPRESSED
         );
     }
 
@@ -909,8 +906,8 @@ void Foam::ensightMesh::writeAscii
         ensightGeometryFile.precision(5);
 
         ensightGeometryFile
-            << "OpenFOAM Geometry File " << nl
-            << "OpenFOAM version " << Foam::FOAMversion << nl
+            << "EnSight Geometry File" << nl
+            << "written from OpenFOAM-" << Foam::FOAMversion << nl
             << "node id assign" << nl
             << "element id assign" << nl;
     }
@@ -927,7 +924,7 @@ void Foam::ensightMesh::writeAscii
             ensightGeometryFile
                 << "part" << nl
                 << setw(10) << 1 << nl
-                << "FOAM cells" << nl
+                << "internalMesh" << nl
                 << "coordinates" << nl
                 << setw(10) << nPoints
                 << endl;
@@ -1038,35 +1035,34 @@ void Foam::ensightMesh::writeAscii
     }
 
 
-    label ensightPatchi = 2;
+    label ensightPatchI = patchPartOffset_;
 
-    forAllConstIter(HashTable<labelList>, allPatchNames_, iter)
+    forAll(allPatchNames_, patchi)
     {
-        const labelList& patchProcessors = iter();
+        const word& patchName = allPatchNames_[patchi];
+        const labelList& patchProcessors = allPatchProcs_[patchi];
 
-        if (patchNames_.empty() || patchNames_.found(iter.key()))
+        if (patchNames_.empty() || patchNames_.found(patchName))
         {
-            const word& patchName = iter.key();
             const nFacePrimitives& nfp = nPatchPrims_.find(patchName)();
 
-            const labelList *trisPtr = NULL;
+            const labelList *trisPtr  = NULL;
             const labelList *quadsPtr = NULL;
             const labelList *polysPtr = NULL;
 
             const pointField *patchPointsPtr = NULL;
             const faceList *patchFacesPtr = NULL;
 
-            if (patchIndices_.found(iter.key()))
+            if (mesh_.boundary()[patchi].size())
             {
-                label patchi = patchIndices_.find(iter.key())();
                 const polyPatch& p = mesh_.boundaryMesh()[patchi];
 
-                trisPtr = &boundaryFaceSets_[patchi].tris;
+                trisPtr  = &boundaryFaceSets_[patchi].tris;
                 quadsPtr = &boundaryFaceSets_[patchi].quads;
                 polysPtr = &boundaryFaceSets_[patchi].polys;
 
                 patchPointsPtr = &(p.localPoints());
-                patchFacesPtr = &(p.localFaces());
+                patchFacesPtr  = &(p.localFaces());
             }
 
             const labelList& tris = *trisPtr;
@@ -1083,7 +1079,7 @@ void Foam::ensightMesh::writeAscii
                 {
                     ensightGeometryFile
                         << "part" << nl
-                        << setw(10) << ensightPatchi++ << nl
+                        << setw(10) << ensightPatchI++ << nl
                         << patchName << nl
                         << "coordinates" << nl
                         << setw(10) << nfp.nPoints
@@ -1235,11 +1231,11 @@ void Foam::ensightMesh::writeBinary
 
     if (Pstream::master())
     {
-        writeEnsDataBinary("C binary",ensightGeometryFile);
-        writeEnsDataBinary("OpenFOAM Geometry File",ensightGeometryFile);
-        writeEnsDataBinary("Binary format",ensightGeometryFile);
-        writeEnsDataBinary("node id assign",ensightGeometryFile);
-        writeEnsDataBinary("element id assign",ensightGeometryFile);
+        writeEnsDataBinary("C binary", ensightGeometryFile);
+        writeEnsDataBinary("EnSight Geometry File", ensightGeometryFile);
+        writeEnsDataBinary("written from OpenFOAM", ensightGeometryFile);
+        writeEnsDataBinary("node id assign", ensightGeometryFile);
+        writeEnsDataBinary("element id assign", ensightGeometryFile);
     }
 
     labelList pointOffsets(Pstream::nProcs(), 0);
@@ -1253,7 +1249,7 @@ void Foam::ensightMesh::writeBinary
         {
             writeEnsDataBinary("part",ensightGeometryFile);
             writeEnsDataBinary(1,ensightGeometryFile);
-            writeEnsDataBinary("FOAM cells",ensightGeometryFile);
+            writeEnsDataBinary("internalMesh",ensightGeometryFile);
             writeEnsDataBinary("coordinates",ensightGeometryFile);
             writeEnsDataBinary(nPoints,ensightGeometryFile);
 
@@ -1364,18 +1360,17 @@ void Foam::ensightMesh::writeBinary
 
     }
 
-    label ensightPatchi = 2;
-
+    label ensightPatchI = patchPartOffset_;
     label iCount = 0;
 
-    forAllConstIter(HashTable<labelList>, allPatchNames_, iter)
+    forAll(allPatchNames_, patchi)
     {
         iCount ++;
-        const labelList& patchProcessors = iter();
+        const word& patchName = allPatchNames_[patchi];
+        const labelList& patchProcessors = allPatchProcs_[patchi];
 
-        if (patchNames_.empty() || patchNames_.found(iter.key()))
+        if (patchNames_.empty() || patchNames_.found(patchName))
         {
-            const word& patchName = iter.key();
             const nFacePrimitives& nfp = nPatchPrims_.find(patchName)();
 
             const labelList *trisPtr = NULL;
@@ -1385,9 +1380,8 @@ void Foam::ensightMesh::writeBinary
             const pointField *patchPointsPtr = NULL;
             const faceList *patchFacesPtr = NULL;
 
-            if (patchIndices_.found(iter.key()))
+            if (mesh_.boundary()[patchi].size())
             {
-                label patchi = patchIndices_.find(iter.key())();
                 const polyPatch& p = mesh_.boundaryMesh()[patchi];
 
                 trisPtr = &boundaryFaceSets_[patchi].tris;
@@ -1411,9 +1405,9 @@ void Foam::ensightMesh::writeBinary
                 if (Pstream::master())
                 {
                     writeEnsDataBinary("part",ensightGeometryFile);
-                    writeEnsDataBinary(ensightPatchi++,ensightGeometryFile);
+                    writeEnsDataBinary(ensightPatchI++,ensightGeometryFile);
                     //writeEnsDataBinary(patchName.c_str(),ensightGeometryFile);
-                    writeEnsDataBinary(iter.key().c_str(),ensightGeometryFile);
+                    writeEnsDataBinary(patchName.c_str(),ensightGeometryFile);
                     writeEnsDataBinary("coordinates",ensightGeometryFile);
                     writeEnsDataBinary(nfp.nPoints,ensightGeometryFile);
 

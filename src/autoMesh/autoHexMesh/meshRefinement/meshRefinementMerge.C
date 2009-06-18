@@ -29,10 +29,6 @@ License
 #include "polyTopoChange.H"
 #include "removePoints.H"
 
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Merge faces that are in-line.
@@ -106,6 +102,11 @@ Foam::label Foam::meshRefinement::mergePatchFaces
         {
             // Delete mesh volumes. No other way to do this?
             mesh_.clearOut();
+        }
+
+        if (overwrite())
+        {
+            mesh_.setInstance(oldInstance());
         }
 
         faceCombiner.updateMesh(map);
@@ -201,6 +202,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeEdges
         {
             // Delete mesh volumes. No other way to do this?
             mesh_.clearOut();
+        }
+
+        if (overwrite())
+        {
+            mesh_.setInstance(oldInstance());
         }
 
         pointRemover.updateMesh(map);

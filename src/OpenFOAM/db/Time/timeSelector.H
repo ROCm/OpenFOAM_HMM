@@ -85,7 +85,7 @@ class argList;
 class Time;
 
 /*---------------------------------------------------------------------------*\
-                       Class timeSelector Declaration
+                        Class timeSelector Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeSelector
@@ -136,7 +136,7 @@ public:
         );
 
         //- Return the set of times selected based on the argList options
-        static List<Foam::instant> select
+        static List<instant> select
         (
             const List<instant>&,
             const argList& args
@@ -144,7 +144,7 @@ public:
 
         //- Return the set of times selected based on the argList options
         //  also set the runTime to the first instance
-        static List<Foam::instant> select0
+        static List<instant> select0
         (
             Time& runTime,
             const argList& args

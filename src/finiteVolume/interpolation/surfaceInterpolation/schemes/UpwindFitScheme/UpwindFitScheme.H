@@ -126,9 +126,10 @@ public:
         {
             const fvMesh& mesh = this->mesh();
 
-            const extendedUpwindStencil& stencil = Stencil::New
+            const extendedUpwindCellToFaceStencil& stencil = Stencil::New
             (
                 mesh,
+                false,          //pureUpwind
                 scalar(0.5)
             );
 
@@ -137,6 +138,7 @@ public:
             (
                 mesh,
                 stencil,
+                true,           //calculate as offset to linear
                 linearLimitFactor_,
                 centralWeight_
             );

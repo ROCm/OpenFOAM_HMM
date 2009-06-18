@@ -215,7 +215,7 @@ namespace meshTools
             const label vertI
         );
 
-        //- Return face on cell using edgeI but not faceI. Throws error 
+        //- Return face on cell using edgeI but not faceI. Throws error
         //  if none found.
         label otherFace
         (
@@ -225,7 +225,7 @@ namespace meshTools
             const label edgeI
         );
 
-        //- Return cell on other side of face. Throws error 
+        //- Return cell on other side of face. Throws error
         //  if face not internal.
         label otherCell
         (
@@ -249,14 +249,32 @@ namespace meshTools
     // Constraints on position
 
         //- Set the constrained components of position to mesh centre
-        void constrainToMeshCentre(const polyMesh&, point&);
-        void constrainToMeshCentre(const polyMesh&, pointField&);
+        void constrainToMeshCentre
+        (
+            const polyMesh& mesh,
+            point& pt
+        );
+        void constrainToMeshCentre
+        (
+            const polyMesh& mesh,
+            pointField& pt
+        );
 
         //- Set the constrained components of directions/velocity to zero
-        void constrainDirection(const polyMesh&, vector&);
-        void constrainDirection(const polyMesh&, vectorField&);
+        void constrainDirection
+        (
+            const polyMesh& mesh,
+            const Vector<label>& dirs,
+            vector& d
+        );
+        void constrainDirection
+        (
+            const polyMesh& mesh,
+            const Vector<label>& dirs,
+            vectorField& d
+        );
 
-    
+
     // Hex only functionality.
 
         //- Given edge on hex find other 'parallel', non-connected edges.
@@ -287,7 +305,7 @@ namespace meshTools
             const label cellI,
             const vector& cutDir
         );
-    
+
 } // End namespace meshTools
 
 

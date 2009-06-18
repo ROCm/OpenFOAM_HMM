@@ -52,7 +52,6 @@ class basicKinematicCloud
 :
     public KinematicCloud<basicKinematicParcel>
 {
-
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -73,7 +72,7 @@ public:
         //- Construct from components
         basicKinematicCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const volScalarField& mu,
@@ -82,8 +81,7 @@ public:
 
 
     //- Destructor
-
-        ~basicKinematicCloud();
+    ~basicKinematicCloud();
 
 
     // Member functions

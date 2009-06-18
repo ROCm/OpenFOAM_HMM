@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
     const word oldInstance = mesh.pointsInstance();
 
     scalar thickness(readScalar(IStringStream(args.additionalArgs()[0])()));
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
 
     // Check that mesh is 2D

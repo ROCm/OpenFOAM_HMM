@@ -591,24 +591,10 @@ commandStatus parseType
     }
     else if (setType == "time")
     {
-        scalar time = readScalar(is);
-
+        scalar requestedTime = readScalar(is);
         instantList Times = runTime.times();
 
-        int nearestIndex = -1;
-        scalar nearestDiff = Foam::GREAT;
-
-        forAll(Times, timeIndex)
-        {
-            if (Times[timeIndex].name() == "constant") continue;
-
-            scalar diff = fabs(Times[timeIndex].value() - time);
-            if (diff < nearestDiff)
-            {
-                nearestDiff = diff;
-                nearestIndex = timeIndex;
-            }
-        }
+        label nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
 
         Pout<< "Changing time from " << runTime.timeName()
             << " to " << Times[nearestIndex].name()
@@ -646,7 +632,8 @@ commandStatus parseType
             }
             default:
             {
-                FatalErrorIn("parseType") << "Illegal mesh update state "
+                FatalErrorIn("parseType")
+                    << "Illegal mesh update state "
                     << stat  << abort(FatalError);
                 break;
             }
@@ -723,7 +710,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    bool writeVTK = !args.options().found("noVTK");
+    bool writeVTK = !args.optionFound("noVTK");
 
     // Get times list
     instantList Times = runTime.times();
@@ -740,13 +727,13 @@ int main(int argc, char *argv[])
 
     std::ifstream* fileStreamPtr(NULL);
 
-    if (args.options().found("batch"))
+    if (args.optionFound("batch"))
     {
-        fileName batchFile(args.options()["batch"]);
+        fileName batchFile(args.option("batch"));
 
         Pout<< "Reading commands from file " << batchFile << endl;
 
-        // we also cannot handle .gz files
+        // we cannot handle .gz files
         if (!isFile(batchFile, false))
         {
             FatalErrorIn(args.executable())
@@ -864,7 +851,7 @@ int main(int argc, char *argv[])
         delete fileStreamPtr;
     }
 
-    Pout << nl << "End" << endl;
+    Pout<< "\nEnd" << endl;
 
     return 0;
 }

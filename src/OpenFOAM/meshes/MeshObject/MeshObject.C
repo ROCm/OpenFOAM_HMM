@@ -137,7 +137,7 @@ const Type& Foam::MeshObject<Mesh, Type>::New
 {
     if (!mesh.thisDb().objectRegistry::foundObject<Type>(Type::typeName))
     {
-        return store(new Type(mesh, d3, d4));
+        return store(new Type(mesh, d1, d2, d3, d4));
     }
     else
     {

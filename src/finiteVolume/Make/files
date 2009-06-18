@@ -39,26 +39,41 @@ fvMeshMapper = fvMesh/fvMeshMapper
 $(fvMeshMapper)/fvPatchMapper.C
 $(fvMeshMapper)/fvSurfaceMapper.C
 
+
 extendedStencil = fvMesh/extendedStencil
-$(extendedStencil)/extendedStencil.C
-$(extendedStencil)/extendedUpwindStencil.C
-$(extendedStencil)/extendedCentredStencil.C
 
-$(extendedStencil)/faceStencil/faceStencil.C
-$(extendedStencil)/faceStencil/faceEdgeCellStencil.C
-$(extendedStencil)/faceStencil/cellFaceCellStencil.C
-$(extendedStencil)/faceStencil/cellPointCellStencil.C
-$(extendedStencil)/faceStencil/cellEdgeCellStencil.C
+cellToCell = $(extendedStencil)/cellToCell
+$(cellToCell)/fullStencils/cellToCellStencil.C
+$(cellToCell)/fullStencils/CFCCellToCellStencil.C
+$(cellToCell)/fullStencils/CPCCellToCellStencil.C
+$(cellToCell)/fullStencils/CECCellToCellStencil.C
 
-$(extendedStencil)/extendedStencilMeshObjects/centredCECStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/centredCFCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/centredCPCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/centredFECStencilObject.C
+cellToFace = $(extendedStencil)/cellToFace
+$(cellToFace)/fullStencils/cellToFaceStencil.C
+$(cellToFace)/fullStencils/CFCCellToFaceStencil.C
+$(cellToFace)/fullStencils/CECCellToFaceStencil.C
+$(cellToFace)/fullStencils/CPCCellToFaceStencil.C
+$(cellToFace)/fullStencils/FECCellToFaceStencil.C
+$(cellToFace)/extendedCellToFaceStencil.C
+$(cellToFace)/extendedCentredCellToFaceStencil.C
+$(cellToFace)/extendedUpwindCellToFaceStencil.C
+$(cellToFace)/MeshObjects/centredCECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/centredCFCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/centredCPCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/centredFECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindCECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindCFCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindCPCCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/upwindFECCellToFaceStencilObject.C
+$(cellToFace)/MeshObjects/pureUpwindCFCCellToFaceStencilObject.C
 
-$(extendedStencil)/extendedStencilMeshObjects/upwindCECStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/upwindCFCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/upwindCPCStencilObject.C
-$(extendedStencil)/extendedStencilMeshObjects/upwindFECStencilObject.C
+faceToCell = $(extendedStencil)/faceToCell
+$(faceToCell)/fullStencils/faceToCellStencil.C
+$(faceToCell)/fullStencils/CFCFaceToCellStencil.C
+$(faceToCell)/extendedFaceToCellStencil.C
+$(faceToCell)/extendedCentredFaceToCellStencil.C
+$(faceToCell)/MeshObjects/centredCFCFaceToCellStencilObject.C
+
 
 fvPatchFields = fields/fvPatchFields
 $(fvPatchFields)/fvPatchField/fvPatchFields.C
@@ -166,6 +181,8 @@ $(interpolation)/interpolationCell/makeInterpolationCell.C
 $(interpolation)/interpolationCellPoint/cellPointWeight/cellPointWeight.C
 $(interpolation)/interpolationCellPoint/makeInterpolationCellPoint.C
 $(interpolation)/interpolationCellPointFace/makeInterpolationCellPointFace.C
+$(interpolation)/interpolationCellPointWallModified/cellPointWeightWallModified/cellPointWeightWallModified.C
+$(interpolation)/interpolationCellPointWallModified/makeInterpolationCellPointWallModified.C
 
 volPointInterpolation = interpolation/volPointInterpolation
 $(volPointInterpolation)/pointPatchInterpolation/pointPatchInterpolation.C
@@ -200,6 +217,10 @@ $(schemes)/quadraticFit/quadraticFit.C
 $(schemes)/quadraticLinearUpwindFit/quadraticLinearUpwindFit.C
 $(schemes)/quadraticUpwindFit/quadraticUpwindFit.C
 $(schemes)/cubicUpwindFit/cubicUpwindFit.C
+/*
+$(schemes)/quadraticLinearPureUpwindFit/quadraticLinearPureUpwindFit.C
+*/
+$(schemes)/linearPureUpwindFit/linearPureUpwindFit.C
 
 limitedSchemes = $(surfaceInterpolation)/limitedSchemes
 $(limitedSchemes)/limitedSurfaceInterpolationScheme/limitedSurfaceInterpolationSchemes.C
@@ -295,18 +316,32 @@ $(laplacianSchemes)/gaussLaplacianScheme/gaussLaplacianSchemes.C
 
 finiteVolume/fvc/fvcMeshPhi.C
 
-cfdTools/general/findRefCell/findRefCell.C
-cfdTools/general/adjustPhi/adjustPhi.C
-cfdTools/general/bound/bound.C
-cfdTools/general/porousMedia/porousZone.C
-cfdTools/general/porousMedia/porousZones.C
-cfdTools/general/MRF/MRFZone.C
-cfdTools/general/MRF/MRFZones.C
-cfdTools/general/fieldSources/pressureGradientExplicitSource/pressureGradientExplicitSource.C
-cfdTools/general/fieldSources/timeActivatedExplicitSource/timeActivatedExplicitSource.C
-cfdTools/general/SRF/SRFModel/SRFModel/SRFModel.C
-cfdTools/general/SRF/SRFModel/SRFModel/newSRFModel.C
-cfdTools/general/SRF/SRFModel/rpm/rpm.C
-cfdTools/general/SRF/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
+general = cfdTools/general
+$(general)/findRefCell/findRefCell.C
+$(general)/adjustPhi/adjustPhi.C
+$(general)/bound/bound.C
+
+porousMedia = $(general)/porousMedia
+$(porousMedia)/porousZone.C
+$(porousMedia)/porousZones.C
+
+MRF = $(general)/MRF
+$(MRF)/MRFZone.C
+$(MRF)/MRFZones.C
+
+SRF = $(general)/SRF
+$(SRF)/SRFModel/SRFModel/SRFModel.C
+$(SRF)/SRFModel/SRFModel/newSRFModel.C
+$(SRF)/SRFModel/rpm/rpm.C
+$(SRF)/derivedFvPatchFields/SRFVelocityFvPatchVectorField/SRFVelocityFvPatchVectorField.C
+
+fieldSources = $(general)/fieldSources
+$(fieldSources)/pressureGradientExplicitSource/pressureGradientExplicitSource.C
+$(fieldSources)/timeActivatedExplicitSource/timeActivatedExplicitSource.C
+$(fieldSources)/timeActivatedExplicitCellSource/timeActivatedExplicitCellSource.C
+
+$(fieldSources)/timeActivatedExplicitMulticomponentPointSource/timeActivatedExplicitMulticomponentPointSource.C
+$(fieldSources)/timeActivatedExplicitMulticomponentPointSource/pointSourceProperties/pointSourceProperties.C
+$(fieldSources)/timeActivatedExplicitMulticomponentPointSource/pointSourceProperties/pointSourcePropertiesIO.C
 
 LIB = $(FOAM_LIBBIN)/libfiniteVolume

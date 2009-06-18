@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "GradientDispersionRAS.H"
@@ -111,7 +109,7 @@ Foam::vector Foam::GradientDispersionRAS<CloudType>::update
             // away from the axis of symmetry
             // This creates a 'hole' in the spray and to
             // prevent this we let x1 be both negative/positive
-            if (this->owner().meshInfo().caseIs2d())
+            if (this->owner().mesh().nSolutionD() == 2)
             {
                 fac *= x1;
             }

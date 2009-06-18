@@ -109,7 +109,7 @@ fi
 
 
 #
-# remove files and subdirectories
+# remove files (mesh itself, modifiers, snappyHexMesh ones) and subdirectories
 #
 echo "Clearing ${caseDir:-.}/$meshDir" 1>&2
 
@@ -126,6 +126,10 @@ for i in \
     meshModifiers \
     parallelData \
     sets \
+    cellLevel \
+    pointLevel \
+    refinementHistory \
+    surfaceIndex \
 ;
 do
     rm -rf $meshDir/$i

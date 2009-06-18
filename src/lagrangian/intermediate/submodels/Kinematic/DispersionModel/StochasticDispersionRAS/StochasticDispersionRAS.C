@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "StochasticDispersionRAS.H"
@@ -95,7 +93,8 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
             dir /= mag(dir) + SMALL;
 
             // Numerical Recipes... Ch. 7. Random Numbers...
-            scalar x1, x2;
+            scalar x1 = 0.0;
+            scalar x2 = 0.0;
             scalar rsq = 10.0;
             while ((rsq > 1.0) || (rsq == 0.0))
             {

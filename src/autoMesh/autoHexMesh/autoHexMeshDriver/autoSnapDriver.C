@@ -557,7 +557,7 @@ Foam::tmp<Foam::scalarField> Foam::autoSnapDriver::edgePatchDist
     //        IOobject
     //        (
     //            "pointDist",
-    //            mesh.DB().timeName(),
+    //            meshRefiner_.timeName(),
     //            mesh.DB(),
     //            IOobject::NO_READ,
     //            IOobject::AUTO_WRITE
@@ -580,7 +580,7 @@ Foam::tmp<Foam::scalarField> Foam::autoSnapDriver::edgePatchDist
     //        pointDist[pointI] /= mesh.pointEdges()[pointI].size();
     //    }
     //    Info<< "Writing patch distance to " << pointDist.name()
-    //        << " at time " << mesh.DB().timeName() << endl;
+    //        << " at time " << meshRefiner_.timeName() << endl;
     //
     //    pointDist.write();
     //}
@@ -750,7 +750,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoSnapDriver::createZoneBaffles
             {
                 const_cast<Time&>(mesh.time())++;
                 Pout<< "Writing baffled mesh to time "
-                    << mesh.time().timeName() << endl;
+                    << meshRefiner_.timeName() << endl;
                 mesh.write();
             }
         }
@@ -830,35 +830,6 @@ Foam::scalarField Foam::autoSnapDriver::calcSnapDistance
 }
 
 
-//// Invert globalToPatch_ to get the patches related to surfaces.
-//Foam::labelList Foam::autoSnapDriver::getSurfacePatches() const
-//{
-//    // Set of patches originating from surface
-//    labelHashSet surfacePatchSet(globalToPatch_.size());
-//
-//    forAll(globalToPatch_, i)
-//    {
-//        if (globalToPatch_[i] != -1)
-//        {
-//            surfacePatchSet.insert(globalToPatch_[i]);
-//        }
-//    }
-//
-//    const fvMesh& mesh = meshRefiner_.mesh();
-//
-//    DynamicList<label> surfacePatches(surfacePatchSet.size());
-//
-//    for (label patchI = 0; patchI < mesh.boundaryMesh().size(); patchI++)
-//    {
-//        if (surfacePatchSet.found(patchI))
-//        {
-//            surfacePatches.append(patchI);
-//        }
-//    }
-//    return surfacePatches.shrink();
-//}
-
-
 void Foam::autoSnapDriver::preSmoothPatch
 (
     const snapParameters& snapParams,
@@ -928,7 +899,7 @@ void Foam::autoSnapDriver::preSmoothPatch
     if (debug)
     {
         const_cast<Time&>(mesh.time())++;
-        Pout<< "Writing patch smoothed mesh to time " << mesh.time().timeName()
+        Pout<< "Writing patch smoothed mesh to time " << meshRefiner_.timeName()
             << endl;
 
         mesh.write();
@@ -1222,7 +1193,7 @@ void Foam::autoSnapDriver::smoothDisplacement
     if (debug)
     {
         const_cast<Time&>(mesh.time())++;
-        Pout<< "Writing smoothed mesh to time " << mesh.time().timeName()
+        Pout<< "Writing smoothed mesh to time " << meshRefiner_.timeName()
             << endl;
 
         // Moving mesh creates meshPhi. Can be cleared out by a mesh.clearOut
@@ -1284,7 +1255,7 @@ void Foam::autoSnapDriver::scaleMesh
         if (debug)
         {
             const_cast<Time&>(mesh.time())++;
-            Pout<< "Writing scaled mesh to time " << mesh.time().timeName()
+            Pout<< "Writing scaled mesh to time " << meshRefiner_.timeName()
                 << endl;
             mesh.write();
 
@@ -1476,10 +1447,8 @@ void Foam::autoSnapDriver::doSnap
         << "--------------" << nl
         << endl;
 
-    const_cast<Time&>(mesh.time())++;
-
     // Get the labels of added patches.
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch_));
+    labelList adaptPatchIDs(meshRefiner_.meshedPatches());
 
     // Create baffles (pairs of faces that share the same points)
     // Baffles stored as owner and neighbour face that have been created.

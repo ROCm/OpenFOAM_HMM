@@ -95,6 +95,7 @@ DebugSwitches
     Euler               0;
     EulerImplicit       0;
     EulerRotation       0;
+    extendedCellToFaceStencil 0;
     FDIC                0;
     FaceCellWave        0;
     GAMG                0;
@@ -195,6 +196,7 @@ DebugSwitches
     PatchToPatchInterpolation 0;
     Phi                 0;
     PointEdgeWave       0;
+    POSIX               0;
     Prandtl             0;
     PrimitivePatch      0;
     Pstream             0;
@@ -249,7 +251,6 @@ DebugSwitches
     ThermoParcel<basicThermoParcel>     0;
     UMIST               0;
     UMISTV              0;
-    Unix                0;
     UpwindFitData<cubicUpwindFitPolynomial> 0;
     UpwindFitData<quadraticLinearUpwindFitPolynomial> 0;
     UpwindFitData<quadraticUpwindFitPolynomial>     0;

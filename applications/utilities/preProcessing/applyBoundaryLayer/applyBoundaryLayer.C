@@ -76,16 +76,15 @@ int main(int argc, char *argv[])
     // Set the mean boundary-layer thickness
     dimensionedScalar ybl("ybl", dimLength, 0);
 
-    if (args.options().found("ybl"))
+    if (args.optionFound("ybl"))
     {
         // If the boundary-layer thickness is provided use it
-        ybl.value() = readScalar(IStringStream(args.options()["ybl"])());
+        ybl.value() = args.optionRead<scalar>("ybl");
     }
-    else if (args.options().found("Cbl"))
+    else if (args.optionFound("Cbl"))
     {
         // Calculate boundary layer thickness as Cbl * mean distance to wall
-        ybl.value() =
-            gAverage(y)*readScalar(IStringStream(args.options()["Cbl"])());
+        ybl.value() = gAverage(y) * args.optionRead<scalar>("Cbl");
     }
     else
     {
@@ -155,7 +154,7 @@ int main(int argc, char *argv[])
         sqr(kappa*min(y, ybl))*::sqrt(2)*mag(dev(symm(fvc::grad(U))))
     );
 
-    if (args.options().found("writenut"))
+    if (args.optionFound("writenut"))
     {
         Info<< "Writing nut" << endl;
         nut.write();

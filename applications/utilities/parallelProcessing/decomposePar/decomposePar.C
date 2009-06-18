@@ -99,20 +99,20 @@ int main(int argc, char *argv[])
     word regionName = fvMesh::defaultRegion;
     word regionDir = word::null;
 
-    if (args.options().found("region"))
+    if (args.optionFound("region"))
     {
-        regionName = args.options()["region"];
+        regionName = args.option("region");
         regionDir = regionName;
         Info<< "Decomposing mesh " << regionName << nl << endl;
     }
 
 
-    bool writeCellDist(args.options().found("cellDist"));
-    bool copyUniform(args.options().found("copyUniform"));
-    bool decomposeFieldsOnly(args.options().found("fields"));
-    bool filterPatches(args.options().found("filterPatches"));
-    bool forceOverwrite(args.options().found("force"));
-    bool ifRequiredDecomposition(args.options().found("ifRequired"));
+    bool writeCellDist           = args.optionFound("cellDist");
+    bool copyUniform             = args.optionFound("copyUniform");
+    bool decomposeFieldsOnly     = args.optionFound("fields");
+    bool filterPatches           = args.optionFound("filterPatches");
+    bool forceOverwrite          = args.optionFound("force");
+    bool ifRequiredDecomposition = args.optionFound("ifRequired");
 
 #   include "createTime.H"
 
@@ -566,7 +566,7 @@ int main(int argc, char *argv[])
             IOobject
             (
                 "cellProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::MUST_READ,
@@ -579,7 +579,7 @@ int main(int argc, char *argv[])
             IOobject
             (
                 "boundaryProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::MUST_READ,
@@ -603,7 +603,7 @@ int main(int argc, char *argv[])
                 IOobject
                 (
                     "faceProcAddressing",
-                    "constant",
+                    procMesh.facesInstance(),
                     procMesh.meshSubDir,
                     procMesh,
                     IOobject::MUST_READ,
@@ -645,7 +645,7 @@ int main(int argc, char *argv[])
                 IOobject
                 (
                     "pointProcAddressing",
-                    "constant",
+                    procMesh.facesInstance(),
                     procMesh.meshSubDir,
                     procMesh,
                     IOobject::MUST_READ,

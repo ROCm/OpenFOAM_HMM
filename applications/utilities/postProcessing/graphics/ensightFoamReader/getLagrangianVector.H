@@ -5,7 +5,6 @@ nVar -= Num_variables - nSprayVariables + lagrangianScalarNames.size();
 
 if (nVar >= 0)
 {
-
     word name = lagrangianVectorNames[nVar];
 
     IOField<vector> v
@@ -42,7 +41,7 @@ if (nVar >= 0)
 }
 else
 {
-    //Info << "getLagrangianVector: nVar = " << nVar << endl;
+    // Info<< "getLagrangianVector: nVar = " << nVar << endl;
     return Z_UNDEF;
 }
 

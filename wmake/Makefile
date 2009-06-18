@@ -63,7 +63,7 @@ CLASSES_DIR        = $(MAKE_DIR)/classes
 SYS_INC            =
 SYS_LIBS           =
 
-PROJECT_INC        = -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude -I$(LIB_SRC)/OSspecific/$(WM_OS)/lnInclude
+PROJECT_INC        = -I$(LIB_SRC)/$(WM_PROJECT)/lnInclude -I$(LIB_SRC)/OSspecific/$(WM_OSTYPE)/lnInclude
 PROJECT_LIBS       = -l$(WM_PROJECT)
 ##
 ## unused:

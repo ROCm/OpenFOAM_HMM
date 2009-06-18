@@ -45,8 +45,7 @@ namespace RASModels
 scalar nutRoughWallFunctionFvPatchScalarField::fnRough
 (
     const scalar KsPlus,
-    const scalar Cs,
-    const scalar kappa
+    const scalar Cs
 ) const
 {
     // Return fn based on non-dimensional roughness height
@@ -205,7 +204,7 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 
         if (KsPlus > 2.25)
         {
-            Edash = E/fnRough(KsPlus, Cs_[faceI], kappa);
+            Edash = E/fnRough(KsPlus, Cs_[faceI]);
         }
 
         if (yPlus > yPlusLam)
@@ -219,7 +218,8 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
                 (
                     min
                     (
-                        nuw[faceI]*(yPlus*kappa/log(Edash*yPlus) - 1),
+                        nuw[faceI]
+                       *(yPlus*kappa/log(max(Edash*yPlus, 1+1e-4)) - 1),
                         2*limitingNutw
                     ), 0.5*limitingNutw
                 );

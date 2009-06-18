@@ -142,9 +142,9 @@ int main(int argc, char *argv[])
     word masterPatchName(args.additionalArgs()[0]);
     word slavePatchName(args.additionalArgs()[1]);
 
-    bool partialCover = args.options().found("partial");
-    bool perfectCover = args.options().found("perfect");
-    bool overwrite = args.options().found("overwrite");
+    bool partialCover = args.optionFound("partial");
+    bool perfectCover = args.optionFound("perfect");
+    bool overwrite    = args.optionFound("overwrite");
 
     if (partialCover && perfectCover)
     {

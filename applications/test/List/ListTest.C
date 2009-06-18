@@ -29,6 +29,8 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "OSspecific.H"
+#include "argList.H"
+#include "wordReList.H"
 
 #include "IOstreams.H"
 #include "IStringStream.H"
@@ -38,11 +40,21 @@ Description
 
 using namespace Foam;
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main(int argc, char *argv[])
 {
+    argList::noParallel();
+    argList::validOptions.insert("reList", "reList");
+    argList::validOptions.insert("wordList", "wordList");
+    argList::validOptions.insert("stringList", "stringList");
+    argList::validOptions.insert("float", "xx");
+    argList::validOptions.insert("flag", "");
+
+#   include "setRootCase.H"
+
     List<vector> list1(IStringStream("1 ((0 1 2))")());
     Info<< "list1: " << list1 << endl;
 
@@ -68,6 +80,43 @@ int main(int argc, char *argv[])
     List<vector> subList3(list3, map);
     Info<< "Elements " << map << " out of " << list3
         << " => " << subList3 << endl;
+
+    wordReList reLst;
+    wordList wLst;
+    stringList sLst;
+
+
+    scalar xxx(-1);
+
+    if (args.optionFound("flag"))
+    {
+        Info<<"-flag:" << args.option("flag") << endl;
+    }
+
+    if (args.optionReadIfPresent<scalar>("float", xxx))
+    {
+        Info<<"read float " << xxx << endl;
+    }
+
+    if (args.optionFound("reList"))
+    {
+        reLst = args.optionReadList<wordRe>("reList");
+    }
+
+    if (args.optionFound("wordList"))
+    {
+        wLst = args.optionReadList<word>("wordList");
+    }
+
+    if (args.optionFound("stringList"))
+    {
+        sLst = args.optionReadList<string>("stringList");
+    }
+
+    Info<< nl
+        << "-reList: " << reLst << nl
+        << "-wordList: " << wLst << nl
+        << "-stringList: " << sLst << endl;
 
     return 0;
 }
