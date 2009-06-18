@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "Polynomial.H"
-#include "error.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -33,7 +32,9 @@ template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial()
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
-    name_("unknownPolynomialName")
+    name_("unknownPolynomialName"),
+    logActive_(false),
+    logCoeff_(0.0)
 {}
 
 
@@ -41,25 +42,27 @@ template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
-    name_(is)
+    name_(is),
+    logActive_(false),
+    logCoeff_(0.0)
 {
     if (name_ != name)
     {
         FatalErrorIn
         (
-            "Foam::Polynomial<PolySize>::Polynomial(const word&, Istream&)"
+            "Polynomial<PolySize>::Polynomial(const word&, Istream&)"
         )   << "Expected polynomial name " << name << " but read " << name_
             << nl << exit(FatalError);
     }
 
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>::
-        operator=(polyType(is));
+        operator=(VectorSpace<Polynomial<PolySize>, scalar, PolySize>(is));
 
     if (this->size() == 0)
     {
         FatalErrorIn
         (
-            "Foam::Polynomial<PolySize>::Polynomial(const word&, Istream&)"
+            "Polynomial<PolySize>::Polynomial(const word&, Istream&)"
         )   << "Polynomial coefficients for entry " << name_
             << " are invalid (empty)" << nl << exit(FatalError);
     }
@@ -70,7 +73,9 @@ template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial(const Polynomial<PolySize>& poly)
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(poly),
-    name_(poly.name_)
+    name_(poly.name_),
+    logActive_(poly.logActive_),
+    logCoeff_(poly.logCoeff_)
 {}
 
 
@@ -82,7 +87,9 @@ Foam::Polynomial<PolySize>::Polynomial
 )
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(poly),
-    name_(name)
+    name_(name),
+    logActive_(poly.logActive_),
+    logCoeff_(poly.logCoeff_)
 {}
 
 
@@ -103,12 +110,32 @@ const Foam::word& Foam::Polynomial<PolySize>::name() const
 
 
 template<int PolySize>
+bool& Foam::Polynomial<PolySize>::logActive()
+{
+    return logActive_;
+}
+
+
+template<int PolySize>
+Foam::scalar& Foam::Polynomial<PolySize>::logCoeff()
+{
+    return logCoeff_;
+}
+
+
+template<int PolySize>
 Foam::scalar Foam::Polynomial<PolySize>::evaluate(const scalar x) const
 {
-    scalar y = 0.0;
-    forAll(*this, i)
+    scalar y = this->v_[0];
+
+    for (label i=1; i<PolySize; i++)
     {
         y += this->v_[i]*pow(x, i);
+    }
+
+    if (logActive_)
+    {
+        y += logCoeff_*log(x);
     }
 
     return y;
@@ -122,14 +149,22 @@ Foam::scalar Foam::Polynomial<PolySize>::integrateLimits
     const scalar x2
 ) const
 {
-    scalar intx = 0.0;
-
-    forAll(*this, i)
+    if (logActive_)
     {
-        intx += this->v_[i]/(i + 1)*(pow(x2, i + 1) - pow(x1, i + 1));
+        FatalErrorIn
+        (
+            "scalar Polynomial<PolySize>::integrateLimits"
+            "("
+                "const scalar, "
+                "const scalar"
+            ") const"
+        )   << "Cannot integrate polynomial with logarithmic coefficients"
+            << nl << abort(FatalError);
     }
 
-    return intx;
+    intPolyType poly = this->integrate();
+
+    return poly.evaluate(x2) - poly.evaluate(x1);
 }
 
 
@@ -149,6 +184,32 @@ Foam::Polynomial<PolySize>::integrate(const scalar intConstant)
 }
 
 
+template<int PolySize>
+typename Foam::Polynomial<PolySize>::polyType
+Foam::Polynomial<PolySize>::integrateMinus1(const scalar intConstant)
+{
+    polyType newCoeffs;
+
+    if (this->v_[0] > VSMALL)
+    {
+        newCoeffs.logActive() = true;
+        newCoeffs.logCoeff() = this->v_[0];
+    }
+
+    newCoeffs[0] = intConstant;
+
+    if (PolySize > 0)
+    {
+        for (label i=1; i<PolySize; i++)
+        {
+            newCoeffs[i] = this->v_[i]/i;
+        }
+    }
+
+    return newCoeffs;
+}
+
+
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<int PolySize>
@@ -156,6 +217,8 @@ void Foam::Polynomial<PolySize>::operator=(const Polynomial<PolySize>& poly)
 {
     name_ = poly.name_;
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>::operator=(poly);
+    logActive_ = poly.logActive_;
+    logCoeff_ = poly.logCoeff_;
 }
 
 

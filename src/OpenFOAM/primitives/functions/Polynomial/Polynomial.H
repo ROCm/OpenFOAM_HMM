@@ -28,7 +28,7 @@ Class
 Description
     Polynomial templated on size (order):
 
-        poly = sum(coeff_[i]*x^i)
+        poly = logCoeff*log(x) + sum(coeff_[i]*x^i)
 
     where 0 <= i <= n
 
@@ -37,6 +37,8 @@ Description
     - integrate(x1, x2) between two scalar values
     - integrate() to return a new, intergated coeff polynomial
       - increases the size (order)
+    - integrateMinus1() to return a new, integrated coeff polynomial where
+      the base poly starts at order -1
 
 SourceFiles
     Polynomial.C
@@ -86,10 +88,16 @@ private:
         //- Polynomial name
         word name_;
 
+        //- Include the log term? - only activated using integrateMinus1()
+        bool logActive_;
+
+        //- Log coefficient - only activated using integrateMinus1()
+        scalar logCoeff_;
+
 
 public:
 
-    typedef VectorSpace<Polynomial<PolySize>, scalar, PolySize> polyType;
+    typedef Polynomial<PolySize> polyType;
 
     typedef Polynomial<PolySize+1> intPolyType;
 
@@ -123,6 +131,12 @@ public:
             //- Return const access to the polynomial name
             const word& name() const;
 
+            //- Return access to the log term active flag
+            bool& logActive();
+
+            //- Return access to the log coefficient
+            scalar& logCoeff();
+
 
         // Evaluation
 
@@ -132,6 +146,10 @@ public:
             //- Return integrated polynomial coefficients
             //  argument becomes zeroth element (constant of integration)
             intPolyType integrate(const scalar intConstant = 0.0);
+
+            //- Return integrated polynomial coefficients when lowest order
+            //  is -1. Argument added to zeroth element
+            polyType integrateMinus1(const scalar intConstant = 0.0);
 
             //- Integrate between two values
             scalar integrateLimits(const scalar x1, const scalar x2) const;
