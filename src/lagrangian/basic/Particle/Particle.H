@@ -151,18 +151,20 @@ protected:
             const label facei
         ) const;
 
-        //- Return the faces between position and cell centre
-        labelList findFaces
+        //- Find the faces between position and cell centre
+        void findFaces
         (
-            const vector& position
+            const vector& position,
+            DynamicList<label>& faceList
         ) const;
 
-        //- Return the faces between position and cell centre
-        labelList findFaces
+        //- Find the faces between position and cell centre
+        void findFaces
         (
             const vector& position,
             const label celli,
-            const scalar stepFraction
+            const scalar stepFraction,
+            DynamicList<label>& faceList
         ) const;
 
 
