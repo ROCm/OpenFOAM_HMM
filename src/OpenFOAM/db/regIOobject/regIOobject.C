@@ -138,10 +138,21 @@ bool Foam::regIOobject::checkIn()
         // are created with the same name as their originating mesh
         if (!registered_ && debug && name() != polyMesh::defaultRegion)
         {
-            WarningIn("regIOobject::checkIn()")
-                << "failed to register object " << objectPath()
+            if (debug == 2)
+            {
+                // Temporary: for ease of finding where checkin originates from.
+                FatalErrorIn("regIOobject::checkIn()")
+                    << "failed to register object " << objectPath()
                     << " the name already exists in the objectRegistry"
-                << endl;
+                    << abort(FatalError);
+            }
+            else
+            {
+                WarningIn("regIOobject::checkIn()")
+                    << "failed to register object " << objectPath()
+                    << " the name already exists in the objectRegistry"
+                    << endl;
+            }
         }
     }
 
