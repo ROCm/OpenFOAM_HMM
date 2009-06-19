@@ -90,12 +90,12 @@ Foam::ODEChemistryModel<CompType, ThermoType>::RR
             IOobject
             (
                 "RR(" + this->Y_[i].name() + ')',
-                this->thermo().rho()().mesh().time().timeName(),
-                this->thermo().rho()().mesh(),
+                this->time().timeName(),
+                this->mesh(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            this->thermo().rho()().mesh(),
+            this->mesh(),
             dimensionedScalar("zero", dimensionSet(1, -3, -1, 0, 0), 0.0),
             zeroGradientFvPatchScalarField::typeName
         )

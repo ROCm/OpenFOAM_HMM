@@ -454,7 +454,20 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
     scalar pf,cf,pr,cr;
     label lRef, rRef;
 
-    const volScalarField rho = this->thermo().rho();
+    const volScalarField rho
+    (
+        IOobject
+        (
+            "rho",
+            this->time().timeName(),
+            this->mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->thermo().rho()
+    );
+
     label nCells = rho.size();
     label nReaction = reactions_.size();
 
@@ -582,7 +595,19 @@ Foam::label Foam::ODEChemistryModel<CompType, ThermoType>::nEqns() const
 template<class CompType, class ThermoType>
 void Foam::ODEChemistryModel<CompType, ThermoType>::calculate()
 {
-    const volScalarField rho = this->thermo().rho();
+    const volScalarField rho
+    (
+        IOobject
+        (
+            "rho",
+            this->time().timeName(),
+            this->mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->thermo().rho()
+    );
 
     for (label i=0; i<nSpecie_; i++)
     {
@@ -629,7 +654,19 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
     const scalar deltaT
 )
 {
-    const volScalarField rho = this->thermo().rho();
+    const volScalarField rho
+    (
+        IOobject
+        (
+            "rho",
+            this->time().timeName(),
+            this->mesh(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        ),
+        this->thermo().rho()
+    );
 
     for (label i=0; i<nSpecie_; i++)
     {
