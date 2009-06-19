@@ -98,10 +98,10 @@ class polynomialThermo
 {
     // Private data
 
-        //- Heat of formation [m2/s2]
+        //- Heat of formation [J/kg]
         scalar Hf_;
 
-        //- Standard entropy [m2/(s2 K)]
+        //- Standard entropy [J/(kg.K)]
         scalar Sf_;
 
         //- Specific heat at constant pressure
