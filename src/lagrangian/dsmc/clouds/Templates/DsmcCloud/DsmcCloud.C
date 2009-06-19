@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,9 +33,6 @@ License
 
 template<class ParcelType>
 Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
-
-template<class ParcelType>
-Foam::scalar Foam::DsmcCloud<ParcelType>::Tref = 273;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
