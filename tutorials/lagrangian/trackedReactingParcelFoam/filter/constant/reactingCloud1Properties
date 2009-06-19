@@ -81,7 +81,7 @@ particleForces
 
 ManualInjectionCoeffs
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 1e-7;
+    massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
     parcelBasisType mass;
     SOI             0;
     positionsFile   "reactingCloud1Positions";
@@ -99,12 +99,12 @@ ManualInjectionCoeffs
 
 ReactingLookupTableInjectionCoeffs
 {
-    massTotal       massTotal [ 1 0 0 0 0 ] 1e-7;
+    massTotal       massTotal [ 1 0 0 0 0 ] 1e-2;
     parcelBasisType mass;
-    SOI             0;
+    SOI             0.5;
     inputFile       "parcelInjectionProperties";
     duration        1.0;
-    parcelsPerSecond 1e2;
+    parcelsPerSecond 250;
 }
 
 
@@ -123,7 +123,7 @@ LocalInteractionCoeffs
             e       1;
             mu      0;
         }
-	cycLeft
+        cycLeft
         {
             e       1;
             mu      0;
@@ -157,6 +157,8 @@ LiquidEvaporationCoeffs
 
 PatchPostProcessingCoeffs
 {
+    maxStoredParcels 20;
+
     patches
     (
         cycLeft

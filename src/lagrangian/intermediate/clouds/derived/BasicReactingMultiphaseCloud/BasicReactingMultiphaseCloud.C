@@ -35,8 +35,7 @@ Foam::BasicReactingMultiphaseCloud<ThermoType>::BasicReactingMultiphaseCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo,
-    PtrList<ThermoType>& carrierSpecies
+    basicThermo& thermo
 )
 :
     ReactingMultiphaseCloud<BasicReactingMultiphaseParcel<ThermoType> >
@@ -45,8 +44,7 @@ Foam::BasicReactingMultiphaseCloud<ThermoType>::BasicReactingMultiphaseCloud
         rho,
         U,
         g,
-        thermo,
-        carrierSpecies
+        thermo
     )
 {
     BasicReactingMultiphaseParcel<ThermoType>::readFields(*this);

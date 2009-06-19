@@ -33,7 +33,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "calc.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
@@ -66,9 +66,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
         if (isFile(runTime.constantPath()/"thermophysicalProperties"))
         {
             // thermophysical Mach
-            autoPtr<basicThermo> thermo
+            autoPtr<basicPsiThermo> thermo
             (
-                basicThermo::New(mesh)
+                basicPsiThermo::New(mesh)
             );
 
             volScalarField Cp = thermo->Cp();

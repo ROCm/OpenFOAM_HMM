@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
         runTime.write();
 

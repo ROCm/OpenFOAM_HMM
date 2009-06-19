@@ -19,6 +19,12 @@ numberOfSubdomains 4;
 
 method          metis;
 
+preservePatches
+(
+    cycLeft
+    cycRight
+);
+
 simpleCoeffs
 {
     n               ( 2 2 1 );
@@ -41,10 +47,6 @@ manualCoeffs
 {
     dataFile        "";
 }
-
-distributed     no;
-
-roots           ( );
 
 
 // ************************************************************************* //

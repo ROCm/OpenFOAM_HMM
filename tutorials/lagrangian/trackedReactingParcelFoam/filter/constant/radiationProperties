@@ -17,11 +17,11 @@ FoamFile
 
 radiation       off;
 
-radiationModel  P1;
+radiationModel  noRadiation;
 
 solverFreq      10;
 
-noRadiation
+noRadiationCoeffs
 {
 }
 

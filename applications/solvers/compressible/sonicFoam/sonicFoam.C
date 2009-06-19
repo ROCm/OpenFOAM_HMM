@@ -32,7 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
             surfaceScalarField phid
             (
                 "phid",
-                fvc::interpolate(thermo->psi())
+                fvc::interpolate(psi)
                *(
                    (fvc::interpolate(U) & mesh.Sf())
                  + fvc::ddtPhiCorr(rUA, rho, U, phi)

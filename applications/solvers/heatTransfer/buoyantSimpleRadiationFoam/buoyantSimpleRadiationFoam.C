@@ -32,7 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "RASModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "radiationModel.H"
@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 #       include "readSIMPLEControls.H"
 #       include "initConvergenceCheck.H"
 
-        pd.storePrevIter();
+        p.storePrevIter();
         rho.storePrevIter();
 
         // Pressure-velocity SIMPLE corrector

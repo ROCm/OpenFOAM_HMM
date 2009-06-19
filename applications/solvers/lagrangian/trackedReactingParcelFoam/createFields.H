@@ -1,19 +1,22 @@
-    Info<< "Reading thermophysical properties" << nl << endl;
+    Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<hCombustionThermo> thermo
+    autoPtr<rhoChemistryModel> pChemistry
     (
-        hCombustionThermo::New(mesh)
+        rhoChemistryModel::New(mesh)
     );
+    rhoChemistryModel& chemistry = pChemistry();
 
-    combustionMixture& composition = thermo->composition();
+    hReactionThermo& thermo = chemistry.thermo();
+
+    basicMultiComponentMixture& composition = thermo.composition();
     PtrList<volScalarField>& Y = composition.Y();
 
-    word inertSpecie(thermo->lookup("inertSpecie"));
+    word inertSpecie(thermo.lookup("inertSpecie"));
 
-    volScalarField& p = thermo->p();
-    volScalarField& h = thermo->h();
-    const volScalarField& T = thermo->T();
-    const volScalarField& psi = thermo->psi();
+    volScalarField& p = thermo.p();
+    volScalarField& h = thermo.h();
+    const volScalarField& T = thermo.T();
+    const volScalarField& psi = thermo.psi();
 
     volScalarField rho
     (
@@ -25,10 +28,10 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        thermo->rho()
+        thermo.rho()
     );
 
-    Info<< "Reading field U" << nl << endl;
+    Info<< "\nReading field U\n" << endl;
     volVectorField U
     (
         IOobject
@@ -42,7 +45,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
     DimensionedField<scalar, volMesh> kappa
     (
@@ -58,7 +61,7 @@
         dimensionedScalar("zero", dimless, 0.0)
     );
 
-    Info<< "Creating turbulence model" << nl << endl;
+    Info<< "Creating turbulence model\n" << endl;
     autoPtr<compressible::turbulenceModel> turbulence
     (
         compressible::turbulenceModel::New
@@ -66,19 +69,15 @@
             rho,
             U,
             phi,
-            thermo()
+            thermo
         )
     );
 
-    Info<< "Creating field DpDt" << nl << endl;
-    volScalarField DpDt =
-        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
-
-    Info << "Constructing chemical mechanism" << nl << endl;
-    chemistryModel chemistry
+    Info<< "Creating field DpDt\n" << endl;
+    volScalarField DpDt
     (
-        thermo(),
-        rho
+        "DpDt",
+        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
     );
 
     multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
@@ -88,24 +87,3 @@
         fields.add(Y[i]);
     }
     fields.add(h);
-
-    Info<< "Creating porous zones" << nl << endl;
-    porousZones pZones(mesh);
-    Switch pressureImplicitPorosity(false);
-
-    label nUCorr = 0;
-    if (pZones.size())
-    {
-        // nUCorrectors for pressureImplicitPorosity
-        if (mesh.solutionDict().subDict("PISO").found("nUCorrectors"))
-        {
-            mesh.solutionDict().subDict("PISO").lookup("nUCorrectors")
-                >> nUCorr;
-        }
-
-        if (nUCorr > 0)
-        {
-            pressureImplicitPorosity = true;
-        }
-    }
-

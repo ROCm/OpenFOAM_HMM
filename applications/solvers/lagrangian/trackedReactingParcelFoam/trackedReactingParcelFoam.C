@@ -23,18 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
+    trackedReactingParcelFoam
 
 Description
+    - reacting parcel cloud tracking
+    - porous media
+    - point mass sources
+    - polynomial based, incompressible thermodynamics (f(T))
+
+    Note: ddtPhiCorr not used here - not well defined for porous calcs
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "hCombustionThermo.H"
+#include "hReactionThermo.H"
 #include "turbulenceModel.H"
 #include "BasicTrackedReactingCloud.H"
-#include "chemistryModel.H"
+#include "rhoChemistryModel.H"
 #include "chemistrySolver.H"
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "timeActivatedExplicitMulticomponentPointSource.H"
@@ -53,6 +60,7 @@ int main(int argc, char *argv[])
     #include "createRadiationModel.H"
     #include "createClouds.H"
     #include "createMulticomponentPointSources.H"
+    #include "createPorousZones.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
@@ -74,23 +82,23 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        reactingParcels.evolve();
+        parcels.evolve();
 
-        reactingParcels.info();
+        parcels.info();
 
         #include "chemistry.H"
         #include "rhoEqn.H"
+        #include "UEqn.H"
 
         // --- PIMPLE loop
-        for (int ocorr=1; ocorr<=nOuterCorr; ocorr++)
+        for (int oCorr=1; oCorr<=nOuterCorr; oCorr++)
         {
-            #include "UEqn.H"
             #include "YEqn.H"
+            #include "hEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
-                #include "hEqn.H"
                 #include "pEqn.H"
             }
 
@@ -100,12 +108,9 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
-        if (runTime.write())
-        {
-            #include "additionalOutput.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

@@ -1,5 +1,5 @@
     // Initialise fluid field pointer lists
-    PtrList<basicThermo> thermoFluid(fluidRegions.size());
+    PtrList<basicPsiThermo> thermoFluid(fluidRegions.size());
     PtrList<volScalarField> rhoFluid(fluidRegions.size());
     PtrList<volScalarField> KFluid(fluidRegions.size());
     PtrList<volVectorField> UFluid(fluidRegions.size());
@@ -19,7 +19,7 @@
         thermoFluid.set
         (
             i,
-            basicThermo::New(fluidRegions[i]).ptr()
+            basicPsiThermo::New(fluidRegions[i]).ptr()
         );
 
         Info<< "    Adding to rhoFluid\n" << endl;

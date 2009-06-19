@@ -15,21 +15,26 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      hMixtureThermo<reactingMixture>;
+thermoType      hRhoMixtureThermo<reactingMixture<icoPoly8ThermoPhysics>>;
 
 chemistryReader foamChemistryReader;
 
-foamChemistryFile "$FOAM_CASE/chemkin/foam.inp";
+foamChemistryFile "$FOAM_CASE/constant/reactions";
 
-foamChemistryThermoFile "$FOAM_CASE/chemkin/foam.dat";
+foamChemistryThermoFile "$FOAM_CASE/constant/thermo.incompressiblePoly";
 
-liquidComponents ( H2O );
+liquidComponents
+(
+    H2O
+);
+H2O             H2O defaultCoeffs;
 
-solidFuelComponents ( );
+solidFuelComponents
+(
+);
 
 inertSpecie     N2;
 
-H2O             H2O defaultCoeffs;
 
 
 // ************************************************************************* //

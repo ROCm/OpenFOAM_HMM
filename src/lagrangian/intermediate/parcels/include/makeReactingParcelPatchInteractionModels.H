@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "KinematicCloud.H"
 
 #include "LocalInteraction.H"
@@ -43,13 +43,19 @@ License
     makeReactingPatchInteractionModelThermoType                               \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
                                                                               \
     makeReactingPatchInteractionModelThermoType                               \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
+    );                                                                        \
+                                                                              \
+    makeReactingPatchInteractionModelThermoType                               \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

@@ -35,26 +35,18 @@ Foam::ReactingCloud<ParcelType>::constProps() const
 
 
 template<class ParcelType>
-inline const Foam::hCombustionThermo&
-Foam::ReactingCloud<ParcelType>::carrierThermo() const
+inline const Foam::multiComponentMixture<typename ParcelType::thermoType>&
+Foam::ReactingCloud<ParcelType>::mcCarrierThermo() const
 {
-    return carrierThermo_;
+    return mcCarrierThermo_;
 }
 
 
 template<class ParcelType>
-inline Foam::hCombustionThermo&
-Foam::ReactingCloud<ParcelType>::carrierThermo()
+inline Foam::multiComponentMixture<typename ParcelType::thermoType>&
+Foam::ReactingCloud<ParcelType>::mcCarrierThermo()
 {
-    return carrierThermo_;
-}
-
-
-template<class ParcelType>
-inline const Foam::PtrList<typename ParcelType::thermoType>&
-Foam::ReactingCloud<ParcelType>::carrierSpecies() const
-{
-    return carrierSpecies_;
+    return mcCarrierThermo_;
 }
 
 
