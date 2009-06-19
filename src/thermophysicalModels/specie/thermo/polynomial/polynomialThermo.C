@@ -34,6 +34,7 @@ Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo(Istream& is)
 :
     EquationOfState(is),
     Hf_(readScalar(is)),
+    Sf_(readScalar(is)),
     cpPolynomial_("cpPolynomial", is),
     dhPolynomial_("dhPolynomial", cpPolynomial_.integrate()),
     sPolynomial_("sPolynomial", cpPolynomial_.integrateMinus1())
@@ -51,6 +52,7 @@ Foam::Ostream& Foam::operator<<
 {
     os  << static_cast<const EquationOfState&>(pt) << tab
         << pt.Hf_ << tab
+        << pt.Sf_ << tab
         << pt.cpPolynomial_ << tab
         << pt.dhPolynomial_ << tab
         << pt.sPolynomial;

@@ -98,8 +98,11 @@ class polynomialThermo
 {
     // Private data
 
-        //- Heat of formation
+        //- Heat of formation [m2/s2]
         scalar Hf_;
+
+        //- Standard entropy [m2/(s2 K)]
+        scalar Sf_;
 
         //- Specific heat at constant pressure
         Polynomial<PolySize> cpPolynomial_;
@@ -118,6 +121,7 @@ class polynomialThermo
         (
             const EquationOfState& pt,
             const scalar Hf,
+            const scalar Sf,
             const Polynomial<PolySize>& cpPoly,
             const typename Polynomial<PolySize>::intPolyType& hPoly,
             const Polynomial<PolySize>& sPoly
