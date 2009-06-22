@@ -37,7 +37,7 @@ void Foam::InjectionModel<CloudType>::readProps()
     (
         "injectionProperties",
         owner_.db().time().timeName(),
-        "uniform/Lagrangian"/owner_.name(),
+        "uniform"/cloud::prefix/owner_.name(),
         owner_.db(),
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -67,7 +67,7 @@ void Foam::InjectionModel<CloudType>::writeProps()
             (
                 "injectionProperties",
                 owner_.db().time().timeName(),
-                "uniform/Lagrangian"/owner_.name(),
+                "uniform"/cloud::prefix/owner_.name(),
                 owner_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
