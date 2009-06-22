@@ -206,9 +206,7 @@ public:
 
         // IOstream Operators
 
-            #ifndef __MAKECINT__
             friend Ostream& operator<<(Ostream&, const compound&);
-            #endif
     };
 
 

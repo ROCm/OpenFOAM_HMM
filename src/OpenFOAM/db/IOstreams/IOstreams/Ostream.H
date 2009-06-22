@@ -199,7 +199,6 @@ public:
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
-#ifndef __CINT__
 
 typedef Ostream& (*OstreamManip)(Ostream&);
 
@@ -253,8 +252,6 @@ inline Ostream& endl(Ostream& os)
     os.endl();
     return os;
 }
-
-#endif
 
 
 // Useful aliases for tab and newline characters

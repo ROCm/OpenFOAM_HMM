@@ -193,9 +193,7 @@ public:
 
 
             //- Ostream operator
-            #ifndef __MAKECINT__
             friend Ostream& operator<<(Ostream& os, const versionNumber& vn);
-            #endif
         };
 
 
@@ -421,7 +419,7 @@ public:
             }
 
             //- Return compression of given compression name
-            static compressionType compressionEnum(const word&); 
+            static compressionType compressionEnum(const word&);
 
             //- Return the stream compression
             compressionType compression() const
@@ -554,7 +552,6 @@ Ostream& operator<<(Ostream& os, const IOstream::versionNumber& vn);
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
-#ifndef __CINT__
 
 typedef IOstream& (*IOstreamManip)(IOstream&);
 
@@ -594,8 +591,6 @@ inline IOstream& scientific(IOstream& io)
     io.setf(ios_base::scientific, ios_base::floatfield);
     return io;
 }
-
-#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

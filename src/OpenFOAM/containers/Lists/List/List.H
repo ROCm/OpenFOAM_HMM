@@ -233,10 +233,7 @@ public:
     // Istream operator
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <T>
-        #endif
+        friend Istream& operator>> <T>
         (Istream&, List<T>&);
 };
 
