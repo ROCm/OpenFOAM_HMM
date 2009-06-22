@@ -26,13 +26,13 @@ Application
     rhoSimpleFoam
 
 Description
-    Steady-state SIMPLE solver for laminar or turbulent flow of
+    Steady-state SIMPLE solver for laminar or turbulent RANS flow of
     compressible fluids.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -37,16 +37,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readThermodynamicProperties.H"
+    #include "readTransportProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readThermodynamicProperties.H"
-#   include "readTransportProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -54,10 +53,10 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
         fvVectorMatrix UEqn
         (
@@ -79,8 +78,8 @@ int main(int argc, char *argv[])
             surfaceScalarField phid
             (
                 "phid",
-                psi*
-                (
+                psi
+               *(
                     (fvc::interpolate(U) & mesh.Sf())
                   + fvc::ddtPhiCorr(rUA, rho, U, phi)
                 )
@@ -100,7 +99,7 @@ int main(int argc, char *argv[])
 
             phi += pEqn.flux();
 
-#           include "compressibleContinuityErrs.H"
+            #include "compressibleContinuityErrs.H"
 
             U -= rUA*fvc::grad(p);
             U.correctBoundaryConditions();

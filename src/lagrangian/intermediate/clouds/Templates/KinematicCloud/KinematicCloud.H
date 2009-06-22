@@ -357,7 +357,7 @@ public:
             //- Check parcel properties
             void checkParcelProperties
             (
-                ParcelType* pPtr,
+                ParcelType& parcel,
                 const scalar lagrangianDt,
                 const bool fullyDescribed
             );

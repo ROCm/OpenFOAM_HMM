@@ -27,14 +27,15 @@ License
 #ifndef createReactingCloudTypes_H
 #define createReactingCloudTypes_H
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #define createReactingCloudType(CloudType)                                    \
                                                                               \
-    createReactingCloudThermoType(CloudType, specieConstProperties);          \
-    createReactingCloudThermoType(CloudType, specieReactingProperties);
+    createReactingCloudThermoType(CloudType, constGasThermoPhysics);          \
+    createReactingCloudThermoType(CloudType, gasThermoPhysics);               \
+    createReactingCloudThermoType(CloudType, icoPoly8ThermoPhysics);
 
 
 #define createReactingCloudThermoType(CloudType, ThermoType)                  \

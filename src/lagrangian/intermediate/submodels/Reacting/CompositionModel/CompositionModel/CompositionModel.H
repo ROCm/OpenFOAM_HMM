@@ -44,7 +44,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 
 #include "PtrList.H"
-#include "hCombustionThermo.H"
+#include "multiComponentMixture.H"
 
 #include "liquidMixture.H"
 #include "solidMixture.H"
@@ -74,11 +74,8 @@ class CompositionModel
         //- The coefficients dictionary
         const dictionary& coeffDict_;
 
-        //- Reference to the carrier phase thermo package
-        hCombustionThermo& carrierThermo_;
-
-        //- Reference to the carrier phase species
-        const PtrList<typename CloudType::thermoType>& carrierSpecies_;
+        //- Reference to the multi-component carrier phase thermo
+        multiComponentMixture<typename CloudType::thermoType>& mcCarrierThermo_;
 
         //- Global (additional) liquid properties data
         autoPtr<liquidMixture> liquids_;
@@ -146,14 +143,11 @@ public:
             const dictionary& coeffDict() const;
 
             //- Return the carrier phase thermo package
-            const hCombustionThermo& carrierThermo() const;
+            const multiComponentMixture<typename CloudType::thermoType>&
+                mcCarrierThermo() const;
 
 
             // Composition lists
-
-                //- Return the carrier species
-                const PtrList<typename CloudType::thermoType>&
-                    carrierSpecies() const;
 
                 //- Return the global (additional) liquids
                 const liquidMixture& liquids() const;

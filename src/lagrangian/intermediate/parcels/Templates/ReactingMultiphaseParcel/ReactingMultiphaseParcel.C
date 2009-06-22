@@ -168,7 +168,8 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::cellValueSourceCorrection
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().carrierSpecies()[i].Cp(this->Tc_);
+            cpEff +=
+                Y*td.cloud().mcCarrierThermo().speciesData()[i].Cp(this->Tc_);
         }
     }
     const scalar cpc = td.cpInterp().psi()[cellI];
@@ -248,7 +249,12 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
     scalarField dMassSRGas(YGas_.size(), 0.0);
     scalarField dMassSRLiquid(YLiquid_.size(), 0.0);
     scalarField dMassSRSolid(YSolid_.size(), 0.0);
-    scalarField dMassSRCarrier(td.cloud().carrierSpecies().size(), 0.0);
+    scalarField
+        dMassSRCarrier
+        (
+            td.cloud().mcCarrierThermo().species().size(),
+            0.0
+        );
 
     // Clac mass and enthalpy transfer due to surface reactions
     calcSurfaceReactions
@@ -340,7 +346,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassGas[i]
-               *td.cloud().composition().carrierSpecies()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
         }
         forAll(YLiquid_, i)
         {
@@ -349,7 +355,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassLiquid[i]
-               *td.cloud().composition().carrierSpecies()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
         }
 /*
         // No mapping between solid components and carrier phase
@@ -360,7 +366,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassSolid[i]
-               *td.cloud().composition().carrierSpecies()[gid].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
         }
 */
         forAll(dMassSRCarrier, i)
@@ -369,7 +375,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
             td.cloud().hcTrans()[cellI] +=
                 np0
                *dMassSRCarrier[i]
-               *td.cloud().composition().carrierSpecies()[i].H(T0);
+               *td.cloud().mcCarrierThermo().speciesData()[i].H(T0);
         }
 
         // Update momentum transfer

@@ -127,6 +127,12 @@ protected:
         //- Fraction of time-step completed
         scalar stepFraction_;
 
+        //- Originating processor id
+        label origProc_;
+
+        //- Local particle id on originating processor
+        label origId_;
+
 
     // Private member functions
 
@@ -151,18 +157,20 @@ protected:
             const label facei
         ) const;
 
-        //- Return the faces between position and cell centre
-        labelList findFaces
+        //- Find the faces between position and cell centre
+        void findFaces
         (
-            const vector& position
+            const vector& position,
+            DynamicList<label>& faceList
         ) const;
 
-        //- Return the faces between position and cell centre
-        labelList findFaces
+        //- Find the faces between position and cell centre
+        void findFaces
         (
             const vector& position,
             const label celli,
-            const scalar stepFraction
+            const scalar stepFraction,
+            DynamicList<label>& faceList
         ) const;
 
 
@@ -265,11 +273,14 @@ public:
 
     // Static data members
 
+        //- Runtime type information
+        TypeName("Particle");
+
         //- String representation of properties
         static string propHeader;
 
-        //- Runtime type information
-        TypeName("Particle");
+        //- Cumulative particle count used for particle id
+        static label particleCount;
 
 
     // Constructors
@@ -393,6 +404,12 @@ public:
 
             //-  Return the fraction of time-step completed
             inline scalar stepFraction() const;
+
+            //- Return the originating processor id
+            inline label origProc() const;
+
+            //- Return the particle id on originating processor
+            inline label origId() const;
 
 
         // Track

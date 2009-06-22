@@ -15,17 +15,20 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+psiChemistryModel ODEChemistryModel<gasThermoPhysics>;
+
 chemistry       on;
 
 turbulentReaction on;
 
-chemistrySolver ODE;
+chemistrySolver ode;
 
 initialChemicalTimeStep 1e-07;
 
 sequentialCoeffs
 {
     cTauChem        0.001;
+    equilibriumRateLimiter off;
 }
 
 EulerImplicitCoeffs
@@ -34,7 +37,7 @@ EulerImplicitCoeffs
     equilibriumRateLimiter off;
 }
 
-ODECoeffs
+odeCoeffs
 {
     ODESolver       SIBS;
     eps             0.05;

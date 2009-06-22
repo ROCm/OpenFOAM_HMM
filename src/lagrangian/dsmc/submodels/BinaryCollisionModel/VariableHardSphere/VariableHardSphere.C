@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,7 +35,8 @@ Foam::VariableHardSphere<CloudType>::VariableHardSphere
     CloudType& cloud
 )
 :
-    BinaryCollisionModel<CloudType>(dict, cloud, typeName)
+    BinaryCollisionModel<CloudType>(dict, cloud, typeName),
+    Tref_(readScalar(this->coeffDict().lookup("Tref")))
 {}
 
 
@@ -90,7 +91,7 @@ Foam::scalar Foam::VariableHardSphere<CloudType>::sigmaTcR
     // calculating cross section = pi*dPQ^2, where dPQ is from Bird, eq. 4.79
     scalar sigmaTPQ =
         mathematicalConstant::pi*dPQ*dPQ
-       *pow(2.0*CloudType::kb*CloudType::Tref/(mR*cR*cR), omegaPQ - 0.5)
+       *pow(2.0*CloudType::kb*Tref_/(mR*cR*cR), omegaPQ - 0.5)
        /exp(Foam::lgamma(2.5 - omegaPQ));
 
     return sigmaTPQ*cR;

@@ -29,17 +29,20 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class CloudType>
-bool Foam::LocalInteraction<CloudType>::applyToPatch(const polyPatch& pp) const
+Foam::label Foam::LocalInteraction<CloudType>::applyToPatch
+(
+    const label globalPatchI
+) const
 {
     forAll(patchIds_, patchI)
     {
-        if (patchIds_[patchI] == pp.index())
+        if (patchIds_[patchI] == globalPatchI)
         {
-            return true;
+            return patchI;
         }
     }
 
-    return false;
+    return -1;
 }
 
 
@@ -75,7 +78,11 @@ Foam::LocalInteraction<CloudType>::LocalInteraction
     DynamicList<word> badWalls;
     forAll(bMesh, patchI)
     {
-        if (isA<wallPolyPatch>(bMesh[patchI]) && !applyToPatch(bMesh[patchI]))
+        if
+        (
+            isA<wallPolyPatch>(bMesh[patchI])
+         && applyToPatch(bMesh[patchI].index()) < 0
+        )
         {
             badWalls.append(bMesh[patchI].name());
         }
@@ -115,7 +122,9 @@ bool Foam::LocalInteraction<CloudType>::correct
     vector& U
 ) const
 {
-    if (applyToPatch(pp))
+    label patchI = applyToPatch(pp.index());
+
+    if (patchI >= 0)
     {
         vector nw = pp.faceAreas()[pp.whichFace(faceId)];
         nw /= mag(nw);
@@ -125,10 +134,10 @@ bool Foam::LocalInteraction<CloudType>::correct
 
         if (Un > 0)
         {
-            U -= (1.0 + patchData_[pp.index()].e())*Un*nw;
+            U -= (1.0 + patchData_[patchI].e())*Un*nw;
         }
 
-        U -= patchData_[pp.index()].mu()*Ut;
+        U -= patchData_[patchI].mu()*Ut;
 
         return true;
     }

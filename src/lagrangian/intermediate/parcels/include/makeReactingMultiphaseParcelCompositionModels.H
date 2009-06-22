@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "ReactingCloud.H"
 
 #include "SingleMixtureFraction.H"
@@ -41,12 +41,17 @@ License
     makeReactingMultiphaseCompositionModelThermoType                          \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
     makeReactingMultiphaseCompositionModelThermoType                          \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
+    );                                                                        \
+    makeReactingMultiphaseCompositionModelThermoType                          \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

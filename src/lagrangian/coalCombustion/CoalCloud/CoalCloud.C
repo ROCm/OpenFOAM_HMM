@@ -35,7 +35,7 @@ Foam::CoalCloud<ThermoType>::CoalCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo
+    basicThermo& thermo
 )
 :
     ReactingMultiphaseCloud<CoalParcel<ThermoType> >

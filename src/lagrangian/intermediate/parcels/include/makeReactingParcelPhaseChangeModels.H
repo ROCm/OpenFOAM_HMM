@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 #include "ReactingCloud.H"
 
 #include "NoPhaseChange.H"
@@ -42,13 +42,19 @@ License
     makeReactingPhaseChangeModelThermoType                                    \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
                                                                               \
     makeReactingPhaseChangeModelThermoType                                    \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
+    );                                                                        \
+                                                                              \
+    makeReactingPhaseChangeModelThermoType                                    \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 

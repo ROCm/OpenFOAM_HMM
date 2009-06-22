@@ -28,6 +28,8 @@ Description
 
 #include "enrichedPatch.H"
 #include "demandDrivenData.H"
+#include "OFstream.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -246,6 +248,33 @@ bool Foam::enrichedPatch::checkSupport() const
     }
 
     return error;
+}
+
+
+void Foam::enrichedPatch::writeOBJ(const fileName& fName) const
+{
+    OFstream str(fName);
+
+    const pointField& lp = localPoints();
+
+    forAll(lp, pointI)
+    {
+        meshTools::writeOBJ(str, lp[pointI]);
+    }
+
+    const faceList& faces = localFaces();
+
+    forAll(faces, faceI)
+    {
+        const face& f = faces[faceI];
+
+        str << 'f';
+        forAll(f, fp)
+        {
+            str << ' ' << f[fp]+1;
+        }
+        str << nl;
+    }
 }
 
 

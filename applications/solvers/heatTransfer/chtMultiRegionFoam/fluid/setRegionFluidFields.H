@@ -1,6 +1,6 @@
     const fvMesh& mesh = fluidRegions[i];
 
-    basicThermo& thermo = thermoFluid[i];
+    basicPsiThermo& thermo = thermoFluid[i];
     volScalarField& rho = rhoFluid[i];
     volScalarField& K = KFluid[i];
     volVectorField& U = UFluid[i];

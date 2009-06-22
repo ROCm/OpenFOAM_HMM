@@ -75,15 +75,15 @@ public:
         //- The default cloud name: %defaultCloud
         static word defaultName;
 
+
     // Constructors
 
         //- Construct for the given objectRegistry and named cloud instance
         cloud(const objectRegistry&, const word& cloudName = "");
 
 
-    // Destructor
-
-        virtual ~cloud();
+    //- Destructor
+    virtual ~cloud();
 
 
     // Member Functions
