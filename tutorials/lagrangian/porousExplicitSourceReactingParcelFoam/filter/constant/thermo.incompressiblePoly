@@ -12,6 +12,7 @@ N2 N2   1   28.0134
         0
     )
     0.0                                 // Heat of formation
+    0.0                                 // Standard entropy
     cpPolynomial
     (
         2.75E+004
@@ -58,6 +59,7 @@ O2 O2   1   31.9988
         0
     )
     0.0                                 // Heat of formation
+    0.0                                 // Standard entropy
     cpPolynomial
     (
         2.67E+004
@@ -104,6 +106,7 @@ H2O H2O 1   18.0153
         0
     )
     -241.8                                 // Heat of formation
+    0.0                                    // Standard entropy
     cpPolynomial
     (
         2.85E+004

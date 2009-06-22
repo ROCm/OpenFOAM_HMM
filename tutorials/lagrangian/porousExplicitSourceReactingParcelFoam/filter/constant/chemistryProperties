@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-rhoChemistryModelType  ODEChemistryModel<icoPoly8ThermoPhysics>;
+rhoChemistryModel  ODEChemistryModel<icoPoly8ThermoPhysics>;
 
 chemistry       off;
 
