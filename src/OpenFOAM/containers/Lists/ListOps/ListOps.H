@@ -73,7 +73,7 @@ void inplaceReorder(const UList<label>& oldToNew, ListType&);
 template<class Container>
 void inplaceMapValue(const UList<label>& oldToNew, Container&);
 
-//- Recreate with mapped keys. Remove elements with negative key.
+//- Recreate with mapped keys. Do not map elements with negative key.
 template<class Container>
 void inplaceMapKey(const UList<label>& oldToNew, Container&);
 

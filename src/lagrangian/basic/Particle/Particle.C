@@ -36,16 +36,17 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::labelList Foam::Particle<ParticleType>::findFaces
+void Foam::Particle<ParticleType>::findFaces
 (
-    const vector& position
+    const vector& position,
+    DynamicList<label>& faceList
 ) const
 {
     const polyMesh& mesh = cloud_.polyMesh_;
     const labelList& faces = mesh.cells()[celli_];
     const vector& C = mesh.cellCentres()[celli_];
 
-    DynamicList<label> faceList(10);
+    faceList.clear();
     forAll(faces, i)
     {
         label facei = faces[i];
@@ -56,26 +57,23 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
             faceList.append(facei);
         }
     }
-
-    faceList.shrink();
-
-    return faceList;
 }
 
 
 template<class ParticleType>
-Foam::labelList Foam::Particle<ParticleType>::findFaces
+void Foam::Particle<ParticleType>::findFaces
 (
     const vector& position,
     const label celli,
-    const scalar stepFraction
+    const scalar stepFraction,
+    DynamicList<label>& faceList
 ) const
 {
     const polyMesh& mesh = cloud_.polyMesh_;
     const labelList& faces = mesh.cells()[celli];
     const vector& C = mesh.cellCentres()[celli];
 
-    DynamicList<label> faceList(10);
+    faceList.clear();
     forAll(faces, i)
     {
         label facei = faces[i];
@@ -86,10 +84,6 @@ Foam::labelList Foam::Particle<ParticleType>::findFaces
             faceList.append(facei);
         }
     }
-
-    faceList.shrink();
-
-    return faceList;
 }
 
 
@@ -237,7 +231,8 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 {
     const polyMesh& mesh = cloud_.polyMesh_;
 
-    labelList faces = findFaces(endPosition);
+    DynamicList<label>& faces = cloud_.labels_;
+    findFaces(endPosition, faces);
 
     facei_ = -1;
     scalar trackFraction = 0.0;

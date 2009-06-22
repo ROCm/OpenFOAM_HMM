@@ -132,8 +132,8 @@ class LocalInteraction
 
     // Private member functions
 
-        //- Returns true if patch is in patchIds_ list
-        bool applyToPatch(const polyPatch& pp) const;
+        //- Returns local patchI if patch is in patchIds_ list
+        label applyToPatch(const label globalPatchI) const;
 
 
 

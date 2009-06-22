@@ -147,7 +147,7 @@ void Foam::inplaceMapKey
     Container& lst
 )
 {
-    Container newLst(lst);
+    Container newLst(lst.size());
 
     for
     (

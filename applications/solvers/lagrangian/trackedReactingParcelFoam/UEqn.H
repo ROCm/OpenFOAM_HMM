@@ -1,11 +1,12 @@
     fvVectorMatrix UEqn
     (
-        fvm::ddt(rho, U)
+//        fvm::ddt(rho, U)
+        pZones.ddt(rho, U)
       + fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
      ==
         rho.dimensionedInternalField()*g
-      + reactingParcels.SU()
+      + parcels.SU()
     );
 
     UEqn.relax();
@@ -32,16 +33,11 @@
     {
         pZones.addResistance(UEqn);
 
+        trAU = 1.0/UEqn.A();
+        trAU().rename("rAU");
+
         solve
         (
             UEqn == -fvc::grad(p)
         );
-
-        trAU = 1.0/UEqn.A();
-        trAU().rename("rAU");
-    }
-
-    if (momentumPredictor)
-    {
-        solve(UEqn == -fvc::grad(p));
     }

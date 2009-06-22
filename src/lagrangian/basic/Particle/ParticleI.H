@@ -236,7 +236,8 @@ inline scalar Particle<ParticleType>::lambda
 template<class ParticleType>
 inline bool Particle<ParticleType>::inCell() const
 {
-    labelList faces = findFaces(position_);
+    DynamicList<label>& faces = cloud_.labels_;
+    findFaces(position_, faces);
 
     return (!faces.size());
 }
@@ -250,7 +251,8 @@ inline bool Particle<ParticleType>::inCell
     const scalar stepFraction
 ) const
 {
-    labelList faces = findFaces(position, celli, stepFraction);
+    DynamicList<label>& faces = cloud_.labels_;
+    findFaces(position, celli, stepFraction, faces);
 
     return (!faces.size());
 }

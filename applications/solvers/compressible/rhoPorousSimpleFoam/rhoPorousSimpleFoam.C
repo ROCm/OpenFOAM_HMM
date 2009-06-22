@@ -27,12 +27,12 @@ Application
 
 Description
     Steady-state solver for turbulent flow of compressible fluids with
-    implicit or explicit porosity treatment
+    RANS turbulence modelling, and implicit or explicit porosity treatment
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "RASModel.H"
 #include "porousZones.H"
 

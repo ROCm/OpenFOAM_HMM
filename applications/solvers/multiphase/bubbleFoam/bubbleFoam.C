@@ -26,7 +26,7 @@ Application
     bubbleFoam
 
 Description
-    Solver for a system of 2 incompressible fluid phases with one phase 
+    Solver for a system of 2 incompressible fluid phases with one phase
     dispersed, e.g. gas bubbles in a liquid.
 
 \*---------------------------------------------------------------------------*/
@@ -40,16 +40,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -57,30 +56,30 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readBubbleFoamControls.H"
-#       include "CourantNo.H"
+        #include "readBubbleFoamControls.H"
+        #include "CourantNo.H"
 
-#       include "alphaEqn.H"
-#       include "liftDragCoeffs.H"
-#       include "UEqns.H"
+        #include "alphaEqn.H"
+        #include "liftDragCoeffs.H"
+        #include "UEqns.H"
 
         // --- PISO loop
 
         for (int corr=0; corr<nCorr; corr++)
         {
-#           include "pEqn.H"
+            #include "pEqn.H"
 
             if (correctAlpha)
             {
-#               include "alphaEqn.H"
+                #include "alphaEqn.H"
             }
         }
 
-#       include "DDtU.H"
+        #include "DDtU.H"
 
-#       include "kEpsilon.H"
+        #include "kEpsilon.H"
 
-#       include "write.H"
+        #include "write.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

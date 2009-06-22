@@ -36,7 +36,7 @@ Description
     to be appropriate by comparison with the results from the
     spectral model.
 
-    Strain effects are encorporated directly into the Xi equation
+    Strain effects are incorporated directly into the Xi equation
     but not in the algebraic approximation.  Further work need to be
     done on this issue, particularly regarding the enhanced removal rate
     caused by flame compression.  Analysis using results of the spectral
@@ -70,53 +70,53 @@ Description
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readCombustionProperties.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "CourantNo.H"
-#   include "setInitialDeltaT.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readCombustionProperties.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "readPISOControls.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
-scalar StCoNum = 0.0;
+    scalar StCoNum = 0.0;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
         Info<< "\n\nTime = " << runTime.timeName() << endl;
 
-#       include "rhoEqn.H"
-#       include "UEqn.H"
+        #include "rhoEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=1; corr<=nCorr; corr++)
         {
-#           include "bEqn.H"
-#           include "ftEqn.H"
-#           include "huEqn.H"
-#           include "hEqn.H"
+            #include "bEqn.H"
+            #include "ftEqn.H"
+            #include "huEqn.H"
+            #include "hEqn.H"
 
             if (!ign.ignited())
             {
                 hu == h;
             }
 
-#           include "pEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();

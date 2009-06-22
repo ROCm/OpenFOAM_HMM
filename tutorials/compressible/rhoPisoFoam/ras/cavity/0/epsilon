@@ -23,13 +23,13 @@ boundaryField
 {
     movingWall
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 0;
     }
 
     fixedWalls
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 0;
     }
 

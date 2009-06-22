@@ -76,7 +76,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo
+            basicThermo& thermo
         );
 
 

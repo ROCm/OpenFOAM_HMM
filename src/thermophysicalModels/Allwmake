@@ -10,7 +10,7 @@ wmake libso solids
 wmake libso solidMixture
 
 wmake libso basic
-wmake libso combustion
+wmake libso reactionThermo
 wmake libso laminarFlameSpeed
 wmake libso chemistryModel
 wmake libso pdfs

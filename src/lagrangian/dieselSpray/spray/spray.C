@@ -36,7 +36,7 @@ License
 #include "injectorModel.H"
 #include "wallModel.H"
 
-#include "combustionMixture.H"
+#include "basicMultiComponentMixture.H"
 
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
@@ -56,8 +56,8 @@ Foam::spray::spray
     const volScalarField& rho,
     const volScalarField& p,
     const volScalarField& T,
-    const combustionMixture& composition,
-    const PtrList<specieProperties>& gasProperties,
+    const basicMultiComponentMixture& composition,
+    const PtrList<gasThermoPhysics>& gasProperties,
     const dictionary&,
     const dictionary& environmentalProperties
 )
@@ -264,7 +264,7 @@ Foam::spray::spray
                 "spray::spray(const volVectorField& U, "
                 "const volScalarField& rho, const volScalarField& p, "
                 "const volScalarField& T, const combustionMixture& composition,"
-                "const PtrList<specieProperties>& gaseousFuelProperties, "
+                "const PtrList<gasThermoPhsyics>& gaseousFuelProperties, "
                 "const dictionary& thermophysicalProperties, "
                 "const dictionary& environmentalProperties)"
             )   << "spray::(...) only one wedgePolyPatch found. "

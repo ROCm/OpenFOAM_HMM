@@ -11,5 +11,5 @@
     hEqn.relax();
     hEqn.solve();
 
-    thermo->correct();
+    thermo.correct();
 }

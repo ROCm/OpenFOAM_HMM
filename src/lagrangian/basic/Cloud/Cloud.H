@@ -78,6 +78,9 @@ class Cloud
         const unallocLabelList& owner_;
         const unallocLabelList& neighbour_;
 
+        //- Temporary storage for addressing. Used in findFaces.
+        mutable DynamicList<label> labels_;
+
 
     // Private member functions
 

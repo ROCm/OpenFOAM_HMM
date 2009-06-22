@@ -28,7 +28,7 @@ License
 #define createReactingMultiphaseParcelTypes_H
 
 #include "makeParcelIOList.H"
-#include "reactingThermoTypes.H"
+#include "thermoPhysicsTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,12 +37,17 @@ License
     createReactingMultiphaseParcelThermoType                                  \
     (                                                                         \
         ParcelType,                                                           \
-        specieConstProperties                                                 \
+        constGasThermoPhysics                                                 \
     );                                                                        \
     createReactingMultiphaseParcelThermoType                                  \
     (                                                                         \
         ParcelType,                                                           \
-        specieReactingProperties                                              \
+        gasThermoPhysics                                                      \
+    );                                                                        \
+    createReactingMultiphaseParcelThermoType                                  \
+    (                                                                         \
+        ParcelType,                                                           \
+        icoPoly8ThermoPhysics                                                 \
     );
 
 
