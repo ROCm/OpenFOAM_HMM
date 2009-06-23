@@ -75,8 +75,6 @@ class dictionary;
                            Class Field Declaration
 \*---------------------------------------------------------------------------*/
 
-#include "CintDefs.H"
-
 template<class Type>
 class Field
 :
@@ -348,7 +346,6 @@ public:
         (Ostream&, const tmp<Field<Type> >&);
 };
 
-#include "CintUndefs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

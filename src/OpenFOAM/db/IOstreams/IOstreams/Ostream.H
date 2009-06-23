@@ -70,6 +70,7 @@ protected:
         //- Current indent level
         unsigned short indentLevel_;
 
+
 public:
 
     // Constructors
@@ -87,10 +88,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~Ostream()
-        {}
+    //- Destructor
+    virtual ~Ostream()
+    {}
 
 
     // Member functions

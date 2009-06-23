@@ -74,8 +74,6 @@ namespace Foam
                            Class IOstream Declaration
 \*---------------------------------------------------------------------------*/
 
-#include "CintDefs.H"
-
 class IOstream
 {
 
@@ -543,7 +541,6 @@ public:
             }
 };
 
-#include "CintUndefs.H"
 
 Ostream& operator<<(Ostream& os, const IOstream::streamFormat& sf);
 Ostream& operator<<(Ostream& os, const IOstream::versionNumber& vn);

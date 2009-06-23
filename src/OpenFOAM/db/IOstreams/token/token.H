@@ -66,8 +66,6 @@ Ostream& operator<<(Ostream&, const token&);
                            Class token Declaration
 \*---------------------------------------------------------------------------*/
 
-#include "CintDefs.H"
-
 class token
 {
 
@@ -429,7 +427,6 @@ public:
         friend ostream& operator<<(ostream&, const InfoProxy<token>&);
 };
 
-#include "CintUndefs.H"
 
 Ostream& operator<<(Ostream&, const token::punctuationToken&);
 ostream& operator<<(ostream&, const token::punctuationToken&);

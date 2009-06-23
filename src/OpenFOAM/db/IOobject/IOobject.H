@@ -83,8 +83,6 @@ class objectRegistry;
                            Class IOobject Declaration
 \*---------------------------------------------------------------------------*/
 
-#include "CintDefs.H"
-
 class IOobject
 {
 
@@ -395,7 +393,6 @@ public:
         void operator=(const IOobject&);
 };
 
-#include "CintUndefs.H"
 
 #if defined (__GNUC__)
 template<>
