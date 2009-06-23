@@ -151,9 +151,8 @@ public:
         }
 
 
-    // Destructor
-
-        ~directMappedPolyPatch();
+    //- Destructor
+    virtual ~directMappedPolyPatch();
 
 
     // Member functions

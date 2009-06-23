@@ -647,7 +647,6 @@ operator&&(const Tensor<Cmpt>& t1, const SphericalTensor<Cmpt>& st2)
     return(t1.xx()*st2.ii() + t1.yy()*st2.ii() + t1.zz()*st2.ii());
 }
 
-#ifndef __CINT__
 template<class Cmpt>
 class typeOfSum<SphericalTensor<Cmpt>, Tensor<Cmpt> >
 {
@@ -679,7 +678,7 @@ public:
 
     typedef Tensor<Cmpt> type;
 };
-#endif
+
 
 // * * * * * * * * * * Mixed Tensor SymmTensor Operators * * * * * * * * * * //
 
@@ -806,7 +805,6 @@ operator&&(const Tensor<Cmpt>& t1, const SymmTensor<Cmpt>& st2)
     );
 }
 
-#ifndef __CINT__
 template<class Cmpt>
 class typeOfSum<SymmTensor<Cmpt>, Tensor<Cmpt> >
 {
@@ -839,7 +837,6 @@ public:
 
     typedef Tensor<Cmpt> type;
 };
-#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

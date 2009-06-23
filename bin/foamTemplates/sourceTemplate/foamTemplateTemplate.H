@@ -129,16 +129,10 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <TemplateArgument>
-        #endif
+        friend Istream& operator>> <TemplateArgument>
         (Istream&, ClassName<TemplateArgument>&);
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <TemplateArgument>
-        #endif
+        friend Ostream& operator<< <TemplateArgument>
         (Ostream&, const ClassName<TemplateArgument>&);
 };
 

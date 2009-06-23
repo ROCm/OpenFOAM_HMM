@@ -62,12 +62,10 @@ Istream& operator>>(Istream&, DynamicField<Type>&);
                            Class DynamicField Declaration
 \*---------------------------------------------------------------------------*/
 
-#include "CintDefs.H"
-
 template<class Type>
 class DynamicField
 :
-    public Field<Type>     //private Field<Type>
+    public Field<Type>
 {
 
     // Private data
@@ -185,26 +183,16 @@ public:
 
     // IOstream operators
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Type>
-        #endif
+        friend Ostream& operator<< <Type>
         (Ostream&, const DynamicField<Type>&);
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Type>
-        #endif
+        friend Ostream& operator<< <Type>
         (Ostream&, const tmp<DynamicField<Type> >&);
 
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <Type>
-        #endif
+        friend Istream& operator>> <Type>
         (Istream&, DynamicField<Type>&);
 };
 
-#include "CintUndefs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -97,16 +97,16 @@ public:
             //- Assignment of all entries to the given value
             inline void operator=(const T&);
 
+
     // Ostream operator
 
         //- Write UIndirectList to Ostream
         //  Binary output is currently still a bit of a problem
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <T>
-        #endif
-        (Ostream&, const UIndirectList<T>&);
-
+        friend Ostream& operator<< <T>
+        (
+            Ostream&,
+            const UIndirectList<T>&
+        );
 };
 
 

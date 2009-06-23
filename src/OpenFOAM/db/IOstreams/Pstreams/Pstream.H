@@ -151,9 +151,7 @@ public:
 
          // Ostream Operator
 
-            #ifndef __CINT__
             friend Ostream& operator<<(Ostream&, const commsStruct&);
-            #endif
     };
 
 

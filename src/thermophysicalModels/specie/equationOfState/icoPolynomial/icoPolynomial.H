@@ -105,8 +105,6 @@ class icoPolynomial
 
 public:
 
-    TypeName("icoPolynomial")
-
     // Constructors
 
         //- Construct from components
