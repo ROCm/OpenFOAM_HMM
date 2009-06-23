@@ -38,7 +38,7 @@ Description
 #include "fvCFD.H"
 #include "hReactionThermo.H"
 #include "turbulenceModel.H"
-#include "BasicTrackedReactingCloud.H"
+#include "BasicReactingCloud.H"
 #include "rhoChemistryModel.H"
 #include "chemistrySolver.H"
 #include "thermoPhysicsTypes.H"

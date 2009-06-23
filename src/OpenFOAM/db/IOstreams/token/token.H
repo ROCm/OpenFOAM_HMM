@@ -66,8 +66,6 @@ Ostream& operator<<(Ostream&, const token&);
                            Class token Declaration
 \*---------------------------------------------------------------------------*/
 
-#include "CintDefs.H"
-
 class token
 {
 
@@ -206,9 +204,7 @@ public:
 
         // IOstream Operators
 
-            #ifndef __MAKECINT__
             friend Ostream& operator<<(Ostream&, const compound&);
-            #endif
     };
 
 
@@ -431,7 +427,6 @@ public:
         friend ostream& operator<<(ostream&, const InfoProxy<token>&);
 };
 
-#include "CintUndefs.H"
 
 Ostream& operator<<(Ostream&, const token::punctuationToken&);
 ostream& operator<<(ostream&, const token::punctuationToken&);

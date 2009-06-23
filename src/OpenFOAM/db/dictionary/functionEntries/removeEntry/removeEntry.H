@@ -74,7 +74,7 @@ class removeEntry
 public:
 
     //- Runtime type information
-    TypeName("remove");
+    ClassName("remove");
 
 
     // Member Functions

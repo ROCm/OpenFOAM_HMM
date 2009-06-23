@@ -313,11 +313,11 @@ public:
     // Ostream operator
 
         // Write UList to Ostream.
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <T>
-        #endif
-        (Ostream&, const UList<T>&);
+        friend Ostream& operator<< <T>
+        (
+            Ostream&,
+            const UList<T>&
+        );
 };
 
 // Reverse the first n elements of the list

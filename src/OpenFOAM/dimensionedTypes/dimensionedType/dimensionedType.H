@@ -174,16 +174,10 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <Type>
-        #endif
+        friend Istream& operator>> <Type>
         (Istream&, dimensioned<Type>&);
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Type>
-        #endif
+        friend Ostream& operator<< <Type>
         (Ostream&, const dimensioned<Type>&);
 };
 

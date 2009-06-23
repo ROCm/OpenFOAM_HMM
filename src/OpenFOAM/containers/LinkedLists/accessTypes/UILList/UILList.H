@@ -277,10 +277,7 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <LListBase, T>
-        #endif
+        friend Ostream& operator<< <LListBase, T>
         (
             Ostream&,
             const UILList<LListBase, T>&

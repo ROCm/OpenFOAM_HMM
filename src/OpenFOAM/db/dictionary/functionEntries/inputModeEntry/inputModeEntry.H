@@ -96,7 +96,7 @@ class inputModeEntry
 public:
 
     //- Runtime type information
-    TypeName("inputMode");
+    ClassName("inputMode");
 
 
     // Member Functions
@@ -118,7 +118,6 @@ public:
 
         //- Return true if the inputMode is %error
         static bool error();
-
 };
 
 

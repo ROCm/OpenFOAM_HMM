@@ -75,8 +75,6 @@ class dictionary;
                            Class Field Declaration
 \*---------------------------------------------------------------------------*/
 
-#include "CintDefs.H"
-
 template<class Type>
 class Field
 :
@@ -198,13 +196,11 @@ public:
 
         //- Return a pointer to a new calculatedFvPatchFieldField created on
         //  freestore without setting patchField values
-        #ifndef __CINT__
         template<class Type2>
         static tmp<Field<Type> > NewCalculatedType(const Field<Type2>& f)
         {
             return tmp<Field<Type> >(new Field<Type>(f.size()));
         }
-        #endif
 
 
     // Member Functions
@@ -343,20 +339,13 @@ public:
 
     // IOstream operators
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Type>
-        #endif
+        friend Ostream& operator<< <Type>
         (Ostream&, const Field<Type>&);
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Type>
-        #endif
+        friend Ostream& operator<< <Type>
         (Ostream&, const tmp<Field<Type> >&);
 };
 
-#include "CintUndefs.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

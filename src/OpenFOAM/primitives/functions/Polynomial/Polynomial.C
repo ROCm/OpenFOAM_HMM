@@ -70,16 +70,6 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 
 
 template<int PolySize>
-Foam::Polynomial<PolySize>::Polynomial(const Polynomial<PolySize>& poly)
-:
-    VectorSpace<Polynomial<PolySize>, scalar, PolySize>(poly),
-    name_(poly.name_),
-    logActive_(poly.logActive_),
-    logCoeff_(poly.logCoeff_)
-{}
-
-
-template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial
 (
     const word& name,
@@ -90,13 +80,6 @@ Foam::Polynomial<PolySize>::Polynomial
     name_(name),
     logActive_(poly.logActive_),
     logCoeff_(poly.logCoeff_)
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<int PolySize>
-Foam::Polynomial<PolySize>::~Polynomial()
 {}
 
 
@@ -207,18 +190,6 @@ Foam::Polynomial<PolySize>::integrateMinus1(const scalar intConstant)
     }
 
     return newCoeffs;
-}
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-template<int PolySize>
-void Foam::Polynomial<PolySize>::operator=(const Polynomial<PolySize>& poly)
-{
-    name_ = poly.name_;
-    VectorSpace<Polynomial<PolySize>, scalar, PolySize>::operator=(poly);
-    logActive_ = poly.logActive_;
-    logCoeff_ = poly.logCoeff_;
 }
 
 

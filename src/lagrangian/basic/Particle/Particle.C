@@ -33,6 +33,12 @@ License
 #include "wallPolyPatch.H"
 #include "transform.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class ParticleType>
+Foam::label Foam::Particle<ParticleType>::particleCount = 0;
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
@@ -69,7 +75,7 @@ void Foam::Particle<ParticleType>::findFaces
     DynamicList<label>& faceList
 ) const
 {
-    const polyMesh& mesh = cloud_.polyMesh_;
+    const polyMesh& mesh = cloud_.mesh();
     const labelList& faces = mesh.cells()[celli];
     const vector& C = mesh.cellCentres()[celli];
 
@@ -176,7 +182,9 @@ Foam::Particle<ParticleType>::Particle
     position_(position),
     celli_(celli),
     facei_(-1),
-    stepFraction_(0.0)
+    stepFraction_(0.0),
+    origProc_(Pstream::myProcNo()),
+    origId_(particleCount++)
 {}
 
 
@@ -187,7 +195,9 @@ Foam::Particle<ParticleType>::Particle(const Particle<ParticleType>& p)
     position_(p.position_),
     celli_(p.celli_),
     facei_(p.facei_),
-    stepFraction_(p.stepFraction_)
+    stepFraction_(p.stepFraction_),
+    origProc_(p.origProc_),
+    origId_(p.origId_)
 {}
 
 
