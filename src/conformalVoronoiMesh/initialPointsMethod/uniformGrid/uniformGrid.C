@@ -73,9 +73,6 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
     scalar zR = bb.max().z() - z0;
     int nk = int(zR/initialCellSize_) + 1;
 
-    Info<< "    Is this actually uniform?  or is it fitting the span with an "
-        << "integer number?" << endl;
-
     vector delta(xR/ni, yR/nj, zR/nk);
 
     delta *= pow((1.0),-(1.0/3.0));
