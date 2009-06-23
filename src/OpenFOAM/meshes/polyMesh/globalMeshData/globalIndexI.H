@@ -40,14 +40,20 @@ inline Foam::label Foam::globalIndex::offset(const label procI) const
 }
 
 
-inline Foam::label Foam::globalIndex::localSize() const
+inline Foam::label Foam::globalIndex::localSize(const label procI) const
 {
     return
     (
-        Pstream::myProcNo() == 0
-      ? offsets_[Pstream::myProcNo()]
-      : offsets_[Pstream::myProcNo()] - offsets_[Pstream::myProcNo()-1]
+        procI == 0
+      ? offsets_[procI]
+      : offsets_[procI] - offsets_[procI-1]
     );
+}
+
+
+inline Foam::label Foam::globalIndex::localSize() const
+{
+    return localSize(Pstream::myProcNo());
 }
 
 
