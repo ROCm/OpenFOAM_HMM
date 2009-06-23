@@ -5,7 +5,7 @@
         rho,
         U,
         g,
-        thermo()
+        thermo
     );
 
     Info<< "Constructing kinematicCloud1" << endl;
@@ -14,7 +14,7 @@
         "kinematicCloud1",
         rho,
         U,
-        thermo().mu(),
+        thermo.mu(),
         g
     );
 
