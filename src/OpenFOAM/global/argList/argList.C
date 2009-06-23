@@ -298,6 +298,7 @@ Foam::argList::argList
     jobInfo.add("startTime", timeString);
     jobInfo.add("userName", userName());
     jobInfo.add("foamVersion", word(FOAMversion));
+    jobInfo.add("foamBuild", Foam::FOAMbuild);
     jobInfo.add("code", executable_);
     jobInfo.add("argList", argListString);
     jobInfo.add("currentDir", cwd());
