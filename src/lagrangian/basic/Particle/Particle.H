@@ -127,6 +127,12 @@ protected:
         //- Fraction of time-step completed
         scalar stepFraction_;
 
+        //- Originating processor id
+        label origProc_;
+
+        //- Local particle id on originating processor
+        label origId_;
+
 
     // Private member functions
 
@@ -267,11 +273,14 @@ public:
 
     // Static data members
 
+        //- Runtime type information
+        TypeName("Particle");
+
         //- String representation of properties
         static string propHeader;
 
-        //- Runtime type information
-        TypeName("Particle");
+        //- Cumulative particle count used for particle id
+        static label particleCount;
 
 
     // Constructors
@@ -395,6 +404,12 @@ public:
 
             //-  Return the fraction of time-step completed
             inline scalar stepFraction() const;
+
+            //- Return the originating processor id
+            inline label origProc() const;
+
+            //- Return the particle id on originating processor
+            inline label origId() const;
 
 
         // Track

@@ -23,7 +23,6 @@ $(DERIVEDCLOUDS)/basicKinematicCloud/basicKinematicCloud.C
 $(DERIVEDCLOUDS)/basicThermoCloud/basicThermoCloud.C
 $(DERIVEDCLOUDS)/BasicReactingCloud/defineBasicReactingCloud.C
 $(DERIVEDCLOUDS)/BasicReactingMultiphaseCloud/defineBasicReactingMultiphaseCloud.C
-$(DERIVEDCLOUDS)/BasicTrackedReactingCloud/defineBasicTrackedReactingCloud.C
 
 
 /* kinematic parcel sub-models */
@@ -44,12 +43,6 @@ $(THERMOPARCEL)/makeBasicThermoParcelSubmodels.C
 REACTINGPARCEL=$(DERIVEDPARCELS)/BasicReactingParcel
 $(REACTINGPARCEL)/defineBasicReactingParcel.C
 $(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
-
-
-/* tracked reacting parcel sub-models */
-TRACKEDREACTINGPARCEL=$(DERIVEDPARCELS)/BasicTrackedReactingParcel
-$(TRACKEDREACTINGPARCEL)/defineTrackedReactingParcel.C
-$(TRACKEDREACTINGPARCEL)/makeBasicTrackedReactingParcelSubmodels.C
 
 
 /* reacting multiphase parcel sub-models */
