@@ -157,17 +157,6 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makePolynomial(PolySize)                                             \
-                                                                             \
-defineTemplateTypeNameAndDebugWithName                                       \
-(                                                                            \
-    Polynomial<PolySize>,                                                    \
-    "Polynomial<"#PolySize">",                                               \
-    0                                                                        \
-)
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 #ifdef NoRepository
 #   include "Polynomial.C"
 #   include "PolynomialIO.C"
