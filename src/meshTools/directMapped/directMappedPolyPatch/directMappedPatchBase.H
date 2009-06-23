@@ -105,6 +105,7 @@ private:
             //  - schedule
             mutable autoPtr<mapDistribute> mapPtr_;
 
+
     // Private Member Functions
 
         //- Collect single list of samples and originating processor+face.
@@ -162,7 +163,7 @@ private:
 public:
 
     //- Runtime type information
-    ClassName("directMappedPatchBase");
+    TypeName("directMappedPatchBase");
 
 
     // Constructors
@@ -177,14 +178,13 @@ public:
         directMappedPatchBase(const polyPatch&, const directMappedPatchBase&);
 
 
-    // Destructor
-
-        ~directMappedPatchBase();
-
-        void clearOut();
+    //- Destructor
+    virtual ~directMappedPatchBase();
 
 
     // Member functions
+
+        void clearOut();
 
         //- What to sample
         const sampleMode& mode() const

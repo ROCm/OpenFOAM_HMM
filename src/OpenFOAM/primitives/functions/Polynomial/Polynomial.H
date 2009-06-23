@@ -52,7 +52,6 @@ SourceFiles
 #include "scalar.H"
 #include "Ostream.H"
 #include "VectorSpace.H"
-#include "Vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -81,8 +80,6 @@ class Polynomial
 :
     public VectorSpace<Polynomial<PolySize>, scalar, PolySize>
 {
-private:
-
     // Private data
 
         //- Polynomial name
@@ -101,9 +98,6 @@ public:
 
     typedef Polynomial<PolySize+1> intPolyType;
 
-    //- Run-time type information
-    TypeName("Polynomial")
-
 
     // Constructors
 
@@ -113,15 +107,8 @@ public:
         //- Construct from name and Istream
         Polynomial(const word& name, Istream& is);
 
-        //- Copy constructor
-        Polynomial(const Polynomial& poly);
-
         //- Copy constructor with name
         Polynomial(const word& name, const Polynomial& poly);
-
-
-    //- Destructor
-    ~Polynomial();
 
 
     // Member Functions
@@ -153,11 +140,6 @@ public:
 
             //- Integrate between two values
             scalar integrateLimits(const scalar x1, const scalar x2) const;
-
-
-    // Member operators
-
-        void operator=(const Polynomial& poly);
 
 
     //- Ostream Operator
