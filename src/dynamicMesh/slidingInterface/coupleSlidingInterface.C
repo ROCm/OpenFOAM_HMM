@@ -35,9 +35,11 @@ License
 #include "plane.H"
 #include "polyTopoChanger.H"
 #include "polyAddPoint.H"
+#include "polyRemovePoint.H"
 #include "polyAddFace.H"
 #include "polyModifyPoint.H"
 #include "polyModifyFace.H"
+#include "polyRemoveFace.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -765,6 +767,9 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
         projectedSlavePoints
     );
 
+    // Demand driven calculate the cut faces. Apart from the
+    // cutFaces/cutFaceMaster/cutFaceSlave no information from the cutPatch
+    // is used anymore!
     const faceList& cutFaces = cutPatch.cutFaces();
     const labelList& cutFaceMaster = cutPatch.cutFaceMaster();
     const labelList& cutFaceSlave = cutPatch.cutFaceSlave();
@@ -1109,22 +1114,26 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
         {
             nOrphanedMasters++;
 
-            // Recover original orientation
-            ref.setAction
-            (
-                polyModifyFace
-                (
-                    masterPatch[faceI],                 // new face
-                    masterPatchAddr[faceI],             // master face index
-                    -1,                                 // owner
-                    -1,                                 // neighbour
-                    false,                              // flux flip
-                    -1,                                 // patch ID
-                    false,                              // remove from zone
-                    masterFaceZoneID_.index(),          // zone ID
-                    false                               // zone flip
-                )
-            );
+            //// Recover original orientation
+            //ref.setAction
+            //(
+            //    polyModifyFace
+            //    (
+            //        masterPatch[faceI],                 // new face
+            //        masterPatchAddr[faceI],             // master face index
+            //        -1,                                 // owner
+            //        -1,                                 // neighbour
+            //        false,                              // flux flip
+            //        -1,                                 // patch ID
+            //        false,                              // remove from zone
+            //        masterFaceZoneID_.index(),          // zone ID
+            //        false                               // zone flip
+            //    )
+            //);
+
+            //Pout<< "**MJ:deleting master face " << masterPatchAddr[faceI]
+            //    << " old verts:" << masterPatch[faceI] << endl;
+            ref.setAction(polyRemoveFace(masterPatchAddr[faceI]));
         }
     }
 
@@ -1136,22 +1145,26 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
         {
             nOrphanedSlaves++;
 
-            // Recover original orientation
-            ref.setAction
-            (
-                polyModifyFace
-                (
-                    slavePatch[faceI],                // new face
-                    slavePatchAddr[faceI],            // slave face index
-                    -1,                               // owner
-                    -1,                               // neighbour
-                    false,                            // flux flip
-                    -1,                               // patch ID
-                    false,                            // remove from zone
-                    slaveFaceZoneID_.index(),         // zone ID
-                    false                             // zone flip
-                )
-            );
+            //// Recover original orientation
+            //ref.setAction
+            //(
+            //    polyModifyFace
+            //    (
+            //        slavePatch[faceI],                // new face
+            //        slavePatchAddr[faceI],            // slave face index
+            //        -1,                               // owner
+            //        -1,                               // neighbour
+            //        false,                            // flux flip
+            //        -1,                               // patch ID
+            //        false,                            // remove from zone
+            //        slaveFaceZoneID_.index(),         // zone ID
+            //        false                             // zone flip
+            //    )
+            //);
+
+            //Pout<< "**MJ:deleting slave face " << slavePatchAddr[faceI]
+            //    << " old verts:" << slavePatch[faceI] << endl;
+            ref.setAction(polyRemoveFace(slavePatchAddr[faceI]));
         }
     }
 
@@ -1400,24 +1413,46 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             face newFace;
             newFace.transfer(newFaceLabels);
 
-//             Pout << "Modifying master stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
+            //Pout << "Modifying master stick-out face " << curFaceID
+            //    << " old face: " << oldFace << " new face: " << newFace << endl;
 
             // Modify the face
-            ref.setAction
-            (
-                polyModifyFace
+            if (mesh.isInternalFace(curFaceID))
+            {
+                ref.setAction
                 (
-                    newFace,                // modified face
-                    curFaceID,              // label of face being modified
-                    own[curFaceID],         // owner
-                    nei[curFaceID],         // neighbour
-                    false,                  // face flip
-                    mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
-                    false,                  // remove from zone
-                    modifiedFaceZone,       // zone for face
-                    modifiedFaceZoneFlip    // face flip in zone
-                )
-            );
+                    polyModifyFace
+                    (
+                        newFace,                // modified face
+                        curFaceID,              // label of face being modified
+                        own[curFaceID],         // owner
+                        nei[curFaceID],         // neighbour
+                        false,                  // face flip
+                        -1,                     // patch for face
+                        false,                  // remove from zone
+                        modifiedFaceZone,       // zone for face
+                        modifiedFaceZoneFlip    // face flip in zone
+                    )
+                );
+            }
+            else
+            {
+                ref.setAction
+                (
+                    polyModifyFace
+                    (
+                        newFace,                // modified face
+                        curFaceID,              // label of face being modified
+                        own[curFaceID],         // owner
+                        -1,                     // neighbour
+                        false,                  // face flip
+                        mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
+                        false,                  // remove from zone
+                        modifiedFaceZone,       // zone for face
+                        modifiedFaceZoneFlip    // face flip in zone
+                    )
+                );
+            }
         }
     }
 
@@ -1688,21 +1723,42 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
 //             Pout << "Modifying slave stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
 
             // Modify the face
-            ref.setAction
-            (
-                polyModifyFace
+            if (mesh.isInternalFace(curFaceID))
+            {
+                ref.setAction
                 (
-                    newFace,                // modified face
-                    curFaceID,              // label of face being modified
-                    own[curFaceID],         // owner
-                    nei[curFaceID],         // neighbour
-                    false,                  // face flip
-                    mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
-                    false,                  // remove from zone
-                    modifiedFaceZone,       // zone for face
-                    modifiedFaceZoneFlip    // face flip in zone
-                )
-            );
+                    polyModifyFace
+                    (
+                        newFace,                // modified face
+                        curFaceID,              // label of face being modified
+                        own[curFaceID],         // owner
+                        nei[curFaceID],         // neighbour
+                        false,                  // face flip
+                        -1,                     // patch for face
+                        false,                  // remove from zone
+                        modifiedFaceZone,       // zone for face
+                        modifiedFaceZoneFlip    // face flip in zone
+                    )
+                );
+            }
+            else
+            {
+                ref.setAction
+                (
+                    polyModifyFace
+                    (
+                        newFace,                // modified face
+                        curFaceID,              // label of face being modified
+                        own[curFaceID],         // owner
+                        -1,                     // neighbour
+                        false,                  // face flip
+                        mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
+                        false,                  // remove from zone
+                        modifiedFaceZone,       // zone for face
+                        modifiedFaceZoneFlip    // face flip in zone
+                    )
+                );
+            }
         }
     }
 
@@ -1735,15 +1791,25 @@ void Foam::slidingInterface::coupleInterface(polyTopoChange& ref) const
             // slave patch
             nRetiredPoints++;
 
+            //ref.setAction
+            //(
+            //    polyModifyPoint
+            //    (
+            //        slaveMeshPoints[pointI],             // point ID
+            //        points[slaveMeshPoints[pointI]],     // point
+            //        false,                               // remove from zone
+            //        mesh.pointZones().whichZone(slaveMeshPoints[pointI]),// zone
+            //        false                                // in a cell
+            //    )
+            //);
+            //Pout<< "MJ retire slave point " << slaveMeshPoints[pointI]
+            //    << " coord " << points[slaveMeshPoints[pointI]]
+            //    << endl;
             ref.setAction
             (
-                polyModifyPoint
+                polyRemovePoint
                 (
-                    slaveMeshPoints[pointI],             // point ID
-                    points[slaveMeshPoints[pointI]],     // point
-                    false,                               // remove from zone
-                    mesh.pointZones().whichZone(slaveMeshPoints[pointI]),// zone
-                    false                                // in a cell
+                    slaveMeshPoints[pointI]
                 )
             );
 

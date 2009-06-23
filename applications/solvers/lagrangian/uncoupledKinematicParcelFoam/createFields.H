@@ -1,9 +1,10 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<basicThermo> thermo
+    autoPtr<basicPsiThermo> pThermo
     (
-        basicThermo::New(mesh)
+        basicPsiThermo::New(mesh)
     );
+    basicPsiThermo& thermo = pThermo();
 
     volScalarField rho
     (
@@ -15,7 +16,7 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        thermo->rho()
+        thermo.rho()
     );
 
     Info<< "\nReading field U\n" << endl;
@@ -42,7 +43,7 @@
             rho,
             U,
             phi,
-            thermo()
+            thermo
         )
     );
 
@@ -55,6 +56,6 @@
         kinematicCloudName,
         rho,
         U,
-        thermo().mu(),
+        thermo.mu(),
         g
     );

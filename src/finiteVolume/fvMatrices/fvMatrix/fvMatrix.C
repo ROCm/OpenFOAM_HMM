@@ -1301,7 +1301,11 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
 {
     tmp<Foam::fvMatrix<Type> > tAcorr = A - (A & A.psi());
 
-    if ((A.hasUpper() || A.hasLower()) && A.mesh().fluxRequired(A.psi().name()))
+    if
+    (
+        (A.hasUpper() || A.hasLower())
+     && A.psi().mesh().fluxRequired(A.psi().name())
+    )
     {
         tAcorr().faceFluxCorrectionPtr() = (-A.flux()).ptr();
     }
@@ -1321,7 +1325,11 @@ Foam::tmp<Foam::fvMatrix<Type> > Foam::correction
     // Note the matrix coefficients are still that of matrix A
     const fvMatrix<Type>& A = tAcorr();
 
-    if ((A.hasUpper() || A.hasLower()) && A.mesh().fluxRequired(A.psi().name()))
+    if
+    (
+        (A.hasUpper() || A.hasLower())
+     && A.psi().mesh().fluxRequired(A.psi().name())
+    )
     {
         tAcorr().faceFluxCorrectionPtr() = (-A.flux()).ptr();
     }

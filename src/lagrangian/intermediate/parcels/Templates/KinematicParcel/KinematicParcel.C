@@ -49,7 +49,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Limiting density in cell " << cellI << " to "
+        )   << "Limiting observed density in cell " << cellI << " to "
             << td.constProps().rhoMin() <<  nl << endl;
 
         rhoc_ = td.constProps().rhoMin();
@@ -112,9 +112,6 @@ void Foam::KinematicParcel<ParcelType>::calc
 
     // Motion
     // ~~~~~~
-
-    // No additional forces
-    vector Fx = vector::zero;
 
     // Calculate new particle velocity
     vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Su, dUTrans);

@@ -38,7 +38,7 @@ Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo
+    basicThermo& thermo
 )
 :
     ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo),
@@ -76,14 +76,14 @@ Foam::ReactingMultiphaseCloud<ParcelType>::~ReactingMultiphaseCloud()
 template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::checkParcelProperties
 (
-    ParcelType* pPtr,
+    ParcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
     ReactingCloud<ParcelType>::checkParcelProperties
     (
-        pPtr,
+        parcel,
         lagrangianDt,
         fullyDescribed
     );
@@ -94,27 +94,27 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::checkParcelProperties
 
     if (!fullyDescribed)
     {
-        pPtr->YGas() = this->composition().Y0(idGas);
-        pPtr->YLiquid() = this->composition().Y0(idLiquid);
-        pPtr->YSolid() = this->composition().Y0(idSolid);
+        parcel.YGas() = this->composition().Y0(idGas);
+        parcel.YLiquid() = this->composition().Y0(idLiquid);
+        parcel.YSolid() = this->composition().Y0(idSolid);
     }
     else
     {
         this->checkSuppliedComposition
         (
-            pPtr->YGas(),
+            parcel.YGas(),
             this->composition().Y0(idGas),
             "YGas"
         );
         this->checkSuppliedComposition
         (
-            pPtr->YLiquid(),
+            parcel.YLiquid(),
             this->composition().Y0(idLiquid),
             "YLiquid"
         );
         this->checkSuppliedComposition
         (
-            pPtr->YSolid(),
+            parcel.YSolid(),
             this->composition().Y0(idSolid),
             "YSolid"
         );

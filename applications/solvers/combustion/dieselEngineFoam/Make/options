@@ -7,10 +7,10 @@ EXE_INC = \
     -I$(LIB_SRC)/thermophysicalModels/liquidMixture/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/specie/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/thermophysicalFunctions/lnInclude \
-    -I$(LIB_SRC)/thermophysicalModels/combustion/lnInclude \
+    -I$(LIB_SRC)/thermophysicalModels/reactionThermo/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/basic/lnInclude \
     -I$(LIB_SRC)/thermophysicalModels/laminarFlameSpeed/lnInclude \
-    -I$(LIB_SRC)/../applications/solvers/combustion/XiFoam \
+    -I$(LIB_SRC)/../applications/solvers/reactionThermo/XiFoam \
     -I$(LIB_SRC)/thermophysicalModels/chemistryModel/lnInclude \
     -I$(LIB_SRC)/ODE/lnInclude \
     -I$(LIB_SRC)/engine/lnInclude \
@@ -20,7 +20,7 @@ EXE_LIBS = \
     -lengine \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
-    -lcombustionThermophysicalModels \
+    -lreactionThermophysicalModels \
     -lfiniteVolume \
     -llagrangian \
     -ldieselSpray \

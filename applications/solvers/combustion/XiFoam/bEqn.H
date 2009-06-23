@@ -6,7 +6,7 @@ if (ign.ignited())
 
     // Unburnt gas density
     // ~~~~~~~~~~~~~~~~~~~
-    volScalarField rhou = thermo->rhou();
+    volScalarField rhou = thermo.rhou();
 
     // Calculate flame normal etc.
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,7 +76,7 @@ if (ign.ignited())
 
     volScalarField epsilon = pow(uPrimeCoef, 3)*turbulence->epsilon();
 
-    volScalarField tauEta = sqrt(thermo->muu()/(rhou*epsilon));
+    volScalarField tauEta = sqrt(thermo.muu()/(rhou*epsilon));
 
     volScalarField Reta = up/
     (
@@ -180,7 +180,7 @@ if (ign.ignited())
         // with a linear correction function to give a plausible profile for Xi
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        volScalarField XiEqStar = 
+        volScalarField XiEqStar =
             scalar(1.001) + XiCoef*sqrt(up/(Su + SuMin))*Reta;
 
         volScalarField XiEq =

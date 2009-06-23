@@ -37,7 +37,7 @@ void Foam::InjectionModel<CloudType>::readProps()
     (
         "injectionProperties",
         owner_.db().time().timeName(),
-        "uniform/Lagrangian"/owner_.name(),
+        "uniform"/cloud::prefix/owner_.name(),
         owner_.db(),
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -67,7 +67,7 @@ void Foam::InjectionModel<CloudType>::writeProps()
             (
                 "injectionProperties",
                 owner_.db().time().timeName(),
-                "uniform/Lagrangian"/owner_.name(),
+                "uniform"/cloud::prefix/owner_.name(),
                 owner_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
@@ -401,7 +401,7 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                 setProperties(parcelI, newParcels, timeInj, *pPtr);
 
                 // Check new parcel properties
-                td.cloud().checkParcelProperties(pPtr, dt, fullyDescribed());
+                td.cloud().checkParcelProperties(*pPtr, dt, fullyDescribed());
 
                 // Apply correction to velocity for 2-D cases
                 meshTools::constrainDirection

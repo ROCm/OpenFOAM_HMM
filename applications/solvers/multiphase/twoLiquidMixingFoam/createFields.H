@@ -40,7 +40,7 @@
         mesh
     );
 
-#   include "createPhi.H"
+    #include "createPhi.H"
 
     Info<< "Reading transportProperties\n" << endl;
     twoPhaseMixture twoPhaseProperties(U, phi);
