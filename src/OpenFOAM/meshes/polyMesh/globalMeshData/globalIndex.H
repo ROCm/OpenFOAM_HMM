@@ -81,8 +81,10 @@ public:
 
     // Member Functions
 
-        //- Start of procI+1 data
-        inline const labelList& offsets() const;
+        ////- Start of procI+1 data
+        //inline const labelList& offsets() const;
+        //- Start of procI data
+        inline label offset(const label procI) const;
 
         //- my local size
         inline label localSize() const;

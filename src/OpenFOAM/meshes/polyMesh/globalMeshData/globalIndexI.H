@@ -28,9 +28,15 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline const Foam::labelList& Foam::globalIndex::offsets() const
+//inline const Foam::labelList& Foam::globalIndex::offsets() const
+//{
+//    return offsets_;
+//}
+
+
+inline Foam::label Foam::globalIndex::offset(const label procI) const
 {
-    return offsets_;
+    return (procI == 0 ? 0 : offsets_[procI-1]);
 }
 
 
