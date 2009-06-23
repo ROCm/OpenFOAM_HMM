@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      hMixtureThermo<reactingMixture>;
+thermoType      hPsiMixtureThermo<reactingMixture<gasThermoPhysics>>;
 
 CHEMKINFile     "$FOAM_CASE/chemkin/chem.inp";
 
