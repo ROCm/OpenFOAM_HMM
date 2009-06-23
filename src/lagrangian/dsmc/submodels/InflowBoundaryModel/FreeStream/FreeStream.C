@@ -162,6 +162,13 @@ void Foam::FreeStream<CloudType>::inflow()
 
             scalar mass = cloud.constProps(typeId).mass();
 
+            if (min(boundaryT[patchI]) < SMALL)
+            {
+                FatalErrorIn ("Foam::FreeStream<CloudType>::inflow()")
+                    << "Zero boundary temperature detected, check boundaryT condition." << nl
+                    << nl << abort(FatalError);
+            }
+
             scalarField mostProbableSpeed
             (
                 cloud.maxwellianMostProbableSpeed
