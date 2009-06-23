@@ -26,7 +26,8 @@ Class
     Foam::searchableSurfaceCollection
 
 Description
-    Union of transformed searchableSurfaces
+    Set of transformed searchableSurfaces. Does not do boolean operations.
+    So when meshing might find parts 'inside'.
 
 SourceFiles
     searchableSurfaceCollection.C
