@@ -25,7 +25,7 @@ solvers
         relTol          0;
     }
 
-    pd
+    p
     {
         solver          PCG;
         preconditioner  DIC;
@@ -33,7 +33,7 @@ solvers
         relTol          0.05;
     }
 
-    pdFinal
+    pFinal
     {
         solver          PCG;
         preconditioner  DIC;
@@ -87,9 +87,9 @@ PISO
     momentumPredictor no;
     nCorrectors     3;
     nNonOrthogonalCorrectors 0;
-    nGammaCorr      1;
-    nGammaSubCycles 4;
-    cGamma          2;
+    nAlphaCorr      1;
+    nAlphaSubCycles 4;
+    cAlpha          2;
 }
 
 

@@ -27,7 +27,6 @@ License
 #include "error.H"
 
 #include "UPtrList.H"
-#include "PtrListLoopM.H"
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 

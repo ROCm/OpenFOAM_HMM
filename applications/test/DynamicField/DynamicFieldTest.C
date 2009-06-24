@@ -26,10 +26,55 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "PackedList.H"
+#include "DynamicField.H"
+#include "IOstreams.H"
+#include "labelField.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+using namespace Foam;
 
-defineTypeNameAndDebug(Foam::PackedListName, 0);
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
+
+int main(int argc, char *argv[])
+{
+    {
+        DynamicField<label> dl(10);
+        Pout<< "null construct dl:" << dl << endl;
+        dl.append(3);
+        dl.append(2);
+        dl.append(1);
+        Pout<< "appending : dl:" << dl << endl;
+    }
+
+    {
+        DynamicField<label> dl(IStringStream("(1 2 3)")());
+        Pout<< "reading : dl:" << dl << endl;
+    }
+
+    {
+        labelField lf(3);
+        lf[0] = 1;
+        lf[1] = 2;
+        lf[2] = 3;
+        DynamicField<label> dl;
+        dl = lf;
+        Pout<< "assigning from labelField : dl:" << dl << endl;
+    }
+
+    {
+        labelField lf(3);
+        lf[0] = 1;
+        lf[1] = 2;
+        lf[2] = 3;
+        DynamicField<label> dl(lf);
+        Pout<< "constructing from labelField dl:" << dl << endl;
+    }
+
+
+    Info<< "\nEnd\n";
+
+    return 0;
+}
+
 
 // ************************************************************************* //

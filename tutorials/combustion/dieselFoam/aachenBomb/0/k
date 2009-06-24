@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -23,7 +23,7 @@ boundaryField
 {
     walls
     {
-        type            kQRWallFunction;
+        type            compressible::kQRWallFunction;
         value           uniform 1;
     }
 }

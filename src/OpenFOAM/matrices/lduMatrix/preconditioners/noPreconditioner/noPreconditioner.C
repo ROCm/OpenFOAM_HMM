@@ -68,17 +68,8 @@ void Foam::noPreconditioner::precondition
 
     register label nCells = wA.size();
 
-    #ifdef ICC_IA64_PREFETCH
-    #pragma ivdep
-    #endif
-
     for (register label cell=0; cell<nCells; cell++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&wAPtr[cell+96],0,1);
-        __builtin_prefetch (&rAPtr[cell+96],0,1);
-        #endif
-
         wAPtr[cell] = rAPtr[cell];
     }
 }

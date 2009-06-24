@@ -30,7 +30,7 @@ divSchemes
     div(rho*phi,U)  Gauss upwind;
     div(phi,alpha)  Gauss vanLeer;
     div(phirb,alpha) Gauss interfaceCompression 1;
-    div(phi,pd)     Gauss upwind;
+    div(phi,p)      Gauss upwind;
     div(phi,k)      Gauss vanLeer;
     div((nuEff*dev(grad(U).T()))) Gauss linear;
 }
@@ -53,9 +53,9 @@ snGradSchemes
 fluxRequired
 {
     default         no;
-    pd              ;
-    pcorr           ;
-    gamma           ;
+    p;
+    pcorr;
+    gamma;
 }
 
 

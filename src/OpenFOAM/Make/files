@@ -63,7 +63,7 @@ primitives/random/Random.C
 containers/HashTables/HashTable/HashTableName.C
 containers/HashTables/StaticHashTable/StaticHashTableName.C
 containers/Lists/SortableList/ParSortableListName.C
-containers/Lists/PackedList/PackedListCore.C
+containers/Lists/PackedList/PackedListName.C
 containers/Lists/ListOps/ListOps.C
 containers/LinkedLists/linkTypes/SLListBase/SLListBase.C
 containers/LinkedLists/linkTypes/DLListBase/DLListBase.C

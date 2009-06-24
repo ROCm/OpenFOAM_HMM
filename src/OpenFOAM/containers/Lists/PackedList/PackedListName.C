@@ -22,25 +22,12 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    A List\<Type\> is a 1D array of objects of type 'Type',
-    where the size of the array is known and used for subscript
-    bounds checking, etc.
-
 \*---------------------------------------------------------------------------*/
 
-#ifdef List_FOR_ALL
+#include "PackedList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-#undef List_FOR_ALL
-#undef List_END_FOR_ALL
-#undef List_ELEM
-#undef List_ACCESS
-#undef List_CONST_ACCESS
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+defineTypeNameAndDebug(Foam::PackedListName, 0);
 
 // ************************************************************************* //

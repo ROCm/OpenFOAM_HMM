@@ -4,8 +4,8 @@
       + fvm::div(phi, U)
       + turbulence->divDevRhoReff(U)
      ==
-        thermoCloud1.SU1()
-      + kinematicCloud1.SU1()
+        thermoCloud1.SU()
+      + kinematicCloud1.SU()
       + rho.dimensionedInternalField()*g
     );
 
