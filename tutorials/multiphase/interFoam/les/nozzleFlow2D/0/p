@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      pd;
+    object      p;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,17 +20,17 @@ internalField   uniform 0;
 
 boundaryField
 {
-    leftWall
+    axis
+    {
+        type            empty;
+    }
+
+    inlet
     {
         type            zeroGradient;
     }
 
-    rightWall
-    {
-        type            zeroGradient;
-    }
-
-    lowerWall
+    wall
     {
         type            zeroGradient;
     }
@@ -47,9 +47,14 @@ boundaryField
         value           uniform 0;
     }
 
-    defaultFaces
+    front
     {
-        type            empty;
+        type            wedge;
+    }
+
+    back
+    {
+        type            wedge;
     }
 }
 

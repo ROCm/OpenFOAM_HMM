@@ -10,7 +10,7 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      pd;
+    object      p.org;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -20,28 +20,9 @@ internalField   uniform 0;
 
 boundaryField
 {
-    floor
+    walls
     {
-        type            fixedFluxBuoyantPressure;
-        value           uniform 0;
-    }
-
-    ceiling
-    {
-        type            fixedFluxBuoyantPressure;
-        value           uniform 0;
-    }
-
-    fixedWalls
-    {
-        type            fixedFluxBuoyantPressure;
-        value           uniform 0;
-    }
-
-    box
-    {
-        type            fixedFluxBuoyantPressure;
-        value           uniform 0;
+        type            zeroGradient;
     }
 }
 

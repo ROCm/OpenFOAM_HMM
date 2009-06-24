@@ -10,44 +10,39 @@ FoamFile
     version     2.0;
     format      ascii;
     class       volScalarField;
-    object      pd;
+    object      alpha1;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dimensions      [1 -1 -2 0 0 0 0];
+dimensions      [0 0 0 0 0 0 0];
 
 internalField   uniform 0;
 
 boundaryField
 {
-    leftWall
+    leftWall        
     {
         type            zeroGradient;
     }
 
-    rightWall
+    rightWall       
     {
         type            zeroGradient;
     }
 
-    lowerWall
+    lowerWall       
     {
         type            zeroGradient;
     }
 
-    atmosphere
+    atmosphere      
     {
-        type            totalPressure;
-        p0              uniform 0;
-        U               U;
-        phi             phi;
-        rho             rho;
-        psi             none;
-        gamma           1;
+        type            inletOutlet;
+        inletValue      uniform 0;
         value           uniform 0;
     }
 
-    defaultFaces
+    defaultFaces    
     {
         type            empty;
     }
