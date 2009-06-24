@@ -81,30 +81,43 @@ public:
 
     // Member Functions
 
-        //- Start of procI+1 data
-        inline const labelList& offsets() const;
+        ////- Start of procI+1 data
+        //inline const labelList& offsets() const;
 
-        //- my local size
-        inline label localSize() const;
 
-        //- Global sum of localSizes
-        inline label size() const;
+        // Queries relating to my processor
 
-        //- From local to global
-        inline label toGlobal(const label i) const;
+            //- my local size
+            inline label localSize() const;
 
-        //- Is on local processor
-        inline bool isLocal(const label i) const;
+            //- From local to global
+            inline label toGlobal(const label i) const;
 
-        //- From global to local on procI
-        inline label toLocal(const label procI, const label i) const;
+            //- Is on local processor
+            inline bool isLocal(const label i) const;
 
-        //- From global to local on current processor.
-        //  FatalError if not on local processor.
-        inline label toLocal(const label i) const;
+            //- From global to local on current processor.
+            //  FatalError if not on local processor.
+            inline label toLocal(const label i) const;
 
-        //- Which processor does global come from?
-        inline label whichProcID(const label i) const;
+
+        // Global queries
+
+            //- Global sum of localSizes
+            inline label size() const;
+
+            //- From global to local on procI
+            inline label toLocal(const label procI, const label i) const;
+
+            //- Which processor does global come from? Binary search.
+            inline label whichProcID(const label i) const;
+
+            //- Start of procI data
+            inline label offset(const label procI) const;
+
+            //- Size of procI data
+            inline label localSize(const label procI) const;
+
 
 
     // IOstream Operators

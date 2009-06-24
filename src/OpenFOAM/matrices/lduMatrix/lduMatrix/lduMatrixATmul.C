@@ -67,38 +67,15 @@ void Foam::lduMatrix::Amul
     register const label nCells = diag().size();
     for (register label cell=0; cell<nCells; cell++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&psiPtr[cell+96],0,1);
-        __builtin_prefetch (&diagPtr[cell+96],0,1);
-        __builtin_prefetch (&ApsiPtr[cell+96],1,1);
-        #endif
-
         ApsiPtr[cell] = diagPtr[cell]*psiPtr[cell];
     }
 
 
     register const label nFaces = upper().size();
-    #ifdef ICC_IA64_PREFETCH
-    #pragma swp
-    #endif
+
     for (register label face=0; face<nFaces; face++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&uPtr[face+32],0,0);
-        __builtin_prefetch (&lPtr[face+32],0,0);
-        __builtin_prefetch (&lowerPtr[face+32],0,1);
-        __builtin_prefetch (&psiPtr[lPtr[face+32]],0,1);
-        __builtin_prefetch (&ApsiPtr[uPtr[face+32]],0,1);
-        #endif
-
         ApsiPtr[uPtr[face]] += lowerPtr[face]*psiPtr[lPtr[face]];
-
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&upperPtr[face+32],0,1);
-        __builtin_prefetch (&psiPtr[uPtr[face+32]],0,1);
-        __builtin_prefetch (&ApsiPtr[lPtr[face+32]],0,1);
-        #endif
-
         ApsiPtr[lPtr[face]] += upperPtr[face]*psiPtr[uPtr[face]];
     }
 
@@ -151,34 +128,13 @@ void Foam::lduMatrix::Tmul
     register const label nCells = diag().size();
     for (register label cell=0; cell<nCells; cell++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&psiPtr[cell+96],0,1);
-        __builtin_prefetch (&diagPtr[cell+96],0,1);
-        __builtin_prefetch (&TpsiPtr[cell+96],1,1);
-        #endif
-
         TpsiPtr[cell] = diagPtr[cell]*psiPtr[cell];
     }
 
     register const label nFaces = upper().size();
     for (register label face=0; face<nFaces; face++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&uPtr[face+32],0,0);
-        __builtin_prefetch (&lPtr[face+32],0,0);
-        __builtin_prefetch (&upperPtr[face+32],0,1);
-        __builtin_prefetch (&psiPtr[lPtr[face+32]],0,1);
-        __builtin_prefetch (&TpsiPtr[uPtr[face+32]],0,1);
-        #endif
-
         TpsiPtr[uPtr[face]] += upperPtr[face]*psiPtr[lPtr[face]];
-
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&lowerPtr[face+32],0,1);
-        __builtin_prefetch (&psiPtr[uPtr[face+32]],0,1);
-        __builtin_prefetch (&TpsiPtr[lPtr[face+32]],0,1);
-        #endif
-
         TpsiPtr[lPtr[face]] += lowerPtr[face]*psiPtr[uPtr[face]];
     }
 
@@ -218,34 +174,12 @@ void Foam::lduMatrix::sumA
 
     for (register label cell=0; cell<nCells; cell++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&diagPtr[cell+96],0,1);
-        __builtin_prefetch (&sumAPtr[cell+96],1,1);
-        #endif
-
         sumAPtr[cell] = diagPtr[cell];
     }
 
-    #ifdef ICC_IA64_PREFETCH
-    #pragma swp
-    #endif
-
     for (register label face=0; face<nFaces; face++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&uPtr[face+32],0,0);
-        __builtin_prefetch (&lPtr[face+32],0,0);
-        __builtin_prefetch (&lowerPtr[face+32],0,1);
-        __builtin_prefetch (&sumAPtr[uPtr[face+32]],0,1);
-        #endif
-
         sumAPtr[uPtr[face]] += lowerPtr[face];
-
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&upperPtr[face+32],0,1);
-        __builtin_prefetch (&sumAPtr[lPtr[face+32]],0,1);
-        #endif
-
         sumAPtr[lPtr[face]] += upperPtr[face];
     }
 
@@ -323,39 +257,15 @@ void Foam::lduMatrix::residual
     register const label nCells = diag().size();
     for (register label cell=0; cell<nCells; cell++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&psiPtr[cell+96],0,1);
-        __builtin_prefetch (&diagPtr[cell+96],0,1);
-        __builtin_prefetch (&sourcePtr[cell+96],0,1);
-        __builtin_prefetch (&rAPtr[cell+96],1,1);
-        #endif
-
         rAPtr[cell] = sourcePtr[cell] - diagPtr[cell]*psiPtr[cell];
     }
 
 
     register const label nFaces = upper().size();
-    #ifdef ICC_IA64_PREFETCH
-    #pragma swp
-    #endif
+
     for (register label face=0; face<nFaces; face++)
     {
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&uPtr[face+32],0,0);
-        __builtin_prefetch (&lPtr[face+32],0,0);
-        __builtin_prefetch (&lowerPtr[face+32],0,1);
-        __builtin_prefetch (&psiPtr[lPtr[face+32]],0,1);
-        __builtin_prefetch (&rAPtr[uPtr[face+32]],0,1);
-        #endif
-
         rAPtr[uPtr[face]] -= lowerPtr[face]*psiPtr[lPtr[face]];
-
-        #ifdef ICC_IA64_PREFETCH
-        __builtin_prefetch (&upperPtr[face+32],0,1);
-        __builtin_prefetch (&psiPtr[uPtr[face+32]],0,1);
-        __builtin_prefetch (&rAPtr[lPtr[face+32]],0,1);
-        #endif
-
         rAPtr[lPtr[face]] -= upperPtr[face]*psiPtr[uPtr[face]];
     }
 

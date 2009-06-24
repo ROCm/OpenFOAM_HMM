@@ -657,6 +657,16 @@ void readCells
     << "    tet  :" << nTet << endl
     << endl;
 
+    if (cells.size() == 0)
+    {
+        FatalErrorIn("readCells(..)")
+            << "No cells read from file " << inFile.name() << nl
+            << "Does your file specify any 3D elements (hex=" << MSHHEX
+            << ", prism=" << MSHPRISM << ", pyramid=" << MSHPYR
+            << ", tet=" << MSHTET << ")?" << nl
+            << "Perhaps you have not exported the 3D elements?"
+            << exit(FatalError);
+    }
 
     Info<< "CellZones:" << nl
         << "Zone\tSize" << endl;
