@@ -11,13 +11,11 @@ FoamFile
     format      ascii;
     class       dictionary;
     location    "constant";
-    object      thermophysicalProperties;
+    object      turbulenceProperties;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      ePsiThermo<pureMixture<constTransport<specieThermo<eConstThermo<perfectGas>>>>>;
-
-mixture         air 1 28.9 717.5 0 1.8e-05 0.7;
+simulationType  laminar;
 
 
 // ************************************************************************* //

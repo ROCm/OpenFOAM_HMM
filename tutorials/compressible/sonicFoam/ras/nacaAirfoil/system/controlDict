@@ -49,7 +49,12 @@ functions
     {
         type        forceCoeffs;
         functionObjectLibs ( "libforces.so" );
-        patches     ( WALL10 );
+        outputControl timeStep;
+        outputInterval 1;
+        patches
+        (
+            WALL10
+        );
         pName       p;
         UName       U;
         log         true;
