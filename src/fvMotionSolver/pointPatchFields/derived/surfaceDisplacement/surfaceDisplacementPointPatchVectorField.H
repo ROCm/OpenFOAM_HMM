@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,16 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::surfaceSlipDisplacementPointPatchVectorField
+    surfaceDisplacementPointPatchVectorField
 
 Description
-    Displacement follows a triSurface. Use in a displacement fvMotionSolver
+    Displacement fixed by projection onto triSurface.
+    Use in a displacement fvMotionSolver
     as a bc on the pointDisplacement field.
-    Following is done by calculating the projection onto the surface according
+
+    Calculates the projection onto the surface according
     to the projectMode
     - NEAREST : nearest
     - POINTNORMAL : intersection with point normal
     - FIXEDNORMAL : intersection with fixed vector
+
+    This displacement is then clipped with the specified velocity * deltaT.
 
     Optionally (intersection only) removes a component ("wedgePlane") to
     stay in 2D.
@@ -47,15 +51,17 @@ Description
                          that do not move
 
 SourceFiles
-    surfaceSlipDisplacementPointPatchVectorField.C
+    surfaceDisplacementPointPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef surfaceSlipDisplacementPointPatchVectorField_H
-#define surfaceSlipDisplacementPointPatchVectorField_H
+#ifndef surfaceDisplacementPointPatchVectorField_H
+#define surfaceDisplacementPointPatchVectorField_H
 
 #include "pointPatchFields.H"
+#include "fixedValuePointPatchFields.H"
 #include "searchableSurfaces.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -63,12 +69,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-          Class surfaceSlipDisplacementPointPatchVectorField Declaration
+          Class surfaceDisplacementPointPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class surfaceSlipDisplacementPointPatchVectorField
+class surfaceDisplacementPointPatchVectorField
 :
-    public pointPatchVectorField
+    public fixedValuePointPatchVectorField
 {
 
 public:
@@ -88,6 +94,9 @@ private:
 
         //- project mode names
         static const NamedEnum<projectMode, 3> projectModeNames_;
+
+        //- Maximum velocity
+        const vector velocity_;
 
         //- names of surfaces
         const dictionary surfacesDict_;
@@ -113,27 +122,27 @@ private:
         //- Calculate displacement (w.r.t. points0()) to project onto surface
         void calcProjection(vectorField& displacement) const;
 
-        //- Disallow default bitwise assignment
-        void operator=(const surfaceSlipDisplacementPointPatchVectorField&);
 
+        //- Disallow default bitwise assignment
+        void operator=(const surfaceDisplacementPointPatchVectorField&);
 
 public:
 
     //- Runtime type information
-    TypeName("surfaceSlipDisplacement");
+    TypeName("surfaceDisplacement");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        surfaceSlipDisplacementPointPatchVectorField
+        surfaceDisplacementPointPatchVectorField
         (
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        surfaceSlipDisplacementPointPatchVectorField
+        surfaceDisplacementPointPatchVectorField
         (
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&,
@@ -141,18 +150,18 @@ public:
         );
 
         //- Construct by mapping given patchField<vector> onto a new patch
-        surfaceSlipDisplacementPointPatchVectorField
+        surfaceDisplacementPointPatchVectorField
         (
-            const surfaceSlipDisplacementPointPatchVectorField&,
+            const surfaceDisplacementPointPatchVectorField&,
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&,
             const pointPatchFieldMapper&
         );
 
         //- Construct as copy
-        surfaceSlipDisplacementPointPatchVectorField
+        surfaceDisplacementPointPatchVectorField
         (
-            const surfaceSlipDisplacementPointPatchVectorField&
+            const surfaceDisplacementPointPatchVectorField&
         );
 
         //- Construct and return a clone
@@ -160,7 +169,7 @@ public:
         {
             return autoPtr<pointPatchVectorField>
             (
-                new surfaceSlipDisplacementPointPatchVectorField
+                new surfaceDisplacementPointPatchVectorField
                 (
                     *this
                 )
@@ -168,9 +177,9 @@ public:
         }
 
         //- Construct as copy setting internal field reference
-        surfaceSlipDisplacementPointPatchVectorField
+        surfaceDisplacementPointPatchVectorField
         (
-            const surfaceSlipDisplacementPointPatchVectorField&,
+            const surfaceDisplacementPointPatchVectorField&,
             const DimensionedField<vector, pointMesh>&
         );
 
@@ -182,7 +191,7 @@ public:
         {
             return autoPtr<pointPatchVectorField>
             (
-                new surfaceSlipDisplacementPointPatchVectorField
+                new surfaceDisplacementPointPatchVectorField
                 (
                     *this,
                     iF
@@ -195,11 +204,8 @@ public:
         //- Surface to follow. Demand loads surfaceNames.
         const searchableSurfaces& surfaces() const;
 
-        //- Update the patch field
-        virtual void evaluate
-        (
-            const Pstream::commsTypes commsType=Pstream::blocking
-        );
+        //- Update the coefficients associated with the patch field
+        virtual void updateCoeffs();
 
         //- Write
         virtual void write(Ostream&) const;
