@@ -63,27 +63,39 @@ inline Foam::label Foam::globalIndex::size() const
 }
 
 
-inline Foam::label Foam::globalIndex::toGlobal(const label i) const
+inline Foam::label Foam::globalIndex::toGlobal
+(
+    const label procI,
+    const label i
+) const
 {
-    return
-    (
-        Pstream::myProcNo() == 0
-      ? i
-      : i + offsets_[Pstream::myProcNo()-1]
-    );
+    return(procI == 0 ? i : i + offsets_[procI-1]);
 }
 
+
+inline Foam::label Foam::globalIndex::toGlobal(const label i) const
+{
+    return toGlobal(Pstream::myProcNo(), i);
+}
+
+
 //- Is on local processor
-inline bool Foam::globalIndex::isLocal(const label i) const
+inline bool Foam::globalIndex::isLocal(const label procI, const label i) const
 {
     return
-        (i < offsets_[Pstream::myProcNo()])
-     && (i >= (Pstream::myProcNo() == 0 ? 0 : offsets_[Pstream::myProcNo()-1]));
+        (i < offsets_[procI])
+     && (i >= (procI == 0 ? 0 : offsets_[procI-1]));
+}
+
+
+inline bool Foam::globalIndex::isLocal(const label i) const
+{
+    return isLocal(Pstream::myProcNo(), i);
 }
 
 
 inline Foam::label Foam::globalIndex::toLocal(const label procI, const label i)
- const
+const
 {
     label localI = (procI == 0 ? i : i - offsets_[procI-1]);
 
