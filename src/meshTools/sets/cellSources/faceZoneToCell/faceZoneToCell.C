@@ -22,11 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "patchToFace.H"
+#include "faceZoneToCell.H"
 #include "polyMesh.H"
 
 #include "addToRunTimeSelectionTable.H"
@@ -36,58 +34,77 @@ Description
 namespace Foam
 {
 
-defineTypeNameAndDebug(patchToFace, 0);
+defineTypeNameAndDebug(faceZoneToCell, 0);
 
-addToRunTimeSelectionTable(topoSetSource, patchToFace, word);
+addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, word);
 
-addToRunTimeSelectionTable(topoSetSource, patchToFace, istream);
+addToRunTimeSelectionTable(topoSetSource, faceZoneToCell, istream);
 
 }
 
 
-Foam::topoSetSource::addToUsageTable Foam::patchToFace::usage_
+Foam::topoSetSource::addToUsageTable Foam::faceZoneToCell::usage_
 (
-    patchToFace::typeName,
-    "\n    Usage: patchToFace patch\n\n"
-    "    Select all faces in the patch. Note:accepts wildcards for patch.\n\n"
+    faceZoneToCell::typeName,
+    "\n    Usage: faceZoneToCell zone master|slave\n\n"
+    "    Select master or slave side of the faceZone."
+    " Note:accepts wildcards for zone.\n\n"
 );
+
+
+template<>
+const char* Foam::NamedEnum<Foam::faceZoneToCell::faceAction, 2>::names[] =
+{
+    "master",
+    "slave"
+};
+
+
+const Foam::NamedEnum<Foam::faceZoneToCell::faceAction, 2>
+    Foam::faceZoneToCell::faceActionNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::patchToFace::combine(topoSet& set, const bool add) const
+void Foam::faceZoneToCell::combine(topoSet& set, const bool add) const
 {
     bool hasMatched = false;
 
-    forAll(mesh_.boundaryMesh(), patchI)
+    forAll(mesh_.faceZones(), i)
     {
-        const polyPatch& pp = mesh_.boundaryMesh()[patchI];
+        const faceZone& zone = mesh_.faceZones()[i];
 
-        if (patchName_.match(pp.name()))
+        if (zoneName_.match(zone.name()))
         {
-            Info<< "    Found matching patch " << pp.name()
-                << " with " << pp.size() << " faces." << endl;
+            const labelList& cellLabels =
+            (
+                option_ == MASTER
+              ? zone.masterCells()
+              : zone.slaveCells()
+            );
+
+            Info<< "    Found matching zone " << zone.name()
+                << " with " << cellLabels.size() << " cells on selected side."
+                << endl;
 
             hasMatched = true;
 
-
-            for
-            (
-                label faceI = pp.start();
-                faceI < pp.start() + pp.size();
-                faceI++
-            )
+            forAll(cellLabels, i)
             {
-                addOrDelete(set, faceI, add);
+                // Only do active cells
+                if (cellLabels[i] < mesh_.nCells())
+                {
+                    addOrDelete(set, cellLabels[i], add);
+                }
             }
         }
     }
 
     if (!hasMatched)
     {
-        WarningIn("patchToFace::combine(topoSet&, const bool)")
-            << "Cannot find any patch named " << patchName_ << endl
-            << "Valid names are " << mesh_.boundaryMesh().names() << endl;
+        WarningIn("faceZoneToCell::combine(topoSet&, const bool)")
+            << "Cannot find any faceZone named " << zoneName_ << endl
+            << "Valid names are " << mesh_.faceZones().names() << endl;
     }
 }
 
@@ -95,50 +112,54 @@ void Foam::patchToFace::combine(topoSet& set, const bool add) const
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-Foam::patchToFace::patchToFace
+Foam::faceZoneToCell::faceZoneToCell
 (
     const polyMesh& mesh,
-    const word& patchName
+    const word& zoneName,
+    const faceAction option
 )
 :
     topoSetSource(mesh),
-    patchName_(patchName)
+    zoneName_(zoneName),
+    option_(option)
 {}
 
 
 // Construct from dictionary
-Foam::patchToFace::patchToFace
+Foam::faceZoneToCell::faceZoneToCell
 (
     const polyMesh& mesh,
     const dictionary& dict
 )
 :
     topoSetSource(mesh),
-    patchName_(dict.lookup("name"))
+    zoneName_(dict.lookup("name")),
+    option_(faceActionNames_.read(dict.lookup("option")))
 {}
 
 
 // Construct from Istream
-Foam::patchToFace::patchToFace
+Foam::faceZoneToCell::faceZoneToCell
 (
     const polyMesh& mesh,
     Istream& is
 )
 :
     topoSetSource(mesh),
-    patchName_(checkIs(is))
+    zoneName_(checkIs(is)),
+    option_(faceActionNames_.read(checkIs(is)))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::patchToFace::~patchToFace()
+Foam::faceZoneToCell::~faceZoneToCell()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::patchToFace::applyToSet
+void Foam::faceZoneToCell::applyToSet
 (
     const topoSetSource::setAction action,
     topoSet& set
@@ -146,14 +167,15 @@ void Foam::patchToFace::applyToSet
 {
     if ((action == topoSetSource::NEW) || (action == topoSetSource::ADD))
     {
-        Info<< "    Adding all faces of patch " << patchName_ << " ..." << endl;
+        Info<< "    Adding all " << faceActionNames_[option_]
+            << " cells of faceZone " << zoneName_ << " ..." << endl;
 
         combine(set, true);
     }
     else if (action == topoSetSource::DELETE)
     {
-        Info<< "    Removing all faces of patch " << patchName_ << " ..."
-            << endl;
+        Info<< "    Removing all " << faceActionNames_[option_]
+            << " cells of faceZone " << zoneName_ << " ..." << endl;
 
         combine(set, false);
     }
