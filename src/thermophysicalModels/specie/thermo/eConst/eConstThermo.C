@@ -29,9 +29,10 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::eConstThermo::eConstThermo(Istream& is)
+template<class equationOfState>
+Foam::eConstThermo<equationOfState>::eConstThermo(Istream& is)
 :
-    specieThermo(is),
+    equationOfState(is),
     Cv_(readScalar(is)),
     Hf_(readScalar(is))
 {
@@ -41,9 +42,15 @@ Foam::eConstThermo::eConstThermo(Istream& is)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const eConstThermo& ct)
+template<class equationOfState>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const eConstThermo<equationOfState>& ct
+)
 {
-    os << (const specieThermo&)ct << tab << ct.Cv_ << tab << ct.Hf_;
+    os  << static_cast<const equationOfState&>(ct) << tab
+        << ct.Cv_ << tab << ct.Hf_;
 
     os.check("Ostream& operator<<(Ostream& os, const eConstThermo& ct)");
     return os;
