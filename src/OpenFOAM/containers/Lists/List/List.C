@@ -35,8 +35,6 @@ License
 #include "BiIndirectList.H"
 #include "contiguous.H"
 
-#include <algorithm>
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
@@ -439,34 +437,6 @@ void Foam::List<T>::transfer(SortableList<T>& a)
     // shrink away the sort indices
     a.shrink();
     transfer(static_cast<List<T>&>(a));
-}
-
-
-template<class T>
-void Foam::sort(List<T>& a)
-{
-    std::sort(a.begin(), a.end());
-}
-
-
-template<class T, class Cmp>
-void Foam::sort(List<T>& a, const Cmp& cmp)
-{
-    std::sort(a.begin(), a.end(), cmp);
-}
-
-
-template<class T>
-void Foam::stableSort(List<T>& a)
-{
-    std::stable_sort(a.begin(), a.end());
-}
-
-
-template<class T, class Cmp>
-void Foam::stableSort(List<T>& a, const Cmp& cmp)
-{
-    std::stable_sort(a.begin(), a.end(), cmp);
 }
 
 
