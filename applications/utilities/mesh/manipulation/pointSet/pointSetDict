@@ -51,16 +51,22 @@ topoSetSources
         value (12 13 56);   // labels of points
     }
 
-    // Points with coordinate within box
-    boxToPoint
-    {
-       box   (0 0 0) (1 1 1);
-    }
-
     // All points in pointzone
     zoneToPoint
     {
         name ".*Zone";      // name of pointZone, regular expressions allowed
+    }
+
+    // Points nearest to coordinates
+    nearestToPoint
+    {
+       points ((0 0 0) (1 1 1));
+    }
+
+    // Points with coordinate within box
+    boxToPoint
+    {
+       box   (0 0 0) (1 1 1);
     }
 
     // Select based on surface
