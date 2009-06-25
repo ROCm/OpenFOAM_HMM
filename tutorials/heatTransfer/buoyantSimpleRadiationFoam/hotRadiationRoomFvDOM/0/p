@@ -22,25 +22,25 @@ boundaryField
 {
     floor
     {
-        type            calculated;
+        type            fixedFluxBuoyantPressure;
         value           uniform 100000;
     }
 
     ceiling
     {
-        type            calculated;
+        type            fixedFluxBuoyantPressure;
         value           uniform 100000;
     }
 
     fixedWalls
     {
-        type            calculated;
+        type            fixedFluxBuoyantPressure;
         value           uniform 100000;
     }
 
     box
     {
-        type            calculated;
+        type            fixedFluxBuoyantPressure;
         value           uniform 100000;
     }
 }

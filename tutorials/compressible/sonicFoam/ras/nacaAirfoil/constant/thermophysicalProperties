@@ -15,9 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-thermoType      hPsiThermo<pureMixture<constTransport<specieThermo<hConstThermo<perfectGas>>>>>;
+thermoType      ePsiThermo<pureMixture<constTransport<specieThermo<eConstThermo<perfectGas>>>>>;
 
-mixture         air 1 28.9 1000 2.544e+06 1.8e-05 0.7;
+mixture         air 1 28.9 717.5 0 1.8e-05 0.7;
 
 
 // ************************************************************************* //

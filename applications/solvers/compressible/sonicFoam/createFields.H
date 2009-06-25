@@ -7,7 +7,7 @@
     basicPsiThermo& thermo = pThermo();
 
     volScalarField& p = thermo.p();
-    volScalarField& h = thermo.h();
+    volScalarField& e = thermo.e();
     const volScalarField& psi = thermo.psi();
 
     volScalarField rho
@@ -35,7 +35,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
 
     Info<< "Creating turbulence model\n" << endl;
@@ -49,7 +49,3 @@
             thermo
         )
     );
-
-    Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt =
-        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);

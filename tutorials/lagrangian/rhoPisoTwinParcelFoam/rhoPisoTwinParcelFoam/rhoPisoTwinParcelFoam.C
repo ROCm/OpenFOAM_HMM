@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 
 #include "basicThermoCloud.H"
@@ -41,62 +41,59 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "createClouds.H"
+    #include "readPISOControls.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "createClouds.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        Info<< "Evolving thermoCloud1" << endl;
         thermoCloud1.evolve();
         thermoCloud1.info();
 
-        Info<< "Evolving kinematicCloud1" << endl;
         kinematicCloud1.evolve();
         kinematicCloud1.info();
 
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
         // --- PIMPLE loop
         for (int ocorr=1; ocorr<=nOuterCorr; ocorr++)
         {
-#           include "UEqn.H"
+            #include "UEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
-#               include "hEqn.H"
-#               include "pEqn.H"
+                #include "hEqn.H"
+                #include "pEqn.H"
             }
         }
 
         turbulence->correct();
 
-        rho = thermo->rho();
+        rho = thermo.rho();
 
         runTime.write();
 
