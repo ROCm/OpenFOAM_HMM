@@ -109,7 +109,6 @@ $(derivedFvPatchFields)/directMappedFixedValue/directMappedFixedValueFvPatchFiel
 $(derivedFvPatchFields)/directMappedVelocityFluxFixedValue/directMappedVelocityFluxFixedValueFvPatchField.C
 $(derivedFvPatchFields)/fan/fanFvPatchFields.C
 $(derivedFvPatchFields)/fixedFluxBuoyantPressure/fixedFluxBuoyantPressureFvPatchScalarField.C
-$(derivedFvPatchFields)/fixedFluxBoussinesqBuoyantPressure/fixedFluxBoussinesqBuoyantPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedFluxPressure/fixedFluxPressureFvPatchScalarField.C
 $(derivedFvPatchFields)/fixedInternalValueFvPatchField/fixedInternalValueFvPatchFields.C
 $(derivedFvPatchFields)/fixedNormalSlip/fixedNormalSlipFvPatchFields.C

@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
@@ -43,8 +43,5 @@ timePrecision   6;
 
 runTimeModifiable yes;
 
-adjustTimeStep  no;
-
-maxCo           0.5;
 
 // ************************************************************************* //

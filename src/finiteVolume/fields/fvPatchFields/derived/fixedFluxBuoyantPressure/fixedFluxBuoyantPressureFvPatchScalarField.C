@@ -43,8 +43,25 @@ fixedFluxBuoyantPressureFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedGradientFvPatchScalarField(p, iF)
+    fixedGradientFvPatchScalarField(p, iF),
+    rhoName_("rho")
 {}
+
+
+fixedFluxBuoyantPressureFvPatchScalarField::
+fixedFluxBuoyantPressureFvPatchScalarField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedGradientFvPatchScalarField(p, iF),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
+{
+    fvPatchField<scalar>::operator=(patchInternalField());
+    gradient() = 0.0;
+}
 
 
 fixedFluxBuoyantPressureFvPatchScalarField::
@@ -56,43 +73,31 @@ fixedFluxBuoyantPressureFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedGradientFvPatchScalarField(ptf, p, iF, mapper)
+    fixedGradientFvPatchScalarField(ptf, p, iF, mapper),
+    rhoName_(ptf.rhoName_)
 {}
 
 
 fixedFluxBuoyantPressureFvPatchScalarField::
 fixedFluxBuoyantPressureFvPatchScalarField
 (
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary&
+    const fixedFluxBuoyantPressureFvPatchScalarField& ptf
 )
 :
-    fixedGradientFvPatchScalarField(p, iF)
-{
-    fvPatchField<scalar>::operator=(patchInternalField());
-    gradient() = 0.0;
-}
-
-
-fixedFluxBuoyantPressureFvPatchScalarField::
-fixedFluxBuoyantPressureFvPatchScalarField
-(
-    const fixedFluxBuoyantPressureFvPatchScalarField& wbppsf
-)
-:
-    fixedGradientFvPatchScalarField(wbppsf)
+    fixedGradientFvPatchScalarField(ptf),
+    rhoName_(ptf.rhoName_)
 {}
 
 
 fixedFluxBuoyantPressureFvPatchScalarField::
 fixedFluxBuoyantPressureFvPatchScalarField
 (
-    const fixedFluxBuoyantPressureFvPatchScalarField& wbppsf,
+    const fixedFluxBuoyantPressureFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedGradientFvPatchScalarField(wbppsf, iF)
+    fixedGradientFvPatchScalarField(ptf, iF),
+    rhoName_(ptf.rhoName_)
 {}
 
 
@@ -111,7 +116,7 @@ void fixedFluxBuoyantPressureFvPatchScalarField::updateCoeffs()
     dimensionedVector g(environmentalProperties.lookup("g"));
 
     const fvPatchField<scalar>& rho =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
     // If the variable name is "pd" assume it is p - rho*g.h
     // and set the gradient appropriately.
@@ -132,6 +137,7 @@ void fixedFluxBuoyantPressureFvPatchScalarField::updateCoeffs()
 void fixedFluxBuoyantPressureFvPatchScalarField::write(Ostream& os) const
 {
     fixedGradientFvPatchScalarField::write(os);
+    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

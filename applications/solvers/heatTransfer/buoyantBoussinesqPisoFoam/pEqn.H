@@ -1,9 +1,8 @@
 {
-    volScalarField rUA("rUA", 1.0/UEqn().A());
+    volScalarField rUA("rUA", 1.0/UEqn.A());
     surfaceScalarField rUAf("(1|A(U))", fvc::interpolate(rUA));
 
-    U = rUA*UEqn().H();
-    UEqn.clear();
+    U = rUA*UEqn.H();
 
     surfaceScalarField phiU
     (
@@ -11,31 +10,31 @@
       + fvc::ddtPhiCorr(rUA, U, phi)
     );
 
-    phi = phiU + betaghf*fvc::snGrad(T)*rUAf*mesh.magSf();
+    phi = phiU + rUAf*fvc::interpolate(rhok)*(g & mesh.Sf());
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pdEqn
+        fvScalarMatrix pEqn
         (
-            fvm::laplacian(rUAf, pd) == fvc::div(phi)
+            fvm::laplacian(rUAf, p) == fvc::div(phi)
         );
 
         if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
         {
-            pdEqn.solve(mesh.solver(pd.name() + "Final"));
+            pEqn.solve(mesh.solver(p.name() + "Final"));
         }
         else
         {
-            pdEqn.solve(mesh.solver(pd.name()));
+            pEqn.solve(mesh.solver(p.name()));
         }
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi += pdEqn.flux();
+            phi -= pEqn.flux();
         }
     }
 
-    U -= rUA*fvc::reconstruct((phi - phiU)/rUAf);
+    U += rUA*fvc::reconstruct((phi - phiU)/rUAf);
     U.correctBoundaryConditions();
 
     #include "continuityErrs.H"
