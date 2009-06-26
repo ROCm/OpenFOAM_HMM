@@ -34,6 +34,8 @@ Description
 
 #include "perfectGas.H"
 
+#include "eConstThermo.H"
+
 #include "hConstThermo.H"
 #include "janafThermo.H"
 #include "specieThermo.H"
@@ -65,6 +67,22 @@ makeBasicMixture
     pureMixture,
     sutherlandTransport,
     hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    eConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    eConstThermo,
     perfectGas
 );
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,23 +24,24 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "surfaceSlipDisplacementPointPatchVectorField.H"
+#include "surfaceDisplacementPointPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
 #include "transformField.H"
 #include "fvMesh.H"
-#include "displacementFvMotionSolver.H"
+#include "displacementLaplacianFvMotionSolver.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<>
 const char*
-NamedEnum<surfaceSlipDisplacementPointPatchVectorField::projectMode, 3>::
+NamedEnum<surfaceDisplacementPointPatchVectorField::projectMode, 3>::
 names[] =
 {
     "nearest",
@@ -48,13 +49,13 @@ names[] =
     "fixedNormal"
 };
 
-const NamedEnum<surfaceSlipDisplacementPointPatchVectorField::projectMode, 3>
-    surfaceSlipDisplacementPointPatchVectorField::projectModeNames_;
+const NamedEnum<surfaceDisplacementPointPatchVectorField::projectMode, 3>
+    surfaceDisplacementPointPatchVectorField::projectModeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void surfaceSlipDisplacementPointPatchVectorField::calcProjection
+void surfaceDisplacementPointPatchVectorField::calcProjection
 (
     vectorField& displacement
 ) const
@@ -89,7 +90,7 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
 
         zonePtr = &pZones[pZones.findZoneID(frozenPointsZone_)];
 
-        Pout<< "surfaceSlipDisplacementPointPatchVectorField : Fixing all "
+        Pout<< "surfaceDisplacementPointPatchVectorField : Fixing all "
             << zonePtr->size() << " points in pointZone " << zonePtr->name()
             << endl;
     }
@@ -289,7 +290,7 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
 
     if (nNotProjected > 0)
     {
-        Info<< "surfaceSlipDisplacement :"
+        Info<< "surfaceDisplacement :"
             << " on patch " << patch().name()
             << " did not project " << nNotProjected
             << " out of " << returnReduce(localPoints.size(), sumOp<label>())
@@ -300,47 +301,67 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-surfaceSlipDisplacementPointPatchVectorField::
-surfaceSlipDisplacementPointPatchVectorField
+surfaceDisplacementPointPatchVectorField::
+surfaceDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF
 )
 :
-    pointPatchVectorField(p, iF),
+    fixedValuePointPatchVectorField(p, iF),
+    velocity_(vector::zero),
     projectMode_(NEAREST),
     projectDir_(vector::zero),
     wedgePlane_(-1)
 {}
 
 
-surfaceSlipDisplacementPointPatchVectorField::
-surfaceSlipDisplacementPointPatchVectorField
+surfaceDisplacementPointPatchVectorField::
+surfaceDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
     const dictionary& dict
 )
 :
-    pointPatchVectorField(p, iF, dict),
+    fixedValuePointPatchVectorField(p, iF, dict),
+    velocity_(dict.lookup("velocity")),
     surfacesDict_(dict.subDict("geometry")),
     projectMode_(projectModeNames_.read(dict.lookup("projectMode"))),
     projectDir_(dict.lookup("projectDirection")),
     wedgePlane_(readLabel(dict.lookup("wedgePlane"))),
     frozenPointsZone_(dict.lookupOrDefault("frozenPointsZone", word::null))
-{}
+{
+    if (velocity_.x() < 0 || velocity_.y() < 0 || velocity_.z() < 0)
+    {
+        FatalErrorIn
+        (
+            "surfaceDisplacementPointPatchVectorField::\n"
+            "surfaceDisplacementPointPatchVectorField\n"
+            "(\n"
+            "    const pointPatch& p,\n"
+            "    const DimensionedField<vector, pointMesh>& iF,\n"
+            "    const dictionary& dict\n"
+            ")\n"
+        )   << "All components of velocity have to be positive : "
+            << velocity_ << nl
+            << "Set velocity components to a great value if no clipping"
+            << " necessary." << exit(FatalError);
+    }
+}
 
 
-surfaceSlipDisplacementPointPatchVectorField::
-surfaceSlipDisplacementPointPatchVectorField
+surfaceDisplacementPointPatchVectorField::
+surfaceDisplacementPointPatchVectorField
 (
-    const surfaceSlipDisplacementPointPatchVectorField& ppf,
+    const surfaceDisplacementPointPatchVectorField& ppf,
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
-    const pointPatchFieldMapper&
+    const pointPatchFieldMapper& mapper
 )
 :
-    pointPatchVectorField(p, iF),
+    fixedValuePointPatchVectorField(ppf, p, iF, mapper),
+    velocity_(ppf.velocity_),
     surfacesDict_(ppf.surfacesDict_),
     projectMode_(ppf.projectMode_),
     projectDir_(ppf.projectDir_),
@@ -349,13 +370,14 @@ surfaceSlipDisplacementPointPatchVectorField
 {}
 
 
-surfaceSlipDisplacementPointPatchVectorField::
-surfaceSlipDisplacementPointPatchVectorField
+surfaceDisplacementPointPatchVectorField::
+surfaceDisplacementPointPatchVectorField
 (
-    const surfaceSlipDisplacementPointPatchVectorField& ppf
+    const surfaceDisplacementPointPatchVectorField& ppf
 )
 :
-    pointPatchVectorField(ppf),
+    fixedValuePointPatchVectorField(ppf),
+    velocity_(ppf.velocity_),
     surfacesDict_(ppf.surfacesDict_),
     projectMode_(ppf.projectMode_),
     projectDir_(ppf.projectDir_),
@@ -364,14 +386,15 @@ surfaceSlipDisplacementPointPatchVectorField
 {}
 
 
-surfaceSlipDisplacementPointPatchVectorField::
-surfaceSlipDisplacementPointPatchVectorField
+surfaceDisplacementPointPatchVectorField::
+surfaceDisplacementPointPatchVectorField
 (
-    const surfaceSlipDisplacementPointPatchVectorField& ppf,
+    const surfaceDisplacementPointPatchVectorField& ppf,
     const DimensionedField<vector, pointMesh>& iF
 )
 :
-    pointPatchVectorField(ppf, iF),
+    fixedValuePointPatchVectorField(ppf, iF),
+    velocity_(ppf.velocity_),
     surfacesDict_(ppf.surfacesDict_),
     projectMode_(ppf.projectMode_),
     projectDir_(ppf.projectDir_),
@@ -383,7 +406,7 @@ surfaceSlipDisplacementPointPatchVectorField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const searchableSurfaces&
-surfaceSlipDisplacementPointPatchVectorField::surfaces() const
+surfaceDisplacementPointPatchVectorField::surfaces() const
 {
     if (surfacesPtr_.empty())
     {
@@ -408,29 +431,57 @@ surfaceSlipDisplacementPointPatchVectorField::surfaces() const
 }
 
 
-void surfaceSlipDisplacementPointPatchVectorField::evaluate
-(
-    const Pstream::commsTypes commsType
-)
+void surfaceDisplacementPointPatchVectorField::updateCoeffs()
 {
-    vectorField displacement(this->patchInternalField());
+    if (this->updated())
+    {
+        return;
+    }
 
-    // Calculate displacement to project points onto surface
+    const polyMesh& mesh = patch().boundaryMesh().mesh()();
+
+    vectorField currentDisplacement = this->patchInternalField();
+
+    // Calculate intersections with surface w.r.t points0.
+    vectorField displacement(currentDisplacement);
     calcProjection(displacement);
 
-    // Get internal field to insert values into
-    Field<vector>& iF = const_cast<Field<vector>&>(this->internalField());
+    // offset wrt current displacement
+    vectorField offset = displacement-currentDisplacement;
 
-    //setInInternalField(iF, motionU);
-    setInInternalField(iF, displacement);
+    // Clip offset to maximum displacement possible: velocity*timestep
 
-    pointPatchVectorField::evaluate(commsType);
+    const scalar deltaT = mesh.time().deltaT().value();
+    const vector clipVelocity = velocity_*deltaT;
+
+    forAll(displacement, i)
+    {
+        vector& d = offset[i];
+
+        for (direction cmpt = 0; cmpt < vector::nComponents; cmpt++)
+        {
+            if (d[cmpt] < 0)
+            {
+                d[cmpt] = max(d[cmpt], -clipVelocity[cmpt]);
+            }
+            else
+            {
+                d[cmpt] = min(d[cmpt], clipVelocity[cmpt]);
+            }
+        }
+    }
+
+    this->operator==(currentDisplacement+offset);
+
+    fixedValuePointPatchVectorField::updateCoeffs();
 }
 
 
-void surfaceSlipDisplacementPointPatchVectorField::write(Ostream& os) const
+void surfaceDisplacementPointPatchVectorField::write(Ostream& os) const
 {
-    pointPatchVectorField::write(os);
+    fixedValuePointPatchVectorField::write(os);
+    os.writeKeyword("velocity") << velocity_
+        << token::END_STATEMENT << nl;
     os.writeKeyword("geometry") << surfacesDict_
         << token::END_STATEMENT << nl;
     os.writeKeyword("projectMode") << projectModeNames_[projectMode_]
@@ -451,8 +502,8 @@ void surfaceSlipDisplacementPointPatchVectorField::write(Ostream& os) const
 
 makePointPatchTypeField
 (
-    pointPatchVectorField,
-    surfaceSlipDisplacementPointPatchVectorField
+    fixedValuePointPatchVectorField,
+    surfaceDisplacementPointPatchVectorField
 );
 
 

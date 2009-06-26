@@ -33,14 +33,16 @@ divSchemes
     div(phi,U)      Gauss upwind;
     div(phid,p)     Gauss limitedLinear 1;
     div(phi,e)      Gauss limitedLinear 1;
+    div(phiU,p)     Gauss limitedLinear 1;
+    div((muEff*dev2(grad(U).T()))) Gauss linear 1;
 }
 
 laplacianSchemes
 {
     default         none;
-    laplacian(mu,U) Gauss linear corrected;
-    laplacian(mu,e) Gauss linear corrected;
     laplacian((rho*(1|A(U))),p) Gauss linear corrected;
+    laplacian(muEff,U) Gauss linear corrected;
+    laplacian(alphaEff,e) Gauss linear corrected;
 }
 
 interpolationSchemes

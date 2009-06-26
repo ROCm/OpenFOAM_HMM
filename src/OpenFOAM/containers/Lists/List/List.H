@@ -248,18 +248,6 @@ public:
 template<class T>
 List<T> readList(Istream&);
 
-template<class T>
-void sort(List<T>&);
-
-template<class T, class Cmp>
-void sort(List<T>&, const Cmp&);
-
-template<class T>
-void stableSort(List<T>&);
-
-template<class T, class Cmp>
-void stableSort(List<T>&, const Cmp&);
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
