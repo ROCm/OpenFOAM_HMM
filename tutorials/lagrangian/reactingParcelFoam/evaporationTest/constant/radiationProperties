@@ -17,7 +17,7 @@ FoamFile
 
 radiation       off;
 
-radiationModel  P1;
+radiationModel  none;
 
 solverFreq      10;
 

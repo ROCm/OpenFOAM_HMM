@@ -40,7 +40,7 @@ solvers
         maxIter         100;
     }
 
-    pd
+    p
     {
         solver          GAMG;
         tolerance       1e-08;
@@ -55,7 +55,7 @@ solvers
         mergeLevels     1;
     }
 
-    pdFinal
+    pFinal
     {
         solver          PCG;
         preconditioner
@@ -122,9 +122,8 @@ PISO
     nAlphaSubCycles 3;
     cAlpha          1;
 
-    pdRefPoint      (0.51 0.51 0.51);
-    pdRefValue      0;
-    pRefValue       0;
+    pRefPoint      (0.51 0.51 0.51);
+    pRefValue      0;
 }
 
 

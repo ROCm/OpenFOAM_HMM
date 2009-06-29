@@ -70,6 +70,7 @@ protected:
         //- Current indent level
         unsigned short indentLevel_;
 
+
 public:
 
     // Constructors
@@ -87,10 +88,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~Ostream()
-        {}
+    //- Destructor
+    virtual ~Ostream()
+    {}
 
 
     // Member functions
@@ -199,7 +199,6 @@ public:
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
-#ifndef __CINT__
 
 typedef Ostream& (*OstreamManip)(Ostream&);
 
@@ -253,8 +252,6 @@ inline Ostream& endl(Ostream& os)
     os.endl();
     return os;
 }
-
-#endif
 
 
 // Useful aliases for tab and newline characters

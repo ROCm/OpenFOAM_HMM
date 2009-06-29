@@ -49,7 +49,7 @@ Foam::topoSetSource::addToUsageTable Foam::patchToFace::usage_
 (
     patchToFace::typeName,
     "\n    Usage: patchToFace patch\n\n"
-    "    Select all faces in the patch\n\n"
+    "    Select all faces in the patch. Note:accepts wildcards for patch.\n\n"
 );
 
 

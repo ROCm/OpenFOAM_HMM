@@ -428,20 +428,19 @@ inline bool Foam::HashTable<T, Key, Hash>::const_iterator::operator!=
 
 
 template<class T, class Key, class Hash>
-inline const T& 
+inline const T&
 Foam::HashTable<T, Key, Hash>::const_iterator::operator*() const
 {
     return elmtPtr_->obj_;
 }
 
-#ifndef __CINT__
 template<class T, class Key, class Hash>
 inline const T&
 Foam::HashTable<T, Key, Hash>::const_iterator::operator()() const
 {
     return elmtPtr_->obj_;
 }
-#endif
+
 
 template<class T, class Key, class Hash>
 inline

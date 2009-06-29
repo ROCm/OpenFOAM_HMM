@@ -69,8 +69,8 @@ Foam::COxidationMurphyShaddix<CloudType>::COxidationMurphyShaddix
     CsLocalId_ = owner.composition().localId(idSolid, "C");
 
     // Set local copies of thermo properties
-    WO2_ = owner.composition().carrierSpecies()[O2GlobalId_].W();
-    scalar WCO2 = owner.composition().carrierSpecies()[CO2GlobalId_].W();
+    WO2_ = owner.mcCarrierThermo().speciesData()[O2GlobalId_].W();
+    scalar WCO2 = owner.mcCarrierThermo().speciesData()[CO2GlobalId_].W();
     WC_ = WCO2 - WO2_;
 }
 
@@ -125,7 +125,7 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
 
     // Cell carrier phase O2 species density [kg/m^3]
     const scalar rhoO2 =
-        rhoc*this->owner().carrierThermo().composition().Y(O2GlobalId_)[cellI];
+        rhoc*this->owner().mcCarrierThermo().Y(O2GlobalId_)[cellI];
 
     if (rhoO2 < SMALL)
     {
@@ -211,9 +211,9 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
         this->owner().composition().solids().properties()[CsLocalId_].Hf()
       + this->owner().composition().solids().properties()[CsLocalId_].cp()*T;
     const scalar HCO2 =
-        this->owner().composition().carrierSpecies()[CO2GlobalId_].H(T);
+        this->owner().mcCarrierThermo().speciesData()[CO2GlobalId_].H(T);
     const scalar HO2 =
-        this->owner().composition().carrierSpecies()[O2GlobalId_].H(T);
+        this->owner().mcCarrierThermo().speciesData()[O2GlobalId_].H(T);
 
     // Heat of reaction
     return dOmega*(WC_*HC + WO2_*HO2 - (WC_ + WO2_)*HCO2);

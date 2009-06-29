@@ -47,7 +47,8 @@ Foam::topoSetSource::addToUsageTable Foam::zoneToPoint::usage_
 (
     zoneToPoint::typeName,
     "\n    Usage: zoneToPoint zone\n\n"
-    "    Select all points in the pointZone\n\n"
+    "    Select all points in the pointZone."
+    " Note:accepts wildcards for zone.\n\n"
 );
 
 

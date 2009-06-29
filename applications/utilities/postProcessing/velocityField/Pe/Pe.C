@@ -39,7 +39,7 @@ Description
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 #include "incompressible/RAS/RASModel/RASModel.H"
 #include "incompressible/LES/LESModel/LESModel.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "compressible/RAS/RASModel/RASModel.H"
 #include "compressible/LES/LESModel/LESModel.H"
 
@@ -204,7 +204,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             {
                 IOdictionary RASProperties(RASPropertiesHeader);
 
-                autoPtr<basicThermo> thermo(basicThermo::New(mesh));
+                autoPtr<basicPsiThermo> thermo(basicPsiThermo::New(mesh));
 
                 volScalarField rho
                 (
@@ -252,7 +252,7 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
             {
                 IOdictionary LESProperties(LESPropertiesHeader);
 
-                autoPtr<basicThermo> thermo(basicThermo::New(mesh));
+                autoPtr<basicPsiThermo> thermo(basicPsiThermo::New(mesh));
 
                 volScalarField rho
                 (

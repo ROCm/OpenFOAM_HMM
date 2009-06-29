@@ -40,11 +40,9 @@ SourceFiles
 #ifndef ThermoCloud_H
 #define ThermoCloud_H
 
-#include "autoPtr.H"
-#include "hCombustionThermo.H"
-
 #include "KinematicCloud.H"
 #include "thermoCloud.H"
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -220,7 +218,7 @@ public:
             //- Check parcel properties
             void checkParcelProperties
             (
-                ParcelType* pPtr,
+                ParcelType& parcel,
                 const scalar lagrangianDt,
                 const bool fullyDescribed
             );

@@ -32,7 +32,6 @@ Description
 
 SourceFiles
     coupledPolyPatch.C
-    coupledPolyPatchMorph.C
 
 \*---------------------------------------------------------------------------*/
 

@@ -28,8 +28,8 @@ gradSchemes
 divSchemes
 {
     div(rho*phi,U)  Gauss linear;
-    div(phi,gamma)  Gauss vanLeer;
-    div(phirb,gamma) Gauss interfaceCompression;
+    div(phi,alpha)  Gauss vanLeer;
+    div(phirb,alpha) Gauss interfaceCompression;
     div(phi,k)      Gauss upwind;
     div(phi,epsilon) Gauss upwind;
     div(phi,R)      Gauss upwind;
@@ -57,9 +57,9 @@ snGradSchemes
 fluxRequired
 {
     default         no;
-    pd              ;
-    pcorr           ;
-    gamma           ;
+    p;
+    pcorr;
+    alpha;
 }
 
 

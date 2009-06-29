@@ -113,22 +113,22 @@ Foam::ThermoCloud<ParcelType>::~ThermoCloud()
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::checkParcelProperties
 (
-    ParcelType* pPtr,
+    ParcelType& parcel,
     const scalar lagrangianDt,
     const bool fullyDescribed
 )
 {
     KinematicCloud<ParcelType>::checkParcelProperties
     (
-        pPtr,
+        parcel,
         lagrangianDt,
         fullyDescribed
     );
 
     if (!fullyDescribed)
     {
-        pPtr->T() = constProps_.T0();
-        pPtr->cp() = constProps_.cp0();
+        parcel.T() = constProps_.T0();
+        parcel.cp() = constProps_.cp0();
     }
 }
 

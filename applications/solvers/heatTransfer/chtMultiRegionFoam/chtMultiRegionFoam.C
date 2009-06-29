@@ -32,7 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
 #include "regionProperties.H"
@@ -42,37 +42,36 @@ Description
 
 int main(int argc, char *argv[])
 {
-
-#   include "setRootCase.H"
-#   include "createTime.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
 
     regionProperties rp(runTime);
 
-#   include "createFluidMeshes.H"
-#   include "createSolidMeshes.H"
+    #include "createFluidMeshes.H"
+    #include "createSolidMeshes.H"
 
-#   include "createFluidFields.H"
-#   include "createSolidFields.H"
+    #include "createFluidFields.H"
+    #include "createSolidFields.H"
 
-#   include "initContinuityErrs.H"
+    #include "initContinuityErrs.H"
 
-#   include "readTimeControls.H"
+    #include "readTimeControls.H"
 
     if (fluidRegions.size())
     {
-#       include "compressibleMultiRegionCourantNo.H"
-#       include "setInitialDeltaT.H"
+        #include "compressibleMultiRegionCourantNo.H"
+        #include "setInitialDeltaT.H"
     }
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPIMPLEControls.H"
+        #include "readTimeControls.H"
+        #include "readPIMPLEControls.H"
 
         if (fluidRegions.size())
         {
-#           include "compressibleMultiRegionCourantNo.H"
-#           include "setDeltaT.H"
+            #include "compressibleMultiRegionCourantNo.H"
+            #include "setDeltaT.H"
         }
 
         runTime++;
@@ -83,8 +82,8 @@ int main(int argc, char *argv[])
         {
             forAll(fluidRegions, i)
             {
-#               include "setRegionFluidFields.H"
-#               include "storeOldFluidFields.H"
+                #include "setRegionFluidFields.H"
+                #include "storeOldFluidFields.H"
             }
         }
 
@@ -96,18 +95,18 @@ int main(int argc, char *argv[])
             {
                 Info<< "\nSolving for fluid region "
                     << fluidRegions[i].name() << endl;
-#               include "setRegionFluidFields.H"
-#               include "readFluidMultiRegionPIMPLEControls.H"
-#               include "solveFluid.H"
+                #include "setRegionFluidFields.H"
+                #include "readFluidMultiRegionPIMPLEControls.H"
+                #include "solveFluid.H"
             }
 
             forAll(solidRegions, i)
             {
                 Info<< "\nSolving for solid region "
                     << solidRegions[i].name() << endl;
-#               include "setRegionSolidFields.H"
-#               include "readSolidMultiRegionPIMPLEControls.H"
-#               include "solveSolid.H"
+                #include "setRegionSolidFields.H"
+                #include "readSolidMultiRegionPIMPLEControls.H"
+                #include "solveSolid.H"
             }
         }
 

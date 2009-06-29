@@ -144,19 +144,8 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
 
             if (solverPerf.nIterations() == 0)
             {
-                #ifdef ICC_IA64_PREFETCH
-                #pragma ivdep
-                #endif
-
                 for (register label cell=0; cell<nCells; cell++)
                 {
-                    #ifdef ICC_IA64_PREFETCH
-                    __builtin_prefetch (&pAPtr[cell+96],0,1);
-                    __builtin_prefetch (&pTPtr[cell+96],0,1);
-                    __builtin_prefetch (&wAPtr[cell+96],0,1);
-                    __builtin_prefetch (&wTPtr[cell+96],0,1);
-                    #endif
-
                     pAPtr[cell] = wAPtr[cell];
                     pTPtr[cell] = wTPtr[cell];
                 }
@@ -165,19 +154,8 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
             {
                 scalar beta = wArT/wArTold;
 
-                #ifdef ICC_IA64_PREFETCH
-                #pragma ivdep
-                #endif
-
                 for (register label cell=0; cell<nCells; cell++)
                 {
-                    #ifdef ICC_IA64_PREFETCH
-                    __builtin_prefetch (&pAPtr[cell+96],0,1);
-                    __builtin_prefetch (&pTPtr[cell+96],0,1);
-                    __builtin_prefetch (&wAPtr[cell+96],0,1);
-                    __builtin_prefetch (&wTPtr[cell+96],0,1);
-                    #endif
-
                     pAPtr[cell] = wAPtr[cell] + beta*pAPtr[cell];
                     pTPtr[cell] = wTPtr[cell] + beta*pTPtr[cell];
                 }
@@ -199,21 +177,8 @@ Foam::lduMatrix::solverPerformance Foam::PBiCG::solve
 
             scalar alpha = wArT/wApT;
 
-            #ifdef ICC_IA64_PREFETCH
-            #pragma ivdep
-            #endif
-
             for (register label cell=0; cell<nCells; cell++)
             {
-                #ifdef ICC_IA64_PREFETCH
-                __builtin_prefetch (&pAPtr[cell+96],0,1);
-                __builtin_prefetch (&wAPtr[cell+96],0,1);
-                __builtin_prefetch (&wTPtr[cell+96],0,1);
-                __builtin_prefetch (&psiPtr[cell+96],0,1);
-                __builtin_prefetch (&rAPtr[cell+96],0,1);
-                __builtin_prefetch (&rTPtr[cell+96],0,1);
-                #endif
-
                 psiPtr[cell] += alpha*pAPtr[cell];
                 rAPtr[cell] -= alpha*wAPtr[cell];
                 rTPtr[cell] -= alpha*wTPtr[cell];

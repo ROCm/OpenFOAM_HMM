@@ -1,0 +1,15 @@
+#!/bin/sh
+set -x
+
+# remove old cell sets
+rm -rf constant/polyMesh/sets
+
+# remove old time folders
+rm -rf 0 *[1-9]*
+
+# remove old log files
+rm -f log*
+
+# copy 0.org to 0
+cp -r 0.org 0
+

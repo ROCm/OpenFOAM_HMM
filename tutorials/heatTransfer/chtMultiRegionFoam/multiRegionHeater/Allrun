@@ -15,13 +15,13 @@ runApplication splitMeshRegions -cellZones
 
 for i in bottomAir topAir heater leftSolid rightSolid
 do
-   changeDictionary -region $i
+   changeDictionary -region $i >& log.changeDictionary.$i
 done
 
 # remove fluid fields from solid regions (important for post-processing)
 for i in heater leftSolid rightSolid
 do
-   rm -f 0*/$i/{mut,alphat,epsilon,k,p,pd,U}
+   rm -f 0*/$i/{mut,alphat,epsilon,k,p,p,U}
 done
 
 # remove solid fields from fluid regions (important for post-processing)
@@ -37,7 +37,7 @@ done
 # Decompose
 for i in bottomAir topAir heater leftSolid rightSolid
 do
-   decomposePar -region $i
+   decomposePar -region $i >& log.decomposePar.$i
 done
 
 # Run
@@ -47,7 +47,7 @@ runParallel chtMultiRegionFoam 4 system/machines
 # Reconstruct
 for i in bottomAir topAir heater leftSolid rightSolid
 do
-   reconstructPar -region $i
+   reconstructPar -region $i >& log.reconstructPar.$i
 done
 
 

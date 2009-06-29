@@ -47,7 +47,8 @@ Foam::topoSetSource::addToUsageTable Foam::zoneToFace::usage_
 (
     zoneToFace::typeName,
     "\n    Usage: zoneToFace zone\n\n"
-    "    Select all faces in the faceZone\n\n"
+    "    Select all faces in the faceZone."
+    " Note:accepts wildcards for zone.\n\n"
 );
 
 

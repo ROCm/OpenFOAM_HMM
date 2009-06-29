@@ -30,6 +30,8 @@ License
 #include "ListLoopM.H"
 #include "contiguous.H"
 
+#include <algorithm>
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
@@ -113,6 +115,34 @@ Foam::label Foam::UList<T>::byteSize() const
     }
 
     return this->size_*sizeof(T);
+}
+
+
+template<class T>
+void Foam::sort(UList<T>& a)
+{
+    std::sort(a.begin(), a.end());
+}
+
+
+template<class T, class Cmp>
+void Foam::sort(UList<T>& a, const Cmp& cmp)
+{
+    std::sort(a.begin(), a.end(), cmp);
+}
+
+
+template<class T>
+void Foam::stableSort(UList<T>& a)
+{
+    std::stable_sort(a.begin(), a.end());
+}
+
+
+template<class T, class Cmp>
+void Foam::stableSort(UList<T>& a, const Cmp& cmp)
+{
+    std::stable_sort(a.begin(), a.end(), cmp);
 }
 
 

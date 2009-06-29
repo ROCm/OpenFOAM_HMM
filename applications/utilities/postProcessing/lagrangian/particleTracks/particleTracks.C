@@ -46,14 +46,20 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
+    timeSelector::addOptions();
+    #include "addRegionOption.H"
 
-#   include "createTime.H"
+    #include "setRootCase.H"
+
+    #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-#   include "createMesh.H"
-#   include "createFields.H"
+    #include "createNamedMesh.H"
+    #include "createFields.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    fileName vtkPath(runTime.path()/"VTK");
+    mkDir(vtkPath);
 
     Info<< "Scanning times to determine track data" << nl << endl;
 
@@ -63,29 +69,28 @@ int main(int argc, char *argv[])
         runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
 
-        IOobject origProcHeader
+        IOobject positionsHeader
         (
-            "origProc",
+            "positions",
             runTime.timeName(),
             cloud::prefix/cloudName,
             mesh,
-            IOobject::MUST_READ
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE,
+            false
         );
-        IOobject idHeader
-        (
-            "id",
-            runTime.timeName(),
-            cloud::prefix/cloudName,
-            mesh,
-            IOobject::MUST_READ
-        );
-        if (idHeader.headerOk() && origProcHeader.headerOk())
+
+        if (positionsHeader.headerOk())
         {
-            IOField<label> origProc(origProcHeader);
-            IOField<label> id(idHeader);
-            forAll(id, i)
+            Info<< "    Reading particle positions" << endl;
+            Cloud<passiveParticle> myCloud(mesh, cloudName, false);
+
+            forAllConstIter(Cloud<passiveParticle>, myCloud, iter)
             {
-                maxIds[origProc[i]] = max(maxIds[origProc[i]], id[i]);
+                label origId = iter().origId();
+                label origProc = iter().origProc();
+
+                maxIds[origProc] = max(maxIds[origProc], origId);
             }
         }
     }
@@ -124,60 +129,35 @@ int main(int argc, char *argv[])
             false
         );
 
-        IOobject origProcHeader
-        (
-            "origProc",
-            runTime.timeName(),
-            cloud::prefix/cloudName,
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        IOobject idHeader
-        (
-            "id",
-            runTime.timeName(),
-            cloud::prefix/cloudName,
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE,
-            false
-        );
-
-        if
-        (
-            positionsHeader.headerOk()
-         && origProcHeader.headerOk()
-         && idHeader.headerOk()
-        )
+        if (positionsHeader.headerOk())
         {
             Info<< "    Reading particle positions" << endl;
             Cloud<passiveParticle> myCloud(mesh, cloudName, false);
 
-            Info<< "    Reading particle id" << endl;
-            IOField<label> id(idHeader);
-
-            Info<< "    Reading particle origProc" << endl;
-            IOField<label> origProc(origProcHeader);
-
             // collect the track data on the master processor
-            label i = 0;
             List<pointField> allPositions(Pstream::nProcs());
-            allPositions[Pstream::myProcNo()].setSize(myCloud.size());
+            allPositions[Pstream::myProcNo()].setSize
+            (
+                myCloud.size(),
+                point::zero
+            );
+
+            List<labelField> allOrigIds(Pstream::nProcs());
+            allOrigIds[Pstream::myProcNo()].setSize(myCloud.size(), 0);
+
+            List<labelField> allOrigProcs(Pstream::nProcs());
+            allOrigProcs[Pstream::myProcNo()].setSize(myCloud.size(), 0);
+
+            label i = 0;
             forAllConstIter(Cloud<passiveParticle>, myCloud, iter)
             {
-                allPositions[Pstream::myProcNo()][i++] = iter().position();
+                allPositions[Pstream::myProcNo()][i] = iter().position();
+                allOrigIds[Pstream::myProcNo()][i] = iter().origId();
+                allOrigProcs[Pstream::myProcNo()][i] = iter().origProc();
+                i++;
             }
             Pstream::gatherList(allPositions);
-
-            List<labelList> allIds(Pstream::nProcs());
-            allIds[Pstream::myProcNo()] = id;
-            Pstream::gatherList(allIds);
-
-            List<labelList> allOrigProcs(Pstream::nProcs());
-            allOrigProcs[Pstream::myProcNo()] = origProc;
+            Pstream::gatherList(allOrigIds);
             Pstream::gatherList(allOrigProcs);
 
             Info<< "    Constructing tracks" << nl << endl;
@@ -189,7 +169,7 @@ int main(int argc, char *argv[])
                     {
                         label globalId =
                             startIds[allOrigProcs[procI][i]]
-                        + allIds[procI][i];
+                          + allOrigIds[procI][i];
 
                         if (globalId % sampleFrequency == 0)
                         {
@@ -216,7 +196,7 @@ int main(int argc, char *argv[])
     {
         Info<< "\nWriting particle tracks" << nl << endl;
 
-        OFstream vtkTracks("particleTracks.vtk");
+        OFstream vtkTracks(vtkPath/"particleTracks.vtk");
 
         // Total number of points in tracks + 1 per track
         label nPoints = 0;

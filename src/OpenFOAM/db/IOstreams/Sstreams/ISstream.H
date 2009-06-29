@@ -58,9 +58,7 @@ class ISstream
     // Private data
 
         fileName name_;
-        #ifndef __CINT__
         istream& is_;
-        #endif
 
 
     // Private member functions

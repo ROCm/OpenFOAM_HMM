@@ -58,9 +58,7 @@ class OSstream
     // Private data
 
         fileName name_;
-        #ifndef __CINT__
         ostream& os_;
-        #endif
 
 
     // Private Member Functions

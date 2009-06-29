@@ -27,13 +27,13 @@ Application
 
 Description
     Transient Solver for buoyant, turbulent flow of compressible fluids for
-    ventilation and heat-transfer.  Turbulence is modelled using a run-time
-    selectable compressible RAS model.
+    ventilation and heat-transfer. Turbulence is modelled using a run-time
+    selectable compressible RAS or LES model.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicRhoThermo.H"
 #include "turbulenceModel.H"
 #include "fixedGradientFvPatchFields.H"
 
@@ -80,6 +80,8 @@ int main(int argc, char *argv[])
         }
 
         turbulence->correct();
+
+        rho = thermo.rho();
 
         runTime.write();
 

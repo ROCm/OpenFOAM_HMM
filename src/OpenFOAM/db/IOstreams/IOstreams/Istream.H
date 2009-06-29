@@ -152,7 +152,6 @@ public:
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
-#ifndef __CINT__
 
 typedef Istream& (*IstreamManip)(Istream&);
 
@@ -168,8 +167,6 @@ inline Istream& operator>>(Istream& is, IOstreamManip f)
     f(is);
     return is;
 }
-
-#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

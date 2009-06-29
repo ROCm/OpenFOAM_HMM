@@ -80,7 +80,7 @@ class includeEntry
 public:
 
     //- Runtime type information
-    TypeName("include");
+    ClassName("include");
 
 
     // Member Functions
