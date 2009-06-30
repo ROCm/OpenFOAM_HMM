@@ -45,6 +45,7 @@ Foam::referredMolecule::sitePositions() const
     return sitePositions_;
 }
 
+
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 inline bool Foam::operator==
@@ -70,7 +71,5 @@ inline bool Foam::operator!=
     return !(a == b);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

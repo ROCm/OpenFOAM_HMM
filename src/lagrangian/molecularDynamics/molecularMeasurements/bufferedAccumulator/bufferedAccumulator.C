@@ -126,6 +126,7 @@ void Foam::bufferedAccumulator<Type>::setSizes
     }
 }
 
+
 template<class Type>
 Foam::label Foam::bufferedAccumulator<Type>::addToBuffers
 (
@@ -184,11 +185,10 @@ Foam::Field<Type> Foam::bufferedAccumulator<Type>::averaged() const
         WarningIn
         (
             "bufferedAccumulator<Type>::averagedbufferedAccumulator() const"
-        )
-        << "Averaged correlation function requested but averagesTaken = "
-        << averagesTaken_
-        << ". Returning empty field."
-        << endl;
+        )   << "Averaged correlation function requested but averagesTaken = "
+            << averagesTaken_
+            << ". Returning empty field."
+            << endl;
 
         return Field<Type>(bufferLength(), pTraits<Type>::zero);
     }
@@ -218,8 +218,7 @@ void Foam::bufferedAccumulator<Type>::operator=
         FatalErrorIn
         (
             "bufferedAccumulator<Type>::operator=(const bufferedAccumulator&)"
-        )
-            << "Attempted assignment to self"
+        )   << "Attempted assignment to self"
             << abort(FatalError);
     }
 

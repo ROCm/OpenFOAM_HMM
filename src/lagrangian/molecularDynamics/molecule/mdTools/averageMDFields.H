@@ -56,7 +56,7 @@ if (runTime.outputTime())
 
         forAll(singleSpeciesVelocity, sSV)
         {
-            if(allSpeciesN_RU[v][sSV])
+            if (allSpeciesN_RU[v][sSV])
             {
                 singleSpeciesVelocity[sSV] =
                     allSpeciesVelocitySum_RU[v][sSV]
@@ -78,7 +78,7 @@ if (runTime.outputTime())
 
     forAll(totalVelocity.internalField(), tV)
     {
-        if(totalMass_sum[tV] > VSMALL)
+        if (totalMass_sum[tV] > VSMALL)
         {
             totalVelocity.internalField()[tV] =
                 totalMomentum_sum[tV]
@@ -110,14 +110,13 @@ if (runTime.outputTime())
 
         forAll(singleSpeciesTemp, sST)
         {
-            if(allSpeciesN_RU[t][sST])
+            if (allSpeciesN_RU[t][sST])
             {
                 singleSpeciesTemp[sST] =
                     allSpeciesM_RU[t][sST]
                     /allSpeciesN_RU[t][sST]
                     /(3.0 * moleculeCloud::kb * allSpeciesN_RU[t][sST])
-                    *
-                    (
+                   *(
                         allSpeciesVelocityMagSquaredSum_RU[t][sST]
                         -
                         (
@@ -130,11 +129,10 @@ if (runTime.outputTime())
 
                 totalTemperatureVTerms_sum[sST] +=
                     allSpeciesM_RU[t][sST]
-                    /allSpeciesN_RU[t][sST]
-                    *
-                    (
+                   /allSpeciesN_RU[t][sST]
+                   *(
                         allSpeciesVelocityMagSquaredSum_RU[t][sST]
-                        -
+                      -
                         (
                             allSpeciesVelocitySum_RU[t][sST]
                             &
@@ -187,10 +185,9 @@ if (runTime.outputTime())
             {
                 singleSpeciesMeanKE[sSMKE] =
                     allSpeciesM_RU[mKE][sSMKE]
-                    /allSpeciesN_RU[mKE][sSMKE]
-                    /(2.0 * allSpeciesN_RU[mKE][sSMKE])
-                    *
-                    (
+                   /allSpeciesN_RU[mKE][sSMKE]
+                   /(2.0*allSpeciesN_RU[mKE][sSMKE])
+                   *(
                         allSpeciesVelocityMagSquaredSum_RU[mKE][sSMKE]
                     );
 
@@ -198,8 +195,7 @@ if (runTime.outputTime())
                     allSpeciesM_RU[mKE][sSMKE]
                     /allSpeciesN_RU[mKE][sSMKE]
                     /2.0
-                    *
-                    (
+                   *(
                         allSpeciesVelocityMagSquaredSum_RU[mKE][sSMKE]
                     );
             }

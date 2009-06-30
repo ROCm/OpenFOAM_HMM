@@ -46,7 +46,7 @@ namespace pairPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class dampedCoulomb Declaration
+                         Class dampedCoulomb Declaration
 \*---------------------------------------------------------------------------*/
 
 class dampedCoulomb
@@ -59,14 +59,17 @@ class dampedCoulomb
 
         scalar alpha_;
 
+
 public:
 
     //- Runtime type information
-        TypeName("dampedCoulomb");
+    TypeName("dampedCoulomb");
+
 
     // Static data members
 
         static scalar oneOverFourPiEps0;
+
 
     // Constructors
 

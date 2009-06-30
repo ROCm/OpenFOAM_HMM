@@ -46,7 +46,7 @@ namespace pairPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class lennardJones Declaration
+                         Class lennardJones Declaration
 \*---------------------------------------------------------------------------*/
 
 class lennardJones
@@ -59,6 +59,7 @@ class lennardJones
 
         scalar sigma_;
         scalar epsilon_;
+
 
 public:
 

@@ -79,8 +79,12 @@ void Foam::directInteractionList::buildDirectInteractionList
                             {
                                 if
                                 (
-                                    findIndex(directInteractionList[cellI],
-                                    cellJ) == -1
+                                    findIndex
+                                    (
+                                        directInteractionList[cellI],
+                                        cellJ
+                                    )
+                                 == -1
                                 )
                                 {
                                     directInteractionList[cellI].append(cellJ);
@@ -91,8 +95,13 @@ void Foam::directInteractionList::buildDirectInteractionList
                             {
                                 if
                                 (
-                                    findIndex(directInteractionList[cellJ],
-                                    cellI) == -1
+                                    findIndex
+                                    (
+                                        directInteractionList[cellJ],
+                                        cellI
+                                    )
+                                 ==
+                                    -1
                                 )
                                 {
                                     directInteractionList[cellJ].append(cellI);
@@ -109,11 +118,11 @@ void Foam::directInteractionList::buildDirectInteractionList
         Info<< tab << "Point-Face, Edge-Edge direct interaction list build."
             << endl;
 
-        forAll (mesh.points(), p)
+        forAll(mesh.points(), p)
         {
             forAll(mesh.faces(), f)
             {
-                if(il_.testPointFaceDistance(p, f))
+                if (il_.testPointFaceDistance(p, f))
                 {
                     const labelList& pCells(mesh.pointCells()[p]);
 
@@ -129,8 +138,13 @@ void Foam::directInteractionList::buildDirectInteractionList
                         {
                             if
                             (
-                                findIndex(directInteractionList[cellI],
-                                cellO) == -1
+                                findIndex
+                                (
+                                    directInteractionList[cellI],
+                                    cellO
+                                )
+                             ==
+                                -1
                             )
                             {
                                 directInteractionList[cellI].append(cellO);
@@ -141,8 +155,13 @@ void Foam::directInteractionList::buildDirectInteractionList
                         {
                             if
                             (
-                                findIndex(directInteractionList[cellO],
-                                cellI) == -1
+                                findIndex
+                                (
+                                    directInteractionList[cellO],
+                                    cellI
+                                )
+                             ==
+                                -1
                             )
                             {
                                 directInteractionList[cellO].append(cellI);
@@ -160,8 +179,13 @@ void Foam::directInteractionList::buildDirectInteractionList
                             {
                                 if
                                 (
-                                    findIndex(directInteractionList[cellI],
-                                    cellN) == -1
+                                    findIndex
+                                    (
+                                        directInteractionList[cellI],
+                                        cellN
+                                    )
+                                 ==
+                                    -1
                                 )
                                 {
                                     directInteractionList[cellI].append(cellN);
@@ -172,8 +196,13 @@ void Foam::directInteractionList::buildDirectInteractionList
                             {
                                 if
                                 (
-                                    findIndex(directInteractionList[cellN],
-                                    cellI) == -1
+                                    findIndex
+                                    (
+                                        directInteractionList[cellN],
+                                        cellI
+                                    )
+                                 ==
+                                    -1
                                 )
                                 {
                                     directInteractionList[cellN].append(cellI);
@@ -187,7 +216,7 @@ void Foam::directInteractionList::buildDirectInteractionList
 
         label edgeJIndex;
 
-        forAll (mesh.edges(), edgeIIndex)
+        forAll(mesh.edges(), edgeIIndex)
         {
             const edge& eI(mesh.edges()[edgeIIndex]);
 
@@ -218,8 +247,13 @@ void Foam::directInteractionList::buildDirectInteractionList
                             {
                                 if
                                 (
-                                    findIndex(directInteractionList[cellI],
-                                    cellJ) == -1
+                                    findIndex
+                                    (
+                                        directInteractionList[cellI],
+                                        cellJ
+                                    )
+                                 ==
+                                    -1
                                 )
                                 {
                                     directInteractionList[cellI].append(cellJ);
@@ -230,8 +264,13 @@ void Foam::directInteractionList::buildDirectInteractionList
                             {
                                 if
                                 (
-                                    findIndex(directInteractionList[cellJ],
-                                    cellI) == -1
+                                    findIndex
+                                    (
+                                        directInteractionList[cellJ],
+                                        cellI
+                                    )
+                                 ==
+                                    -1
                                 )
                                 {
                                     directInteractionList[cellJ].append(cellI);
@@ -272,11 +311,11 @@ Foam::directInteractionList::directInteractionList
     labelListList(il.mesh().nCells()),
     il_(il)
 {
-    if((*this).size() > 1)
+    if ((*this).size() > 1)
     {
         buildDirectInteractionList(pointPointListBuild);
     }
-    else if((*this).size() == 1)
+    else if ((*this).size() == 1)
     {
         Info<< nl
             << "Single cell mesh, no direct interaction lists required."
@@ -303,18 +342,6 @@ Foam::directInteractionList::directInteractionList
 
 Foam::directInteractionList::~directInteractionList()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

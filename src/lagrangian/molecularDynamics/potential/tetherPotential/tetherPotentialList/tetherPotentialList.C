@@ -154,6 +154,5 @@ Foam::scalar Foam::tetherPotentialList::energy
     return (*this)[tetherPotentialIndex(a)].energy(rIT);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

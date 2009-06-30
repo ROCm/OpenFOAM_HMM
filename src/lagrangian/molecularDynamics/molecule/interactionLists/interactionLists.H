@@ -52,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class interactionLists Declaration
+                       Class interactionLists Declaration
 \*---------------------------------------------------------------------------*/
 
 class interactionLists
@@ -71,6 +71,7 @@ class interactionLists
 
         List<receivingReferralList> cellReceivingReferralLists_;
 
+
     // Private Member Functions
 
         //- Build referralLists which define how to send information
@@ -83,12 +84,14 @@ class interactionLists
         //- Disallow default bitwise assignment
         void operator=(const interactionLists&);
 
+
 public:
 
     // Static data members
 
         //- Tolerance for checking that faces on a patch segment
         static scalar transTol;
+
 
     // Constructors
 
@@ -102,6 +105,7 @@ public:
 
         //- Construct from file
         interactionLists(const polyMesh& mesh);
+
 
     // Destructor
 
@@ -176,6 +180,7 @@ public:
                 const labelList& segmentEdges,
                 const labelList& segmentPoints
             ) const;
+
 
         // Access
 

@@ -72,7 +72,7 @@ namespace pairPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class maitlandSmith Declaration
+                       Class maitlandSmith Declaration
 \*---------------------------------------------------------------------------*/
 
 class maitlandSmith
@@ -87,6 +87,7 @@ class maitlandSmith
         scalar gamma_;
         scalar rm_;
         scalar epsilon_;
+
 
 public:
 

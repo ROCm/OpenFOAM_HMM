@@ -155,7 +155,10 @@ public:
     // IOstream Operators
 
         friend Ostream& operator<< <Type>
-        (Ostream&, const correlationFunction<Type>&);
+        (
+            Ostream&,
+            const correlationFunction<Type>&
+        );
 };
 
 

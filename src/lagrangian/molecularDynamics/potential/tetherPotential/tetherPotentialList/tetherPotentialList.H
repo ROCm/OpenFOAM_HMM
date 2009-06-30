@@ -57,6 +57,7 @@ class tetherPotentialList
 
         List<label> idMap_;
 
+
     // Private Member Functions
 
         inline label tetherPotentialIndex
@@ -92,9 +93,11 @@ public:
             const List<word>& tetherSiteIdList
         );
 
+
     // Destructor
 
         ~tetherPotentialList();
+
 
     // Member Functions
 

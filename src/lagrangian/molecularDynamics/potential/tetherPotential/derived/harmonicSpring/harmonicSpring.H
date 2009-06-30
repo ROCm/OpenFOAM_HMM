@@ -46,7 +46,7 @@ namespace tetherPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class harmonicSpring Declaration
+                       Class harmonicSpring Declaration
 \*---------------------------------------------------------------------------*/
 
 class harmonicSpring

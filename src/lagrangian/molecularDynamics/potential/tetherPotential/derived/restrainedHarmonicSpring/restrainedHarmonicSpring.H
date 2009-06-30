@@ -46,7 +46,7 @@ namespace tetherPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class restrainedHarmonicSpring Declaration
+                  Class restrainedHarmonicSpring Declaration
 \*---------------------------------------------------------------------------*/
 
 class restrainedHarmonicSpring

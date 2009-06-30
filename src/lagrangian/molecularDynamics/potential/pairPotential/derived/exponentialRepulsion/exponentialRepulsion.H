@@ -46,7 +46,7 @@ namespace pairPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class exponentialRepulsion Declaration
+                   Class exponentialRepulsion Declaration
 \*---------------------------------------------------------------------------*/
 
 class exponentialRepulsion
@@ -59,6 +59,7 @@ class exponentialRepulsion
 
         scalar rm_;
         scalar epsilon_;
+
 
 public:
 

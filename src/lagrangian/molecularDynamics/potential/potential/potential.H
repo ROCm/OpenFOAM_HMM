@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class potential Declaration
+                         Class potential Declaration
 \*---------------------------------------------------------------------------*/
 
 class potential
@@ -73,6 +73,7 @@ class potential
         tetherPotentialList tetherPotentials_;
 
         vector gravity_;
+
 
     // Private Member Functions
 
@@ -107,6 +108,7 @@ public:
             const IOdictionary& mdInitialiseDict,
             IOdictionary& idListDict
         );
+
 
     // Destructor
 

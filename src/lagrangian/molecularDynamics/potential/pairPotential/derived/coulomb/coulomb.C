@@ -47,9 +47,7 @@ addToRunTimeSelectionTable
 );
 
 scalar coulomb::oneOverFourPiEps0 =
-1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12);
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+    1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -64,6 +62,7 @@ coulomb::coulomb
 {
     setLookupTables();
 }
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 

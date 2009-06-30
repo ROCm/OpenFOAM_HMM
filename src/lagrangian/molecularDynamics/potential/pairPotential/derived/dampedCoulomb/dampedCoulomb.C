@@ -47,9 +47,7 @@ addToRunTimeSelectionTable
 );
 
 scalar dampedCoulomb::oneOverFourPiEps0 =
-1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12);
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+    1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -70,6 +68,7 @@ dampedCoulomb::dampedCoulomb
     setLookupTables();
 }
 
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 scalar dampedCoulomb::unscaledEnergy(const scalar r) const
@@ -83,7 +82,7 @@ bool dampedCoulomb::read(const dictionary& pairPotentialProperties)
     pairPotential::read(pairPotentialProperties);
 
     dampedCoulombCoeffs_ =
-    pairPotentialProperties.subDict(typeName + "Coeffs");
+        pairPotentialProperties.subDict(typeName + "Coeffs");
 
     dampedCoulombCoeffs_.lookup("alpha") >> alpha_;
 

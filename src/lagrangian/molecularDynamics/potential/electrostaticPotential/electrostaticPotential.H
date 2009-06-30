@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class electrostaticPotential Declaration
+                   Class electrostaticPotential Declaration
 \*---------------------------------------------------------------------------*/
 
 class electrostaticPotential

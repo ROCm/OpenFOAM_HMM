@@ -56,6 +56,7 @@ inline Foam::label Foam::pairPotentialList::pairPotentialIndex
     return index;
 }
 
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 inline Foam::scalar Foam::pairPotentialList::rCutMax() const

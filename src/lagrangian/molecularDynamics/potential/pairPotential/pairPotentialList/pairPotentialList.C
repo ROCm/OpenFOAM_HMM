@@ -170,12 +170,14 @@ void Foam::pairPotentialList::readPairPotentialDict
     rCutMaxSqr_ = rCutMax_*rCutMax_;
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pairPotentialList::pairPotentialList()
 :
     PtrList<pairPotential>()
 {}
+
 
 Foam::pairPotentialList::pairPotentialList
 (
@@ -319,6 +321,5 @@ Foam::scalar Foam::pairPotentialList::energy
     return e;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

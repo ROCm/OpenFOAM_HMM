@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class referredMolecule Declaration
+                      Class referredMolecule Declaration
 \*---------------------------------------------------------------------------*/
 
 class referredMolecule

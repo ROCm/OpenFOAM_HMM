@@ -27,8 +27,6 @@ License
 #include "electrostaticPotential.H"
 #include "mathematicalConstants.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::electrostaticPotential::electrostaticPotential()

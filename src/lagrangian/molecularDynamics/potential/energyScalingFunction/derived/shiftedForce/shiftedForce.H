@@ -46,7 +46,7 @@ namespace energyScalingFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class shiftedForce Declaration
+                       Class shiftedForce Declaration
 \*---------------------------------------------------------------------------*/
 
 class shiftedForce

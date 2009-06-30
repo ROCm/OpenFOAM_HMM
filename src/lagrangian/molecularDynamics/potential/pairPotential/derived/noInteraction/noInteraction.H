@@ -46,7 +46,7 @@ namespace pairPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noInteraction Declaration
+                       Class noInteraction Declaration
 \*---------------------------------------------------------------------------*/
 
 class noInteraction

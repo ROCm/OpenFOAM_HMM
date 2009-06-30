@@ -53,7 +53,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class referredCell Declaration
+                          Class referredCell Declaration
 \*---------------------------------------------------------------------------*/
 
 class referredCell

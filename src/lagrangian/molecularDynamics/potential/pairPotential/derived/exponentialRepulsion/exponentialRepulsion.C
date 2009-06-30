@@ -45,8 +45,6 @@ addToRunTimeSelectionTable
     dictionary
 );
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -57,12 +55,16 @@ exponentialRepulsion::exponentialRepulsion
 )
 :
     pairPotential(name, exponentialRepulsion),
-    exponentialRepulsionCoeffs_(exponentialRepulsion.subDict(typeName + "Coeffs")),
+    exponentialRepulsionCoeffs_
+    (
+        exponentialRepulsion.subDict(typeName + "Coeffs")
+    ),
     rm_(readScalar(exponentialRepulsionCoeffs_.lookup("rm"))),
     epsilon_(readScalar(exponentialRepulsionCoeffs_.lookup("epsilon")))
 {
     setLookupTables();
 }
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -76,7 +78,8 @@ bool exponentialRepulsion::read(const dictionary& exponentialRepulsion)
 {
     pairPotential::read(exponentialRepulsion);
 
-    exponentialRepulsionCoeffs_ = exponentialRepulsion.subDict(typeName + "Coeffs");
+    exponentialRepulsionCoeffs_ =
+        exponentialRepulsion.subDict(typeName + "Coeffs");
 
     exponentialRepulsionCoeffs_.lookup("rm") >> rm_;
     exponentialRepulsionCoeffs_.lookup("epsilon") >> epsilon_;

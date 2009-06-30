@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class tetherPotential Declaration
+                      Class tetherPotential Declaration
 \*---------------------------------------------------------------------------*/
 
 class tetherPotential

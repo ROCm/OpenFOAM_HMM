@@ -36,8 +36,6 @@ namespace Foam
 defineTypeNameAndDebug(energyScalingFunction, 0);
 defineRunTimeSelectionTable(energyScalingFunction, dictionary);
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::energyScalingFunction::energyScalingFunction
@@ -65,6 +63,7 @@ bool Foam::energyScalingFunction::read
 
     return true;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

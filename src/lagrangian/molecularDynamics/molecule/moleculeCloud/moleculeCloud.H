@@ -52,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class moleculeCloud Declaration
+                       Class moleculeCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 class moleculeCloud
@@ -75,6 +75,7 @@ private:
         List<molecule::constantProperties> constPropList_;
 
         Random rndGen_;
+
 
     // Private Member Functions
 
@@ -163,6 +164,7 @@ public:
 
         static scalar vacuumPermittivity;
 
+
     // Constructors
 
         //- Construct given mesh and potential references
@@ -180,8 +182,8 @@ public:
             const IOdictionary& mdInitialiseDict
         );
 
-    // Member Functions
 
+    // Member Functions
 
         //- Evolve the molecules (move, calculate forces, control state etc)
         void evolve();
@@ -193,6 +195,7 @@ public:
             const scalar targetTemperature,
             const scalar measuredTemperature
         );
+
 
         // Access
 
@@ -207,19 +210,18 @@ public:
             inline const List<molecule::constantProperties> constProps() const;
 
             inline const molecule::constantProperties&
-            constProps(label id) const;
+                constProps(label id) const;
 
             inline Random& rndGen();
+
 
     // Member Operators
 
         //- Write fields
-
-            void writeFields() const;
+        void writeFields() const;
 
         //- Write molecule sites in XYZ format
-
-            void writeXYZ(const fileName& fName) const;
+        void writeXYZ(const fileName& fName) const;
 };
 
 

@@ -108,6 +108,7 @@ public:
 
             bool linearMoleculeTest() const;
 
+
     public:
 
         inline constantProperties();
@@ -214,6 +215,7 @@ private:
 
         List<vector> sitePositions_;
 
+
     // Private Member Functions
 
         tensor rotationTensorX(scalar deltaT) const;
@@ -221,6 +223,7 @@ private:
         tensor rotationTensorY(scalar deltaT) const;
 
         tensor rotationTensorZ(scalar deltaT) const;
+
 
 public:
 

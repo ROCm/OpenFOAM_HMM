@@ -46,7 +46,7 @@ namespace energyScalingFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class doubleSigmoid Declaration
+                        Class doubleSigmoid Declaration
 \*---------------------------------------------------------------------------*/
 
 class doubleSigmoid
@@ -61,6 +61,7 @@ class doubleSigmoid
         scalar scale1_;
         scalar shift2_;
         scalar scale2_;
+
 
     // Private Member Functions
 

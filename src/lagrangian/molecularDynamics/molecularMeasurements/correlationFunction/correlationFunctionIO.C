@@ -34,10 +34,10 @@ bool Foam::correlationFunction<Type>::writeAveraged(Ostream& os) const
 
     forAll(averageCF, v)
     {
-        os<< v*sampleInterval()
-          << token::SPACE
-          << averageCF[v]
-          << nl;
+        os  << v*sampleInterval()
+            << token::SPACE
+            << averageCF[v]
+            << nl;
     }
 
     return os.good();
@@ -51,12 +51,12 @@ Foam::Ostream& Foam::operator<<
     const correlationFunction<Type>& cF
 )
 {
-    os<< cF.duration()
-      << nl << cF.sampleInterval()
-      << nl << cF.averagingInterval()
-      << nl << cF.sampleSteps()
-      << nl << cF.tZeroBuffers()
-      << nl << static_cast<const bufferedAccumulator<scalar>&>(cF);
+    os  << cF.duration()
+        << nl << cF.sampleInterval()
+        << nl << cF.averagingInterval()
+        << nl << cF.sampleSteps()
+        << nl << cF.tZeroBuffers()
+        << nl << static_cast<const bufferedAccumulator<scalar>&>(cF);
 
     // Check state of Ostream
     os.check

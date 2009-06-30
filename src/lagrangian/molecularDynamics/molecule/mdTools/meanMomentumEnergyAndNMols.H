@@ -186,7 +186,7 @@ if (singleStepNMols)
 }
 else
 {
-    Info << "No molecules in system" << endl;
+    Info<< "No molecules in system" << endl;
 }
 
 

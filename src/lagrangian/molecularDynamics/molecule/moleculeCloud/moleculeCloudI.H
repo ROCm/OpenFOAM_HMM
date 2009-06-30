@@ -32,9 +32,9 @@ inline void Foam::moleculeCloud::evaluatePair
     molecule* molJ
 )
 {
-    const pairPotentialList& pairPot(pot_.pairPotentials());
+    const pairPotentialList& pairPot = pot_.pairPotentials();
 
-    const pairPotential& electrostatic(pairPot.electrostatic());
+    const pairPotential& electrostatic = pairPot.electrostatic();
 
     label idI = molI->id();
 
@@ -67,7 +67,7 @@ inline void Foam::moleculeCloud::evaluatePair
             if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
             {
                 vector rsIsJ =
-                molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+                    molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
@@ -75,8 +75,9 @@ inline void Foam::moleculeCloud::evaluatePair
                 {
                     scalar rsIsJMag = mag(rsIsJ);
 
-                    vector fsIsJ = (rsIsJ/rsIsJMag)
-                    *pairPot.force(idsI, idsJ, rsIsJMag);
+                    vector fsIsJ =
+                        (rsIsJ/rsIsJMag)
+                       *pairPot.force(idsI, idsJ, rsIsJMag);
 
                     molI->siteForces()[sI] += fsIsJ;
 
@@ -94,7 +95,7 @@ inline void Foam::moleculeCloud::evaluatePair
                     vector rIJ = molI->position() - molJ->position();
 
                     tensor virialContribution =
-                    (rsIsJ * fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
+                        (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
 
                     molI->rf() += virialContribution;
 
@@ -121,15 +122,17 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     scalar chargeJ = constPropJ.siteCharges()[sJ];
 
-                    vector fsIsJ = (rsIsJ/rsIsJMag)
-                    *chargeI*chargeJ*electrostatic.force(rsIsJMag);
+                    vector fsIsJ =
+                        (rsIsJ/rsIsJMag)
+                       *chargeI*chargeJ*electrostatic.force(rsIsJMag);
 
                     molI->siteForces()[sI] += fsIsJ;
 
                     molJ->siteForces()[sJ] += -fsIsJ;
 
-                    scalar potentialEnergy = chargeI*chargeJ
-                    *electrostatic.energy(rsIsJMag);
+                    scalar potentialEnergy =
+                        chargeI*chargeJ
+                       *electrostatic.energy(rsIsJMag);
 
                     molI->potentialEnergy() += 0.5*potentialEnergy;
 
@@ -138,7 +141,7 @@ inline void Foam::moleculeCloud::evaluatePair
                     vector rIJ = molI->position() - molJ->position();
 
                     tensor virialContribution =
-                    (rsIsJ * fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
+                        (rsIsJ*fsIsJ)*(rsIsJ & rIJ)/rsIsJMagSq;
 
                     molI->rf() += virialContribution;
 
@@ -153,15 +156,16 @@ inline void Foam::moleculeCloud::evaluatePair
     }
 }
 
+
 inline void Foam::moleculeCloud::evaluatePair
 (
     molecule* molReal,
     referredMolecule* molRef
 )
 {
-    const pairPotentialList& pairPot(pot_.pairPotentials());
+    const pairPotentialList& pairPot = pot_.pairPotentials();
 
-    const pairPotential& electrostatic(pairPot.electrostatic());
+    const pairPotential& electrostatic = pairPot.electrostatic();
 
     label idReal = molReal->id();
 
@@ -194,16 +198,18 @@ inline void Foam::moleculeCloud::evaluatePair
             if (pairPotentialSitesReal[sReal] && pairPotentialSitesRef[sRef])
             {
                 vector rsRealsRef =
-                molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
+                    molReal->sitePositions()[sReal]
+                  - molRef->sitePositions()[sRef];
 
                 scalar rsRealsRefMagSq = magSqr(rsRealsRef);
 
-                if(pairPot.rCutSqr(idsReal, idsRef, rsRealsRefMagSq))
+                if (pairPot.rCutSqr(idsReal, idsRef, rsRealsRefMagSq))
                 {
                     scalar rsRealsRefMag = mag(rsRealsRef);
 
-                    vector fsRealsRef = (rsRealsRef/rsRealsRefMag)
-                    *pairPot.force(idsReal, idsRef, rsRealsRefMag);
+                    vector fsRealsRef =
+                        (rsRealsRef/rsRealsRefMag)
+                       *pairPot.force(idsReal, idsRef, rsRealsRefMag);
 
                     molReal->siteForces()[sReal] += fsRealsRef;
 
@@ -216,9 +222,10 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     vector rRealRef = molReal->position() - molRef->position();
 
-                    molReal->rf() += (rsRealsRef * fsRealsRef)
-                    *(rsRealsRef & rRealRef)
-                    /rsRealsRefMagSq;
+                    molReal->rf() +=
+                        (rsRealsRef*fsRealsRef)
+                       *(rsRealsRef & rRealRef)
+                       /rsRealsRefMagSq;
 
                     // molReal->rf() += rsRealsRef * fsRealsRef;
 
@@ -228,11 +235,12 @@ inline void Foam::moleculeCloud::evaluatePair
             if (electrostaticSitesReal[sReal] && electrostaticSitesRef[sRef])
             {
                 vector rsRealsRef =
-                molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
+                    molReal->sitePositions()[sReal]
+                  - molRef->sitePositions()[sRef];
 
                 scalar rsRealsRefMagSq = magSqr(rsRealsRef);
 
-                if(rsRealsRefMagSq <= electrostatic.rCutSqr())
+                if (rsRealsRefMagSq <= electrostatic.rCutSqr())
                 {
                     scalar rsRealsRefMag = mag(rsRealsRef);
 
@@ -240,22 +248,25 @@ inline void Foam::moleculeCloud::evaluatePair
 
                     scalar chargeRef = constPropRef.siteCharges()[sRef];
 
-                    vector fsRealsRef = (rsRealsRef/rsRealsRefMag)
-                    *chargeReal*chargeRef
-                    *electrostatic.force(rsRealsRefMag);
+                    vector fsRealsRef =
+                        (rsRealsRef/rsRealsRefMag)
+                       *chargeReal*chargeRef
+                       *electrostatic.force(rsRealsRefMag);
 
                     molReal->siteForces()[sReal] += fsRealsRef;
 
-                    scalar potentialEnergy = chargeReal*chargeRef
-                    *electrostatic.energy(rsRealsRefMag);
+                    scalar potentialEnergy =
+                        chargeReal*chargeRef
+                       *electrostatic.energy(rsRealsRefMag);
 
                     molReal->potentialEnergy() += 0.5*potentialEnergy;
 
                     vector rRealRef = molReal->position() - molRef->position();
 
-                    molReal->rf() += (rsRealsRef * fsRealsRef)
-                    *(rsRealsRef & rRealRef)
-                    /rsRealsRefMagSq;
+                    molReal->rf() +=
+                        (rsRealsRef*fsRealsRef)
+                       *(rsRealsRef & rRealRef)
+                       /rsRealsRefMagSq;
 
                     // molReal->rf() += rsRealsRef * fsRealsRef;
                 }
@@ -271,9 +282,9 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
     molecule* molJ
 ) const
 {
-    const pairPotentialList& pairPot(pot_.pairPotentials());
+    const pairPotentialList& pairPot = pot_.pairPotentials();
 
-    const pairPotential& electrostatic(pairPot.electrostatic());
+    const pairPotential& electrostatic = pairPot.electrostatic();
 
     label idI = molI->id();
 
@@ -306,11 +317,11 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             if (pairPotentialSitesI[sI] && pairPotentialSitesJ[sJ])
             {
                 vector rsIsJ =
-                molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+                    molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                if(pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
+                if (pairPot.rCutSqr(idsI, idsJ, rsIsJMagSq))
                 {
                     scalar rsIsJMag = mag(rsIsJ);
 
@@ -321,7 +332,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                     if (rsIsJMag < SMALL)
                     {
                         WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                        << "Molecule site pair closer than "
+                            << "Molecule site pair closer than "
                             << SMALL
                             << ": mag separation = " << rsIsJMag
                             << ". These may have been placed on top of each"
@@ -355,11 +366,11 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             if (electrostaticSitesI[sI] && electrostaticSitesJ[sJ])
             {
                 vector rsIsJ =
-                molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
+                    molI->sitePositions()[sI] - molJ->sitePositions()[sJ];
 
                 scalar rsIsJMagSq = magSqr(rsIsJ);
 
-                if(pairPot.rCutMaxSqr(rsIsJMagSq))
+                if (pairPot.rCutMaxSqr(rsIsJMagSq))
                 {
                     scalar rsIsJMag = mag(rsIsJ);
 
@@ -370,7 +381,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                     if (rsIsJMag < SMALL)
                     {
                         WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                        << "Molecule site pair closer than "
+                            << "Molecule site pair closer than "
                             << SMALL
                             << ": mag separation = " << rsIsJMag
                             << ". These may have been placed on top of each"
@@ -414,9 +425,9 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
     referredMolecule* molRef
 ) const
 {
-    const pairPotentialList& pairPot(pot_.pairPotentials());
+    const pairPotentialList& pairPot = pot_.pairPotentials();
 
-    const pairPotential& electrostatic(pairPot.electrostatic());
+    const pairPotential& electrostatic = pairPot.electrostatic();
 
     label idReal = molReal->id();
 
@@ -449,11 +460,12 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             if (pairPotentialSitesReal[sReal] && pairPotentialSitesRef[sRef])
             {
                 vector rsRealsRef =
-                molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
+                    molReal->sitePositions()[sReal]
+                  - molRef->sitePositions()[sRef];
 
                 scalar rsRealsRefMagSq = magSqr(rsRealsRef);
 
-                if(pairPot.rCutSqr(idsReal, idsRef, rsRealsRefMagSq))
+                if (pairPot.rCutSqr(idsReal, idsRef, rsRealsRefMagSq))
                 {
                     scalar rsRealsRefMag = mag(rsRealsRef);
 
@@ -464,7 +476,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                     if (rsRealsRefMag < SMALL)
                     {
                         WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                        << "Molecule site pair closer than "
+                            << "Molecule site pair closer than "
                             << SMALL
                             << ": mag separation = " << rsRealsRefMag
                             << ". These may have been placed on top of each"
@@ -499,11 +511,12 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
             if (electrostaticSitesReal[sReal] && electrostaticSitesRef[sRef])
             {
                 vector rsRealsRef =
-                molReal->sitePositions()[sReal] - molRef->sitePositions()[sRef];
+                    molReal->sitePositions()[sReal]
+                  - molRef->sitePositions()[sRef];
 
                 scalar rsRealsRefMagSq = magSqr(rsRealsRef);
 
-                if(pairPot.rCutMaxSqr(rsRealsRefMagSq))
+                if (pairPot.rCutMaxSqr(rsRealsRefMagSq))
                 {
                     scalar rsRealsRefMag = mag(rsRealsRef);
 
@@ -514,7 +527,7 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                     if (rsRealsRefMag < SMALL)
                     {
                         WarningIn("moleculeCloud::removeHighEnergyOverlaps()")
-                        << "Molecule site pair closer than "
+                            << "Molecule site pair closer than "
                             << SMALL
                             << ": mag separation = " << rsRealsRefMag
                             << ". These may have been placed on top of each"
@@ -539,8 +552,9 @@ inline bool Foam::moleculeCloud::evaluatePotentialLimit
                     (
                         mag
                         (
-                            chargeReal*chargeRef
-                            *electrostatic.energy(rsRealsRefMag)
+                            chargeReal
+                           *chargeRef
+                           *electrostatic.energy(rsRealsRefMag)
                         )
                       > pot_.potentialEnergyLimit()
                     )
@@ -598,6 +612,7 @@ inline Foam::vector Foam::moleculeCloud::equipartitionAngularMomentum
         );
     }
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

@@ -34,9 +34,9 @@ Foam::Ostream&
 Foam::operator<<(Ostream& os, const bufferedAccumulator<Type>& bA)
 {
 
-    os<< bA.averagesTaken_
-      << static_cast<const List< Field<Type> >&>(bA)
-      << bA.bufferOffsets();
+    os  << bA.averagesTaken_
+        << static_cast<const List< Field<Type> >&>(bA)
+        << bA.bufferOffsets();
 
     // Check state of Ostream
     os.check

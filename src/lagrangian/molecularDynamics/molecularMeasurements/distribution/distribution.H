@@ -30,7 +30,6 @@ Description
 SourceFiles
     distributionI.H
     distribution.C
-    distributionIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -46,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class distribution Declaration
+                        Class distribution Declaration
 \*---------------------------------------------------------------------------*/
 
 class distribution

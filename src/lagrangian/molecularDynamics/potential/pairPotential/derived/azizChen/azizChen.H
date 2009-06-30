@@ -85,6 +85,7 @@ class azizChen
         scalar D_;
         scalar gamma_;
 
+
 public:
 
     //- Runtime type information

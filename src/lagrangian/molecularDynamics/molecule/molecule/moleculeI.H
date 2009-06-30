@@ -119,10 +119,8 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses_[i]*diagTensor
-            (
-                0, p.x()*p.x(), p.x()*p.x()
-            );
+            momOfInertia +=
+                siteMasses_[i]*diagTensor(0, p.x()*p.x(), p.x()*p.x());
         }
 
         momentOfInertia_ = diagTensor
@@ -156,8 +154,7 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             FatalErrorIn("molecule::constantProperties::constantProperties")
                 << "An eigenvalue of the inertia tensor is zero, the molecule "
-                << dict.name()
-                << " is not a valid 6DOF shape."
+                << dict.name() << " is not a valid 6DOF shape."
                 << nl << abort(FatalError);
         }
 
@@ -172,7 +169,7 @@ inline Foam::molecule::constantProperties::constantProperties
         // global axes
 
         tensor Q =
-        vector(1,0,0)*e.x() + vector(0,1,0)*e.y() + vector(0,0,1)*e.z();
+            vector(1,0,0)*e.x() + vector(0,1,0)*e.y() + vector(0,0,1)*e.z();
 
         // Transform the site positions
 
@@ -379,7 +376,7 @@ inline bool Foam::molecule::constantProperties::pairPotentialSite
 {
     label s = findIndex(siteIds_, sId);
 
-    if(s == -1)
+    if (s == -1)
     {
         FatalErrorIn("moleculeI.H") << nl
             << sId << " site not found."
@@ -403,10 +400,12 @@ inline bool Foam::molecule::constantProperties::electrostaticSite
 {
     label s = findIndex(siteIds_, sId);
 
-    if(s == -1)
+    if (s == -1)
     {
-        FatalErrorIn("moleculeI.H") << nl
-            << sId << " site not found."
+        FatalErrorIn
+        (
+            "molecule::constantProperties::electrostaticSite(label)"
+        )   << sId << " site not found."
             << nl << abort(FatalError);
     }
 
@@ -615,7 +614,5 @@ inline Foam::label Foam::molecule::id() const
     return id_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

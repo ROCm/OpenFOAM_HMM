@@ -54,7 +54,7 @@ namespace Foam
 class energyScalingFunction;
 
 /*---------------------------------------------------------------------------*\
-                Class pairPotential Declaration
+                     Class pairPotential Declaration
 \*---------------------------------------------------------------------------*/
 
 class pairPotential
@@ -79,6 +79,7 @@ protected:
         mutable energyScalingFunction* esfPtr_;
 
         bool writeTables_;
+
 
     // Private Member Functions
 
@@ -160,7 +161,7 @@ public:
 
         inline bool writeTables() const;
 
-        virtual scalar unscaledEnergy (const scalar r) const = 0;
+        virtual scalar unscaledEnergy(const scalar r) const = 0;
 
         scalar scaledEnergy(const scalar r) const;
 

@@ -342,6 +342,7 @@ bool Foam::interactionLists::testPointFaceDistance
     );
 }
 
+
 bool Foam::interactionLists::testPointFaceDistance
 (
     const vector& p,

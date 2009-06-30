@@ -55,16 +55,16 @@ Foam::molecule::molecule
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> Q_;
-            is >> v_;
-            is >> a_;
-            is >> pi_;
-            is >> tau_;
-            is >> siteForces_;
-            is >> sitePositions_;
-            is >> specialPosition_;
+            is  >> Q_;
+            is  >> v_;
+            is  >> a_;
+            is  >> pi_;
+            is  >> tau_;
+            is  >> siteForces_;
+            is  >> sitePositions_;
+            is  >> specialPosition_;
             potentialEnergy_ = readScalar(is);
-            is >> rf_;
+            is  >> rf_;
             special_ = readLabel(is);
             id_ = readLabel(is);
         }
@@ -74,18 +74,18 @@ Foam::molecule::molecule
             (
                 reinterpret_cast<char*>(&Q_),
                 sizeof(Q_)
-                + sizeof(v_)
-                + sizeof(a_)
-                + sizeof(pi_)
-                + sizeof(tau_)
-                + sizeof(specialPosition_)
-                + sizeof(potentialEnergy_)
-                + sizeof(rf_)
-                + sizeof(special_)
-                + sizeof(id_)
+              + sizeof(v_)
+              + sizeof(a_)
+              + sizeof(pi_)
+              + sizeof(tau_)
+              + sizeof(specialPosition_)
+              + sizeof(potentialEnergy_)
+              + sizeof(rf_)
+              + sizeof(special_)
+              + sizeof(id_)
             );
 
-            is >> siteForces_ >> sitePositions_;
+            is  >> siteForces_ >> sitePositions_;
         }
     }
 
@@ -176,6 +176,7 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
         mC.fieldIOobject("piGlobal", IOobject::NO_READ),
         np
     );
+
     IOField<vector> tauGlobal
     (
         mC.fieldIOobject("tauGlobal", IOobject::NO_READ),
@@ -276,17 +277,17 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
         (
             reinterpret_cast<const char*>(&mol.Q_),
             sizeof(mol.Q_)
-            + sizeof(mol.v_)
-            + sizeof(mol.a_)
-            + sizeof(mol.pi_)
-            + sizeof(mol.tau_)
-            + sizeof(mol.specialPosition_)
-            + sizeof(mol.potentialEnergy_)
-            + sizeof(mol.rf_)
-            + sizeof(mol.special_)
-            + sizeof(mol.id_)
+          + sizeof(mol.v_)
+          + sizeof(mol.a_)
+          + sizeof(mol.pi_)
+          + sizeof(mol.tau_)
+          + sizeof(mol.specialPosition_)
+          + sizeof(mol.potentialEnergy_)
+          + sizeof(mol.rf_)
+          + sizeof(mol.special_)
+          + sizeof(mol.id_)
         );
-        os << mol.siteForces_ << mol.sitePositions_;
+        os  << mol.siteForces_ << mol.sitePositions_;
     }
 
     // Check state of Ostream

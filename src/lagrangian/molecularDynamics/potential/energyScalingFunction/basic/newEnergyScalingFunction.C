@@ -58,8 +58,8 @@ autoPtr<energyScalingFunction> energyScalingFunction::New
         (
             "energyScalingFunction::New()"
         )   << "Unknown energyScalingFunction type "
-            << energyScalingFunctionTypeName << endl << endl
-            << "Valid  energyScalingFunctions are : " << endl
+            << energyScalingFunctionTypeName << nl << nl
+            << "Valid  energyScalingFunctions are: " << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }

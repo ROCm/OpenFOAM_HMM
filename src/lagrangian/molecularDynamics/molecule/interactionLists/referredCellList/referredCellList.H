@@ -48,7 +48,7 @@ namespace Foam
 class interactionLists;
 
 /*---------------------------------------------------------------------------*\
-                        Class referredCellList Declaration
+                      Class referredCellList Declaration
 \*---------------------------------------------------------------------------*/
 
 class referredCellList
@@ -59,7 +59,8 @@ class referredCellList
 
         const interactionLists& il_;
 
-        // Private Member Functions
+
+    // Private Member Functions
 
         void buildReferredCellList
         (

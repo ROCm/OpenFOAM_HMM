@@ -138,7 +138,7 @@ void Foam::correlationFunction<Type>::calculateCorrelationFunction
         FatalErrorIn("correlationFunction<Type>::calculateCorrelationFunction")
             << "Trying to supply a Field of length"
             << currentValues.size()
-            <<" to calculate the correlation function.  "
+            << " to calculate the correlation function. "
             << "Expecting a Field of length "
             << measurandFieldSize() << nl
             << abort(FatalError);
@@ -205,7 +205,7 @@ Foam::scalar Foam::correlationFunction<Type>::integral() const
 
     scalar cFIntegral = 0.0;
 
-    for(label v = 0; v < averageCF.size() - 1; v++)
+    for (label v = 0; v < averageCF.size() - 1; v++)
     {
         cFIntegral +=
             0.5

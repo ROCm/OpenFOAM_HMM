@@ -56,7 +56,8 @@ class coulomb
 public:
 
     //- Runtime type information
-        TypeName("coulomb");
+    TypeName("coulomb");
+
 
     // Static data members
 

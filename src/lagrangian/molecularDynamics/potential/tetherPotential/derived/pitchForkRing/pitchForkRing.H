@@ -46,7 +46,7 @@ namespace tetherPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pitchForkRing Declaration
+                       Class pitchForkRing Declaration
 \*---------------------------------------------------------------------------*/
 
 class pitchForkRing
