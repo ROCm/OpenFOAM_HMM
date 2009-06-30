@@ -110,7 +110,7 @@ Foam::label Foam::meshRefinement::createBaffle
                 -1,                         // masterPointID
                 -1,                         // masterEdgeID
                 faceI,                      // masterFaceID,
-                false,                      // face flip
+                true,                       // face flip
                 neiPatch,                   // patch for face
                 zoneID,                     // zone for face
                 zoneFlip                    // face flip in zone
@@ -1017,7 +1017,7 @@ void Foam::meshRefinement::findCellZoneGeometric
 
         if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
         {
-            // Give face the zone of the owner
+            // Give face the zone of max cell zone
             namedSurfaceIndex[faceI] = findIndex
             (
                 surfaceToCellZone,
@@ -1059,7 +1059,7 @@ void Foam::meshRefinement::findCellZoneGeometric
 
                 if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
                 {
-                    // Give face the zone of the owner
+                    // Give face the max cell zone
                     namedSurfaceIndex[faceI] = findIndex
                     (
                         surfaceToCellZone,
@@ -2211,16 +2211,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         {
             label faceI = testFaces[i];
 
-            label own = mesh_.faceOwner()[faceI];
-
             if (mesh_.isInternalFace(faceI))
             {
-                start[i] = cellCentres[own];
-                end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
+                start[i] = cellCentres[faceOwner[faceI]];
+                end[i] = cellCentres[faceNeighbour[faceI]];
             }
             else
             {
-                start[i] = cellCentres[own];
+                start[i] = cellCentres[faceOwner[faceI]];
                 end[i] = neiCc[faceI-mesh_.nInternalFaces()];
             }
         }
@@ -2357,6 +2355,20 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         if (surfI != -1)
         {
+            // Orient face zone to have slave cells in max cell zone.
+            label ownZone = cellToZone[faceOwner[faceI]];
+            label neiZone = cellToZone[faceNeighbour[faceI]];
+
+            bool flip;
+            if (ownZone == max(ownZone, neiZone))
+            {
+                flip = false;
+            }
+            else
+            {
+                flip = true;
+            }
+
             meshMod.setAction
             (
                 polyModifyFace
@@ -2369,12 +2381,31 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     -1,                             // patch for face
                     false,                          // remove from zone
                     surfaceToFaceZone[surfI],       // zone for face
-                    false                           // face flip in zone
+                    flip                            // face flip in zone
                 )
             );
         }
     }
 
+    // Get coupled neighbour cellZone. Set to -1 on non-coupled patches.
+    labelList neiCellZone(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                neiCellZone[faceI-mesh_.nInternalFaces()] =
+                    cellToZone[mesh_.faceOwner()[faceI]];
+            }
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
+
+    // Set owner as no-flip
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -2387,6 +2418,19 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
             if (surfI != -1)
             {
+                label ownZone = cellToZone[faceOwner[faceI]];
+                label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+
+                bool flip;
+                if (ownZone == max(ownZone, neiZone))
+                {
+                    flip = false;
+                }
+                else
+                {
+                    flip = true;
+                }
+
                 meshMod.setAction
                 (
                     polyModifyFace
@@ -2399,7 +2443,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                         patchI,                         // patch for face
                         false,                          // remove from zone
                         surfaceToFaceZone[surfI],       // zone for face
-                        false                           // face flip in zone
+                        flip                            // face flip in zone
                     )
                 );
             }

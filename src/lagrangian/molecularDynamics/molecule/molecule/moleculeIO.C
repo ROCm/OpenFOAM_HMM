@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,16 +55,16 @@ Foam::molecule::molecule
     {
         if (is.format() == IOstream::ASCII)
         {
-            is >> Q_;
-            is >> v_;
-            is >> a_;
-            is >> pi_;
-            is >> tau_;
-            is >> siteForces_;
-            is >> sitePositions_;
-            is >> specialPosition_;
+            is  >> Q_;
+            is  >> v_;
+            is  >> a_;
+            is  >> pi_;
+            is  >> tau_;
+            is  >> siteForces_;
+            is  >> sitePositions_;
+            is  >> specialPosition_;
             potentialEnergy_ = readScalar(is);
-            is >> rf_;
+            is  >> rf_;
             special_ = readLabel(is);
             id_ = readLabel(is);
         }
@@ -74,18 +74,18 @@ Foam::molecule::molecule
             (
                 reinterpret_cast<char*>(&Q_),
                 sizeof(Q_)
-                + sizeof(v_)
-                + sizeof(a_)
-                + sizeof(pi_)
-                + sizeof(tau_)
-                + sizeof(specialPosition_)
-                + sizeof(potentialEnergy_)
-                + sizeof(rf_)
-                + sizeof(special_)
-                + sizeof(id_)
+              + sizeof(v_)
+              + sizeof(a_)
+              + sizeof(pi_)
+              + sizeof(tau_)
+              + sizeof(specialPosition_)
+              + sizeof(potentialEnergy_)
+              + sizeof(rf_)
+              + sizeof(special_)
+              + sizeof(id_)
             );
 
-            is >> siteForces_ >> sitePositions_;
+            is  >> siteForces_ >> sitePositions_;
         }
     }
 
@@ -169,6 +169,38 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
     IOField<label> special(mC.fieldIOobject("special", IOobject::NO_READ), np);
     IOField<label> id(mC.fieldIOobject("id", IOobject::NO_READ), np);
 
+    // Post processing fields
+
+    IOField<vector> piGlobal
+    (
+        mC.fieldIOobject("piGlobal", IOobject::NO_READ),
+        np
+    );
+
+    IOField<vector> tauGlobal
+    (
+        mC.fieldIOobject("tauGlobal", IOobject::NO_READ),
+        np
+    );
+
+    IOField<vector> orientation1
+    (
+        mC.fieldIOobject("orientation1", IOobject::NO_READ),
+        np
+    );
+
+    IOField<vector> orientation2
+    (
+        mC.fieldIOobject("orientation2", IOobject::NO_READ),
+        np
+    );
+
+    IOField<vector> orientation3
+    (
+        mC.fieldIOobject("orientation3", IOobject::NO_READ),
+        np
+    );
+
     label i = 0;
     forAllConstIter(moleculeCloud, mC, iter)
     {
@@ -182,6 +214,14 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
         specialPosition[i] = mol.specialPosition_;
         special[i] = mol.special_;
         id[i] = mol.id_;
+
+        piGlobal[i] = mol.Q_ & mol.pi_;
+        tauGlobal[i] = mol.Q_ & mol.tau_;
+
+        orientation1[i] = mol.Q_ & vector(1,0,0);
+        orientation2[i] = mol.Q_ & vector(0,1,0);
+        orientation3[i] = mol.Q_ & vector(0,0,1);
+
         i++;
     }
 
@@ -193,6 +233,18 @@ void Foam::molecule::writeFields(const moleculeCloud& mC)
     specialPosition.write();
     special.write();
     id.write();
+
+    piGlobal.write();
+    tauGlobal.write();
+
+    orientation1.write();
+    orientation2.write();
+    orientation3.write();
+
+    mC.writeXYZ
+    (
+        mC.mesh().time().timePath() + "/lagrangian" + "/moleculeCloud.xmol"
+    );
 }
 
 
@@ -225,17 +277,17 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const molecule& mol)
         (
             reinterpret_cast<const char*>(&mol.Q_),
             sizeof(mol.Q_)
-            + sizeof(mol.v_)
-            + sizeof(mol.a_)
-            + sizeof(mol.pi_)
-            + sizeof(mol.tau_)
-            + sizeof(mol.specialPosition_)
-            + sizeof(mol.potentialEnergy_)
-            + sizeof(mol.rf_)
-            + sizeof(mol.special_)
-            + sizeof(mol.id_)
+          + sizeof(mol.v_)
+          + sizeof(mol.a_)
+          + sizeof(mol.pi_)
+          + sizeof(mol.tau_)
+          + sizeof(mol.specialPosition_)
+          + sizeof(mol.potentialEnergy_)
+          + sizeof(mol.rf_)
+          + sizeof(mol.special_)
+          + sizeof(mol.id_)
         );
-        os << mol.siteForces_ << mol.sitePositions_;
+        os  << mol.siteForces_ << mol.sitePositions_;
     }
 
     // Check state of Ostream

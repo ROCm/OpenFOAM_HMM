@@ -83,8 +83,8 @@ geometry
 
         seal
         {
-            surface fridgeFreezer;
-            scale (1.0 1.0 1.0);
+            surface box1;
+            scale (1.0 1.0 2.1);
             transform
             {
                 type    cartesian;
@@ -95,8 +95,8 @@ geometry
         }
         herring
         {
-            surface fridgeFreezer;
-            scale (1.0 1.0 1.0);
+            surface box1;
+            scale (1.0 1.0 2.1);
             transform
             {
                 type    cartesian;

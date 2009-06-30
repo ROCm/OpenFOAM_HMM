@@ -159,7 +159,7 @@ public:
             //    return nRegions_;
             //}
 
-            //- Per point that is to duplicated to the local index
+            //- Per point that is to be duplicated the local index
             const Map<label>& meshPointMap() const
             {
                 return meshPointMap_;

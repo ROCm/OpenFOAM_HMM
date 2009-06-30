@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,7 @@ class shifted
 
         scalar e_at_rCut_;
 
+
 public:
 
     //- Runtime type information
@@ -79,11 +80,12 @@ public:
         ~shifted()
         {}
 
+
     // Member Functions
 
         void scaleEnergy(scalar& e, const scalar r) const;
 
-        //- Read transportProperties dictionary
+        //- Read dictionary
         bool read(const dictionary& energyScalingFunctionProperties);
 };
 

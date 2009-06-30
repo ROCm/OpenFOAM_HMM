@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -155,7 +155,10 @@ public:
     // IOstream Operators
 
         friend Ostream& operator<< <Type>
-        (Ostream&, const correlationFunction<Type>&);
+        (
+            Ostream&,
+            const correlationFunction<Type>&
+        );
 };
 
 

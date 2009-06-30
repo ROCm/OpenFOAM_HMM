@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,7 +75,7 @@ label distribution::totalEntries() const
                 << "sumOfEntries = " << sumOfEntries
                 << ". This is most likely to be because too many samples "
                 << "have been added to the bins and the label has 'rolled "
-                << "round'.  Try distribution::approxTotalEntries which "
+                << "round'. Try distribution::approxTotalEntries which "
                 << "returns a scalar." << endl;
 
             sumOfEntries = -1;
@@ -336,8 +336,8 @@ List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
                    *(oldDist[u].second() - oldDist[u-1].second())
                   +
                     (
-                        oldDist[u-1].second() * oldDist[u].first()
-                      - oldDist[u].second() * oldDist[u-1].first()
+                        oldDist[u-1].second()*oldDist[u].first()
+                      - oldDist[u].second()*oldDist[u-1].first()
                     )
                     /binWidth_;
             }
@@ -348,7 +348,7 @@ List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
             {
                 newDist[u].second() =
                     (0.5 + scalar(newKey))*-oldDist[u].second()
-                  + oldDist[u].second() * (oldDist[u].first() + binWidth_)
+                  + oldDist[u].second()*(oldDist[u].first() + binWidth_)
                    /binWidth_;
             }
             else
@@ -358,8 +358,8 @@ List< Pair<scalar> > distribution::normalisedShifted(const scalar shiftValue)
                    *(oldDist[u+1].second() - oldDist[u].second())
                   +
                     (
-                        oldDist[u].second() * oldDist[u+1].first()
-                      - oldDist[u+1].second() * oldDist[u].first()
+                        oldDist[u].second()*oldDist[u+1].first()
+                      - oldDist[u+1].second()*oldDist[u].first()
                     )
                    /binWidth_;
             }
@@ -395,7 +395,7 @@ List<Pair<scalar> > distribution::raw()
     {
         label key = keys[k];
 
-        rawDist[k].first() = (0.5 + scalar(key)) * binWidth_;
+        rawDist[k].first() = (0.5 + scalar(key))*binWidth_;
 
         rawDist[k].second() = scalar((*this)[key]);
     }
