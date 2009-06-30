@@ -302,6 +302,10 @@ public:
         //- Check zone definition. Return true if in error.
         bool checkDefinition(const bool report = false) const;
 
+        //- Check whether all procs have faces synchronised. Return
+        //  true if in error.
+        bool checkParallelSync(const bool report = false) const;
+
         //- Correct patch after moving points
         virtual void movePoints(const pointField&);
 
