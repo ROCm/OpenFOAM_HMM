@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class PatchPostProcessing Declaration
+                    Class PatchPostProcessing Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -59,7 +59,7 @@ class PatchPostProcessing
         //- Reference to the mesh
         const polyMesh& mesh_;
 
-        //- Maximum number of parcels to store per patch
+        //- Maximum number of parcels to store
         label maxStoredParcels_;
 
         //- List of patch names
@@ -68,8 +68,14 @@ class PatchPostProcessing
         //- List of parcel data per patch
         List<DynamicList<autoPtr<parcelType> > > patchData_;
 
-        //- Mapping from global to local patch ids
-        labelList globalToLocalPatchIds_;
+        //- Mapping from local to global patch ids
+        labelList patchIds_;
+
+
+    // Private member functions
+
+        //- Returns local patchI if patch is in patchIds_ list
+        label applyToPatch(const label globalPatchI) const;
 
 
 protected:
@@ -109,8 +115,8 @@ public:
             //- Return const access to the list of patch names
             inline const wordList& patchNames() const;
 
-            //- Return const mapping from global to local patch ids
-            inline const labelList& globalToLocalPatchIds() const;
+            //- Return const mapping from local to global patch ids
+            inline const labelList& patchIds() const;
 
 
         // Evaluation
