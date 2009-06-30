@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,6 +44,7 @@ SourceFiles
 #include "interactionLists.H"
 #include "labelVector.H"
 #include "Random.H"
+#include "fileName.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +52,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class moleculeCloud Declaration
+                       Class moleculeCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 class moleculeCloud
@@ -74,6 +75,7 @@ private:
         List<molecule::constantProperties> constPropList_;
 
         Random rndGen_;
+
 
     // Private Member Functions
 
@@ -131,6 +133,8 @@ private:
             const vector& bulkVelocity
         );
 
+        label nSites() const;
+
         inline vector equipartitionLinearVelocity
         (
             scalar temperature,
@@ -160,6 +164,7 @@ public:
 
         static scalar vacuumPermittivity;
 
+
     // Constructors
 
         //- Construct given mesh and potential references
@@ -177,8 +182,8 @@ public:
             const IOdictionary& mdInitialiseDict
         );
 
-    // Member Functions
 
+    // Member Functions
 
         //- Evolve the molecules (move, calculate forces, control state etc)
         void evolve();
@@ -190,6 +195,7 @@ public:
             const scalar targetTemperature,
             const scalar measuredTemperature
         );
+
 
         // Access
 
@@ -204,15 +210,18 @@ public:
             inline const List<molecule::constantProperties> constProps() const;
 
             inline const molecule::constantProperties&
-            constProps(label id) const;
+                constProps(label id) const;
 
             inline Random& rndGen();
+
 
     // Member Operators
 
         //- Write fields
+        void writeFields() const;
 
-            void writeFields() const;
+        //- Write molecule sites in XYZ format
+        void writeXYZ(const fileName& fName) const;
 };
 
 

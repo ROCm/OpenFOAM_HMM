@@ -40,7 +40,7 @@ namespace Foam
 
 template<>
 const char*
-NamedEnum<surfaceSlipDisplacementPointPatchVectorField::followMode, 3>::
+NamedEnum<surfaceSlipDisplacementPointPatchVectorField::projectMode, 3>::
 names[] =
 {
     "nearest",
@@ -48,8 +48,8 @@ names[] =
     "fixedNormal"
 };
 
-const NamedEnum<surfaceSlipDisplacementPointPatchVectorField::followMode, 3>
-    surfaceSlipDisplacementPointPatchVectorField::followModeNames_;
+const NamedEnum<surfaceSlipDisplacementPointPatchVectorField::projectMode, 3>
+    surfaceSlipDisplacementPointPatchVectorField::projectModeNames_;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -95,12 +95,10 @@ void surfaceSlipDisplacementPointPatchVectorField::calcProjection
     }
 
     // Get the starting locations from the motionSolver
-    const displacementFvMotionSolver& motionSolver =
-        mesh.lookupObject<displacementFvMotionSolver>
-        (
-            "dynamicMeshDict"
-        );
-    const pointField& points0 = motionSolver.points0();
+    const pointField& points0 = mesh.lookupObject<displacementFvMotionSolver>
+    (
+        "dynamicMeshDict"
+    ).points0();
 
 
     pointField start(meshPoints.size());
@@ -326,7 +324,7 @@ surfaceSlipDisplacementPointPatchVectorField
 :
     pointPatchVectorField(p, iF, dict),
     surfacesDict_(dict.subDict("geometry")),
-    projectMode_(followModeNames_.read(dict.lookup("followMode"))),
+    projectMode_(projectModeNames_.read(dict.lookup("projectMode"))),
     projectDir_(dict.lookup("projectDirection")),
     wedgePlane_(readLabel(dict.lookup("wedgePlane"))),
     frozenPointsZone_(dict.lookupOrDefault("frozenPointsZone", word::null))
@@ -343,11 +341,11 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(p, iF),
-    surfacesDict_(ppf.surfacesDict()),
-    projectMode_(ppf.projectMode()),
-    projectDir_(ppf.projectDir()),
-    wedgePlane_(ppf.wedgePlane()),
-    frozenPointsZone_(ppf.frozenPointsZone())
+    surfacesDict_(ppf.surfacesDict_),
+    projectMode_(ppf.projectMode_),
+    projectDir_(ppf.projectDir_),
+    wedgePlane_(ppf.wedgePlane_),
+    frozenPointsZone_(ppf.frozenPointsZone_)
 {}
 
 
@@ -358,11 +356,11 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(ppf),
-    surfacesDict_(ppf.surfacesDict()),
-    projectMode_(ppf.projectMode()),
-    projectDir_(ppf.projectDir()),
-    wedgePlane_(ppf.wedgePlane()),
-    frozenPointsZone_(ppf.frozenPointsZone())
+    surfacesDict_(ppf.surfacesDict_),
+    projectMode_(ppf.projectMode_),
+    projectDir_(ppf.projectDir_),
+    wedgePlane_(ppf.wedgePlane_),
+    frozenPointsZone_(ppf.frozenPointsZone_)
 {}
 
 
@@ -374,11 +372,11 @@ surfaceSlipDisplacementPointPatchVectorField
 )
 :
     pointPatchVectorField(ppf, iF),
-    surfacesDict_(ppf.surfacesDict()),
-    projectMode_(ppf.projectMode()),
-    projectDir_(ppf.projectDir()),
-    wedgePlane_(ppf.wedgePlane()),
-    frozenPointsZone_(ppf.frozenPointsZone())
+    surfacesDict_(ppf.surfacesDict_),
+    projectMode_(ppf.projectMode_),
+    projectDir_(ppf.projectDir_),
+    wedgePlane_(ppf.wedgePlane_),
+    frozenPointsZone_(ppf.frozenPointsZone_)
 {}
 
 
@@ -435,7 +433,7 @@ void surfaceSlipDisplacementPointPatchVectorField::write(Ostream& os) const
     pointPatchVectorField::write(os);
     os.writeKeyword("geometry") << surfacesDict_
         << token::END_STATEMENT << nl;
-    os.writeKeyword("followMode") << followModeNames_[projectMode_]
+    os.writeKeyword("projectMode") << projectModeNames_[projectMode_]
         << token::END_STATEMENT << nl;
     os.writeKeyword("projectDirection") << projectDir_
         << token::END_STATEMENT << nl;

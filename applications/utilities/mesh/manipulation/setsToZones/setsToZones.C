@@ -28,8 +28,8 @@ Description
 
     There is one catch: for faceZones you also need to specify a flip
     condition which basically denotes the side of the face. In this app
-    it reads a cellSet (xxxCells if 'xxx' is the name of the faceSet) and
-    any face whose neighbour is in the cellSet gets a flip=true.
+    it reads a cellSet (xxxCells if 'xxx' is the name of the faceSet) which
+    is the masterCells of the zone.
     There are lots of situations in which this will go wrong but it is the
     best I can think of for now.
 
@@ -201,13 +201,10 @@ int main(int argc, char *argv[])
 
         if (!noFlipMap)
         {
-            word setName(set.name() + "Cells");
+            word setName(set.name() + "SlaveCells");
 
             Pout<< "Trying to load cellSet " << setName
-                << " to find out the flipMap." << nl
-                << "If the neighbour side of the face is in the cellSet"
-                << " the flipMap becomes true," << nl
-                << "in all other cases it stays false."
+                << " to find out the slave side of the zone." << nl
                 << " If you do not care about the flipMap"
                 << " (i.e. do not use the sideness)" << nl
                 << "use the -noFlipMap command line option."
@@ -230,7 +227,7 @@ int main(int argc, char *argv[])
                     && !cells.found(mesh.faceNeighbour()[faceI])
                     )
                     {
-                        flip = false;
+                        flip = true;
                     }
                     else if
                     (
@@ -238,7 +235,7 @@ int main(int argc, char *argv[])
                      && cells.found(mesh.faceNeighbour()[faceI])
                     )
                     {
-                        flip = true;
+                        flip = false;
                     }
                     else
                     {
@@ -260,11 +257,11 @@ int main(int argc, char *argv[])
                 {
                     if (cells.found(mesh.faceOwner()[faceI]))
                     {
-                        flip = false;
+                        flip = true;
                     }
                     else
                     {
-                        flip = true;
+                        flip = false;
                     }
                 }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -928,7 +928,6 @@ void Foam::moleculeCloud::initialiseMolecules
 
                     n++;
                 }
-
             }
         }
     }
@@ -1022,6 +1021,21 @@ void Foam::moleculeCloud::createMolecule
             id
         )
     );
+}
+
+
+Foam::label Foam::moleculeCloud::nSites() const
+{
+    label n = 0;
+
+    const_iterator mol(this->begin());
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        n += constProps(mol().id()).nSites();
+    }
+
+    return n;
 }
 
 
@@ -1155,6 +1169,32 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
 void Foam::moleculeCloud::writeFields() const
 {
     molecule::writeFields(*this);
+}
+
+
+void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
+{
+    OFstream str(fName);
+
+    str << nSites() << nl << "moleculeCloud site positions in angstroms" << nl;
+
+    const_iterator mol(this->begin());
+
+    for (mol = this->begin(); mol != this->end(); ++mol)
+    {
+        const molecule::constantProperties& cP = constProps(mol().id());
+
+        forAll(mol().sitePositions(), i)
+        {
+            const point& sP = mol().sitePositions()[i];
+
+            str << pot_.siteIdList()[cP.siteIds()[i]]
+                << ' ' << sP.x()*1e10
+                << ' ' << sP.y()*1e10
+                << ' ' << sP.z()*1e10
+                << nl;
+        }
+    }
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace tetherPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class pitchForkRing Declaration
+                       Class pitchForkRing Declaration
 \*---------------------------------------------------------------------------*/
 
 class pitchForkRing
@@ -90,7 +90,7 @@ public:
 
         vector force(const vector r) const;
 
-        //- Read transportProperties dictionary
+        //- Read dictionary
         bool read(const dictionary& tetherPotentialProperties);
 };
 

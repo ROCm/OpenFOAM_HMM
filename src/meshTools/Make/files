@@ -91,6 +91,7 @@ $(cellSources)/nbrToCell/nbrToCell.C
 $(cellSources)/zoneToCell/zoneToCell.C
 $(cellSources)/sphereToCell/sphereToCell.C
 $(cellSources)/cylinderToCell/cylinderToCell.C
+$(cellSources)/faceZoneToCell/faceZoneToCell.C
 
 faceSources = sets/faceSources
 $(faceSources)/faceToFace/faceToFace.C

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,7 @@ class directInteractionList
 
         const interactionLists& il_;
 
+
     // Private Member Functions
 
         void buildDirectInteractionList
@@ -71,6 +72,7 @@ class directInteractionList
 
         //- Disallow default bitwise assignment
         void operator=(const directInteractionList&);
+
 
 public:
 
@@ -89,6 +91,7 @@ public:
             const interactionLists& il
         );
 
+
     // Destructor
 
         ~directInteractionList();
@@ -99,12 +102,6 @@ public:
         // Access
 
         inline const interactionLists& il() const;
-
-        // Check
-
-        // Edit
-
-        // Write
 
 
     // IOstream Operators

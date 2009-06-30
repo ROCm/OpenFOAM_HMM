@@ -14,13 +14,12 @@
         mesh
     );
 
-    // kinematic pd
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -56,12 +55,25 @@
     Info<< "Calculating field beta*(g.h)\n" << endl;
     surfaceScalarField betaghf("betagh", beta*(g & mesh.Cf()));
 
-    label pdRefCell = 0;
-    scalar pdRefValue = 0.0;
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
     setRefCell
     (
-        pd,
+        p,
         mesh.solutionDict().subDict("SIMPLE"),
-        pdRefCell,
-        pdRefValue
+        pRefCell,
+        pRefValue
+    );
+
+
+    // Kinematic density for buoyancy force
+    volScalarField rhok
+    (
+        IOobject
+        (
+            "rhok",
+            runTime.timeName(),
+            mesh
+        ),
+        1.0 - beta*(T - TRef)
     );
