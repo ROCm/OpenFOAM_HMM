@@ -150,13 +150,13 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const polyMesh& mesh = this->cloud().pMesh();
 
     // Momentum transfer coefficient
-    const scalar ptc =
-        td.cloud().drag().ptc(U - Uc_, d, rhoc_, muc_) + ROOTVSMALL;
+    const scalar utc =
+        td.cloud().drag().utc(U - Uc_, d, rhoc_, muc_) + ROOTVSMALL;
 
     // Momentum source due to particle forces
-    const vector PFCoupled =
+    const vector FCoupled =
         mass*td.cloud().forces().calcCoupled(cellI, dt, rhoc_, rho, Uc_, U);
-    const vector PFNonCoupled =
+    const vector FNonCoupled =
         mass*td.cloud().forces().calcNonCoupled(cellI, dt, rhoc_, rho, Uc_, U);
 
 
@@ -165,15 +165,15 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
 
     // Update velocity - treat as 3-D
     const scalar As = this->areaS(d);
-    const vector ap = Uc_ + (PFCoupled + PFNonCoupled + Su)/(ptc*As);
-    const scalar bp = 6.0*ptc/(rho*d);
+    const vector ap = Uc_ + (FCoupled + FNonCoupled + Su)/(utc*As);
+    const scalar bp = 6.0*utc/(rho*d);
 
     IntegrationScheme<vector>::integrationResult Ures =
         td.cloud().UIntegrator().integrate(U, dt, ap, bp);
 
     vector Unew = Ures.value();
 
-    dUTrans += dt*(ptc*As*(Ures.average() - Uc_) - PFCoupled);
+    dUTrans += dt*(utc*As*(Ures.average() - Uc_) - FCoupled);
 
     // Apply correction to velocity and dUTrans for reduced-D cases
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
