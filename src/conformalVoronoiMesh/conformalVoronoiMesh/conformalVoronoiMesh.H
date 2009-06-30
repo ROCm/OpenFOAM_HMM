@@ -214,8 +214,8 @@ class conformalVoronoiMesh
             const pointIndexHit& edHit
         );
 
-        //- Insert point groups at the feature points.
-        void conformToFeaturePoints();
+        //- Determine and insert point groups at the feature points.
+        void createFeaturePoints();
 
         //- Insert point groups at convex feature points
         void insertConvexFeaturesPoints();

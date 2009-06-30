@@ -97,6 +97,35 @@ inline const Foam::vectorField& Foam::featureEdgeMesh::edgeDirections() const
 }
 
 
+inline Foam::vector Foam::featureEdgeMesh::edgeDirection
+(
+    label edgeI,
+    label ptI
+) const
+{
+    const edge& e = edges()[edgeI];
+
+    if (ptI == e.start())
+    {
+        return edgeDirections()[edgeI];
+    }
+    else if (ptI == e.end())
+    {
+        return -edgeDirections()[edgeI];
+    }
+    else
+    {
+        FatalErrorIn("Foam::featureEdgeMesh::edgedirection")
+            << "Requested ptI " << ptI << " is not a point on the requested "
+            << "edgeI " << edgeI << ". edgeI start and end: "
+            << e.start() << " " << e.end()
+            << exit(FatalError);
+
+        return vector::zero;
+    }
+}
+
+
 inline const Foam::labelListList& Foam::featureEdgeMesh::edgeNormals() const
 {
     return edgeNormals_;

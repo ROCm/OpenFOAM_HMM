@@ -91,7 +91,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 {
     timeCheck();
 
-    conformToFeaturePoints();
+    createFeaturePoints();
     timeCheck();
 
     insertInitialPoints();
@@ -294,7 +294,7 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
     const vector& nB = feNormals[edNormalIs[1]];
 
     // Concave. master and reflected points inside the domain.
-    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL );
+    point refPt = edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
 
     // Generate reflected master to be outside.
     point reflMasterPt = refPt + 2*(edgePt - refPt);
@@ -375,8 +375,30 @@ void Foam::conformalVoronoiMesh::insertMultipleEdgePointGroup
 }
 
 
-void Foam::conformalVoronoiMesh::conformToFeaturePoints()
+void Foam::conformalVoronoiMesh::createFeaturePoints()
 {
+    const boundBox& bb = geometryToConformTo().bounds();
+
+    scalar span
+    (
+        max(mag(bb.max().x()), mag(bb.min().x()))
+      + max(mag(bb.max().y()), mag(bb.min().y()))
+      + max(mag(bb.max().z()), mag(bb.min().z()))
+    );
+
+    Info<< nl << "Creating bounding points" << endl;
+
+    scalar bigSpan = 10*span;
+
+    insertPoint(point(-bigSpan, -bigSpan, -bigSpan), Vb::FAR_POINT);
+    insertPoint(point(-bigSpan, -bigSpan,  bigSpan), Vb::FAR_POINT);
+    insertPoint(point(-bigSpan,  bigSpan, -bigSpan), Vb::FAR_POINT);
+    insertPoint(point(-bigSpan,  bigSpan,  bigSpan), Vb::FAR_POINT);
+    insertPoint(point( bigSpan, -bigSpan, -bigSpan), Vb::FAR_POINT);
+    insertPoint(point( bigSpan, -bigSpan,  bigSpan), Vb::FAR_POINT);
+    insertPoint(point( bigSpan,  bigSpan, -bigSpan), Vb::FAR_POINT);
+    insertPoint(point( bigSpan,  bigSpan , bigSpan), Vb::FAR_POINT);
+
     Info<< nl << "Conforming to feature points" << endl;
 
     insertConvexFeaturesPoints();
@@ -421,14 +443,14 @@ void Foam::conformalVoronoiMesh::insertConvexFeaturesPoints()
 
         for
         (
-            label pI = feMesh.convexStart();
-            pI < feMesh.concaveStart();
-            pI++
+            label ptI = feMesh.convexStart();
+            ptI < feMesh.concaveStart();
+            ptI++
         )
         {
-            vectorField featPtNormals = feMesh.featurePointNormals(pI);
+            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
 
-            const point& featPt = feMesh.points()[pI];
+            const point& featPt = feMesh.points()[ptI];
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
@@ -464,14 +486,14 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 
         for
         (
-            label pI = feMesh.concaveStart();
-            pI < feMesh.mixedStart();
-            pI++
+            label ptI = feMesh.concaveStart();
+            ptI < feMesh.mixedStart();
+            ptI++
         )
         {
-            vectorField featPtNormals = feMesh.featurePointNormals(pI);
+            vectorField featPtNormals = feMesh.featurePointNormals(ptI);
 
-            const point& featPt = feMesh.points()[pI];
+            const point& featPt = feMesh.points()[ptI];
 
             vector cornerNormal = sum(featPtNormals);
             cornerNormal /= mag(cornerNormal);
@@ -494,7 +516,7 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
                 internalPtIndex = insertPoint(internalPt, externalPtIndex);
             }
 
-            insertPoint(externalPt,internalPtIndex);
+            insertPoint(externalPt, internalPtIndex);
         }
     }
 }
@@ -502,24 +524,167 @@ void Foam::conformalVoronoiMesh::insertConcaveFeaturePoints()
 
 void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 {
-    Info<< "    Mixed feature points not implemented." << endl;
+    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
 
-    // const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
+    forAll(feMeshes, i)
+    {
+        const featureEdgeMesh& feMesh(feMeshes[i]);
 
-    // forAll(feMeshes, i)
-    // {
-    //     const featureEdgeMesh& feMesh(feMeshes[i]);
+        for
+        (
+            label ptI = feMesh.mixedStart();
+            ptI < feMesh.nonFeatureStart();
+            ptI++
+        )
+        {
+            labelList pEds(feMesh.pointEdges()[ptI]);
 
-    //     for
-    //     (
-    //         label pI = feMesh.mixedStart();
-    //         pI < feMesh.nonFeatureStart();
-    //         pI++
-    //     )
-    //     {
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    //     }
-    // }
+            // Hard coding mixed type decision making to be an integer sum, as
+            // only 3 edge types allowed:
+            //     edgeTypeSum == 1 is 2 EXTERNAL, 1 INTERNAL
+            //     edgeTypeSum == 2 is 1 EXTERNAL, 2 INTERNAL
+
+            label edgeTypeSum = 0;
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Skipping unsupported mixed feature point types
+
+            bool skipEdge = false;
+
+            // if (pEds.size() > 3)
+            // {
+            //     Info<< "    Mixed feature points of 3 edges only supported."
+            //         << " Point " << ptI << " has " << pEds.size()
+            //         << " edges." << endl;
+
+            //     skipEdge = true;
+            // }
+
+            forAll(pEds, e)
+            {
+                label edgeI = pEds[e];
+
+                featureEdgeMesh::edgeStatus edStatus =
+                    feMesh.getEdgeStatus(edgeI);
+
+                edgeTypeSum += edStatus;
+
+                if
+                (
+                    edStatus == featureEdgeMesh::FLAT
+                 || edStatus == featureEdgeMesh::OPEN
+                 || edStatus == featureEdgeMesh::MULTIPLE
+                )
+                {
+                    Info<< "    Edge type " << edStatus
+                        << " found for mixed feature point " << ptI
+                        << ". Not supported."
+                        << endl;
+
+                    skipEdge = true;
+                }
+
+            }
+
+            if(skipEdge)
+            {
+                Info<< "    Skipping point " << ptI << nl << endl;
+
+                continue;
+            }
+
+            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+            const point& pt(feMesh.points()[ptI]);
+
+            // if (edgeTypeSum == 1 || edgeTypeSum == 2)
+            // {
+                // Info<< "    2 EXTERNAL, 1 INTERNAL mixed feature point" << nl
+                //     << " or 1 EXTERNAL, 2 INTERNAL mixed feature point" << endl;
+
+                scalar ppDist = pointPairDistance(pt);
+
+                forAll(pEds, e)
+                {
+                    label edgeI = pEds[e];
+
+                    const vectorField& feNormals = feMesh.normals();
+                    const labelList& edNormalIs =
+                    feMesh.edgeNormals()[edgeI];
+
+                    // As this is an external or internal edge, there are two
+                    // normals by definition
+                    const vector& nA = feNormals[edNormalIs[0]];
+                    const vector& nB = feNormals[edNormalIs[1]];
+
+                    point edgePt =
+                        pt + 8.0*ppDist*feMesh.edgeDirection(edgeI, ptI);
+
+                    // Concave. master and reflected points inside the domain.
+                    point refPt =
+                        edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+
+                    featureEdgeMesh::edgeStatus edStatus =
+                        feMesh.getEdgeStatus(edgeI);
+
+                    if (edStatus == featureEdgeMesh::INTERNAL)
+                    {
+                        // Generate reflected master to be outside.
+                        point reflMasterPt = refPt + 2*(edgePt - refPt);
+
+                        // Reflect reflMasterPt in both faces.
+                        point reflectedA = reflMasterPt - 2*ppDist*nA;
+
+                        point reflectedB = reflMasterPt - 2*ppDist*nB;
+
+                        // index of reflMaster
+                        label reflectedMaster = number_of_vertices() + 2;
+
+                        // Master A is inside.
+                        label reflectedAI =
+                        insertPoint(reflectedA, reflectedMaster);
+
+                        // Master B is inside.
+                        insertPoint(reflectedB, reflectedMaster);
+
+                        // Slave is outside.
+                        insertPoint(reflMasterPt, reflectedAI);
+                    }
+                    else if (edStatus == featureEdgeMesh::EXTERNAL)
+                    {
+                        // Insert the master point referring the the first slave
+                        label masterPtIndex =
+                            insertPoint(refPt, number_of_vertices() + 1);
+
+                        // Insert the slave points by reflecting refPt in both
+                        // faces.  with each slave refering to the master
+
+                        point reflectedA = refPt + 2*ppDist*nA;
+                        insertPoint(reflectedA, masterPtIndex);
+
+                        point reflectedB = refPt + 2*ppDist*nB;
+                        insertPoint(reflectedB, masterPtIndex);
+                    }
+                }
+            // }
+            // else if (edgeTypeSum == 2)
+            // {
+            //     Info<< "1 EXTERNAL, 2 INTERNAL mixed feature point" << endl;
+            // }
+            // else
+            // {
+            //     FatalErrorIn
+            //     (
+            //         "Foam::conformalVoronoiMesh::insertMixedFeaturePoints"
+            //     )
+            //         << "Invalid edgeTypeSum " << edgeTypeSum
+            //         << " for point " << ptI
+            //         << exit(FatalError);
+            // }
+        }
+    }
 }
 
 

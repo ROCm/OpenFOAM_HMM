@@ -308,6 +308,9 @@ public:
             //- Return the edgeDirection vectors
             inline const vectorField& edgeDirections() const;
 
+            //- Return the direction of edgeI, pointing away from ptI
+            inline vector edgeDirection(label edgeI, label ptI) const;
+
             //- Return the indices of the normals that are adjacent to the
             //  feature edges
             inline const labelListList& edgeNormals() const;
