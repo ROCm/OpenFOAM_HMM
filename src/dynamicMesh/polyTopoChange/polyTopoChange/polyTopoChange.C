@@ -2732,8 +2732,8 @@ Foam::label Foam::polyTopoChange::addFace
     if (zoneID >= 0)
     {
         faceZone_.insert(faceI, zoneID);
-        faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
     }
+    faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
 
     return faceI;
 }
@@ -2768,8 +2768,6 @@ void Foam::polyTopoChange::modifyFace
 
     if (faceFnd != faceZone_.end())
     {
-        faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
-
         if (zoneID >= 0)
         {
             faceFnd() = zoneID;
@@ -2782,8 +2780,8 @@ void Foam::polyTopoChange::modifyFace
     else if (zoneID >= 0)
     {
         faceZone_.insert(faceI, zoneID);
-        faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
     }
+    faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
 }
 
 
