@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,8 +45,6 @@ addToRunTimeSelectionTable
     dictionary
 );
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -88,6 +86,7 @@ scalar restrainedHarmonicSpring::energy(const vector r) const
     }
 }
 
+
 vector restrainedHarmonicSpring::force(const vector r) const
 {
     scalar magR = mag(r);
@@ -102,7 +101,11 @@ vector restrainedHarmonicSpring::force(const vector r) const
     }
 }
 
-bool restrainedHarmonicSpring::read(const dictionary& tetherPotentialProperties)
+
+bool restrainedHarmonicSpring::read
+(
+    const dictionary& tetherPotentialProperties
+)
 {
     tetherPotential::read(tetherPotentialProperties);
 

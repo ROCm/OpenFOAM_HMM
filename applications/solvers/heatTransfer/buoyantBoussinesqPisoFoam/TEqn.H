@@ -2,7 +2,7 @@
     volScalarField kappaEff
     (
         "kappaEff",
-        turbulence->nu() + turbulence->nut()/Prt
+        turbulence->nu()/Pr + turbulence->nut()/Prt
     );
 
     fvScalarMatrix TEqn
@@ -15,4 +15,6 @@
     TEqn.relax();
 
     TEqn.solve();
+
+    rhok = 1.0 - beta*(T - TRef);
 }

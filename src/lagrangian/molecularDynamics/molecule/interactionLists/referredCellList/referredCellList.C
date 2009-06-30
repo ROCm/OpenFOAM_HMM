@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -357,7 +357,7 @@ void Foam::referredCellList::buildReferredCellList
 
     label iterationNo = 0;
 
-    while(cellsReferredThisIteration)
+    while (cellsReferredThisIteration)
     {
         label refIntListStartSize = referredInteractionList.size();
 
@@ -499,7 +499,10 @@ void Foam::referredCellList::buildReferredCellList
                                 (
                                     meshPointsOnThisSegment,
                                     facePoint
-                                ) == -1)
+                                )
+                             ==
+                                -1
+                            )
                             {
                                 meshPointsOnThisSegment.append(facePoint);
                             }
@@ -610,18 +613,20 @@ void Foam::referredCellList::buildReferredCellList
 
                     forAll(referredCellsFoundInRange,cFIR)
                     {
-                        referredCell& existingRefCell = referredInteractionList
-                        [
-                            referredCellsFoundInRange[cFIR]
-                        ];
+                        referredCell& existingRefCell =
+                            referredInteractionList
+                            [
+                                referredCellsFoundInRange[cFIR]
+                            ];
 
-                        referredCell cellToReRefer = existingRefCell.reRefer
-                        (
-                            patch.faceCentres()[0],
-                            patch.faceCentres()[patch.size()/2],
-                            patch.faceNormals()[0],
-                            patch.faceNormals()[patch.size()/2]
-                        );
+                        referredCell cellToReRefer =
+                            existingRefCell.reRefer
+                            (
+                                patch.faceCentres()[0],
+                                patch.faceCentres()[patch.size()/2],
+                                patch.faceNormals()[0],
+                                patch.faceNormals()[patch.size()/2]
+                            );
 
                         // Test all existing referred and real cells to check
                         // duplicates are not being made or cells aren't being
@@ -705,7 +710,9 @@ void Foam::referredCellList::buildReferredCellList
                                 (
                                     meshEdgesOnThisSegment,
                                     faceEdge
-                                ) == -1
+                                )
+                             ==
+                                -1
                             )
                             {
                                 meshEdgesOnThisSegment.append(faceEdge);
@@ -724,7 +731,10 @@ void Foam::referredCellList::buildReferredCellList
                                 (
                                     meshPointsOnThisSegment,
                                     facePoint
-                                ) == -1)
+                                )
+                             ==
+                                -1
+                            )
                             {
                                 meshPointsOnThisSegment.append(facePoint);
                             }
@@ -823,28 +833,30 @@ void Foam::referredCellList::buildReferredCellList
                     referredInteractionList.shrink();
 
                     referredCellsFoundInRange =
-                    il_.referredCellsInRangeOfSegment
-                    (
-                        referredInteractionList,
-                        meshFacesOnThisSegment,
-                        meshEdgesOnThisSegment,
-                        meshPointsOnThisSegment
-                    );
+                        il_.referredCellsInRangeOfSegment
+                        (
+                            referredInteractionList,
+                            meshFacesOnThisSegment,
+                            meshEdgesOnThisSegment,
+                            meshPointsOnThisSegment
+                        );
 
                     forAll(referredCellsFoundInRange,cFIR)
                     {
-                        referredCell& existingRefCell = referredInteractionList
-                        [
-                            referredCellsFoundInRange[cFIR]
-                        ];
+                        referredCell& existingRefCell =
+                            referredInteractionList
+                            [
+                                referredCellsFoundInRange[cFIR]
+                            ];
 
-                        referredCell cellToReRefer = existingRefCell.reRefer
-                        (
-                            patch.faceCentres()[patch.size()/2],
-                            patch.faceCentres()[0],
-                            patch.faceNormals()[patch.size()/2],
-                            patch.faceNormals()[0]
-                        );
+                        referredCell cellToReRefer =
+                            existingRefCell.reRefer
+                            (
+                                patch.faceCentres()[patch.size()/2],
+                                patch.faceCentres()[0],
+                                patch.faceNormals()[patch.size()/2],
+                                patch.faceNormals()[0]
+                            );
 
                         // Test all existing referred and real cells to check
                         // duplicates are not being made or cells aren't being
@@ -901,15 +913,15 @@ void Foam::referredCellList::buildReferredCellList
             forAll(procPatches,pP)
             {
                 const processorPolyPatch& patch =
-                refCast<const processorPolyPatch>
-                (
-                    mesh.boundaryMesh()[procPatches[pP]]
-                );
+                    refCast<const processorPolyPatch>
+                    (
+                        mesh.boundaryMesh()[procPatches[pP]]
+                    );
 
                 DynamicList<referredCell> referredCellsToTransfer;
 
                 const vectorList& neighbFaceCentres =
-                allNeighbourFaceCentres[pP];
+                    allNeighbourFaceCentres[pP];
 
                 const vectorList& neighbFaceAreas = allNeighbourFaceAreas[pP];
 
@@ -971,7 +983,9 @@ void Foam::referredCellList::buildReferredCellList
                                 (
                                     meshEdgesOnThisSegment,
                                     faceEdge
-                                ) == -1
+                                )
+                             ==
+                                -1
                             )
                             {
                                 meshEdgesOnThisSegment.append(faceEdge);
@@ -990,7 +1004,9 @@ void Foam::referredCellList::buildReferredCellList
                                 (
                                     meshPointsOnThisSegment,
                                     facePoint
-                                ) == -1
+                                )
+                             ==
+                                -1
                             )
                             {
                                 meshPointsOnThisSegment.append(facePoint);
@@ -1032,7 +1048,7 @@ void Foam::referredCellList::buildReferredCellList
                             forAll(realCellsFoundInRange,cFIR)
                             {
                                 const label realCell =
-                                realCellsFoundInRange[cFIR];
+                                    realCellsFoundInRange[cFIR];
 
                                 referredCell cellToRefer
                                 (
@@ -1074,19 +1090,20 @@ void Foam::referredCellList::buildReferredCellList
                         forAll(referredCellsFoundInRange,cFIR)
                         {
                             referredCell& existingRefCell =
-                            referredInteractionList
-                            [
-                                referredCellsFoundInRange[cFIR]
-                            ];
+                                referredInteractionList
+                                [
+                                    referredCellsFoundInRange[cFIR]
+                                ];
 
-                            referredCell cellToReRefer = existingRefCell.reRefer
-                            (
-                                patch.faceCentres()[faceT],
-                                neighbFaceCentres[faceT],
-                                patch.faceNormals()[faceT],
-                                neighbFaceAreas[faceT]
-                                /(mag(neighbFaceAreas[faceT]) + VSMALL)
-                            );
+                            referredCell cellToReRefer =
+                                existingRefCell.reRefer
+                                (
+                                    patch.faceCentres()[faceT],
+                                    neighbFaceCentres[faceT],
+                                    patch.faceNormals()[faceT],
+                                    neighbFaceAreas[faceT]
+                                    /(mag(neighbFaceAreas[faceT]) + VSMALL)
+                                );
 
                             referredCellsToTransfer.append(cellToReRefer);
                         }
@@ -1409,6 +1426,7 @@ void Foam::referredCellList::buildReferredCellList
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::referredCellList::referredCellList
@@ -1555,9 +1573,6 @@ void Foam::referredCellList::referMolecules
         }
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

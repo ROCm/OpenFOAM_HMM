@@ -14,5 +14,5 @@ IOdictionary mdEquilibrationDict
 
 scalar targetTemperature = readScalar
 (
-    mdEquilibrationDict.lookup("equilibrationTargetTemperature")
+    mdEquilibrationDict.lookup("targetTemperature")
 );

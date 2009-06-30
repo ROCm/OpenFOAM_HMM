@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ void referredCell::setConstructionData
     const label sourceCell
 )
 {
-    // * * * * * * * * * * * Points * * * * * * * * * * *
+    // Points
 
     const labelList& points = mesh.cellPoints()[sourceCell];
 
@@ -51,7 +51,8 @@ void referredCell::setConstructionData
 
     vertexPositions_ = referPositions(sourceCellVertices);
 
-    // * * * * * * * * * * * Edges * * * * * * * * * * *
+
+    // Edges
 
     const labelList& edges = mesh.cellEdges()[sourceCell];
 
@@ -64,7 +65,8 @@ void referredCell::setConstructionData
 
     locallyMapEdgeList(points, sourceCellEdges);
 
-    // * * * * * * * * * * * Faces * * * * * * * * * * *
+
+    // Faces
 
     labelList faces(mesh.cells()[sourceCell]);
 
@@ -383,8 +385,8 @@ bool referredCell::duplicate(const referredCell& refCellDupl) const
     return
     (
         sourceProc_ == refCellDupl.sourceProc()
-        && sourceCell_ == refCellDupl.sourceCell()
-        && mag(offset_ - refCellDupl.offset()) < interactionLists::transTol
+     && sourceCell_ == refCellDupl.sourceCell()
+     && mag(offset_ - refCellDupl.offset()) < interactionLists::transTol
     );
 }
 
@@ -394,8 +396,8 @@ bool referredCell::duplicate(const label procNo,const label nCells) const
     return
     (
         sourceProc_ == procNo
-        && sourceCell_ < nCells
-        && mag(offset_) < interactionLists::transTol
+     && sourceCell_ < nCells
+     && mag(offset_) < interactionLists::transTol
     );
 }
 
@@ -405,7 +407,7 @@ bool referredCell::duplicate(const label procNo,const label nCells) const
 Istream& operator>>(Istream& is, referredCell& rC)
 {
 
-    is >> rC.sourceProc_
+    is  >> rC.sourceProc_
         >> rC.sourceCell_
         >> rC.vertexPositions_
         >> rC.edges_
@@ -424,7 +426,7 @@ Istream& operator>>(Istream& is, referredCell& rC)
 Ostream& operator<<(Ostream& os, const referredCell& rC)
 {
 
-    os << rC.sourceProc()
+    os  << rC.sourceProc()
         << token::SPACE << rC.sourceCell()
         << token::SPACE << rC.vertexPositions()
         << token::SPACE << rC.edges()
