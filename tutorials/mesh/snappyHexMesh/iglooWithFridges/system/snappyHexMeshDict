@@ -42,12 +42,13 @@ geometry
         min (0 0 0);
         max (1 1 1);
     }
+
     fridgeFreezer
     {
         type searchableSurfaceCollection;
 
         mergeSubRegions true;
-    
+
         freezer
         {
             surface box1;
@@ -73,12 +74,13 @@ geometry
             }
         }
     }
+
     twoFridgeFreezers
     {
         type searchableSurfaceCollection;
-    
+
         mergeSubRegions true;
-    
+
         seal
         {
             surface fridgeFreezer;

@@ -9,70 +9,44 @@ FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    object      blockMeshDict;
+    class       volScalarField;
+    object      p;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 1;
+dimensions      [0 2 -2 0 0 0 0];
 
-vertices
-(
-    (-2.03 -2.0  0)
-    ( 8.03 -2.0  0)
-    ( 8.03  8.0  0)
-    (-2.03  8.0  0)
-    (-2.03 -2.0  5)
-    ( 8.03 -2.0  5)
-    ( 8.03  8.0  5)
-    (-2.03  8.0  5)
-);
+internalField   uniform 0;
 
-blocks
-(
-    hex (0 1 2 3 4 5 6 7) (20 20 20) simpleGrading (1 1 1)
-);
+boundaryField
+{
+    ground
+    {
+        type            fixedFluxBuoyantPressure;
+        rho             rhok;
+        value           uniform 0;
+    }
 
-edges
-(
-);
+    igloo_region0
+    {
+        type            fixedFluxBuoyantPressure;
+        rho             rhok;
+        value           uniform 0;
+    }
 
-patches
-(
-    empty maxY
-    (
-        (3 7 6 2)
-    )
+    twoFridgeFreezers_seal_0
+    {
+        type            fixedFluxBuoyantPressure;
+        rho             rhok;
+        value           uniform 0;
+    }
 
-    empty minX
-    (
-        (0 4 7 3)
-    )
-
-    empty maxX
-    (
-        (2 6 5 1)
-    )
-
-    empty minY
-    (
-        (1 5 4 0)
-    )
-
-    wall ground
-    (
-        (0 3 2 1)
-    )
-
-    empty maxZ
-    (
-        (4 5 6 7)
-    )
-);
-
-mergePatchPairs
-(
-);
+    twoFridgeFreezers_herring_1
+    {
+        type            fixedFluxBuoyantPressure;
+        rho             rhok;
+        value           uniform 0;
+    }
+}
 
 // ************************************************************************* //
