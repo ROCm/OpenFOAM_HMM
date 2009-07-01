@@ -1603,8 +1603,8 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                                             edHit.hitPoint()
                                           - surfHit.hitPoint()
                                         )
-                                        < surfacePtReplaceDistCoeffSqr
-                                        *targetCellSizeSqr
+                                      < surfacePtReplaceDistCoeffSqr
+                                       *targetCellSizeSqr
                                     )
                                     {
                                         keepSurfacePoint = false;
@@ -1732,10 +1732,10 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                                     magSqr
                                     (
                                         edHit.hitPoint()
-                                        - surfHit.hitPoint()
+                                      - surfHit.hitPoint()
                                     )
-                                    < surfacePtReplaceDistCoeffSqr
-                                    *targetCellSizeSqr
+                                  < surfacePtReplaceDistCoeffSqr
+                                   *targetCellSizeSqr
                                 )
                                 {
                                     keepSurfacePoint = false;
