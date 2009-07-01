@@ -64,8 +64,8 @@ cleanCase ()
 
     rm -rf constant/polyMesh/{allOwner*,cell*,face*,meshModifiers*} \
            constant/polyMesh/{owner*,neighbour*,point*,edge*} \
-           constant/polyMesh/{cellLevel,pointLevel,refinementHistory,surfaceIndex} \
-           constant/{cellLevel,pointLevel} \
+           constant/polyMesh/{cellLevel*,pointLevel*,refinementHistory*,surfaceIndex*} \
+           constant/{cellLevel*,pointLevel*} \
            constant/polyMesh/sets/ \
            > /dev/null 2>&1
 
