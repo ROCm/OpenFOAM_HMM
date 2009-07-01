@@ -73,23 +73,6 @@ public:
 };
 
 
-
-label getPatch(const polyBoundaryMesh& patches, const word& patchName)
-{
-    label patchI = patches.findPatchID(patchName);
-
-    if (patchI == -1)
-    {
-        FatalErrorIn("createPatch(const polyBoundaryMesh&, const word&)")
-            << "Cannot find source patch " << patchName
-            << endl << "Valid patch names are " << patches.names()
-            << exit(FatalError);
-    }
-
-    return patchI;
-}
-
-
 void changePatchID
 (
     const polyMesh& mesh,
@@ -704,14 +687,12 @@ int main(int argc, char *argv[])
 
         if (sourceType == "patches")
         {
-            wordList patchSources(dict.lookup("patches"));
+            labelHashSet patchSources(patches.patchSet(dict.lookup("patches")));
 
             // Repatch faces of the patches.
-            forAll(patchSources, sourceI)
+            forAllConstIter(labelHashSet, patchSources, iter)
             {
-                label patchI = getPatch(patches, patchSources[sourceI]);
-
-                const polyPatch& pp = patches[patchI];
+                const polyPatch& pp = patches[iter.key()];
 
                 Info<< "Moving faces from patch " << pp.name()
                     << " to patch " << destPatchI << endl;
