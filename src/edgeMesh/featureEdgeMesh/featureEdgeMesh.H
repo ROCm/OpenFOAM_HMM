@@ -110,7 +110,7 @@ private:
         //- Index of the start of the convex feature points - static as 0
         static label convexStart_;
 
-        //- Index of the start of the convex feature points - static as 0
+        //- Index of the start of the external feature edges - static as 0
         static label externalStart_;
 
 
@@ -338,12 +338,13 @@ public:
             //- Return the edgeStatus of a specified edge
             inline edgeStatus getEdgeStatus(label edgeI) const;
 
-            //- Demand driven contruction of octree for boundary edges
+            //- Demand driven construction of octree for boundary edges
             const indexedOctree<treeDataEdge>& edgeTree() const;
 
-            //- Demand driven contruction of octree for boundary edges by type
+            //- Demand driven construction of octree for boundary edges by type
             const PtrList<indexedOctree<treeDataEdge> >&
             edgeTreesByType() const;
+
 
         // Check
 

@@ -64,6 +64,9 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     cvMeshControls_(*this, cvMeshDict),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
+    featureVertices_(),
+    featurePointLocations_(),
+    featurePointTree_(),
     initialPointsMethod_
     (
         initialPointsMethod::New
@@ -429,6 +432,8 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
         featPtI++;
     }
 
+    constructFeaturePointLocations();
+
     writePoints("featureVertices.obj", false);
 }
 
@@ -539,28 +544,9 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
         {
             labelList pEds(feMesh.pointEdges()[ptI]);
 
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            // Hard coding mixed type decision making to be an integer sum, as
-            // only 3 edge types allowed:
-            //     edgeTypeSum == 1 is 2 EXTERNAL, 1 INTERNAL
-            //     edgeTypeSum == 2 is 1 EXTERNAL, 2 INTERNAL
-
-            label edgeTypeSum = 0;
-
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
             // Skipping unsupported mixed feature point types
 
             bool skipEdge = false;
-
-            // if (pEds.size() > 3)
-            // {
-            //     Info<< "    Mixed feature points of 3 edges only supported."
-            //         << " Point " << ptI << " has " << pEds.size()
-            //         << " edges." << endl;
-
-            //     skipEdge = true;
-            // }
 
             forAll(pEds, e)
             {
@@ -568,8 +554,6 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 
                 featureEdgeMesh::edgeStatus edStatus =
                     feMesh.getEdgeStatus(edgeI);
-
-                edgeTypeSum += edStatus;
 
                 if
                 (
@@ -595,96 +579,103 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
                 continue;
             }
 
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+            // Inserting mixed internal and external feature points
 
             const point& pt(feMesh.points()[ptI]);
 
-            // if (edgeTypeSum == 1 || edgeTypeSum == 2)
-            // {
-                // Info<< "    2 EXTERNAL, 1 INTERNAL mixed feature point" << nl
-                //     << " or 1 EXTERNAL, 2 INTERNAL mixed feature point" << endl;
+            scalar ppDist = pointPairDistance(pt);
 
-                scalar ppDist = pointPairDistance(pt);
+            scalar edgeGroupDistance = mixedFeaturePointDistance(pt);
 
-                forAll(pEds, e)
+            forAll(pEds, e)
+            {
+                label edgeI = pEds[e];
+
+                const vectorField& feNormals = feMesh.normals();
+                const labelList& edNormalIs =
+                feMesh.edgeNormals()[edgeI];
+
+                // As this is an external or internal edge, there are two
+                // normals by definition
+                const vector& nA = feNormals[edNormalIs[0]];
+                const vector& nB = feNormals[edNormalIs[1]];
+
+                point edgePt =
+                    pt + edgeGroupDistance*feMesh.edgeDirection(edgeI, ptI);
+
+                // Concave. master and reflected points inside the domain.
+                point refPt =
+                    edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+
+                featureEdgeMesh::edgeStatus edStatus =
+                    feMesh.getEdgeStatus(edgeI);
+
+                if (edStatus == featureEdgeMesh::INTERNAL)
                 {
-                    label edgeI = pEds[e];
+                    // Generate reflected master to be outside.
+                    point reflMasterPt = refPt + 2*(edgePt - refPt);
 
-                    const vectorField& feNormals = feMesh.normals();
-                    const labelList& edNormalIs =
-                    feMesh.edgeNormals()[edgeI];
+                    // Reflect reflMasterPt in both faces.
+                    point reflectedA = reflMasterPt - 2*ppDist*nA;
 
-                    // As this is an external or internal edge, there are two
-                    // normals by definition
-                    const vector& nA = feNormals[edNormalIs[0]];
-                    const vector& nB = feNormals[edNormalIs[1]];
+                    point reflectedB = reflMasterPt - 2*ppDist*nB;
 
-                    point edgePt =
-                        pt + 8.0*ppDist*feMesh.edgeDirection(edgeI, ptI);
+                    // index of reflMaster
+                    label reflectedMaster = number_of_vertices() + 2;
 
-                    // Concave. master and reflected points inside the domain.
-                    point refPt =
-                        edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+                    // Master A is inside.
+                    label reflectedAI =
+                    insertPoint(reflectedA, reflectedMaster);
 
-                    featureEdgeMesh::edgeStatus edStatus =
-                        feMesh.getEdgeStatus(edgeI);
+                    // Master B is inside.
+                    insertPoint(reflectedB, reflectedMaster);
 
-                    if (edStatus == featureEdgeMesh::INTERNAL)
-                    {
-                        // Generate reflected master to be outside.
-                        point reflMasterPt = refPt + 2*(edgePt - refPt);
-
-                        // Reflect reflMasterPt in both faces.
-                        point reflectedA = reflMasterPt - 2*ppDist*nA;
-
-                        point reflectedB = reflMasterPt - 2*ppDist*nB;
-
-                        // index of reflMaster
-                        label reflectedMaster = number_of_vertices() + 2;
-
-                        // Master A is inside.
-                        label reflectedAI =
-                        insertPoint(reflectedA, reflectedMaster);
-
-                        // Master B is inside.
-                        insertPoint(reflectedB, reflectedMaster);
-
-                        // Slave is outside.
-                        insertPoint(reflMasterPt, reflectedAI);
-                    }
-                    else if (edStatus == featureEdgeMesh::EXTERNAL)
-                    {
-                        // Insert the master point referring the the first slave
-                        label masterPtIndex =
-                            insertPoint(refPt, number_of_vertices() + 1);
-
-                        // Insert the slave points by reflecting refPt in both
-                        // faces.  with each slave refering to the master
-
-                        point reflectedA = refPt + 2*ppDist*nA;
-                        insertPoint(reflectedA, masterPtIndex);
-
-                        point reflectedB = refPt + 2*ppDist*nB;
-                        insertPoint(reflectedB, masterPtIndex);
-                    }
+                    // Slave is outside.
+                    insertPoint(reflMasterPt, reflectedAI);
                 }
-            // }
-            // else if (edgeTypeSum == 2)
-            // {
-            //     Info<< "1 EXTERNAL, 2 INTERNAL mixed feature point" << endl;
-            // }
-            // else
-            // {
-            //     FatalErrorIn
-            //     (
-            //         "Foam::conformalVoronoiMesh::insertMixedFeaturePoints"
-            //     )
-            //         << "Invalid edgeTypeSum " << edgeTypeSum
-            //         << " for point " << ptI
-            //         << exit(FatalError);
-            // }
+                else if (edStatus == featureEdgeMesh::EXTERNAL)
+                {
+                    // Insert the master point referring the the first slave
+                    label masterPtIndex =
+                        insertPoint(refPt, number_of_vertices() + 1);
+
+                    // Insert the slave points by reflecting refPt in both
+                    // faces.  with each slave refering to the master
+
+                    point reflectedA = refPt + 2*ppDist*nA;
+                    insertPoint(reflectedA, masterPtIndex);
+
+                    point reflectedB = refPt + 2*ppDist*nB;
+                    insertPoint(reflectedB, masterPtIndex);
+                }
+            }
         }
     }
+}
+
+
+void Foam::conformalVoronoiMesh::constructFeaturePointLocations()
+{
+    DynamicList<point> ftPtLocs;
+
+    const PtrList<featureEdgeMesh>& feMeshes(geometryToConformTo_.features());
+
+    forAll(feMeshes, i)
+    {
+        const featureEdgeMesh& feMesh(feMeshes[i]);
+
+        for
+        (
+            label ptI = feMesh.convexStart();
+            ptI < feMesh.nonFeatureStart();
+            ptI++
+        )
+        {
+            ftPtLocs.append(feMesh.points()[ptI]);
+        }
+    }
+
+    featurePointLocations_.transfer(ftPtLocs);
 }
 
 
@@ -694,6 +685,46 @@ void Foam::conformalVoronoiMesh::reinsertFeaturePoints()
     {
         insertVb(featureVertices_[f]);
     }
+}
+
+
+const Foam::indexedOctree<Foam::treeDataPoint>&
+Foam::conformalVoronoiMesh::featurePointTree() const
+{
+    if (featurePointTree_.empty())
+    {
+        treeBoundBox overallBb(geometryToConformTo_.bounds());
+        Random rndGen(92561);
+        overallBb.extend(rndGen, 1E-4);
+        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+        featurePointTree_.reset
+        (
+            new indexedOctree<treeDataPoint>
+            (
+                treeDataPoint(featurePointLocations_),
+                overallBb,  // overall search domain
+                10,         // max levels
+                10.0,       // maximum ratio of cubes v.s. cells
+                100.0       // max. duplicity; n/a since no bounding boxes.
+            )
+        );
+    }
+
+    return featurePointTree_();
+}
+
+
+bool Foam::conformalVoronoiMesh::nearFeaturePt(const point& pt) const
+{
+    const indexedOctree<treeDataPoint>& tree = featurePointTree();
+
+    scalar exclusionRangeSqr = featurePointExclusionDistanceSqr(pt);
+
+    pointIndexHit info = tree.findNearest(pt, exclusionRangeSqr);
+
+    return info.hit();
 }
 
 
@@ -1544,6 +1575,11 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
                         bool keepSurfacePoint = true;
 
+                        if (nearFeaturePt(surfHit.hitPoint()))
+                        {
+                            keepSurfacePoint = false;
+                        }
+
                         forAll(edHits, i)
                         {
                             const pointIndexHit& edHit(edHits[i]);
@@ -1555,20 +1591,24 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                                 // used here if necessary, i.e to avoid
                                 // over-populating internal edges
 
-                                featureEdgeHits.append(edHit);
-                                featureEdgeFeaturesHit.append(featureHit);
-
-                                if
-                                (
-                                    magSqr
-                                    (
-                                        edHit.hitPoint() - surfHit.hitPoint()
-                                    )
-                                  < surfacePtReplaceDistCoeffSqr
-                                   *targetCellSizeSqr
-                                )
+                                if (!nearFeaturePt(edHit.hitPoint()))
                                 {
-                                    keepSurfacePoint = false;
+                                    featureEdgeHits.append(edHit);
+                                    featureEdgeFeaturesHit.append(featureHit);
+
+                                    if
+                                    (
+                                        magSqr
+                                        (
+                                            edHit.hitPoint()
+                                          - surfHit.hitPoint()
+                                        )
+                                        < surfacePtReplaceDistCoeffSqr
+                                        *targetCellSizeSqr
+                                    )
+                                    {
+                                        keepSurfacePoint = false;
+                                    }
                                 }
                             }
                         }
@@ -1606,7 +1646,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     label iterationNo = 0;
 
-    label maxIterations = 5;
+    label maxIterations = 10;
     Info << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
     // Set totalHits to a positive value to enter the while loop on the first
@@ -1666,6 +1706,11 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
                     bool keepSurfacePoint = true;
 
+                    if (nearFeaturePt(surfHit.hitPoint()))
+                    {
+                        keepSurfacePoint = false;
+                    }
+
                     forAll(edHits, i)
                     {
                         const pointIndexHit& edHit(edHits[i]);
@@ -1677,20 +1722,24 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                             // used here if necessary, i.e to avoid
                             // over-populating internal edges
 
-                            featureEdgeHits.append(edHit);
-                            featureEdgeFeaturesHit.append(featureHit);
-
-                            if
-                            (
-                                magSqr
-                                (
-                                    edHit.hitPoint() - surfHit.hitPoint()
-                                )
-                              < surfacePtReplaceDistCoeffSqr
-                               *targetCellSizeSqr
-                            )
+                            if (!nearFeaturePt(edHit.hitPoint()))
                             {
-                                keepSurfacePoint = false;
+                                featureEdgeHits.append(edHit);
+                                featureEdgeFeaturesHit.append(featureHit);
+
+                                if
+                                (
+                                    magSqr
+                                    (
+                                        edHit.hitPoint()
+                                        - surfHit.hitPoint()
+                                    )
+                                    < surfacePtReplaceDistCoeffSqr
+                                    *targetCellSizeSqr
+                                )
+                                {
+                                    keepSurfacePoint = false;
+                                }
                             }
                         }
                     }
@@ -1733,6 +1782,13 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         }
 
         iterationNo++;
+
+        if (iterationNo == maxIterations)
+        {
+            WarningIn("conformalVoronoiMesh::conformToSurface()")
+                << "Maximum surface conformation iterations ("
+                << maxIterations <<  ") reached." << endl;
+        }
     }
 }
 

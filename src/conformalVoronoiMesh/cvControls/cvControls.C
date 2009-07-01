@@ -46,6 +46,16 @@ Foam::cvControls::cvControls
         surfDict.lookup("pointPairDistanceCoeff")
     );
 
+    mixedFeaturePointPPDistanceCoeff_ = readScalar
+    (
+        surfDict.lookup("mixedFeaturePointPPDistanceCoeff")
+    );
+
+    featurePointExclusionDistanceCoeff_ = readScalar
+    (
+        surfDict.lookup("featurePointExclusionDistanceCoeff")
+    );
+
     surfaceSearchDistanceCoeff_ = readScalar
     (
         surfDict.lookup("surfaceSearchDistanceCoeff")

@@ -66,6 +66,15 @@ class cvControls
             //  cell size
             scalar pointPairDistanceCoeff_;
 
+            //- Distance along feature edge to ;lace mixed feature point
+            //  conformation groups - to be multiple of pointPairDistanceCoeff_.
+            scalar mixedFeaturePointPPDistanceCoeff_;
+
+            //- Distance to a feature point within which surface and edge
+            //  conformation points are excluded - fraction of the local target
+            //  cell size
+            scalar featurePointExclusionDistanceCoeff_;
+
             //- Surface search distance coefficient - faction of the local
             //  target cell size
             scalar surfaceSearchDistanceCoeff_;
@@ -78,6 +87,7 @@ class cvControls
             //- Maximum quadrant angle allowed at a concave edge before
             //  additional "mitering" lines are added
             scalar maxQuadAngle_;
+
 
     // Motion control controls
 
@@ -93,9 +103,11 @@ class cvControls
 
             scalar alignmentAcceptanceAngle_;
 
+
         // Point removal criteria
 
             scalar cellCentreRemovalDistCoeff_;
+
 
     // polyMesh filtering controls
 
@@ -131,6 +143,12 @@ public:
 
             //- Return the pointPairDistanceCoeff
             inline scalar pointPairDistanceCoeff() const;
+
+            //- Return the mixedFeaturePointPPDistanceCoeff
+            inline scalar mixedFeaturePointPPDistanceCoeff() const;
+
+            //- Return the featurePointExclusionDistanceCoeff
+            inline scalar featurePointExclusionDistanceCoeff() const;
 
             //- Return the surfaceSearchDistanceCoeff
             inline scalar surfaceSearchDistanceCoeff() const;

@@ -44,6 +44,18 @@ inline Foam::scalar Foam::cvControls::pointPairDistanceCoeff() const
 }
 
 
+inline Foam::scalar Foam::cvControls::mixedFeaturePointPPDistanceCoeff() const
+{
+    return mixedFeaturePointPPDistanceCoeff_;
+}
+
+
+inline Foam::scalar Foam::cvControls::featurePointExclusionDistanceCoeff() const
+{
+    return featurePointExclusionDistanceCoeff_;
+}
+
+
 inline Foam::scalar Foam::cvControls::surfaceSearchDistanceCoeff() const
 {
     return surfaceSearchDistanceCoeff_;

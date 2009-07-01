@@ -51,6 +51,31 @@ inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
 }
 
 
+inline Foam::scalar Foam::conformalVoronoiMesh::mixedFeaturePointDistance
+(
+    const point& pt
+) const
+{
+    return
+        pointPairDistance(pt)
+       *cvMeshControls_.mixedFeaturePointPPDistanceCoeff();
+}
+
+
+inline Foam::scalar Foam::conformalVoronoiMesh::featurePointExclusionDistanceSqr
+(
+    const point& pt
+) const
+{
+    return
+        sqr
+        (
+            targetCellSize(pt)
+           *cvMeshControls_.featurePointExclusionDistanceCoeff()
+        );
+}
+
+
 inline Foam::scalar Foam::conformalVoronoiMesh::surfaceSearchDistanceSqr
 (
     const point& pt

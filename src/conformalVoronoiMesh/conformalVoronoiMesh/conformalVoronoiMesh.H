@@ -52,6 +52,8 @@ SourceFiles
 #include "SortableList.H"
 #include "meshTools.H"
 #include "triSurfaceTools.H"
+#include "indexedOctree.H"
+#include "treeDataPoint.H"
 #include "mathematicalConstants.H"
 #include "transform.H"
 
@@ -101,6 +103,13 @@ class conformalVoronoiMesh
         //- triangulation clear
         List<Vb> featureVertices_;
 
+        //- Storing the locations of all of the features to be conformed to.
+        //  Single pointField required by the featurePointTree_.
+        pointField featurePointLocations_;
+
+        //- Search tree for feature point locations
+        mutable autoPtr<indexedOctree<treeDataPoint> > featurePointTree_;
+
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
 
@@ -121,6 +130,12 @@ class conformalVoronoiMesh
 
         //- Return the local point pair separation at the given location
         inline scalar pointPairDistance(const point& pt) const;
+
+        //- Return the local mixed feature point placement distance
+        inline scalar mixedFeaturePointDistance(const point& pt) const;
+
+        //- Return the square of the local feature point exclusion distance
+        inline scalar featurePointExclusionDistanceSqr(const point& pt) const;
 
         //- Return the square of the local surface search distance
         inline scalar surfaceSearchDistanceSqr(const point& pt) const;
@@ -226,8 +241,17 @@ class conformalVoronoiMesh
         //- Insert point groups at mixed feature points
         void insertMixedFeaturePoints();
 
+        //- Store the locations of all of the features to be conformed to.
+        void constructFeaturePointLocations();
+
         //- Reinsert stored feature point defining points.
         void reinsertFeaturePoints();
+
+        //- Demand driven construction of octree for feature points
+        const indexedOctree<treeDataPoint>& featurePointTree() const;
+
+        //- Check if a location is in exclusion range around a feature point
+        bool nearFeaturePt(const point& pt) const;
 
         //- Insert the initial points into the triangulation, based on the
         //  initialPointsMethod
@@ -282,6 +306,7 @@ public:
             const IOdictionary& cvMeshDict
         );
 
+
     //- Destructor
     ~conformalVoronoiMesh();
 
@@ -317,6 +342,7 @@ public:
 
             //- Return the cvMeshControls object
             inline const cvControls& cvMeshControls() const;
+
 
         // Check
 
