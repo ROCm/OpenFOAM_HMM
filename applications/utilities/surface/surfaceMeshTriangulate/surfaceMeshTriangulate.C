@@ -50,9 +50,8 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::validArgs.append("output file");
-
+#   include "addRegionOption.H"
     argList::validOptions.insert("excludeProcPatches", "");
-
     argList::validOptions.insert("patches", "(patch0 .. patchN)");
 
 #   include "setRootCase.H"
@@ -65,7 +64,7 @@ int main(int argc, char *argv[])
 
     Pout<< "Reading mesh from time " << runTime.value() << endl;
 
-#   include "createPolyMesh.H"
+#   include "createNamedPolyMesh.H"
 
     bool includeProcPatches =
        !(
