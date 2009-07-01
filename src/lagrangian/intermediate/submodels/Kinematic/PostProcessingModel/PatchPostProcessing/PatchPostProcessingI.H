@@ -47,9 +47,9 @@ const Foam::wordList& Foam::PatchPostProcessing<CloudType>::patchNames() const
 
 template<class CloudType>
 const Foam::labelList&
-Foam::PatchPostProcessing<CloudType>::globalToLocalPatchIds() const
+Foam::PatchPostProcessing<CloudType>::patchIds() const
 {
-    return globalToLocalPatchIds_;
+    return patchIds_;
 }
 
 

@@ -170,7 +170,7 @@ public:
             //- Flag to identify whether model fully describes the parcel
             virtual bool fullyDescribed() const;
 
-            //- Return flag to identify whether or not injection in cellI is
+            //- Return flag to identify whether or not injection of parcelI is
             //  permitted
             virtual bool validInjection(const label parcelI);
 };

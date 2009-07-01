@@ -280,7 +280,7 @@ bool Foam::ConeInjectionMP<CloudType>::fullyDescribed() const
 
 
 template<class CloudType>
-bool Foam::ConeInjectionMP<CloudType>::validInjection(const label parcelI)
+bool Foam::ConeInjectionMP<CloudType>::validInjection(const label)
 {
     return true;
 }

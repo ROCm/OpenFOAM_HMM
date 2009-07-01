@@ -42,57 +42,47 @@ geometry
         min (0 0 0);
         max (1 1 1);
     }
-    //fridgeFreezer
-    //{
-    //    type searchableSurfaceCollection;
-    //
-    //    mergeSubRegions true;
-    //
-    //    // Note: the two parts of fridgeFreezer abut. This can give problems
-    //    // in snapping if the nearest point on the surface is the
-    //    // internal face.
-    //    freezer
-    //    {
-    //        surface box1;
-    //        scale (1 1 1);
-    //        transform
-    //        {
-    //            type    cartesian;
-    //            origin  (0 0 0);
-    //            e1      (1 0 0);
-    //            e3      (0 0 1);
-    //        }
-    //    }
-    //    fridge
-    //    {
-    //        surface box1;
-    //        scale (1 1 1.1);
-    //        transform
-    //        {
-    //            type    cartesian;
-    //            origin  (0 0 1);
-    //            e1      (1 0 0);
-    //            e3      (0 0 1);
-    //        }
-    //    }
-    //}
+
+    fridgeFreezer
+    {
+        type searchableSurfaceCollection;
+
+        mergeSubRegions true;
+
+        freezer
+        {
+            surface box1;
+            scale (1 1 1);
+            transform
+            {
+                type    cartesian;
+                origin  (0 0 0);
+                e1      (1 0 0);
+                e3      (0 0 1);
+            }
+        }
+        fridge
+        {
+            surface box1;
+            scale (1 1 1.1);
+            transform
+            {
+                type    cartesian;
+                origin  (0 0 1);
+                e1      (1 0 0);
+                e3      (0 0 1);
+            }
+        }
+    }
+
     twoFridgeFreezers
     {
         type searchableSurfaceCollection;
-    
+
         mergeSubRegions true;
-    
+
         seal
         {
-            //surface fridgeFreezer;
-            //scale (1.0 1.0 1.0);
-            //transform
-            //{
-            //    type    cartesian;
-            //    origin  (2 2 0);
-            //    e1      (1 0 0);
-            //    e3      (0 0 1);
-            //}
             surface box1;
             scale (1.0 1.0 2.1);
             transform
@@ -105,15 +95,6 @@ geometry
         }
         herring
         {
-            //surface fridgeFreezer;
-            //scale (1.0 1.0 1.0);
-            //transform
-            //{
-            //    type    cartesian;
-            //    origin  (3.5 3 0);
-            //    e1      (1 0 0);
-            //    e3      (0 0 1);
-            //}
             surface box1;
             scale (1.0 1.0 2.1);
             transform

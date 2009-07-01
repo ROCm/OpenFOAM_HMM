@@ -17,33 +17,40 @@ FoamFile
 
 ddtSchemes
 {
-    default         Euler;
+    default         steadyState;
 }
 
 gradSchemes
 {
     default         Gauss linear;
-    grad(p)         Gauss linear;
 }
 
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss linear;
+    div(phi,U)      Gauss upwind;
+    div(phi,T)      Gauss upwind;
+    div(phi,k)      Gauss upwind;
+    div(phi,epsilon) Gauss upwind;
+    div(phi,R)      Gauss upwind;
+    div(R)          Gauss linear;
+    div((nuEff*dev(grad(U).T()))) Gauss linear;
 }
 
 laplacianSchemes
 {
     default         none;
-    laplacian(nu,U) Gauss linear corrected;
-    laplacian(1|A(U),p) Gauss linear corrected;
-    laplacian(diffusivity,cellMotionU) Gauss linear uncorrected;
+    laplacian(nuEff,U) Gauss linear corrected;
+    laplacian((1|A(U)),p) Gauss linear corrected;
+    laplacian(kappaEff,T) Gauss linear corrected;
+    laplacian(DkEff,k) Gauss linear corrected;
+    laplacian(DepsilonEff,epsilon) Gauss linear corrected;
+    laplacian(DREff,R) Gauss linear corrected;
 }
 
 interpolationSchemes
 {
     default         linear;
-    interpolate(HbyA) linear;
 }
 
 snGradSchemes

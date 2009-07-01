@@ -121,8 +121,8 @@ public:
         virtual scalar Cd(const scalar Re) const = 0;
 
         //- Return momentum transfer coefficient
-        //  Drag force per unit particle surface area = ptc(U - Up)
-        scalar ptc
+        //  Drag force per unit particle surface area = utc(U - Up)
+        scalar utc
         (
             const vector& Ur,
             const scalar d,

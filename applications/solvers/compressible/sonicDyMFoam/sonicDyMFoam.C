@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
         solve(UEqn == -fvc::grad(p));
 
-        #include "hEqn.H"
+        #include "eEqn.H"
 
 
         // --- PISO loop

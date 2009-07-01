@@ -42,14 +42,13 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readThermodynamicProperties.H"
+    #include "createFields.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readThermodynamicProperties.H"
-#   include "createFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -57,10 +56,10 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.value() << nl << endl;
 
-#       include "readPISOControls.H"
+        #include "readPISOControls.H"
         scalar HbyAblend = readScalar(piso.lookup("HbyAblend"));
 
-#       include "readTimeControls.H"
+        #include "readTimeControls.H"
 
         scalar CoNum = max
         (
@@ -70,7 +69,7 @@ int main(int argc, char *argv[])
 
         Info<< "Max Courant Number = " << CoNum << endl;
 
-#       include "setDeltaT.H"
+        #include "setDeltaT.H"
 
         for (int outerCorr=0; outerCorr<nOuterCorr; outerCorr++)
         {
@@ -145,9 +144,9 @@ int main(int argc, char *argv[])
 
                 phi -= phiGradp;
 
-#               include "resetPhiPatches.H"
+                #include "resetPhiPatches.H"
 
-                surfaceScalarField rhof = 
+                surfaceScalarField rhof =
                     mvConvection.interpolationScheme()()(rho)()
                    .interpolate(rho);
 
@@ -165,7 +164,7 @@ int main(int argc, char *argv[])
 
                 phi += phiGradp + pEqn.flux();
                 rho = psi*p;
-                rhof = 
+                rhof =
                     mvConvection.interpolationScheme()()(rho)()
                    .interpolate(rho);
                 phiv = phi/rhof;

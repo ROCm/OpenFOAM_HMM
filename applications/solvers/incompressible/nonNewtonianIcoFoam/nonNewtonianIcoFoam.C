@@ -37,15 +37,14 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMeshNoClear.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMeshNoClear.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -53,8 +52,8 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
 
         fluid.correct();
 
@@ -95,7 +94,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-#           include "continuityErrs.H"
+            #include "continuityErrs.H"
 
             U -= rUA*fvc::grad(p);
             U.correctBoundaryConditions();

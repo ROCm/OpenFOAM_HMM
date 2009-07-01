@@ -22,7 +22,7 @@ solvers
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-08;
-        relTol          0;
+        relTol          0.01;
     }
 
     U
@@ -30,7 +30,7 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
+        relTol          0.1;
     }
 
     T
@@ -38,7 +38,7 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
+        relTol          0.1;
     }
 
     k
@@ -46,7 +46,7 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
+        relTol          0.1;
     }
 
     epsilon
@@ -54,7 +54,7 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
+        relTol          0.1;
     }
 
     R
@@ -62,7 +62,7 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
+        relTol          0.1;
     }
 }
 
