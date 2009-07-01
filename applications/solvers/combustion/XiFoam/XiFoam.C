@@ -61,50 +61,49 @@ Description
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readCombustionProperties.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readCombustionProperties.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "rhoEqn.H"
-#       include "UEqn.H"
+        #include "rhoEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=1; corr<=nCorr; corr++)
         {
-#           include "ftEqn.H"
-#           include "bEqn.H"
-#           include "huEqn.H"
-#           include "hEqn.H"
+            #include "ftEqn.H"
+            #include "bEqn.H"
+            #include "huEqn.H"
+            #include "hEqn.H"
 
             if (!ign.ignited())
             {
                 hu == h;
             }
 
-#           include "pEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();

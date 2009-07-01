@@ -54,18 +54,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "CourantNo.H"
-#   include "setInitialDeltaT.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -73,25 +72,25 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
 
-#       include "UEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=0; corr<nCorr; corr++)
         {
-#           include "TEqn.H"
-#           include "pdEqn.H"
+            #include "TEqn.H"
+            #include "pdEqn.H"
         }
 
         turbulence->correct();
 
         if (runTime.write())
         {
-#           include "writeAdditionalFields.H"
+            #include "writeAdditionalFields.H"
         }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
