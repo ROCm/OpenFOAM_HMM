@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,16 +129,10 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <TemplateArgument>
-        #endif
+        friend Istream& operator>> <TemplateArgument>
         (Istream&, ClassName<TemplateArgument>&);
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <TemplateArgument>
-        #endif
+        friend Ostream& operator<< <TemplateArgument>
         (Ostream&, const ClassName<TemplateArgument>&);
 };
 

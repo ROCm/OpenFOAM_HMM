@@ -327,19 +327,13 @@ public:
 
     // IOstream operators
 
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <LListBase, T>
-        #endif
+        friend Istream& operator>> <LListBase, T>
         (
             Istream&,
             LList<LListBase, T>&
         );
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <LListBase, T>
-        #endif
+        friend Ostream& operator<< <LListBase, T>
         (
             Ostream&,
             const LList<LListBase, T>&

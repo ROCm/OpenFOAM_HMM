@@ -266,7 +266,7 @@ public:
             virtual scalar mug(scalar p, scalar T) const = 0;
 
             //- Liquid thermal conductivity  [W/(m K)]
-            virtual scalar K(scalar p, scalar T) const =0;
+            virtual scalar K(scalar p, scalar T) const = 0;
 
             //- Vapour thermal conductivity  [W/(m K)]
             virtual scalar Kg(scalar p, scalar T) const = 0;

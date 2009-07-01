@@ -95,6 +95,7 @@ DebugSwitches
     Euler               0;
     EulerImplicit       0;
     EulerRotation       0;
+    extendedCellToFaceStencil 0;
     FDIC                0;
     FaceCellWave        0;
     GAMG                0;

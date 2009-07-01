@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,60 +29,19 @@ License
 #include "DevolatilisationModel.H"
 #include "SurfaceReactionModel.H"
 
-// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::ReactingMultiphaseCloud<ParcelType>::addNewParcel
-(
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
-)
-{
-    label idGas = this->composition().idGas();
-    label idLiquid = this->composition().idLiquid();
-    label idSolid = this->composition().idSolid();
-
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        position,
-        cellId,
-        this->parcelTypeId(),
-        nParticles,
-        d,
-        U,
-        this->composition().YMixture0(),
-        this->composition().Y0(idGas),
-        this->composition().Y0(idLiquid),
-        this->composition().Y0(idSolid),
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
 Foam::ReactingMultiphaseCloud<ParcelType>::ReactingMultiphaseCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& carrierSpecies
+    basicThermo& thermo
 )
 :
-    ReactingCloud<ParcelType>(cloudType, rho, U, g, thermo, carrierSpecies),
+    ReactingCloud<ParcelType>(cloudName, rho, U, g, thermo),
     reactingMultiphaseCloud(),
     constProps_(this->particleProperties()),
     devolatilisationModel_
@@ -113,6 +72,55 @@ Foam::ReactingMultiphaseCloud<ParcelType>::~ReactingMultiphaseCloud()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    ReactingCloud<ParcelType>::checkParcelProperties
+    (
+        parcel,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    label idGas = this->composition().idGas();
+    label idLiquid = this->composition().idLiquid();
+    label idSolid = this->composition().idSolid();
+
+    if (!fullyDescribed)
+    {
+        parcel.YGas() = this->composition().Y0(idGas);
+        parcel.YLiquid() = this->composition().Y0(idLiquid);
+        parcel.YSolid() = this->composition().Y0(idSolid);
+    }
+    else
+    {
+        this->checkSuppliedComposition
+        (
+            parcel.YGas(),
+            this->composition().Y0(idGas),
+            "YGas"
+        );
+        this->checkSuppliedComposition
+        (
+            parcel.YLiquid(),
+            this->composition().Y0(idLiquid),
+            "YLiquid"
+        );
+        this->checkSuppliedComposition
+        (
+            parcel.YSolid(),
+            this->composition().Y0(idSolid),
+            "YSolid"
+        );
+    }
+}
+
 
 template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::resetSourceTerms()
@@ -190,6 +198,8 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
 }
 
 

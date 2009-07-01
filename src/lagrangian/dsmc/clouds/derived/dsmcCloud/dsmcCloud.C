@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,12 +38,12 @@ namespace Foam
 
 Foam::dsmcCloud::dsmcCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& T,
     const volVectorField& U
 )
 :
-    DsmcCloud<dsmcParcel>(cloudType, T, U)
+    DsmcCloud<dsmcParcel>(cloudName, T, U)
 {
     dsmcParcel::readFields(*this);
 }
@@ -51,11 +51,11 @@ Foam::dsmcCloud::dsmcCloud
 
 Foam::dsmcCloud::dsmcCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const fvMesh& mesh
 )
 :
-    DsmcCloud<dsmcParcel>(cloudType, mesh)
+    DsmcCloud<dsmcParcel>(cloudName, mesh)
 {}
 
 

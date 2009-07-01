@@ -196,8 +196,7 @@ public:
 
 
     // Destructor
-
-        ~SCOPE();
+    ~SCOPE();
 
 
     // Member functions

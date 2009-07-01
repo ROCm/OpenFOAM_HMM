@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -238,6 +238,28 @@ void Foam::molecule::setSiteSizes(label size)
     sitePositions_.setSize(size);
 
     siteForces_.setSize(size);
+}
+
+
+bool Foam::molecule::hitPatch
+(
+    const polyPatch&,
+    molecule::trackData&,
+    const label
+)
+{
+    return false;
+}
+
+
+bool Foam::molecule::hitPatch
+(
+    const polyPatch&,
+    int&,
+    const label
+)
+{
+    return false;
 }
 
 

@@ -29,13 +29,14 @@ Description
     Virtual abstract base class for templated reactingMultiphaseCloud
 
 SourceFiles
+    reactingMultiphaseCloud.C
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef reactingMultiphaseCloud_H
 #define reactingMultiphaseCloud_H
 
-#include "volFields.H"
+#include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

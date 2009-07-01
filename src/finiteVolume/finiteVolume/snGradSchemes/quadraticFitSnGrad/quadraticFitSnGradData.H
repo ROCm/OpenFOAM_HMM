@@ -38,7 +38,7 @@ SourceFiles
 
 #include "MeshObject.H"
 #include "fvMesh.H"
-#include "extendedStencil.H"
+#include "extendedCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,7 +62,7 @@ class quadraticFitSnGradData
         const label minSize_;
 
         //- Extended stencil addressing
-        extendedStencil stencil_;
+        extendedCellToFaceStencil stencil_;
 
         //- For each cell in the mesh store the values which multiply the
         //  values of the stencil to obtain the gradient for each direction
@@ -107,7 +107,7 @@ public:
     // Member functions
 
         //- Return reference to the stencil
-        const extendedStencil& stencil() const
+        const extendedCellToFaceStencil& stencil() const
         {
             return stencil_;
         }

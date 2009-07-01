@@ -91,9 +91,9 @@ class ensightMesh
 
         List<faceSets> boundaryFaceSets_;
 
-        HashTable<labelList> allPatchNames_;
+        wordList allPatchNames_;
 
-        HashTable<label> patchIndices_;
+        List<labelList> allPatchProcs_;
 
         wordHashSet patchNames_;
 
@@ -269,14 +269,14 @@ public:
                 return boundaryFaceSets_;
             }
 
-            const HashTable<labelList>& allPatchNames() const
+            const wordList& allPatchNames() const
             {
                 return allPatchNames_;
             }
 
-            const HashTable<label>& patchIndices() const
+            const List<labelList>& allPatchProcs() const
             {
-                return patchIndices_;
+                return allPatchProcs_;
             }
 
             const wordHashSet& patchNames() const

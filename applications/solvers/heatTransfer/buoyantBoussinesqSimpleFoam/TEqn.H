@@ -2,7 +2,7 @@
     volScalarField kappaEff
     (
         "kappaEff",
-        turbulence->nu() + turbulence->nut()/Prt
+        turbulence->nu()/Pr + turbulence->nut()/Prt
     );
 
     fvScalarMatrix TEqn
@@ -16,4 +16,6 @@
 
     eqnResidual = TEqn.solve().initialResidual();
     maxResidual = max(eqnResidual, maxResidual);
+
+    rhok = 1.0 - beta*(T - TRef);
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ SourceFiles
 #include "runTimeSelectionTables.H"
 
 #include "PtrList.H"
-#include "hCombustionThermo.H"
+#include "multiComponentMixture.H"
 
 #include "liquidMixture.H"
 #include "solidMixture.H"
@@ -74,11 +74,8 @@ class CompositionModel
         //- The coefficients dictionary
         const dictionary& coeffDict_;
 
-        //- Reference to the carrier phase thermo package
-        hCombustionThermo& carrierThermo_;
-
-        //- Reference to the carrier phase species
-        const PtrList<specieReactingProperties>& carrierSpecies_;
+        //- Reference to the multi-component carrier phase thermo
+        multiComponentMixture<typename CloudType::thermoType>& mcCarrierThermo_;
 
         //- Global (additional) liquid properties data
         autoPtr<liquidMixture> liquids_;
@@ -146,13 +143,11 @@ public:
             const dictionary& coeffDict() const;
 
             //- Return the carrier phase thermo package
-            const hCombustionThermo& carrierThermo() const;
+            const multiComponentMixture<typename CloudType::thermoType>&
+                mcCarrierThermo() const;
 
 
             // Composition lists
-
-                //- Return the carrier species
-                const PtrList<specieReactingProperties>& carrierSpecies() const;
 
                 //- Return the global (additional) liquids
                 const liquidMixture& liquids() const;
@@ -281,13 +276,18 @@ public:
     );
 
 
-#define makeCompositionModelType(SS, CloudType, ParcelType)                   \
+#define makeCompositionModelThermoType(SS, CloudType, ParcelType, ThermoType) \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
                                                                               \
-    CompositionModel<CloudType<ParcelType> >::                                \
-        adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
-            add##SS##CloudType##ParcelType##ConstructorToTable_;
+    CompositionModel<CloudType<ParcelType<ThermoType> > >::                   \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

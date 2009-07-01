@@ -28,9 +28,14 @@ License
 #include "IOstreams.H"
 #include "IOPosition.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class ParticleType>
+Foam::string Foam::Particle<ParticleType>::propHeader =
+    "(Px Py Pz) cellI origProc origId";
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from Istream
 template<class ParticleType>
 Foam::Particle<ParticleType>::Particle
 (
@@ -41,20 +46,26 @@ Foam::Particle<ParticleType>::Particle
 :
     cloud_(cloud),
     facei_(-1),
-    stepFraction_(0.0)
+    stepFraction_(0.0),
+    origProc_(Pstream::myProcNo()),
+    origId_(-1)
 {
     if (is.format() == IOstream::ASCII)
     {
-        is >> position_ >> celli_;
+        is >> position_ >> celli_ >> origProc_ >> origId_;
     }
     else
     {
-        // In binary read both celli_ and facei_, needed for parallel transfer
+        // In binary read all particle data - needed for parallel transfer
         is.read
         (
             reinterpret_cast<char*>(&position_),
-            sizeof(position_) + sizeof(celli_)
-          + sizeof(facei_) + sizeof(stepFraction_)
+            sizeof(position_)
+            + sizeof(celli_)
+            + sizeof(facei_)
+            + sizeof(stepFraction_)
+            + sizeof(origProc_)
+            + sizeof(origId_)
         );
     }
 
@@ -86,7 +97,9 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Particle<ParticleType>& p)
     if (os.format() == IOstream::ASCII)
     {
         os << p.position_
-           << token::SPACE << p.celli_;
+           << token::SPACE << p.celli_
+           << token::SPACE << p.origProc_
+           << token::SPACE << p.origId_;
     }
     else
     {
@@ -94,8 +107,12 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const Particle<ParticleType>& p)
         os.write
         (
             reinterpret_cast<const char*>(&p.position_),
-            sizeof(p.position_) + sizeof(p.celli_)
-          + sizeof(p.facei_) + sizeof(p.stepFraction_)
+            sizeof(p.position_)
+          + sizeof(p.celli_)
+          + sizeof(p.facei_)
+          + sizeof(p.stepFraction_)
+          + sizeof(p.origProc_)
+          + sizeof(p.origId_)
         );
     }
 

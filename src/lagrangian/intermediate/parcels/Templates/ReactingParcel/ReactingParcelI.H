@@ -35,7 +35,6 @@ inline Foam::ReactingParcel<ParcelType>::constantProperties::constantProperties
     ThermoParcel<ParcelType>::constantProperties(parentDict),
     pMin_(dimensionedScalar(this->dict().lookup("pMin")).value()),
     constantVolume_(this->dict().lookup("constantVolume")),
-    Tbp_(dimensionedScalar(this->dict().lookup("Tbp")).value()),
     Tvap_(dimensionedScalar(this->dict().lookup("Tvap")).value())
 {}
 
@@ -68,6 +67,21 @@ inline Foam::ReactingParcel<ParcelType>::trackData::trackData
     cloud_(cloud),
     constProps_(constProps),
     pInterp_(pInterp)
+{}
+
+
+template<class ParcelType>
+inline Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    ReactingCloud<ParcelType>& owner,
+    const vector& position,
+    const label cellI
+)
+:
+    ThermoParcel<ParcelType>(owner, position, cellI),
+    mass0_(0.0),
+    Y_(0),
+    pc_(0.0)
 {}
 
 
@@ -120,14 +134,6 @@ inline Foam::Switch
 Foam::ReactingParcel<ParcelType>::constantProperties::constantVolume() const
 {
     return constantVolume_;
-}
-
-
-template<class ParcelType>
-inline Foam::scalar
-Foam::ReactingParcel<ParcelType>::constantProperties::Tbp() const
-{
-    return Tbp_;
 }
 
 

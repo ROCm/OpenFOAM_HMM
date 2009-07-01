@@ -25,21 +25,33 @@ License
 Description
     Calculate the dual of a polyMesh. Adheres to all the feature&patch edges.
 
-    Feature angle:
-    convex features : point becomes single boundary cell with multiple
-                      boundary faces.
-    concave features: point becomes multiple boundary cells.
 
-    -splitAllFaces:
+Usage
+
+    - polyDualMesh featureAngle
+
+    Detects any boundary edge > angle and creates multiple boundary faces
+    for it. Normal behaviour is to have each point become a cell
+    (1.5 behaviour)
+
+    @param -concaveMultiCells
+    Creates multiple cells for each point on a concave edge. Might limit
+    the amount of distortion on some meshes.
+
+    @param -splitAllFaces
     Normally only constructs a single face between two cells. This single face
     might be too distorted. splitAllFaces will create a single face for every
     original cell the face passes through. The mesh will thus have
     multiple faces inbetween two cells! (so is not strictly upper-triangular
     anymore - checkMesh will complain)
-    -doNotPreserveFaceZones:
+
+    @param -doNotPreserveFaceZones:
     By default all faceZones are preserved by marking all faces, edges and
     points on them as features. The -doNotPreserveFaceZones disables this
     behaviour.
+
+    Note: is just a driver for meshDualiser. Substitute your own
+    simpleMarkFeatures to have different behaviour.
 
 \*---------------------------------------------------------------------------*/
 
@@ -70,6 +82,7 @@ void simpleMarkFeatures
     const polyMesh& mesh,
     const PackedBoolList& isBoundaryEdge,
     const scalar featureAngle,
+    const bool concaveMultiCells,
     const bool doNotPreserveFaceZones,
 
     labelList& featureFaces,
@@ -182,7 +195,7 @@ void simpleMarkFeatures
                   - allBoundary[f0].centre(allBoundary.points())
                 );
 
-                if ((c1c0 & n0) > SMALL)
+                if (concaveMultiCells && (c1c0 & n0) > SMALL)
                 {
                     // Found concave edge. Make into multiCell features
                     Info<< "Detected concave feature edge:" << edgeI
@@ -230,7 +243,7 @@ void simpleMarkFeatures
 
     if (doNotPreserveFaceZones)
     {
-        if (faceZones.size())
+        if (faceZones.size() > 0)
         {
             WarningIn("simpleMarkFeatures(..)")
                 << "Detected " << faceZones.size()
@@ -240,7 +253,7 @@ void simpleMarkFeatures
     }
     else
     {
-        if (faceZones.size())
+        if (faceZones.size() > 0)
         {
             Info<< "Detected " << faceZones.size()
                 << " faceZones. Preserving these by marking their"
@@ -345,6 +358,7 @@ int main(int argc, char *argv[])
 
     argList::validArgs.append("feature angle[0-180]");
     argList::validOptions.insert("splitAllFaces", "");
+    argList::validOptions.insert("concaveMultiCells", "");
     argList::validOptions.insert("doNotPreserveFaceZones", "");
     argList::validOptions.insert("overwrite", "");
 
@@ -381,11 +395,25 @@ int main(int argc, char *argv[])
 
 
     const bool splitAllFaces = args.optionFound("splitAllFaces");
+    if (splitAllFaces)
+    {
+        Info<< "Splitting all internal faces to create multiple faces"
+            << " between two cells." << nl
+            << endl;
+    }
+
     const bool overwrite = args.optionFound("overwrite");
     const bool doNotPreserveFaceZones = args.optionFound
     (
         "doNotPreserveFaceZones"
     );
+    const bool concaveMultiCells = args.optionFound("concaveMultiCells");
+    if (concaveMultiCells)
+    {
+        Info<< "Generating multiple cells for points on concave feature edges."
+            << nl << endl;
+    }
+
 
     // Face(centre)s that need inclusion in the dual mesh
     labelList featureFaces;
@@ -393,7 +421,7 @@ int main(int argc, char *argv[])
     labelList featureEdges;
     // Points (that become a single cell) that need inclusion in the dual mesh
     labelList singleCellFeaturePoints;
-    // Points (that become a mulitple cells)        ,,
+    // Points (that become a multiple cells)        ,,
     labelList multiCellFeaturePoints;
 
     // Sample implementation of feature detection.
@@ -402,6 +430,7 @@ int main(int argc, char *argv[])
         mesh,
         isBoundaryEdge,
         featureAngle,
+        concaveMultiCells,
         doNotPreserveFaceZones,
 
         featureFaces,

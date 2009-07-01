@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -365,8 +365,7 @@ void Foam::potential::potential::readMdInitialiseDict
 
 Foam::potential::potential(const polyMesh& mesh)
 :
-    mesh_(mesh),
-    electrostaticPotential_()
+    mesh_(mesh)
 {
     readPotentialDict();
 }
@@ -379,8 +378,7 @@ Foam::potential::potential
     IOdictionary& idListDict
 )
 :
-    mesh_(mesh),
-    electrostaticPotential_()
+    mesh_(mesh)
 {
     readMdInitialiseDict(mdInitialiseDict, idListDict);
 }

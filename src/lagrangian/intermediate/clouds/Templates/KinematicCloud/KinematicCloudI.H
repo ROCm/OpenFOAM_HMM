@@ -29,13 +29,6 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const Foam::word& Foam::KinematicCloud<ParcelType>::cloudType() const
-{
-    return cloudType_;
-}
-
-
-template<class ParcelType>
 inline Foam::label Foam::KinematicCloud<ParcelType>::parcelTypeId() const
 {
     return parcelTypeId_;
@@ -159,6 +152,14 @@ Foam::KinematicCloud<ParcelType>::injection() const
 
 
 template<class ParcelType>
+inline const Foam::PatchInteractionModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::patchInteraction() const
+{
+    return patchInteractionModel_;
+}
+
+
+template<class ParcelType>
 inline Foam::InjectionModel<Foam::KinematicCloud<ParcelType> >&
 Foam::KinematicCloud<ParcelType>::injection()
 {
@@ -167,10 +168,10 @@ Foam::KinematicCloud<ParcelType>::injection()
 
 
 template<class ParcelType>
-inline const Foam::WallInteractionModel<Foam::KinematicCloud<ParcelType> >&
-Foam::KinematicCloud<ParcelType>::wallInteraction() const
+inline Foam::PostProcessingModel<Foam::KinematicCloud<ParcelType> >&
+Foam::KinematicCloud<ParcelType>::postProcessing()
 {
-    return wallInteractionModel_;
+    return postProcessingModel_();
 }
 
 

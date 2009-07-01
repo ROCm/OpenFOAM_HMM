@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ Class
 
 Description
     Templated base class for multiphase reacting cloud
+
     - Adds to reacting cloud
       - multiphase composition
       - devolatilisatsion
@@ -67,7 +68,18 @@ class ReactingMultiphaseCloud
     public ReactingCloud<ParcelType>,
     public reactingMultiphaseCloud
 {
-    // Private data
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ReactingMultiphaseCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
@@ -100,15 +112,6 @@ class ReactingMultiphaseCloud
             scalar dMassSurfaceReaction_;
 
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const ReactingMultiphaseCloud&);
-
-
 public:
 
     // Constructors
@@ -116,12 +119,11 @@ public:
         //- Construct given carrier gas fields
         ReactingMultiphaseCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& carrierSpecies
+            basicThermo& thermo
         );
 
 
@@ -173,15 +175,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType& parcel,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

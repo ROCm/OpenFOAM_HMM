@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ License
 inline Foam::molecule::constantProperties::constantProperties()
 :
     siteReferencePositions_(Field<vector>(0)),
+    siteMasses_(List<scalar>(0)),
     siteCharges_(List<scalar>(0)),
     siteIds_(List<label>(0)),
     pairPotentialSites_(List<bool>(false)),
@@ -44,6 +45,7 @@ inline Foam::molecule::constantProperties::constantProperties
 )
 :
     siteReferencePositions_(dict.lookup("siteReferencePositions")),
+    siteMasses_(dict.lookup("siteMasses")),
     siteCharges_(dict.lookup("siteCharges")),
     siteIds_(List<word>(dict.lookup("siteIds")).size(), -1),
     pairPotentialSites_(),
@@ -59,9 +61,7 @@ inline Foam::molecule::constantProperties::constantProperties
         List<word>(dict.lookup("pairPotentialSiteIds"))
     );
 
-    scalarList siteMasses(dict.lookup("siteMasses"));
-
-    mass_ = sum(siteMasses);
+    mass_ = sum(siteMasses_);
 
     vector centreOfMass(vector::zero);
 
@@ -70,7 +70,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
     forAll(siteReferencePositions_, i)
     {
-        centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+        centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
     }
 
     centreOfMass /= mass_;
@@ -106,7 +106,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
         forAll(siteReferencePositions_, i)
         {
-            centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+            centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
         }
 
         centreOfMass /= mass_;
@@ -119,10 +119,8 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses[i]*diagTensor
-            (
-                0, p.x()*p.x(), p.x()*p.x()
-            );
+            momOfInertia +=
+                siteMasses_[i]*diagTensor(0, p.x()*p.x(), p.x()*p.x());
         }
 
         momentOfInertia_ = diagTensor
@@ -144,7 +142,7 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses[i]*tensor
+            momOfInertia += siteMasses_[i]*tensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
                 -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
@@ -156,8 +154,7 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             FatalErrorIn("molecule::constantProperties::constantProperties")
                 << "An eigenvalue of the inertia tensor is zero, the molecule "
-                << dict.name()
-                << " is not a valid 6DOF shape."
+                << dict.name() << " is not a valid 6DOF shape."
                 << nl << abort(FatalError);
         }
 
@@ -172,7 +169,7 @@ inline Foam::molecule::constantProperties::constantProperties
         // global axes
 
         tensor Q =
-        vector(1,0,0)*e.x() + vector(0,1,0)*e.y() + vector(0,0,1)*e.z();
+            vector(1,0,0)*e.x() + vector(0,1,0)*e.y() + vector(0,0,1)*e.z();
 
         // Transform the site positions
 
@@ -187,7 +184,7 @@ inline Foam::molecule::constantProperties::constantProperties
 
         forAll(siteReferencePositions_, i)
         {
-            centreOfMass += siteReferencePositions_[i]*siteMasses[i];
+            centreOfMass += siteReferencePositions_[i]*siteMasses_[i];
         }
 
         centreOfMass /= mass_;
@@ -203,7 +200,7 @@ inline Foam::molecule::constantProperties::constantProperties
         {
             const vector& p(siteReferencePositions_[i]);
 
-            momOfInertia += siteMasses[i]*tensor
+            momOfInertia += siteMasses_[i]*tensor
             (
                 p.y()*p.y() + p.z()*p.z(), -p.x()*p.y(), -p.x()*p.z(),
                 -p.y()*p.x(), p.x()*p.x() + p.z()*p.z(), -p.y()*p.z(),
@@ -338,6 +335,13 @@ Foam::molecule::constantProperties::siteReferencePositions() const
 
 
 inline const Foam::List<Foam::scalar>&
+Foam::molecule::constantProperties::siteMasses() const
+{
+    return siteMasses_;
+}
+
+
+inline const Foam::List<Foam::scalar>&
 Foam::molecule::constantProperties::siteCharges() const
 {
     return siteCharges_;
@@ -372,7 +376,7 @@ inline bool Foam::molecule::constantProperties::pairPotentialSite
 {
     label s = findIndex(siteIds_, sId);
 
-    if(s == -1)
+    if (s == -1)
     {
         FatalErrorIn("moleculeI.H") << nl
             << sId << " site not found."
@@ -396,10 +400,12 @@ inline bool Foam::molecule::constantProperties::electrostaticSite
 {
     label s = findIndex(siteIds_, sId);
 
-    if(s == -1)
+    if (s == -1)
     {
-        FatalErrorIn("moleculeI.H") << nl
-            << sId << " site not found."
+        FatalErrorIn
+        (
+            "molecule::constantProperties::electrostaticSite(label)"
+        )   << sId << " site not found."
             << nl << abort(FatalError);
     }
 
@@ -416,13 +422,30 @@ Foam::molecule::constantProperties::momentOfInertia() const
 
 inline bool Foam::molecule::constantProperties::linearMolecule() const
 {
-    return (momentOfInertia_.xx() < 0);
+    return ((momentOfInertia_.xx() < 0) && (momentOfInertia_.yy() > 0));
 }
 
 
 inline bool Foam::molecule::constantProperties::pointMolecule() const
 {
     return (momentOfInertia_.zz() < 0);
+}
+
+
+inline Foam::label Foam::molecule::constantProperties::degreesOfFreedom() const
+{
+    if (linearMolecule())
+    {
+        return 5;
+    }
+    else if (pointMolecule())
+    {
+        return 3;
+    }
+    else
+    {
+        return 6;
+    }
 }
 
 
@@ -591,7 +614,5 @@ inline Foam::label Foam::molecule::id() const
     return id_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

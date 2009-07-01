@@ -27,6 +27,7 @@ Class
 
 Description
     Templated base class for reacting cloud
+
     - Adds to thermodynamic cloud
       - Variable composition (single phase)
       - Phase change
@@ -40,13 +41,9 @@ SourceFiles
 #ifndef ReactingCloud_H
 #define ReactingCloud_H
 
-#include "autoPtr.H"
-#include "hCombustionThermo.H"
-
 #include "ThermoCloud.H"
 #include "reactingCloud.H"
-
-#include "ReactingCloudThermoTypes.H"
+#include "multiComponentMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,16 +68,32 @@ class ReactingCloud
     public ThermoCloud<ParcelType>,
     public reactingCloud
 {
-    // Private data
+public:
+
+    //- Type of thermodynamics the cloud was instantiated for
+    typedef typename ParcelType::thermoType thermoType;
+
+
+private:
+
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ReactingCloud(const ReactingCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ReactingCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- Parcel constant properties
         typename ParcelType::constantProperties constProps_;
 
-        //- Thermodynamics package (combustion)
-        hCombustionThermo& carrierThermo_;
-
-        //- Gas phase properties
-        PtrList<specieReactingProperties>& carrierSpecies_;
+        //- Multi-component carrier phase thermo
+        multiComponentMixture<thermoType>& mcCarrierThermo_;
 
 
         // References to the cloud sub-models
@@ -106,13 +119,17 @@ class ReactingCloud
             scalar dMassPhaseChange_;
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
-        //- Disallow default bitwise copy construct
-        ReactingCloud(const ReactingCloud&);
+        // New parcel helper functions
 
-        //- Disallow default bitwise assignment
-        void operator=(const ReactingCloud&);
+            //- Check that size of a composition field is valid
+            void checkSuppliedComposition
+            (
+                const scalarField& YSupplied,
+                const scalarField& Y,
+                const word& YName
+            );
 
 
 public:
@@ -122,12 +139,11 @@ public:
         //- Construct given carrier gas fields
         ReactingCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            hCombustionThermo& thermo,
-            PtrList<specieReactingProperties>& carrierSpecies
+            basicThermo& thermo
         );
 
 
@@ -147,14 +163,12 @@ public:
             inline const typename ParcelType::constantProperties&
                 constProps() const;
 
-            //- Return const access to carrier phase thermo package
-            inline const hCombustionThermo& carrierThermo() const;
+            //- Return const access to multi-component carrier phase thermo
+            inline const multiComponentMixture<thermoType>&
+                mcCarrierThermo() const;
 
-            //- Return access to carrier phase thermo package
-            inline hCombustionThermo& carrierThermo();
-
-            //- Gas phase properties
-            inline const PtrList<specieReactingProperties>& carrierSpecies() const;
+            //- Return access to multi-component carrier phase thermo
+            inline multiComponentMixture<thermoType>& mcCarrierThermo();
 
 
             // Sub-models
@@ -200,15 +214,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType& parcel,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

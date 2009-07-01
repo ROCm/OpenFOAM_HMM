@@ -398,7 +398,6 @@ inline bool Foam::FixedList<T, Size>::empty() const
 }
 
 
-#ifndef __CINT__
 template<class T, unsigned Size>
 template<class HashT>
 inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
@@ -426,6 +425,5 @@ inline unsigned Foam::FixedList<T, Size>::Hash<HashT>::operator()
     }
 }
 
-#endif  // __CINT__
 
 // ************************************************************************* //

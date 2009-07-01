@@ -49,7 +49,7 @@ void Foam::KinematicParcel<ParcelType>::setCellValues
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Limiting density in cell " << cellI << " to "
+        )   << "Limiting observed density in cell " << cellI << " to "
             << td.constProps().rhoMin() <<  nl << endl;
 
         rhoc_ = td.constProps().rhoMin();
@@ -103,14 +103,18 @@ void Foam::KinematicParcel<ParcelType>::calc
     const scalar mass0 = mass();
 
 
+    // Explicit momentum source for particle
+    vector Su = vector::zero;
+
+    // Momentum transfer from the particle to the carrier phase
+    vector dUTrans = vector::zero;
+
+
     // Motion
     // ~~~~~~
 
-    // No additional forces
-    vector Fx = vector::zero;
-
     // Calculate new particle velocity
-    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx);
+    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Su, dUTrans);
 
 
     // Accumulate carrier phase source terms
@@ -118,7 +122,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     if (td.cloud().coupled())
     {
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += np0*mass0*(U0 - U1);
+        td.cloud().UTrans()[cellI] += np0*dUTrans;
     }
 
 
@@ -139,32 +143,66 @@ const Foam::vector Foam::KinematicParcel<ParcelType>::calcVelocity
     const vector& U,
     const scalar rho,
     const scalar mass,
-    const vector& Fx
+    const vector& Su,
+    vector& dUTrans
 ) const
 {
     const polyMesh& mesh = this->cloud().pMesh();
 
-    // Return linearised term from drag model
-    scalar Cud = td.cloud().drag().Cu(U - Uc_, d, rhoc_, rho, muc_);
+    // Momentum transfer coefficient
+    const scalar utc =
+        td.cloud().drag().utc(U - Uc_, d, rhoc_, muc_) + ROOTVSMALL;
 
-    // Calculate particle forces
-    vector Ftot = td.cloud().forces().calc(cellI, dt, rhoc_, rho, Uc_, U);
+    // Momentum source due to particle forces
+    const vector FCoupled =
+        mass*td.cloud().forces().calcCoupled(cellI, dt, rhoc_, rho, Uc_, U);
+    const vector FNonCoupled =
+        mass*td.cloud().forces().calcNonCoupled(cellI, dt, rhoc_, rho, Uc_, U);
 
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
-    const vector ap = Uc_ + (Ftot + Fx)/(Cud + VSMALL);
-    const scalar bp = Cud;
+    const scalar As = this->areaS(d);
+    const vector ap = Uc_ + (FCoupled + FNonCoupled + Su)/(utc*As);
+    const scalar bp = 6.0*utc/(rho*d);
 
-    vector Unew = td.cloud().UIntegrator().integrate(U, dt, ap, bp).value();
+    IntegrationScheme<vector>::integrationResult Ures =
+        td.cloud().UIntegrator().integrate(U, dt, ap, bp);
 
-    // Apply correction to velocity for reduced-D cases
+    vector Unew = Ures.value();
+
+    dUTrans += dt*(utc*As*(Ures.average() - Uc_) - FCoupled);
+
+    // Apply correction to velocity and dUTrans for reduced-D cases
     meshTools::constrainDirection(mesh, mesh.solutionD(), Unew);
+    meshTools::constrainDirection(mesh, mesh.solutionD(), dUTrans);
 
     return Unew;
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::KinematicParcel<ParcelType>::KinematicParcel
+(
+    const KinematicParcel<ParcelType>& p
+)
+:
+    Particle<ParcelType>(p),
+    typeId_(p.typeId_),
+    nParticle_(p.nParticle_),
+    d_(p.d_),
+    U_(p.U_),
+    rho_(p.rho_),
+    tTurb_(p.tTurb_),
+    UTurb_(p.UTurb_),
+    rhoc_(p.rhoc_),
+    Uc_(p.Uc_),
+    muc_(p.muc_)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -218,17 +256,42 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
 
         if (p.onBoundary() && td.keepParticle)
         {
-            if (p.face() > -1)
+            if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
             {
-                if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
-                {
-                    td.switchProcessor = true;
-                }
+                td.switchProcessor = true;
             }
         }
     }
 
     return td.keepParticle;
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+bool Foam::KinematicParcel<ParcelType>::hitPatch
+(
+    const polyPatch& pp,
+    TrackData& td,
+    const label patchI
+)
+{
+    ParcelType& p = static_cast<ParcelType&>(*this);
+    td.cloud().postProcessing().postPatch(p, patchI);
+
+    return td.cloud().patchInteraction().correct(pp, this->face(), U_);
+}
+
+
+template<class ParcelType>
+bool Foam::KinematicParcel<ParcelType>::hitPatch
+(
+    const polyPatch& pp,
+    int& td,
+    const label patchI
+)
+{
+    return false;
 }
 
 
@@ -261,7 +324,7 @@ void Foam::KinematicParcel<ParcelType>::hitWallPatch
     TrackData& td
 )
 {
-    td.cloud().wallInteraction().correct(wpp, this->face(), U_);
+    // Wall interactions handled by generic hitPatch function
 }
 
 

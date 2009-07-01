@@ -354,8 +354,7 @@ public:
             //- Range of global indices that can be returned.
             virtual label globalSize() const
             {
-                const labelList& offsets = globalTris().offsets();
-                return offsets[offsets.size()-1];
+                return globalTris().size();
             }
 
             virtual void findNearest

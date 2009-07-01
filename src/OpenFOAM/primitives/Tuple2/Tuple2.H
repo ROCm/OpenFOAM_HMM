@@ -139,19 +139,13 @@ public:
 
     // Friend Operators
 
-        friend bool operator==
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend bool operator== <Type1, Type2>
         (
             const Tuple2<Type1, Type2>& a,
             const Tuple2<Type1, Type2>& b
         );
 
-        friend bool operator!=
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend bool operator!= <Type1, Type2>
         (
             const Tuple2<Type1, Type2>& a,
             const Tuple2<Type1, Type2>& b
@@ -161,20 +155,14 @@ public:
     // IOstream operators
 
         //- Read Tuple2 from Istream, discarding contents of existing Tuple2.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend Istream& operator>> <Type1, Type2>
         (
             Istream& is,
             Tuple2<Type1, Type2>& t2
         );
 
         // Write Tuple2 to Ostream.
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend Ostream& operator<< <Type1, Type2>
         (
             Ostream& os,
             const Tuple2<Type1, Type2>& t2

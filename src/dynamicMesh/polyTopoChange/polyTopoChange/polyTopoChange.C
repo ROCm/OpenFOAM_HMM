@@ -58,23 +58,6 @@ const Foam::point Foam::polyTopoChange::greatPoint
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-// Renumber
-void Foam::polyTopoChange::renumber
-(
-    const labelList& map,
-    DynamicList<label>& elems
-)
-{
-    forAll(elems, elemI)
-    {
-        if (elems[elemI] >= 0)
-        {
-            elems[elemI] = map[elems[elemI]];
-        }
-    }
-}
-
-
 // Renumber with special handling for merged items (marked with <-1)
 void Foam::polyTopoChange::renumberReverseMap
 (
@@ -205,6 +188,20 @@ void Foam::polyTopoChange::countMap
             nMerge++;
         }
     }
+}
+
+
+Foam::labelHashSet Foam::polyTopoChange::getSetIndices(const PackedBoolList& lst)
+{
+    labelHashSet values(lst.count());
+    forAll(lst, i)
+    {
+        if (lst[i])
+        {
+            values.insert(i);
+        }
+    }
+    return values;
 }
 
 
@@ -382,6 +379,35 @@ void Foam::polyTopoChange::checkFace
             << " faceI(-1 if added face):" << faceI
             << " own:" << own << " nei:" << nei
             << " patchI:" << patchI << abort(FatalError);
+    }
+    if (faceI >= 0 && faceI < faces_.size() && faceRemoved(faceI))
+    {
+        FatalErrorIn
+        (
+            "polyTopoChange::checkFace(const face&, const label"
+            ", const label, const label, const label)"
+        )   << "Face already marked for removal"
+            << nl
+            << "f:" << f
+            << " faceI(-1 if added face):" << faceI
+            << " own:" << own << " nei:" << nei
+            << " patchI:" << patchI << abort(FatalError);
+    }
+    forAll(f, fp)
+    {
+        if (f[fp] < points_.size() && pointRemoved(f[fp]))
+        {
+            FatalErrorIn
+            (
+                "polyTopoChange::checkFace(const face&, const label"
+                ", const label, const label, const label)"
+            )   << "Face uses removed vertices"
+                << nl
+                << "f:" << f
+                << " faceI(-1 if added face):" << faceI
+                << " own:" << own << " nei:" << nei
+                << " patchI:" << patchI << abort(FatalError);
+        }
     }
 }
 
@@ -753,9 +779,11 @@ void Foam::polyTopoChange::reorderCompactFaces
 
     renumberKey(oldToNew, faceFromPoint_);
     renumberKey(oldToNew, faceFromEdge_);
-    renumber(oldToNew, flipFaceFlux_);
+    inplaceReorder(oldToNew, flipFaceFlux_);
+    flipFaceFlux_.setCapacity(newSize);
     renumberKey(oldToNew, faceZone_);
-    renumberKey(oldToNew, faceZoneFlip_);
+    inplaceReorder(oldToNew, faceZoneFlip_);
+    faceZoneFlip_.setCapacity(newSize);
 }
 
 
@@ -1068,6 +1096,18 @@ void Foam::polyTopoChange::compact
                         {
                             faces_[faceI] = faces_[faceI].reverseFace();
                             Swap(faceOwner_[faceI], faceNeighbour_[faceI]);
+                            flipFaceFlux_[faceI] =
+                            (
+                                flipFaceFlux_[faceI]
+                              ? 0
+                              : 1
+                            );
+                            faceZoneFlip_[faceI] =
+                            (
+                                faceZoneFlip_[faceI]
+                              ? 0
+                              : 1
+                            );
                         }
                     }
                 }
@@ -2273,9 +2313,9 @@ void Foam::polyTopoChange::addMesh
         faceMap_.setCapacity(faceMap_.size() + nAllFaces);
         faceFromPoint_.resize(faceFromPoint_.size() + nAllFaces/100);
         faceFromEdge_.resize(faceFromEdge_.size() + nAllFaces/100);
-        flipFaceFlux_.resize(flipFaceFlux_.size() + nAllFaces/100);
+        flipFaceFlux_.setCapacity(faces_.size() + nAllFaces);
         faceZone_.resize(faceZone_.size() + nAllFaces/100);
-        faceZoneFlip_.resize(faceZoneFlip_.size() + nAllFaces/100);
+        faceZoneFlip_.setCapacity(faces_.size() + nAllFaces);
 
 
         // Precalc offset zones
@@ -2687,16 +2727,13 @@ Foam::label Foam::polyTopoChange::addFace
     }
     reverseFaceMap_.append(faceI);
 
-    if (flipFaceFlux)
-    {
-        flipFaceFlux_.insert(faceI);
-    }
+    flipFaceFlux_[faceI] = (flipFaceFlux ? 1 : 0);
 
     if (zoneID >= 0)
     {
         faceZone_.insert(faceI, zoneID);
-        faceZoneFlip_.insert(faceI, zoneFlip);
     }
+    faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
 
     return faceI;
 }
@@ -2725,14 +2762,7 @@ void Foam::polyTopoChange::modifyFace
     faceNeighbour_[faceI] = nei;
     region_[faceI] = patchID;
 
-    if (flipFaceFlux)
-    {
-        flipFaceFlux_.insert(faceI);
-    }
-    else
-    {
-        flipFaceFlux_.erase(faceI);
-    }
+    flipFaceFlux_[faceI] = (flipFaceFlux ? 1 : 0);
 
     Map<label>::iterator faceFnd = faceZone_.find(faceI);
 
@@ -2741,19 +2771,17 @@ void Foam::polyTopoChange::modifyFace
         if (zoneID >= 0)
         {
             faceFnd() = zoneID;
-            faceZoneFlip_.find(faceI)() = zoneFlip;
         }
         else
         {
             faceZone_.erase(faceFnd);
-            faceZoneFlip_.erase(faceI);
         }
     }
     else if (zoneID >= 0)
     {
         faceZone_.insert(faceI, zoneID);
-        faceZoneFlip_.insert(faceI, zoneFlip);
     }
+    faceZoneFlip_[faceI] = (zoneFlip ? 1 : 0);
 }
 
 
@@ -2794,9 +2822,9 @@ void Foam::polyTopoChange::removeFace(const label faceI, const label mergeFaceI)
     }
     faceFromEdge_.erase(faceI);
     faceFromPoint_.erase(faceI);
-    flipFaceFlux_.erase(faceI);
+    flipFaceFlux_[faceI] = 0;
     faceZone_.erase(faceI);
-    faceZoneFlip_.erase(faceI);
+    faceZoneFlip_[faceI] = 0;
 }
 
 
@@ -3090,6 +3118,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
     labelListList faceZonePointMap(mesh.faceZones().size());
     calcFaceZonePointMap(mesh, oldFaceZoneMeshPointMaps, faceZonePointMap);
 
+    labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
 
     return autoPtr<mapPolyMesh>
     (
@@ -3118,7 +3147,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::changeMesh
             reverseFaceMap_,
             reverseCellMap_,
 
-            flipFaceFlux_,
+            flipFaceFluxSet,
 
             patchPointMap,
 
@@ -3381,6 +3410,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
         writeMeshStats(mesh, Pout);
     }
 
+    labelHashSet flipFaceFluxSet(getSetIndices(flipFaceFlux_));
+
     return autoPtr<mapPolyMesh>
     (
         new mapPolyMesh
@@ -3408,7 +3439,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
             reverseFaceMap_,
             reverseCellMap_,
 
-            flipFaceFlux_,
+            flipFaceFluxSet,
 
             patchPointMap,
 

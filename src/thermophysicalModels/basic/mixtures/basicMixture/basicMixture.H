@@ -47,7 +47,7 @@ class fvMesh;
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                           Class basicMixture Declaration
+                        Class basicMixture Declaration
 \*---------------------------------------------------------------------------*/
 
 class basicMixture
@@ -65,9 +65,8 @@ public:
         basicMixture(const dictionary&, const fvMesh&);
 
 
-    // Destructor
-
-        virtual ~basicMixture();
+    //- Destructor
+    virtual ~basicMixture();
 };
 
 

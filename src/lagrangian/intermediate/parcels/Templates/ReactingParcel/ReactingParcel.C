@@ -50,7 +50,7 @@ void Foam::ReactingParcel<ParcelType>::setCellValues
                 "const scalar, "
                 "const label"
             ")"
-        )   << "Limiting pressure in cell " << cellI << " to "
+        )   << "Limiting observed pressure in cell " << cellI << " to "
             << td.constProps().pMin() <<  nl << endl;
 
         pc_ = td.constProps().pMin();
@@ -86,7 +86,8 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
         forAll(td.cloud().rhoTrans(), i)
         {
             scalar Y = td.cloud().rhoTrans(i)[cellI]/addedMass;
-            cpEff += Y*td.cloud().carrierSpecies()[i].Cp(this->Tc_);
+            cpEff +=
+                Y*td.cloud().mcCarrierThermo().speciesData()[i].Cp(this->Tc_);
         }
     }
     const scalar cpc = td.cpInterp().psi()[cellI];
@@ -138,10 +139,17 @@ void Foam::ReactingParcel<ParcelType>::calc
     const scalar cp0 = this->cp_;
     const scalar mass0 = this->mass();
 
-    // Intial ethalpy state
-    scalar H0H = td.cloud().composition().H(0, Y_, pc_, T0);
-    scalar H0L = td.cloud().composition().L(0, Y_, pc_, T0);
-    scalar H0 = H0H - H0L;
+    // Explicit momentum source for particle
+    vector Su = vector::zero;
+
+    // Momentum transfer from the particle to the carrier phase
+    vector dUTrans = vector::zero;
+
+    // Explicit enthalpy source for particle
+    scalar Sh = 0.0;
+
+    // Sensible enthalpy transfer from the particle to the carrier phase
+    scalar dhsTrans = 0.0;
 
 
     // Phase change
@@ -150,9 +158,23 @@ void Foam::ReactingParcel<ParcelType>::calc
     // Mass transfer due to phase change
     scalarField dMassPC(Y_.size(), 0.0);
 
-    // Return enthalpy source and calc mass transfer due to phase change
-    scalar ShPC =
-        calcPhaseChange(td, dt, cellI, d0, T0, U0, mass0, 0, 1.0, Y_, dMassPC);
+    // Calc mass and enthalpy transfer due to phase change
+    calcPhaseChange
+    (
+        td,
+        dt,
+        cellI,
+        d0,
+        T0,
+        U0,
+        mass0,
+        0,
+        1.0,
+        Y_,
+        dMassPC,
+        Sh,
+        dhsTrans
+    );
 
     // Update particle component mass and mass fractions
     scalar mass1 = updateMassFraction(mass0, dMassPC, Y_);
@@ -162,23 +184,17 @@ void Foam::ReactingParcel<ParcelType>::calc
     // ~~~~~~~~~~~~~
 
     // Calculate new particle temperature
-    scalar T1 = calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, ShPC);
-
-    // Calculate new enthalpy state
-    scalar H1H = td.cloud().composition().H(0, Y_, pc_, T1);
-    scalar H1L = td.cloud().composition().L(0, Y_, pc_, T1);
-    scalar H1 = H1H - H1L;
+    scalar T1 =
+        calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, Sh, dhsTrans);
 
 
     // Motion
     // ~~~~~~
 
-    // No additional forces
-    vector Fx = vector::zero;
-
     // Calculate new particle velocity
-    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Fx);
+    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Su, dUTrans);
 
+    dUTrans += 0.5*(mass0 - mass1)*(U0 + U1);
 
     // Accumulate carrier phase source terms
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -187,15 +203,19 @@ void Foam::ReactingParcel<ParcelType>::calc
         // Transfer mass lost from particle to carrier mass source
         forAll(dMassPC, i)
         {
-            label id = td.cloud().composition().localToGlobalCarrierId(0, i);
-            td.cloud().rhoTrans(id)[cellI] += np0*dMassPC[i];
+            label gid = td.cloud().composition().localToGlobalCarrierId(0, i);
+            td.cloud().rhoTrans(gid)[cellI] += np0*dMassPC[i];
+            td.cloud().hcTrans()[cellI] +=
+                np0
+               *dMassPC[i]
+               *td.cloud().mcCarrierThermo().speciesData()[gid].H(T0);
         }
 
         // Update momentum transfer
-        td.cloud().UTrans()[cellI] += np0*(mass0*U0 - mass1*U1);
+        td.cloud().UTrans()[cellI] += np0*dUTrans;
 
         // Update sensible enthalpy transfer
-        td.cloud().hsTrans()[cellI] += np0*(mass0*H0 - mass1*H1);
+        td.cloud().hsTrans()[cellI] += np0*dhsTrans;
     }
 
 
@@ -210,12 +230,13 @@ void Foam::ReactingParcel<ParcelType>::calc
             // Absorb parcel into carrier phase
             forAll(Y_, i)
             {
-                label id =
+                label gid =
                     td.cloud().composition().localToGlobalCarrierId(0, i);
-                td.cloud().rhoTrans(id)[cellI] += np0*mass1*Y_[i];
+                td.cloud().rhoTrans(gid)[cellI] += np0*mass1*Y_[i];
             }
             td.cloud().UTrans()[cellI] += np0*mass1*U1;
-            td.cloud().hsTrans()[cellI] += np0*mass1*H1;
+            td.cloud().hcTrans()[cellI] +=
+                np0*mass1*td.cloud().composition().H(0, Y_, pc_, T1);
         }
     }
 
@@ -225,9 +246,9 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     else
     {
-        this->U_ = U1;
-        this->T_ = T1;
         this->cp_ = td.cloud().composition().cp(0, Y_, pc_, T1);
+        this->T_ = T1;
+        this->U_ = U1;
 
         // Update particle density or diameter
         if (td.constProps().constantVolume())
@@ -244,7 +265,7 @@ void Foam::ReactingParcel<ParcelType>::calc
 
 template<class ParcelType>
 template<class TrackData>
-Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
+void Foam::ReactingParcel<ParcelType>::calcPhaseChange
 (
     TrackData& td,
     const scalar dt,
@@ -256,7 +277,9 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     const label idPhase,
     const scalar YPhase,
     const scalarField& YComponents,
-    scalarField& dMassPC
+    scalarField& dMassPC,
+    scalar& Sh,
+    scalar& dhsTrans
 )
 {
     if
@@ -266,7 +289,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
      || YPhase < SMALL
     )
     {
-        return 0.0;
+        return;
     }
 
     // Calculate mass transfer due to phase change
@@ -275,7 +298,7 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
         dt,
         cellI,
         d,
-        min(T, td.constProps().Tbp()), // Limit to boiling temperature
+        T,
         pc_,
         this->Tc_,
         this->muc_/(this->rhoc_ + ROOTVSMALL),
@@ -291,11 +314,35 @@ Foam::scalar Foam::ReactingParcel<ParcelType>::calcPhaseChange
     // Add to cumulative phase change mass
     td.cloud().addToMassPhaseChange(this->nParticle_*dMassTot);
 
-    // Effective latent heat of vaporisation
-    scalar LEff = td.cloud().composition().L(idPhase, YComponents, pc_, T);
+    // Enthalphy transfer to carrier phase
+    label id;
+    forAll(YComponents, i)
+    {
+        id = td.cloud().composition().localToGlobalCarrierId(idPhase, i);
+        const scalar hv = td.cloud().mcCarrierThermo().speciesData()[id].H(T);
 
-    return -dMassTot*LEff;
+        id = td.cloud().composition().globalIds(idPhase)[i];
+        const scalar hl =
+            td.cloud().composition().liquids().properties()[id].h(pc_, T);
+
+        Sh += dMassPC[i]*(hl - hv)/dt;
+    }
 }
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::ReactingParcel<ParcelType>::ReactingParcel
+(
+    const ReactingParcel<ParcelType>& p
+)
+:
+    ThermoParcel<ParcelType>(p),
+    mass0_(p.mass0_),
+    Y_(p.Y_),
+    pc_(p.pc_)
+{}
 
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //

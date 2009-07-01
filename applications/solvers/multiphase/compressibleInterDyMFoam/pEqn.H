@@ -2,17 +2,17 @@
     volScalarField rUA = 1.0/UEqn.A();
     surfaceScalarField rUAf = fvc::interpolate(rUA);
 
-    tmp<fvScalarMatrix> pdEqnComp;
+    tmp<fvScalarMatrix> pEqnComp;
 
     if (transonic)
     {
-        pdEqnComp =
-            (fvm::ddt(pd) + fvm::div(phi, pd) - fvm::Sp(fvc::div(phi), pd));
+        pEqnComp =
+            (fvm::ddt(p) + fvm::div(phi, p) - fvm::Sp(fvc::div(phi), p));
     }
     else
     {
-        pdEqnComp =
-            (fvm::ddt(pd) + fvc::div(phi, pd) - fvc::Sp(fvc::div(phi), pd));
+        pEqnComp =
+            (fvm::ddt(p) + fvc::div(phi, p) - fvc::Sp(fvc::div(phi), p));
     }
 
 
@@ -26,16 +26,16 @@
 
     phi = phiU +
         (
-            fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
-          - ghf*fvc::snGrad(rho)
-        )*rUAf*mesh.magSf();
+            fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)*mesh.magSf()
+          + fvc::interpolate(rho)*(g & mesh.Sf())
+        )*rUAf;
 
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pdEqnIncomp
+        fvScalarMatrix pEqnIncomp
         (
             fvc::div(phi)
-          - fvm::laplacian(rUAf, pd)
+          - fvm::laplacian(rUAf, p)
         );
 
         if
@@ -51,9 +51,9 @@
                     max(alpha1, scalar(0))*(psi1/rho1)
                   + max(alpha2, scalar(0))*(psi2/rho2)
                 )
-               *pdEqnComp()
-              + pdEqnIncomp,
-                mesh.solver(pd.name() + "Final")
+               *pEqnComp()
+              + pEqnIncomp,
+                mesh.solver(p.name() + "Final")
             );
         }
         else
@@ -64,8 +64,8 @@
                     max(alpha1, scalar(0))*(psi1/rho1)
                   + max(alpha2, scalar(0))*(psi2/rho2)
                 )
-               *pdEqnComp()
-              + pdEqnIncomp
+               *pEqnComp()
+              + pEqnIncomp
             );
         }
 
@@ -73,26 +73,21 @@
         {
             dgdt =
                 (pos(alpha2)*(psi2/rho2) - pos(alpha1)*(psi1/rho1))
-               *(pdEqnComp & pd);
-            phi += pdEqnIncomp.flux();
+               *(pEqnComp & p);
+            phi += pEqnIncomp.flux();
         }
     }
 
     U += rUA*fvc::reconstruct((phi - phiU)/rUAf);
     U.correctBoundaryConditions();
 
-    p = max
-        (
-            (pd + gh*(alpha1*rho10 + alpha2*rho20))
-           /(1.0 - gh*(alpha1*psi1 + alpha2*psi2)),
-            pMin
-        );
+    p.max(pMin);
 
     rho1 = rho10 + psi1*p;
     rho2 = rho20 + psi2*p;
 
     Info<< "max(U) " << max(mag(U)).value() << endl;
-    Info<< "min(pd) " << min(pd).value() << endl;
+    Info<< "min(p) " << min(p).value() << endl;
 
     // Make the fluxes relative to the mesh motion
     fvc::makeRelative(phi, U);

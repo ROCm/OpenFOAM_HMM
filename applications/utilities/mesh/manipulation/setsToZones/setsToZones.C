@@ -28,8 +28,8 @@ Description
 
     There is one catch: for faceZones you also need to specify a flip
     condition which basically denotes the side of the face. In this app
-    it reads a cellSet (xxxCells if 'xxx' is the name of the faceSet) and
-    any face whose neighbour is in the cellSet gets a flip=true.
+    it reads a cellSet (xxxCells if 'xxx' is the name of the faceSet) which
+    is the masterCells of the zone.
     There are lots of situations in which this will go wrong but it is the
     best I can think of for now.
 
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
         polyMesh::meshSubDir/"sets"
     );
 
-    Pout<< "Searched : " << mesh.pointsInstance()/polyMesh::meshSubDir/"sets"
+    Info<< "Searched : " << mesh.pointsInstance()/polyMesh::meshSubDir/"sets"
         << nl
         << "Found    : " << objects.names() << nl
         << endl;
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 
     IOobjectList pointObjects(objects.lookupClass(pointSet::typeName));
 
-    Pout<< "pointSets:" << pointObjects.names() << endl;
+    //Pout<< "pointSets:" << pointObjects.names() << endl;
 
     for
     (
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
                 )
             );
             mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
+            mesh.pointZones().instance() = mesh.facesInstance();
         }
         else
         {
@@ -133,57 +134,17 @@ int main(int argc, char *argv[])
                 << " with that of set " << set.name() << "." << endl;
             mesh.pointZones()[zoneID] = pointLabels;
             mesh.pointZones().writeOpt() = IOobject::AUTO_WRITE;
+            mesh.pointZones().instance() = mesh.facesInstance();
         }
     }
 
-
-    IOobjectList cellObjects(objects.lookupClass(cellSet::typeName));
-
-    Pout<< "cellSets:" << cellObjects.names() << endl;
-
-    for
-    (
-        IOobjectList::const_iterator iter = cellObjects.begin();
-        iter != cellObjects.end();
-        ++iter
-    )
-    {
-        // Not in memory. Load it.
-        cellSet set(*iter());
-        SortableList<label> cellLabels(set.toc());
-
-        label zoneID = mesh.cellZones().findZoneID(set.name());
-        if (zoneID == -1)
-        {
-            Info<< "Adding set " << set.name() << " as a cellZone." << endl;
-            label sz = mesh.cellZones().size();
-            mesh.cellZones().setSize(sz+1);
-            mesh.cellZones().set
-            (
-                sz,
-                new cellZone
-                (
-                    set.name(),             //name
-                    cellLabels,             //addressing
-                    sz,                     //index
-                    mesh.cellZones()        //pointZoneMesh
-                )
-            );
-            mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
-        }
-        else
-        {
-            Info<< "Overwriting contents of existing cellZone " << zoneID
-                << " with that of set " << set.name() << "." << endl;
-            mesh.cellZones()[zoneID] = cellLabels;
-            mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
-        }
-    }
 
 
     IOobjectList faceObjects(objects.lookupClass(faceSet::typeName));
 
-    Pout<< "faceSets:" << faceObjects.names() << endl;
+    HashSet<word> slaveCellSets;
+
+    //Pout<< "faceSets:" << faceObjects.names() << endl;
 
     for
     (
@@ -201,20 +162,20 @@ int main(int argc, char *argv[])
 
         if (!noFlipMap)
         {
-            word setName(set.name() + "Cells");
+            word setName(set.name() + "SlaveCells");
 
-            Pout<< "Trying to load cellSet " << setName
-                << " to find out the flipMap." << nl
-                << "If the neighbour side of the face is in the cellSet"
-                << " the flipMap becomes true," << nl
-                << "in all other cases it stays false."
-                << " If you do not care about the flipMap"
+            Info<< "Trying to load cellSet " << setName
+                << " to find out the slave side of the zone." << nl
+                << "If you do not care about the flipMap"
                 << " (i.e. do not use the sideness)" << nl
                 << "use the -noFlipMap command line option."
                 << endl;
 
             // Load corresponding cells
             cellSet cells(mesh, setName);
+
+            // Store setName to exclude from cellZones further on
+            slaveCellSets.insert(setName);
 
             forAll(faceLabels, i)
             {
@@ -302,6 +263,7 @@ int main(int argc, char *argv[])
                 )
             );
             mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+            mesh.faceZones().instance() = mesh.facesInstance();
         }
         else
         {
@@ -313,10 +275,63 @@ int main(int argc, char *argv[])
                 flipMap.shrink()
             );
             mesh.faceZones().writeOpt() = IOobject::AUTO_WRITE;
+            mesh.faceZones().instance() = mesh.facesInstance();
         }
     }
 
-    Pout<< "Writing mesh." << endl;
+
+
+    IOobjectList cellObjects(objects.lookupClass(cellSet::typeName));
+
+    //Pout<< "cellSets:" << cellObjects.names() << endl;
+
+    for
+    (
+        IOobjectList::const_iterator iter = cellObjects.begin();
+        iter != cellObjects.end();
+        ++iter
+    )
+    {
+        if (!slaveCellSets.found(iter.key()))
+        {
+            // Not in memory. Load it.
+            cellSet set(*iter());
+            SortableList<label> cellLabels(set.toc());
+
+            label zoneID = mesh.cellZones().findZoneID(set.name());
+            if (zoneID == -1)
+            {
+                Info<< "Adding set " << set.name() << " as a cellZone." << endl;
+                label sz = mesh.cellZones().size();
+                mesh.cellZones().setSize(sz+1);
+                mesh.cellZones().set
+                (
+                    sz,
+                    new cellZone
+                    (
+                        set.name(),             //name
+                        cellLabels,             //addressing
+                        sz,                     //index
+                        mesh.cellZones()        //pointZoneMesh
+                    )
+                );
+                mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
+                mesh.cellZones().instance() = mesh.facesInstance();
+            }
+            else
+            {
+                Info<< "Overwriting contents of existing cellZone " << zoneID
+                    << " with that of set " << set.name() << "." << endl;
+                mesh.cellZones()[zoneID] = cellLabels;
+                mesh.cellZones().writeOpt() = IOobject::AUTO_WRITE;
+                mesh.cellZones().instance() = mesh.facesInstance();
+            }
+        }
+    }
+
+
+
+    Info<< "Writing mesh." << endl;
 
     if (!mesh.write())
     {
@@ -325,7 +340,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Pout << nl << "End" << endl;
+    Info<< nl << "End" << endl;
 
     return 0;
 }

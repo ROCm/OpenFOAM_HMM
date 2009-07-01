@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -152,26 +152,26 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeBinaryCollisionModel(CloudType)                            \
+#define makeBinaryCollisionModel(CloudType)                                   \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        BinaryCollisionModel<CloudType>,                               \
+        BinaryCollisionModel<CloudType>,                                      \
         0                                                                     \
     );                                                                        \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        BinaryCollisionModel<CloudType>,                               \
+        BinaryCollisionModel<CloudType>,                                      \
         dictionary                                                            \
     );
 
 
-#define makeBinaryCollisionModelType(SS, CloudType, ParcelType)        \
+#define makeBinaryCollisionModelType(SS, CloudType, ParcelType)               \
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    BinaryCollisionModel<CloudType<ParcelType> >::                     \
+    BinaryCollisionModel<CloudType<ParcelType> >::                            \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 

@@ -66,9 +66,6 @@ class primitiveEntry
     public entry,
     public ITstream
 {
-
-public:
-
     // Private member functions
 
         //- Append the given token to this entry
@@ -92,9 +89,6 @@ public:
             const dictionary&,
             Istream&
         );
-
-        //- Read tokens from the given stream
-        bool read(const dictionary&, Istream&);
 
         //- Read the complete entry from the given stream
         void readEntry(const dictionary&, Istream&);
@@ -168,6 +162,9 @@ public:
         //- This entry is not a dictionary,
         //  calling this function generates a FatalError
         dictionary& dict();
+
+        //- Read tokens from the given stream
+        bool read(const dictionary&, Istream&);
 
         // Write
         void write(Ostream&) const;

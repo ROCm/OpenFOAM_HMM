@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,9 +60,9 @@ void Foam::pairPotentialList::readPairPotentialDict
                 else
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
-                            << "Pair pairPotential specification subDict "
-                            << idA << "-" << idB << " not found"
-                            << nl << abort(FatalError);
+                        << "Pair pairPotential specification subDict "
+                        << idA << "-" << idB << " not found"
+                        << nl << abort(FatalError);
                 }
             }
             else
@@ -80,10 +80,10 @@ void Foam::pairPotentialList::readPairPotentialDict
                 else
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
-                            << "Pair pairPotential specification subDict "
-                            << idA << "-" << idB << " or "
-                            << idB << "-" << idA << " not found"
-                            << nl << abort(FatalError);
+                        << "Pair pairPotential specification subDict "
+                        << idA << "-" << idB << " or "
+                        << idB << "-" << idA << " not found"
+                        << nl << abort(FatalError);
                 }
 
                 if
@@ -93,10 +93,10 @@ void Foam::pairPotentialList::readPairPotentialDict
                 )
                 {
                     FatalErrorIn("pairPotentialList::buildPotentials") << nl
-                            << "Pair pairPotential specification subDict "
-                            << idA << "-" << idB << " and "
-                            << idB << "-" << idA << " found multiple definition"
-                            << nl << abort(FatalError);
+                        << "Pair pairPotential specification subDict "
+                        << idA << "-" << idB << " and "
+                        << idB << "-" << idA << " found multiple definition"
+                        << nl << abort(FatalError);
                 }
             }
 
@@ -136,8 +136,40 @@ void Foam::pairPotentialList::readPairPotentialDict
         }
     }
 
+    if (!pairPotentialDict.found("electrostatic"))
+    {
+        FatalErrorIn("pairPotentialList::buildPotentials") << nl
+            << "Pair pairPotential specification subDict electrostatic"
+            << nl << abort(FatalError);
+    }
+
+    electrostaticPotential_ = pairPotential::New
+    (
+        "electrostatic",
+        pairPotentialDict.subDict("electrostatic")
+    );
+
+    if (electrostaticPotential_->rCut() > rCutMax_)
+    {
+        rCutMax_ = electrostaticPotential_->rCut();
+    }
+
+    if (electrostaticPotential_->writeTables())
+    {
+        OFstream ppTabFile(mesh.time().path()/"electrostatic");
+
+        if(!electrostaticPotential_->writeEnergyAndForceTables(ppTabFile))
+        {
+            FatalErrorIn("pairPotentialList::readPairPotentialDict")
+                << "Failed writing to "
+                << ppTabFile.name() << nl
+                << abort(FatalError);
+        }
+    }
+
     rCutMaxSqr_ = rCutMax_*rCutMax_;
 }
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -145,6 +177,7 @@ Foam::pairPotentialList::pairPotentialList()
 :
     PtrList<pairPotential>()
 {}
+
 
 Foam::pairPotentialList::pairPotentialList
 (
@@ -188,13 +221,13 @@ const Foam::pairPotential& Foam::pairPotentialList::pairPotentialFunction
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)];
+    return (*this)[pairPotentialIndex(a, b)];
 }
 
 
 bool Foam::pairPotentialList::rCutMaxSqr(const scalar rIJMagSqr) const
 {
-    if (rIJMagSqr <= rCutMaxSqr_)
+    if (rIJMagSqr < rCutMaxSqr_)
     {
         return true;
     }
@@ -212,7 +245,7 @@ bool Foam::pairPotentialList::rCutSqr
     const scalar rIJMagSqr
 ) const
 {
-    if (rIJMagSqr <= rCutSqr (a, b))
+    if (rIJMagSqr < rCutSqr(a, b))
     {
         return true;
     }
@@ -229,7 +262,7 @@ Foam::scalar Foam::pairPotentialList::rMin
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].rMin();
+    return (*this)[pairPotentialIndex(a, b)].rMin();
 }
 
 
@@ -239,7 +272,7 @@ Foam::scalar Foam::pairPotentialList::dr
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].dr();
+    return (*this)[pairPotentialIndex(a, b)].dr();
 }
 
 
@@ -249,7 +282,7 @@ Foam::scalar Foam::pairPotentialList::rCutSqr
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].rCutSqr();
+    return (*this)[pairPotentialIndex(a, b)].rCutSqr();
 }
 
 
@@ -259,7 +292,7 @@ Foam::scalar Foam::pairPotentialList::rCut
     const label b
 ) const
 {
-    return (*this)[pairPotentialIndex (a, b)].rCut();
+    return (*this)[pairPotentialIndex(a, b)].rCut();
 }
 
 
@@ -270,7 +303,7 @@ Foam::scalar Foam::pairPotentialList::force
     const scalar rIJMag
 ) const
 {
-    scalar f = (*this)[pairPotentialIndex (a, b)].forceLookup(rIJMag);
+    scalar f = (*this)[pairPotentialIndex(a, b)].force(rIJMag);
 
     return f;
 }
@@ -283,11 +316,10 @@ Foam::scalar Foam::pairPotentialList::energy
     const scalar rIJMag
 ) const
 {
-    scalar e = (*this)[pairPotentialIndex (a, b)].energyLookup(rIJMag);
+    scalar e = (*this)[pairPotentialIndex(a, b)].energy(rIJMag);
 
     return e;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

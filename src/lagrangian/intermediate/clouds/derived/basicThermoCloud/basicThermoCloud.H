@@ -26,6 +26,7 @@ Class
     Foam::basicThermoCloud
 
 Description
+    Cloud class to introduce thermodynamic parcels
 
 SourceFiles
     basicThermoCloud.C
@@ -74,7 +75,7 @@ public:
         //- Construct given carrier gas fields
         basicThermoCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,

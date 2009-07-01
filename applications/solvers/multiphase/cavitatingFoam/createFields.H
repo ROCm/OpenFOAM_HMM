@@ -71,8 +71,8 @@
         mesh
     );
 
-#   include "createPhiv.H"
-#   include "compressibleCreatePhi.H"
+    #include "createPhiv.H"
+    #include "compressibleCreatePhi.H"
 
     Info<< "Reading transportProperties\n" << endl;
 

@@ -1,9 +1,10 @@
     Info<< "Reading thermophysical properties\n" << endl;
 
-    autoPtr<basicThermo> thermo
+    autoPtr<basicRhoThermo> pThermo
     (
-        basicThermo::New(mesh)
+        basicRhoThermo::New(mesh)
     );
+    basicRhoThermo& thermo = pThermo();
 
     volScalarField rho
     (
@@ -15,12 +16,12 @@
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        thermo->rho()
+        thermo.rho()
     );
 
-    volScalarField& p = thermo->p();
-    volScalarField& h = thermo->h();
-    const volScalarField& psi = thermo->psi();
+    volScalarField& p = thermo.p();
+    volScalarField& h = thermo.h();
+    const volScalarField& psi = thermo.psi();
 
 
     Info<< "Reading field U\n" << endl;
@@ -37,7 +38,7 @@
         mesh
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
 
     Info<< "Creating turbulence model\n" << endl;
@@ -48,7 +49,7 @@
             rho,
             U,
             phi,
-            thermo()
+            thermo
         )
     );
 
@@ -59,27 +60,8 @@
         fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
     );
 
-    Info<< "Calculating field g.h\n" << endl;
-    volScalarField gh("gh", g & mesh.C());
-    surfaceScalarField ghf("ghf", g & mesh.Cf());
-
-    dimensionedScalar pRef("pRef", p.dimensions(), thermo->lookup("pRef"));
-
-    Info<< "Creating field pd\n" << endl;
-    volScalarField pd
-    (
-        IOobject
-        (
-            "pd",
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ,
-            IOobject::AUTO_WRITE
-        ),
-        mesh
-    );
-
-    p = pd + rho*gh + pRef;
-    thermo->correct();
+    thermo.correct();
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);
+
+    dimensionedScalar totalVolume = sum(mesh.V());

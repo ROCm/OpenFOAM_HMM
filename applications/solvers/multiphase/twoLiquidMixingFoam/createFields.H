@@ -1,9 +1,9 @@
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -40,7 +40,7 @@
         mesh
     );
 
-#   include "createPhi.H"
+    #include "createPhi.H"
 
     Info<< "Reading transportProperties\n" << endl;
     twoPhaseMixture twoPhaseProperties(U, phi);
@@ -75,45 +75,9 @@
     );
 
 
-    Info<< "Calculating field g.h\n" << endl;
-    volScalarField gh("gh", g & mesh.C());
-    surfaceScalarField ghf("gh", g & mesh.Cf());
-
-
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pd + rho*gh
-    );
-
-
-    label pdRefCell = 0;
-    scalar pdRefValue = 0.0;
-    setRefCell(pd, mesh.solutionDict().subDict("PISO"), pdRefCell, pdRefValue);
-
+    label pRefCell = 0;
     scalar pRefValue = 0.0;
-
-    if (pd.needReference())
-    {
-        pRefValue = readScalar
-        (
-            mesh.solutionDict().subDict("PISO").lookup("pRefValue")
-        );
-
-        p += dimensionedScalar
-        (
-            "p",
-            p.dimensions(),
-            pRefValue - getRefCellValue(p, pdRefCell)
-        );
-    }
+    setRefCell(p, mesh.solutionDict().subDict("PIMPLE"), pRefCell, pRefValue);
 
 
     // Construct incompressible turbulence model

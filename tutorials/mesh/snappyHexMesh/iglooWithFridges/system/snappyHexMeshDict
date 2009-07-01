@@ -42,10 +42,13 @@ geometry
         min (0 0 0);
         max (1 1 1);
     }
+
     fridgeFreezer
     {
         type searchableSurfaceCollection;
-    
+
+        mergeSubRegions true;
+
         freezer
         {
             surface box1;
@@ -71,14 +74,17 @@ geometry
             }
         }
     }
+
     twoFridgeFreezers
     {
         type searchableSurfaceCollection;
-    
+
+        mergeSubRegions true;
+
         seal
         {
-            surface fridgeFreezer;
-            scale (1.0 1.0 1.0);
+            surface box1;
+            scale (1.0 1.0 2.1);
             transform
             {
                 type    cartesian;
@@ -89,8 +95,8 @@ geometry
         }
         herring
         {
-            surface fridgeFreezer;
-            scale (1.0 1.0 1.0);
+            surface box1;
+            scale (1.0 1.0 2.1);
             transform
             {
                 type    cartesian;
@@ -244,6 +250,8 @@ snapControls
 // Settings for the layer addition.
 addLayersControls
 {
+    relativeSizes true;
+
     // Per final patch (so not geometry!) the layer information
     layers
     {
@@ -264,7 +272,7 @@ addLayersControls
     //  is the
     //  thickness of the layer furthest away from the wall.
     //  Relative to undistorted size of cell outside layer.
-    finalLayerRatio 0.5;
+    finalLayerThickness 0.5;
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.

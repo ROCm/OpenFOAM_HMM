@@ -182,12 +182,9 @@ public:
         );
 
         //- Convert to Ostream for << operations
-        #ifndef __CINT__
         operator OSstream&();
-        #endif
 
         //- Explicitly convert to Ostream for << operations
-        //  needed in cint
         OSstream& operator()()
         {
             return operator OSstream&();

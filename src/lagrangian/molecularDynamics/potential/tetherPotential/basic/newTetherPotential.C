@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,11 @@ autoPtr<tetherPotential> tetherPotential::New
     const dictionary& tetherPotentialProperties
 )
 {
-    word tetherPotentialTypeName(tetherPotentialProperties.lookup("tetherPotential"));
+    word
+        tetherPotentialTypeName
+        (
+            tetherPotentialProperties.lookup("tetherPotential")
+        );
 
     Info<< nl << "Selecting tether potential "
         << tetherPotentialTypeName << " for "
@@ -54,8 +58,8 @@ autoPtr<tetherPotential> tetherPotential::New
         (
             "tetherPotential::New()"
         )   << "Unknown tetherPotential type "
-            << tetherPotentialTypeName << endl << endl
-            << "Valid  tetherPotentials are : " << endl
+            << tetherPotentialTypeName << nl << nl
+            << "Valid  tetherPotentials are: " << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }

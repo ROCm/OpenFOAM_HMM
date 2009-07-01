@@ -233,10 +233,7 @@ public:
     // Istream operator
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <T>
-        #endif
+        friend Istream& operator>> <T>
         (Istream&, List<T>&);
 };
 
@@ -250,18 +247,6 @@ public:
 //  Mostly useful for handling command-line arguments.
 template<class T>
 List<T> readList(Istream&);
-
-template<class T>
-void sort(List<T>&);
-
-template<class T, class Cmp>
-void sort(List<T>&, const Cmp&);
-
-template<class T>
-void stableSort(List<T>&);
-
-template<class T, class Cmp>
-void stableSort(List<T>&, const Cmp&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

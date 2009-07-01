@@ -27,6 +27,7 @@ Class
 
 Description
     Templated base class for thermodynamic cloud
+
     - Adds to kinematic cloud
       - Heat transfer
 
@@ -39,12 +40,9 @@ SourceFiles
 #ifndef ThermoCloud_H
 #define ThermoCloud_H
 
-#include "autoPtr.H"
-#include "hCombustionThermo.H"
-
 #include "KinematicCloud.H"
 #include "thermoCloud.H"
-
+#include "basicThermo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,7 +64,18 @@ class ThermoCloud
     public KinematicCloud<ParcelType>,
     public thermoCloud
 {
-    // Private data
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        ThermoCloud(const ThermoCloud&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const ThermoCloud&);
+
+
+protected:
+
+    // Protected data
 
         //- Thermo parcel constant properties
         typename ParcelType::constantProperties constProps_;
@@ -109,15 +118,6 @@ class ThermoCloud
             DimensionedField<scalar, volMesh> hcTrans_;
 
 
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        ThermoCloud(const ThermoCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const ThermoCloud&);
-
-
 public:
 
     // Constructors
@@ -125,7 +125,7 @@ public:
         //- Construct given carrier gas fields
         ThermoCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
@@ -215,15 +215,12 @@ public:
 
         // Cloud evolution functions
 
-            //- Add new parcel
-            void addNewParcel
+            //- Check parcel properties
+            void checkParcelProperties
             (
-                const vector& position,
-                const label cellId,
-                const scalar d,
-                const vector& U,
-                const scalar nParticles,
-                const scalar lagrangianDt
+                ParcelType& parcel,
+                const scalar lagrangianDt,
+                const bool fullyDescribed
             );
 
             //- Reset the spray source terms

@@ -107,7 +107,7 @@ public:
 
     // Member functions
 
-        void set();
+        void set(const bool verbose);
 };
 
 

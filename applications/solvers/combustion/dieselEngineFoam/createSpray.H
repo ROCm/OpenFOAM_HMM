@@ -1,14 +1,15 @@
 Info << "Constructing Spray" << endl;
 
-PtrList<specieProperties> gasProperties(Y.size());
+PtrList<gasThermoPhysics> gasProperties(Y.size());
 forAll(gasProperties, i)
 {
     gasProperties.set
     (
         i,
-        new specieProperties
+        new gasThermoPhysics
         (
-            dynamic_cast<const reactingMixture&>(thermo()).speciesData()[i]
+            dynamic_cast<const reactingMixture<gasThermoPhysics>&>
+                (thermo).speciesData()[i]
         )
     );
 }

@@ -32,33 +32,29 @@ License
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class ParcelType>
-void Foam::ReactingCloud<ParcelType>::addNewParcel
+void Foam::ReactingCloud<ParcelType>::checkSuppliedComposition
 (
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
+    const scalarField& YSupplied,
+    const scalarField& Y,
+    const word& YName
 )
 {
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        position,
-        cellId,
-        this->parcelTypeId(),
-        nParticles,
-        d,
-        U,
-        composition().YMixture0(),
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
+    if (YSupplied.size() != Y.size())
+    {
+        FatalErrorIn
+        (
+            "ReactingCloud<ParcelType>::checkSuppliedComposition"
+            "("
+                "const scalarField&, "
+                "const scalarField&, "
+                "const word&"
+            ")"
+        )   << YName << " supplied, but size is not compatible with "
+            << "parcel composition: " << nl << "    "
+            << YName << "(" << YSupplied.size() << ") vs required composition "
+            << YName << "(" << Y.size() << ")" << nl
+            << abort(FatalError);
+    }
 }
 
 
@@ -67,19 +63,20 @@ void Foam::ReactingCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::ReactingCloud<ParcelType>::ReactingCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    hCombustionThermo& thermo,
-    PtrList<specieReactingProperties>& carrierSpecies
+    basicThermo& thermo
 )
 :
-    ThermoCloud<ParcelType>(cloudType, rho, U, g, thermo),
+    ThermoCloud<ParcelType>(cloudName, rho, U, g, thermo),
     reactingCloud(),
     constProps_(this->particleProperties()),
-    carrierThermo_(thermo),
-    carrierSpecies_(carrierSpecies),
+    mcCarrierThermo_
+    (
+        dynamic_cast<multiComponentMixture<thermoType>&>(thermo)
+    ),
     compositionModel_
     (
         CompositionModel<ReactingCloud<ParcelType> >::New
@@ -96,7 +93,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             *this
         )
     ),
-    rhoTrans_(thermo.composition().Y().size()),
+    rhoTrans_(mcCarrierThermo_.species().size()),
     dMassPhaseChange_(0.0)
 {
     // Set storage for mass source fields and initialise to zero
@@ -109,9 +106,7 @@ Foam::ReactingCloud<ParcelType>::ReactingCloud
             (
                 IOobject
                 (
-                    this->name()
-                      + "rhoTrans_"
-                      + thermo.composition().Y()[i].name(),
+                    this->name() + "rhoTrans_" + mcCarrierThermo_.species()[i],
                     this->db().time().timeName(),
                     this->db(),
                     IOobject::NO_READ,
@@ -136,6 +131,40 @@ Foam::ReactingCloud<ParcelType>::~ReactingCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+void Foam::ReactingCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    ThermoCloud<ParcelType>::checkParcelProperties
+    (
+        parcel,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    if (!fullyDescribed)
+    {
+        parcel.Y() = composition().YMixture0();
+    }
+    else
+    {
+        checkSuppliedComposition
+        (
+            parcel.Y(),
+            composition().YMixture0(),
+            "YMixture"
+        );
+    }
+
+    // derived information - store initial mass
+    parcel.mass0() = parcel.mass();
+}
+
+
+template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 {
     ThermoCloud<ParcelType>::resetSourceTerms();
@@ -149,9 +178,9 @@ void Foam::ReactingCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ReactingCloud<ParcelType>::evolve()
 {
-    const volScalarField& T = carrierThermo_.T();
-    const volScalarField cp = carrierThermo_.Cp();
-    const volScalarField& p = carrierThermo_.p();
+    const volScalarField& T = this->carrierThermo().T();
+    const volScalarField cp = this->carrierThermo().Cp();
+    const volScalarField& p = this->carrierThermo().p();
 
     autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
@@ -215,6 +244,8 @@ void Foam::ReactingCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    this->postProcessing().post();
 }
 
 

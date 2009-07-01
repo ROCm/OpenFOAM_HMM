@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,7 +76,7 @@ class DsmcCloud
 
         //- Cloud type - used to set the name of the parcel properties
         //  dictionary by appending "Properties"
-        const word cloudType_;
+        const word cloudName_;
 
         //- References to the mesh and time databases
         const fvMesh& mesh_;
@@ -172,16 +172,13 @@ public:
         //- Boltzmann constant
         static scalar kb;
 
-        //- Reference temperature for all models
-        static scalar Tref;
-
 
     // Constructors
 
         //- Construct given name and mesh, will read Parcels from file
         DsmcCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& T,
             const volVectorField& U
         );
@@ -189,7 +186,7 @@ public:
         //- Construct given name and mesh.  Used to initialise.
         DsmcCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const fvMesh& mesh
         );
 
@@ -205,7 +202,7 @@ public:
             // References to the mesh and databases
 
                 //- Return the cloud type
-                inline const word& cloudType() const;
+                inline const word& cloudName() const;
 
                 //- Return refernce to the mesh
                 inline const fvMesh& mesh() const;

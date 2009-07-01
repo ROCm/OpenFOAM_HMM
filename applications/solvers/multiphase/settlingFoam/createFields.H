@@ -128,7 +128,7 @@
         alpha.boundaryField().types()
     );
 
-#   include "compressibleCreatePhi.H"
+    #include "compressibleCreatePhi.H"
 
 
     label pRefCell = 0;
@@ -337,6 +337,3 @@
         ),
         mut + mul
     );
-
-    Info<< "Calculating field (g.h)f\n" << endl;
-    surfaceScalarField ghf = surfaceScalarField("ghf", g & mesh.Cf());

@@ -37,7 +37,7 @@ void Foam::InjectionModel<CloudType>::readProps()
     (
         "injectionProperties",
         owner_.db().time().timeName(),
-        "uniform/Lagrangian"/owner_.name(),
+        "uniform"/cloud::prefix/owner_.name(),
         owner_.db(),
         IOobject::MUST_READ,
         IOobject::NO_WRITE,
@@ -67,7 +67,7 @@ void Foam::InjectionModel<CloudType>::writeProps()
             (
                 "injectionProperties",
                 owner_.db().time().timeName(),
-                "uniform/Lagrangian"/owner_.name(),
+                "uniform"/cloud::prefix/owner_.name(),
                 owner_.db(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE,
@@ -88,8 +88,7 @@ void Foam::InjectionModel<CloudType>::writeProps()
 template<class CloudType>
 void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
 (
-    const scalar time0,
-    const scalar time1,
+    const scalar time,
     label& newParcels,
     scalar& newVolume
 )
@@ -99,15 +98,15 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
     newVolume = 0.0;
 
     // Return if not started injection event
-    if (time1 < SOI_)
+    if (time < SOI_)
     {
-        timeStep0_ = time1;
+        timeStep0_ = time;
         return;
     }
 
     // Make times relative to SOI
     scalar t0 = timeStep0_ - SOI_;
-    scalar t1 = time1 - SOI_;
+    scalar t1 = time - SOI_;
 
     // Number of parcels to inject
     newParcels = parcelsToInject(t0, t1);
@@ -123,7 +122,7 @@ void Foam::InjectionModel<CloudType>::prepareForNextTimeStep
     else
     {
         // advance value of timeStep0_
-        timeStep0_ = time1;
+        timeStep0_ = time;
     }
 }
 
@@ -348,13 +347,13 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     }
 
     const scalar time = owner_.db().time().value();
-    const scalar continuousDt = owner_.db().time().deltaT().value();
+    const scalar carrierDt = owner_.db().time().deltaT().value();
     const polyMesh& mesh = owner_.mesh();
 
     // Prepare for next time step
     label newParcels = 0;
     scalar newVolume = 0.0;
-    prepareForNextTimeStep(time0_, time, newParcels, newVolume);
+    prepareForNextTimeStep(time, newParcels, newVolume);
 
     // Return if no parcels are required
     if (newParcels == 0)
@@ -363,18 +362,12 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
         return;
     }
 
-    // Particle density given by constant properties
-    const scalar rho = td.constProps().rho0();
-
     // Volume fraction to introduce during this timestep
     const scalar volFraction = volumeFraction(newVolume);
 
     // Duration of injection period during this timestep
-    const scalar deltaT = min
-    (
-        continuousDt,
-        min(time - SOI_, timeEnd() - time0_)
-    );
+    const scalar deltaT =
+        max(0.0, min(carrierDt, min(time - SOI_, timeEnd() - time0_)));
 
     // Pad injection time if injection starts during this timestep
     const scalar padTime = max(0.0, SOI_ - time0_);
@@ -383,44 +376,56 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
     label parcelsAdded = 0;
     for (label parcelI=0; parcelI<newParcels; parcelI++)
     {
-        // Calculate the pseudo time of injection for parcel 'parcelI'
-        scalar timeInj = time0_ + padTime + deltaT*parcelI/newParcels;
-
-        // Determine the injection position and owner cell
-        label cellI = -1;
-        vector pos = vector::zero;
-        setPositionAndCell(parcelI, timeInj, pos, cellI);
-
-        if (cellI > -1)
+        if (validInjection(parcelI))
         {
-            if (validInjection(parcelI))
+            // Calculate the pseudo time of injection for parcel 'parcelI'
+            scalar timeInj = time0_ + padTime + deltaT*parcelI/newParcels;
+
+            // Determine the injection position and owner cell
+            label cellI = -1;
+            vector pos = vector::zero;
+            setPositionAndCell(parcelI, newParcels, timeInj, pos, cellI);
+
+            if (cellI > -1)
             {
-                // Diameter of parcels
-                scalar d = d0(parcelI, timeInj);
-
-                // Number of particles per parcel
-                scalar nP = setNumberOfParticles
-                (
-                    newParcels,
-                    newVolume,
-                    volFraction,
-                    d,
-                    rho
-                );
-
-                // Velocity of parcels
-                vector U = velocity(parcelI, timeInj);
-
                 // Lagrangian timestep
                 scalar dt = time - timeInj;
 
-                // Apply corrections for 2-D cases
+                // Apply corrections to position for 2-D cases
                 meshTools::constrainToMeshCentre(mesh, pos);
-                meshTools::constrainDirection(mesh, mesh.solutionD(), U);
+
+                // Create a new parcel
+                parcelType* pPtr = new parcelType(td.cloud(), pos, cellI);
+
+                // Assign new parcel properties in injection model
+                setProperties(parcelI, newParcels, timeInj, *pPtr);
+
+                // Check new parcel properties
+                td.cloud().checkParcelProperties(*pPtr, dt, fullyDescribed());
+
+                // Apply correction to velocity for 2-D cases
+                meshTools::constrainDirection
+                (
+                    mesh,
+                    mesh.solutionD(),
+                    pPtr->U()
+                );
+
+                // Number of particles per parcel
+                pPtr->nParticle() =
+                    setNumberOfParticles
+                    (
+                        newParcels,
+                        newVolume,
+                        volFraction,
+                        pPtr->d(),
+                        pPtr->rho()
+                    );
 
                 // Add the new parcel
-                td.cloud().addNewParcel(pos, cellI, d, U, nP, dt);
-                massInjected_ += nP*rho*mathematicalConstant::pi*pow3(d)/6.0;
+                td.cloud().addParticle(pPtr);
+
+                massInjected_ += pPtr->nParticle()*pPtr->mass();
                 parcelsAdded++;
             }
         }

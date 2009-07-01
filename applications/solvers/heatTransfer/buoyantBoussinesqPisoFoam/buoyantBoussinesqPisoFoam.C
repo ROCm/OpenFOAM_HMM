@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,18 +30,18 @@ Description
 
     Uses the Boussinesq approximation:
     \f[
-        rho_{eff} = 1 - beta(T - T_{ref})
+        rho_{k} = 1 - beta(T - T_{ref})
     \f]
 
     where:
-        \f$ rho_{eff} \f$ = the effective (driving) density
+        \f$ rho_{k} \f$ = the effective (driving) kinematic density
         beta = thermal expansion coefficient [1/K]
         T = temperature [K]
         \f$ T_{ref} \f$ = reference temperature [K]
 
     Valid when:
     \f[
-        rho_{eff} << 1
+        rho_{k} << 1
     \f]
 
 \*---------------------------------------------------------------------------*/
@@ -54,18 +54,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "CourantNo.H"
-#   include "setInitialDeltaT.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -73,26 +72,23 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
+        #include "setDeltaT.H"
 
-#       include "UEqn.H"
+        #include "UEqn.H"
+        #include "TEqn.H"
 
         // --- PISO loop
         for (int corr=0; corr<nCorr; corr++)
         {
-#           include "TEqn.H"
-#           include "pdEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
 
-        if (runTime.write())
-        {
-#           include "writeAdditionalFields.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

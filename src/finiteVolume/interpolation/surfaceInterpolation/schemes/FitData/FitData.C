@@ -28,22 +28,22 @@ License
 #include "surfaceFields.H"
 #include "volFields.H"
 #include "SVD.H"
-#include "syncTools.H"
-#include "extendedStencil.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
-template<class Form, class extendedStencil, class Polynomial>
-Foam::FitData<Form, extendedStencil, Polynomial>::FitData
+template<class Form, class ExtendedStencil, class Polynomial>
+Foam::FitData<Form, ExtendedStencil, Polynomial>::FitData
 (
     const fvMesh& mesh,
-    const extendedStencil& stencil,
+    const ExtendedStencil& stencil,
+    const bool linearCorrection,
     const scalar linearLimitFactor,
     const scalar centralWeight
 )
 :
     MeshObject<fvMesh, Form>(mesh),
     stencil_(stencil),
+    linearCorrection_(linearCorrection),
     linearLimitFactor_(linearLimitFactor),
     centralWeight_(centralWeight),
 #   ifdef SPHERICAL_GEOMETRY
@@ -145,7 +145,10 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
     // Setup the point weights
     scalarList wts(C.size(), scalar(1));
     wts[0] = centralWeight_;
-    wts[1] = centralWeight_;
+    if (linearCorrection_)
+    {
+        wts[1] = centralWeight_;
+    }
 
     // Reference point
     point p0 = this->mesh().faceCentres()[facei];
@@ -220,10 +223,20 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
             }
         }
 
-        goodFit =
-            (mag(coeffsi[0] - wLin) < linearLimitFactor_*wLin)
-         && (mag(coeffsi[1] - (1 - wLin)) < linearLimitFactor_*(1 - wLin))
-         && maxCoeffi <= 1;
+        if (linearCorrection_)
+        {
+            goodFit =
+                (mag(coeffsi[0] - wLin) < linearLimitFactor_*wLin)
+             && (mag(coeffsi[1] - (1 - wLin)) < linearLimitFactor_*(1 - wLin))
+             && maxCoeffi <= 1;
+        }
+        else
+        {
+            // Upwind: weight on face is 1.
+            goodFit =
+                (mag(coeffsi[0] - 1.0) < linearLimitFactor_*1.0)
+             && maxCoeffi <= 1;
+        }
 
         // if (goodFit && iIt > 0)
         // {
@@ -253,7 +266,10 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
             // }
 
             wts[0] *= 10;
-            wts[1] *= 10;
+            if (linearCorrection_)
+            {
+                wts[1] *= 10;
+            }
 
             for(label j = 0; j < B.m(); j++)
             {
@@ -271,9 +287,17 @@ void Foam::FitData<FitDataType, ExtendedStencil, Polynomial>::calcFit
 
     if (goodFit)
     {
-        // Remove the uncorrected linear ocefficients
-        coeffsi[0] -= wLin;
-        coeffsi[1] -= 1 - wLin;
+        if (linearCorrection_)
+        {
+            // Remove the uncorrected linear coefficients
+            coeffsi[0] -= wLin;
+            coeffsi[1] -= 1 - wLin;
+        }
+        else
+        {
+            // Remove the uncorrected upwind coefficients
+            coeffsi[0] -= 1.0;
+        }
     }
     else
     {

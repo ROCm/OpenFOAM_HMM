@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -223,7 +223,7 @@ protected:
 
         //- Calculate Devolatilisation
         template<class TrackData>
-        scalar calcDevolatilisation
+        void calcDevolatilisation
         (
             TrackData& td,
             const scalar dt,           // timestep
@@ -234,12 +234,14 @@ protected:
             const scalar YVolatileTot, // total volatile mass fraction
             const scalarField& YVolatile, // volatile component mass fractions
             bool& canCombust,          // 'can combust' flag
-            scalarField& dMassDV       // mass transfer - local to particle
+            scalarField& dMassDV,      // mass transfer - local to particle
+            scalar& Sh,                // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         ) const;
 
         //- Calculate surface reactions
         template<class TrackData>
-        scalar calcSurfaceReactions
+        void calcSurfaceReactions
         (
             TrackData& td,
             const scalar dt,           // timestep
@@ -256,19 +258,37 @@ protected:
             scalarField& dMassSRGas,   // gas-phase mass transfer - local
             scalarField& dMassSRLiquid,// liquid-phase mass transfer - local
             scalarField& dMassSRSolid, // solid-phase mass transfer - local
-            scalarField& dMassSRCarrier// carrier phase mass transfer
+            scalarField& dMassSRCarrier, // carrier phase mass transfer
+            scalar& Sh,                // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         ) const;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("ReactingMultiphaseParcel");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("ReactingMultiphaseParcel");
+
 
     friend class Cloud<ParcelType>;
 
 
     // Constructors
+
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        inline ReactingMultiphaseParcel
+        (
+            ReactingMultiphaseCloud<ParcelType>& owner,
+            const vector& position,
+            const label cellI
+        );
+
 
         //- Construct from components
         inline ReactingMultiphaseParcel
@@ -295,13 +315,17 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        ReactingMultiphaseParcel(const ReactingMultiphaseParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<ReactingMultiphaseParcel> clone() const
         {
-            return autoPtr<ParcelType>
-            (
-                new ReactingMultiphaseParcel<ParcelType>(*this)
-            );
+            return
+                autoPtr<ReactingMultiphaseParcel>
+                (
+                    new ReactingMultiphaseParcel(*this)
+                );
         }
 
 
@@ -318,6 +342,9 @@ public:
             //- Return const access to mass fractions of solids
             inline const scalarField& YSolid() const;
 
+            //- Return const access to the canCombust flag
+            inline bool canCombust() const;
+
 
         // Edit
 
@@ -329,6 +356,9 @@ public:
 
             //- Return access to mass fractions of solids
             inline scalarField& YSolid();
+
+            //- Return access to the canCombust flag
+            inline bool& canCombust();
 
 
         // Main calculation loop

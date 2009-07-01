@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "system";
     object      cellSetDict.1;
@@ -19,7 +19,13 @@ name            c0;
 
 action          new;
 
-topoSetSources  ( boxToCell { box ( 0.004 -0.001 -1 ) ( 0.012 0.001 1 ) ; } );
+topoSetSources
+(
+    boxToCell
+    {
+        box ( 0.004 -0.001 -1 ) ( 0.012 0.001 1 );
+    }
+);
 
 
 // ************************************************************************* //

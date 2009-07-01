@@ -152,10 +152,7 @@ public:
     // Istream operator
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <LListBase, T>
-        #endif
+        friend Istream& operator>> <LListBase, T>
         (
             Istream&,
             ILList<LListBase, T>&

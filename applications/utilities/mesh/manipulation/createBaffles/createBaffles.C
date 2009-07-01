@@ -43,16 +43,89 @@ Description
 #include "ReadFields.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "ZoneIDs.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+void modifyOrAddFace
+(
+    polyTopoChange& meshMod,
+    const face& f,
+    const label faceI,
+    const label own,
+    const bool flipFaceFlux,
+    const label newPatchI,
+    const label zoneID,
+    const bool zoneFlip,
+
+    PackedBoolList& modifiedFace
+)
+{
+    if (!modifiedFace[faceI])
+    {
+        // First usage of face. Modify.
+        meshMod.setAction
+        (
+            polyModifyFace
+            (
+                f,                          // modified face
+                faceI,                      // label of face
+                own,                        // owner
+                -1,                         // neighbour
+                flipFaceFlux,               // face flip
+                newPatchI,                  // patch for face
+                false,                      // remove from zone
+                zoneID,                     // zone for face
+                zoneFlip                    // face flip in zone
+            )
+        );
+        modifiedFace[faceI] = 1;
+    }
+    else
+    {
+        // Second or more usage of face. Add.
+        meshMod.setAction
+        (
+            polyAddFace
+            (
+                f,                          // modified face
+                own,                        // owner
+                -1,                         // neighbour
+                -1,                         // master point
+                -1,                         // master edge
+                faceI,                      // master face
+                flipFaceFlux,               // face flip
+                newPatchI,                  // patch for face
+                zoneID,                     // zone for face
+                zoneFlip                    // face flip in zone
+            )
+        );
+    }
+}
+
+
+label findPatchID(const polyMesh& mesh, const word& name)
+{
+    label patchI = mesh.boundaryMesh().findPatchID(name);
+
+    if (patchI == -1)
+    {
+        FatalErrorIn("findPatchID(const polyMesh&, const word&)")
+            << "Cannot find patch " << name << endl
+            << "Valid patches are " << mesh.boundaryMesh().names()
+            << exit(FatalError);
+    }
+    return patchI;
+}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
 {
-    argList::validArgs.append("set");
+    argList::validArgs.append("faceZone");
     argList::validArgs.append("patch");
     argList::validOptions.insert("additionalPatches", "(patch2 .. patchN)");
     argList::validOptions.insert("overwrite", "");
@@ -67,29 +140,27 @@ int main(int argc, char *argv[])
     const faceZoneMesh& faceZones = mesh.faceZones();
 
     // Faces to baffle
-    word setName(args.additionalArgs()[0]);
-    Info<< "Reading faceSet from " << setName << nl << endl;
-    faceSet facesToSplit(mesh, setName);
-    // Make sure set is synchronised across couples
-    facesToSplit.sync(mesh);
-    Info<< "Read " << returnReduce(facesToSplit.size(), sumOp<label>())
-        << " faces from " << setName << nl << endl;
+    faceZoneID zoneID(args.additionalArgs()[0], faceZones);
 
+    Info<< "Converting faces on zone " << zoneID.name()
+        << " into baffles." << nl << endl;
+
+    const faceZone& fZone = faceZones[zoneID.index()];
+
+    Info<< "Found " << returnReduce(fZone.size(), sumOp<label>())
+        << " faces on zone " << zoneID.name() << nl << endl;
+
+    // Make sure patches and zoneFaces are synchronised across couples
+    patches.checkParallelSync(true);
+    fZone.checkParallelSync(true);
 
     // Patches to put baffles into
     DynamicList<label> newPatches(1);
 
     word patchName(args.additionalArgs()[1]);
-    newPatches.append(patches.findPatchID(patchName));
-    Pout<< "Using patch " << patchName
+    newPatches.append(findPatchID(mesh, patchName));
+    Info<< "Using patch " << patchName
         << " at index " << newPatches[0] << endl;
-
-    if (newPatches[0] == -1)
-    {
-        FatalErrorIn(args.executable())
-            << "Cannot find patch " << patchName << endl
-            << "Valid patches are " << patches.names() << exit(FatalError);
-    }
 
 
     // Additional patches
@@ -103,19 +174,9 @@ int main(int argc, char *argv[])
         newPatches.reserve(patchNames.size() + 1);
         forAll(patchNames, i)
         {
-            label patchI = patches.findPatchID(patchNames[i]);
+            newPatches.append(findPatchID(mesh, patchNames[i]));
             Info<< "Using additional patch " << patchNames[i]
-                << " at index " << patchI << endl;
-
-            if (patchI == -1)
-            {
-                FatalErrorIn(args.executable())
-                    << "Cannot find patch " << patchNames[i] << endl
-                    << "Valid patches are " << patches.names()
-                    << exit(FatalError);
-            }
-
-            newPatches.append(patchI);
+                << " at index " << newPatches[newPatches.size()-1] << endl;
         }
     }
 
@@ -166,111 +227,112 @@ int main(int argc, char *argv[])
     polyTopoChange meshMod(mesh);
 
 
-    // Do the actual changes
-    // Note order in which faces are modified/added is so they end up correctly
-    // for cyclic patches (original faces first and then reversed faces)
-    // since otherwise it will have trouble matching baffles.
+    // Do the actual changes. Note:
+    // - loop in incrementing face order (not necessary if faceZone ordered).
+    //   Preserves any existing ordering on patch faces.
+    // - two passes, do non-flip faces first and flip faces second. This
+    //   guarantees that when e.g. creating a cyclic all faces from one
+    //   side come first and faces from the other side next.
 
-    label nBaffled = 0;
+    PackedBoolList modifiedFace(mesh.nFaces());
 
     forAll(newPatches, i)
     {
         label newPatchI = newPatches[i];
 
+        // Pass 1. Do selected side of zone
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
         for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
         {
-            if (facesToSplit.found(faceI))
-            {
-                const face& f = mesh.faces()[faceI];
-                label zoneID = faceZones.whichZone(faceI);
-                bool zoneFlip = false;
-                if (zoneID >= 0)
-                {
-                    const faceZone& fZone = faceZones[zoneID];
-                    zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
-                }
+            label zoneFaceI = fZone.whichFace(faceI);
 
-                if (i == 0)
+            if (zoneFaceI != -1)
+            {
+                if (!fZone.flipMap()[zoneFaceI])
                 {
-                    // First usage of face. Modify.
-                    meshMod.setAction
+                    // Use owner side of face
+                    modifyOrAddFace
                     (
-                        polyModifyFace
-                        (
-                            f,                          // modified face
-                            faceI,                      // label of face
-                            mesh.faceOwner()[faceI],    // owner
-                            -1,                         // neighbour
-                            false,                      // face flip
-                            newPatchI,                  // patch for face
-                            false,                      // remove from zone
-                            zoneID,                     // zone for face
-                            zoneFlip                    // face flip in zone
-                        )
+                        meshMod,
+                        mesh.faces()[faceI],    // modified face
+                        faceI,                  // label of face
+                        mesh.faceOwner()[faceI],// owner
+                        false,                  // face flip
+                        newPatchI,              // patch for face
+                        zoneID.index(),         // zone for face
+                        false,                  // face flip in zone
+                        modifiedFace            // modify or add status
                     );
                 }
                 else
                 {
-                    // Second or more usage of face. Add.
-                    meshMod.setAction
+                    // Use neighbour side of face
+                    modifyOrAddFace
                     (
-                        polyAddFace
-                        (
-                            f,                          // modified face
-                            mesh.faceOwner()[faceI],    // owner
-                            -1,                         // neighbour
-                            -1,                         // master point
-                            -1,                         // master edge
-                            faceI,                      // master face
-                            false,                      // face flip
-                            newPatchI,                  // patch for face
-                            zoneID,                     // zone for face
-                            zoneFlip                    // face flip in zone
-                        )
-                    );
-                }
-
-                nBaffled++;
-            }
-        }
-
-        // Add the reversed face.
-        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
-        {
-            if (facesToSplit.found(faceI))
-            {
-                const face& f = mesh.faces()[faceI];
-                label zoneID = faceZones.whichZone(faceI);
-                bool zoneFlip = false;
-                if (zoneID >= 0)
-                {
-                    const faceZone& fZone = faceZones[zoneID];
-                    zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
-                }
-                label nei = mesh.faceNeighbour()[faceI];
-
-                meshMod.setAction
-                (
-                    polyAddFace
-                    (
-                        f.reverseFace(),            // modified face
-                        nei,                        // owner
-                        -1,                         // neighbour
-                        -1,                         // masterPointID
-                        -1,                         // masterEdgeID
-                        faceI,                      // masterFaceID,
+                        meshMod,
+                        mesh.faces()[faceI].reverseFace(),  // modified face
+                        faceI,                      // label of face
+                        mesh.faceNeighbour()[faceI],// owner
                         true,                       // face flip
                         newPatchI,                  // patch for face
-                        zoneID,                     // zone for face
-                        zoneFlip                    // face flip in zone
-                    )
-                );
-
-                nBaffled++;
+                        zoneID.index(),             // zone for face
+                        true,                       // face flip in zone
+                        modifiedFace                // modify or add status
+                    );
+                }
             }
         }
 
+
+        // Pass 2. Do other side of zone
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        {
+            label zoneFaceI = fZone.whichFace(faceI);
+
+            if (zoneFaceI != -1)
+            {
+                if (!fZone.flipMap()[zoneFaceI])
+                {
+                    // Use neighbour side of face
+                    modifyOrAddFace
+                    (
+                        meshMod,
+                        mesh.faces()[faceI].reverseFace(),  // modified face
+                        faceI,                              // label of face
+                        mesh.faceNeighbour()[faceI],        // owner
+                        true,                               // face flip
+                        newPatchI,                          // patch for face
+                        zoneID.index(),                     // zone for face
+                        true,                               // face flip in zone
+                        modifiedFace                        // modify or add
+                    );
+                }
+                else
+                {
+                    // Use owner side of face
+                    modifyOrAddFace
+                    (
+                        meshMod,
+                        mesh.faces()[faceI],    // modified face
+                        faceI,                  // label of face
+                        mesh.faceOwner()[faceI],// owner
+                        false,                  // face flip
+                        newPatchI,              // patch for face
+                        zoneID.index(),         // zone for face
+                        false,                  // face flip in zone
+                        modifiedFace            // modify or add status
+                    );
+                }
+            }
+        }
+
+
         // Modify any boundary faces
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~
+
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
@@ -286,58 +348,22 @@ int main(int argc, char *argv[])
                 {
                     label faceI = pp.start()+i;
 
-                    if (facesToSplit.found(faceI))
+                    label zoneFaceI = fZone.whichFace(faceI);
+
+                    if (zoneFaceI != -1)
                     {
-                        const face& f = mesh.faces()[faceI];
-                        label zoneID = faceZones.whichZone(faceI);
-                        bool zoneFlip = false;
-                        if (zoneID >= 0)
-                        {
-                            const faceZone& fZone = faceZones[zoneID];
-                            zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
-                        }
-
-                        if (i == 0)
-                        {
-                            // First usage of face. Modify.
-                            meshMod.setAction
-                            (
-                                polyModifyFace
-                                (
-                                    f,                      // modified face
-                                    faceI,                  // label of face
-                                    mesh.faceOwner()[faceI],// owner
-                                    -1,                     // neighbour
-                                    false,                  // face flip
-                                    newPatchI,              // patch for face
-                                    false,                  // remove from zone
-                                    zoneID,                 // zone for face
-                                    zoneFlip                // face flip in zone
-                                )
-                            );
-                        }
-                        else
-                        {
-                            // Second or more usage of face. Add.
-                            meshMod.setAction
-                            (
-                                polyAddFace
-                                (
-                                    f,                      // modified face
-                                    mesh.faceOwner()[faceI],// owner
-                                    -1,                     // neighbour
-                                    -1,                     // master point
-                                    -1,                     // master edge
-                                    faceI,                  // master face
-                                    false,                  // face flip
-                                    newPatchI,              // patch for face
-                                    zoneID,                 // zone for face
-                                    zoneFlip                // face flip in zone
-                                )
-                            );
-                        }
-
-                        nBaffled++;
+                        modifyOrAddFace
+                        (
+                            meshMod,
+                            mesh.faces()[faceI],        // modified face
+                            faceI,                      // label of face
+                            mesh.faceOwner()[faceI],    // owner
+                            false,                      // face flip
+                            newPatchI,                  // patch for face
+                            zoneID.index(),             // zone for face
+                            fZone.flipMap()[zoneFaceI], // face flip in zone
+                            modifiedFace                // modify or add status
+                        );
                     }
                 }
             }
@@ -345,7 +371,7 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "Converted " << returnReduce(nBaffled, sumOp<label>())
+    Info<< "Converted " << returnReduce(modifiedFace.count(), sumOp<label>())
         << " faces into boundary faces on patch " << patchName << nl << endl;
 
     if (!overwrite)

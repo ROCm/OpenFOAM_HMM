@@ -241,7 +241,6 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.csh
 # _foamSource $WM_PROJECT_DIR/etc/apps/paraview/cshrc
 _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/cshrc
 # _foamSource $WM_PROJECT_DIR/etc/apps/ensight/cshrc
-# _foamSource $WM_PROJECT_DIR/etc/apps/cint/cshrc
 
 
 # Clean environment paths again. Only remove duplicates

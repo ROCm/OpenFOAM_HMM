@@ -34,15 +34,14 @@ License
 #include "wallPolyPatch.H"
 #include "wedgePolyPatch.H"
 #include "processorPolyPatch.H"
-#include "combustionMixture.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "basicMultiComponentMixture.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 namespace Foam
 {
-defineParticleTypeNameAndDebug(parcel, 0);
-defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
+    defineParticleTypeNameAndDebug(parcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -695,7 +694,5 @@ void Foam::parcel::transformProperties(const tensor& T)
 void Foam::parcel::transformProperties(const vector&)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

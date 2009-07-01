@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,7 +143,7 @@ bool operator==
 
 Foam::Istream& Foam::operator>>(Istream& is, receivingReferralList& rRL)
 {
-    is >> rRL.sourceProc_ >> static_cast<labelListList&>(rRL);
+    is  >> rRL.sourceProc_ >> static_cast<labelListList&>(rRL);
 
     is.check
     (
@@ -160,7 +160,7 @@ Foam::Ostream& Foam::operator<<
     const receivingReferralList& rRL
 )
 {
-    os << rRL.sourceProc() << token::SPACE
+    os  << rRL.sourceProc() << token::SPACE
         << static_cast< const labelListList& >(rRL);
 
     os.check
@@ -170,8 +170,6 @@ Foam::Ostream& Foam::operator<<
 
     return os;
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

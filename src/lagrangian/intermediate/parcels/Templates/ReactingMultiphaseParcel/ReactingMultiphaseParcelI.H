@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,6 +82,22 @@ inline Foam::ReactingMultiphaseParcel<ParcelType>::trackData::trackData
     ),
     cloud_(cloud),
     constProps_(constProps)
+{}
+
+
+template <class ParcelType>
+inline Foam::ReactingMultiphaseParcel<ParcelType>::ReactingMultiphaseParcel
+(
+    ReactingMultiphaseCloud<ParcelType>& owner,
+    const vector& position,
+    const label cellI
+)
+:
+    ReactingParcel<ParcelType>(owner, position, cellI),
+    YGas_(0),
+    YLiquid_(0),
+    YSolid_(0),
+    canCombust_(false)
 {}
 
 
@@ -186,6 +202,13 @@ YSolid() const
 
 
 template<class ParcelType>
+inline bool Foam::ReactingMultiphaseParcel<ParcelType>::canCombust() const
+{
+    return canCombust_;
+}
+
+
+template<class ParcelType>
 inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YGas()
 {
     return YGas_;
@@ -205,5 +228,11 @@ inline Foam::scalarField& Foam::ReactingMultiphaseParcel<ParcelType>::YSolid()
     return YSolid_;
 }
 
+
+template<class ParcelType>
+inline bool& Foam::ReactingMultiphaseParcel<ParcelType>::canCombust()
+{
+    return canCombust_;
+}
 
 // ************************************************************************* //

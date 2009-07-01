@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Selection function for internal energy based thermodynamics package.
+    Mixture instantiation
 
 \*---------------------------------------------------------------------------*/
 
@@ -33,6 +33,8 @@ Description
 #include "makeBasicMixture.H"
 
 #include "perfectGas.H"
+
+#include "eConstThermo.H"
 
 #include "hConstThermo.H"
 #include "janafThermo.H"
@@ -65,6 +67,22 @@ makeBasicMixture
     pureMixture,
     sutherlandTransport,
     hConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    constTransport,
+    eConstThermo,
+    perfectGas
+);
+
+makeBasicMixture
+(
+    pureMixture,
+    sutherlandTransport,
+    eConstThermo,
     perfectGas
 );
 

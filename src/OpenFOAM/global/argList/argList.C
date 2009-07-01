@@ -298,6 +298,7 @@ Foam::argList::argList
     jobInfo.add("startTime", timeString);
     jobInfo.add("userName", userName());
     jobInfo.add("foamVersion", word(FOAMversion));
+    jobInfo.add("foamBuild", Foam::FOAMbuild);
     jobInfo.add("code", executable_);
     jobInfo.add("argList", argListString);
     jobInfo.add("currentDir", cwd());
@@ -526,10 +527,10 @@ Foam::argList::argList
 
     // Switch on signal trapping. We have to wait until after Pstream::init
     // since this sets up its own ones.
-    sigFpe_.set();
-    sigInt_.set();
-    sigQuit_.set();
-    sigSegv_.set();
+    sigFpe_.set(bannerEnabled);
+    sigInt_.set(bannerEnabled);
+    sigQuit_.set(bannerEnabled);
+    sigSegv_.set(bannerEnabled);
 
     if (Pstream::master() && bannerEnabled)
     {

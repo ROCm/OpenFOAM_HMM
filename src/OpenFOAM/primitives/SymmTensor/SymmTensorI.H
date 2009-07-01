@@ -520,7 +520,6 @@ public:
     typedef SymmTensor<Cmpt> type;
 };
 
-#ifndef __CINT__
 template<class Cmpt>
 class innerProduct<SymmTensor<Cmpt>, SymmTensor<Cmpt> >
 {
@@ -528,7 +527,6 @@ public:
 
     typedef SymmTensor<Cmpt> type;
 };
-
 
 template<class Cmpt>
 class innerProduct<SymmTensor<Cmpt>, Vector<Cmpt> >
@@ -578,7 +576,7 @@ public:
 
     typedef SymmTensor<Cmpt> type;
 };
-#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

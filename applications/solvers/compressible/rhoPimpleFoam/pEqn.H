@@ -1,4 +1,4 @@
-rho = thermo->rho();
+rho = thermo.rho();
 
 volScalarField rUA = 1.0/UEqn().A();
 U = rUA*UEqn().H();
@@ -13,7 +13,7 @@ if (transonic)
     surfaceScalarField phid
     (
         "phid",
-        fvc::interpolate(thermo->psi())
+        fvc::interpolate(psi)
        *(
             (fvc::interpolate(U) & mesh.Sf())
           + fvc::ddtPhiCorr(rUA, rho, U, phi)
@@ -99,7 +99,7 @@ else
     // Explicitly relax pressure for momentum corrector
     p.relax();
 
-    rho = thermo->rho();
+    rho = thermo.rho();
     rho.relax();
     Info<< "rho max/min : " << max(rho).value()
         << " " << min(rho).value() << endl;
@@ -117,7 +117,7 @@ bound(p, pMin);
 /*
 if (closedVolume)
 {
-    p += (initialMass - fvc::domainIntegrate(thermo->psi()*p))
-        /fvc::domainIntegrate(thermo->psi());
+    p += (initialMass - fvc::domainIntegrate(psi*p))
+        /fvc::domainIntegrate(psi);
 }
 */
