@@ -10,65 +10,54 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    object      blockMeshDict;
+    object      fvSchemes;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-convertToMeters 1;
+ddtSchemes
+{
+    default steadyState;
+}
 
-vertices
-(
-    (-20.29 -10  -4.232e-05)
-    ( 41.71 -10  -4.232e-05)
-    ( 41.71  10  -4.232e-05)
-    (-20.29  10  -4.232e-05)
-    (-20.29 -10   20)
-    ( 41.71 -10   20)
-    ( 41.71  10   20)
-    (-20.29  10   20)
-);
+gradSchemes
+{
+    default         Gauss linear;
+    grad(p)         Gauss linear;
+    grad(U)         Gauss linear;
+//    grad(U)         cellLimited Gauss linear 1;
+}
 
-blocks
-(
-    hex (0 1 2 3 4 5 6 7) (60 20 20) simpleGrading (1 1 1)
-);
+divSchemes
+{
+    default         none;
+    div(phi,U)      Gauss linearUpwindV Gauss linear;
+    div(phi,k)      Gauss upwind;
+    div(phi,omega)  Gauss upwind;
+    div((nuEff*dev(grad(U).T()))) Gauss linear;
+}
 
-edges
-(
-);
+laplacianSchemes
+{
+    default         Gauss linear corrected;
+//    default         Gauss linear limited 0.5;
+//    default         Gauss linear limited 0.333;
+}
 
-patches
-(
-    patch maxY
-    (
-        (3 7 6 2)
-    )
-    patch minX
-    (
-        (0 4 7 3)
-    )
-    patch maxX
-    (
-        (2 6 5 1)
-    )
-    patch minY
-    (
-        (1 5 4 0)
-    )
-    patch minZ
-    (
-        (0 3 2 1)
-    )
-    patch maxZ
-    (
-        (4 5 6 7)
-    )
-);
+interpolationSchemes
+{
+    default         linear;
+    interpolate(U)  linear;
+}
 
-mergePatchPairs
-(
-);
+snGradSchemes
+{
+    default         corrected;
+}
 
+fluxRequired
+{
+    default         no;
+    p;
+}
 
 // ************************************************************************* //
