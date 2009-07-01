@@ -8,10 +8,16 @@
 
 FoamFile
 {
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      snappyHexMeshDict;
+    version         2.0;
+    format          ascii;
+
+    root            "/home/penfold/mattijs/foam/mattijs2.1/run/icoFoam";
+    case            "cavity";
+    instance        "system";
+    local           "";
+
+    class           dictionary;
+    object          autoHexMeshDict;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -19,7 +25,7 @@ FoamFile
 // Which of the steps to run
 castellatedMesh true;
 snap            true;
-addLayers       true;
+addLayers       false;
 
 
 // Geometry. Definition of all surfaces. All surfaces are of class
@@ -30,18 +36,42 @@ addLayers       true;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    motorBike.stl
+    bottomAir.stl
     {
         type triSurfaceMesh;
-        name motorBike;
+        name bottomAir;
     }
 
-    refinementBox
+    topAir.stl
     {
-        type searchableBox;
-        min (-1.0 -0.7 0.0);
-        max ( 8.0  0.7 2.5);
+        type triSurfaceMesh;
+        name topAir;
     }
+
+    leftSolid.stl
+    {
+        type triSurfaceMesh;
+        name leftSolid;
+    }
+
+    rightSolid.stl
+    {
+        type triSurfaceMesh;
+        name rightSolid;
+    }
+
+    heater.stl
+    {
+        type triSurfaceMesh;
+        name heater;
+    }
+
+    //refinementBox
+    //{
+    //    type searchableBox;
+    //    min (-0.3 -0.4 -0.1);
+    //    max ( 3.0  0.4  1.4);
+   // }
 };
 
 
@@ -74,7 +104,7 @@ castellatedMeshControls
     // Number of buffer layers between different levels.
     // 1 means normal 2:1 refinement restriction, larger means slower
     // refinement.
-    nCellsBetweenLevels 3;
+    nCellsBetweenLevels 2;
 
 
 
@@ -85,10 +115,6 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-        //{
-        //    file "someLine.eMesh";
-        //    level 2;
-        //}
     );
 
 
@@ -104,10 +130,54 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        motorBike
+        bottomAir
         {
             // Surface-wise min and max refinement level
-            level (5 6);
+            level (1 1);
+
+	    faceZone bottomAir;
+            cellZone bottomAir;
+            zoneInside true;
+        }
+
+        topAir
+        {
+            // Surface-wise min and max refinement level
+            level (1 1);
+
+	    faceZone topAir;
+            cellZone topAir;
+            zoneInside true;
+        }
+
+        heater
+        {
+            // Surface-wise min and max refinement level
+            level (0 0);
+
+	    faceZone heater;
+            cellZone heater;
+            zoneInside true;
+        }
+
+        leftSolid
+        {
+            // Surface-wise min and max refinement level
+            level (1 1);
+
+	    faceZone leftSolid;
+            cellZone leftSolid;
+            zoneInside true;
+        }
+
+        rightSolid
+        {
+            // Surface-wise min and max refinement level
+            level (1 1);
+
+	    faceZone rightSolid;
+            cellZone rightSolid;
+            zoneInside true;
         }
     }
 
@@ -130,11 +200,11 @@ castellatedMeshControls
 
     refinementRegions
     {
-        refinementBox
-        {
-            mode inside;
-            levels ((1E15 4));
-        }
+        //refinementBox
+        //{
+        //    mode inside;
+        //    levels ((1E15 4));
+        //}
     }
 
 
@@ -146,7 +216,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (3 3 0.43);
+    locationInMesh (0.01 0.01 0.01);
 }
 
 
@@ -176,281 +246,23 @@ snapControls
 // Settings for the layer addition.
 addLayersControls
 {
+    relativeSizes true;
+
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        minZ
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_frt-fairing:001%1
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_windshield:002%2
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-rim:005%5
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-rim:010%10
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-wh-rim:011%11
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-wh-brake-disk:012%12
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_frame:016-shadow%13
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-susp:014%14
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-susp:014-shadow%15
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_frame:016%16
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-rim:005-shadow%17
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-chain-hub:022%22
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rearseat%24
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_frt-fairing%25
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_windshield%26
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_headlights%27
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_driversseat%28
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-body%29
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fuel-tank%30
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_exhaust%31
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-rim%32
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-mud-guard%33
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-wh-rim%34
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-wh-brake-disk%35
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-brake-caliper%36
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-wh-tyre%37
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_hbars%38
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-forks%39
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_chain%40
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-tyre%41
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_square-dial%42
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_round-dial%43
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_dial-holder%44
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-susp%45
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-brake-lights%46
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-light-bracket%47
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_frame%48
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-mud-guard%49
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-susp-spring-damp%50
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fairing-inner-plate%51
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_clutch-housing%52
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_radiator%53
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_water-pipe%54
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_water-pump%55
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_engine%56
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-shock-link%57
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-brake-fluid-pot-bracket%58
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-brake-fluid-pot%59
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_footpeg%60
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-chain-hub%61
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-brake-caliper%62
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rider-helmet%65
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rider-visor%66
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rider-boots%67
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rider-gloves%68
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rider-body%69
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_frame:0%70
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_frt-fairing:001-shadow%74
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_windshield-shadow%75
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-mud-guard-shadow%81
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_fr-wh-brake-disk-shadow%83
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-mud-guard-shadow%84
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-susp-spring-damp-shadow%85
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_radiator-shadow%86
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-shock-link-shadow%87
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rear-brake-fluid-pot-bracket-shadow%88
-        {
-            nSurfaceLayers 1;
-        }
-        motorBike_rr-wh-chain-hub-shadow%89
-        {
-            nSurfaceLayers 1;
-        }
+	//flowAirDuctReagent_flowAirDuctReagent
+        //{
+        //    nSurfaceLayers 1;
+        //}
+	//flowAirDuctReagent_inlet1
+        //{
+        //    nSurfaceLayers 1;
+        //}
+	//flowAirDuctReagent_inlet2
+        //{
+        //    nSurfaceLayers 1;
+        //}
     }
 
     // Expansion factor for layer mesh
@@ -460,7 +272,7 @@ addLayersControls
     //  is the
     //  thickness of the layer furthest away from the wall.
     //  Relative to undistorted size of cell outside layer.
-    finalLayerRatio 0.3;
+    finalLayerThickness 0.3; 
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
@@ -470,7 +282,7 @@ addLayersControls
     //- If points get not extruded do nGrow layers of connected faces that are
     //  also not grown. This helps convergence of the layer addition process
     //  close to features.
-    nGrow 1;
+    nGrow 0;
 
 
     // Advanced settings
@@ -483,20 +295,20 @@ addLayersControls
     //  before upon reaching a correct mesh.
     nRelaxIter 3;
 
-    // Number of smoothing iterations of surface normals
+    // Number of smoothing iterations of surface normals 
     nSmoothSurfaceNormals 1;
 
-    // Number of smoothing iterations of interior mesh movement direction
+    // Number of smoothing iterations of interior mesh movement direction  
     nSmoothNormals 3;
 
     // Smooth layer thickness over surface patches
     nSmoothThickness 10;
 
-    // Stop layer growth on highly warped cells
+    // Stop layer growth on highly warped cells 
     maxFaceThicknessRatio 0.5;
 
-    // Reduce layer growth where ratio thickness to medial
-    // distance is large
+    // Reduce layer growth where ratio thickness to medial 
+    // distance is large 
     maxThicknessToMedialRatio 0.3;
 
     // Angle used to pick up medial axis points
@@ -529,7 +341,7 @@ meshQualityControls
 
     //- Minimum pyramid volume. Is absolute volume of cell pyramid.
     //  Set to very negative number (e.g. -1E30) to disable.
-    minVol 1e-13;
+    minVol 0;
 
     //- Minimum face area. Set to <0 to disable.
     minArea -1;
@@ -542,7 +354,7 @@ meshQualityControls
     //- 1 = hex, <= 0 = folded or flattened illegal cell
     minDeterminant 0.001;
 
-    //- minFaceWeight (0 -> 0.5)
+    //- minFaceWeight (0 -> 0.5) 
     minFaceWeight 0.02;
 
     //- minVolRatio (0 -> 1)
