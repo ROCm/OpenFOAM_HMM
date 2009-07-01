@@ -106,6 +106,15 @@ public:
             //- Global sum of localSizes
             inline label size() const;
 
+            //- Size of procI data
+            inline label localSize(const label procI) const;
+
+            //- From local to global on procI
+            inline label toGlobal(const label procI, const label i) const;
+
+            //- Is on processor procI
+            inline bool isLocal(const label procI, const label i) const;
+
             //- From global to local on procI
             inline label toLocal(const label procI, const label i) const;
 
@@ -114,9 +123,6 @@ public:
 
             //- Start of procI data
             inline label offset(const label procI) const;
-
-            //- Size of procI data
-            inline label localSize(const label procI) const;
 
 
 

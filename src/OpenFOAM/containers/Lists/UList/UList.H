@@ -320,6 +320,18 @@ public:
         );
 };
 
+template<class T>
+void sort(UList<T>&);
+
+template<class T, class Cmp>
+void sort(UList<T>&, const Cmp&);
+
+template<class T>
+void stableSort(UList<T>&);
+
+template<class T, class Cmp>
+void stableSort(UList<T>&, const Cmp&);
+
 // Reverse the first n elements of the list
 template<class T>
 inline void reverse(UList<T>&, const label n);

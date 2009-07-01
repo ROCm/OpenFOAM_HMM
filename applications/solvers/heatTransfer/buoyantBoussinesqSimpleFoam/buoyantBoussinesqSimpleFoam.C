@@ -72,21 +72,18 @@ int main(int argc, char *argv[])
         #include "readSIMPLEControls.H"
         #include "initConvergenceCheck.H"
 
-        pd.storePrevIter();
+        p.storePrevIter();
 
         // Pressure-velocity SIMPLE corrector
         {
             #include "UEqn.H"
             #include "TEqn.H"
-            #include "pdEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
 
-        if (runTime.write())
-        {
-            #include "writeAdditionalFields.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

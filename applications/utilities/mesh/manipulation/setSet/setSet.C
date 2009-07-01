@@ -367,7 +367,7 @@ bool doCommand
         {
             r = IOobject::NO_READ;
 
-            backup(mesh, setName, setName + "_old");
+            //backup(mesh, setName, setName + "_old");
 
             currentSetPtr = topoSet::New(setType, mesh, setName, typSize);
         }
@@ -399,11 +399,11 @@ bool doCommand
                 << "  Action:" << actionName
                 << endl;
 
-            if ((r == IOobject::MUST_READ) && (action != topoSetSource::LIST))
-            {
-                // currentSet has been read so can make copy.
-                backup(mesh, setName, currentSet, setName + "_old");
-            }
+            //if ((r == IOobject::MUST_READ) && (action != topoSetSource::LIST))
+            //{
+            //    // currentSet has been read so can make copy.
+            //    backup(mesh, setName, currentSet, setName + "_old");
+            //}
 
             switch (action)
             {
@@ -558,7 +558,8 @@ void printMesh(const Time& runTime, const polyMesh& mesh)
         << "  cells:" << mesh.nCells()
         << "  faces:" << mesh.nFaces()
         << "  points:" << mesh.nPoints()
-        << "  patches:" << mesh.boundaryMesh().size() << nl;
+        << "  patches:" << mesh.boundaryMesh().size()
+        << "  bb:" << mesh.bounds() << nl;
 }
 
 

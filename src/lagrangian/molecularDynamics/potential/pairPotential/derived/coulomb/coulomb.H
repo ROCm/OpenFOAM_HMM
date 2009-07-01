@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::pairPotentials::coulomb
+    Foam::pairPotentials::electrostatic
 
 Description
 
@@ -53,12 +53,15 @@ class coulomb
 :
     public pairPotential
 {
-
 public:
 
     //- Runtime type information
     TypeName("coulomb");
 
+
+    // Static data members
+
+        static scalar oneOverFourPiEps0;
 
     // Constructors
 
@@ -80,7 +83,7 @@ public:
 
         scalar unscaledEnergy(const scalar r) const;
 
-        //- Read transportProperties dictionary
+        //- Read dictionary
         bool read(const dictionary& pairPotentialProperties);
 };
 

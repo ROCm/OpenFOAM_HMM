@@ -30,18 +30,18 @@ Description
 
     Uses the Boussinesq approximation:
     \f[
-        rho_{eff} = 1 - beta(T - T_{ref})
+        rho_{k} = 1 - beta(T - T_{ref})
     \f]
 
     where:
-        \f$ rho_{eff} \f$ = the effective (driving) density
+        \f$ rho_{k} \f$ = the effective (driving) kinematic density
         beta = thermal expansion coefficient [1/K]
         T = temperature [K]
         \f$ T_{ref} \f$ = reference temperature [K]
 
     Valid when:
     \f[
-        rho_{eff} << 1
+        rho_{k} << 1
     \f]
 
 \*---------------------------------------------------------------------------*/
@@ -78,20 +78,17 @@ int main(int argc, char *argv[])
         #include "setDeltaT.H"
 
         #include "UEqn.H"
+        #include "TEqn.H"
 
         // --- PISO loop
         for (int corr=0; corr<nCorr; corr++)
         {
-            #include "TEqn.H"
-            #include "pdEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
 
-        if (runTime.write())
-        {
-            #include "writeAdditionalFields.H"
-        }
+        runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

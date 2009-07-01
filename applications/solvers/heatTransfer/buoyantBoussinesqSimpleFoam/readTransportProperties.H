@@ -1,13 +1,13 @@
     singlePhaseTransportModel laminarTransport(U, phi);
 
-    // thermal expansion coefficient [1/K]
+    // Thermal expansion coefficient [1/K]
     dimensionedScalar beta(laminarTransport.lookup("beta"));
 
-    // reference temperature [K]
+    // Reference temperature [K]
     dimensionedScalar TRef(laminarTransport.lookup("TRef"));
 
-    // reference kinematic pressure [m2/s2]
-    dimensionedScalar pRef(laminarTransport.lookup("pRef"));
+    // Laminar Prandtl number
+    dimensionedScalar Pr(laminarTransport.lookup("Pr"));
 
-    // turbulent Prandtl number
+    // Turbulent Prandtl number
     dimensionedScalar Prt(laminarTransport.lookup("Prt"));

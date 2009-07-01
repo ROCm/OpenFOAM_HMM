@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,7 @@ addToRunTimeSelectionTable
     dictionary
 );
 
+
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
 scalar sigmoid::sigmoidScale
@@ -57,6 +58,7 @@ scalar sigmoid::sigmoidScale
     return 1.0 / (1.0 + exp( scale * (r - shift)));
 }
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 sigmoid::sigmoid
@@ -67,10 +69,14 @@ sigmoid::sigmoid
 )
 :
     energyScalingFunction(name, energyScalingFunctionProperties, pairPot),
-    sigmoidCoeffs_(energyScalingFunctionProperties.subDict(typeName + "Coeffs")),
+    sigmoidCoeffs_
+    (
+        energyScalingFunctionProperties.subDict(typeName + "Coeffs")
+    ),
     shift_(readScalar(sigmoidCoeffs_.lookup("shift"))),
     scale_(readScalar(sigmoidCoeffs_.lookup("scale")))
 {}
+
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
@@ -79,15 +85,17 @@ void sigmoid::scaleEnergy(scalar& e, const scalar r) const
     e *= sigmoidScale(r, shift_, scale_);
 }
 
+
 bool sigmoid::read(const dictionary& energyScalingFunctionProperties)
 {
     energyScalingFunction::read(energyScalingFunctionProperties);
 
-    sigmoidCoeffs_ = energyScalingFunctionProperties.subDict(typeName + "Coeffs");
+    sigmoidCoeffs_ =
+        energyScalingFunctionProperties.subDict(typeName + "Coeffs");
 
     sigmoidCoeffs_.lookup("shift") >> shift_;
     sigmoidCoeffs_.lookup("scale") >> shift_;
-    
+
     return true;
 }
 

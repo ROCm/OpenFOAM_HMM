@@ -55,6 +55,11 @@ class fixedFluxBuoyantPressureFvPatchScalarField
 :
     public fixedGradientFvPatchScalarField
 {
+    // Private data
+
+        //- Name of the density field used to calculate the buoyancy force
+        word rhoName_;
+
 
 public:
 

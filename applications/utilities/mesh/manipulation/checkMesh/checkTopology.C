@@ -7,6 +7,31 @@
 #include "pointSet.H"
 #include "IOmanip.H"
 
+bool Foam::checkSync(const wordList& names)
+{
+    List<wordList> allNames(Pstream::nProcs());
+    allNames[Pstream::myProcNo()] = names;
+    Pstream::gatherList(allNames);
+
+    bool hasError = false;
+
+    for (label procI = 1; procI < allNames.size(); procI++)
+    {
+        if (allNames[procI] != allNames[0])
+        {
+            hasError = true;
+
+            Info<< " ***Inconsistent zones across processors, "
+                   "processor 0 has zones:" << allNames[0]
+                << ", processor " << procI << " has zones:"
+                << allNames[procI]
+                << endl;
+        }
+    }
+    return hasError;
+}
+
+
 Foam::label Foam::checkTopology
 (
     const polyMesh& mesh,
@@ -23,6 +48,31 @@ Foam::label Foam::checkTopology
 
     // Check if the boundary processor patches are correct
     mesh.boundaryMesh().checkParallelSync(true);
+
+    // Check names of zones are equal
+    if (checkSync(mesh.cellZones().names()))
+    {
+        noFailedChecks++;
+    }
+    if (checkSync(mesh.faceZones().names()))
+    {
+        noFailedChecks++;
+    }
+    if (checkSync(mesh.pointZones().names()))
+    {
+        noFailedChecks++;
+    }
+
+    // Check contents of faceZones consistent
+    {
+        forAll(mesh.faceZones(), zoneI)
+        {
+            if (mesh.faceZones()[zoneI].checkParallelSync(true))
+            {
+                noFailedChecks++;
+            }
+        }
+    }
 
     {
         pointSet points(mesh, "unusedPoints", mesh.nPoints()/100);

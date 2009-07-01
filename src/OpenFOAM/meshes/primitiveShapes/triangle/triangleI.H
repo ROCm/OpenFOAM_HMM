@@ -607,6 +607,18 @@ inline bool triangle<Point, PointRef>::classify
     // system E0, E1
     //
 
+    //Pout<< "alpha:" << alpha << endl;
+    //Pout<< "beta:" << beta << endl;
+    //Pout<< "hit:" << hit << endl;
+    //Pout<< "tol:" << tol << endl;
+
+    if (hit)
+    {
+        // alpha,beta might get negative due to precision errors
+        alpha = max(0.0, min(1.0, alpha));
+        beta = max(0.0, min(1.0, beta));
+    }
+
     nearType = NONE;
     nearLabel = -1;
 

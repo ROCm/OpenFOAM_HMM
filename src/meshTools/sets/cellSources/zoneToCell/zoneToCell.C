@@ -47,7 +47,8 @@ Foam::topoSetSource::addToUsageTable Foam::zoneToCell::usage_
 (
     zoneToCell::typeName,
     "\n    Usage: zoneToCell zone\n\n"
-    "    Select all cells in the cellZone\n\n"
+    "    Select all cells in the cellZone."
+    " Note:accepts wildcards for zone.\n\n"
 );
 
 
