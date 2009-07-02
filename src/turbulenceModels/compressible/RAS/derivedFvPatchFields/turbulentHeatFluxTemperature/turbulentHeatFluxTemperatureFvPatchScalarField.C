@@ -48,7 +48,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(p, iF),
     q_(p.size(), 0.0),
-    rhoName_("undefinedRho")
+    rhoName_("rho")
 {}
 
 
@@ -77,7 +77,7 @@ turbulentHeatFluxTemperatureFvPatchScalarField
 :
     fixedGradientFvPatchScalarField(p, iF),
     q_("q", dict, p.size()),
-    rhoName_(dict.lookup("rho"))
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho"))
 {
     fvPatchField<scalar>::operator=(patchInternalField());
     gradient() = 0.0;
