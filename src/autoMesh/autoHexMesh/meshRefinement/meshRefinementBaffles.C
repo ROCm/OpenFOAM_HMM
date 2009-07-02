@@ -113,7 +113,7 @@ Foam::label Foam::meshRefinement::createBaffle
                 true,                       // face flip
                 neiPatch,                   // patch for face
                 zoneID,                     // zone for face
-                zoneFlip                    // face flip in zone
+                !zoneFlip                   // face flip in zone
             )
         );
     }
