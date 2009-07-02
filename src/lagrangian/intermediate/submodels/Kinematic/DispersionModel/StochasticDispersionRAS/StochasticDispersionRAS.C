@@ -68,8 +68,10 @@ Foam::vector Foam::StochasticDispersionRAS<CloudType>::update
 {
     const scalar cps = 0.16432;
 
-    const volScalarField k = this->turbulence().k();
-    const volScalarField epsilon = this->turbulence().epsilon();
+    const tmp<volScalarField> tk = this->turbulence().k();
+    const volScalarField& k = tk();
+    const tmp<volScalarField> tepsilon = this->turbulence().epsilon();
+    const volScalarField& epsilon = tepsilon();
 
     const scalar UrelMag = mag(U - Uc - UTurb);
 
