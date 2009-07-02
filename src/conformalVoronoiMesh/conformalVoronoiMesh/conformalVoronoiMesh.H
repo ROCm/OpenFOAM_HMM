@@ -273,6 +273,38 @@ class conformalVoronoiMesh
             label& hitSurface
         ) const;
 
+        //- Check if a location is in the exclusion range of an existing feature
+        //- edge conformation location
+        bool nearFeatureEdgeLocation
+        (
+            const point& pt,
+            DynamicList<point>& newEdgeLocations,
+            pointField& existingEdgeLocations,
+            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+        ) const;
+
+        //- build or rebuild the edgeLocationTree
+        void buildEdgeLocationTree
+        (
+            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree,
+            const pointField& existingEdgeLocations
+        ) const;
+
+        //- Process the surface conformation locations to decide which surface
+        //  and edge conformation locations to add.
+        void addSurfaceAndEdgeHits
+        (
+            const point& vert,
+            const pointIndexHit& surfHit,
+            label hitSurface,
+            scalar surfacePtReplaceDistCoeffSqr,
+            scalar edgeSearchDistCoeffSqr,
+            DynamicList<pointIndexHit>& surfaceHits,
+            DynamicList<label>& hitSurfaces,
+            DynamicList<pointIndexHit>& featureEdgeHits,
+            DynamicList<label>& featureEdgeFeaturesHit
+        ) const;
+
         //- Dual calculation
         void calcDualMesh
         (

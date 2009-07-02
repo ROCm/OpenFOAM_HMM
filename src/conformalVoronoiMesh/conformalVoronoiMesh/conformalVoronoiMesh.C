@@ -694,7 +694,9 @@ Foam::conformalVoronoiMesh::featurePointTree() const
     if (featurePointTree_.empty())
     {
         treeBoundBox overallBb(geometryToConformTo_.bounds());
+
         Random rndGen(92561);
+
         overallBb.extend(rndGen, 1E-4);
         overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
         overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
@@ -883,6 +885,149 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
                 }
             }
         }
+    }
+}
+
+
+bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
+(
+    const point& pt,
+    DynamicList<point>& newEdgeLocations,
+    pointField& existingEdgeLocations,
+    autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
+) const
+{
+    scalar exclusionRangeSqr = sqr(0.1);
+
+    if (newEdgeLocations.size() >= max(0.01*existingEdgeLocations.size(), 100))
+    {
+        existingEdgeLocations.append(newEdgeLocations);
+
+        buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
+
+        newEdgeLocations.clear();
+    }
+    else
+    {
+        // Search for the nearest point in newEdgeLocations.
+        // Searching here first, because the intention is that the value of
+        // newEdgeLocationsSizeLimit should make this faster by design.
+
+        if (min(magSqr(newEdgeLocations - pt)) <= exclusionRangeSqr)
+        {
+            return true;
+        }
+    }
+
+    // Searching for the nearest point in existingEdgeLocations using the
+    // indexedOctree
+
+    pointIndexHit info = edgeLocationTree().findNearest(pt, exclusionRangeSqr);
+
+    return info.hit();
+}
+
+
+void Foam::conformalVoronoiMesh::buildEdgeLocationTree
+(
+    autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree,
+    const pointField& existingEdgeLocations
+) const
+{
+    treeBoundBox overallBb(geometryToConformTo_.bounds());
+
+    Random rndGen(72953);
+
+    overallBb.extend(rndGen, 1E-4);
+    overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+    edgeLocationTree.reset
+    (
+        new indexedOctree<treeDataPoint>
+        (
+            treeDataPoint(existingEdgeLocations),
+            overallBb,  // overall search domain
+            10,         // max levels
+            10.0,       // maximum ratio of cubes v.s. cells
+            100.0       // max. duplicity; n/a since no bounding boxes.
+        )
+    );
+}
+
+
+void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
+(
+    const point& vert,
+    const pointIndexHit& surfHit,
+    label hitSurface,
+    scalar surfacePtReplaceDistCoeffSqr,
+    scalar edgeSearchDistCoeffSqr,
+    DynamicList<pointIndexHit>& surfaceHits,
+    DynamicList<label>& hitSurfaces,
+    DynamicList<pointIndexHit>& featureEdgeHits,
+    DynamicList<label>& featureEdgeFeaturesHit
+) const
+{
+    List<pointIndexHit> edHits;
+
+    labelList featuresHit;
+
+    scalar targetCellSizeSqr = sqr(targetCellSize(vert));
+
+    geometryToConformTo_.findEdgeNearestByType
+    (
+        surfHit.hitPoint(),
+        edgeSearchDistCoeffSqr*targetCellSizeSqr,
+        edHits,
+        featuresHit
+    );
+
+    bool keepSurfacePoint = true;
+
+    if (nearFeaturePt(surfHit.hitPoint()))
+    {
+        keepSurfacePoint = false;
+    }
+
+    forAll(edHits, i)
+    {
+        const pointIndexHit& edHit(edHits[i]);
+
+        label featureHit = featuresHit[i];
+
+        if (edHit.hit())
+        {
+            if (!nearFeaturePt(edHit.hitPoint()))
+            {
+                // Do not place edge control points too close to a feature
+                // point.
+
+                featureEdgeHits.append(edHit);
+
+                featureEdgeFeaturesHit.append(featureHit);
+
+                if
+                (
+                    magSqr(edHit.hitPoint() - surfHit.hitPoint())
+                  < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
+                )
+                {
+                    // If the point is within a given distance of a feature
+                    // edge, shift it to being an edge control point instead,
+                    // this will prevent "pits" forming.
+
+                    keepSurfacePoint = false;
+                }
+            }
+        }
+    }
+
+    if (keepSurfacePoint)
+    {
+        surfaceHits.append(surfHit);
+
+        hitSurfaces.append(hitSurface);
     }
 }
 
@@ -1515,6 +1660,59 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     startOfSurfacePointPairs_ = number_of_vertices();
 
+    DynamicList<point> newEdgeLocations;
+
+    pointField existingEdgeLocations(0);
+
+    autoPtr<indexedOctree<treeDataPoint> > edgeLocationTree;
+
+    // Initialise the edgeLocationTree
+    buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Test nearFeatureEdgeLocation
+
+    Random rndGen(3412561);
+
+    labelList allNq((identity(10) + 1)*2);
+
+    Info<< allNq << endl;
+
+    label Nt = 250000;
+
+    forAll(allNq, q)
+    {
+        label Nq = allNq[q];
+
+        Info<< nl << "Test nearFeatureEdgeLocation" << nl
+            << "Nt: " << Nt << ", Nq: " << Nq
+            << endl;
+
+        timeCheck();
+
+        for (label i = 0; i < Nt/Nq; i++)
+        {
+            newEdgeLocations.append(rndGen.vector01());
+
+            for(label j = 0; j < Nq; j++)
+            {
+                nearFeatureEdgeLocation
+                (
+                    rndGen.vector01(),
+                    newEdgeLocations,
+                    existingEdgeLocations,
+                    edgeLocationTree
+                );
+            }
+        }
+
+        timeCheck();
+
+        Info<< "Test nearFeatureEdgeLocation end" << endl;
+    }
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
     // Initial surface protrusion conformation - nearest surface point
     {
         Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
@@ -1556,68 +1754,18 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
                     if (dualCellSurfaceAnyIntersection(vit))
                     {
-                        // If the point is within a given distance of a feature
-                        // edge, shift it to being an edge control point
-                        // instead, this will prevent "pits" forming.
-
-                        List<pointIndexHit> edHits;
-                        labelList featuresHit;
-
-                        scalar targetCellSizeSqr = sqr(targetCellSize(vert));
-
-                        geometryToConformTo_.findEdgeNearestByType
+                        addSurfaceAndEdgeHits
                         (
-                            surfHit.hitPoint(),
-                            edgeSearchDistCoeffSqr*targetCellSizeSqr,
-                            edHits,
-                            featuresHit
+                            vert,
+                            surfHit,
+                            hitSurface,
+                            surfacePtReplaceDistCoeffSqr,
+                            edgeSearchDistCoeffSqr,
+                            surfaceHits,
+                            hitSurfaces,
+                            featureEdgeHits,
+                            featureEdgeFeaturesHit
                         );
-
-                        bool keepSurfacePoint = true;
-
-                        if (nearFeaturePt(surfHit.hitPoint()))
-                        {
-                            keepSurfacePoint = false;
-                        }
-
-                        forAll(edHits, i)
-                        {
-                            const pointIndexHit& edHit(edHits[i]);
-                            label featureHit = featuresHit[i];
-
-                            if (edHit.hit())
-                            {
-                                // Note that edge type classification can be
-                                // used here if necessary, i.e to avoid
-                                // over-populating internal edges
-
-                                if (!nearFeaturePt(edHit.hitPoint()))
-                                {
-                                    featureEdgeHits.append(edHit);
-                                    featureEdgeFeaturesHit.append(featureHit);
-
-                                    if
-                                    (
-                                        magSqr
-                                        (
-                                            edHit.hitPoint()
-                                          - surfHit.hitPoint()
-                                        )
-                                      < surfacePtReplaceDistCoeffSqr
-                                       *targetCellSizeSqr
-                                    )
-                                    {
-                                        keepSurfacePoint = false;
-                                    }
-                                }
-                            }
-                        }
-
-                        if (keepSurfacePoint)
-                        {
-                            surfaceHits.append(surfHit);
-                            hitSurfaces.append(hitSurface);
-                        }
                     }
                 }
             }
@@ -1646,7 +1794,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     label iterationNo = 0;
 
-    label maxIterations = 10;
+    label maxIterations = 3;
     Info << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
     // Set totalHits to a positive value to enter the while loop on the first
@@ -1687,68 +1835,18 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
                 if (surfHit.hit())
                 {
-                    // If the point is within a given distance of a feature
-                    // edge, shift it to being an edge control point
-                    // instead, this will prevent "pits" forming.
-
-                    List<pointIndexHit> edHits;
-                    labelList featuresHit;
-
-                    scalar targetCellSizeSqr = sqr(targetCellSize(vert));
-
-                    geometryToConformTo_.findEdgeNearestByType
+                    addSurfaceAndEdgeHits
                     (
-                        surfHit.hitPoint(),
-                        edgeSearchDistCoeffSqr*targetCellSizeSqr,
-                        edHits,
-                        featuresHit
+                        vert,
+                        surfHit,
+                        hitSurface,
+                        surfacePtReplaceDistCoeffSqr,
+                        edgeSearchDistCoeffSqr,
+                        surfaceHits,
+                        hitSurfaces,
+                        featureEdgeHits,
+                        featureEdgeFeaturesHit
                     );
-
-                    bool keepSurfacePoint = true;
-
-                    if (nearFeaturePt(surfHit.hitPoint()))
-                    {
-                        keepSurfacePoint = false;
-                    }
-
-                    forAll(edHits, i)
-                    {
-                        const pointIndexHit& edHit(edHits[i]);
-                        label featureHit = featuresHit[i];
-
-                        if (edHit.hit())
-                        {
-                            // Note that edge type classification can be
-                            // used here if necessary, i.e to avoid
-                            // over-populating internal edges
-
-                            if (!nearFeaturePt(edHit.hitPoint()))
-                            {
-                                featureEdgeHits.append(edHit);
-                                featureEdgeFeaturesHit.append(featureHit);
-
-                                if
-                                (
-                                    magSqr
-                                    (
-                                        edHit.hitPoint()
-                                      - surfHit.hitPoint()
-                                    )
-                                  < surfacePtReplaceDistCoeffSqr
-                                   *targetCellSizeSqr
-                                )
-                                {
-                                    keepSurfacePoint = false;
-                                }
-                            }
-                        }
-                    }
-
-                    if (keepSurfacePoint)
-                    {
-                        surfaceHits.append(surfHit);
-                        hitSurfaces.append(hitSurface);
-                    }
                 }
             }
         }
@@ -1797,7 +1895,7 @@ void Foam::conformalVoronoiMesh::move()
 {
     scalar relaxation = relaxationModel_->relaxation();
 
-    Info<< nl << "   Relaxation = " << relaxation << endl;
+    Info<< nl << "    Relaxation = " << relaxation << endl;
 
     timeCheck();
 }
