@@ -37,10 +37,11 @@ License
 #include "KinematicLookupTableInjection.H"
 #include "ManualInjection.H"
 #include "NoInjection.H"
+#include "PatchInjection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelInjectionModels(ParcelType)                                  \
+#define makeParcelInjectionModels(ParcelType)                                 \
                                                                               \
     makeInjectionModel(KinematicCloud<ParcelType>);                           \
                                                                               \
@@ -77,6 +78,12 @@ License
     makeInjectionModelType                                                    \
     (                                                                         \
         NoInjection,                                                          \
+        KinematicCloud,                                                       \
+        ParcelType                                                            \
+    );                                                                        \
+    makeInjectionModelType                                                    \
+    (                                                                         \
+        PatchInjection,                                                       \
         KinematicCloud,                                                       \
         ParcelType                                                            \
     );
