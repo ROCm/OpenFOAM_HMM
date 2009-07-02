@@ -1,16 +1,23 @@
-/*--------------------------------*- C++ -*----------------------------------*\
+/*---------------------------------------------------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
+|  \\    /   O peration     | Version:  1.0                                   |
+|   \\  /    A nd           | Web:      http://www.openfoam.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
+
 FoamFile
 {
-    version     2.0;
-    format      ascii;
-    class       dictionary;
-    object      autoHexMeshDict;
+    version         2.0;
+    format          ascii;
+
+    root            "/home/penfold/mattijs/foam/mattijs2.1/run/icoFoam";
+    case            "cavity";
+    instance        "system";
+    local           "";
+
+    class           dictionary;
+    object          autoHexMeshDict;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -29,33 +36,42 @@ addLayers       false;
 // - to 'snap' the mesh boundary to the surface
 geometry
 {
-    box1x1x1
-    {
-        type searchableBox;
-        min (1.5 1 -0.5);
-        max (3.5 2 0.5);
-    }
-
-    sphere.stl
+    bottomAir.stl
     {
         type triSurfaceMesh;
-
-        // Per region the patchname. If not provided will be <name>_<region>.
-        regions
-        {
-            secondSolid
-            {
-                name mySecondPatch;
-            }
-        }
+        name bottomAir;
     }
 
-    sphere2
+    topAir.stl
     {
-        type searchableSphere;
-        centre  (1.5 1.5 1.5);
-        radius  1.03;
+        type triSurfaceMesh;
+        name topAir;
     }
+
+    leftSolid.stl
+    {
+        type triSurfaceMesh;
+        name leftSolid;
+    }
+
+    rightSolid.stl
+    {
+        type triSurfaceMesh;
+        name rightSolid;
+    }
+
+    heater.stl
+    {
+        type triSurfaceMesh;
+        name heater;
+    }
+
+    //refinementBox
+    //{
+    //    type searchableBox;
+    //    min (-0.3 -0.4 -0.1);
+    //    max ( 3.0  0.4  1.4);
+   // }
 };
 
 
@@ -83,12 +99,12 @@ castellatedMeshControls
     // few cells. This setting will cause refinement to stop if <= minimumRefine
     // are selected for refinement. Note: it will at least do one iteration
     // (unless the number of cells to refine is 0)
-    minRefinementCells 0;
+    minRefinementCells 10;
 
     // Number of buffer layers between different levels.
     // 1 means normal 2:1 refinement restriction, larger means slower
     // refinement.
-    nCellsBetweenLevels 1;
+    nCellsBetweenLevels 2;
 
 
 
@@ -99,10 +115,6 @@ castellatedMeshControls
     // This is a featureEdgeMesh, read from constant/triSurface for now.
     features
     (
-        //{
-        //    file "someLine.eMesh";
-        //    level 2;
-        //}
     );
 
 
@@ -118,28 +130,58 @@ castellatedMeshControls
 
     refinementSurfaces
     {
-        sphere.stl
+        bottomAir
         {
             // Surface-wise min and max refinement level
-            level (2 2);
+            level (1 1);
 
-            // Optional region-wise level specification
-            regions
-            {
-                secondSolid
-                {
-                    level (3 3);
-                }
-            }
+	    faceZone bottomAir;
+            cellZone bottomAir;
+            zoneInside true;
+        }
 
-            // Optional angle to detect small-large cell situation perpendicular
-            // to the surface. Is the angle of face w.r.t the local surface
-            // normal. Use on flat(ish) surfaces only. Otherwise
-            // leave out or set to negative number.
-            //perpendicularAngle 10;
+        topAir
+        {
+            // Surface-wise min and max refinement level
+            level (1 1);
+
+	    faceZone topAir;
+            cellZone topAir;
+            zoneInside true;
+        }
+
+        heater
+        {
+            // Surface-wise min and max refinement level
+            level (0 0);
+
+	    faceZone heater;
+            cellZone heater;
+            zoneInside true;
+        }
+
+        leftSolid
+        {
+            // Surface-wise min and max refinement level
+            level (1 1);
+
+	    faceZone leftSolid;
+            cellZone leftSolid;
+            zoneInside true;
+        }
+
+        rightSolid
+        {
+            // Surface-wise min and max refinement level
+            level (1 1);
+
+	    faceZone rightSolid;
+            cellZone rightSolid;
+            zoneInside true;
         }
     }
 
+    // Resolve sharp angles
     resolveFeatureAngle 30;
 
 
@@ -158,15 +200,10 @@ castellatedMeshControls
 
     refinementRegions
     {
-        box1x1x1
-        {
-            mode inside;
-            levels ((1.0 4));
-        }
-        //sphere.stl
+        //refinementBox
         //{
-        //    mode distance;
-        //    levels ((1.0 5) (2.0 3));
+        //    mode inside;
+        //    levels ((1E15 4));
         //}
     }
 
@@ -179,7 +216,7 @@ castellatedMeshControls
     // section reachable from the locationInMesh is kept.
     // NOTE: This point should never be on a face, always inside a cell, even
     // after refinement.
-    locationInMesh (5 0.28 0.43);
+    locationInMesh (0.01 0.01 0.01);
 }
 
 
@@ -214,62 +251,64 @@ addLayersControls
     // Per final patch (so not geometry!) the layer information
     layers
     {
-        sphere.stl_firstSolid
-        {
-            nSurfaceLayers 1;
-
-        }
-        maxY
-        {
-            nSurfaceLayers 1;
-        }
+	//flowAirDuctReagent_flowAirDuctReagent
+        //{
+        //    nSurfaceLayers 1;
+        //}
+	//flowAirDuctReagent_inlet1
+        //{
+        //    nSurfaceLayers 1;
+        //}
+	//flowAirDuctReagent_inlet2
+        //{
+        //    nSurfaceLayers 1;
+        //}
     }
 
     // Expansion factor for layer mesh
     expansionRatio 1.0;
 
-
     //- Wanted thickness of final added cell layer. If multiple layers
     //  is the
     //  thickness of the layer furthest away from the wall.
     //  Relative to undistorted size of cell outside layer.
-    finalLayerThickness 0.3;
+    finalLayerThickness 0.3; 
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
     //  Relative to undistorted size of cell outside layer.
-    minThickness 0.25;
+    minThickness 0.1;
 
     //- If points get not extruded do nGrow layers of connected faces that are
     //  also not grown. This helps convergence of the layer addition process
     //  close to features.
-    nGrow 1;
+    nGrow 0;
 
 
     // Advanced settings
 
     //- When not to extrude surface. 0 is flat surface, 90 is when two faces
     //  make straight angle.
-    featureAngle 60;
+    featureAngle 30;
 
     //- Maximum number of snapping relaxation iterations. Should stop
     //  before upon reaching a correct mesh.
-    nRelaxIter 5;
+    nRelaxIter 3;
 
-    // Number of smoothing iterations of surface normals
+    // Number of smoothing iterations of surface normals 
     nSmoothSurfaceNormals 1;
 
-    // Number of smoothing iterations of interior mesh movement direction
+    // Number of smoothing iterations of interior mesh movement direction  
     nSmoothNormals 3;
 
     // Smooth layer thickness over surface patches
     nSmoothThickness 10;
 
-    // Stop layer growth on highly warped cells
+    // Stop layer growth on highly warped cells 
     maxFaceThicknessRatio 0.5;
 
-    // Reduce layer growth where ratio thickness to medial
-    // distance is large
+    // Reduce layer growth where ratio thickness to medial 
+    // distance is large 
     maxThicknessToMedialRatio 0.3;
 
     // Angle used to pick up medial axis points
@@ -277,14 +316,6 @@ addLayersControls
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
-
-
-    // Overall max number of layer addition iterations
-    nLayerIter 50;
-
-    // Max number of iterations after which relaxed meshQuality controls
-    // get used.
-    nRelaxedIter 20;
 }
 
 
@@ -309,35 +340,28 @@ meshQualityControls
     minFlatness 0.5;
 
     //- Minimum pyramid volume. Is absolute volume of cell pyramid.
-    //  Set to a sensible fraction of the smallest cell volume expected.
     //  Set to very negative number (e.g. -1E30) to disable.
-    minVol 1e-13;
+    minVol 0;
 
     //- Minimum face area. Set to <0 to disable.
     minArea -1;
 
     //- Minimum face twist. Set to <-1 to disable. dot product of face normal
     //- and face centre triangles normal
-    minTwist 0.05;
+    minTwist 0.02;
 
     //- minimum normalised cell determinant
     //- 1 = hex, <= 0 = folded or flattened illegal cell
     minDeterminant 0.001;
 
-    //- minFaceWeight (0 -> 0.5)
-    minFaceWeight 0.05;
+    //- minFaceWeight (0 -> 0.5) 
+    minFaceWeight 0.02;
 
     //- minVolRatio (0 -> 1)
     minVolRatio 0.01;
 
     //must be >0 for Fluent compatibility
     minTriangleTwist -1;
-
-    //- if >0 : preserve single cells with all points on the surface if the
-    //  resulting volume after snapping (by approximation) is larger than
-    //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
-    //  If <0 : delete always.
-    //minVolCollapseRatio 0.5;
 
 
     // Advanced
@@ -346,16 +370,6 @@ meshQualityControls
     nSmoothScale 4;
     //- amount to scale back displacement at error points
     errorReduction 0.75;
-
-
-
-    // Optional : some meshing phases allow usage of relaxed rules.
-    // See e.g. addLayersControls::nRelaxedIter.
-    relaxed
-    {
-        //- Maximum non-orthogonality allowed. Set to 180 to disable.
-        maxNonOrtho 75;
-    }
 }
 
 

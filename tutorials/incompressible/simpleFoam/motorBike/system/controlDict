@@ -2,7 +2,7 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
@@ -10,52 +10,38 @@ FoamFile
     version     2.0;
     format      ascii;
     class       dictionary;
-    location    "system";
-    object      fvSchemes;
+    object      controlDict;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-ddtSchemes
-{
-    default         Euler;
-}
+application     simpleFoam;
 
-gradSchemes
-{
-    default         Gauss linear;
-    grad(p)         Gauss linear;
-}
+startFrom       latestTime;
 
-divSchemes
-{
-    default         none;
-    div(phi,U)      Gauss linear;
-}
+startTime       0;
 
-laplacianSchemes
-{
-    default         none;
-    laplacian(nu,U) Gauss linear corrected;
-    laplacian(1|A(U),p) Gauss linear corrected;
-    laplacian(diffusivity,cellMotionU) Gauss linear uncorrected;
-}
+stopAt          endTime;
 
-interpolationSchemes
-{
-    default         linear;
-    interpolate(HbyA) linear;
-}
+endTime         500;
 
-snGradSchemes
-{
-    default         corrected;
-}
+deltaT          1;
 
-fluxRequired
-{
-    default         no;
-    p               ;
-}
+writeControl    timeStep;
 
+writeInterval   100;
+
+purgeWrite      0;
+
+writeFormat     ascii;
+
+writePrecision  6;
+
+writeCompression compressed;
+
+timeFormat      general;
+
+timePrecision   6;
+
+runTimeModifiable yes;
 
 // ************************************************************************* //
