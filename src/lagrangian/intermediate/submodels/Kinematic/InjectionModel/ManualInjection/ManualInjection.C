@@ -138,7 +138,7 @@ void Foam::ManualInjection<CloudType>::setPositionAndCell
 (
     const label parcelI,
     const label,
-    const scalar time,
+    const scalar,
     vector& position,
     label& cellOwner
 )
