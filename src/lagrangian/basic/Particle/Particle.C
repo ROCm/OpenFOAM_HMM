@@ -75,7 +75,7 @@ void Foam::Particle<ParticleType>::findFaces
     DynamicList<label>& faceList
 ) const
 {
-    const polyMesh& mesh = cloud_.mesh();
+    const polyMesh& mesh = cloud_.pMesh();
     const labelList& faces = mesh.cells()[celli];
     const vector& C = mesh.cellCentres()[celli];
 
