@@ -23,7 +23,7 @@ INCLUDE_DIRECTORIES(
 )
 
 ADD_DEFINITIONS(
-    -D$ENV{WM_PRECISION_OPTION}
+    -DWM_$ENV{WM_PRECISION_OPTION}
 )
 
 # Set output library destination to plugin folder

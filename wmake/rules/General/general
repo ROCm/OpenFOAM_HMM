@@ -3,7 +3,7 @@ ARFLAGS    = cr
 RANLIB     = ranlib
 LD         = ld
 
-GFLAGS     = -D$(WM_ARCH) -D$(WM_PRECISION_OPTION)
-GINC       = 
+GFLAGS     = -D$(WM_ARCH) -DWM_$(WM_PRECISION_OPTION)
+GINC       =
 GLIBS      = -lm
-GLIB_LIBS  = 
+GLIB_LIBS  =
