@@ -29,7 +29,7 @@ liquidComponents
 );
 H2O             H2O defaultCoeffs;
 
-solidFuelComponents
+solidComponents
 (
 );
 
