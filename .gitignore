@@ -27,18 +27,19 @@ core
 # dependency files - anywhere
 *.dep
 
-# lnInclude folders - anywhere
+# lnInclude (symlink) folders - anywhere
 lnInclude
 
-# linux build folder(s) - anywhere
-linux*Gcc*
+# build folder(s) - anywhere
+linux*Gcc*/
+linux*Icc*/
+linuxming*/
+SiCortex*Gcc*/
+solaris*Gcc*/
+SunOS*Gcc*/
 
-# reinstate wmake/rules that look like build folders
-!wmake/rules/linux*
-
-# but do continue to ignore the derived wmake files
-wmake/rules/*/dirToString
-wmake/rules/*/wmkdep
+# reinstate wmake/rules that might look like build folders
+!wmake/rules/*/
 
 # doxygen generated documentation
 doc/[Dd]oxygen/html
