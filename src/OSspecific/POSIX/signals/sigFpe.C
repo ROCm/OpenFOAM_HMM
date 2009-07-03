@@ -68,7 +68,7 @@ void* Foam::sigFpe::my_malloc_hook(size_t size, const void *caller)
     result = malloc (size);
 
     // initialize to signalling nan
-#   ifdef SP
+#   ifdef WM_SP
 
     const uint32_t sNAN = 0x7ff7fffflu;
 
