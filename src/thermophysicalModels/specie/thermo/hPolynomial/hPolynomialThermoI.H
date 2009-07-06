@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polynomialThermo.H"
+#include "hPolynomialThermo.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
-inline Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo
+inline Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 (
     const EquationOfState& pt,
     const scalar Hf,
@@ -51,10 +51,10 @@ inline Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
-inline Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo
+inline Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
 (
     const word& name,
-    const polynomialThermo& pt
+    const hPolynomialThermo& pt
 )
 :
     EquationOfState(name, pt),
@@ -69,7 +69,7 @@ inline Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
-inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::cp
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::cp
 (
     const scalar T
 ) const
@@ -79,7 +79,7 @@ inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::cp
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::h
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::h
 (
     const scalar T
 ) const
@@ -89,7 +89,7 @@ inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::h
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::hs
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::hs
 (
     const scalar T
 ) const
@@ -99,7 +99,7 @@ inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::hs
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::hc()
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::hc()
 const
 {
     return Hf_*this->W();
@@ -107,7 +107,7 @@ const
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::s
+inline Foam::scalar Foam::hPolynomialThermo<EquationOfState, PolySize>::s
 (
     const scalar T
 ) const
@@ -119,9 +119,9 @@ inline Foam::scalar Foam::polynomialThermo<EquationOfState, PolySize>::s
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
-inline void Foam::polynomialThermo<EquationOfState, PolySize>::operator+=
+inline void Foam::hPolynomialThermo<EquationOfState, PolySize>::operator+=
 (
-    const polynomialThermo<EquationOfState, PolySize>& pt
+    const hPolynomialThermo<EquationOfState, PolySize>& pt
 )
 {
     scalar molr1 = this->nMoles();
@@ -140,9 +140,9 @@ inline void Foam::polynomialThermo<EquationOfState, PolySize>::operator+=
 
 
 template<class EquationOfState, int PolySize>
-inline void Foam::polynomialThermo<EquationOfState, PolySize>::operator-=
+inline void Foam::hPolynomialThermo<EquationOfState, PolySize>::operator-=
 (
-    const polynomialThermo<EquationOfState, PolySize>& pt
+    const hPolynomialThermo<EquationOfState, PolySize>& pt
 )
 {
     scalar molr1 = this->nMoles();
@@ -163,10 +163,10 @@ inline void Foam::polynomialThermo<EquationOfState, PolySize>::operator-=
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
-inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator+
+inline Foam::hPolynomialThermo<EquationOfState, PolySize> Foam::operator+
 (
-    const polynomialThermo<EquationOfState, PolySize>& pt1,
-    const polynomialThermo<EquationOfState, PolySize>& pt2
+    const hPolynomialThermo<EquationOfState, PolySize>& pt1,
+    const hPolynomialThermo<EquationOfState, PolySize>& pt2
 )
 {
     EquationOfState eofs
@@ -177,7 +177,7 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator+
 
     scalar molr1 = pt1.nMoles()/eofs.nMoles();
     scalar molr2 = pt2.nMoles()/eofs.nMoles();
-    return polynomialThermo<EquationOfState, PolySize>
+    return hPolynomialThermo<EquationOfState, PolySize>
     (
         eofs,
         molr1*pt1.Hf_ + molr2*pt2.Hf_,
@@ -190,10 +190,10 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator+
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator-
+inline Foam::hPolynomialThermo<EquationOfState, PolySize> Foam::operator-
 (
-    const polynomialThermo<EquationOfState, PolySize>& pt1,
-    const polynomialThermo<EquationOfState, PolySize>& pt2
+    const hPolynomialThermo<EquationOfState, PolySize>& pt1,
+    const hPolynomialThermo<EquationOfState, PolySize>& pt2
 )
 {
     EquationOfState eofs
@@ -204,7 +204,7 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator-
 
     scalar molr1 = pt1.nMoles()/eofs.nMoles();
     scalar molr2 = pt2.nMoles()/eofs.nMoles();
-    return polynomialThermo<EquationOfState, PolySize>
+    return hPolynomialThermo<EquationOfState, PolySize>
     (
         eofs,
         molr1*pt1.Hf_ - molr2*pt2.Hf_,
@@ -217,13 +217,13 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator-
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator*
+inline Foam::hPolynomialThermo<EquationOfState, PolySize> Foam::operator*
 (
     const scalar s,
-    const polynomialThermo<EquationOfState, PolySize>& pt
+    const hPolynomialThermo<EquationOfState, PolySize>& pt
 )
 {
-    return polynomialThermo<EquationOfState, PolySize>
+    return hPolynomialThermo<EquationOfState, PolySize>
     (
         s*static_cast<const EquationOfState&>(pt),
         pt.Hf_,
@@ -236,10 +236,10 @@ inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator*
 
 
 template<class EquationOfState, int PolySize>
-inline Foam::polynomialThermo<EquationOfState, PolySize> Foam::operator==
+inline Foam::hPolynomialThermo<EquationOfState, PolySize> Foam::operator==
 (
-    const polynomialThermo<EquationOfState, PolySize>& pt1,
-    const polynomialThermo<EquationOfState, PolySize>& pt2
+    const hPolynomialThermo<EquationOfState, PolySize>& pt1,
+    const hPolynomialThermo<EquationOfState, PolySize>& pt2
 )
 {
     return pt2 - pt1;

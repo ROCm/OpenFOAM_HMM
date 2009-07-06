@@ -24,13 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polynomialThermo.H"
+#include "hPolynomialThermo.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
-Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo(Istream& is)
+Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo(Istream& is)
 :
     EquationOfState(is),
     Hf_(readScalar(is)),
@@ -47,7 +47,7 @@ template<class EquationOfState, int PolySize>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const polynomialThermo<EquationOfState, PolySize>& pt
+    const hPolynomialThermo<EquationOfState, PolySize>& pt
 )
 {
     os  << static_cast<const EquationOfState&>(pt) << tab
@@ -59,7 +59,7 @@ Foam::Ostream& Foam::operator<<
 
     os.check
     (
-        "operator<<(Ostream& os, const polynomialThermo<EquationOfState>& pt)"
+        "operator<<(Ostream& os, const hPolynomialThermo<EquationOfState>& pt)"
     );
 
     return os;

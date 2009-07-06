@@ -41,7 +41,7 @@ Description
 #include "constTransport.H"
 
 #include "icoPolynomial.H"
-#include "polynomialThermo.H"
+#include "hPolynomialThermo.H"
 #include "polynomialTransport.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,7 +58,7 @@ namespace Foam
         <
             specieThermo
             <
-                polynomialThermo
+                hPolynomialThermo
                 <
                     icoPolynomial<8>,
                     8

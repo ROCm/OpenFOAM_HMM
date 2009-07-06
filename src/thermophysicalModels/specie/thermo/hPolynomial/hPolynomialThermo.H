@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::polynomialThermo
+    Foam::hPolynomialThermo
 
 Description
     Thermodynamics package templated on the equation of state, using polynomial
@@ -32,13 +32,13 @@ Description
     Polynomials for h and s derived from cp
 
 SourceFiles
-    polynomialThermoI.H
-    polynomialThermo.C
+    hPolynomialThermoI.H
+    hPolynomialThermo.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef polynomialThermo_H
-#define polynomialThermo_H
+#ifndef hPolynomialThermo_H
+#define hPolynomialThermo_H
 
 #include "scalar.H"
 #include "Polynomial.H"
@@ -51,50 +51,50 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 template<class EquationOfState, int PolySize>
-class polynomialThermo;
+class hPolynomialThermo;
 
 template<class EquationOfState, int PolySize>
-inline polynomialThermo<EquationOfState, PolySize> operator+
+inline hPolynomialThermo<EquationOfState, PolySize> operator+
 (
-    const polynomialThermo<EquationOfState, PolySize>&,
-    const polynomialThermo<EquationOfState, PolySize>&
+    const hPolynomialThermo<EquationOfState, PolySize>&,
+    const hPolynomialThermo<EquationOfState, PolySize>&
 );
 
 template<class EquationOfState, int PolySize>
-inline polynomialThermo<EquationOfState, PolySize> operator-
+inline hPolynomialThermo<EquationOfState, PolySize> operator-
 (
-    const polynomialThermo<EquationOfState, PolySize>&,
-    const polynomialThermo<EquationOfState, PolySize>&
+    const hPolynomialThermo<EquationOfState, PolySize>&,
+    const hPolynomialThermo<EquationOfState, PolySize>&
 );
 
 template<class EquationOfState, int PolySize>
-inline polynomialThermo<EquationOfState, PolySize> operator*
+inline hPolynomialThermo<EquationOfState, PolySize> operator*
 (
     const scalar,
-    const polynomialThermo<EquationOfState, PolySize>&
+    const hPolynomialThermo<EquationOfState, PolySize>&
 );
 
 template<class EquationOfState, int PolySize>
-inline polynomialThermo<EquationOfState, PolySize> operator==
+inline hPolynomialThermo<EquationOfState, PolySize> operator==
 (
-    const polynomialThermo<EquationOfState, PolySize>&,
-    const polynomialThermo<EquationOfState, PolySize>&
+    const hPolynomialThermo<EquationOfState, PolySize>&,
+    const hPolynomialThermo<EquationOfState, PolySize>&
 );
 
 template<class EquationOfState, int PolySize>
 Ostream& operator<<
 (
     Ostream&,
-    const polynomialThermo<EquationOfState, PolySize>&
+    const hPolynomialThermo<EquationOfState, PolySize>&
 );
 
 
 /*---------------------------------------------------------------------------*\
-                      Class polynomialThermo Declaration
+                      Class hPolynomialThermo Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class EquationOfState, int PolySize>
-class polynomialThermo
+class hPolynomialThermo
 :
     public EquationOfState
 {
@@ -119,7 +119,7 @@ class polynomialThermo
     // Private member functions
 
         //- Construct from components
-        inline polynomialThermo
+        inline hPolynomialThermo
         (
             const EquationOfState& pt,
             const scalar Hf,
@@ -135,10 +135,10 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        polynomialThermo(Istream& is);
+        hPolynomialThermo(Istream& is);
 
         //- Construct as a named copy
-        inline polynomialThermo(const word&, const polynomialThermo&);
+        inline hPolynomialThermo(const word&, const hPolynomialThermo&);
 
 
     // Member Functions
@@ -161,34 +161,34 @@ public:
 
     // Member operators
 
-        inline void operator+=(const polynomialThermo&);
-        inline void operator-=(const polynomialThermo&);
+        inline void operator+=(const hPolynomialThermo&);
+        inline void operator-=(const hPolynomialThermo&);
 
 
     // Friend operators
 
-        friend polynomialThermo operator+ <EquationOfState, PolySize>
+        friend hPolynomialThermo operator+ <EquationOfState, PolySize>
         (
-            const polynomialThermo&,
-            const polynomialThermo&
+            const hPolynomialThermo&,
+            const hPolynomialThermo&
         );
 
-        friend polynomialThermo operator- <EquationOfState, PolySize>
+        friend hPolynomialThermo operator- <EquationOfState, PolySize>
         (
-            const polynomialThermo&,
-            const polynomialThermo&
+            const hPolynomialThermo&,
+            const hPolynomialThermo&
         );
 
-        friend polynomialThermo operator* <EquationOfState, PolySize>
+        friend hPolynomialThermo operator* <EquationOfState, PolySize>
         (
             const scalar,
-            const polynomialThermo&
+            const hPolynomialThermo&
         );
 
-        friend polynomialThermo operator== <EquationOfState, PolySize>
+        friend hPolynomialThermo operator== <EquationOfState, PolySize>
         (
-            const polynomialThermo&,
-            const polynomialThermo&
+            const hPolynomialThermo&,
+            const hPolynomialThermo&
         );
 
 
@@ -197,7 +197,7 @@ public:
         friend Ostream& operator<< <EquationOfState, PolySize>
         (
             Ostream&,
-            const polynomialThermo&
+            const hPolynomialThermo&
         );
 };
 
@@ -208,10 +208,10 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "polynomialThermoI.H"
+#include "hPolynomialThermoI.H"
 
 #ifdef NoRepository
-#   include "polynomialThermo.C"
+#   include "hPolynomialThermo.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
