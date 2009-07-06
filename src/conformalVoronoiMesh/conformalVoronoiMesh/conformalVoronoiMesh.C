@@ -583,71 +583,18 @@ void Foam::conformalVoronoiMesh::insertMixedFeaturePoints()
 
             const point& pt(feMesh.points()[ptI]);
 
-            scalar ppDist = pointPairDistance(pt);
-
             scalar edgeGroupDistance = mixedFeaturePointDistance(pt);
 
             forAll(pEds, e)
             {
                 label edgeI = pEds[e];
 
-                const vectorField& feNormals = feMesh.normals();
-                const labelList& edNormalIs =
-                feMesh.edgeNormals()[edgeI];
-
-                // As this is an external or internal edge, there are two
-                // normals by definition
-                const vector& nA = feNormals[edNormalIs[0]];
-                const vector& nB = feNormals[edNormalIs[1]];
-
                 point edgePt =
                     pt + edgeGroupDistance*feMesh.edgeDirection(edgeI, ptI);
 
-                // Concave. master and reflected points inside the domain.
-                point refPt =
-                    edgePt - ppDist*(nA + nB)/(1 + (nA & nB) + VSMALL);
+                pointIndexHit edgeHit(true, edgePt, edgeI);
 
-                featureEdgeMesh::edgeStatus edStatus =
-                    feMesh.getEdgeStatus(edgeI);
-
-                if (edStatus == featureEdgeMesh::INTERNAL)
-                {
-                    // Generate reflected master to be outside.
-                    point reflMasterPt = refPt + 2*(edgePt - refPt);
-
-                    // Reflect reflMasterPt in both faces.
-                    point reflectedA = reflMasterPt - 2*ppDist*nA;
-
-                    point reflectedB = reflMasterPt - 2*ppDist*nB;
-
-                    // index of reflMaster
-                    label reflectedMaster = number_of_vertices() + 2;
-
-                    // Master A is inside.
-                    label reflectedAI =
-                    insertPoint(reflectedA, reflectedMaster);
-
-                    // Master B is inside.
-                    insertPoint(reflectedB, reflectedMaster);
-
-                    // Slave is outside.
-                    insertPoint(reflMasterPt, reflectedAI);
-                }
-                else if (edStatus == featureEdgeMesh::EXTERNAL)
-                {
-                    // Insert the master point referring the the first slave
-                    label masterPtIndex =
-                        insertPoint(refPt, number_of_vertices() + 1);
-
-                    // Insert the slave points by reflecting refPt in both
-                    // faces.  with each slave refering to the master
-
-                    point reflectedA = refPt + 2*ppDist*nA;
-                    insertPoint(reflectedA, masterPtIndex);
-
-                    point reflectedB = refPt + 2*ppDist*nB;
-                    insertPoint(reflectedB, masterPtIndex);
-                }
+                insertEdgePointGroup(feMesh, edgeHit);
             }
         }
     }
@@ -897,9 +844,19 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
     autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
 ) const
 {
-    scalar exclusionRangeSqr = sqr(0.1);
 
-    if (newEdgeLocations.size() >= max(0.01*existingEdgeLocations.size(), 100))
+    scalar exclusionRangeCoeff = 0.2;
+
+    scalar exclusionRangeSqr = sqr(exclusionRangeCoeff*targetCellSize(pt));
+
+    // 0.01 and 1000 determined from speed tests, varying the indexedOctree
+    // rebuild frequency and balance of additions to queries.
+
+    if
+    (
+        newEdgeLocations.size()
+     >= max(0.01*existingEdgeLocations.size(), 1000)
+    )
     {
         existingEdgeLocations.append(newEdgeLocations);
 
@@ -966,7 +923,10 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     DynamicList<pointIndexHit>& surfaceHits,
     DynamicList<label>& hitSurfaces,
     DynamicList<pointIndexHit>& featureEdgeHits,
-    DynamicList<label>& featureEdgeFeaturesHit
+    DynamicList<label>& featureEdgeFeaturesHit,
+    DynamicList<point>& newEdgeLocations,
+    pointField& existingEdgeLocations,
+    autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
 ) const
 {
     List<pointIndexHit> edHits;
@@ -990,6 +950,12 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
         keepSurfacePoint = false;
     }
 
+    // Gather edge locations but do not add them to newEdgeLocations inside the
+    // loop as they will prevent nearby edge locations of different types being
+    // conformed to.
+
+    DynamicList<point> currentEdgeLocations;
+
     forAll(edHits, i)
     {
         const pointIndexHit& edHit(edHits[i]);
@@ -998,30 +964,45 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
         if (edHit.hit())
         {
+            if
+            (
+                magSqr(edHit.hitPoint() - surfHit.hitPoint())
+              < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
+            )
+            {
+                // If the point is within a given distance of a feature edge,
+                // give control to edge control points instead, this will
+                // prevent "pits" forming.
+
+                keepSurfacePoint = false;
+            }
+
             if (!nearFeaturePt(edHit.hitPoint()))
             {
-                // Do not place edge control points too close to a feature
-                // point.
-
-                featureEdgeHits.append(edHit);
-
-                featureEdgeFeaturesHit.append(featureHit);
-
                 if
                 (
-                    magSqr(edHit.hitPoint() - surfHit.hitPoint())
-                  < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
+                    !nearFeatureEdgeLocation
+                    (
+                        edHit.hitPoint(),
+                        newEdgeLocations,
+                        existingEdgeLocations,
+                        edgeLocationTree
+                    )
                 )
                 {
-                    // If the point is within a given distance of a feature
-                    // edge, shift it to being an edge control point instead,
-                    // this will prevent "pits" forming.
+                    // Do not place edge control points too close to a feature
+                    // point or existing edge control points
 
-                    keepSurfacePoint = false;
+                    featureEdgeHits.append(edHit);
+                    featureEdgeFeaturesHit.append(featureHit);
+
+                    currentEdgeLocations.append(edHit.hitPoint());
                 }
             }
         }
     }
+
+    newEdgeLocations.append(currentEdgeLocations);
 
     if (keepSurfacePoint)
     {
@@ -1660,6 +1641,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     startOfSurfacePointPairs_ = number_of_vertices();
 
+    // Initialise containers to store the edge conformation locations
     DynamicList<point> newEdgeLocations;
 
     pointField existingEdgeLocations(0);
@@ -1668,50 +1650,6 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     // Initialise the edgeLocationTree
     buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    // Test nearFeatureEdgeLocation
-
-    Random rndGen(3412561);
-
-    labelList allNq((identity(10) + 1)*2);
-
-    Info<< allNq << endl;
-
-    label Nt = 250000;
-
-    forAll(allNq, q)
-    {
-        label Nq = allNq[q];
-
-        Info<< nl << "Test nearFeatureEdgeLocation" << nl
-            << "Nt: " << Nt << ", Nq: " << Nq
-            << endl;
-
-        timeCheck();
-
-        for (label i = 0; i < Nt/Nq; i++)
-        {
-            newEdgeLocations.append(rndGen.vector01());
-
-            for(label j = 0; j < Nq; j++)
-            {
-                nearFeatureEdgeLocation
-                (
-                    rndGen.vector01(),
-                    newEdgeLocations,
-                    existingEdgeLocations,
-                    edgeLocationTree
-                );
-            }
-        }
-
-        timeCheck();
-
-        Info<< "Test nearFeatureEdgeLocation end" << endl;
-    }
-
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     // Initial surface protrusion conformation - nearest surface point
     {
@@ -1764,7 +1702,10 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                             surfaceHits,
                             hitSurfaces,
                             featureEdgeHits,
-                            featureEdgeFeaturesHit
+                            featureEdgeFeaturesHit,
+                            newEdgeLocations,
+                            existingEdgeLocations,
+                            edgeLocationTree
                         );
                     }
                 }
@@ -1794,7 +1735,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     label iterationNo = 0;
 
-    label maxIterations = 3;
+    label maxIterations = 10;
     Info << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
     // Set totalHits to a positive value to enter the while loop on the first
@@ -1845,7 +1786,10 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                         surfaceHits,
                         hitSurfaces,
                         featureEdgeHits,
-                        featureEdgeFeaturesHit
+                        featureEdgeFeaturesHit,
+                        newEdgeLocations,
+                        existingEdgeLocations,
+                        edgeLocationTree
                     );
                 }
             }

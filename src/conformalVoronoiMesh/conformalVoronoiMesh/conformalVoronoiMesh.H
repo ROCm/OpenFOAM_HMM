@@ -302,7 +302,10 @@ class conformalVoronoiMesh
             DynamicList<pointIndexHit>& surfaceHits,
             DynamicList<label>& hitSurfaces,
             DynamicList<pointIndexHit>& featureEdgeHits,
-            DynamicList<label>& featureEdgeFeaturesHit
+            DynamicList<label>& featureEdgeFeaturesHit,
+            DynamicList<point>& newEdgeLocations,
+            pointField& existingEdgeLocations,
+            autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
         ) const;
 
         //- Dual calculation
