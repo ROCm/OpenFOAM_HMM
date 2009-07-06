@@ -39,6 +39,7 @@ SourceFiles
 #include "dictionary.H"
 #include "Switch.H"
 #include "vector.H"
+#include "volFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,6 +66,9 @@ class particleForces
         //- Gravity
         const vector g_;
 
+        //- Velocity gradient field
+        const volTensorField* gradUPtr_;
+
 
         // Forces to include in particle motion evaluation
 
@@ -80,8 +84,11 @@ class particleForces
             //- Pressure gradient
             Switch pressureGradient_;
 
-            //- Name of velocity gradient field for pressure gradient force
-            word gradUName_;
+
+        // Additional info
+
+            //- Name of velucity field - default = "U"
+            const word UName_;
 
 
 public:
@@ -126,11 +133,14 @@ public:
             //- Return pressure gradient force activate switch
             Switch pressureGradient() const;
 
-            //- Return the name of the velocity gradient field
-            const word& gradUName() const;
+            //- Return name of velocity field
+            const word& UName() const;
 
 
        // Evaluation
+
+            //- Cache carrier fields
+            void cacheFields(const bool store);
 
             //- Calculate action/reaction forces between carrier and particles
             vector calcCoupled
