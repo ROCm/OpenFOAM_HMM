@@ -44,6 +44,7 @@ SourceFiles
 
 #include "searchableSurfaces.H"
 #include "conformationSurfaces.H"
+#include "cellSizeControlSurfaces.H"
 #include "cvControls.H"
 #include "DynamicList.H"
 #include "Time.H"
@@ -89,6 +90,9 @@ class conformalVoronoiMesh
 
         //- The surfaces to conform to
         conformationSurfaces geometryToConformTo_;
+
+        //- The cell size control object
+        cellSizeControlSurfaces cellSizeControl_;
 
         //- Controls for the conformal Voronoi meshing process
         cvControls cvMeshControls_;
@@ -367,6 +371,7 @@ public:
         inline pointFromPoint topoint(const Point&) const;
         inline PointFrompoint toPoint(const point&) const;
 
+
         // Access
 
             //- Return the Time object
@@ -375,13 +380,12 @@ public:
             //- Return the conformationSurfaces object
             inline const conformationSurfaces& geometryToConformTo() const;
 
+            //- Return the cellSizeControlSurfaces object
+            inline const cellSizeControlSurfaces& cellSizeControl() const;
+
             //- Return the cvMeshControls object
             inline const cvControls& cvMeshControls() const;
 
-
-        // Check
-
-        // Edit
 
         // Write
 

@@ -163,10 +163,6 @@ Foam::conformationSurfaces::~conformationSurfaces()
 {}
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::Field<bool> Foam::conformationSurfaces::inside

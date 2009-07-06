@@ -61,6 +61,12 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
         allGeometry_,
         cvMeshDict.subDict("surfaceConformation")
     ),
+    cellSizeControl_
+    (
+        *this,
+        allGeometry_,
+        cvMeshDict.subDict("motionControl")
+    ),
     cvMeshControls_(*this, cvMeshDict),
     startOfInternalPoints_(0),
     startOfSurfacePointPairs_(0),
@@ -1729,7 +1735,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
         (
             featureEdgeHits,
             featureEdgeFeaturesHit,
-            "edgeGenerationLocations_initial.obj"
+            "edgeConformationLocations_initial.obj"
         );
     }
 
@@ -1842,6 +1848,45 @@ void Foam::conformalVoronoiMesh::move()
     Info<< nl << "    Relaxation = " << relaxation << endl;
 
     timeCheck();
+
+    pointField dualVertices(number_of_cells());
+
+    pointField displacementAccumulator(startOfSurfacePointPairs_, vector::zero);
+
+    List<bool> pointToBeRetained(startOfSurfacePointPairs_, true);
+
+    label dualVerti = 0;
+
+    // Find the dual point of each tetrahedron and assign it an index.
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        cit->cellIndex() = -1;
+
+        if
+        (
+            cit->vertex(0)->internalOrBoundaryPoint()
+         || cit->vertex(1)->internalOrBoundaryPoint()
+         || cit->vertex(2)->internalOrBoundaryPoint()
+         || cit->vertex(3)->internalOrBoundaryPoint()
+        )
+        {
+            cit->cellIndex() = dualVerti;
+
+            dualVertices[dualVerti] = topoint(dual(cit));
+
+            dualVerti++;
+        }
+    }
+
+    // setVertexAlignmentDirections();
+
+    dualVertices.setSize(dualVerti);
+
 }
 
 

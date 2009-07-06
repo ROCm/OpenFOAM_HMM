@@ -7,6 +7,8 @@ cvControls/cvControls.C
 
 conformationSurfaces/conformationSurfaces.C
 
+cellSizeControlSurfaces/cellSizeControlSurfaces.C
+
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
 initialPointsMethod/pointFile/pointFile.C

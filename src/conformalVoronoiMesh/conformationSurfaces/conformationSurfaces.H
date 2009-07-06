@@ -30,7 +30,6 @@ Description
 SourceFiles
     conformationSurfacesI.H
     conformationSurfaces.C
-    conformationSurfacesIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,14 +51,14 @@ class conformalVoronoiMesh;
 
 
 /*---------------------------------------------------------------------------*\
-                       Class conformationSurfaces Declaration
+                     Class conformationSurfaces Declaration
 \*---------------------------------------------------------------------------*/
 
 class conformationSurfaces
 {
     // Private data
 
-        //- Reference to the conformalVoronoiMesh holding this cvControls object
+        //- Reference to the conformalVoronoiMesh holding this object
         const conformalVoronoiMesh& cvMesh_;
 
         //- Reference to the searchableSurfaces object holding all geometry data
@@ -96,8 +95,8 @@ public:
 
     // Constructors
 
-        //- Construct from references to conformalVoronoiMesh and
-        //- searchableSurfaces
+        //- Construct from dictionary and references to conformalVoronoiMesh and
+        //  searchableSurfaces
         conformationSurfaces
         (
             const conformalVoronoiMesh& cvMesh,

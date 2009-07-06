@@ -192,6 +192,7 @@ Foam::conformalVoronoiMesh::topoint
     return reinterpret_cast<pointFromPoint>(P);
 }
 
+
 inline Foam::conformalVoronoiMesh::PointFrompoint
 Foam::conformalVoronoiMesh::toPoint
 (
@@ -200,6 +201,7 @@ Foam::conformalVoronoiMesh::toPoint
 {
     return reinterpret_cast<PointFrompoint>(p);
 }
+
 
 #else
 
@@ -216,6 +218,7 @@ Foam::conformalVoronoiMesh::topoint
         CGAL::to_double(P.z())
     );
 }
+
 
 inline Foam::conformalVoronoiMesh::PointFrompoint
 Foam::conformalVoronoiMesh::toPoint
@@ -239,6 +242,13 @@ inline const Foam::conformationSurfaces&
 Foam::conformalVoronoiMesh::geometryToConformTo() const
 {
     return geometryToConformTo_;
+}
+
+
+inline const Foam::cellSizeControlSurfaces&
+Foam::conformalVoronoiMesh::cellSizeControl() const
+{
+    return cellSizeControl_;
 }
 
 
