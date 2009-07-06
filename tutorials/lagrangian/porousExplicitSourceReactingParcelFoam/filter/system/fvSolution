@@ -131,6 +131,13 @@ PISO
 //    nUCorrectors    2;
 }
 
+additional
+{
+    dpdt            true;
+    hWork           true;
+    eWork           true;
+}
+
 relaxationFactors
 {
 /*
