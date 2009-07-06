@@ -1,7 +1,7 @@
 ParMGridGen = $(WM_THIRD_PARTY_DIR)/ParMGridGen-1.0
 
 TYPE_REAL=
-#if defined(SP)
+#if defined(WM_SP)
 TYPE_REAL=-DTYPE_REAL
 #endif
 

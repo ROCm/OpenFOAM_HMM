@@ -64,7 +64,7 @@ const Foam::dictionary& Foam::DragModel<CloudType>::dict() const
 
 
 template<class CloudType>
-Foam::scalar Foam::DragModel<CloudType>::ptc
+Foam::scalar Foam::DragModel<CloudType>::utc
 (
     const vector& Ur,
     const scalar d,

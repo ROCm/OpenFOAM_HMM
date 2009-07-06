@@ -161,7 +161,7 @@ protected:
             const scalar time1
         ) const = 0;
 
-        //- Additional flag to identify whether or not injection in cellI is
+        //- Additional flag to identify whether or not injection of parcelI is
         //  permitted
         virtual bool validInjection(const label parcelI) = 0;
 

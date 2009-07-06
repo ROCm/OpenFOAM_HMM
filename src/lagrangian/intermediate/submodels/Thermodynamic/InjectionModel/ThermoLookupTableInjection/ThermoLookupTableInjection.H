@@ -181,7 +181,7 @@ public:
                 return true;
             }
 
-            //- Return flag to identify whether or not injection in cellI is
+            //- Return flag to identify whether or not injection of parcelI is
             //  permitted
             virtual bool validInjection(const label parcelI);
 };

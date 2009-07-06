@@ -67,7 +67,6 @@ int main(int argc, char *argv[])
 
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
-    #include "readPISOControls.H"
     #include "readCombustionProperties.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"

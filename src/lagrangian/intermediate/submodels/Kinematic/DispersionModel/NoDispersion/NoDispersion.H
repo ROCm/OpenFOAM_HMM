@@ -72,10 +72,13 @@ public:
     // Member Functions
 
         //- Flag to indicate whether model activates injection model
-        bool active() const;
+        virtual bool active() const;
+
+        //- Cache carrier fields
+        virtual void cacheFields(const bool store);
 
         //- Update (disperse particles)
-        vector update
+        virtual vector update
         (
             const scalar dt,
             const label celli,

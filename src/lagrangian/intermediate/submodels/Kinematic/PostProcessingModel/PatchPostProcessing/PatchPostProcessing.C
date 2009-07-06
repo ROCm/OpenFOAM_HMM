@@ -27,6 +27,26 @@ License
 #include "PatchPostProcessing.H"
 #include "IOPtrList.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template <class CloudType>
+Foam::label Foam::PatchPostProcessing<CloudType>::applyToPatch
+(
+    const label globalPatchI
+) const
+{
+    forAll(patchIds_, patchI)
+    {
+        if (patchIds_[patchI] == globalPatchI)
+        {
+            return patchI;
+        }
+    }
+
+    return -1;
+}
+
+
 // * * * * * * * * * * * * * protected Member Functions  * * * * * * * * * * //
 
 template<class CloudType>
@@ -80,9 +100,8 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
     mesh_(owner.mesh()),
     patchNames_(this->coeffDict().lookup("patches")),
     patchData_(patchNames_.size()),
-    globalToLocalPatchIds_(patchNames_.size())
+    patchIds_(patchNames_.size())
 {
-    labelList localToGlobal(patchNames_.size());
     forAll(patchNames_, patchI)
     {
         label id = mesh_.boundaryMesh().findPatchID(patchNames_[patchI]);
@@ -99,12 +118,7 @@ Foam::PatchPostProcessing<CloudType>::PatchPostProcessing
              << "Available patches are: " << mesh_.boundaryMesh().names() << nl
              << exit(FatalError);
         }
-        localToGlobal[patchI] = id;
-    }
-
-    forAll(localToGlobal, patchI)
-    {
-        globalToLocalPatchIds_[localToGlobal[patchI]] = patchI;
+        patchIds_[patchI] = id;
     }
 }
 
@@ -132,8 +146,8 @@ void Foam::PatchPostProcessing<CloudType>::postPatch
     const label patchI
 )
 {
-    label localPatchI = globalToLocalPatchIds_[patchI];
-    if (patchData_[localPatchI].size() < maxStoredParcels_)
+    label localPatchI = applyToPatch(patchI);
+    if (localPatchI >= 0 && patchData_[localPatchI].size() < maxStoredParcels_)
     {
         patchData_[localPatchI].append(p.clone());
     }

@@ -61,7 +61,6 @@ int main(int argc, char *argv[])
     #include "createClouds.H"
     #include "createMulticomponentPointSources.H"
     #include "createPorousZones.H"
-    #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
     #include "compressibleCourantNo.H"

@@ -122,7 +122,7 @@ public:
         //- Construct and return a clone
         inline autoPtr<hConstThermo> clone() const;
 
-        // Selector from Istream
+        //- Selector from Istream
         inline static autoPtr<hConstThermo> New(Istream& is);
 
 

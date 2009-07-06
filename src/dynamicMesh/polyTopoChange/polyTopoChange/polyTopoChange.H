@@ -171,13 +171,13 @@ class polyTopoChange
             Map<label> faceFromEdge_;
 
             //- In mapping whether to reverse the flux.
-            labelHashSet flipFaceFlux_;
+            PackedBoolList flipFaceFlux_;
 
             //- Zone of face
             Map<label> faceZone_;
 
             //- Orientation of face in zone
-            Map<bool> faceZoneFlip_;
+            PackedBoolList faceZoneFlip_;
 
             //- Active faces
             label nActiveFaces_;
@@ -216,14 +216,16 @@ class polyTopoChange
         template<class T>
         static void renumberKey(const labelList& map, Map<T>&);
 
-        //- Renumber elements of list according to map
-        static void renumber(const labelList&, DynamicList<label>&);
+        //- Renumber elements of container according to map
         static void renumber(const labelList&, labelHashSet&);
         //- Special handling of reverse maps which have <-1 in them
         static void renumberReverseMap(const labelList&, DynamicList<label>&);
 
         //- Renumber & compact elements of list according to map
         static void renumberCompact(const labelList&, labelList&);
+
+        //- Get all set elements as a labelHashSet
+        static labelHashSet getSetIndices(const PackedBoolList&);
 
         //- Count number of added and removed quantities from maps.
         static void countMap

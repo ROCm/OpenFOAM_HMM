@@ -69,8 +69,8 @@ patches
         // How to construct: either from 'patches' or 'set'
         constructFrom patches;
 
-        // If constructFrom = patches : names of patches
-        patches (periodic-1 periodic-2);
+        // If constructFrom = patches : names of patches. Wildcards allowed.
+        patches ("periodic.*");
 
         // If constructFrom = set : name of faceSet
         set f0;
