@@ -127,11 +127,11 @@ void Foam::staticPressure::write()
     {
         const volScalarField& p = obr_.lookupObject<volScalarField>(pName_);
 
-        volScalarField pDyn
+        volScalarField pStatic
         (
             IOobject
             (
-                "pDyn",
+                "pStatic",
                 obr_.time().timeName(),
                 obr_,
                 IOobject::NO_READ
@@ -139,7 +139,7 @@ void Foam::staticPressure::write()
             dimensionedScalar("rho", dimDensity, rho_)*p
         );
 
-        pDyn.write();
+        pStatic.write();
     }
 }
 
