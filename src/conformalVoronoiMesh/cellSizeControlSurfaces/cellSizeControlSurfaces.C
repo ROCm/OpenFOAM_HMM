@@ -26,6 +26,7 @@ License
 
 #include "cellSizeControlSurfaces.H"
 #include "conformalVoronoiMesh.H"
+#include "cellSizeFunction.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -42,7 +43,7 @@ Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
     defaultCellSize_(readScalar(motionControlDict.lookup("defaultCellSize"))),
     defaultPriority_
     (
-        motionControlDict.lookupOrDefault<scalar>("defaultPriority", 0)
+        motionControlDict.lookupOrDefault<label>("defaultPriority", 0)
     )
 {
     const dictionary& surfacesDict
@@ -50,9 +51,13 @@ Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
         motionControlDict.subDict("cellSizeControlGeometry")
     );
 
-    Info<< nl << "Reading cellSizeControlGeometry." << endl;
+    Info<< nl << "Reading cellSizeControlGeometry" << endl;
 
     surfaces_.setSize(surfacesDict.size());
+
+    cellSizeFunctions_.setSize(surfacesDict.size());
+
+    labelList priorities(surfacesDict.size());
 
     label surfI = 0;
 
@@ -74,13 +79,58 @@ Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
 
         const dictionary& surfaceSubDict(surfacesDict.subDict(surfaceName));
 
-        // Code here ->
+        const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
-        Info<< nl << surfaceName << surfaceSubDict << endl;
+        Info<< nl << "    " << surfaceName << endl;
 
-        // <- Code here
+        cellSizeFunctions_.set
+        (
+            surfI,
+            cellSizeFunction::New
+            (
+                surfaceSubDict,
+                cvMesh,
+                surface
+            )
+        );
+
+        priorities[surfI] = cellSizeFunctions_[surfI].priority();
 
         surfI++;
+    }
+
+    // Sort cellSizeFunctions_ and surfaces_ by priority.  Cut off any surfaces
+    // where priority < defaultPriority_
+
+    labelList sortedIndices;
+
+    sortedOrder(priorities, sortedIndices);
+
+    sortedIndices = invert(sortedIndices.size(), sortedIndices);
+
+    // Reverse the sort order
+    sortedIndices = (sortedIndices.size() - 1) - sortedIndices;
+
+    inplaceReorder(sortedIndices, surfaces_);
+    inplaceReorder(sortedIndices, priorities);
+    cellSizeFunctions_.reorder(sortedIndices);
+
+    forAll(priorities, surfI)
+    {
+        if (priorities[surfI] < defaultPriority_)
+        {
+            WarningIn("cellSizeControlSurfaces::cellSizeControlSurfaces")
+                << "Priority of " << priorities[surfI]
+                << " is less than defaultPriority " << defaultPriority_
+                << ". All cellSizeFunctions with priorities lower than default "
+                << "will be ignored."
+                << endl;
+
+            surfaces_.setSize(surfI);
+            cellSizeFunctions_.setSize(surfI);
+
+            break;
+        }
     }
 }
 
@@ -91,16 +141,61 @@ Foam::cellSizeControlSurfaces::~cellSizeControlSurfaces()
 {}
 
 
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+bool Foam::cellSizeControlSurfaces::samePriorityNext(label i) const
+{
+    if (i == cellSizeFunctions_.size() - 1)
+    {
+        // Last element in the list, compare to default priority
+
+        return
+            cellSizeFunctions_[i].priority()
+         == defaultPriority_;
+    }
+    else
+    {
+        // Not the last element, compare to the next element in the list
+
+        return
+            cellSizeFunctions_[i].priority()
+         == cellSizeFunctions_[i + 1].priority();
+    }
+}
+
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::scalar Foam::cellSizeControlSurfaces::targetCellSize
+Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 (
     const point& pt
 ) const
 {
-    Info<< "TARGETCELLSIZE NOT IMPLEMENTED." << endl;
+    scalar sizeAccumulator = 0;
+    scalar numberOfFunctions = 0;
 
-    return 1.0;
+    forAll(cellSizeFunctions_, i)
+    {
+        const cellSizeFunction& cSF = cellSizeFunctions_[i];
+
+        scalar sizeI;
+
+        if (cSF.cellSize(pt, sizeI))
+        {
+            sizeAccumulator += sizeI;
+            numberOfFunctions++;
+
+            if (!samePriorityNext(i))
+            {
+                return sizeAccumulator/numberOfFunctions;
+            }
+        }
+    }
+
+    sizeAccumulator += defaultCellSize_;
+    numberOfFunctions++;
+
+    return sizeAccumulator/numberOfFunctions;
 }
 
 

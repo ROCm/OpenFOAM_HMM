@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pointFile.H"
+#include "uniformDistance.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,67 +34,31 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(pointFile, 0);
-addToRunTimeSelectionTable(initialPointsMethod, pointFile, dictionary);
+defineTypeNameAndDebug(uniformDistance, 0);
+addToRunTimeSelectionTable(cellSizeFunction, uniformDistance, dictionary);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pointFile::pointFile
+uniformDistance::uniformDistance
 (
     const dictionary& initialPointsDict,
-    const conformalVoronoiMesh& cvMesh
+    const conformalVoronoiMesh& cvMesh,
+    const searchableSurface& surface
 )
 :
-    initialPointsMethod(typeName, initialPointsDict, cvMesh),
-    pointFileName_(detailsDict().lookup("pointFile"))
+    cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
+    cellSize_(readScalar(coeffsDict().lookup("cellSize"))),
+    distance_(readScalar(coeffsDict().lookup("distance")))
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point> pointFile::initialPoints() const
+bool uniformDistance::cellSize(const point& pt, scalar& size) const
 {
-    pointIOField points
-    (
-        IOobject
-        (
-            pointFileName_.name(),
-            pointFileName_.path(),
-            cvMesh_.time(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
+    size = cellSize_;
 
-    Info<< "    Inserting points from file " << pointFileName_ << endl;
-
-    std::vector<Vb::Point> initialPoints;
-
-    Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
-    (
-        points,
-        sqr(minimumSurfaceDistance_)
-    );
-
-    forAll(insidePoints, i)
-    {
-        if (insidePoints[i])
-        {
-            const point& p(points[i]);
-
-            initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
-        }
-    }
-
-    label nPointsRejected = points.size() - initialPoints.size();
-
-    if (nPointsRejected)
-    {
-        Info<< "    " << nPointsRejected << " points rejected from "
-            << pointFileName_.name() << endl;
-    }
-
-    return initialPoints;
+    return true;
 }
 
 

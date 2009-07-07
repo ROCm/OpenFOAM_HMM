@@ -116,7 +116,7 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
             Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
             (
                 points,
-                minimumSurfaceDistance_*minimumSurfaceDistance_
+                sqr(minimumSurfaceDistance_)
             );
 
             forAll(insidePoints, i)

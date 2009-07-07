@@ -49,7 +49,7 @@ Foam::conformationSurfaces::conformationSurfaces
         surfaceConformationDict.subDict("geometryToConformTo")
     );
 
-    Info<< nl << "Reading geometryToConformTo." << endl;
+    Info<< nl << "Reading geometryToConformTo" << endl;
 
     surfaces_.setSize(surfacesDict.size());
 

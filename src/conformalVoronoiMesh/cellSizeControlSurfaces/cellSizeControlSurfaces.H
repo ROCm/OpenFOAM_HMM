@@ -48,6 +48,8 @@ namespace Foam
 // Forward declaration of classes
 class conformalVoronoiMesh;
 
+class cellSizeFunction;
+
 
 /*---------------------------------------------------------------------------*\
                    Class cellSizeControlSurfaces Declaration
@@ -66,16 +68,25 @@ class cellSizeControlSurfaces
         //- Indices of surfaces in allGeometry that are to be conformed to
         labelList surfaces_;
 
+        //- A list of all of the cellSizeFunction objects
+        PtrList<cellSizeFunction> cellSizeFunctions_;
+
         //- Regions where no cell size function is specified use defaultCellSize
         scalar defaultCellSize_;
 
         //- Assigning a priority to all requests for cell sizes, the highest
         //  overrules.  Regions requesting with the same priority take the
         //  average
-        scalar defaultPriority_;
+        label defaultPriority_;
 
 
     // Private Member Functions
+
+        //- Helper function to decide whether to terminate searching
+        //  cellSizeFunctions by determining if the next cellSizeFunction has
+        //  the same priority, includes looking off the end of the
+        //  cellSizeFunctions_ list at the defaultPriority_ value
+        bool samePriorityNext(label i) const;
 
         //- Disallow default bitwise copy construct
         cellSizeControlSurfaces(const cellSizeControlSurfaces&);
@@ -114,8 +125,8 @@ public:
 
         // Query
 
-            //- Return the target cell size at the given location
-            scalar targetCellSize(const point& pt) const;
+            //- Return the cell size at the given location
+            scalar cellSize(const point& pt) const;
 };
 
 

@@ -9,6 +9,12 @@ conformationSurfaces/conformationSurfaces.C
 
 cellSizeControlSurfaces/cellSizeControlSurfaces.C
 
+cellSiseFunctions = cellSizeControlSurfaces/cellSizeFunction
+$(cellSiseFunctions)/cellSizeFunction/cellSizeFunction.C
+$(cellSiseFunctions)/uniform/uniform.C
+$(cellSiseFunctions)/uniformDistance/uniformDistance.C
+$(cellSiseFunctions)/linearDistance/linearDistance.C
+
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
 initialPointsMethod/pointFile/pointFile.C
