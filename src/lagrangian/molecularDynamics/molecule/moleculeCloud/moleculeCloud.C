@@ -507,7 +507,7 @@ void Foam::moleculeCloud::initialiseMolecules
             else
             {
                 const dictionary& zoneDict =
-                mdInitialiseDict.subDict(zone.name());
+                    mdInitialiseDict.subDict(zone.name());
 
                 const scalar temperature
                 (
@@ -530,7 +530,7 @@ void Foam::moleculeCloud::initialiseMolecules
                 {
                     FatalErrorIn("Foam::moleculeCloud::initialiseMolecules")
                         << "latticeIds and latticePositions must be the same "
-                            << " size." << nl
+                        << " size." << nl
                         << abort(FatalError);
                 }
 
@@ -547,6 +547,15 @@ void Foam::moleculeCloud::initialiseMolecules
                     (
                         zoneDict.lookup("numberDensity")
                     );
+
+                    if (numberDensity < VSMALL)
+                    {
+                        WarningIn("moleculeCloud::initialiseMolecules")
+                            << "numberDensity too small, not filling zone "
+                            << zone.name() << endl;
+
+                        continue;
+                    }
 
                     latticeCellScale = pow
                     (
@@ -572,9 +581,19 @@ void Foam::moleculeCloud::initialiseMolecules
                         zoneDict.lookup("massDensity")
                     );
 
+                    if (massDensity < VSMALL)
+                    {
+                        WarningIn("moleculeCloud::initialiseMolecules")
+                            << "massDensity too small, not filling zone "
+                            << zone.name() << endl;
+
+                        continue;
+                    }
+
+
                     latticeCellScale = pow
                     (
-                        unitCellMass /(det(latticeCellShape)*massDensity),
+                        unitCellMass/(det(latticeCellShape)*massDensity),
                         (1.0/3.0)
                     );
                 }
@@ -906,7 +925,7 @@ void Foam::moleculeCloud::initialiseMolecules
                     )
                     {
                         WarningIn("Foam::moleculeCloud::initialiseMolecules()")
-                        << "A whole layer of unit cells was placed "
+                            << "A whole layer of unit cells was placed "
                             << "outside the bounds of the mesh, but no "
                             << "molecules have been placed in zone '"
                             << zone.name()
