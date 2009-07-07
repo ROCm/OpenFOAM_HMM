@@ -63,7 +63,21 @@ Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
 
     forAllConstIter(dictionary, surfacesDict, iter)
     {
-        word surfaceName = iter().keyword();
+        const dictionary& surfaceSubDict
+        (
+            surfacesDict.subDict(iter().keyword())
+        );
+
+        // If the "surface" keyword is not found in the dictionary, assume that
+        // the name of the dictionary is the surface.  Distinction required to
+        // allow the same surface to be used multiple times to supply multiple
+        // cellSizeFunctions
+
+        word surfaceName = surfaceSubDict.lookupOrDefault<word>
+        (
+            "surface",
+            iter().keyword()
+        );
 
         surfaces_[surfI] = allGeometry_.findSurfaceID(surfaceName);
 
@@ -72,16 +86,15 @@ Foam::cellSizeControlSurfaces::cellSizeControlSurfaces
             FatalErrorIn
             (
                 "Foam::cellSizeControlSurfaces::cellSizeControlSurfaces"
-            )   << "No surface " << iter().keyword() << " found. "
+            )   << "No surface " << surfaceName << " found. "
                 << "Valid geometry is " << nl << allGeometry_.names()
                 << exit(FatalError);
         }
 
-        const dictionary& surfaceSubDict(surfacesDict.subDict(surfaceName));
-
         const searchableSurface& surface = allGeometry_[surfaces_[surfI]];
 
-        Info<< nl << "    " << surfaceName << endl;
+        Info<< nl << "    " << iter().keyword() << nl
+            << "    surface: " << surfaceName << endl;
 
         cellSizeFunctions_.set
         (
