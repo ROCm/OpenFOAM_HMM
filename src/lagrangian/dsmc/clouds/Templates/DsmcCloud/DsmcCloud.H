@@ -116,6 +116,10 @@ class DsmcCloud
         //- Random number generator
         Random rndGen_;
 
+        //- In-cloud cache of deltaT, lookup in submodels and parcel is
+        //  expensive
+        scalar cachedDeltaT_;
+
 
         // References to the macroscopic fields
 
@@ -242,6 +246,12 @@ public:
 
                 //- Return refernce to the random object
                 inline Random& rndGen();
+
+                //- Store (cache) the current value of deltaT
+                inline void storeDeltaT();
+
+                //- Return the cached value of deltaT
+                inline scalar cachedDeltaT() const;
 
 
             // References to the surface data collection fields
