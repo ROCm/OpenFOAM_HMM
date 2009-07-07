@@ -117,6 +117,7 @@ void Foam::Particle<ParticleType>::readFields
     }
 
     IOobject procIO(c.fieldIOobject("origProcId", IOobject::MUST_READ));
+
     if (procIO.headerOk())
     {
         IOField<label> origProcId(procIO);
