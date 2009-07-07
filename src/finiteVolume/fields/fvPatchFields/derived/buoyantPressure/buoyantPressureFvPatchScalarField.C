@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "fixedFluxBuoyantPressureFvPatchScalarField.H"
+#include "buoyantPressureFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -36,8 +36,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-fixedFluxBuoyantPressureFvPatchScalarField::
-fixedFluxBuoyantPressureFvPatchScalarField
+buoyantPressureFvPatchScalarField::
+buoyantPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -48,8 +48,8 @@ fixedFluxBuoyantPressureFvPatchScalarField
 {}
 
 
-fixedFluxBuoyantPressureFvPatchScalarField::
-fixedFluxBuoyantPressureFvPatchScalarField
+buoyantPressureFvPatchScalarField::
+buoyantPressureFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -64,10 +64,10 @@ fixedFluxBuoyantPressureFvPatchScalarField
 }
 
 
-fixedFluxBuoyantPressureFvPatchScalarField::
-fixedFluxBuoyantPressureFvPatchScalarField
+buoyantPressureFvPatchScalarField::
+buoyantPressureFvPatchScalarField
 (
-    const fixedFluxBuoyantPressureFvPatchScalarField& ptf,
+    const buoyantPressureFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -78,10 +78,10 @@ fixedFluxBuoyantPressureFvPatchScalarField
 {}
 
 
-fixedFluxBuoyantPressureFvPatchScalarField::
-fixedFluxBuoyantPressureFvPatchScalarField
+buoyantPressureFvPatchScalarField::
+buoyantPressureFvPatchScalarField
 (
-    const fixedFluxBuoyantPressureFvPatchScalarField& ptf
+    const buoyantPressureFvPatchScalarField& ptf
 )
 :
     fixedGradientFvPatchScalarField(ptf),
@@ -89,10 +89,10 @@ fixedFluxBuoyantPressureFvPatchScalarField
 {}
 
 
-fixedFluxBuoyantPressureFvPatchScalarField::
-fixedFluxBuoyantPressureFvPatchScalarField
+buoyantPressureFvPatchScalarField::
+buoyantPressureFvPatchScalarField
 (
-    const fixedFluxBuoyantPressureFvPatchScalarField& ptf,
+    const buoyantPressureFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -103,7 +103,7 @@ fixedFluxBuoyantPressureFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void fixedFluxBuoyantPressureFvPatchScalarField::updateCoeffs()
+void buoyantPressureFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -134,7 +134,7 @@ void fixedFluxBuoyantPressureFvPatchScalarField::updateCoeffs()
 }
 
 
-void fixedFluxBuoyantPressureFvPatchScalarField::write(Ostream& os) const
+void buoyantPressureFvPatchScalarField::write(Ostream& os) const
 {
     fixedGradientFvPatchScalarField::write(os);
     os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
@@ -147,7 +147,7 @@ void fixedFluxBuoyantPressureFvPatchScalarField::write(Ostream& os) const
 makePatchTypeField
 (
     fvPatchScalarField,
-    fixedFluxBuoyantPressureFvPatchScalarField
+    buoyantPressureFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

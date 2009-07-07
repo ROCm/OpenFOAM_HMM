@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::fixedFluxBuoyantPressureFvPatchScalarField
+    Foam::buoyantPressureFvPatchScalarField
 
 Description
     Set the pressure gradient boundary condition appropriately for buoyant flow.
@@ -32,12 +32,12 @@ Description
     appropriately.  Otherwise assume the variable is the static pressure.
 
 SourceFiles
-    fixedFluxBuoyantPressureFvPatchScalarField.C
+    buoyantPressureFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef fixedFluxBuoyantPressureFvPatchScalarFields_H
-#define fixedFluxBuoyantPressureFvPatchScalarFields_H
+#ifndef buoyantPressureFvPatchScalarFields_H
+#define buoyantPressureFvPatchScalarFields_H
 
 #include "fvPatchFields.H"
 #include "fixedGradientFvPatchFields.H"
@@ -48,10 +48,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                  Class fixedFluxBuoyantPressureFvPatch Declaration
+                  Class buoyantPressureFvPatch Declaration
 \*---------------------------------------------------------------------------*/
 
-class fixedFluxBuoyantPressureFvPatchScalarField
+class buoyantPressureFvPatchScalarField
 :
     public fixedGradientFvPatchScalarField
 {
@@ -64,20 +64,20 @@ class fixedFluxBuoyantPressureFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("fixedFluxBuoyantPressure");
+    TypeName("buoyantPressure");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        fixedFluxBuoyantPressureFvPatchScalarField
+        buoyantPressureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        fixedFluxBuoyantPressureFvPatchScalarField
+        buoyantPressureFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -85,19 +85,19 @@ public:
         );
 
         //- Construct by mapping given
-        //  fixedFluxBuoyantPressureFvPatchScalarField onto a new patch
-        fixedFluxBuoyantPressureFvPatchScalarField
+        //  buoyantPressureFvPatchScalarField onto a new patch
+        buoyantPressureFvPatchScalarField
         (
-            const fixedFluxBuoyantPressureFvPatchScalarField&,
+            const buoyantPressureFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        fixedFluxBuoyantPressureFvPatchScalarField
+        buoyantPressureFvPatchScalarField
         (
-            const fixedFluxBuoyantPressureFvPatchScalarField&
+            const buoyantPressureFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -105,14 +105,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new fixedFluxBuoyantPressureFvPatchScalarField(*this)
+                new buoyantPressureFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        fixedFluxBuoyantPressureFvPatchScalarField
+        buoyantPressureFvPatchScalarField
         (
-            const fixedFluxBuoyantPressureFvPatchScalarField&,
+            const buoyantPressureFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -124,7 +124,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new fixedFluxBuoyantPressureFvPatchScalarField(*this, iF)
+                new buoyantPressureFvPatchScalarField(*this, iF)
             );
         }
 

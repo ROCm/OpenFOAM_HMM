@@ -86,9 +86,6 @@ int main(int argc, char *argv[])
                 << " s" << endl;
         }
 
-        volScalarField gh("gh", g & mesh.C());
-        surfaceScalarField ghf("ghf", g & mesh.Cf());
-
         if (mesh.changing() && correctPhi)
         {
             #include "correctPhi.H"
