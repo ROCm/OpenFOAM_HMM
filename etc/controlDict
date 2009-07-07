@@ -424,7 +424,7 @@ DebugSwitches
     filteredLinear3     0;
     filteredLinear3V    0;
     fixedEnthalpy       0;
-    fixedFluxBuoyantPressure 0;
+    buoyantPressure 0;
     fixedFluxBoussinesqBuoyantPressure 0;
     fixedFluxPressure   0;
     fixedGradient       0;

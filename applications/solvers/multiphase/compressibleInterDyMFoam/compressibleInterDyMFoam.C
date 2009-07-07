@@ -104,12 +104,6 @@ int main(int argc, char *argv[])
             #include "meshCourantNo.H"
         }
 
-        if (mesh.changing())
-        {
-            gh = g & mesh.C();
-            ghf = g & mesh.Cf();
-        }
-
         turbulence->correct();
 
         // --- Outer-corrector loop
