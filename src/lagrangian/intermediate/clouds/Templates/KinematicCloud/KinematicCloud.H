@@ -184,6 +184,15 @@ protected:
             DimensionedField<vector, volMesh> UTrans_;
 
 
+        // Cloud evolution functions
+
+            //- Pre-evolve
+            void preEvolve();
+
+            //- Post-evolve
+            void postEvolve();
+
+
 public:
 
     // Constructors

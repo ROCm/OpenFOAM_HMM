@@ -130,8 +130,24 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::preEvolve()
+{
+    ReactingCloud<ParcelType>::preEvolve();
+}
+
+
+template<class ParcelType>
+void Foam::ReactingMultiphaseCloud<ParcelType>::postEvolve()
+{
+    ReactingCloud<ParcelType>::postEvolve();
+}
+
+
+template<class ParcelType>
 void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
 {
+    preEvolve();
+
     const volScalarField& T = this->carrierThermo().T();
     const volScalarField cp = this->carrierThermo().Cp();
     const volScalarField& p = this->carrierThermo().p();
@@ -187,11 +203,6 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
 
     this->injection().inject(td);
 
-    if (debug)
-    {
-        this->writePositions();
-    }
-
     if (this->coupled())
     {
         resetSourceTerms();
@@ -199,7 +210,7 @@ void Foam::ReactingMultiphaseCloud<ParcelType>::evolve()
 
     Cloud<ParcelType>::move(td);
 
-    this->postProcessing().post();
+    postEvolve();
 }
 
 

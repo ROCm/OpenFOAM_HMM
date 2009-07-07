@@ -2,44 +2,24 @@
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
 |  \\    /   O peration     | Version:  1.5                                   |
-|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
+|   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
     format      ascii;
-    class       dictionary;
-    location    "system";
-    object      decomposeParDict;
+    class       volScalarField;
+    object      k;
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-numberOfSubdomains 6;
+#include        "initialConditions"
 
-method          hierarchical;
+dimensions      [0 2 -2 0 0 0 0];
 
-simpleCoeffs
-{
-    n               ( 4 1 1 );
-    delta           0.001;
-}
+internalField   uniform $turbulentKE;
 
-hierarchicalCoeffs
-{
-    n               ( 3 2 1 );
-    delta           0.001;
-    order           xyz;
-}
-
-manualCoeffs
-{
-    dataFile        "cellDecomposition";
-}
-
-metisCoeffs
-{
-}
-
+#include        "turbulentBoundaryField"
 
 // ************************************************************************* //
