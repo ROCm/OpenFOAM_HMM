@@ -233,7 +233,8 @@ void Foam::InjectionModel<CloudType>::postInjectCheck(const label parcelsAdded)
 {
     if (parcelsAdded > 0)
     {
-        Pout<< "\n--> Cloud: " << owner_.name() << nl
+        Pout<< nl
+            << "--> Cloud: " << owner_.name() << nl
             << "    Added " << parcelsAdded
             << " new parcels" << nl << endl;
     }

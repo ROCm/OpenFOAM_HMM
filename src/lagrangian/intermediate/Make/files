@@ -59,6 +59,7 @@ submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
 /* data entries */
 submodels/IO/DataEntry/makeDataEntries.C
 submodels/IO/DataEntry/polynomial/polynomial.C
+submodels/IO/DataEntry/polynomial/polynomialIO.C
 
 
 /* integration schemes */

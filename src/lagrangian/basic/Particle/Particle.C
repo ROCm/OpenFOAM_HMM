@@ -33,12 +33,6 @@ License
 #include "wallPolyPatch.H"
 #include "transform.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class ParticleType>
-Foam::label Foam::Particle<ParticleType>::particleCount = 0;
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
@@ -184,7 +178,7 @@ Foam::Particle<ParticleType>::Particle
     facei_(-1),
     stepFraction_(0.0),
     origProc_(Pstream::myProcNo()),
-    origId_(particleCount++)
+    origId_(cloud_.getNewParticleID())
 {}
 
 
@@ -313,13 +307,13 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         // change cell
         if (internalFace) // Internal face
         {
-            if (celli_ == cloud_.owner_[facei_])
+            if (celli_ == mesh.faceOwner()[facei_])
             {
-                celli_ = cloud_.neighbour_[facei_];
+                celli_ = mesh.faceNeighbour()[facei_];
             }
-            else if (celli_ == cloud_.neighbour_[facei_])
+            else if (celli_ == mesh.faceNeighbour()[facei_])
             {
-                celli_ = cloud_.owner_[facei_];
+                celli_ = mesh.faceOwner()[facei_];
             }
             else
             {
