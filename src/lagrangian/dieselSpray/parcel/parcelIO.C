@@ -36,7 +36,7 @@ Foam::parcel::parcel
     bool readFields
 )
 :
-    Particle<parcel>(cloud, is),
+    Particle<parcel>(cloud, is, readFields),
 
     liquidComponents_
     (

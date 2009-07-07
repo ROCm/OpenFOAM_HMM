@@ -78,6 +78,7 @@ int main(int argc, char *argv[])
     if (sourceType == "patch")
     {
         fileName sourceCasePath(dict.lookup("sourceCase"));
+        sourceCasePath.expand();
         fileName sourceRootDir = sourceCasePath.path();
         fileName sourceCaseDir = sourceCasePath.name();
         word patchName(dict.lookup("sourcePatch"));

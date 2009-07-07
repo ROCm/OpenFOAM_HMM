@@ -23,70 +23,54 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::BasicReactingCloud
+    Foam::indexedParticleCloud
 
 Description
-    Reacting cloud templated on the type of carrier phase thermodynamics
+    A Cloud of particles carrying an additional index.
 
 SourceFiles
-    BasicReactingCloud.C
+    indexedParticleCloud.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef BasicReactingCloud_H
-#define BasicReactingCloud_H
+#ifndef indexedParticleCloud_H
+#define indexedParticleCloud_H
 
-#include "ReactingCloud.H"
-#include "BasicReactingParcel.H"
+#include "Cloud.H"
+#include "indexedParticle.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
-// Forward declaration of classes
-template<class ThermoType>
-class BasicReactingCloud;
-
 /*---------------------------------------------------------------------------*\
-                        Class BasicReactingCloud Declaration
+                           Class indexedParticleCloud Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class ThermoType>
-class BasicReactingCloud
+class indexedParticleCloud
 :
-    public ReactingCloud<BasicReactingParcel<ThermoType> >
+    public Cloud<indexedParticle>
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        BasicReactingCloud(const BasicReactingCloud&);
+        indexedParticleCloud(const indexedParticleCloud&);
 
         //- Disallow default bitwise assignment
-        void operator=(const BasicReactingCloud&);
+        void operator=(const indexedParticleCloud&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("BasicReactingCloud");
-
-
     // Constructors
 
-        //- Construct given carrier gas fields
-        BasicReactingCloud
+        //- Construct given mesh
+        indexedParticleCloud
         (
-            const word& cloudName,
-            const volScalarField& rho,
-            const volVectorField& U,
-            const dimensionedVector& g,
-            basicThermo& thermo
+            const polyMesh&,
+            const word& cloudName = "defaultCloud"
         );
-
-
-    //- Destructor
-    ~BasicReactingCloud();
 
 
     // Member Functions
@@ -99,12 +83,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-    #include "BasicReactingCloud.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
