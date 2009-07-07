@@ -217,9 +217,8 @@ public:
         tmp<DimensionedField<Type, GeoMesh> > clone() const;
 
 
-    // Destructor
-
-        ~DimensionedField();
+    //- Destructor
+    virtual ~DimensionedField();
 
 
     // Member Functions
