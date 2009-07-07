@@ -15,6 +15,7 @@ setSet -batch system/sets.setSet >& log.setSet1
 setsToZones -noFlipMap >& log.setsToZones
 
 # create the first cyclic - lhs of porous zone
+unset FOAM_SETNAN
 createBaffles cycLeft cycLeft -overwrite >& log.createBaffles1
 
 # create the second cyclic - rhs of porous zone
