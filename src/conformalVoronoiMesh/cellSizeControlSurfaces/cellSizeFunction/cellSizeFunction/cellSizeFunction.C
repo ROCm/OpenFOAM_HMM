@@ -57,23 +57,35 @@ cellSizeFunction::cellSizeFunction
 {
     word mode = cellSizeFunctionDict.lookup("mode");
 
-    if (mode == "inside")
+    if (surface_.hasVolumeType())
     {
-        sideMode_ = INSIDE;
-    }
-    else if (mode == "outside")
-    {
-        sideMode_ = OUTSIDE;
-    }
-    else if (mode == "bothSides")
-    {
-        sideMode_ = BOTHSIDES;
-    }
-    else
-    {
-        FatalErrorIn("cellSizeFunction::cellSizeFunction")
+        if (mode == "inside")
+        {
+            sideMode_ = INSIDE;
+        }
+        else if (mode == "outside")
+        {
+            sideMode_ = OUTSIDE;
+        }
+        else if (mode == "bothSides")
+        {
+            sideMode_ = BOTHSIDES;
+        }
+        else
+        {
+            FatalErrorIn("cellSizeFunction::cellSizeFunction")
             << "Unknown mode, expected: inside, outside or bothSides" << nl
-            << exit(FatalError);
+                << exit(FatalError);
+        }
+    }
+    else if (mode != BOTHSIDES)
+    {
+        WarningIn("cellSizeFunction::cellSizeFunction")
+            << "surface does not support volumeType, defaulting mode to "
+            << "bothSides."
+            << endl;
+
+        sideMode_ = BOTHSIDES;
     }
 }
 

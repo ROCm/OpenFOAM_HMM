@@ -100,6 +100,9 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 {
     timeCheck();
 
+    point sizeTestPt = vector(0.5, 0.3, 0.6);
+    Info<< nl << cellSizeControl().cellSize(sizeTestPt) << endl;
+
     createFeaturePoints();
     timeCheck();
 

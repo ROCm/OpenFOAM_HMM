@@ -55,9 +55,44 @@ uniform::uniform
 
 bool uniform::cellSize(const point& pt, scalar& size) const
 {
-    size = cellSize_;
+    if (sideMode_ == BOTHSIDES)
+    {
+        size = cellSize_;
 
-    return true;
+        return true;
+    }
+
+    pointField ptF(1, pt);
+    List<searchableSurface::volumeType> vTL(1);
+
+    surface_.getVolumeType(ptF, vTL);
+
+    size = 0;
+
+    bool functionApplied = false;
+
+    if
+    (
+        sideMode_ == INSIDE
+     && vTL[1] == searchableSurface::INSIDE
+    )
+    {
+        size = cellSize_;
+
+        functionApplied = true;
+    }
+    else if
+    (
+        sideMode_ == OUTSIDE
+     && vTL[1] == searchableSurface::OUTSIDE
+    )
+    {
+        size = cellSize_;
+
+        functionApplied = true;
+    }
+
+    return functionApplied;
 }
 
 
