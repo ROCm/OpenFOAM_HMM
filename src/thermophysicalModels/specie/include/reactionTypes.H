@@ -37,7 +37,7 @@ Description
 #include "Reaction.H"
 
 #include "icoPolynomial.H"
-#include "polynomialThermo.H"
+#include "hPolynomialThermo.H"
 #include "polynomialTransport.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

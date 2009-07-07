@@ -27,6 +27,7 @@ License
 #include "particleForces.H"
 #include "fvMesh.H"
 #include "volFields.H"
+#include "fvcGrad.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -40,20 +41,16 @@ Foam::particleForces::particleForces
     mesh_(mesh),
     dict_(dict.subDict("particleForces")),
     g_(g),
+    gradUPtr_(NULL),
     gravity_(dict_.lookup("gravity")),
     virtualMass_(dict_.lookup("virtualMass")),
     Cvm_(0.0),
     pressureGradient_(dict_.lookup("pressureGradient")),
-    gradUName_("unknown_gradUName")
+    UName_(dict_.lookupOrDefault<word>("U", "U"))
 {
-    if (gravity_)
+    if (virtualMass_)
     {
         dict_.lookup("Cvm") >> Cvm_;
-    }
-
-    if (pressureGradient_)
-    {
-        dict_.lookup("gradU") >> gradUName_;
     }
 }
 
@@ -63,18 +60,21 @@ Foam::particleForces::particleForces(const particleForces& f)
     mesh_(f.mesh_),
     dict_(f.dict_),
     g_(f.g_),
+    gradUPtr_(f.gradUPtr_),
     gravity_(f.gravity_),
     virtualMass_(f.virtualMass_),
     Cvm_(f.Cvm_),
     pressureGradient_(f.pressureGradient_),
-    gradUName_(f.gradUName_)
+    UName_(f.UName_)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::particleForces::~particleForces()
-{}
+{
+    cacheFields(false);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
@@ -109,9 +109,26 @@ Foam::Switch Foam::particleForces::pressureGradient() const
 }
 
 
-const Foam::word& Foam::particleForces::gradUName() const
+const Foam::word& Foam::particleForces::UName() const
 {
-    return gradUName_;
+    return UName_;
+}
+
+
+void Foam::particleForces::cacheFields(const bool store)
+{
+    if (store && pressureGradient_)
+    {
+        const volVectorField U = mesh_.lookupObject<volVectorField>(UName_);
+        gradUPtr_ = fvc::grad(U).ptr();
+    }
+    else
+    {
+        if (gradUPtr_)
+        {
+            delete gradUPtr_;
+        }
+    }
 }
 
 
@@ -130,15 +147,17 @@ Foam::vector Foam::particleForces::calcCoupled
     // Virtual mass force
     if (virtualMass_)
     {
-        notImplemented("Foam::particleForces::calc(...) - virtualMass force");
+        notImplemented
+        (
+            "Foam::particleForces::calcCoupled(...) - virtual mass force"
+        );
 //        Ftot += Cvm_*rhoc/rho*d(Uc - U)/dt;
     }
 
     // Pressure gradient force
     if (pressureGradient_)
     {
-        const volSymmTensorField& gradU =
-            mesh_.lookupObject<volSymmTensorField>(gradUName_);
+        const volTensorField& gradU = *gradUPtr_;
         Ftot += rhoc/rho*(U & gradU[cellI]);
     }
 

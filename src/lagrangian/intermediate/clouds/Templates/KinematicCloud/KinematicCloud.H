@@ -274,18 +274,6 @@ public:
                 inline const dictionary& interpolationSchemes() const;
 
 
-            // Forces to include in particle motion evaluation
-
-                //- Return reference to the gravity force flag
-                inline Switch forceGravity() const;
-
-                //- Return reference to the virtual mass force flag
-                inline Switch forceVirtualMass() const;
-
-                //- Return reference to the pressure gradient force flag
-                inline Switch forcePressureGradient() const;
-
-
             // Sub-models
 
                 //- Return const-access to the dispersion model
