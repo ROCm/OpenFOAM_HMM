@@ -47,7 +47,9 @@ Foam::passiveParticleCloud::passiveParticleCloud
 )
 :
     Cloud<passiveParticle>(mesh, cloudName, false)
-{}
+{
+    readFields();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

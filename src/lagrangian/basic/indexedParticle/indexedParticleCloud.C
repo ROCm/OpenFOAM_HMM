@@ -49,7 +49,9 @@ Foam::indexedParticleCloud::indexedParticleCloud
 )
 :
     Cloud<indexedParticle>(mesh, cloudName, false)
-{}
+{
+    indexedParticle::readFields(*this);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
