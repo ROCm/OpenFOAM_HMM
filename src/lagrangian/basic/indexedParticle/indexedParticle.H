@@ -84,7 +84,7 @@ public:
             bool readFields = true
         )
         :
-            Particle<indexedParticle>(c, is)
+            Particle<indexedParticle>(c, is, readFields)
         {}
 
         //- Construct as a copy

@@ -87,13 +87,13 @@ public:
 
     // Member functions
 
-        //- Return the compostion of the combustion mixture
+        //- Return the compostion of the mixture
         virtual basicMixture& composition()
         {
             return *this;
         }
 
-        //- Return the compostion of the combustion mixture
+        //- Return the compostion of the mixture
         virtual const basicMixture& composition() const
         {
             return *this;

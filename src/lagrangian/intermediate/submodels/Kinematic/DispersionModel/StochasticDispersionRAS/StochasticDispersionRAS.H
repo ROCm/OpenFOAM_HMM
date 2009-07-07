@@ -74,10 +74,10 @@ public:
     // Member Functions
 
         //- Flag to indicate whether model activates injection model
-        bool active() const;
+        virtual bool active() const;
 
         //- Update (disperse particles)
-        vector update
+        virtual vector update
         (
             const scalar dt,
             const label celli,

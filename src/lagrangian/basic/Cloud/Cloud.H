@@ -51,6 +51,9 @@ template<class ParticleType>
 class Cloud;
 
 template<class ParticleType>
+class IOPosition;
+
+template<class ParticleType>
 Ostream& operator<<
 (
     Ostream&,
@@ -71,12 +74,9 @@ class Cloud
     // Private data
 
         const polyMesh& polyMesh_;
-        const faceList& allFaces_;
-        const vectorField& points_;
-        const cellList& cellFaces_;
-        const vectorField& allFaceCentres_;
-        const unallocLabelList& owner_;
-        const unallocLabelList& neighbour_;
+
+        //- Overall count of particles ever created. Never decreases.
+        mutable label particleCount_;
 
         //- Temporary storage for addressing. Used in findFaces.
         mutable DynamicList<label> labels_;
@@ -92,6 +92,8 @@ public:
 
     template<class ParticleT>
     friend class Particle;
+    template<class ParticleT>
+    friend class IOPosition;
 
     typedef ParticleType particleType;
 
@@ -218,6 +220,9 @@ public:
                 return IDLList<ParticleType>::clear();
             };
 
+            //- Get unique particle creation id
+            label getNewParticleID() const;
+
             //- Transfer particle to cloud
             void addParticle(ParticleType* pPtr);
 
@@ -251,13 +256,15 @@ public:
                 const IOField<DataType>& data
             ) const;
 
-            //- Read the field data for the cloud of particles
-            void readFields();
+            //- Read the field data for the cloud of particles. Dummy at
+            //  this level.
+            virtual void readFields();
 
 
         // Write
 
-            //- Write the field data for the cloud of particles
+            //- Write the field data for the cloud of particles Dummy at
+            //  this level.
             virtual void writeFields() const;
 
             //- Write using given format, version and compression.

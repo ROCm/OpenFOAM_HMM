@@ -174,8 +174,33 @@ void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::preEvolve()
+{
+    this->dispersion().cacheFields(true);
+    forces_.cacheFields(true);
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::postEvolve()
+{
+    if (debug)
+    {
+        this->writePositions();
+    }
+
+    this->dispersion().cacheFields(false);
+    forces_.cacheFields(false);
+
+    this->postProcessing().post();
+}
+
+
+template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
+    preEvolve();
+
     autoPtr<interpolation<scalar> > rhoInterpolator =
         interpolation<scalar>::New
         (
@@ -209,11 +234,6 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
     this->injection().inject(td);
 
-    if (debug)
-    {
-        this->writePositions();
-    }
-
     if (coupled_)
     {
         resetSourceTerms();
@@ -221,7 +241,7 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
     Cloud<ParcelType>::move(td);
 
-    this->postProcessing().post();
+    postEvolve();
 }
 
 

@@ -132,6 +132,15 @@ protected:
             );
 
 
+        // Cloud evolution functions
+
+            //- Pre-evolve
+            void preEvolve();
+
+            //- Post-evolve
+            void postEvolve();
+
+
 public:
 
     // Constructors

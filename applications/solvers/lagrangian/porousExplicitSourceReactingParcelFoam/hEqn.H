@@ -1,20 +1,51 @@
 {
-    fvScalarMatrix hEqn
+    tmp<volScalarField> pWork
     (
-        fvm::ddt(rho, h)
-      + mvConvection->fvmDiv(phi, h)
-      - fvm::laplacian(turbulence->alphaEff(), h)
-     ==
-        DpDt
-     +  parcels.Sh()
-     +  radiation->Sh(thermo)
+        new volScalarField
+        (
+            IOobject
+            (
+                "pWork",
+                runTime.timeName(),
+                mesh,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            mesh,
+            dimensionedScalar("zero", dimensionSet(1, -1, -3, 0, 0), 0.0)
+        )
     );
 
-    hEqn.relax();
+    if (dpdt)
+    {
+        pWork() += fvc::ddt(p);
+    }
+    if (eWork)
+    {
+        pWork() = -p*fvc::div(phi/fvc::interpolate(rho));
+    }
+    if (hWork)
+    {
+        pWork() += fvc::div(phi/fvc::interpolate(rho)*fvc::interpolate(p));
+    }
 
-    hEqn.solve();
+    {
+        solve
+        (
+            fvm::ddt(rho, h)
+          + mvConvection->fvmDiv(phi, h)
+          - fvm::laplacian(turbulence->alphaEff(), h)
+         ==
+            pWork()
+          + parcels.Sh()
+          + radiation->Sh(thermo)
+        );
 
-    thermo.correct();
+        thermo.correct();
 
-    radiation->correct();
+        radiation->correct();
+
+        Info<< "T gas min/max   = " << min(T).value() << ", "
+            << max(T).value() << endl;
+    }
 }

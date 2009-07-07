@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,45 +24,81 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "polynomialThermo.H"
-#include "IOstreams.H"
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class EquationOfState, int PolySize>
-Foam::polynomialThermo<EquationOfState, PolySize>::polynomialThermo(Istream& is)
-:
-    EquationOfState(is),
-    Hf_(readScalar(is)),
-    Sf_(readScalar(is)),
-    cpPolynomial_("cpPolynomial", is),
-    dhPolynomial_("dhPolynomial", cpPolynomial_.integrate()),
-    sPolynomial_("sPolynomial", cpPolynomial_.integrateMinus1())
-{}
-
-
-// * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
-
-template<class EquationOfState, int PolySize>
-Foam::Ostream& Foam::operator<<
-(
-    Ostream& os,
-    const polynomialThermo<EquationOfState, PolySize>& pt
-)
+inline Foam::scalar Foam::MB::rho(scalar p, scalar T) const
 {
-    os  << static_cast<const EquationOfState&>(pt) << tab
-        << pt.Hf_ << tab
-        << pt.Sf_ << tab
-        << pt.cpPolynomial_ << tab
-        << pt.dhPolynomial_ << tab
-        << pt.sPolynomial;
+    return rho_.f(p, T);
+}
 
-    os.check
-    (
-        "operator<<(Ostream& os, const polynomialThermo<EquationOfState>& pt)"
-    );
 
-    return os;
+inline Foam::scalar Foam::MB::pv(scalar p, scalar T) const
+{
+    return pv_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::hl(scalar p, scalar T) const
+{
+    return hl_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::cp(scalar p, scalar T) const
+{
+    return cp_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::h(scalar p, scalar T) const
+{
+    return h_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::cpg(scalar p, scalar T) const
+{
+    return cpg_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::B(scalar p, scalar T) const
+{
+    return B_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::mu(scalar p, scalar T) const
+{
+    return mu_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::mug(scalar p, scalar T) const
+{
+    return mug_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::K(scalar p, scalar T) const
+{
+    return K_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::Kg(scalar p, scalar T) const
+{
+    return Kg_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::sigma(scalar p, scalar T) const
+{
+    return sigma_.f(p, T);
+}
+
+
+inline Foam::scalar Foam::MB::D(scalar p, scalar T) const
+{
+    return D_.f(p, T);
 }
 
 
