@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"

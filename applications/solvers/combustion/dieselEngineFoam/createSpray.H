@@ -23,7 +23,7 @@ spray dieselSpray
     composition,
     gasProperties,
     thermo,
-    environmentalProperties
+    g
 );
 
 scalar gasMass0 = fvc::domainIntegrate(rho).value();

@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "readPPProperties.H"
     #include "initContinuityErrs.H"

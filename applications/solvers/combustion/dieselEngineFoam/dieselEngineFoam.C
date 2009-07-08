@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
     #include "createFields.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readCombustionProperties.H"
     #include "createSpray.H"
     #include "initContinuityErrs.H"
