@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::linearDistance
+    Foam::surfaceOffsetLinearDistance
 
 Description
 
 SourceFiles
-    linearDistance.C
+    surfaceOffsetLinearDistance.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef linearDistance_H
-#define linearDistance_H
+#ifndef surfaceOffsetLinearDistance_H
+#define surfaceOffsetLinearDistance_H
 
 #include "cellSizeFunction.H"
 
@@ -43,10 +43,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class linearDistance Declaration
+                 Class surfaceOffsetLinearDistance Declaration
 \*---------------------------------------------------------------------------*/
 
-class linearDistance
+class surfaceOffsetLinearDistance
 :
     public cellSizeFunction
 {
@@ -61,14 +61,21 @@ private:
         //- cell size at distance_ from the surface
         scalar distanceCellSize_;
 
-        //- distance from the surface to control over
-        scalar distance_;
+        //- Offset distance from surface for constant size portion
+        scalar surfaceOffset_;
 
-        //- distance squared
-        scalar distanceSqr_;
+        //- Total distance from the surface to control over (distance +
+        //  surfaceOffset)
+        scalar totalDistance_;
+
+        //- totalDistance squared
+        scalar totalDistanceSqr_;
 
         //- storing gradient for linear function
         scalar gradient_;
+
+        //- storing intercept for linear function
+        scalar intercept_;
 
 
     // Private Member Functions
@@ -80,12 +87,12 @@ private:
 public:
 
     //- Runtime type information
-    TypeName("linearDistance");
+    TypeName("surfaceOffsetLinearDistance");
 
     // Constructors
 
         //- Construct from components
-        linearDistance
+        surfaceOffsetLinearDistance
         (
             const dictionary& initialPointsDict,
             const conformalVoronoiMesh& cvMesh,
@@ -94,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~linearDistance()
+    virtual ~surfaceOffsetLinearDistance()
     {}
 
 

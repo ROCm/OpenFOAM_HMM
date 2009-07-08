@@ -14,6 +14,7 @@ $(cellSiseFunctions)/cellSizeFunction/cellSizeFunction.C
 $(cellSiseFunctions)/uniform/uniform.C
 $(cellSiseFunctions)/uniformDistance/uniformDistance.C
 $(cellSiseFunctions)/linearDistance/linearDistance.C
+$(cellSiseFunctions)/surfaceOffsetLinearDistance/surfaceOffsetLinearDistance.C
 
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C

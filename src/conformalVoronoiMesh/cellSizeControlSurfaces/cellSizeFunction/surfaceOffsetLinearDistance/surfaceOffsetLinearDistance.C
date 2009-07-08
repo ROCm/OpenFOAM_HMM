@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "linearDistance.H"
+#include "surfaceOffsetLinearDistance.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,12 +34,17 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(linearDistance, 0);
-addToRunTimeSelectionTable(cellSizeFunction, linearDistance, dictionary);
+defineTypeNameAndDebug(surfaceOffsetLinearDistance, 0);
+addToRunTimeSelectionTable
+(
+    cellSizeFunction,
+    surfaceOffsetLinearDistance,
+    dictionary
+);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-linearDistance::linearDistance
+surfaceOffsetLinearDistance::surfaceOffsetLinearDistance
 (
     const dictionary& initialPointsDict,
     const conformalVoronoiMesh& cvMesh,
@@ -49,23 +54,36 @@ linearDistance::linearDistance
     cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
     surfaceCellSize_(readScalar(coeffsDict().lookup("surfaceCellSize"))),
     distanceCellSize_(readScalar(coeffsDict().lookup("distanceCellSize"))),
-    distance_(readScalar(coeffsDict().lookup("distance"))),
-    distanceSqr_(sqr(distance_)),
-    gradient_((distanceCellSize_ - surfaceCellSize_)/distance_)
+    surfaceOffset_(readScalar(coeffsDict().lookup("surfaceOffset"))),
+    totalDistance_
+    (
+        readScalar(coeffsDict().lookup("distance")) + surfaceOffset_
+    ),
+    totalDistanceSqr_(sqr(totalDistance_)),
+    gradient_
+    (
+        (distanceCellSize_ - surfaceCellSize_)/(totalDistance_ - surfaceOffset_)
+    ),
+    intercept_(surfaceCellSize_ - gradient_*surfaceOffset_)
 {}
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-scalar linearDistance::sizeFunction(scalar d) const
+scalar surfaceOffsetLinearDistance::sizeFunction(scalar d) const
 {
-    return gradient_*d + surfaceCellSize_;
+    if (d <= surfaceOffset_)
+    {
+        return surfaceCellSize_;
+    }
+
+    return gradient_*d + intercept_;
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool linearDistance::cellSize(const point& pt, scalar& size) const
+bool surfaceOffsetLinearDistance::cellSize(const point& pt, scalar& size) const
 {
     size = 0;
 
@@ -74,7 +92,7 @@ bool linearDistance::cellSize(const point& pt, scalar& size) const
     surface_.findNearest
     (
         pointField(1, pt),
-        scalarField(1, distanceSqr_),
+        scalarField(1, totalDistanceSqr_),
         hits
     );
 

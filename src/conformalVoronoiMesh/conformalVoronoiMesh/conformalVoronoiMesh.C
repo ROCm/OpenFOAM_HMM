@@ -32,6 +32,8 @@ License
 #include "ulong.H"
 #include "surfaceFeatures.H"
 
+#include "zeroGradientPointPatchField.H"
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::conformalVoronoiMesh::conformalVoronoiMesh
@@ -100,9 +102,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 {
     timeCheck();
 
-    point sizeTestPt = vector(0.5, 0.3, 0.6);
-    Info<< nl << cellSizeControl().cellSize(sizeTestPt) << endl;
-
     createFeaturePoints();
     timeCheck();
 
@@ -117,6 +116,51 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     writeMesh();
     timeCheck();
+
+    // Test field creation and cell size functions
+
+    Info<< "Create fvMesh" << endl;
+
+    fvMesh fMesh
+    (
+        IOobject
+        (
+            Foam::polyMesh::defaultRegion,
+            runTime_.constant(),
+            runTime_,
+            IOobject::MUST_READ
+        )
+    );
+
+    timeCheck();
+
+    Info<< "Create volScalarField" << endl;
+
+    volScalarField cellSizeTest
+    (
+        IOobject
+        (
+            "cellSizeTest",
+            runTime_.timeName(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        fMesh,
+        dimensionedScalar("cellSize", dimLength, 0),
+        zeroGradientPointPatchField<scalar>::typeName
+    );
+
+    scalarField& cellSize = cellSizeTest.internalField();
+
+    const vectorField& C = fMesh.cellCentres();
+
+    forAll(cellSize, i)
+    {
+        cellSize[i] = cellSizeControl().cellSize(C[i]);
+    }
+
+    cellSizeTest.write();
 }
 
 
@@ -127,7 +171,6 @@ Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
 
 void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 (
@@ -1744,7 +1787,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     label iterationNo = 0;
 
-    label maxIterations = 10;
+    label maxIterations = 2;
     Info << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
     // Set totalHits to a positive value to enter the while loop on the first

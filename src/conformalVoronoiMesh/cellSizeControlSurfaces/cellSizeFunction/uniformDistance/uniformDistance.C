@@ -48,7 +48,8 @@ uniformDistance::uniformDistance
 :
     cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
     cellSize_(readScalar(coeffsDict().lookup("cellSize"))),
-    distance_(readScalar(coeffsDict().lookup("distance")))
+    distance_(readScalar(coeffsDict().lookup("distance"))),
+    distanceSqr_(sqr(distance_))
 {}
 
 
@@ -56,9 +57,58 @@ uniformDistance::uniformDistance
 
 bool uniformDistance::cellSize(const point& pt, scalar& size) const
 {
-    size = cellSize_;
+    size = 0;
 
-    return true;
+    List<pointIndexHit> hits;
+
+    surface_.findNearest
+    (
+        pointField(1, pt),
+        scalarField(1, distanceSqr_),
+        hits
+    );
+
+    if (hits[0].hit())
+    {
+        if (sideMode_ == BOTHSIDES)
+        {
+            size = cellSize_;
+
+            return true;
+        }
+
+        pointField ptF(1, pt);
+        List<searchableSurface::volumeType> vTL;
+
+        surface_.getVolumeType(ptF, vTL);
+
+        bool functionApplied = false;
+
+        if
+        (
+            sideMode_ == INSIDE
+         && vTL[0] == searchableSurface::INSIDE
+        )
+        {
+            size = cellSize_;
+
+            functionApplied = true;
+        }
+        else if
+        (
+            sideMode_ == OUTSIDE
+         && vTL[0] == searchableSurface::OUTSIDE
+        )
+        {
+            size = cellSize_;
+
+            functionApplied = true;
+        }
+
+        return functionApplied;
+    }
+
+    return false;
 }
 
 

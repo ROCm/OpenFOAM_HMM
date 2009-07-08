@@ -61,6 +61,9 @@ private:
         //- Distance
         scalar distance_;
 
+        //- Distance squared
+        scalar distanceSqr_;
+
 
 public:
 

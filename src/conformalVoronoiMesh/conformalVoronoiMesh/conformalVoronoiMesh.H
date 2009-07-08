@@ -57,6 +57,8 @@ SourceFiles
 #include "treeDataPoint.H"
 #include "mathematicalConstants.H"
 #include "transform.H"
+#include "volFields.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
