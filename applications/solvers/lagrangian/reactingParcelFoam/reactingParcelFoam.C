@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readChemistryProperties.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createClouds.H"
     #include "createRadiationModel.H"

@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "createFields.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readCombustionProperties.H"
     #include "createSpray.H"
     #include "initContinuityErrs.H"
