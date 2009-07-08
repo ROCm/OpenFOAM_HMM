@@ -99,12 +99,14 @@ int main(int argc, char *argv[])
             #include "pEqn.H"
         }
 
-
         turbulence->correct();
 
         rho = thermo.rho();
 
-        runTime.write();
+        if (runTime.write())
+        {
+            chemistry.dQ()().write();
+        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
