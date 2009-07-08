@@ -60,7 +60,7 @@ class UniformDimensionedField
 public:
 
     //- Runtime type information
-    TypeName("DimensionedType");
+    TypeName("UniformDimensionedField");
 
 
     // Constructors
