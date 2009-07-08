@@ -9,7 +9,7 @@ FoamFile
 {
     version     2.0;
     format      binary;
-    class       dictionary;
+    class       uniformDimensionedVectorField;
     location    "constant";
     object      g;
 }
