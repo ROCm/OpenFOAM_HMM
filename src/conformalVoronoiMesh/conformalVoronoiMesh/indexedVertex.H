@@ -67,10 +67,6 @@ class indexedVertex
 
         Foam::List<Foam::vector> alignmentDirections_;
 
-        Foam::scalar distanceToClosestSurface_;
-
-        Foam::label indexOfClosestPatch_;
-
 
 public:
 
@@ -98,9 +94,7 @@ public:
         Vb(),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0),
-        distanceToClosestSurface_(-1),
-        indexOfClosestPatch_(-1)
+        alignmentDirections_(0)
     {}
 
     indexedVertex(const Point& p)
@@ -108,9 +102,7 @@ public:
         Vb(p),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0),
-        distanceToClosestSurface_(-1),
-        indexOfClosestPatch_(-1)
+        alignmentDirections_(0)
     {}
 
     indexedVertex(const Point& p, Cell_handle f)
@@ -118,9 +110,7 @@ public:
         Vb(f, p),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0),
-        distanceToClosestSurface_(-1),
-        indexOfClosestPatch_(-1)
+        alignmentDirections_(0)
     {}
 
     indexedVertex(Cell_handle f)
@@ -128,9 +118,7 @@ public:
         Vb(f),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0),
-        distanceToClosestSurface_(-1),
-        indexOfClosestPatch_(-1)
+        alignmentDirections_(0)
     {}
 
 
@@ -162,16 +150,6 @@ public:
     inline const Foam::List<Foam::vector>& alignmentDirections() const
     {
         return alignmentDirections_;
-    }
-
-    inline Foam::scalar& distanceToClosestSurface()
-    {
-        return distanceToClosestSurface_;
-    }
-
-    inline Foam::label& indexOfClosestPatch()
-    {
-        return indexOfClosestPatch_;
     }
 
     inline bool uninitialised() const

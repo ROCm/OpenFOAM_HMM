@@ -161,6 +161,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     }
 
     cellSizeTest.write();
+
+    timeCheck();
 }
 
 
