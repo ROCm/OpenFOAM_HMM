@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "turbulentMixingLengthFrequencyInletFvPatchScalarField.H"
+#include "backwardsCompatibilityTurbulentMixingLengthFrequencyInlet.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "surfaceFields.H"
@@ -40,8 +40,8 @@ namespace compressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -52,10 +52,10 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     kName_("k")
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField
 (
-    const turbulentMixingLengthFrequencyInletFvPatchScalarField& ptf,
+    const backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -66,8 +66,8 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     kName_(ptf.kName_)
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -79,10 +79,10 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     kName_(dict.lookupOrDefault<word>("k", "k"))
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField
 (
-    const turbulentMixingLengthFrequencyInletFvPatchScalarField& ptf
+    const backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField& ptf
 )
 :
     fixedValueFvPatchField<scalar>(ptf),
@@ -90,10 +90,10 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
     kName_(ptf.kName_)
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField
 (
-    const turbulentMixingLengthFrequencyInletFvPatchScalarField& ptf,
+    const backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -105,7 +105,7 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
+void backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -127,14 +127,20 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
 }
 
 
-void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
+void backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField::write
 (
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    // write with prefix for forwards compatibility
+    // mimic - fvPatchField<scalar>::write(os);
+
+    os.writeKeyword("type")
+        << "compressible::" << type() << token::END_STATEMENT << nl;
+
     os.writeKeyword("mixingLength")
         << mixingLength_ << token::END_STATEMENT << nl;
+
     os.writeKeyword("k") << kName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
@@ -145,7 +151,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
 makePatchTypeField
 (
     fvPatchScalarField,
-    turbulentMixingLengthFrequencyInletFvPatchScalarField
+    backwardsCompatibilityTurbulentMixingLengthFrequencyInletFvPatchScalarField
 );
 
 

@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "turbulentMixingLengthFrequencyInletFvPatchScalarField.H"
+#include "backwardsCompatibilityTurbulentMixingLengthDissipationRateInlet.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "surfaceFields.H"
@@ -40,34 +40,32 @@ namespace compressible
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    mixingLength_(0.0),
-    kName_("k")
+    mixingLength_(0.001)
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 (
-    const turbulentMixingLengthFrequencyInletFvPatchScalarField& ptf,
+    const backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
     fixedValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    mixingLength_(ptf.mixingLength_),
-    kName_(ptf.kName_)
+    mixingLength_(ptf.mixingLength_)
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -75,37 +73,34 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF, dict),
-    mixingLength_(readScalar(dict.lookup("mixingLength"))),
-    kName_(dict.lookupOrDefault<word>("k", "k"))
+    mixingLength_(readScalar(dict.lookup("mixingLength")))
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 (
-    const turbulentMixingLengthFrequencyInletFvPatchScalarField& ptf
+    const backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField& ptf
 )
 :
     fixedValueFvPatchField<scalar>(ptf),
-    mixingLength_(ptf.mixingLength_),
-    kName_(ptf.kName_)
+    mixingLength_(ptf.mixingLength_)
 {}
 
-turbulentMixingLengthFrequencyInletFvPatchScalarField::
-turbulentMixingLengthFrequencyInletFvPatchScalarField
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField::
+backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 (
-    const turbulentMixingLengthFrequencyInletFvPatchScalarField& ptf,
+    const backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField& ptf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
     fixedValueFvPatchField<scalar>(ptf, iF),
-    mixingLength_(ptf.mixingLength_),
-    kName_(ptf.kName_)
+    mixingLength_(ptf.mixingLength_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
+void backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -116,26 +111,30 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
     const scalar Cmu = readScalar(rasModel.coeffDict().lookup("Cmu"));
-    const scalar Cmu25 = pow(Cmu, 0.25);
+    const scalar Cmu75 = pow(Cmu, 0.75);
 
     const fvPatchField<scalar>& kp =
-        patch().lookupPatchField<volScalarField, scalar>(kName_);
+        patch().lookupPatchField<volScalarField, scalar>("k");
 
-    operator==(sqrt(kp)/(Cmu25*mixingLength_));
+    operator==(Cmu75*kp*sqrt(kp)/mixingLength_);
 
     fixedValueFvPatchField<scalar>::updateCoeffs();
 }
 
 
-void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
+void backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField::write
 (
     Ostream& os
 ) const
 {
-    fvPatchField<scalar>::write(os);
+    // write with prefix for forwards compatibility
+    // mimic - fvPatchField<scalar>::write(os);
+
+    os.writeKeyword("type")
+        << "compressible::" << type() << token::END_STATEMENT << nl;
+
     os.writeKeyword("mixingLength")
         << mixingLength_ << token::END_STATEMENT << nl;
-    os.writeKeyword("k") << kName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 
@@ -145,7 +144,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
 makePatchTypeField
 (
     fvPatchScalarField,
-    turbulentMixingLengthFrequencyInletFvPatchScalarField
+    backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 );
 
 
