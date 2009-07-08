@@ -449,7 +449,11 @@ meshTools = meshes/meshTools
 $(meshTools)/matchPoints.C
 $(meshTools)/mergePoints.C
 
+fields/UniformDimensionedFields/uniformDimensionedFields.C
+fields/cloud/cloud.C
+
 Fields = fields/Fields
+
 $(Fields)/labelField/labelField.C
 $(Fields)/scalarField/scalarField.C
 $(Fields)/sphericalTensorField/sphericalTensorField.C
@@ -457,8 +461,6 @@ $(Fields)/diagTensorField/diagTensorField.C
 $(Fields)/symmTensorField/symmTensorField.C
 $(Fields)/tensorField/tensorField.C
 $(Fields)/complexFields/complexFields.C
-
-fields/cloud/cloud.C
 
 $(Fields)/labelField/labelIOField.C
 $(Fields)/scalarField/scalarIOField.C
