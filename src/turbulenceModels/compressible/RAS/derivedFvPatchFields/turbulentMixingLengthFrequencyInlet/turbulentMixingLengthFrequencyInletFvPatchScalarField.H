@@ -32,7 +32,7 @@ Description
     @verbatim
         inlet
         {
-            type            turbulentMixingLengthFrequencyInlet;
+            type            compressible::turbulentMixingLengthFrequencyInlet;
             mixingLength    0.005;         // 5 mm
             k               k;             // turbulent k field
             value           uniform 5;     // initial value

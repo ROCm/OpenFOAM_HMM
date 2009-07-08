@@ -24,28 +24,19 @@ License
 
 Class
     Foam::compressible::
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 
 Description
-    Calculate epsilon via the mixing length [m]
-
-    Example of the boundary condition specification:
-    @verbatim
-        inlet
-        {
-            type            compressible::turbulentMixingLengthDissipationRateInlet;
-            mixingLength    0.005;         // 5 mm
-            value           uniform 200;   // placeholder
-        }
-    @endverbatim
+    Compatibility for the new namespace qualifier
+    Foam::compressible::turbulentMixingLengthDissipationRateInletFvPatchScalarField
 
 SourceFiles
-    turbulentMixingLengthDissipationRateInletFvPatchScalarField.C
+    backwardsCompatibilityTurbulentMixingLengthDissipationRateInlet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
-#define compressibleturbulentMixingLengthDissipationRateInletFvPatchField_H
+#ifndef backwardsCompatibilityTurbulentMixingLengthDissipationRateInlet_H
+#define backwardsCompatibilityTurbulentMixingLengthDissipationRateInlet_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -57,10 +48,10 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-       Class turbulentMixingLengthDissipationRateInletFvPatch Declaration
+       Class backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class turbulentMixingLengthDissipationRateInletFvPatchScalarField
+class backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
@@ -72,20 +63,20 @@ class turbulentMixingLengthDissipationRateInletFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("compressible::turbulentMixingLengthDissipationRateInlet");
+    TypeName("turbulentMixingLengthDissipationRateInlet");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -93,20 +84,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        //  backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
         //  onto a new patch
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
         (
-            const turbulentMixingLengthDissipationRateInletFvPatchScalarField&,
+            const backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
         (
-            const turbulentMixingLengthDissipationRateInletFvPatchScalarField&
+            const backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -114,7 +105,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentMixingLengthDissipationRateInletFvPatchScalarField
+                new backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
                 (
                     *this
                 )
@@ -122,9 +113,9 @@ public:
         }
 
         //- Construct as copy setting internal field reference
-        turbulentMixingLengthDissipationRateInletFvPatchScalarField
+        backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
         (
-            const turbulentMixingLengthDissipationRateInletFvPatchScalarField&,
+            const backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -136,7 +127,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new turbulentMixingLengthDissipationRateInletFvPatchScalarField
+                new backwardsCompatibilityTurbulentMixingLengthDissipationRateInletFvPatchScalarField
                 (
                     *this,
                     iF
