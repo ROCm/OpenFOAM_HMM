@@ -81,7 +81,7 @@ Foam::sigInt::~sigInt()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigInt::set()
+void Foam::sigInt::set(const bool verbose)
 {
     if (oldAction_.sa_handler)
     {

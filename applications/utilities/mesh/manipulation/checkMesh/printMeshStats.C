@@ -69,13 +69,13 @@ void Foam::printMeshStats(const polyMesh& mesh, const bool allTopology)
         << "    cells:            "
         << returnReduce(mesh.cells().size(), sumOp<label>()) << nl
         << "    boundary patches: "
-        << returnReduce(mesh.boundaryMesh().size(), sumOp<label>()) << nl
+        << mesh.boundaryMesh().size() << nl
         << "    point zones:      "
-        << returnReduce(mesh.pointZones().size(), sumOp<label>()) << nl
+        << mesh.pointZones().size() << nl
         << "    face zones:       "
-        << returnReduce(mesh.faceZones().size(), sumOp<label>()) << nl
+        << mesh.faceZones().size() << nl
         << "    cell zones:       "
-        << returnReduce(mesh.cellZones().size(), sumOp<label>()) << nl
+        << mesh.cellZones().size() << nl
         << endl;
 
 

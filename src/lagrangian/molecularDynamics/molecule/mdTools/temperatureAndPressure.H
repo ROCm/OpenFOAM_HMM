@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,17 +47,17 @@ accumulatedTotalrDotfSum += singleStepTotalrDotf;
 
 accumulatedNMols += singleStepNMols;
 
+accumulatedDOFs += singleStepDOFs;
+
 if (runTime.outputTime())
 {
-    // calculate averages
-
     if (accumulatedNMols)
     {
         Info << "calculating averages" << endl;
 
         averageTemperature =
         (
-            2.0/(6.0 * moleculeCloud::kb * accumulatedNMols)
+            2.0/(moleculeCloud::kb * accumulatedDOFs)
             *
             (
                 accumulatedTotalLinearKE + accumulatedTotalAngularKE
@@ -79,26 +79,19 @@ if (runTime.outputTime())
             meshVolume
         );
 
-        // output values
-
         Info << "----------------------------------------" << nl
             << "Averaged properties" << nl
             << "Average |velocity| = "
-                << mag(accumulatedTotalLinearMomentum)/accumulatedTotalMass
-                << " m/s" << nl
-            << "Average temperature = "
-                << averageTemperature << " K" << nl
-            << "Average pressure = "
-                << averagePressure << " N/m^2" << nl
+            << mag(accumulatedTotalLinearMomentum)/accumulatedTotalMass << nl
+            << "Average temperature = " << averageTemperature << nl
+            << "Average pressure = " << averagePressure << nl
             << "----------------------------------------" << endl;
     }
     else
     {
-        Info << "Not averaging temperature and pressure: "
+        Info<< "Not averaging temperature and pressure: "
             << "no molecules in system" << endl;
     }
-
-    // reset counters
 
     accumulatedTotalLinearMomentum = vector::zero;
 
@@ -113,6 +106,9 @@ if (runTime.outputTime())
     accumulatedTotalrDotfSum = 0.0;
 
     accumulatedNMols = 0;
+
+    accumulatedDOFs = 0;
 }
+
 
 // ************************************************************************* //

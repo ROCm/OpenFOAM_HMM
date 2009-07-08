@@ -134,14 +134,26 @@ bool Foam::regIOobject::checkIn()
         // any mapping
         registered_ = db().checkIn(*this);
 
-        // checkin on defaultRegion is allowed to fail, since subsetted meshes
+        // check-in on defaultRegion is allowed to fail, since subsetted meshes
         // are created with the same name as their originating mesh
         if (!registered_ && debug && name() != polyMesh::defaultRegion)
         {
-            WarningIn("regIOobject::checkIn()")
-                << "failed to register object " << objectPath()
+            if (debug == 2)
+            {
+                // for ease of finding where attempted duplicate check-in
+                // originated
+                FatalErrorIn("regIOobject::checkIn()")
+                    << "failed to register object " << objectPath()
                     << " the name already exists in the objectRegistry"
-                << endl;
+                    << abort(FatalError);
+            }
+            else
+            {
+                WarningIn("regIOobject::checkIn()")
+                    << "failed to register object " << objectPath()
+                    << " the name already exists in the objectRegistry"
+                    << endl;
+            }
         }
     }
 

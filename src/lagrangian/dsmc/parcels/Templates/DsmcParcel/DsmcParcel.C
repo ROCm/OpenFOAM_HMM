@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ bool Foam::DsmcParcel<ParcelType>::move
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    const scalar deltaT = mesh.time().deltaT().value();
+    const scalar deltaT = td.cloud().cachedDeltaT();
     scalar tEnd = (1.0 - p.stepFraction())*deltaT;
     const scalar dtMax = tEnd;
 
@@ -61,20 +61,27 @@ bool Foam::DsmcParcel<ParcelType>::move
 
         if (p.onBoundary() && td.keepParticle)
         {
-            if (p.face() > -1)
+            if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
             {
-                if
-                (
-                    isType<processorPolyPatch>(pbMesh[p.patch(p.face())])
-                )
-                {
-                    td.switchProcessor = true;
-                }
+                td.switchProcessor = true;
             }
         }
     }
 
     return td.keepParticle;
+}
+
+
+template<class ParcelType>
+template<class TrackData>
+bool Foam::DsmcParcel<ParcelType>::hitPatch
+(
+    const polyPatch&,
+    TrackData& td,
+    const label patchI
+)
+{
+    return false;
 }
 
 
@@ -138,7 +145,7 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
 
     const scalar fA = mag(wpp.faceAreas()[wppLocalFace]);
 
-    const scalar deltaT = td.cloud().mesh().time().deltaT().value();
+    const scalar deltaT = td.cloud().cachedDeltaT();
 
     scalar deltaQ = td.cloud().nParticle()*(preIE - postIE)/(deltaT*fA);
 

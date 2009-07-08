@@ -27,6 +27,15 @@ License
 #include "ThermoParcel.H"
 #include "IOstreams.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class ParcelType>
+Foam::string Foam::ThermoParcel<ParcelType>::propHeader =
+    KinematicParcel<ParcelType>::propHeader
+  + " T"
+  + " cp";
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -140,13 +149,13 @@ Foam::Ostream& Foam::operator<<
 {
     if (os.format() == IOstream::ASCII)
     {
-        os  << static_cast<const KinematicParcel<ParcelType>& >(p)
+        os  << static_cast<const KinematicParcel<ParcelType>&>(p)
             << token::SPACE << p.T()
             << token::SPACE << p.cp();
     }
     else
     {
-        os  << static_cast<const KinematicParcel<ParcelType>& >(p);
+        os  << static_cast<const KinematicParcel<ParcelType>&>(p);
         os.write
         (
             reinterpret_cast<const char*>(&p.T_),

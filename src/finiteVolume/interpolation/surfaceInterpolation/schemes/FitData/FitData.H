@@ -26,7 +26,11 @@ Class
     Foam::FitData
 
 Description
-    Data for the upwinded and centred polynomial fit interpolation schemes
+    Data for the upwinded and centred polynomial fit interpolation schemes.
+    The linearCorrection_ determines whether the fit is for a corrected
+    linear scheme (first two coefficients are corrections for owner and
+    neighbour) or a pure upwind scheme (first coefficient is correction for
+    owner ; weight on face taken as 1).
 
 SourceFiles
     FitData.C
@@ -58,7 +62,11 @@ class FitData
         //- The stencil the fit is based on
         const ExtendedStencil& stencil_;
 
-        //- Factor the fit is allowed to deviate from linear.
+        //- Is scheme correction on linear (true) or on upwind (false)
+        const bool linearCorrection_;
+
+        //- Factor the fit is allowed to deviate from the base scheme
+        //  (linear or pure upwind)
         //  This limits the amount of high-order correction and increases
         //  stability on bad meshes
         const scalar linearLimitFactor_;
@@ -84,11 +92,6 @@ class FitData
             const label faci
         );
 
-        //- Calculate the fit for the all the mesh faces
-        //  and set the coefficients
-        // virtual void calcFit();
-
-
 public:
 
     //TypeName("FitData");
@@ -101,6 +104,7 @@ public:
         (
             const fvMesh& mesh,
             const ExtendedStencil& stencil,
+            const bool linearCorrection,
             const scalar linearLimitFactor,
             const scalar centralWeight
         );
@@ -119,12 +123,18 @@ public:
             return stencil_;
         }
 
+        bool linearCorrection() const
+        {
+            return linearCorrection_;
+        }
+
         //- Calculate the fit for the specified face and set the coefficients
         void calcFit
         (
             scalarList& coeffsi, // coefficients to be set
             const List<point>&,  // Stencil points
-            const scalar wLin,   // Linear weight
+            const scalar wLin,   // Weight for linear approximation (weights
+                                 // nearest neighbours)
             const label faci     // Current face index
         );
 
@@ -132,7 +142,7 @@ public:
         virtual void calcFit() = 0;
 
 
-        //- Delete the data when the mesh moves not implemented
+        //- Recalculate weights (but not stencil) when the mesh moves
         bool movePoints();
 };
 

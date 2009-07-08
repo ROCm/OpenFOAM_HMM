@@ -47,59 +47,58 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "readPPProperties.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "CourantNo.H"
+    #include "setInitialDeltaT.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "readPPProperties.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "CourantNo.H"
-#   include "setInitialDeltaT.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTwoPhaseEulerFoamControls.H"
-#       include "CourantNos.H"
-#       include "setDeltaT.H"
+        #include "readTwoPhaseEulerFoamControls.H"
+        #include "CourantNos.H"
+        #include "setDeltaT.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "alphaEqn.H"
+        #include "alphaEqn.H"
 
-#       include "liftDragCoeffs.H"
+        #include "liftDragCoeffs.H"
 
-#       include "UEqns.H"
+        #include "UEqns.H"
 
         // --- PISO loop
         for (int corr=0; corr<nCorr; corr++)
         {
-#           include "pEqn.H"
+            #include "pEqn.H"
 
             if (correctAlpha && corr<nCorr-1)
             {
-#               include "alphaEqn.H"
+                #include "alphaEqn.H"
             }
         }
 
-#       include "DDtU.H"
+        #include "DDtU.H"
 
-#       include "kEpsilon.H"
+        #include "kEpsilon.H"
 
         if (kineticTheory.on())
         {
             kineticTheory.solve();
             nuEffa += kineticTheory.mua()/rhoa;
         }
-#       include "write.H"
+        #include "write.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

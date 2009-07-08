@@ -417,19 +417,13 @@ public:
 
     // IOstream Operator
 
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <T, Key, Hash>
-        #endif
+        friend Istream& operator>> <T, Key, Hash>
         (
             Istream&,
             HashTable<T, Key, Hash>&
         );
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <T, Key, Hash>
-        #endif
+        friend Ostream& operator<< <T, Key, Hash>
         (
             Ostream&,
             const HashTable<T, Key, Hash>&

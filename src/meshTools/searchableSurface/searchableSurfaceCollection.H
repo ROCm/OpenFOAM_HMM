@@ -26,7 +26,8 @@ Class
     Foam::searchableSurfaceCollection
 
 Description
-    Union of transformed searchableSurfaces
+    Set of transformed searchableSurfaces. Does not do boolean operations.
+    So when meshing might find parts 'inside'.
 
 SourceFiles
     searchableSurfaceCollection.C
@@ -40,6 +41,7 @@ SourceFiles
 #include "treeBoundBox.H"
 #include "coordinateSystem.H"
 #include "UPtrList.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -72,6 +74,8 @@ private:
             PtrList<coordinateSystem> transform_;
 
             UPtrList<searchableSurface> subGeom_;
+
+            Switch mergeSubRegions_;
 
         //- Region names
         mutable wordList regions_;

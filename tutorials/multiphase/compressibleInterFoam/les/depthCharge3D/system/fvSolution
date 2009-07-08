@@ -45,7 +45,7 @@ solvers
         solver          diagonal;
     }
 
-    pd
+    p
     {
         solver          GAMG;
         tolerance       1e-07;
@@ -60,7 +60,7 @@ solvers
         mergeLevels     1;
     }
 
-    pdFinal
+    pFinal
     {
         solver          PCG;
         preconditioner

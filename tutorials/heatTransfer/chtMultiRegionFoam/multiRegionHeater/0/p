@@ -16,40 +16,40 @@ FoamFile
 
 dimensions      [1 -1 -2 0 0 0 0];
 
-internalField   uniform 0;
+internalField   uniform 1e5;
 
 boundaryField
 {
     minX
     {
-        type            calculated;
-        value           uniform 0;
+        type            buoyantPressure;
+        value           1e5;
     }
     maxX
     {
-        type            calculated;
-        value           uniform 0;
+        type            buoyantPressure;
+        value           1e5;
     }
 
     minY
     {
-        type            calculated;
-        value           uniform 0;
+        type            buoyantPressure;
+        value           1e5;
     }
     maxY
     {
-        type            calculated;
-        value           uniform 0;
+        type            buoyantPressure;
+        value           1e5;
     }
     minZ
     {
-        type            calculated;
-        value           uniform 0;
+        type            buoyantPressure;
+        value           1e5;
     }
     maxZ
     {
-        type            calculated;
-        value           uniform 0;
+        type            buoyantPressure;
+        value           1e5;
     }
 }
 

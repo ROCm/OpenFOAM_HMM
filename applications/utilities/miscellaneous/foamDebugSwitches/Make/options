@@ -1,7 +1,7 @@
 EXE_LIBS = \
     -lbasicThermophysicalModels \
     -lchemistryModel \
-    -lcombustionThermophysicalModels \
+    -lreactionThermophysicalModels \
     -lcompressibleLESModels \
     -ldecompositionMethods \
     -ldieselSpray \

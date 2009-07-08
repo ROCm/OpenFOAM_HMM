@@ -44,33 +44,11 @@ const Foam::NamedEnum<Foam::timeActivatedExplicitSource::volumeType, 2>
 Foam::timeActivatedExplicitSource::volumeTypeNames_;
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::timeActivatedExplicitSource::updateCellSet()
-{
-    cellSelector_->applyToSet(topoSetSource::NEW, selectedCellSet_);
-
-    Info<< "    " << sourceName_ << ": selected "
-        << returnReduce(selectedCellSet_.size(), sumOp<label>())
-        << " cells" << nl << endl;
-
-    V_ = scalarField(selectedCellSet_.size(), 1.0);
-    if (volumeType_ == vtAbsolute)
-    {
-        label i = 0;
-        forAllConstIter(cellSet, selectedCellSet_, iter)
-        {
-            V_[i++] = mesh_.V()[iter.key()];
-        }
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::timeActivatedExplicitSource::timeActivatedExplicitSource
 (
-    const word& sourceName,
+    const word& name,
     const fvMesh& mesh,
     const dimensionSet& dims
 )
@@ -79,50 +57,62 @@ Foam::timeActivatedExplicitSource::timeActivatedExplicitSource
     (
         IOobject
         (
-            sourceName + "Properties",
+            name + "Properties",
             mesh.time().constant(),
             mesh,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
-    sourceName_(sourceName),
     mesh_(mesh),
     runTime_(mesh.time()),
+    name_(name),
+    active_(lookup("active")),
     dimensions_(dims),
     volumeType_(volumeTypeNames_.read(lookup("volumeType"))),
     timeStart_(readScalar(lookup("timeStart"))),
-    duration_(readScalar(lookup("duration"))),
-    onValue_(readScalar(lookup("onValue"))),
-    offValue_(readScalar(lookup("offValue"))),
-    currentValue_(0.0),
-    V_(0),
-    cellSource_(lookup("cellSource")),
-    cellSelector_
-    (
-        topoSetSource::New
-        (
-            cellSource_,
-            mesh,
-            subDict(cellSource_ + "Coeffs")
-        )
-    ),
-    selectedCellSet_
-    (
-        mesh,
-        sourceName + "SourceCellSet",
-        mesh.nCells()/10 + 1  // Reasonable size estimate.
-    )
-{
-    // Create the cell set
-    updateCellSet();
-
-    // Initialise the value
-    update();
-}
+    duration_(readScalar(lookup("duration")))
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::fvMesh& Foam::timeActivatedExplicitSource::mesh() const
+{
+    return mesh_;
+}
+
+
+const Foam::Time& Foam::timeActivatedExplicitSource::runTime() const
+{
+    return runTime_;
+}
+
+
+const Foam::word& Foam::timeActivatedExplicitSource::name() const
+{
+    return name_;
+}
+
+
+const Foam::Switch& Foam::timeActivatedExplicitSource::active() const
+{
+    return active_;
+}
+
+
+const Foam::dimensionSet& Foam::timeActivatedExplicitSource::dimensions() const
+{
+    return dimensions_;
+}
+
+
+const Foam::timeActivatedExplicitSource::volumeType&
+Foam::timeActivatedExplicitSource::volume() const
+{
+    return volumeType_;
+}
+
 
 Foam::scalar Foam::timeActivatedExplicitSource::timeStart() const
 {
@@ -136,70 +126,22 @@ Foam::scalar Foam::timeActivatedExplicitSource::duration() const
 }
 
 
-const Foam::dimensionedScalar
-Foam::timeActivatedExplicitSource::currentValue() const
-{
-    return dimensionedScalar
-    (
-        sourceName_,
-        dimensions_,
-        currentValue_
-    );
-}
-
-
-Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::timeActivatedExplicitSource::Su() const
-{
-    tmp<DimensionedField<scalar, volMesh> > tSource
-    (
-        new DimensionedField<scalar, volMesh>
-        (
-            IOobject
-            (
-                sourceName_ + "Su",
-                runTime_.timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensions_, 0.0)
-        )
-    );
-
-    DimensionedField<scalar, volMesh>& sourceField = tSource();
-
-    label i = 0;
-    forAllConstIter(cellSet, selectedCellSet_, iter)
-    {
-        sourceField[iter.key()] = currentValue_/V_[i++];
-    }
-
-    return tSource;
-}
-
-
 bool Foam::timeActivatedExplicitSource::read()
 {
     if (regIOobject::read())
     {
-        volumeType_ = volumeTypeNames_.read(lookup("volumeType"));
-        lookup("timeStart") >> duration_;
-        lookup("duration") >> duration_;
-        lookup("onValue") >> onValue_;
-        lookup("offValue") >> offValue_;
-        lookup("cellSource") >> cellSource_;
-        cellSelector_ =
-            topoSetSource::New
-            (
-                cellSource_,
-                mesh_,
-                subDict(cellSource_ + "Coeffs")
-            );
-        updateCellSet();
-
-        return true;
+        lookup("active") >> active_;
+        if (active_)
+        {
+            volumeType_ = volumeTypeNames_.read(lookup("volumeType"));
+            lookup("timeStart") >> duration_;
+            lookup("duration") >> duration_;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
     else
     {
@@ -208,28 +150,6 @@ bool Foam::timeActivatedExplicitSource::read()
 }
 
 
-void Foam::timeActivatedExplicitSource::update()
-{
-    // Set the source value
-    if
-    (
-        (runTime_.time().value() >= timeStart_)
-     && (runTime_.time().value() <= timeStart_ + duration_)
-    )
-    {
-        currentValue_ = onValue_;
-    }
-    else
-    {
-        currentValue_ = offValue_;
-    }
-
-    // Update the cell set if the mesh is changing
-    if (mesh_.changing())
-    {
-        updateCellSet();
-    }
-}
 
 
 // ************************************************************************* //

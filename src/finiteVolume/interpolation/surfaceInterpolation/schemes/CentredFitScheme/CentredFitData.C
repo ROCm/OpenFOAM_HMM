@@ -29,7 +29,7 @@ License
 #include "volFields.H"
 #include "SVD.H"
 #include "syncTools.H"
-#include "extendedCentredStencil.H"
+#include "extendedCentredCellToFaceStencil.H"
 
 // * * * * * * * * * * * * * * * * Constructors * * * * * * * * * * * * * * //
 
@@ -37,14 +37,19 @@ template<class Polynomial>
 Foam::CentredFitData<Polynomial>::CentredFitData
 (
     const fvMesh& mesh,
-    const extendedCentredStencil& stencil,
+    const extendedCentredCellToFaceStencil& stencil,
     const scalar linearLimitFactor,
     const scalar centralWeight
 )
 :
-    FitData<CentredFitData<Polynomial>, extendedCentredStencil, Polynomial>
+    FitData
+    <
+        CentredFitData<Polynomial>,
+        extendedCentredCellToFaceStencil,
+        Polynomial
+    >
     (
-        mesh, stencil, linearLimitFactor, centralWeight
+        mesh, stencil, true, linearLimitFactor, centralWeight
     ),
     coeffs_(mesh.nFaces())
 {
@@ -83,8 +88,12 @@ void Foam::CentredFitData<Polynomial>::calcFit()
 
     for(label facei = 0; facei < mesh.nInternalFaces(); facei++)
     {
-        FitData<CentredFitData<Polynomial>, extendedCentredStencil, Polynomial>::
-                   calcFit(coeffs_[facei], stencilPoints[facei], w[facei], facei);
+        FitData
+        <
+            CentredFitData<Polynomial>,
+            extendedCentredCellToFaceStencil,
+            Polynomial
+        >::calcFit(coeffs_[facei], stencilPoints[facei], w[facei], facei);
     }
 
     const surfaceScalarField::GeometricBoundaryField& bw = w.boundaryField();
@@ -101,7 +110,9 @@ void Foam::CentredFitData<Polynomial>::calcFit()
             {
                 FitData
                 <
-                    CentredFitData<Polynomial>, extendedCentredStencil, Polynomial
+                    CentredFitData<Polynomial>,
+                    extendedCentredCellToFaceStencil,
+                    Polynomial
                 >::calcFit(coeffs_[facei], stencilPoints[facei], pw[i], facei);
                 facei++;
             }

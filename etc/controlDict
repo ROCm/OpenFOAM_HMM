@@ -95,6 +95,7 @@ DebugSwitches
     Euler               0;
     EulerImplicit       0;
     EulerRotation       0;
+    extendedCellToFaceStencil 0;
     FDIC                0;
     FaceCellWave        0;
     GAMG                0;
@@ -423,7 +424,7 @@ DebugSwitches
     filteredLinear3     0;
     filteredLinear3V    0;
     fixedEnthalpy       0;
-    fixedFluxBuoyantPressure 0;
+    buoyantPressure 0;
     fixedFluxBoussinesqBuoyantPressure 0;
     fixedFluxPressure   0;
     fixedGradient       0;

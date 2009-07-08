@@ -43,7 +43,7 @@ SourceFiles
 namespace Foam
 {
 
-class extendedCentredStencil;
+class extendedCentredCellToFaceStencil;
 
 /*---------------------------------------------------------------------------*\
                     Class CentredFitData Declaration
@@ -52,7 +52,7 @@ class extendedCentredStencil;
 template<class Polynomial>
 class CentredFitData
 :
-    public FitData<CentredFitData<Polynomial>, extendedCentredStencil, Polynomial>
+    public FitData<CentredFitData<Polynomial>, extendedCentredCellToFaceStencil, Polynomial>
 {
     // Private data
 
@@ -79,7 +79,7 @@ public:
         CentredFitData
         (
             const fvMesh& mesh,
-            const extendedCentredStencil& stencil,
+            const extendedCentredCellToFaceStencil& stencil,
             const scalar linearLimitFactor,
             const scalar centralWeight
         );

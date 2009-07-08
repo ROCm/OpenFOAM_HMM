@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -238,6 +238,16 @@ public:
 
 
         // Patch interactions
+
+            //- Overridable function to handle the particle hitting a patch
+            //  Executed before other patch-hitting functions
+            template<class TrackData>
+            bool hitPatch
+            (
+                const polyPatch&,
+                TrackData& td,
+                const label patchI
+            );
 
             //- Overridable function to handle the particle hitting a
             //  processorPatch

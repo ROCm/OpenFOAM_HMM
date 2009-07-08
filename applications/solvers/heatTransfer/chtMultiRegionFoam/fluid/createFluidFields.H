@@ -1,23 +1,13 @@
     // Initialise fluid field pointer lists
-    PtrList<basicThermo> thermoFluid(fluidRegions.size());
+    PtrList<basicPsiThermo> thermoFluid(fluidRegions.size());
     PtrList<volScalarField> rhoFluid(fluidRegions.size());
     PtrList<volScalarField> KFluid(fluidRegions.size());
     PtrList<volVectorField> UFluid(fluidRegions.size());
     PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
     PtrList<compressible::turbulenceModel> turbulence(fluidRegions.size());
     PtrList<volScalarField> DpDtFluid(fluidRegions.size());
-    PtrList<volScalarField> ghFluid(fluidRegions.size());
-    PtrList<surfaceScalarField> ghfFluid(fluidRegions.size());
-    PtrList<volScalarField> pdFluid(fluidRegions.size());
 
     List<scalar> initialMassFluid(fluidRegions.size());
-
-    dimensionedScalar pRef
-    (
-        "pRef",
-        dimensionSet(1, -1, -2, 0, 0),
-        rp.lookup("pRef")
-    );
 
     // Populate fluid field pointer lists
     forAll(fluidRegions, i)
@@ -25,29 +15,11 @@
         Info<< "*** Reading fluid mesh thermophysical properties for region "
             << fluidRegions[i].name() << nl << endl;
 
-        Info<< "    Adding to pdFluid\n" << endl;
-        pdFluid.set
-        (
-            i,
-            new volScalarField
-            (
-                IOobject
-                (
-                    "pd",
-                    runTime.timeName(),
-                    fluidRegions[i],
-                    IOobject::MUST_READ,
-                    IOobject::AUTO_WRITE
-                ),
-                fluidRegions[i]
-            )
-        );
-
         Info<< "    Adding to thermoFluid\n" << endl;
         thermoFluid.set
         (
             i,
-            basicThermo::New(fluidRegions[i]).ptr()
+            basicPsiThermo::New(fluidRegions[i]).ptr()
         );
 
         Info<< "    Adding to rhoFluid\n" << endl;
@@ -145,6 +117,7 @@
             i,
             new volScalarField
             (
+                "DpDt",
                 fvc::DDt
                 (
                     surfaceScalarField
@@ -157,36 +130,5 @@
             )
         );
 
-        const dictionary& environmentalProperties =
-            fluidRegions[i].lookupObject<IOdictionary>
-                ("environmentalProperties");
-        dimensionedVector g(environmentalProperties.lookup("g"));
-
-        Info<< "    Adding to ghFluid\n" << endl;
-        ghFluid.set
-        (
-            i,
-            new volScalarField
-            (
-                "gh",
-                 g & fluidRegions[i].C()
-            )
-        );
-        ghfFluid.set
-        (
-            i,
-            new surfaceScalarField
-            (
-                "ghf",
-                 g & fluidRegions[i].Cf()
-            )
-        );
-
-        Info<< "    Updating p from pd\n" << endl;
-        thermoFluid[i].p() == pdFluid[i] + rhoFluid[i]*ghFluid[i] + pRef;
-        thermoFluid[i].correct();
-
         initialMassFluid[i] = fvc::domainIntegrate(rhoFluid[i]).value();
     }
-
-

@@ -41,6 +41,7 @@ Description
 #include "pointFields.H"
 #include "cellIOList.H"
 #include "IOobjectList.H"
+#include "IOPtrList.H"
 
 #include "writeMeshObject.H"
 #include "fieldDictionary.H"
@@ -48,6 +49,14 @@ Description
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    defineTemplateTypeNameAndDebug(IOPtrList<entry>, 0);
+}
+
+
+// Main program:
 
 int main(int argc, char *argv[])
 {
@@ -67,6 +76,9 @@ int main(int argc, char *argv[])
         writeMeshObject<labelIOList>("neighbour", runTime);
         writeMeshObject<faceIOList>("faces", runTime);
         writeMeshObject<pointIOField>("points", runTime);
+        writeMeshObject<IOPtrList<entry> >("cellZones", runTime);
+        writeMeshObject<IOPtrList<entry> >("faceZones", runTime);
+        writeMeshObject<IOPtrList<entry> >("pointZones", runTime);
 
         // Get list of objects from the database
         IOobjectList objects(runTime, runTime.timeName());

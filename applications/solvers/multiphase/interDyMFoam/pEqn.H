@@ -5,40 +5,40 @@
     U = rAU*UEqn.H();
     surfaceScalarField phiU("phiU", (fvc::interpolate(U) & mesh.Sf()));
 
+    if (p.needReference())
+    {
+        fvc::makeRelative(phiU, U);
+        adjustPhi(phiU, U, p);
+        fvc::makeAbsolute(phiU, U);
+    }
+
     phi = phiU +
     (
-        fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)
-      - ghf*fvc::snGrad(rho)
-    )*rAUf*mesh.magSf();
-
-    if (pd.needReference())
-    {
-        fvc::makeRelative(phi, U);
-        adjustPhi(phi, U, pd);
-        fvc::makeAbsolute(phi, U);
-    }
+        fvc::interpolate(interface.sigmaK())*fvc::snGrad(alpha1)*mesh.magSf()
+      + fvc::interpolate(rho)*(g & mesh.Sf())
+    )*rAUf;
 
     for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pdEqn
+        fvScalarMatrix pEqn
         (
-            fvm::laplacian(rAUf, pd) == fvc::div(phi)
+            fvm::laplacian(rAUf, p) == fvc::div(phi)
         );
 
-        pdEqn.setReference(pdRefCell, pdRefValue);
+        pEqn.setReference(pRefCell, pRefValue);
 
         if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
         {
-            pdEqn.solve(mesh.solver(pd.name() + "Final"));
+            pEqn.solve(mesh.solver(p.name() + "Final"));
         }
         else
         {
-            pdEqn.solve(mesh.solver(pd.name()));
+            pEqn.solve(mesh.solver(p.name()));
         }
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi -= pdEqn.flux();
+            phi -= pEqn.flux();
         }
     }
 

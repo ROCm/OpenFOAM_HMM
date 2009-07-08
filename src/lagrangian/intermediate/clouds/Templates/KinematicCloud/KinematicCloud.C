@@ -25,67 +25,35 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "KinematicCloud.H"
-#include "DispersionModel.H"
-#include "DragModel.H"
-#include "InjectionModel.H"
-#include "WallInteractionModel.H"
 #include "IntegrationScheme.H"
 #include "interpolation.H"
 
-
-// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::addNewParcel
-(
-    const vector& position,
-    const label cellId,
-    const scalar d,
-    const vector& U,
-    const scalar nParticles,
-    const scalar lagrangianDt
-)
-{
-    ParcelType* pPtr = new ParcelType
-    (
-        *this,
-        parcelTypeId_,
-        position,
-        cellId,
-        d,
-        U,
-        nParticles,
-        constProps_
-    );
-
-    scalar continuousDt = this->db().time().deltaT().value();
-    pPtr->stepFraction() = (continuousDt - lagrangianDt)/continuousDt;
-
-    addParticle(pPtr);
-}
-
+#include "DispersionModel.H"
+#include "DragModel.H"
+#include "InjectionModel.H"
+#include "PatchInteractionModel.H"
+#include "PostProcessingModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
 Foam::KinematicCloud<ParcelType>::KinematicCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const volScalarField& mu,
     const dimensionedVector& g
 )
 :
-    Cloud<ParcelType>(rho.mesh(), cloudType, false),
+    Cloud<ParcelType>(rho.mesh(), cloudName, false),
     kinematicCloud(),
-    cloudType_(cloudType),
     mesh_(rho.mesh()),
     particleProperties_
     (
         IOobject
         (
-            cloudType + "Properties",
+            cloudName + "Properties",
             rho.mesh().time().constant(),
             rho.mesh(),
             IOobject::MUST_READ,
@@ -95,11 +63,16 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
     constProps_(particleProperties_),
     parcelTypeId_(readLabel(particleProperties_.lookup("parcelTypeId"))),
     coupled_(particleProperties_.lookup("coupled")),
+    cellValueSourceCorrection_
+    (
+        particleProperties_.lookup("cellValueSourceCorrection")
+    ),
     rndGen_(label(0)),
     rho_(rho),
     U_(U),
     mu_(mu),
     g_(g),
+    forces_(mesh_, particleProperties_, g_.value()),
     interpolationSchemes_(particleProperties_.subDict("interpolationSchemes")),
     dispersionModel_
     (
@@ -125,11 +98,19 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             *this
         )
     ),
-    wallInteractionModel_
+    patchInteractionModel_
     (
-        WallInteractionModel<KinematicCloud<ParcelType> >::New
+        PatchInteractionModel<KinematicCloud<ParcelType> >::New
         (
             particleProperties_,
+            *this
+        )
+    ),
+    postProcessingModel_
+    (
+        PostProcessingModel<KinematicCloud<ParcelType> >::New
+        (
+            this->particleProperties_,
             *this
         )
     ),
@@ -153,21 +134,7 @@ Foam::KinematicCloud<ParcelType>::KinematicCloud
             false
         ),
         mesh_,
-        dimensionedVector("zero", dimensionSet(1, 1, -1, 0, 0), vector::zero)
-    ),
-    UCoeff_
-    (
-        IOobject
-        (
-            this->name() + "UCoeff",
-            this->db().time().timeName(),
-            this->db(),
-            IOobject::NO_READ,
-            IOobject::NO_WRITE,
-            false
-        ),
-        mesh_,
-        dimensionedScalar("zero",  dimensionSet(1, 0, -1, 0, 0), 0.0)
+        dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
     )
 {}
 
@@ -182,16 +149,58 @@ Foam::KinematicCloud<ParcelType>::~KinematicCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    if (!fullyDescribed)
+    {
+        parcel.rho() = constProps_.rho0();
+    }
+
+    scalar carrierDt = this->db().time().deltaT().value();
+    parcel.stepFraction() = (carrierDt - lagrangianDt)/carrierDt;
+}
+
+
+template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::resetSourceTerms()
 {
     UTrans_.field() = vector::zero;
-    UCoeff_.field() = 0.0;
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::preEvolve()
+{
+    this->dispersion().cacheFields(true);
+    forces_.cacheFields(true);
+}
+
+
+template<class ParcelType>
+void Foam::KinematicCloud<ParcelType>::postEvolve()
+{
+    if (debug)
+    {
+        this->writePositions();
+    }
+
+    this->dispersion().cacheFields(false);
+    forces_.cacheFields(false);
+
+    this->postProcessing().post();
 }
 
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::evolve()
 {
+    preEvolve();
+
     autoPtr<interpolation<scalar> > rhoInterpolator =
         interpolation<scalar>::New
         (
@@ -225,26 +234,23 @@ void Foam::KinematicCloud<ParcelType>::evolve()
 
     this->injection().inject(td);
 
-    if (debug)
-    {
-        this->dumpParticlePositions();
-    }
-
     if (coupled_)
     {
         resetSourceTerms();
     }
 
     Cloud<ParcelType>::move(td);
+
+    postEvolve();
 }
 
 
 template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
-    Info<< "Cloud name: " << this->name() << nl
+    Info<< "Cloud: " << this->name() << nl
         << "    Parcels added during this run   = "
-        << returnReduce(this->injection().nParcelsAddedTotal(), sumOp<label>())
+        << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
             << nl
         << "    Mass introduced during this run = "
         << returnReduce(this->injection().massInjected(), sumOp<scalar>())
@@ -252,29 +258,7 @@ void Foam::KinematicCloud<ParcelType>::info() const
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
-        << returnReduce(massInSystem(), sumOp<scalar>()) << nl
-        << endl;
-}
-
-
-template<class ParcelType>
-void Foam::KinematicCloud<ParcelType>::dumpParticlePositions() const
-{
-    OFstream pObj
-    (
-        this->db().time().path()/"parcelPositions_"
-      + this->name() + "_"
-      + name(this->injection().nInjections()) + ".obj"
-    );
-
-    forAllConstIter(typename KinematicCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        pObj<< "v " << p.position().x() << " " << p.position().y() << " "
-            << p.position().z() << nl;
-    }
-
-    pObj.flush();
+        << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
 }
 
 

@@ -170,9 +170,6 @@ public:
                 const indirectPrimitivePatch&
             ) const;
 
-            ////- Get patches generated for surfaces.
-            //labelList getSurfacePatches() const;
-
             //- Smooth the mesh (patch and internal) to increase visibility
             //  of surface points (on castellated mesh) w.r.t. surface.
             void preSmoothPatch

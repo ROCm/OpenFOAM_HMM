@@ -32,7 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 #include "motionSolver.H"
 
@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 
         solve(UEqn == -fvc::grad(p));
 
-        #include "hEqn.H"
+        #include "eEqn.H"
 
 
         // --- PISO loop
@@ -84,8 +84,8 @@ int main(int argc, char *argv[])
             surfaceScalarField phid
             (
                 "phid",
-                fvc::interpolate(psi)*
-                (
+                fvc::interpolate(psi)
+               *(
                     (fvc::interpolate(U) & mesh.Sf()) - fvc::meshPhi(rho, U)
                 )
             );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace Foam
 class interactionLists;
 
 /*---------------------------------------------------------------------------*\
-                        Class referredCellList Declaration
+                      Class referredCellList Declaration
 \*---------------------------------------------------------------------------*/
 
 class referredCellList
@@ -59,7 +59,8 @@ class referredCellList
 
         const interactionLists& il_;
 
-        // Private Member Functions
+
+    // Private Member Functions
 
         void buildReferredCellList
         (

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "coulomb.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -45,7 +46,8 @@ addToRunTimeSelectionTable
     dictionary
 );
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+scalar coulomb::oneOverFourPiEps0 =
+    1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -61,11 +63,12 @@ coulomb::coulomb
     setLookupTables();
 }
 
+
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 scalar coulomb::unscaledEnergy(const scalar r) const
 {
-    return 1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12 * r);
+    return oneOverFourPiEps0/r;
 }
 
 

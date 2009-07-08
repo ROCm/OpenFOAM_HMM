@@ -1,5 +1,5 @@
 {
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 
     volScalarField pcorr
     (
@@ -12,7 +12,7 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("pcorr", pd.dimensions(), 0.0),
+        dimensionedScalar("pcorr", p.dimensions(), 0.0),
         pcorrTypes
     );
 
@@ -27,7 +27,7 @@
             fvm::laplacian(rAUf, pcorr) == fvc::div(phi)
         );
 
-        pcorrEqn.setReference(pdRefCell, pdRefValue);
+        pcorrEqn.setReference(pRefCell, pRefValue);
         pcorrEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
@@ -36,5 +36,5 @@
         }
     }
 
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 }

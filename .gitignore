@@ -7,6 +7,7 @@
 *.orig
 *.bak
 \#*\#
+.directory
 
 # CVS recovered versions - anywhere
 .#*
@@ -48,7 +49,9 @@ doc/[Dd]oxygen/man
 # source packages - anywhere
 *.tar.bz2
 *.tar.gz
+*.tar
 *.tgz
+*.gtgz
 
 # ignore the persistent .build tag in the main directory
 /.build

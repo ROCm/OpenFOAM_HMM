@@ -210,20 +210,14 @@ public:
     // IOstream operators
 
         // Write DynamicList to Ostream.
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <T, SizeInc, SizeMult, SizeDiv>
-        #endif
+        friend Ostream& operator<< <T, SizeInc, SizeMult, SizeDiv>
         (
             Ostream&,
             const DynamicList<T, SizeInc, SizeMult, SizeDiv>&
         );
 
         //- Read from Istream, discarding contents of existing DynamicList.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <T, SizeInc, SizeMult, SizeDiv>
-        #endif
+        friend Istream& operator>> <T, SizeInc, SizeMult, SizeDiv>
         (
             Istream&,
             DynamicList<T, SizeInc, SizeMult, SizeDiv>&

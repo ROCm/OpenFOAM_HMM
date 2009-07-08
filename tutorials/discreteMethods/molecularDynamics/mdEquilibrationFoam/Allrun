@@ -5,9 +5,14 @@
 
 application="mdEquilibrationFoam"
 
-cd periodicCube
+cd periodicCubeArgon
     runApplication blockMesh
-    runApplication molConfig
+    runApplication mdInitialise
     runApplication $application
 cd ..
 
+cd periodicCubeWater
+    runApplication blockMesh
+    runApplication mdInitialise
+    runApplication $application
+cd ..

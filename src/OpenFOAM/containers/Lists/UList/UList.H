@@ -313,12 +313,24 @@ public:
     // Ostream operator
 
         // Write UList to Ostream.
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <T>
-        #endif
-        (Ostream&, const UList<T>&);
+        friend Ostream& operator<< <T>
+        (
+            Ostream&,
+            const UList<T>&
+        );
 };
+
+template<class T>
+void sort(UList<T>&);
+
+template<class T, class Cmp>
+void sort(UList<T>&, const Cmp&);
+
+template<class T>
+void stableSort(UList<T>&);
+
+template<class T, class Cmp>
+void stableSort(UList<T>&, const Cmp&);
 
 // Reverse the first n elements of the list
 template<class T>

@@ -1,9 +1,9 @@
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -92,47 +92,21 @@
         incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
     );
 
-    wordList pcorrTypes(pd.boundaryField().types());
+    wordList pcorrTypes
+    (
+        p.boundaryField().size(),
+        zeroGradientFvPatchScalarField::typeName
+    );
 
-    for (label i=0; i<pd.boundaryField().size(); i++)
+    for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if (pd.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
     }
 
 
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pd + rho*(g & mesh.C())
-    );
-
-    label pdRefCell = 0;
-    scalar pdRefValue = 0.0;
-    setRefCell(pd, mesh.solutionDict().subDict("PISO"), pdRefCell, pdRefValue);
-
+    label pRefCell = 0;
     scalar pRefValue = 0.0;
-
-    if (pd.needReference())
-    {
-        pRefValue = readScalar
-        (
-            mesh.solutionDict().subDict("PISO").lookup("pRefValue")
-        );
-
-        p += dimensionedScalar
-        (
-            "p",
-            p.dimensions(),
-            pRefValue - getRefCellValue(p, pdRefCell)
-        );
-    }
+    setRefCell(p, mesh.solutionDict().subDict("PISO"), pRefCell, pRefValue);

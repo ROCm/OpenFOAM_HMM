@@ -26,7 +26,7 @@ Class
     Foam::IOPosition
 
 Description
-    Helper IO class to write particle positions
+    Helper IO class to read and write particle positions
 
 SourceFiles
     IOPosition.C
@@ -59,34 +59,42 @@ class IOPosition
         const Cloud<ParticleType>& cloud_;
 
 
+    // Private member functions
+
+        //- Read particle properties dictionary
+        void readParticleProperties();
+
+        //- Write particle properties dictionary
+        void writeParticleProperties() const;
+
+
 public:
 
-    //- Runtime type name information
-    virtual const word& type() const
-    {
-        return cloud_.type();
-    }
+    // Static data
+
+        //- Runtime type name information. Use cloud type.
+        virtual const word& type() const
+        {
+            return cloud_.type();
+        }
+
+        //- Name of particle properties dictionary
+        static word particlePropertiesName;
+
 
     // Constructors
 
         //- Construct from cloud
-        IOPosition
-        (
-            const Cloud<ParticleType>&
-        );
+        IOPosition(const Cloud<ParticleType>&);
 
 
     // Member functions
 
-        void readData
-        (
-            Cloud<ParticleType>& c,
-            bool checkClass
-        );
+        virtual void readData(Cloud<ParticleType>& c, bool checkClass);
 
-        bool write() const;
+        virtual bool write() const;
 
-        bool writeData(Ostream& os) const;
+        virtual bool writeData(Ostream& os) const;
 };
 
 

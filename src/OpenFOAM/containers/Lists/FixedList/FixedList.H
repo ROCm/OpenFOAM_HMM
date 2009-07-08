@@ -331,17 +331,11 @@ public:
     // IOstream operators
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <T, Size>
-        #endif
+        friend Istream& operator>> <T, Size>
         (Istream&, FixedList<T, Size>&);
 
         // Write FixedList to Ostream.
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <T, Size>
-        #endif
+        friend Ostream& operator<< <T, Size>
         (
             Ostream&,
             const FixedList<T, Size>&

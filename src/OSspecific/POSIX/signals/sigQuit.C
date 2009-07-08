@@ -83,7 +83,7 @@ Foam::sigQuit::~sigQuit()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::sigQuit::set()
+void Foam::sigQuit::set(const bool verbose)
 {
     if (oldAction_.sa_handler)
     {

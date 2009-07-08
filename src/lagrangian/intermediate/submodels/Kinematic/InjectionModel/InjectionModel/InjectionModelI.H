@@ -90,9 +90,9 @@ Foam::label Foam::InjectionModel<CloudType>::nInjections() const
 
 
 template<class CloudType>
-Foam::label Foam::InjectionModel<CloudType>::nParcelsAddedTotal() const
+Foam::label Foam::InjectionModel<CloudType>::parcelsAddedTotal() const
 {
-    return nParcelsAddedTotal_;
+    return parcelsAddedTotal_;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,6 +82,8 @@ public:
 
             Field<vector> siteReferencePositions_;
 
+            List<scalar> siteMasses_;
+
             List<scalar> siteCharges_;
 
             List<label> siteIds_;
@@ -106,6 +108,7 @@ public:
 
             bool linearMoleculeTest() const;
 
+
     public:
 
         inline constantProperties();
@@ -116,6 +119,8 @@ public:
         // Member functions
 
         inline const Field<vector>& siteReferencePositions() const;
+
+        inline const List<scalar>& siteMasses() const;
 
         inline const List<scalar>& siteCharges() const;
 
@@ -136,6 +141,8 @@ public:
         inline bool linearMolecule() const;
 
         inline bool pointMolecule() const;
+
+        inline label degreesOfFreedom() const;
 
         inline scalar mass() const;
 
@@ -208,6 +215,7 @@ private:
 
         List<vector> sitePositions_;
 
+
     // Private Member Functions
 
         tensor rotationTensorX(scalar deltaT) const;
@@ -215,6 +223,7 @@ private:
         tensor rotationTensorY(scalar deltaT) const;
 
         tensor rotationTensorZ(scalar deltaT) const;
+
 
 public:
 
@@ -256,7 +265,8 @@ public:
 
     // Member Functions
 
-        //- Tracking
+        // Tracking
+
             bool move(trackData&);
 
             void transformProperties(const tensor& T);
@@ -266,6 +276,7 @@ public:
             void setSitePositions(const constantProperties& constProps);
 
             void setSiteSizes(label size);
+
 
         // Access
 
@@ -305,7 +316,26 @@ public:
 
             inline label id() const;
 
+
     // Member Operators
+
+        //- Overridable function to handle the particle hitting a patch
+        //  Executed before other patch-hitting functions
+        bool hitPatch
+        (
+            const polyPatch&,
+            molecule::trackData& td,
+            const label patchI
+        );
+
+        //- Overridable function to handle the particle hitting a patch
+        //  Executed before other patch-hitting functions without trackData
+        bool hitPatch
+        (
+            const polyPatch& p,
+            int& td,
+            const label patchI
+        );
 
         //- Overridable function to handle the particle hitting a processorPatch
         void hitProcessorPatch

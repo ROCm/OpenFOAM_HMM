@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,9 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
-inline const Foam::word& Foam::DsmcCloud<ParcelType>::cloudType() const
+inline const Foam::word& Foam::DsmcCloud<ParcelType>::cloudName() const
 {
-    return cloudType_;
+    return cloudName_;
 }
 
 
@@ -117,6 +117,20 @@ template<class ParcelType>
 inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
 {
     return rndGen_;
+}
+
+
+template<class ParcelType>
+inline void Foam::DsmcCloud<ParcelType>::storeDeltaT()
+{
+    cachedDeltaT_ = mesh().time().deltaT().value();
+}
+
+
+template<class ParcelType>
+inline Foam::scalar Foam::DsmcCloud<ParcelType>::cachedDeltaT() const
+{
+    return cachedDeltaT_;
 }
 
 

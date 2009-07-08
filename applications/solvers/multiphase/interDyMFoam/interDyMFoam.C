@@ -86,9 +86,6 @@ int main(int argc, char *argv[])
                 << " s" << endl;
         }
 
-        volScalarField gh("gh", g & mesh.C());
-        surfaceScalarField ghf("ghf", g & mesh.Cf());
-
         if (mesh.changing() && correctPhi)
         {
             #include "correctPhi.H"
@@ -112,18 +109,6 @@ int main(int argc, char *argv[])
         for (int corr=0; corr<nCorr; corr++)
         {
             #include "pEqn.H"
-        }
-
-        p = pd + rho*gh;
-
-        if (pd.needReference())
-        {
-            p += dimensionedScalar
-            (
-                "p",
-                p.dimensions(),
-                pRefValue - getRefCellValue(p, pdRefCell)
-            );
         }
 
         turbulence->correct();

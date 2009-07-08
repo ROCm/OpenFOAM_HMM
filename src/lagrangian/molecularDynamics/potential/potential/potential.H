@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class potential Declaration
+                         Class potential Declaration
 \*---------------------------------------------------------------------------*/
 
 class potential
@@ -70,11 +70,10 @@ class potential
 
         pairPotentialList pairPotentials_;
 
-        electrostaticPotential electrostaticPotential_;
-
         tetherPotentialList tetherPotentials_;
 
         vector gravity_;
+
 
     // Private Member Functions
 
@@ -110,6 +109,7 @@ public:
             IOdictionary& idListDict
         );
 
+
     // Destructor
 
         ~potential();
@@ -132,8 +132,6 @@ public:
             inline const labelList& removalOrder() const;
 
             inline const pairPotentialList& pairPotentials() const;
-
-            inline const electrostaticPotential& electrostatic() const;
 
             inline const tetherPotentialList& tetherPotentials() const;
 

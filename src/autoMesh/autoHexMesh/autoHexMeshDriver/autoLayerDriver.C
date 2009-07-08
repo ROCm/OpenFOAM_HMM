@@ -75,7 +75,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
     labelHashSet boundaryCells(mesh.nFaces()-mesh.nInternalFaces());
 
     {
-        labelList patchIDs(meshRefinement::addedPatches(globalToPatch_));
+        labelList patchIDs(meshRefiner_.meshedPatches());
 
         const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -159,10 +159,14 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
             mesh.clearOut();
         }
 
+        if (meshRefiner_.overwrite())
+        {
+            mesh.setInstance(meshRefiner_.oldInstance());
+        }
+
         faceCombiner.updateMesh(map);
 
         meshRefiner_.updateMesh(map, labelList(0));
-
 
 
         for (label iteration = 0; iteration < 100; iteration++)
@@ -313,6 +317,11 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
                 mesh.clearOut();
             }
 
+            if (meshRefiner_.overwrite())
+            {
+                mesh.setInstance(meshRefiner_.oldInstance());
+            }
+
             faceCombiner.updateMesh(map);
 
             // Renumber restore maps
@@ -336,7 +345,7 @@ Foam::label Foam::autoLayerDriver::mergePatchFacesUndo
         if (debug)
         {
             Pout<< "Writing merged-faces mesh to time "
-                << mesh.time().timeName() << nl << endl;
+                << meshRefiner_.timeName() << nl << endl;
             mesh.write();
         }
     }
@@ -378,6 +387,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRemovePoints
     {
         // Delete mesh volumes.
         mesh.clearOut();
+    }
+
+    if (meshRefiner_.overwrite())
+    {
+        mesh.setInstance(meshRefiner_.oldInstance());
     }
 
     pointRemover.updateMesh(map);
@@ -431,6 +445,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::autoLayerDriver::doRestorePoints
     {
         // Delete mesh volumes.
         mesh.clearOut();
+    }
+
+    if (meshRefiner_.overwrite())
+    {
+        mesh.setInstance(meshRefiner_.oldInstance());
     }
 
     pointRemover.updateMesh(map);
@@ -656,7 +675,7 @@ Foam::label Foam::autoLayerDriver::mergeEdgesUndo
         if (debug)
         {
             Pout<< "Writing merged-edges mesh to time "
-                << mesh.time().timeName() << nl << endl;
+                << meshRefiner_.timeName() << nl << endl;
             mesh.write();
         }
     }
@@ -2446,14 +2465,9 @@ void Foam::autoLayerDriver::getLayerCellsFaces
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::autoLayerDriver::autoLayerDriver
-(
-    meshRefinement& meshRefiner,
-    const labelList& globalToPatch
-)
+Foam::autoLayerDriver::autoLayerDriver(meshRefinement& meshRefiner)
 :
-    meshRefiner_(meshRefiner),
-    globalToPatch_(globalToPatch)
+    meshRefiner_(meshRefiner)
 {}
 
 
@@ -2729,7 +2743,7 @@ void Foam::autoLayerDriver::addLayers
         IOobject
         (
             "pointMedialDist",
-            mesh.time().timeName(),
+            meshRefiner_.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -2744,7 +2758,7 @@ void Foam::autoLayerDriver::addLayers
         IOobject
         (
             "dispVec",
-            mesh.time().timeName(),
+            meshRefiner_.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -2759,7 +2773,7 @@ void Foam::autoLayerDriver::addLayers
         IOobject
         (
             "medialRatio",
-            mesh.time().timeName(),
+            meshRefiner_.timeName(),
             mesh,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -2911,7 +2925,7 @@ void Foam::autoLayerDriver::addLayers
             );
 
             const_cast<Time&>(mesh.time())++;
-            Info<< "Writing shrunk mesh to " << mesh.time().timeName() << endl;
+            Info<< "Writing shrunk mesh to " << meshRefiner_.timeName() << endl;
 
             // See comment in autoSnapDriver why we should not remove meshPhi
             // using mesh.clearPout().
@@ -3012,6 +3026,11 @@ void Foam::autoLayerDriver::addLayers
         //?neccesary? Update fields
         newMesh.updateMesh(map);
 
+        if (meshRefiner_.overwrite())
+        {
+            newMesh.setInstance(meshRefiner_.oldInstance());
+        }
+
         // Update numbering on addLayer:
         // - cell/point labels to be newMesh.
         // - patchFaces to remain in oldMesh order.
@@ -3034,7 +3053,7 @@ void Foam::autoLayerDriver::addLayers
 
         if (debug)
         {
-            Info<< "Writing layer mesh to " << mesh.time().timeName() << endl;
+            Info<< "Writing layer mesh to " << meshRefiner_.timeName() << endl;
             newMesh.write();
             cellSet addedCellSet
             (
@@ -3113,6 +3132,11 @@ void Foam::autoLayerDriver::addLayers
         mesh.clearOut();
     }
 
+    if (meshRefiner_.overwrite())
+    {
+        mesh.setInstance(meshRefiner_.oldInstance());
+    }
+
     meshRefiner_.updateMesh(map, labelList(0));
 
 
@@ -3180,8 +3204,6 @@ void Foam::autoLayerDriver::doLayers
         << "Shrinking and layer addition phase" << nl
         << "----------------------------------" << nl
         << endl;
-
-    const_cast<Time&>(mesh.time())++;
 
     Info<< "Using mesh parameters " << motionDict << nl << endl;
 

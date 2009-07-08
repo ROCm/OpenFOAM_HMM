@@ -22,7 +22,7 @@ INCLUDE_DIRECTORIES(
     $ENV{ParaView_INST_DIR}/include
     ../vtkFoam/lnInclude
 )
-ADD_DEFINITIONS(-D$ENV{WM_PRECISION_OPTION})
+ADD_DEFINITIONS(-DWM_$ENV{WM_PRECISION_OPTION})
 
 #-----------------------------------------------------------------------------
 # Most users should not need to change anything below this line.

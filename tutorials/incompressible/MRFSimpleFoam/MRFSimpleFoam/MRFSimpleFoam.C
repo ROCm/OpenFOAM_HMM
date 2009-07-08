@@ -40,15 +40,14 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -56,7 +55,7 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readSIMPLEControls.H"
+        #include "readSIMPLEControls.H"
 
         p.storePrevIter();
 
@@ -101,7 +100,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-#           include "continuityErrs.H"
+            #include "continuityErrs.H"
 
             // Explicitly relax pressure for momentum corrector
             p.relax();

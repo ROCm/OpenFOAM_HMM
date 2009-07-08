@@ -32,7 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -58,64 +58,21 @@ int main(int argc, char *argv[])
 
         #include "rhoEqn.H"
 
-        fvVectorMatrix UEqn
-        (
-            fvm::ddt(rho, U)
-          + fvm::div(phi, U)
-          + turbulence->divDevRhoReff(U)
-        );
+        #include "UEqn.H"
 
-        solve(UEqn == -fvc::grad(p));
-
-        #include "hEqn.H"
+        #include "eEqn.H"
 
 
         // --- PISO loop
 
         for (int corr=0; corr<nCorr; corr++)
         {
-            volScalarField rUA = 1.0/UEqn.A();
-            U = rUA*UEqn.H();
-
-            surfaceScalarField phid
-            (
-                "phid",
-                fvc::interpolate(thermo->psi())
-               *(
-                   (fvc::interpolate(U) & mesh.Sf())
-                 + fvc::ddtPhiCorr(rUA, rho, U, phi)
-               )
-            );
-
-            for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
-            {
-                fvScalarMatrix pEqn
-                (
-                    fvm::ddt(psi, p)
-                  + fvm::div(phid, p)
-                  - fvm::laplacian(rho*rUA, p)
-                );
-
-                pEqn.solve();
-
-                if (nonOrth == nNonOrthCorr)
-                {
-                    phi = pEqn.flux();
-                }
-            }
-
-             #include "compressibleContinuityErrs.H"
-
-            U -= rUA*fvc::grad(p);
-            U.correctBoundaryConditions();
+            #include "pEqn.H"
         }
-
-        DpDt =
-            fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 
         turbulence->correct();
 
-        rho = psi*p;
+        rho = thermo.rho();
 
         runTime.write();
 

@@ -148,6 +148,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
 Foam::autoHexMeshDriver::autoHexMeshDriver
 (
     fvMesh& mesh,
+    const bool overwrite,
     const dictionary& dict,
     const dictionary& decomposeDict
 )
@@ -292,6 +293,41 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     meshRefinement::checkCoupledFaceZones(mesh_);
 
 
+    // Refinement engine
+    // ~~~~~~~~~~~~~~~~~
+
+    {
+        Info<< nl
+            << "Determining initial surface intersections" << nl
+            << "-----------------------------------------" << nl
+            << endl;
+
+        // Main refinement engine
+        meshRefinerPtr_.reset
+        (
+            new meshRefinement
+            (
+                mesh,
+                mergeDist_,         // tolerance used in sorting coordinates
+                overwrite,
+                surfaces(),
+                shells()
+            )
+        );
+        Info<< "Calculated surface intersections in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        // Some stats
+        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
+
+        meshRefinerPtr_().write
+        (
+            debug_&meshRefinement::OBJINTERSECTIONS,
+            mesh_.time().path()/meshRefinerPtr_().timeName()
+        );
+    }
+
+
     // Add all the surface regions as patches
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -319,9 +355,8 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 
             forAll(regNames, i)
             {
-                label patchI = meshRefinement::addPatch
+                label patchI = meshRefinerPtr_().addMeshedPatch
                 (
-                    mesh,
                     regNames[i],
                     wallPolyPatch::typeName
                 );
@@ -404,40 +439,6 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
         // Mesh distribution engine (uses tolerance to reconstruct meshes)
         distributorPtr_.reset(new fvMeshDistribute(mesh_, mergeDist_));
     }
-
-
-    // Refinement engine
-    // ~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< nl
-            << "Determining initial surface intersections" << nl
-            << "-----------------------------------------" << nl
-            << endl;
-
-        // Main refinement engine
-        meshRefinerPtr_.reset
-        (
-            new meshRefinement
-            (
-                mesh,
-                mergeDist_,         // tolerance used in sorting coordinates
-                surfaces(),
-                shells()
-            )
-        );
-        Info<< "Calculated surface intersections in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        // Some stats
-        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
-
-        meshRefinerPtr_().write
-        (
-            debug_&meshRefinement::OBJINTERSECTIONS,
-            mesh_.time().path()/mesh_.time().timeName()
-        );
-    }
 }
 
 
@@ -448,7 +449,7 @@ void Foam::autoHexMeshDriver::writeMesh(const string& msg) const
     const meshRefinement& meshRefiner = meshRefinerPtr_();
 
     meshRefiner.printMeshInfo(debug_, msg);
-    Info<< "Writing mesh to time " << mesh_.time().timeName() << endl;
+    Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
     meshRefiner.write(meshRefinement::MESH|meshRefinement::SCALARLEVELS, "");
     if (debug_ & meshRefinement::OBJINTERSECTIONS)
@@ -456,7 +457,7 @@ void Foam::autoHexMeshDriver::writeMesh(const string& msg) const
         meshRefiner.write
         (
             meshRefinement::OBJINTERSECTIONS,
-            mesh_.time().path()/mesh_.time().timeName()
+            mesh_.time().path()/meshRefiner.timeName()
         );
     }
     Info<< "Written mesh in = "
@@ -522,11 +523,7 @@ void Foam::autoHexMeshDriver::doMesh()
         const dictionary& shrinkDict = dict_.subDict("shrinkDict");
         PtrList<dictionary> surfaceDicts(dict_.lookup("surfaces"));
 
-        autoLayerDriver layerDriver
-        (
-            meshRefinerPtr_(),
-            globalToPatch_
-        );
+        autoLayerDriver layerDriver(meshRefinerPtr_());
 
         // Get all the layer specific params
         layerParameters layerParams

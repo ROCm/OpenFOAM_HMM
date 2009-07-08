@@ -22,11 +22,73 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "IOPosition.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class ParticleType>
+Foam::word Foam::IOPosition<ParticleType>::particlePropertiesName
+(
+    "particleProperties"
+);
+
+
+// * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * * //
+
+template<class ParticleType>
+void Foam::IOPosition<ParticleType>::readParticleProperties()
+{
+    IOobject propsDictHeader
+    (
+        particlePropertiesName,
+        cloud_.db().time().timeName(),
+        "uniform"/cloud::prefix/cloud_.name(),
+        cloud_.db(),
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE,
+        false
+    );
+
+    if (propsDictHeader.headerOk())
+    {
+        const IOdictionary propsDict(propsDictHeader);
+
+        word procName("processor" + Foam::name(Pstream::myProcNo()));
+        if (propsDict.found(procName))
+        {
+            propsDict.subDict(procName).lookup("particleCount")
+                >> cloud_.particleCount_;
+        }
+    }
+}
+
+
+template<class ParticleType>
+void Foam::IOPosition<ParticleType>::writeParticleProperties() const
+{
+    IOdictionary propsDict
+    (
+        IOobject
+        (
+            particlePropertiesName,
+            cloud_.db().time().timeName(),
+            "uniform"/cloud::prefix/cloud_.name(),
+            cloud_.db(),
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        )
+    );
+
+    word procName("processor" + Foam::name(Pstream::myProcNo()));
+    propsDict.add(procName, dictionary());
+    propsDict.subDict(procName).add("particleCount", cloud_.particleCount_);
+
+    propsDict.regIOobject::write();
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -70,11 +132,20 @@ bool Foam::IOPosition<ParticleType>::write() const
 template<class ParticleType>
 bool Foam::IOPosition<ParticleType>::writeData(Ostream& os) const
 {
+    // Write global cloud data
+    writeParticleProperties();
+
     os<< cloud_.size() << nl << token::BEGIN_LIST << nl;
 
     forAllConstIter(typename Cloud<ParticleType>, cloud_, iter)
     {
-        os<< static_cast<const Particle<ParticleType>&>(iter()) << nl;
+        // Prevent writing additional fields
+        static_cast<const Particle<ParticleType>&>(iter()).write
+        (
+            os,
+            false
+        );
+        os  << nl;
     }
 
     os<< token::END_LIST << endl;
@@ -90,6 +161,9 @@ void Foam::IOPosition<ParticleType>::readData
     bool checkClass
 )
 {
+    // Read global cloud data. Resets count on cloud.
+    readParticleProperties();
+
     Istream& is = readStream(checkClass ? typeName : "");
 
     token firstToken(is);
@@ -103,6 +177,7 @@ void Foam::IOPosition<ParticleType>::readData
 
         for (label i=0; i<s; i++)
         {
+            // Do not read any fields, position only
             c.append(new ParticleType(c, is, false));
         }
 
@@ -133,6 +208,7 @@ void Foam::IOPosition<ParticleType>::readData
         )
         {
             is.putBack(lastToken);
+            // Do not read any fields, position only
             c.append(new ParticleType(c, is, false));
             is >> lastToken;
         }

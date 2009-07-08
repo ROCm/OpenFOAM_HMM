@@ -43,17 +43,15 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readEnvironmentalProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -61,27 +59,27 @@ int main(int argc, char *argv[])
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
-#       include "calcVdj.H"
+        #include "calcVdj.H"
 
-#       include "UEqn.H"
+        #include "UEqn.H"
 
-#       include "alphaEqn.H"
+        #include "alphaEqn.H"
 
-#       include "correctViscosity.H"
+        #include "correctViscosity.H"
 
 
         // --- PISO loop
         for (int corr=0; corr<nCorr; corr++)
         {
-#           include "pEqn.H"
+            #include "pEqn.H"
         }
 
-#       include "kEpsilon.H"
+        #include "kEpsilon.H"
 
         runTime.write();
 

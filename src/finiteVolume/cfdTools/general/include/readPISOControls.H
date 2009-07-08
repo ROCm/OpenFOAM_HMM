@@ -13,7 +13,3 @@
 
     int nOuterCorr =
         piso.lookupOrDefault<int>("nOuterCorrectors", 1);
-
-    bool ddtPhiCorr =
-        piso.lookupOrDefault<Switch>("ddtPhiCorr", false);
-

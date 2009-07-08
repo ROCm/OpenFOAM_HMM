@@ -13,12 +13,12 @@
     (
         UEqn()
       ==
-       -fvc::reconstruct
+        fvc::reconstruct
         (
             (
-                fvc::snGrad(pd)
-              - betaghf*fvc::snGrad(T)
-            ) * mesh.magSf()
+                fvc::interpolate(rhok)*(g & mesh.Sf())
+              - fvc::snGrad(p)*mesh.magSf()
+            )
         )
     ).initialResidual();
 

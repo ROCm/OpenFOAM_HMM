@@ -110,10 +110,10 @@ Foam::label Foam::meshRefinement::createBaffle
                 -1,                         // masterPointID
                 -1,                         // masterEdgeID
                 faceI,                      // masterFaceID,
-                false,                      // face flip
+                true,                       // face flip
                 neiPatch,                   // patch for face
                 zoneID,                     // zone for face
-                zoneFlip                    // face flip in zone
+                !zoneFlip                   // face flip in zone
             )
         );
     }
@@ -226,7 +226,13 @@ void Foam::meshRefinement::getBafflePatches
     label vertI = 0;
     if (debug&OBJINTERSECTIONS)
     {
-        str.reset(new OFstream(mesh_.time().timePath()/"intersections.obj"));
+        str.reset
+        (
+            new OFstream
+            (
+                mesh_.time().path()/timeName()/"intersections.obj"
+            )
+        );
 
         Pout<< "getBafflePatches : Writing surface intersections to file "
             << str().name() << nl << endl;
@@ -459,6 +465,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     {
         // Delete mesh volumes.
         mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
     }
 
     //- Redo the intersections on the newly create baffle faces. Note that
@@ -820,6 +831,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
         mesh_.clearOut();
     }
 
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
+
     // Update intersections. Recalculate intersections on merged faces since
     // this seems to give problems? Note: should not be nessecary since
     // baffles preserve intersections from when they were created.
@@ -1001,7 +1017,7 @@ void Foam::meshRefinement::findCellZoneGeometric
 
         if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
         {
-            // Give face the zone of the owner
+            // Give face the zone of max cell zone
             namedSurfaceIndex[faceI] = findIndex
             (
                 surfaceToCellZone,
@@ -1043,7 +1059,7 @@ void Foam::meshRefinement::findCellZoneGeometric
 
                 if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
                 {
-                    // Give face the zone of the owner
+                    // Give face the max cell zone
                     namedSurfaceIndex[faceI] = findIndex
                     (
                         surfaceToCellZone,
@@ -1482,7 +1498,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        Pout<< "Writing baffled mesh to time " << mesh_.time().timeName()
+        Pout<< "Writing baffled mesh to time " << timeName()
             << endl;
         write(debug, runTime.path()/"baffles");
         Pout<< "Dumped debug data in = "
@@ -1511,11 +1527,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
                 perpendicularAngle,
                 globalToPatch
             )
-            //markFacesOnProblemCellsGeometric
-            //(
-            //    motionDict,
-            //    globalToPatch
-            //)
+            //markFacesOnProblemCellsGeometric(motionDict)
         );
         Info<< "Analyzed problem cells in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
@@ -1569,7 +1581,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         if (debug)
         {
             Pout<< "Writing extra baffled mesh to time "
-                << mesh_.time().timeName() << endl;
+                << timeName() << endl;
             write(debug, runTime.path()/"extraBaffles");
             Pout<< "Dumped debug data in = "
                 << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
@@ -1604,9 +1616,9 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        Pout<< "Writing subsetted mesh to time " << mesh_.time().timeName()
+        Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;
-        write(debug, runTime.timePath());
+        write(debug, runTime.path()/timeName());
         Pout<< "Dumped debug data in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
     }
@@ -1665,7 +1677,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
 
 // Split off (with optional buffer layers) unreachable areas of mesh.
-Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 (
     const label nBufferLayers,
     const labelList& globalToPatch,
@@ -1998,6 +2010,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
         mesh_.clearOut();
     }
 
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
+
     // Update intersections. Is mapping only (no faces created, positions stay
     // same) so no need to recalculate intersections.
     updateMesh(map, labelList(0));
@@ -2194,16 +2211,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         {
             label faceI = testFaces[i];
 
-            label own = mesh_.faceOwner()[faceI];
-
             if (mesh_.isInternalFace(faceI))
             {
-                start[i] = cellCentres[own];
-                end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
+                start[i] = cellCentres[faceOwner[faceI]];
+                end[i] = cellCentres[faceNeighbour[faceI]];
             }
             else
             {
-                start[i] = cellCentres[own];
+                start[i] = cellCentres[faceOwner[faceI]];
                 end[i] = neiCc[faceI-mesh_.nInternalFaces()];
             }
         }
@@ -2340,6 +2355,20 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
         if (surfI != -1)
         {
+            // Orient face zone to have slave cells in max cell zone.
+            label ownZone = cellToZone[faceOwner[faceI]];
+            label neiZone = cellToZone[faceNeighbour[faceI]];
+
+            bool flip;
+            if (ownZone == max(ownZone, neiZone))
+            {
+                flip = false;
+            }
+            else
+            {
+                flip = true;
+            }
+
             meshMod.setAction
             (
                 polyModifyFace
@@ -2352,12 +2381,31 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     -1,                             // patch for face
                     false,                          // remove from zone
                     surfaceToFaceZone[surfI],       // zone for face
-                    false                           // face flip in zone
+                    flip                            // face flip in zone
                 )
             );
         }
     }
 
+    // Get coupled neighbour cellZone. Set to -1 on non-coupled patches.
+    labelList neiCellZone(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                neiCellZone[faceI-mesh_.nInternalFaces()] =
+                    cellToZone[mesh_.faceOwner()[faceI]];
+            }
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone, false);
+
+    // Set owner as no-flip
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
@@ -2370,6 +2418,19 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
 
             if (surfI != -1)
             {
+                label ownZone = cellToZone[faceOwner[faceI]];
+                label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+
+                bool flip;
+                if (ownZone == max(ownZone, neiZone))
+                {
+                    flip = false;
+                }
+                else
+                {
+                    flip = true;
+                }
+
                 meshMod.setAction
                 (
                     polyModifyFace
@@ -2382,7 +2443,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                         patchI,                         // patch for face
                         false,                          // remove from zone
                         surfaceToFaceZone[surfI],       // zone for face
-                        false                           // face flip in zone
+                        flip                            // face flip in zone
                     )
                 );
             }
@@ -2427,6 +2488,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     {
         // Delete mesh volumes.
         mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
     }
 
     // None of the faces has changed, only the zones. Still...

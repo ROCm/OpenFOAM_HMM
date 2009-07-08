@@ -243,14 +243,7 @@ int main(int argc, char *argv[])
             meshDict.lookup("mergePatchPairs")
         );
 
-        if (mergePatchPairs.size())
-        {
-            FatalErrorIn(args.executable())
-                << "mergePatchPairs not currently supported."
-                << exit(FatalError);
-        }
-
-        //// #include "mergePatchPairs.H"
+#       include "mergePatchPairs.H"
     }
     else
     {

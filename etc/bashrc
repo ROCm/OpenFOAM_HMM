@@ -74,7 +74,7 @@ export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 # Location of third-party software
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty
+export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 
 
 # Operating System/Platform
@@ -244,7 +244,6 @@ _foamSource $WM_PROJECT_DIR/etc/aliases.sh
 # _foamSource $WM_PROJECT_DIR/etc/apps/paraview/bashrc
 _foamSource $WM_PROJECT_DIR/etc/apps/paraview3/bashrc
 _foamSource $WM_PROJECT_DIR/etc/apps/ensight/bashrc
-_foamSource $WM_PROJECT_DIR/etc/apps/cint/bashrc
 
 
 # Clean environment paths again. Only remove duplicates

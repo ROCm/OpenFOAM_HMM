@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ public:
         //- Construct from components
         dsmcCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& T,
             const volVectorField& U
         );
@@ -80,7 +80,7 @@ public:
         //- Construct from name and mesh, used to initialise.
         dsmcCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const fvMesh& mesh
         );
 
@@ -91,7 +91,7 @@ public:
     // Member functions
 
         //- Write fields
-        void writeFields() const;
+        virtual void writeFields() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

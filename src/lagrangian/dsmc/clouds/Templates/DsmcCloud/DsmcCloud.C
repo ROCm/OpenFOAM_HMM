@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,9 +33,6 @@ License
 
 template<class ParcelType>
 Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
-
-template<class ParcelType>
-Foam::scalar Foam::DsmcCloud<ParcelType>::Tref = 273;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -302,7 +299,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
     // Temporary storage for subCells
     List<DynamicList<label> > subCells(8);
 
-    scalar deltaT = mesh_.time().deltaT().value();
+    scalar deltaT = cachedDeltaT();
 
     label collisionCandidates = 0;
 
@@ -527,20 +524,20 @@ void Foam::DsmcCloud<ParcelType>::addNewParcel
 template<class ParcelType>
 Foam::DsmcCloud<ParcelType>::DsmcCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const volScalarField& T,
     const volVectorField& U
 )
 :
-    Cloud<ParcelType>(T.mesh(), cloudType, false),
+    Cloud<ParcelType>(T.mesh(), cloudName, false),
     DsmcBaseCloud(),
-    cloudType_(cloudType),
+    cloudName_(cloudName),
     mesh_(T.mesh()),
     particleProperties_
     (
         IOobject
         (
-            cloudType + "Properties",
+            cloudName + "Properties",
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,
@@ -639,19 +636,19 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
 template<class ParcelType>
 Foam::DsmcCloud<ParcelType>::DsmcCloud
 (
-    const word& cloudType,
+    const word& cloudName,
     const fvMesh& mesh
 )
     :
-    Cloud<ParcelType>(mesh, cloudType, false),
+    Cloud<ParcelType>(mesh, cloudName, false),
     DsmcBaseCloud(),
-    cloudType_(cloudType),
+    cloudName_(cloudName),
     mesh_(mesh),
     particleProperties_
     (
         IOobject
         (
-            cloudType + "Properties",
+            cloudName + "Properties",
             mesh_.time().constant(),
             mesh_,
             IOobject::MUST_READ,
@@ -781,6 +778,9 @@ Foam::DsmcCloud<ParcelType>::~DsmcCloud()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::evolve()
 {
+    // cache the value of deltaT for this timestep
+    storeDeltaT();
+
     typename ParcelType::trackData td(*this);
 
     // Reset the surface data collection fields

@@ -39,16 +39,19 @@ SourceFiles
 #include "cloud.H"
 #include "IDLList.H"
 #include "IOField.H"
-
-#include "polyMeshInfo.H"
+#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of functions
 template<class ParticleType>
 class Cloud;
+
+template<class ParticleType>
+class IOPosition;
 
 template<class ParticleType>
 Ostream& operator<<
@@ -68,19 +71,15 @@ class Cloud
     public cloud,
     public IDLList<ParticleType>
 {
-
     // Private data
 
         const polyMesh& polyMesh_;
-        const faceList& allFaces_;
-        const vectorField& points_;
-        const cellList& cellFaces_;
-        const vectorField& allFaceCentres_;
-        const unallocLabelList& owner_;
-        const unallocLabelList& neighbour_;
 
-        //- Mesh information object
-        const polyMeshInfo meshInfo_;
+        //- Overall count of particles ever created. Never decreases.
+        mutable label particleCount_;
+
+        //- Temporary storage for addressing. Used in findFaces.
+        mutable DynamicList<label> labels_;
 
 
     // Private member functions
@@ -93,6 +92,8 @@ public:
 
     template<class ParticleT>
     friend class Particle;
+    template<class ParticleT>
+    friend class IOPosition;
 
     typedef ParticleType particleType;
 
@@ -173,54 +174,54 @@ public:
                 return polyMesh_.boundaryMesh()[patchi].whichFace(facei);
             }
 
-            //- Return reference to the mesh information object
-            const polyMeshInfo& meshInfo() const
-            {
-                return meshInfo_;
-            }
-
             label size() const
             {
                 return IDLList<ParticleType>::size();
             };
 
-            const const_iterator begin() const
-            {
-                return IDLList<ParticleType>::begin();
-            };
 
-            const const_iterator cbegin() const
-            {
-                return IDLList<ParticleType>::cbegin();
-            };
+            // Iterators
 
-            const const_iterator end() const
-            {
-                return IDLList<ParticleType>::end();
-            };
+                const const_iterator begin() const
+                {
+                    return IDLList<ParticleType>::begin();
+                };
 
-            const const_iterator cend() const
-            {
-                return IDLList<ParticleType>::cend();
-            };
+                const const_iterator cbegin() const
+                {
+                    return IDLList<ParticleType>::cbegin();
+                };
 
-            iterator begin()
-            {
-                return IDLList<ParticleType>::begin();
-            };
+                const const_iterator end() const
+                {
+                    return IDLList<ParticleType>::end();
+                };
 
-            iterator end()
-            {
-                return IDLList<ParticleType>::end();
-            };
+                const const_iterator cend() const
+                {
+                    return IDLList<ParticleType>::cend();
+                };
+
+                iterator begin()
+                {
+                    return IDLList<ParticleType>::begin();
+                };
+
+                iterator end()
+                {
+                    return IDLList<ParticleType>::end();
+                };
+
+
+        // Edit
 
             void clear()
             {
                 return IDLList<ParticleType>::clear();
             };
 
-
-        // Edit
+            //- Get unique particle creation id
+            label getNewParticleID() const;
 
             //- Transfer particle to cloud
             void addParticle(ParticleType* pPtr);
@@ -255,13 +256,15 @@ public:
                 const IOField<DataType>& data
             ) const;
 
-            //- Read the field data for the cloud of particles
-            void readFields();
+            //- Read the field data for the cloud of particles. Dummy at
+            //  this level.
+            virtual void readFields();
 
 
         // Write
 
-            //- Write the field data for the cloud of particles
+            //- Write the field data for the cloud of particles Dummy at
+            //  this level.
             virtual void writeFields() const;
 
             //- Write using given format, version and compression.
@@ -272,6 +275,9 @@ public:
                 IOstream::versionNumber ver,
                 IOstream::compressionType cmp
             ) const;
+
+            //- Write positions to <cloudName>_positions.obj file
+            void writePositions() const;
 
 
     // Ostream Operator

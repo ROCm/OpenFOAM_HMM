@@ -1,11 +1,15 @@
 {
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 
-    wordList pcorrTypes(pd.boundaryField().types());
+    wordList pcorrTypes
+    (
+        p.boundaryField().size(),
+        zeroGradientFvPatchScalarField::typeName
+    );
 
-    for (label i=0; i<pd.boundaryField().size(); i++)
+    for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if (pd.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
@@ -22,7 +26,7 @@
             IOobject::NO_WRITE
         ),
         mesh,
-        dimensionedScalar("pcorr", pd.dimensions(), 0.0),
+        dimensionedScalar("pcorr", p.dimensions(), 0.0),
         pcorrTypes
     );
 
@@ -37,7 +41,7 @@
             fvm::laplacian(rUAf, pcorr) == fvc::div(phi)
         );
 
-        pcorrEqn.setReference(pdRefCell, pdRefValue);
+        pcorrEqn.setReference(pRefCell, pRefValue);
         pcorrEqn.solve();
 
         if (nonOrth == nNonOrthCorr)
@@ -46,5 +50,5 @@
         }
     }
 
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 }

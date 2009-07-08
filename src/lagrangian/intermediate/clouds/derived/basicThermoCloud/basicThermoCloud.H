@@ -26,6 +26,7 @@ Class
     Foam::basicThermoCloud
 
 Description
+    Cloud class to introduce thermodynamic parcels
 
 SourceFiles
     basicThermoCloud.C
@@ -51,7 +52,6 @@ class basicThermoCloud
 :
     public ThermoCloud<basicThermoParcel>
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -75,7 +75,7 @@ public:
         //- Construct given carrier gas fields
         basicThermoCloud
         (
-            const word& cloudType,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
@@ -84,14 +84,13 @@ public:
 
 
     //- Destructor
-
-        ~basicThermoCloud();
+    ~basicThermoCloud();
 
 
     // Member Functions
 
         //- Write fields
-        void writeFields() const;
+        virtual void writeFields() const;
 };
 
 

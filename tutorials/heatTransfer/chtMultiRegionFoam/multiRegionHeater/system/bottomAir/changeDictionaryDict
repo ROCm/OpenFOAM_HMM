@@ -16,6 +16,31 @@ FoamFile
 
 dictionaryReplacement
 {
+    boundary
+    {
+        bottomAir_to_leftSolid
+        {
+            offset          ( 0 0 0 );
+            sampleMode      nearestPatchFace;
+            sampleRegion    leftSolid;
+            samplePatch     leftSolid_to_bottomAir;
+        }
+        bottomAir_to_rightSolid
+        {
+            offset          ( 0 0 0 );
+            sampleMode      nearestPatchFace;
+            sampleRegion    rightSolid;
+            samplePatch     rightSolid_to_bottomAir;
+        }
+        bottomAir_to_heater
+        {
+            offset          ( 0 0 0 );
+            sampleMode      nearestPatchFace;
+            sampleRegion    heater;
+            samplePatch     heater_to_bottomAir;
+        }
+    }
+
     U
     {
         internalField   uniform (0 0 0);
@@ -62,8 +87,6 @@ dictionaryReplacement
             bottomAir_to_leftSolid
             {
                 type            solidWallMixedTemperatureCoupled;
-                neighbourRegionName leftSolid;
-                neighbourPatchName leftSolid_to_bottomAir;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
@@ -72,8 +95,6 @@ dictionaryReplacement
             bottomAir_to_heater
             {
                 type            solidWallMixedTemperatureCoupled;
-                neighbourRegionName heater;
-                neighbourPatchName heater_to_bottomAir;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
@@ -81,8 +102,6 @@ dictionaryReplacement
             bottomAir_to_rightSolid
             {
                 type            solidWallMixedTemperatureCoupled;
-                neighbourRegionName rightSolid;
-                neighbourPatchName rightSolid_to_bottomAir;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
@@ -205,101 +224,55 @@ dictionaryReplacement
         }
     }
 
-    pd
-    {
-        boundaryField
-        {
-            minX
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-            maxX
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-            minY
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-            minZ
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-            maxZ
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-            bottomAir_to_leftSolid
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-            bottomAir_to_heater
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-            bottomAir_to_rightSolid
-            {
-                type            fixedFluxBuoyantPressure;
-                value           0;
-            }
-        }
-    }
-
     p
     {
-        internalField   uniform 100000;
+        internalField   uniform 1E5;
+
         boundaryField
         {
             minX
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
             maxX
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
             minY
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
             minZ
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
             maxZ
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
-
             bottomAir_to_leftSolid
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
             bottomAir_to_heater
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
             bottomAir_to_rightSolid
             {
-                type            calculated;
-                value           uniform 100000;
+                type            buoyantPressure;
+                value           1e5;
             }
         }
     }
+
 }
 
 // ************************************************************************* //

@@ -816,6 +816,8 @@ int main(int argc, char *argv[])
 
     // Pre-filtering: flip "owner" boundary or wrong oriented internal
     // faces and move to neighbour
+
+    boolList fm(faces.size(), false);
     forAll (faces, facei)
     {
         if
@@ -824,6 +826,7 @@ int main(int argc, char *argv[])
          || (neighbour[facei] != -1 && owner[facei] > neighbour[facei])
         )
         {
+            fm[facei] = true;
             faces[facei] = faces[facei].reverseFace();
             Swap(owner[facei], neighbour[facei]);
         }
@@ -1175,7 +1178,7 @@ int main(int argc, char *argv[])
                     false,              // flipFaceFlux
                     -1,                 // patchID
                     faceZonei,          // zoneID
-                    false               // zoneFlip
+                    fm[facei]           // zoneFlip
                 );
             }
 

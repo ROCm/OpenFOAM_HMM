@@ -7,26 +7,37 @@
     surfaceScalarField phiU
     (
         "phiU",
-        (fvc::interpolate(U) & mesh.Sf()) + fvc::ddtPhiCorr(rUA, rho, U, phi)
+        (fvc::interpolate(U) & mesh.Sf())
+      + fvc::ddtPhiCorr(rUA, rho, U, phi)
     );
 
-    phi = phiU - ghf*fvc::snGrad(rho)*rUAf*mesh.magSf();
-
-    adjustPhi(phi, U, pd);
+    phi = phiU + fvc::interpolate(rho)*(g & mesh.Sf())*rUAf;
 
     for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pdEqn
+        fvScalarMatrix pEqn
         (
-            fvm::laplacian(rUAf, pd) == fvc::div(phi)
+            fvm::laplacian(rUAf, p) == fvc::div(phi)
         );
 
-        pdEqn.setReference(pdRefCell, pdRefValue);
-        pdEqn.solve();
+        pEqn.setReference(pRefCell, pRefValue);
+
+        if
+        (
+            corr == nCorr-1
+         && nonOrth == nNonOrthCorr
+        )
+        {
+            pEqn.solve(mesh.solver(p.name() + "Final"));
+        }
+        else
+        {
+            pEqn.solve(mesh.solver(p.name()));
+        }
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi -= pdEqn.flux();
+            phi -= pEqn.flux();
         }
     }
 

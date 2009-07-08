@@ -48,7 +48,6 @@ class RanzMarshall
 :
     public HeatTransferModel<CloudType>
 {
-
     // Private data
 
         // Prandtl number
@@ -71,25 +70,24 @@ public:
         );
 
 
-    // Destructor
-
-        ~RanzMarshall();
+    //- Destructor
+    virtual ~RanzMarshall();
 
 
     // Member Functions
 
         //- Flag to indicate whether model activates heat transfer model
-        bool active() const;
+        virtual bool active() const;
 
         //- Nusselt number
-        scalar Nu
+        virtual scalar Nu
         (
             const scalar Re,
             const scalar Pr
         ) const;
 
         //- Prandtl number
-        scalar Pr() const;
+        virtual scalar Pr() const;
 };
 
 

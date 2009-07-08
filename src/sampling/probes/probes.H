@@ -175,9 +175,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~probes();
+    //- Destructor
+    virtual ~probes();
 
 
     // Member Functions
@@ -186,6 +185,18 @@ public:
         virtual const word& name() const
         {
             return name_;
+        }
+
+        //- Return names of fields to probe
+        virtual const wordList& fieldNames() const
+        {
+            return fieldNames_;
+        }
+
+        //- Return locations to probe
+        virtual const vectorField& probeLocations() const
+        {
+            return probeLocations_;
         }
 
         //- Cells to be probed (obtained from the locations)

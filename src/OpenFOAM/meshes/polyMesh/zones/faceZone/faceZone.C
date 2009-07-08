@@ -34,6 +34,7 @@ Description
 #include "primitiveMesh.H"
 #include "demandDrivenData.H"
 #include "mapPolyMesh.H"
+#include "syncTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -527,6 +528,87 @@ bool Foam::faceZone::checkDefinition(const bool report) const
         }
     }
     return boundaryError;
+}
+
+
+bool Foam::faceZone::checkParallelSync(const bool report) const
+{
+    const polyMesh& mesh = zoneMesh().mesh();
+    const polyBoundaryMesh& bm = mesh.boundaryMesh();
+
+    bool boundaryError = false;
+
+
+    // Check that zone faces are synced
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    {
+        boolList neiZoneFace(mesh.nFaces()-mesh.nInternalFaces(), false);
+        boolList neiZoneFlip(mesh.nFaces()-mesh.nInternalFaces(), false);
+        forAll(*this, i)
+        {
+            label faceI = operator[](i);
+
+            if (!mesh.isInternalFace(faceI))
+            {
+                neiZoneFace[faceI-mesh.nInternalFaces()] = true;
+                neiZoneFlip[faceI-mesh.nInternalFaces()] = flipMap()[i];
+            }
+        }
+        boolList myZoneFace(neiZoneFace);
+        syncTools::swapBoundaryFaceList(mesh, neiZoneFace, false);
+        boolList myZoneFlip(neiZoneFlip);
+        syncTools::swapBoundaryFaceList(mesh, neiZoneFlip, false);
+
+        forAll(*this, i)
+        {
+            label faceI = operator[](i);
+
+            label patchI = bm.whichPatch(faceI);
+
+            if (patchI != -1 && bm[patchI].coupled())
+            {
+                label bFaceI = faceI-mesh.nInternalFaces();
+
+                // Check face in zone on both sides
+                if (myZoneFace[bFaceI] != neiZoneFace[bFaceI])
+                {
+                    boundaryError = true;
+
+                    if (report)
+                    {
+                        Pout<< " ***Problem with faceZone " << index()
+                            << " named " << name()
+                            << ". Face " << faceI
+                            << " on coupled patch "
+                            << bm[patchI].name()
+                            << " is not consistent with its coupled neighbour."
+                            << endl;
+                    }
+                }
+
+                // Flip state should be opposite.
+                if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
+                {
+                    boundaryError = true;
+
+                    if (report)
+                    {
+                        Pout<< " ***Problem with faceZone " << index()
+                            << " named " << name()
+                            << ". Face " << faceI
+                            << " on coupled patch "
+                            << bm[patchI].name()
+                            << " does not have consistent flipMap"
+                            << " across coupled faces."
+                            << endl;
+                    }
+                }
+            }
+        }
+    }
+
+    return returnReduce(boundaryError, orOp<bool>());
 }
 
 
