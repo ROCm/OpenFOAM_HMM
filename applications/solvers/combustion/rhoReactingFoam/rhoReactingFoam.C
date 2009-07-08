@@ -86,7 +86,10 @@ int main(int argc, char *argv[])
 
         rho = thermo.rho();
 
-        runTime.write();
+        if (runTime.write())
+        {
+            chemistry.dQ()().write();
+        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
