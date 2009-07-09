@@ -100,6 +100,12 @@ Foam::label Foam::meshRefinement::createBaffle
                 << " ownPatch:" << ownPatch << abort(FatalError);
         }
 
+        bool reverseFlip = false;
+        if (zoneID >= 0)
+        {
+            reverseFlip = !zoneFlip;
+        }
+
         dupFaceI = meshMod.setAction
         (
             polyAddFace
@@ -113,7 +119,7 @@ Foam::label Foam::meshRefinement::createBaffle
                 true,                       // face flip
                 neiPatch,                   // patch for face
                 zoneID,                     // zone for face
-                !zoneFlip                   // face flip in zone
+                reverseFlip                 // face flip in zone
             )
         );
     }
