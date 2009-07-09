@@ -80,6 +80,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     {
         Info<< "    No U" << endl;
     }
+
+    Info<< "\nEnd\n" << endl;
 }
 
 

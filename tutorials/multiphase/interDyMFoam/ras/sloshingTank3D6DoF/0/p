@@ -22,7 +22,8 @@ boundaryField
 {
     walls
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 }
 
