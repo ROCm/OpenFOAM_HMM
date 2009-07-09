@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readChemistryProperties.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createClouds.H"
     #include "createRadiationModel.H"
@@ -114,7 +114,10 @@ int main(int argc, char *argv[])
 
         rho = thermo.rho();
 
-        runTime.write();
+        if (runTime.write())
+        {
+            chemistry.dQ()().write();
+        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

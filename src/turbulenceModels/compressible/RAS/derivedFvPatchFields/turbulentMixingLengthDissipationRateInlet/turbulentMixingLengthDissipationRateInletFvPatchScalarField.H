@@ -33,7 +33,7 @@ Description
     @verbatim
         inlet
         {
-            type            turbulentMixingLengthDissipationRateInlet;
+            type            compressible::turbulentMixingLengthDissipationRateInlet;
             mixingLength    0.005;         // 5 mm
             value           uniform 200;   // placeholder
         }

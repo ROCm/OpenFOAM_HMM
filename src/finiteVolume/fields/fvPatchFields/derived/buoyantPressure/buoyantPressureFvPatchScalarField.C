@@ -28,6 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "uniformDimensionedFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -110,10 +111,8 @@ void buoyantPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const dictionary& environmentalProperties
-        = db().lookupObject<IOdictionary>("environmentalProperties");
-
-    dimensionedVector g(environmentalProperties.lookup("g"));
+    const uniformDimensionedVectorField& g =
+        db().lookupObject<uniformDimensionedVectorField>("g");
 
     const fvPatchField<scalar>& rho =
         patch().lookupPatchField<volScalarField, scalar>(rhoName_);

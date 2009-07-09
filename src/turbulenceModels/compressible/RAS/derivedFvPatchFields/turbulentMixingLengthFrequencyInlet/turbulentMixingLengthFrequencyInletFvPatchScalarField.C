@@ -49,7 +49,7 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 :
     fixedValueFvPatchField<scalar>(p, iF),
     mixingLength_(0.0),
-    kName_("undefined-k")
+    kName_("k")
 {}
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::

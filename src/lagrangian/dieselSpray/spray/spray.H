@@ -122,7 +122,7 @@ class spray
 
 
         //- Acceleration due to gravity
-        vector g_;
+        const vector& g_;
 
 
         // Composition properties
@@ -195,7 +195,7 @@ public:
             const basicMultiComponentMixture& composition,
             const PtrList<gasThermoPhysics>& gasProperties,
             const dictionary& thermophysicalProperties,
-            const dictionary& environmentalProperties
+            const dimensionedVector& g
         );
 
 
