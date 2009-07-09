@@ -19,42 +19,6 @@ RASModel        kEpsilon;
 
 turbulence      on;
 
-laminarCoeffs
-{
-}
-
-kEpsilonCoeffs
-{
-    Cmu             0.09;
-    C1              1.44;
-    C2              1.92;
-    C3              -0.33;
-    alphah          1;
-    alphak          1;
-    alphaEps        0.76923;
-}
-
-RNGkEpsilonCoeffs
-{
-}
-
-LaunderSharmaKECoeffs
-{
-}
-
-LRRCoeffs
-{
-}
-
-LaunderGibsonRSTMCoeffs
-{
-}
-
-wallFunctionCoeffs
-{
-    kappa           0.4187;
-    E               9;
-}
-
+printCoeffs     yes;
 
 // ************************************************************************* //
