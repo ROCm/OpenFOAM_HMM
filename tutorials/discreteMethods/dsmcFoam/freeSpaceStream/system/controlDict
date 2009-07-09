@@ -15,19 +15,21 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     dsmcFoam;
+
 startFrom       startTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         1e-3;
+endTime         2e-2;
 
 deltaT          1e-6;
 
 writeControl    runTime;
 
-writeInterval   1e-4;
+writeInterval   1e-3;
 
 purgeWrite      0;
 
