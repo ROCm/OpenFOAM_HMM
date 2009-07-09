@@ -30,7 +30,10 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class EquationOfState, int PolySize>
-Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo(Istream& is)
+Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo
+(
+    Istream& is
+)
 :
     EquationOfState(is),
     Hf_(readScalar(is)),
