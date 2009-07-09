@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-application     molecularDynamics;
+application     mdEquilibrationFoam;
 
 startFrom       startTime;
 
