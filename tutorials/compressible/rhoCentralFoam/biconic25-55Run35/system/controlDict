@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     rhoCentralFoam;
+
 startFrom       latestTime;
 
 startTime       0.005;

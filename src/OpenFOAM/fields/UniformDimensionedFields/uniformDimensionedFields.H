@@ -28,7 +28,7 @@ InClass
 Description
 
 SourceFiles
-    UniformDimensionedFields.C
+    uniformDimensionedFields.C
 
 \*---------------------------------------------------------------------------*/
 

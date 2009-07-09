@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     simpleFoam;
+
 startFrom       latestTime;
 
 startTime       0;

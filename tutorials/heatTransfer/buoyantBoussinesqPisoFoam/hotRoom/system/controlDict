@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     buoyantBoussinesqPisoFoam;
+
 startFrom       startTime;
 
 startTime       0;
