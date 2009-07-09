@@ -36,8 +36,8 @@ Foam::hPolynomialThermo<EquationOfState, PolySize>::hPolynomialThermo(Istream& i
     Hf_(readScalar(is)),
     Sf_(readScalar(is)),
     cpPolynomial_("cpPolynomial", is),
-    dhPolynomial_("dhPolynomial", cpPolynomial_.integrate()),
-    sPolynomial_("sPolynomial", cpPolynomial_.integrateMinus1())
+    dhPolynomial_(cpPolynomial_.integrate()),
+    sPolynomial_(cpPolynomial_.integrateMinus1())
 {}
 
 
