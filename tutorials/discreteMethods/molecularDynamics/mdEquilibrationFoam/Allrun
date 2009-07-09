@@ -5,11 +5,11 @@
 
 application="mdEquilibrationFoam"
 
-# cd periodicCubeArgon
-#     runApplication blockMesh
-#     runApplication mdInitialise
-#     runApplication $application
-# cd ..
+cd periodicCubeArgon
+    runApplication blockMesh
+    runApplication mdInitialise
+    runApplication $application
+cd ..
 
 cd periodicCubeWater
     runApplication blockMesh

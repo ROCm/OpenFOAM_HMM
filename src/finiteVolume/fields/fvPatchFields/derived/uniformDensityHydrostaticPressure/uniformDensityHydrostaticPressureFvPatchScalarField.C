@@ -29,7 +29,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
-
+#include "uniformDimensionedFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -126,10 +126,8 @@ void Foam::uniformDensityHydrostaticPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const dictionary& environmentalProperties
-        = db().lookupObject<IOdictionary>("environmentalProperties");
-
-    dimensionedVector g(environmentalProperties.lookup("g"));
+    const uniformDimensionedVectorField& g =
+        db().lookupObject<uniformDimensionedVectorField>("g");
 
     operator==
     (

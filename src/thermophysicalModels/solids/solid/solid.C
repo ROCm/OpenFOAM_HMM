@@ -26,16 +26,14 @@ License
 
 #include "solid.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(solid, 0);
-defineRunTimeSelectionTable(solid,);
-defineRunTimeSelectionTable(solid, Istream);
+    defineTypeNameAndDebug(solid, 0);
+    defineRunTimeSelectionTable(solid,);
+    defineRunTimeSelectionTable(solid, Istream);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -80,15 +78,11 @@ void Foam::solid::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& operator<<(Ostream& os, const solid& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const solid& s)
 {
     s.writeData(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

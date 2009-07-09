@@ -5,6 +5,8 @@
     volScalarField& K = KFluid[i];
     volVectorField& U = UFluid[i];
     surfaceScalarField& phi = phiFluid[i];
+    const dimensionedVector& g = gFluid[i];
+
     compressible::turbulenceModel& turb = turbulence[i];
     volScalarField& DpDt = DpDtFluid[i];
 
@@ -13,9 +15,3 @@
     volScalarField& h = thermo.h();
 
     const dimensionedScalar massIni("massIni", dimMass, initialMassFluid[i]);
-
-    const dictionary& environmentalProperties =
-        fluidRegions[i].lookupObject<IOdictionary>
-        ("environmentalProperties");
-
-    const dimensionedVector g(environmentalProperties.lookup("g"));

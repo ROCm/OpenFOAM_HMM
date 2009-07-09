@@ -73,13 +73,7 @@
         )
     );
 
-    Info<< "Creating field DpDt\n" << endl;
-    volScalarField DpDt
-    (
-        "DpDt",
-        fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p)
-    );
-
+    Info<< "Creating multi-variate interpolation scheme\n" << endl;
     multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 
     forAll (Y, i)

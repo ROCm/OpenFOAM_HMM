@@ -42,15 +42,12 @@ Foam::Cloud<ParticleType>::Cloud
 )
 :
     cloud(pMesh),
-    IDLList<ParticleType>(particles),
+    IDLList<ParticleType>(),
     polyMesh_(pMesh),
-    allFaces_(pMesh.faces()),
-    points_(pMesh.points()),
-    cellFaces_(pMesh.cells()),
-    allFaceCentres_(pMesh.faceCentres()),
-    owner_(pMesh.faceOwner()),
-    neighbour_(pMesh.faceNeighbour())
-{}
+    particleCount_(0)
+{
+    IDLList<ParticleType>::operator=(particles);
+}
 
 
 template<class ParticleType>
@@ -62,18 +59,30 @@ Foam::Cloud<ParticleType>::Cloud
 )
 :
     cloud(pMesh, cloudName),
-    IDLList<ParticleType>(particles),
+    IDLList<ParticleType>(),
     polyMesh_(pMesh),
-    allFaces_(pMesh.faces()),
-    points_(pMesh.points()),
-    cellFaces_(pMesh.cells()),
-    allFaceCentres_(pMesh.faceCentres()),
-    owner_(pMesh.faceOwner()),
-    neighbour_(pMesh.faceNeighbour())
-{}
+    particleCount_(0)
+{
+    IDLList<ParticleType>::operator=(particles);
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParticleType>
+Foam::label Foam::Cloud<ParticleType>::getNewParticleID() const
+{
+    label id = particleCount_++;
+
+    if (id == labelMax)
+    {
+        WarningIn("Cloud<ParticleType>::getNewParticleID() const")
+            << "Particle counter has overflowed. This might cause problems"
+            << " when reconstructing particle tracks." << endl;
+    }
+    return id;
+}
+
 
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::addParticle(ParticleType* pPtr)

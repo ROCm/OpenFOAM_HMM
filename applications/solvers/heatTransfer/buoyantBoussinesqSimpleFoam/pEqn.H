@@ -7,6 +7,7 @@
 
     phi = fvc::interpolate(U) & mesh.Sf();
     adjustPhi(phi, U, p);
+
     surfaceScalarField buoyancyPhi =
         rUAf*fvc::interpolate(rhok)*(g & mesh.Sf());
     phi += buoyancyPhi;

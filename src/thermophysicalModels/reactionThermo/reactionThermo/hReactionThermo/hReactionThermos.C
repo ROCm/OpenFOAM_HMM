@@ -114,6 +114,7 @@ makeReactionThermo
     perfectGas
 );
 
+
 makeReactionThermo
 (
     hReactionThermo,
@@ -135,6 +136,14 @@ makeReactionMixtureThermo
     icoPoly8ThermoPhysics
 );
 
+makeReactionMixtureThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    multiComponentMixture,
+    gasThermoPhysics
+);
+
 
 // Multi-component reaction thermo
 
@@ -144,6 +153,14 @@ makeReactionMixtureThermo
     hRhoMixtureThermo,
     reactingMixture,
     icoPoly8ThermoPhysics
+);
+
+makeReactionMixtureThermo
+(
+    hReactionThermo,
+    hRhoMixtureThermo,
+    reactingMixture,
+    gasThermoPhysics
 );
 
 

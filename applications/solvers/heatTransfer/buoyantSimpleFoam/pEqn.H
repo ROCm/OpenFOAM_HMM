@@ -9,6 +9,7 @@
 
     phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
     bool closedVolume = adjustPhi(phi, U, p);
+
     surfaceScalarField buoyancyPhi =
         rhorUAf*fvc::interpolate(rho)*(g & mesh.Sf());
     phi += buoyancyPhi;

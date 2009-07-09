@@ -58,8 +58,6 @@ else
         //+ fvc::ddtPhiCorr(rUA, rho, U, phi)
         );
 
-    //bool closedVolume = adjustPhi(phi, U, p);
-
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
         // Pressure corrector

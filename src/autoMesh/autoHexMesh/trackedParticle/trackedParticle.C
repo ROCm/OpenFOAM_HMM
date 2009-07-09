@@ -56,7 +56,7 @@ Foam::trackedParticle::trackedParticle
     bool readFields
 )
 :
-    ExactParticle<trackedParticle>(c, is)
+    ExactParticle<trackedParticle>(c, is, readFields)
 {
     if (readFields)
     {

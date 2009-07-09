@@ -265,7 +265,7 @@ dictionaryReplacement
         {
             minX
             {
-                type            fixedFluxBuoyantPressure;
+                type            buoyantPressure;
                 value           1e5;
             }
             maxX
@@ -283,34 +283,34 @@ dictionaryReplacement
 
             maxY
             {
-                type            fixedFluxBuoyantPressure;
+                type            buoyantPressure;
                 value           1e5;
             }
 
             minZ
             {
-                type            fixedFluxBuoyantPressure;
+                type            buoyantPressure;
                 value           1e5;
             }
             maxZ
             {
-                type            fixedFluxBuoyantPressure;
+                type            buoyantPressure;
                 value           1e5;
             }
 
             topAir_to_leftSolid
             {
-                type            fixedFluxBuoyantPressure;
+                type            buoyantPressure;
                 value           1e5;
             }
             topAir_to_heater
             {
-                type            fixedFluxBuoyantPressure;
+                type            buoyantPressure;
                 value           1e5;
             }
             topAir_to_rightSolid
             {
-                type            fixedFluxBuoyantPressure;
+                type            buoyantPressure;
                 value           1e5;
             }
         }

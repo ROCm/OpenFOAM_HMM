@@ -27,16 +27,14 @@ License
 #include "CaCO3.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(CaCO3, 0);
-addToRunTimeSelectionTable(solid, CaCO3,);
-addToRunTimeSelectionTable(solid, CaCO3, Istream);
+    defineTypeNameAndDebug(CaCO3, 0);
+    addToRunTimeSelectionTable(solid, CaCO3,);
+    addToRunTimeSelectionTable(solid, CaCO3, Istream);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -72,15 +70,11 @@ void Foam::CaCO3::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& operator<<(Ostream& os, const CaCO3& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const CaCO3& s)
 {
     s.writeData(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
