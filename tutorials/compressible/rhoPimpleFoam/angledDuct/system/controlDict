@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     rhoPimpleFoam;
+
 startFrom       startTime;
 
 startTime       0;

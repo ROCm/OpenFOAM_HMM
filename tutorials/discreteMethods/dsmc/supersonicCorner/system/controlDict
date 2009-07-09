@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     dsmc;
+
 startFrom       startTime;
 
 startTime       0;

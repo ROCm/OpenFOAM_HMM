@@ -1,25 +1,18 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.4                                   |
-|   \\  /    A nd           | Web:      http://www.openfoam.org               |
+|  \\    /   O peration     | Version:  1.5                                   |
+|   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
-
 FoamFile
 {
-    version         2.0;
-    format          ascii;
-
-    root            "";
-    case            "";
-    instance        "";
-    local           "";
-
-    class           dictionary;
-    object          fvSolution;
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    location    "system";
+    object      fvSolution;
 }
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 solvers
@@ -65,18 +58,6 @@ solvers
         relTol           0;
     };
 }
-
-//PISO
-//{
-//    nCorrectors     2;
-//    nNonOrthogonalCorrectors 2;
-//    pRefCell        0;
-//    pRefValue       0;
-//}
-//
-//relaxationFactors
-//{
-//}
 
 
 // ************************************************************************* //
