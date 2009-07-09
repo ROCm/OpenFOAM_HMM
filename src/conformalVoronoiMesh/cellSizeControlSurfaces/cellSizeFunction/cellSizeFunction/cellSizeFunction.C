@@ -37,6 +37,8 @@ namespace Foam
 defineTypeNameAndDebug(cellSizeFunction, 0);
 defineRunTimeSelectionTable(cellSizeFunction, dictionary);
 
+scalar cellSizeFunction::snapToSurfaceTol_ = 1e-10;
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

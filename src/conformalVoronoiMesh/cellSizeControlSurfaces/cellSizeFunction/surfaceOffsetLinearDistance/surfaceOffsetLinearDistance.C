@@ -83,8 +83,20 @@ scalar surfaceOffsetLinearDistance::sizeFunction(scalar d) const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool surfaceOffsetLinearDistance::cellSize(const point& pt, scalar& size) const
+bool surfaceOffsetLinearDistance::cellSize
+(
+    const point& pt,
+    scalar& size,
+    bool isSurfacePoint
+) const
 {
+    if (isSurfacePoint)
+    {
+        size = surfaceCellSize_;
+
+        return true;
+    }
+
     size = 0;
 
     List<pointIndexHit> hits;
@@ -103,6 +115,15 @@ bool surfaceOffsetLinearDistance::cellSize(const point& pt, scalar& size) const
         if (sideMode_ == BOTHSIDES)
         {
             size = sizeFunction(mag(pt - hitInfo.hitPoint()));
+
+            return true;
+        }
+
+        // If the nearest point is essentially on the surface, do not do a
+        // getVolumeType calculation, as it will be prone to error.
+        if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
+        {
+            size = sizeFunction(0);
 
             return true;
         }

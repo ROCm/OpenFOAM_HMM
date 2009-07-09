@@ -131,8 +131,14 @@ class conformalVoronoiMesh
         //- Write the elapsedCpuTime
         inline void timeCheck() const;
 
-        //- Return the local target cell size at the given location
-        inline scalar targetCellSize(const point& pt) const;
+        //- Return the local target cell size at the given location.  Takes
+        //  boolean argument to allow speed-up of queries if the point is going
+        //  to be on a surface.
+        inline scalar targetCellSize
+        (
+            const point& pt,
+            bool isSurfacePoint = false
+        ) const;
 
         //- Return the local point pair separation at the given location
         inline scalar pointPairDistance(const point& pt) const;
@@ -153,7 +159,7 @@ class conformalVoronoiMesh
         inline scalar minimumEdgeLength(const point& pt) const;
 
         //- Return the required alignment directions at the given location
-        inline tensor requiredAlignment(const point& pt) const;
+        tensor requiredAlignment(const point& pt) const;
 
         //- Insert point and return it's index
         inline label insertPoint
@@ -412,6 +418,9 @@ public:
                 const fileName& fName
             ) const;
 
+            //- Read mesh from file as an fvMesh then calculate and write a
+            // field of the target cell size
+            void writeTargetCellSize() const;
 };
 
 

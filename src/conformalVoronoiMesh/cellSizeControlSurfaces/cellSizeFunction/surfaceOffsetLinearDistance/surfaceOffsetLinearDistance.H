@@ -111,7 +111,12 @@ public:
         //  Return a boolean specifying if the function was used, i.e. false if
         //  the point was not in range of the surface for a spatially varying
         //  size.
-        virtual bool cellSize(const point& pt, scalar& size) const;
+        virtual bool cellSize
+        (
+            const point& pt,
+            scalar& size,
+            bool isSurfacePoint = false
+        ) const;
 };
 
 

@@ -32,9 +32,9 @@ inline const Foam::IOdictionary& Foam::cvControls::cvMeshDict() const
 }
 
 
-inline Foam::scalar Foam::cvControls::defaultCellSize() const
+inline Foam::scalar Foam::cvControls::span() const
 {
-    return defaultCellSize_;
+    return span_;
 }
 
 

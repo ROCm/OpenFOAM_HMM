@@ -53,11 +53,43 @@ uniform::uniform
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool uniform::cellSize(const point& pt, scalar& size) const
+bool uniform::cellSize
+(
+    const point& pt,
+    scalar& size,
+    bool isSurfacePoint
+) const
 {
-    size = 0;
+    if (isSurfacePoint)
+    {
+        size = cellSize_;
+
+        return true;
+    }
 
     if (sideMode_ == BOTHSIDES)
+    {
+        size = cellSize_;
+
+        return true;
+    }
+
+    size = 0;
+
+    List<pointIndexHit> hits;
+
+    surface_.findNearest
+    (
+        pointField(1, pt),
+        scalarField(1, sqr(snapToSurfaceTol_)),
+        hits
+    );
+
+    const pointIndexHit& hitInfo = hits[0];
+
+    // If the nearest point is essentially on the surface, do not do a
+    // getVolumeType calculation, as it will be prone to error.
+    if (hitInfo.hit())
     {
         size = cellSize_;
 

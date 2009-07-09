@@ -32,8 +32,6 @@ License
 #include "ulong.H"
 #include "surfaceFeatures.H"
 
-#include "zeroGradientPointPatchField.H"
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::conformalVoronoiMesh::conformalVoronoiMesh
@@ -117,51 +115,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     writeMesh();
     timeCheck();
 
-    // Test field creation and cell size functions
-
-    Info<< "Create fvMesh" << endl;
-
-    fvMesh fMesh
-    (
-        IOobject
-        (
-            Foam::polyMesh::defaultRegion,
-            runTime_.constant(),
-            runTime_,
-            IOobject::MUST_READ
-        )
-    );
-
-    timeCheck();
-
-    Info<< "Create volScalarField" << endl;
-
-    volScalarField cellSizeTest
-    (
-        IOobject
-        (
-            "cellSizeTest",
-            runTime_.timeName(),
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        fMesh,
-        dimensionedScalar("cellSize", dimLength, 0),
-        zeroGradientPointPatchField<scalar>::typeName
-    );
-
-    scalarField& cellSize = cellSizeTest.internalField();
-
-    const vectorField& C = fMesh.cellCentres();
-
-    forAll(cellSize, i)
-    {
-        cellSize[i] = cellSizeControl().cellSize(C[i]);
-    }
-
-    cellSizeTest.write();
-
+    writeTargetCellSize();
     timeCheck();
 }
 
@@ -173,6 +127,15 @@ Foam::conformalVoronoiMesh::~conformalVoronoiMesh()
 
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
+(
+    const point& pt
+) const
+{
+    return I;
+}
+
 
 void Foam::conformalVoronoiMesh::insertSurfacePointPairs
 (
@@ -434,18 +397,9 @@ void Foam::conformalVoronoiMesh::insertMultipleEdgePointGroup
 
 void Foam::conformalVoronoiMesh::createFeaturePoints()
 {
-    const boundBox& bb = geometryToConformTo().bounds();
-
-    scalar span
-    (
-        max(mag(bb.max().x()), mag(bb.min().x()))
-      + max(mag(bb.max().y()), mag(bb.min().y()))
-      + max(mag(bb.max().z()), mag(bb.min().z()))
-    );
-
     Info<< nl << "Creating bounding points" << endl;
 
-    scalar bigSpan = 10*span;
+    scalar bigSpan = 10*cvMeshControls().span();
 
     insertPoint(point(-bigSpan, -bigSpan, -bigSpan), Vb::FAR_POINT);
     insertPoint(point(-bigSpan, -bigSpan,  bigSpan), Vb::FAR_POINT);
@@ -827,6 +781,10 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
     std::list<Facet> facets;
     incident_facets(vit, std::back_inserter(facets));
 
+    point vert(topoint(vit->point()));
+
+    scalar maxProtrusionDistance = maxSurfaceProtrusion(vert);
+
     for
     (
         std::list<Facet>::iterator fit=facets.begin();
@@ -840,10 +798,6 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
          && !is_infinite(fit->first->neighbor(fit->second))
         )
         {
-            point vert(topoint(vit->point()));
-
-            scalar maxProtrusionDistance = maxSurfaceProtrusion(vert);
-
             point edgeMid =
                 0.5
                *(
@@ -860,7 +814,7 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
                 edgeMid,
                 surfHit,
                 hitSurface
-           );
+            );
 
             if (surfHit.hit())
             {
@@ -901,7 +855,8 @@ bool Foam::conformalVoronoiMesh::nearFeatureEdgeLocation
 
     scalar exclusionRangeCoeff = 0.2;
 
-    scalar exclusionRangeSqr = sqr(exclusionRangeCoeff*targetCellSize(pt));
+    scalar exclusionRangeSqr =
+        sqr(exclusionRangeCoeff*targetCellSize(pt, true));
 
     // 0.01 and 1000 determined from speed tests, varying the indexedOctree
     // rebuild frequency and balance of additions to queries.
@@ -1789,7 +1744,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
     label iterationNo = 0;
 
-    label maxIterations = 2;
+    label maxIterations = 10;
     Info << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
     // Set totalHits to a positive value to enter the while loop on the first
@@ -1873,7 +1828,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
             (
                 featureEdgeHits,
                 featureEdgeFeaturesHit,
-                "edgeGenerationLocations_" + name(iterationNo) + ".obj"
+                "edgeConformationLocations_" + name(iterationNo) + ".obj"
             );
         }
 

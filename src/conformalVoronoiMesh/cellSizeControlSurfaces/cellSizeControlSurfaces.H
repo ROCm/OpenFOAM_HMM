@@ -126,7 +126,11 @@ public:
         // Query
 
             //- Return the cell size at the given location
-            scalar cellSize(const point& pt) const;
+            scalar cellSize
+            (
+                const point& pt,
+                bool isSurfacePoint = false
+            ) const;
 };
 
 

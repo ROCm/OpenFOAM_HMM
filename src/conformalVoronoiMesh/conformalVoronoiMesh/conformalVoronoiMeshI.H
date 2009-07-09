@@ -35,10 +35,11 @@ inline void Foam::conformalVoronoiMesh::timeCheck() const
 
 inline Foam::scalar Foam::conformalVoronoiMesh::targetCellSize
 (
-    const point& pt
+    const point& pt,
+    bool isSurfacePoint
 ) const
 {
-    return cvMeshControls_.defaultCellSize();
+    return cellSizeControl().cellSize(pt, isSurfacePoint);
 }
 
 
@@ -47,7 +48,10 @@ inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
     const point& pt
 ) const
 {
-    return targetCellSize(pt)*cvMeshControls_.pointPairDistanceCoeff();
+    // Point pair distances are always going to be at the surface, so the
+    // targetCellSize can be told to do a quick, surface only check.
+
+    return targetCellSize(pt, true)*cvMeshControls_.pointPairDistanceCoeff();
 }
 
 
@@ -67,10 +71,13 @@ inline Foam::scalar Foam::conformalVoronoiMesh::featurePointExclusionDistanceSqr
     const point& pt
 ) const
 {
+    // Exclusion distance tests are always going to be at the surface, so the
+    // targetCellSize can be told to do a quick, surface only check.
+
     return
         sqr
         (
-            targetCellSize(pt)
+            targetCellSize(pt, true)
            *cvMeshControls_.featurePointExclusionDistanceCoeff()
         );
 }
@@ -100,16 +107,6 @@ inline Foam::scalar Foam::conformalVoronoiMesh::minimumEdgeLength
 ) const
 {
     return targetCellSize(pt)*cvMeshControls_.minimumEdgeLengthCoeff();
-}
-
-
-inline Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
-(
-    const point& pt
-) const
-{
-    Info<< "STILL TO IMPLEMENT requiredAlignment." << endl;
-    return I;
 }
 
 

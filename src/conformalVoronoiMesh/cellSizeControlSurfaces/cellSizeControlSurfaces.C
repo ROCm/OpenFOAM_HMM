@@ -181,7 +181,8 @@ bool Foam::cellSizeControlSurfaces::samePriorityNext(label i) const
 
 Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 (
-    const point& pt
+    const point& pt,
+    bool isSurfacePoint
 ) const
 {
     scalar sizeAccumulator = 0;
@@ -193,7 +194,7 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 
         scalar sizeI;
 
-        if (cSF.cellSize(pt, sizeI))
+        if (cSF.cellSize(pt, sizeI, isSurfacePoint))
         {
             sizeAccumulator += sizeI;
             numberOfFunctions++;

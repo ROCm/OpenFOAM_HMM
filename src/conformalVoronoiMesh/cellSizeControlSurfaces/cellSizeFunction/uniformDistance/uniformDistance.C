@@ -55,8 +55,20 @@ uniformDistance::uniformDistance
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool uniformDistance::cellSize(const point& pt, scalar& size) const
+bool uniformDistance::cellSize
+(
+    const point& pt,
+    scalar& size,
+    bool isSurfacePoint
+) const
 {
+    if (isSurfacePoint)
+    {
+        size = cellSize_;
+
+        return true;
+    }
+
     size = 0;
 
     List<pointIndexHit> hits;
@@ -68,9 +80,20 @@ bool uniformDistance::cellSize(const point& pt, scalar& size) const
         hits
     );
 
-    if (hits[0].hit())
+    const pointIndexHit& hitInfo = hits[0];
+
+    if (hitInfo.hit())
     {
         if (sideMode_ == BOTHSIDES)
+        {
+            size = cellSize_;
+
+            return true;
+        }
+
+        // If the nearest point is essentially on the surface, do not do a
+        // getVolumeType calculation, as it will be prone to error.
+        if (mag(pt  - hitInfo.hitPoint()) < snapToSurfaceTol_)
         {
             size = cellSize_;
 

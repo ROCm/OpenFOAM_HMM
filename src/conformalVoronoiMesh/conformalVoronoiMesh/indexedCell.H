@@ -53,8 +53,8 @@ class indexedCell
 {
     // Private data
 
-        //- The index for this triangle Cell
-        //  -1: triangle and changed and associated data needs updating
+        //- The index for this tetrahedral cell
+        //  -1: tetrahedral and changed and associated data needs updating
         // >=0: index of cells, set by external update algorithm
         int index_;
 

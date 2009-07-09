@@ -38,7 +38,17 @@ Foam::cvControls::cvControls
     cvMesh_(cvMesh),
     cvMeshDict_(cvMeshDict)
 {
+    // General parameters
+
+    const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
+
+    span_ =
+        max(mag(bb.max().x()), mag(bb.min().x()))
+      + max(mag(bb.max().y()), mag(bb.min().y()))
+      + max(mag(bb.max().z()), mag(bb.min().z()));
+
     // Surface conformation controls
+
     const dictionary& surfDict(cvMeshDict_.subDict("surfaceConformation"));
 
     pointPairDistanceCoeff_ = readScalar
@@ -69,9 +79,8 @@ Foam::cvControls::cvControls
     maxQuadAngle_= readScalar(surfDict.lookup("maxQuadAngle"));
 
     // Motion control controls
-    const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
 
-    defaultCellSize_ = readScalar(motionDict.lookup("defaultCellSize"));
+    const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
 
     const dictionary& insertionDict
     (
@@ -104,6 +113,7 @@ Foam::cvControls::cvControls
     );
 
     // polyMesh filtering controls
+
     const dictionary& filteringDict(cvMeshDict_.subDict("polyMeshFiltering"));
 
     minimumEdgeLengthCoeff_ = readScalar

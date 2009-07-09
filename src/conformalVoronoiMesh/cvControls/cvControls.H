@@ -60,6 +60,11 @@ class cvControls
         //- Reference to the cvMeshDict
         const IOdictionary& cvMeshDict_;
 
+        // General parameters
+
+            //- Span of the domain
+            scalar span_;
+
         // Surface conformation controls
 
             //- Point pair spacing coefficient - fraction of the local target
@@ -90,10 +95,6 @@ class cvControls
 
 
     // Motion control controls
-
-        // Storing the default cell size value for the moment until a method for
-        // storing the spatially resolved size requirement is implemented
-        scalar defaultCellSize_;
 
         // Point insertion criteria
 
@@ -138,8 +139,8 @@ public:
             //- Return the cvMeshDict
             inline const IOdictionary& cvMeshDict() const;
 
-            //- Return the defaultCellSize
-            inline scalar defaultCellSize() const;
+            //- Return the span
+            inline scalar span() const;
 
             //- Return the pointPairDistanceCoeff
             inline scalar pointPairDistanceCoeff() const;

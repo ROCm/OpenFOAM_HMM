@@ -27,6 +27,7 @@ License
 #include "conformalVoronoiMesh.H"
 #include "IOstreams.H"
 #include "OFstream.H"
+#include "zeroGradientPointPatchField.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -173,6 +174,53 @@ void Foam::conformalVoronoiMesh::writeDual
 
         str<< nl;
     }
+}
+
+
+void Foam::conformalVoronoiMesh::writeTargetCellSize() const
+{
+    Info<< nl << "Create fvMesh" << endl;
+
+    fvMesh fMesh
+    (
+        IOobject
+        (
+            Foam::polyMesh::defaultRegion,
+            runTime_.constant(),
+            runTime_,
+            IOobject::MUST_READ
+        )
+    );
+
+    timeCheck();
+
+    Info<< nl << "Create targetCellSize volScalarField" << endl;
+
+    volScalarField targetCellSize
+    (
+        IOobject
+        (
+            "targetCellSize",
+            runTime_.timeName(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        fMesh,
+        dimensionedScalar("cellSize", dimLength, 0),
+        zeroGradientPointPatchField<scalar>::typeName
+    );
+
+    scalarField& cellSize = targetCellSize.internalField();
+
+    const vectorField& C = fMesh.cellCentres();
+
+    forAll(cellSize, i)
+    {
+        cellSize[i] = cellSizeControl().cellSize(C[i]);
+    }
+
+    targetCellSize.write();
 }
 
 

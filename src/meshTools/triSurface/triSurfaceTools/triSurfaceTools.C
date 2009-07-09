@@ -2225,7 +2225,11 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
         // Nearest to face interior. Use faceNormal to determine side
         scalar c = (sample - nearestPoint) & surf.faceNormals()[nearestFaceI];
 
-        c /= (mag(sample - nearestPoint)*mag(surf.faceNormals()[nearestFaceI]));
+        c /= max
+        (
+            VSMALL,
+            mag(sample - nearestPoint)*mag(surf.faceNormals()[nearestFaceI])
+        );
 
         if (mag(c) < 0.9)
         {
@@ -2235,6 +2239,10 @@ Foam::triSurfaceTools::sideType Foam::triSurfaceTools::surfaceSide
                 << "perpendicular to the normal." << nl
                 << "sample: " << sample << nl
                 << "nearestPoint: " << nearestPoint << nl
+                << "sample - nearestPoint: " << sample - nearestPoint << nl
+                << "normal: " << surf.faceNormals()[nearestFaceI] << nl
+                << "mag(sample - nearestPoint): "
+                << mag(sample - nearestPoint) << nl
                 << "normalised dot product: " << c << nl
                 << "triangle vertices: " << nl
                 << "    " << points[f[0]] << nl
