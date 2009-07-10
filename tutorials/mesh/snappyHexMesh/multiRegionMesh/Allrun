@@ -38,8 +38,7 @@ runApplication chtMultiRegionFoam
 #done
 #
 ## Run
-#hostname > system/machines
-#runParallel chtMultiRegionFoam 4 system/machines
+#runParallel chtMultiRegionFoam 4
 #
 ## Reconstruct
 #for i in bottomAir topAir heater leftSolid rightSolid
