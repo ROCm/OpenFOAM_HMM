@@ -61,12 +61,17 @@ cleanTimeDirectories ()
 cleanCase ()
 {
     cleanTimeDirectories
+    rm -rf processor* > /dev/null 2>&1
+    rm -rf probes* > /dev/null 2>&1
+    rm -rf forces* > /dev/null 2>&1
 
-    rm -rf constant/polyMesh/{allOwner*,cell*,face*,meshModifiers*} \
+    rm -rf system/machines \
+           constant/polyMesh/{allOwner*,cell*,face*,meshModifiers*} \
            constant/polyMesh/{owner*,neighbour*,point*,edge*} \
            constant/polyMesh/{cellLevel*,pointLevel*,refinementHistory*,surfaceIndex*} \
-           constant/{cellLevel*,pointLevel*} \
+           constant/{cellToRegion,cellLevel*,pointLevel*} \
            constant/polyMesh/sets/ \
+           VTK \
            > /dev/null 2>&1
 
     for f in `find . -name "*Dict"`
@@ -74,13 +79,6 @@ cleanCase ()
         sed -e /arguments/d $f > temp.$$
         mv temp.$$ $f
     done
-}
-
-cleanParallelCase ()
-{
-    cleanCase
-
-    rm -rf processor* > /dev/null 2>&1
 }
 
 removeCase ()
