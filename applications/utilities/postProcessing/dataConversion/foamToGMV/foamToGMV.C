@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info << nl << "Translation Complete." << nl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

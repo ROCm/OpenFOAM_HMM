@@ -5,5 +5,3 @@
 
 cleanCase
 rm -rf 0/lagrangian 0/dsmcSigmaTcRMax
-rm -rf processor*
-rm -f system/machines
