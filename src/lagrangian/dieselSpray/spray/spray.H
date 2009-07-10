@@ -79,6 +79,9 @@ class spray
             //- Random number generator
             Random rndGen_;
 
+        //- Acceleration due to gravity
+        const vector& g_;
+
 
         // References to the physical fields
 
@@ -93,14 +96,14 @@ class spray
 
 
         //- Ambient Pressure
-            scalar ambientPressure_;
+        scalar ambientPressure_;
 
         //- Ambient Temperature
-            scalar ambientTemperature_;
+        scalar ambientTemperature_;
 
 
         //- The injectors
-            IOPtrList<injector> injectors_;
+        IOPtrList<injector> injectors_;
 
 
         // References to the spray sub-models
@@ -119,10 +122,6 @@ class spray
 
         //- Minimum number of lagrangian subcycles
         const label subCycles_;
-
-
-        //- Acceleration due to gravity
-        const vector& g_;
 
 
         // Composition properties
