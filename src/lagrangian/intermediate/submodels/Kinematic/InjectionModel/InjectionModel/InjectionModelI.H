@@ -96,14 +96,4 @@ Foam::label Foam::InjectionModel<CloudType>::parcelsAddedTotal() const
 }
 
 
-template<class CloudType>
-Foam::scalar Foam::InjectionModel<CloudType>::volumeFraction
-(
-    const scalar volume
-) const
-{
-    return volume/volumeTotal_;
-}
-
-
 // ************************************************************************* //

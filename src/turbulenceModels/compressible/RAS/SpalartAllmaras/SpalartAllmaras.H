@@ -81,7 +81,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SpalartAllmaras Declaration
+                      Class SpalartAllmaras Declaration
 \*---------------------------------------------------------------------------*/
 
 class SpalartAllmaras
@@ -90,20 +90,27 @@ class SpalartAllmaras
 {
     // Private data
 
-        dimensionedScalar alphaNut_;
-        dimensionedScalar alphah_;
+        // Model coefficients
+            dimensionedScalar alphaNut_;
+            dimensionedScalar alphah_;
 
-        dimensionedScalar Cb1_;
-        dimensionedScalar Cb2_;
-        dimensionedScalar Cw1_;
-        dimensionedScalar Cw2_;
-        dimensionedScalar Cw3_;
-        dimensionedScalar Cv1_;
-        dimensionedScalar Cv2_;
+            dimensionedScalar Cb1_;
+            dimensionedScalar Cb2_;
+            dimensionedScalar Cw1_;
+            dimensionedScalar Cw2_;
+            dimensionedScalar Cw3_;
+            dimensionedScalar Cv1_;
+            dimensionedScalar Cv2_;
 
-        volScalarField nuTilda_;
-        volScalarField mut_;
 
+        // Fields
+
+            volScalarField nuTilda_;
+            volScalarField mut_;
+            volScalarField alphat_;
+
+
+        //- Wall distance
         wallDist d_;
 
 
@@ -173,7 +180,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*mut_ + alpha())
+                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
             );
         }
 

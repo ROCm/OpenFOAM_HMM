@@ -42,9 +42,12 @@ Foam::C::C()
 :
     solid(2010, 710, 0.04, 0.0, 1.0)
 {
-    WarningIn("C::C()")
-        << "Properties of graphite need to be checked!!!"
-        << endl;
+    if (debug)
+    {
+        WarningIn("C::C()")
+            << "Properties of graphite need to be checked!!!"
+            << endl;
+    }
 }
 
 

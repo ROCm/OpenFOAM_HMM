@@ -65,6 +65,7 @@ class STLtriangle
         //- The attribute information could for colour or solid id, etc
         STLattrib attrib_;
 
+
 public:
 
     // Constructors
@@ -96,10 +97,12 @@ public:
             inline const STLpoint& c() const;
             inline unsigned short attrib() const;
 
+
         // Read
 
             //- Read from istream (binary)
             inline void read(istream&);
+
 
         // Write
 

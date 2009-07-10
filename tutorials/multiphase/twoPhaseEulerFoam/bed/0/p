@@ -22,7 +22,8 @@ boundaryField
 {
     bottom
     {
-        type               zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
     top
@@ -33,7 +34,8 @@ boundaryField
 
     walls
     {
-        type               zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
     frontBack

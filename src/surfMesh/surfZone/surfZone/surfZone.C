@@ -45,7 +45,6 @@ Foam::surfZone::surfZone()
 {}
 
 
-
 Foam::surfZone::surfZone
 (
     const word& name,

@@ -4,8 +4,7 @@
 
 runApplication blockMesh
 runApplication decomposePar
-runParallel dsmcInitialise 4 system/machines
-hostname > system/machines
-runParallel dsmcFoam 4 system/machines
+runParallel dsmcInitialise 4
+runParallel dsmcFoam 4
 runApplication reconstructPar -noLagrangian
 

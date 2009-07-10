@@ -29,8 +29,6 @@ License
 #include "IStringStream.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -256,5 +254,6 @@ void Foam::fileFormats::OFSsurfaceFormat<Face>::write
     // Check state of Ostream
     os.check("OFSsurfaceFormat<Face>::write(Ostream&)");
 }
+
 
 // ************************************************************************* //

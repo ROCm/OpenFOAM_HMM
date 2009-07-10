@@ -8,9 +8,8 @@ application=`getApplication`
 runApplication blockMesh
 
 runApplication decomposePar
-hostname > system/machines
 
-runParallel mdInitialise 4 system/machines
-runParallel $application 4 system/machines
+runParallel mdInitialise 4
+runParallel $application 4
 
 runApplication reconstructPar

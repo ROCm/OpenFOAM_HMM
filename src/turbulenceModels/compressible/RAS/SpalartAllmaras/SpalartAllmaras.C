@@ -26,7 +26,8 @@ License
 
 #include "SpalartAllmaras.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallDist.H"
+
+#include "backwardsCompatibilityWallFunctions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -215,8 +216,24 @@ SpalartAllmaras::SpalartAllmaras
         mesh_
     ),
 
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
+    ),
+
     d_(mesh_)
 {
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
+
     printCoeffs();
 }
 
@@ -305,6 +322,12 @@ void SpalartAllmaras::correct()
     {
         // Re-calculate viscosity
         mut_ = rho_*nuTilda_*fv1(chi());
+        mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -338,8 +361,13 @@ void SpalartAllmaras::correct()
     bound(nuTilda_, dimensionedScalar("0", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();
 
+    // Re-calculate viscosity
     mut_.internalField() = fv1*nuTilda_.internalField()*rho_.internalField();
     mut_.correctBoundaryConditions();
+
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 

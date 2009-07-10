@@ -54,21 +54,21 @@ namespace fileFormats
 class VTKsurfaceFormatCore
 {
 protected:
+
     // Protected Member Functions
 
-    //- Write header information with points
-    static void writeHeader
-    (
-        Ostream&,
-        const pointField&
-    );
+        //- Write header information with points
+        static void writeHeader
+        (
+            Ostream&,
+            const pointField&
+        );
 
-    //- Write trailing information with zone information
-    static void writeTail(Ostream&, const UList<surfZone>&);
+        //- Write trailing information with zone information
+        static void writeTail(Ostream&, const UList<surfZone>&);
 
-    //- Write trailing information with zone Ids
-    static void writeTail(Ostream&, const UList<label>& zoneIds);
-
+        //- Write trailing information with zone Ids
+        static void writeTail(Ostream&, const UList<label>& zoneIds);
 };
 
 

@@ -74,8 +74,6 @@ public:
         //- Construct null
         WRLsurfaceFormat();
 
-    // Selectors
-
 
     // Destructor
 

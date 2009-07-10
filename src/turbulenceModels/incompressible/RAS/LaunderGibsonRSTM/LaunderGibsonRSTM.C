@@ -421,7 +421,7 @@ void LaunderGibsonRSTM::correct()
 
 
     // Re-calculate turbulent viscosity
-    nut_ == Cmu_*sqr(k_)/epsilon_;
+    nut_ = Cmu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 
 

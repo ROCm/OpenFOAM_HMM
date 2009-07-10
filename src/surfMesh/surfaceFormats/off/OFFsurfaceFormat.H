@@ -74,12 +74,14 @@ class OFFsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const OFFsurfaceFormat&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         OFFsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -92,15 +94,16 @@ public:
             );
         }
 
-    // Destructor
-        virtual ~OFFsurfaceFormat()
-        {}
+
+    //- Destructor
+    virtual ~OFFsurfaceFormat()
+    {}
+
 
     // Member Functions
 
         //- Write surface mesh components by proxy
         static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
-
 
         //- Read from file
         virtual bool read(const fileName&);
@@ -110,7 +113,6 @@ public:
         {
             write(name, MeshedSurfaceProxy<Face>(*this));
         }
-
 };
 
 

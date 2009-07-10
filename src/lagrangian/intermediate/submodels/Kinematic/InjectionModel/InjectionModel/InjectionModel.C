@@ -186,7 +186,6 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
 (
     const label parcels,
     const scalar volume,
-    const scalar volumeFraction,
     const scalar diameter,
     const scalar rho
 )
@@ -196,13 +195,14 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
     {
         case pbMass:
         {
-            nP = volumeFraction*massTotal_/parcels
-               /(rho*mathematicalConstant::pi/6.0*pow3(diameter));
+            nP = volume/volumeTotal_
+                *massTotal_/rho
+               /(parcels*mathematicalConstant::pi/6.0*pow3(diameter));
             break;
         }
         case pbNumber:
         {
-            nP = volumeFraction*massTotal_/(rho*volume);
+            nP = massTotal_/(rho*volumeTotal_*parcels);
             break;
         }
         default:
@@ -363,9 +363,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
         return;
     }
 
-    // Volume fraction to introduce during this timestep
-    const scalar volFraction = volumeFraction(newVolume);
-
     // Duration of injection period during this timestep
     const scalar deltaT =
         max(0.0, min(carrierDt, min(time - SOI_, timeEnd() - time0_)));
@@ -418,7 +415,6 @@ void Foam::InjectionModel<CloudType>::inject(TrackData& td)
                     (
                         newParcels,
                         newVolume,
-                        volFraction,
                         pPtr->d(),
                         pPtr->rho()
                     );
