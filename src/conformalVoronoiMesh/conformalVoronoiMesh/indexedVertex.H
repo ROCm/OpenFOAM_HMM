@@ -36,7 +36,7 @@ Description
 
 #include <CGAL/Triangulation_3.h>
 #include "List.H"
-#include "vector.H"
+#include "tensor.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -65,7 +65,9 @@ class indexedVertex
         //                        Lowest numbered is inside one (master).
         int type_;
 
-        Foam::List<Foam::vector> alignmentDirections_;
+        Foam::tensor alignment_;
+
+        Foam::scalar targetCellSize_;
 
 
 public:
@@ -94,7 +96,8 @@ public:
         Vb(),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0)
+        alignment_(),
+        targetCellSize_()
     {}
 
     indexedVertex(const Point& p)
@@ -102,7 +105,8 @@ public:
         Vb(p),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0)
+        alignment_(),
+        targetCellSize_()
     {}
 
     indexedVertex(const Point& p, Cell_handle f)
@@ -110,7 +114,8 @@ public:
         Vb(f, p),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0)
+        alignment_(),
+        targetCellSize_()
     {}
 
     indexedVertex(Cell_handle f)
@@ -118,7 +123,8 @@ public:
         Vb(f),
         index_(INTERNAL_POINT),
         type_(INTERNAL_POINT),
-        alignmentDirections_(0)
+        alignment_(),
+        targetCellSize_()
     {}
 
 
@@ -142,14 +148,24 @@ public:
         return type_;
     }
 
-    inline Foam::List<Foam::vector>& alignmentDirections()
+    inline Foam::tensor& alignment()
     {
-        return alignmentDirections_;
+        return alignment_;
     }
 
-    inline const Foam::List<Foam::vector>& alignmentDirections() const
+    inline const Foam::tensor& alignment() const
     {
-        return alignmentDirections_;
+        return alignment_;
+    }
+
+    inline Foam::scalar& targetCellSize()
+    {
+        return targetCellSize_;
+    }
+
+    inline Foam::scalar targetCellSize() const
+    {
+        return targetCellSize_;
     }
 
     inline bool uninitialised() const

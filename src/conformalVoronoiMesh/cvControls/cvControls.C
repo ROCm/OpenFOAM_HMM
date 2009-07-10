@@ -94,6 +94,14 @@ Foam::cvControls::cvControls
         motionDict.lookup("alignmentSearchSpokes")
     );
 
+    cosAlignmentAcceptanceAngle_ = cos
+    (
+        readScalar
+        (
+            motionDict.lookup("alignmentAcceptanceAngle")
+        )
+    );
+
     const dictionary& insertionDict
     (
         motionDict.subDict("pointInsertionCriteria")
@@ -107,11 +115,6 @@ Foam::cvControls::cvControls
     faceAreaRatioCoeff_ = readScalar
     (
         insertionDict.lookup("faceAreaRatioCoeff")
-    );
-
-    alignmentAcceptanceAngle_ = readScalar
-    (
-        insertionDict.lookup("alignmentAcceptanceAngle")
     );
 
     const dictionary& removalDict

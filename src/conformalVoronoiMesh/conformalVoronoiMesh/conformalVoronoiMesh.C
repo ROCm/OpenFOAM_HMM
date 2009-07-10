@@ -1989,17 +1989,19 @@ void Foam::conformalVoronoiMesh::conformToSurface()
 
 void Foam::conformalVoronoiMesh::move()
 {
+    timeCheck();
+
     scalar relaxation = relaxationModel_->relaxation();
 
     Info<< nl << "    Relaxation = " << relaxation << endl;
-
-    timeCheck();
 
     pointField dualVertices(number_of_cells());
 
     pointField displacementAccumulator(startOfSurfacePointPairs_, vector::zero);
 
     List<bool> pointToBeRetained(startOfSurfacePointPairs_, true);
+
+    DynamicList<point> newPointsToInsert;
 
     label dualVerti = 0;
 
@@ -2029,10 +2031,146 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    // setVertexAlignmentDirections();
-
     dualVertices.setSize(dualVerti);
 
+    timeCheck();
+
+    Info<< nl << "    Calculating target cell alignment and size" << endl;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalOrBoundaryPoint())
+        {
+            point pt(topoint(vit->point()));
+
+            vit->alignment() = requiredAlignment(pt);
+
+            vit->targetCellSize() = targetCellSize(pt);
+        }
+    }
+
+    timeCheck();
+
+    Info<< nl << "    Looping over all dual faces" << endl;
+
+    vectorField cartesianDirections(3);
+
+    cartesianDirections[0] = vector(0,0,1);
+    cartesianDirections[1] = vector(0,1,0);
+    cartesianDirections[2] = vector(1,0,0);
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        ++eit
+    )
+    {
+        if
+        (
+            eit->first->vertex(eit->second)->internalOrBoundaryPoint()
+         && eit->first->vertex(eit->third)->internalOrBoundaryPoint()
+        )
+        {
+            Cell_circulator ccStart = incident_cells(*eit);
+            Cell_circulator cc = ccStart;
+
+            DynamicList<label> verticesOnFace;
+
+            do
+            {
+                if (!is_infinite(cc))
+                {
+                    if (cc->cellIndex() < 0)
+                    {
+                        FatalErrorIn("conformalVoronoiMesh::move")
+                            << "Dual face uses circumcenter defined by a "
+                            << " Delaunay tetrahedron with no internal "
+                            << "or boundary points."
+                            << exit(FatalError);
+                    }
+
+                    verticesOnFace.append(cc->cellIndex());
+                }
+            } while (++cc != ccStart);
+
+            verticesOnFace.shrink();
+        }
+
+        Cell_handle c = eit->first;
+        Vertex_handle vA = c->vertex(eit->second);
+        Vertex_handle vB = c->vertex(eit->third);
+
+        point dVA = topoint(vA->point());
+        point dVB = topoint(vB->point());
+
+        Field<vector> alignmentDirsA = vA->alignment() & cartesianDirections;
+        Field<vector> alignmentDirsB = vB->alignment() & cartesianDirections;
+
+        Field<vector> alignmentDirs(3);
+
+        forAll(alignmentDirsA, aA)
+        {
+            const vector& a(alignmentDirsA[aA]);
+
+            scalar maxDotProduct = 0.0;
+
+            forAll(alignmentDirsB, aB)
+            {
+                const vector& b(alignmentDirsB[aB]);
+
+                scalar dotProduct = a & b;
+
+                if (mag(dotProduct) > maxDotProduct)
+                {
+                    maxDotProduct = mag(dotProduct);
+
+                    alignmentDirs[aA] = a + sign(dotProduct)*b;
+
+                    alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                }
+            }
+        }
+
+        vector rAB = dVA - dVB;
+
+        scalar rABMag = mag(rAB);
+
+        forAll(alignmentDirs, aD)
+        {
+            vector& alignmentDir = alignmentDirs[aD];
+
+            if ((rAB & alignmentDir) < 0)
+            {
+                // swap the direction of the alignment so that has the
+                // same sense as rAB
+                alignmentDir *= -1;
+            }
+
+            scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
+
+            scalar targetCellSize =
+                0.5*(vA->targetCellSize() + vB->targetCellSize());
+
+            scalar targetFaceArea = sqr(targetCellSize);
+
+            if
+            (
+                alignmentDotProd
+              > cvMeshControls().cosAlignmentAcceptanceAngle()
+            )
+            {
+                alignmentDir *= 0.5*targetCellSize;
+
+                vector delta = alignmentDir - 0.5*rAB;
+            }
+        }
+    }
 }
 
 

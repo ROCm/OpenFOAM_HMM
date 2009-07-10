@@ -108,13 +108,15 @@ class cvControls
         //  direction
         label alignmentSearchSpokes_;
 
+        //- cosine of angle of alignment with required direction where a face
+        //  will be accepted for rotation
+        scalar cosAlignmentAcceptanceAngle_;
+
         // Point insertion criteria
 
             scalar cellCentreInsertionDistCoeff_;
 
             scalar faceAreaRatioCoeff_;
-
-            scalar alignmentAcceptanceAngle_;
 
 
         // Point removal criteria
@@ -184,6 +186,8 @@ public:
             //- Return the number of alignmentSearchSpokes to use
             inline label alignmentSearchSpokes() const;
 
+            //- Return the cosAlignmentAcceptanceAngle
+            inline scalar cosAlignmentAcceptanceAngle() const;
 };
 
 

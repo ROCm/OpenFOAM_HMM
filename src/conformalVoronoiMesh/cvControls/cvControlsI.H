@@ -98,4 +98,10 @@ inline Foam::label Foam::cvControls::alignmentSearchSpokes() const
 }
 
 
+inline Foam::scalar Foam::cvControls::cosAlignmentAcceptanceAngle() const
+{
+    return cosAlignmentAcceptanceAngle_;
+}
+
+
 // ************************************************************************* //
