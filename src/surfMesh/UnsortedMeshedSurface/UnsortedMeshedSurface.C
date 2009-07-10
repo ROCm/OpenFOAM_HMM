@@ -33,8 +33,6 @@ License
 #include "polyBoundaryMesh.H"
 #include "polyMesh.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
 template<class Face>
@@ -299,10 +297,6 @@ Foam::UnsortedMeshedSurface<Face>::UnsortedMeshedSurface
 template<class Face>
 Foam::UnsortedMeshedSurface<Face>::~UnsortedMeshedSurface()
 {}
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
 
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -694,7 +688,6 @@ Foam::UnsortedMeshedSurface<Face>::xfer()
 }
 
 
-
 // Read from file, determine format from extension
 template<class Face>
 bool Foam::UnsortedMeshedSurface<Face>::read(const fileName& name)
@@ -772,11 +765,6 @@ Foam::MeshedSurfaceProxy<Face>() const
     );
 }
 
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

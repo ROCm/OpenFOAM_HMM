@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 inline Foam::STLtriangle::STLtriangle()
@@ -62,20 +60,24 @@ inline const Foam::STLpoint& Foam::STLtriangle::normal() const
     return normal_;
 }
 
+
 inline const Foam::STLpoint& Foam::STLtriangle::a() const
 {
     return a_;
 }
+
 
 inline const Foam::STLpoint& Foam::STLtriangle::b() const
 {
     return b_;
 }
 
+
 inline const Foam::STLpoint& Foam::STLtriangle::c() const
 {
     return c_;
 }
+
 
 inline unsigned short Foam::STLtriangle::attrib() const
 {
@@ -96,6 +98,7 @@ inline void Foam::STLtriangle::write(ostream& os)
     os.write(reinterpret_cast<char*>(&attrib_), sizeof(STLattrib));
 }
 
+
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
 inline Foam::Ostream& Foam::operator<<(Ostream& os, const STLtriangle& t)
@@ -109,7 +112,5 @@ inline Foam::Ostream& Foam::operator<<(Ostream& os, const STLtriangle& t)
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

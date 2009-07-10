@@ -3,7 +3,7 @@
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
 # Get application directory
-application="channelFoam"
+application=`getApplication`
 
 runApplication blockMesh
 runApplication $application

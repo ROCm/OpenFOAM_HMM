@@ -26,7 +26,6 @@ License
 
 #include "kOmegaSST.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -259,10 +258,10 @@ kOmegaSST::kOmegaSST
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ == a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
+    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
     mut_.correctBoundaryConditions();
 
-    alphat_ == mut_/Prt_;
+    alphat_ = mut_/Prt_;
     alphat_.correctBoundaryConditions();
 
     printCoeffs();
@@ -352,7 +351,7 @@ void kOmegaSST::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ ==
+        mut_ =
             a1_*rho_*k_
            /max(a1_*omega_, F2()*sqrt(magSqr(symm(fvc::grad(U_)))));
         mut_.correctBoundaryConditions();
@@ -435,7 +434,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    mut_ == a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    mut_ = a1_*rho_*k_/max(a1_*omega_, F2()*sqrt(S2));
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

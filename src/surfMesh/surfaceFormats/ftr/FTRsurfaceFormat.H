@@ -82,6 +82,7 @@ class FTRsurfaceFormat
             }
         };
 
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -90,12 +91,14 @@ class FTRsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const FTRsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         FTRsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -119,7 +122,6 @@ public:
 
         //- Read from file
         virtual bool read(const fileName&);
-
 };
 
 

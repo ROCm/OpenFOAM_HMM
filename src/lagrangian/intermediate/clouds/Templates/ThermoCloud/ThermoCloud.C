@@ -143,8 +143,24 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 
 
 template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::preEvolve()
+{
+    KinematicCloud<ParcelType>::preEvolve();
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::postEvolve()
+{
+    KinematicCloud<ParcelType>::postEvolve();
+}
+
+
+template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolve()
 {
+    preEvolve();
+
     const volScalarField& T = carrierThermo_.T();
     const volScalarField cp = carrierThermo_.Cp();
 
@@ -192,11 +208,6 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 
     this->injection().inject(td);
 
-    if (debug)
-    {
-        this->writePositions();
-    }
-
     if (this->coupled())
     {
         resetSourceTerms();
@@ -204,7 +215,7 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 
     Cloud<ParcelType>::move(td);
 
-    this->postProcessing().post();
+    postEvolve();
 }
 
 

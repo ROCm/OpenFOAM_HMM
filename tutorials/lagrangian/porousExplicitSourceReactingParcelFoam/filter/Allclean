@@ -3,6 +3,7 @@ set -x
 
 # remove old cell sets
 rm -rf constant/polyMesh/sets
+foamClearPolyMesh
 
 # remove old time folders
 rm -rf 0 *[1-9]*

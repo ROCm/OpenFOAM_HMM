@@ -96,9 +96,6 @@ private:
         MeshReference;
 
 
-    // Permanent data
-
-
     // Private member functions
 
         //- Disallow construct as copy
@@ -106,6 +103,7 @@ private:
 
         //- Disallow default bitwise assignment
         void operator=(const surfMesh&);
+
 
 protected:
 
@@ -129,7 +127,6 @@ protected:
             return Allocator::storedIOZones();
         }
 
-
         //- Update references to storedFaces
         virtual void updateFacesRef();
 
@@ -138,6 +135,7 @@ protected:
 
         //- Update references to storedPoints/storedFaces
         virtual void updateRefs();
+
 
 public:
 
@@ -177,6 +175,7 @@ public:
             const Xfer< MeshedSurface<face> >& surf,
             const word& surfName=""
         );
+
 
     // Destructor
 

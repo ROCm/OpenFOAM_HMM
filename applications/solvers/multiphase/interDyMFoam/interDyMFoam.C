@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
@@ -85,9 +85,6 @@ int main(int argc, char *argv[])
                 << runTime.elapsedCpuTime() - timeBeforeMeshUpdate
                 << " s" << endl;
         }
-
-        volScalarField gh("gh", g & mesh.C());
-        surfaceScalarField ghf("ghf", g & mesh.Cf());
 
         if (mesh.changing() && correctPhi)
         {

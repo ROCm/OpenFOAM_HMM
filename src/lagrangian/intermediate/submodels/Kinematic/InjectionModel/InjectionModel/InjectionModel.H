@@ -113,8 +113,8 @@ protected:
             //- Start of injection [s]
             const scalar SOI_;
 
-            //- Total volume of parcels to introduce [m^3]
-            //  Initialised in the individual injection models
+            //- Total volume of particles introduced by this injector [m^3]
+            //  - scaled to ensure massTotal is achieved
             scalar volumeTotal_;
 
             //- Total mass to inject [kg]
@@ -183,7 +183,6 @@ protected:
         (
             const label parcels,
             const scalar volume,
-            const scalar volumeFraction,
             const scalar diameter,
             const scalar rho
         );
@@ -289,9 +288,6 @@ public:
             //- Main injection loop
             template<class TrackData>
             void inject(TrackData& td);
-
-            //- Return the volume fraction to introduce
-            inline scalar volumeFraction(const scalar volume) const;
 
 
         // Injection geometry

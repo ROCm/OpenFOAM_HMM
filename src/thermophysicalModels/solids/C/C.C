@@ -27,16 +27,14 @@ License
 #include "C.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(C, 0);
-addToRunTimeSelectionTable(solid, C,);
-addToRunTimeSelectionTable(solid, C, Istream);
+    defineTypeNameAndDebug(C, 0);
+    addToRunTimeSelectionTable(solid, C,);
+    addToRunTimeSelectionTable(solid, C, Istream);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -44,9 +42,12 @@ Foam::C::C()
 :
     solid(2010, 710, 0.04, 0.0, 1.0)
 {
-    WarningIn("C::C()")
-        << "Properties of graphite need to be checked!!!"
-        << endl;
+    if (debug)
+    {
+        WarningIn("C::C()")
+            << "Properties of graphite need to be checked!!!"
+            << endl;
+    }
 }
 
 
@@ -72,15 +73,11 @@ void Foam::C::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& operator<<(Ostream& os, const C& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const C& s)
 {
     s.writeData(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -32,7 +32,6 @@ template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial()
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
-    name_("unknownPolynomialName"),
     logActive_(false),
     logCoeff_(0.0)
 {}
@@ -42,16 +41,17 @@ template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(),
-    name_(is),
     logActive_(false),
     logCoeff_(0.0)
 {
-    if (name_ != name)
+    word isName(is);
+
+    if (isName != name)
     {
         FatalErrorIn
         (
             "Polynomial<PolySize>::Polynomial(const word&, Istream&)"
-        )   << "Expected polynomial name " << name << " but read " << name_
+        )   << "Expected polynomial name " << name << " but read " << isName
             << nl << exit(FatalError);
     }
 
@@ -63,7 +63,7 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
         FatalErrorIn
         (
             "Polynomial<PolySize>::Polynomial(const word&, Istream&)"
-        )   << "Polynomial coefficients for entry " << name_
+        )   << "Polynomial coefficients for entry " << isName
             << " are invalid (empty)" << nl << exit(FatalError);
     }
 }
@@ -72,25 +72,16 @@ Foam::Polynomial<PolySize>::Polynomial(const word& name, Istream& is)
 template<int PolySize>
 Foam::Polynomial<PolySize>::Polynomial
 (
-    const word& name,
     const Polynomial<PolySize>& poly
 )
 :
     VectorSpace<Polynomial<PolySize>, scalar, PolySize>(poly),
-    name_(name),
     logActive_(poly.logActive_),
     logCoeff_(poly.logCoeff_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<int PolySize>
-const Foam::word& Foam::Polynomial<PolySize>::name() const
-{
-    return name_;
-}
-
 
 template<int PolySize>
 bool& Foam::Polynomial<PolySize>::logActive()

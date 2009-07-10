@@ -27,7 +27,7 @@ FoamFile
 
 sectionA
 {
-    massDensity             980;
+    massDensity             1004;
     temperature             298;
     bulkVelocity            (0.0 0.0 0.0);
     latticeIds
@@ -46,7 +46,7 @@ sectionA
 
 sectionB
 {
-    massDensity             980;
+    massDensity             1004;
     temperature             298;
     bulkVelocity            (0.0 0.0 0.0);
     latticeIds
@@ -65,7 +65,7 @@ sectionB
 
 sectionC
 {
-    massDensity             980;
+    massDensity             1004;
     temperature             298;
     bulkVelocity            (0.0 0.0 0.0);
     latticeIds

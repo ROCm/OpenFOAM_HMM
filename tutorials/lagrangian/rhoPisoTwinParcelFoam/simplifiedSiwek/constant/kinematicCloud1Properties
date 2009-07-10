@@ -54,9 +54,7 @@ particleForces
 {
     gravity         on;
     virtualMass     off;
-    Cvm             0.5;
     pressureGradient off;
-    gradU           gradU;
 }
 
 ManualInjectionCoeffs

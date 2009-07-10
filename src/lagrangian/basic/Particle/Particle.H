@@ -279,9 +279,6 @@ public:
         //- String representation of properties
         static string propHeader;
 
-        //- Cumulative particle count used for particle id
-        static label particleCount;
-
 
     // Constructors
 
@@ -330,7 +327,15 @@ public:
 
             autoPtr<ParticleType> operator()(Istream& is) const
             {
-                return autoPtr<ParticleType>(new ParticleType(cloud_, is));
+                return autoPtr<ParticleType>
+                (
+                    new ParticleType
+                    (
+                        cloud_,
+                        is,
+                        true
+                    )
+                );
             }
         };
 
@@ -454,9 +459,14 @@ public:
 
     // I-O
 
+        //- Read the fields associated with the owner cloud
+        static void readFields(Cloud<ParticleType>& c);
+
         //- Write the fields associated with the owner cloud
         static void writeFields(const Cloud<ParticleType>& c);
 
+        //- Write the particle data
+        void write(Ostream& os, bool writeFields) const;
 
     // Ostream Operator
 

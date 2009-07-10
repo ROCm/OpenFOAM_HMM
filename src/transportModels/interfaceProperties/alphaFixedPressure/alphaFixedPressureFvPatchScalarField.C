@@ -29,6 +29,7 @@ License
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
+#include "uniformDimensionedFields.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -140,10 +141,8 @@ void Foam::alphaFixedPressureFvPatchScalarField::updateCoeffs()
         return;
     }
 
-    const dictionary& environmentalProperties
-        = db().lookupObject<IOdictionary>("environmentalProperties");
-
-    dimensionedVector g(environmentalProperties.lookup("g"));
+    const uniformDimensionedVectorField& g =
+        db().lookupObject<uniformDimensionedVectorField>("g");
 
     const fvPatchField<scalar>& rho =
         patch().lookupPatchField<volScalarField, scalar>("rho");

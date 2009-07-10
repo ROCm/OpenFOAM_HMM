@@ -229,10 +229,10 @@ LRR::LRR
             << exit(FatalError);
     }
 
-    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
 
-    alphat_ == mut_/Prt_;
+    alphat_ = mut_/Prt_;
     alphat_.correctBoundaryConditions();
 
     printCoeffs();
@@ -418,7 +418,7 @@ void LRR::correct()
 
 
     // Re-calculate viscosity
-    mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

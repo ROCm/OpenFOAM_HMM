@@ -184,6 +184,15 @@ protected:
             DimensionedField<vector, volMesh> UTrans_;
 
 
+        // Cloud evolution functions
+
+            //- Pre-evolve
+            void preEvolve();
+
+            //- Post-evolve
+            void postEvolve();
+
+
 public:
 
     // Constructors
@@ -263,18 +272,6 @@ public:
 
                 //- Return reference to the interpolation dictionary
                 inline const dictionary& interpolationSchemes() const;
-
-
-            // Forces to include in particle motion evaluation
-
-                //- Return reference to the gravity force flag
-                inline Switch forceGravity() const;
-
-                //- Return reference to the virtual mass force flag
-                inline Switch forceVirtualMass() const;
-
-                //- Return reference to the pressure gradient force flag
-                inline Switch forcePressureGradient() const;
 
 
             // Sub-models

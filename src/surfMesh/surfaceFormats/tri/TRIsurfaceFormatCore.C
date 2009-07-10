@@ -30,10 +30,6 @@ License
 #include "IStringStream.H"
 #include "Map.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
@@ -48,6 +44,7 @@ Foam::fileFormats::TRIsurfaceFormatCore::TRIsurfaceFormatCore
 {
     read(filename);
 }
+
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 

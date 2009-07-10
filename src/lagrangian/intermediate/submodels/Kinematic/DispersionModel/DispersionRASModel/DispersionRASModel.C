@@ -42,7 +42,11 @@ Foam::DispersionRASModel<CloudType>::DispersionRASModel
         (
             "RASProperties"
         )
-    )
+    ),
+    kPtr_(NULL),
+    ownK_(false),
+    epsilonPtr_(NULL),
+    ownEpsilon_(false)
 {}
 
 
@@ -50,7 +54,56 @@ Foam::DispersionRASModel<CloudType>::DispersionRASModel
 
 template<class CloudType>
 Foam::DispersionRASModel<CloudType>::~DispersionRASModel()
-{}
+{
+    cacheFields(false);
+}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+void Foam::DispersionRASModel<CloudType>::cacheFields(const bool store)
+{
+    if (store)
+    {
+        tmp<volScalarField> tk = this->turbulence().k();
+        if (tk.isTmp())
+        {
+            kPtr_ = tk.ptr();
+            ownK_ = true;
+        }
+        else
+        {
+            kPtr_ = tk.operator->();
+            ownK_ = false;
+        }
+
+        tmp<volScalarField> tepsilon = this->turbulence().epsilon();
+        if (tepsilon.isTmp())
+        {
+            epsilonPtr_ = tepsilon.ptr();
+            ownEpsilon_ = true;
+        }
+        else
+        {
+            epsilonPtr_ = tepsilon.operator->();
+            ownEpsilon_ = false;
+        }
+    }
+    else
+    {
+        if (ownK_ && kPtr_)
+        {
+            delete kPtr_;
+            ownK_ = false;
+        }
+        if (ownEpsilon_ && epsilonPtr_)
+        {
+            delete epsilonPtr_;
+            ownEpsilon_ = false;
+        }
+    }
+}
 
 
 // ************************************************************************* //

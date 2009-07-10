@@ -68,7 +68,7 @@ class ReactingMultiphaseCloud
     public ReactingCloud<ParcelType>,
     public reactingMultiphaseCloud
 {
-    // Private Member Functions
+    // Private member functions
 
         //- Disallow default bitwise copy construct
         ReactingMultiphaseCloud(const ReactingMultiphaseCloud&);
@@ -110,6 +110,17 @@ protected:
             //- Total mass transferred to continuous phase via surface
             //  reactions
             scalar dMassSurfaceReaction_;
+
+
+    // Protected member functions
+
+        // Cloud evolution functions
+
+            //- Pre-evolve
+            void preEvolve();
+
+            //- Post-evolve
+            void postEvolve();
 
 
 public:

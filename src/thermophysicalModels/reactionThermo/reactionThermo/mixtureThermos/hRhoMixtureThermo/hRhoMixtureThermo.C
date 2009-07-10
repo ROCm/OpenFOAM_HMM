@@ -44,15 +44,15 @@ void Foam::hRhoMixtureThermo<MixtureType>::calculate()
 
     forAll(TCells, celli)
     {
-        const typename MixtureType::thermoType& mixture_ =
+        const typename MixtureType::thermoType& mixture =
             this->cellMixture(celli);
 
-        TCells[celli] = mixture_.TH(hCells[celli], TCells[celli]);
-        psiCells[celli] = mixture_.psi(pCells[celli], TCells[celli]);
-        rhoCells[celli] = mixture_.rho(pCells[celli], TCells[celli]);
+        TCells[celli] = mixture.TH(hCells[celli], TCells[celli]);
+        psiCells[celli] = mixture.psi(pCells[celli], TCells[celli]);
+        rhoCells[celli] = mixture.rho(pCells[celli], TCells[celli]);
 
-        muCells[celli] = mixture_.mu(TCells[celli]);
-        alphaCells[celli] = mixture_.alpha(TCells[celli]);
+        muCells[celli] = mixture.mu(TCells[celli]);
+        alphaCells[celli] = mixture.alpha(TCells[celli]);
     }
 
     forAll(T_.boundaryField(), patchi)
@@ -71,30 +71,30 @@ void Foam::hRhoMixtureThermo<MixtureType>::calculate()
         {
             forAll(pT, facei)
             {
-                const typename MixtureType::thermoType& mixture_ =
+                const typename MixtureType::thermoType& mixture =
                     this->patchFaceMixture(patchi, facei);
 
-                ph[facei] = mixture_.H(pT[facei]);
+                ph[facei] = mixture.H(pT[facei]);
 
-                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
-                prho[facei] = mixture_.rho(pp[facei], pT[facei]);
-                pmu_[facei] = mixture_.mu(pT[facei]);
-                palpha_[facei] = mixture_.alpha(pT[facei]);
+                ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
+                prho[facei] = mixture.rho(pp[facei], pT[facei]);
+                pmu_[facei] = mixture.mu(pT[facei]);
+                palpha_[facei] = mixture.alpha(pT[facei]);
             }
         }
         else
         {
             forAll(pT, facei)
             {
-                const typename MixtureType::thermoType& mixture_ =
+                const typename MixtureType::thermoType& mixture =
                     this->patchFaceMixture(patchi, facei);
 
-                pT[facei] = mixture_.TH(ph[facei], pT[facei]);
+                pT[facei] = mixture.TH(ph[facei], pT[facei]);
 
-                ppsi[facei] = mixture_.psi(pp[facei], pT[facei]);
-                prho[facei] = mixture_.rho(pp[facei], pT[facei]);
-                pmu_[facei] = mixture_.mu(pT[facei]);
-                palpha_[facei] = mixture_.alpha(pT[facei]);
+                ppsi[facei] = mixture.psi(pp[facei], pT[facei]);
+                prho[facei] = mixture.rho(pp[facei], pT[facei]);
+                pmu_[facei] = mixture.mu(pT[facei]);
+                palpha_[facei] = mixture.alpha(pT[facei]);
             }
         }
     }

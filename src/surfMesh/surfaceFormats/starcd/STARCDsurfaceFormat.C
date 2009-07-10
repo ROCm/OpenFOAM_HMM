@@ -27,8 +27,6 @@ License
 #include "STARCDsurfaceFormat.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Face>
@@ -72,6 +70,7 @@ Foam::fileFormats::STARCDsurfaceFormat<Face>::STARCDsurfaceFormat
 {
     read(filename);
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

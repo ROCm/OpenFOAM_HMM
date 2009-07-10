@@ -70,6 +70,7 @@ class VTKsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const VTKsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
@@ -77,30 +78,35 @@ public:
         //- Construct null
         VTKsurfaceFormat();
 
-    // Selectors
 
     // Destructor
 
         virtual ~VTKsurfaceFormat()
         {}
 
+
     // Member Functions
 
         // Write
 
-        //- Write surface mesh components by proxy
-        static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
+            //- Write surface mesh components by proxy
+            static void write
+            (
+                const fileName&, const MeshedSurfaceProxy<Face>&
+            );
 
-        //- Write UnsortedMeshedSurface, the output remains unsorted
-        static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
+            //- Write UnsortedMeshedSurface, the output remains unsorted
+            static void write
+            (
+                const fileName&, const UnsortedMeshedSurface<Face>&
+            );
 
 
-        //- Write object
-        virtual void write(Ostream& os) const
-        {
-            write(os, MeshedSurfaceProxy<Face>(*this));
-        }
-
+            //- Write object
+            virtual void write(Ostream& os) const
+            {
+                write(os, MeshedSurfaceProxy<Face>(*this));
+            }
 };
 
 

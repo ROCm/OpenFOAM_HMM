@@ -56,6 +56,13 @@ bool Foam::NoDispersion<CloudType>::active() const
 
 
 template<class CloudType>
+void Foam::NoDispersion<CloudType>::cacheFields(const bool)
+{
+// do nothing
+}
+
+
+template<class CloudType>
 Foam::vector Foam::NoDispersion<CloudType>::update
 (
     const scalar,

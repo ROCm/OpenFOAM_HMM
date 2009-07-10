@@ -118,6 +118,17 @@ protected:
             DimensionedField<scalar, volMesh> hcTrans_;
 
 
+    // Protected member functions
+
+        // Cloud evolution functions
+
+            //- Pre-evolve
+            void preEvolve();
+
+            //- Post-evolve
+            void postEvolve();
+
+
 public:
 
     // Constructors

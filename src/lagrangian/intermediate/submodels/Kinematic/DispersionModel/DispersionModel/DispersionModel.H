@@ -121,6 +121,9 @@ public:
         //- Flag to indicate whether model activates injection model
         virtual bool active() const = 0;
 
+        //- Cache carrier fields
+        virtual void cacheFields(const bool store) = 0;
+
         //- Update (disperse particles)
         virtual vector update
         (

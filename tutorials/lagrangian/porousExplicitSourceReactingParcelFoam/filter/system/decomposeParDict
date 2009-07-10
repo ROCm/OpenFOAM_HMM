@@ -19,7 +19,7 @@ numberOfSubdomains 4;
 
 method          metis;
 
-preservePatches
+preserveFaceZones
 (
     cycLeft
     cycRight
@@ -39,9 +39,7 @@ hierarchicalCoeffs
 }
 
 metisCoeffs
-{
-    processorWeights ( 1 1 1 1 );
-}
+{}
 
 manualCoeffs
 {

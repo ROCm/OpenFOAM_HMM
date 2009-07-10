@@ -59,7 +59,7 @@ Foam::spray::spray
     const basicMultiComponentMixture& composition,
     const PtrList<gasThermoPhysics>& gasProperties,
     const dictionary&,
-    const dictionary& environmentalProperties
+    const dimensionedVector& g
 )
 :
     Cloud<parcel>(U.mesh(), false), // suppress className checking on positions
@@ -67,6 +67,7 @@ Foam::spray::spray
     time0_(runTime_.value()),
     mesh_(U.mesh()),
     rndGen_(label(0)),
+    g_(g.value()),
 
     U_(U),
     rho_(rho),
@@ -181,7 +182,6 @@ Foam::spray::spray
     ),
 
     subCycles_(readLabel(sprayProperties_.lookup("subCycles"))),
-    g_(dimensionedVector(environmentalProperties.lookup("g")).value()),
 
     gasProperties_(gasProperties),
     composition_(composition),
@@ -266,7 +266,7 @@ Foam::spray::spray
                 "const volScalarField& T, const combustionMixture& composition,"
                 "const PtrList<gasThermoPhsyics>& gaseousFuelProperties, "
                 "const dictionary& thermophysicalProperties, "
-                "const dictionary& environmentalProperties)"
+                "const dimensionedScalar& g)"
             )   << "spray::(...) only one wedgePolyPatch found. "
                    "Please check you BC-setup."
                 << abort(FatalError);

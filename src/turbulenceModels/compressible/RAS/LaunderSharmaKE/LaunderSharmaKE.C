@@ -26,7 +26,8 @@ License
 
 #include "LaunderSharmaKE.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
+
+#include "backwardsCompatibilityWallFunctions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -141,10 +142,10 @@ LaunderSharmaKE::LaunderSharmaKE
             "k",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateK("k", mesh_)
     ),
 
     epsilon_
@@ -154,10 +155,10 @@ LaunderSharmaKE::LaunderSharmaKE
             "epsilon",
             runTime_.timeName(),
             mesh_,
-            IOobject::MUST_READ,
+            IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateEpsilon("epsilon", mesh_)
     ),
 
     mut_
@@ -170,9 +171,28 @@ LaunderSharmaKE::LaunderSharmaKE
             IOobject::NO_READ,
             IOobject::NO_WRITE
         ),
-        Cmu_*fMu()*rho_*sqr(k_)/(epsilon_ + epsilonSmall_)
+        autoCreateMut("mut", mesh_)
+    ),
+
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
     )
 {
+    mut_ = rho_*Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
+
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
+
     printCoeffs();
 }
 
@@ -256,6 +276,12 @@ void LaunderSharmaKE::correct()
     {
         // Re-calculate viscosity
         mut_ = rho_*Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -275,9 +301,11 @@ void LaunderSharmaKE::correct()
     }
 
     tmp<volTensorField> tgradU = fvc::grad(U_);
-    volScalarField G = mut_*(tgradU() && dev(twoSymm(tgradU())));
+    volScalarField G("RASModel::G", mut_*(tgradU() && dev(twoSymm(tgradU()))));
     tgradU.clear();
 
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
 
@@ -294,6 +322,9 @@ void LaunderSharmaKE::correct()
     );
 
     epsEqn().relax();
+
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
+
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
 
@@ -317,7 +348,12 @@ void LaunderSharmaKE::correct()
 
 
     // Re-calculate viscosity
-    mut_ = Cmu_*fMu()*rho_*sqr(k_)/epsilon_;
+    mut_ = Cmu_*fMu()*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_.correctBoundaryConditions();
+
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 

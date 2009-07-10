@@ -77,12 +77,14 @@ class TRIsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const TRIsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         TRIsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -95,9 +97,11 @@ public:
             );
         }
 
-    // Destructor
-        virtual ~TRIsurfaceFormat()
-        {}
+
+    //- Destructor
+    virtual ~TRIsurfaceFormat()
+    {}
+
 
     // Member Functions
 
@@ -108,7 +112,6 @@ public:
         //  by default the output is not sorted by zones
         static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
-
         //- Read from file
         virtual bool read(const fileName&);
 
@@ -117,7 +120,6 @@ public:
         {
             write(name, MeshedSurfaceProxy<Face>(*this));
         }
-
 };
 
 

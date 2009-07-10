@@ -1,7 +1,11 @@
 {
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 
-    wordList pcorrTypes(p.boundaryField().types());
+    wordList pcorrTypes
+    (
+        p.boundaryField().size(),
+        zeroGradientFvPatchScalarField::typeName
+    );
 
     for (label i=0; i<p.boundaryField().size(); i++)
     {
@@ -46,5 +50,5 @@
         }
     }
 
-#   include "continuityErrs.H"
+    #include "continuityErrs.H"
 }

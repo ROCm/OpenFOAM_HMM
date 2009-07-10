@@ -91,7 +91,7 @@ public:
     // Member functions
 
         //- Write fields
-        void writeFields() const;
+        virtual void writeFields() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

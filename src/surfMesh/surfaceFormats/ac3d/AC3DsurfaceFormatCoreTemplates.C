@@ -39,6 +39,5 @@ Type Foam::fileFormats::AC3DsurfaceFormatCore::parse(const string& s)
     return t;
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

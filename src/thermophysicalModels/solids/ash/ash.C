@@ -27,16 +27,14 @@ License
 #include "ash.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(ash, 0);
-addToRunTimeSelectionTable(solid, ash,);
-addToRunTimeSelectionTable(solid, ash, Istream);
+    defineTypeNameAndDebug(ash, 0);
+    addToRunTimeSelectionTable(solid, ash,);
+    addToRunTimeSelectionTable(solid, ash, Istream);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -44,9 +42,12 @@ Foam::ash::ash()
 :
     solid(2010, 710, 0.04, 0.0, 1.0)
 {
-    WarningIn("ash::ash()")
-        << "Properties of ash need to be checked!!!"
-        << endl;
+    if (debug)
+    {
+        WarningIn("ash::ash()")
+            << "Properties of ash need to be checked!!!"
+            << endl;
+    }
 }
 
 
@@ -72,15 +73,11 @@ void Foam::ash::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& operator<<(Ostream& os, const ash& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const ash& s)
 {
     s.writeData(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -73,8 +73,6 @@ public:
         //- Construct null
         X3DsurfaceFormat();
 
-    // Selectors
-
 
     // Destructor
 

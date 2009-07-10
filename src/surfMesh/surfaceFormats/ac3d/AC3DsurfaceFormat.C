@@ -30,11 +30,6 @@ License
 #include "tensor.H"
 #include "primitivePatch.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -45,6 +40,7 @@ Foam::fileFormats::AC3DsurfaceFormat<Face>::AC3DsurfaceFormat
 {
     read(filename);
 }
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
