@@ -22,17 +22,20 @@ boundaryField
 {
     leftWall
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
     rightWall
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
     lowerWall
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
     atmosphere

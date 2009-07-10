@@ -37,12 +37,13 @@ getApplication ()
 runApplication ()
 {
     APP_RUN=$1; shift
+    APP_NAME=${APP_RUN##*/}
 
-    if [ -f log.$APP_RUN ] ; then
-        echo "$APP_RUN already run on $PWD: remove log file to run"
+    if [ -f log.$APP_NAME ] ; then
+        echo "$APP_NAME already run on $PWD: remove log file to run"
     else
         echo "Running $APP_RUN on $PWD"
-        $APP_RUN $* > log.$APP_RUN 2>&1
+        $APP_RUN $* > log.$APP_NAME 2>&1
     fi
 }
 
