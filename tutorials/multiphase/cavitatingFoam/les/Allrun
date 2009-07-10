@@ -36,8 +36,7 @@ cd throttle3D
     mapFields ../throttle -sourceTime latestTime >& log.mapFields
 
     runApplication decomposePar
-    hostname > system/machines
-    runParallel $application 4 system/machines
+    runParallel $application 4
     runApplication reconstructPar
 cd ..
 
