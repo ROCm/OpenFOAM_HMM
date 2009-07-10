@@ -145,6 +145,16 @@
         fvc::interpolate(alpha)*phia + fvc::interpolate(beta)*phib
     );
 
+    volScalarField rho
+    (
+        IOobject
+        (
+            "rho",
+            runTime.timeName(),
+            mesh
+        ),
+        alpha*rhoa + beta*rhob
+    );
 
     IOdictionary RASProperties
     (

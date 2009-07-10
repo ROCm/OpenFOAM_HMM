@@ -23,17 +23,17 @@ boundaryField
 {
     piston
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 450;
     }
     liner
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 450;
     }
     cylinderHead
     {
-        type            epsilonWallFunction;
+        type            compressible::epsilonWallFunction;
         value           uniform 450;
     }
 }

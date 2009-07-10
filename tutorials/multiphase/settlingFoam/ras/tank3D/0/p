@@ -20,102 +20,115 @@ internalField   uniform 0;
 
 boundaryField
 {
-    SYMP3           
+    SYMP3
     {
         type            symmetryPlane;
     }
 
-    INLE1           
+    INLE1
     {
         type            zeroGradient;
     }
 
-    OUTL9           
+    OUTL9
     {
         type            zeroGradient;
     }
 
-    OUTL10          
+    OUTL10
     {
         type            zeroGradient;
     }
 
-    OUTL11          
+    OUTL11
     {
         type            zeroGradient;
     }
 
-    OUTL12          
+    OUTL12
     {
         type            zeroGradient;
     }
 
-    WALL6           
+    WALL6
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL8           
+    WALL8
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL61          
+    WALL61
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL62          
+    WALL62
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL63          
+    WALL63
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL64          
+    WALL64
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL65          
+    WALL65
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL66          
+    WALL66
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL67          
+    WALL67
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL68          
+    WALL68
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL69          
+    WALL69
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL7           
+    WALL7
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL70          
+    WALL70
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    OUTL15          
+    OUTL15
     {
         type            fixedValue;
         value           uniform 0;

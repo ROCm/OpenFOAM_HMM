@@ -52,3 +52,5 @@
             << endl;
     }
 }
+
+rho = alpha*rhoa + beta*rhob;
