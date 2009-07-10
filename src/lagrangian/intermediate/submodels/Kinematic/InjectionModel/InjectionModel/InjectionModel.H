@@ -113,8 +113,8 @@ protected:
             //- Start of injection [s]
             const scalar SOI_;
 
-            //- Total volume of parcels to introduce [m^3]
-            //  Initialised in the individual injection models
+            //- Total volume of particles introduced by this injector [m^3]
+            //  - scaled to ensure massTotal is achieved
             scalar volumeTotal_;
 
             //- Total mass to inject [kg]
