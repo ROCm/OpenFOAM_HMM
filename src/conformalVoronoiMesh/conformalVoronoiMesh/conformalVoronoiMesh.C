@@ -100,17 +100,6 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 {
     timeCheck();
 
-    List<vector> alignmentTests(3);
-
-    alignmentTests[0] = vector(0.34, 0.59, 0.34);
-    alignmentTests[1] = vector(0.44, 0.23, 0.54);
-    alignmentTests[2] = vector(0.54, 0.33, 0.34);
-
-    forAll(alignmentTests, i)
-    {
-        requiredAlignment(alignmentTests[i]);
-    }
-
     createFeaturePoints();
     timeCheck();
 
@@ -291,22 +280,6 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
     ns /= mag(ns);
 
     tensor Rs = rotationTensor((Rp & vector(0,1,0)), ns);
-
-    tensor R = (Rs & Rp);
-
-    Info<< nl
-        << Rp << nl
-        << Rs << nl
-        << R << nl
-        << (R & vector(1, 0, 0)) << nl
-        << (R & vector(0, 1, 0)) << nl
-        << (R & vector(0, 0, 1)) << nl
-        << pt << nl
-        << surfHit.hitPoint() << nl
-        << pt + (R & vector(0, 0, 1)) << nl
-        << pt + (R & vector(0, 1, 0)) << nl
-        << pt + (R & vector(1, 0, 0)) << nl
-        << endl;
 
     return (Rs & Rp);
 }
