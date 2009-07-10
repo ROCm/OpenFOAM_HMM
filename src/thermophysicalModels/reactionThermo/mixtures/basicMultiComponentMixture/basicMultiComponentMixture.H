@@ -63,12 +63,6 @@ protected:
         PtrList<volScalarField> Y_;
 
 
-    // Protected member functions
-
-        //- Correct the mass fractions to sum to 1
-        void correctMassFractions();
-
-
 public:
 
     // Constructors
