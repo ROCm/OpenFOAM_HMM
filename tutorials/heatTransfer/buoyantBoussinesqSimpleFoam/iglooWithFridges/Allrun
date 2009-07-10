@@ -4,6 +4,5 @@
 
 runApplication blockMesh
 runApplication snappyHexMesh -overwrite
-runApplication setFields
 runApplication buoyantBoussinesqSimpleFoam
 

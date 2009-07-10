@@ -29,6 +29,11 @@
 #
 #------------------------------------------------------------------------------
 
+getApplication ()
+{
+    grep application system/controlDict | sed "s/application *\([a-zA-Z]*\);/\1/"
+}
+
 runApplication ()
 {
     APP_RUN=$1; shift

@@ -37,7 +37,7 @@ Foam::molecule::molecule
     bool readFields
 )
 :
-    Particle<molecule>(cloud, is, true),
+    Particle<molecule>(cloud, is, readFields),
     Q_(tensor::zero),
     v_(vector::zero),
     a_(vector::zero),

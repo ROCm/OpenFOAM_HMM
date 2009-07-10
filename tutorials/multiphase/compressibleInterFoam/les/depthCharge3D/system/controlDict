@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     compressibleInterFoam;
+
 startFrom       latestTime;
 
 startTime       0;

@@ -15,6 +15,8 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     interDyMFoam;
+
 startFrom       startTime;
 
 startTime       0;
@@ -54,9 +56,9 @@ functions
     probes
     {
         type            probes;
-        name            probes;
+        functionObjectLibs ("libsampling.so");
         outputControl   timeStep;
-        outputInterval  10;
+        outputInterval  1;
         probeLocations
         (
             ( 0 9.95 19.77 )
@@ -71,7 +73,7 @@ functions
     wallPressure
     {
         type            surfaces;
-        functionObjectLibs ( "libsampling.so" );
+        functionObjectLibs ("libsampling.so");
         outputControl   timeStep;
         outputInterval  10;
         surfaceFormat   raw;
@@ -79,6 +81,7 @@ functions
         (
             p
         );
+
         surfaces
         (
             walls

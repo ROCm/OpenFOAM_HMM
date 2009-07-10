@@ -67,8 +67,13 @@ Foam::label Foam::checkTopology
     {
         forAll(mesh.faceZones(), zoneI)
         {
-            if (mesh.faceZones()[zoneI].checkParallelSync(true))
+            if (mesh.faceZones()[zoneI].checkParallelSync(false))
             {
+                Info<< " ***FaceZone " << mesh.faceZones()[zoneI].name()
+                    << " is not correctly synchronised"
+                    << " acrosss coupled boundaries."
+                    << " (coupled faces both"
+                    << " present in set but with opposite flipmap)" << endl;
                 noFailedChecks++;
             }
         }

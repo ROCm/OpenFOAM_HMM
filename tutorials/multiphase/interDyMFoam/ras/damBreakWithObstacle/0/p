@@ -22,12 +22,14 @@ boundaryField
 {
     walls
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
     obstacle
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
     atmosphere
