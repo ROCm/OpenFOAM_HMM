@@ -183,7 +183,6 @@ protected:
         (
             const label parcels,
             const scalar volume,
-            const scalar volumeFraction,
             const scalar diameter,
             const scalar rho
         );
@@ -289,9 +288,6 @@ public:
             //- Main injection loop
             template<class TrackData>
             void inject(TrackData& td);
-
-            //- Return the volume fraction to introduce
-            inline scalar volumeFraction(const scalar volume) const;
 
 
         // Injection geometry
