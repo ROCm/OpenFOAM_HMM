@@ -30,7 +30,6 @@ License
 #include "faceAreaWeightModel.H"
 #include "uint.H"
 #include "ulong.H"
-#include "surfaceFeatures.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
