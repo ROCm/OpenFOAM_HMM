@@ -38,6 +38,12 @@ inline Foam::scalar Foam::cvControls::span() const
 }
 
 
+inline Foam::scalar Foam::cvControls::spanSqr() const
+{
+    return spanSqr_;
+}
+
+
 inline Foam::scalar Foam::cvControls::pointPairDistanceCoeff() const
 {
     return pointPairDistanceCoeff_;
@@ -53,6 +59,12 @@ inline Foam::scalar Foam::cvControls::mixedFeaturePointPPDistanceCoeff() const
 inline Foam::scalar Foam::cvControls::featurePointExclusionDistanceCoeff() const
 {
     return featurePointExclusionDistanceCoeff_;
+}
+
+
+inline Foam::scalar Foam::cvControls::featureEdgeExclusionDistanceCoeff() const
+{
+    return featureEdgeExclusionDistanceCoeff_;
 }
 
 
@@ -77,6 +89,12 @@ inline Foam::scalar Foam::cvControls::maxQuadAngle() const
 inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
 {
     return minimumEdgeLengthCoeff_;
+}
+
+
+inline Foam::label Foam::cvControls::alignmentSearchSpokes() const
+{
+    return alignmentSearchSpokes_;
 }
 
 

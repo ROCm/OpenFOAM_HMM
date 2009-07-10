@@ -47,6 +47,8 @@ Foam::cvControls::cvControls
       + max(mag(bb.max().y()), mag(bb.min().y()))
       + max(mag(bb.max().z()), mag(bb.min().z()));
 
+    spanSqr_ = sqr(span_);
+
     // Surface conformation controls
 
     const dictionary& surfDict(cvMeshDict_.subDict("surfaceConformation"));
@@ -66,6 +68,11 @@ Foam::cvControls::cvControls
         surfDict.lookup("featurePointExclusionDistanceCoeff")
     );
 
+    featureEdgeExclusionDistanceCoeff_ = readScalar
+    (
+        surfDict.lookup("featureEdgeExclusionDistanceCoeff")
+    );
+
     surfaceSearchDistanceCoeff_ = readScalar
     (
         surfDict.lookup("surfaceSearchDistanceCoeff")
@@ -81,6 +88,11 @@ Foam::cvControls::cvControls
     // Motion control controls
 
     const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
+
+    alignmentSearchSpokes_ = readLabel
+    (
+        motionDict.lookup("alignmentSearchSpokes")
+    );
 
     const dictionary& insertionDict
     (

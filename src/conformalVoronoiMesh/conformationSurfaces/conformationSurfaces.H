@@ -163,8 +163,17 @@ public:
                 label& hitSurface
             ) const;
 
-            //- Find the nearest point to the sample and return it to the
-            //  pointIndexHit, and the normal at the hit location, if found.
+            //- Finding the nearestIntersection of the surface to start
+            void findSurfaceNearestIntersection
+            (
+                point start,
+                point end,
+                pointIndexHit& surfHit,
+                label& hitSurface
+            ) const;
+
+                //- Find the nearest point to the sample and return it to the
+            //  pointIndexHit
             void findSurfaceNearest
             (
                 const point& sample,

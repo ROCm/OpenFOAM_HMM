@@ -51,7 +51,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::pointPairDistance
     // Point pair distances are always going to be at the surface, so the
     // targetCellSize can be told to do a quick, surface only check.
 
-    return targetCellSize(pt, true)*cvMeshControls_.pointPairDistanceCoeff();
+    return targetCellSize(pt, true)*cvMeshControls().pointPairDistanceCoeff();
 }
 
 
@@ -62,7 +62,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::mixedFeaturePointDistance
 {
     return
         pointPairDistance(pt)
-       *cvMeshControls_.mixedFeaturePointPPDistanceCoeff();
+       *cvMeshControls().mixedFeaturePointPPDistanceCoeff();
 }
 
 
@@ -78,7 +78,24 @@ inline Foam::scalar Foam::conformalVoronoiMesh::featurePointExclusionDistanceSqr
         sqr
         (
             targetCellSize(pt, true)
-           *cvMeshControls_.featurePointExclusionDistanceCoeff()
+           *cvMeshControls().featurePointExclusionDistanceCoeff()
+        );
+}
+
+
+inline Foam::scalar Foam::conformalVoronoiMesh::featureEdgeExclusionDistanceSqr
+(
+    const point& pt
+) const
+{
+    // Exclusion distance tests are always going to be at the surface, so the
+    // targetCellSize can be told to do a quick, surface only check.
+
+    return
+        sqr
+        (
+            targetCellSize(pt, true)
+           *cvMeshControls().featureEdgeExclusionDistanceCoeff()
         );
 }
 
@@ -88,7 +105,8 @@ inline Foam::scalar Foam::conformalVoronoiMesh::surfaceSearchDistanceSqr
     const point& pt
 ) const
 {
-    return sqr(targetCellSize(pt)*cvMeshControls_.surfaceSearchDistanceCoeff());
+    return
+        sqr(targetCellSize(pt)*cvMeshControls().surfaceSearchDistanceCoeff());
 }
 
 
@@ -97,7 +115,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::maxSurfaceProtrusion
     const point& pt
 ) const
 {
-    return targetCellSize(pt)*cvMeshControls_.maxSurfaceProtrusionCoeff();
+    return targetCellSize(pt)*cvMeshControls().maxSurfaceProtrusionCoeff();
 }
 
 
@@ -106,7 +124,7 @@ inline Foam::scalar Foam::conformalVoronoiMesh::minimumEdgeLength
     const point& pt
 ) const
 {
-    return targetCellSize(pt)*cvMeshControls_.minimumEdgeLengthCoeff();
+    return targetCellSize(pt)*cvMeshControls().minimumEdgeLengthCoeff();
 }
 
 

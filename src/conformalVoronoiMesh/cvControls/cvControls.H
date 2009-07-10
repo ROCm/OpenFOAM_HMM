@@ -65,13 +65,16 @@ class cvControls
             //- Span of the domain
             scalar span_;
 
+            //- Square of span_
+            scalar spanSqr_;
+
         // Surface conformation controls
 
             //- Point pair spacing coefficient - fraction of the local target
             //  cell size
             scalar pointPairDistanceCoeff_;
 
-            //- Distance along feature edge to ;lace mixed feature point
+            //- Distance along feature edge to place mixed feature point
             //  conformation groups - to be multiple of pointPairDistanceCoeff_.
             scalar mixedFeaturePointPPDistanceCoeff_;
 
@@ -79,6 +82,11 @@ class cvControls
             //  conformation points are excluded - fraction of the local target
             //  cell size
             scalar featurePointExclusionDistanceCoeff_;
+
+            //- Distance to an existing feature edge conformation location
+            //  within which other edge conformation location are excluded -
+            //  fraction of the local target cell size
+            scalar featureEdgeExclusionDistanceCoeff_;
 
             //- Surface search distance coefficient - faction of the local
             //  target cell size
@@ -95,6 +103,10 @@ class cvControls
 
 
     // Motion control controls
+
+        //- Number of "spokes" to use to search for secondary alignment
+        //  direction
+        label alignmentSearchSpokes_;
 
         // Point insertion criteria
 
@@ -142,6 +154,9 @@ public:
             //- Return the span
             inline scalar span() const;
 
+            //- Return spanSqr
+            inline scalar spanSqr() const;
+
             //- Return the pointPairDistanceCoeff
             inline scalar pointPairDistanceCoeff() const;
 
@@ -150,6 +165,9 @@ public:
 
             //- Return the featurePointExclusionDistanceCoeff
             inline scalar featurePointExclusionDistanceCoeff() const;
+
+            //- Return the featureEdgeExclusionDistanceCoeff
+            inline scalar featureEdgeExclusionDistanceCoeff() const;
 
             //- Return the surfaceSearchDistanceCoeff
             inline scalar surfaceSearchDistanceCoeff() const;
@@ -162,6 +180,9 @@ public:
 
             //- Return the minimumEdgeLengthCoeff
             inline scalar minimumEdgeLengthCoeff() const;
+
+            //- Return the number of alignmentSearchSpokes to use
+            inline label alignmentSearchSpokes() const;
 
 };
 

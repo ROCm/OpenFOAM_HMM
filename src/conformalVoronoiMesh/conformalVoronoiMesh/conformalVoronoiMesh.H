@@ -149,6 +149,9 @@ class conformalVoronoiMesh
         //- Return the square of the local feature point exclusion distance
         inline scalar featurePointExclusionDistanceSqr(const point& pt) const;
 
+        //- Return the square of the local feature edge exclusion distance
+        inline scalar featureEdgeExclusionDistanceSqr(const point& pt) const;
+
         //- Return the square of the local surface search distance
         inline scalar surfaceSearchDistanceSqr(const point& pt) const;
 
