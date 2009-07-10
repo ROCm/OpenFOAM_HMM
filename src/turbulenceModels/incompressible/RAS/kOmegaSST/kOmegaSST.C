@@ -26,7 +26,6 @@ License
 
 #include "kOmegaSST.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -237,7 +236,7 @@ kOmegaSST::kOmegaSST
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ ==
+    nut_ =
         a1_*k_
        /max
         (
@@ -395,7 +394,7 @@ void kOmegaSST::correct()
 
 
     // Re-calculate viscosity
-    nut_ == a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
+    nut_ = a1_*k_/max(a1_*omega_, F2()*sqrt(S2));
     nut_.correctBoundaryConditions();
 }
 
