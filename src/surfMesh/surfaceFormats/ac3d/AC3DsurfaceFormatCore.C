@@ -29,8 +29,6 @@ License
 #include "IFstream.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::fileFormats::AC3DsurfaceFormatCore::readCmd
@@ -156,6 +154,5 @@ void Foam::fileFormats::AC3DsurfaceFormatCore::writeHeader
         << "kids " << zoneLst.size() << endl;
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

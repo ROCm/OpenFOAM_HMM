@@ -27,8 +27,6 @@ License
 #include "VTKsurfaceFormatCore.H"
 #include "clock.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::fileFormats::VTKsurfaceFormatCore::writeHeader
@@ -126,7 +124,5 @@ void Foam::fileFormats::VTKsurfaceFormatCore::writeTail
     os  << nl;
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

@@ -30,15 +30,12 @@ License
 #include "OFstream.H"
 #include "Ostream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
 Foam::fileFormats::SMESHsurfaceFormat<Face>::SMESHsurfaceFormat()
 {}
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 

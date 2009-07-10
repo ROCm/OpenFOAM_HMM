@@ -53,11 +53,11 @@ namespace fileFormats
 class NASsurfaceFormatCore
 {
 protected:
+
     // Protected Member Functions
 
-    //- Do weird things to extract number
-    static scalar parseNASCoord(const string&);
-
+        //- Do weird things to extract number
+        static scalar parseNASCoord(const string&);
 };
 
 
@@ -65,8 +65,6 @@ protected:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

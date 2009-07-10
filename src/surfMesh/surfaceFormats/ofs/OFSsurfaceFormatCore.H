@@ -55,16 +55,16 @@ namespace fileFormats
 class OFSsurfaceFormatCore
 {
 protected:
+
     // Protected Member Functions
 
-    //- Write header information and surfZoneList
-    static void writeHeader
-    (
-        Ostream&,
-        const pointField&,
-        const UList<surfZone>&
-    );
-
+        //- Write header information and surfZoneList
+        static void writeHeader
+        (
+            Ostream&,
+            const pointField&,
+            const UList<surfZone>&
+        );
 };
 
 

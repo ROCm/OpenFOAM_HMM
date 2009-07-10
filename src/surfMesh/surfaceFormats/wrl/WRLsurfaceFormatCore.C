@@ -27,8 +27,6 @@ License
 #include "WRLsurfaceFormatCore.H"
 #include "clock.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::fileFormats::WRLsurfaceFormatCore::writeHeader
@@ -36,7 +34,7 @@ void Foam::fileFormats::WRLsurfaceFormatCore::writeHeader
     Ostream& os,
     const pointField& pointLst,
     const label nFaces,
-    const UList<surfZone>& zoneLst    
+    const UList<surfZone>& zoneLst
 )
 {
     os  << "#VRML V2.0 utf8" << nl
@@ -52,8 +50,6 @@ void Foam::fileFormats::WRLsurfaceFormatCore::writeHeader
         os  << "#   " << zoneI << "  " << zoneLst[zoneI].name()
             << "  (nFaces: " << zoneLst[zoneI].size() << ")" << nl;
     }
-
-
 }
 
 
@@ -74,7 +70,5 @@ void Foam::fileFormats::WRLsurfaceFormatCore::writeAppearance
 
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

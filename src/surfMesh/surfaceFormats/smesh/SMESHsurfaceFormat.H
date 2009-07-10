@@ -70,6 +70,7 @@ class SMESHsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const SMESHsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
@@ -77,7 +78,6 @@ public:
         //- Construct null
         SMESHsurfaceFormat();
 
-    // Selectors
 
     // Destructor
 
@@ -90,13 +90,11 @@ public:
         //- Write surface mesh components by proxy
         static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
 
-
         //- Write object
         virtual void write(const fileName& name) const
         {
             write(name, MeshedSurfaceProxy<Face>(*this));
         }
-
 };
 
 

@@ -30,8 +30,6 @@ License
 #include "OFstream.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -140,7 +138,6 @@ void Foam::fileFormats::WRLsurfaceFormat<Face>::write
         "  }\n"                        // end Shape
         " ]\n"                         // end children
         "}\n";                         // end Group
-
 }
 
 

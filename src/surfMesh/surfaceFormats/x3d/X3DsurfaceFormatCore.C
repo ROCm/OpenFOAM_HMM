@@ -27,8 +27,6 @@ License
 #include "X3DsurfaceFormatCore.H"
 #include "clock.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::fileFormats::X3DsurfaceFormatCore::writeHeader
@@ -64,7 +62,5 @@ void Foam::fileFormats::X3DsurfaceFormatCore::writeAppearance
         "  </Appearance>\n";
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

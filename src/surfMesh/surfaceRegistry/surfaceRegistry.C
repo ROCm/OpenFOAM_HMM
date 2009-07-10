@@ -62,7 +62,5 @@ Foam::surfaceRegistry::surfaceRegistry
 Foam::surfaceRegistry::~surfaceRegistry()
 {}
 
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
 
 // ************************************************************************* //

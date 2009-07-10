@@ -31,10 +31,6 @@ License
 #include "Ostream.H"
 #include "OFstream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -214,7 +210,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
     {
         os << "# <zone name=\"" << zoneLst[zoneI].name() << "\">" << endl;
 
-        if (surf.useFaceMap()) 
+        if (surf.useFaceMap())
         {
             forAll(zoneLst[zoneI], localFaceI)
             {
@@ -245,7 +241,7 @@ void Foam::fileFormats::OFFsurfaceFormat<Face>::write
                 // add optional zone information
                 os << ' ' << zoneI << endl;
             }
-        }        
+        }
         os << "# </zone>" << endl;
     }
     os << "# </faces>" << endl;

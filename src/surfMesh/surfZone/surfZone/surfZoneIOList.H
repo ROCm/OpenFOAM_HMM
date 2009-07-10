@@ -57,9 +57,6 @@ class surfZoneIOList
     public surfZoneList,
     public regIOobject
 {
-    // Private data
-
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -86,6 +83,7 @@ public:
         //- Construct from IOobject and surfZoneList
         surfZoneIOList(const IOobject&, const Xfer<surfZoneList>&);
 
+
     // Destructor
 
         ~surfZoneIOList();
@@ -96,12 +94,6 @@ public:
         //- writeData member function required by regIOobject
         bool writeData(Ostream&) const;
 
-
-    // Member Operators
-
-    // Friend Functions
-
-    // Friend Operators
 
     // IOstream Operators
 
