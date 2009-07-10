@@ -19,6 +19,8 @@ LESModel        oneEqEddy;
 
 delta           cubeRootVol;
 
+turbulence      on;
+
 printCoeffs     on;
 
 laminarCoeffs

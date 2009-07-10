@@ -33,13 +33,13 @@ Class
     Foam::compressible::LESModel
 
 Description
-    Class for all compressible flow LES SGS models.
+    Base class for all compressible flow LES SGS models.
 
-    This class defines the basic interface for a compressible flow SGS model,
-    and encapsulates data of value to all possible models. In particular
-    this includes references to all the dependent fields (rho, U, phi),
-    the physical viscosity mu, and the LESProperties dictionary,
-    which contains the model selection and model coefficients.
+    This class defines the basic interface for a compressible flow SGS
+    model, and encapsulates data of value to all possible models.
+    In particular this includes references to all the dependent fields
+    (rho, U, phi), the physical viscosity mu, and the LESProperties
+    dictionary, which contains the model selection and model coefficients.
 
 SourceFiles
     LESModel.C
@@ -80,6 +80,7 @@ protected:
 
     // Protected data
 
+        Switch turbulence_;
         Switch printCoeffs_;
         dictionary coeffDict_;
 
@@ -291,6 +292,15 @@ public:
                 return divDevRhoBeff(U);
             }
 
+
+        //- The source for the enthalpy equation resulting from
+        //  viscous and turbulent dissipation
+        virtual tmp<volScalarField> thermalDissipation() const;
+
+        //- The source for the enthalpy equation resulting from
+        //  the effective viscous dissipation
+        //  (ie, when turbulent production and dissipation are in equilibrium)
+        virtual tmp<volScalarField> thermalDissipationEff() const;
 
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying

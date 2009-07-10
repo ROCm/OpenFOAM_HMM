@@ -125,8 +125,8 @@ autoPtr<LESModel> LESModel::New
     {
         FatalErrorIn
         (
-            "LESModel::select(const volVectorField&, const "
-            "surfaceScalarField&, transportModel&)"
+            "LESModel::New(const volVectorField& U, const "
+            "surfaceScalarField& phi, transportModel&)"
         )   << "Unknown LESModel type " << modelName
             << endl << endl
             << "Valid LESModel types are :" << endl
@@ -138,13 +138,56 @@ autoPtr<LESModel> LESModel::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-LESModel::~LESModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+tmp<volScalarField> LESModel::thermalDissipation() const
+{
+    tmp<volTensorField> tgradU = fvc::grad(this->U());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "thermalDissipation",
+                runTime_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            (
+                ( this->nu()*dev(twoSymm(tgradU())) ) && tgradU()
+            ) + this->epsilon()
+        )
+    );
+}
+
+
+tmp<volScalarField> LESModel::thermalDissipationEff() const
+{
+    tmp<volTensorField> tgradU = fvc::grad(this->U());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "thermalDissipationEff",
+                runTime_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            (
+                this->nuEff()*dev(twoSymm(tgradU()))
+              - ((2.0/3.0)*I) * this->k()
+            ) && tgradU()
+        )
+    );
+}
+
 
 void LESModel::correct(const tmp<volTensorField>&)
 {

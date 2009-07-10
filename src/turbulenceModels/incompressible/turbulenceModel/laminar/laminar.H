@@ -104,11 +104,20 @@ public:
         //- Return the Reynolds stress tensor, i.e. 0 for laminar flow
         virtual tmp<volSymmTensorField> R() const;
 
-        //- Return the effective stress tensor including the laminar stress
+        //- Return the effective stress tensor, i.e. the laminar stress
         virtual tmp<volSymmTensorField> devReff() const;
 
         //- Return the source term for the momentum equation
         virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const;
+
+        //- The source for the enthalpy equation resulting from
+        //  viscous and turbulent dissipation
+        virtual tmp<volScalarField> thermalDissipation() const;
+
+        //- The source for the enthalpy equation resulting from
+        //  the effective viscous dissipation
+        //  (ie, when turbulent production and dissipation are in equilibrium)
+        virtual tmp<volScalarField> thermalDissipationEff() const;
 
         //- Correct the laminar viscosity
         virtual void correct();

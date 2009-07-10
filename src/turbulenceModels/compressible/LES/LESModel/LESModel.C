@@ -76,6 +76,7 @@ LESModel::LESModel
         )
     ),
 
+    turbulence_(true),  // TODO: turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDictPtr(type + "Coeffs")),
 
@@ -179,6 +180,55 @@ autoPtr<LESModel> LESModel::New
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+tmp<volScalarField> LESModel::thermalDissipation() const
+{
+    tmp<volTensorField> tgradU = fvc::grad(this->U());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "thermalDissipation",
+                runTime_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            (
+                ( this->mu()*dev(twoSymm(tgradU())) ) && tgradU()
+            ) + this->rho() * this->epsilon()
+        )
+    );
+}
+
+
+tmp<volScalarField> LESModel::thermalDissipationEff() const
+{
+    tmp<volTensorField> tgradU = fvc::grad(this->U());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "thermalDissipationEff",
+                runTime_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            (
+                this->muEff()*dev(twoSymm(tgradU()))
+              - ((2.0/3.0)*I) * this->rho() * this->k()
+            ) && tgradU()
+        )
+    );
+}
+
 
 void LESModel::correct(const tmp<volTensorField>&)
 {

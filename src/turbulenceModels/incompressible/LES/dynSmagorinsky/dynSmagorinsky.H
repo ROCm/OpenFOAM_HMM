@@ -125,7 +125,8 @@ public:
 
 
     //- Destructor
-    virtual ~dynSmagorinsky();
+    virtual ~dynSmagorinsky()
+    {}
 
 
     // Member Functions

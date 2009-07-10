@@ -77,12 +77,6 @@ tmp<volScalarField> laminar::nut() const
 }
 
 
-tmp<volScalarField> laminar::nuEff() const
-{
-    return tmp<volScalarField>(new volScalarField("nuEff", nu()));
-}
-
-
 tmp<volScalarField> laminar::k() const
 {
     return tmp<volScalarField>
@@ -178,6 +172,50 @@ tmp<fvVectorMatrix> laminar::divDevReff(volVectorField& U) const
     (
       - fvm::laplacian(nuEff(), U)
       - fvc::div(nuEff()*dev(fvc::grad(U)().T()))
+    );
+}
+
+
+tmp<volScalarField> laminar::thermalDissipation() const
+{
+    tmp<volTensorField> tgradU = fvc::grad(this->U());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "thermalDissipation",
+                runTime_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            ( this->nu()*dev(twoSymm(tgradU())) ) && tgradU()
+        )
+    );
+}
+
+
+tmp<volScalarField> laminar::thermalDissipationEff() const
+{
+    tmp<volTensorField> tgradU = fvc::grad(this->U());
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "thermalDissipationEff",
+                runTime_.timeName(),
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            ( this->nu()*dev(twoSymm(tgradU())) ) && tgradU()
+        )
     );
 }
 

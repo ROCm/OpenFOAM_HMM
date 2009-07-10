@@ -126,12 +126,6 @@ locDynOneEqEddy::locDynOneEqEddy
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-locDynOneEqEddy::~locDynOneEqEddy()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void locDynOneEqEddy::correct(const tmp<volTensorField>& gradU)

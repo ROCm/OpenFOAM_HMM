@@ -124,12 +124,6 @@ dynSmagorinsky::dynSmagorinsky
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-dynSmagorinsky::~dynSmagorinsky()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void dynSmagorinsky::correct(const tmp<volTensorField>& gradU)
