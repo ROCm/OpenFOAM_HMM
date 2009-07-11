@@ -2155,17 +2155,17 @@ void Foam::conformalVoronoiMesh::move()
 
                 scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
 
-                scalar targetCellSize =
-                0.5*(vA->targetCellSize() + vB->targetCellSize());
-
-                scalar targetFaceArea = sqr(targetCellSize);
-
                 if
                 (
                     alignmentDotProd
-                    > cvMeshControls().cosAlignmentAcceptanceAngle()
+                  > cvMeshControls().cosAlignmentAcceptanceAngle()
                 )
                 {
+                    scalar targetCellSize =
+                        0.5*(vA->targetCellSize() + vB->targetCellSize());
+
+                    scalar targetFaceArea = sqr(targetCellSize);
+
                     alignmentDir *= 0.5*targetCellSize;
 
                     vector delta = alignmentDir - 0.5*rAB;
