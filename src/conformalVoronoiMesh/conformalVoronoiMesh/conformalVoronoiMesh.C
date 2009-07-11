@@ -2100,74 +2100,76 @@ void Foam::conformalVoronoiMesh::move()
             } while (++cc != ccStart);
 
             verticesOnFace.shrink();
-        }
 
-        Cell_handle c = eit->first;
-        Vertex_handle vA = c->vertex(eit->second);
-        Vertex_handle vB = c->vertex(eit->third);
+            Cell_handle c = eit->first;
+            Vertex_handle vA = c->vertex(eit->second);
+            Vertex_handle vB = c->vertex(eit->third);
 
-        point dVA = topoint(vA->point());
-        point dVB = topoint(vB->point());
+            point dVA = topoint(vA->point());
+            point dVB = topoint(vB->point());
 
-        Field<vector> alignmentDirsA = vA->alignment() & cartesianDirections;
-        Field<vector> alignmentDirsB = vB->alignment() & cartesianDirections;
+            Field<vector> alignmentDirsA =
+                vA->alignment() & cartesianDirections;
+            Field<vector> alignmentDirsB =
+                vB->alignment() & cartesianDirections;
 
-        Field<vector> alignmentDirs(3);
+            Field<vector> alignmentDirs(3);
 
-        forAll(alignmentDirsA, aA)
-        {
-            const vector& a(alignmentDirsA[aA]);
-
-            scalar maxDotProduct = 0.0;
-
-            forAll(alignmentDirsB, aB)
+            forAll(alignmentDirsA, aA)
             {
-                const vector& b(alignmentDirsB[aB]);
+                const vector& a(alignmentDirsA[aA]);
 
-                scalar dotProduct = a & b;
+                scalar maxDotProduct = 0.0;
 
-                if (mag(dotProduct) > maxDotProduct)
+                forAll(alignmentDirsB, aB)
                 {
-                    maxDotProduct = mag(dotProduct);
+                    const vector& b(alignmentDirsB[aB]);
 
-                    alignmentDirs[aA] = a + sign(dotProduct)*b;
+                    scalar dotProduct = a & b;
 
-                    alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                    if (mag(dotProduct) > maxDotProduct)
+                    {
+                        maxDotProduct = mag(dotProduct);
+
+                        alignmentDirs[aA] = a + sign(dotProduct)*b;
+
+                        alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                    }
                 }
             }
-        }
 
-        vector rAB = dVA - dVB;
+            vector rAB = dVA - dVB;
 
-        scalar rABMag = mag(rAB);
+            scalar rABMag = mag(rAB);
 
-        forAll(alignmentDirs, aD)
-        {
-            vector& alignmentDir = alignmentDirs[aD];
-
-            if ((rAB & alignmentDir) < 0)
+            forAll(alignmentDirs, aD)
             {
-                // swap the direction of the alignment so that has the
-                // same sense as rAB
-                alignmentDir *= -1;
-            }
+                vector& alignmentDir = alignmentDirs[aD];
 
-            scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
+                if ((rAB & alignmentDir) < 0)
+                {
+                    // swap the direction of the alignment so that has the
+                    // same sense as rAB
+                    alignmentDir *= -1;
+                }
 
-            scalar targetCellSize =
+                scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
+
+                scalar targetCellSize =
                 0.5*(vA->targetCellSize() + vB->targetCellSize());
 
-            scalar targetFaceArea = sqr(targetCellSize);
+                scalar targetFaceArea = sqr(targetCellSize);
 
-            if
-            (
-                alignmentDotProd
-              > cvMeshControls().cosAlignmentAcceptanceAngle()
-            )
-            {
-                alignmentDir *= 0.5*targetCellSize;
+                if
+                (
+                    alignmentDotProd
+                    > cvMeshControls().cosAlignmentAcceptanceAngle()
+                )
+                {
+                    alignmentDir *= 0.5*targetCellSize;
 
-                vector delta = alignmentDir - 0.5*rAB;
+                    vector delta = alignmentDir - 0.5*rAB;
+                }
             }
         }
     }
