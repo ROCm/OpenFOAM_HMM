@@ -86,12 +86,6 @@ inline Foam::scalar Foam::cvControls::maxQuadAngle() const
 }
 
 
-inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
-{
-    return minimumEdgeLengthCoeff_;
-}
-
-
 inline Foam::label Foam::cvControls::alignmentSearchSpokes() const
 {
     return alignmentSearchSpokes_;
@@ -101,6 +95,31 @@ inline Foam::label Foam::cvControls::alignmentSearchSpokes() const
 inline Foam::scalar Foam::cvControls::cosAlignmentAcceptanceAngle() const
 {
     return cosAlignmentAcceptanceAngle_;
+}
+
+inline Foam::scalar Foam::cvControls::cellCentreInsertionDistCoeff() const
+{
+    return cellCentreInsertionDistCoeff_;
+}
+
+inline Foam::scalar Foam::cvControls::faceAreaRatioCoeff() const
+{
+    return faceAreaRatioCoeff_;
+}
+
+inline Foam::scalar Foam::cvControls::cosInsertionAcceptanceAngle() const
+{
+    return cosInsertionAcceptanceAngle_;
+}
+
+inline Foam::scalar Foam::cvControls::cellCentreRemovalDistCoeff() const
+{
+    return cellCentreRemovalDistCoeff_;
+}
+
+inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const
+{
+    return minimumEdgeLengthCoeff_;
 }
 
 

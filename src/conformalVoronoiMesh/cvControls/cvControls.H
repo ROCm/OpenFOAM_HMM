@@ -108,19 +108,30 @@ class cvControls
         //  direction
         label alignmentSearchSpokes_;
 
-        //- cosine of angle of alignment with required direction where a face
-        //  will be accepted for rotation
+        //- cosine of angle of alignment with required direction within which a
+        //  face will be accepted for rotation
         scalar cosAlignmentAcceptanceAngle_;
 
         // Point insertion criteria
 
+            //- Length between Delaunay vertices above which a new Dv should be
+            //  inserted - fraction of the local target cell size
             scalar cellCentreInsertionDistCoeff_;
 
+            //- Minimum dual face area corresponding to long Delaunay edge where
+            //  a new Dv is to be inserted - fraction of the local target cell
+            //  size
             scalar faceAreaRatioCoeff_;
+
+            //- cosine of the angle of alignment with the required direction
+            //  within which a long De will be accepted for a new Dv insertion
+            scalar cosInsertionAcceptanceAngle_;
 
 
         // Point removal criteria
 
+            //- Length between Delaunay vertices below which a Dv should be
+            //  removed - fraction of the local target cell size
             scalar cellCentreRemovalDistCoeff_;
 
 
@@ -141,6 +152,7 @@ public:
             const conformalVoronoiMesh& cvMesh,
             const IOdictionary& cvMeshDict
         );
+
 
     //- Destructor
     ~cvControls();
@@ -180,14 +192,26 @@ public:
             //- Return the maxQuadAngle
             inline scalar maxQuadAngle() const;
 
-            //- Return the minimumEdgeLengthCoeff
-            inline scalar minimumEdgeLengthCoeff() const;
-
             //- Return the number of alignmentSearchSpokes to use
             inline label alignmentSearchSpokes() const;
 
             //- Return the cosAlignmentAcceptanceAngle
             inline scalar cosAlignmentAcceptanceAngle() const;
+
+            //- Return the cellCentreInsertionDistCoeff
+            inline scalar cellCentreInsertionDistCoeff() const;
+
+            //- Return the faceAreaRatioCoeff
+            inline scalar faceAreaRatioCoeff() const;
+
+            //- Return the cosInsertionAcceptanceAngle
+            inline scalar cosInsertionAcceptanceAngle() const;
+
+            //- Return cellCentreRemovalDistCoeff
+            inline scalar cellCentreRemovalDistCoeff() const;
+
+            //- Return the minimumEdgeLengthCoeff
+            inline scalar minimumEdgeLengthCoeff() const;
 };
 
 
