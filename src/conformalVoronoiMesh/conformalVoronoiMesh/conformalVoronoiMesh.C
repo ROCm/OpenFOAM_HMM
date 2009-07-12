@@ -28,8 +28,6 @@ License
 #include "initialPointsMethod.H"
 #include "relaxationModel.H"
 #include "faceAreaWeightModel.H"
-#include "uint.H"
-#include "ulong.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -836,32 +834,34 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 {
     startOfInternalPoints_ = number_of_vertices();
 
-    label nVert = startOfInternalPoints_;
-
     Info<< nl << "Inserting initial points" << endl;
 
-    std::vector<Point> initialPoints = initialPointsMethod_->initialPoints();
+    insertPoints(initialPointsMethod_->initialPoints());
 
-    Info<< "    " << initialPoints.size() << " points to insert..." << endl;
+    // std::vector<Point> initialPoints = initialPointsMethod_->initialPoints();
 
-    // using the range insert (faster than inserting points one by one)
-    insert(initialPoints.begin(), initialPoints.end());
+    // Info<< "    " << initialPoints.size() << " points to insert..." << endl;
 
-    Info<< "    " << number_of_vertices() - startOfInternalPoints_
-        << " points inserted" << endl;
+    // label nVert = startOfInternalPoints_;
 
-    for
-    (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        ++vit
-    )
-    {
-        if (vit->uninitialised())
-        {
-            vit->index() = nVert++;
-        }
-    }
+    // // using the range insert (faster than inserting points one by one)
+    // insert(initialPoints.begin(), initialPoints.end());
+
+    // Info<< "    " << number_of_vertices() - startOfInternalPoints_
+    //     << " points inserted" << endl;
+
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     ++vit
+    // )
+    // {
+    //     if (vit->uninitialised())
+    //     {
+    //         vit->index() = nVert++;
+    //     }
+    // }
 
     writePoints("initialPoints.obj", true);
 }

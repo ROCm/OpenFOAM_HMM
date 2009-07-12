@@ -153,6 +153,36 @@ inline Foam::label Foam::conformalVoronoiMesh::insertPoint
 }
 
 
+inline void Foam::conformalVoronoiMesh::insertPoints
+(
+    const std::vector<Point>& points
+)
+{
+    Info<< "    " << points.size() << " points to insert..." << endl;
+
+    label nVert = number_of_vertices();
+
+    // using the range insert (faster than inserting points one by one)
+    insert(points.begin(), points.end());
+
+    Info<< "    " << number_of_vertices() - startOfInternalPoints_
+        << " points inserted" << endl;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->uninitialised())
+        {
+            vit->index() = nVert++;
+        }
+    }
+}
+
+
 inline void Foam::conformalVoronoiMesh::insertPointPair
 (
     const scalar ppDist,

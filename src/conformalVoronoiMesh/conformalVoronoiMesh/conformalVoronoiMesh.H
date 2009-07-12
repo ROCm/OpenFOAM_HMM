@@ -41,7 +41,8 @@ SourceFiles
 #define CGAL_HIERARCHY
 
 #include "CGALTriangulation3Ddefs.H"
-
+#include "uint.H"
+#include "ulong.H"
 #include "searchableSurfaces.H"
 #include "conformationSurfaces.H"
 #include "cellSizeControlSurfaces.H"
@@ -170,6 +171,9 @@ class conformalVoronoiMesh
             const point& pt,
             const label type
         );
+
+        //- Insert a range of points using the CGAL range insertion method
+        inline void insertPoints(const std::vector<Point>& points);
 
         //- Insert a point-pair at a ppDist distance either side of
         //  surface point surfPt, in the direction n
