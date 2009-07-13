@@ -97,9 +97,9 @@ inline Foam::scalar Foam::cvControls::cosAlignmentAcceptanceAngle() const
     return cosAlignmentAcceptanceAngle_;
 }
 
-inline Foam::scalar Foam::cvControls::cellCentreInsertionDistCoeff() const
+inline Foam::scalar Foam::cvControls::insertionDistCoeff() const
 {
-    return cellCentreInsertionDistCoeff_;
+    return insertionDistCoeff_;
 }
 
 inline Foam::scalar Foam::cvControls::faceAreaRatioCoeff() const
@@ -112,9 +112,9 @@ inline Foam::scalar Foam::cvControls::cosInsertionAcceptanceAngle() const
     return cosInsertionAcceptanceAngle_;
 }
 
-inline Foam::scalar Foam::cvControls::cellCentreRemovalDistCoeff() const
+inline Foam::scalar Foam::cvControls::removalDistCoeff() const
 {
-    return cellCentreRemovalDistCoeff_;
+    return removalDistCoeff_;
 }
 
 inline Foam::scalar Foam::cvControls::minimumEdgeLengthCoeff() const

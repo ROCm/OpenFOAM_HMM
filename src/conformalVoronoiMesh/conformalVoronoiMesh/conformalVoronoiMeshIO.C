@@ -77,7 +77,48 @@ void Foam::conformalVoronoiMesh::writePoints
 }
 
 
-void Foam::conformalVoronoiMesh::writeMesh()
+void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices() const
+{
+    Info<< nl << "    Writing internal Delaunay vertices to pointField "
+        << "ADD NAME CHOICE ARGUMENT" << endl;
+
+    pointField internalDelaunayVertices(number_of_vertices());
+
+    label vertI = 0;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalPoint())
+        {
+            internalDelaunayVertices[vertI++] = topoint(vit->point());
+        }
+    }
+
+    internalDelaunayVertices.setSize(vertI);
+
+    pointIOField internalDVs
+    (
+        IOobject
+        (
+            "internalDelaunayVertices",
+            runTime_.timeName(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        internalDelaunayVertices
+    );
+
+    internalDVs.write();
+}
+
+
+void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
 {
     pointField points(0);
     faceList faces(0);
@@ -86,6 +127,8 @@ void Foam::conformalVoronoiMesh::writeMesh()
     wordList patchNames(0);
     labelList patchSizes(0);
     labelList patchStarts(0);
+
+    writeInternalDelaunayVertices();
 
     calcDualMesh
     (
@@ -103,13 +146,31 @@ void Foam::conformalVoronoiMesh::writeMesh()
     IOobject io
     (
         Foam::polyMesh::defaultRegion,
-        runTime_.constant(),
+        runTime_.timeName(),
         runTime_,
         IOobject::NO_READ,
         IOobject::AUTO_WRITE
     );
 
-    Info<< nl << "Writing polyMesh to constant." << endl;
+    if (writeToConstant)
+    {
+        Info<< nl << "    Writing polyMesh to constant." << endl;
+
+        io = IOobject
+        (
+            Foam::polyMesh::defaultRegion,
+            runTime_.constant(),
+            runTime_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        );
+
+    }
+    else
+    {
+        Info<< nl << "    Writing polyMesh to time directory "
+            << runTime_.timeName() << endl;
+    }
 
     polyMesh pMesh
     (
@@ -142,6 +203,8 @@ void Foam::conformalVoronoiMesh::writeMesh()
         << "Failed writing polyMesh."
             << exit(FatalError);
     }
+
+    writeTargetCellSize();
 }
 
 
@@ -152,7 +215,7 @@ void Foam::conformalVoronoiMesh::writeDual
     const fileName& fName
 ) const
 {
-    Info<< nl << "Writing dual points and faces to " << fName << endl;
+    Info<< nl << "    Writing dual points and faces to " << fName << endl;
 
     OFstream str(fName);
 

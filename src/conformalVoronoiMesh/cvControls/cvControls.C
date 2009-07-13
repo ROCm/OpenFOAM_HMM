@@ -97,6 +97,7 @@ Foam::cvControls::cvControls
     cosAlignmentAcceptanceAngle_ = cos
     (
         readScalar(motionDict.lookup("alignmentAcceptanceAngle"))
+       *mathematicalConstant::pi/180
     );
 
     // Point removal criteria
@@ -106,7 +107,7 @@ Foam::cvControls::cvControls
         motionDict.subDict("pointInsertionCriteria")
     );
 
-    cellCentreInsertionDistCoeff_ = readScalar
+    insertionDistCoeff_ = readScalar
     (
         insertionDict.lookup("cellCentreDistCoeff")
     );
@@ -119,6 +120,7 @@ Foam::cvControls::cvControls
     cosInsertionAcceptanceAngle_ = cos
     (
         readScalar(insertionDict.lookup("acceptanceAngle"))
+       *mathematicalConstant::pi/180
     );
 
     // Point removal criteria
@@ -128,7 +130,7 @@ Foam::cvControls::cvControls
         motionDict.subDict("pointRemovalCriteria")
     );
 
-    cellCentreRemovalDistCoeff_ = readScalar
+    removalDistCoeff_ = readScalar
     (
         removalDict.lookup("cellCentreDistCoeff")
     );

@@ -158,7 +158,7 @@ inline void Foam::conformalVoronoiMesh::insertPoints
     const std::vector<Point>& points
 )
 {
-    Info<< "    " << points.size() << " points to insert..." << endl;
+    Info<< nl << "    " << points.size() << " points to insert..." << endl;
 
     label nVert = number_of_vertices();
 
@@ -275,6 +275,13 @@ Foam::conformalVoronoiMesh::toPoint
 }
 
 #endif
+
+
+inline Foam::conformalVoronoiMesh::CGALVector
+Foam::conformalVoronoiMesh::toCGALVector(const point& pt) const
+{
+    return CGALVector(pt.x(), pt.y(), pt.z());
+}
 
 
 inline const Foam::Time& Foam::conformalVoronoiMesh::time() const

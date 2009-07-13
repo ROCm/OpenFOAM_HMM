@@ -48,6 +48,7 @@ SourceFiles
 #include "cellSizeControlSurfaces.H"
 #include "cvControls.H"
 #include "DynamicList.H"
+#include "PackedBoolList.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "plane.H"
@@ -60,6 +61,7 @@ SourceFiles
 #include "transform.H"
 #include "volFields.H"
 #include "fvMesh.H"
+#include "Histogram.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -172,7 +174,8 @@ class conformalVoronoiMesh
             const label type
         );
 
-        //- Insert a range of points using the CGAL range insertion method
+        //- Insert a std::vector of CGAL Points using the CGAL range insertion
+        //  method
         inline void insertPoints(const std::vector<Point>& points);
 
         //- Insert a point-pair at a ppDist distance either side of
@@ -386,6 +389,9 @@ public:
         inline pointFromPoint topoint(const Point&) const;
         inline PointFrompoint toPoint(const point&) const;
 
+        typedef K::Vector_3 CGALVector;
+
+        inline CGALVector toCGALVector(const point& pt) const;
 
         // Access
 
@@ -414,8 +420,12 @@ public:
                 const List<point>& points
             ) const;
 
+            //- Write the internal Delaunay vertices of the tessellation as a
+            //  pointField that may be used to restart the meshing process
+            void writeInternalDelaunayVertices() const;
+
             //- Write polyMesh
-            void writeMesh();
+            void writeMesh(bool writeToConstant = true);
 
             //- Write dual points and faces as .obj file
             void writeDual

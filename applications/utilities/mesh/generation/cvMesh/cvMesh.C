@@ -63,8 +63,14 @@ int main(int argc, char *argv[])
 
         mesh.move();
 
+        mesh.conformToSurface();
+
         runTime++;
     }
+
+    mesh.writeMesh();
+
+    mesh.writePoints("allFinalPoints.obj", false);
 
     Info<< nl << "End\n" << endl;
 

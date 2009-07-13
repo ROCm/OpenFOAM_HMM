@@ -58,8 +58,8 @@ Description
     typedef CGAL::Exact_predicates_exact_constructions_kernel K;
 #endif
 
-typedef CGAL::indexedVertex<K>                           Vb;
-typedef CGAL::indexedCell<K>                             Cb;
+typedef CGAL::indexedVertex<K>          Vb;
+typedef CGAL::indexedCell<K>            Cb;
 
 #ifdef CGAL_HIERARCHY
     // Data structures for hierarchical Delaunay triangulation which is more

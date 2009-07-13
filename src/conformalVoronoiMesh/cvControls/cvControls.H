@@ -116,7 +116,7 @@ class cvControls
 
             //- Length between Delaunay vertices above which a new Dv should be
             //  inserted - fraction of the local target cell size
-            scalar cellCentreInsertionDistCoeff_;
+            scalar insertionDistCoeff_;
 
             //- Minimum dual face area corresponding to long Delaunay edge where
             //  a new Dv is to be inserted - fraction of the local target cell
@@ -132,7 +132,7 @@ class cvControls
 
             //- Length between Delaunay vertices below which a Dv should be
             //  removed - fraction of the local target cell size
-            scalar cellCentreRemovalDistCoeff_;
+            scalar removalDistCoeff_;
 
 
     // polyMesh filtering controls
@@ -198,8 +198,8 @@ public:
             //- Return the cosAlignmentAcceptanceAngle
             inline scalar cosAlignmentAcceptanceAngle() const;
 
-            //- Return the cellCentreInsertionDistCoeff
-            inline scalar cellCentreInsertionDistCoeff() const;
+            //- Return the insertionDistCoeff
+            inline scalar insertionDistCoeff() const;
 
             //- Return the faceAreaRatioCoeff
             inline scalar faceAreaRatioCoeff() const;
@@ -207,8 +207,8 @@ public:
             //- Return the cosInsertionAcceptanceAngle
             inline scalar cosInsertionAcceptanceAngle() const;
 
-            //- Return cellCentreRemovalDistCoeff
-            inline scalar cellCentreRemovalDistCoeff() const;
+            //- Return removalDistCoeff
+            inline scalar removalDistCoeff() const;
 
             //- Return the minimumEdgeLengthCoeff
             inline scalar minimumEdgeLengthCoeff() const;
