@@ -41,19 +41,20 @@ namespace LESModels
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    UName_("U"),
+    rhoName_("rho"),
+    muName_("mu")
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 (
     const muSgsWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -61,52 +62,49 @@ muSgsWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    rhoName_(ptf.rhoName_),
+    muName_(ptf.muName_)
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    Istream& is
-)
-:
-    fixedValueFvPatchScalarField(p, iF, is)
-{}
-
-
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    muName_(dict.lookupOrDefault<word>("mu", "mu"))
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& tppsf
+    const muSgsWallFunctionFvPatchScalarField& mwfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(mwfpsf),
+    UName_(mwfpsf.UName_),
+    rhoName_(mwfpsf.rhoName_),
+    muName_(mwfpsf.muName_)
 {}
 
 
-muSgsWallFunctionFvPatchScalarField::
-muSgsWallFunctionFvPatchScalarField
+muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
 (
-    const muSgsWallFunctionFvPatchScalarField& tppsf,
+    const muSgsWallFunctionFvPatchScalarField& mwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(mwfpsf, iF),
+    UName_(mwfpsf.UName_),
+    rhoName_(mwfpsf.rhoName_),
+    muName_(mwfpsf.muName_)
 {}
 
 
@@ -125,15 +123,15 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     scalarField magUp = mag(U.patchInternalField() - U);
 
     const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>("mu");
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
 
     const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>("rho");
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
 
     scalarField& muSgsw = *this;
 
@@ -184,6 +182,16 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
             muSgsw[facei] = 0;
         }
     }
+}
+
+
+void muSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
+{
+    fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
+    writeEntry("value", os);
 }
 
 

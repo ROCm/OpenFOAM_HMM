@@ -48,7 +48,9 @@ nuSgsWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    UName_("U"),
+    nuName_("nu")
 {}
 
 
@@ -61,7 +63,9 @@ nuSgsWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    UName_(ptf.UName_),
+    nuName_(ptf.nuName_)
 {}
 
 
@@ -73,28 +77,34 @@ nuSgsWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    UName_(dict.lookupOrDefault<word>("U", "U")),
+    nuName_(dict.lookupOrDefault<word>("nu", "nu"))
 {}
 
 
 nuSgsWallFunctionFvPatchScalarField::
 nuSgsWallFunctionFvPatchScalarField
 (
-    const nuSgsWallFunctionFvPatchScalarField& tppsf
+    const nuSgsWallFunctionFvPatchScalarField& nwfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(nwfpsf),
+    UName_(nwfpsf.UName_),
+    nuName_(nwfpsf.nuName_)
 {}
 
 
 nuSgsWallFunctionFvPatchScalarField::
 nuSgsWallFunctionFvPatchScalarField
 (
-    const nuSgsWallFunctionFvPatchScalarField& tppsf,
+    const nuSgsWallFunctionFvPatchScalarField& nwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(nwfpsf, iF),
+    UName_(nwfpsf.UName_),
+    nuName_(nwfpsf.nuName_)
 {}
 
 
@@ -117,12 +127,12 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>("U");
+        patch().lookupPatchField<volVectorField, vector>(UName_);
 
     scalarField magUp = mag(U.patchInternalField() - U);
 
     const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>("nu");
+        patch().lookupPatchField<volScalarField, scalar>(nuName_);
     scalarField& nuSgsw = *this;
 
 
@@ -134,7 +144,7 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
 
         scalar utau = sqrt((nuSgsw[facei] + nuw[facei])*magFaceGradU[facei]);
 
-        if(utau > VSMALL)
+        if (utau > VSMALL)
         {
             int iter = 0;
             scalar err = GREAT;
@@ -168,6 +178,15 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
             nuSgsw[facei] = 0;
         }
     }
+}
+
+
+void nuSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
+{
+    fvPatchField<scalar>::write(os);
+    writeEntryIfDifferent<word>(os, "U", "U", UName_);
+    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
+    writeEntry("value", os);
 }
 
 
