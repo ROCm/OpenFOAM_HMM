@@ -156,15 +156,16 @@ tmp<volScalarField> LESModel::thermalDissipation() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            (
+          - (
                 ( this->nu()*dev(twoSymm(tgradU())) ) && tgradU()
-            ) + this->epsilon()
+            )
+          - this->epsilon()
         )
     );
 }
 
 
-tmp<volScalarField> LESModel::thermalDissipationEff() const
+tmp<volScalarField> LESModel::thermalDissipationEquilibrium() const
 {
     tmp<volTensorField> tgradU = fvc::grad(this->U());
 
@@ -174,13 +175,13 @@ tmp<volScalarField> LESModel::thermalDissipationEff() const
         (
             IOobject
             (
-                "thermalDissipationEff",
+                "thermalDissipationEquilibrium",
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            (
+          - (
                 this->nuEff()*dev(twoSymm(tgradU()))
               - ((2.0/3.0)*I) * this->k()
             ) && tgradU()

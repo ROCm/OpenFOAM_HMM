@@ -207,15 +207,16 @@ tmp<volScalarField> RASModel::thermalDissipation() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            (
+          - (
                 ( this->mu()*dev(twoSymm(tgradU())) ) && tgradU()
-            ) + this->rho() * this->epsilon()
+            )
+          - this->rho() * this->epsilon()
         )
     );
 }
 
 
-tmp<volScalarField> RASModel::thermalDissipationEff() const
+tmp<volScalarField> RASModel::thermalDissipationEquilibrium() const
 {
     tmp<volTensorField> tgradU = fvc::grad(this->U());
 
@@ -225,13 +226,13 @@ tmp<volScalarField> RASModel::thermalDissipationEff() const
         (
             IOobject
             (
-                "thermalDissipationEff",
+                "thermalDissipationEquilibrium",
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            (
+          - (
                 this->muEff()*dev(twoSymm(tgradU()))
               - ((2.0/3.0)*I) * this->rho() * this->k()
             ) && tgradU()

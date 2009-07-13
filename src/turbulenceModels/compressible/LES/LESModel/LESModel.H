@@ -300,7 +300,7 @@ public:
         //- The source for the enthalpy equation resulting from
         //  the effective viscous dissipation
         //  (ie, when turbulent production and dissipation are in equilibrium)
-        virtual tmp<volScalarField> thermalDissipationEff() const;
+        virtual tmp<volScalarField> thermalDissipationEquilibrium() const;
 
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying

@@ -119,7 +119,7 @@ public:
         //- The source for the enthalpy equation resulting from
         //  the effective viscous dissipation
         //  (ie, when turbulent production and dissipation are in equilibrium)
-        virtual tmp<volScalarField> thermalDissipationEff() const;
+        virtual tmp<volScalarField> thermalDissipationEquilibrium() const;
 
         //- Correct the laminar viscosity
         virtual void correct();

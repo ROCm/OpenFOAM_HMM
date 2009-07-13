@@ -352,7 +352,7 @@ public:
         //- The source for the enthalpy equation resulting from
         //  the effective viscous dissipation
         //  (ie, when turbulent production and dissipation are in equilibrium)
-        virtual tmp<volScalarField> thermalDissipationEff() const;
+        virtual tmp<volScalarField> thermalDissipationEquilibrium() const;
 
         //- Return yPlus for the given patch
         virtual tmp<scalarField> yPlus(const label patchI) const;

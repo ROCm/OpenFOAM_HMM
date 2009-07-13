@@ -90,7 +90,7 @@ dissipationSelector::dissipation() const
     }
     else if (treatment_ == equilibrium)
     {
-        return turbModel_.thermalDissipationEff();
+        return turbModel_.thermalDissipationEquilibrium();
     }
     else
     {

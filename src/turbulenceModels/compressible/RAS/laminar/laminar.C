@@ -193,13 +193,13 @@ tmp<volScalarField> laminar::thermalDissipation() const
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            ( this->mu()*dev(twoSymm(tgradU())) ) && tgradU()
+          - ( this->mu()*dev(twoSymm(tgradU())) ) && tgradU()
         )
     );
 }
 
 
-tmp<volScalarField> laminar::thermalDissipationEff() const
+tmp<volScalarField> laminar::thermalDissipationEquilibrium() const
 {
     tmp<volTensorField> tgradU = fvc::grad(this->U());
 
@@ -209,13 +209,13 @@ tmp<volScalarField> laminar::thermalDissipationEff() const
         (
             IOobject
             (
-                "thermalDissipationEff",
+                "thermalDissipationEquilibrium",
                 runTime_.timeName(),
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            ( this->mu()*dev(twoSymm(tgradU())) ) && tgradU()
+          - ( this->mu()*dev(twoSymm(tgradU())) ) && tgradU()
         )
     );
 }
