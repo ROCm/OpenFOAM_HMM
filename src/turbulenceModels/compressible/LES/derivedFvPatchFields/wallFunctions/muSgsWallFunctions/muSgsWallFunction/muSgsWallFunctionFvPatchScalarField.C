@@ -143,13 +143,10 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
     {
         scalar magUpara = magUp[facei];
 
-        scalar utau = sqrt
-        (
-            (muSgsw[facei] + muw[facei])
-            *magFaceGradU[facei]/rhow[facei]
-        );
+        scalar utau =
+            sqrt((muSgsw[facei] + muw[facei])*magFaceGradU[facei]/rhow[facei]);
 
-        if(utau > 0)
+        if (utau > 0)
         {
             int iter = 0;
             scalar err = GREAT;
@@ -176,7 +173,11 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
             } while (utau > VSMALL && err > 0.01 && ++iter < 10);
 
             muSgsw[facei] =
-                max(rhow[facei]*sqr(utau)/magFaceGradU[facei] - muw[facei],0.0);
+                max
+                (
+                    rhow[facei]*sqr(utau)/magFaceGradU[facei] - muw[facei],
+                    0.0
+                );
         }
         else
         {
