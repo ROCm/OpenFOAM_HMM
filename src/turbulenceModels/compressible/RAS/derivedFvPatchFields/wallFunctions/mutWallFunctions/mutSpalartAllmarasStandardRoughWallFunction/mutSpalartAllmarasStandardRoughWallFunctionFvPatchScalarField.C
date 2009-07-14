@@ -157,8 +157,6 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
         patch().lookupPatchField<volScalarField, scalar>(muName_);
     scalarField& mutw = *this;
 
-    scalarField magFaceGradU = mag(U.snGrad());
-
     if (roughnessHeight_ > 0.0)
     {
         // Rough Walls.

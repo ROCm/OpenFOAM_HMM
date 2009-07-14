@@ -91,6 +91,9 @@ public:
             //- Vaporisation temperature [K]
             const scalar Tvap_;
 
+            //- Boiling point [K]
+            const scalar Tbp_;
+
 
     public:
 
@@ -107,7 +110,10 @@ public:
 
             //- Return const access to the vaporisation temperature
             inline scalar Tvap() const;
-    };
+
+            //- Return const access to the boiling point
+            inline scalar Tbp() const;
+   };
 
 
     //- Class used to pass reacting tracking data to the trackToFace function
