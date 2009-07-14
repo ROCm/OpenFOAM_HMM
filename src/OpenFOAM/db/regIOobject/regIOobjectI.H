@@ -32,7 +32,7 @@ inline bool Foam::regIOobject::ownedByRegistry() const
 }
 
 
-void Foam::regIOobject::store()
+inline void Foam::regIOobject::store()
 {
     ownedByRegistry_ = true;
 }
@@ -74,18 +74,18 @@ inline Type& Foam::regIOobject::store(autoPtr<Type>& atPtr)
 }
 
 
-void Foam::regIOobject::release()
+inline void Foam::regIOobject::release()
 {
     ownedByRegistry_ = false;
 }
 
 
-Foam::label Foam::regIOobject::eventNo() const
+inline Foam::label Foam::regIOobject::eventNo() const
 {
     return eventNo_;
 }
 
-Foam::label& Foam::regIOobject::eventNo()
+inline Foam::label& Foam::regIOobject::eventNo()
 {
     return eventNo_;
 }
