@@ -1,0 +1,213 @@
+#                            -*- mode: org; -*-
+#
+#+TITLE:          OpenFOAM release notes for version 1.6
+#+AUTHOR:                      OpenCFD Ltd.
+#+DATE:                       29 August 2009
+#+LINK:                  http://www.opencfd.co.uk
+#+OPTIONS: author:nil ^:{}
+
+
+* Regular Expressions
+  + new regExp class: support for accessing POSIX extended regular
+    expresssions from within OpenFOAM.
+
+  + new wordRe class: can contain a word or a regExp.
+    The match() method matches appropriately (as word or regExp).
+
+  + new stringListOps: search string lists based on regular expressions, wordRe
+    or wordReList.
+
+  + Istream and Ostream now retain backslashes when reading/writing strings.
+    The backslash continues to be used as an escape character for double-quote
+    and newline, but otherwise get passed through "as-is" without any other
+    special meaning (ie, they are *not* C-style strings). This especially
+    helps with input/output of regular expressions.
+
+
+* Dictionary improvements/changes
+  + dictionaries can use words (unquoted) or regular expressions (quoted)
+    for their keywords. When searching, an exact match has priority
+    over a regular expression match.
+
+  + The default inputMode is now 'merge', which corresponds to the most
+    general usage. The inputMode 'warn' corresponds to the previous default
+    behaviour.
+
+  + The new inputMode 'protect' can be used to conditionally merge default
+    values into existing dictionaries.
+
+  + new digest() method to calculate and return the SHA1 message digest
+
+
+* Improved List containers
+  + It is now possible to append a UList to an existing List or DynamicList.
+
+  + DynamicList is now much more flexible. It can be used with the append()
+    method, or with the setSize() method and operator[], as per List.
+    DynamicList also has more methods for adjusting the space allocated.
+
+  + SortableList now uses stable sort and allows reverseSort as well.
+    SortableList is also more versatile - the indices mostly remain
+    unallocated until they are required in the sort() method.
+    The sort indices can be deallocated with the shrink() method.
+    Works as expected with transfer() and assignment from other Lists.
+
+  + specialization for UList<bool>::operator[](..) const to return false for
+    out-of-range elements. This allows lazy evaluation with no noticeable
+    change in performance.
+
+  + PackedList has much better performance, lazy evaluation and auto-vivify
+    of elements on assignment. Any auto-vivified elements will also
+    flood-fill the gaps with zero.  The append() method can be used like in
+    DynamicList to append a single element. The set() method can be used
+    like in labelHashSet.
+
+  + new UIndirectList for an indirect list without storing the addressing.
+
+
+* New hashing algorithms
+  + Bob Jenkins' hash routine for performance improvement (5-10% faster for
+    string hashing than the previous algorithm) and fewer collisions.
+
+  + SHA1 hashing and SHA1 message digests (NIST specification FIPS-180-1)
+    added. The SHA1 digest provides a compact (20 bytes) means of
+    determining if the contents of an object have changed. The OSHA1stream
+    can be used to calculate SHA1 digests for anything that can write to an
+    output stream.
+
+
+* HashTable/HashSet improvements
+  + Performance improvements for querying on empty tables
+
+  + The erase() method can take a list of keys or the keys from any
+    another HashTable/HashSet.
+
+  + HashSet has an operator[]() const that allows the same syntax
+    to be used for boolList, PackedBoolList and labelHashSet.
+
+  + HashSet has additional operators '+=', '-=', '&=' to add, remove or
+    intersect keys, respectively.
+
+
+* Improved bool/Switch
+  + Switch: reduced the storage to be on par with bool.
+    It is now more flexible and behaves much more like a bool.
+
+  + bool: IO uses Switch internally so the end-user doesn't need to know if
+    a particular class used bool or Switch internally.
+
+
+* Miscellaneous container class improvments
+  + boost-style StaticAssert added.
+    Useful to catch invalid template sizes, for example.
+
+  + various containers now have C++0x-style cbegin(), cend() iterator methods.
+
+  + various containers now have STL-style empty() method, which may be more
+    readable than !size() or !valid().
+
+  + various containers now have an xfer() method for yielding their contents
+    to a corresponding Xfer class.
+
+
+* New surfMesh library
+  Provides a more efficient storage mechanism than possible with triSurface
+  without restrictions on the shape of the face (templated parameter).
+  It will however take quite some time before it can fully replace triSurface.
+
+  + MeshedSurface class: with zero or more contiguous surfZones.
+
+  + UnsortedMeshedSurface class: unordered surface zones (as per triSurface)
+
+  + surfMesh class: for reading/writing in native OpenFOAM format
+
+
+* New Xfer class
+  Provides finer grained control over copying or transferring objects with
+  very little overhead. It can be used for any object that has a transfer()
+  method and a operator=() copy method.
+  Since it is decided upon construction of the Xfer object whether the
+  parameter is to be copied or transferred, the contents of the resulting
+  Xfer object can be transferred unconditionally. This greatly simplifies
+  defining constructors or methods in other classes with mixed
+  transfer/copy semantics without requiring 2^N different versions.
+
+  + xferCopy(), xferMove() and xferCopyTo(), xferMoveTo() functions
+    to ease the use of the Xfer class.
+
+
+* Improvements for functionObjects and time-looping
+  + The functionObjectList retains the order of the functionObject order,
+    which allows a chaining of operations. It is thus internally more
+    efficient when system/controlDict uses functions {..} instead of
+    functions (..), but the both forms are supported.
+
+  + The functionObjects now have an additional end() method that gets called
+    when Time::loop() or Time::run() determines that the time-loop exits.
+    Accordingly, one of these two idioms should be used in solver code:
+    1. while (runTime.loop() { ... }
+    2. while (runTime.run()) { runTime++; ... }
+
+  + functionObjectList now tracks the SHA1 message digest of the
+    sub-directories. This avoids reloading a functionObject when something
+    unrelated in system/controlDict changed.
+
+
+* Solver control improvments
+  Use dictionary entries instead of an Istream for the solver controls.
+  + allows dictionary substitutions and regular expressions in
+    system/fvSolution
+
+  + old solver control syntax is still supported (warning emitted), but the
+    foamUpgradeFvSolution application can be used to convert
+    system/fvSolution to the new format.
+
+
+* Convenience changes
+  + IOobject: new constructor for creating an IOobject from a
+    single-path specification (eg, see blockMesh -dict option).
+
+  + argList: convenience methods for accessing options more directly.
+    option(), optionFound(), optionLookup(), optionRead(),
+    optionReadIfPresent().
+
+  + readList(Istream&) can read a bracket-delimited list or handle a single
+    value as a list of size 1. This can be a useful convenience when
+    processing command-line options.
+
+
+* Misc. improvements
+  + improved consistency and interoperability between face and triFace classes.
+
+  + face::triangles() can split and append to a DynamicList
+
+  + coordinateSystems can access global systems (similar to MeshObject)
+
+
+* Improvements to utilities
+  + blockMesh: -dict option for specifying an alternative dictionary for the
+    block mesh description. The 'convertToMeters' entry is now optional, and
+    the alternative 'scale' entry can be used for less typing.
+
+  + foamToEnsight: the -noPatches option suppresses generation of patches
+
+  + foamToEnsightParts: the -noMesh option and the -index option can
+    be used when post-processing incrementally.
+
+  + timeSelector: can combine -time ranges and -latestTime options. More
+    reliable behaviour for cases missing constant/ or 0/ directories. When
+    the -noZero option is available, -latestTime will not select the 0/
+    directory unless the -zeroTime option is also given. This helps avoid
+    ill effects caused by accidentally using the 0/ directory for certain
+    utilities (eg, reconstructPar).
+
+
+* Improvements to Paraview reader module
+  + PV3FoamReader: added mesh region handling. The region name is parsed
+    from the filename. Eg, case{region}.OpenFOAM
+
+  + paraFoam: new -region option for specifying an alternative region. A new
+    -touch option to generate the .OpenFOAM file only. Only creates (and
+    removes) .OpenFOAM files if they didn't already exist, which is useful
+    in connection with the -touch option.
+
