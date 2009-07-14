@@ -989,14 +989,14 @@ void Foam::conformalVoronoiMesh::limitDisplacement
         // If dispPt is outside bounding box then displacement cuts boundary
         limit = true;
 
-        Info<< "bb limit" << endl;
+        Info<< "    bb limit" << endl;
     }
     else if (geometryToConformTo_.findSurfaceAnyIntersection(pt, dispPt))
     {
         // Full surface penetration test
         limit = true;
 
-        Info<< "intersection limit" << endl;
+        Info<< "    intersection limit" << endl;
     }
     else
     {
@@ -1004,23 +1004,33 @@ void Foam::conformalVoronoiMesh::limitDisplacement
         // Within twice the local surface point pair insertion distance is
         // considered "too close"
 
+        scalar searchDistanceSqr = sqr
+        (
+            2*vit->targetCellSize()
+           *cvMeshControls().pointPairDistanceCoeff()
+        );
+
         geometryToConformTo_.findSurfaceNearest
         (
             dispPt,
-            sqr
-            (
-                2*vit->targetCellSize()
-               *cvMeshControls().pointPairDistanceCoeff()
-            ),
+            searchDistanceSqr,
             surfHit,
             hitSurface
         );
 
-        limit = surfHit.hit();
-
-        if (limit)
+        if (surfHit.hit())
         {
-            Info<< "proximity limit" << endl;
+            Info<< "    proximity limit" << endl;
+
+            limit = true;
+
+            if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
+            {
+                Info<< "    Cannot limit displacement, point " << pt
+                    << "closer than tolerance." << endl;
+
+                return;
+            }
         }
     }
 
@@ -2356,8 +2366,6 @@ void Foam::conformalVoronoiMesh::move()
     // indexing of the tessellation.
     if (runTime_.outputTime())
     {
-        writeInternalDelaunayVertices();
-
         writeMesh(false);
 
         writeTargetCellSize();

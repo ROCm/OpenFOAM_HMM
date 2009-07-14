@@ -77,11 +77,11 @@ void Foam::conformalVoronoiMesh::writePoints
 }
 
 
-void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices() const
+void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
+(
+    bool writeToConstant
+) const
 {
-    Info<< nl << "    Writing internal Delaunay vertices to pointField "
-        << "ADD NAME CHOICE ARGUMENT" << endl;
-
     pointField internalDelaunayVertices(number_of_vertices());
 
     label vertI = 0;
@@ -101,18 +101,30 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices() const
 
     internalDelaunayVertices.setSize(vertI);
 
-    pointIOField internalDVs
+    IOobject io
     (
-        IOobject
+        "internalDelaunayVertices",
+        runTime_.timeName(),
+        runTime_,
+        IOobject::NO_READ,
+        IOobject::AUTO_WRITE
+    );
+
+    if (writeToConstant)
+    {
+        io = IOobject
         (
             "internalDelaunayVertices",
-            runTime_.timeName(),
+            runTime_.constant(),
             runTime_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
-        ),
-        internalDelaunayVertices
-    );
+        );
+    }
+
+    Info<< nl << "    Writing " << io.name() << " to " << io.instance() << endl;
+
+    pointIOField internalDVs(io, internalDelaunayVertices);
 
     internalDVs.write();
 }
@@ -127,6 +139,8 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
     wordList patchNames(0);
     labelList patchSizes(0);
     labelList patchStarts(0);
+
+    writeInternalDelaunayVertices(writeToConstant);
 
     calcDualMesh
     (
@@ -165,7 +179,6 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         );
-
     }
     else
     {

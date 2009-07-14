@@ -430,7 +430,7 @@ public:
 
             //- Write the internal Delaunay vertices of the tessellation as a
             //  pointField that may be used to restart the meshing process
-            void writeInternalDelaunayVertices() const;
+            void writeInternalDelaunayVertices(bool writeToConstant) const;
 
             //- Write polyMesh
             void writeMesh(bool writeToConstant = true);
