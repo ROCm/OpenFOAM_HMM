@@ -17,8 +17,6 @@ FoamFile
 
 LESModel        oneEqEddy;
 
-turbulence      on;
-
 delta           smooth;
 
 laminarCoeffs

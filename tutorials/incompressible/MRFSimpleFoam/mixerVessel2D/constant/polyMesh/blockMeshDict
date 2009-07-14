@@ -15,7 +15,16 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // General macros to create 2D/extruded-2D meshes
 
-//define(calc, [esyscmd(echo $1 | bc | tr -d \\n)])
+
+
+
+
+
+
+
+
+
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -23,32 +32,282 @@ convertToMeters 0.1;
 
 // Hub radius
 
+
 // Impeller-tip radius
+
 
 // Baffle-tip radius
 
+
 // Tank radius
+
 
 // MRF region radius
 
+
 // Thickness of 2D slab
+
 
 // Base z
 
+
 // Top z
 
+
 // Number of cells radially between hub and impeller tip
+
 
 // Number of cells radially in each of the two regions between
 // impeller and baffle tips
 
+
 // Number of cells radially between baffle tip and tank
+
 
 // Number of cells azimuthally in each of the 8 blocks
 
+
 // Number of cells in the thickness of the slab
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -161,7 +420,7 @@ vertices
     (0.707106781821139 0.707106780551956 0.1) // Vertex R7st = 95 
 );
 
-blocks          
+blocks
 (
     // block0
     hex (0 2 13 12 48 50 61 60)
@@ -433,7 +692,7 @@ edges
     arc 94 84 (0.923879532683006 0.382683431950523 0.1)
 );
 
-patches         
+patches
 (
     wall rotor
     (

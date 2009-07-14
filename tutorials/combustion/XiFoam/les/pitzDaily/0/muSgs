@@ -20,27 +20,31 @@ internalField   uniform 0;
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            zeroGradient;
     }
 
-    outlet          
+    outlet
     {
         type            zeroGradient;
     }
 
-    upperWall       
+    upperWall
     {
         type            zeroGradient;
+        //type            compressible::muSgsWallFunction;
+        value           uniform 0;
     }
 
-    lowerWall       
+    lowerWall
     {
         type            zeroGradient;
+        //type            compressible::muSgsWallFunction;
+        value           uniform 0;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            empty;
     }
