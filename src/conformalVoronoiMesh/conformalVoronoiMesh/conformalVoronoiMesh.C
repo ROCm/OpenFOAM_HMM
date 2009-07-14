@@ -2312,7 +2312,7 @@ void Foam::conformalVoronoiMesh::move()
     reinsertFeaturePoints();
     startOfInternalPoints_ = number_of_vertices();
 
-    Info<< nl << "Reinserting entire tessellation" << endl;
+    Info<< nl << "    Reinserting entire tessellation" << endl;
     insertPoints(pointsToInsert);
 }
 
