@@ -26,7 +26,6 @@ License
 
 #include "kEpsilon.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 

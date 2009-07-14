@@ -27,8 +27,6 @@ License
 #include "NASsurfaceFormatCore.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Do weird things to extract a floating point number
@@ -55,8 +53,6 @@ Foam::scalar Foam::fileFormats::NASsurfaceFormatCore::parseNASCoord
         return readScalar(IStringStream(s)());
     }
 }
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

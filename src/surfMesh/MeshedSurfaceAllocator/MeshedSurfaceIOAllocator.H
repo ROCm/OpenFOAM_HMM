@@ -63,6 +63,7 @@ class MeshedSurfaceIOAllocator
         //- Surface zones
         surfZoneIOList zones_;
 
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -70,6 +71,7 @@ class MeshedSurfaceIOAllocator
 
         //- Disallow default bitwise assignment
         void operator=(const MeshedSurfaceIOAllocator&);
+
 
 public:
 
@@ -179,7 +181,6 @@ public:
                 const Xfer< faceList >& faces,
                 const Xfer< surfZoneList >& zones
             );
-
 };
 
 

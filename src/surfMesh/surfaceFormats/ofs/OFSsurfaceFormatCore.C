@@ -27,8 +27,6 @@ License
 #include "OFSsurfaceFormatCore.H"
 #include "clock.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::fileFormats::OFSsurfaceFormatCore::writeHeader
@@ -70,7 +68,5 @@ void Foam::fileFormats::OFSsurfaceFormatCore::writeHeader
     IOobject::writeDivider(os);
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //

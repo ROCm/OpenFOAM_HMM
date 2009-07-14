@@ -73,12 +73,14 @@ class AC3DsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const AC3DsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         AC3DsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -90,6 +92,7 @@ public:
                 new AC3DsurfaceFormat<Face>(name)
             );
         }
+
 
     // Destructor
 
@@ -105,7 +108,6 @@ public:
         //- Write UnsortedMeshedSurface, the output is always sorted by zones.
         static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
-
         //- Read from file
         virtual bool read(const fileName&);
 
@@ -114,7 +116,6 @@ public:
         {
             write(name, MeshedSurfaceProxy<Face>(*this));
         }
-
 };
 
 

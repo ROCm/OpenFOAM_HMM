@@ -203,6 +203,4 @@ Foam::surfMesh::readUpdateState Foam::surfMesh::readUpdate()
 }
 
 
-
-
 // ************************************************************************* //

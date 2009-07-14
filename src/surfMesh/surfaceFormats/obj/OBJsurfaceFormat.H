@@ -66,12 +66,14 @@ class OBJsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const OBJsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         OBJsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -83,6 +85,7 @@ public:
                 new OBJsurfaceFormat<Face>(name)
             );
         }
+
 
     // Destructor
 
@@ -103,7 +106,6 @@ public:
         {
             write(name, MeshedSurfaceProxy<Face>(*this));
         }
-
 };
 
 

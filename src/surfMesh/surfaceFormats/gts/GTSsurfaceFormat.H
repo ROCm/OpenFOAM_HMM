@@ -66,12 +66,14 @@ class GTSsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const GTSsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         GTSsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -84,9 +86,11 @@ public:
             );
         }
 
-    // Destructor
-        virtual ~GTSsurfaceFormat()
-        {}
+
+    //- Destructor
+    virtual ~GTSsurfaceFormat()
+    {}
+
 
     // Member Functions
 
@@ -96,7 +100,6 @@ public:
         //- Write UnsortedMeshedSurface, the output remains unsorted
         static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
-
         //- Read from file
         virtual bool read(const fileName&);
 
@@ -105,7 +108,6 @@ public:
         {
             write(name, *this);
         }
-
 };
 
 

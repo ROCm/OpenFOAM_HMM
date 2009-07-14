@@ -76,7 +76,6 @@ public:
         {
             return size(mesh_);
         }
-
 };
 
 

@@ -74,12 +74,14 @@ class NASsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const NASsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         NASsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -92,16 +94,17 @@ public:
             );
         }
 
+
     // Destructor
 
         virtual ~NASsurfaceFormat()
         {}
 
+
     // Member Functions
 
         //- Read from a file
         virtual bool read(const fileName&);
-
 };
 
 

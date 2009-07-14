@@ -31,7 +31,13 @@ License
 const dataType Foam::className::staticData();
 
 
-// * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -69,12 +75,6 @@ Foam::autoPtr<Foam::className> Foam::className::New()
 
 Foam::className::~className()
 {}
-
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

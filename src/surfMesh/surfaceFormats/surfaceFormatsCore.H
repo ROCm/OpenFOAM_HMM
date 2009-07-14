@@ -78,6 +78,7 @@ protected:
         //- Read non-comment line
         static string getLineNoComment(IFstream&);
 
+
 public:
 
     // Static Data
@@ -85,6 +86,7 @@ public:
         //- The file extension corresponding to 'native' surface format
         //  Normally "ofs" (mnemonic: OF = OpenFOAM, S = Surface)
         static word nativeExt;
+
 
     // Static Member Functions
 
@@ -95,7 +97,6 @@ public:
             const bool verbose,
             const word& functionName
         );
-
 
         //- Return the local file name (within time directory)
         //  NEEDS FIXING
@@ -109,28 +110,16 @@ public:
         //  NEEDS FIXING
         static fileName findMeshFile(const Time&, const word& surfName="");
 
+
     // Constructors
 
         //- Construct null
         surfaceFormatsCore();
 
+
     // Destructor
 
         virtual ~surfaceFormatsCore();
-
-    // Member Functions
-
-    // Access
-
-    // Edit
-
-    // Read
-
-    // Write
-
-    // Member operators
-
-    // Ostream Operator
 };
 
 

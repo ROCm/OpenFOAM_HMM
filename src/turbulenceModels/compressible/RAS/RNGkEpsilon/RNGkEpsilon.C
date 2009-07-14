@@ -26,7 +26,6 @@ License
 
 #include "RNGkEpsilon.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -187,10 +186,10 @@ RNGkEpsilon::RNGkEpsilon
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
 
-    alphat_ == mut_/Prt_;
+    alphat_ = mut_/Prt_;
     alphat_.correctBoundaryConditions();
 
     printCoeffs();
@@ -277,7 +276,7 @@ void RNGkEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity
@@ -349,7 +348,7 @@ void RNGkEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

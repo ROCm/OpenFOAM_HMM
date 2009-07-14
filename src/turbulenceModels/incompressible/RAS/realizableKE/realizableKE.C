@@ -26,7 +26,6 @@ License
 
 #include "realizableKE.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -182,7 +181,7 @@ realizableKE::realizableKE
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
 
-    nut_ == rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -324,7 +323,7 @@ void realizableKE::correct()
 
 
     // Re-calculate viscosity
-    nut_ == rCmu(gradU, S2, magS)*sqr(k_)/epsilon_;
+    nut_ = rCmu(gradU, S2, magS)*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 }
 

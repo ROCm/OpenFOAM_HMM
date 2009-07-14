@@ -27,8 +27,6 @@ License
 #include "TRIsurfaceFormat.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Face>
@@ -234,5 +232,6 @@ void Foam::fileFormats::TRIsurfaceFormat<Face>::write
         }
     }
 }
+
 
 // ************************************************************************* //

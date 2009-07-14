@@ -42,9 +42,12 @@ Foam::ash::ash()
 :
     solid(2010, 710, 0.04, 0.0, 1.0)
 {
-    WarningIn("ash::ash()")
-        << "Properties of ash need to be checked!!!"
-        << endl;
+    if (debug)
+    {
+        WarningIn("ash::ash()")
+            << "Properties of ash need to be checked!!!"
+            << endl;
+    }
 }
 
 
