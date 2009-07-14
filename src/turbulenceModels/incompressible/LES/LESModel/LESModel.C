@@ -75,7 +75,6 @@ LESModel::LESModel
         )
     ),
 
-    turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDictPtr(type + "Coeffs")),
 
