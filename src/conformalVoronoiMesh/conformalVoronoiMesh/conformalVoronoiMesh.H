@@ -109,7 +109,7 @@ class conformalVoronoiMesh
         label startOfSurfacePointPairs_;
 
         //- Store the feature constraining points to be reinserted after a
-        //- triangulation clear
+        //  triangulation clear
         List<Vb> featureVertices_;
 
         //- Storing the locations of all of the features to be conformed to.
@@ -287,12 +287,20 @@ class conformalVoronoiMesh
         ) const;
 
         //- Find the "worst" protrusion of a dual cell through the surface,
-        //- subject to the tolerance
+        //  subject to the tolerance
         void dualCellLargestSurfaceProtrusion
         (
             const Triangulation::Finite_vertices_iterator& vit,
             pointIndexHit& surfHit,
             label& hitSurface
+        ) const;
+
+        //- Limit the displacement of a point so that it doesn't penetrate the
+        //  surface to be meshed or come too close to it.
+        void limitDisplacement
+        (
+            const Triangulation::Finite_vertices_iterator& vit,
+            vector& displacement
         ) const;
 
         //- Check if a location is in the exclusion range of an existing feature
@@ -436,7 +444,7 @@ public:
             ) const;
 
             //- Read mesh from file as an fvMesh then calculate and write a
-            // field of the target cell size
+            //  field of the target cell size
             void writeTargetCellSize() const;
 };
 

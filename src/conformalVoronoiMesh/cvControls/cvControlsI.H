@@ -86,6 +86,12 @@ inline Foam::scalar Foam::cvControls::maxQuadAngle() const
 }
 
 
+inline bool Foam::cvControls::objOutput() const
+{
+    return objOutput_;
+}
+
+
 inline Foam::label Foam::cvControls::alignmentSearchSpokes() const
 {
     return alignmentSearchSpokes_;

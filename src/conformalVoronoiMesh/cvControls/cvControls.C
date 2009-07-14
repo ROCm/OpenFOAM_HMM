@@ -89,6 +89,8 @@ Foam::cvControls::cvControls
 
     const dictionary& motionDict(cvMeshDict_.subDict("motionControl"));
 
+    objOutput_ = Switch(motionDict.lookupOrDefault<Switch>("objOutput", false));
+
     alignmentSearchSpokes_ = readLabel
     (
         motionDict.lookup("alignmentSearchSpokes")

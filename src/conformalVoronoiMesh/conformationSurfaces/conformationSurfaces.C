@@ -153,7 +153,10 @@ Foam::conformationSurfaces::conformationSurfaces
 
     bounds_ = searchableSurfacesQueries::bounds(allGeometry_, surfaces_);
 
-    writeFeatureObj("cvMesh");
+    if(cvMesh_.cvMeshControls().objOutput())
+    {
+        writeFeatureObj("cvMesh");
+    }
 }
 
 

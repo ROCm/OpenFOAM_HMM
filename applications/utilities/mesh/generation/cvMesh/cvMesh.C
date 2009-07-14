@@ -57,20 +57,16 @@ int main(int argc, char *argv[])
 
     conformalVoronoiMesh mesh(runTime, cvMeshDict);
 
-    while (runTime.run())
+    while (runTime.loop())
     {
         Info<< nl << "Time = " << runTime.timeName() << endl;
 
         mesh.move();
 
         mesh.conformToSurface();
-
-        runTime++;
     }
 
     mesh.writeMesh();
-
-    mesh.writePoints("allFinalPoints.obj", false);
 
     Info<< nl << "End\n" << endl;
 

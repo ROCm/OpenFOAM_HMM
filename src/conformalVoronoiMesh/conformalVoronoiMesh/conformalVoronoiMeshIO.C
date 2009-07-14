@@ -128,8 +128,6 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
     labelList patchSizes(0);
     labelList patchStarts(0);
 
-    writeInternalDelaunayVertices();
-
     calcDualMesh
     (
         points,
@@ -141,7 +139,10 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
         patchStarts
     );
 
-    writeDual(points, faces, "dualMesh.obj");
+    if(cvMeshControls().objOutput())
+    {
+        writeDual(points, faces, "dualMesh.obj");
+    }
 
     IOobject io
     (
@@ -203,8 +204,6 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
         << "Failed writing polyMesh."
             << exit(FatalError);
     }
-
-    writeTargetCellSize();
 }
 
 

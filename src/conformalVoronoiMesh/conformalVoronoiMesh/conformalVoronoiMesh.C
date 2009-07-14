@@ -101,7 +101,10 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     conformToSurface();
 
-    writePoints("allInitialPoints.obj", false);
+    if(cvMeshControls().objOutput())
+    {
+        writePoints("allInitialPoints.obj", false);
+    }
 }
 
 
@@ -313,7 +316,7 @@ void Foam::conformalVoronoiMesh::insertSurfacePointPairs
         );
     }
 
-    if (fName != fileName::null)
+    if(cvMeshControls().objOutput() && fName != fileName::null)
     {
         List<point> surfacePts(surfaceHits.size());
 
@@ -353,7 +356,7 @@ void Foam::conformalVoronoiMesh::insertEdgePointGroups
         insertEdgePointGroup(feMesh, edgeHits[i]);
     }
 
-    if (fName != fileName::null)
+    if(cvMeshControls().objOutput() && fName != fileName::null)
     {
         List<point> edgePts(edgeHits.size());
 
@@ -580,7 +583,10 @@ void Foam::conformalVoronoiMesh::createFeaturePoints()
 
     constructFeaturePointLocations();
 
-    writePoints("featureVertices.obj", false);
+    if(cvMeshControls().objOutput())
+    {
+        writePoints("featureVertices.obj", false);
+    }
 }
 
 
@@ -833,7 +839,10 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     insertPoints(initialPointsMethod_->initialPoints());
 
-    writePoints("initialPoints.obj", true);
+    if(cvMeshControls().objOutput())
+    {
+        writePoints("initialPoints.obj", true);
+    }
 }
 
 
@@ -957,6 +966,74 @@ void Foam::conformalVoronoiMesh::dualCellLargestSurfaceProtrusion
                 }
             }
         }
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::limitDisplacement
+(
+    const Triangulation::Finite_vertices_iterator& vit,
+    vector& displacement
+) const
+{
+    point pt = topoint(vit->point());
+    point dispPt = pt + displacement;
+
+    bool limit = false;
+
+    pointIndexHit surfHit;
+    label hitSurface;
+
+    if (!geometryToConformTo_.bounds().contains(dispPt))
+    {
+        // If dispPt is outside bounding box then displacement cuts boundary
+        limit = true;
+
+        Info<< "bb limit" << endl;
+    }
+    else if (geometryToConformTo_.findSurfaceAnyIntersection(pt, dispPt))
+    {
+        // Full surface penetration test
+        limit = true;
+
+        Info<< "intersection limit" << endl;
+    }
+    else
+    {
+        // Testing if the displaced position is too close to the surface.
+        // Within twice the local surface point pair insertion distance is
+        // considered "too close"
+
+        geometryToConformTo_.findSurfaceNearest
+        (
+            dispPt,
+            sqr
+            (
+                2*vit->targetCellSize()
+               *cvMeshControls().pointPairDistanceCoeff()
+            ),
+            surfHit,
+            hitSurface
+        );
+
+        limit = surfHit.hit();
+
+        if (limit)
+        {
+            Info<< "proximity limit" << endl;
+        }
+    }
+
+    if (limit)
+    {
+        // Halve the displacement and call this function again.  Will continue
+        // recursively until the displacement is small enough.
+
+        displacement *= 0.5;
+
+        Info<< "    Limiting displacement of point " << pt << endl;
+
+        limitDisplacement(vit, displacement);
     }
 }
 
@@ -2223,50 +2300,25 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    // Clip displacements that pierce, or get too close to the surface
-
-    Info<< "ARBITRARY CLIP TO 2*aveDisp" << endl;
-
-    scalar aveDisp =
-        sum(mag(displacementAccumulator))/displacementAccumulator.size();
-
-    forAll(displacementAccumulator, i)
+    // Limit displacements that pierce, or get too close to the surface
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
     {
-        if (mag(displacementAccumulator[i]) > 2*aveDisp)
+        // Assuming that only points set as nearBoundary during surface
+        // conformation can be pushed out of the surface
+        if (vit->nearBoundary())
         {
-            displacementAccumulator[i] *=
-                2*aveDisp/mag(displacementAccumulator[i]);
-
-            // for
-            // (
-            //     Triangulation::Finite_vertices_iterator vit =
-            //         finite_vertices_begin();
-            //     vit != finite_vertices_end();
-            //     ++vit
-            // )
-            // {
-            //     if (vit->index() == i)
-            //     {
-            //         Info<< topoint(vit->point()) << nl
-            //             << topoint(vit->point()) + displacementAccumulator[i]
-            //             <<endl;
-            //     }
-            // }
+            limitDisplacement
+            (
+                vit,
+                displacementAccumulator[vit->index()]
+            );
         }
     }
-
-    // scalarField bins(100);
-
-    // scalar maxDisp = max(mag(displacementAccumulator));
-
-    // forAll(bins, i)
-    // {
-    //     bins[i] = i*1.01*maxDisp/bins.size();
-    // }
-
-    // Histogram<scalarField> dispHisto(bins, mag(displacementAccumulator));
-
-    // Info<< nl << bins << nl << dispHisto.counts() << endl;
 
     vector totalDisp = sum(displacementAccumulator);
     scalar totalDist = sum(mag(displacementAccumulator));
@@ -2300,10 +2352,15 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    // Write the mesh before clearing it
+    // Write the mesh before clearing it.  Beware that writeMesh destroys the
+    // indexing of the tessellation.
     if (runTime_.outputTime())
     {
+        writeInternalDelaunayVertices();
+
         writeMesh(false);
+
+        writeTargetCellSize();
     }
 
     // Remove the entire tessellation

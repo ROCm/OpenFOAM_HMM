@@ -37,6 +37,7 @@ SourceFiles
 #define cvControls_H
 
 #include "IOdictionary.H"
+#include "Switch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -103,6 +104,9 @@ class cvControls
 
 
     // Motion control controls
+
+        //- Switch to control the output of obj files for debug
+        Switch objOutput_;
 
         //- Number of "spokes" to use to search for secondary alignment
         //  direction
@@ -191,6 +195,9 @@ public:
 
             //- Return the maxQuadAngle
             inline scalar maxQuadAngle() const;
+
+            //- Return the objOutput Switch
+            inline bool objOutput() const;
 
             //- Return the number of alignmentSearchSpokes to use
             inline label alignmentSearchSpokes() const;
