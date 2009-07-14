@@ -35,7 +35,13 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(sampledIsoSurface, 0);
-    addNamedToRunTimeSelectionTable(sampledSurface, sampledIsoSurface, word, isoSurface);
+    addNamedToRunTimeSelectionTable
+    (
+        sampledSurface,
+        sampledIsoSurface,
+        word,
+        isoSurface
+    );
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -574,8 +580,7 @@ bool Foam::sampledIsoSurface::update()
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledIsoSurface::sample
+Foam::tmp<Foam::scalarField> Foam::sampledIsoSurface::sample
 (
     const volScalarField& vField
 ) const
@@ -584,8 +589,7 @@ Foam::sampledIsoSurface::sample
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledIsoSurface::sample
+Foam::tmp<Foam::vectorField> Foam::sampledIsoSurface::sample
 (
     const volVectorField& vField
 ) const
@@ -594,8 +598,7 @@ Foam::sampledIsoSurface::sample
 }
 
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::sampledIsoSurface::sample
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledIsoSurface::sample
 (
     const volSphericalTensorField& vField
 ) const
@@ -604,8 +607,7 @@ Foam::sampledIsoSurface::sample
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledIsoSurface::sample
+Foam::tmp<Foam::symmTensorField> Foam::sampledIsoSurface::sample
 (
     const volSymmTensorField& vField
 ) const
@@ -614,8 +616,7 @@ Foam::sampledIsoSurface::sample
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledIsoSurface::sample
+Foam::tmp<Foam::tensorField> Foam::sampledIsoSurface::sample
 (
     const volTensorField& vField
 ) const
@@ -624,8 +625,7 @@ Foam::sampledIsoSurface::sample
 }
 
 
-Foam::tmp<Foam::scalarField>
-Foam::sampledIsoSurface::interpolate
+Foam::tmp<Foam::scalarField> Foam::sampledIsoSurface::interpolate
 (
     const interpolation<scalar>& interpolator
 ) const
@@ -634,8 +634,7 @@ Foam::sampledIsoSurface::interpolate
 }
 
 
-Foam::tmp<Foam::vectorField>
-Foam::sampledIsoSurface::interpolate
+Foam::tmp<Foam::vectorField> Foam::sampledIsoSurface::interpolate
 (
     const interpolation<vector>& interpolator
 ) const
@@ -643,8 +642,7 @@ Foam::sampledIsoSurface::interpolate
     return interpolateField(interpolator);
 }
 
-Foam::tmp<Foam::sphericalTensorField>
-Foam::sampledIsoSurface::interpolate
+Foam::tmp<Foam::sphericalTensorField> Foam::sampledIsoSurface::interpolate
 (
     const interpolation<sphericalTensor>& interpolator
 ) const
@@ -653,8 +651,7 @@ Foam::sampledIsoSurface::interpolate
 }
 
 
-Foam::tmp<Foam::symmTensorField>
-Foam::sampledIsoSurface::interpolate
+Foam::tmp<Foam::symmTensorField> Foam::sampledIsoSurface::interpolate
 (
     const interpolation<symmTensor>& interpolator
 ) const
@@ -663,8 +660,7 @@ Foam::sampledIsoSurface::interpolate
 }
 
 
-Foam::tmp<Foam::tensorField>
-Foam::sampledIsoSurface::interpolate
+Foam::tmp<Foam::tensorField> Foam::sampledIsoSurface::interpolate
 (
     const interpolation<tensor>& interpolator
 ) const
