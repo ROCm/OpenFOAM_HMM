@@ -21,10 +21,6 @@ radiationModel  none;
 
 solverFreq      10;
 
-noRadiation
-{
-}
-
 P1Coeffs
 {
     C               C [ 0 0 0 0 0 0 0 ] 0;
@@ -49,7 +45,10 @@ binaryAbsorptionEmissionCoeffs
         absorptionEmissionModel cloudAbsorptionEmission;
         cloudAbsorptionEmissionCoeffs
         {
-            cloudNames      ( coalCloud1 limestoneCloud1 );
+            cloudNames
+            (
+                reactingCloud1
+            );
         }
     }
 }
@@ -58,7 +57,10 @@ scatterModel    cloudScatter;
 
 cloudScatterCoeffs
 {
-    cloudNames      ( coalCloud1 limestoneCloud1 );
+    cloudNames
+    (
+        reactingCloud1
+    );
 }
 
 
