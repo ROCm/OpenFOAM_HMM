@@ -63,21 +63,22 @@ void Foam::fieldAverage::addMeanField
             const fieldType& baseField =
                 obr_.lookupObject<fieldType>(fieldName);
 
-            fieldType* fPtr = new fieldType
-            (
-                IOobject
-                (
-                    meanFieldName,
-                    obr_.time().timeName(),
-                    obr_,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
-                ),
-                baseField
-            );
-
             // Store on registry
-            fPtr->store();
+            obr_.store
+            (
+                new fieldType
+                (
+                    IOobject
+                    (
+                        meanFieldName,
+                        obr_.time().timeName(),
+                        obr_,
+                        IOobject::READ_IF_PRESENT,
+                        IOobject::NO_WRITE
+                    ),
+                    1*baseField
+                )
+            );
 
             meanFieldList[fieldI] = meanFieldName;
         }
@@ -121,21 +122,21 @@ void Foam::fieldAverage::addPrime2MeanField
             const fieldType1& meanField =
                 obr_.lookupObject<fieldType1>(meanFieldList[fieldI]);
 
-            fieldType2* fPtr = new fieldType2
+            obr_.store
             (
-                IOobject
+                new fieldType2
                 (
-                    meanFieldName,
-                    obr_.time().timeName(),
-                    obr_,
-                    IOobject::READ_IF_PRESENT,
-                    IOobject::NO_WRITE
-                ),
-                sqr(baseField) - sqr(meanField)
+                    IOobject
+                    (
+                        meanFieldName,
+                        obr_.time().timeName(),
+                        obr_,
+                        IOobject::READ_IF_PRESENT,
+                        IOobject::NO_WRITE
+                    ),
+                    sqr(baseField) - sqr(meanField)
+                )
             );
-
-            // Store on registry
-            fPtr->store();
 
             prime2MeanFieldList[fieldI] = meanFieldName;
         }
