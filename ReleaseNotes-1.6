@@ -1,213 +1,235 @@
 #                            -*- mode: org; -*-
 #
-#+TITLE:          OpenFOAM release notes for version 1.6
+#+TITLE:          *OpenFOAM release notes for version 1.6*
 #+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                       29 August 2009
+#+DATE:                         July 2009
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil ^:{}
 
-
-* Regular Expressions
-  + new regExp class: support for accessing POSIX extended regular
-    expresssions from within OpenFOAM.
-
-  + new wordRe class: can contain a word or a regExp.
-    The match() method matches appropriately (as word or regExp).
-
-  + new stringListOps: search string lists based on regular expressions, wordRe
-    or wordReList.
-
-  + Istream and Ostream now retain backslashes when reading/writing strings.
-    The backslash continues to be used as an escape character for double-quote
-    and newline, but otherwise get passed through "as-is" without any other
-    special meaning (ie, they are *not* C-style strings). This especially
-    helps with input/output of regular expressions.
-
-
-* Dictionary improvements/changes
-  + dictionaries can use words (unquoted) or regular expressions (quoted)
-    for their keywords. When searching, an exact match has priority
-    over a regular expression match.
-
-  + The default inputMode is now 'merge', which corresponds to the most
-    general usage. The inputMode 'warn' corresponds to the previous default
-    behaviour.
-
-  + The new inputMode 'protect' can be used to conditionally merge default
-    values into existing dictionaries.
-
-  + new digest() method to calculate and return the SHA1 message digest
-
-
-* Improved List containers
-  + It is now possible to append a UList to an existing List or DynamicList.
-
-  + DynamicList is now much more flexible. It can be used with the append()
-    method, or with the setSize() method and operator[], as per List.
-    DynamicList also has more methods for adjusting the space allocated.
-
-  + SortableList now uses stable sort and allows reverseSort as well.
-    SortableList is also more versatile - the indices mostly remain
-    unallocated until they are required in the sort() method.
-    The sort indices can be deallocated with the shrink() method.
-    Works as expected with transfer() and assignment from other Lists.
-
-  + specialization for UList<bool>::operator[](..) const to return false for
-    out-of-range elements. This allows lazy evaluation with no noticeable
-    change in performance.
-
-  + PackedList has much better performance, lazy evaluation and auto-vivify
-    of elements on assignment. Any auto-vivified elements will also
-    flood-fill the gaps with zero.  The append() method can be used like in
-    DynamicList to append a single element. The set() method can be used
-    like in labelHashSet.
-
-  + new UIndirectList for an indirect list without storing the addressing.
-
-
-* New hashing algorithms
-  + Bob Jenkins' hash routine for performance improvement (5-10% faster for
-    string hashing than the previous algorithm) and fewer collisions.
-
-  + SHA1 hashing and SHA1 message digests (NIST specification FIPS-180-1)
-    added. The SHA1 digest provides a compact (20 bytes) means of
-    determining if the contents of an object have changed. The OSHA1stream
-    can be used to calculate SHA1 digests for anything that can write to an
-    output stream.
-
-
-* HashTable/HashSet improvements
-  + Performance improvements for querying on empty tables
-
-  + The erase() method can take a list of keys or the keys from any
-    another HashTable/HashSet.
-
-  + HashSet has an operator[]() const that allows the same syntax
-    to be used for boolList, PackedBoolList and labelHashSet.
-
-  + HashSet has additional operators '+=', '-=', '&=' to add, remove or
-    intersect keys, respectively.
-
-
-* Improved bool/Switch
-  + Switch: reduced the storage to be on par with bool.
-    It is now more flexible and behaves much more like a bool.
-
-  + bool: IO uses Switch internally so the end-user doesn't need to know if
-    a particular class used bool or Switch internally.
-
-
-* Miscellaneous container class improvments
-  + boost-style StaticAssert added.
-    Useful to catch invalid template sizes, for example.
-
-  + various containers now have C++0x-style cbegin(), cend() iterator methods.
-
-  + various containers now have STL-style empty() method, which may be more
-    readable than !size() or !valid().
-
-  + various containers now have an xfer() method for yielding their contents
-    to a corresponding Xfer class.
-
-
-* New surfMesh library
-  Provides a more efficient storage mechanism than possible with triSurface
-  without restrictions on the shape of the face (templated parameter).
-  It will however take quite some time before it can fully replace triSurface.
-
-  + MeshedSurface class: with zero or more contiguous surfZones.
-
-  + UnsortedMeshedSurface class: unordered surface zones (as per triSurface)
-
-  + surfMesh class: for reading/writing in native OpenFOAM format
-
-
-* New Xfer class
-  Provides finer grained control over copying or transferring objects with
-  very little overhead. It can be used for any object that has a transfer()
-  method and a operator=() copy method.
-  Since it is decided upon construction of the Xfer object whether the
-  parameter is to be copied or transferred, the contents of the resulting
-  Xfer object can be transferred unconditionally. This greatly simplifies
-  defining constructors or methods in other classes with mixed
-  transfer/copy semantics without requiring 2^N different versions.
-
-  + xferCopy(), xferMove() and xferCopyTo(), xferMoveTo() functions
-    to ease the use of the Xfer class.
-
-
-* Improvements for functionObjects and time-looping
-  + The functionObjectList retains the order of the functionObject order,
-    which allows a chaining of operations. It is thus internally more
-    efficient when system/controlDict uses functions {..} instead of
-    functions (..), but the both forms are supported.
-
-  + The functionObjects now have an additional end() method that gets called
-    when Time::loop() or Time::run() determines that the time-loop exits.
-    Accordingly, one of these two idioms should be used in solver code:
-    1. while (runTime.loop() { ... }
-    2. while (runTime.run()) { runTime++; ... }
-
-  + functionObjectList now tracks the SHA1 message digest of the
-    sub-directories. This avoids reloading a functionObject when something
-    unrelated in system/controlDict changed.
-
-
-* Solver control improvments
-  Use dictionary entries instead of an Istream for the solver controls.
-  + allows dictionary substitutions and regular expressions in
-    system/fvSolution
-
-  + old solver control syntax is still supported (warning emitted), but the
-    foamUpgradeFvSolution application can be used to convert
-    system/fvSolution to the new format.
-
-
-* Convenience changes
-  + IOobject: new constructor for creating an IOobject from a
-    single-path specification (eg, see blockMesh -dict option).
-
-  + argList: convenience methods for accessing options more directly.
-    option(), optionFound(), optionLookup(), optionRead(),
-    optionReadIfPresent().
-
-  + readList(Istream&) can read a bracket-delimited list or handle a single
-    value as a list of size 1. This can be a useful convenience when
-    processing command-line options.
-
-
-* Misc. improvements
-  + improved consistency and interoperability between face and triFace classes.
-
-  + face::triangles() can split and append to a DynamicList
-
-  + coordinateSystems can access global systems (similar to MeshObject)
-
-
-* Improvements to utilities
-  + blockMesh: -dict option for specifying an alternative dictionary for the
-    block mesh description. The 'convertToMeters' entry is now optional, and
-    the alternative 'scale' entry can be used for less typing.
-
-  + foamToEnsight: the -noPatches option suppresses generation of patches
-
-  + foamToEnsightParts: the -noMesh option and the -index option can
-    be used when post-processing incrementally.
-
-  + timeSelector: can combine -time ranges and -latestTime options. More
-    reliable behaviour for cases missing constant/ or 0/ directories. When
-    the -noZero option is available, -latestTime will not select the 0/
-    directory unless the -zeroTime option is also given. This helps avoid
-    ill effects caused by accidentally using the 0/ directory for certain
-    utilities (eg, reconstructPar).
-
-
-* Improvements to Paraview reader module
-  + PV3FoamReader: added mesh region handling. The region name is parsed
-    from the filename. Eg, case{region}.OpenFOAM
-
-  + paraFoam: new -region option for specifying an alternative region. A new
-    -touch option to generate the .OpenFOAM file only. Only creates (and
-    removes) .OpenFOAM files if they didn't already exist, which is useful
-    in connection with the -touch option.
-
+* Overview
+  OpenFOAM-1.6 is is a significant upgrade to version 1.5 in ways which are
+  outlined below.  This release passes all our standard tests and the tutorials
+  have been broadly checked.  If there are any bugs, please report them using
+  the instructions set out in: http://www.OpenFOAM.org/bugs.html.
+
+* GNU/Linux version
+  The 32bit and 64bit binary packs of the OpenFOAM release were compiled on a
+  machine running SuSE GNU/Linux version 11.1 and also tested on Ubuntu 9.  We
+  recommend that users run OpenFOAM on one of these or a similar recent version
+  of GNU/Linux.  This release has also been successfully compiled and tested on
+  older GNU/Linux releases but this requires the installation of Qt 4.3.? (the
+  sources for which are supplied with OpenFOAM-1.6, see README) for ParaView-3
+  to run.
+
+* C++ Compiler version
+  + Release compiled with GCC 4.3.3.
+  + Built in support for the Intel C++ 10.? compiler (untested).
+  + The choice of the compiler is controlled by the setting of the
+    ~$WM_COMPILER~ and ~$WM_COMPILER_ARCH~ environment variables in the
+    /OpenFOAM-1.6/etc/bashrc/ (or /cshrc/) file.
+  + The location of the installation of the compiler is controlled by the
+    ~$compilerInstall~ environment variable in the
+    /OpenFOAM-1.6/etc/settings.sh/ (or /settings.csh/) file.
+
+* Library developments
+
+*** Turbulence modelling
+    + Major development of turbulence model libraries to give extra flexibility
+      at the solver level.  For solvers that can support either RAS/LES
+      computations, the selection is made in the
+      /constant/turbulenceProperties/,
+      by setting the =simulationType= keyword to:
+      - =laminar=
+      - =RASModel=
+      - =LESModel=
+    + Depending on the selection, the model is the instantiated from /constant//
+      - /RASProperties/
+      - /LESProperties/
+
+***** RAS wall functions
+      Wall functions are now run-time selectable per patch for RAS.
+
+******* Velocity:
+        + Apply to turbulent viscosities =nut= or =mut=
+        + Apply to =k=, =Q=, =R=
+        + Apply to =epsilon=, =omega=
+
+******* Temperature:
+        + Apply to turbulent thermal diffusivity, =alphat= (compressible only)
+
+******* To apply wall functions:
+        + To recapture the functionality of previous OpenFOAM versions (v1.5 and
+          earlier) assign:
+          - for velocity:
+            - =nut=: =nutWallFunction=
+            - =mut=: =muWallFunction=
+            - =epsilon=: =epsilonWallFunction=
+            - =omega=: =omegaWallFunction=
+            - =k=, =Q=, =R=: =kQRWallFunction=
+          - for temperature:
+            - =alphat=: =alphatWallFunction=
+        + New =alphaSgsJayatillekeWallFunction= thermal wall function for
+          compressible LES
+
+***** *New* LES turbulence models
+      + Spalart-Allmaras DDES
+      + Spalart-Allmaras IDDES
+
+***** Upgrading:
+      + *New* utility - =applyWallFunctionBoundaryConditions=
+      + Solvers will automatically update existing cases
+        - New fields created based on the presence of the =nut/mut= field
+        - Boundary conditions include scoping, i.e compressibility:: for
+          compressible solvers
+        - Modified fields will be backed-up to /<field>.old/
+      + NOTE:
+        - Fields are only updated for those fields associated with the current
+          turbulence model selection, i.e. if fields exist for use with other
+          models, they will not be updated
+        - New specification is not backwards compatible
+
+*** Thermo-physical Models
+    + Old compressibility based thermo package renamed
+      =basicThermo= \rightarrow =basicPsiThermo=
+    + *New* =basicRhoThermo= thermo package
+      - Additional density field stored
+      - General form - can be used for other types of media, e.g. liquids
+      - Additional polynomial-based thermodynamics
+        - Equation of state: =icoPolynomial=
+        - Transport: =polynomialTransport=
+        - Thermo: =hPolynomialThermo=
+    + Removed earlier hard-coding of gas thermophysics for chemistry modelling:
+      - =reactingMixture= now templated on thermo package
+      - =chemistryModel= now templated on thermo package
+      - =chemistrySolver= now templated on thermo package
+    + *New* =fvDOM= radition model
+      - finite volume, discrete ordinates method
+    + *New* (reinstated) =eThermo= thermodynamics package
+      - internal energy based thermodynamics
+
+*** Lagrangian
+
+***** Intermediate
+      - Overhaul of the underlying framework
+      - Reacting now split into reacting and reacting multiphase
+      - New structure for variable composition
+      - Many new sub-models, including:
+        - Injection
+          - =PatchInjection= - injection local to patch face cells
+          - =FieldActivatedInjection= - injection based on satisfying external
+            criterion
+          - LookupTableInjection - explicity define injection locations and all
+            parcel properties
+        - Post-processing
+          - patch post-processing - collect data for parcels impacting user
+            defined patches
+        - Patch interaction
+          - generalised behaviour for parcel interaction with patch
+        - Phase change
+          - liquid evaporation
+
+***** Coal combustion
+      - *New* library - extension of reacting-multiphase functionality
+        - Surface reaction/combustion models
+
+*** Discrete methods
+    - *New* library offering DSMC simulation functionality - see =dsmcFoam=
+      below
+    - *New* libraries offering molecular dynamics simulation functionality - see
+      =mdFoam= and =mdEquilibrationFoam=: below.
+
+* Solver restructuring
+  The upgrade to the turbulence models means that the simulation type, i.e.
+  laminar, RAS or LES can be selected at run time. This has allowed a reduction
+  in the number of solvers, simplifying the overall code structure
+  + Solvers which support laminar, RAS and LES:
+    - =turbFoam=, =oodles= \rightarrow =pisoFoam=
+    - =turbDyMFoam= \rightarrow =pimpleDyMFoam=
+    - =rhoTurbFoam=, =coodles= \rightarrow =rhoPisoFoam=
+    - =xoodles= \rightarrow absorbed into =XiFoam=
+    - =buoyantFoam=, =lesBuoyantFoam= \rightarrow =buoyantPisoFoam=
+    - =interFoam=, rasInterFoam, =lesInterFoam= \rightarrow =interFoam=
+    - =lesCavitatingFoam=, =rasCavitatingFoam= \rightarrow =cavitatingFoam=
+  + Solvers which support LES only:
+    - =channelOodles= \rightarrow =channelFoam= (LES)
+
+* General changes
+  - pd to p ------------------------------------------------------------ [HENRY]
+  - gravity ------------------------------------------------------------ [HENRY]
+
+* Tutorial restructuring
+  to reflect solver application structure
+
+* Post-processing ---------------------------------------------------- [MATTIJS]
+  - SAMPLING - improved plane, iso-surface handling
+
+* *New* Solvers
+  + =buoyantBoussinesqSimpleFoam=
+    Steady state heat transfer solver using a Boussinesq approximation for
+    buoyancy, with laminar, RAS or LES turbulence modelling
+
+  + =buoyantBoussinesqPisoFoam=
+    Transient heat transfer solver using a Boussinesq approximation for
+    buoyancy, with laminar, RAS or LES turbulence modelling
+
+  + =coalChemistryFoam=
+    Transient, reacting lagrangian solver, employing a coal cloud and a thermo
+    cloud, with chemistry, and laminar, RAS or LES turbulence modelling
+
+  + =porousExplicitSourceReactingParcelFoam=
+    Transient, reacting lagrangian solver, employing a single phase reacting
+    cloud, with porous media, explicit mass sources, and laminar, RAS or LES
+    turbulence modelling
+
+  + =rhoReactingFoam=
+    Density-based thermodynamics variant of the reactingFoam solver, i.e. now
+    applicable to liquid systems
+
+  + =dsmcFoam=
+    DSMC (Direct Simulation Monte-Carlo) solver for rarefied gas dynamics
+    simultions, able to simulate mixtures of an arbitrary number of gas species.
+    The variable hard sphere collision model with Larsen-Borgnakke internal
+    energy redistribution (see "Molecular Gas Dynamics and the Direct Simulation
+    of Gas Flows" G.A. Bird, 1994) is available; other run-time selectable
+    collision models can be easily added.
+
+* Updated solvers
+  + =mdFoam=
+    Molecular Dynamics (MD) solver able to simulate a mixture of an arbitrary
+    number of mono-atomic and small, rigid polyatomic (i.e. H2O, N2) molecular
+    species, with 6 degree of freedom motion, in complex geometries. A molecule
+    of any species can be built by specifying its sites of mass and charge. All
+    molecules interact with short-range dispersion forces and pairwise
+    electrostatic interactions using methods described in:
+    Fennell and Gezelter, J. Chem. Phys. 124, 234104 (2006)
+
+  + =mdEquilibrationFoam=
+    Similar to mdFoam, but employs velocity scaling to adjust the simulation
+    temperature to a target value. Useful to equilibrate a case before
+    simulation.
+
+* Function objects
+
+*** *New* function objects:
+    - =systemCall= - executes a list of system instructions
+    - =fieldMinMax= - computes the min/max of a <field>
+    - =staticPressure= - converts kinematic pressure to static pressure
+    - =dsmcFields= - calculates intensive fields (velocity and temperature) from
+      averaged extensive fields (i.e. momentum and energy)
+
+*** Usage
+    - Improved output control: =timeStep= or =outputTime=
+
+* Boundary conditions
+  - Improved set of direct mapped boundary conditions
+  - Buoyancy boundary condition ---------------------------------------- [HENRY]
+
+* *New* utilities
+  - =particleTracks= - generate particle tracks for lagrangian calculations
+  - =dsmcInitialise= - preprocessing utility to create initial configurations of
+    DSMC particles in a geometry
+
+*** *New* foamCalc functions
+    - =interpolate= - performs fvc::interpolate(<field>)
+    - =randomise= - randomises a <field> by a given perturbation
+    - =addSubtract= - simple add/subtract field functionality

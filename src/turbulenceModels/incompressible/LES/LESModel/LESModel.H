@@ -80,7 +80,6 @@ protected:
 
     // Protected data
 
-        Switch turbulence_;
         Switch printCoeffs_;
         dictionary coeffDict_;
 
