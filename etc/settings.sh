@@ -34,21 +34,21 @@
 # prefix to PATH
 _foamAddPath()
 {
-   while [ $# -ge 1 ]
-   do
-      export PATH=$1:$PATH
-      shift
-   done
+    while [ $# -ge 1 ]
+    do
+        export PATH=$1:$PATH
+        shift
+    done
 }
 
 # prefix to LD_LIBRARY_PATH
 _foamAddLib()
 {
-   while [ $# -ge 1 ]
-   do
-      export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
-      shift
-   done
+    while [ $# -ge 1 ]
+    do
+        export LD_LIBRARY_PATH=$1:$LD_LIBRARY_PATH
+        shift
+    done
 }
 
 
@@ -142,26 +142,13 @@ unset MPI_ARCH_PATH
 
 case "$WM_MPLIB" in
 OPENMPI)
+    # mpi_version=openmpi-1.3.3
     mpi_version=openmpi-1.3.2
     export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
     export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
-
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
-
-    export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
-    unset mpi_version
-    ;;
-
-LAM)
-    mpi_version=lam-7.1.4
-    export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
-    export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
-    export LAMHOME=$WM_THIRD_PARTY_DIR/$mpi_version
-    # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib
