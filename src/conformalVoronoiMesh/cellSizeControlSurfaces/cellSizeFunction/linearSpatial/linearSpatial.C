@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "uniform.H"
+#include "linearSpatial.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,12 +34,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(uniform, 0);
-addToRunTimeSelectionTable(cellSizeFunction, uniform, dictionary);
+defineTypeNameAndDebug(linearSpatial, 0);
+addToRunTimeSelectionTable(cellSizeFunction, linearSpatial, dictionary);
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-uniform::uniform
+linearSpatial::linearSpatial
 (
     const dictionary& initialPointsDict,
     const conformalVoronoiMesh& cvMesh,
@@ -47,13 +48,28 @@ uniform::uniform
 )
 :
     cellSizeFunction(typeName, initialPointsDict, cvMesh, surface),
-    cellSize_(readScalar(coeffsDict().lookup("cellSize")))
-{}
+    referencePoint_(coeffsDict().lookup("referencePoint")),
+    referenceCellSize_(readScalar(coeffsDict().lookup("referenceCellSize"))),
+    direction_(coeffsDict().lookup("direction")),
+    cellSizeGradient_(readScalar(coeffsDict().lookup("cellSizeGradient")))
+{
+    direction_ /= mag(direction_);
+}
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+scalar linearSpatial::sizeFunction(const point& pt) const
+{
+    return
+        referenceCellSize_
+      + ((pt - referencePoint_) & direction_)*cellSizeGradient_;
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool uniform::cellSize
+bool linearSpatial::cellSize
 (
     const point& pt,
     scalar& size,
@@ -62,7 +78,7 @@ bool uniform::cellSize
 {
     if (sideMode_ == BOTHSIDES || isSurfacePoint)
     {
-        size = cellSize_;
+        size = sizeFunction(pt);
 
         return true;
     }
@@ -84,13 +100,13 @@ bool uniform::cellSize
     // getVolumeType calculation, as it will be prone to error.
     if (hitInfo.hit())
     {
-        size = cellSize_;
+        size = sizeFunction(pt);
 
         return true;
     }
 
     pointField ptF(1, pt);
-    List<searchableSurface::volumeType> vTL(1);
+    List<searchableSurface::volumeType> vTL;
 
     surface_.getVolumeType(ptF, vTL);
 
@@ -99,25 +115,26 @@ bool uniform::cellSize
     if
     (
         sideMode_ == INSIDE
-     && vTL[0] == searchableSurface::INSIDE
+        && vTL[0] == searchableSurface::INSIDE
     )
     {
-        size = cellSize_;
+        size = sizeFunction(pt);
 
         functionApplied = true;
     }
     else if
     (
         sideMode_ == OUTSIDE
-     && vTL[0] == searchableSurface::OUTSIDE
+        && vTL[0] == searchableSurface::OUTSIDE
     )
     {
-        size = cellSize_;
+        size = sizeFunction(pt);
 
         functionApplied = true;
     }
 
     return functionApplied;
+
 }
 
 
