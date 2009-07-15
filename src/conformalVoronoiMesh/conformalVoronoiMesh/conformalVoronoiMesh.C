@@ -1481,6 +1481,10 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     patchNames = geometryToConformTo_.patchNames();
 
+    patchNames.setSize(patchNames.size() + 1);
+
+    patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
+
     label nPatches = patchNames.size();
 
     patchSizes.setSize(nPatches);
@@ -1611,9 +1615,14 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
                     if (patchIndex == -1)
                     {
+                        patchIndex = patchNames.size() - 1;
+
                         WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
-                            << "Dual face found that is not on a surface "
-                            << "patch. Adding to " << patchNames[0]
+                            << "Dual face found between Dv pair " << nl
+                            << ptA << nl << ptB
+                            <<" that is not on a surface "
+                            << "patch. Adding to "
+                            << patchNames[patchIndex]
                             << endl;
                     }
 
