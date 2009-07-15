@@ -370,6 +370,12 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
             << indent << token::BEGIN_BLOCK << incrIndent << nl;
     }
 
+    if (dict_.found("note"))
+    {
+        os.writeKeyword("note") << string(dict_.lookup("note"))
+            << token::END_STATEMENT << nl;
+    }
+
     coordSys_.writeDict(os, true);
 
     if (dict_.found("porosity"))
