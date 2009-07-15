@@ -1027,7 +1027,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
             if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
             {
                 Info<< "    Cannot limit displacement, point " << pt
-                    << "closer than tolerance." << endl;
+                    << " closer than tolerance" << endl;
 
                 return;
             }
@@ -2310,7 +2310,7 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    // Limit displacements that pierce, or get too close to the surface
+    Limit displacements that pierce, or get too close to the surface
     for
     (
         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();

@@ -22,6 +22,7 @@ initialPointsMethod/pointFile/pointFile.C
 
 relaxationModel/relaxationModel/relaxationModel.C
 relaxationModel/adaptiveLinear/adaptiveLinear.C
+relaxationModel/rampHoldFall/rampHoldFall.C
 
 faceAreaWeightModel/faceAreaWeightModel/faceAreaWeightModel.C
 faceAreaWeightModel/piecewiseLinearRamp/piecewiseLinearRamp.C
