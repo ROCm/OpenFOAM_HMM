@@ -2310,7 +2310,7 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
-    Limit displacements that pierce, or get too close to the surface
+    // Limit displacements that pierce, or get too close to the surface
     for
     (
         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
@@ -2318,9 +2318,7 @@ void Foam::conformalVoronoiMesh::move()
         ++vit
     )
     {
-        // Assuming that only points set as nearBoundary during surface
-        // conformation can be pushed out of the surface
-        if (vit->nearBoundary())
+        if (vit->internalPoint())
         {
             limitDisplacement
             (
