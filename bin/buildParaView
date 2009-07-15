@@ -114,7 +114,7 @@ runCONFIG=true
 runMAKE=true
 runMAKEDOC=true
 runINSTALL=true
-runENVPATH=false
+runENVPATH=true
 
 
 # parse options
@@ -153,6 +153,7 @@ do
         shift
         ;;
     -envpath)            # optional: change cmake files to use env variables
+                         # This is now the default behaviour
         runCONFIG=false
         runMAKE=false
         runMAKEDOC=false
