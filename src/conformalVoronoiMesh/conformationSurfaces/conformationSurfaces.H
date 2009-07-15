@@ -74,9 +74,22 @@ class conformationSurfaces
         //- Indices of surfaces in allGeometry that are to be conformed to
         labelList surfaces_;
 
+        //- Reverse mapping, which entry in surfaces corresponds to the surface
+        //  in allGeometry specified by the list index.  -1 for a surface that
+        //  isn't used.
+        labelList allGeometryToSurfaces_;
+
         //- A boolean value for each surface to be conformed to specifying if it
         //  is to be treated as a baffle
         boolList baffleSurfaces_;
+
+        //- A flat list of all of the names of the patches from all of the
+        //  surfaces to be reproduced in the meshed geometry
+        List<word> patchNames_;
+
+        //- The offset between the patch indices of the individual surface and
+        //  the entry in the overall patch list
+        labelList patchOffsets_;
 
         //- The overall boundBox of all of the surfaces to be conformed to
         boundBox bounds_;
@@ -122,6 +135,9 @@ public:
             //- Return the surface indices
             inline const labelList& surfaces() const;
 
+            //- Return the patch names
+            inline const List<word>& patchNames() const;
+
             //- Return the boundBox
             inline const boundBox& bounds() const;
 
@@ -151,14 +167,18 @@ public:
             ) const;
 
             // Finding if the line joining start and end intersects the surface
-            bool findSurfaceAnyIntersection(point start, point end) const;
+            bool findSurfaceAnyIntersection
+            (
+                const point& start,
+                const point& end
+            ) const;
 
             //- Finding if the line joining start and end intersects the surface
             //  and returning the hit and surface information
             void findSurfaceAnyIntersection
             (
-                point start,
-                point end,
+                const point& start,
+                const point& end,
                 pointIndexHit& surfHit,
                 label& hitSurface
             ) const;
@@ -166,8 +186,8 @@ public:
             //- Finding the nearestIntersection of the surface to start
             void findSurfaceNearestIntersection
             (
-                point start,
-                point end,
+                const point& start,
+                const point& end,
                 pointIndexHit& surfHit,
                 label& hitSurface
             ) const;
@@ -216,6 +236,10 @@ public:
                 List<pointIndexHit>& edgeHit,
                 List<label>& featureHit
             ) const;
+
+            //- Find which patch is intersected by the line from one point to
+            //  another
+            label findPatch(const point& dVA, const point& dVB) const;
 
         // Write
 

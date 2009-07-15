@@ -41,7 +41,10 @@ Foam::conformationSurfaces::conformationSurfaces
     features_(),
     locationInMesh_(surfaceConformationDict.lookup("locationInMesh")),
     surfaces_(),
+    allGeometryToSurfaces_(),
     baffleSurfaces_(),
+    patchNames_(0),
+    patchOffsets_(),
     bounds_()
 {
     const dictionary& surfacesDict
@@ -53,9 +56,13 @@ Foam::conformationSurfaces::conformationSurfaces
 
     surfaces_.setSize(surfacesDict.size());
 
+    allGeometryToSurfaces_.setSize(allGeometry_.size(), -1);
+
     baffleSurfaces_.setSize(surfacesDict.size());
 
     features_.setSize(surfacesDict.size());
+
+    patchOffsets_.setSize(surfacesDict.size());
 
     label surfI = 0;
 
@@ -65,6 +72,8 @@ Foam::conformationSurfaces::conformationSurfaces
 
         surfaces_[surfI] = allGeometry_.findSurfaceID(surfaceName);
 
+        allGeometryToSurfaces_[surfaces_[surfI]] = surfI;
+
         if (surfaces_[surfI] < 0)
         {
             FatalErrorIn("Foam::conformationSurfaces::conformationSurfaces")
@@ -72,6 +81,10 @@ Foam::conformationSurfaces::conformationSurfaces
                 << "Valid geometry is " << nl << allGeometry_.names()
                 << exit(FatalError);
         }
+
+        patchOffsets_[surfI] = patchNames_.size();
+
+        patchNames_.append(allGeometry.regionNames()[surfaces_[surfI]]);
 
         const dictionary& surfaceSubDict(surfacesDict.subDict(surfaceName));
 
@@ -307,8 +320,8 @@ Foam::Field<bool> Foam::conformationSurfaces::wellOutside
 
 bool Foam::conformationSurfaces::findSurfaceAnyIntersection
 (
-    point start,
-    point end
+    const point& start,
+    const point& end
 ) const
 {
     labelList hitSurfaces;
@@ -330,8 +343,8 @@ bool Foam::conformationSurfaces::findSurfaceAnyIntersection
 
 void Foam::conformationSurfaces::findSurfaceAnyIntersection
 (
-    point start,
-    point end,
+    const point& start,
+    const point& end,
     pointIndexHit& surfHit,
     label& hitSurface
 ) const
@@ -364,8 +377,8 @@ void Foam::conformationSurfaces::findSurfaceAnyIntersection
 
 void Foam::conformationSurfaces::findSurfaceNearestIntersection
 (
-    point start,
-    point end,
+    const point& start,
+    const point& end,
     pointIndexHit& surfHit,
     label& hitSurface
 ) const
@@ -604,6 +617,36 @@ void Foam::conformationSurfaces::writeFeatureObj
             ftStr << "l " << verti-1 << ' ' << verti << endl;
         }
     }
+}
+
+
+Foam::label Foam::conformationSurfaces::findPatch
+(
+    const point& ptA,
+    const point& ptB
+) const
+{
+    pointIndexHit surfHit;
+    label hitSurface;
+
+    findSurfaceAnyIntersection(ptA, ptB, surfHit, hitSurface);
+
+    if (!surfHit.hit())
+    {
+        return -1;
+    }
+
+    labelList surfLocalRegion;
+
+    allGeometry_[hitSurface].getRegion
+    (
+        List<pointIndexHit>(1, surfHit),
+        surfLocalRegion
+    );
+
+    return
+        surfLocalRegion[0] + patchOffsets_[allGeometryToSurfaces_[hitSurface]];
+
 }
 
 

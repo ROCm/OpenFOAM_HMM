@@ -1479,24 +1479,9 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // ~~~~~~~~~~~~ dual face and owner neighbour construction ~~~~~~~~~~~~~~~~~
 
-    //label nPatches = qSurf_.patches().size() + 1;
+    patchNames = geometryToConformTo_.patchNames();
 
-    //label defaultPatchIndex = qSurf_.patches().size();
-
-    label nPatches = 1;
-
-    label defaultPatchIndex = 0;
-
-    patchNames.setSize(nPatches);
-
-    //const geometricSurfacePatchList& surfacePatches = qSurf_.patches();
-
-    // forAll(surfacePatches, sP)
-    // {
-    //     patchNames[sP] = surfacePatches[sP].name();
-    // }
-
-    patchNames[defaultPatchIndex] = "cvMesh_defaultPatch";
+    label nPatches = patchNames.size();
 
     patchSizes.setSize(nPatches);
 
@@ -1622,20 +1607,13 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
                     point ptB = topoint(vB->point());
 
-                    //pointIndexHit pHit = qSurf_.tree().findLineAny(ptA, ptB);
-
-                    //label patchIndex = qSurf_[pHit.index()].region();
-
-                    label patchIndex = defaultPatchIndex;
+                    label patchIndex = geometryToConformTo_.findPatch(ptA, ptB);
 
                     if (patchIndex == -1)
                     {
-                        patchIndex = defaultPatchIndex;
-
                         WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
                             << "Dual face found that is not on a surface "
-                            << "patch. Adding to "
-                            << patchNames[defaultPatchIndex]
+                            << "patch. Adding to " << patchNames[0]
                             << endl;
                     }
 
@@ -2253,12 +2231,25 @@ void Foam::conformalVoronoiMesh::move()
                     )
                     {
                         // Point insertion
-                        pointsToInsert.push_back
-                        (
-                            toPoint(0.5*(dVA + dVB))
-                        );
 
-                        pointsAdded++;
+                        if
+                        (
+                            !geometryToConformTo_.findSurfaceAnyIntersection
+                            (
+                                dVA,
+                                dVB
+                            )
+                        )
+                        {
+                            // Prevent insertions spanning surfaces
+
+                            pointsToInsert.push_back
+                            (
+                                toPoint(0.5*(dVA + dVB))
+                            );
+
+                            pointsAdded++;
+                        }
                     }
                     else if
                     (
@@ -2325,6 +2316,20 @@ void Foam::conformalVoronoiMesh::move()
                 vit,
                 displacementAccumulator[vit->index()]
             );
+
+
+            // TEMPORARY: CHECK IF ALL INTERNAL POINTS ARE INSIDE
+            if
+            (
+                geometryToConformTo_.inside
+                (
+                    pointField(1, topoint(vit->point()))
+                )[0] == false
+            )
+            {
+                Info<< "INTERNAL POINT " << topoint(vit->point())
+                    << " NOT INSIDE" << endl;
+            }
         }
     }
 

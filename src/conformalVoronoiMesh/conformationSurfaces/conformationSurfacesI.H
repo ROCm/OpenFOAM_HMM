@@ -45,6 +45,12 @@ const Foam::labelList& Foam::conformationSurfaces::surfaces() const
 }
 
 
+const Foam::List<Foam::word>& Foam::conformationSurfaces::patchNames() const
+{
+    return patchNames_;
+}
+
+
 const Foam::boundBox& Foam::conformationSurfaces::bounds() const
 {
     return bounds_;
