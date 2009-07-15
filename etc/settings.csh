@@ -118,26 +118,12 @@ unset MPI_ARCH_PATH
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    set mpi_version=openmpi-1.3.2
+    set mpi_version=openmpi-1.3.3
     setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
     setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
-
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
-
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
-    unset mpi_version
-    breaksw
-
-case LAM:
-    set mpi_version=lam-7.1.4
-    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
-    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
-    setenv LAMHOME $WM_THIRD_PARTY_DIR/$mpi_version
-    # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib

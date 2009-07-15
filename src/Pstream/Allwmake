@@ -5,7 +5,7 @@ set -x
 wmake libso dummy
 
 case "$WM_MPLIB" in
-LAM | *MPI* )
+*MPI*)
     set +x
     echo
     echo "Note: ignore spurious warnings about missing mpicxx.h headers"
