@@ -20,23 +20,24 @@ internalField   uniform 0;
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            zeroGradient;
     }
 
-    outlet          
+    outlet
     {
         type            fixedValue;
         value           uniform 0;
     }
 
-    walls           
+    walls
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    defaultFaces    
+    defaultFaces
     {
         type            empty;
     }

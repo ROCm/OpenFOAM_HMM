@@ -87,7 +87,6 @@ public:
         {
             return point(x(), y(), z());
         }
-
 };
 
 

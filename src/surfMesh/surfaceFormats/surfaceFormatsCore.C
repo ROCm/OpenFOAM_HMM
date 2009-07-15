@@ -38,8 +38,7 @@ Foam::word Foam::fileFormats::surfaceFormatsCore::nativeExt("ofs");
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
 
-Foam::string
-Foam::fileFormats::surfaceFormatsCore::getLineNoComment
+Foam::string Foam::fileFormats::surfaceFormatsCore::getLineNoComment
 (
     IFstream& is
 )
@@ -54,9 +53,12 @@ Foam::fileFormats::surfaceFormatsCore::getLineNoComment
     return line;
 }
 
+
 #if 0
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::localMeshFileName
+(
+    const word& surfName
+)
 {
     const word name(surfName.size() ? surfName : surfaceRegistry::defaultName);
 
@@ -68,8 +70,7 @@ Foam::fileFormats::surfaceFormatsCore::localMeshFileName(const word& surfName)
 }
 
 
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshInstance
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 (
     const Time& t,
     const word& surfName
@@ -109,8 +110,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshInstance
 }
 
 
-Foam::fileName
-Foam::fileFormats::surfaceFormatsCore::findMeshFile
+Foam::fileName Foam::fileFormats::surfaceFormatsCore::findMeshFile
 (
     const Time& t,
     const word& surfName
@@ -154,8 +154,7 @@ Foam::fileFormats::surfaceFormatsCore::findMeshFile
 #endif
 
 
-bool
-Foam::fileFormats::surfaceFormatsCore::checkSupport
+bool Foam::fileFormats::surfaceFormatsCore::checkSupport
 (
     const wordHashSet& available,
     const word& ext,
@@ -198,19 +197,5 @@ Foam::fileFormats::surfaceFormatsCore::surfaceFormatsCore()
 Foam::fileFormats::surfaceFormatsCore::~surfaceFormatsCore()
 {}
 
-
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

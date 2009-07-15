@@ -82,14 +82,20 @@ Foam::objectRegistry::objectRegistry
 
 Foam::objectRegistry::~objectRegistry()
 {
+    List<regIOobject*> myObjects(size());
+    label nMyObjects = 0;
+
     for (iterator iter = begin(); iter != end(); ++iter)
     {
         if (iter()->ownedByRegistry())
         {
-            regIOobject* object = iter();
-            erase(iter);
-            delete object;
+            myObjects[nMyObjects++] = iter();
         }
+    }
+
+    for (label i=0; i<nMyObjects; i++)
+    {
+        checkOut(*myObjects[i]);
     }
 }
 
@@ -235,7 +241,7 @@ bool Foam::objectRegistry::checkOut(regIOobject& io) const
                 << endl;
         }
     }
-    
+
     return false;
 }
 

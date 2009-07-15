@@ -55,30 +55,30 @@ namespace fileFormats
 class AC3DsurfaceFormatCore
 {
 protected:
+
     // Protected Member Functions
 
-    //- Read a type via IStringStream
-    template<class Type>
-    static Type parse(const string&);
+        //- Read a type via IStringStream
+        template<class Type>
+        static Type parse(const string&);
 
-    //- Read cmd, args from IFstream
-    static bool readCmd(IFstream&, string& cmd, string& args);
+        //- Read cmd, args from IFstream
+        static bool readCmd(IFstream&, string& cmd, string& args);
 
-    //- Cue up to cmd, reading args
-    static bool cueTo(IFstream&, const string& cmd, string& args);
+        //- Cue up to cmd, reading args
+        static bool cueTo(IFstream&, const string& cmd, string& args);
 
-    //- Cue up to cmd, reading args or exit with a FatalError
-    //  returns the command args
-    static string cueToOrDie
-    (
-        IFstream&,
-        const string& cmd,
-        const string& errorMsg=string::null
-    );
+        //- Cue up to cmd, reading args or exit with a FatalError
+        //  returns the command args
+        static string cueToOrDie
+        (
+            IFstream&,
+            const string& cmd,
+            const string& errorMsg=string::null
+        );
 
-    //- Write header with materials
-    static void writeHeader(Ostream&, const UList<surfZone>&);
-
+        //- Write header with materials
+        static void writeHeader(Ostream&, const UList<surfZone>&);
 };
 
 

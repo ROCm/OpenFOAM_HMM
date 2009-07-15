@@ -26,7 +26,6 @@ License
 
 #include "realizableKE.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -204,10 +203,10 @@ realizableKE::realizableKE
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
 
-    mut_ == rCmu(fvc::grad(U_))*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ = rCmu(fvc::grad(U_))*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
 
-    alphat_ == mut_/Prt_;
+    alphat_ = mut_/Prt_;
     alphat_.correctBoundaryConditions();
 
     printCoeffs();
@@ -291,7 +290,7 @@ void realizableKE::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ == rCmu(fvc::grad(U_))*rho_*sqr(k_)/epsilon_;
+        mut_ = rCmu(fvc::grad(U_))*rho_*sqr(k_)/epsilon_;
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity
@@ -362,7 +361,7 @@ void realizableKE::correct()
     bound(k_, k0_);
 
     // Re-calculate viscosity
-    mut_ == rCmu(gradU, S2, magS)*rho_*sqr(k_)/epsilon_;
+    mut_ = rCmu(gradU, S2, magS)*rho_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

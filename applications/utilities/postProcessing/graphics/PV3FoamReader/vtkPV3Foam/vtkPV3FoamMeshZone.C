@@ -38,7 +38,6 @@ Description
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 vtkPolyData* Foam::vtkPV3Foam::faceZoneVTKMesh
 (
     const fvMesh& mesh,
@@ -111,7 +110,6 @@ vtkPolyData* Foam::vtkPV3Foam::faceZoneVTKMesh
 }
 
 
-
 vtkPolyData* Foam::vtkPV3Foam::pointZoneVTKMesh
 (
     const fvMesh& mesh,
@@ -147,5 +145,6 @@ vtkPolyData* Foam::vtkPV3Foam::pointZoneVTKMesh
 
     return vtkmesh;
 }
+
 
 // ************************************************************************* //

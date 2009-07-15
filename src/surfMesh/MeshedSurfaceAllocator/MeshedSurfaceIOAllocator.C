@@ -26,12 +26,8 @@ License
 
 #include "MeshedSurfaceIOAllocator.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
 
 Foam::MeshedSurfaceIOAllocator::MeshedSurfaceIOAllocator
 (

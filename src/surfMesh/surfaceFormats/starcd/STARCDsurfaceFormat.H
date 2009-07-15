@@ -72,6 +72,7 @@ class STARCDsurfaceFormat
         //- STAR-CD identifier for shell type (shells vs. baffles)
         static const int starcdShellType_  = 4;
 
+
     // Private Member Functions
 
         static inline void writeShell
@@ -88,12 +89,14 @@ class STARCDsurfaceFormat
         //- Disallow default bitwise assignment
         void operator=(const STARCDsurfaceFormat<Face>&);
 
+
 public:
 
     // Constructors
 
         //- Construct from file name
         STARCDsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -106,16 +109,16 @@ public:
             );
         }
 
-    // Destructor
-        virtual ~STARCDsurfaceFormat()
-        {}
+
+    //- Destructor
+    virtual ~STARCDsurfaceFormat()
+    {}
 
 
     // Member Functions
 
         //- Write surface mesh components by proxy
         static void write(const fileName&, const MeshedSurfaceProxy<Face>&);
-
 
         //- Read from file
         virtual bool read(const fileName&);
@@ -125,7 +128,6 @@ public:
         {
             write(name, MeshedSurfaceProxy<Face>(*this));
         }
-
 };
 
 

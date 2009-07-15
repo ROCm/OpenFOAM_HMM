@@ -2,8 +2,8 @@
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-# Get application name from directory
-application="compressibleInterFoam"
+# Get application name
+application=`getApplication`
 
 runApplication blockMesh
 cp 0/alpha1.org 0/alpha1

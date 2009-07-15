@@ -1,5 +1,0 @@
-#!/bin/sh
-set -x
-
-(cd laminar && ./Allrun)
-(cd ras && ./Allrun)

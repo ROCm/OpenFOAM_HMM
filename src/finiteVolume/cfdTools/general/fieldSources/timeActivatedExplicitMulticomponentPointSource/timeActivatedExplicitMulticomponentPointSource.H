@@ -111,7 +111,7 @@ protected:
         const PtrList<volScalarField>& carrierFields_;
 
         //- Active flag
-        bool active_;
+        Switch active_;
 
         //- List of point source properties
         List<pointSourceProperties> pointSources_;

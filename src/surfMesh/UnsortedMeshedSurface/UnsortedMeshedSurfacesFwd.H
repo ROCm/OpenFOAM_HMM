@@ -31,6 +31,8 @@ License
 
 namespace Foam
 {
+
+// Forward declaration of classes
 class face;
 class triFace;
 

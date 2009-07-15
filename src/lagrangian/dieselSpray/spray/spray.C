@@ -67,6 +67,7 @@ Foam::spray::spray
     time0_(runTime_.value()),
     mesh_(U.mesh()),
     rndGen_(label(0)),
+    g_(g.value()),
 
     U_(U),
     rho_(rho),
@@ -181,7 +182,6 @@ Foam::spray::spray
     ),
 
     subCycles_(readLabel(sprayProperties_.lookup("subCycles"))),
-    g_(g.value()),
 
     gasProperties_(gasProperties),
     composition_(composition),

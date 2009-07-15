@@ -71,6 +71,7 @@ class TRIsurfaceFormatCore
         //- The solid count, in the order of their first appearance
         List<label> sizes_;
 
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -81,6 +82,7 @@ class TRIsurfaceFormatCore
 
         bool read(const fileName&);
 
+
 public:
 
     // Constructors
@@ -88,9 +90,11 @@ public:
         //- Read from file, filling in the information
         TRIsurfaceFormatCore(const fileName&);
 
+
     // Destructor
 
         ~TRIsurfaceFormatCore();
+
 
     // Member Functions
 
@@ -126,7 +130,6 @@ public:
         {
             return sizes_;
         }
-
 };
 
 
@@ -134,8 +137,6 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

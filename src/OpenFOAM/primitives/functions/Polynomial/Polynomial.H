@@ -82,9 +82,6 @@ class Polynomial
 {
     // Private data
 
-        //- Polynomial name
-        word name_;
-
         //- Include the log term? - only activated using integrateMinus1()
         bool logActive_;
 
@@ -107,16 +104,13 @@ public:
         //- Construct from name and Istream
         Polynomial(const word& name, Istream& is);
 
-        //- Copy constructor with name
-        Polynomial(const word& name, const Polynomial& poly);
+        //- Copy constructor
+        Polynomial(const Polynomial& poly);
 
 
     // Member Functions
 
         // Access
-
-            //- Return const access to the polynomial name
-            const word& name() const;
 
             //- Return access to the log term active flag
             bool& logActive();

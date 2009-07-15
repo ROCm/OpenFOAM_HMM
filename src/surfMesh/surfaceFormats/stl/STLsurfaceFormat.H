@@ -86,12 +86,15 @@ class STLsurfaceFormat
 
         //- Disallow default bitwise assignment
         void operator=(const STLsurfaceFormat<Face>&);
+
+
 public:
 
     // Constructors
 
         //- Construct from file name
         STLsurfaceFormat(const fileName&);
+
 
     // Selectors
 
@@ -104,9 +107,11 @@ public:
             );
         }
 
-    // Destructor
-        virtual ~STLsurfaceFormat()
-        {}
+
+    //- Destructor
+    virtual ~STLsurfaceFormat()
+    {}
+
 
     // Member Functions
 
@@ -146,7 +151,6 @@ public:
         //  as ASCII or BINARY, depending on the extension
         static void write(const fileName&, const UnsortedMeshedSurface<Face>&);
 
-
         //- Read from file
         virtual bool read(const fileName&);
 
@@ -155,7 +159,6 @@ public:
         {
             write(name, MeshedSurfaceProxy<Face>(*this));
         }
-
 };
 
 

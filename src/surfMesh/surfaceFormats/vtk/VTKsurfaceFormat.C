@@ -26,9 +26,8 @@ License
 
 #include "VTKsurfaceFormat.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 template<class Face>
 void Foam::fileFormats::VTKsurfaceFormat<Face>::writeHeaderPolygons
 (

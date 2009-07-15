@@ -132,8 +132,6 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
         patch().lookupPatchField<volScalarField, scalar>(nuName_);
     scalarField& nutw = *this;
 
-    scalarField magFaceGradU = mag(U.snGrad());
-
     forAll(nutw, facei)
     {
         scalar magUpara = magUp[facei];

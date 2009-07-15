@@ -72,6 +72,7 @@ public:
         //- The default surface name: %default
         static word defaultName;
 
+
     // Constructors
 
         //- Construct for the given objectRegistry and named surface
@@ -81,7 +82,6 @@ public:
     // Destructor
 
         virtual ~surfaceRegistry();
-
 };
 
 

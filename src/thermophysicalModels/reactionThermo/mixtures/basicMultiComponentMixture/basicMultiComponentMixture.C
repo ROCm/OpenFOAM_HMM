@@ -26,24 +26,6 @@ License
 
 #include "basicMultiComponentMixture.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void Foam::basicMultiComponentMixture::correctMassFractions()
-{
-    volScalarField Yt = Y_[0];
-
-    for(label n=1; n<Y_.size(); n++)
-    {
-        Yt += Y_[n];
-    }
-
-    forAll (Y_, n)
-    {
-        Y_[n] /= Yt;
-    }
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::basicMultiComponentMixture::basicMultiComponentMixture
@@ -120,7 +102,8 @@ Foam::basicMultiComponentMixture::basicMultiComponentMixture
         }
     }
 
-    correctMassFractions();
+    // Do not enforce constraint of sum of mass fractions to equal 1 here
+    // - not applicable to all models
 }
 
 

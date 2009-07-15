@@ -35,8 +35,7 @@ Foam::Ostream& Foam::operator<<
     const Polynomial<PolySize>& poly
 )
 {
-    os  << poly.name_ << token::SPACE
-        << static_cast
+    os  << static_cast
             <VectorSpace<Polynomial<PolySize>, scalar, PolySize> >(poly);
 
     // Check state of Ostream

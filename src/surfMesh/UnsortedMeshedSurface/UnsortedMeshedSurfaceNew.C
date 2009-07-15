@@ -28,7 +28,6 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
 template<class Face>
 Foam::autoPtr< Foam::UnsortedMeshedSurface<Face> >
 Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
@@ -68,7 +67,7 @@ Foam::UnsortedMeshedSurface<Face>::New(const fileName& name, const word& ext)
             "(const fileName&, const word&) : "
             "constructing UnsortedMeshedSurface"
         )   << "Unknown file extension " << ext << nl << nl
-            << "Valid types are :" << nl
+            << "Valid types are:" << nl
             << supported
             << exit(FatalError);
     }
@@ -89,5 +88,6 @@ Foam::UnsortedMeshedSurface<Face>::New(const fileName& name)
 
     return New(name, ext);
 }
+
 
 // ************************************************************************* //

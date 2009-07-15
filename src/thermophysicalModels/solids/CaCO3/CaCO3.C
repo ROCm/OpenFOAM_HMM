@@ -42,9 +42,12 @@ Foam::CaCO3::CaCO3()
 :
     solid(2710, 850, 1.3, 0.0, 1.0)
 {
-    WarningIn("CaCO3::CaCO3()")
-        << "Properties of CaCO3 need to be checked!!!"
-        << endl;
+    if (debug)
+    {
+        WarningIn("CaCO3::CaCO3()")
+            << "Properties of CaCO3 need to be checked!!!"
+            << endl;
+    }
 }
 
 

@@ -28,8 +28,6 @@ License
 #include "clock.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 bool Foam::fileFormats::STARCDsurfaceFormatCore::readHeader
@@ -193,7 +191,6 @@ void Foam::fileFormats::STARCDsurfaceFormatCore::writeCase
     os.flush();
 }
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // ************************************************************************* //
 
