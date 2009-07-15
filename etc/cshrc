@@ -32,7 +32,7 @@
 #------------------------------------------------------------------------------
 
 setenv WM_PROJECT OpenFOAM
-# setenv WM_PROJECT_VERSION 1.5.x
+# setenv WM_PROJECT_VERSION 1.6.x
 if ( ! $?WM_PROJECT_VERSION ) setenv WM_PROJECT_VERSION dev
 
 ################################################################################
@@ -99,7 +99,7 @@ if ( ! $?WM_COMPILE_OPTION ) setenv WM_COMPILE_OPTION Opt
 # WM_JAVAC_OPTION = Opt | Debug
 if ( ! $?WM_JAVAC_OPTION ) setenv WM_JAVAC_OPTION Opt
 
-# WM_MPLIB = | OPENMPI | LAM | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
+# WM_MPLIB = | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
 if ( ! $?WM_MPLIB ) setenv WM_MPLIB OPENMPI
 
 
