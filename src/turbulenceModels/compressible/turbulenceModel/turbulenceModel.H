@@ -65,7 +65,7 @@ namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class turbulenceModel Declaration
+                       Class turbulenceModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class turbulenceModel
@@ -144,7 +144,8 @@ public:
 
 
     //- Destructor
-    virtual ~turbulenceModel();
+    virtual ~turbulenceModel()
+    {}
 
 
     // Member Functions

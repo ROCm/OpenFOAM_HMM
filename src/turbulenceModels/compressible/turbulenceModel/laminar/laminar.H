@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef laminar_H
-#define laminar_H
+#ifndef compressibleLaminar_H
+#define compressibleLaminar_H
 
 #include "turbulenceModel.H"
 
@@ -67,7 +67,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel
+            const basicThermo& thermophysicalModel
         );
 
 
@@ -79,7 +79,7 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            const basicThermo& thermoPhysicalModel
+            const basicThermo& thermophysicalModel
         );
 
 
@@ -94,10 +94,17 @@ public:
         virtual tmp<volScalarField> mut() const;
 
         //- Return the effective viscosity, i.e. the laminar viscosity
-        virtual tmp<volScalarField> muEff() const;
+        virtual tmp<volScalarField> muEff() const
+        {
+            return tmp<volScalarField>(new volScalarField("muEff", mu()));
+        }
 
-        //- Return the effective turbulent thermal diffusivity
-        virtual tmp<volScalarField> alphaEff() const;
+        //- Return the effective turbulent thermal diffusivity,
+        //  i.e. the laminar thermal diffusivity
+        virtual tmp<volScalarField> alphaEff() const
+        {
+            return tmp<volScalarField>(new volScalarField("alphaEff", alpha()));
+        }
 
         //- Return the turbulence kinetic energy, i.e. 0 for laminar flow
         virtual tmp<volScalarField> k() const;
@@ -109,7 +116,7 @@ public:
         //- Return the Reynolds stress tensor, i.e. 0 for laminar flow
         virtual tmp<volSymmTensorField> R() const;
 
-        //- Return the effective stress tensor including the laminar stress
+        //- Return the effective stress tensor, i.e. the laminar stress
         virtual tmp<volSymmTensorField> devRhoReff() const;
 
         //- Return the source term for the momentum equation

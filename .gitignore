@@ -41,10 +41,6 @@ SunOS*Gcc*/
 # reinstate wmake/rules that might look like build folders
 !wmake/rules/*/
 
-# but do continue to ignore the derived wmake files
-wmake/rules/*/dirToString
-wmake/rules/*/wmkdep
-
 # doxygen generated documentation
 doc/[Dd]oxygen/html
 doc/[Dd]oxygen/latex

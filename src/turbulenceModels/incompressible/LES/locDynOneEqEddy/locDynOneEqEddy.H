@@ -138,7 +138,8 @@ public:
 
 
     //- Destructor
-    virtual ~locDynOneEqEddy();
+    virtual ~locDynOneEqEddy()
+    {}
 
 
     // Member Functions
