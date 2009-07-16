@@ -190,15 +190,6 @@ public:
         //- Return the source term for the momentum equation
         virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const = 0;
 
-        //- The source for the enthalpy equation resulting from
-        //  viscous and turbulent dissipation
-        virtual tmp<volScalarField> thermalDissipation() const = 0;
-
-        //- The source for the enthalpy equation resulting from
-        //  the effective viscous dissipation
-        //  (ie, when turbulent production and dissipation are in equilibrium)
-        virtual tmp<volScalarField> thermalDissipationEquilibrium() const = 0;
-
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;
 

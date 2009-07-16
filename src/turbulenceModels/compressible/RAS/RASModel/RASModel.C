@@ -191,56 +191,6 @@ autoPtr<RASModel> RASModel::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<volScalarField> RASModel::thermalDissipation() const
-{
-    tmp<volTensorField> tgradU = fvc::grad(this->U());
-
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "thermalDissipation",
-                runTime_.timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-          - (
-                ( this->mu()*dev(twoSymm(tgradU())) ) && tgradU()
-            )
-          - this->rho() * this->epsilon()
-        )
-    );
-}
-
-
-tmp<volScalarField> RASModel::thermalDissipationEquilibrium() const
-{
-    tmp<volTensorField> tgradU = fvc::grad(this->U());
-
-    return tmp<volScalarField>
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "thermalDissipationEquilibrium",
-                runTime_.timeName(),
-                mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-          - (
-                this->muEff()*dev(twoSymm(tgradU()))
-              - ((2.0/3.0)*I) * this->rho() * this->k()
-            ) && tgradU()
-        )
-    );
-}
-
-
 scalar RASModel::yPlusLam(const scalar kappa, const scalar E) const
 {
     scalar ypl = 11.0;

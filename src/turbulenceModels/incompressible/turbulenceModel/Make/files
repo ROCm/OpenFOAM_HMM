@@ -1,5 +1,4 @@
 turbulenceModel.C
 laminar/laminar.C
-dissipationSelector/dissipationSelector.C
 
 LIB = $(FOAM_LIBBIN)/libincompressibleTurbulenceModel

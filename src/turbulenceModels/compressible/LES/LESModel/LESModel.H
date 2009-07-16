@@ -80,7 +80,6 @@ protected:
 
     // Protected data
 
-        Switch turbulence_;
         Switch printCoeffs_;
         dictionary coeffDict_;
 
@@ -292,15 +291,6 @@ public:
                 return divDevRhoBeff(U);
             }
 
-
-        //- The source for the enthalpy equation resulting from
-        //  viscous and turbulent dissipation
-        virtual tmp<volScalarField> thermalDissipation() const;
-
-        //- The source for the enthalpy equation resulting from
-        //  the effective viscous dissipation
-        //  (ie, when turbulent production and dissipation are in equilibrium)
-        virtual tmp<volScalarField> thermalDissipationEquilibrium() const;
 
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying
