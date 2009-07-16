@@ -1619,9 +1619,9 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
                         WarningIn("Foam::conformalVoronoiMesh::calcDualMesh")
                             << "Dual face found between Dv pair " << nl
-                            << ptA << nl << ptB
-                            <<" that is not on a surface "
-                            << "patch. Adding to "
+                            << "    ptA" << nl
+                            << "    ptB" << nl
+                            << "    that is not on a surface patch. Adding to "
                             << patchNames[patchIndex]
                             << endl;
                     }
@@ -2325,20 +2325,6 @@ void Foam::conformalVoronoiMesh::move()
                 vit,
                 displacementAccumulator[vit->index()]
             );
-
-
-            // TEMPORARY: CHECK IF ALL INTERNAL POINTS ARE INSIDE
-            if
-            (
-                geometryToConformTo_.inside
-                (
-                    pointField(1, topoint(vit->point()))
-                )[0] == false
-            )
-            {
-                Info<< "INTERNAL POINT " << topoint(vit->point())
-                    << " NOT INSIDE" << endl;
-            }
         }
     }
 
