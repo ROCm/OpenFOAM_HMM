@@ -86,9 +86,10 @@ find -H $packDir               \
  -a ! -name "log[0-9]*"        \
  -a ! -name "so_locations"     \
 | sed                          \
- -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \
- -e '\@applications/bin/@d'       \
+ -e '\@/\.git/@d'              \
+ -e '\@applications/bin/@d'    \
+ -e '\@wmake/utilbin/@d'       \
  -e '\@/t/@d'                     \
  -e '\@Make[.A-Za-z]*/[^/]*/@d'   \
  -e '\@doc/[Dd]oxygen/html@d'     \
@@ -100,7 +101,7 @@ find -H $packDir               \
 
 tar czpf $packFile --files-from $tmpFile
 
-if [ $? = 0 ]
+if [ $? -eq 0 ]
 then
     echo "Finished packing and compressing $packDir into file $packFile"
 else

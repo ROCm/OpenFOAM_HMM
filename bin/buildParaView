@@ -85,14 +85,14 @@ For finer control, the build stages can be also selected individually
   -make
   -makedoc
   -install
-  [-envpath]    alter absolute paths in CMake files to use env variables
+  -envpath      alter absolute paths in CMake files to use env variables
 
 Build and install paraview-$ParaView_VERSION
   - run from folder above the ParaView source folder or place the ParaView
     source under \$WM_THIRD_PARTY_DIR ($WM_THIRD_PARTY_DIR)
 
 USAGE
-   exit 1
+    exit 1
 }
 
 #------------------------------------------------------------------------------
@@ -150,8 +150,7 @@ do
         runINSTALL=true
         shift
         ;;
-    -envpath)            # optional: change cmake files to use env variables
-                         # This is now the default behaviour
+    -envpath)            # stage 5: change cmake files to use env variables
         runCONFIG=false
         runMAKE=false
         runMAKEDOC=false

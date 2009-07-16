@@ -117,12 +117,6 @@ autoPtr<turbulenceModel> turbulenceModel::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-turbulenceModel::~turbulenceModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void turbulenceModel::correct()

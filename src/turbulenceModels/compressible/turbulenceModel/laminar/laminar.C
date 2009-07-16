@@ -52,10 +52,10 @@ laminar::laminar
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermoPhysicalModel
+    const basicThermo& thermophysicalModel
 )
 :
-    turbulenceModel(rho, U, phi, thermoPhysicalModel)
+    turbulenceModel(rho, U, phi, thermophysicalModel)
 {}
 
 
@@ -66,10 +66,10 @@ autoPtr<laminar> laminar::New
     const volScalarField& rho,
     const volVectorField& U,
     const surfaceScalarField& phi,
-    const basicThermo& thermoPhysicalModel
+    const basicThermo& thermophysicalModel
 )
 {
-    return autoPtr<laminar>(new laminar(rho, U, phi, thermoPhysicalModel));
+    return autoPtr<laminar>(new laminar(rho, U, phi, thermophysicalModel));
 }
 
 
@@ -93,18 +93,6 @@ tmp<volScalarField> laminar::mut() const
             dimensionedScalar("mut", mu().dimensions(), 0.0)
         )
     );
-}
-
-
-tmp<volScalarField> laminar::muEff() const
-{
-    return tmp<volScalarField>(new volScalarField("muEff", mu()));
-}
-
-
-tmp<volScalarField> laminar::alphaEff() const
-{
-    return tmp<volScalarField>(new volScalarField("alphaEff", alpha()));
 }
 
 

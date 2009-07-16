@@ -51,8 +51,8 @@ void kQRWallFunctionFvPatchField<Type>::checkType()
             << "Invalid wall function specification" << nl
             << "    Patch type for patch " << this->patch().name()
             << " must be wall" << nl
-            << "    Current patch type is " << this->patch().type()
-            << nl << endl << abort(FatalError);
+            << "    Current patch type is " << this->patch().type() << nl << endl
+            << abort(FatalError);
     }
 }
 
