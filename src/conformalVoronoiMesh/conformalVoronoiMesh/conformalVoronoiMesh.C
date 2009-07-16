@@ -1138,6 +1138,13 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
 ) const
 {
+    bool keepSurfacePoint = true;
+
+    if (nearFeaturePt(surfHit.hitPoint()))
+    {
+        keepSurfacePoint = false;
+    }
+
     List<pointIndexHit> edHits;
 
     labelList featuresHit;
@@ -1151,13 +1158,6 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
         edHits,
         featuresHit
     );
-
-    bool keepSurfacePoint = true;
-
-    if (nearFeaturePt(surfHit.hitPoint()))
-    {
-        keepSurfacePoint = false;
-    }
 
     // Gather edge locations but do not add them to newEdgeLocations inside the
     // loop as they will prevent nearby edge locations of different types being
@@ -1173,21 +1173,21 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
         if (edHit.hit())
         {
-            if
-            (
-                magSqr(edHit.hitPoint() - surfHit.hitPoint())
-              < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
-            )
-            {
-                // If the point is within a given distance of a feature edge,
-                // give control to edge control points instead, this will
-                // prevent "pits" forming.
-
-                keepSurfacePoint = false;
-            }
-
             if (!nearFeaturePt(edHit.hitPoint()))
             {
+                if
+                (
+                    magSqr(edHit.hitPoint() - surfHit.hitPoint())
+                  < surfacePtReplaceDistCoeffSqr*targetCellSizeSqr
+                )
+                {
+                    // If the point is within a given distance of a feature
+                    // edge, give control to edge control points instead, this
+                    // will prevent "pits" forming.
+
+                    keepSurfacePoint = false;
+                }
+
                 if
                 (
                     !nearFeatureEdgeLocation
@@ -2030,6 +2030,39 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                 << maxIterations <<  ") reached." << endl;
         }
     }
+
+    // Info<< nl << "    After iterations, check penetrations" << endl;
+
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit =
+    //     finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     vit++
+    // )
+    // {
+    //     if (vit->internalOrBoundaryPoint())
+    //     {
+    //         point vert(topoint(vit->point()));
+    //         pointIndexHit surfHit;
+    //         label hitSurface;
+
+    //         dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
+
+    //         if (surfHit.hit())
+    //         {
+    //             Info<< nl << "Residual penetration: " << nl
+    //                 << vit->index() << nl
+    //                 << vit->type() << nl
+    //                 << vit->ppMaster() << nl
+    //                 << "nearFeaturePt "
+    //                 << nearFeaturePt(surfHit.hitPoint()) << nl
+    //                 << vert << nl
+    //                 << surfHit.hitPoint()
+    //                 << endl;
+    //         }
+    //     }
+    // }
 }
 
 
@@ -2381,3 +2414,5 @@ void Foam::conformalVoronoiMesh::move()
 
 
 // ************************************************************************* //
+
+//  LocalWords:  edHit
