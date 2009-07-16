@@ -123,6 +123,7 @@ kappa           0.4187;
 wallFunctionCoeffs
 {
     E               9;
+    Prt             0.85;
 }
 
 

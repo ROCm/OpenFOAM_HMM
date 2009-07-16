@@ -32,15 +32,13 @@ boundaryField
 
     upperWall
     {
-        type            zeroGradient;
-        //type            compressible::alphaSgsWallFunction;
+        type            compressible::alphaSgsJayatillekeWallFunction;
         value           uniform 0;
     }
 
     lowerWall
     {
-        type            zeroGradient;
-        //type            compressible::alphaSgsWallFunction;
+        type            compressible::alphaSgsJayatillekeWallFunction;
         value           uniform 0;
     }
 

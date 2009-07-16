@@ -68,16 +68,16 @@ GuldersCoeffs
     }
 }
 
-ignite          yes;
+ignite     yes;
 
 ignitionSites
 (
     {
-        location (0 0 0);
+        location (0.005 -0.02 0.01905);
         diameter 0.003;
         start 0;
-        duration 0.001;
-        strength 2;
+        duration 0.1;
+        strength 200;
     }
 );
 
