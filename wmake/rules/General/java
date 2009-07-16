@@ -2,7 +2,8 @@
 
 javac       = javac
 
-include $(GENERAL_RULES)/java$(WM_JAVAC_OPTION)
+## avoid recursive include if WM_JAVAC_OPTION isn't defined
+## include $(GENERAL_RULES)/java$(WM_JAVAC_OPTION)
 
 javaFLAGS   = -classpath $(CLASS_PATH):$(CLASSES_DIR):. $(EXE_INC) $(javaOPT) $(javaDBUG) -d $(CLASSES_DIR) -deprecation
 

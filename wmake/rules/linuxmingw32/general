@@ -20,6 +20,6 @@ include $(RULES)/c++
 SO      = dll
 EXE_EXT = .exe
 
-# Ensure we know what OS we are compiling for 
+# Ensure we know what OS we are compiling for
 # during MakefileFiles and MakefileOptions
 GFLAGS  += -DWIN32 -DLITTLE_ENDIAN
