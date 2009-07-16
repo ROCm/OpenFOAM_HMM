@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef laminar_H
-#define laminar_H
+#ifndef compressibleLaminar_H
+#define compressibleLaminar_H
 
 #include "turbulenceModel.H"
 

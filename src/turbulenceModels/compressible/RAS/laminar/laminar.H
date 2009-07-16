@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleLaminar_H
-#define compressibleLaminar_H
+#ifndef compressibleRasLaminar_H
+#define compressibleRasLaminar_H
 
 #include "RASModel.H"
 

@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef laminar_H
-#define laminar_H
+#ifndef rasLaminar_H
+#define rasLaminar_H
 
 #include "RASModel.H"
 
