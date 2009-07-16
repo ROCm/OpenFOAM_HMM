@@ -57,6 +57,8 @@
     + Dictionaries can use words (unquoted) or regular expressions (quoted) for
       their keywords. When searching, an exact match has priority over a regular
       expression match.
+MJ: If multiple regular expressions they get matched in reverse order.
+
     + The default =#inputMode= is now '=merge=', which corresponds to the most
       general usage. The =#inputMode warn= corresponds to the previous default
       behaviour.
@@ -278,7 +280,7 @@
   + pd to p ------------------------------------------------------------ [HENRY]
   + gravity ------------------------------------------------------------ [HENRY]
 
-** Solver control improvments
+** Solver control improvements
    Use dictionary entries instead of an =Istream= for the solver controls.
    + This Allows dictionary substitutions and regular expressions in
      /system/fvSolution/
@@ -290,9 +292,10 @@
   to reflect solver application structure
 
 * Post-processing ---------------------------------------------------- [MATTIJS]
-  + SAMPLING - improved plane, iso-surface handling
-  + Output to any surface geometry format supported by the =surfMesh= library.
-
+  * sampling on iso-surfaces, interpolated or non-interpolated
+  * sampling on surface defined by distance to surface (distanceSurface)
+  * cutting planes on non-convex cells
+  * Output to any surface geometry format supported by the =surfMesh= library.
 * *New* Solvers
   + =buoyantBoussinesqSimpleFoam=
     Steady state heat transfer solver using a Boussinesq approximation for
@@ -331,6 +334,10 @@
     Similar to mdFoam, but employs velocity scaling to adjust the simulation
     temperature to a target value. Useful to equilibrate a case before
     simulation.
+
+  + =chtMultiRegionFoam=
+    New boundary condition allows independent decomposition of coupled regions
+	without any constraint on the decomposition.
 
 * Function objects
 
@@ -376,23 +383,30 @@
   + =foamToEnsightParts= has *new* =-noMesh= and =-index= options that can
     be useful when post-processing results incrementally.
 
+  + =snappyHexMesh= has lower memory footprint. New distributed triangulated
+	surface type for meshing surfaces with extremely large triangle count.
+
 ** *New* utilities
   + =particleTracks= - generate particle tracks for lagrangian calculations
   + =dsmcInitialise= - preprocessing utility to create initial configurations of
     DSMC particles in a geometry
 
+  + =surfaceRedistributePar= - preprocessing utility to create distributed
+	triangulated surface.
 *** *New* foamCalc functions
     + =interpolate= - performs fvc::interpolate(<field>)
     + =randomise= - randomises a <field> by a given perturbation
     + =addSubtract= - simple add/subtract field functionality
 
 ** Usage
-  + =timeSelector= can now combine =-time ranges= and =-latestTime= options.
+  + =timeSelector= can now combine =-time ranges= and =-latestTime= options
+	(e.g. -time '0.01:0.09', -time '0.01:').
     More reliable behaviour for cases missing /constant// or /0//
     directories. When the =-noZero= option is enabled, =-latestTime= will not
     select the =0/= directory unless the =-zeroTime= option is given.
     This helps avoid ill effects caused by accidentally using the
     /0// directory in certain utilities (eg, =reconstructPar=).
+  + =-region= option added to more utilities.
 
 ** Improvements to Paraview reader module
   + =PV3FoamReader= added mesh region handling. The region name is parsed
