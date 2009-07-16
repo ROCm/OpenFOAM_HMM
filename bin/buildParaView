@@ -58,8 +58,6 @@ withQTSUPPORT=true
 
 # Set the path to the Qt-4.3.? qmake if the system Qt is other than this version
 QMAKE_PATH=""
-#QMAKE_PATH=/usr/local/Trolltech/Qt-4.3.5/bin/qmake
-#QMAKE_PATH=$WM_THIRD_PARTY_DIR/qt-x11-opensource-src-4.3.5/platforms/linux64GccDPOpt/bin/qmake
 
 #
 # No further editing below this line
@@ -183,6 +181,11 @@ do
     -qt)
         withQTSUPPORT=true
         shift
+        ;;
+    -qmake)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        export QMAKE_PATH=$2
+        shift 2
         ;;
     -verbose)
         withVERBOSE=true
