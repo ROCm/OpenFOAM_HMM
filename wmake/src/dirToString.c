@@ -34,10 +34,10 @@ Usage
 
     e.g.
         using sh
-        baseDirName=`echo $dir | sed 's%^\./%%' | $utilbin/dirToString`
+        baseDirName=`echo $dir | sed 's%^\./%%' | $bin/dirToString`
 
         using csh
-        set baseDirName=`echo $dir | sed 's%^\./%%' | $utilbin/dirToString`
+        set baseDirName=`echo $dir | sed 's%^\./%%' | $bin/dirToString`
 
 \*----------------------------------------------------------------------------*/
 

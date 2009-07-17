@@ -106,7 +106,7 @@ SEXE            = a.out
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
-UTILBIN       = $(WM_DIR)/utilbin/$(WM_ARCH)$(WM_COMPILER)
+BIN           = $(WM_DIR)/bin/$(WM_ARCH)$(WM_COMPILER)
 
 include $(GENERAL_RULES)/general
 include $(RULES)/general
