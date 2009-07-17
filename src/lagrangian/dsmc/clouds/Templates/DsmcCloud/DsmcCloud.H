@@ -110,6 +110,12 @@ class DsmcCloud
         //- Force density at surface field
         volVectorField fD_;
 
+        //- Momentum density field
+        volVectorField momentum_;
+
+        //- Mass density field
+        volScalarField rhoM_;
+
         //- Parcel constant properties - one for each type
         List<typename ParcelType::constantProperties> constProps_;
 
@@ -254,19 +260,19 @@ public:
                 inline scalar cachedDeltaT() const;
 
 
-            // References to the surface data collection fields
+            // References to the boundary fields for surface data collection
 
-                //- Return heat flux at surface field
-                inline const volScalarField& q() const;
+                //- Return non-const heat flux boundary field reference
+                inline volScalarField::GeometricBoundaryField& qBF();
 
-                //- Return non-const heat flux at surface field
-                inline volScalarField& q();
+                //- Return non-const force density at boundary field reference
+                inline volVectorField::GeometricBoundaryField& fDBF();
 
-                //- Return force density at surface field
-                inline const volVectorField& fD() const;
+                //- Return non-const momentum density boundary field reference
+                inline volVectorField::GeometricBoundaryField& momentumBF();
 
-                //- Return non-const force density at surface field
-                inline volVectorField& fD();
+                //- Return non-const mass density boundary field reference
+                inline volScalarField::GeometricBoundaryField& rhoMBF();
 
 
             // References to the macroscopic fields
@@ -391,17 +397,20 @@ public:
 
             // Fields
 
+                //- Return heat flux at surface field
+                inline const volScalarField& q() const;
+
+                //- Return force density at surface field
+                inline const volVectorField& fD() const;
+
                 //- Return the real particle number density field
                 inline const tmp<volScalarField> rhoN() const;
 
                 //- Return the particle mass density field
-                inline const tmp<volScalarField> rhoM() const;
-
-                //- Return the field of number of DSMC particles
-                inline const tmp<volScalarField> dsmcRhoN() const;
+                inline const volScalarField& rhoM();
 
                 //- Return the momentum density field
-                inline const tmp<volVectorField> momentum() const;
+                inline const volVectorField& momentum();
 
                 //- Return the total linear kinetic energy (translational and
                 // thermal density field
@@ -412,6 +421,9 @@ public:
 
                 //- Return the average internal degrees of freedom  field
                 inline const tmp<volScalarField> iDof() const;
+
+                //- Return the field of number of DSMC particles
+                inline const tmp<volScalarField> dsmcRhoN() const;
 
 
         // Cloud evolution functions

@@ -68,10 +68,10 @@ void Foam::MaxwellianThermal<CloudType>::correct
     nw /= mag(nw);
 
     // Normal velocity magnitude
-    scalar magUn = U & nw;
+    scalar U_dot_nw = U & nw;
 
     // Wall tangential velocity (flow direction)
-    vector Ut = U - magUn*nw;
+    vector Ut = U - U_dot_nw*nw;
 
     CloudType& cloud(this->owner());
 
@@ -90,9 +90,9 @@ void Foam::MaxwellianThermal<CloudType>::correct
             U.z()*(0.8 + 0.2*rndGen.scalar01())
         );
 
-        magUn = U & nw;
+        U_dot_nw = U & nw;
 
-        Ut = U - magUn*nw;
+        Ut = U - U_dot_nw*nw;
     }
 
     // Wall tangential unit vector

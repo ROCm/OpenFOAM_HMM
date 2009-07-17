@@ -490,6 +490,23 @@ void Foam::DsmcCloud<ParcelType>::resetSurfaceDataFields()
     {
         fDBF[p] = vector::zero;
     }
+
+    volVectorField::GeometricBoundaryField& momentumBF
+    (
+        momentum_.boundaryField()
+    );
+
+    forAll(momentumBF, p)
+    {
+        momentumBF[p] = vector::zero;
+    }
+
+    volScalarField::GeometricBoundaryField& rhoMBF(rhoM_.boundaryField());
+
+    forAll(rhoMBF, p)
+    {
+        rhoMBF[p] = VSMALL;
+    }
 }
 
 
@@ -590,6 +607,37 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             dimensionSet(1, -1, -2, 0, 0),
             vector::zero
         )
+    ),
+    momentum_
+    (
+        IOobject
+        (
+            this->name() + "momentum_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedVector
+        (
+            "zero",
+            dimensionSet(1, -2, -1, 0, 0),
+            vector::zero
+        )
+    ),
+    rhoM_
+    (
+        IOobject
+        (
+            this->name() + "rhoM_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("zero",  dimensionSet(1, -3, 0, 0, 0), 0.0)
     ),
     constProps_(),
     rndGen_(label(149382906) + 7183*Pstream::myProcNo()),
@@ -702,6 +750,37 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
             dimensionSet(1, -1, -2, 0, 0),
             vector::zero
         )
+    ),
+    momentum_
+    (
+        IOobject
+        (
+            this->name() + "momentum_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedVector
+        (
+            "zero",
+            dimensionSet(1, -2, -1, 0, 0),
+            vector::zero
+        )
+    ),
+    rhoM_
+    (
+        IOobject
+        (
+            this->name() + "rhoM_",
+            mesh_.time().timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE
+        ),
+        mesh_,
+        dimensionedScalar("zero",  dimensionSet(1, -3, 0, 0, 0), 0.0)
     ),
     constProps_(),
     rndGen_(label(971501) + 1526*Pstream::myProcNo()),

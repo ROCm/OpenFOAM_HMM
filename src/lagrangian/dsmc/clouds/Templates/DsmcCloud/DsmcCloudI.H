@@ -135,30 +135,34 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::cachedDeltaT() const
 
 
 template<class ParcelType>
-inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::q() const
+inline Foam::volScalarField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::qBF()
 {
-    return q_;
+    return q_.boundaryField();
 }
 
 
 template<class ParcelType>
-inline Foam::volScalarField& Foam::DsmcCloud<ParcelType>::q()
+inline Foam::volVectorField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::fDBF()
 {
-    return q_;
+    return fD_.boundaryField();
 }
 
 
 template<class ParcelType>
-inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::fD() const
+inline Foam::volVectorField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::momentumBF()
 {
-    return fD_;
+    return momentum_.boundaryField();
 }
 
 
 template<class ParcelType>
-inline Foam::volVectorField& Foam::DsmcCloud<ParcelType>::fD()
+inline Foam::volScalarField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::rhoMBF()
 {
-    return fD_;
+    return rhoM_.boundaryField();
 }
 
 
@@ -374,6 +378,20 @@ Foam::DsmcCloud<ParcelType>::maxwellianMostProbableSpeed
 
 
 template<class ParcelType>
+inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::q() const
+{
+    return q_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::fD() const
+{
+    return fD_;
+}
+
+
+template<class ParcelType>
 inline const Foam::tmp<Foam::volScalarField>
 Foam::DsmcCloud<ParcelType>::rhoN() const
 {
@@ -411,116 +429,44 @@ Foam::DsmcCloud<ParcelType>::rhoN() const
 
 
 template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::rhoM() const
+inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::rhoM()
 {
-    tmp<volScalarField> trhoM
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "rhoM",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(1, -3, 0, 0, 0), VSMALL)
-        )
-    );
+    scalarField& rM = rhoM_.internalField();
 
-    scalarField& rhoM = trhoM().internalField();
+    rM = VSMALL;
+
     forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
     {
         const ParcelType& p = iter();
         const label cellI = p.cell();
 
-        rhoM[cellI] += constProps(p.typeId()).mass();
+        rM[cellI] += constProps(p.typeId()).mass();
     }
 
-    rhoM *= nParticle_/mesh().cellVolumes();
+    rM *= nParticle_/mesh().cellVolumes();
 
-    return trhoM;
+    return rhoM_;
 }
 
 
 template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::dsmcRhoN() const
+inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::momentum()
 {
-    tmp<volScalarField> tdsmcRhoN
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "dsmcRhoN",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), 0.0)
-        )
-    );
+    vectorField& mom = momentum_.internalField();
 
-    scalarField& dsmcRhoN = tdsmcRhoN().internalField();
+    mom = vector::zero;
+
     forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
     {
         const ParcelType& p = iter();
         const label cellI = p.cell();
 
-        dsmcRhoN[cellI]++;
+        mom[cellI] += constProps(p.typeId()).mass()*p.U();
     }
 
-    return tdsmcRhoN;
-}
+    mom *= nParticle_/mesh().cellVolumes();
 
-
-template<class ParcelType>
-inline const Foam::tmp<Foam::volVectorField>
-Foam::DsmcCloud<ParcelType>::momentum() const
-{
-    tmp<volVectorField> tmomentum
-    (
-        new volVectorField
-        (
-            IOobject
-            (
-                this->name() + "momentum",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedVector
-            (
-                "zero",
-                dimensionSet(1, -2, -1, 0, 0),
-                vector::zero
-            )
-        )
-    );
-
-    vectorField& momentum = tmomentum().internalField();
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-
-        momentum[cellI] += constProps(p.typeId()).mass()*p.U();
-    }
-
-    momentum *= nParticle_/mesh().cellVolumes();
-
-    return tmomentum;
+    return momentum_;
 }
 
 
@@ -633,6 +579,41 @@ Foam::DsmcCloud<ParcelType>::iDof() const
     iDof *= nParticle_/mesh().cellVolumes();
 
     return tiDof;
+}
+
+
+template<class ParcelType>
+inline const Foam::tmp<Foam::volScalarField>
+Foam::DsmcCloud<ParcelType>::dsmcRhoN() const
+{
+    tmp<volScalarField> tdsmcRhoN
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                this->name() + "dsmcRhoN",
+                this->db().time().timeName(),
+                this->db(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE,
+                false
+            ),
+            mesh_,
+            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), 0.0)
+        )
+    );
+
+    scalarField& dsmcRhoN = tdsmcRhoN().internalField();
+    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+        const label cellI = p.cell();
+
+        dsmcRhoN[cellI]++;
+    }
+
+    return tdsmcRhoN;
 }
 
 
