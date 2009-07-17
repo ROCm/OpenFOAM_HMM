@@ -167,16 +167,18 @@ Foam::DsmcCloud<ParcelType>::rhoMBF()
 
 
 template<class ParcelType>
-inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::T() const
+inline const Foam::volScalarField&
+Foam::DsmcCloud<ParcelType>::boundaryT() const
 {
-    return T_;
+    return boundaryT_;
 }
 
 
 template<class ParcelType>
-inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::U() const
+inline const Foam::volVectorField&
+Foam::DsmcCloud<ParcelType>::boundaryU() const
 {
-    return U_;
+    return boundaryU_;
 }
 
 
@@ -392,228 +394,56 @@ inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::fD() const
 
 
 template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
+inline const Foam::volScalarField&
 Foam::DsmcCloud<ParcelType>::rhoN() const
 {
-    tmp<volScalarField> trhoN
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "rhoN",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
-        )
-    );
-
-    scalarField& rhoN = trhoN().internalField();
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-
-        rhoN[cellI]++;
-    }
-
-    rhoN *= nParticle_/mesh().cellVolumes();
-
-    return trhoN;
+    return rhoN_;
 }
 
 
 template<class ParcelType>
-inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::rhoM()
+inline const Foam::volScalarField& Foam::DsmcCloud<ParcelType>::rhoM() const
 {
-    scalarField& rM = rhoM_.internalField();
-
-    rM = VSMALL;
-
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-
-        rM[cellI] += constProps(p.typeId()).mass();
-    }
-
-    rM *= nParticle_/mesh().cellVolumes();
-
     return rhoM_;
 }
 
 
 template<class ParcelType>
-inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::momentum()
-{
-    vectorField& mom = momentum_.internalField();
-
-    mom = vector::zero;
-
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-
-        mom[cellI] += constProps(p.typeId()).mass()*p.U();
-    }
-
-    mom *= nParticle_/mesh().cellVolumes();
-
-    return momentum_;
-}
-
-
-template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::linearKE() const
-{
-    tmp<volScalarField> tlinearKE
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "linearKE",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(1, -1, -2, 0, 0), 0.0)
-        )
-    );
-
-    scalarField& linearKE = tlinearKE().internalField();
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-
-        linearKE[cellI] += 0.5*constProps(p.typeId()).mass()*(p.U() & p.U());
-    }
-
-    linearKE *= nParticle_/mesh().cellVolumes();
-
-    return tlinearKE;
-}
-
-
-template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::internalE() const
-{
-    tmp<volScalarField> tinternalE
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "internalE",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(1, -1, -2, 0, 0), 0.0)
-        )
-    );
-
-    scalarField& internalE = tinternalE().internalField();
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-
-        internalE[cellI] += p.Ei();
-    }
-
-    internalE *= nParticle_/mesh().cellVolumes();
-
-    return tinternalE;
-}
-
-
-template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
-Foam::DsmcCloud<ParcelType>::iDof() const
-{
-    tmp<volScalarField> tiDof
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "iDof",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), VSMALL)
-        )
-    );
-
-    scalarField& iDof = tiDof().internalField();
-
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
-
-        iDof[cellI] += constProps(p.typeId()).internalDegreesOfFreedom();
-    }
-
-    iDof *= nParticle_/mesh().cellVolumes();
-
-    return tiDof;
-}
-
-
-template<class ParcelType>
-inline const Foam::tmp<Foam::volScalarField>
+inline const Foam::volScalarField&
 Foam::DsmcCloud<ParcelType>::dsmcRhoN() const
 {
-    tmp<volScalarField> tdsmcRhoN
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                this->name() + "dsmcRhoN",
-                this->db().time().timeName(),
-                this->db(),
-                IOobject::NO_READ,
-                IOobject::NO_WRITE,
-                false
-            ),
-            mesh_,
-            dimensionedScalar("zero", dimensionSet(0, -3, 0, 0, 0), 0.0)
-        )
-    );
+    return dsmcRhoN_;
+}
 
-    scalarField& dsmcRhoN = tdsmcRhoN().internalField();
-    forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
-    {
-        const ParcelType& p = iter();
-        const label cellI = p.cell();
 
-        dsmcRhoN[cellI]++;
-    }
+template<class ParcelType>
+inline const Foam::volScalarField&
+Foam::DsmcCloud<ParcelType>::linearKE() const
+{
+    return linearKE_;
+}
 
-    return tdsmcRhoN;
+
+template<class ParcelType>
+inline const Foam::volScalarField&
+Foam::DsmcCloud<ParcelType>::internalE() const
+{
+    return internalE_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volScalarField&
+Foam::DsmcCloud<ParcelType>::iDof() const
+{
+    return iDof_;
+}
+
+
+template<class ParcelType>
+inline const Foam::volVectorField& Foam::DsmcCloud<ParcelType>::momentum() const
+{
+    return momentum_;
 }
 
 

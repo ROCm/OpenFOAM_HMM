@@ -69,19 +69,20 @@ public:
 
     // Constructors
 
-        //- Construct from components
-        dsmcCloud
-        (
-            const word& cloudName,
-            const volScalarField& T,
-            const volVectorField& U
-        );
-
-        //- Construct from name and mesh, used to initialise.
+        //- Construct given name and mesh, will read Parcels and fields from
+        //  file
         dsmcCloud
         (
             const word& cloudName,
             const fvMesh& mesh
+        );
+
+        //- Construct given name, mesh and initialisation dictionary.
+        dsmcCloud
+        (
+            const word& cloudName,
+            const fvMesh& mesh,
+            const IOdictionary& dsmcInitialiseDict
         );
 
     //- Destructor

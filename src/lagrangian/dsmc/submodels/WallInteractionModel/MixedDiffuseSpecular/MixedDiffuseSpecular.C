@@ -106,7 +106,7 @@ void Foam::MixedDiffuseSpecular<CloudType>::correct
         // Other tangential unit vector
         vector tw2 = nw^tw1;
 
-        scalar T = cloud.T().boundaryField()[wppIndex][wppLocalFace];
+        scalar T = cloud.boundaryT().boundaryField()[wppIndex][wppLocalFace];
 
         scalar mass = cloud.constProps(typeId).mass();
 
@@ -120,7 +120,7 @@ void Foam::MixedDiffuseSpecular<CloudType>::correct
           - sqrt(-2.0*log(max(1 - rndGen.scalar01(), VSMALL)))*nw
         );
 
-        U += cloud.U().boundaryField()[wppIndex][wppLocalFace];
+        U += cloud.boundaryU().boundaryField()[wppIndex][wppLocalFace];
 
         Ei = cloud.equipartitionInternalEnergy(T, iDof);
     }

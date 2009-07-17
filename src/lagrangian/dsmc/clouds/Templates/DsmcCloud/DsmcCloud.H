@@ -110,11 +110,26 @@ class DsmcCloud
         //- Force density at surface field
         volVectorField fD_;
 
-        //- Momentum density field
-        volVectorField momentum_;
+        //- number density field
+        volScalarField rhoN_;
 
         //- Mass density field
         volScalarField rhoM_;
+
+        //- dsmc particle density field
+        volScalarField dsmcRhoN_;
+
+        //- linear kinetic energy density field
+        volScalarField linearKE_;
+
+        //- Internal energy density field
+        volScalarField internalE_;
+
+        // Internal degree of freedom density field
+        volScalarField iDof_;
+
+        //- Momentum density field
+        volVectorField momentum_;
 
         //- Parcel constant properties - one for each type
         List<typename ParcelType::constantProperties> constProps_;
@@ -127,13 +142,13 @@ class DsmcCloud
         scalar cachedDeltaT_;
 
 
-        // References to the macroscopic fields
+        // boundary value fields
 
-            //- Temperature
-            const volScalarField& T_;
+            //- boundary temperature
+            volScalarField boundaryT_;
 
-            //- Velocity
-            const volVectorField& U_;
+            //- boundary velocity
+            volVectorField boundaryU_;
 
 
         // References to the cloud sub-models
@@ -165,8 +180,11 @@ class DsmcCloud
         //- Calculate collisions between molecules
         void collisions();
 
-        //- Reset the surface data accumulation field values
-        void resetSurfaceDataFields();
+        //- Reset the data accumulation field values to zero
+        void resetFields();
+
+        //- Calculate the volume field data
+        void calculateFields();
 
         //- Disallow default bitwise copy construct
         DsmcCloud(const DsmcCloud&);
@@ -185,19 +203,20 @@ public:
 
     // Constructors
 
-        //- Construct given name and mesh, will read Parcels from file
-        DsmcCloud
-        (
-            const word& cloudName,
-            const volScalarField& T,
-            const volVectorField& U
-        );
-
-        //- Construct given name and mesh.  Used to initialise.
+        //- Construct given name and mesh, will read Parcels and fields from
+        //  file
         DsmcCloud
         (
             const word& cloudName,
             const fvMesh& mesh
+        );
+
+        //- Construct given name, mesh and initialisation dictionary.
+        DsmcCloud
+        (
+            const word& cloudName,
+            const fvMesh& mesh,
+            const IOdictionary& dsmcInitialiseDict
         );
 
 
@@ -268,20 +287,48 @@ public:
                 //- Return non-const force density at boundary field reference
                 inline volVectorField::GeometricBoundaryField& fDBF();
 
-                //- Return non-const momentum density boundary field reference
-                inline volVectorField::GeometricBoundaryField& momentumBF();
-
                 //- Return non-const mass density boundary field reference
                 inline volScalarField::GeometricBoundaryField& rhoMBF();
+
+                //- Return non-const momentum density boundary field reference
+                inline volVectorField::GeometricBoundaryField& momentumBF();
 
 
             // References to the macroscopic fields
 
                 //- Return macroscopic temperature
-                inline const volScalarField& T() const;
+                inline const volScalarField& boundaryT() const;
 
                 //- Return macroscopic velocity
-                inline const volVectorField& U() const;
+                inline const volVectorField& boundaryU() const;
+
+                //- Return heat flux at surface field
+                inline const volScalarField& q() const;
+
+                //- Return force density at surface field
+                inline const volVectorField& fD() const;
+
+                //- Return the real particle number density field
+                inline const volScalarField& rhoN() const;
+
+                //- Return the particle mass density field
+                inline const volScalarField& rhoM() const;
+
+                //- Return the field of number of DSMC particles
+                inline const volScalarField& dsmcRhoN() const;
+
+                //- Return the total linear kinetic energy (translational and
+                // thermal density field
+                inline const volScalarField& linearKE() const;
+
+                //- Return the internal energy density field
+                inline const volScalarField& internalE() const;
+
+                //- Return the average internal degrees of freedom  field
+                inline const volScalarField& iDof() const;
+
+                //- Return the momentum density field
+                inline const volVectorField& momentum() const;
 
 
             // Kinetic theory helper functions
@@ -395,35 +442,6 @@ public:
             void dumpParticlePositions() const;
 
 
-            // Fields
-
-                //- Return heat flux at surface field
-                inline const volScalarField& q() const;
-
-                //- Return force density at surface field
-                inline const volVectorField& fD() const;
-
-                //- Return the real particle number density field
-                inline const tmp<volScalarField> rhoN() const;
-
-                //- Return the particle mass density field
-                inline const volScalarField& rhoM();
-
-                //- Return the momentum density field
-                inline const volVectorField& momentum();
-
-                //- Return the total linear kinetic energy (translational and
-                // thermal density field
-                inline const tmp<volScalarField> linearKE() const;
-
-                //- Return the internal energy density field
-                inline const tmp<volScalarField> internalE() const;
-
-                //- Return the average internal degrees of freedom  field
-                inline const tmp<volScalarField> iDof() const;
-
-                //- Return the field of number of DSMC particles
-                inline const tmp<volScalarField> dsmcRhoN() const;
 
 
         // Cloud evolution functions
@@ -440,7 +458,6 @@ public:
 
             //- Evolve the cloud (move, collide)
             void evolve();
-
 
             //- Clear the Cloud
             inline void clear();
