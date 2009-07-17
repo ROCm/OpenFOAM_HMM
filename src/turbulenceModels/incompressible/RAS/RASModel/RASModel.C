@@ -174,13 +174,8 @@ autoPtr<RASModel> RASModel::New
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-RASModel::~RASModel()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 
 scalar RASModel::yPlusLam(const scalar kappa, const scalar E) const
 {

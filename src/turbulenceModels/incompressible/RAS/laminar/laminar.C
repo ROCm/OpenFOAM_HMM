@@ -77,12 +77,6 @@ tmp<volScalarField> laminar::nut() const
 }
 
 
-tmp<volScalarField> laminar::nuEff() const
-{
-    return tmp<volScalarField>(new volScalarField("nuEff", nu()));
-}
-
-
 tmp<volScalarField> laminar::k() const
 {
     return tmp<volScalarField>

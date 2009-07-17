@@ -38,155 +38,122 @@
 
 *** Regular Expressions
     The addition of regular expressions marks a major improvement in usability.
-
     + *New* =regExp= class provides support for accessing POSIX extended regular
-      expresssions from within OpenFOAM.
-      See the manpages on your system (/man 7 regex/) for more information
-      about the extended regular expresssion syntax. Since entire strings are
-      matched, the =^= and =$= anchors are not required.
-
-    + *New* =wordRe= class can contain a =word= or a =regExp= .
-      The match() method matches appropriately (as a =word= or as a =regExp=).
-
+      expresssions from within OpenFOAM.  See the manpages on your system (/man
+      7 regex/) for more information about the extended regular expression
+      syntax. Since entire strings are matched, the =^= and =$= anchors are not
+      required.
+    + *New* =wordRe= class can contain a =word= or a =regExp= .  The match()
+      method matches appropriately (as a =word= or as a =regExp=).
     + *New* =stringListOps= to search string lists based on regular expressions,
       =wordRe= or =wordReList= .
-
-    + =Istream= and =Ostream= now retain backslashes when reading/writing strings.
-      The backslash continues to be used as an escape character for double-quote
-      and newline, but otherwise get passed through "as-is" without any other
-      special meaning (ie, they are /not/ C-style strings). This especially
-      helps with input/output of regular expressions.
-
+    + =Istream= and =Ostream= now retain backslashes when reading/writing
+      strings.  The backslash continues to be used as an escape character for
+      double-quote and newline, but otherwise get passed through "as-is" without
+      any other special meaning (ie, they are /not/ C-style strings). This
+      especially helps with input/output of regular expressions.
 
 *** Dictionary improvements/changes
-    + Dictionaries can use words (unquoted) or regular expressions (quoted)
-      for their keywords. When searching, an exact match has priority
-      over a regular expression match.
+    + Dictionaries can use words (unquoted) or regular expressions (quoted) for
+      their keywords. When searching, an exact match has priority over a regular
+      expression match.
+MJ: If multiple regular expressions they get matched in reverse order.
 
     + The default =#inputMode= is now '=merge=', which corresponds to the most
-      general usage. The =#inputMode warn= corresponds to the previous
-      default behaviour.
-
-    + The *new* =#inputMode protect=  can be used to conditionally merge default
+      general usage. The =#inputMode warn= corresponds to the previous default
+      behaviour.
+    + The *new* =#inputMode protect= can be used to conditionally merge default
       values into existing dictionaries.
-
     + *New* =digest()= method to calculate and return the SHA1 message digest
-
 
 *** Improved list containers
     + It is now possible to append a =UList= to an existing =List= or
       =DynamicList= .
-
     + =DynamicList= is now much more flexible. It can be used with the
-      =append()= method, or with the =setSize()= method and =operator[]=, as
-      per =List= .  =DynamicList= also has more methods for adjusting the
-      space allocated.
-
+      =append()= method, or with the =setSize()= method and =operator[]=, as per
+      =List= .  =DynamicList= also has more methods for adjusting the space
+      allocated.
     + =SortableList= now uses stable sort and allows =reverseSort()= as well.
       =SortableList= is also more versatile - the indices mostly remain
-      unallocated until they are required in the =sort()= method.
-      The sort indices can be deallocated with the =shrink()= method.
-      Works as expected with =transfer()= and assignment from other lists.
-
+      unallocated until they are required in the =sort()= method.  The sort
+      indices can be deallocated with the =shrink()= method.  Works as expected
+      with =transfer()= and assignment from other lists.
     + Specialization for =UList<bool>::operator[](..) const= to return =false=
       for out-of-range elements. This allows lazy evaluation with no noticeable
       change in performance.
-
-    + =PackedList= has much better performance, *new* lazy evaluation and
-      *new* auto-vivify of elements on assignment. Any auto-vivified
-      elements will also flood-fill the gaps with zero.  The =append()= method
-      can be used like in =DynamicList= to append a single element. The =set()=
-      method can be used like in =labelHashSet= .
-      A =PackedBoolList= can thus replace =labelHashSet= in many places.
-
+    + =PackedList= has much better performance, *new* lazy evaluation and *new*
+      auto-vivify of elements on assignment. Any auto-vivified elements will
+      also flood-fill the gaps with zero.  The =append()= method can be used
+      like in =DynamicList= to append a single element. The =set()= method can
+      be used like in =labelHashSet= .  A =PackedBoolList= can thus replace
+      =labelHashSet= in many places.
     + *New* =UIndirectList= for an indirect list without storing the addressing.
-
 
 *** New hashing algorithms
     + Bob Jenkins' hash routine for performance improvement (5-10% faster for
       string hashing than the previous algorithm) and fewer collisions.
-
     + SHA1 hashing and SHA1 message digests (NIST specification FIPS-180-1)
-      added. The SHA1 digest provides a compact (20 bytes) means of
-      determining if the contents of an object have changed. The *new*
-      =OSHA1stream= class can be used to calculate SHA1 digests for anything
-      that can write to an output stream.
-
+      added. The SHA1 digest provides a compact (20 bytes) means of determining
+      if the contents of an object have changed. The *new* =OSHA1stream= class
+      can be used to calculate SHA1 digests for anything that can write to an
+      output stream.
 
 *** HashTable/HashSet improvements
    + Performance improvements for querying on empty tables
-
-   + The =erase()= method can take a list of keys or the keys from any
-     another =HashTable=/=HashSet= .
-
-   + =HashSet= has an =operator[]() const= that allows the same syntax
-     to be used for =boolList=, =PackedBoolList= and =labelHashSet= .
-
+   + The =erase()= method can take a list of keys or the keys from any another
+     =HashTable=/=HashSet= .
+   + =HashSet= has an =operator[]() const= that allows the same syntax to be
+     used for =boolList=, =PackedBoolList= and =labelHashSet= .
    + =HashSet has additional operators '+=', '-=', '&=' to add, remove or
      intersect keys, respectively.
 
-
 *** Improved bool/Switch
-   + The =Switch= class has reduced the storage to be on par with =bool= .
-     It is now more flexible and behaves much more like a =bool= .
-
+   + The =Switch= class has reduced the storage to be on par with =bool= .  It
+     is now more flexible and behaves much more like a =bool= .
    + The IO for =bool= uses =Switch= internally for reading, so the end-user
      doesn't need to know if a particular class used =bool= or =Switch= .
 
-
 *** Miscellaneous container class improvments
-    + *New* Boost-style =StaticAssert= added.
-      Which is useful to catch invalid template sizes, for example.
-
-    + Various containers now have C++0x-style =cbegin()=, =cend()= iterator methods.
-
+    + *New* Boost-style =StaticAssert= added.  Which is useful to catch invalid
+      template sizes, for example.
+    + Various containers now have C++0x-style =cbegin()=, =cend()= iterator
+      methods.
     + Various containers now have STL-style =empty()= method, which may be more
       readable and universal than =!size()= or =!valid()= conditions.
-
     + various containers now have an =xfer()= method for yielding their contents
       to a corresponding =Xfer= class.
-
 
 *** *New* Xfer class
     Provides finer grained control over copying or transferring objects with
     very little overhead. It can be used for any object that has a =transfer()=
-    method and a =operator=()= copy method.
-    Since it is decided upon construction of the =Xfer= object whether the
-    parameter is to be copied or transferred, the contents of the resulting
-    Xfer object can be transferred unconditionally. This greatly simplifies
-    defining constructors or methods in other classes with mixed
-    transfer/copy semantics without requiring 2^N different versions.
-
-    + =xferCopy()=, =xferMove()= and =xferCopyTo()=, =xferMoveTo()= functions
-      to ease the use of the =Xfer= class.
+    method and a =operator=()= copy method.  Since it is decided upon
+    construction of the =Xfer= object whether the parameter is to be copied or
+    transferred, the contents of the resulting Xfer object can be transferred
+    unconditionally. This greatly simplifies defining constructors or methods in
+    other classes with mixed transfer/copy semantics without requiring 2^N
+    different versions.
+    + =xferCopy()=, =xferMove()= and =xferCopyTo()=, =xferMoveTo()= functions to
+      ease the use of the =Xfer= class.
 
 *** Convenience changes
     + =IOobject= has a *new* constructor for creating an =IOobject= from a
       single-path specification (eg, see =blockMesh -dict= option).
-
-    + =argList= has *new* convenience methods for accessing options more directly:
-      =option()=, =optionFound()=, =optionLookup()=, =optionRead()=,
+    + =argList= has *new* convenience methods for accessing options more
+      directly: =option()=, =optionFound()=, =optionLookup()=, =optionRead()=,
       =optionReadIfPresent()= .
-
-    + The *new* =readList(Istream&)= can read a bracket-delimited list or
-      handle a single value as a list of size 1. This can be a useful
-      convenience when processing command-line options.
-
+    + The *new* =readList(Istream&)= can read a bracket-delimited list or handle
+      a single value as a list of size 1. This can be a useful convenience when
+      processing command-line options.
 
 *** Misc. improvements
     + Improved consistency and interoperability between =face= and =triFace= classes.
-
     + =face::triangles()= can split and append to a =DynamicList=
-
     + =coordinateSystems= can access global systems (similar to =MeshObject=)
-
-
 
 ** Turbulence modelling
    + Major development of turbulence model libraries to give extra flexibility
      at the solver level.  For solvers that can support either RAS/LES
-     computations, the selection is made in the
-     /constant/turbulenceProperties/,
+     computations, the selection is made in the /constant/turbulenceProperties/,
      by setting the =simulationType= keyword to:
      - =laminar=
      - =RASModel=
@@ -197,17 +164,15 @@
 
 **** RAS wall functions
      Wall functions are now run-time selectable per patch for RAS.
+     + Velocity:
+       - Apply to turbulent viscosities =nut= or =mut=
+       - Apply to =k=, =Q=, =R=
+       - Apply to =epsilon=, =omega=
+     + Temperature:
+       - Apply to turbulent thermal diffusivity, =alphat= (compressible only)
 
-****** Velocity:
-       + Apply to turbulent viscosities =nut= or =mut=
-       + Apply to =k=, =Q=, =R=
-       + Apply to =epsilon=, =omega=
-
-****** Temperature:
-       + Apply to turbulent thermal diffusivity, =alphat= (compressible only)
-
-****** To apply wall functions:
-       + To recapture the functionality of previous OpenFOAM versions (v1.5 and
+     + To apply wall functions:
+       - To recapture the functionality of previous OpenFOAM versions (v1.5 and
          earlier) assign:
          - for velocity:
            - =nut=: =nutWallFunction=
@@ -217,7 +182,7 @@
            - =k=, =Q=, =R=: =kQRWallFunction=
          - for temperature:
            - =alphat=: =alphatWallFunction=
-       + New =alphaSgsJayatillekeWallFunction= thermal wall function for
+       - New =alphaSgsJayatillekeWallFunction= thermal wall function for
          compressible LES
 
 **** *New* LES turbulence models
@@ -259,10 +224,10 @@
 ** Lagrangian
 
 **** Intermediate
-     - Overhaul of the underlying framework
-     - Reacting now split into reacting and reacting multiphase
-     - New structure for variable composition
-     - Many new sub-models, including:
+     + Overhaul of the underlying framework
+     + Reacting now split into reacting and reacting multiphase
+     + New structure for variable composition
+     + Many new sub-models, including:
        - Injection
          - =PatchInjection= - injection local to patch face cells
          - =FieldActivatedInjection= - injection based on satisfying external
@@ -278,29 +243,23 @@
          - liquid evaporation
 
 **** Coal combustion
-     - *New* library - extension of reacting-multiphase functionality
+     + *New* library - extension of reacting-multiphase functionality
        - Surface reaction/combustion models
 
 ** Discrete methods
-    - *New* library offering DSMC simulation functionality - see =dsmcFoam=
+    + *New* library offering DSMC simulation functionality - see =dsmcFoam=
       below
-    - *New* libraries offering molecular dynamics simulation functionality - see
+    + *New* libraries offering molecular dynamics simulation functionality - see
       =mdFoam= and =mdEquilibrationFoam=: below.
-
 
 ** *New* surfMesh library
    Provides a more efficient storage mechanism than possible with =triSurface=
-   without restrictions on the shape of the face (templated parameter).
-   It will however take quite some time before it can fully replace
-   =triSurface= .
-
+   without restrictions on the shape of the face (templated parameter).  It will
+   however take quite some time before it can fully replace =triSurface= .
    + =MeshedSurface= class - with zero or more contiguous =surfZones= .
-
-   + =UnsortedMeshedSurface= class - unordered surface zones
-     (as per =triSurface=)
-
+   + =UnsortedMeshedSurface= class - unordered surface zones (as per
+     =triSurface=)
    + =surfMesh= class - for reading/writing in native OpenFOAM format
-
 
 * Solver restructuring
   The upgrade to the turbulence models means that the simulation type, i.e.
@@ -318,48 +277,42 @@
     - =channelOodles= \rightarrow =channelFoam= (LES)
 
 * General changes
-  - pd to p ------------------------------------------------------------ [HENRY]
-  - gravity ------------------------------------------------------------ [HENRY]
+  + pd to p ------------------------------------------------------------ [HENRY]
+  + gravity ------------------------------------------------------------ [HENRY]
 
-** Solver control improvments
+** Solver control improvements
    Use dictionary entries instead of an =Istream= for the solver controls.
    + This Allows dictionary substitutions and regular expressions in
      /system/fvSolution/
-
    + The old solver control syntax is still supported (warning emitted), but
      the *new* =foamUpgradeFvSolution= utility can be used to convert
      /system/fvSolution/ to the new format.
-
 
 * Tutorial restructuring
   to reflect solver application structure
 
 * Post-processing ---------------------------------------------------- [MATTIJS]
-  - SAMPLING - improved plane, iso-surface handling
-  - Output to any surface geometry format supported by the =surfMesh= library.
-
+  * sampling on iso-surfaces, interpolated or non-interpolated
+  * sampling on surface defined by distance to surface (distanceSurface)
+  * cutting planes on non-convex cells
+  * Output to any surface geometry format supported by the =surfMesh= library.
 * *New* Solvers
   + =buoyantBoussinesqSimpleFoam=
     Steady state heat transfer solver using a Boussinesq approximation for
     buoyancy, with laminar, RAS or LES turbulence modelling
-
   + =buoyantBoussinesqPisoFoam=
     Transient heat transfer solver using a Boussinesq approximation for
     buoyancy, with laminar, RAS or LES turbulence modelling
-
   + =coalChemistryFoam=
     Transient, reacting lagrangian solver, employing a coal cloud and a thermo
     cloud, with chemistry, and laminar, RAS or LES turbulence modelling
-
   + =porousExplicitSourceReactingParcelFoam=
     Transient, reacting lagrangian solver, employing a single phase reacting
     cloud, with porous media, explicit mass sources, and laminar, RAS or LES
     turbulence modelling
-
   + =rhoReactingFoam=
     Density-based thermodynamics variant of the reactingFoam solver, i.e. now
     applicable to liquid systems
-
   + =dsmcFoam=
     DSMC (Direct Simulation Monte-Carlo) solver for rarefied gas dynamics
     simulations, able to simulate mixtures of an arbitrary number of gas species.
@@ -377,11 +330,14 @@
     molecules interact with short-range dispersion forces and pairwise
     electrostatic interactions using methods described in:
     Fennell and Gezelter, J. Chem. Phys. 124, 234104 (2006)
-
   + =mdEquilibrationFoam=
     Similar to mdFoam, but employs velocity scaling to adjust the simulation
     temperature to a target value. Useful to equilibrate a case before
     simulation.
+
+  + =chtMultiRegionFoam=
+    New boundary condition allows independent decomposition of coupled regions
+	without any constraint on the decomposition.
 
 * Function objects
 
@@ -390,30 +346,28 @@
      which allows a chaining of operations. It is thus internally more
      efficient when /system/controlDict/ uses =functions {..}= instead of
      =functions (..)=, but both forms are supported.
-
    + The =functionObject= now has an additional =end()= method that is called
      when =Time::loop()= or =Time::run()= determine that the time-loop exits.
      Accordingly, one of these two idioms should be used in solver code:
      1. =while (runTime.loop() { ... }=
      2. =while (runTime.run()) { runTime++; ... }=
-
    + *New* - =functionObjectList= now tracks the SHA1 message digest of the
      sub-directories. This avoids reloading a =functionObject= when
      something unrelated in /system/controlDict/ changed.
 
 ** *New* function objects:
-    - =systemCall= - executes a list of system instructions
-    - =fieldMinMax= - computes the min/max of a <field>
-    - =staticPressure= - converts kinematic pressure to static pressure
-    - =dsmcFields= - calculates intensive fields (velocity and temperature) from
+    + =systemCall= - executes a list of system instructions
+    + =fieldMinMax= - computes the min/max of a <field>
+    + =staticPressure= - converts kinematic pressure to static pressure
+    + =dsmcFields= - calculates intensive fields (velocity and temperature) from
       averaged extensive fields (i.e. momentum and energy)
 
 ** Usage
-    - Improved output control: =timeStep= or =outputTime=
+    + Improved output control: =timeStep= or =outputTime=
 
 * Boundary conditions
-  - Improved set of direct mapped boundary conditions
-  - Buoyancy boundary condition ---------------------------------------- [HENRY]
+  + Improved set of direct mapped boundary conditions
+  + Buoyancy boundary condition ---------------------------------------- [HENRY]
 
 * Utilities
 
@@ -429,30 +383,35 @@
   + =foamToEnsightParts= has *new* =-noMesh= and =-index= options that can
     be useful when post-processing results incrementally.
 
+  + =snappyHexMesh= has lower memory footprint. New distributed triangulated
+	surface type for meshing surfaces with extremely large triangle count.
+
 ** *New* utilities
-  - =particleTracks= - generate particle tracks for lagrangian calculations
-  - =dsmcInitialise= - preprocessing utility to create initial configurations of
+  + =particleTracks= - generate particle tracks for lagrangian calculations
+  + =dsmcInitialise= - preprocessing utility to create initial configurations of
     DSMC particles in a geometry
 
+  + =surfaceRedistributePar= - preprocessing utility to create distributed
+	triangulated surface.
 *** *New* foamCalc functions
-    - =interpolate= - performs fvc::interpolate(<field>)
-    - =randomise= - randomises a <field> by a given perturbation
-    - =addSubtract= - simple add/subtract field functionality
+    + =interpolate= - performs fvc::interpolate(<field>)
+    + =randomise= - randomises a <field> by a given perturbation
+    + =addSubtract= - simple add/subtract field functionality
 
 ** Usage
-  + =timeSelector= can now combine =-time ranges= and =-latestTime= options.
+  + =timeSelector= can now combine =-time ranges= and =-latestTime= options
+	(e.g. -time '0.01:0.09', -time '0.01:').
     More reliable behaviour for cases missing /constant// or /0//
     directories. When the =-noZero= option is enabled, =-latestTime= will not
     select the =0/= directory unless the =-zeroTime= option is given.
     This helps avoid ill effects caused by accidentally using the
     /0// directory in certain utilities (eg, =reconstructPar=).
+  + =-region= option added to more utilities.
 
 ** Improvements to Paraview reader module
   + =PV3FoamReader= added mesh region handling. The region name is parsed
     from the filename. Eg, /case{region}.OpenFOAM/
-
   + =paraFoam= with a *new* =-region= option for specifying an alternative
     region. A *new* =-touch= option to generate the /.OpenFOAM/ file only.
     Only creates (and removes) /.OpenFOAM/ files if they didn't already
     exist, which is useful in connection with the =-touch= option.
-

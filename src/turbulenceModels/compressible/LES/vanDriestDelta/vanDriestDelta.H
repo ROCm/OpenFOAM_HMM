@@ -22,97 +22,93 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::compressible::LESModels::vanDriestDelta
+
+Description
+    Simple cube-root of cell volume delta used in compressible LES models.
+
+SourceFiles
+    vanDriestDelta.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "scaleSimilarity.H"
+#ifndef vanDriestDelta_H
+#define vanDriestDelta_H
+
+#include "LESdelta.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace LESModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+/*---------------------------------------------------------------------------*\
+                           Class vanDriestDelta Declaration
+\*---------------------------------------------------------------------------*/
 
-defineTypeNameAndDebug(scaleSimilarity, 0);
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-scaleSimilarity::scaleSimilarity
-(
-    const volVectorField& U,
-    const surfaceScalarField& phi,
-    transportModel& transport
-)
+class vanDriestDelta
 :
-    LESModel(typeName, U, phi, transport),
-    filterPtr_(LESfilter::New(U.mesh(), coeffDict())),
-    filter_(filterPtr_())
+    public LESdelta
 {
-    printCoeffs();
-}
+    // Private data
+
+        autoPtr<LESdelta> geometricDelta_;
+        scalar kappa_;
+        scalar Aplus_;
+        scalar Cdelta_;
+        label calcInterval_;
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+    // Private Member Functions
 
-tmp<volScalarField> scaleSimilarity::k() const
-{
-    return(0.5*(filter_(magSqr(U())) - magSqr(filter_(U()))));
-}
+        //- Disallow default bitwise copy construct and assignment
+        vanDriestDelta(const vanDriestDelta&);
+        void operator=(const vanDriestDelta&);
 
-
-tmp<volScalarField> scaleSimilarity::epsilon() const
-{
-    volSymmTensorField D = symm(fvc::grad(U()));
-
-    return((filter_(sqr(U())) - sqr(filter_(U()))) && D);
-}
+        // Calculate the delta values
+        void calcDelta();
 
 
-tmp<volSymmTensorField> scaleSimilarity::B() const
-{
-    return(filter_(sqr(U())) - sqr(filter_(U())));
-}
+public:
+
+    //- Runtime type information
+    TypeName("vanDriest");
 
 
-tmp<volSymmTensorField> scaleSimilarity::devBeff() const
-{
-    return dev(B());
-}
+    // Constructors
+
+        //- Construct from name, mesh and IOdictionary
+        vanDriestDelta(const word& name, const fvMesh& mesh, const dictionary&);
 
 
-tmp<fvVectorMatrix> scaleSimilarity::divDevBeff(volVectorField& U) const
-{
-    return fvm::Su(fvc::div(devBeff()), U);
-}
+    //- Destructor
+    virtual ~vanDriestDelta()
+    {}
 
 
-void scaleSimilarity::correct(const tmp<volTensorField>&)
-{}
+    // Member Functions
 
+        //- Read the LESdelta dictionary
+        virtual void read(const dictionary&);
 
-bool scaleSimilarity::read()
-{
-    if (LESModel::read())
-    {
-        filter_.read(coeffDict());
-
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
+        // Correct values
+        virtual void correct();
+};
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

@@ -58,8 +58,6 @@ withQTSUPPORT=true
 
 # Set the path to the Qt-4.3.? qmake if the system Qt is other than this version
 QMAKE_PATH=""
-#QMAKE_PATH=/usr/local/Trolltech/Qt-4.3.5/bin/qmake
-#QMAKE_PATH=$WM_THIRD_PARTY_DIR/qt-x11-opensource-src-4.3.5/platforms/linux64GccDPOpt/bin/qmake
 
 #
 # No further editing below this line
@@ -87,14 +85,14 @@ For finer control, the build stages can be also selected individually
   -make
   -makedoc
   -install
-  [-envpath]    alter absolute paths in CMake files to use env variables
+  -envpath      alter absolute paths in CMake files to use env variables
 
 Build and install paraview-$ParaView_VERSION
   - run from folder above the ParaView source folder or place the ParaView
     source under \$WM_THIRD_PARTY_DIR ($WM_THIRD_PARTY_DIR)
 
 USAGE
-   exit 1
+    exit 1
 }
 
 #------------------------------------------------------------------------------
@@ -114,7 +112,7 @@ runCONFIG=true
 runMAKE=true
 runMAKEDOC=true
 runINSTALL=true
-runENVPATH=false
+runENVPATH=true
 
 
 # parse options
@@ -152,7 +150,7 @@ do
         runINSTALL=true
         shift
         ;;
-    -envpath)            # optional: change cmake files to use env variables
+    -envpath)            # stage 5: change cmake files to use env variables
         runCONFIG=false
         runMAKE=false
         runMAKEDOC=false
@@ -182,6 +180,11 @@ do
     -qt)
         withQTSUPPORT=true
         shift
+        ;;
+    -qmake)
+        [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
+        export QMAKE_PATH=$2
+        shift 2
         ;;
     -verbose)
         withVERBOSE=true

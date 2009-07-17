@@ -33,13 +33,13 @@ Class
     Foam::compressible::LESModel
 
 Description
-    Class for all compressible flow LES SGS models.
+    Base class for all compressible flow LES SGS models.
 
-    This class defines the basic interface for a compressible flow SGS model,
-    and encapsulates data of value to all possible models. In particular
-    this includes references to all the dependent fields (rho, U, phi),
-    the physical viscosity mu, and the LESProperties dictionary,
-    which contains the model selection and model coefficients.
+    This class defines the basic interface for a compressible flow SGS
+    model, and encapsulates data of value to all possible models.
+    In particular this includes references to all the dependent fields
+    (rho, U, phi), the physical viscosity mu, and the LESProperties
+    dictionary, which contains the model selection and model coefficients.
 
 SourceFiles
     LESModel.C

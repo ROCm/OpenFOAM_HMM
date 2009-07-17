@@ -182,7 +182,8 @@ public:
 
 
     //- Destructor
-    virtual ~RASModel();
+    virtual ~RASModel()
+    {}
 
 
     // Member Functions
@@ -310,9 +311,6 @@ public:
             );
         }
 
-        //- Return yPlus for the given patch
-        virtual tmp<scalarField> yPlus(const label patchI) const;
-
         //- Return the turbulence kinetic energy
         virtual tmp<volScalarField> k() const = 0;
 
@@ -327,6 +325,9 @@ public:
 
         //- Return the source term for the momentum equation
         virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const = 0;
+
+        //- Return yPlus for the given patch
+        virtual tmp<scalarField> yPlus(const label patchI) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;

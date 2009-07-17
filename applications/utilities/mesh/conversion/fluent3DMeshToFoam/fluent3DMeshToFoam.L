@@ -47,6 +47,7 @@ Description
 #include "cyclicPolyPatch.H"
 #include "Swap.H"
 #include "IFstream.H"
+#include "readHexLabel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -91,6 +92,9 @@ DynamicList<label> cellGroupZoneID;
 DynamicList<label> cellGroupStartIndex;
 DynamicList<label> cellGroupEndIndex;
 DynamicList<label> cellGroupType;
+
+// Special parsing of (incorrect) Cubit files
+bool cubitFile = false;
 
 
 void uniquify(word& name, HashSet<word>& patchNames)
@@ -622,11 +626,20 @@ endOfSection               {space}")"{space}
         BEGIN(readZoneGroupData);
     }
 
-<readZoneGroupData>{space}{label}{space}{word}{space}{word}{space}{label}? {
+<readZoneGroupData>{space}{hexLabel}{space}{word}{space}{word}{space}{label}? {
         IStringStream zoneDataStream(YYText());
 
         // cell zone-ID not in hexadecimal!!! Inconsistency
-        label zoneID(readLabel(zoneDataStream));
+        label zoneID = -1;
+
+        if (cubitFile)
+        {
+            zoneID = readHexLabel(zoneDataStream);
+        }
+        else
+        {
+            zoneID = readLabel(zoneDataStream);
+        }
 
         groupType.insert(zoneID, word(zoneDataStream));
         groupName.insert(zoneID, word(zoneDataStream));
@@ -752,6 +765,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("scale", "scale factor");
     argList::validOptions.insert("ignoreCellGroups", "cell group names");
     argList::validOptions.insert("ignoreFaceGroups", "face group names");
+    argList::validOptions.insert("cubit", "");
 
     argList args(argc, argv);
 
@@ -773,6 +787,17 @@ int main(int argc, char *argv[])
     {
         args.optionLookup("ignoreFaceGroups")() >> ignoreFaceGroups;
     }
+
+    cubitFile = args.options().found("cubit");
+
+    if (cubitFile)
+    {
+        Info<< nl
+            << "Assuming Cubit generated file"
+            << " (incorrect face orientation; hexadecimal zoneIDs)."
+            << nl << endl;
+    }
+
 
 #   include "createTime.H"
 
@@ -827,7 +852,10 @@ int main(int argc, char *argv[])
         )
         {
             fm[facei] = true;
-            faces[facei] = faces[facei].reverseFace();
+            if (!cubitFile)
+            {
+                faces[facei] = faces[facei].reverseFace();
+            }
             Swap(owner[facei], neighbour[facei]);
         }
     }

@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.5                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -18,6 +18,8 @@ FoamFile
 LESModel        oneEqEddy;
 
 delta           cubeRootVol;
+
+turbulence      on;
 
 printCoeffs     on;
 
@@ -123,6 +125,7 @@ kappa           0.4187;
 wallFunctionCoeffs
 {
     E               9;
+    Prt             0.85;
 }
 
 

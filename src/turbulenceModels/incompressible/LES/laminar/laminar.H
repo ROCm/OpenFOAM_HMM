@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef laminar_H
-#define laminar_H
+#ifndef lesLaminar_H
+#define lesLaminar_H
 
 #include "LESModel.H"
 #include "volFields.H"

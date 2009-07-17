@@ -39,7 +39,7 @@ then
     exit 1
 fi
 
-utilbin=$WM_DIR/utilbin/$WM_ARCH$WM_COMPILER
+bin=$WM_DIR/bin/$WM_ARCH$WM_COMPILER
 
 [ -d Make ] || mkdir Make
 rm -f Make/files
@@ -51,7 +51,7 @@ do
     if [ $dir != . ]
     then
         baseDir=`echo $dir | sed 's%^\./%%'`
-        baseDirName=`echo $baseDir | $utilbin/dirToString`
+        baseDirName=`echo $baseDir | $bin/dirToString`
 
         if [ $baseDirName != Make ]
         then
@@ -66,7 +66,7 @@ files=`find . -name "*.[cCylfF]" -type f  -print`
 
 for file in $files
 do
-    pathName=`echo ${file%/*} | sed 's%^\.%%' | sed 's%^/%%' | $utilbin/dirToString`
+    pathName=`echo ${file%/*} | sed 's%^\.%%' | sed 's%^/%%' | $bin/dirToString`
     fileName=`echo ${file##*/}`
 
     if [ "$pathName" != "" ]

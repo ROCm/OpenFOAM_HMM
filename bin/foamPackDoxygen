@@ -41,7 +41,7 @@ Usage: ${0##*/} [-prefix DIR] [-o outputDir]
     Packs and compresses the OpenFOAM doxygen html for release
 
 USAGE
-   exit 1
+    exit 1
 }
 
 unset prefix outputDir
@@ -87,16 +87,16 @@ fi
 #
 if [ -d "$outputDir" ]
 then
-   packFile="$outputDir/$packDir$packTag"
+    packFile="$outputDir/$packDir$packTag"
 else
-   packFile="$packDir$packTag"
+    packFile="$packDir$packTag"
 fi
 
 
 if [ -f $packFile ]
 then
-   echo "Error: $packFile already exists"
-   exit 1
+    echo "Error: $packFile already exists"
+    exit 1
 fi
 
 # Pack and compress the packFile using GNU tar
@@ -107,16 +107,16 @@ echo
 
 if [ -n "$prefix" ]
 then
-   tar czpf $packFile --transform="s@^@$prefix/@" doc/Doxygen/html
+    tar czpf $packFile --transform="s@^@$prefix/@" doc/Doxygen/html
 else
-   tar czpf $packFile $packDir/doc/Doxygen/html
+    tar czpf $packFile $packDir/doc/Doxygen/html
 fi
 
-if [ $? = 0 ]
+if [ $? -eq 0 ]
 then
-   echo "Finished packing doxygen html into file $packFile"
+    echo "Finished packing doxygen html into file $packFile"
 else
-   echo "Error: failure packing doxygen html file $packFile"
+    echo "Error: failure packing doxygen html file $packFile"
 fi
 
 #------------------------------------------------------------------------------
