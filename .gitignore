@@ -38,8 +38,8 @@ SiCortex*Gcc*/
 solaris*Gcc*/
 SunOS*Gcc*/
 
-# reinstate wmake/rules that might look like build folders
-!wmake/rules/*/
+# all of the wmake wmkdep and dirToString binaries
+wmake/bin
 
 # doxygen generated documentation
 doc/[Dd]oxygen/html

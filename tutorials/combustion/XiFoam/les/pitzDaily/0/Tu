@@ -42,7 +42,7 @@ boundaryField
     lowerWall
     {
         type            fixedValue;
-        value           uniform 293;
+        value           uniform 570;
     }
 
     frontAndBack

@@ -2,7 +2,6 @@ include $(GENERAL_RULES)/version
 
 include $(GENERAL_RULES)/sourceToDep
 
-include $(GENERAL_RULES)/java
 include $(GENERAL_RULES)/flex
 include $(GENERAL_RULES)/flex++
 ## include $(GENERAL_RULES)/byacc

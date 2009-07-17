@@ -20,33 +20,33 @@ internalField   uniform (0 0 0);
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            turbulentInlet;
         referenceField  uniform (13.3 0 0);
         fluctuationScale (0.04 0.02 0.02);
     }
 
-    outlet          
+    outlet
     {
         type            inletOutlet;
         inletValue      uniform (0 0 0);
         value           uniform (0 0 0);
     }
 
-    upperWall       
+    upperWall
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    lowerWall       
+    lowerWall
     {
         type            fixedValue;
         value           uniform (0 0 0);
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            cyclic;
     }

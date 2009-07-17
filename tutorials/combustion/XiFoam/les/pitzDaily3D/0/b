@@ -20,30 +20,30 @@ internalField   uniform 1;
 
 boundaryField
 {
-    inlet           
+    inlet
     {
         type            fixedValue;
         value           uniform 1;
     }
 
-    outlet          
+    outlet
     {
         type            inletOutlet;
         inletValue      uniform 1;
         value           uniform 1;
     }
 
-    upperWall       
+    upperWall
     {
         type            zeroGradient;
     }
 
-    lowerWall       
+    lowerWall
     {
         type            zeroGradient;
     }
 
-    frontAndBack    
+    frontAndBack
     {
         type            cyclic;
     }

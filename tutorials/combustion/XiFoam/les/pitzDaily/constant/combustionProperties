@@ -21,7 +21,7 @@ fuel            Propane;
 
 Su              Su [0 1 -1 0 0 0 0] 0.135;
 
-SuModel         unstrained;
+SuModel         transport;
 
 equivalenceRatio equivalenceRatio [0 0 0 0 0 0 0] 0.6;
 
@@ -68,7 +68,7 @@ GuldersCoeffs
     }
 }
 
-ignite          yes;
+ignite     yes;
 
 ignitionSites
 (
@@ -76,8 +76,8 @@ ignitionSites
         location (0.005 -0.02 0);
         diameter 0.003;
         start 0;
-        duration 0.1;
-        strength 40;
+        duration 0.05;
+        strength 20;
     }
 );
 

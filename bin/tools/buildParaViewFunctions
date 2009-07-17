@@ -171,10 +171,13 @@ addQtSupport()
 
     addCMakeVariable "PARAVIEW_BUILD_QT_GUI=ON"
 
+    qmakeExe=qmake
+
     if [ -n "$QMAKE_PATH" ]
     then
         if [ -x "$QMAKE_PATH" ]
         then
+            qmakeExe=$QMAKE_PATH
             addCMakeVariable QT_QMAKE_EXECUTABLE:FILEPATH=$QMAKE_PATH
         else
             echo
@@ -183,6 +186,28 @@ addQtSupport()
             echo "leaving unspecified"
             echo
         fi
+    fi
+
+    # Check qmake can be found
+    if [ `which $qmakeExe` ]
+    then
+        # Check the Qt version selected
+        QtVersion=`$qmakeExe -v | grep Using | sed "s/.* version \(.\..\).*/\1/"`
+        QtMajor=`echo $QtVersion | sed "s/\(.\)\../\1/"`
+        QtMinor=`echo $QtVersion | sed "s/.\.\(.\)/\1/"`
+
+        if [ $QtMajor -lt 4 -o $QtMinor -lt 3 ]
+        then
+            echo "*** Error: Qt version provided < 4.3"
+            echo "***     Please use the -qmake option to specify the location of a version of Qt >= 4.3 "
+            echo "***     e.g."
+            echo "***         -qmake /usr/local/Trolltech/Qt-4.3.5/bin/qmake"
+            echo "***         -qmake $WM_THIRD_PARTY_DIR/qt-x11-opensource-src-4.3.5/platforms/$WM_OPTIONS/bin/qmake"
+            exit 1
+        fi
+    else
+        echo "*** Error: cannot find qmake either at \$QMAKE_PATH or in current \$PATH"
+        exit 1
     fi
 }
 

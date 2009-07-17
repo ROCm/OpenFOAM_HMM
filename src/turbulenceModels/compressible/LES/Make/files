@@ -9,6 +9,8 @@ dynOneEqEddy/dynOneEqEddy.C
 DeardorffDiffStress/DeardorffDiffStress.C
 SpalartAllmaras/SpalartAllmaras.C
 
+vanDriestDelta/vanDriestDelta.C
+
 /* Wall functions */
 wallFunctions=derivedFvPatchFields/wallFunctions
 
