@@ -76,7 +76,7 @@ dirList=$(
         $packDir/lib/$arch \
         $packDir/applications/bin/$arch \
         $packDir/wmake/rules \
-        $packDir/wmake/utilbin/$baseArch \
+        $packDir/wmake/bin/$baseArch \
         ;
     do
         [ -d $dir ] && echo $dir
