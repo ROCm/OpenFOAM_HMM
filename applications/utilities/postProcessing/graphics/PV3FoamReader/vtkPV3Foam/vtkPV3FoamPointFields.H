@@ -132,7 +132,6 @@ void Foam::vtkPV3Foam::convertPointFields
 }
 
 
-
 template<class Type>
 void Foam::vtkPV3Foam::convertPointFieldBlock
 (
@@ -160,7 +159,6 @@ void Foam::vtkPV3Foam::convertPointFieldBlock
        }
    }
 }
-
 
 
 template<class Type>
@@ -193,7 +191,7 @@ void Foam::vtkPV3Foam::convertPointField
     pointData->SetNumberOfTuples(nPoints + addPointCellLabels.size());
     pointData->SetNumberOfComponents(nComp);
     pointData->Allocate(nComp*(nPoints + addPointCellLabels.size()));
-    pointData->SetName(ptf.name().c_str());
+    pointData->SetName(tf.name().c_str());
 
     if (debug)
     {
@@ -268,6 +266,7 @@ void Foam::vtkPV3Foam::convertPointField
 
     pointData->Delete();
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
