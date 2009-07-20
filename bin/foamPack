@@ -90,7 +90,7 @@ find -H $packDir               \
  -e '\@/\.git/@d'              \
  -e '\@applications/bin/@d'    \
  -e '\@wmake/bin/@d'           \
- -e '\@/t/@d'                     \
+ -e '\@/t/@d'                  \
  -e '\@Make[.A-Za-z]*/[^/]*/@d'   \
  -e '\@doc/[Dd]oxygen/html@d'     \
  -e '\@doc/[Dd]oxygen/latex@d'    \

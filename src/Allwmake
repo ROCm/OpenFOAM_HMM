@@ -5,8 +5,8 @@ set -x
 # update OpenFOAM version strings if required
 wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
 
-wmakeLnInclude -f OpenFOAM
-wmakeLnInclude -f OSspecific/$WM_OSTYPE
+wmakeLnInclude OpenFOAM
+wmakeLnInclude OSspecific/$WM_OSTYPE
 Pstream/Allwmake
 
 wmake libo  OSspecific/$WM_OSTYPE
