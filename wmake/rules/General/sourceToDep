@@ -1,6 +1,6 @@
 .SUFFIXES: .c .cc .cxx .cpp .C .F .f .dep
 
-MKDEP       = $(UTILBIN)/wmkdep -I$(*D) $(LIB_HEADER_DIRS)
+MKDEP       = $(BIN)/wmkdep -I$(*D) $(LIB_HEADER_DIRS)
 
 .c.dep:
 	$(MAKE_DEP)
