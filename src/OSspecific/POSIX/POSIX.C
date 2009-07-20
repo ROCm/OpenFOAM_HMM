@@ -474,20 +474,20 @@ Foam::fileName::Type Foam::type(const fileName& name)
 
 
 // Does the name exist in the filing system?
-bool Foam::exists(const fileName& name)
+bool Foam::exists(const fileName& name, const bool checkGzip)
 {
-    return mode(name) || isFile(name);
+    return mode(name) || isFile(name, checkGzip);
 }
 
 
-// Does the directory exist
+// Does the directory exist?
 bool Foam::isDir(const fileName& name)
 {
     return S_ISDIR(mode(name));
 }
 
 
-// Does the file exist
+// Does the file exist?
 bool Foam::isFile(const fileName& name, const bool checkGzip)
 {
     return S_ISREG(mode(name)) || (checkGzip && S_ISREG(mode(name + ".gz")));
@@ -757,31 +757,31 @@ bool Foam::ln(const fileName& src, const fileName& dst)
 
 
 // Rename srcFile dstFile
-bool Foam::mv(const fileName& srcFile, const fileName& dstFile)
+bool Foam::mv(const fileName& src, const fileName& dst)
 {
     if (POSIX::debug)
     {
-        Info<< "Move : " << srcFile << " to " << dstFile << endl;
+        Info<< "Move : " << src << " to " << dst << endl;
     }
 
     if
     (
-        dstFile.type() == fileName::DIRECTORY
-     && srcFile.type() != fileName::DIRECTORY
+        dst.type() == fileName::DIRECTORY
+     && src.type() != fileName::DIRECTORY
     )
     {
-        const fileName dstName(dstFile/srcFile.name());
+        const fileName dstName(dst/src.name());
 
-        return rename(srcFile.c_str(), dstName.c_str()) == 0;
+        return rename(src.c_str(), dstName.c_str()) == 0;
     }
     else
     {
-        return rename(srcFile.c_str(), dstFile.c_str()) == 0;
+        return rename(src.c_str(), dst.c_str()) == 0;
     }
 }
 
 
-// Remove a file returning true if successful otherwise false
+// Remove a file, returning true if successful otherwise false
 bool Foam::rm(const fileName& file)
 {
     if (POSIX::debug)

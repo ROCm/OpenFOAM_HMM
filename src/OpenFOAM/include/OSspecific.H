@@ -119,7 +119,8 @@ mode_t mode(const fileName&);
 fileName::Type type(const fileName&);
 
 //- Does the name exist (as DIRECTORY or FILE) in the file system?
-bool exists(const fileName&);
+//  Optionally enable/disable check for gzip file.
+bool exists(const fileName&, const bool checkGzip=true);
 
 //- Does the name exist as a DIRECTORY in the file system?
 bool isDir(const fileName&);
