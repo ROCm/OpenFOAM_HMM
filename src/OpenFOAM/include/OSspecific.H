@@ -144,15 +144,19 @@ fileNameList readDir
 );
 
 //- Copy, recursively if necessary, the source to the destination
-bool cp(const fileName& srcFile, const fileName& destFile);
+bool cp(const fileName& src, const fileName& dst);
 
-//- Create a softlink. destFile should not exist. Returns true if successful.
-bool ln(const fileName& srcFile, const fileName& destFile);
+//- Create a softlink. dst should not exist. Returns true if successful.
+bool ln(const fileName& src, const fileName& dst);
 
-//- Rename srcFile destFile
-bool mv(const fileName& srcFile, const fileName& destFile);
+//- Rename src to dst
+bool mv(const fileName& src, const fileName& dst);
 
-//- Remove a file returning true if successful otherwise false
+//- Rename to a corresponding backup file
+//  If the backup file already exists, attempt with "01" .. "99" suffix
+bool mvBak(const fileName&, const std::string& ext = "bak");
+
+//- Remove a file, returning true if successful otherwise false
 bool rm(const fileName&);
 
 //- Remove a dirctory and its contents

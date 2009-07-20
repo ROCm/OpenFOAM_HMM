@@ -781,6 +781,45 @@ bool Foam::mv(const fileName& src, const fileName& dst)
 }
 
 
+//- Rename to a corresponding backup file
+//  If the backup file already exists, attempt with "01" .. "99" index
+bool Foam::mvBak(const fileName& src, const std::string& ext)
+{
+    if (POSIX::debug)
+    {
+        Info<< "mvBak : " << src << " to extension " << ext << endl;
+    }
+
+    if (exists(src, false))
+    {
+        const int maxIndex = 99;
+        char index[3];
+
+        for (int n = 0; n <= maxIndex; n++)
+        {
+            fileName dstName(src + "." + ext);
+            if (n)
+            {
+                sprintf(index, "%02d", n);
+                dstName += index;
+            }
+
+            // avoid overwriting existing files, except for the last
+            // possible index where we have no choice
+            if (!exists(dstName, false) || n == maxIndex)
+            {
+                return rename(src.c_str(), dstName.c_str()) == 0;
+            }
+
+        }
+    }
+
+    // fall-through: nothing to do
+    return false;
+}
+
+
+
 // Remove a file, returning true if successful otherwise false
 bool Foam::rm(const fileName& file)
 {
