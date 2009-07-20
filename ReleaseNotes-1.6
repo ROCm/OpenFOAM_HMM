@@ -56,9 +56,8 @@
 *** Dictionary improvements/changes
     + Dictionaries can use words (unquoted) or regular expressions (quoted) for
       their keywords. When searching, an exact match has priority over a regular
-      expression match.
-MJ: If multiple regular expressions they get matched in reverse order.
-
+      expression match.  Multiple regular expressions are matched in reverse
+      order.
     + The default =#inputMode= is now '=merge=', which corresponds to the most
       general usage. The =#inputMode warn= corresponds to the previous default
       behaviour.
@@ -291,53 +290,46 @@ MJ: If multiple regular expressions they get matched in reverse order.
 * Tutorial restructuring
   to reflect solver application structure
 
-* Post-processing ---------------------------------------------------- [MATTIJS]
+* Post-processing
   * sampling on iso-surfaces, interpolated or non-interpolated
   * sampling on surface defined by distance to surface (distanceSurface)
   * cutting planes on non-convex cells
   * Output to any surface geometry format supported by the =surfMesh= library.
 * *New* Solvers
-  + =buoyantBoussinesqSimpleFoam=
-    Steady state heat transfer solver using a Boussinesq approximation for
-    buoyancy, with laminar, RAS or LES turbulence modelling
-  + =buoyantBoussinesqPisoFoam=
-    Transient heat transfer solver using a Boussinesq approximation for
-    buoyancy, with laminar, RAS or LES turbulence modelling
-  + =coalChemistryFoam=
-    Transient, reacting lagrangian solver, employing a coal cloud and a thermo
-    cloud, with chemistry, and laminar, RAS or LES turbulence modelling
-  + =porousExplicitSourceReactingParcelFoam=
-    Transient, reacting lagrangian solver, employing a single phase reacting
-    cloud, with porous media, explicit mass sources, and laminar, RAS or LES
-    turbulence modelling
-  + =rhoReactingFoam=
-    Density-based thermodynamics variant of the reactingFoam solver, i.e. now
-    applicable to liquid systems
-  + =dsmcFoam=
-    DSMC (Direct Simulation Monte-Carlo) solver for rarefied gas dynamics
-    simulations, able to simulate mixtures of an arbitrary number of gas species.
-    The variable hard sphere collision model with Larsen-Borgnakke internal
-    energy redistribution (see "Molecular Gas Dynamics and the Direct Simulation
-    of Gas Flows" G.A. Bird, 1994) is available; other run-time selectable
-    collision models can be easily added.
+  + =buoyantBoussinesqSimpleFoam= Steady state heat transfer solver using a
+    Boussinesq approximation for buoyancy, with laminar, RAS or LES turbulence
+    modelling
+  + =buoyantBoussinesqPisoFoam= Transient heat transfer solver using a
+    Boussinesq approximation for buoyancy, with laminar, RAS or LES turbulence
+    modelling
+  + =coalChemistryFoam= Transient, reacting lagrangian solver, employing a coal
+    cloud and a thermo cloud, with chemistry, and laminar, RAS or LES turbulence
+    modelling
+  + =porousExplicitSourceReactingParcelFoam= Transient, reacting lagrangian
+    solver, employing a single phase reacting cloud, with porous media, explicit
+    mass sources, and laminar, RAS or LES turbulence modelling
+  + =rhoReactingFoam= Density-based thermodynamics variant of the reactingFoam
+    solver, i.e. now applicable to liquid systems
+  + =dsmcFoam= DSMC (Direct Simulation Monte-Carlo) solver for rarefied gas
+    dynamics simulations, able to simulate mixtures of an arbitrary number of
+    gas species.  The variable hard sphere collision model with Larsen-Borgnakke
+    internal energy redistribution (see "Molecular Gas Dynamics and the Direct
+    Simulation of Gas Flows" G.A. Bird, 1994) is available; other run-time
+    selectable collision models can be easily added.
 
 * Updated solvers
-  + =mdFoam=
-    Molecular Dynamics (MD) solver able to simulate a mixture of an arbitrary
-    number of mono-atomic and small, rigid polyatomic (i.e. H2O, N2) molecular
-    species, with 6 degree of freedom motion, in complex geometries. A molecule
-    of any species can be built by specifying its sites of mass and charge. All
-    molecules interact with short-range dispersion forces and pairwise
-    electrostatic interactions using methods described in:
-    Fennell and Gezelter, J. Chem. Phys. 124, 234104 (2006)
-  + =mdEquilibrationFoam=
-    Similar to mdFoam, but employs velocity scaling to adjust the simulation
-    temperature to a target value. Useful to equilibrate a case before
-    simulation.
-
-  + =chtMultiRegionFoam=
-    New boundary condition allows independent decomposition of coupled regions
-	without any constraint on the decomposition.
+  + =mdFoam= Molecular Dynamics (MD) solver able to simulate a mixture of an
+    arbitrary number of mono-atomic and small, rigid polyatomic (i.e. H2O, N2)
+    molecular species, with 6 degree of freedom motion, in complex geometries. A
+    molecule of any species can be built by specifying its sites of mass and
+    charge. All molecules interact with short-range dispersion forces and
+    pairwise electrostatic interactions using methods described in: Fennell and
+    Gezelter, J. Chem. Phys. 124, 234104 (2006)
+  + =mdEquilibrationFoam= Similar to mdFoam, but employs velocity scaling to
+    adjust the simulation temperature to a target value. Useful to equilibrate a
+    case before simulation.
+  + =chtMultiRegionFoam= New boundary condition allows independent decomposition
+    of coupled regions without any constraint on the decomposition.
 
 * Function objects
 
@@ -384,15 +376,16 @@ MJ: If multiple regular expressions they get matched in reverse order.
     be useful when post-processing results incrementally.
 
   + =snappyHexMesh= has lower memory footprint. New distributed triangulated
-	surface type for meshing surfaces with extremely large triangle count.
+    surface type for meshing surfaces with extremely large triangle count.
+    Now supports multi-region meshing of arbitrarily complex regions.
 
 ** *New* utilities
   + =particleTracks= - generate particle tracks for lagrangian calculations
   + =dsmcInitialise= - preprocessing utility to create initial configurations of
     DSMC particles in a geometry
-
   + =surfaceRedistributePar= - preprocessing utility to create distributed
-	triangulated surface.
+    triangulated surface.
+
 *** *New* foamCalc functions
     + =interpolate= - performs fvc::interpolate(<field>)
     + =randomise= - randomises a <field> by a given perturbation
@@ -400,12 +393,12 @@ MJ: If multiple regular expressions they get matched in reverse order.
 
 ** Usage
   + =timeSelector= can now combine =-time ranges= and =-latestTime= options
-	(e.g. -time '0.01:0.09', -time '0.01:').
-    More reliable behaviour for cases missing /constant// or /0//
-    directories. When the =-noZero= option is enabled, =-latestTime= will not
-    select the =0/= directory unless the =-zeroTime= option is given.
-    This helps avoid ill effects caused by accidentally using the
-    /0// directory in certain utilities (eg, =reconstructPar=).
+    (e.g. -time '0.01:0.09', -time '0.01:').  More reliable behaviour for cases
+    missing /constant// or /0// directories. When the =-noZero= option is
+    enabled, =-latestTime= will not select the =0/= directory unless the
+    =-zeroTime= option is given.  This helps avoid ill effects caused by
+    accidentally using the /0// directory in certain utilities (eg,
+    =reconstructPar=).
   + =-region= option added to more utilities.
 
 ** Improvements to Paraview reader module
