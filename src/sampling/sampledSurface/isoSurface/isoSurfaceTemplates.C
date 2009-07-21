@@ -81,7 +81,11 @@ Foam::isoSurface::adaptPatchFields
     {
         const polyPatch& pp = patches[patchI];
 
-        if (isA<emptyPolyPatch>(pp))
+        if
+        (
+            isA<emptyPolyPatch>(pp)
+         && pp.size() != sliceFld.boundaryField()[patchI].size()
+        )
         {
             // Clear old value. Cannot resize it since is a slice.
             sliceFld.boundaryField().set(patchI, NULL);
