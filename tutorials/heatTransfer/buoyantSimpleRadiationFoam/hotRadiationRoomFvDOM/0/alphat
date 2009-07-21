@@ -1,14 +1,14 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      ascii;
+    format      binary;
     class       volScalarField;
     location    "0";
     object      alphat;
@@ -23,22 +23,26 @@ boundaryField
 {
     box
     {
-        type            alphatWallFunction;
+        type            compressible::alphatWallFunction;
+        Prt             0.85;
         value           uniform 0;
     }
     floor
     {
-        type            alphatWallFunction;
+        type            compressible::alphatWallFunction;
+        Prt             0.85;
         value           uniform 0;
     }
     ceiling
     {
-        type            alphatWallFunction;
+        type            compressible::alphatWallFunction;
+        Prt             0.85;
         value           uniform 0;
     }
     fixedWalls
     {
-        type            alphatWallFunction;
+        type            compressible::alphatWallFunction;
+        Prt             0.85;
         value           uniform 0;
     }
 }
