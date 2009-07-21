@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::kQRWallFunctionFvPatchField
+    Foam::compressible::RASModels::kqRWallFunctionFvPatchField
 
 Description
     Boundary condition for turbulence k, Q, and R when using wall functions.
     Simply acts as a zero gradient condition.
 
 SourceFiles
-    kQRWallFunctionFvPatchField.C
+    kqRWallFunctionFvPatchField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kQRWallFunctionFvPatchField_H
-#define kQRWallFunctionFvPatchField_H
+#ifndef kqRWallFunctionFvPatchField_H
+#define kqRWallFunctionFvPatchField_H
 
 #include "zeroGradientFvPatchField.H"
 
@@ -43,17 +43,17 @@ SourceFiles
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                Class kQRWallFunctionFvPatchField Declaration
+                Class kqRWallFunctionFvPatchField Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class kQRWallFunctionFvPatchField
+class kqRWallFunctionFvPatchField
 :
     public zeroGradientFvPatchField<Type>
 {
@@ -67,20 +67,20 @@ class kQRWallFunctionFvPatchField
 public:
 
     //- Runtime type information
-    TypeName("kQRWallFunction");
+    TypeName("compressible::kqRWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        kQRWallFunctionFvPatchField
+        kqRWallFunctionFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        kQRWallFunctionFvPatchField
+        kqRWallFunctionFvPatchField
         (
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
@@ -88,20 +88,20 @@ public:
         );
 
         //- Construct by mapping given
-        // kQRWallFunctionFvPatchField
+        // kqRWallFunctionFvPatchField
         //  onto a new patch
-        kQRWallFunctionFvPatchField
+        kqRWallFunctionFvPatchField
         (
-            const kQRWallFunctionFvPatchField&,
+            const kqRWallFunctionFvPatchField&,
             const fvPatch&,
             const DimensionedField<Type, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        kQRWallFunctionFvPatchField
+        kqRWallFunctionFvPatchField
         (
-            const kQRWallFunctionFvPatchField&
+            const kqRWallFunctionFvPatchField&
         );
 
         //- Construct and return a clone
@@ -109,14 +109,14 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new kQRWallFunctionFvPatchField(*this)
+                new kqRWallFunctionFvPatchField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        kQRWallFunctionFvPatchField
+        kqRWallFunctionFvPatchField
         (
-            const kQRWallFunctionFvPatchField&,
+            const kqRWallFunctionFvPatchField&,
             const DimensionedField<Type, volMesh>&
         );
 
@@ -128,7 +128,7 @@ public:
         {
             return tmp<fvPatchField<Type> >
             (
-                new kQRWallFunctionFvPatchField(*this, iF)
+                new kqRWallFunctionFvPatchField(*this, iF)
             );
         }
 
@@ -154,13 +154,13 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "kQRWallFunctionFvPatchField.C"
+#   include "kqRWallFunctionFvPatchField.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

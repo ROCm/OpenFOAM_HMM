@@ -29,7 +29,7 @@ License
 #include "calculatedFvPatchField.H"
 #include "nutWallFunctionFvPatchScalarField.H"
 #include "epsilonWallFunctionFvPatchScalarField.H"
-#include "kQRWallFunctionFvPatchField.H"
+#include "kqRWallFunctionFvPatchField.H"
 #include "omegaWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -159,7 +159,7 @@ tmp<volScalarField> autoCreateK
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kQRWallFunctionFvPatchField<scalar>
+            RASModels::kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -178,7 +178,7 @@ tmp<volScalarField> autoCreateQ
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kQRWallFunctionFvPatchField<scalar>
+            RASModels::kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -197,7 +197,7 @@ tmp<volSymmTensorField> autoCreateR
         autoCreateWallFunctionField
         <
             symmTensor,
-            RASModels::kQRWallFunctionFvPatchField<symmTensor>
+            RASModels::kqRWallFunctionFvPatchField<symmTensor>
         >
         (
             fieldName,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kQRWallFunctionFvPatchField.H"
+#include "kqRWallFunctionFvPatchField.H"
 #include "fvPatchFieldMapper.H"
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
@@ -33,7 +33,7 @@ License
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace RASModels
 {
@@ -41,11 +41,11 @@ namespace RASModels
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Type>
-void kQRWallFunctionFvPatchField<Type>::checkType()
+void kqRWallFunctionFvPatchField<Type>::checkType()
 {
     if (!isA<wallFvPatch>(this->patch()))
     {
-        FatalErrorIn("kQRWallFunctionFvPatchField::checkType()")
+        FatalErrorIn("kqRWallFunctionFvPatchField::checkType()")
             << "Invalid wall function specification" << nl
             << "    Patch type for patch " << this->patch().name()
             << " must be wall" << nl
@@ -58,7 +58,7 @@ void kQRWallFunctionFvPatchField<Type>::checkType()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
+kqRWallFunctionFvPatchField<Type>::kqRWallFunctionFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF
@@ -71,9 +71,9 @@ kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 
 
 template<class Type>
-kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
+kqRWallFunctionFvPatchField<Type>::kqRWallFunctionFvPatchField
 (
-    const kQRWallFunctionFvPatchField& ptf,
+    const kqRWallFunctionFvPatchField& ptf,
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -86,7 +86,7 @@ kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 
 
 template<class Type>
-kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
+kqRWallFunctionFvPatchField<Type>::kqRWallFunctionFvPatchField
 (
     const fvPatch& p,
     const DimensionedField<Type, volMesh>& iF,
@@ -100,9 +100,9 @@ kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 
 
 template<class Type>
-kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
+kqRWallFunctionFvPatchField<Type>::kqRWallFunctionFvPatchField
 (
-    const kQRWallFunctionFvPatchField& tkqrwfpf
+    const kqRWallFunctionFvPatchField& tkqrwfpf
 )
 :
     zeroGradientFvPatchField<Type>(tkqrwfpf)
@@ -112,9 +112,9 @@ kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 
 
 template<class Type>
-kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
+kqRWallFunctionFvPatchField<Type>::kqRWallFunctionFvPatchField
 (
-    const kQRWallFunctionFvPatchField& tkqrwfpf,
+    const kqRWallFunctionFvPatchField& tkqrwfpf,
     const DimensionedField<Type, volMesh>& iF
 )
 :
@@ -127,7 +127,7 @@ kQRWallFunctionFvPatchField<Type>::kQRWallFunctionFvPatchField
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class Type>
-void kQRWallFunctionFvPatchField<Type>::evaluate
+void kqRWallFunctionFvPatchField<Type>::evaluate
 (
     const Pstream::commsTypes commsType
 )
@@ -137,7 +137,7 @@ void kQRWallFunctionFvPatchField<Type>::evaluate
 
 
 template<class Type>
-void kQRWallFunctionFvPatchField<Type>::write(Ostream& os) const
+void kqRWallFunctionFvPatchField<Type>::write(Ostream& os) const
 {
     zeroGradientFvPatchField<Type>::write(os);
     this->writeEntry("value", os);
@@ -147,7 +147,7 @@ void kQRWallFunctionFvPatchField<Type>::write(Ostream& os) const
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // ************************************************************************* //

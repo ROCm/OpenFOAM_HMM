@@ -24,10 +24,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kQRWallFunctionFvPatchFields.H"
-#include "fvPatchFields.H"
-#include "addToRunTimeSelectionTable.H"
-#include "volFields.H"
+#ifndef kqRWallFunctionFvPatchFields_H
+#define kqRWallFunctionFvPatchFields_H
+
+#include "kqRWallFunctionFvPatchField.H"
+#include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -38,14 +39,18 @@ namespace compressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchFields(kQRWallFunction);
+makePatchTypeFieldTypedefs(kqRWallFunction)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
 } // End namespace compressible
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

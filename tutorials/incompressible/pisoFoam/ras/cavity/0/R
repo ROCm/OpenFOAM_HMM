@@ -22,12 +22,12 @@ boundaryField
 {
     movingWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
     }
 
     fixedWalls
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
     }
 
     frontAndBack

@@ -23,19 +23,19 @@ boundaryField
 {
     leftWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform ( 0 0 0 0 0 0 );
     }
 
     rightWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform ( 0 0 0 0 0 0 );
     }
 
     lowerWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform ( 0 0 0 0 0 0 );
     }
 

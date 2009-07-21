@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "QZeta.H"
+#include "qZeta.H"
 #include "addToRunTimeSelectionTable.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
@@ -40,12 +40,12 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(QZeta, 0);
-addToRunTimeSelectionTable(RASModel, QZeta, dictionary);
+defineTypeNameAndDebug(qZeta, 0);
+addToRunTimeSelectionTable(RASModel, qZeta, dictionary);
 
 // * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
 
-tmp<volScalarField> QZeta::fMu() const
+tmp<volScalarField> qZeta::fMu() const
 {
     volScalarField Rt = q_*k_/(2.0*nu()*zeta_);
 
@@ -62,7 +62,7 @@ tmp<volScalarField> QZeta::fMu() const
 }
 
 
-tmp<volScalarField> QZeta::f2() const
+tmp<volScalarField> qZeta::f2() const
 {
     volScalarField Rt = q_*k_/(2.0*nu()*zeta_);
     return scalar(1) - 0.3*exp(-sqr(Rt));
@@ -71,7 +71,7 @@ tmp<volScalarField> QZeta::f2() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-QZeta::QZeta
+qZeta::qZeta
 (
     const volVectorField& U,
     const surfaceScalarField& phi,
@@ -202,7 +202,7 @@ QZeta::QZeta
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<volSymmTensorField> QZeta::R() const
+tmp<volSymmTensorField> qZeta::R() const
 {
     return tmp<volSymmTensorField>
     (
@@ -223,7 +223,7 @@ tmp<volSymmTensorField> QZeta::R() const
 }
 
 
-tmp<volSymmTensorField> QZeta::devReff() const
+tmp<volSymmTensorField> qZeta::devReff() const
 {
     return tmp<volSymmTensorField>
     (
@@ -243,7 +243,7 @@ tmp<volSymmTensorField> QZeta::devReff() const
 }
 
 
-tmp<fvVectorMatrix> QZeta::divDevReff(volVectorField& U) const
+tmp<fvVectorMatrix> qZeta::divDevReff(volVectorField& U) const
 {
     return
     (
@@ -253,7 +253,7 @@ tmp<fvVectorMatrix> QZeta::divDevReff(volVectorField& U) const
 }
 
 
-bool QZeta::read()
+bool qZeta::read()
 {
     if (RASModel::read())
     {
@@ -272,7 +272,7 @@ bool QZeta::read()
 }
 
 
-void QZeta::correct()
+void qZeta::correct()
 {
     RASModel::correct();
 

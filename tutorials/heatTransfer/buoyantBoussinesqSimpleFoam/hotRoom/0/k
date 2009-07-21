@@ -23,17 +23,17 @@ boundaryField
 {
     floor
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
     ceiling
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
     fixedWalls
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
 }

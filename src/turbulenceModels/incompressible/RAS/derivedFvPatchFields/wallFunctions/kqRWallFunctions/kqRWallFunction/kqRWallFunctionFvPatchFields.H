@@ -22,30 +22,35 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Global
-    wallDissipation
-
-Description
-    Set wall dissipation in the epsilon matrix
-
 \*---------------------------------------------------------------------------*/
 
+#ifndef kqRWallFunctionFvPatchFields_H
+#define kqRWallFunctionFvPatchFields_H
+
+#include "kqRWallFunctionFvPatchField.H"
+#include "fieldTypes.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    const fvPatchList& patches = mesh.boundary();
+namespace incompressible
+{
+namespace RASModels
+{
 
-    forAll(patches, patchi)
-    {
-        const fvPatch& p = patches[patchi];
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-        if (isType<wallFvPatch>(p))
-        {
-            epsEqn.setValues
-            (
-                p.faceCells(),
-                epsilon.boundaryField()[patchi].patchInternalField()
-            );
-        }
-    }
-}
+makePatchTypeFieldTypedefs(kqRWallFunction)
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace RASModels
+} // End namespace incompressible
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

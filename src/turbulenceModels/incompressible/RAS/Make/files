@@ -10,7 +10,7 @@ SpalartAllmaras/SpalartAllmaras.C
 LRR/LRR.C
 LaunderGibsonRSTM/LaunderGibsonRSTM.C
 LaunderSharmaKE/LaunderSharmaKE.C
-QZeta/QZeta.C
+qZeta/qZeta.C
 LienCubicKE/LienCubicKE.C
 LienCubicKELowRe/LienCubicKELowRe.C
 NonlinearKEShih/NonlinearKEShih.C
@@ -33,8 +33,8 @@ $(epsilonWallFunctions)/epsilonWallFunction/epsilonWallFunctionFvPatchScalarFiel
 omegaWallFunctions = $(wallFunctions)/omegaWallFunctions
 $(omegaWallFunctions)/omegaWallFunction/omegaWallFunctionFvPatchScalarField.C
 
-kQRWallFunctions = $(wallFunctions)/kQRWallFunctions
-$(kQRWallFunctions)/kQRWallFunction/kQRWallFunctionFvPatchFields.C
+kqRWallFunctions = $(wallFunctions)/kqRWallFunctions
+$(kqRWallFunctions)/kqRWallFunction/kqRWallFunctionFvPatchFields.C
 
 
 /* Patch fields */
