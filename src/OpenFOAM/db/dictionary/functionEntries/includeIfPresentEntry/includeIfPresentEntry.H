@@ -23,32 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::functionEntries::includeEntry
+    Foam::functionEntries::includeIfPresentEntry
 
 Description
-    Specify an include file when reading dictionaries, expects a
-    single string to follow.
+    Specify a file to include if it exists. Expects a single string to follow.
 
-    An example of the @c \#include directive:
-    @verbatim
-        #include "includeFile"
-    @endverbatim
-
-    The usual expansion of environment variables and other constructs
-    (eg, the @c ~OpenFOAM/ expansion) is retained.
+    The @c \#includeIfPresent directive is similar to the @c \#include
+    directive, but does not generate an error if the file does not exist.
 
 See Also
-    fileName, string::expand()
+    Foam::functionEntries::includeEntry
 
 SourceFiles
-    includeEntry.C
+    includeIfPresentEntry.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef includeEntry_H
-#define includeEntry_H
+#ifndef includeIfPresentEntry_H
+#define includeIfPresentEntry_H
 
-#include "functionEntry.H"
+#include "includeEntry.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,33 +52,25 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                        Class includeEntry Declaration
+                    Class includeIfPresentEntry Declaration
 \*---------------------------------------------------------------------------*/
 
-class includeEntry
+class includeIfPresentEntry
 :
-    public functionEntry
+    public includeEntry
 {
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        includeEntry(const includeEntry&);
+        includeIfPresentEntry(const includeIfPresentEntry&);
 
         //- Disallow default bitwise assignment
-        void operator=(const includeEntry&);
-
-protected:
-
-    // Protected Member Functions
-
-        //- Read the include fileName from Istream, expand and return
-        static fileName includeFileName(Istream&);
-
+        void operator=(const includeIfPresentEntry&);
 
 public:
 
     //- Runtime type information
-    ClassName("include");
+    ClassName("includeIfPresent");
 
 
     // Member Functions

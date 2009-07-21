@@ -43,7 +43,22 @@ SHELL      = /bin/sh
 .SUFFIXES:
 .SUFFIXES: .o
 
-BIN = $(WM_DIR)/bin/$(WM_ARCH)$(WM_COMPILER)
+
+#------------------------------------------------------------------------------
+# set compilation and dependency building rules
+#------------------------------------------------------------------------------
+
+GENERAL_RULES = $(WM_DIR)/rules/General
+RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
+BIN           = $(WM_DIR)/bin/$(WM_ARCH)$(WM_COMPILER)
+
+include $(RULES)/general
+include $(RULES)/$(WM_LINK_LANGUAGE)
+
+
+#------------------------------------------------------------------------------
+# targets
+#------------------------------------------------------------------------------
 
 all:  $(BIN)/dirToString $(BIN)/wmkdep
 
@@ -59,16 +74,7 @@ $(BIN)/wmkdep: wmkdep.l
 	@mkdir -p $(BIN)
 	flex wmkdep.l
 	$(cc) $(cFLAGS) lex.yy.c -o $(BIN)/wmkdep
+	@rm -f lex.yy.c 2>/dev/null
 
-
-#------------------------------------------------------------------------------
-# set compilation and dependency building rules
-#------------------------------------------------------------------------------
-
-GENERAL_RULES = $(WM_DIR)/rules/General
-RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
-
-include $(RULES)/general
-include $(RULES)/$(WM_LINK_LANGUAGE)
 
 #------------------------------------------------------------------------------

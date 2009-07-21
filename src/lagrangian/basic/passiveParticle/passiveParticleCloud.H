@@ -63,6 +63,9 @@ class passiveParticleCloud
 
 public:
 
+    //- Type of parcel the cloud was instantiated for
+    typedef passiveParticle parcelType;
+
     // Constructors
 
         //- Construct given mesh
@@ -70,6 +73,14 @@ public:
         (
             const polyMesh&,
             const word& cloudName = "defaultCloud"
+        );
+
+        //- Construct from mesh, cloud name, and a list of particles
+        passiveParticleCloud
+        (
+            const polyMesh& mesh,
+            const word& cloudName,
+            const IDLList<passiveParticle>& particles
         );
 
 

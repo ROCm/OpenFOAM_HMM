@@ -63,9 +63,6 @@ class OutputFilterFunctionObject
 {
     // Private data
 
-        //- Output filter name
-        word name_;
-
         //- Reference to the time database
         const Time& time_;
 
@@ -120,12 +117,6 @@ public:
     // Member Functions
 
         // Access
-
-            //- Return name
-            virtual const word& name() const
-            {
-                return name_;
-            }
 
             //- Return time database
             virtual const Time& time() const

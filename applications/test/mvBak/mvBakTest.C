@@ -22,58 +22,59 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#include "passiveParticleCloud.H"
+#include "OSspecific.H"
+#include "argList.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-namespace Foam
+int main(int argc, char *argv[])
 {
+    argList::noBanner();
+    argList::noParallel();
+    argList::validArgs.insert("file .. fileN");
+    argList::validOptions.erase("case");
+    argList::validOptions.insert("ext", "bak");
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+    argList args(argc, argv, false, true);
 
-defineParticleTypeNameAndDebug(passiveParticle, 0);
-defineTemplateTypeNameAndDebug(Cloud<passiveParticle>, 0);
+    if (args.additionalArgs().empty())
+    {
+        args.printUsage();
+    }
 
-};
+    label ok = 0;
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+    forAll(args.additionalArgs(), argI)
+    {
+        const string& srcFile = args.additionalArgs()[argI];
 
-Foam::passiveParticleCloud::passiveParticleCloud
-(
-    const polyMesh& mesh,
-    const word& cloudName
-)
-:
-    Cloud<passiveParticle>(mesh, cloudName, false)
-{
-    readFields();
-}
+        if (args.optionFound("ext"))
+        {
+            if (mvBak(srcFile, args.option("ext")))
+            {
+                ok++;
+            }
+        }
+        else
+        {
+            if (mvBak(srcFile))
+            {
+                ok++;
+            }
+        }
+    }
 
+    Info<< "mvBak called for " << args.additionalArgs().size()
+        << " files (moved " << ok << ")\n" << endl;
 
-Foam::passiveParticleCloud::passiveParticleCloud
-(
-    const polyMesh& mesh,
-    const word& cloudName,
-    const IDLList<passiveParticle>& particles
-)
-:
-    Cloud<passiveParticle>(mesh, cloudName, particles)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::passiveParticleCloud::readFields()
-{
-    passiveParticle::readFields(*this);
-}
-
-
-void Foam::passiveParticleCloud::writeFields() const
-{
-    passiveParticle::writeFields(*this);
+    return 0;
 }
 
 

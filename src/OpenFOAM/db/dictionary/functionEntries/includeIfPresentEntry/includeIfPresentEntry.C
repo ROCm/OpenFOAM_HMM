@@ -24,21 +24,21 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "includeEntry.H"
+#include "includeIfPresentEntry.H"
 #include "dictionary.H"
 #include "IFstream.H"
 #include "addToMemberFunctionSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const Foam::word Foam::functionEntries::includeEntry::typeName
+const Foam::word Foam::functionEntries::includeIfPresentEntry::typeName
 (
-    Foam::functionEntries::includeEntry::typeName_()
+    Foam::functionEntries::includeIfPresentEntry::typeName_()
 );
 
 // Don't lookup the debug switch here as the debug switch dictionary
-// might include includeEntry
-int Foam::functionEntries::includeEntry::debug(0);
+// might include includeIfPresentEntry
+int Foam::functionEntries::includeIfPresentEntry::debug(0);
 
 namespace Foam
 {
@@ -47,7 +47,7 @@ namespace functionEntries
     addToMemberFunctionSelectionTable
     (
         functionEntry,
-        includeEntry,
+        includeIfPresentEntry,
         execute,
         dictionaryIstream
     );
@@ -55,36 +55,16 @@ namespace functionEntries
     addToMemberFunctionSelectionTable
     (
         functionEntry,
-        includeEntry,
+        includeIfPresentEntry,
         execute,
         primitiveEntryIstream
     );
 }
 }
 
-// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
-
-Foam::fileName Foam::functionEntries::includeEntry::includeFileName
-(
-    Istream& is
-)
-{
-    fileName fName(is);
-    fName.expand();
-
-    // relative name
-    if (fName.size() && fName[0] != '/')
-    {
-        fName = fileName(is.name()).path()/fName;
-    }
-
-    return fName;
-}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionEntries::includeEntry::execute
+bool Foam::functionEntries::includeIfPresentEntry::execute
 (
     dictionary& parentDict,
     Istream& is
@@ -95,25 +75,13 @@ bool Foam::functionEntries::includeEntry::execute
     if (ifs)
     {
         parentDict.read(ifs);
-        return true;
     }
-    else
-    {
-        FatalIOErrorIn
-        (
-            "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict, Istream&)",
-            is
-        )   << "Cannot open include file " << ifs.name()
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    return true;
 }
 
 
-bool Foam::functionEntries::includeEntry::execute
+bool Foam::functionEntries::includeIfPresentEntry::execute
 (
     const dictionary& parentDict,
     primitiveEntry& entry,
@@ -125,21 +93,9 @@ bool Foam::functionEntries::includeEntry::execute
     if (ifs)
     {
         entry.read(parentDict, ifs);
-        return true;
     }
-    else
-    {
-        FatalIOErrorIn
-        (
-            "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict, primitiveEntry&, Istream&)",
-            is
-        )   << "Cannot open include file " << ifs.name()
-            << " while reading dictionary " << parentDict.name()
-            << exit(FatalIOError);
 
-        return false;
-    }
+    return true;
 }
 
 // ************************************************************************* //

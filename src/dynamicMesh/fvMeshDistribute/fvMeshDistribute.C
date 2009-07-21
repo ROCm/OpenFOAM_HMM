@@ -928,7 +928,7 @@ Foam::labelList Foam::fvMeshDistribute::mapBoundaryData
     {
         label newFaceI = map.oldFaceMap()[oldBFaceI + map.nOldInternalFaces()];
 
-        // Face still exists (is nessecary?) and still boundary face
+        // Face still exists (is necessary?) and still boundary face
         if (newFaceI >= 0 && newFaceI >= mesh.nInternalFaces())
         {
             newBoundaryData[newFaceI - mesh.nInternalFaces()] =

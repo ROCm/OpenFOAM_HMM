@@ -26,7 +26,14 @@ Application
     redistributeMeshPar
 
 Description
-    Parallel redecomposition of mesh.
+    Parallel redecomposition of mesh. Start with maximum number of processors.
+    Balances mesh and writes new mesh to new timedirectory.
+
+    Can also work like decomposePar:
+
+        mkdir processor0
+        cp -r constant processor0
+        mpirun -np ddd redistributeMeshPar -parallel
 
 \*---------------------------------------------------------------------------*/
 

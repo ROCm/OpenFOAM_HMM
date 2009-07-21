@@ -104,7 +104,7 @@ autoCreateWallFunctionField
         // rename file
         Info<< "    Backup original " << fieldName << " to "
             << fieldName << ".old" << endl;
-        mv(ioObj.objectPath(), ioObj.objectPath() + ".old");
+        mvBak(ioObj.objectPath(), "old");
 
 
         PtrList<fvPatchField<Type> > newPatchFields(mesh.boundary().size());
