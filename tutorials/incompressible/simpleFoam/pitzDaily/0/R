@@ -33,12 +33,12 @@ boundaryField
 
     upperWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
     }
 
     lowerWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
     }
 
     frontAndBack

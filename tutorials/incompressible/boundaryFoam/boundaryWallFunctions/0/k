@@ -23,12 +23,12 @@ boundaryField
 {
     lowerWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 1e-10;
     }
     upperWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 1e-10;
     }
     frontBack

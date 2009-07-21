@@ -23,25 +23,25 @@ boundaryField
 {
     front
     {
-        type            compressible::kQRWallFunction;
+        type            compressible::kqRWallFunction;
         value           uniform 1;
     }
 
     back
     {
-        type            compressible::kQRWallFunction;
+        type            compressible::kqRWallFunction;
         value           uniform 1;
     }
 
     wall
     {
-        type            compressible::kQRWallFunction;
+        type            compressible::kqRWallFunction;
         value           uniform 1;
     }
 
     porosityWall
     {
-        type            compressible::kQRWallFunction;
+        type            compressible::kqRWallFunction;
         value           uniform 1;
     }
 

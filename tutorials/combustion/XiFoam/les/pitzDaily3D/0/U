@@ -25,6 +25,7 @@ boundaryField
         type            turbulentInlet;
         referenceField  uniform (13.3 0 0);
         fluctuationScale (0.04 0.02 0.02);
+        alpha            0.1;
     }
 
     outlet

@@ -21,24 +21,5 @@ turbulence      off;
 
 printCoeffs     off;
 
-laminarCoeffs
-{
-}
-
-kEpsilonCoeffs
-{
-    Cmu             0.09;
-    C1              1.44;
-    C2              1.92;
-    alphak          1;
-    alphaEps        0.76923;
-}
-
-wallFunctionCoeffs
-{
-    kappa           0.4187;
-    E               9;
-}
-
 
 // ************************************************************************* //

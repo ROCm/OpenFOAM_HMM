@@ -19,12 +19,12 @@ boundaryField
 
     lowerWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
     }
 
     "motorBike_.*"
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
     }
 
     #include "frontBackUpperPatches"

@@ -33,7 +33,7 @@ boundaryField
     }
     walls
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 10;
     }
     frontBack

@@ -32,12 +32,12 @@ boundaryField
     }
     innerWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.375;
     }
     outerWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.375;
     }
     cyclic

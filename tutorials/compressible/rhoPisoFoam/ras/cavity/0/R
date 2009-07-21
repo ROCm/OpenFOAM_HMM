@@ -23,13 +23,13 @@ boundaryField
 {
     movingWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform ( 0 0 0 0 0 0 );
     }
 
     fixedWalls
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform ( 0 0 0 0 0 0 );
     }
 

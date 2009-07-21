@@ -23,12 +23,12 @@ boundaryField
 {
     minY
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
     maxY
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
     minX
@@ -42,12 +42,12 @@ boundaryField
     }
     minZ
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
     maxZ
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
     topAir_to_leftSolid

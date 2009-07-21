@@ -266,9 +266,9 @@ int main(int argc, char *argv[])
 
     replaceBoundaryType(mesh, "epsilon", "epsilonWallFunction", "0");
     replaceBoundaryType(mesh, "omega", "omegaWallFunction", "0");
-    replaceBoundaryType(mesh, "k", "kQRWallFunction", "0");
-    replaceBoundaryType(mesh, "q", "kQRWallFunction", "0");
-    replaceBoundaryType(mesh, "R", "kQRWallFunction", "(0 0 0 0 0 0)");
+    replaceBoundaryType(mesh, "k", "kqRWallFunction", "0");
+    replaceBoundaryType(mesh, "q", "kqRWallFunction", "0");
+    replaceBoundaryType(mesh, "R", "kqRWallFunction", "(0 0 0 0 0 0)");
 
     Info<< "End\n" << endl;
 

@@ -67,12 +67,12 @@ boundaryField
     }
     upperWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.375;
     }
     lowerWall
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.375;
     }
     frontAndBack

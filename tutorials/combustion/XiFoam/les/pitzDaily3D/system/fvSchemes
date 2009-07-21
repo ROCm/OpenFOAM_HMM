@@ -34,7 +34,11 @@ divSchemes
     div(phiXi,Xi)   Gauss limitedLinear01 0.1;
     div(phiXi,Su)   Gauss limitedLinear01 0.1;
     div(phiSt,b)    Gauss limitedLinear01 0.1;
-    div(phi,ft_b_h_hu) Gauss multivariateSelection
+    div(phi,ft) Gauss limitedLinear01 0.1;
+    div(phi,b) Gauss limitedLinear01 0.1;
+    div(phi,h) Gauss limitedLinear 0.1;
+    div(phi,hu) Gauss limitedLinear 0.1;
+    div(phi,ft_b_h_hu)_0 Gauss multivariateSelection
     {
         ft limitedLinear01 0.1;
         b limitedLinear01 0.1;
