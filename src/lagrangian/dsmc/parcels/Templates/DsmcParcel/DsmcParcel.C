@@ -130,13 +130,24 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
     nw /= mag(nw);
 
     scalar U_dot_nw = U_ & nw;
+
     vector Ut = U_ - U_dot_nw*nw;
 
-    td.cloud().momentumBF()[wppIndex][wppLocalFace] +=
-        m*Ut/max(mag(U_dot_nw)*fA, VSMALL);
+    scalar invMagUnfA = 1/max(mag(U_dot_nw)*fA, VSMALL);
 
-    td.cloud().rhoMBF()[wppIndex][wppLocalFace] +=
-        m/max(mag(U_dot_nw)*fA, VSMALL);
+    td.cloud().rhoNBF()[wppIndex][wppLocalFace] += invMagUnfA;
+
+    td.cloud().rhoMBF()[wppIndex][wppLocalFace] += m*invMagUnfA;
+
+    td.cloud().linearKEBF()[wppIndex][wppLocalFace] +=
+        0.5*m*(U_ & U_)*invMagUnfA;
+
+    td.cloud().internalEBF()[wppIndex][wppLocalFace] += Ei_*invMagUnfA;
+
+    td.cloud().iDofBF()[wppIndex][wppLocalFace] +=
+        constProps.internalDegreesOfFreedom()*invMagUnfA;
+
+    td.cloud().momentumBF()[wppIndex][wppLocalFace] += m*Ut*invMagUnfA;
 
     // pre-interaction energy
     scalar preIE = 0.5*m*(U_ & U_) + Ei_;
@@ -154,13 +165,24 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
     );
 
     U_dot_nw = U_ & nw;
+
     Ut = U_ - U_dot_nw*nw;
 
-    td.cloud().momentumBF()[wppIndex][wppLocalFace] +=
-        m*Ut/max(mag(U_dot_nw)*fA, VSMALL);
+    invMagUnfA = 1/max(mag(U_dot_nw)*fA, VSMALL);
 
-    td.cloud().rhoMBF()[wppIndex][wppLocalFace] +=
-        m/max(mag(U_dot_nw)*fA, VSMALL);
+    td.cloud().rhoNBF()[wppIndex][wppLocalFace] += invMagUnfA;
+
+    td.cloud().rhoMBF()[wppIndex][wppLocalFace] += m*invMagUnfA;
+
+    td.cloud().linearKEBF()[wppIndex][wppLocalFace] +=
+        0.5*m*(U_ & U_)*invMagUnfA;
+
+    td.cloud().internalEBF()[wppIndex][wppLocalFace] += Ei_*invMagUnfA;
+
+    td.cloud().iDofBF()[wppIndex][wppLocalFace] +=
+        constProps.internalDegreesOfFreedom()*invMagUnfA;
+
+    td.cloud().momentumBF()[wppIndex][wppLocalFace] += m*Ut*invMagUnfA;
 
     // post-interaction energy
     scalar postIE = 0.5*m*(U_ & U_) + Ei_;

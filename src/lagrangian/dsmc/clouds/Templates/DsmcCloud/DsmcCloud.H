@@ -287,8 +287,23 @@ public:
                 //- Return non-const force density at boundary field reference
                 inline volVectorField::GeometricBoundaryField& fDBF();
 
+                //- Return non-const number density boundary field reference
+                inline volScalarField::GeometricBoundaryField& rhoNBF();
+
                 //- Return non-const mass density boundary field reference
                 inline volScalarField::GeometricBoundaryField& rhoMBF();
+
+                //- Return non-const linear kinetic energy density boundary
+                //  field reference
+                inline volScalarField::GeometricBoundaryField& linearKEBF();
+
+                //- Return non-const internal energy density boundary field
+                // reference
+                inline volScalarField::GeometricBoundaryField& internalEBF();
+
+                //- Return non-const internal degree of freedom density boundary
+                //  field reference
+                inline volScalarField::GeometricBoundaryField& iDofBF();
 
                 //- Return non-const momentum density boundary field reference
                 inline volVectorField::GeometricBoundaryField& momentumBF();

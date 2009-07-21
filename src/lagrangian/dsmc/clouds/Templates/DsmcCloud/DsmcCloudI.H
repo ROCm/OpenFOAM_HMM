@@ -151,10 +151,10 @@ Foam::DsmcCloud<ParcelType>::fDBF()
 
 
 template<class ParcelType>
-inline Foam::volVectorField::GeometricBoundaryField&
-Foam::DsmcCloud<ParcelType>::momentumBF()
+inline Foam::volScalarField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::rhoNBF()
 {
-    return momentum_.boundaryField();
+    return rhoN_.boundaryField();
 }
 
 
@@ -163,6 +163,38 @@ inline Foam::volScalarField::GeometricBoundaryField&
 Foam::DsmcCloud<ParcelType>::rhoMBF()
 {
     return rhoM_.boundaryField();
+}
+
+
+template<class ParcelType>
+inline Foam::volScalarField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::linearKEBF()
+{
+    return linearKE_.boundaryField();
+}
+
+
+template<class ParcelType>
+inline Foam::volScalarField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::internalEBF()
+{
+    return internalE_.boundaryField();
+}
+
+
+template<class ParcelType>
+inline Foam::volScalarField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::iDofBF()
+{
+    return iDof_.boundaryField();
+}
+
+
+template<class ParcelType>
+inline Foam::volVectorField::GeometricBoundaryField&
+Foam::DsmcCloud<ParcelType>::momentumBF()
+{
+    return momentum_.boundaryField();
 }
 
 

@@ -511,25 +511,18 @@ template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::calculateFields()
 {
     scalarField& rhoN = rhoN_.internalField();
-    rhoN = VSMALL;
 
     scalarField& rhoM = rhoM_.internalField();
-    rhoM = VSMALL;
 
     scalarField& dsmcRhoN = dsmcRhoN_.internalField();
-    dsmcRhoN = 0.0;
 
     scalarField& linearKE = linearKE_.internalField();
-    linearKE = 0.0;
 
     scalarField& internalE = internalE_.internalField();
-    internalE = 0.0;
 
     scalarField& iDof = iDof_.internalField();
-    iDof = VSMALL;
 
     vectorField& momentum = momentum_.internalField();
-    momentum = vector::zero;
 
     forAllConstIter(typename DsmcCloud<ParcelType>, *this, iter)
     {
