@@ -324,6 +324,7 @@ class conformalVoronoiMesh
         //  and edge conformation locations to add.
         void addSurfaceAndEdgeHits
         (
+            const Triangulation::Finite_vertices_iterator& vit,
             const point& vert,
             const pointIndexHit& surfHit,
             label hitSurface,

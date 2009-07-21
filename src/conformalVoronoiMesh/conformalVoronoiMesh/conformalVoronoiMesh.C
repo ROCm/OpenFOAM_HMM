@@ -1124,6 +1124,7 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
 
 void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 (
+    const Triangulation::Finite_vertices_iterator& vit,
     const point& vert,
     const pointIndexHit& surfHit,
     label hitSurface,
@@ -1143,6 +1144,13 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
     if (nearFeaturePt(surfHit.hitPoint()))
     {
         keepSurfacePoint = false;
+
+        if (vit->index() < startOfInternalPoints_)
+        {
+            surfaceHits.append(surfHit);
+
+            hitSurfaces.append(hitSurface);
+        }
     }
 
     List<pointIndexHit> edHits;
@@ -1892,6 +1900,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                     {
                         addSurfaceAndEdgeHits
                         (
+                            vit,
                             vert,
                             surfHit,
                             hitSurface,
@@ -1976,6 +1985,7 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                 {
                     addSurfaceAndEdgeHits
                     (
+                        vit,
                         vert,
                         surfHit,
                         hitSurface,
@@ -2415,4 +2425,3 @@ void Foam::conformalVoronoiMesh::move()
 
 // ************************************************************************* //
 
-//  LocalWords:  edHit
