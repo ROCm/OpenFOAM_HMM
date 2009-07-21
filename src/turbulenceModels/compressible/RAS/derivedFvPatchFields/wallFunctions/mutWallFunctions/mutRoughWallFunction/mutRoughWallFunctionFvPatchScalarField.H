@@ -73,6 +73,15 @@ class mutRoughWallFunctionFvPatchScalarField
         //- Name of turbulence kinetic energy field
         word kName_;
 
+        //- Cmu coefficient
+        scalar Cmu_;
+
+        //- Von-karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
         //- Roughness height
         scalarField Ks_;
 

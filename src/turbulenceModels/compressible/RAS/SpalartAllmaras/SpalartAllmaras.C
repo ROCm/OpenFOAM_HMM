@@ -115,20 +115,29 @@ SpalartAllmaras::SpalartAllmaras
 :
     RASModel(typeName, rho, U, phi, thermophysicalModel),
 
-    alphaNut_
+    sigmaNut_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaNut",
+            "sigmaNut",
             coeffDict_,
-            1.5
+            0.66666
         )
     ),
-    alphah_
+    kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphah",
+            "kappa",
+            coeffDict_,
+            0.41
+        )
+    ),
+    Prt_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Prt",
             coeffDict_,
             1.0
         )
@@ -152,7 +161,7 @@ SpalartAllmaras::SpalartAllmaras
             0.622
         )
     ),
-    Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
+    Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -296,12 +305,13 @@ bool SpalartAllmaras::read()
 {
     if (RASModel::read())
     {
-        alphaNut_.readIfPresent(coeffDict());
-        alphah_.readIfPresent(coeffDict());
+        sigmaNut_.readIfPresent(coeffDict());
+        kappa_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
 
         Cb1_.readIfPresent(coeffDict());
         Cb2_.readIfPresent(coeffDict());
-        Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
+        Cw1_ = Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_;
         Cw2_.readIfPresent(coeffDict());
         Cw3_.readIfPresent(coeffDict());
         Cv1_.readIfPresent(coeffDict());
@@ -350,7 +360,7 @@ void SpalartAllmaras::correct()
         fvm::ddt(rho_, nuTilda_)
       + fvm::div(phi_, nuTilda_)
       - fvm::laplacian(DnuTildaEff(), nuTilda_)
-      - alphaNut_*Cb2_*rho_*magSqr(fvc::grad(nuTilda_))
+      - Cb2_/sigmaNut_*rho_*magSqr(fvc::grad(nuTilda_))
      ==
         Cb1_*rho_*Stilda*nuTilda_
       - fvm::Sp(Cw1_*fw(Stilda)*nuTilda_*rho_/sqr(d_), nuTilda_)

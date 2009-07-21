@@ -36,9 +36,9 @@ Description
             C1          1.44;
             C2          1.92;
             C3          -0.33;  // only for compressible
-            alphak      1.0;    // only for compressible
-            alphaEps    0.76923;
-            alphah      1.0;    // only for compressible
+            sigmak      1.0;    // only for compressible
+            sigmaEps    1.3;
+            Prt         1.0;    // only for compressible
         }
     @endverbatim
 
@@ -78,9 +78,9 @@ class kEpsilon
             dimensionedScalar C1_;
             dimensionedScalar C2_;
             dimensionedScalar C3_;
-            dimensionedScalar alphak_;
-            dimensionedScalar alphaEps_;
-            dimensionedScalar alphah_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar Prt_;
 
         // Fields
 
@@ -119,7 +119,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*mut_ + mu())
+                new volScalarField("DkEff", mut_/sigmak_ + mu())
             );
         }
 
@@ -128,7 +128,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -143,7 +143,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_/Prt_ + alpha())
             );
         }
 

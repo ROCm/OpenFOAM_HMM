@@ -75,6 +75,15 @@ class omegaWallFunctionFvPatchScalarField
         //- Name of turbulent viscosity field
         word mutName_;
 
+        //- Cmu coefficient
+        scalar Cmu_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
 
     // Private member functions
 

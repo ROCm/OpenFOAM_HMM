@@ -54,8 +54,9 @@ Description
             Cw3         2.0;
             Cv1         7.1;
             Cv2         5.0;
-            alphaNut    1.5;
-            alphah      1.0;    // only for compressible
+            sigmaNut    0.66666;
+            Prt         1.0;    // only for compressible
+            kappa       0.41;
         }
     @endverbatim
 
@@ -91,8 +92,10 @@ class SpalartAllmaras
     // Private data
 
         // Model coefficients
-            dimensionedScalar alphaNut_;
-            dimensionedScalar alphah_;
+
+            dimensionedScalar sigmaNut_;
+            dimensionedScalar kappa_;
+            dimensionedScalar Prt_;
 
             dimensionedScalar Cb1_;
             dimensionedScalar Cb2_;
@@ -164,7 +167,7 @@ public:
                 new volScalarField
                 (
                     "DnuTildaEff",
-                    alphaNut_*rho_*nuTilda_ + mu()
+                    rho_*nuTilda_/sigmaNut_ + mu()
                 )
             );
         }
@@ -180,7 +183,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_/Prt_ + alpha())
             );
         }
 

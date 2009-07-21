@@ -60,7 +60,7 @@ Description
             alphaK2     1.0;
             alphaOmega1 0.5;
             alphaOmega2 0.85616;
-            alphah      1.0;    // only for compressible
+            Prt         1.0;    // only for compressible
             beta1       0.075;
             beta2       0.0828;
             betaStar    0.09;
@@ -112,7 +112,7 @@ class kOmegaSST
             dimensionedScalar alphaOmega1_;
             dimensionedScalar alphaOmega2_;
 
-            dimensionedScalar alphah_;
+            dimensionedScalar Prt_;
 
             dimensionedScalar gamma1_;
             dimensionedScalar gamma2_;
@@ -153,34 +153,22 @@ class kOmegaSST
             return F1*(psi1 - psi2) + psi2;
         }
 
-        tmp<volScalarField> alphaK
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> alphaK(const volScalarField& F1) const
         {
             return blend(F1, alphaK1_, alphaK2_);
         }
 
-        tmp<volScalarField> alphaOmega
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> alphaOmega(const volScalarField& F1) const
         {
             return blend(F1, alphaOmega1_, alphaOmega2_);
         }
 
-        tmp<volScalarField> beta
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> beta(const volScalarField& F1) const
         {
             return blend(F1, beta1_, beta2_);
         }
 
-        tmp<volScalarField> gamma
-        (
-            const volScalarField& F1
-        ) const
+        tmp<volScalarField> gamma(const volScalarField& F1) const
         {
             return blend(F1, gamma1_, gamma2_);
         }
@@ -239,7 +227,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_/Prt_ + alpha())
             );
         }
 

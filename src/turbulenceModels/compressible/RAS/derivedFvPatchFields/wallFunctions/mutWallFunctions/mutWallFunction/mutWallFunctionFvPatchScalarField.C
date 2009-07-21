@@ -51,7 +51,10 @@ mutWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     rhoName_("rho"),
     muName_("mu"),
-    kName_("k")
+    kName_("k"),
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.0)
 {}
 
 
@@ -67,7 +70,10 @@ mutWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     rhoName_(ptf.rhoName_),
     muName_(ptf.muName_),
-    kName_(ptf.kName_)
+    kName_(ptf.kName_),
+    Cmu_(ptf.Cmu_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_)
 {}
 
 
@@ -82,7 +88,10 @@ mutWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
-    kName_(dict.lookupOrDefault<word>("k", "k"))
+    kName_(dict.lookupOrDefault<word>("k", "k")),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.0))
 {}
 
 
@@ -95,7 +104,10 @@ mutWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf),
     rhoName_(wfpsf.rhoName_),
     muName_(wfpsf.muName_),
-    kName_(wfpsf.kName_)
+    kName_(wfpsf.kName_),
+    Cmu_(wfpsf.Cmu_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_)
 {}
 
 
@@ -109,7 +121,10 @@ mutWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf, iF),
     rhoName_(wfpsf.rhoName_),
     muName_(wfpsf.muName_),
-    kName_(wfpsf.kName_)
+    kName_(wfpsf.kName_),
+    Cmu_(wfpsf.Cmu_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_)
 {}
 
 
@@ -118,14 +133,10 @@ mutWallFunctionFvPatchScalarField
 void mutWallFunctionFvPatchScalarField::updateCoeffs()
 {
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const scalar Cmu = rasModel.Cmu().value();
-    const scalar Cmu25 = pow(Cmu, 0.25);
-    const scalar kappa = rasModel.kappa().value();
-    const scalar E = rasModel.E().value();
-    const scalar yPlusLam = rasModel.yPlusLam();
-
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patch().index()];
+
+    const scalar Cmu25 = pow(Cmu_, 0.25);
 
     const scalarField& rhow =
         patch().lookupPatchField<volScalarField, scalar>(rhoName_);
@@ -147,7 +158,7 @@ void mutWallFunctionFvPatchScalarField::updateCoeffs()
 
         if (yPlus > yPlusLam)
         {
-            mutw[faceI] = muw[faceI]*(yPlus*kappa/log(E*yPlus) - 1);
+            mutw[faceI] = muw[faceI]*(yPlus*kappa_/log(E_*yPlus) - 1);
         }
         else
         {
@@ -163,6 +174,9 @@ void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
     writeEntryIfDifferent<word>(os, "k", "k", kName_);
+    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

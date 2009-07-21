@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "mutSpalartAllmarasWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -51,7 +50,9 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     UName_("U"),
     rhoName_("rho"),
-    muName_("mu")
+    muName_("mu"),
+    kappa_(0.41),
+    E_(9.0)
 {}
 
 
@@ -67,7 +68,9 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     UName_(ptf.UName_),
     rhoName_(ptf.rhoName_),
-    muName_(ptf.muName_)
+    muName_(ptf.muName_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_)
 {}
 
 
@@ -82,7 +85,9 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    muName_(dict.lookupOrDefault<word>("mu", "mu"))
+    muName_(dict.lookupOrDefault<word>("mu", "mu")),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.0))
 {}
 
 
@@ -95,7 +100,9 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf),
     UName_(wfpsf.UName_),
     rhoName_(wfpsf.rhoName_),
-    muName_(wfpsf.muName_)
+    muName_(wfpsf.muName_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_)
 {}
 
 
@@ -109,7 +116,9 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(wfpsf, iF),
     UName_(wfpsf.UName_),
     rhoName_(wfpsf.rhoName_),
-    muName_(wfpsf.muName_)
+    muName_(wfpsf.muName_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_)
 {}
 
 
@@ -120,11 +129,6 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const scalar kappa = rasModel.kappa().value();
-    const scalar E = rasModel.E().value();
-
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
@@ -156,18 +160,18 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
 
             do
             {
-                scalar kUu = min(kappa*magUpara/utau, 50);
+                scalar kUu = min(kappa_*magUpara/utau, 50);
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
                     - utau/(ry[faceI]*(muw[faceI]/rhow[faceI]))
                     + magUpara/utau
-                    + 1/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
+                    + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
                     1.0/(ry[faceI]*(muw[faceI]/rhow[faceI]))
                   + magUpara/sqr(utau)
-                  + 1/E*kUu*fkUu/utau;
+                  + 1/E_*kUu*fkUu/utau;
 
                 scalar utauNew = utau + f/df;
                 err = mag((utau - utauNew)/utau);
@@ -177,7 +181,7 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
 
             mutw[faceI] = max
             (
-                rhow[faceI]*sqr(max(utau, 0))/magFaceGradU[faceI]- muw[faceI],
+                rhow[faceI]*sqr(max(utau, 0))/magFaceGradU[faceI] - muw[faceI],
                 0.0
             );
         }
@@ -198,6 +202,8 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

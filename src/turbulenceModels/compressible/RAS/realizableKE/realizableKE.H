@@ -46,9 +46,9 @@ Description
             Cmu         0.09;
             A0          4.0;
             C2          1.9;
-            alphak      1.0;
-            alphaEps    0.833333;
-            alphah      1.0;    // only for compressible
+            sigmak      1.0;
+            sigmaEps    1.2;
+            Prt         1.0;    // only for compressible
         }
     @endverbatim
 
@@ -72,7 +72,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class realizableKE Declaration
+                        Class realizableKE Declaration
 \*---------------------------------------------------------------------------*/
 
 class realizableKE
@@ -81,17 +81,25 @@ class realizableKE
 {
     // Private data
 
-        dimensionedScalar Cmu_;
-        dimensionedScalar A0_;
-        dimensionedScalar C2_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar alphah_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField mut_;
-        volScalarField alphat_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar A0_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar Prt_;
+
+
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField mut_;
+            volScalarField alphat_;
+
+
+   // Private member functions
 
         tmp<volScalarField> rCmu
         (
@@ -100,10 +108,8 @@ class realizableKE
             const volScalarField& magS
         );
 
-        tmp<volScalarField> rCmu
-        (
-            const volTensorField& gradU
-        );
+        tmp<volScalarField> rCmu(const volTensorField& gradU);
+
 
 public:
 
@@ -134,7 +140,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*mut_ + mu())
+                new volScalarField("DkEff", mut_/sigmak_ + mu())
             );
         }
 
@@ -143,7 +149,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -158,7 +164,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_/Prt_ + alpha())
             );
         }
 

@@ -36,9 +36,9 @@ Description
             C1          1.42;
             C2          1.68;
             C3          -0.33;  // only for compressible
-            alphah      1.0;    // only for compressible
-            alphak      1.39;
-            alphaEps    1.39;
+            Prt         1.0;    // only for compressible
+            sigmak      0.71942;
+            sigmaEps    0.71942;
             eta0        4.38;
             beta        0.012;
         }
@@ -74,20 +74,24 @@ class RNGkEpsilon
 {
     // Private data
 
-        dimensionedScalar Cmu_;
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar C3_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar alphah_;
-        dimensionedScalar eta0_;
-        dimensionedScalar beta_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField mut_;
-        volScalarField alphat_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar C3_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar Prt_;
+            dimensionedScalar eta0_;
+            dimensionedScalar beta_;
+
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField mut_;
+            volScalarField alphat_;
 
 
 public:
@@ -119,7 +123,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*mut_ + mu())
+                new volScalarField("DkEff", mut_/sigmak_ + mu())
             );
         }
 
@@ -128,7 +132,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -143,7 +147,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_/Prt_ + alpha())
             );
         }
 

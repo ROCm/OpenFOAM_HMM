@@ -29,6 +29,7 @@ Description
     Boundary condition for turbulent thermal diffusivity when using wall
     functions
     - replicates OpenFOAM v1.5 (and earlier) behaviour
+    - Turbulent Prandtl number defaults to 0.85 if unspecified
 
 SourceFiles
     alphatWallFunctionFvPatchScalarField.C
@@ -61,6 +62,9 @@ class alphatWallFunctionFvPatchScalarField
 
         //- Name of turbulent viscosity field
         word mutName_;
+
+        //- Turbulent Prandtl number
+        scalar Prt_;
 
 
 public:
