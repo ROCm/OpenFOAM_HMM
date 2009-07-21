@@ -58,6 +58,7 @@ laplacianSchemes
     laplacian(muEff,ft) Gauss linear limited 0.5;
     laplacian(alphaEff,h) Gauss linear limited 0.5;
     laplacian(alphaEff,hu) Gauss linear limited 0.5;
+    laplacian(alphaEff,ft) Gauss linear limited 0.5;
 }
 
 interpolationSchemes
