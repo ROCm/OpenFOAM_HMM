@@ -67,6 +67,12 @@ class muSgsWallFunctionFvPatchScalarField
         //- Name of laminar viscosity field
         word muName_;
 
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
 
 public:
 

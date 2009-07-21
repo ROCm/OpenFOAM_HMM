@@ -50,7 +50,7 @@ void SpalartAllmaras::updateSubGridScaleFields()
     muSgs_.internalField() = rho()*fv1()*nuTilda_.internalField();
     muSgs_.correctBoundaryConditions();
 
-    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_ = muSgs_/Prt_;
     alphaSgs_.correctBoundaryConditions();
 }
 
@@ -112,13 +112,22 @@ SpalartAllmaras::SpalartAllmaras
 :
     LESModel(typeName, rho, U, phi, thermoPhysicalModel),
 
-    alphaNut_
+    sigmaNut_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaNut",
+            "sigmaNut",
             coeffDict_,
-            1.5
+            0.66666
+        )
+    ),
+    Prt_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Prt",
+            coeffDict_,
+            1.0
         )
     ),
 
@@ -185,7 +194,7 @@ SpalartAllmaras::SpalartAllmaras
             0.4187
         )
     ),
-    Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
+    Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -299,11 +308,11 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& tgradU)
       + fvm::div(phi(), nuTilda_)
       - fvm::laplacian
         (
-            alphaNut_*(nuTilda_*rho() + mu()),
+            (nuTilda_*rho() + mu())/sigmaNut_,
             nuTilda_,
             "laplacian(DnuTildaEff,nuTilda)"
         )
-      - alphaNut_*rho()*Cb2_*magSqr(fvc::grad(nuTilda_))
+      - rho()*Cb2_/sigmaNut_*magSqr(fvc::grad(nuTilda_))
      ==
         rho()*Cb1_*Stilda*nuTilda_
       - fvm::Sp(rho()*Cw1_*fw(Stilda)*nuTilda_/sqr(dTilda_), nuTilda_)
@@ -320,10 +329,11 @@ bool SpalartAllmaras::read()
 {
     if (LESModel::read())
     {
-        alphaNut_.readIfPresent(coeffDict());
+        sigmaNut_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
         Cb1_.readIfPresent(coeffDict());
         Cb2_.readIfPresent(coeffDict());
-        Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
+        Cw1_ = Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_;
         Cw2_.readIfPresent(coeffDict());
         Cw3_.readIfPresent(coeffDict());
         Cv1_.readIfPresent(coeffDict());

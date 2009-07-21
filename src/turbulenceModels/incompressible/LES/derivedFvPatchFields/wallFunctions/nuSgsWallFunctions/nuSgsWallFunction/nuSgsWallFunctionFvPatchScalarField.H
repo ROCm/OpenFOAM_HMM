@@ -64,6 +64,12 @@ class nuSgsWallFunctionFvPatchScalarField
         //- Name of laminar viscosity field
         word nuName_;
 
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E constant
+        scalar E_;
+
 
 public:
 

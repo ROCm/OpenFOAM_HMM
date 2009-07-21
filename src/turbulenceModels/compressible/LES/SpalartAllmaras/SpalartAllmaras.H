@@ -58,18 +58,29 @@ class SpalartAllmaras
 {
     // Private data
 
-        dimensionedScalar alphaNut_;
+        // Model coefficients
 
-        dimensionedScalar Cb1_;
-        dimensionedScalar Cb2_;
-        dimensionedScalar Cv1_;
-        dimensionedScalar Cv2_;
-        dimensionedScalar CDES_;
-        dimensionedScalar ck_;
-        dimensionedScalar kappa_;
-        dimensionedScalar Cw1_;
-        dimensionedScalar Cw2_;
-        dimensionedScalar Cw3_;
+            dimensionedScalar sigmaNut_;
+            dimensionedScalar Prt_;
+
+            dimensionedScalar Cb1_;
+            dimensionedScalar Cb2_;
+            dimensionedScalar Cv1_;
+            dimensionedScalar Cv2_;
+            dimensionedScalar CDES_;
+            dimensionedScalar ck_;
+            dimensionedScalar kappa_;
+            dimensionedScalar Cw1_;
+            dimensionedScalar Cw2_;
+            dimensionedScalar Cw3_;
+
+
+    // Fields
+
+        volScalarField nuTilda_;
+        volScalarField dTilda_;
+        volScalarField muSgs_;
+        volScalarField alphaSgs_;
 
 
     // Private member functions
@@ -85,11 +96,6 @@ class SpalartAllmaras
         // Disallow default bitwise copy construct and assignment
         SpalartAllmaras(const SpalartAllmaras&);
         SpalartAllmaras& operator=(const SpalartAllmaras&);
-
-        volScalarField nuTilda_;
-        volScalarField dTilda_;
-        volScalarField muSgs_;
-        volScalarField alphaSgs_;
 
 
 public:

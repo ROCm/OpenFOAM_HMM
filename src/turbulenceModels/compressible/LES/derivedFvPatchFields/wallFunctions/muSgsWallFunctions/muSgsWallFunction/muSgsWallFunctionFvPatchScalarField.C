@@ -50,7 +50,9 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     UName_("U"),
     rhoName_("rho"),
-    muName_("mu")
+    muName_("mu"),
+    kappa_(0.41),
+    E_(9.0)
 {}
 
 
@@ -65,7 +67,9 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     UName_(ptf.UName_),
     rhoName_(ptf.rhoName_),
-    muName_(ptf.muName_)
+    muName_(ptf.muName_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_)
 {}
 
 
@@ -79,7 +83,9 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    muName_(dict.lookupOrDefault<word>("mu", "mu"))
+    muName_(dict.lookupOrDefault<word>("mu", "mu")),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.0))
 {}
 
 
@@ -91,7 +97,9 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(mwfpsf),
     UName_(mwfpsf.UName_),
     rhoName_(mwfpsf.rhoName_),
-    muName_(mwfpsf.muName_)
+    muName_(mwfpsf.muName_),
+    kappa_(mwfpsf.kappa_),
+    E_(mwfpsf.E_)
 {}
 
 
@@ -104,7 +112,9 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(mwfpsf, iF),
     UName_(mwfpsf.UName_),
     rhoName_(mwfpsf.rhoName_),
-    muName_(mwfpsf.muName_)
+    muName_(mwfpsf.muName_),
+    kappa_(mwfpsf.kappa_),
+    E_(mwfpsf.E_)
 {}
 
 
@@ -115,11 +125,6 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
-
-    const scalar kappa = lesModel.kappa().value();
-    const scalar E = lesModel.E().value();
-
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
@@ -151,18 +156,18 @@ void muSgsWallFunctionFvPatchScalarField::evaluate
 
             do
             {
-                scalar kUu = kappa*magUpara/utau;
+                scalar kUu = kappa_*magUpara/utau;
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
                     - utau/(ry[facei]*muw[facei]/rhow[facei])
                     + magUpara/utau
-                    + 1/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
+                    + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
                     - 1.0/(ry[facei]*muw[facei]/rhow[facei])
                     - magUpara/sqr(utau)
-                    - 1/E*kUu*fkUu/utau;
+                    - 1/E_*kUu*fkUu/utau;
 
                 scalar utauNew = utau - f/df;
                 err = mag((utau - utauNew)/utau);
@@ -191,6 +196,8 @@ void muSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

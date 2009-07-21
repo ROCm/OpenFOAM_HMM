@@ -158,7 +158,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphat_/Prt_ + alpha())
+                new volScalarField("alphaEff", alphat_ + alpha())
             );
         }
 
