@@ -184,7 +184,7 @@ void Foam::dsmcFields::write()
                     obr_,
                     IOobject::NO_READ
                 ),
-                2.0/(dsmcCloud::kb*iDofMean)*internalEMean
+                (2.0/dsmcCloud::kb)*(internalEMean/iDofMean)
             );
 
             Info<< "    Calculating overallT field." << endl;
