@@ -27,21 +27,18 @@
 #     wmakeLnIncludeAll
 #
 # Description
-#     Find directories containing an lnInclude/ directory and execute
-#     'wmakeLnInclude -f' for each one
+#     Find directories with a 'Make/files' that contains a 'LIB =' directive
+#     and execute 'wmakeLnInclude -f' for each one
 #
 #------------------------------------------------------------------------------
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
 
-usage: ${0##*/} [-make] [dir1 .. dirN]
+usage: ${0##*/} [dir1 .. dirN]
 
-    Find directories containing an lnInclude/ directory and execute
-    'wmakeLnInclude -f' for each one
-
-Note
-    Use the '-make' option to search for Make/ instead of lnInclude/
+    Find directories with a 'Make/files' that contains a 'LIB =' directive
+    and execute 'wmakeLnInclude -f' for each one
 
 USAGE
     exit 1
@@ -56,10 +53,6 @@ do
     case "$1" in
     -h | -help)   # provide immediate help
         usage
-        ;;
-    -make)
-        shift
-        findName=Make
         ;;
     -*)
         usage "unknown option: '$*'"
@@ -78,7 +71,7 @@ for checkDir
 do
     if [ -d $checkDir ]
     then
-        echo "searching: $checkDir for '$findName' directories"
+        echo "searching: $checkDir for 'Make' directories"
         echo "---------"
     else
         echo "skipping non-dir: $checkDir"
@@ -86,12 +79,19 @@ do
         continue
     fi
 
-    find $checkDir -depth -type d -name $findName -print | while read dir
+    find $checkDir -depth -type d -name Make -print | while read makeDir
     do
-        dir=${dir%/$findName}    # trim findName from the end
-        if [ -d "$dir" ]
+        topDir=${makeDir%/Make}    # trim /Make from the end
+        if [ -d "$topDir" ]
         then
-            wmakeLnInclude -f $dir
+            if grep -e '^ *LIB *=' "$makeDir/files" >/dev/null 2>&1
+            then
+                wmakeLnInclude -f $topDir
+            elif [ -d "$topDir/lnInclude" ]
+            then
+                echo "removing spurious $topDir/lnInclude"
+                rm -rf "$topDir/lnInclude"
+            fi
         fi
     done
 done
