@@ -24,10 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kQRWallFunctionFvPatchFields_H
-#define kQRWallFunctionFvPatchFields_H
+#ifndef kqRWallFunctionFvPatchFields_H
+#define kqRWallFunctionFvPatchFields_H
 
-#include "kQRWallFunctionFvPatchField.H"
+#include "kqRWallFunctionFvPatchField.H"
 #include "fieldTypes.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -41,7 +41,7 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeFieldTypedefs(kQRWallFunction)
+makePatchTypeFieldTypedefs(kqRWallFunction)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

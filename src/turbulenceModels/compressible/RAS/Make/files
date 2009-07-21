@@ -29,8 +29,8 @@ $(epsilonWallFunctions)/epsilonWallFunction/epsilonWallFunctionFvPatchScalarFiel
 omegaWallFunctions = $(wallFunctions)/omegaWallFunctions
 $(omegaWallFunctions)/omegaWallFunction/omegaWallFunctionFvPatchScalarField.C
 
-kQRWallFunctions = $(wallFunctions)/kQRWallFunctions
-$(kQRWallFunctions)/kQRWallFunction/kQRWallFunctionFvPatchFields.C
+kqRWallFunctions = $(wallFunctions)/kqRWallFunctions
+$(kqRWallFunctions)/kqRWallFunction/kqRWallFunctionFvPatchFields.C
 
 /* Patch fields */
 derivedFvPatchFields/turbulentHeatFluxTemperature/turbulentHeatFluxTemperatureFvPatchScalarField.C

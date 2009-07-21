@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kQRWallFunctionFvPatchFields.H"
+#include "kqRWallFunctionFvPatchFields.H"
 #include "fvPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
@@ -40,7 +40,7 @@ namespace RASModels
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-makePatchFields(kQRWallFunction);
+makePatchFields(kqRWallFunction);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
