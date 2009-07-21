@@ -75,6 +75,9 @@ class PDRkEpsilon
         dimensionedScalar alphaEps_;
         dimensionedScalar alphah_;
 
+        dimensionedScalar kappa_;
+        dimensionedScalar E_;
+
         volScalarField k_;
         volScalarField epsilon_;
         volScalarField mut_;
@@ -84,6 +87,7 @@ public:
 
     //- Runtime type information
     TypeName("PDRkEpsilon");
+
 
     // Constructors
 
