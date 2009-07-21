@@ -22,42 +22,60 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Description
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef UnMapped_H
-#define UnMapped_H
-
-#include "IOobjectList.H"
 #include "OSspecific.H"
+#include "argList.H"
+
+using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Main program:
 
-namespace Foam
+int main(int argc, char *argv[])
 {
+    argList::noBanner();
+    argList::noParallel();
+    argList::validArgs.insert("file .. fileN");
+    argList::validOptions.erase("case");
+    argList::validOptions.insert("ext", "bak");
 
-template<class Type>
-void UnMapped(const IOobjectList& objects)
-{
-    IOobjectList fields = objects.lookupClass(Type::typeName);
+    argList args(argc, argv, false, true);
 
-    for
-    (
-        IOobjectList::iterator fieldIter = fields.begin();
-        fieldIter != fields.end();
-        ++fieldIter
-    )
+    if (args.additionalArgs().empty())
     {
-        mvBak(fieldIter()->objectPath(), "unmapped");
+        args.printUsage();
     }
+
+    label ok = 0;
+
+    forAll(args.additionalArgs(), argI)
+    {
+        const string& srcFile = args.additionalArgs()[argI];
+
+        if (args.optionFound("ext"))
+        {
+            if (mvBak(srcFile, args.option("ext")))
+            {
+                ok++;
+            }
+        }
+        else
+        {
+            if (mvBak(srcFile))
+            {
+                ok++;
+            }
+        }
+    }
+
+    Info<< "mvBak called for " << args.additionalArgs().size()
+        << " files (moved " << ok << ")\n" << endl;
+
+    return 0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

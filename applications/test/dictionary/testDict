@@ -78,6 +78,7 @@ boundaryField
 // NB: the inputMode has a global scope
 #inputMode merge
 #include "testDict2"
+#includeIfPresent "SomeUnknownFile"
 
 foo
 {
