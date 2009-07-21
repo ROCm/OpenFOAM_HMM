@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::QZeta
+    Foam::incompressible::RASModels::qZeta
 
 Description
     Gibson and Dafa'Alla's q-zeta two-equation low-Re turbulence model
     for incompressible flows
 
 SourceFiles
-    QZeta.C
+    qZeta.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef QZeta_H
-#define QZeta_H
+#ifndef qZeta_H
+#define qZeta_H
 
 #include "RASModel.H"
 
@@ -49,10 +49,10 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class QZeta Declaration
+                           Class qZeta Declaration
 \*---------------------------------------------------------------------------*/
 
-class QZeta
+class qZeta
 :
     public RASModel
 {
@@ -82,12 +82,12 @@ class QZeta
 public:
 
     //- Runtime type information
-    TypeName("QZeta");
+    TypeName("qZeta");
 
     // Constructors
 
         //- Construct from components
-        QZeta
+        qZeta
         (
             const volVectorField& U,
             const surfaceScalarField& phi,
@@ -96,7 +96,7 @@ public:
 
 
     //- Destructor
-    virtual ~QZeta()
+    virtual ~qZeta()
     {}
 
 
