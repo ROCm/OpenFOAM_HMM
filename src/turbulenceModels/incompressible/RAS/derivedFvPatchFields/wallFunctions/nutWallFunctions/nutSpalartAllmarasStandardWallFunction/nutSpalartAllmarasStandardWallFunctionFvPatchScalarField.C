@@ -50,7 +50,9 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     UName_("U"),
-    nuName_("nu")
+    nuName_("nu"),
+    kappa_(0.41),
+    E_(9.0)
 {}
 
 
@@ -65,7 +67,9 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     UName_(ptf.UName_),
-    nuName_(ptf.nuName_)
+    nuName_(ptf.nuName_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_)
 {}
 
 
@@ -79,32 +83,38 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
-    nuName_(dict.lookupOrDefault<word>("nu", "nu"))
+    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.0))
 {}
 
 
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 (
-    const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& tppsf
+    const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& sawfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf),
-    UName_(tppsf.UName_),
-    nuName_(tppsf.nuName_)
+    fixedValueFvPatchScalarField(sawfpsf),
+    UName_(sawfpsf.UName_),
+    nuName_(sawfpsf.nuName_),
+    kappa_(sawfpsf.kappa_),
+    E_(sawfpsf.E_)
 {}
 
 
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 (
-    const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& tppsf,
+    const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& sawfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF),
-    UName_(tppsf.UName_),
-    nuName_(tppsf.nuName_)
+    fixedValueFvPatchScalarField(sawfpsf, iF),
+    UName_(sawfpsf.UName_),
+    nuName_(sawfpsf.nuName_),
+    kappa_(sawfpsf.kappa_),
+    E_(sawfpsf.E_)
 {}
 
 
@@ -116,10 +126,7 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
 )
 {
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const scalar kappa = rasModel.kappa().value();
-    const scalar E = rasModel.E().value();
-    const scalar yPlusLam = rasModel.yPlusLam();
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
 
     const scalarField& ry = patch().deltaCoeffs();
 
@@ -136,7 +143,7 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
     {
         scalar magUpara = magUp[facei];
 
-        scalar kappaRe = kappa*magUpara/(nuw[facei]*ry[facei]);
+        scalar kappaRe = kappa_*magUpara/(nuw[facei]*ry[facei]);
 
         scalar yPlus = yPlusLam;
         scalar ryPlusLam = 1.0/yPlus;
@@ -147,13 +154,13 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
         do
         {
             yPlusLast = yPlus;
-            yPlus = (kappaRe + yPlus)/(1.0 + log(E*yPlus));
+            yPlus = (kappaRe + yPlus)/(1.0 + log(E_*yPlus));
 
         } while(mag(ryPlusLam*(yPlus - yPlusLast)) > 0.01 && ++iter < 10 );
 
         if (yPlus > yPlusLam)
         {
-            nutw[facei] = nuw[facei]*(yPlus*kappa/log(E*yPlus) - 1);
+            nutw[facei] = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1);
         }
         else
         {
@@ -171,6 +178,8 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
     fixedValueFvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
 }
 
 

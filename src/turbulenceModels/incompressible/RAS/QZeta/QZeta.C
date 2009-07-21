@@ -27,6 +27,8 @@ License
 #include "QZeta.H"
 #include "addToRunTimeSelectionTable.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -105,13 +107,13 @@ QZeta::QZeta
             1.92
         )
     ),
-    alphaZeta_
+    sigmaZeta_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaZeta",
+            "sigmaZeta",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
     anisotropic_
@@ -178,8 +180,22 @@ QZeta::QZeta
         epsilon_.boundaryField().types()
     ),
 
-    nut_(Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateNut("nut", mesh_)
+    )
 {
+    nut_ = Cmu_*fMu()*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_.correctBoundaryConditions();
+
     printCoeffs();
 }
 
@@ -244,7 +260,7 @@ bool QZeta::read()
         Cmu_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphaZeta_.readIfPresent(coeffDict());
+        sigmaZeta_.readIfPresent(coeffDict());
         anisotropic_.readIfPresent("anisotropic", coeffDict());
 
         return true;
@@ -267,7 +283,7 @@ void QZeta::correct()
 
     volScalarField S2 = 2*magSqr(symm(fvc::grad(U_)));
 
-    volScalarField G = nut_/(2.0*q_)*S2;
+    volScalarField G("RASModel::G", nut_/(2.0*q_)*S2);
     volScalarField E = nu()*nut_/q_*fvc::magSqrGradGrad(U_);
 
 
@@ -315,6 +331,7 @@ void QZeta::correct()
 
     // Re-calculate viscosity
     nut_ = Cmu_*fMu()*sqr(k_)/epsilon_;
+    nut_.correctBoundaryConditions();
 }
 
 

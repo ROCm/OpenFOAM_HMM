@@ -77,6 +77,9 @@ nutRoughWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     kName_("k"),
     nuName_("nu"),
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.0),
     Ks_(p.size(), 0.0),
     Cs_(p.size(), 0.0)
 {}
@@ -94,6 +97,9 @@ nutRoughWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     kName_(ptf.kName_),
     nuName_(ptf.nuName_),
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.0),
     Ks_(ptf.Ks_, mapper),
     Cs_(ptf.Cs_, mapper)
 {}
@@ -110,6 +116,9 @@ nutRoughWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict),
     kName_(dict.lookupOrDefault<word>("k", "k")),
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.0)),
     Ks_("Ks", dict, p.size()),
     Cs_("Cs", dict, p.size())
 {}
@@ -118,29 +127,35 @@ nutRoughWallFunctionFvPatchScalarField
 nutRoughWallFunctionFvPatchScalarField::
 nutRoughWallFunctionFvPatchScalarField
 (
-    const nutRoughWallFunctionFvPatchScalarField& nrwfpsf
+    const nutRoughWallFunctionFvPatchScalarField& rwfpsf
 )
 :
-    fixedValueFvPatchScalarField(nrwfpsf),
-    kName_(nrwfpsf.kName_),
-    nuName_(nrwfpsf.nuName_),
-    Ks_(nrwfpsf.Ks_),
-    Cs_(nrwfpsf.Cs_)
+    fixedValueFvPatchScalarField(rwfpsf),
+    kName_(rwfpsf.kName_),
+    nuName_(rwfpsf.nuName_),
+    Cmu_(rwfpsf.Cmu_),
+    kappa_(rwfpsf.kappa_),
+    E_(rwfpsf.E_),
+    Ks_(rwfpsf.Ks_),
+    Cs_(rwfpsf.Cs_)
 {}
 
 
 nutRoughWallFunctionFvPatchScalarField::
 nutRoughWallFunctionFvPatchScalarField
 (
-    const nutRoughWallFunctionFvPatchScalarField& nrwfpsf,
+    const nutRoughWallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(nrwfpsf, iF),
-    kName_(nrwfpsf.kName_),
-    nuName_(nrwfpsf.nuName_),
-    Ks_(nrwfpsf.Ks_),
-    Cs_(nrwfpsf.Cs_)
+    fixedValueFvPatchScalarField(rwfpsf, iF),
+    kName_(rwfpsf.kName_),
+    nuName_(rwfpsf.nuName_),
+    Cmu_(rwfpsf.Cmu_),
+    kappa_(rwfpsf.kappa_),
+    E_(rwfpsf.E_),
+    Ks_(rwfpsf.Ks_),
+    Cs_(rwfpsf.Cs_)
 {}
 
 
@@ -176,14 +191,10 @@ void nutRoughWallFunctionFvPatchScalarField::rmap
 void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
 {
     const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
-
-    const scalar Cmu = ras.Cmu().value();
-    const scalar Cmu25 = pow(Cmu, 0.25);
-    const scalar kappa = ras.kappa().value();
-    const scalar E = ras.E().value();
-    const scalar yPlusLam = ras.yPlusLam();
-
+    const scalar yPlusLam = ras.yPlusLam(kappa_, E_);
     const scalarField& y = ras.y()[patch().index()];
+
+    const scalar Cmu25 = pow(Cmu_, 0.25);
 
     const scalarField& k = db().lookupObject<volScalarField>(kName_);
 
@@ -200,11 +211,11 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
         scalar yPlus = uStar*y[faceI]/nuw[faceI];
         scalar KsPlus = uStar*Ks_[faceI]/nuw[faceI];
 
-        scalar Edash = E;
+        scalar Edash = E_;
 
         if (KsPlus > 2.25)
         {
-            Edash = E/fnRough(KsPlus, Cs_[faceI]);
+            Edash /= fnRough(KsPlus, Cs_[faceI]);
         }
 
         if (yPlus > yPlusLam)
@@ -219,7 +230,7 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
                     min
                     (
                         nuw[faceI]
-                       *(yPlus*kappa/log(max(Edash*yPlus, 1+1e-4)) - 1),
+                       *(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1),
                         2*limitingNutw
                     ), 0.5*limitingNutw
                 );
@@ -246,6 +257,9 @@ void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "k", "k", kName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
+    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     Cs_.writeEntry("Cs", os);
     Ks_.writeEntry("Ks", os);
     writeEntry("value", os);

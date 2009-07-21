@@ -58,19 +58,24 @@ class QZeta
 {
     // Private data
 
-        dimensionedScalar Cmu_;
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar alphaZeta_;
-        Switch anisotropic_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmaZeta_;
+            Switch anisotropic_;
 
-        volScalarField q_;
-        volScalarField zeta_;
 
-        volScalarField nut_;
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilon_;
+
+            volScalarField q_;
+            volScalarField zeta_;
+
+            volScalarField nut_;
 
 
     // Private member functions
@@ -122,7 +127,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DzetaEff", alphaZeta_*nut_ + nu())
+                new volScalarField("DzetaEff", nut_/sigmaZeta_ + nu())
             );
         }
 

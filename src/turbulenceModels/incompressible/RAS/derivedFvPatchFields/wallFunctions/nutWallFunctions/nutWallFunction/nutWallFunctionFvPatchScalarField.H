@@ -65,6 +65,15 @@ class nutWallFunctionFvPatchScalarField
         //- Name of laminar viscosity field
         word nuName_;
 
+        //- Cmu coefficient
+        scalar Cmu_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
 
 public:
 

@@ -71,22 +71,22 @@ NonlinearKEShih::NonlinearKEShih
             1.92
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
             1.0
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
     A1_
@@ -144,6 +144,25 @@ NonlinearKEShih::NonlinearKEShih
         )
     ),
 
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa_",
+            coeffDict_,
+            0.41
+        )
+    ),
+    E_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "E",
+            coeffDict_,
+            9.0
+        )
+    ),
+
     k_
     (
         IOobject
@@ -196,7 +215,7 @@ NonlinearKEShih::NonlinearKEShih
         )
     )
 {
-#   include "wallNonlinearViscosityI.H"
+    #include "wallNonlinearViscosityI.H"
 
     printCoeffs();
 }
@@ -264,14 +283,17 @@ bool NonlinearKEShih::read()
     {
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
         A1_.readIfPresent(coeffDict());
         A2_.readIfPresent(coeffDict());
         Ctau1_.readIfPresent(coeffDict());
         Ctau2_.readIfPresent(coeffDict());
         Ctau3_.readIfPresent(coeffDict());
         alphaKsi_.readIfPresent(coeffDict());
+
+        kappa_.readIfPresent(coeffDict());
+        E_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -300,7 +322,7 @@ void NonlinearKEShih::correct()
         Cmu_*sqr(k_)/epsilon_*S2
       - (nonlinearStress_ && gradU_);
 
-#   include "nonLinearWallFunctionsI.H"
+    #include "nonLinearWallFunctionsI.H"
 
     // Dissipation equation
     tmp<fvScalarMatrix> epsEqn
@@ -315,7 +337,7 @@ void NonlinearKEShih::correct()
 
     epsEqn().relax();
 
-#   include "wallDissipationI.H"
+    #include "wallDissipationI.H"
 
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
@@ -347,7 +369,7 @@ void NonlinearKEShih::correct()
 
     nut_ = Cmu_*sqr(k_)/epsilon_;
 
-#   include "wallNonlinearViscosityI.H"
+    #include "wallNonlinearViscosityI.H"
 
     nonlinearStress_ = symm
     (

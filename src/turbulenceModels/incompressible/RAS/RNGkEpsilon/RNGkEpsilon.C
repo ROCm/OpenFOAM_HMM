@@ -81,22 +81,22 @@ RNGkEpsilon::RNGkEpsilon
             1.68
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
-            1.39
+            0.71942
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            1.39
+            0.71942
         )
     ),
     eta0_
@@ -223,8 +223,8 @@ bool RNGkEpsilon::read()
         Cmu_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
         eta0_.readIfPresent(coeffDict());
         beta_.readIfPresent(coeffDict());
 

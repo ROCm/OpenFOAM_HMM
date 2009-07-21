@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "nutSpalartAllmarasWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -50,7 +49,9 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     UName_("U"),
-    nuName_("nu")
+    nuName_("nu"),
+    kappa_(0.41),
+    E_(9.0)
 {}
 
 
@@ -65,7 +66,9 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     UName_(ptf.UName_),
-    nuName_(ptf.nuName_)
+    nuName_(ptf.nuName_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_)
 {}
 
 
@@ -79,32 +82,38 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
-    nuName_(dict.lookupOrDefault<word>("nu", "nu"))
+    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.0))
 {}
 
 
 nutSpalartAllmarasWallFunctionFvPatchScalarField::
 nutSpalartAllmarasWallFunctionFvPatchScalarField
 (
-    const nutSpalartAllmarasWallFunctionFvPatchScalarField& tppsf
+    const nutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf),
-    UName_(tppsf.UName_),
-    nuName_(tppsf.nuName_)
+    fixedValueFvPatchScalarField(wfpsf),
+    UName_(wfpsf.UName_),
+    nuName_(wfpsf.nuName_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_)
 {}
 
 
 nutSpalartAllmarasWallFunctionFvPatchScalarField::
 nutSpalartAllmarasWallFunctionFvPatchScalarField
 (
-    const nutSpalartAllmarasWallFunctionFvPatchScalarField& tppsf,
+    const nutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF),
-    UName_(tppsf.UName_),
-    nuName_(tppsf.nuName_)
+    fixedValueFvPatchScalarField(wfpsf, iF),
+    UName_(wfpsf.UName_),
+    nuName_(wfpsf.nuName_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_)
 {}
 
 
@@ -115,11 +124,6 @@ void nutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
     const Pstream::commsTypes
 )
 {
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const scalar kappa = rasModel.kappa().value();
-    const scalar E = rasModel.E().value();
-
     const scalarField& ry = patch().deltaCoeffs();
 
     const fvPatchVectorField& U =
@@ -147,18 +151,18 @@ void nutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
 
             do
             {
-                scalar kUu = min(kappa*magUpara/utau, 50);
+                scalar kUu = min(kappa_*magUpara/utau, 50);
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
                     - utau/(ry[facei]*nuw[facei])
                     + magUpara/utau
-                    + 1/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
+                    + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
                     1.0/(ry[facei]*nuw[facei])
                   + magUpara/sqr(utau)
-                  + 1/E*kUu*fkUu/utau;
+                  + 1/E_*kUu*fkUu/utau;
 
                 scalar utauNew = utau + f/df;
                 err = mag((utau - utauNew)/utau);
@@ -185,6 +189,8 @@ void nutSpalartAllmarasWallFunctionFvPatchScalarField::write
     fixedValueFvPatchScalarField::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
 }
 
 

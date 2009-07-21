@@ -27,6 +27,8 @@ License
 #include "LaunderSharmaKE.H"
 #include "addToRunTimeSelectionTable.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -95,13 +97,13 @@ LaunderSharmaKE::LaunderSharmaKE
             1.92
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
 
@@ -131,8 +133,22 @@ LaunderSharmaKE::LaunderSharmaKE
         mesh_
     ),
 
-    nut_(Cmu_*fMu()*sqr(k_)/(epsilonTilda_ + epsilonSmall_))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateNut("nut", mesh_)
+    )
 {
+    nut_ = Cmu_*fMu()*sqr(k_)/(epsilonTilda_ + epsilonSmall_);
+    nut_.correctBoundaryConditions();
+
     printCoeffs();
 }
 
@@ -197,7 +213,7 @@ bool LaunderSharmaKE::read()
         Cmu_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -261,6 +277,7 @@ void LaunderSharmaKE::correct()
 
     // Re-calculate viscosity
     nut_ = Cmu_*fMu()*sqr(k_)/epsilonTilda_;
+    nut_.correctBoundaryConditions();
 }
 
 

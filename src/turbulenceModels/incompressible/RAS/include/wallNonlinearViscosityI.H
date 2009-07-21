@@ -33,6 +33,8 @@ Description
 {
     const fvPatchList& patches = mesh_.boundary();
 
+    const scalar yPlusLam = this->yPlusLam(kappa_.value(), E_.value());
+
     forAll(patches, patchi)
     {
         const fvPatch& curPatch = patches[patchi];
@@ -52,10 +54,11 @@ Description
                 scalar yPlus =
                     Cmu25*y_[patchi][facei]*sqrt(k_[faceCelli])/nuw[facei];
 
-                if (yPlus > yPlusLam_)
+                if (yPlus > yPlusLam)
                 {
-                    nutw[facei] = nuw[facei]
-                        *(yPlus*kappa_.value()/log(E_.value()*yPlus) - 1);
+                    nutw[facei] =
+                        nuw[facei]
+                       *(yPlus*kappa_.value()/log(E_.value()*yPlus) - 1);
                 }
                 else
                 {

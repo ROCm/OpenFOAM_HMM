@@ -74,6 +74,15 @@ class epsilonWallFunctionFvPatchScalarField
         //- Name of turbulent viscosity field
         word nutName_;
 
+        //- Cmu coefficient
+        scalar Cmu_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
 
     // Private member functions
 

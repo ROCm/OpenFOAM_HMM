@@ -40,9 +40,7 @@ Description
             C2          1.92;
             Cs          0.25;
             Ceps        0.15;
-            alphah      1.0;    // only for compressible
-            alphaEps    0.76923;
-            alphaR      1.22;   // only for compressible
+            sigmaEps    1.3;
             couplingFactor  0.0;    // only for incompressible
         }
     @endverbatim
@@ -76,23 +74,28 @@ class LRR
 {
     // Private data
 
-        dimensionedScalar Cmu_;
+        // Model coefficients
 
-        dimensionedScalar Clrr1_;
-        dimensionedScalar Clrr2_;
+            dimensionedScalar Cmu_;
 
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar Cs_;
-        dimensionedScalar Ceps_;
-        dimensionedScalar alphaEps_;
+            dimensionedScalar Clrr1_;
+            dimensionedScalar Clrr2_;
 
-        dimensionedScalar couplingFactor_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar Cs_;
+            dimensionedScalar Ceps_;
+            dimensionedScalar sigmaEps_;
 
-        volSymmTensorField R_;
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField nut_;
+            dimensionedScalar couplingFactor_;
+
+
+        // Fields
+
+            volSymmTensorField R_;
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField nut_;
 
 
 public:
@@ -138,7 +141,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

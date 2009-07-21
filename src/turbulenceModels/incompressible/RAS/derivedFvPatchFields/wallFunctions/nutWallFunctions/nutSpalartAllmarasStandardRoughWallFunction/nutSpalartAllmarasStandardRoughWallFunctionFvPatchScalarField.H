@@ -64,6 +64,12 @@ class nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
         //- Name of laminar viscosity field
         word nuName_;
 
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
         // Roughness model parameters
 
             //- Height

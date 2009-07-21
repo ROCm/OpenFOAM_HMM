@@ -34,6 +34,8 @@ Description
 {
     labelList cellBoundaryFaceCount(epsilon_.size(), 0);
 
+    scalar yPlusLam = this->yPlusLam(kappa_.value(), E_.value());
+
     const fvPatchList& patches = mesh_.boundary();
 
     //- Initialise the near-wall G and epsilon fields to zero
@@ -61,7 +63,7 @@ Description
 
         if (isType<wallFvPatch>(curPatch))
         {
-#           include "checkPatchFieldTypes.H"
+            #include "checkPatchFieldTypes.H"
 
             const scalarField& nuw = nu().boundaryField()[patchi];
             const scalarField& nutw = nut_.boundaryField()[patchi];
@@ -91,7 +93,7 @@ Description
                      Cmu75*pow(k_[faceCelli], 1.5)
                     /(kappa_.value()*y_[patchi][facei]);
 
-                if (yPlus > yPlusLam_)
+                if (yPlus > yPlusLam)
                 {
                     G[faceCelli] +=
                         (nutw[facei] + nuw[facei])

@@ -59,24 +59,30 @@ class LienLeschzinerLowRe
 {
     // Private data
 
-        scalar C1;
-        scalar C2;
-        scalar alphak;
-        scalar alphaEps;
-        scalar Cmu;
+        // Model coefficients
 
-        scalar Am;
-        scalar Aepsilon;
-        scalar Amu;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar kappa_;
 
-        volScalarField k_;
-        volScalarField epsilon_;
+            dimensionedScalar Am_;
+            dimensionedScalar Aepsilon_;
+            dimensionedScalar Amu_;
 
-        wallDist y_;
 
-        volScalarField yStar_;
+        // Fields
 
-        volScalarField nut_;
+            volScalarField k_;
+            volScalarField epsilon_;
+
+            wallDist y_;
+
+            volScalarField yStar_;
+
+            volScalarField nut_;
 
 
 public:
@@ -112,7 +118,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak*nut_ + nu())
+                new volScalarField("DkEff", nut_/sigmak_ + nu())
             );
         }
 
@@ -121,7 +127,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

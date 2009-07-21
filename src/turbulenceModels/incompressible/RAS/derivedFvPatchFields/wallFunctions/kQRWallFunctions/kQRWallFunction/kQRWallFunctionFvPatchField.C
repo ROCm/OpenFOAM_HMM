@@ -25,9 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "kQRWallFunctionFvPatchField.H"
-#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
-#include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"
 
