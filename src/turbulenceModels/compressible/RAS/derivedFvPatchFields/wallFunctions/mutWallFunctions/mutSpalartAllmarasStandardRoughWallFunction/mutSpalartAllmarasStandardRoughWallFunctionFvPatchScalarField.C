@@ -52,7 +52,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
     rhoName_("rho"),
     muName_("mu"),
     kappa_(0.41),
-    E_(9.0),
+    E_(9.8),
     roughnessHeight_(pTraits<scalar>::zero),
     roughnessConstant_(pTraits<scalar>::zero),
     roughnessFudgeFactor_(pTraits<scalar>::zero)
@@ -93,7 +93,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.0)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     roughnessHeight_(readScalar(dict.lookup("roughnessHeight"))),
     roughnessConstant_(readScalar(dict.lookup("roughnessConstant"))),
     roughnessFudgeFactor_(readScalar(dict.lookup("roughnessFudgeFactor")))

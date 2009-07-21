@@ -191,7 +191,7 @@ SpalartAllmaras::SpalartAllmaras
         (
             "kappa",
             *this,
-            0.4187
+            0.41
         )
     ),
     Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),

@@ -51,7 +51,7 @@ nuSgsWallFunctionFvPatchScalarField
     UName_("U"),
     nuName_("nu"),
     kappa_(0.41),
-    E_(9.0)
+    E_(9.8)
 {}
 
 
@@ -84,7 +84,7 @@ nuSgsWallFunctionFvPatchScalarField
     UName_(dict.lookupOrDefault<word>("U", "U")),
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.0))
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {}
 
 

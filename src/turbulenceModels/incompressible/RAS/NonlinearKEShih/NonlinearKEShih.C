@@ -159,7 +159,7 @@ NonlinearKEShih::NonlinearKEShih
         (
             "E",
             coeffDict_,
-            9.0
+            9.8
         )
     ),
 

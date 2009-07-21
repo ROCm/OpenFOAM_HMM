@@ -73,7 +73,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     mutName_("mut"),
     Cmu_(0.09),
     kappa_(0.41),
-    E_(9.0)
+    E_(9.8)
 {
     checkType();
 }
@@ -118,7 +118,7 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
     mutName_(dict.lookupOrDefault<word>("mut", "mut")),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.0))
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {
     checkType();
 }

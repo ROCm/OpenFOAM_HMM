@@ -170,7 +170,7 @@ SpalartAllmaras::SpalartAllmaras
         (
             "kappa",
             *this,
-            0.4187
+            0.41
         )
     ),
     Cb1_

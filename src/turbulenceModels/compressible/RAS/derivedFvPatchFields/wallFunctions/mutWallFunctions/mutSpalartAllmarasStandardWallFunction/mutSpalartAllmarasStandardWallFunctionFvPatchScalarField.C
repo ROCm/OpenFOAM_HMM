@@ -53,7 +53,7 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     rhoName_("rho"),
     muName_("mu"),
     kappa_(0.41),
-    E_(9.0)
+    E_(9.8)
 {}
 
 
@@ -88,7 +88,7 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.0))
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {}
 
 

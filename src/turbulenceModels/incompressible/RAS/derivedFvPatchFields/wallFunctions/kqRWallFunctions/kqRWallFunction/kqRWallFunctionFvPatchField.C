@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "kQRWallFunctionFvPatchField.H"
+#include "kqRWallFunctionFvPatchField.H"
 #include "fvPatchFieldMapper.H"
 #include "addToRunTimeSelectionTable.H"
 #include "wallFvPatch.H"

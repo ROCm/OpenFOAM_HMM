@@ -79,7 +79,7 @@ nutRoughWallFunctionFvPatchScalarField
     nuName_("nu"),
     Cmu_(0.09),
     kappa_(0.41),
-    E_(9.0),
+    E_(9.8),
     Ks_(p.size(), 0.0),
     Cs_(p.size(), 0.0)
 {}
@@ -99,7 +99,7 @@ nutRoughWallFunctionFvPatchScalarField
     nuName_(ptf.nuName_),
     Cmu_(0.09),
     kappa_(0.41),
-    E_(9.0),
+    E_(9.8),
     Ks_(ptf.Ks_, mapper),
     Cs_(ptf.Cs_, mapper)
 {}
@@ -118,7 +118,7 @@ nutRoughWallFunctionFvPatchScalarField
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.0)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     Ks_("Ks", dict, p.size()),
     Cs_("Cs", dict, p.size())
 {}
