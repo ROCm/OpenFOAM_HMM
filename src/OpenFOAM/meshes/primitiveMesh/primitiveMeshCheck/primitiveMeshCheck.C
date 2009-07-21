@@ -626,7 +626,8 @@ bool Foam::primitiveMesh::checkFaceSkewness
         vector d = cellCtrs[nei[faceI]] - cellCtrs[own[faceI]];
 
         // Skewness vector
-        vector sv = Cpf - ((fAreas[faceI] & Cpf)/(fAreas[faceI] & d))*d;
+        vector sv =
+            Cpf - ((fAreas[faceI] & Cpf)/((fAreas[faceI] & d) + VSMALL))*d;
         vector svHat = sv/(mag(sv) + VSMALL);
 
         // Normalisation distance calculated as the approximate distance
@@ -674,7 +675,8 @@ bool Foam::primitiveMesh::checkFaceSkewness
 
 
         // Skewness vector
-        vector sv = Cpf - ((fAreas[faceI]&Cpf)/((fAreas[faceI]&d)+VSMALL))*d;
+        vector sv =
+            Cpf - ((fAreas[faceI] & Cpf)/((fAreas[faceI] & d) + VSMALL))*d;
         vector svHat = sv/(mag(sv) + VSMALL);
 
         // Normalisation distance calculated as the approximate distance
