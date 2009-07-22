@@ -27,6 +27,7 @@ Application
 
 Description
     Updates OpenFOAM RAS cases to use the new wall function framework
+
     Attempts to determine whether case is compressible or incompressible, or
     can be supplied with -compressible command line argument
 
