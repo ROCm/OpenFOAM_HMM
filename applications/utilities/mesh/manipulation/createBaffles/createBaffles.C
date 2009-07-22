@@ -23,8 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Makes internal faces into boundary faces. Does not duplicate points. Use
-    mergeOrSplitBaffles if you want this.
+    Makes internal faces into boundary faces. Does not duplicate points, unlike
+    mergeOrSplitBaffles.
 
     Note: if any coupled patch face is selected for baffling automatically
     the opposite member is selected for baffling as well. Note that this

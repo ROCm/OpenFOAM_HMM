@@ -23,8 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Splits mesh into multiple regions. Each region is defined as a domain
-    whose cells can all be reached by cell-face-cell walking without crossing
+    Splits mesh into multiple regions.
+
+    Each region is defined as a domain whose cells can all be reached by
+    cell-face-cell walking without crossing
     - boundary faces
     - additional faces from faceset (-blockedFaces faceSet).
     - any face inbetween differing cellZones (-cellZones)

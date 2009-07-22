@@ -27,6 +27,7 @@ Application
 
 Description
     Calculates and writes the enstrophy of the velocity field U.
+
     The -noWrite option just outputs the max/min values without writing the
     field.
 

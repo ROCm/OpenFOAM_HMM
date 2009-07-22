@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
             scaleFactor = 1;
         }
     }
-    
+
     if (args.optionFound("solids"))
     {
         meshReaders::STARCD::keepSolids = true;

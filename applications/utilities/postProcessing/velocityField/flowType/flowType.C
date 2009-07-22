@@ -27,6 +27,7 @@ Application
 
 Description
     Calculates and writes the flowType of velocity field U.
+
     The -noWrite option has no meaning.
 
     The flow type parameter is obtained according to the following equation:

@@ -23,7 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Reader module for Fieldview9 to read Foam mesh&data.
+    Reader module for Fieldview9 to read OpenFOAM mesh and data.
+
     Creates new 'fvbin' type executable which needs to be installed in place
     of bin/fvbin.
 
