@@ -35,16 +35,20 @@ Description
 #include "RASModel.H"
 #include "wallFvPatch.H"
 #include "wallDist.H"
+#include "nutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    typedef incompressible::RASModels::nutWallFunctionFvPatchScalarField
+        wallFunctionPatchField;
+
     timeSelector::addOptions();
     #include "setRootCase.H"
-#   include "createTime.H"
+    #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-#   include "createMesh.H"
+    #include "createMesh.H"
 
     forAll(timeDirs, timeI)
     {
@@ -90,7 +94,7 @@ int main(int argc, char *argv[])
             mesh
         );
 
-#       include "createPhi.H"
+        #include "createPhi.H"
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
@@ -99,26 +103,28 @@ int main(int argc, char *argv[])
             incompressible::RASModel::New(U, phi, laminarTransport)
         );
 
-        const fvPatchList& patches = mesh.boundary();
+        const volScalarField::GeometricBoundaryField nutPatches =
+            RASModel->nut()().boundaryField();
 
-        forAll(patches, patchi)
+        forAll(nutPatches, patchi)
         {
-            const fvPatch& currPatch = patches[patchi];
-
-            if (typeid(currPatch) == typeid(wallFvPatch))
+            if (isA<wallFunctionPatchField>(nutPatches[patchi]))
             {
-                yPlus.boundaryField()[patchi] = RASModel->yPlus(patchi);
+                const wallFunctionPatchField& nutPw =
+                    dynamic_cast<const wallFunctionPatchField&>
+                        (nutPatches[patchi]);
+
+                yPlus.boundaryField()[patchi] = nutPw.yPlus();
                 const scalarField& Yp = yPlus.boundaryField()[patchi];
 
                 Info<< "Patch " << patchi
-                    << " named " << currPatch.name()
+                    << " named " << nutPw.patch().name()
                     << " y+ : min: " << min(Yp) << " max: " << max(Yp)
                     << " average: " << average(Yp) << nl << endl;
             }
         }
 
-        Info<< "Writing yPlus to field "
-            << yPlus.name() << nl << endl;
+        Info<< "Writing yPlus to field " << yPlus.name() << nl << endl;
 
         yPlus.write();
     }
@@ -127,5 +133,6 @@ int main(int argc, char *argv[])
 
     return 0;
 }
+
 
 // ************************************************************************* //
