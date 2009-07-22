@@ -94,23 +94,26 @@ int main(int argc, char *argv[])
 
         singlePhaseTransportModel laminarTransport(U, phi);
 
-        autoPtr<incompressible::RASModel> RASModel
+        autoPtr<incompressible::RASModel> rasModel
         (
             incompressible::RASModel::New(U, phi, laminarTransport)
         );
 
+        const scalar Cmu =
+            rasModel->coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
+
         const fvPatchList& patches = mesh.boundary();
 
-        forAll(patches, patchi)
+        forAll(patches, patchI)
         {
-            const fvPatch& currPatch = patches[patchi];
+            const fvPatch& currPatch = patches[patchI];
 
             if (typeid(currPatch) == typeid(wallFvPatch))
             {
-                yPlus.boundaryField()[patchi] = RASModel->yPlus(patchi);
-                const scalarField& Yp = yPlus.boundaryField()[patchi];
+                yPlus.boundaryField()[patchI] = rasModel->yPlus(patchI, Cmu);
+                const scalarField& Yp = yPlus.boundaryField()[patchI];
 
-                Info<< "Patch " << patchi
+                Info<< "Patch " << patchI
                     << " named " << currPatch.name()
                     << " y+ : min: " << min(Yp) << " max: " << max(Yp)
                     << " average: " << average(Yp) << nl << endl;
