@@ -522,8 +522,9 @@ Foam::argList::argList
     }
     jobInfo.write();
 
-    // Set the case as an environment variable
+    // Set the case and case-name as an environment variable
     setEnv("FOAM_CASE", rootPath_/globalCase_, true);
+    setEnv("FOAM_CASENAME", globalCase_, true);
 
     // Switch on signal trapping. We have to wait until after Pstream::init
     // since this sets up its own ones.

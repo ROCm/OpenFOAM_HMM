@@ -261,11 +261,15 @@ Foam::vtkPV3Foam::vtkPV3Foam
     // Set the case as an environment variable - some BCs might use this
     if (fullCasePath.name().find("processor", 0) == 0)
     {
-        setEnv("FOAM_CASE", fullCasePath.path(), true);
+        const fileName globalCase = fullCasePath.path();
+
+        setEnv("FOAM_CASE", globalCase, true);
+        setEnv("FOAM_CASENAME", globalCase.name(), true);
     }
     else
     {
         setEnv("FOAM_CASE", fullCasePath, true);
+        setEnv("FOAM_CASENAME", fullCasePath.name(), true);
     }
 
     // look for 'case{region}.OpenFOAM'
@@ -299,6 +303,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
     {
         Info<< "fullCasePath=" << fullCasePath << nl
             << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+            << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << nl
             << "region=" << meshRegion_ << endl;
     }
 
