@@ -26,7 +26,8 @@ Application
     CreateTurbulenceFields
 
 Description
-    Creates a full setturbulence fields.
+    Creates a full set of turbulence fields.
+
     - Currently does not output nut and nuTilda
 
 Source files:

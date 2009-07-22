@@ -26,7 +26,7 @@ Application
     dieselFoam
 
 Description
-    Diesel engine spray and combustion code.
+    Solver for diesel engine spray and combustion.
 
 \*---------------------------------------------------------------------------*/
 

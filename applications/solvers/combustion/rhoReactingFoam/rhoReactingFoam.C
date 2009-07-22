@@ -26,7 +26,8 @@ Application
     rhoReactingFoam
 
 Description
-    Chemical reaction code using density based thermodynamics package.
+    Solver for combustion with chemical reactions using density based
+    thermodynamics package.
 
 \*---------------------------------------------------------------------------*/
 

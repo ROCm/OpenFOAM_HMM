@@ -27,8 +27,9 @@ Application
 
 Description
     Calculates and optionally writes the local Mach number from the velocity
-    field U at each time. The -nowrite option just outputs the max value
-    without writing the field.
+    field U at each time.
+
+    The -nowrite option just outputs the max value without writing the field.
 
 \*---------------------------------------------------------------------------*/
 

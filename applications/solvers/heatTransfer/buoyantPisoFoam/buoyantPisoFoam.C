@@ -26,9 +26,11 @@ Application
     buoyantPisoFoam
 
 Description
-    Transient Solver for buoyant, turbulent flow of compressible fluids for
-    ventilation and heat-transfer. Turbulence is modelled using a run-time
-    selectable compressible RAS or LES model.
+    Transient solver for buoyant, turbulent flow of compressible fluids for
+    ventilation and heat-transfer.
+
+    Turbulence is modelled using a run-time selectable compressible RAS or
+    LES model.
 
 \*---------------------------------------------------------------------------*/
 

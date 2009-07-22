@@ -27,6 +27,7 @@ Application
 
 Description
     Calculates and writes the scalar field of uprime (sqrt(2/3 k)).
+
     The -noWrite option just outputs the max/min values without writing
     the field.
 

@@ -26,8 +26,8 @@ Application
     XiFoam
 
 Description
-    Compressible premixed/partially-premixed combustion solver with turbulence
-    modelling.
+    Solver for compressible premixed/partially-premixed combustion with
+    turbulence modelling.
 
     Combusting RANS code using the b-Xi two-equation model.
     Xi may be obtained by either the solution of the Xi transport
