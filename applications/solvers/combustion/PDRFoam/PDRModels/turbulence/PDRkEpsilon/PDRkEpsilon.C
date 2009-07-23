@@ -110,6 +110,25 @@ PDRkEpsilon::PDRkEpsilon
         )
     ),
 
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa_",
+            coeffDict_,
+            0.41
+        )
+    ),
+    E_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "E",
+            coeffDict_,
+            9.8
+        )
+    ),
+
     k_
     (
         IOobject

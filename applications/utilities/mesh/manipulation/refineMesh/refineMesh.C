@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Utility to refine cells in multiple directions. Either supply -all
-    option to refine all cells (3D refinement for 3D cases; 2D for 2D cases)
-    or reads a refineMeshDict with
+    Utility to refine cells in multiple directions.
+
+    Either supply -all option to refine all cells (3D refinement for 3D
+    cases; 2D for 2D cases) or reads a refineMeshDict with
     - cellSet to refine
     - directions to refine
 

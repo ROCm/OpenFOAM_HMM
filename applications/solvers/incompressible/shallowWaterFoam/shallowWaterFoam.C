@@ -27,6 +27,7 @@ Application
 
 Description
     Transient solver for inviscid shallow-water equations with rotation.
+
     If the geometry is 3D then it is assumed to be one layers of cells and the
     component of the velocity normal to gravity is removed.
 
