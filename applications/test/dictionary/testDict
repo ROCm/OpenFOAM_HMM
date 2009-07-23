@@ -14,6 +14,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #inputMode  merge
+#includeIfPresent "someUnknownFile"
+#includeIfPresent "$FOAM_CASE/someUnknownFile"
+#includeIfPresent "$FOAM_CASE/someUnknownFile-$FOAM_CASENAME"
 
 internalField   uniform 1;
 
@@ -78,7 +81,6 @@ boundaryField
 // NB: the inputMode has a global scope
 #inputMode merge
 #include "testDict2"
-#includeIfPresent "SomeUnknownFile"
 
 foo
 {
