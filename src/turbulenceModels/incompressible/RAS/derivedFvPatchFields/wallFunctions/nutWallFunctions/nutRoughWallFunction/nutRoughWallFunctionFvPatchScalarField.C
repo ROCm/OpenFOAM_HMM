@@ -39,7 +39,6 @@ namespace incompressible
 namespace RASModels
 {
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 scalar nutRoughWallFunctionFvPatchScalarField::fnRough
@@ -67,26 +66,19 @@ scalar nutRoughWallFunctionFvPatchScalarField::fnRough
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutRoughWallFunctionFvPatchScalarField::
-nutRoughWallFunctionFvPatchScalarField
+nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    kName_("k"),
-    nuName_("nu"),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8),
+    nutWallFunctionFvPatchScalarField(p, iF),
     Ks_(p.size(), 0.0),
     Cs_(p.size(), 0.0)
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::
-nutRoughWallFunctionFvPatchScalarField
+nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
 (
     const nutRoughWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -94,66 +86,43 @@ nutRoughWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    kName_(ptf.kName_),
-    nuName_(ptf.nuName_),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8),
+    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
     Ks_(ptf.Ks_, mapper),
     Cs_(ptf.Cs_, mapper)
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::
-nutRoughWallFunctionFvPatchScalarField
+nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict),
-    kName_(dict.lookupOrDefault<word>("k", "k")),
-    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
+    nutWallFunctionFvPatchScalarField(p, iF, dict),
     Ks_("Ks", dict, p.size()),
     Cs_("Cs", dict, p.size())
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::
-nutRoughWallFunctionFvPatchScalarField
+nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
 (
     const nutRoughWallFunctionFvPatchScalarField& rwfpsf
 )
 :
-    fixedValueFvPatchScalarField(rwfpsf),
-    kName_(rwfpsf.kName_),
-    nuName_(rwfpsf.nuName_),
-    Cmu_(rwfpsf.Cmu_),
-    kappa_(rwfpsf.kappa_),
-    E_(rwfpsf.E_),
+    nutWallFunctionFvPatchScalarField(rwfpsf),
     Ks_(rwfpsf.Ks_),
     Cs_(rwfpsf.Cs_)
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::
-nutRoughWallFunctionFvPatchScalarField
+nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
 (
     const nutRoughWallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(rwfpsf, iF),
-    kName_(rwfpsf.kName_),
-    nuName_(rwfpsf.nuName_),
-    Cmu_(rwfpsf.Cmu_),
-    kappa_(rwfpsf.kappa_),
-    E_(rwfpsf.E_),
+    nutWallFunctionFvPatchScalarField(rwfpsf, iF),
     Ks_(rwfpsf.Ks_),
     Cs_(rwfpsf.Cs_)
 {}
@@ -166,7 +135,7 @@ void nutRoughWallFunctionFvPatchScalarField::autoMap
     const fvPatchFieldMapper& m
 )
 {
-    fixedValueFvPatchScalarField::autoMap(m);
+    nutWallFunctionFvPatchScalarField::autoMap(m);
     Ks_.autoMap(m);
     Cs_.autoMap(m);
 }
@@ -178,30 +147,31 @@ void nutRoughWallFunctionFvPatchScalarField::rmap
     const labelList& addr
 )
 {
-    fixedValueFvPatchScalarField::rmap(ptf, addr);
+    nutWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
     const nutRoughWallFunctionFvPatchScalarField& nrwfpsf =
         refCast<const nutRoughWallFunctionFvPatchScalarField>(ptf);
 
-    Cs_.rmap(nrwfpsf.Cs_, addr);
     Ks_.rmap(nrwfpsf.Ks_, addr);
+    Cs_.rmap(nrwfpsf.Cs_, addr);
 }
 
 
-void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
+tmp<scalarField> nutRoughWallFunctionFvPatchScalarField::calcNut() const
 {
-    const RASModel& ras = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = ras.yPlusLam(kappa_, E_);
-    const scalarField& y = ras.y()[patch().index()];
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalarField& y = rasModel.y()[patchI];
+    const tmp<volScalarField> tk = rasModel.k();
+    const volScalarField& k = tk();
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     const scalar Cmu25 = pow(Cmu_, 0.25);
 
-    const scalarField& k = db().lookupObject<volScalarField>(kName_);
-
-    const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>(nuName_);
-
-    scalarField& nutw = *this;
+    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    scalarField& nutw = tnutw();
 
     forAll(nutw, faceI)
     {
@@ -235,10 +205,6 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
                     ), 0.5*limitingNutw
                 );
         }
-        else
-        {
-            nutw[faceI] = 0.0;
-        }
 
         if (debug)
         {
@@ -249,14 +215,14 @@ void nutRoughWallFunctionFvPatchScalarField::updateCoeffs()
                 << endl;
         }
     }
+
+    return tnutw;
 }
 
 
 void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>(os, "k", "k", kName_);
-    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;

@@ -27,6 +27,7 @@ License
 #include "mutSpalartAllmarasWallFunctionFvPatchScalarField.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "RASModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -38,6 +39,72 @@ namespace compressible
 namespace RASModels
 {
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
+(
+    const scalarField& magGradU
+) const
+{
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalarField& y = rasModel.y()[patch().index()];
+
+    const fvPatchVectorField& Uw =
+        rasModel.U().boundaryField()[patch().index()];
+
+    scalarField magUp = mag(Uw.patchInternalField() - Uw);
+
+    const fvPatchScalarField& rhow =
+        rasModel.rho().boundaryField()[patch().index()];
+
+    const fvPatchScalarField& muw =
+        rasModel.mu().boundaryField()[patch().index()];
+    const scalarField& mutw = *this;
+
+    tmp<scalarField> tuTau(new scalarField(patch().size(), 0.0));
+    scalarField& uTau = tuTau();
+
+    forAll(mutw, faceI)
+    {
+        scalar magUpara = magUp[faceI];
+
+        scalar ut =
+            sqrt((mutw[faceI] + muw[faceI])*magGradU[faceI]/rhow[faceI]);
+
+        if (ut > VSMALL)
+        {
+            int iter = 0;
+            scalar err = GREAT;
+
+            do
+            {
+                scalar kUu = min(kappa_*magUpara/ut, 50);
+                scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
+
+                scalar f =
+                    - ut*y[faceI]/(muw[faceI]/rhow[faceI])
+                    + magUpara/ut
+                    + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
+
+                scalar df =
+                    y[faceI]/(muw[faceI]/rhow[faceI])
+                  + magUpara/sqr(ut)
+                  + 1/E_*kUu*fkUu/ut;
+
+                scalar uTauNew = ut + f/df;
+                err = mag((ut - uTauNew)/ut);
+                ut = uTauNew;
+
+            } while (ut > VSMALL && err > 0.01 && ++iter < 10);
+
+            uTau[faceI] = max(0.0, ut);
+        }
+    }
+
+    return tuTau;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 mutSpalartAllmarasWallFunctionFvPatchScalarField::
@@ -47,12 +114,7 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    UName_("U"),
-    rhoName_("rho"),
-    muName_("mu"),
-    kappa_(0.41),
-    E_(9.8)
+    mutWallFunctionFvPatchScalarField(p, iF)
 {}
 
 
@@ -65,12 +127,7 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
-    rhoName_(ptf.rhoName_),
-    muName_(ptf.muName_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_)
+    mutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
@@ -82,12 +139,7 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    muName_(dict.lookupOrDefault<word>("mu", "mu")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    mutWallFunctionFvPatchScalarField(p, iF, dict)
 {}
 
 
@@ -97,12 +149,7 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const mutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    fixedValueFvPatchScalarField(wfpsf),
-    UName_(wfpsf.UName_),
-    rhoName_(wfpsf.rhoName_),
-    muName_(wfpsf.muName_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_)
+    mutWallFunctionFvPatchScalarField(wfpsf)
 {}
 
 
@@ -113,83 +160,45 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(wfpsf, iF),
-    UName_(wfpsf.UName_),
-    rhoName_(wfpsf.rhoName_),
-    muName_(wfpsf.muName_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_)
+    mutWallFunctionFvPatchScalarField(wfpsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void mutSpalartAllmarasWallFunctionFvPatchScalarField::evaluate
-(
-    const Pstream::commsTypes
-)
+tmp<scalarField>
+mutSpalartAllmarasWallFunctionFvPatchScalarField::calcMut() const
 {
-    const scalarField& ry = patch().deltaCoeffs();
+    const label patchI = patch().index();
 
-    const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
-    scalarField magUp = mag(U.patchInternalField() - U);
+    const scalarField magGradU = mag(Uw.snGrad());
 
-    const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
 
-    const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>(muName_);
+    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
-    scalarField& mutw = *this;
+    return max(0.0, rhow*sqr(calcUTau(magGradU))/magGradU - muw);
+}
 
-    scalarField magFaceGradU = mag(U.snGrad());
 
-    forAll(mutw, faceI)
-    {
-        scalar magUpara = magUp[faceI];
+tmp<scalarField>
+mutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const
+{
+    const label patchI = patch().index();
 
-        scalar utau =
-            sqrt((mutw[faceI] + muw[faceI])*magFaceGradU[faceI]/rhow[faceI]);
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalarField& y = rasModel.y()[patchI];
 
-        if (utau > VSMALL)
-        {
-            int iter = 0;
-            scalar err = GREAT;
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
-            do
-            {
-                scalar kUu = min(kappa_*magUpara/utau, 50);
-                scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
+    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
 
-                scalar f =
-                    - utau/(ry[faceI]*(muw[faceI]/rhow[faceI]))
-                    + magUpara/utau
-                    + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
+    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
-                scalar df =
-                    1.0/(ry[faceI]*(muw[faceI]/rhow[faceI]))
-                  + magUpara/sqr(utau)
-                  + 1/E_*kUu*fkUu/utau;
-
-                scalar utauNew = utau + f/df;
-                err = mag((utau - utauNew)/utau);
-                utau = utauNew;
-
-            } while (utau > VSMALL && err > 0.01 && ++iter < 10);
-
-            mutw[faceI] = max
-            (
-                rhow[faceI]*sqr(max(utau, 0))/magFaceGradU[faceI] - muw[faceI],
-                0.0
-            );
-        }
-        else
-        {
-            mutw[faceI] = 0;
-        }
-    }
+    return y*calcUTau(mag(Uw.snGrad()))/(muw/rhow);
 }
 
 
@@ -199,9 +208,6 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);

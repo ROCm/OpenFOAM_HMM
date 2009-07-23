@@ -57,16 +57,9 @@ class mutWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    // Private data
+protected:
 
-        //- Name of density field
-        word rhoName_;
-
-        //- Name of laminar viscosity field
-        word muName_;
-
-        //- Name of turbulence kinetic energy field
-        word kName_;
+    // Protected data
 
         //- Cmu coefficient
         scalar Cmu_;
@@ -76,6 +69,15 @@ class mutWallFunctionFvPatchScalarField
 
         //- E coefficient
         scalar E_;
+
+
+    // Protected member functions
+
+        //- Check the type of the patch
+        virtual void checkType();
+
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcMut() const;
 
 
 public:
@@ -150,6 +152,9 @@ public:
     // Member functions
 
         // Evaluation functions
+
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
 
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();

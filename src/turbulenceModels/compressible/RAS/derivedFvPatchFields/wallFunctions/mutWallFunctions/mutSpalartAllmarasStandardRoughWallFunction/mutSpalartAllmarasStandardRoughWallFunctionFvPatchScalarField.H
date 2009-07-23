@@ -37,7 +37,7 @@ SourceFiles
 #ifndef mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField_H
 #define mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "mutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,25 +54,11 @@ Class mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField Declaration
 
 class mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public mutWallFunctionFvPatchScalarField
 {
-    // Private data
+protected:
 
-        //- Name of velocity field
-        word UName_;
-
-        //- Name of density field
-        word rhoName_;
-
-        //- Name of laminar viscosity field
-        word muName_;
-
-        //- Von Karman constant
-        scalar kappa_;
-
-        //- E coefficient
-        scalar E_;
-
+    // Protected data
 
         // Roughness parameters
 
@@ -84,6 +70,12 @@ class mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 
             //- Scale factor
             scalar roughnessFudgeFactor_;
+
+
+    // Protected member functions
+
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcMut() const;
 
 
 public:
@@ -206,15 +198,14 @@ public:
 
         // Evaluation functions
 
-            //- Evaluate the patchField
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
 
 
-        //- Write
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

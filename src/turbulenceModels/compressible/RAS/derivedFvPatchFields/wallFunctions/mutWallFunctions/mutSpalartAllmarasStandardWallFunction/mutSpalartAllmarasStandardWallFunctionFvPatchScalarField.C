@@ -48,12 +48,7 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    UName_("U"),
-    rhoName_("rho"),
-    muName_("mu"),
-    kappa_(0.41),
-    E_(9.8)
+    mutWallFunctionFvPatchScalarField(p, iF)
 {}
 
 
@@ -66,12 +61,7 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
-    rhoName_(ptf.rhoName_),
-    muName_(ptf.muName_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_)
+    mutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
@@ -83,12 +73,7 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    muName_(dict.lookupOrDefault<word>("mu", "mu")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    mutWallFunctionFvPatchScalarField(p, iF, dict)
 {}
 
 
@@ -98,12 +83,7 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const mutSpalartAllmarasStandardWallFunctionFvPatchScalarField& sawfpsf
 )
 :
-    fixedValueFvPatchScalarField(sawfpsf),
-    UName_(sawfpsf.UName_),
-    rhoName_(sawfpsf.rhoName_),
-    muName_(sawfpsf.muName_),
-    kappa_(sawfpsf.kappa_),
-    E_(sawfpsf.E_)
+    mutWallFunctionFvPatchScalarField(sawfpsf)
 {}
 
 
@@ -114,46 +94,37 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(sawfpsf, iF),
-    UName_(sawfpsf.UName_),
-    rhoName_(sawfpsf.rhoName_),
-    muName_(sawfpsf.muName_),
-    kappa_(sawfpsf.kappa_),
-    E_(sawfpsf.E_)
+    mutWallFunctionFvPatchScalarField(sawfpsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
-(
-    const Pstream::commsTypes
-)
+tmp<scalarField>
+mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcMut() const
 {
+    const label patchI = patch().index();
+
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalarField& y = rasModel.y()[patchI];
 
-    const scalarField& ry = patch().deltaCoeffs();
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
-    const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    scalarField magUp = mag(U.patchInternalField() - U);
+    const fvPatchScalarField& rhow = rasModel.rho().boundaryField()[patchI];
 
-    const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+    const fvPatchScalarField& muw = rasModel.mu().boundaryField()[patchI];
 
-    const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>(muName_);
-    scalarField& mutw = *this;
-
-    scalarField magFaceGradU = mag(U.snGrad());
+    tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
+    scalarField& mutw = tmutw();
 
     forAll(mutw, faceI)
     {
         scalar magUpara = magUp[faceI];
 
-        scalar kappaRe = kappa_*magUpara/((muw[faceI]/rhow[faceI])*ry[faceI]);
+        scalar kappaRe = kappa_*magUpara*y[faceI]/(muw[faceI]/rhow[faceI]);
 
         scalar yPlus = yPlusLam;
         scalar ryPlusLam = 1.0/yPlus;
@@ -166,17 +137,28 @@ void mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
             yPlusLast = yPlus;
             yPlus = (kappaRe + yPlus)/(1.0 + log(E_*yPlus));
 
-        } while (mag(ryPlusLam*(yPlus - yPlusLast)) > 0.01 && ++iter < 10 );
+        } while (mag(ryPlusLam*(yPlus - yPlusLast)) > 0.01 && ++iter < 10);
 
         if (yPlus > yPlusLam)
         {
-            mutw[faceI] = muw[faceI]*(yPlus*kappa_/log(E_*yPlus) - 1);
-        }
-        else
-        {
-            mutw[faceI] = 0.0;
+            mutw[faceI] = muw[faceI]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
         }
     }
+
+    return tmutw;
+}
+
+
+tmp<scalarField>
+mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
+{
+    notImplemented
+    (
+        "mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() "
+        "const"
+    );
+
+    return tmp<scalarField>(NULL);
 }
 
 
@@ -186,9 +168,6 @@ void mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);

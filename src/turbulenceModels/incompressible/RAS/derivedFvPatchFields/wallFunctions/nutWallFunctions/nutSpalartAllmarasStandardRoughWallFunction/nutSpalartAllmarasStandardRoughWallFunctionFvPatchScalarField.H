@@ -37,7 +37,7 @@ SourceFiles
 #ifndef nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField_H
 #define nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "nutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,21 +54,9 @@ Class nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField Declaration
 
 class nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public nutWallFunctionFvPatchScalarField
 {
     // Private data
-
-        //- Name of velocity field
-        word UName_;
-
-        //- Name of laminar viscosity field
-        word nuName_;
-
-        //- Von Karman constant
-        scalar kappa_;
-
-        //- E coefficient
-        scalar E_;
 
         // Roughness model parameters
 
@@ -80,6 +68,12 @@ class nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 
             //- Scale factor
             scalar roughnessFudgeFactor_;
+
+
+    // Protected member functions
+
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcNut() const;
 
 
 public:
@@ -201,17 +195,18 @@ public:
             }
 
 
+    // I-O
+
         // Evaluation functions
 
-            //- Evaluate the patchField
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
 
 
-        //- Write
-        virtual void write(Ostream& os) const;
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

@@ -61,15 +61,19 @@ export WM_LINK_LANGUAGE=c++
 export WM_OPTIONS=$WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
 
 # base configuration
-export FOAM_SRC=$WM_PROJECT_DIR/src
-export FOAM_LIB=$WM_PROJECT_DIR/lib
-export FOAM_LIBBIN=$WM_PROJECT_DIR/lib/$WM_OPTIONS
 export FOAM_APP=$WM_PROJECT_DIR/applications
 export FOAM_APPBIN=$WM_PROJECT_DIR/applications/bin/$WM_OPTIONS
+export FOAM_LIB=$WM_PROJECT_DIR/lib
+export FOAM_LIBBIN=$WM_PROJECT_DIR/lib/$WM_OPTIONS
+export FOAM_SRC=$WM_PROJECT_DIR/src
+
+# shared site configuration - similar naming convention as ~OpenFOAM expansion
+export FOAM_SITE_APPBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/bin/$WM_OPTIONS
+export FOAM_SITE_LIBBIN=$WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/lib/$WM_OPTIONS
 
 # user configuration
-export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
 export FOAM_USER_APPBIN=$WM_PROJECT_USER_DIR/applications/bin/$WM_OPTIONS
+export FOAM_USER_LIBBIN=$WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
 
 # convenience
 export FOAM_TUTORIALS=$WM_PROJECT_DIR/tutorials
@@ -80,8 +84,8 @@ export FOAM_RUN=$WM_PROJECT_USER_DIR/run
 # add OpenFOAM scripts and wmake to the path
 export PATH=$WM_DIR:$WM_PROJECT_DIR/bin:$PATH
 
-_foamAddPath $FOAM_APPBIN $FOAM_USER_APPBIN
-_foamAddLib  $FOAM_LIBBIN $FOAM_USER_LIBBIN
+_foamAddPath $FOAM_APPBIN $FOAM_SITE_APPBIN $FOAM_USER_APPBIN
+_foamAddLib  $FOAM_LIBBIN $FOAM_SITE_LIBBIN $FOAM_USER_LIBBIN
 
 
 # Compiler settings

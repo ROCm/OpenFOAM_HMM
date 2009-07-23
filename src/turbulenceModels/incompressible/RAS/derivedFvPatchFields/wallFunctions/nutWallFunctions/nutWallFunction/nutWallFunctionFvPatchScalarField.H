@@ -57,13 +57,9 @@ class nutWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
-    //Private data
+protected:
 
-        //- Name of turbulence kinetic energy field
-        word kName_;
-
-        //- Name of laminar viscosity field
-        word nuName_;
+    // Protected data
 
         //- Cmu coefficient
         scalar Cmu_;
@@ -73,6 +69,15 @@ class nutWallFunctionFvPatchScalarField
 
         //- E coefficient
         scalar E_;
+
+
+    // Protected member functions
+
+        //- Check the type of the patch
+        virtual void checkType();
+
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcNut() const;
 
 
 public:
@@ -148,6 +153,9 @@ public:
 
         // Evaluation functions
 
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
+
             //- Update the coefficients associated with the patch field
             virtual void updateCoeffs();
 
@@ -155,7 +163,7 @@ public:
         // I-O
 
             //- Write
-            void write(Ostream&) const;
+            virtual void write(Ostream&) const;
 };
 
 

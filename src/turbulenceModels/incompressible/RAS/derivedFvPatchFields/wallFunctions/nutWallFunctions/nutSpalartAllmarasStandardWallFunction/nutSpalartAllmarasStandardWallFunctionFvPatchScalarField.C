@@ -48,11 +48,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    UName_("U"),
-    nuName_("nu"),
-    kappa_(0.41),
-    E_(9.8)
+    nutWallFunctionFvPatchScalarField(p, iF)
 {}
 
 
@@ -65,11 +61,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
-    nuName_(ptf.nuName_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_)
+    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
@@ -81,11 +73,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    nutWallFunctionFvPatchScalarField(p, iF, dict)
 {}
 
 
@@ -95,11 +83,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& sawfpsf
 )
 :
-    fixedValueFvPatchScalarField(sawfpsf),
-    UName_(sawfpsf.UName_),
-    nuName_(sawfpsf.nuName_),
-    kappa_(sawfpsf.kappa_),
-    E_(sawfpsf.E_)
+    nutWallFunctionFvPatchScalarField(sawfpsf)
 {}
 
 
@@ -110,40 +94,33 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(sawfpsf, iF),
-    UName_(sawfpsf.UName_),
-    nuName_(sawfpsf.nuName_),
-    kappa_(sawfpsf.kappa_),
-    E_(sawfpsf.E_)
+    nutWallFunctionFvPatchScalarField(sawfpsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
-(
-    const Pstream::commsTypes
-)
+tmp<scalarField>
+nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcNut() const
 {
+    const label patchI = patch().index();
+
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalarField& y = rasModel.y()[patchI];
 
-    const scalarField& ry = patch().deltaCoeffs();
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
-    const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    scalarField magUp = mag(U.patchInternalField() - U);
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
-    const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>(nuName_);
-    scalarField& nutw = *this;
+    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    scalarField& nutw = tnutw();
 
     forAll(nutw, facei)
     {
-        scalar magUpara = magUp[facei];
-
-        scalar kappaRe = kappa_*magUpara/(nuw[facei]*ry[facei]);
+        scalar kappaRe = kappa_*magUp[facei]*y[facei]/nuw[facei];
 
         scalar yPlus = yPlusLam;
         scalar ryPlusLam = 1.0/yPlus;
@@ -160,13 +137,24 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::evaluate
 
         if (yPlus > yPlusLam)
         {
-            nutw[facei] = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1);
-        }
-        else
-        {
-            nutw[facei] = 0.0;
+            nutw[facei] = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
         }
     }
+
+    return tnutw;
+}
+
+
+tmp<scalarField>
+nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
+{
+    notImplemented
+    (
+        "nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() "
+        "const"
+    );
+
+    return tmp<scalarField>(NULL);
 }
 
 
@@ -176,8 +164,6 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
 }
