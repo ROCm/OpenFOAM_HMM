@@ -1,8 +1,8 @@
 #                            -*- mode: org; -*-
 #
-#+TITLE:             *OpenFOAM README for version 1.5*
+#+TITLE:             OpenFOAM README for version 1.6
 #+AUTHOR:                      OpenCFD Ltd.
-#+DATE:                       26 August 2008
+#+DATE:                         July 2009
 #+LINK:                  http://www.opencfd.co.uk
 #+OPTIONS: author:nil ^:{}
 
@@ -62,7 +62,7 @@
   in the OpenFOAM release. e.g. in
 
   + $HOME/OpenFOAM/OpenFOAM-<VERSION>/etc/
-  + where <VERSION> corresponds to the version 1.4, 1.5, ...
+  + where <VERSION> corresponds to the version 1.5, 1.6, ...
 
   1) EITHER, if running bash or ksh (if in doubt type 'echo $SHELL'), source the
     etc/bashrc file by adding the following line to the end of your
@@ -135,7 +135,7 @@
 
 * Getting Started
   Create a project directory within the $HOME/OpenFOAM directory named
-  <USER>-<VERSION> (e.g. 'chris-1.5' for user chris and OpenFOAM version 1.5)
+  <USER>-<VERSION> (e.g. 'chris-1.6' for user chris and OpenFOAM version 1.6)
   and create a directory named 'run' within it, e.g. by typing:
 
   + mkdir -p $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run
@@ -156,12 +156,13 @@
 
 * Compiling Paraview 3.3 and the PV3FoamReader module
   A version of Qt 4.3.x must be installed to compile ParaView.  The compilation
-  is a fairly simple process using the supplied buildParaView3.3-cvs script that
-  has worked is our tests with other packages supplied in the ThirdParty
-  directory, namely cmake-2.4.6 and gcc-4.3.1.  Execute the following:
-  + cd $FOAM_INST_DIR/ThirdParty
-  + rm -rf ParaView3.3-cvs/platforms
-  + buildParaView3.3-cvs
+  is a fairly simple process using the supplied buildParaView script that
+  has worked in our tests with other packages supplied in the ThirdParty
+  directory, namely cmake-2.6.4 and gcc-4.3.3.  Execute the following:
+  + cd $WM_THIRD_PARTY_DIR
+  + rm -rf paraview-3.6/platforms
+  + buildParaView
+
 
   The PV3FoamReader module is an OpenFOAM utility that can be compiled in the
   usual manner as follows:
@@ -184,3 +185,4 @@
   is the default mode on a 64-bit machine.  To use an installed 32-bit version,
   the user must set the environment variable WM_ARCH_OPTION to 32 before
   sourcing the etc/bashrc (or etc/cshrc) file.
+
