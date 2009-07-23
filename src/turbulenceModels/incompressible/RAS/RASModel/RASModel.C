@@ -176,8 +176,7 @@ tmp<scalarField> RASModel::yPlus(const label patchNo, const scalar Cmu) const
     {
         WarningIn
         (
-            "tmp<scalarField> RASModel::yPlus"
-            "(const label patchNo, const scalar Cmu) const"
+            "tmp<scalarField> RASModel::yPlus(const label patchNo) const"
         )   << "Patch " << patchNo << " is not a wall. Returning null field"
             << nl << endl;
 
