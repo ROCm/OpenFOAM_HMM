@@ -26,7 +26,7 @@ Application
     mdEquilibrationFoam
 
 Description
-    Equilibrates and/or preconditions MD systems
+    Equilibrates and/or preconditions molecular dynamics systems
 
 \*---------------------------------------------------------------------------*/
 

@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Reads .ele and .node and .face files as written by tetgen.
+    Converts .ele and .node and .face files, written by tetgen.
 
     Make sure to use add boundary attributes to the smesh file
     (5 fifth column in the element section)

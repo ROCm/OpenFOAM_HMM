@@ -26,7 +26,7 @@ Application
     mergeOrSplitBaffles
 
 Description
-    Detect faces that share points (baffles). Either merge them or
+    Detects faces that share points (baffles). Either merge them or
     duplicate the points.
 
     Notes:
