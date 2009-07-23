@@ -48,6 +48,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
     const label patchI = patch().index();
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patchI];
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
     const fvPatchScalarField& rho = rasModel.rho().boundaryField()[patchI];
@@ -122,7 +123,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
                     scalar denom = 1.0 + log(E_*yp) - G - yPlusGPrime;
                     if (mag(denom) > VSMALL)
                     {
-                        yp = kappaRe + yp*(1 - yPlusGPrime))/denom;
+                        yp = (kappaRe + yp*(1 - yPlusGPrime))/denom;
                     }
 
                 } while
@@ -298,8 +299,7 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    writeLocalEntries(os);
     os.writeKeyword("roughnessHeight")
         << roughnessHeight_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessConstant")

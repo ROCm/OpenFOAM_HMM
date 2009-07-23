@@ -42,7 +42,7 @@ namespace RASModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<scalarField>
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
+mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
 (
     const scalarField& magUp
 ) const
@@ -60,7 +60,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
 
     forAll(yPlus, faceI)
     {
-        scalar kappaRe = kappa_*magUp[facei]*y[faceI]/(muw[faceI]/rhow[faceI]);
+        scalar kappaRe = kappa_*magUp[faceI]*y[faceI]/(muw[faceI]/rhow[faceI]);
 
         scalar yp = yPlusLam;
         scalar ryPlusLam = 1.0/yp;
@@ -75,11 +75,10 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
 
         } while (mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10);
 
-        yPlus[facei] = max(0.0, yp);
+        yPlus[faceI] = max(0.0, yp);
     }
 
     return tyPlus;
-
 }
 
 
@@ -151,10 +150,8 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcMut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
-    const scalarField& y = rasModel.y()[patchI];
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
     const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-    const fvPatchScalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const fvPatchScalarField& muw = rasModel.mu().boundaryField()[patchI];
 
     tmp<scalarField> tyPlus = calcYPlus(magUp);
@@ -165,10 +162,10 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcMut() const
 
     forAll(yPlus, faceI)
     {
-        if (yPlus[facei] > yPlusLam)
+        if (yPlus[faceI] > yPlusLam)
         {
             mutw[faceI] =
-                muw[faceI]*(yPlus[facei]*kappa_/log(E_*yPlus[facei]) - 1.0);
+                muw[faceI]*(yPlus[faceI]*kappa_/log(E_*yPlus[faceI]) - 1.0);
         }
     }
 
@@ -194,8 +191,7 @@ void mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

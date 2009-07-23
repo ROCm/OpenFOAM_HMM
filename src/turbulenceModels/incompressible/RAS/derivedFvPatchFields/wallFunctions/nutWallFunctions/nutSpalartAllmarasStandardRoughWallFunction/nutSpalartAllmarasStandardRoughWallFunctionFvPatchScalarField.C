@@ -294,15 +294,15 @@ void nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedValueFvPatchScalarField::write(os);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
     os.writeKeyword("roughnessHeight")
         << roughnessHeight_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessConstant")
         << roughnessConstant_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessFudgeFactor")
         << roughnessFudgeFactor_ << token::END_STATEMENT << nl;
+    writeEntry("value", os);
 }
 
 

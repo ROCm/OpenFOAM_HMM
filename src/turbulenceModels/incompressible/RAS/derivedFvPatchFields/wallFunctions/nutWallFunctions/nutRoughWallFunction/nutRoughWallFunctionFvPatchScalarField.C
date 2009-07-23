@@ -223,9 +223,7 @@ tmp<scalarField> nutRoughWallFunctionFvPatchScalarField::calcNut() const
 void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    writeLocalEntries(os);
     Cs_.writeEntry("Cs", os);
     Ks_.writeEntry("Ks", os);
     writeEntry("value", os);

@@ -189,9 +189,9 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedValueFvPatchScalarField::write(os);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 
