@@ -27,6 +27,7 @@ License
 #include "mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
+#include "RASModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,12 +48,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF),
-    UName_("U"),
-    rhoName_("rho"),
-    muName_("mu"),
-    kappa_(0.41),
-    E_(9.8),
+    mutWallFunctionFvPatchScalarField(p, iF),
     roughnessHeight_(pTraits<scalar>::zero),
     roughnessConstant_(pTraits<scalar>::zero),
     roughnessFudgeFactor_(pTraits<scalar>::zero)
@@ -68,12 +64,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
-    rhoName_(ptf.rhoName_),
-    muName_(ptf.muName_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_),
+    mutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
     roughnessHeight_(ptf.roughnessHeight_),
     roughnessConstant_(ptf.roughnessConstant_),
     roughnessFudgeFactor_(ptf.roughnessFudgeFactor_)
@@ -88,12 +79,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    muName_(dict.lookupOrDefault<word>("mu", "mu")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
+    mutWallFunctionFvPatchScalarField(p, iF, dict),
     roughnessHeight_(readScalar(dict.lookup("roughnessHeight"))),
     roughnessConstant_(readScalar(dict.lookup("roughnessConstant"))),
     roughnessFudgeFactor_(readScalar(dict.lookup("roughnessFudgeFactor")))
@@ -106,12 +92,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
     const mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField& rwfpsf
 )
 :
-    fixedValueFvPatchScalarField(rwfpsf),
-    UName_(rwfpsf.UName_),
-    rhoName_(rwfpsf.rhoName_),
-    muName_(rwfpsf.muName_),
-    kappa_(rwfpsf.kappa_),
-    E_(rwfpsf.E_),
+    mutWallFunctionFvPatchScalarField(rwfpsf),
     roughnessHeight_(rwfpsf.roughnessHeight_),
     roughnessConstant_(rwfpsf.roughnessConstant_),
     roughnessFudgeFactor_(rwfpsf.roughnessFudgeFactor_)
@@ -125,12 +106,7 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(rwfpsf, iF),
-    UName_(rwfpsf.UName_),
-    rhoName_(rwfpsf.rhoName_),
-    muName_(rwfpsf.muName_),
-    kappa_(rwfpsf.kappa_),
-    E_(rwfpsf.E_),
+    mutWallFunctionFvPatchScalarField(rwfpsf, iF),
     roughnessHeight_(rwfpsf.roughnessHeight_),
     roughnessConstant_(rwfpsf.roughnessConstant_),
     roughnessFudgeFactor_(rwfpsf.roughnessFudgeFactor_)
@@ -139,28 +115,24 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
-(
-    const Pstream::commsTypes
-)
+tmp<scalarField>
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcMut() const
 {
-    const scalar yPlusLam = 11.225;
+    const label patchI = patch().index();
 
-    // The reciprical of the distance to the adjacent cell centre.
-    const scalarField& ry = patch().deltaCoeffs();
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalarField& y = rasModel.y()[patchI];
 
-    const fvPatchVectorField& U =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
-    const fvPatchScalarField& rho =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+    scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    // The flow velocity at the adjacent cell centre.
-    scalarField magUp = mag(U.patchInternalField() - U);
+    const fvPatchScalarField& rho = rasModel.rho().boundaryField()[patchI];
 
-    const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>(muName_);
-    scalarField& mutw = *this;
+    tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
+    scalarField& mutw = tmutw();
 
     if (roughnessHeight_ > 0.0)
     {
@@ -177,7 +149,7 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
             forAll(mutw, facei)
             {
                 const scalar magUpara = magUp[facei];
-                const scalar Re = rho[facei]*magUpara/(muw[facei]*ry[facei]);
+                const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
                 const scalar kappaRe = kappa_*Re;
 
                 scalar yPlus = yPlusLam;
@@ -185,7 +157,7 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
 
                 int iter = 0;
                 scalar yPlusLast = 0.0;
-                scalar dKsPlusdYPlus = roughnessHeight_*ry[facei];
+                scalar dKsPlusdYPlus = roughnessHeight_/y[facei];
 
                 // Enforce the roughnessHeight to be less than the distance to
                 // the first cell centre.
@@ -194,18 +166,17 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
                     dKsPlusdYPlus = 1;
                 }
 
-                // Fudge factor to get results to be similar to fluent
-                // (at least difference between rough and smooth).
+                // Additional tuning parameter (fudge factor) - nominally = 1
                 dKsPlusdYPlus *= roughnessFudgeFactor_;
 
                 do
                 {
                     yPlusLast = yPlus;
 
-                    // The non-dimensional roughness height.
+                    // The non-dimensional roughness height
                     scalar KsPlus = yPlus*dKsPlusdYPlus;
 
-                    // The extra term in the law-of-the-wall.
+                    // The extra term in the law-of-the-wall
                     scalar G = 0.0;
 
                     scalar yPlusGPrime = 0.0;
@@ -238,7 +209,7 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
                     }
                     else
                     {
-                        // Ensure immediate end and mutw = 0.
+                        // Ensure immediate end and mutw = 0
                         yPlus = 0;
                     }
 
@@ -253,20 +224,16 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
                 {
                     mutw[facei] = muw[facei]*(yPlus*yPlus/Re - 1);
                 }
-                else
-                {
-                    mutw[facei] = 0.0;
-                }
             }
         }
     }
     else
     {
-        // Smooth Walls.
+        // Smooth Walls
         forAll(mutw, facei)
         {
             const scalar magUpara = magUp[facei];
-            const scalar Re = rho[facei]*magUpara/(muw[facei]*ry[facei]);
+            const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
             const scalar kappaRe = kappa_*Re;
 
             scalar yPlus = yPlusLam;
@@ -290,12 +257,23 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::evaluate
             {
                 mutw[facei] = muw[facei]*(yPlus*yPlus/Re - 1);
             }
-            else
-            {
-                mutw[facei] = 0.0;
-            }
         }
     }
+
+    return tmutw;
+}
+
+
+tmp<scalarField>
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::yPlus() const
+{
+    notImplemented
+    (
+        "mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::yPlus()"
+        "const"
+    );
+
+    return tmp<scalarField>(NULL);
 }
 
 
@@ -305,11 +283,6 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessHeight")
         << roughnessHeight_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessConstant")
