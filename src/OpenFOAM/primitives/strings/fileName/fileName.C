@@ -55,6 +55,27 @@ Foam::fileName::Type Foam::fileName::type() const
 }
 
 
+bool Foam::fileName::clean()
+{
+    bool changed = false;
+
+    changed = this->removeRepeated('/') || changed;
+    changed = this->removeTrailing('/') || changed;
+
+    return changed;
+}
+
+
+// Return string with repeated characters removed
+Foam::fileName Foam::fileName::clean() const
+{
+    fileName fName(*this);
+    fName.clean();
+    return fName;
+}
+
+
+
 //  Return file name (part beyond last /)
 //
 //  behaviour compared to /usr/bin/basename:
