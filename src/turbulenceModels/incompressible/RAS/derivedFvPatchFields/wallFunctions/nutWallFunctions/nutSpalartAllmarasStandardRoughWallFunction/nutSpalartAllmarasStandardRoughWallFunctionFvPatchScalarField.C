@@ -155,7 +155,7 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
             do
             {
                 yPlusLast = yp;
-                yPlus = (kappaRe + yp)/(1.0 + log(E_*yp));
+                yp = (kappaRe + yp)/(1.0 + log(E_*yp));
 
             } while(mag(ryPlusLam*(yp - yPlusLast)) > 0.0001 && ++iter < 10);
 

@@ -39,7 +39,7 @@ namespace incompressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<scalarField>
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
@@ -70,11 +70,11 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
         do
         {
             yPlusLast = yp;
-            yPlus = (kappaRe + yp)/(1.0 + log(E_*yp));
+            yp = (kappaRe + yp)/(1.0 + log(E_*yp));
 
         } while(mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10 );
 
-        yPlus[facei] = yp;
+        yPlus[facei] = max(0.0, yp);
     }
 
     return tyPlus;
