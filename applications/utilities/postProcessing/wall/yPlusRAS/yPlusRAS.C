@@ -26,29 +26,156 @@ Application
     yPlusRAS
 
 Description
-    Calculates and reports yPlus for all wall patches, for the specified times.
+    Calculates and reports yPlus for all wall patches, for the specified times
+    when using RAS turbulence models.
+
+    Default behaviour assumes operating in incompressible mode. To apply to
+    compressible RAS cases, use the -compressible option.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
+
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "RASModel.H"
-#include "wallFvPatch.H"
+#include "incompressible/RAS/RASModel/RASModel.H"
+#include "nutWallFunction/nutWallFunctionFvPatchScalarField.H"
+
+#include "basicPsiThermo.H"
+#include "compressible/RAS/RASModel/RASModel.H"
+#include "mutWallFunction/mutWallFunctionFvPatchScalarField.H"
+
 #include "wallDist.H"
-#include "nutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+void calcIncompressibleYPlus
+(
+    const fvMesh& mesh,
+    const Time& runTime,
+    const volVectorField& U,
+    volScalarField& yPlus
+)
 {
     typedef incompressible::RASModels::nutWallFunctionFvPatchScalarField
         wallFunctionPatchField;
 
+    #include "createPhi.H"
+
+    singlePhaseTransportModel laminarTransport(U, phi);
+
+    autoPtr<incompressible::RASModel> RASModel
+    (
+        incompressible::RASModel::New(U, phi, laminarTransport)
+    );
+
+    const volScalarField::GeometricBoundaryField nutPatches =
+        RASModel->nut()().boundaryField();
+
+    forAll(nutPatches, patchi)
+    {
+        if (isA<wallFunctionPatchField>(nutPatches[patchi]))
+        {
+            const wallFunctionPatchField& nutPw =
+                dynamic_cast<const wallFunctionPatchField&>
+                    (nutPatches[patchi]);
+
+            yPlus.boundaryField()[patchi] = nutPw.yPlus();
+            const scalarField& Yp = yPlus.boundaryField()[patchi];
+
+            Info<< "Patch " << patchi
+                << " named " << nutPw.patch().name()
+                << " y+ : min: " << min(Yp) << " max: " << max(Yp)
+                << " average: " << average(Yp) << nl << endl;
+        }
+    }
+}
+
+
+void calcCompressibleYPlus
+(
+    const fvMesh& mesh,
+    const Time& runTime,
+    const volVectorField& U,
+    volScalarField& yPlus
+)
+{
+    typedef compressible::RASModels::mutWallFunctionFvPatchScalarField
+        wallFunctionPatchField;
+
+    IOobject rhoHeader
+    (
+        "rho",
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ,
+        IOobject::NO_WRITE
+    );
+
+    if (!rhoHeader.headerOk())
+    {
+        Info<< "    no rho field" << endl;
+        return;
+    }
+
+    Info << "Reading field rho\n" << endl;
+    volScalarField rho(rhoHeader, mesh);
+
+    #include "compressibleCreatePhi.H"
+
+    autoPtr<basicPsiThermo> pThermo
+    (
+        basicPsiThermo::New(mesh)
+    );
+    basicPsiThermo& thermo = pThermo();
+
+    autoPtr<compressible::RASModel> RASModel
+    (
+        compressible::RASModel::New
+        (
+            rho,
+            U,
+            phi,
+            thermo
+        )
+    );
+
+    const volScalarField::GeometricBoundaryField mutPatches =
+        RASModel->mut()().boundaryField();
+
+    forAll(mutPatches, patchi)
+    {
+        if (isA<wallFunctionPatchField>(mutPatches[patchi]))
+        {
+            const wallFunctionPatchField& mutPw =
+                dynamic_cast<const wallFunctionPatchField&>
+                    (mutPatches[patchi]);
+
+            yPlus.boundaryField()[patchi] = mutPw.yPlus();
+            const scalarField& Yp = yPlus.boundaryField()[patchi];
+
+            Info<< "Patch " << patchi
+                << " named " << mutPw.patch().name()
+                << " y+ : min: " << min(Yp) << " max: " << max(Yp)
+                << " average: " << average(Yp) << nl << endl;
+        }
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
     timeSelector::addOptions();
+
+    #include "addRegionOption.H"
+
+    argList::validOptions.insert("compressible","");
+
     #include "setRootCase.H"
     #include "createTime.H"
     instantList timeDirs = timeSelector::select0(runTime, args);
-    #include "createMesh.H"
+    #include "createNamedMesh.H"
+
+    bool compressible = args.optionFound("compressible");
 
     forAll(timeDirs, timeI)
     {
@@ -80,48 +207,32 @@ int main(int argc, char *argv[])
             dimensionedScalar("yPlus", dimless, 0.0)
         );
 
-        Info << "Reading field U\n" << endl;
-        volVectorField U
+        IOobject UHeader
         (
-            IOobject
-            (
-                "U",
-                runTime.timeName(),
-                mesh,
-                IOobject::MUST_READ,
-                IOobject::AUTO_WRITE
-            ),
-            mesh
+            "U",
+            runTime.timeName(),
+            mesh,
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
         );
 
-        #include "createPhi.H"
-
-        singlePhaseTransportModel laminarTransport(U, phi);
-
-        autoPtr<incompressible::RASModel> RASModel
-        (
-            incompressible::RASModel::New(U, phi, laminarTransport)
-        );
-
-        const volScalarField::GeometricBoundaryField nutPatches =
-            RASModel->nut()().boundaryField();
-
-        forAll(nutPatches, patchi)
+        if (UHeader.headerOk())
         {
-            if (isA<wallFunctionPatchField>(nutPatches[patchi]))
+            Info << "Reading field U\n" << endl;
+            volVectorField U(UHeader, mesh);
+
+            if (compressible)
             {
-                const wallFunctionPatchField& nutPw =
-                    dynamic_cast<const wallFunctionPatchField&>
-                        (nutPatches[patchi]);
-
-                yPlus.boundaryField()[patchi] = nutPw.yPlus();
-                const scalarField& Yp = yPlus.boundaryField()[patchi];
-
-                Info<< "Patch " << patchi
-                    << " named " << nutPw.patch().name()
-                    << " y+ : min: " << min(Yp) << " max: " << max(Yp)
-                    << " average: " << average(Yp) << nl << endl;
+                calcCompressibleYPlus(mesh, runTime, U, yPlus);
             }
+            else
+            {
+                calcIncompressibleYPlus(mesh, runTime, U, yPlus);
+            }
+        }
+        else
+        {
+            Info<< "    no U field" << endl;
         }
 
         Info<< "Writing yPlus to field " << yPlus.name() << nl << endl;
