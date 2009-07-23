@@ -67,8 +67,7 @@ scalar mutRoughWallFunctionFvPatchScalarField::fnRough
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-mutRoughWallFunctionFvPatchScalarField::
-mutRoughWallFunctionFvPatchScalarField
+mutRoughWallFunctionFvPatchScalarField::mutRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -80,8 +79,7 @@ mutRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutRoughWallFunctionFvPatchScalarField::
-mutRoughWallFunctionFvPatchScalarField
+mutRoughWallFunctionFvPatchScalarField::mutRoughWallFunctionFvPatchScalarField
 (
     const mutRoughWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
@@ -95,8 +93,7 @@ mutRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutRoughWallFunctionFvPatchScalarField::
-mutRoughWallFunctionFvPatchScalarField
+mutRoughWallFunctionFvPatchScalarField::mutRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -109,8 +106,7 @@ mutRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutRoughWallFunctionFvPatchScalarField::
-mutRoughWallFunctionFvPatchScalarField
+mutRoughWallFunctionFvPatchScalarField::mutRoughWallFunctionFvPatchScalarField
 (
     const mutRoughWallFunctionFvPatchScalarField& rwfpsf
 )
@@ -121,8 +117,7 @@ mutRoughWallFunctionFvPatchScalarField
 {}
 
 
-mutRoughWallFunctionFvPatchScalarField::
-mutRoughWallFunctionFvPatchScalarField
+mutRoughWallFunctionFvPatchScalarField::mutRoughWallFunctionFvPatchScalarField
 (
     const mutRoughWallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
@@ -221,6 +216,7 @@ tmp<scalarField> mutRoughWallFunctionFvPatchScalarField::calcMut() const
 void mutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
     Cs_.writeEntry("Cs", os);
     Ks_.writeEntry("Ks", os);
     writeEntry("value", os);

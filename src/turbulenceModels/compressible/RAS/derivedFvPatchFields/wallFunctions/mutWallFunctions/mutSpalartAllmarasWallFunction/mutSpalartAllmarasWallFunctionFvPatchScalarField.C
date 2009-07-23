@@ -39,7 +39,7 @@ namespace compressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
 (
@@ -173,11 +173,8 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField::calcMut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField magGradU = mag(Uw.snGrad());
-
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
     return max(0.0, rhow*sqr(calcUTau(magGradU))/magGradU - muw);
@@ -191,11 +188,8 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalarField& y = rasModel.y()[patchI];
-
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
     return y*calcUTau(mag(Uw.snGrad()))/(muw/rhow);
@@ -208,8 +202,7 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

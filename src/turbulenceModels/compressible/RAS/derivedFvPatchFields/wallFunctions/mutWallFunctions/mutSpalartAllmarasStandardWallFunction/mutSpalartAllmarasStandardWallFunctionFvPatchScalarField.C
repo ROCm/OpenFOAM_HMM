@@ -39,6 +39,49 @@ namespace compressible
 namespace RASModels
 {
 
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+tmp<scalarField>
+mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
+(
+    const scalarField& magUp
+) const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalarField& y = rasModel.y()[patchI];
+    const fvPatchScalarField& rhow = rasModel.rho().boundaryField()[patchI];
+    const fvPatchScalarField& muw = rasModel.mu().boundaryField()[patchI];
+
+    tmp<scalarField> tyPlus(new scalarField(patch().size(), 0.0));
+    scalarField& yPlus = tyPlus();
+
+    forAll(yPlus, faceI)
+    {
+        scalar kappaRe = kappa_*magUp[faceI]*y[faceI]/(muw[faceI]/rhow[faceI]);
+
+        scalar yp = yPlusLam;
+        scalar ryPlusLam = 1.0/yp;
+
+        int iter = 0;
+        scalar yPlusLast = 0.0;
+
+        do
+        {
+            yPlusLast = yp;
+            yp = (kappaRe + yp)/(1.0 + log(E_*yp));
+
+        } while (mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10);
+
+        yPlus[faceI] = max(0.0, yp);
+    }
+
+    return tyPlus;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
@@ -107,41 +150,22 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcMut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
-    const scalarField& y = rasModel.y()[patchI];
-
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-
-    const fvPatchScalarField& rhow = rasModel.rho().boundaryField()[patchI];
-
     const fvPatchScalarField& muw = rasModel.mu().boundaryField()[patchI];
+
+    tmp<scalarField> tyPlus = calcYPlus(magUp);
+    scalarField& yPlus = tyPlus();
 
     tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
     scalarField& mutw = tmutw();
 
-    forAll(mutw, faceI)
+    forAll(yPlus, faceI)
     {
-        scalar magUpara = magUp[faceI];
-
-        scalar kappaRe = kappa_*magUpara*y[faceI]/(muw[faceI]/rhow[faceI]);
-
-        scalar yPlus = yPlusLam;
-        scalar ryPlusLam = 1.0/yPlus;
-
-        int iter = 0;
-        scalar yPlusLast = 0.0;
-
-        do
+        if (yPlus[faceI] > yPlusLam)
         {
-            yPlusLast = yPlus;
-            yPlus = (kappaRe + yPlus)/(1.0 + log(E_*yPlus));
-
-        } while (mag(ryPlusLam*(yPlus - yPlusLast)) > 0.01 && ++iter < 10);
-
-        if (yPlus > yPlusLam)
-        {
-            mutw[faceI] = muw[faceI]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
+            mutw[faceI] =
+                muw[faceI]*(yPlus[faceI]*kappa_/log(E_*yPlus[faceI]) - 1.0);
         }
     }
 
@@ -152,13 +176,12 @@ mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcMut() const
 tmp<scalarField>
 mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
 {
-    notImplemented
-    (
-        "mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() "
-        "const"
-    );
+    const label patchI = patch().index();
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    return tmp<scalarField>(NULL);
+    return calcYPlus(magUp);
 }
 
 
@@ -168,8 +191,7 @@ void mutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
 ) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

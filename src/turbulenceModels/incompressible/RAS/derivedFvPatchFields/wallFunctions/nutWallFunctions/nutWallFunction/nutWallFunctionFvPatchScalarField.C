@@ -40,7 +40,7 @@ namespace incompressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void nutWallFunctionFvPatchScalarField::checkType()
 {
@@ -158,7 +158,6 @@ tmp<scalarField> nutWallFunctionFvPatchScalarField::calcNut() const
 
     const scalar Cmu25 = pow(Cmu_, 0.25);
 
-
     tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
     scalarField& nutw = tnutw();
 
@@ -197,10 +196,16 @@ tmp<scalarField> nutWallFunctionFvPatchScalarField::yPlus() const
 void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
+}
+
+
+void nutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+{
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
-    writeEntry("value", os);
 }
 
 

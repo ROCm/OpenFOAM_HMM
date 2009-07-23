@@ -51,8 +51,7 @@ tmp<scalarField> nutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
 
     const fvPatchVectorField& Uw =
         rasModel.U().boundaryField()[patch().index()];
-
-    scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
     const scalarField& nuw = rasModel.nu().boundaryField()[patch().index()];
     const scalarField& nutw = *this;
@@ -167,9 +166,7 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField::calcNut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField magGradU = mag(Uw.snGrad());
-
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     return max(0.0, sqr(calcUTau(magGradU))/magGradU - nuw);
@@ -183,9 +180,7 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalarField& y = rasModel.y()[patchI];
-
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     return y*calcUTau(mag(Uw.snGrad()))/nuw;
@@ -197,9 +192,9 @@ void nutSpalartAllmarasWallFunctionFvPatchScalarField::write
     Ostream& os
 ) const
 {
-    fixedValueFvPatchScalarField::write(os);
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
 }
 
 

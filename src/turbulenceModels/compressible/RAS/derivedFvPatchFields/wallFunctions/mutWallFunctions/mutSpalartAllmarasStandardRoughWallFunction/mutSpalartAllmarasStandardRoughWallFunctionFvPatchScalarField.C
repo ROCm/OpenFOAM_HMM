@@ -39,6 +39,138 @@ namespace compressible
 namespace RASModels
 {
 
+tmp<scalarField>
+mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
+(
+    const scalarField& magUp
+) const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalarField& y = rasModel.y()[patchI];
+    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+    const fvPatchScalarField& rho = rasModel.rho().boundaryField()[patchI];
+
+    tmp<scalarField> tyPlus(new scalarField(patch().size(), 0.0));
+    scalarField& yPlus = tyPlus();
+
+    if (roughnessHeight_ > 0.0)
+    {
+        // Rough Walls
+        const scalar c_1 = 1/(90 - 2.25) + roughnessConstant_;
+        static const scalar c_2 = 2.25/(90 - 2.25);
+        static const scalar c_3 = 2.0*atan(1.0)/log(90/2.25);
+        static const scalar c_4 = c_3*log(2.25);
+
+        //if (KsPlusBasedOnYPlus_)
+        {
+            // If KsPlus is based on YPlus the extra term added to the law
+            // of the wall will depend on yPlus
+            forAll(yPlus, facei)
+            {
+                const scalar magUpara = magUp[facei];
+                const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
+                const scalar kappaRe = kappa_*Re;
+
+                scalar yp = yPlusLam;
+                const scalar ryPlusLam = 1.0/yp;
+
+                int iter = 0;
+                scalar yPlusLast = 0.0;
+                scalar dKsPlusdYPlus = roughnessHeight_/y[facei];
+
+                // Enforce the roughnessHeight to be less than the distance to
+                // the first cell centre.
+                if (dKsPlusdYPlus > 1)
+                {
+                    dKsPlusdYPlus = 1;
+                }
+
+                // Additional tuning parameter (fudge factor) - nominally = 1
+                dKsPlusdYPlus *= roughnessFudgeFactor_;
+
+                do
+                {
+                    yPlusLast = yp;
+
+                    // The non-dimensional roughness height
+                    scalar KsPlus = yp*dKsPlusdYPlus;
+
+                    // The extra term in the law-of-the-wall
+                    scalar G = 0.0;
+
+                    scalar yPlusGPrime = 0.0;
+
+                    if (KsPlus >= 90)
+                    {
+                        const scalar t_1 = 1 + roughnessConstant_*KsPlus;
+                        G = log(t_1);
+                        yPlusGPrime = roughnessConstant_*KsPlus/t_1;
+                    }
+                    else if (KsPlus > 2.25)
+                    {
+                        const scalar t_1 = c_1*KsPlus - c_2;
+                        const scalar t_2 = c_3*log(KsPlus) - c_4;
+                        const scalar sint_2 = sin(t_2);
+                        const scalar logt_1 = log(t_1);
+                        G = logt_1*sint_2;
+                        yPlusGPrime =
+                            (c_1*sint_2*KsPlus/t_1) + (c_3*logt_1*cos(t_2));
+                    }
+
+                    scalar denom = 1.0 + log(E_*yp) - G - yPlusGPrime;
+                    if (mag(denom) > VSMALL)
+                    {
+                        yp = (kappaRe + yp*(1 - yPlusGPrime))/denom;
+                    }
+
+                } while
+                (
+                    mag(ryPlusLam*(yp - yPlusLast)) > 0.0001
+                 && ++iter < 10
+                 && yp > VSMALL
+                );
+
+                yPlus[facei] = max(0.0, yp);
+            }
+        }
+    }
+    else
+    {
+        // Smooth Walls
+        forAll(yPlus, facei)
+        {
+            const scalar magUpara = magUp[facei];
+            const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
+            const scalar kappaRe = kappa_*Re;
+
+            scalar yp = yPlusLam;
+            const scalar ryPlusLam = 1.0/yp;
+
+            int iter = 0;
+            scalar yPlusLast = 0.0;
+
+            do
+            {
+                yPlusLast = yp;
+                yp = (kappaRe + yp)/(1.0 + log(E_*yp));
+
+            } while
+            (
+                mag(ryPlusLam*(yp - yPlusLast)) > 0.0001
+             && ++iter < 10
+            );
+
+            yPlus[facei] = max(0.0, yp);
+        }
+    }
+
+    return tyPlus;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::
@@ -123,140 +255,24 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcMut() const
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patchI];
-
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+    const fvPatchScalarField& rho = rasModel.rho().boundaryField()[patchI];
 
     scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    const fvPatchScalarField& rho = rasModel.rho().boundaryField()[patchI];
+    tmp<scalarField> tyPlus = calcYPlus(magUp);
+    scalarField& yPlus = tyPlus();
 
     tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
     scalarField& mutw = tmutw();
 
-    if (roughnessHeight_ > 0.0)
+    forAll(yPlus, facei)
     {
-        // Rough Walls.
-        const scalar c_1 = 1/(90 - 2.25) + roughnessConstant_;
-        static const scalar c_2 = 2.25/(90 - 2.25);
-        static const scalar c_3 = 2.0*atan(1.0)/log(90/2.25);
-        static const scalar c_4 = c_3*log(2.25);
-
-        //if (KsPlusBasedOnYPlus_)
+        if (yPlus[facei] > yPlusLam)
         {
-            // If KsPlus is based on YPlus the extra term added to the law
-            // of the wall will depend on yPlus.
-            forAll(mutw, facei)
-            {
-                const scalar magUpara = magUp[facei];
-                const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
-                const scalar kappaRe = kappa_*Re;
-
-                scalar yPlus = yPlusLam;
-                const scalar ryPlusLam = 1.0/yPlus;
-
-                int iter = 0;
-                scalar yPlusLast = 0.0;
-                scalar dKsPlusdYPlus = roughnessHeight_/y[facei];
-
-                // Enforce the roughnessHeight to be less than the distance to
-                // the first cell centre.
-                if (dKsPlusdYPlus > 1)
-                {
-                    dKsPlusdYPlus = 1;
-                }
-
-                // Additional tuning parameter (fudge factor) - nominally = 1
-                dKsPlusdYPlus *= roughnessFudgeFactor_;
-
-                do
-                {
-                    yPlusLast = yPlus;
-
-                    // The non-dimensional roughness height
-                    scalar KsPlus = yPlus*dKsPlusdYPlus;
-
-                    // The extra term in the law-of-the-wall
-                    scalar G = 0.0;
-
-                    scalar yPlusGPrime = 0.0;
-
-                    if (KsPlus >= 90)
-                    {
-                        const scalar t_1 = 1 + roughnessConstant_*KsPlus;
-                        G = log(t_1);
-                        yPlusGPrime = roughnessConstant_*KsPlus/t_1;
-                    }
-                    else if (KsPlus > 2.25)
-                    {
-                        const scalar t_1 = c_1*KsPlus - c_2;
-                        const scalar t_2 = c_3*log(KsPlus) - c_4;
-                        const scalar sint_2 = sin(t_2);
-                        const scalar logt_1 = log(t_1);
-                        G = logt_1*sint_2;
-                        yPlusGPrime =
-                            (c_1*sint_2*KsPlus/t_1) + (c_3*logt_1*cos(t_2));
-                    }
-
-                    scalar denom = 1.0 + log(E_*yPlus) - G - yPlusGPrime;
-                    if (mag(denom) > VSMALL)
-                    {
-                        yPlus = (kappaRe + yPlus*(1 - yPlusGPrime))/denom;
-                        if( yPlus < 0 )
-                        {
-                            yPlus = 0;
-                        }
-                    }
-                    else
-                    {
-                        // Ensure immediate end and mutw = 0
-                        yPlus = 0;
-                    }
-
-                } while
-                (
-                    mag(ryPlusLam*(yPlus - yPlusLast)) > 0.0001
-                 && ++iter < 10
-                 && yPlus > VSMALL
-                );
-
-                if (yPlus > yPlusLam)
-                {
-                    mutw[facei] = muw[facei]*(yPlus*yPlus/Re - 1);
-                }
-            }
-        }
-    }
-    else
-    {
-        // Smooth Walls
-        forAll(mutw, facei)
-        {
-            const scalar magUpara = magUp[facei];
-            const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
-            const scalar kappaRe = kappa_*Re;
-
-            scalar yPlus = yPlusLam;
-            const scalar ryPlusLam = 1.0/yPlus;
-
-            int iter = 0;
-            scalar yPlusLast = 0.0;
-
-            do
-            {
-                yPlusLast = yPlus;
-                yPlus = (kappaRe + yPlus)/(1.0 + log(E_*yPlus));
-
-            } while
-            (
-                mag(ryPlusLam*(yPlus - yPlusLast)) > 0.0001
-             && ++iter < 10
-            );
-
-            if (yPlus > yPlusLam)
-            {
-                mutw[facei] = muw[facei]*(yPlus*yPlus/Re - 1);
-            }
+            const scalar Re = rho[facei]*magUp[facei]*y[facei]/muw[facei];
+            mutw[facei] = muw[facei]*(sqr(yPlus[facei])/Re - 1);
         }
     }
 
@@ -267,13 +283,13 @@ mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcMut() const
 tmp<scalarField>
 mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::yPlus() const
 {
-    notImplemented
-    (
-        "mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::yPlus()"
-        "const"
-    );
+    const label patchI = patch().index();
 
-    return tmp<scalarField>(NULL);
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+
+    return calcYPlus(magUp);
 }
 
 
@@ -283,6 +299,7 @@ void mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::write
 ) const
 {
     fixedValueFvPatchScalarField::write(os);
+    writeLocalEntries(os);
     os.writeKeyword("roughnessHeight")
         << roughnessHeight_ << token::END_STATEMENT << nl;
     os.writeKeyword("roughnessConstant")
