@@ -47,7 +47,11 @@ addToRunTimeSelectionTable(dynamicFvMesh, dynamicRefineFvMesh, IOobject);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-label dynamicRefineFvMesh::count(const PackedBoolList& l, const unsigned int val)
+label dynamicRefineFvMesh::count
+(
+    const PackedBoolList& l,
+    const unsigned int val
+)
 {
     label n = 0;
     forAll(l, i)
@@ -915,6 +919,10 @@ dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
     {
         labelList neiLevel(nFaces());
 
+        for (label faceI = 0; faceI < nInternalFaces(); faceI++)
+        {
+            neiLevel[faceI] = cellLevel[faceNeighbour()[faceI]];
+        }
         for (label faceI = nInternalFaces(); faceI < nFaces(); faceI++)
         {
             neiLevel[faceI] = cellLevel[faceOwner()[faceI]];
