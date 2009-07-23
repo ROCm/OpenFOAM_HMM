@@ -127,8 +127,7 @@ void Foam::argList::getRootCase()
     if (iter != options_.end())
     {
         casePath = iter();
-        casePath.removeRepeated('/');
-        casePath.removeTrailing('/');
+        casePath.clean();
 
         // handle degenerate form and '-case .' like no -case specified
         if (casePath.empty() || casePath == ".")
