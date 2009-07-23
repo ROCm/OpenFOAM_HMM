@@ -82,7 +82,7 @@ tmp<scalarField> nutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
                     + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
-                    1.0*y[facei]/nuw[facei]
+                    y[facei]/nuw[facei]
                   + magUpara/sqr(ut)
                   + 1/E_*kUu*fkUu/ut;
 

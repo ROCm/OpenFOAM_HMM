@@ -130,9 +130,7 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcNut() const
     // The flow velocity at the adjacent cell centre
     scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    scalarField magFaceGradU = mag(Uw.snGrad());
-
-    tmp<scalarField> tnutw(scalarField(patch().size(), 0.0));
+    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
     scalarField& nutw = tnutw();
 
     if (roughnessHeight_ > 0.0)
@@ -262,22 +260,11 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::yPlus() const
 {
     notImplemented
     (
-        "nutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const"
+        "nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::yPlus()"
+        "const"
     );
 
     return tmp<scalarField>(NULL);
-/*
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patch().index()];
-
-    const volScalarField& kw = db().lookupObject<volScalarField>(kName_);
-    const scalarField& kwc =
-        kw.boundaryField()[patch.index()].patchInternalField()
-    const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>(nuName_);
-
-    return pow(Cmu_, 0.25)*y*sqrt(kwc)/nuw;
-*/
 }
 
 

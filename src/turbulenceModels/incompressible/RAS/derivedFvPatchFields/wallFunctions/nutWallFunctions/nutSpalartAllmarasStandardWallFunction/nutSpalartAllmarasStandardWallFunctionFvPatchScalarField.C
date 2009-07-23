@@ -150,22 +150,11 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
 {
     notImplemented
     (
-        "nutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const"
+        "nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() "
+        "const"
     );
 
     return tmp<scalarField>(NULL);
-/*
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalarField& y = rasModel.y()[patch().index()];
-
-    const volScalarField& kw = db().lookupObject<volScalarField>(kName_);
-    const scalarField& kwc =
-        kw.boundaryField()[patch.index()].patchInternalField()
-    const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>(nuName_);
-
-    return pow(Cmu_, 0.25)*y*sqrt(kwc)/nuw;
-*/
 }
 
 
