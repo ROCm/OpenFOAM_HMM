@@ -72,6 +72,9 @@ class nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 
     // Protected member functions
 
+        //- Calculate yPLus
+        virtual tmp<scalarField> calcYPlus(const scalarField& magUp) const;
+
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
 

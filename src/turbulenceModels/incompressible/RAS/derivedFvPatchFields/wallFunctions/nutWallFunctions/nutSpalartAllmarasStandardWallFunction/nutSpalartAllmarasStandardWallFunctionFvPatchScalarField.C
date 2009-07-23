@@ -39,6 +39,48 @@ namespace incompressible
 namespace RASModels
 {
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+tmp<scalarField>
+nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
+(
+    const scalarField& magUp
+) const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
+    const scalarField& y = rasModel.y()[patchI];
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+
+    tmp<scalarField> tyPlus(new scalarField(patch().size(), 0.0));
+    scalarField& yPlus = tyPlus();
+
+    forAll(yPlus, facei)
+    {
+        scalar kappaRe = kappa_*magUp[facei]*y[facei]/nuw[facei];
+
+        scalar yp = yPlusLam;
+        scalar ryPlusLam = 1.0/yp;
+
+        int iter = 0;
+        scalar yPlusLast = 0.0;
+
+        do
+        {
+            yPlusLast = yp;
+            yPlus = (kappaRe + yp)/(1.0 + log(E_*yp));
+
+        } while(mag(ryPlusLam*(yp - yPlusLast)) > 0.01 && ++iter < 10 );
+
+        yPlus[facei] = yp;
+    }
+
+    return tyPlus;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
@@ -107,37 +149,22 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcNut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
-    const scalarField& y = rasModel.y()[patchI];
-
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+
+    tmp<scalarField> tyPlus = calcYPlus(magUp);
+    scalarField& yPlus = tyPlus();
 
     tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
     scalarField& nutw = tnutw();
 
-    forAll(nutw, facei)
+    forAll(yPlus, facei)
     {
-        scalar kappaRe = kappa_*magUp[facei]*y[facei]/nuw[facei];
-
-        scalar yPlus = yPlusLam;
-        scalar ryPlusLam = 1.0/yPlus;
-
-        int iter = 0;
-        scalar yPlusLast = 0.0;
-
-        do
+        if (yPlus[facei] > yPlusLam)
         {
-            yPlusLast = yPlus;
-            yPlus = (kappaRe + yPlus)/(1.0 + log(E_*yPlus));
-
-        } while(mag(ryPlusLam*(yPlus - yPlusLast)) > 0.01 && ++iter < 10 );
-
-        if (yPlus > yPlusLam)
-        {
-            nutw[facei] = nuw[facei]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
+            nutw[facei] =
+                nuw[facei]*(yPlus[facei]*kappa_/log(E_*yPlus[facei]) - 1.0);
         }
     }
 
@@ -148,13 +175,12 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcNut() const
 tmp<scalarField>
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
 {
-    notImplemented
-    (
-        "nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() "
-        "const"
-    );
+    const label patchI = patch().index();
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    return tmp<scalarField>(NULL);
+    return calcYPlus(magUp);
 }
 
 

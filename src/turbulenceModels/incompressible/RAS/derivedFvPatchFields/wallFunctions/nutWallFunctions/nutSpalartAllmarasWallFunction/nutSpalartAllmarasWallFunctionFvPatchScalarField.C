@@ -167,9 +167,7 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField::calcNut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField magGradU = mag(Uw.snGrad());
-
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     return max(0.0, sqr(calcUTau(magGradU))/magGradU - nuw);
@@ -183,9 +181,7 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalarField& y = rasModel.y()[patchI];
-
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     return y*calcUTau(mag(Uw.snGrad()))/nuw;
