@@ -54,6 +54,8 @@ Description
 
     The environment variable @b FOAM_CASE is set to the path of the
     global case (same for serial and parallel jobs).
+    The environment variable @b FOAM_CASENAME is set to the name of the
+    global case.
 
 Note
     - Adjustment of the valid (mandatory) arguments
