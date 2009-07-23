@@ -396,13 +396,13 @@
     + =addSubtract= - simple add/subtract field functionality
 
 ** Usage
-  + =timeSelector= can now combine =-time ranges= and =-latestTime= options
-    (e.g. -time '0.01:0.09', -time '0.01:').  More reliable behaviour for cases
-    missing /constant// or /0// directories. When the =-noZero= option is
-    enabled, =-latestTime= will not select the =0/= directory unless the
-    =-zeroTime= option is given.  This helps avoid ill effects caused by
-    accidentally using the /0// directory in certain utilities (eg,
-    =reconstructPar=).
+  + =timeSelector= can now combine =-time ranges= and =-latestTime= options.
+    For example, -time '0.01:0.09' -latestTime vs. -time '0.01:'.
+    More reliable behaviour for cases missing /constant// or /0// directories.
+    When the =-noZero= option is enabled, =-latestTime= will not select the
+    =0/= directory unless the =-zeroTime= option is given.
+    This helps avoid ill effects caused by accidentally using the
+    /0// directory in certain utilities (eg, =reconstructPar=).
   + =-region= option added to more utilities.
 
 ** Improvements to Paraview reader module
@@ -412,3 +412,4 @@
     region. A *new* =-touch= option to generate the /.OpenFOAM/ file only.
     Only creates (and removes) /.OpenFOAM/ files if they didn't already
     exist, which is useful in connection with the =-touch= option.
+
