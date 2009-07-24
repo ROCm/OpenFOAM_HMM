@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,8 @@ void Foam::IDDESDelta::calcDelta()
         {
             label faceI = cFaces[cFaceI];
             const point& facevector = mesh().faceCentres()[faceI];
-            scalar tmp = mag(facevector-centrevector);
+            scalar tmp = mag(facevector - centrevector);
+
             if (tmp > deltamaxTmp)
             {
                 deltamaxTmp = tmp;
@@ -79,7 +80,11 @@ void Foam::IDDESDelta::calcDelta()
     {
         delta_.internalField() =
             deltaCoeff_
-           *min(max(max(cw_*wallDist(mesh()).y(),cw_*deltamax),hwn),deltamax);
+           *min
+            (
+                max(max(cw_*wallDist(mesh()).y(), cw_*deltamax), hwn),
+                deltamax
+            );
     }
     else if (nD == 2)
     {
@@ -89,12 +94,16 @@ void Foam::IDDESDelta::calcDelta()
 
         delta_.internalField() =
             deltaCoeff_
-           *min(max(max(cw_*wallDist(mesh()).y(),cw_*deltamax),hwn),deltamax);
+           *min
+            (
+                max(max(cw_*wallDist(mesh()).y(), cw_*deltamax), hwn),
+                deltamax
+            );
     }
     else
     {
         FatalErrorIn("IDDESDelta::calcDelta()")
-            << "Case is not 3D or 2D, LES is not applicable"
+            << "Case is not 3D or 2D, LES is not strictly applicable"
             << exit(FatalError);
     }
 }
