@@ -39,7 +39,7 @@ namespace incompressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 scalar nutRoughWallFunctionFvPatchScalarField::fnRough
 (
@@ -61,6 +61,68 @@ scalar nutRoughWallFunctionFvPatchScalarField::fnRough
     {
         return (1.0 + Cs*KsPlus);
     }
+}
+
+
+tmp<scalarField> nutRoughWallFunctionFvPatchScalarField::calcNut() const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalarField& y = rasModel.y()[patchI];
+    const tmp<volScalarField> tk = rasModel.k();
+    const volScalarField& k = tk();
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+
+    const scalar Cmu25 = pow(Cmu_, 0.25);
+
+    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    scalarField& nutw = tnutw();
+
+    forAll(nutw, faceI)
+    {
+        label faceCellI = patch().faceCells()[faceI];
+
+        scalar uStar = Cmu25*sqrt(k[faceCellI]);
+        scalar yPlus = uStar*y[faceI]/nuw[faceI];
+        scalar KsPlus = uStar*Ks_[faceI]/nuw[faceI];
+
+        scalar Edash = E_;
+
+        if (KsPlus > 2.25)
+        {
+            Edash /= fnRough(KsPlus, Cs_[faceI]);
+        }
+
+        if (yPlus > yPlusLam_)
+        {
+            scalar limitingNutw = max(nutw[faceI], nuw[faceI]);
+
+            // To avoid oscillations limit the change in the wall viscosity
+            // which is particularly important if it temporarily becomes zero
+            nutw[faceI] =
+                max
+                (
+                    min
+                    (
+                        nuw[faceI]
+                       *(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1),
+                        2*limitingNutw
+                    ), 0.5*limitingNutw
+                );
+        }
+
+        if (debug)
+        {
+            Info<< "yPlus = " << yPlus
+                << ", KsPlus = " << KsPlus
+                << ", Edash = " << Edash
+                << ", nutw = " << nutw[faceI]
+                << endl;
+        }
+    }
+
+    return tnutw;
 }
 
 
@@ -154,69 +216,6 @@ void nutRoughWallFunctionFvPatchScalarField::rmap
 
     Ks_.rmap(nrwfpsf.Ks_, addr);
     Cs_.rmap(nrwfpsf.Cs_, addr);
-}
-
-
-tmp<scalarField> nutRoughWallFunctionFvPatchScalarField::calcNut() const
-{
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
-    const scalarField& y = rasModel.y()[patchI];
-    const tmp<volScalarField> tk = rasModel.k();
-    const volScalarField& k = tk();
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
-
-    const scalar Cmu25 = pow(Cmu_, 0.25);
-
-    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
-    scalarField& nutw = tnutw();
-
-    forAll(nutw, faceI)
-    {
-        label faceCellI = patch().faceCells()[faceI];
-
-        scalar uStar = Cmu25*sqrt(k[faceCellI]);
-        scalar yPlus = uStar*y[faceI]/nuw[faceI];
-        scalar KsPlus = uStar*Ks_[faceI]/nuw[faceI];
-
-        scalar Edash = E_;
-
-        if (KsPlus > 2.25)
-        {
-            Edash /= fnRough(KsPlus, Cs_[faceI]);
-        }
-
-        if (yPlus > yPlusLam)
-        {
-            scalar limitingNutw = max(nutw[faceI], nuw[faceI]);
-
-            // To avoid oscillations limit the change in the wall viscosity
-            // which is particularly important if it temporarily becomes zero
-            nutw[faceI] =
-                max
-                (
-                    min
-                    (
-                        nuw[faceI]
-                       *(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1),
-                        2*limitingNutw
-                    ), 0.5*limitingNutw
-                );
-        }
-
-        if (debug)
-        {
-            Info<< "yPlus = " << yPlus
-                << ", KsPlus = " << KsPlus
-                << ", Edash = " << Edash
-                << ", nutw = " << nutw[faceI]
-                << endl;
-        }
-    }
-
-    return tnutw;
 }
 
 

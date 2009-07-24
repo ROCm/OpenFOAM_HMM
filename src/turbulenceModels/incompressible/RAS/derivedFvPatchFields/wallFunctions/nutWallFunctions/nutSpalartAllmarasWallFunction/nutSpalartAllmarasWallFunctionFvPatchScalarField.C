@@ -39,7 +39,21 @@ namespace incompressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+tmp<scalarField>
+nutSpalartAllmarasWallFunctionFvPatchScalarField::calcNut() const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+
+    return max(0.0, sqr(calcUTau(magGradU))/magGradU - nuw);
+}
+
 
 tmp<scalarField> nutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
 (
@@ -158,20 +172,6 @@ nutSpalartAllmarasWallFunctionFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-tmp<scalarField>
-nutSpalartAllmarasWallFunctionFvPatchScalarField::calcNut() const
-{
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
-
-    return max(0.0, sqr(calcUTau(magGradU))/magGradU - nuw);
-}
-
 
 tmp<scalarField>
 nutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const

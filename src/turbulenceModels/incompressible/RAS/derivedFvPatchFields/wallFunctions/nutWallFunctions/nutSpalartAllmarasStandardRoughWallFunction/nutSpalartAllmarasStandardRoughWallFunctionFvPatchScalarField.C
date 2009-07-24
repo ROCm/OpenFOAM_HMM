@@ -39,7 +39,39 @@ namespace incompressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
+
+tmp<scalarField>
+nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcNut() const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalarField& y = rasModel.y()[patchI];
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+
+    // The flow velocity at the adjacent cell centre
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+
+    tmp<scalarField> tyPlus = calcYPlus(magUp);
+    scalarField& yPlus = tyPlus();
+
+    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    scalarField& nutw = tnutw();
+
+    forAll(yPlus, facei)
+    {
+        if (yPlus[facei] > yPlusLam_)
+        {
+            const scalar Re = magUp[facei]*y[facei]/nuw[facei];
+            nutw[facei] = nuw[facei]*(sqr(yPlus[facei])/Re - 1);
+        }
+    }
+
+    return tnutw;
+}
+
 
 tmp<scalarField>
 nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
@@ -50,7 +82,6 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
     const label patchI = patch().index();
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patchI];
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
@@ -75,7 +106,7 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
                 const scalar Re = magUpara*y[facei]/nuw[facei];
                 const scalar kappaRe = kappa_*Re;
 
-                scalar yp = yPlusLam;
+                scalar yp = yPlusLam_;
                 const scalar ryPlusLam = 1.0/yp;
 
                 int iter = 0;
@@ -133,7 +164,7 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
                  && yp > VSMALL
                 );
 
-                yPlus[facei] = yp;
+                yPlus[facei] = max(0.0, yp);
             }
         }
     }
@@ -146,7 +177,7 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
             const scalar Re = magUpara*y[facei]/nuw[facei];
             const scalar kappaRe = kappa_*Re;
 
-            scalar yp = yPlusLam;
+            scalar yp = yPlusLam_;
             const scalar ryPlusLam = 1.0/yp;
 
             int iter = 0;
@@ -159,7 +190,7 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcYPlus
 
             } while(mag(ryPlusLam*(yp - yPlusLast)) > 0.0001 && ++iter < 10);
 
-            yPlus[facei] = yp;
+            yPlus[facei] = max(0.0, yp);
         }
     }
 
@@ -242,39 +273,6 @@ nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-tmp<scalarField>
-nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::calcNut() const
-{
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
-    const scalarField& y = rasModel.y()[patchI];
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
-
-    // The flow velocity at the adjacent cell centre
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-
-    tmp<scalarField> tyPlus = calcYPlus(magUp);
-    scalarField& yPlus = tyPlus();
-
-    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
-    scalarField& nutw = tnutw();
-
-    forAll(yPlus, facei)
-    {
-        if (yPlus[facei] > yPlusLam)
-        {
-            const scalar Re = magUp[facei]*y[facei]/nuw[facei];
-            nutw[facei] = nuw[facei]*(sqr(yPlus[facei])/Re - 1);
-        }
-    }
-
-    return tnutw;
-}
-
 
 tmp<scalarField>
 nutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField::yPlus() const

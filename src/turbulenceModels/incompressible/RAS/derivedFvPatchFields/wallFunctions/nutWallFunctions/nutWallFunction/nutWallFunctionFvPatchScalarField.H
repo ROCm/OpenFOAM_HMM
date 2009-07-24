@@ -70,11 +70,17 @@ protected:
         //- E coefficient
         scalar E_;
 
+        //- Y+ at the edge of the laminar sublayer
+        scalar yPlusLam_;
+
 
     // Protected member functions
 
         //- Check the type of the patch
         virtual void checkType();
+
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;

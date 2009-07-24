@@ -42,6 +42,35 @@ namespace RASModels
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 tmp<scalarField>
+nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcNut() const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+
+    tmp<scalarField> tyPlus = calcYPlus(magUp);
+    scalarField& yPlus = tyPlus();
+
+    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    scalarField& nutw = tnutw();
+
+    forAll(yPlus, facei)
+    {
+        if (yPlus[facei] > yPlusLam_)
+        {
+            nutw[facei] =
+                nuw[facei]*(yPlus[facei]*kappa_/log(E_*yPlus[facei]) - 1.0);
+        }
+    }
+
+    return tnutw;
+}
+
+
+tmp<scalarField>
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
 (
     const scalarField& magUp
@@ -50,7 +79,6 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
     const label patchI = patch().index();
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patchI];
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
@@ -61,7 +89,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
     {
         scalar kappaRe = kappa_*magUp[facei]*y[facei]/nuw[facei];
 
-        scalar yp = yPlusLam;
+        scalar yp = yPlusLam_;
         scalar ryPlusLam = 1.0/yp;
 
         int iter = 0;
@@ -141,36 +169,6 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-tmp<scalarField>
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcNut() const
-{
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
-    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
-
-    tmp<scalarField> tyPlus = calcYPlus(magUp);
-    scalarField& yPlus = tyPlus();
-
-    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
-    scalarField& nutw = tnutw();
-
-    forAll(yPlus, facei)
-    {
-        if (yPlus[facei] > yPlusLam)
-        {
-            nutw[facei] =
-                nuw[facei]*(yPlus[facei]*kappa_/log(E_*yPlus[facei]) - 1.0);
-        }
-    }
-
-    return tnutw;
-}
-
 
 tmp<scalarField>
 nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
