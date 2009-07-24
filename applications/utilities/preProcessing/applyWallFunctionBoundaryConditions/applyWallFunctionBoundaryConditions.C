@@ -26,13 +26,12 @@ Application
     applyWallFunctionBounaryConditions
 
 Description
-    Updates OpenFOAM RAS cases to use the new wall function framework
+    Updates OpenFOAM RAS cases to use the new (v1.6) wall function framework
 
     Attempts to determine whether case is compressible or incompressible, or
     can be supplied with -compressible command line argument
 
 \*---------------------------------------------------------------------------*/
-
 
 #include "argList.H"
 #include "fvMesh.H"
@@ -41,6 +40,16 @@ Description
 #include "surfaceFields.H"
 
 #include "wallPolyPatch.H"
+
+#include "incompressible/RAS/derivedFvPatchFields/wallFunctions/epsilonWallFunctions/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.H"
+#include "incompressible/RAS/derivedFvPatchFields/wallFunctions/kqRWallFunctions/kqRWallFunction/kqRWallFunctionFvPatchField.H"
+#include "incompressible/RAS/derivedFvPatchFields/wallFunctions/nutWallFunctions/nutWallFunction/nutWallFunctionFvPatchScalarField.H"
+#include "incompressible/RAS/derivedFvPatchFields/wallFunctions/omegaWallFunctions/omegaWallFunction/omegaWallFunctionFvPatchScalarField.H"
+
+#include "compressible/RAS/derivedFvPatchFields/wallFunctions/epsilonWallFunctions/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.H"
+#include "compressible/RAS/derivedFvPatchFields/wallFunctions/kqRWallFunctions/kqRWallFunction/kqRWallFunctionFvPatchField.H"
+#include "compressible/RAS/derivedFvPatchFields/wallFunctions/mutWallFunctions/mutWallFunction/mutWallFunctionFvPatchScalarField.H"
+#include "compressible/RAS/derivedFvPatchFields/wallFunctions/omegaWallFunctions/omegaWallFunction/omegaWallFunctionFvPatchScalarField.H"
 
 using namespace Foam;
 
@@ -100,25 +109,6 @@ bool caseIsCompressible(const fvMesh& mesh)
     {
         volScalarField p(pHeader, mesh);
         if (p.dimensions() == dimMass/sqr(dimTime)/dimLength)
-        {
-            return true;
-        }
-    }
-
-    // Attempt hydrostatic pressure field
-    IOobject pdHeader
-    (
-        "pd",
-        mesh.time().timeName(),
-        mesh,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE
-    );
-
-    if (pdHeader.headerOk())
-    {
-        volScalarField pd(pdHeader, mesh);
-        if (pd.dimensions() == dimMass/sqr(dimTime)/dimLength)
         {
             return true;
         }
@@ -231,15 +221,125 @@ void replaceBoundaryType
 }
 
 
+void updateCompressibleCase(const fvMesh& mesh)
+{
+    Info<< "Case treated as compressible" << nl << endl;
+    createVolScalarField
+    (
+        mesh,
+        "mut",
+        dimArea/dimTime*dimDensity
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "mut",
+        compressible::RASModels::mutWallFunctionFvPatchScalarField::typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "epsilon",
+        compressible::RASModels::epsilonWallFunctionFvPatchScalarField::
+            typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "omega",
+        compressible::RASModels::omegaWallFunctionFvPatchScalarField::typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "k",
+        compressible::RASModels::kqRWallFunctionFvPatchField<scalar>::typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "q",
+        compressible::RASModels::kqRWallFunctionFvPatchField<scalar>::typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "R",
+        compressible::RASModels::kqRWallFunctionFvPatchField<symmTensor>::
+            typeName,
+        "(0 0 0 0 0 0)"
+    );
+}
+
+
+void updateIncompressibleCase(const fvMesh& mesh)
+{
+    Info<< "Case treated as incompressible" << nl << endl;
+    createVolScalarField(mesh, "nut", dimArea/dimTime);
+
+    replaceBoundaryType
+    (
+        mesh,
+        "nut",
+        incompressible::RASModels::nutWallFunctionFvPatchScalarField::typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "epsilon",
+        incompressible::RASModels::epsilonWallFunctionFvPatchScalarField::
+            typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "omega",
+        incompressible::RASModels::omegaWallFunctionFvPatchScalarField::
+            typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "k",
+        incompressible::RASModels::kqRWallFunctionFvPatchField<scalar>::
+            typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "q",
+        incompressible::RASModels::kqRWallFunctionFvPatchField<scalar>::
+            typeName,
+        "0"
+    );
+    replaceBoundaryType
+    (
+        mesh,
+        "R",
+        incompressible::RASModels::kqRWallFunctionFvPatchField<symmTensor>::
+            typeName,
+        "(0 0 0 0 0 0)"
+    );
+}
+
+
 int main(int argc, char *argv[])
 {
-
-#   include "addTimeOptions.H"
+    #include "addTimeOptions.H"
     argList::validOptions.insert("compressible", "");
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
 
     bool compressible = args.optionFound("compressible");
 
@@ -249,27 +349,12 @@ int main(int argc, char *argv[])
 
     if (compressible || caseIsCompressible(mesh))
     {
-        Info<< "Case treated as compressible" << nl << endl;
-        createVolScalarField
-        (
-            mesh,
-            "mut",
-            dimArea/dimTime*dimDensity
-        );
-        replaceBoundaryType(mesh, "mut", "mutWallFunction", "0");
+        updateCompressibleCase(mesh);
     }
     else
     {
-        Info<< "Case treated as incompressible" << nl << endl;
-        createVolScalarField(mesh, "nut", dimArea/dimTime);
-        replaceBoundaryType(mesh, "nut", "nutWallFunction", "0");
+        updateIncompressibleCase(mesh);
     }
-
-    replaceBoundaryType(mesh, "epsilon", "epsilonWallFunction", "0");
-    replaceBoundaryType(mesh, "omega", "omegaWallFunction", "0");
-    replaceBoundaryType(mesh, "k", "kqRWallFunction", "0");
-    replaceBoundaryType(mesh, "q", "kqRWallFunction", "0");
-    replaceBoundaryType(mesh, "R", "kqRWallFunction", "(0 0 0 0 0 0)");
 
     Info<< "End\n" << endl;
 

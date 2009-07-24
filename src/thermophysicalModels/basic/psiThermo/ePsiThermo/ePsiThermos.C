@@ -29,6 +29,7 @@ License
 #include "perfectGas.H"
 
 #include "eConstThermo.H"
+#include "hConstThermo.H"
 #include "janafThermo.H"
 #include "specieThermo.H"
 
@@ -60,6 +61,24 @@ makeBasicPsiThermo
     pureMixture,
     sutherlandTransport,
     eConstThermo,
+    perfectGas
+);
+
+makeBasicPsiThermo
+(
+    ePsiThermo,
+    pureMixture,
+    constTransport,
+    hConstThermo,
+    perfectGas
+);
+
+makeBasicPsiThermo
+(
+    ePsiThermo,
+    pureMixture,
+    sutherlandTransport,
+    hConstThermo,
     perfectGas
 );
 

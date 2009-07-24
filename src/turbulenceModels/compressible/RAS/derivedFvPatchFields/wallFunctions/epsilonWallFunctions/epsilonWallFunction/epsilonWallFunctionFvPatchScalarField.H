@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef epsilonWallFunctionFvPatchScalarField_H
-#define epsilonWallFunctionFvPatchScalarField_H
+#ifndef compressibleEpsilonWallFunctionFvPatchScalarField_H
+#define compressibleEpsilonWallFunctionFvPatchScalarField_H
 
 #include "fixedInternalValueFvPatchField.H"
 

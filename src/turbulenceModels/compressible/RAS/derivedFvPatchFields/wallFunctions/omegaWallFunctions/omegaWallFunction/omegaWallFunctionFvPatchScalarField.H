@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef omegaWallFunctionFvPatchScalarField_H
-#define omegaWallFunctionFvPatchScalarField_H
+#ifndef compressibleOmegaWallFunctionFvPatchScalarField_H
+#define compressibleOmegaWallFunctionFvPatchScalarField_H
 
 #include "fixedInternalValueFvPatchField.H"
 
