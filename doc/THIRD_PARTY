@@ -1,0 +1,35 @@
+# A brief listing of some third party sources
+
+# --------------------------------------------------------------------------
+# compiler
+gcc         http://gcc.gnu.org/gcc-4.3/
+mpfr        http://www.mpfr.org/
+gmp         http://gmplib.org/
+
+# --------------------------------------------------------------------------
+# Parallel processing
+
+openmpi     http://www.open-mpi.org/software/ompi/v1.3/downloads/openmpi-1.3.3.tar.bz2
+metis       http://glaros.dtc.umn.edu/gkhome/fetch/sw/metis/metis-5.0pre2.tar.gz
+ParMetis    http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/ParMetis-3.1.tar.gz
+ParMGridGen http://www-users.cs.umn.edu/~moulitsa/download/ParMGridGen-1.0.tar.gz
+mpich       ftp://ftp.mcs.anl.gov/pub/mpi/old/mpich-1.2.4.tar.gz
+scotch      http://gforge.inria.fr/frs/download.php/22247/scotch_5.1.6.tar.gz
+
+# --------------------------------------------------------------------------
+# Allocation
+
+hoard       http://www.cs.umass.edu/%7Eemery/hoard/hoard-3.7.1/hoard-371.tar.gz
+
+-> Note: the code needs minor patching
+fbsdmalloc  http://www.freebsd.org/cgi/cvsweb.cgi/~checkout~/src/lib/libc/stdlib/malloc.c?rev=1.171
+
+# --------------------------------------------------------------------------
+# Misc
+
+cmake       http://www.cmake.org/files/v2.6/cmake-2.6.4.tar.gz#
+paraview    http://www.paraview.org/files/v3.6/paraview-3.6.1.tar.gz
+libccmio    https://wci.llnl.gov/codes/visit/3rd_party/libccmio-2.6.1.tar.gz
+zlib        http://www.zlib.net/zlib-1.2.3.tar.gz
+
+# --------------------------------------------------------------------------
