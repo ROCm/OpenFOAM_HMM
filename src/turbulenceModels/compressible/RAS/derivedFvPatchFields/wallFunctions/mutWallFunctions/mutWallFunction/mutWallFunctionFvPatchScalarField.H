@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mutWallFunctionFvPatchScalarField_H
-#define mutWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutWallFunctionFvPatchScalarField_H
+#define compressibleMutWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 

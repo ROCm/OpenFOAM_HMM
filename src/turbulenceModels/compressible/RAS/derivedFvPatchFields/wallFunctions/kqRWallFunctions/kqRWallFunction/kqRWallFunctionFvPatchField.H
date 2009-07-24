@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef kqRWallFunctionFvPatchField_H
-#define kqRWallFunctionFvPatchField_H
+#ifndef compressiblekqRWallFunctionFvPatchField_H
+#define compressiblekqRWallFunctionFvPatchField_H
 
 #include "zeroGradientFvPatchField.H"
 

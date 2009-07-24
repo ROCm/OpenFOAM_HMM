@@ -40,8 +40,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mutRoughWallFunctionFvPatchScalarField_H
-#define mutRoughWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutRoughWallFunctionFvPatchScalarField_H
+#define compressibleMutRoughWallFunctionFvPatchScalarField_H
 
 #include "mutWallFunctionFvPatchScalarField.H"
 
