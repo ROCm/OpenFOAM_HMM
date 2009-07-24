@@ -1,0 +1,64 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     AllwmakeLibccmio
+#
+# Description
+#     Get and build CD-adapco's ccmio library
+#
+#------------------------------------------------------------------------------
+set -x
+
+packageDir=libccmio-2.6.1
+
+if [ ! -d ${packageDir} ]
+then
+   if [ ! -e ${packageDir}.tar.gz ]
+   then
+      wget --no-check-certificate \
+         https://wci.llnl.gov/codes/visit/3rd_party/${packageDir}.tar.gz
+   fi
+
+   if [ -e ${packageDir}.tar.gz ]
+   then
+      tar -xzf ${packageDir}.tar.gz
+   else
+      echo "no ${packageDir}.tar.gz to unpack"
+   fi
+fi
+
+if [ -d ${packageDir} -a ! -d ${packageDir}/Make ]
+then
+   cp -r wmakeFiles/libccmio/Make ${packageDir}/Make
+fi
+
+if [ -d ${packageDir}/Make ]
+then
+   wmake libso ${packageDir}
+fi
+
+
+# ----------------------------------------------------------------- end-of-file

@@ -1,0 +1,132 @@
+#---------------------------------*- sh -*-------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     foamMakeGcc
+#
+# Description
+#     Build script for gmp, mpfr and gcc-4.3.? and gcc-4.4.?
+#
+#------------------------------------------------------------------------------
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
+
+usage: ${0##*/} <gcc-4.?.?> ...
+
+* build gmp, mpfr and gcc-4.3.? and gcc-4.4.?
+
+USAGE
+    exit 1
+}
+
+if [ $# -ne 1 ]
+then
+    usage "gcc version not provided"
+fi
+
+#
+# Set the number of cores to build on
+#
+WM_NCOMPPROCS=1
+
+if [ -r /proc/cpuinfo ]
+then
+    WM_NCOMPPROCS=$(egrep "^processor" /proc/cpuinfo | wc -l)
+    [ $WM_NCOMPPROCS -le 8 ] || WM_NCOMPPROCS=8
+fi
+
+echo "Building on " $WM_NCOMPPROCS " cores"
+
+GMP_DIR=$WM_THIRD_PARTY_DIR/gmp-4.2.4
+MPFR_DIR=$WM_THIRD_PARTY_DIR/mpfr-2.4.1
+GCC_DIR=$WM_THIRD_PARTY_DIR/$1
+
+GMPROOT=${GMP_DIR}/platforms/$WM_ARCH$WM_COMPILER_ARCH
+MPFRROOT=${MPFR_DIR}/platforms/$WM_ARCH$WM_COMPILER_ARCH
+GCCROOT=${GCC_DIR}/platforms/$WM_ARCH$WM_COMPILER_ARCH
+
+#
+# Bulid GMP
+#
+if [ ! -d $GMPROOT ]
+then
+    (
+        make distclean \
+     && mkdir $GMP_DIR/build \
+     && cd $GMP_DIR/build \
+     && ../configure ABI=$ABI --prefix=$GMPROOT \
+     && make -j $WM_NCOMPPROCS \
+     && make install
+    )
+    echo "    Finished building gmp."
+else
+    echo "    gmp already built."
+fi
+
+export LD_LIBRARY_PATH="$GMPROOT/lib:$LD_LIBRARY_PATH"
+
+#
+# Build MPFR
+#
+if [ ! -d $MPFRROOT ]
+then
+    (
+        make distclean \
+     && mkdir $MPFR_DIR/build \
+     && cd $MPFR_DIR/build \
+     && ../configure ABI=$ABI --prefix=$MPFRROOT --with-gmp=$GMPROOT \
+     && make -j $WM_NCOMPPROCS  \
+     && make install
+    )
+    echo "    Finished building mpfr."
+else
+    echo "    mprf already built."
+fi
+
+export LD_LIBRARY_PATH="$MPFRROOT/lib:$LD_LIBRARY_PATH"
+
+#
+# Build GCC
+#
+if [ ! -d $GCCROOT ]
+then
+    (
+        make distclean \
+     && mkdir $GCC_DIR/build \
+     && cd $GCC_DIR/build \
+     && ../configure --enable-languages=c,c++ --with-pkgversion='OpenFOAM' \
+      --enable-__cxa_atexit --enable-libstdcxx-allocator=new \
+      --with-system-zlib --prefix=$GCCROOT \
+      --with-mpfr=$MPFRROOT --with-gmp=$GMPROOT \
+     && make -j $WM_NCOMPPROCS \
+     && make install
+    )
+    echo "    Finished building gcc."
+else
+    echo "    gcc already built."
+fi
+
+
+# ----------------------------------------------------------------- end-of-file
