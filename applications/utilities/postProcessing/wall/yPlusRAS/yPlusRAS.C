@@ -71,10 +71,13 @@ void calcIncompressibleYPlus
     const volScalarField::GeometricBoundaryField nutPatches =
         RASModel->nut()().boundaryField();
 
+    bool foundNutPatch = false;
     forAll(nutPatches, patchi)
     {
         if (isA<wallFunctionPatchField>(nutPatches[patchi]))
         {
+            foundNutPatch = true;
+
             const wallFunctionPatchField& nutPw =
                 dynamic_cast<const wallFunctionPatchField&>
                     (nutPatches[patchi]);
@@ -87,6 +90,12 @@ void calcIncompressibleYPlus
                 << " y+ : min: " << min(Yp) << " max: " << max(Yp)
                 << " average: " << average(Yp) << nl << endl;
         }
+    }
+
+    if (!foundNutPatch)
+    {
+        Info<< "    no " << wallFunctionPatchField::typeName << " patches"
+            << endl;
     }
 }
 
@@ -142,10 +151,13 @@ void calcCompressibleYPlus
     const volScalarField::GeometricBoundaryField mutPatches =
         RASModel->mut()().boundaryField();
 
+    bool foundMutPatch = false;
     forAll(mutPatches, patchi)
     {
         if (isA<wallFunctionPatchField>(mutPatches[patchi]))
         {
+            foundMutPatch = true;
+
             const wallFunctionPatchField& mutPw =
                 dynamic_cast<const wallFunctionPatchField&>
                     (mutPatches[patchi]);
@@ -158,6 +170,12 @@ void calcCompressibleYPlus
                 << " y+ : min: " << min(Yp) << " max: " << max(Yp)
                 << " average: " << average(Yp) << nl << endl;
         }
+    }
+
+    if (!foundMutPatch)
+    {
+        Info<< "    no " << wallFunctionPatchField::typeName << " patches"
+            << endl;
     }
 }
 
