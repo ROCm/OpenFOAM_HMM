@@ -197,7 +197,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField magGradUw = mag(Uw.snGrad());
 
-    // Set epsilon and G
+    // Set omega and G
     forAll(mutw, faceI)
     {
         label faceCellI = patch().faceCells()[faceI];
