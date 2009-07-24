@@ -6,7 +6,7 @@ set -x
 ( cd wmake/src && make )
 
 # build ThirdParty sources
-( cd $WM_THIRD_PARTY_DIR && AllwmakeThirdParty )
+( cd $WM_THIRD_PARTY_DIR && Allwmake )
 
 src/Allwmake
 applications/Allwmake
