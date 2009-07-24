@@ -1112,6 +1112,13 @@ bool Foam::cyclicPolyPatch::order
         return false;
     }
 
+    if (pp.size()&1)
+    {
+        FatalErrorIn("cyclicPolyPatch::order(..)")
+            << "Size of cyclic " << name() << " should be a multiple of 2"
+            << ". It is " << pp.size() << abort(FatalError);
+    }
+
     label halfSize = pp.size()/2;
 
     // Supplied primitivePatch already with new points.

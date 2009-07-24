@@ -189,10 +189,16 @@ tmp<scalarField> mutWallFunctionFvPatchScalarField::yPlus() const
 void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
+    writeLocalEntries(os);
+    writeEntry("value", os);
+}
+
+
+void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+{
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
-    writeEntry("value", os);
 }
 
 

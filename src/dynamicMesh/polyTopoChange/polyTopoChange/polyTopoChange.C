@@ -191,7 +191,10 @@ void Foam::polyTopoChange::countMap
 }
 
 
-Foam::labelHashSet Foam::polyTopoChange::getSetIndices(const PackedBoolList& lst)
+Foam::labelHashSet Foam::polyTopoChange::getSetIndices
+(
+    const PackedBoolList& lst
+)
 {
     labelHashSet values(lst.count());
     forAll(lst, i)

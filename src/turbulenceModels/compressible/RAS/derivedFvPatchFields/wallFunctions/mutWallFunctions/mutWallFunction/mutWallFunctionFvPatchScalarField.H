@@ -79,6 +79,9 @@ protected:
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcMut() const;
 
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
+
 
 public:
 
