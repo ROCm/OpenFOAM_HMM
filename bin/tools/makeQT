@@ -1,0 +1,73 @@
+#!/bin/sh
+#------------------------------------------------------------------------------
+# =========                 |
+# \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+#  \\    /   O peration     |
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+#    \\/     M anipulation  |
+#------------------------------------------------------------------------------
+# License
+#     This file is part of OpenFOAM.
+#
+#     OpenFOAM is free software; you can redistribute it and/or modify it
+#     under the terms of the GNU General Public License as published by the
+#     Free Software Foundation; either version 2 of the License, or (at your
+#     option) any later version.
+#
+#     OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+#     ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+#     FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+#     for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with OpenFOAM; if not, write to the Free Software Foundation,
+#     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+#
+# Script
+#     makeQT
+#
+# Description
+#     Build script for Qt-4.3.5
+#
+#------------------------------------------------------------------------------
+
+QT_VERSION=4.3.5
+QT_HOME=${WM_THIRD_PARTY_DIR}/qt-x11-opensource-src-${QT_VERSION}
+QT_ARCH_PATH=${QT_HOME}/platforms/${WM_OPTIONS}
+
+
+if [ ! -d $QT_ARCH_PATH ]
+then
+    cd $QT_HOME || {
+       echo "no Qt sources found"
+       exit 1
+    }
+
+    make distclean
+    rm -rf $QT_ARCH_PATH
+
+    ./configure \
+        --prefix=$QT_ARCH_PATH \
+        -nomake demos \
+        -nomake examples
+
+    if [ -r /proc/cpuinfo ]
+    then
+        WM_NCOMPPROCS=$(egrep "^processor" /proc/cpuinfo | wc -l)
+        [ $WM_NCOMPPROCS -le 8 ] || WM_NCOMPPROCS=8
+
+        echo "Building on " $WM_NCOMPPROCS " cores"
+
+        time make -j $WM_NCOMPPROCS
+    else
+        time make
+    fi
+
+    make install
+
+    echo "    Finished building Qt-$QT_VERSION"
+else
+    echo "    Qt-$QT_VERSION already built."
+fi
+
+# ----------------------------------------------------------------- end-of-file
