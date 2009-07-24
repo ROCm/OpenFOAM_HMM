@@ -6,7 +6,7 @@ set -x
 ( cd wmake/src && make )
 
 # build ThirdParty sources
-$WM_PROJECT_DIR/bin/tools/AllwmakeThirdParty
+$WM_THIRD_PARTY_DIR/Allwmake
 
 # build OpenFOAM libraries and applications
 src/Allwmake

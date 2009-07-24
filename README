@@ -22,37 +22,37 @@
   If the user wishes to run OpenFOAM in 32/64-bit mode they should consult the
   section "Running OpenFOAM in 32-bit mode".
 
-*** Qt (from http://trolltech.com/products/qt)
-    The ParaView 3.3 visualisation package requires that Qt version 4.3.x MUST
-    be installed on the system.  Earlier or more recent versions (4.2.x or
-    4.4.x) will NOT work.  To check whether Qt4 is installed, and the version,
-    type:
-    + qmake --version
+** Qt (from http://trolltech.com/products/qt)
+   The ParaView 3.6 visualisation package requires that Qt version 4.3.x MUST
+   be installed on the system.  Earlier or more recent versions (4.2.x or
+   4.4.x) will NOT work.  To check whether Qt4 is installed, and the version,
+   type:
+   + qmake --version
 
-    The ParaView binary executables in the ThirdParty distribution will only
-    work with PRECISELY the same version of Qt with which it was compiled.  The
-    64-bit version of ParaView was compiled with Qt-4.3.1 (with openSuSE-10.3)
-    and the 32-bit version of ParaView was compiled with Qt-4.3.2 (with
-    ubuntu-7.10).  If the user finds that a ParaView binary fails to run, then
-    it is almost certainly due to a conflict in compiled and installed Qt
-    versions and they will need to consult the section below on "Compiling
-    ParaView and the PV3FoamReader module."
+   The ParaView binary executables in the ThirdParty distribution will only
+   work with PRECISELY the same version of Qt with which it was compiled.  The
+   64-bit version of ParaView was compiled with Qt-4.3.1 (with openSuSE-10.3)
+   and the 32-bit version of ParaView was compiled with Qt-4.3.2 (with
+   ubuntu-7.10).  If the user finds that a ParaView binary fails to run, then
+   it is almost certainly due to a conflict in compiled and installed Qt
+   versions and they will need to consult the section below on "Compiling
+   ParaView and the PV3FoamReader module."
 
-    The default versions of Qt used by some GNU/Linux releases are as follows.
-    + ubuntu-7.10:   Version 4.3.2
-    + ubuntu-8.04:   Version 4.3.4
-    + openSuSE-10.2: Version 4.2.1 - too old
-    + openSuSE-10.3: Version 4.3.1
-    + openSuSE-11.0: Version 4.4.0 - too new
+   The default versions of Qt used by some GNU/Linux releases are as follows.
+   + ubuntu-7.10:   Version 4.3.2
+   + ubuntu-8.04:   Version 4.3.4
+   + openSuSE-10.2: Version 4.2.1 - too old
+   + openSuSE-10.3: Version 4.3.1
+   + openSuSE-11.0: Version 4.4.0 - too new
 
-    Compilation and running of ParaView has been successful using the libraries
-    downloaded in the "libqt4-dev" package on ubuntu.
+   Compilation and running of ParaView has been successful using the libraries
+   downloaded in the "libqt4-dev" package on ubuntu.
 
-    If you don't have an appropriate version of Qt installed you can download
-    the sources from TrollTech e.g.:
-    ftp://ftp.trolltech.com/qt/source/qt-x11-opensource-src-4.3.5.tar.bz2
-    and compile and install in /usr/local or some other location that does to
-    conflict with the pre-installed version.
+   If you don't have an appropriate version of Qt installed you can download
+   the sources from TrollTech e.g.:
+   ftp://ftp.trolltech.com/qt/source/qt-x11-opensource-src-4.3.5.tar.bz2
+   and compile and install in /usr/local or some other location that does to
+   conflict with the pre-installed version.
 
 * Installation
   Download and unpack the files in the $HOME/OpenFOAM directory as described in:
@@ -85,26 +85,26 @@
 
     + source $HOME/.cshrc
 
-*** Installation in alternative locations
-    OpenFOAM may also be installed in alternative locations. However, the
-    installation directory should be network available (e.g., NFS) if parallel
-    calculations are planned.
+** Installation in alternative locations
+   OpenFOAM may also be installed in alternative locations. However, the
+   installation directory should be network available (e.g., NFS) if parallel
+   calculations are planned.
 
-    The environment variable 'FOAM_INST_DIR' can be used to find and source the
-    appropriate resource file. Here is a bash/ksh/sh example:
+   The environment variable 'FOAM_INST_DIR' can be used to find and source the
+   appropriate resource file. Here is a bash/ksh/sh example:
 
-    + export FOAM_INST_DIR=/data/app/OpenFOAM
-    + foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
-    + [ -f $foamDotFile ] && . $foamDotFile
+   + export FOAM_INST_DIR=/data/app/OpenFOAM
+   + foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
+   + [ -f $foamDotFile ] && . $foamDotFile
 
-    and a csh/tcsh example:
+   and a csh/tcsh example:
 
-    + setenv FOAM_INST_DIR /data/app/OpenFOAM
-    + foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
-    + if ( -f $foamDotFile ) source $foamDotFile
+   + setenv FOAM_INST_DIR /data/app/OpenFOAM
+   + foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
+   + if ( -f $foamDotFile ) source $foamDotFile
 
-    The value set in '$FOAM_INST_DIR' will be used to locate the remaining parts
-    of the OpenFOAM installation.
+   The value set in '$FOAM_INST_DIR' will be used to locate the remaining parts
+   of the OpenFOAM installation.
 
 * Building from Sources (Optional)
   If you cannot find an appropriate binary pack for your platform, you can build
@@ -154,14 +154,15 @@
   + icoFoam
   + paraFoam
 
-* Compiling Paraview 3.3 and the PV3FoamReader module
-  A version of Qt 4.3.x must be installed to compile ParaView.  The compilation
-  is a fairly simple process using the supplied buildParaView script that
-  has worked in our tests with other packages supplied in the ThirdParty
-  directory, namely cmake-2.6.4 and gcc-4.3.3.  Execute the following:
+* Compiling Paraview 3 and the PV3FoamReader module
+  A version of Qt 4.3.x must be installed to compile ParaView. The
+  compilation is a fairly simple process using the makeParaView script
+  (found in ThirdParty directory) that has worked in our tests with other
+  packages supplied in the ThirdParty directory, namely cmake-2.6.4 and
+  gcc-4.3.3. Execute the following:
   + cd $WM_THIRD_PARTY_DIR
   + rm -rf paraview-3.6/platforms
-  + buildParaView
+  + ./makeParaView
 
 
   The PV3FoamReader module is an OpenFOAM utility that can be compiled in the
