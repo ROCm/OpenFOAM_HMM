@@ -147,6 +147,8 @@
       processing command-line options.
     + Export *new* environment variable =FOAM_CASENAME= that contains the
       name part of the =FOAM_CASE= environment variable
+    + Resolve relative cases ending in =..= to avoid potentially bad/ugly
+      case names being used.
 
 *** Misc. improvements
     + Improved consistency and interoperability between =face= and =triFace= classes.
