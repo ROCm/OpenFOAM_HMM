@@ -176,10 +176,9 @@
 *** Compiling Paraview with a local version of Qt
     If the user still encounters problems with ParaView, it may relate to the
     version of Qt, in which case, it is recommended that the user first
-    downloads the supported version 4.3.5 of Qt as described in the section on
-    "Qt".  The user should unpack the source pack in the $WM_THIRD_PARTY_DIR.
-    Then the user can build Qt 4.3.5 by executing from within
-    $WM_THIRD_PARTY_DIR:
+    downloads a supported version of Qt /e.g./ 4.3.5 as described in the section
+    on "Qt".  The user should unpack the source pack in the $WM_THIRD_PARTY_DIR.
+    Then the user can build Qt by executing from within $WM_THIRD_PARTY_DIR:
     + makeQt
 
     The user should then compile ParaView using the local version of Qt by
@@ -188,6 +187,7 @@
     + makeParaView -qmake <path_to_qmake>
 
     The user must then recompile the PV3FoamReader module as normal (see above).
+
 * Documentation
   http://www.OpenFOAM.org/doc
 
