@@ -105,6 +105,21 @@ tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
 }
 
 
+tmp<scalarField>
+mutSpalartAllmarasWallFunctionFvPatchScalarField::calcMut() const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
+    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+
+    return max(0.0, rhow*sqr(calcUTau(magGradU))/magGradU - muw);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 mutSpalartAllmarasWallFunctionFvPatchScalarField::
@@ -165,21 +180,6 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-tmp<scalarField>
-mutSpalartAllmarasWallFunctionFvPatchScalarField::calcMut() const
-{
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
-
-    return max(0.0, rhow*sqr(calcUTau(magGradU))/magGradU - muw);
-}
-
 
 tmp<scalarField>
 mutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const

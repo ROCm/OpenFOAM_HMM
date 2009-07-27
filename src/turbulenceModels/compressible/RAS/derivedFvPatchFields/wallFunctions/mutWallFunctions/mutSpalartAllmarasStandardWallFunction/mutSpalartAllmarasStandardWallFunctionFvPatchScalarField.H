@@ -34,8 +34,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
-#define mutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
+#define compressibleMutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
 
 #include "mutWallFunctionFvPatchScalarField.H"
 

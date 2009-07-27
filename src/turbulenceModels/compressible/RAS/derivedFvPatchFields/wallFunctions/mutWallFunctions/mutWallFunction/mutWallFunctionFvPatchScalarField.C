@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ namespace compressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void mutWallFunctionFvPatchScalarField::checkType()
 {
@@ -56,82 +56,20 @@ void mutWallFunctionFvPatchScalarField::checkType()
 }
 
 
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+scalar mutWallFunctionFvPatchScalarField::calcYPlusLam
 (
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF
-)
-:
-    fixedValueFvPatchScalarField(p, iF),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8)
-{}
-
-
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
-(
-    const mutWallFunctionFvPatchScalarField& ptf,
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const fvPatchFieldMapper& mapper
-)
-:
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    Cmu_(ptf.Cmu_),
-    kappa_(ptf.kappa_),
-    E_(ptf.E_)
-{}
-
-
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
-(
-    const fvPatch& p,
-    const DimensionedField<scalar, volMesh>& iF,
-    const dictionary& dict
-)
-:
-    fixedValueFvPatchScalarField(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
-{}
-
-
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
-(
-    const mutWallFunctionFvPatchScalarField& wfpsf
-)
-:
-    fixedValueFvPatchScalarField(wfpsf),
-    Cmu_(wfpsf.Cmu_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_)
-{}
-
-
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
-(
-    const mutWallFunctionFvPatchScalarField& wfpsf,
-    const DimensionedField<scalar, volMesh>& iF
-)
-:
-    fixedValueFvPatchScalarField(wfpsf, iF),
-    Cmu_(wfpsf.Cmu_),
-    kappa_(wfpsf.kappa_),
-    E_(wfpsf.E_)
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void mutWallFunctionFvPatchScalarField::updateCoeffs()
+    const scalar kappa,
+    const scalar E
+) const
 {
-    operator==(calcMut());
+    scalar ypl = 11.0;
 
-    fixedValueFvPatchScalarField::updateCoeffs();
+    for (int i=0; i<10; i++)
+    {
+        ypl = log(E*ypl)/kappa;
+    }
+
+    return ypl;
 }
 
 
@@ -139,7 +77,6 @@ tmp<scalarField> mutWallFunctionFvPatchScalarField::calcMut() const
 {
     const label patchI = patch().index();
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patchI];
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const tmp<volScalarField> tk = rasModel.k();
@@ -156,16 +93,107 @@ tmp<scalarField> mutWallFunctionFvPatchScalarField::calcMut() const
         label faceCellI = patch().faceCells()[faceI];
 
         scalar yPlus =
-            Cmu25*y[faceI]*sqrt(k[faceCellI])
-           /(muw[faceI]/rhow[faceI]);
+            Cmu25*y[faceI]*sqrt(k[faceCellI])/(muw[faceI]/rhow[faceI]);
 
-        if (yPlus > yPlusLam)
+        if (yPlus > yPlusLam_)
         {
             mutw[faceI] = muw[faceI]*(yPlus*kappa_/log(E_*yPlus) - 1);
         }
     }
 
     return tmutw;
+}
+
+
+void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+{
+    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    fixedValueFvPatchScalarField(p, iF),
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.8),
+    yPlusLam_(calcYPlusLam(kappa_, E_))
+{}
+
+
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+(
+    const mutWallFunctionFvPatchScalarField& ptf,
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const fvPatchFieldMapper& mapper
+)
+:
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    Cmu_(ptf.Cmu_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_),
+    yPlusLam_(ptf.yPlusLam_)
+{}
+
+
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+(
+    const fvPatch& p,
+    const DimensionedField<scalar, volMesh>& iF,
+    const dictionary& dict
+)
+:
+    fixedValueFvPatchScalarField(p, iF, dict),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
+    yPlusLam_(calcYPlusLam(kappa_, E_))
+{}
+
+
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+(
+    const mutWallFunctionFvPatchScalarField& wfpsf
+)
+:
+    fixedValueFvPatchScalarField(wfpsf),
+    Cmu_(wfpsf.Cmu_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_),
+    yPlusLam_(wfpsf.yPlusLam_)
+{}
+
+
+mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+(
+    const mutWallFunctionFvPatchScalarField& wfpsf,
+    const DimensionedField<scalar, volMesh>& iF
+)
+:
+    fixedValueFvPatchScalarField(wfpsf, iF),
+    Cmu_(wfpsf.Cmu_),
+    kappa_(wfpsf.kappa_),
+    E_(wfpsf.E_),
+    yPlusLam_(wfpsf.yPlusLam_)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void mutWallFunctionFvPatchScalarField::updateCoeffs()
+{
+    operator==(calcMut());
+
+    fixedValueFvPatchScalarField::updateCoeffs();
 }
 
 
@@ -191,14 +219,6 @@ void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
     writeEntry("value", os);
-}
-
-
-void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
-{
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
 }
 
 

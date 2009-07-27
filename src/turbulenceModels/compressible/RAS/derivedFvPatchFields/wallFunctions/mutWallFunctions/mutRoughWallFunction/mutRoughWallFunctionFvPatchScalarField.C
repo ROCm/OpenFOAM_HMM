@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ namespace RASModels
 {
 
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 scalar mutRoughWallFunctionFvPatchScalarField::fnRough
 (
@@ -62,6 +62,60 @@ scalar mutRoughWallFunctionFvPatchScalarField::fnRough
     {
         return (1.0 + Cs*KsPlus);
     }
+}
+
+
+tmp<scalarField> mutRoughWallFunctionFvPatchScalarField::calcMut() const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const scalarField& y = rasModel.y()[patchI];
+    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
+    const tmp<volScalarField> tk = rasModel.k();
+    const volScalarField& k = tk();
+    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+
+    const scalar Cmu25 = pow(Cmu_, 0.25);
+
+    tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
+    scalarField& mutw = tmutw();
+
+    forAll(mutw, faceI)
+    {
+        label faceCellI = patch().faceCells()[faceI];
+
+        scalar uStar = Cmu25*sqrt(k[faceCellI]);
+
+        scalar yPlus = uStar*y[faceI]/(muw[faceI]/rhow[faceI]);
+
+        scalar KsPlus = uStar*Ks_[faceI]/(muw[faceI]/rhow[faceI]);
+
+        scalar Edash = E_;
+        scalar yPlusLamNew = yPlusLam_;
+        if (KsPlus > 2.25)
+        {
+            Edash /= fnRough(KsPlus, Cs_[faceI]);
+            yPlusLamNew = rasModel.yPlusLam(kappa_, Edash);
+        }
+
+        if (debug)
+        {
+            Info<< "yPlus = " << yPlus
+                << ", KsPlus = " << KsPlus
+                << ", Edash = " << Edash
+                << ", yPlusLam = " << yPlusLam_
+                << endl;
+        }
+
+        if (yPlus > yPlusLamNew)
+        {
+            mutw[faceI] =
+                muw[faceI]*(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1);
+        }
+    }
+
+    return tmutw;
 }
 
 
@@ -155,61 +209,6 @@ void mutRoughWallFunctionFvPatchScalarField::rmap
 
     Cs_.rmap(nrwfpsf.Cs_, addr);
     Ks_.rmap(nrwfpsf.Ks_, addr);
-}
-
-
-tmp<scalarField> mutRoughWallFunctionFvPatchScalarField::calcMut() const
-{
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
-    const scalarField& y = rasModel.y()[patchI];
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-    const tmp<volScalarField> tk = rasModel.k();
-    const volScalarField& k = tk();
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
-
-    const scalar Cmu25 = pow(Cmu_, 0.25);
-
-    tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
-    scalarField& mutw = tmutw();
-
-    forAll(mutw, faceI)
-    {
-        label faceCellI = patch().faceCells()[faceI];
-
-        scalar uStar = Cmu25*sqrt(k[faceCellI]);
-
-        scalar yPlus = uStar*y[faceI]/(muw[faceI]/rhow[faceI]);
-
-        scalar KsPlus = uStar*Ks_[faceI]/(muw[faceI]/rhow[faceI]);
-
-        scalar Edash = E_;
-        scalar yPlusLamNew = yPlusLam;
-        if (KsPlus > 2.25)
-        {
-            Edash /= fnRough(KsPlus, Cs_[faceI]);
-            yPlusLamNew = rasModel.yPlusLam(kappa_, Edash);
-        }
-
-        if (debug)
-        {
-            Info<< "yPlus = " << yPlus
-                << ", KsPlus = " << KsPlus
-                << ", Edash = " << Edash
-                << ", yPlusLam = " << yPlusLam
-                << endl;
-        }
-
-        if (yPlus > yPlusLamNew)
-        {
-            mutw[faceI] =
-                muw[faceI]*(yPlus*kappa_/log(max(Edash*yPlus, 1+1e-4)) - 1);
-        }
-    }
-
-    return tmutw;
 }
 
 

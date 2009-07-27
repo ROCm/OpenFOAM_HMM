@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,8 +35,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mutWallFunctionFvPatchScalarField_H
-#define mutWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutWallFunctionFvPatchScalarField_H
+#define compressibleMutWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -70,11 +70,17 @@ protected:
         //- E coefficient
         scalar E_;
 
+        //- Y+ at the edge of the laminar sublayer
+        scalar yPlusLam_;
+
 
     // Protected member functions
 
         //- Check the type of the patch
         virtual void checkType();
+
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcMut() const;
