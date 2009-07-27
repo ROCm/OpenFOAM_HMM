@@ -252,7 +252,7 @@ reportExecutable () {
             ;;
         gcc)
             VERSION=`$1 -v 2>&1                  \
-                | grep 'version'                 \
+                | grep 'gcc version'                 \
                 | cut -d" " -f3`
             if [ ! "$VERSION" = "$SUPPLIED_VERSION_GCC" ]; then
                 echo "WARNING: gcc version does not match gcc supplied" \
@@ -523,32 +523,9 @@ reportExecutable icoFoam "${FOAM_APPBIN}/icoFoam"
 hline
 
 #------------------------------------------------------------------------------
-heading "Checking networking..."
-COL1=`fixlen "Action" 25`
-COL2=`fixlen "Result" 45`
-COL3=`fixlen "Crit" 5`
-
-hline
-echo "$COL1 $COL2 $COL3"
+heading "Summary"
 hline
 
-pingTest "$HOST_NAME" "yes"
-pingTest "localHost" "yes"
-checkRsh
-checkSsh
-
-if [ $SSHRSHOK -eq 1 ]; then
-    echo "(*) Only one of rsh or ssh is required by the OpenFOAM enviroment."
-elif [ $SSHRSHOK -gt 1  ]; then
-    echo "FATAL ERROR: No remote shell available."
-    echo "             OpenFOAM ${FOAM_VERSION} enviroment requires either ssh and/or rsh."
-    echo "             Contact your system administrator."
-    echo ""
-    FATALERROR=`expr $FATALERROR + 1`
-fi
-echo ""
-hline
-echo ""
 if [ $FATALERROR -gt 0 ] ; then
     echo "The system test has evoked $FATALERROR fatal error(s)."
 else
