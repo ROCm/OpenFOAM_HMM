@@ -29,6 +29,20 @@ Description
     Standard k-epsilon turbulence model with additional source terms
     corresponding to PDR basic drag model (\link basic.H \endlink)
 
+    The default model coefficients correspond to the following:
+    @verbatim
+        kEpsilonCoeffs
+        {
+            Cmu         0.09;
+            C1          1.44;
+            C2          1.92;
+            C3          -0.33;  // only for compressible
+            sigmak      1.0;    // only for compressible
+            sigmaEps    1.3;
+            Prt         1.0;    // only for compressible
+        }
+    @endverbatim
+
     The turbulence source term \f$ G_{R} \f$ appears in the
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to
     interaction with unresolved obstacles.
@@ -68,19 +82,21 @@ class PDRkEpsilon
 {
     // Private data
 
+    // Model coefficients
+
         dimensionedScalar Cmu_;
         dimensionedScalar C1_;
         dimensionedScalar C2_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar alphah_;
+        dimensionedScalar sigmak_;
+        dimensionedScalar sigmaEps_;
+        dimensionedScalar Prt_;
 
-        dimensionedScalar kappa_;
-        dimensionedScalar E_;
+    // Fields
 
         volScalarField k_;
         volScalarField epsilon_;
         volScalarField mut_;
+        volScalarField alphat_;
 
 
 public:
@@ -101,7 +117,7 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
     virtual ~PDRkEpsilon()
     {}
 
@@ -118,7 +134,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*mut_ + mu())
+                new volScalarField("DkEff", mut_/sigmak_ + mu())
             );
         }
 
@@ -127,7 +143,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -136,7 +152,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*mut_ + alpha())
+                new volScalarField("alphaEff", alphat_ + alpha())
             );
         }
 
