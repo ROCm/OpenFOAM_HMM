@@ -40,7 +40,7 @@ inline unsigned int Foam::PackedList<nBits>::max_bits()
 template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::max_value()
 {
-    return (1 << nBits) - 1;
+    return (1u << nBits) - 1;
 }
 
 
@@ -54,7 +54,10 @@ inline unsigned int Foam::PackedList<nBits>::packing()
 template<unsigned nBits>
 inline unsigned int Foam::PackedList<nBits>::maskLower(unsigned offset)
 {
-    return (1 << (nBits * offset)) - 1;
+    // return (1u << (nBits * offset)) - 1;
+    // The next one works more reliably with overflows
+    // eg, when compiled without optimization
+    return (~0u >> ( sizeof(StorageType)*CHAR_BIT - nBits * offset));
 }
 
 
@@ -581,7 +584,7 @@ inline void Foam::PackedList<nBits>::resize
             if (fill & ~max_value())
             {
                 // overflow is max_value, fill everything
-                fill = ~0;
+                fill = ~0u;
             }
             else
             {
@@ -847,7 +850,7 @@ inline void Foam::PackedList<nBits>::operator=(const unsigned int val)
         if (fill & ~max_value())
         {
             // treat overflow as max_value
-            fill = ~0;
+            fill = ~0u;
         }
         else
         {

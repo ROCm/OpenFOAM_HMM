@@ -133,12 +133,6 @@ dynOneEqEddy::dynOneEqEddy
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-dynOneEqEddy::~dynOneEqEddy()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void dynOneEqEddy::correct(const tmp<volTensorField>& gradU)

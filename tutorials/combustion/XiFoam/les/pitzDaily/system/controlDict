@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,19 +17,19 @@ FoamFile
 
 application     XiFoam;
 
-startFrom       startTime;
+startFrom       latestTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         10;
+endTime         0.5;
 
 deltaT          5e-06;
 
-writeControl    runTime;
+writeControl    adjustableRunTime;
 
-writeInterval   0.1;
+writeInterval   0.01;
 
 purgeWrite      0;
 

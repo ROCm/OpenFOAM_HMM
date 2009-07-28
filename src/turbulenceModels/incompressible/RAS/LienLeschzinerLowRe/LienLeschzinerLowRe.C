@@ -53,20 +53,87 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
 :
     RASModel(typeName, U, phi, lamTransportModel),
 
-    C1(coeffDict_.lookupOrAddDefault<scalar>("C1", 1.44)),
-    C2(coeffDict_.lookupOrAddDefault<scalar>("C2", 1.92)),
-    alphak(coeffDict_.lookupOrAddDefault<scalar>("alphak", 1.0)),
-    alphaEps
+    C1_
     (
-        coeffDict_.lookupOrAddDefault<scalar>("alphaEps", 0.76923)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C1",
+            coeffDict_,
+            1.44
+        )
     ),
-    Cmu(coeffDict_.lookupOrAddDefault<scalar>("Cmu", 0.09)),
-    Am(coeffDict_.lookupOrAddDefault<scalar>("Am", 0.016)),
-    Aepsilon
+    C2_
     (
-        coeffDict_.lookupOrAddDefault<scalar>("Aepsilon", 0.263)
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "C2",
+            coeffDict_,
+            1.92
+        )
     ),
-    Amu(coeffDict_.lookupOrAddDefault<scalar>("Amu", 0.00222)),
+    sigmak_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "sigmak",
+            coeffDict_,
+            1.0
+        )
+    ),
+    sigmaEps_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "sigmaEps",
+            coeffDict_,
+            1.3
+        )
+    ),
+    Cmu_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Cmu",
+            coeffDict_,
+            0.09
+        )
+    ),
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa",
+            coeffDict_,
+            0.41
+        )
+    ),
+    Am_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Am",
+            coeffDict_,
+            0.016
+        )
+    ),
+    Aepsilon_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Aepsilon",
+            coeffDict_,
+            0.263
+        )
+    ),
+    Amu_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Amu",
+            coeffDict_,
+            0.00222
+        )
+    ),
 
     k_
     (
@@ -100,8 +167,8 @@ LienLeschzinerLowRe::LienLeschzinerLowRe
 
     nut_
     (
-        Cmu*(scalar(1) - exp(-Am*yStar_))
-       /(scalar(1) - exp(-Aepsilon*yStar_) + SMALL)*sqr(k_)
+        Cmu_*(scalar(1) - exp(-Am_*yStar_))
+       /(scalar(1) - exp(-Aepsilon_*yStar_) + SMALL)*sqr(k_)
        /(epsilon_ + epsilonSmall_)
     )
 {
@@ -169,14 +236,14 @@ bool LienLeschzinerLowRe::read()
 {
     if (RASModel::read())
     {
-        coeffDict().readIfPresent<scalar>("C1", C1);
-        coeffDict().readIfPresent<scalar>("C2", C2);
-        coeffDict().readIfPresent<scalar>("alphak", alphak);
-        coeffDict().readIfPresent<scalar>("alphaEps", alphaEps);
-        coeffDict().readIfPresent<scalar>("Cmu", Cmu);
-        coeffDict().readIfPresent<scalar>("Am", Am);
-        coeffDict().readIfPresent<scalar>("Aepsilon", Aepsilon);
-        coeffDict().readIfPresent<scalar>("Amu", Amu);
+        C1_.readIfPresent(coeffDict());
+        C2_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
+        Cmu_.readIfPresent(coeffDict());
+        Am_.readIfPresent(coeffDict());
+        Aepsilon_.readIfPresent(coeffDict());
+        Amu_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -201,7 +268,7 @@ void LienLeschzinerLowRe::correct()
         y_.correct();
     }
 
-    scalar Cmu75 = pow(Cmu, 0.75);
+    scalar Cmu75 = pow(Cmu_.value(), 0.75);
 
     volTensorField gradU = fvc::grad(U_);
 
@@ -212,12 +279,12 @@ void LienLeschzinerLowRe::correct()
     volScalarField Rt = sqr(k_)/(nu()*epsilon_);
 
     volScalarField fMu =
-        (scalar(1) - exp(-Am*yStar_))
-       /(scalar(1) - exp(-Aepsilon*yStar_) + SMALL);
+        (scalar(1) - exp(-Am_*yStar_))
+       /(scalar(1) - exp(-Aepsilon_*yStar_) + SMALL);
 
     volScalarField f2 = scalar(1) - 0.3*exp(-sqr(Rt));
 
-    volScalarField G = Cmu*fMu*sqr(k_)/epsilon_*S2;
+    volScalarField G = Cmu_*fMu*sqr(k_)/epsilon_*S2;
 
 
     // Dissipation equation
@@ -227,12 +294,12 @@ void LienLeschzinerLowRe::correct()
       + fvm::div(phi_, epsilon_)
       - fvm::laplacian(DepsilonEff(), epsilon_)
       ==
-        C1*G*epsilon_/k_
+        C1_*G*epsilon_/k_
         // E-term
-        + C2*f2*Cmu75*pow(k_, scalar(0.5))
-        /(kappa_*y_*(scalar(1) - exp(-Aepsilon*yStar_)))
-       *exp(-Amu*sqr(yStar_))*epsilon_
-      - fvm::Sp(C2*f2*epsilon_/k_, epsilon_)
+        + C2_*f2*Cmu75*pow(k_, scalar(0.5))
+        /(kappa_*y_*(scalar(1) - exp(-Aepsilon_*yStar_)))
+       *exp(-Amu_*sqr(yStar_))*epsilon_
+      - fvm::Sp(C2_*f2*epsilon_/k_, epsilon_)
     );
 
     epsEqn().relax();
@@ -262,7 +329,7 @@ void LienLeschzinerLowRe::correct()
 
 
     // Re-calculate viscosity
-    nut_ = Cmu*fMu*sqr(k_)/epsilon_;
+    nut_ = Cmu_*fMu*sqr(k_)/epsilon_;
 }
 
 

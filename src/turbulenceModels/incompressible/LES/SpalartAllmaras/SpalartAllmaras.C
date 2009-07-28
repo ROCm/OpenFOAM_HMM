@@ -155,13 +155,13 @@ SpalartAllmaras::SpalartAllmaras
 :
     LESModel(modelName, U, phi, transport),
 
-    alphaNut_
+    sigmaNut_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaNut",
+            "sigmaNut",
             coeffDict_,
-            1.5
+            0.66666
         )
     ),
     kappa_
@@ -169,8 +169,8 @@ SpalartAllmaras::SpalartAllmaras
         dimensioned<scalar>::lookupOrAddToDict
         (
             "kappa",
-            *this,
-            0.4187
+            coeffDict_,
+            0.41
         )
     ),
     Cb1_
@@ -227,7 +227,7 @@ SpalartAllmaras::SpalartAllmaras
             0.07
         )
     ),
-    Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
+    Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -301,11 +301,11 @@ void SpalartAllmaras::correct(const tmp<volTensorField>& gradU)
       + fvm::div(phi(), nuTilda_)
       - fvm::laplacian
         (
-            alphaNut_*(nuTilda_ + nu()),
+            (nuTilda_ + nu())/sigmaNut_,
             nuTilda_,
             "laplacian(DnuTildaEff,nuTilda)"
         )
-      - alphaNut_*Cb2_*magSqr(fvc::grad(nuTilda_))
+      - Cb2_/sigmaNut_*magSqr(fvc::grad(nuTilda_))
      ==
         Cb1_*STilda*nuTilda_
       - fvm::Sp(Cw1_*fw(STilda, dTilda)*nuTilda_/sqr(dTilda), nuTilda_)
@@ -358,7 +358,7 @@ bool SpalartAllmaras::read()
 {
     if (LESModel::read())
     {
-        alphaNut_.readIfPresent(coeffDict());
+        sigmaNut_.readIfPresent(coeffDict());
         kappa_.readIfPresent(*this);
         Cb1_.readIfPresent(coeffDict());
         Cb2_.readIfPresent(coeffDict());
@@ -366,7 +366,7 @@ bool SpalartAllmaras::read()
         Cv2_.readIfPresent(coeffDict());
         CDES_.readIfPresent(coeffDict());
         ck_.readIfPresent(coeffDict());
-        Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
+        Cw1_ = Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_;
         Cw2_.readIfPresent(coeffDict());
         Cw3_.readIfPresent(coeffDict());
 

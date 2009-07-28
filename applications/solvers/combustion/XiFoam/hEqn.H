@@ -1,5 +1,5 @@
 {
-    solve
+    fvScalarMatrix hEqn
     (
         fvm::ddt(rho, h)
       + mvConvection->fvmDiv(phi, h)
@@ -7,6 +7,9 @@
      ==
         DpDt
     );
+
+    hEqn.relax();
+    hEqn.solve();
 
     thermo.correct();
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,10 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kName_("k"),
     GName_("RASModel::G"),
     nuName_("nu"),
-    nutName_("nut")
+    nutName_("nut"),
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.8)
 {
     checkType();
 }
@@ -88,7 +91,10 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kName_(ptf.kName_),
     GName_(ptf.GName_),
     nuName_(ptf.nuName_),
-    nutName_(ptf.nutName_)
+    nutName_(ptf.nutName_),
+    Cmu_(ptf.Cmu_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_)
 {
     checkType();
 }
@@ -106,7 +112,10 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kName_(dict.lookupOrDefault<word>("k", "k")),
     GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
-    nutName_(dict.lookupOrDefault<word>("nut", "nut"))
+    nutName_(dict.lookupOrDefault<word>("nut", "nut")),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {
     checkType();
 }
@@ -122,7 +131,10 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kName_(owfpsf.kName_),
     GName_(owfpsf.GName_),
     nuName_(owfpsf.nuName_),
-    nutName_(owfpsf.nutName_)
+    nutName_(owfpsf.nutName_),
+    Cmu_(owfpsf.Cmu_),
+    kappa_(owfpsf.kappa_),
+    E_(owfpsf.E_)
 {
     checkType();
 }
@@ -139,7 +151,10 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     kName_(owfpsf.kName_),
     GName_(owfpsf.GName_),
     nuName_(owfpsf.nuName_),
-    nutName_(owfpsf.nutName_)
+    nutName_(owfpsf.nutName_),
+    Cmu_(owfpsf.Cmu_),
+    kappa_(owfpsf.kappa_),
+    E_(owfpsf.E_)
 {
     checkType();
 }
@@ -150,14 +165,10 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 {
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const scalar Cmu = rasModel.Cmu().value();
-    const scalar Cmu25 = pow(Cmu, 0.25);
-
-    const scalar kappa = rasModel.kappa().value();
-    const scalar yPlusLam = rasModel.yPlusLam();
-
+    const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patch().index()];
+
+    const scalar Cmu25 = pow(Cmu_, 0.25);
 
     volScalarField& G = const_cast<volScalarField&>
         (db().lookupObject<volScalarField>(GName_));
@@ -178,14 +189,14 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 
     const scalarField magGradUw = mag(Uw.snGrad());
 
-    // Set epsilon and G
+    // Set omega and G
     forAll(nutw, faceI)
     {
         label faceCellI = patch().faceCells()[faceI];
 
         scalar yPlus = Cmu25*y[faceI]*sqrt(k[faceCellI])/nuw[faceI];
 
-        omega[faceCellI] = sqrt(k[faceCellI])/(Cmu25*kappa*y[faceI]);
+        omega[faceCellI] = sqrt(k[faceCellI])/(Cmu25*kappa_*y[faceI]);
 
         if (yPlus > yPlusLam)
         {
@@ -193,7 +204,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
                 (nutw[faceI] + nuw[faceI])
                *magGradUw[faceI]
                *Cmu25*sqrt(k[faceCellI])
-               /(kappa*y[faceI]);
+               /(kappa_*y[faceI]);
         }
         else
         {
@@ -213,6 +224,9 @@ void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     writeEntryIfDifferent<word>(os, "nut", "nut", nutName_);
+    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

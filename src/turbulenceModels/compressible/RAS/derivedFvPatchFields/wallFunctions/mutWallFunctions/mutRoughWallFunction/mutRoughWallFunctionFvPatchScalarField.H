@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,10 +40,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mutRoughWallFunctionFvPatchScalarField_H
-#define mutRoughWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutRoughWallFunctionFvPatchScalarField_H
+#define compressibleMutRoughWallFunctionFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "mutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,18 +60,11 @@ namespace RASModels
 
 class mutRoughWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public mutWallFunctionFvPatchScalarField
 {
-    // Private data
+protected:
 
-        //- Name of density field
-        word rhoName_;
-
-        //- Name of laminar viscosity field
-        word muName_;
-
-        //- Name of turbulence kinetic energy field
-        word kName_;
+    // Protected data
 
         //- Roughness height
         scalarField Ks_;
@@ -83,7 +76,10 @@ class mutRoughWallFunctionFvPatchScalarField
     // Private member functions
 
         //- Compute the roughness function
-        scalar fnRough(const scalar KsPlus, const scalar Cs) const;
+        virtual scalar fnRough(const scalar KsPlus, const scalar Cs) const;
+
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcMut() const;
 
 
 public:
@@ -172,16 +168,11 @@ public:
                 const labelList&
             );
 
-        // Evaluation functions
-
-            //- Update the coefficients associated with the patch field
-            virtual void updateCoeffs();
-
 
         // I-O
 
             //- Write
-            void write(Ostream&) const;
+            virtual void write(Ostream&) const;
 };
 
 

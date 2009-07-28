@@ -29,8 +29,8 @@ $(epsilonWallFunctions)/epsilonWallFunction/epsilonWallFunctionFvPatchScalarFiel
 omegaWallFunctions = $(wallFunctions)/omegaWallFunctions
 $(omegaWallFunctions)/omegaWallFunction/omegaWallFunctionFvPatchScalarField.C
 
-kQRWallFunctions = $(wallFunctions)/kQRWallFunctions
-$(kQRWallFunctions)/kQRWallFunction/kQRWallFunctionFvPatchFields.C
+kqRWallFunctions = $(wallFunctions)/kqRWallFunctions
+$(kqRWallFunctions)/kqRWallFunction/kqRWallFunctionFvPatchFields.C
 
 /* Patch fields */
 derivedFvPatchFields/turbulentHeatFluxTemperature/turbulentHeatFluxTemperatureFvPatchScalarField.C
@@ -38,7 +38,5 @@ derivedFvPatchFields/turbulentMixingLengthDissipationRateInlet/turbulentMixingLe
 derivedFvPatchFields/turbulentMixingLengthFrequencyInlet/turbulentMixingLengthFrequencyInletFvPatchScalarField.C
 
 backwardsCompatibility/wallFunctions/backwardsCompatibilityWallFunctions.C
-backwardsCompatibility/derivedFvPatchFields/backwardsCompatibilityTurbulentMixingLengthDissipationRateInlet.C
-backwardsCompatibility/derivedFvPatchFields/backwardsCompatibilityTurbulentMixingLengthFrequencyInlet.C
 
 LIB = $(FOAM_LIBBIN)/libcompressibleRASModels

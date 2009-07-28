@@ -27,6 +27,7 @@ Application
 
 Description
     Calculates and writes the second invariant of the velocity gradient tensor.
+
     The -noWrite option just outputs the max/min values without writing
     the field.
 

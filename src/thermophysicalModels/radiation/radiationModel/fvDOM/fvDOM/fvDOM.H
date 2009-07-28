@@ -27,7 +27,7 @@ Class
 
 Description
 
-    Finite Volume Discrete Ordinary Method. Solves the RTE equation for n
+    Finite Volume Discrete Ordinates Method. Solves the RTE equation for n
     directions in a participating media, not including scatter.
 
     Available absorption models:

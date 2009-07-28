@@ -127,16 +127,19 @@ void Foam::argList::getRootCase()
     if (iter != options_.end())
     {
         casePath = iter();
-        casePath.removeRepeated('/');
-        casePath.removeTrailing('/');
+        casePath.clean();
+
+        // handle degenerate form and '-case .' like no -case specified
+        if (casePath.empty() || casePath == ".")
+        {
+            casePath = cwd();
+            options_.erase("case");
+        }
     }
     else
     {
         // nothing specified, use the current dir
         casePath = cwd();
-
-        // we could add this back in as '-case'?
-        // options_.set("case", casePath);
     }
 
     rootPath_   = casePath.path();
@@ -522,8 +525,25 @@ Foam::argList::argList
     }
     jobInfo.write();
 
-    // Set the case as an environment variable
-    setEnv("FOAM_CASE", rootPath_/globalCase_, true);
+
+    // Set the case and case-name as an environment variable
+    if (rootPath_[0] == '/')
+    {
+        // absolute path
+        setEnv("FOAM_CASE", rootPath_/globalCase_, true);
+    }
+    else if (rootPath_ == ".")
+    {
+        // relative to the current working directory
+        setEnv("FOAM_CASE", cwd()/globalCase_, true);
+    }
+    else
+    {
+        // qualify relative path
+        setEnv("FOAM_CASE", cwd()/rootPath_/globalCase_, true);
+    }
+    setEnv("FOAM_CASENAME", globalCase_, true);
+
 
     // Switch on signal trapping. We have to wait until after Pstream::init
     // since this sets up its own ones.

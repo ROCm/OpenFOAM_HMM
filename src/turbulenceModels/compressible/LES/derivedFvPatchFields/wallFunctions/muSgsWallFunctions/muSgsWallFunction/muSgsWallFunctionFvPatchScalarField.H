@@ -58,6 +58,21 @@ class muSgsWallFunctionFvPatchScalarField
 {
     // Private data
 
+        //- Name of velocity field
+        word UName_;
+
+        //- Name of density field
+        word rhoName_;
+
+        //- Name of laminar viscosity field
+        word muName_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
 
 public:
 
@@ -72,14 +87,6 @@ public:
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
-        );
-
-        //- Construct from patch, internal field and Istream
-        muSgsWallFunctionFvPatchScalarField
-        (
-            const fvPatch&,
-            const DimensionedField<scalar, volMesh>&,
-            Istream&
         );
 
         //- Construct from patch, internal field and dictionary
@@ -149,6 +156,11 @@ public:
             (
                 const Pstream::commsTypes commsType=Pstream::blocking
             );
+
+        // I-O
+
+            //- Write
+            void write(Ostream&) const;
 };
 
 

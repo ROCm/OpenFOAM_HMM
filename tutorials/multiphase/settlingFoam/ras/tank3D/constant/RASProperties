@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,26 +20,6 @@ RASModel        kEpsilon;
 turbulence      on;
 
 printCoeffs     on;
-
-laminarCoeffs
-{
-}
-
-kEpsilonCoeffs
-{
-    Cmu             0.09;
-    C1              1.44;
-    C2              1.92;
-    C3              0.85;
-    alphak          1;
-    alphaEps        0.76923;
-}
-
-wallFunctionCoeffs
-{
-    kappa           0.4187;
-    E               9;
-}
 
 
 // ************************************************************************* //

@@ -30,12 +30,11 @@ Description
 
 SourceFiles
     laminar.C
-    laminarCorrect.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleLaminar_H
-#define compressibleLaminar_H
+#ifndef compressibleRasLaminar_H
+#define compressibleRasLaminar_H
 
 #include "RASModel.H"
 
@@ -82,42 +81,42 @@ public:
     // Member Functions
 
         //- Return the turbulence viscosity, i.e. 0 for laminar flow
-        tmp<volScalarField> mut() const;
+        virtual tmp<volScalarField> mut() const;
 
         //- Return the effective viscosity, i.e. the laminar viscosity
-        tmp<volScalarField> muEff() const
+        virtual tmp<volScalarField> muEff() const
         {
             return tmp<volScalarField>(new volScalarField("muEff", mu()));
         }
 
         //- Return the effective turbulent thermal diffusivity,
         //  i.e. the laminar thermal diffusivity
-        tmp<volScalarField> alphaEff() const
+        virtual tmp<volScalarField> alphaEff() const
         {
             return tmp<volScalarField>(new volScalarField("alphaEff", alpha()));
         }
 
         //- Return the turbulence kinetic energy, i.e. 0 for laminar flow
-        tmp<volScalarField> k() const;
+        virtual tmp<volScalarField> k() const;
 
         //- Return the turbulence kinetic energy dissipation rate,
         //  i.e. 0 for laminar flow
-        tmp<volScalarField> epsilon() const;
+        virtual tmp<volScalarField> epsilon() const;
 
         //- Return the Reynolds stress tensor, i.e. 0 for laminar flow
-        tmp<volSymmTensorField> R() const;
+        virtual tmp<volSymmTensorField> R() const;
 
         //- Return the effective stress tensor, i.e. the laminar stress
-        tmp<volSymmTensorField> devRhoReff() const;
+        virtual tmp<volSymmTensorField> devRhoReff() const;
 
         //- Return the source term for the momentum equation
-        tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
+        virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const;
 
         //- Correct the laminar viscosity
-        void correct();
+        virtual void correct();
 
         //- Read RASProperties dictionary
-        bool read();
+        virtual bool read();
 };
 
 

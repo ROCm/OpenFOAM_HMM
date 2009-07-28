@@ -520,7 +520,7 @@ DebugSwitches
     kOmega              0;
     kOmegaSST           0;
     kOmegaSSTSAS        0;
-    kQRWallFunction     0;
+    kqRWallFunction     0;
     kinematicCloud      0;
     labelField          0;
     labelList           0;

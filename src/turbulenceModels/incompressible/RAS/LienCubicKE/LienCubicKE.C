@@ -72,22 +72,22 @@ LienCubicKE::LienCubicKE
             1.92
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
             1.0
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
     A1_
@@ -293,8 +293,8 @@ bool LienCubicKE::read()
     {
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
         A1_.readIfPresent(coeffDict());
         A2_.readIfPresent(coeffDict());
         Ctau1_.readIfPresent(coeffDict());

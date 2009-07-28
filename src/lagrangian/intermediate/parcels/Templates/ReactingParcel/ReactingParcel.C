@@ -298,7 +298,7 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
         dt,
         cellI,
         d,
-        T,
+        min(T, td.constProps().Tbp()), // Limit to boiling temperature
         pc_,
         this->Tc_,
         this->muc_/(this->rhoc_ + ROOTVSMALL),

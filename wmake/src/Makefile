@@ -43,23 +43,6 @@ SHELL      = /bin/sh
 .SUFFIXES:
 .SUFFIXES: .o
 
-UTILBIN = $(WM_DIR)/utilbin/$(WM_ARCH)$(WM_COMPILER)
-
-all:  $(UTILBIN)/dirToString $(UTILBIN)/wmkdep
-
-clean:
-	rm -f $(UTILBIN)/dirToString $(UTILBIN)/wmkdep 2>/dev/null
-
-
-$(UTILBIN)/dirToString: dirToString.c
-	@mkdir -p $(UTILBIN)
-	$(cc) $(cFLAGS) dirToString.c -o $(UTILBIN)/dirToString
-
-$(UTILBIN)/wmkdep: wmkdep.l
-	@mkdir -p $(UTILBIN)
-	flex wmkdep.l
-	$(cc) $(cFLAGS) lex.yy.c -o $(UTILBIN)/wmkdep
-
 
 #------------------------------------------------------------------------------
 # set compilation and dependency building rules
@@ -67,8 +50,31 @@ $(UTILBIN)/wmkdep: wmkdep.l
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
+BIN           = $(WM_DIR)/bin/$(WM_ARCH)$(WM_COMPILER)
 
 include $(RULES)/general
 include $(RULES)/$(WM_LINK_LANGUAGE)
+
+
+#------------------------------------------------------------------------------
+# targets
+#------------------------------------------------------------------------------
+
+all:  $(BIN)/dirToString $(BIN)/wmkdep
+
+clean:
+	rm -f $(BIN)/dirToString $(BIN)/wmkdep 2>/dev/null
+
+
+$(BIN)/dirToString: dirToString.c
+	@mkdir -p $(BIN)
+	$(cc) $(cFLAGS) dirToString.c -o $(BIN)/dirToString
+
+$(BIN)/wmkdep: wmkdep.l
+	@mkdir -p $(BIN)
+	flex wmkdep.l
+	$(cc) $(cFLAGS) lex.yy.c -o $(BIN)/wmkdep
+	@rm -f lex.yy.c 2>/dev/null
+
 
 #------------------------------------------------------------------------------

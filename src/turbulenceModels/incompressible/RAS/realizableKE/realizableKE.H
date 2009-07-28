@@ -46,9 +46,8 @@ Description
             Cmu         0.09;
             A0          4.0;
             C2          1.9;
-            alphak      1.0;
-            alphaEps    0.833333;
-            alphah      1.0;    // only for compressible
+            sigmak      1.0;
+            sigmaEps    1.2;
         }
     @endverbatim
 
@@ -81,15 +80,23 @@ class realizableKE
 {
     // Private data
 
-        dimensionedScalar Cmu_;
-        dimensionedScalar A0_;
-        dimensionedScalar C2_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField nut_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar A0_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+
+
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField nut_;
+
+
+    // Private member functions
 
         tmp<volScalarField> rCmu
         (
@@ -98,10 +105,8 @@ class realizableKE
             const volScalarField& magS
         );
 
-        tmp<volScalarField> rCmu
-        (
-            const volTensorField& gradU
-        );
+        tmp<volScalarField> rCmu(const volTensorField& gradU);
+
 
 public:
 
@@ -137,7 +142,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*nut_ + nu())
+                new volScalarField("DkEff", nut_/sigmak_ + nu())
             );
         }
 
@@ -146,7 +151,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

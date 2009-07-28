@@ -54,8 +54,8 @@ Description
             Cw3         2.0;
             Cv1         7.1;
             Cv2         5.0;
-            alphaNut    1.5;
-            alphah      1.0;    // only for compressible
+            sigmaNut    0.66666;
+            kappa       0.41;
         }
     @endverbatim
 
@@ -89,36 +89,46 @@ class SpalartAllmaras
 {
     // Private data
 
-        dimensionedScalar alphaNut_;
+        // Model coefficients
 
-        dimensionedScalar Cb1_;
-        dimensionedScalar Cb2_;
-        dimensionedScalar Cw1_;
-        dimensionedScalar Cw2_;
-        dimensionedScalar Cw3_;
-        dimensionedScalar Cv1_;
-        dimensionedScalar Cv2_;
+            dimensionedScalar sigmaNut_;
+            dimensionedScalar kappa_;
 
-        volScalarField nuTilda_;
-        volScalarField nut_;
+            dimensionedScalar Cb1_;
+            dimensionedScalar Cb2_;
+            dimensionedScalar Cw1_;
+            dimensionedScalar Cw2_;
+            dimensionedScalar Cw3_;
+            dimensionedScalar Cv1_;
+            dimensionedScalar Cv2_;
 
-        wallDist d_;
+
+        // Fields
+
+            volScalarField nuTilda_;
+            volScalarField nut_;
+
+            wallDist d_;
 
 
     // Private member functions
 
         tmp<volScalarField> chi() const;
+
         tmp<volScalarField> fv1(const volScalarField& chi) const;
+
         tmp<volScalarField> fv2
         (
             const volScalarField& chi,
             const volScalarField& fv1
         ) const;
+
         tmp<volScalarField> fv3
         (
             const volScalarField& chi,
             const volScalarField& fv1
         ) const;
+
         tmp<volScalarField> fw(const volScalarField& Stilda) const;
 
 

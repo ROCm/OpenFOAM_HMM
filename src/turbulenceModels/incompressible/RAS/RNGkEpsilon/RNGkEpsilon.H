@@ -35,10 +35,8 @@ Description
             Cmu         0.0845;
             C1          1.42;
             C2          1.68;
-            C3          -0.33;  // only for compressible
-            alphah      1.0;    // only for compressible
-            alphak      1.39;
-            alphaEps    1.39;
+            sigmak      0.71942;
+            sigmaEps    0.71942;
             eta0        4.38;
             beta        0.012;
         }
@@ -73,17 +71,22 @@ class RNGkEpsilon
 {
     // Private data
 
-        dimensionedScalar Cmu_;
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar eta0_;
-        dimensionedScalar beta_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField nut_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar eta0_;
+            dimensionedScalar beta_;
+
+
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField nut_;
 
 
 public:
@@ -120,7 +123,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*nut_ + nu())
+                new volScalarField("DkEff", nut_/sigmak_ + nu())
             );
         }
 
@@ -129,7 +132,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

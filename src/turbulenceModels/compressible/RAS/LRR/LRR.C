@@ -128,29 +128,29 @@ LRR::LRR
             0.0
         )
     ),
-    alphaR_
+    sigmaR_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaR",
+            "sigmaR",
             coeffDict_,
-            1.22
+            0.81967
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
-    alphah_
+    Prt_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphah",
+            "Prt",
             coeffDict_,
             1.0
         )
@@ -297,9 +297,9 @@ bool LRR::read()
         C2_.readIfPresent(coeffDict());
         Cs_.readIfPresent(coeffDict());
         Ceps_.readIfPresent(coeffDict());
-        alphaR_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
-        alphah_.readIfPresent(coeffDict());
+        sigmaR_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
         couplingFactor_.readIfPresent(coeffDict());
 
         if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
@@ -324,7 +324,7 @@ void LRR::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity

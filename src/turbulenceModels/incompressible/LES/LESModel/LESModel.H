@@ -35,10 +35,10 @@ Description
     Base class for all incompressible flow LES SGS models.
 
     This class defines the basic interface for an incompressible flow SGS
-    model, and encapsulates data of value to all possible models. In
-    particular this includes references to all the dependent fields (U,
-    phi), the physical viscosity nu, and the LESProperties
-    dictionary which contains the model selection and model coefficients.
+    model, and encapsulates data of value to all possible models.
+    In particular this includes references to all the dependent fields
+    (U, phi), the physical viscosity nu, and the LESProperties
+    dictionary, which contains the model selection and model coefficients.
 
 SourceFiles
     LESModel.C
@@ -80,7 +80,6 @@ protected:
 
     // Protected data
 
-        Switch turbulence_;
         Switch printCoeffs_;
         dictionary coeffDict_;
 
@@ -152,7 +151,8 @@ public:
 
 
     //- Destructor
-    virtual ~LESModel();
+    virtual ~LESModel()
+    {}
 
 
     // Member Functions
@@ -241,13 +241,13 @@ public:
             }
 
 
-        //- Correct Eddy-Viscosity and related properties
-        virtual void correct(const tmp<volTensorField>& gradU);
-
         //- Correct Eddy-Viscosity and related properties.
         //  This calls correct(const tmp<volTensorField>& gradU) by supplying
         //  gradU calculated locally.
         void correct();
+
+        //- Correct Eddy-Viscosity and related properties
+        virtual void correct(const tmp<volTensorField>& gradU);
 
         //- Read LESProperties dictionary
         virtual bool read() = 0;

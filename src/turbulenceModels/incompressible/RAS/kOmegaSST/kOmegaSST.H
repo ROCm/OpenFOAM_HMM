@@ -61,7 +61,6 @@ Description
             alphaK2     1.0;
             alphaOmega1 0.5;
             alphaOmega2 0.85616;
-            alphah      1.0;    // only for compressible
             beta1       0.075;
             beta2       0.0828;
             betaStar    0.09;

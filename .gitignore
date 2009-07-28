@@ -4,9 +4,13 @@
 # editor and misc backup files - anywhere
 *~
 .*~
-*.orig
 *.bak
+*.bak[0-9][0-9]
+*.orig
+*.orig[0-9][0-9]
 \#*\#
+
+# file-browser settings - anywhere
 .directory
 
 # CVS recovered versions - anywhere
@@ -18,7 +22,7 @@
 *.so
 *.jar
 
-# ignore derived files
+# derived files
 lex.yy.c
 
 # Corefiles
@@ -30,7 +34,7 @@ core
 # lnInclude (symlink) folders - anywhere
 lnInclude
 
-# build folder(s) - anywhere
+# build folders - anywhere
 linux*Gcc*/
 linux*Icc*/
 linuxming*/
@@ -38,17 +42,13 @@ SiCortex*Gcc*/
 solaris*Gcc*/
 SunOS*Gcc*/
 
-# reinstate wmake/rules that might look like build folders
-!wmake/rules/*/
-
-# but do continue to ignore the derived wmake files
-wmake/rules/*/dirToString
-wmake/rules/*/wmkdep
-
 # doxygen generated documentation
 doc/[Dd]oxygen/html
 doc/[Dd]oxygen/latex
 doc/[Dd]oxygen/man
+
+# Other HTML files e.g. ReleaseNotes-?.?.html
+*.html
 
 # source packages - anywhere
 *.tar.bz2

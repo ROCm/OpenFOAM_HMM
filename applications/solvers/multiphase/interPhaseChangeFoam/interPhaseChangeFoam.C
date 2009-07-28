@@ -28,8 +28,10 @@ Application
 Description
     Solver for 2 incompressible, isothermal immiscible fluids with phase-change
     (e.g. cavitation).  Uses a VOF (volume of fluid) phase-fraction based
-    interface capturing approach.  The momentum and other fluid properties are
-    of the "mixture" and a single momentum equation is solved.
+    interface capturing approach.
+
+    The momentum and other fluid properties are of the "mixture" and a
+    single momentum equation is solved.
 
     The set of phase-change models provided are designed to simulate cavitation
     but other mechanisms of phase-change are supported within this solver

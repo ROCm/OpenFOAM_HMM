@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,103 +17,9 @@ FoamFile
 
 LESModel        oneEqEddy;
 
-turbulence      on;
-
 delta           smooth;
 
 printCoeffs     on;
-
-laminarCoeffs
-{
-}
-
-oneEqEddyCoeffs
-{
-    ck              0.07;
-    ce              1.05;
-}
-
-dynOneEqEddyCoeffs
-{
-    ce              1.05;
-    filter          simple;
-}
-
-locDynOneEqEddyCoeffs
-{
-    ce              1.05;
-    filter          simple;
-}
-
-SmagorinskyCoeffs
-{
-    ce              1.05;
-    ck              0.07;
-}
-
-Smagorinsky2Coeffs
-{
-    ce              1.05;
-    ck              0.07;
-    cD2             0.02;
-}
-
-spectEddyViscCoeffs
-{
-    ce              1.05;
-    cB              8.22;
-    cK1             0.83;
-    cK2             1.03;
-    cK3             4.75;
-    cK4             2.55;
-}
-
-dynSmagorinskyCoeffs
-{
-    ce              1.05;
-    filter          simple;
-}
-
-mixedSmagorinskyCoeffs
-{
-    ce              1.05;
-    ck              0.07;
-    filter          simple;
-}
-
-dynMixedSmagorinskyCoeffs
-{
-    ce              1.05;
-    filter          simple;
-}
-
-LRRDiffStressCoeffs
-{
-    ce              1.05;
-    ck              0.09;
-    c1              1.8;
-    c2              0.6;
-}
-
-DeardorffDiffStressCoeffs
-{
-    ce              1.05;
-    ck              0.09;
-    cm              4.13;
-}
-
-SpalartAllmarasCoeffs
-{
-    alphaNut        1.5;
-    Cb1             0.1355;
-    Cb2             0.622;
-    Cw2             0.3;
-    Cw3             2;
-    Cv1             7.1;
-    Cv2             5;
-    CDES            0.65;
-    ck              0.07;
-}
 
 cubeRootVolCoeffs
 {
@@ -174,13 +80,6 @@ smoothCoeffs
     }
 
     maxDeltaRatio   1.1;
-}
-
-kappa           0.4187;
-
-wallFunctionCoeffs
-{
-    E               9;
 }
 
 

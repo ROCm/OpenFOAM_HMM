@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -58,6 +58,7 @@ laplacianSchemes
     laplacian(muEff,ft) Gauss linear limited 0.5;
     laplacian(alphaEff,h) Gauss linear limited 0.5;
     laplacian(alphaEff,hu) Gauss linear limited 0.5;
+    laplacian(alphaEff,ft) Gauss linear limited 0.5;
 }
 
 interpolationSchemes

@@ -89,19 +89,6 @@ protected:
         //- Model coefficients dictionary
         dictionary coeffDict_;
 
-        // Wall function properties
-
-            //- Wall function dictionary
-            dictionary wallFunctionDict_;
-
-            dimensionedScalar kappa_;
-
-            dimensionedScalar E_;
-
-            dimensionedScalar Cmu_;
-
-            dimensionedScalar Prt_;
-
         //- Value of y+ at the edge of the laminar sublayer
         scalar yPlusLam_;
 
@@ -262,30 +249,6 @@ public:
                 return omegaSmall_;
             }
 
-            //- Return kappa for use in wall-functions
-            dimensionedScalar kappa() const
-            {
-                return kappa_;
-            }
-
-            //- Return E for use in wall-functions
-            dimensionedScalar E() const
-            {
-                return E_;
-            }
-
-            //- Return Cmu for use in wall-functions
-            dimensionedScalar Cmu() const
-            {
-                return Cmu_;
-            }
-
-            //- Return turbulent Prandtl number for use in wall-functions
-            dimensionedScalar Prt() const
-            {
-                return Prt_;
-            }
-
             //- Return the near wall distances
             const nearWallDist& y() const
             {
@@ -295,23 +258,10 @@ public:
             //- Calculate y+ at the edge of the laminar sublayer
             scalar yPlusLam(const scalar kappa, const scalar E) const;
 
-            //- Return y+ at the edge of the laminar sublayer
-            //  for use in wall-functions
-            scalar yPlusLam() const
-            {
-                return yPlusLam_;
-            }
-
             //- Const access to the coefficients dictionary
             const dictionary& coeffDict() const
             {
                 return coeffDict_;
-            }
-
-            //- Const access to the wall functions coefficients dictionary
-            const dictionary& walLFunctionDict() const
-            {
-                return wallFunctionDict_;
             }
 
 
@@ -346,7 +296,11 @@ public:
         virtual tmp<fvVectorMatrix> divDevRhoReff(volVectorField& U) const = 0;
 
         //- Return yPlus for the given patch
-        virtual tmp<scalarField> yPlus(const label patchI) const;
+        virtual tmp<scalarField> yPlus
+        (
+            const label patchI,
+            const scalar Cmu
+        ) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;

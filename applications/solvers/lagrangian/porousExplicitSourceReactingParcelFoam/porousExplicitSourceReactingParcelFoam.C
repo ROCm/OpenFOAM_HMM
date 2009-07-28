@@ -26,13 +26,17 @@ Application
     porousExplicitSourceReactingParcelFoam
 
 Description
+    Transient PISO solver for compressible, laminar or turbulent flow with
+    reacting Lagrangian parcels for porous media, including explicit sources
+
+    The solver includes:
     - reacting parcel cloud
     - porous media
     - point mass sources
     - polynomial based, incompressible thermodynamics (f(T))
 
     Note: ddtPhiCorr not used here when porous zones are active
-    - not well defined for porous calcs
+    - not well defined for porous calculations
 
 \*---------------------------------------------------------------------------*/
 

@@ -35,10 +35,7 @@ Description
             Cmu         0.09;
             C1          1.44;
             C2          1.92;
-            C3          -0.33;  // only for compressible
-            alphak      1.0;    // only for compressible
-            alphaEps    0.76923;
-            alphah      1.0;    // only for compressible
+            sigmaEps    1.3;
         }
     @endverbatim
 
@@ -76,7 +73,7 @@ class kEpsilon
             dimensionedScalar Cmu_;
             dimensionedScalar C1_;
             dimensionedScalar C2_;
-            dimensionedScalar alphaEps_;
+            dimensionedScalar sigmaEps_;
 
 
         // Fields
@@ -129,7 +126,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

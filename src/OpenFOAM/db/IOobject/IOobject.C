@@ -36,7 +36,7 @@ defineTypeNameAndDebug(Foam::IOobject, 0);
 
 // Return components following the IOobject requirements
 //
-//  behaviour
+// behaviour
 //    input               IOobject(instance, local, name)
 //    -----               ------
 //    "foo"               ("", "", "foo")
@@ -58,7 +58,7 @@ bool Foam::IOobject::IOobject::fileNameComponents
     name.clear();
 
     // called with directory
-    if (!isDir(path))
+    if (isDir(path))
     {
         WarningIn("IOobject::fileNameComponents(const fileName&, ...)")
             << " called with directory: " << path << "\n";

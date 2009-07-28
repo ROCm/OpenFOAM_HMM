@@ -48,7 +48,7 @@ void oneEqEddy::updateSubGridScaleFields()
     muSgs_ = ck_*rho()*sqrt(k_)*delta();
     muSgs_.correctBoundaryConditions();
 
-    alphaSgs_ = muSgs_/Prt();
+    alphaSgs_ = muSgs_/Prt_;
     alphaSgs_.correctBoundaryConditions();
 }
 

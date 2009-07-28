@@ -37,7 +37,7 @@ SourceFiles
 #ifndef nutSpalartAllmarasWallFunctionFvPatchScalarField_H
 #define nutSpalartAllmarasWallFunctionFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "nutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,15 +54,17 @@ namespace RASModels
 
 class nutSpalartAllmarasWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public nutWallFunctionFvPatchScalarField
 {
-    // Private data
+protected:
 
-        //- Name of velocity field
-        word UName_;
+    // Protected member functions
 
-        //- Name of laminar viscosity field
-        word nuName_;
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcNut() const;
+
+        //- Calculate the friction velocity
+        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
 
 
 public:
@@ -138,14 +140,14 @@ public:
 
         // Evaluation functions
 
-            //- Evaluate the patchField
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
 
-        //- Write
-        virtual void write(Ostream& os) const;
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

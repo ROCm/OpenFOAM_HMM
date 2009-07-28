@@ -73,40 +73,47 @@ class LienCubicKELowRe
 {
     // Private data
 
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar A1_;
-        dimensionedScalar A2_;
-        dimensionedScalar Ctau1_;
-        dimensionedScalar Ctau2_;
-        dimensionedScalar Ctau3_;
-        dimensionedScalar alphaKsi_;
+        // Model coefficients
 
-        dimensionedScalar CmuWall_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar A1_;
+            dimensionedScalar A2_;
+            dimensionedScalar Ctau1_;
+            dimensionedScalar Ctau2_;
+            dimensionedScalar Ctau3_;
+            dimensionedScalar alphaKsi_;
 
-        dimensionedScalar Am_;
-        dimensionedScalar Aepsilon_;
-        dimensionedScalar Amu_;
+            dimensionedScalar CmuWall_;
+            dimensionedScalar kappa_;
 
-        volScalarField k_;
-        volScalarField epsilon_;
+            dimensionedScalar Am_;
+            dimensionedScalar Aepsilon_;
+            dimensionedScalar Amu_;
 
-        wallDist y_;
 
-        volTensorField gradU_;
-        volScalarField eta_;
-        volScalarField ksi_;
-        volScalarField Cmu_;
-        volScalarField fEta_;
-        volScalarField C5viscosity_;
+        // Fields
 
-        volScalarField yStar_;
+            volScalarField k_;
+            volScalarField epsilon_;
 
-        volScalarField nut_;
+            wallDist y_;
 
-        volSymmTensorField nonlinearStress_;
+            volTensorField gradU_;
+            volScalarField eta_;
+            volScalarField ksi_;
+            volScalarField Cmu_;
+            volScalarField fEta_;
+            volScalarField C5viscosity_;
+
+            volScalarField yStar_;
+
+            volScalarField nut_;
+
+            volSymmTensorField nonlinearStress_;
+
 
 public:
 
@@ -142,7 +149,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*nut_ + nu())
+                new volScalarField("DkEff", nut_/sigmak_ + nu())
             );
         }
 
@@ -151,7 +158,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

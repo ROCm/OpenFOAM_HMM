@@ -26,8 +26,8 @@ Application
     XiFoam
 
 Description
-    Compressible premixed/partially-premixed combustion solver with turbulence
-    modelling.
+    Solver for compressible premixed/partially-premixed combustion with
+    turbulence modelling.
 
     Combusting RANS code using the b-Xi two-equation model.
     Xi may be obtained by either the solution of the Xi transport
@@ -87,12 +87,12 @@ int main(int argc, char *argv[])
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        #include "rhoEqn.H"
-        #include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
+            #include "rhoEqn.H"
+            #include "UEqn.H"
+
             #include "ftEqn.H"
             #include "bEqn.H"
             #include "huEqn.H"
@@ -103,10 +103,14 @@ int main(int argc, char *argv[])
                 hu == h;
             }
 
-            #include "pEqn.H"
-        }
+            // --- PISO loop
+            for (int corr=1; corr<=nCorr; corr++)
+            {
+                #include "pEqn.H"
+            }
 
-        turbulence->correct();
+            turbulence->correct();
+        }
 
         rho = thermo.rho();
 

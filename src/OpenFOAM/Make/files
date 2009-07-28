@@ -132,6 +132,7 @@ $(dictionaryEntry)/dictionaryEntryIO.C
 functionEntries = $(dictionary)/functionEntries
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
+$(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
 

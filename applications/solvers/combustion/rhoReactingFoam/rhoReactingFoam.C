@@ -26,7 +26,8 @@ Application
     rhoReactingFoam
 
 Description
-    Chemical reaction code using density based thermodynamics package.
+    Solver for combustion with chemical reactions using density based
+    thermodynamics package.
 
 \*---------------------------------------------------------------------------*/
 
@@ -68,10 +69,10 @@ int main(int argc, char *argv[])
 
         #include "chemistry.H"
         #include "rhoEqn.H"
-        #include "UEqn.H"
 
         for (label ocorr=1; ocorr <= nOuterCorr; ocorr++)
         {
+            #include "UEqn.H"
             #include "YEqn.H"
             #include "hEqn.H"
 

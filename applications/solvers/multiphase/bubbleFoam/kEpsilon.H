@@ -16,7 +16,11 @@ if(turbulence)
     (
         fvm::ddt(beta, epsilon)
       + fvm::div(phib, epsilon)
-      - fvm::laplacian(alphaEps*nuEffb, epsilon)
+      - fvm::laplacian
+        (
+            alphaEps*nuEffb, epsilon,
+            "laplacian(DepsilonEff,epsilon)"
+        )
       ==
          C1*beta*G*epsilon/k
        - fvm::Sp(C2*beta*epsilon/k, epsilon)
@@ -35,7 +39,11 @@ if(turbulence)
     (
         fvm::ddt(beta, k)
       + fvm::div(phib, k)
-      - fvm::laplacian(alphak*nuEffb, k)
+      - fvm::laplacian
+        (
+            alphak*nuEffb, k,
+            "laplacian(DkEff,k)"
+        )
       ==
         beta*G
       - fvm::Sp(beta*epsilon/k, k)

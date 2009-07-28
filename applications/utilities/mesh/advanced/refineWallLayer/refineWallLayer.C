@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Utility to refine cells next to patches. Takes a patchName
-    and number of layers to refine. Works out cells within these layers
-    and refines those in the wall-normal direction.
+    Utility to refine cells next to patches.
+
+    Takes a patchName and number of layers to refine. Works out cells within
+    these layers and refines those in the wall-normal direction.
 
 \*---------------------------------------------------------------------------*/
 

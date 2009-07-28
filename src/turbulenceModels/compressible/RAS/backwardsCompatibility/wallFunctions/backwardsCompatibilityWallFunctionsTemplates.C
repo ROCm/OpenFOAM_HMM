@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -104,7 +104,7 @@ autoCreateWallFunctionField
         // rename file
         Info<< "    Backup original " << fieldName << " to "
             << fieldName << ".old" << endl;
-        mv(ioObj.objectPath(), ioObj.objectPath() + ".old");
+        mvBak(ioObj.objectPath(), "old");
 
 
         PtrList<fvPatchField<Type> > newPatchFields(mesh.boundary().size());

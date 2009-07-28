@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Utility to split cells with flat faces. Uses a geometric cut with a plane
-    dividing the edge angle into two so might produce funny cells. For hexes
-    it will use by default a cut from edge onto opposite edge (i.e. purely
-    topological).
+    Utility to split cells with flat faces.
+
+    Uses a geometric cut with a plane dividing the edge angle into two so
+    might produce funny cells. For hexes it will use by default a cut from
+    edge onto opposite edge (i.e. purely topological).
 
     Options:
     - split cells from cellSet only

@@ -1,3 +1,0 @@
-applyWallFunctionBounaryConditions.C
-
-EXE = $(FOAM_APPBIN)/applyWallFunctionBounaryConditions

@@ -79,9 +79,9 @@ class LaunderSharmaKE
             dimensionedScalar C1_;
             dimensionedScalar C2_;
             dimensionedScalar C3_;
-            dimensionedScalar alphak_;
-            dimensionedScalar alphaEps_;
-            dimensionedScalar alphah_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar Prt_;
 
 
         // Fields
@@ -127,7 +127,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*mut_ + mu())
+                new volScalarField("DkEff", mut_/sigmak_ + mu())
             );
         }
 
@@ -136,7 +136,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -151,7 +151,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_ + alpha())
             );
         }
 
