@@ -23,10 +23,11 @@
   section "Running OpenFOAM in 32-bit mode".
 
 *** Qt (from http://trolltech.com/products/qt)
-    The ParaView 3.6.1 visualisation package suggests that Qt version 4.3.x
-    be installed on the system.  The source may build against more recent
-    versions, but this is done at the user's own risk.  To check whether Qt4 is
-    installed, and the version, type:
+    The ParaView 3.6.1 visualisation package requires Qt to be installed on the
+    system.  ParaView's producers state that ParaView is only officially
+    supported on Qt version 4.3.x.  However, we have found in limited tests that
+    ParaView works satisfactorily with newer versions of Qt than 4.3.x.  To
+    check whether Qt4 is installed, and the version, type:
     + qmake --version
 
     Both 32-bit and 64-bit version of ParaView were compiled with Qt-4.4.3 (with
@@ -38,6 +39,7 @@
     The default versions of Qt used by some GNU/Linux releases are as follows.
     + ubuntu-7.10:   Version 4.3.2
     + ubuntu-8.04:   Version 4.3.4
+    + ubuntu-9.04:   Version 4.5.0
     + openSUSE-10.2: Version 4.2.1 - too old
     + openSUSE-10.3: Version 4.3.1
     + openSUSE-11.0: Version 4.4.0
@@ -59,14 +61,13 @@
   The environment variable settings are contained in files in an etc/ directory
   in the OpenFOAM release. e.g. in
 
-  + $HOME/OpenFOAM/OpenFOAM-<VERSION>/etc/
-  + where <VERSION> corresponds to the version 1.6, 1.7, ...
+  + $HOME/OpenFOAM/OpenFOAM-1.6/etc/
 
   1) EITHER, if running bash or ksh (if in doubt type 'echo $SHELL'), source the
     etc/bashrc file by adding the following line to the end of your
     $HOME/.bashrc file:
 
-    + . $HOME/OpenFOAM/OpenFOAM-<VERSION>/etc/bashrc
+    + . $HOME/OpenFOAM/OpenFOAM-1.6/etc/bashrc
 
     Then update the environment variables by sourcing the $HOME/.bashrc file by
     typing in the terminal:
@@ -76,33 +77,33 @@
   2) OR, if running tcsh or csh, source the etc/cshrc file by adding the
     following line to the end of your $HOME/.cshrc file:
 
-    + source $HOME/OpenFOAM/OpenFOAM-<VERSION>/etc/cshrc
+    + source $HOME/OpenFOAM/OpenFOAM-1.6/etc/cshrc
 
     Then update the environment variables by sourcing the $HOME/.cshrc file by
     typing in the terminal:
 
     + source $HOME/.cshrc
 
-** Installation in alternative locations
-   OpenFOAM may also be installed in alternative locations. However, the
-   installation directory should be network available (e.g., NFS) if parallel
-   calculations are planned.
+*** Installation in alternative locations
+    OpenFOAM may also be installed in alternative locations. However, the
+    installation directory should be network available (e.g., NFS) if parallel
+    calculations are planned.
 
-   The environment variable 'FOAM_INST_DIR' can be used to find and source the
-   appropriate resource file. Here is a bash/ksh/sh example:
+    The environment variable 'FOAM_INST_DIR' can be used to find and source the
+    appropriate resource file. Here is a bash/ksh/sh example:
 
-   + export FOAM_INST_DIR=/data/app/OpenFOAM
-   + foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
-   + [ -f $foamDotFile ] && . $foamDotFile
+    + export FOAM_INST_DIR=/data/app/OpenFOAM
+    + foamDotFile=$FOAM_INST_DIR/OpenFOAM-1.6/etc/bashrc
+    + [ -f $foamDotFile ] && . $foamDotFile
 
-   and a csh/tcsh example:
+    and a csh/tcsh example:
 
-   + setenv FOAM_INST_DIR /data/app/OpenFOAM
-   + foamDotFile=$FOAM_INST_DIR/OpenFOAM-<VERSION>/etc/bashrc
-   + if ( -f $foamDotFile ) source $foamDotFile
+    + setenv FOAM_INST_DIR /data/app/OpenFOAM
+    + foamDotFile=$FOAM_INST_DIR/OpenFOAM-1.6/etc/bashrc
+    + if ( -f $foamDotFile ) source $foamDotFile
 
-   The value set in '$FOAM_INST_DIR' will be used to locate the remaining parts
-   of the OpenFOAM installation.
+    The value set in '$FOAM_INST_DIR' will be used to locate the remaining parts
+    of the OpenFOAM installation.
 
 * Building from Sources (Optional)
   If you cannot find an appropriate binary pack for your platform, you can build
@@ -135,28 +136,31 @@
 
 * Getting Started
   Create a project directory within the $HOME/OpenFOAM directory named
-  <USER>-<VERSION> (e.g. 'chris-1.6' for user chris and OpenFOAM version 1.6)
+  <USER>-1.6 (e.g. 'chris-1.6' for user chris and OpenFOAM version 1.6)
   and create a directory named 'run' within it, e.g. by typing:
 
-  + mkdir -p $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run
+  + mkdir -p $FOAM_RUN/run
 
   Copy the 'tutorial' examples directory in the OpenFOAM distribution to the
   'run' directory.  If the OpenFOAM environment variables are set correctly,
   then the following command will be correct:
 
-  + cp -r $WM_PROJECT_DIR/tutorials
-    $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run
+  + cp -r $WM_PROJECT_DIR/tutorials $FOAM_RUN
 
   Run the first example case of incompressible laminar flow in a cavity:
 
-  + cd $HOME/OpenFOAM/${USER}-${WM_PROJECT_VERSION}/run/tutorials/icoFoam/cavity
+  + cd $FOAM_RUN/tutorials/incompressible/icoFoam/cavity
   + blockMesh
   + icoFoam
   + paraFoam
 
+  Refer to the OpenFOAM User Guide at http://www.OpenFOAM.org/doc/user.html for
+  more information.
+
 * Compiling Paraview 3.6.1 and the PV3FoamReader module
-  A version of Qt 4.3.x must be installed to fully compile ParaView.  The
-  compilation is a fairly simple process using the makeParaView script
+  If there are problems encountered with ParaView, then it may be necessary to
+  compile ParaView from sources.  The compilation
+  is a fairly simple process using the makeParaView script
   (found in ThirdParty directory), which has worked in our tests with other
   packages supplied in the ThirdParty directory, namely cmake-2.6.4 and
   gcc-4.3.3.  Execute the following:
@@ -164,12 +168,26 @@
   + rm -rf paraview-3.6.1/platforms
   + ./makeParaView
 
-
   The PV3FoamReader module is an OpenFOAM utility that can be compiled in the
   usual manner as follows:
   + cd $FOAM_UTILITIES/postProcessing/graphics/PV3FoamReader
   + ./Allwclean
   + ./Allwmake
+
+*** Compiling Paraview with a local version of Qt
+    If the user still encounters problems with ParaView, it may relate to the
+    version of Qt, in which case, it is recommended that the user first
+    downloads a supported version of Qt /e.g./ 4.3.5 as described in the section
+    on "Qt".  The user should unpack the source pack in the $WM_THIRD_PARTY_DIR.
+    Then the user can build Qt by executing from within $WM_THIRD_PARTY_DIR:
+    + makeQt
+
+    The user should then compile ParaView using the local version of Qt by
+    executing makeParaView with the -qmake option, giving the full path of the
+    newly built qmake as an argument:
+    + makeParaView -qmake <path_to_qmake>
+
+    The user must then recompile the PV3FoamReader module as normal (see above).
 
 * Documentation
   http://www.OpenFOAM.org/doc
@@ -186,4 +204,3 @@
   is the default mode on a 64-bit machine.  To use an installed 32-bit version,
   the user must set the environment variable WM_ARCH_OPTION to 32 before
   sourcing the etc/bashrc (or etc/cshrc) file.
-
