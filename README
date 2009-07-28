@@ -30,8 +30,8 @@
     check whether Qt4 is installed, and the version, type:
     + qmake --version
 
-    Both 32- and 64-bit version of ParaView were compiled with Qt-4.4.3 (with
-    openSuSE-11.1).  If the user finds that a ParaView binary fails to run, then
+    Both 32-bit and 64-bit version of ParaView were compiled with Qt-4.4.3 (with
+    openSUSE-11.1).  If the user finds that a ParaView binary fails to run, then
     it is almost certainly due to a conflict in compiled and installed Qt
     versions and they will need to consult the section below on "Compiling
     ParaView and the PV3FoamReader module."
@@ -40,10 +40,10 @@
     + ubuntu-7.10:   Version 4.3.2
     + ubuntu-8.04:   Version 4.3.4
     + ubuntu-9.04:   Version 4.5.0
-    + openSuSE-10.2: Version 4.2.1 - too old
-    + openSuSE-10.3: Version 4.3.1
-    + openSuSE-11.0: Version 4.4.0
-    + openSuSE-11.1: Version 4.4.3
+    + openSUSE-10.2: Version 4.2.1 - too old
+    + openSUSE-10.3: Version 4.3.1
+    + openSUSE-11.0: Version 4.4.0
+    + openSUSE-11.1: Version 4.4.3
 
     Compilation and running of ParaView has been successful using the libraries
     downloaded in the "libqt4-dev" package on ubuntu.
@@ -51,7 +51,7 @@
     If you don't have an appropriate version of Qt installed you can download
     the sources from TrollTech e.g.:
     ftp://ftp.trolltech.com/qt/source/qt-x11-opensource-src-4.3.5.tar.bz2
-    and compile and install in /usr/local or some other location that does to
+    and compile and install in /usr/local or some other location that does not
     conflict with the pre-installed version.
 
 * Installation
@@ -112,7 +112,7 @@
   which may be obtained from http://gcc.gnu.org/.
 
   Install the compiler in
-  $WM_PROJECT_INST_DIR/ThirdParty/gcc-<GCC_VERSION>/platforms/$WM_ARCH$WM_COMPILER_ARCH/
+  $WM_THIRD_PARTY_DIR/gcc-<GCC_VERSION>/platforms/$WM_ARCH$WM_COMPILER_ARCH/
   and change the gcc version number in $WM_PROJECT_DIR/etc/settings.sh and
   $WM_PROJECT_DIR/etc/settings.csh appropriately and finally update the
   environment variables as in section 3.
@@ -120,7 +120,7 @@
   Now go to the top-level source directory $WM_PROJECT_DIR and execute the
   top-level build script './Allwmake'.  In principle this will build everything,
   but if problems occur with the build order it may be necessary to update the
-  environment variables and re-execute 'Allwmake'.
+  environment variables and re-execute './Allwmake'.
 
   If you experience difficulties with building the source-pack, or your platform
   is not currently supported, please contact <enquiries@OpenCFD.co.uk> to
@@ -160,12 +160,13 @@
 * Compiling Paraview 3.6.1 and the PV3FoamReader module
   If there are problems encountered with ParaView, then it may be necessary to
   compile ParaView from sources.  The compilation
-  is a fairly simple process using the supplied makeParaView script that
-  has worked in our tests with other packages supplied in the ThirdParty
-  directory, namely cmake-2.6.4 and gcc-4.3.3.  Execute the following:
+  is a fairly simple process using the makeParaView script
+  (found in ThirdParty directory), which has worked in our tests with other
+  packages supplied in the ThirdParty directory, namely cmake-2.6.4 and
+  gcc-4.3.3.  Execute the following:
   + cd $WM_THIRD_PARTY_DIR
   + rm -rf paraview-3.6.1/platforms
-  + makeParaView
+  + ./makeParaView
 
   The PV3FoamReader module is an OpenFOAM utility that can be compiled in the
   usual manner as follows:
