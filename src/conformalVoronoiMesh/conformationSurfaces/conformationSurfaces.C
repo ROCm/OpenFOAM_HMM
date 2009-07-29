@@ -45,7 +45,8 @@ Foam::conformationSurfaces::conformationSurfaces
     baffleSurfaces_(),
     patchNames_(0),
     patchOffsets_(),
-    bounds_()
+    bounds_(),
+    referenceVolumeTypes_(0)
 {
     const dictionary& surfacesDict
     (
@@ -166,50 +167,11 @@ Foam::conformationSurfaces::conformationSurfaces
 
     bounds_ = searchableSurfacesQueries::bounds(allGeometry_, surfaces_);
 
-    if(cvMesh_.cvMeshControls().objOutput())
-    {
-        writeFeatureObj("cvMesh");
-    }
-}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-Foam::conformationSurfaces::~conformationSurfaces()
-{}
-
-
-// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
-
-Foam::Field<bool> Foam::conformationSurfaces::inside
-(
-    const pointField& samplePts
-) const
-{
-    return wellInside(samplePts, 0.0);
-}
-
-
-Foam::Field<bool> Foam::conformationSurfaces::outside
-(
-    const pointField& samplePts
-) const
-{
-    return wellOutside(samplePts, 0.0);
-}
-
-
-Foam::Field<bool> Foam::conformationSurfaces::wellInside
-(
-    const pointField& samplePts,
-    const scalar dist2
-) const
-{
     // Look at all surfaces at determine whether the locationInMesh point is
     // inside or outside each, to establish a signature for the domain to be
     // meshed.
 
-    List<searchableSurface::volumeType> referenceVolumeTypes
+    referenceVolumeTypes_.setSize
     (
         surfaces_.size(),
         searchableSurface::UNKNOWN
@@ -231,10 +193,49 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 
             surface.getVolumeType(pts, vTypes);
 
-            referenceVolumeTypes[s] = vTypes[0];
+            referenceVolumeTypes_[s] = vTypes[0];
         }
     }
 
+    if(cvMesh_.cvMeshControls().objOutput())
+    {
+        writeFeatureObj("cvMesh");
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::conformationSurfaces::~conformationSurfaces()
+{}
+
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
+
+Foam::Field<bool> Foam::conformationSurfaces::inside
+(
+    const pointField& samplePts
+) const
+{
+    return wellInside(samplePts, scalarField(samplePts.size(), 0.0));
+}
+
+
+Foam::Field<bool> Foam::conformationSurfaces::outside
+(
+    const pointField& samplePts
+) const
+{
+    return wellOutside(samplePts, scalarField(samplePts.size(), 0.0));
+}
+
+
+Foam::Field<bool> Foam::conformationSurfaces::wellInside
+(
+    const pointField& samplePts,
+    const scalarField& testDistSqr
+) const
+{
     List<List<searchableSurface::volumeType> > surfaceVolumeTests
     (
         surfaces_.size(),
@@ -264,8 +265,6 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 
     //Check if the points are inside the surface by the given distance squared
 
-    scalarField testDistSqr(insidePoints.size(), dist2);
-
     labelList hitSurfaces;
 
     List<pointIndexHit> hitInfo;
@@ -293,7 +292,7 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 
         forAll(surfaces_, s)
         {
-            if (surfaceVolumeTests[s][i] != referenceVolumeTypes[s])
+            if (surfaceVolumeTests[s][i] != referenceVolumeTypes_[s])
             {
                 insidePoints[i] = false;
 
@@ -306,15 +305,35 @@ Foam::Field<bool> Foam::conformationSurfaces::wellInside
 }
 
 
+bool Foam::conformationSurfaces::wellInside
+(
+    const point& samplePt,
+    scalar testDistSqr
+) const
+{
+    return wellInside(pointField(1, samplePt), scalarField(1, testDistSqr))[0];
+}
+
+
 Foam::Field<bool> Foam::conformationSurfaces::wellOutside
 (
     const pointField& samplePts,
-    const scalar dist2
+    const scalarField& testDistSqr
 ) const
 {
     notImplemented("Field<bool> Foam::conformationSurfaces::wellOutside");
 
     return Field<bool>(samplePts.size(), true);
+}
+
+
+bool Foam::conformationSurfaces::wellOutside
+(
+    const point& samplePt,
+    scalar testDistSqr
+) const
+{
+    return wellOutside(pointField(1, samplePt), scalarField(1, testDistSqr))[0];
 }
 
 

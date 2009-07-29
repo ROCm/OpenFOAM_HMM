@@ -213,6 +213,40 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
 }
 
 
+Foam::scalarField Foam::cellSizeControlSurfaces::cellSize
+(
+    const pointField& pts,
+    const List<bool>& isSurfacePoint
+) const
+{
+    if (pts.size() != isSurfacePoint.size())
+    {
+        FatalErrorIn
+        (
+            "Foam::cellSizeControlSurfaces::cellSizeControlSurfaces \
+             ( \
+                 const pointField& pts, \
+                 const List<bool>& isSurfacePoint \
+             ) \
+             const"
+        )   << "Size of pointField (" << pts.size()
+            << ") and List<bool> (" << isSurfacePoint.size()
+            << ") do not match." << nl
+            << exit(FatalError);
+    }
+
+    scalarField cellSizes(pts.size());
+
+    forAll(pts, i)
+    {
+        cellSizes[i] = cellSize(pts[i], isSurfacePoint[i]);
+    }
+
+    return cellSizes;
+}
+
+
+
 // ************************************************************************* //
 
 

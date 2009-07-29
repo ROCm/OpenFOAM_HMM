@@ -50,11 +50,14 @@ initialPointsMethod::initialPointsMethod
     dictionary(initialPointsDict),
     cvMesh_(cvMesh),
     detailsDict_(subDict(type + "Details")),
-    minimumSurfaceDistance_
+    minimumSurfaceDistanceCoeffSqr_
     (
-        readScalar
+        sqr
         (
-            initialPointsDict.lookup("minimumSurfaceDistance")
+            readScalar
+            (
+                initialPointsDict.lookup("minimumSurfaceDistanceCoeff")
+            )
         )
     )
 {}

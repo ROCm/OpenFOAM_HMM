@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "pointFile.H"
+#include "densityWeightedStochastic.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -34,69 +34,80 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(pointFile, 0);
-addToRunTimeSelectionTable(initialPointsMethod, pointFile, dictionary);
+defineTypeNameAndDebug(densityWeightedStochastic, 0);
+addToRunTimeSelectionTable
+(
+    initialPointsMethod,
+    densityWeightedStochastic,
+    dictionary
+);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-pointFile::pointFile
+densityWeightedStochastic::densityWeightedStochastic
 (
     const dictionary& initialPointsDict,
     const conformalVoronoiMesh& cvMesh
 )
 :
     initialPointsMethod(typeName, initialPointsDict, cvMesh),
-    pointFileName_(detailsDict().lookup("pointFile"))
+    totalVolume_(readScalar(detailsDict().lookup("totalVolume"))),
+    maxDensity_
+    (
+        1.0/pow3(readScalar(detailsDict().lookup("minCellSize")))
+    )
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-std::vector<Vb::Point> pointFile::initialPoints() const
+std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
 {
-    pointIOField points
-    (
-        IOobject
-        (
-            pointFileName_.name(),
-            pointFileName_.path(),
-            cvMesh_.time(),
-            IOobject::MUST_READ,
-            IOobject::NO_WRITE
-        )
-    );
+    const boundBox& bb = cvMesh_.geometryToConformTo().bounds();
 
-    Info<< "    Inserting points from file " << pointFileName_ << endl;
+    Random rndGen(5234986);
 
     std::vector<Vb::Point> initialPoints;
 
-    Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
-    (
-        points,
-        minimumSurfaceDistanceCoeffSqr_
-       *cvMesh_.cellSizeControl().cellSize
-        (
-            points,
-            List<bool>(points.size(), false)
-        )
-    );
+    scalar volumeAdded = 0.0;
 
-    forAll(insidePoints, i)
+    const point& min = bb.min();
+
+    vector span = bb.span();
+
+    while (volumeAdded < totalVolume_)
     {
-        if (insidePoints[i])
+        point p =
+            min
+          + vector
+            (
+                span.x()*rndGen.scalar01(),
+                span.y()*rndGen.scalar01(),
+                span.z()*rndGen.scalar01()
+            );
+
+        scalar localSize = cvMesh_.cellSizeControl().cellSize(p);
+
+        scalar localDensity = 1/pow3(max(localSize, VSMALL));
+
+        // Accept possible placements proportional to the relative local density
+        if (localDensity/maxDensity_ > rndGen.scalar01())
         {
-            const point& p(points[i]);
+            // Determine if the point is "wellInside" the domain
+            if
+            (
+                cvMesh_.geometryToConformTo().wellInside
+                (
+                    p,
+                    minimumSurfaceDistanceCoeffSqr_*sqr(localSize)
+                )
+            )
+            {
+                initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
 
-            initialPoints.push_back(Vb::Point(p.x(), p.y(), p.z()));
+                volumeAdded += 1/localDensity;
+            }
         }
-    }
-
-    label nPointsRejected = points.size() - initialPoints.size();
-
-    if (nPointsRejected)
-    {
-        Info<< "    " << nPointsRejected << " points rejected from "
-            << pointFileName_.name() << endl;
     }
 
     return initialPoints;

@@ -94,6 +94,10 @@ class conformationSurfaces
         //- The overall boundBox of all of the surfaces to be conformed to
         boundBox bounds_;
 
+        //- The pattern/signature of volumeTypes representing a point in the
+        // domain to be meshed
+        List<searchableSurface::volumeType> referenceVolumeTypes_;
+
 
     // Private Member Functions
 
@@ -151,19 +155,31 @@ public:
             Field<bool> outside(const pointField& samplePts) const;
 
             //- Check if point is inside surfaces to conform to by at least
-            //  dist2
+            //  testDistSqr
             Field<bool> wellInside
             (
                 const pointField& samplePts,
-                const scalar dist2
+                const scalarField& testDistSqr
+            ) const;
+
+            bool wellInside
+            (
+                const point& samplePt,
+                scalar testDistSqr
             ) const;
 
             //- Check if point is outside surfaces to conform to by at least
-            // dist2
+            //  testDistSqr
             Field<bool> wellOutside
             (
                 const pointField& samplePts,
-                const scalar dist2
+                const scalarField& testDistSqr
+            ) const;
+
+            bool wellOutside
+            (
+                const point& samplePt,
+                scalar testDistSqr
             ) const;
 
             // Finding if the line joining start and end intersects the surface

@@ -82,6 +82,8 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
 
     std::vector<Vb::Point> initialPoints;
 
+    List<bool> isSurfacePoint(nk, false);
+
     for (int i = 0; i < ni; i++)
     {
         for (int j = 0; j < nj; j++)
@@ -116,7 +118,8 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
             Field<bool> insidePoints = cvMesh_.geometryToConformTo().wellInside
             (
                 points,
-                sqr(minimumSurfaceDistance_)
+                minimumSurfaceDistanceCoeffSqr_
+               *cvMesh_.cellSizeControl().cellSize(points, isSurfacePoint)
             );
 
             forAll(insidePoints, i)

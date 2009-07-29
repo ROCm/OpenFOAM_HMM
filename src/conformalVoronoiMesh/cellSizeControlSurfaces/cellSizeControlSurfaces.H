@@ -131,6 +131,13 @@ public:
                 const point& pt,
                 bool isSurfacePoint = false
             ) const;
+
+            //- Return the cell size at the given locations
+            scalarField cellSize
+            (
+                const pointField& pts,
+                const List<bool>& isSurfacePoint
+            ) const;
 };
 
 

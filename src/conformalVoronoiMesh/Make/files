@@ -20,6 +20,7 @@ $(cellSiseFunctions)/linearSpatial/linearSpatial.C
 initialPointsMethod/initialPointsMethod/initialPointsMethod.C
 initialPointsMethod/uniformGrid/uniformGrid.C
 initialPointsMethod/pointFile/pointFile.C
+initialPointsMethod/densityWeightedStochastic/densityWeightedStochastic.C
 
 relaxationModel/relaxationModel/relaxationModel.C
 relaxationModel/adaptiveLinear/adaptiveLinear.C

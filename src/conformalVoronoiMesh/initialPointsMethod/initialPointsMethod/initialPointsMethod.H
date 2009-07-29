@@ -67,8 +67,9 @@ protected:
         dictionary detailsDict_;
 
         //- Only allow the placement of initial points that are within the
-        //  surfaces to be meshed by minimumSurfaceDistance
-        scalar minimumSurfaceDistance_;
+        //  surfaces to be meshed by minimumSurfaceDistanceCoeff multiplied by
+        //  the local target cell size.  Store square of value.
+        scalar minimumSurfaceDistanceCoeffSqr_;
 
 private:
 

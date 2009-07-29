@@ -2135,6 +2135,8 @@ void Foam::conformalVoronoiMesh::move()
         }
     }
 
+    timeCheck();
+
     Info<< nl << "    Looping over all dual faces" << endl;
 
     vectorField cartesianDirections(3);
