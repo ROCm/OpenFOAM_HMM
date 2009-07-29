@@ -74,10 +74,13 @@ std::vector<Vb::Point> pointFile::initialPoints() const
     (
         points,
         minimumSurfaceDistanceCoeffSqr_
-       *cvMesh_.cellSizeControl().cellSize
+       *sqr
         (
-            points,
-            List<bool>(points.size(), false)
+            cvMesh_.cellSizeControl().cellSize
+            (
+                points,
+                List<bool>(points.size(), false)
+            )
         )
     );
 

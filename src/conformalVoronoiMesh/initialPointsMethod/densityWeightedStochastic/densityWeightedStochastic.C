@@ -75,8 +75,12 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
 
     vector span = bb.span();
 
+    label trialPoints = 0;
+
     while (volumeAdded < totalVolume_)
     {
+        trialPoints++;
+
         point p =
             min
           + vector
@@ -109,6 +113,11 @@ std::vector<Vb::Point> densityWeightedStochastic::initialPoints() const
             }
         }
     }
+
+    Info<< nl << "    " << typeName << " - "
+        << trialPoints << " locations queried ("
+        << scalar(initialPoints.size())/scalar(trialPoints)
+        << " success rate)" << endl;
 
     return initialPoints;
 }

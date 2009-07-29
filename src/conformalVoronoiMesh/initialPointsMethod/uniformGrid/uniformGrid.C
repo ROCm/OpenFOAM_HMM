@@ -119,7 +119,7 @@ std::vector<Vb::Point> uniformGrid::initialPoints() const
             (
                 points,
                 minimumSurfaceDistanceCoeffSqr_
-               *cvMesh_.cellSizeControl().cellSize(points, isSurfacePoint)
+               *sqr(cvMesh_.cellSizeControl().cellSize(points, isSurfacePoint))
             );
 
             forAll(insidePoints, i)
