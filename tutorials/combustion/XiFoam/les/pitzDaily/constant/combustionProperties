@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -19,21 +19,21 @@ laminarFlameSpeedCorrelation constant;
 
 fuel            Propane;
 
-Su              Su [ 0 1 -1 0 0 0 0 ] 0.135;
+Su              Su [0 1 -1 0 0 0 0] 0.135;
 
 SuModel         transport;
 
-equivalenceRatio equivalenceRatio [ 0 0 0 0 0 0 0 ] 0.6;
+equivalenceRatio equivalenceRatio [0 0 0 0 0 0 0] 0.6;
 
-sigmaExt        sigmaExt [ 0 0 -1 0 0 0 0 ] 338;
+sigmaExt        sigmaExt [0 0 -1 0 0 0 0] 338;
 
 XiModel         transport;
 
-XiCoef          XiCoef [ 0 0 0 0 0 0 0 ] 0.62;
+XiCoef          XiCoef [0 0 0 0 0 0 0] 0.62;
 
-XiShapeCoef     XiShapeCoef [ 0 0 0 0 0 0 0 ] 1;
+XiShapeCoef     XiShapeCoef [0 0 0 0 0 0 0] 1;
 
-uPrimeCoef      uPrimeCoef [ 0 0 0 0 0 0 0 ] 1;
+uPrimeCoef      uPrimeCoef [0 0 0 0 0 0 0] 1;
 
 GuldersCoeffs
 {
@@ -68,17 +68,26 @@ GuldersCoeffs
     }
 }
 
-ignite          no;
+ignite     yes;
 
-ignitionSites   ( );
+ignitionSites
+(
+    {
+        location (0.005 -0.02 0);
+        diameter 0.003;
+        start 0;
+        duration 0.05;
+        strength 20;
+    }
+);
 
 ignitionSphereFraction 0;
 
-ignitionThickness ignitionThickness [ 0 1 0 0 0 0 0 ] 0;
+ignitionThickness ignitionThickness [0 1 0 0 0 0 0] 0.001;
 
-ignitionCircleFraction 0;
+ignitionCircleFraction 1;
 
-ignitionKernelArea ignitionKernelArea [ 0 2 0 0 0 0 0 ] 0;
+ignitionKernelArea ignitionKernelArea [0 2 0 0 0 0 0] 0;
 
 
 // ************************************************************************* //

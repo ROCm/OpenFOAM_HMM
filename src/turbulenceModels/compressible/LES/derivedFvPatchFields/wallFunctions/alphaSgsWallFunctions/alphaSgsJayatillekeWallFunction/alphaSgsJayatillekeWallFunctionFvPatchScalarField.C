@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,17 +75,15 @@ scalar alphaSgsJayatillekeWallFunctionFvPatchScalarField::Psmooth
 scalar alphaSgsJayatillekeWallFunctionFvPatchScalarField::yPlusTherm
 (
     const scalar P,
-    const scalar Prat,
-    const scalar E,
-    const scalar kappa
+    const scalar Prat
 ) const
 {
     scalar ypt = 11.0;
 
     for (int i=0; i<maxIters_; i++)
     {
-        scalar f = ypt - (log(E*ypt)/kappa + P)/Prat;
-        scalar df = 1.0 - 1.0/(ypt*kappa*Prat);
+        scalar f = ypt - (log(E_*ypt)/kappa_ + P)/Prat;
+        scalar df = 1.0 - 1.0/(ypt*kappa_*Prat);
         scalar yptNew = ypt - f/df;
 
         if (yptNew < VSMALL)
@@ -115,7 +113,10 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    Prt_(0.85),
+    kappa_(0.41),
+    E_(9.8)
 {
     checkType();
 }
@@ -130,7 +131,10 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    Prt_(ptf.Prt_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_)
 {}
 
 
@@ -142,7 +146,10 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    Prt_(dict.lookupOrDefault<scalar>("Prt", 0.85)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {
     checkType();
 }
@@ -151,10 +158,13 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
 alphaSgsJayatillekeWallFunctionFvPatchScalarField::
 alphaSgsJayatillekeWallFunctionFvPatchScalarField
 (
-    const alphaSgsJayatillekeWallFunctionFvPatchScalarField& tppsf
+    const alphaSgsJayatillekeWallFunctionFvPatchScalarField& awfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(awfpsf),
+    Prt_(awfpsf.Prt_),
+    kappa_(awfpsf.kappa_),
+    E_(awfpsf.E_)
 {
     checkType();
 }
@@ -163,11 +173,14 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
 alphaSgsJayatillekeWallFunctionFvPatchScalarField::
 alphaSgsJayatillekeWallFunctionFvPatchScalarField
 (
-    const alphaSgsJayatillekeWallFunctionFvPatchScalarField& tppsf,
+    const alphaSgsJayatillekeWallFunctionFvPatchScalarField& awfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(awfpsf, iF),
+    Prt_(awfpsf.Prt_),
+    kappa_(awfpsf.kappa_),
+    E_(awfpsf.E_)
 {
     checkType();
 }
@@ -181,11 +194,6 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
 )
 {
     const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
-
-    // Wall function constants
-    const scalar E = lesModel.E().value();
-    const scalar kappa = lesModel.kappa().value();
-    const scalar Prt = lesModel.Prt().value();
 
     // Field data
     const label patchI = patch().index();
@@ -223,18 +231,18 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
 
             do
             {
-                scalar kUu = min(kappa*magUp[faceI]/uTau, maxExp_);
+                scalar kUu = min(kappa_*magUp[faceI]/uTau, maxExp_);
                 scalar fkUu = exp(kUu) - 1.0 - kUu*(1.0 + 0.5*kUu);
 
                 scalar f =
                     - uTau/(ry[faceI]*muw[faceI]/rhow[faceI])
                     + magUp[faceI]/uTau
-                    + 1.0/E*(fkUu - 1.0/6.0*kUu*sqr(kUu));
+                    + 1.0/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
                     - 1.0/(ry[faceI]*muw[faceI]/rhow[faceI])
                     - magUp[faceI]/sqr(uTau)
-                    - 1.0/E*kUu*fkUu/uTau;
+                    - 1.0/E_*kUu*fkUu/uTau;
 
                 scalar uTauNew = uTau - f/df;
                 err = mag((uTau - uTauNew)/uTau);
@@ -248,11 +256,11 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
             scalar Pr = muw[faceI]/alphaw[faceI];
 
             // Molecular-to-turbulenbt Prandtl number ratio
-            scalar Prat = Pr/Prt;
+            scalar Prat = Pr/Prt_;
 
             // Thermal sublayer thickness
             scalar P = Psmooth(Prat);
-            scalar yPlusTherm = this->yPlusTherm(P, Prat, E, kappa);
+            scalar yPlusTherm = this->yPlusTherm(P, Prat);
 
             // Evaluate new effective thermal diffusivity
             scalar alphaEff = 0.0;
@@ -266,11 +274,11 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
             else
             {
                 scalar A = qDot[faceI]*rhow[faceI]*uTau/ry[faceI];
-                scalar B = qDot[faceI]*Prt*(1.0/kappa*log(E*yPlus) + P);
-                scalar magUc = uTau/kappa*log(E*yPlusTherm) - mag(Uw[faceI]);
+                scalar B = qDot[faceI]*Prt_*(1.0/kappa_*log(E_*yPlus) + P);
+                scalar magUc = uTau/kappa_*log(E_*yPlusTherm) - mag(Uw[faceI]);
                 scalar C =
                     0.5*rhow[faceI]*uTau
-                   *(Prt*sqr(magUp[faceI]) + (Pr - Prt)*sqr(magUc));
+                   *(Prt_*sqr(magUp[faceI]) + (Pr - Prt_)*sqr(magUc));
                 alphaEff = A/(B + C + VSMALL);
             }
 
@@ -281,7 +289,7 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
             {
                 Info<< "    uTau           = " << uTau << nl
                     << "    Pr             = " << Pr << nl
-                    << "    Prt            = " << Prt << nl
+                    << "    Prt            = " << Prt_ << nl
                     << "    qDot           = " << qDot[faceI] << nl
                     << "    yPlus          = " << yPlus << nl
                     << "    yPlusTherm     = " << yPlusTherm << nl
@@ -296,6 +304,16 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
             alphaSgsw[faceI] = 0.0;
         }
     }
+}
+
+
+void alphaSgsJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
+{
+    fvPatchField<scalar>::write(os);
+    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    writeEntry("value", os);
 }
 
 

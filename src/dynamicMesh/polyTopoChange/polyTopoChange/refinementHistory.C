@@ -1022,8 +1022,7 @@ void Foam::refinementHistory::compact()
     }
 
     splitCells_.transfer(newSplitCells);
-    freeSplitCells_.clear();
-    freeSplitCells_.labelList::clear();
+    freeSplitCells_.clearStorage();
 
 
     if (debug)
@@ -1142,7 +1141,7 @@ bool Foam::refinementHistory::writeData(Ostream& os) const
 
 Foam::Istream& Foam::operator>>(Istream& is, refinementHistory& rh)
 {
-    rh.freeSplitCells_.clear();
+    rh.freeSplitCells_.clearStorage();
 
     is >> rh.splitCells_ >> rh.visibleCells_;
 

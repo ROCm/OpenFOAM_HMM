@@ -56,12 +56,6 @@ scaleSimilarity::scaleSimilarity
 }
 
 
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-scaleSimilarity::~scaleSimilarity()
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 tmp<volScalarField> scaleSimilarity::k() const

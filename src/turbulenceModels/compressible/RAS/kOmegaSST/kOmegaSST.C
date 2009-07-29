@@ -134,11 +134,11 @@ kOmegaSST::kOmegaSST
             0.85616
         )
     ),
-    alphah_
+    Prt_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphah",
+            "Prt",
             coeffDict_,
             1.0
         )
@@ -328,7 +328,7 @@ bool kOmegaSST::read()
         alphaK2_.readIfPresent(coeffDict());
         alphaOmega1_.readIfPresent(coeffDict());
         alphaOmega2_.readIfPresent(coeffDict());
-        alphah_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
         gamma1_.readIfPresent(coeffDict());
         gamma2_.readIfPresent(coeffDict());
         beta1_.readIfPresent(coeffDict());

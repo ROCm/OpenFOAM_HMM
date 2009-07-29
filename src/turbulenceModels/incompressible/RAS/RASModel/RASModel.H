@@ -86,20 +86,6 @@ protected:
         //- Model coefficients dictionary
         dictionary coeffDict_;
 
-        // Wall function properties
-
-            //- Wall function dictionary
-            dictionary wallFunctionDict_;
-
-            dimensionedScalar kappa_;
-
-            dimensionedScalar E_;
-
-            dimensionedScalar Cmu_;
-
-        //- Value of y+ at the edge of the laminar sublayer
-        scalar yPlusLam_;
-
         //- Lower limit of k
         dimensionedScalar k0_;
 
@@ -182,120 +168,92 @@ public:
 
 
     //- Destructor
-    virtual ~RASModel();
+    virtual ~RASModel()
+    {}
 
 
     // Member Functions
 
-        //- Return the value of k0 which k is not allowed to be less than
-        const dimensionedScalar& k0() const
-        {
-            return k0_;
-        }
+        // Access
 
-        //- Return the value of epsilon0 which epsilon is not allowed to be
-        //  less than
-        const dimensionedScalar& epsilon0() const
-        {
-            return epsilon0_;
-        }
+            //- Return the value of k0 which k is not allowed to be less than
+            const dimensionedScalar& k0() const
+            {
+                return k0_;
+            }
 
-        //- Return the value of epsilonSmall which is added to epsilon when
-        //  calculating nut
-        const dimensionedScalar& epsilonSmall() const
-        {
-            return epsilonSmall_;
-        }
+            //- Return the value of epsilon0 which epsilon is not allowed to be
+            //  less than
+            const dimensionedScalar& epsilon0() const
+            {
+                return epsilon0_;
+            }
 
-        //- Return the value of omega0 which epsilon is not allowed to be
-        //  less than
-        const dimensionedScalar& omega0() const
-        {
-            return omega0_;
-        }
+            //- Return the value of epsilonSmall which is added to epsilon when
+            //  calculating nut
+            const dimensionedScalar& epsilonSmall() const
+            {
+                return epsilonSmall_;
+            }
 
-        //- Return the value of omegaSmall which is added to epsilon when
-        //  calculating nut
-        const dimensionedScalar& omegaSmall() const
-        {
-            return omegaSmall_;
-        }
+            //- Return the value of omega0 which epsilon is not allowed to be
+            //  less than
+            const dimensionedScalar& omega0() const
+            {
+                return omega0_;
+            }
 
-        //- Allow k0 to be changed
-        dimensionedScalar& k0()
-        {
-            return k0_;
-        }
+            //- Return the value of omegaSmall which is added to epsilon when
+            //  calculating nut
+            const dimensionedScalar& omegaSmall() const
+            {
+                return omegaSmall_;
+            }
 
-        //- Allow epsilon0 to be changed
-        dimensionedScalar& epsilon0()
-        {
-            return epsilon0_;
-        }
+            //- Allow k0 to be changed
+            dimensionedScalar& k0()
+            {
+                return k0_;
+            }
 
-        //- Allow epsilonSmall to be changed
-        dimensionedScalar& epsilonSmall()
-        {
-            return epsilonSmall_;
-        }
+            //- Allow epsilon0 to be changed
+            dimensionedScalar& epsilon0()
+            {
+                return epsilon0_;
+            }
 
-        //- Allow omega0 to be changed
-        dimensionedScalar& omega0()
-        {
-            return omega0_;
-        }
+            //- Allow epsilonSmall to be changed
+            dimensionedScalar& epsilonSmall()
+            {
+                return epsilonSmall_;
+            }
 
-        //- Allow omegaSmall to be changed
-        dimensionedScalar& omegaSmall()
-        {
-            return omegaSmall_;
-        }
+            //- Allow omega0 to be changed
+            dimensionedScalar& omega0()
+            {
+                return omega0_;
+            }
 
-        //- Return kappa for use in wall-functions
-        dimensionedScalar kappa() const
-        {
-            return kappa_;
-        }
+            //- Allow omegaSmall to be changed
+            dimensionedScalar& omegaSmall()
+            {
+                return omegaSmall_;
+            }
 
-        //- Return E for use in wall-functions
-        dimensionedScalar E() const
-        {
-            return E_;
-        }
+            //- Return the near wall distances
+            const nearWallDist& y() const
+            {
+                return y_;
+            }
 
-        //- Return Cmu for use in wall-functions
-        dimensionedScalar Cmu() const
-        {
-            return Cmu_;
-        }
+            //- Calculate y+ at the edge of the laminar sublayer
+            scalar yPlusLam(const scalar kappa, const scalar E) const;
 
-        //- Return the near wall distances
-        const nearWallDist& y() const
-        {
-            return y_;
-        }
-
-        //- Calculate y+ at the edge of the laminar sublayer
-        scalar yPlusLam(const scalar kappa, const scalar E) const;
-
-        //- Return y+ at the edge of the laminar sublayer
-        //  for use in wall-functions
-        scalar yPlusLam() const
-        {
-            return yPlusLam_;
-        }
-
-        //- Const access to the coefficients dictionary
-        const dictionary& coeffDict() const
-        {
-            return coeffDict_;
-        }
-
-        //- Const access to the wall functions coefficients dictionary
-        const dictionary& walLFunctionDict() const
-        {
-            return wallFunctionDict_;
-        }
+            //- Const access to the coefficients dictionary
+            const dictionary& coeffDict() const
+            {
+                return coeffDict_;
+            }
 
 
         //- Return the turbulence viscosity
@@ -309,9 +267,6 @@ public:
                 new volScalarField("nuEff", nut() + nu())
             );
         }
-
-        //- Return yPlus for the given patch
-        virtual tmp<scalarField> yPlus(const label patchI) const;
 
         //- Return the turbulence kinetic energy
         virtual tmp<volScalarField> k() const = 0;
@@ -327,6 +282,13 @@ public:
 
         //- Return the source term for the momentum equation
         virtual tmp<fvVectorMatrix> divDevReff(volVectorField& U) const = 0;
+
+        //- Return yPlus for the given patch
+        virtual tmp<scalarField> yPlus
+        (
+            const label patchI,
+            const scalar Cmu
+        ) const;
 
         //- Solve the turbulence equations and correct the turbulence viscosity
         virtual void correct() = 0;

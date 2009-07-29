@@ -37,7 +37,13 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(sampledCuttingPlane, 0);
-    addNamedToRunTimeSelectionTable(sampledSurface, sampledCuttingPlane, word, cuttingPlane);
+    addNamedToRunTimeSelectionTable
+    (
+        sampledSurface,
+        sampledCuttingPlane,
+        word,
+        cuttingPlane
+    );
 }
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -118,7 +124,7 @@ void Foam::sampledCuttingPlane::createGeometry()
 
     // Internal field
     {
-        const pointField& cc = fvm.C();
+        const pointField& cc = fvm.cellCentres();
         scalarField& fld = cellDistance.internalField();
 
         forAll(cc, i)
@@ -130,14 +136,45 @@ void Foam::sampledCuttingPlane::createGeometry()
 
     // Patch fields
     {
-        forAll(fvm.C().boundaryField(), patchI)
+        forAll(cellDistance.boundaryField(), patchI)
         {
-            const pointField& cc = fvm.C().boundaryField()[patchI];
-            fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
-
-            forAll(fld, i)
+            if
+            (
+                isA<emptyFvPatchScalarField>
+                (
+                    cellDistance.boundaryField()[patchI]
+                )
+            )
             {
-                fld[i] =  (cc[i] - plane_.refPoint()) & plane_.normal();
+                cellDistance.boundaryField().set
+                (
+                    patchI,
+                    new calculatedFvPatchScalarField
+                    (
+                        fvm.boundary()[patchI],
+                        cellDistance
+                    )
+                );
+
+                const polyPatch& pp = fvm.boundary()[patchI].patch();
+                pointField::subField cc = pp.patchSlice(fvm.faceCentres());
+
+                fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
+                fld.setSize(pp.size());
+                forAll(fld, i)
+                {
+                    fld[i] = (cc[i] - plane_.refPoint()) & plane_.normal();
+                }
+            }
+            else
+            {
+                const pointField& cc = fvm.C().boundaryField()[patchI];
+                fvPatchScalarField& fld = cellDistance.boundaryField()[patchI];
+
+                forAll(fld, i)
+                {
+                    fld[i] =  (cc[i] - plane_.refPoint()) & plane_.normal();
+                }
             }
         }
     }

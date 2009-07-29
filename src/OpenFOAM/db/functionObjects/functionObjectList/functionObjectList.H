@@ -133,6 +133,9 @@ public:
         //- Return true if the List is empty (ie, size() is zero).
         using PtrList<functionObject>::empty;
 
+        //- Access to the functionObjects
+        using PtrList<functionObject>::operator[];
+
         //- Clear the list of function objects
         virtual void clear();
 

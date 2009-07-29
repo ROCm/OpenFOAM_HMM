@@ -65,6 +65,15 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             0.09
         )
     ),
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa",
+            coeffDict_,
+            0.41
+        )
+    ),
     Clg1_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -146,29 +155,29 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             0.0
         )
     ),
-    alphaR_
+    sigmaR_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaR",
+            "sigmaR",
             coeffDict_,
-            1.22
+            0.81967
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
-    alphah_
+    Prt_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphah",
+            "Prt",
             coeffDict_,
             1.0
         )
@@ -311,6 +320,7 @@ bool LaunderGibsonRSTM::read()
     if (RASModel::read())
     {
         Cmu_.readIfPresent(coeffDict());
+        kappa_.readIfPresent(coeffDict());
         Clg1_.readIfPresent(coeffDict());
         Clg2_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
@@ -319,9 +329,9 @@ bool LaunderGibsonRSTM::read()
         Ceps_.readIfPresent(coeffDict());
         C1Ref_.readIfPresent(coeffDict());
         C2Ref_.readIfPresent(coeffDict());
-        alphaR_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
-        alphah_.readIfPresent(coeffDict());
+        sigmaR_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
 
         couplingFactor_.readIfPresent(coeffDict());
 

@@ -81,13 +81,13 @@ LamBremhorstKE::LamBremhorstKE
             1.92
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
 
@@ -207,7 +207,7 @@ bool LamBremhorstKE::read()
         Cmu_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -239,8 +239,7 @@ void LamBremhorstKE::correct()
     Rt_ = sqr(k_)/(nu()*epsilon_);
     volScalarField Ry = sqrt(k_)*y_/nu();
 
-    fMu_ = sqr(scalar(1) - exp(-0.0165*Ry))
-        *(scalar(1) + 20.5/(Rt_ + SMALL));
+    fMu_ = sqr(scalar(1) - exp(-0.0165*Ry))*(scalar(1) + 20.5/(Rt_ + SMALL));
 
     volScalarField f1 = scalar(1) + pow(0.05/(fMu_ + SMALL), 3);
     volScalarField f2 = scalar(1) - exp(-sqr(Rt_));

@@ -122,22 +122,22 @@ realizableKE::realizableKE
             1.9
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
             1.0
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.833333
+            1.2
         )
     ),
 
@@ -248,8 +248,8 @@ bool realizableKE::read()
         Cmu_.readIfPresent(coeffDict());
         A0_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
 
         return true;
     }

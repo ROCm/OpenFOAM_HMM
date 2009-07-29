@@ -1,4 +1,5 @@
 EXE_INC = \
+    -I../bubbleFoam \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/transportModels/incompressible/lnInclude \
     -IturbulenceModel \
@@ -6,7 +7,7 @@ EXE_INC = \
     -IinterfacialModels/lnInclude \
     -IphaseModel/lnInclude \
     -Iaveraging
-        
+
 EXE_LIBS = \
     -lEulerianInterfacialModels \
     -lfiniteVolume \

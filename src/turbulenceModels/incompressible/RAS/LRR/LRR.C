@@ -118,13 +118,13 @@ LRR::LRR
             0.15
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
     couplingFactor_
@@ -266,7 +266,7 @@ bool LRR::read()
         C2_.readIfPresent(coeffDict());
         Cs_.readIfPresent(coeffDict());
         Ceps_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
 
         couplingFactor_.readIfPresent(coeffDict());
 

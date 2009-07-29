@@ -204,19 +204,15 @@ Foam::Ostream& Foam::PackedList<nBits>::iteratorBase::print(Ostream& os) const
 template<unsigned nBits>
 Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
 {
-    os  << "PackedList<" << label(nBits) << ">"
+    const label packLen = packedLength(size_);
+
+    os  << "PackedList<" << nBits << ">"
         << " max_value:" << max_value()
         << " packing:"   << packing() << nl
-        << "values: " << size_ << "/" << capacity() << "( ";
-    forAll(*this, i)
-    {
-        os << get(i) << ' ';
-    }
-
-    label packLen = packedLength(size_);
-
-    os  << ")\n"
-        << "storage: " << packLen << "/" << StorageList::size() << "( ";
+        << " count: "     << count() << nl
+        << " size/capacity: " << size_ << "/" << capacity() << nl
+        << " storage/capacity: " << packLen << "/" << StorageList::size()
+        << "\n(\n";
 
     // mask value for complete segments
     unsigned int mask = maskLower(packing());
@@ -240,7 +236,7 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
             }
         }
 
-        for (unsigned int testBit = (1 << max_bits()); testBit; testBit >>= 1)
+        for (unsigned int testBit = (1u << max_bits()); testBit; testBit >>= 1)
         {
             if (mask & testBit)
             {
@@ -250,15 +246,15 @@ Foam::Ostream& Foam::PackedList<nBits>::print(Ostream& os) const
                 }
                 else
                 {
-                    os << '0';
+                    os << '-';
                 }
             }
             else
             {
-                os << '.';
+                os << 'x';
             }
         }
-        cout << ' ';
+        os << '\n';
     }
     os << ")\n";
 

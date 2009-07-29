@@ -34,10 +34,10 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mutSpalartAllmarasWallFunctionFvPatchScalarField_H
-#define mutSpalartAllmarasWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutSpalartAllmarasWallFunctionFvPatchScalarField_H
+#define compressibleMutSpalartAllmarasWallFunctionFvPatchScalarField_H
 
-#include "fixedValueFvPatchFields.H"
+#include "mutWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,18 +54,17 @@ namespace RASModels
 
 class mutSpalartAllmarasWallFunctionFvPatchScalarField
 :
-    public fixedValueFvPatchScalarField
+    public mutWallFunctionFvPatchScalarField
 {
-    // Private data
+protected:
 
-        //- Name of velocity field
-        word UName_;
+    // Protected member functions
 
-        //- Name of density field
-        word rhoName_;
+        //- Calculate the turbulence viscosity
+        virtual tmp<scalarField> calcMut() const;
 
-        //- Name of laminar viscosity field
-        word muName_;
+        //- Calculate the friction velocity
+        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
 
 
 public:
@@ -141,14 +140,14 @@ public:
 
         // Evaluation functions
 
-            //- Evaluate the patchField
-            virtual void evaluate
-            (
-                const Pstream::commsTypes commsType=Pstream::blocking
-            );
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
 
-        //- Write
-        virtual void write(Ostream& os) const;
+
+        // I-O
+
+            //- Write
+            virtual void write(Ostream& os) const;
 };
 
 

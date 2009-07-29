@@ -75,7 +75,6 @@ LESModel::LESModel
         )
     ),
 
-    turbulence_(lookup("turbulence")),
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDictPtr(type + "Coeffs")),
 
@@ -125,8 +124,8 @@ autoPtr<LESModel> LESModel::New
     {
         FatalErrorIn
         (
-            "LESModel::select(const volVectorField&, const "
-            "surfaceScalarField&, transportModel&)"
+            "LESModel::New(const volVectorField& U, const "
+            "surfaceScalarField& phi, transportModel&)"
         )   << "Unknown LESModel type " << modelName
             << endl << endl
             << "Valid LESModel types are :" << endl
@@ -136,12 +135,6 @@ autoPtr<LESModel> LESModel::New
 
     return autoPtr<LESModel>(cstrIter()(U, phi, transport));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-LESModel::~LESModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

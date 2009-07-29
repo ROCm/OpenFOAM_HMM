@@ -14,6 +14,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 #inputMode  merge
+#includeIfPresent "someUnknownFile"
+#includeIfPresent "$FOAM_CASE/someUnknownFile"
+#includeIfPresent "$FOAM_CASE/someUnknownFile-$FOAM_CASENAME"
 
 internalField   uniform 1;
 

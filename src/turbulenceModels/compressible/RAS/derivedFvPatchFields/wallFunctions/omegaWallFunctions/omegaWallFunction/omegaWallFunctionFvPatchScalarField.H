@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,8 +33,8 @@ SourceFiles
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef omegaWallFunctionFvPatchScalarField_H
-#define omegaWallFunctionFvPatchScalarField_H
+#ifndef compressibleOmegaWallFunctionFvPatchScalarField_H
+#define compressibleOmegaWallFunctionFvPatchScalarField_H
 
 #include "fixedInternalValueFvPatchField.H"
 
@@ -74,6 +74,15 @@ class omegaWallFunctionFvPatchScalarField
 
         //- Name of turbulent viscosity field
         word mutName_;
+
+        //- Cmu coefficient
+        scalar Cmu_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
 
 
     // Private member functions

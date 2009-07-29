@@ -1,5 +1,7 @@
 {
-    scalar Cmu25 = ::pow(Cmu, 0.25);
+    scalar Cmu25 = ::pow(Cmu.value(), 0.25);
+    scalar kappa_ = kappa.value();
+    scalar E_ = E.value();
 
     const fvPatchList& patches = mesh.boundary();
 
@@ -26,7 +28,7 @@
                 {
                     mutw[facei] =
                         muw[facei]
-                       *(yPlus*kappa/::log(E*yPlus) - 1);
+                       *(yPlus*kappa_/::log(E_*yPlus) - 1);
                 }
                 else
                 {

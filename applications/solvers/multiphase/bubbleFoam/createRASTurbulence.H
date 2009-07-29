@@ -16,51 +16,92 @@
         RASProperties.lookup("turbulence")
     );
 
-    dictionary kEpsilonCoeffs
+    dictionary kEpsilonDict
     (
-        RASProperties.subDict("kEpsilonCoeffs")
+        RASProperties.subDictPtr("kEpsilonCoeffs")
     );
 
-
-    scalar Cmu
+    dimensionedScalar Cmu
     (
-        readScalar(kEpsilonCoeffs.lookup("Cmu"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "Cmu",
+            kEpsilonDict,
+            0.09
+        )
     );
 
-    scalar C1
+    dimensionedScalar C1
     (
-        readScalar(kEpsilonCoeffs.lookup("C1"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "C1",
+            kEpsilonDict,
+            1.44
+        )
     );
 
-    scalar C2
+    dimensionedScalar C2
     (
-        readScalar(kEpsilonCoeffs.lookup("C2"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "C2",
+            kEpsilonDict,
+            1.92
+        )
     );
 
-    scalar alphak
+    dimensionedScalar alphak
     (
-        readScalar(kEpsilonCoeffs.lookup("alphak"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "alphaEps",
+            kEpsilonDict,
+            1.0
+        )
     );
 
-    scalar alphaEps
+    dimensionedScalar alphaEps
     (
-        readScalar(kEpsilonCoeffs.lookup("alphaEps"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "alphaEps",
+            kEpsilonDict,
+            0.76923
+        )
     );
 
-    dictionary wallFunctionCoeffs
+    dictionary wallFunctionDict
     (
-        RASProperties.subDict("wallFunctionCoeffs")
+        RASProperties.subDictPtr("wallFunctionCoeffs")
     );
 
-    scalar kappa
+    dimensionedScalar kappa
     (
-        readScalar(wallFunctionCoeffs.lookup("kappa"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "kappa",
+            wallFunctionDict,
+            0.4187
+        )
     );
 
-    scalar E
+    dimensionedScalar E
     (
-        readScalar(wallFunctionCoeffs.lookup("E"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "E",
+            wallFunctionDict,
+            9.0
+        )
     );
+
+    if (RASProperties.lookupOrDefault<Switch>("printCoeffs", false))
+    {
+        Info<< "kEpsilonCoeffs" << kEpsilonDict << nl
+            << "wallFunctionCoeffs" << wallFunctionDict << endl;
+    }
+
 
     nearWallDist y(mesh);
 

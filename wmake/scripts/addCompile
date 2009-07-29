@@ -53,30 +53,13 @@ else
     cat > $depName
 fi
 
+sed -e s%".*.o.*:"%'$(OBJECTS_DIR)/'"$objectName\:"%  \
+    -e s%$WM_PROJECT_DIR%'$(WM_PROJECT_DIR)'%         \
+    >> $depName
 
-if [ "$sub" = java ]
-then
-
-    sed -e s%"\(.*\).class.*:"%'$(CLASSES_DIR)/'"\1.class\:"%   \
-        -e s%$WM_PROJECT_DIR%'$(WM_PROJECT_DIR)'%               \
-        >> $depName
-
-    echo '$(CLASSES_DIR)/'$sourceDir/$className': $(EXE_DEP)' >> $depName
-    echo '$(CLASSES_DIR)/'$sourceDir/$className':' >> $depName
-    echo '	@SOURCE_DIR='$sourceDir '\' >> $depName
-    echo '	SOURCE='$1' ; $('$sub'toclass)' >> $depName
-
-else
-
-    sed -e s%".*.o.*:"%'$(OBJECTS_DIR)/'"$objectName\:"%  \
-        -e s%$WM_PROJECT_DIR%'$(WM_PROJECT_DIR)'%         \
-        >> $depName
-
-    echo '$(OBJECTS_DIR)/'$objectName': $(EXE_DEP)' >> $depName
-    echo '$(OBJECTS_DIR)/'$objectName':' >> $depName
-    echo '	@SOURCE_DIR='$sourceDir >> $depName
-    echo '	SOURCE='$1' ; $('$sub'too)' >> $depName
-
-fi
+echo '$(OBJECTS_DIR)/'$objectName': $(EXE_DEP)' >> $depName
+echo '$(OBJECTS_DIR)/'$objectName':' >> $depName
+echo '	@SOURCE_DIR='$sourceDir >> $depName
+echo '	SOURCE='$1' ; $('$sub'too)' >> $depName
 
 #------------------------------------------------------------------------------

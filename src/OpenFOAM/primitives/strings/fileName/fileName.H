@@ -128,6 +128,13 @@ public:
         //- Is this character valid for a fileName?
         inline static bool valid(char);
 
+        //- Cleanup file name
+        //  eg, remove repeated slashes, etc.
+        bool clean();
+
+        //- Cleanup file name
+        //  eg, remove repeated slashes, etc.
+        fileName clean() const;
 
         // Interogation
 

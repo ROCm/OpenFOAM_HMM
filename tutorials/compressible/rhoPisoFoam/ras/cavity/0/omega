@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -24,12 +24,18 @@ boundaryField
     movingWall
     {
         type            compressible::omegaWallFunction;
-        value           uniform 0;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 2.6;
     }
     fixedWalls
     {
         type            compressible::omegaWallFunction;
-        value           uniform 0;
+        Cmu             0.09;
+        kappa           0.41;
+        E               9.8;
+        value           uniform 2.6;
     }
     frontAndBack
     {

@@ -107,29 +107,29 @@ LaunderSharmaKE::LaunderSharmaKE
             -0.33
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
             1.0
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
-    alphah_
+    Prt_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphah",
+            "Prt",
             coeffDict_,
             1.0
         )
@@ -257,9 +257,9 @@ bool LaunderSharmaKE::read()
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
         C3_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
-        alphah_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
 
         return true;
     }

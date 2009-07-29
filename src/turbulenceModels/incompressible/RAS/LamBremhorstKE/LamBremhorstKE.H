@@ -62,7 +62,7 @@ class LamBremhorstKE
         dimensionedScalar Cmu_;
         dimensionedScalar C1_;
         dimensionedScalar C2_;
-        dimensionedScalar alphaEps_;
+        dimensionedScalar sigmaEps_;
 
         volScalarField k_;
         volScalarField epsilon_;
@@ -118,7 +118,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

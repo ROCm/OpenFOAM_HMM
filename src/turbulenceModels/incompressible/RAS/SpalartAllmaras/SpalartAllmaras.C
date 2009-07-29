@@ -113,13 +113,22 @@ SpalartAllmaras::SpalartAllmaras
 :
     RASModel(typeName, U, phi, lamTransportModel),
 
-    alphaNut_
+    sigmaNut_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaNut",
+            "sigmaNut",
             coeffDict_,
-            1.5
+            0.66666
+        )
+    ),
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa",
+            coeffDict_,
+            0.41
         )
     ),
 
@@ -141,7 +150,7 @@ SpalartAllmaras::SpalartAllmaras
             0.622
         )
     ),
-    Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
+    Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -217,7 +226,7 @@ tmp<volScalarField> SpalartAllmaras::DnuTildaEff() const
 {
     return tmp<volScalarField>
     (
-        new volScalarField("DnuTildaEff", alphaNut_*nuTilda_ + nu())
+        new volScalarField("DnuTildaEff", nuTilda_/sigmaNut_ + nu())
     );
 }
 
@@ -316,11 +325,11 @@ bool SpalartAllmaras::read()
 {
     if (RASModel::read())
     {
-        alphaNut_.readIfPresent(coeffDict());
+        sigmaNut_.readIfPresent(coeffDict());
 
         Cb1_.readIfPresent(coeffDict());
         Cb2_.readIfPresent(coeffDict());
-        Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
+        Cw1_ = Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_;
         Cw2_.readIfPresent(coeffDict());
         Cw3_.readIfPresent(coeffDict());
         Cv1_.readIfPresent(coeffDict());
@@ -362,7 +371,7 @@ void SpalartAllmaras::correct()
       + fvm::div(phi_, nuTilda_)
       - fvm::Sp(fvc::div(phi_), nuTilda_)
       - fvm::laplacian(DnuTildaEff(), nuTilda_)
-      - alphaNut_*Cb2_*magSqr(fvc::grad(nuTilda_))
+      - Cb2_/sigmaNut_*magSqr(fvc::grad(nuTilda_))
      ==
         Cb1_*Stilda*nuTilda_
       - fvm::Sp(Cw1_*fw(Stilda)*nuTilda_/sqr(d_), nuTilda_)

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 #include "alphatWallFunctionFvPatchScalarField.H"
 #include "mutWallFunctionFvPatchScalarField.H"
 #include "epsilonWallFunctionFvPatchScalarField.H"
-#include "kQRWallFunctionFvPatchField.H"
+#include "kqRWallFunctionFvPatchField.H"
 #include "omegaWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -230,7 +230,7 @@ tmp<volScalarField> autoCreateK
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kQRWallFunctionFvPatchField<scalar>
+            RASModels::kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -249,7 +249,7 @@ tmp<volScalarField> autoCreateQ
         autoCreateWallFunctionField
         <
             scalar,
-            RASModels::kQRWallFunctionFvPatchField<scalar>
+            RASModels::kqRWallFunctionFvPatchField<scalar>
         >
         (
             fieldName,
@@ -268,7 +268,7 @@ tmp<volSymmTensorField> autoCreateR
         autoCreateWallFunctionField
         <
             symmTensor,
-            RASModels::kQRWallFunctionFvPatchField<symmTensor>
+            RASModels::kqRWallFunctionFvPatchField<symmTensor>
         >
         (
             fieldName,

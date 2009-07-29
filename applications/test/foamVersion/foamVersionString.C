@@ -27,6 +27,7 @@ Application
 
 Description
     Print the OpenFOAM version strings.
+
     Simultaneously the smallest possible program to use a minimal bit of
     the OpenFOAM library
 
@@ -37,9 +38,9 @@ Description
 
 int main()
 {
-    std::cerr
-        << "build   " << Foam::FOAMbuild << "\n"
-        << "version " << Foam::FOAMversion << "\n";
+    std::cout
+        << "version " << Foam::FOAMversion << "\n"
+        << "build   " << Foam::FOAMbuild << "\n";
 
     return 0;
 }

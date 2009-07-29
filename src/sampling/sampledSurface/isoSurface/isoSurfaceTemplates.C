@@ -81,7 +81,11 @@ Foam::isoSurface::adaptPatchFields
     {
         const polyPatch& pp = patches[patchI];
 
-        if (isA<emptyPolyPatch>(pp))
+        if
+        (
+            isA<emptyPolyPatch>(pp)
+         && pp.size() != sliceFld.boundaryField()[patchI].size()
+        )
         {
             // Clear old value. Cannot resize it since is a slice.
             sliceFld.boundaryField().set(patchI, NULL);
@@ -96,11 +100,18 @@ Foam::isoSurface::adaptPatchFields
                     sliceFld
                 )
             );
-            sliceFld.boundaryField()[patchI] ==
-                mesh.boundary()[patchI].patchInternalField
-                (
-                    sliceFld
-                );
+
+            // Note: cannot use patchInternalField since uses emptyFvPatch::size
+            // Do our own internalField instead.
+            const unallocLabelList& faceCells =
+                mesh.boundary()[patchI].patch().faceCells();
+
+            Field<Type>& pfld = sliceFld.boundaryField()[patchI];
+            pfld.setSize(faceCells.size());
+            forAll(faceCells, i)
+            {
+                pfld[i] = sliceFld[faceCells[i]];
+            }
         }
         else if (isA<cyclicPolyPatch>(pp))
         {

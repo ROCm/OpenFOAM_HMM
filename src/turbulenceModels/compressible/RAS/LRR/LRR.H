@@ -40,9 +40,9 @@ Description
             C2          1.92;
             Cs          0.25;
             Ceps        0.15;
-            alphah      1.0;    // only for compressible
-            alphaEps    0.76923;
-            alphaR      1.22;   // only for compressible
+            Prt         1.0;        // only for compressible
+            sigmaEps    1.3;
+            sigmaR      0.81967;    // only for compressible
             couplingFactor  0.0;    // only for incompressible
         }
     @endverbatim
@@ -77,27 +77,32 @@ class LRR
 {
     // Private data
 
-        dimensionedScalar Cmu_;
+        // Model coefficients
 
-        dimensionedScalar Clrr1_;
-        dimensionedScalar Clrr2_;
+            dimensionedScalar Cmu_;
 
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar Cs_;
-        dimensionedScalar Ceps_;
+            dimensionedScalar Clrr1_;
+            dimensionedScalar Clrr2_;
 
-        dimensionedScalar couplingFactor_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar Cs_;
+            dimensionedScalar Ceps_;
 
-        dimensionedScalar alphaR_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar alphah_;
+            dimensionedScalar couplingFactor_;
 
-        volSymmTensorField R_;
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField mut_;
-        volScalarField alphat_;
+            dimensionedScalar sigmaR_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar Prt_;
+
+
+        // Fields
+
+            volSymmTensorField R_;
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField mut_;
+            volScalarField alphat_;
 
 
 public:
@@ -129,7 +134,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DREff", alphaR_*mut_ + mu())
+                new volScalarField("DREff", mut_/sigmaR_ + mu())
             );
         }
 
@@ -138,7 +143,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -153,7 +158,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_ + alpha())
             );
         }
 

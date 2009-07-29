@@ -45,15 +45,19 @@ setenv WM_LINK_LANGUAGE c++
 setenv WM_OPTIONS $WM_ARCH$WM_COMPILER$WM_PRECISION_OPTION$WM_COMPILE_OPTION
 
 # base configuration
-setenv FOAM_SRC $WM_PROJECT_DIR/src
-setenv FOAM_LIB $WM_PROJECT_DIR/lib
-setenv FOAM_LIBBIN $WM_PROJECT_DIR/lib/$WM_OPTIONS
 setenv FOAM_APP $WM_PROJECT_DIR/applications
 setenv FOAM_APPBIN $WM_PROJECT_DIR/applications/bin/$WM_OPTIONS
+setenv FOAM_LIB $WM_PROJECT_DIR/lib
+setenv FOAM_LIBBIN $WM_PROJECT_DIR/lib/$WM_OPTIONS
+setenv FOAM_SRC $WM_PROJECT_DIR/src
+
+# shared site configuration - similar naming convention as ~OpenFOAM expansion
+setenv FOAM_SITE_APPBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/bin/$WM_OPTIONS
+setenv FOAM_SITE_LIBBIN $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION/lib/$WM_OPTIONS
 
 # user configuration
-setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
 setenv FOAM_USER_APPBIN $WM_PROJECT_USER_DIR/applications/bin/$WM_OPTIONS
+setenv FOAM_USER_LIBBIN $WM_PROJECT_USER_DIR/lib/$WM_OPTIONS
 
 # convenience
 setenv FOAM_TUTORIALS $WM_PROJECT_DIR/tutorials
@@ -65,8 +69,10 @@ setenv FOAM_RUN $WM_PROJECT_USER_DIR/run
 set path=($WM_DIR $WM_PROJECT_DIR/bin $path)
 
 _foamAddPath $FOAM_APPBIN
+_foamAddPath $FOAM_SITE_APPBIN
 _foamAddPath $FOAM_USER_APPBIN
 _foamAddLib  $FOAM_LIBBIN
+_foamAddLib  $FOAM_SITE_LIBBIN
 _foamAddLib  $FOAM_USER_LIBBIN
 
 
@@ -118,26 +124,12 @@ unset MPI_ARCH_PATH
 
 switch ("$WM_MPLIB")
 case OPENMPI:
-    set mpi_version=openmpi-1.3.2
+    set mpi_version=openmpi-1.3.3
     setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
     setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
 
     # Tell OpenMPI where to find its install directory
     setenv OPAL_PREFIX $MPI_ARCH_PATH
-
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
-
-    setenv FOAM_MPI_LIBBIN $FOAM_LIBBIN/$mpi_version
-    unset mpi_version
-    breaksw
-
-case LAM:
-    set mpi_version=lam-7.1.4
-    setenv MPI_HOME $WM_THIRD_PARTY_DIR/$mpi_version
-    setenv MPI_ARCH_PATH $MPI_HOME/platforms/$WM_OPTIONS
-    setenv LAMHOME $WM_THIRD_PARTY_DIR/$mpi_version
-    # note: LAMHOME is deprecated, should probably point to MPI_ARCH_PATH too
 
     _foamAddPath $MPI_ARCH_PATH/bin
     _foamAddLib  $MPI_ARCH_PATH/lib

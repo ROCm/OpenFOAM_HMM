@@ -26,7 +26,8 @@ Application
     dsmcFoam
 
 Description
-    Direct Simulation Monte Carlo Solver for 3D, transient, multi-species flows
+    Direct simulation Monte Carlo (DSMC) solver for 3D, transient, multi-
+    species flows
 
 \*---------------------------------------------------------------------------*/
 

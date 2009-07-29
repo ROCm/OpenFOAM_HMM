@@ -23,11 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Makes internal faces into boundary faces. Does not duplicate points. Use
-    mergeOrSplitBaffles if you want this.
+    Makes internal faces into boundary faces. Does not duplicate points, unlike
+    mergeOrSplitBaffles.
 
-    Note: if any coupled patch face is selected for baffling automatically
-    the opposite member is selected for baffling as well. Note that this
+    Note: if any coupled patch face is selected for baffling the opposite
+    member has to be selected for baffling as well. Note that this
     is the same as repatching. This was added only for convenience so
     you don't have to filter coupled boundary out of your set.
 
@@ -128,6 +128,7 @@ int main(int argc, char *argv[])
     argList::validArgs.append("faceZone");
     argList::validArgs.append("patch");
     argList::validOptions.insert("additionalPatches", "(patch2 .. patchN)");
+    argList::validOptions.insert("internalFacesOnly", "");
     argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
@@ -183,6 +184,12 @@ int main(int argc, char *argv[])
 
     bool overwrite = args.optionFound("overwrite");
 
+    bool internalFacesOnly = args.optionFound("internalFacesOnly");
+
+    if (internalFacesOnly)
+    {
+        Info<< "Not converting faces on non-coupled patches." << nl << endl;
+    }
 
 
     // Read objects in time directory
@@ -234,7 +241,21 @@ int main(int argc, char *argv[])
     //   guarantees that when e.g. creating a cyclic all faces from one
     //   side come first and faces from the other side next.
 
+    // Whether first use of face (modify) or consecutive (add)
     PackedBoolList modifiedFace(mesh.nFaces());
+    // Never modify coupled faces
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                modifiedFace[pp.start()+i] = 1;
+            }
+        }
+    }
+    label nModified = 0;
 
     forAll(newPatches, i)
     {
@@ -281,6 +302,8 @@ int main(int argc, char *argv[])
                         modifiedFace                // modify or add status
                     );
                 }
+
+                nModified++;
             }
         }
 
@@ -333,16 +356,27 @@ int main(int argc, char *argv[])
         // Modify any boundary faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
+        // Normal boundary:
+        // - move to new patch. Might already be back-to-back baffle
+        // you want to add cyclic to. Do warn though.
+        //
+        // Processor boundary:
+        // - do not move to cyclic
+        // - add normal patches though.
+
+        // For warning once per patch.
+        labelHashSet patchWarned;
+
         forAll(patches, patchI)
         {
             const polyPatch& pp = patches[patchI];
 
-            if (patches[newPatchI].coupled() && pp.coupled())
+            if (pp.coupled() && patches[newPatchI].coupled())
             {
                 // Do not allow coupled faces to be moved to different coupled
                 // patches.
             }
-            else
+            else if (pp.coupled() || !internalFacesOnly)
             {
                 forAll(pp, i)
                 {
@@ -352,6 +386,19 @@ int main(int argc, char *argv[])
 
                     if (zoneFaceI != -1)
                     {
+                        if (patchWarned.insert(patchI))
+                        {
+                            WarningIn(args.executable())
+                                << "Found boundary face (in patch " << pp.name()
+                                << ") in faceZone " << fZone.name()
+                                << " to convert to baffle patch "
+                                << patches[newPatchI].name()
+                                << endl
+                                << "    Run with -internalFacesOnly option"
+                                << " if you don't wish to convert"
+                                << " boundary faces." << endl;
+                        }
+
                         modifyOrAddFace
                         (
                             meshMod,
@@ -364,6 +411,7 @@ int main(int argc, char *argv[])
                             fZone.flipMap()[zoneFaceI], // face flip in zone
                             modifiedFace                // modify or add status
                         );
+                        nModified++;
                     }
                 }
             }
@@ -371,7 +419,7 @@ int main(int argc, char *argv[])
     }
 
 
-    Info<< "Converted " << returnReduce(modifiedFace.count(), sumOp<label>())
+    Info<< "Converted " << returnReduce(nModified, sumOp<label>())
         << " faces into boundary faces on patch " << patchName << nl << endl;
 
     if (!overwrite)

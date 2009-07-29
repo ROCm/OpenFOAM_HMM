@@ -69,7 +69,12 @@ class GenSGSStress
 
 protected:
 
+    // Model coefficients
+
         dimensionedScalar ce_;
+        dimensionedScalar Prt_;
+
+    // Fields
 
         volSymmTensorField B_;
         volScalarField muSgs_;
