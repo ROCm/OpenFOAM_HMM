@@ -67,7 +67,7 @@ scalar rampHoldFall::relaxation()
 
     scalar tStart = cvMesh_.time().startTime().value();
     scalar tEnd = cvMesh_.time().endTime().value();
-    scalar tSpan = tStart - tEnd;
+    scalar tSpan = tEnd - tStart;
 
     if (tSpan < VSMALL)
     {
