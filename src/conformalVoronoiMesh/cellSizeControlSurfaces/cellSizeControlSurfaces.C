@@ -154,29 +154,6 @@ Foam::cellSizeControlSurfaces::~cellSizeControlSurfaces()
 {}
 
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
-
-bool Foam::cellSizeControlSurfaces::samePriorityNext(label i) const
-{
-    if (i == cellSizeFunctions_.size() - 1)
-    {
-        // Last element in the list, compare to default priority
-
-        return
-            cellSizeFunctions_[i].priority()
-         == defaultPriority_;
-    }
-    else
-    {
-        // Not the last element, compare to the next element in the list
-
-        return
-            cellSizeFunctions_[i].priority()
-         == cellSizeFunctions_[i + 1].priority();
-    }
-}
-
-
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::scalar Foam::cellSizeControlSurfaces::cellSize
@@ -188,26 +165,34 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
     scalar sizeAccumulator = 0;
     scalar numberOfFunctions = 0;
 
+    label previousPriority =
+        cellSizeFunctions_[cellSizeFunctions_.size() - 1].priority();
+
     forAll(cellSizeFunctions_, i)
     {
         const cellSizeFunction& cSF = cellSizeFunctions_[i];
+
+        if (cSF.priority() < previousPriority && numberOfFunctions > 0)
+        {
+            return sizeAccumulator/numberOfFunctions;
+        }
 
         scalar sizeI;
 
         if (cSF.cellSize(pt, sizeI, isSurfacePoint))
         {
+            previousPriority = cSF.priority();
+
             sizeAccumulator += sizeI;
             numberOfFunctions++;
-
-            if (!samePriorityNext(i))
-            {
-                return sizeAccumulator/numberOfFunctions;
-            }
         }
     }
 
-    sizeAccumulator += defaultCellSize_;
-    numberOfFunctions++;
+    if (previousPriority == defaultPriority_ || numberOfFunctions == 0)
+    {
+        sizeAccumulator += defaultCellSize_;
+        numberOfFunctions++;
+    }
 
     return sizeAccumulator/numberOfFunctions;
 }

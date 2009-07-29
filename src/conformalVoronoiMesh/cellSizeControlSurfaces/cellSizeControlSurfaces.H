@@ -82,12 +82,6 @@ class cellSizeControlSurfaces
 
     // Private Member Functions
 
-        //- Helper function to decide whether to terminate searching
-        //  cellSizeFunctions by determining if the next cellSizeFunction has
-        //  the same priority, includes looking off the end of the
-        //  cellSizeFunctions_ list at the defaultPriority_ value
-        bool samePriorityNext(label i) const;
-
         //- Disallow default bitwise copy construct
         cellSizeControlSurfaces(const cellSizeControlSurfaces&);
 
