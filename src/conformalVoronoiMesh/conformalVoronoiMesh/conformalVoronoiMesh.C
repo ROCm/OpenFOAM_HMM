@@ -989,14 +989,14 @@ void Foam::conformalVoronoiMesh::limitDisplacement
         // If dispPt is outside bounding box then displacement cuts boundary
         limit = true;
 
-        Info<< "    bb limit" << endl;
+        // Info<< "    bb limit" << endl;
     }
     else if (geometryToConformTo_.findSurfaceAnyIntersection(pt, dispPt))
     {
         // Full surface penetration test
         limit = true;
 
-        Info<< "    intersection limit" << endl;
+        // Info<< "    intersection limit" << endl;
     }
     else
     {
@@ -1020,14 +1020,14 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
         if (surfHit.hit())
         {
-            Info<< "    proximity limit" << endl;
+            // Info<< "    proximity limit" << endl;
 
             limit = true;
 
             if (magSqr(pt - surfHit.hitPoint()) <= searchDistanceSqr)
             {
-                Info<< "    Cannot limit displacement, point " << pt
-                    << " closer than tolerance" << endl;
+                // Info<< "    Cannot limit displacement, point " << pt
+                //     << " closer than tolerance" << endl;
 
                 return;
             }
@@ -1041,7 +1041,7 @@ void Foam::conformalVoronoiMesh::limitDisplacement
 
         displacement *= 0.5;
 
-        Info<< "    Limiting displacement of point " << pt << endl;
+        // Info<< "    Limiting displacement of point " << pt << endl;
 
         limitDisplacement(vit, displacement);
     }
