@@ -165,26 +165,31 @@ Foam::scalar Foam::cellSizeControlSurfaces::cellSize
     scalar sizeAccumulator = 0;
     scalar numberOfFunctions = 0;
 
-    label previousPriority =
-        cellSizeFunctions_[cellSizeFunctions_.size() - 1].priority();
+    label previousPriority = defaultPriority_;
 
-    forAll(cellSizeFunctions_, i)
+    if (cellSizeFunctions_.size())
     {
-        const cellSizeFunction& cSF = cellSizeFunctions_[i];
+        previousPriority =
+            cellSizeFunctions_[cellSizeFunctions_.size() - 1].priority();
 
-        if (cSF.priority() < previousPriority && numberOfFunctions > 0)
+        forAll(cellSizeFunctions_, i)
         {
-            return sizeAccumulator/numberOfFunctions;
-        }
+            const cellSizeFunction& cSF = cellSizeFunctions_[i];
 
-        scalar sizeI;
+            if (cSF.priority() < previousPriority && numberOfFunctions > 0)
+            {
+                return sizeAccumulator/numberOfFunctions;
+            }
 
-        if (cSF.cellSize(pt, sizeI, isSurfacePoint))
-        {
-            previousPriority = cSF.priority();
+            scalar sizeI;
 
-            sizeAccumulator += sizeI;
-            numberOfFunctions++;
+            if (cSF.cellSize(pt, sizeI, isSurfacePoint))
+            {
+                previousPriority = cSF.priority();
+
+                sizeAccumulator += sizeI;
+                numberOfFunctions++;
+            }
         }
     }
 
