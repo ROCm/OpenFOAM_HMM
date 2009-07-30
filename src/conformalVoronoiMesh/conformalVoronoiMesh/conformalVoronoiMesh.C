@@ -70,6 +70,10 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     featureVertices_(),
     featurePointLocations_(),
     featurePointTree_(),
+    sizeAndAlignmentLocations_(),
+    storedSizes_(),
+    storedAlignments_(),
+    sizeAndAlignmentTree_(),
     initialPointsMethod_
     (
         initialPointsMethod::New
@@ -837,12 +841,66 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
 
     Info<< nl << "Inserting initial points" << endl;
 
-    insertPoints(initialPointsMethod_->initialPoints());
+    std::vector<Point> initPts = initialPointsMethod_->initialPoints();
+
+    insertPoints(initPts);
 
     if(cvMeshControls().objOutput())
     {
         writePoints("initialPoints.obj", true);
     }
+
+    storeSizesAndAlignments(initPts);
+
+
+}
+
+
+void Foam::conformalVoronoiMesh::storeSizesAndAlignments
+(
+    const std::vector<Point>& initPts
+)
+{
+    timeCheck();
+
+    Info << "    Initialise stored data" << endl;
+
+    sizeAndAlignmentLocations_.setSize(initPts.size());
+
+    storedSizes_.setSize(sizeAndAlignmentLocations_.size());
+
+    storedAlignments_.setSize(sizeAndAlignmentLocations_.size());
+
+    forAll(sizeAndAlignmentLocations_, i)
+    {
+        sizeAndAlignmentLocations_[i] = topoint(initPts[i]);
+
+        storedSizes_[i] = targetCellSize(sizeAndAlignmentLocations_[i]);
+
+        storedAlignments_[i] = requiredAlignment(sizeAndAlignmentLocations_[i]);
+    }
+
+    timeCheck();
+
+    Info<< "    Initialise sizeAndAlignmentTree_" << endl;
+
+    buildSizeAndAlignmentTree();
+
+    timeCheck();
+
+    Info<< "    Initialised" << endl;
+}
+
+
+const Foam::indexedOctree<Foam::treeDataPoint>&
+Foam::conformalVoronoiMesh::sizeAndAlignmentTree() const
+{
+    if (sizeAndAlignmentTree_.empty())
+    {
+        buildSizeAndAlignmentTree();
+    }
+
+    return sizeAndAlignmentTree_();
 }
 
 
@@ -1113,6 +1171,30 @@ void Foam::conformalVoronoiMesh::buildEdgeLocationTree
         new indexedOctree<treeDataPoint>
         (
             treeDataPoint(existingEdgeLocations),
+            overallBb,  // overall search domain
+            10,         // max levels
+            10.0,       // maximum ratio of cubes v.s. cells
+            100.0       // max. duplicity; n/a since no bounding boxes.
+        )
+    );
+}
+
+
+void Foam::conformalVoronoiMesh::buildSizeAndAlignmentTree() const
+{
+    treeBoundBox overallBb(geometryToConformTo_.bounds());
+
+    Random rndGen(627391);
+
+    overallBb.extend(rndGen, 1E-4);
+    overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+    overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+
+    sizeAndAlignmentTree_.reset
+    (
+        new indexedOctree<treeDataPoint>
+        (
+            treeDataPoint(sizeAndAlignmentLocations_),
             overallBb,  // overall search domain
             10,         // max levels
             10.0,       // maximum ratio of cubes v.s. cells
@@ -1857,6 +1939,8 @@ void Foam::conformalVoronoiMesh::conformToSurface()
     // Initialise the edgeLocationTree
     buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
 
+    label initialTotalHits = 0;
+
     // Initial surface protrusion conformation - nearest surface point
     {
         Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
@@ -1938,18 +2022,35 @@ void Foam::conformalVoronoiMesh::conformToSurface()
             featureEdgeFeaturesHit,
             "edgeConformationLocations_initial.obj"
         );
+
+        initialTotalHits = surfaceHits.size() + featureEdgeHits.size();
     }
 
     label iterationNo = 0;
 
-    label maxIterations = 5;
-    Info << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
+    label maxIterations = 10;
 
-    // Set totalHits to a positive value to enter the while loop on the first
-    // iteration
-    label totalHits = 1;
+    Info<< nl << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
 
-    while (totalHits > 0 && iterationNo < maxIterations)
+    scalar iterationToIntialHitRatioLimit = 0.01;
+
+    label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
+
+    Info<< "    STOPPING ITERATIONS WHEN TOTAL NUMBER OF HITS DROPS BELOW "
+        << iterationToIntialHitRatioLimit << " (HARD CODED) OF INITIAL HITS ("
+        << hitLimit << ")"
+        << endl;
+
+    // Set totalHits to a large enough positive value to enter the while loop on
+    // the first iteration
+    label totalHits = initialTotalHits;
+
+    while
+    (
+        totalHits > 0
+     && totalHits > hitLimit
+     && iterationNo < maxIterations
+    )
     {
         Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
         scalar edgeSearchDistCoeffSqr = sqr(1.25);
@@ -2039,6 +2140,12 @@ void Foam::conformalVoronoiMesh::conformToSurface()
                 << "Maximum surface conformation iterations ("
                 << maxIterations <<  ") reached." << endl;
         }
+
+        if (totalHits < hitLimit)
+        {
+            Info<< nl << "    totalHits (" << totalHits << ") less than limit ("
+                << hitLimit << "), stopping iterations" << endl;
+        }
     }
 
     // Info<< nl << "    After iterations, check penetrations" << endl;
@@ -2116,7 +2223,36 @@ void Foam::conformalVoronoiMesh::move()
 
     dualVertices.setSize(dualVerti);
 
-    Info<< nl << "    Calculating target cell alignment and size" << endl;
+    timeCheck();
+
+    // Info<< nl << "    Calculating target cell alignment and size" << endl;
+
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     vit++
+    // )
+    // {
+    //     if (vit->internalOrBoundaryPoint())
+    //     {
+    //         point pt(topoint(vit->point()));
+
+    //         vit->alignment() = requiredAlignment(pt);
+
+    //         vit->targetCellSize() = targetCellSize(pt);
+    //     }
+    // }
+
+    // timeCheck();
+
+    // Info<< "    Calculated" << endl;
+
+    Info<< nl << "    Looking up target cell alignment and size" << endl;
+
+    scalar spanSqr = cvMeshControls().spanSqr();
+
+    const indexedOctree<treeDataPoint>& tree = sizeAndAlignmentTree();
 
     for
     (
@@ -2129,13 +2265,17 @@ void Foam::conformalVoronoiMesh::move()
         {
             point pt(topoint(vit->point()));
 
-            vit->alignment() = requiredAlignment(pt);
+            pointIndexHit info = tree.findNearest(pt, spanSqr);
 
-            vit->targetCellSize() = targetCellSize(pt);
+            vit->alignment() = storedAlignments_[info.index()];
+
+            vit->targetCellSize() = storedSizes_[info.index()];
         }
     }
 
     timeCheck();
+
+    Info<< "    Looked up" << endl;
 
     Info<< nl << "    Looping over all dual faces" << endl;
 

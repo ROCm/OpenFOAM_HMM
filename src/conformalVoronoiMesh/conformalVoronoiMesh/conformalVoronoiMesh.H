@@ -119,6 +119,19 @@ class conformalVoronoiMesh
         //- Search tree for feature point locations
         mutable autoPtr<indexedOctree<treeDataPoint> > featurePointTree_;
 
+        //- Store locations where the cell size and alignments will be
+        //  pre-calculated and looked up
+        pointField sizeAndAlignmentLocations_;
+
+        //- Stored cell size at sizeAndAlignmentLocations_
+        scalarField storedSizes_;
+
+        //- Stored alignments at sizeAndAlignmentLocations_
+        tensorField storedAlignments_;
+
+        //- Search tree for size and alignment lookup points
+        mutable autoPtr<indexedOctree<treeDataPoint> > sizeAndAlignmentTree_;
+
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
 
@@ -279,6 +292,13 @@ class conformalVoronoiMesh
         //  initialPointsMethod
         void insertInitialPoints();
 
+        //- Store data for sizeAndAlignmentLocations_, storedSizes_ and
+        //  storedAlignments_ and initialise the sizeAndAlignmentTree_
+        void storeSizesAndAlignments(const std::vector<Point>& initPts);
+
+        //- Demand driven construction of octree for and alignment points
+        const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;
+
         //- Check to see if dual cell specified by given vertex iterator
         //  intersects the boundary and hence reqires a point-pair.
         bool dualCellSurfaceAnyIntersection
@@ -313,12 +333,15 @@ class conformalVoronoiMesh
             autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
         ) const;
 
-        //- build or rebuild the edgeLocationTree
+        //- Build or rebuild the edgeLocationTree
         void buildEdgeLocationTree
         (
             autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree,
             const pointField& existingEdgeLocations
         ) const;
+
+        //- Build or rebuild the sizeAndAlignmentTree
+        void buildSizeAndAlignmentTree() const;
 
         //- Process the surface conformation locations to decide which surface
         //  and edge conformation locations to add.
