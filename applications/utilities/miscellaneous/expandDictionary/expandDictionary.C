@@ -33,6 +33,7 @@ Description
 
 #include "argList.H"
 #include "IFstream.H"
+#include "IOobject.H"
 #include "dictionary.H"
 
 using namespace Foam;
@@ -42,13 +43,19 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::noBanner();
+    argList::noParallel();
     argList::validArgs.clear();
     argList::validArgs.append("inputDict");
     argList args(argc, argv);
 
-    IFstream dictStream(args.additionalArgs()[0]);
-    dictionary inputDict(dictStream);
-    Info<< inputDict << endl;
+    const string& dictName = args.additionalArgs()[0];
+
+    Info<<"//\n// expansion of dictionary " << dictName << "\n//\n";
+
+    dictionary(IFstream(dictName)()).write(Info, false);
+
+    IOobject::writeDivider(Info);
 
     return 0;
 }
