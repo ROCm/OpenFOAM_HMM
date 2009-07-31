@@ -178,7 +178,9 @@ void turbulentHeatFluxTemperatureFvPatchScalarField::write
 {
     fvPatchScalarField::write(os);
     q_.writeEntry("q", os);
-    os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
+
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+
     gradient().writeEntry("gradient", os);
     writeEntry("value", os);
 }

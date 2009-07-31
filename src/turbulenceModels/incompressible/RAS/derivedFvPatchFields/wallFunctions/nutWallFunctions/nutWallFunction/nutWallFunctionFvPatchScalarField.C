@@ -106,9 +106,9 @@ tmp<scalarField> nutWallFunctionFvPatchScalarField::calcNut() const
 
 void nutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
-    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<scalar>(os, "Cmu", 0.09, Cmu_);
+    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
 }
 
 

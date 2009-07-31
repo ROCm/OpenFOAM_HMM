@@ -122,7 +122,7 @@ void alphatWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
-    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
+    writeEntryIfDifferent<scalar>(os, "Prt", 0.85, Prt_);
     writeEntry("value", os);
 }
 

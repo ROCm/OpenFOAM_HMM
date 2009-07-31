@@ -310,9 +310,11 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::evaluate
 void alphaSgsJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
-    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
-    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
-    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+
+    writeEntryIfDifferent<scalar>(os, "Prt", 0.85, Prt_);
+    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
+
     writeEntry("value", os);
 }
 
