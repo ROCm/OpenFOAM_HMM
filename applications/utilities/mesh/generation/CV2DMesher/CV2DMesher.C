@@ -99,10 +99,9 @@ int main(int argc, char *argv[])
          )
          *scalar(iter)/scalar(nIterations);
 
+        Info<< "Relaxation = " << relax << endl;
+
         mesh.newPoints(relax);
-        mesh.removeSurfacePointPairs();
-        mesh.insertSurfacePointPairs();
-        mesh.boundaryConform();
     }
 
     mesh.write();

@@ -344,9 +344,59 @@ void Foam::CV2D::newPoints(const scalar relaxation)
 
     const vectorField& faceNormals = qSurf_.faceNormals();
 
-    // Initialise the total displacement and its distance for writing out
-    vector2D totalDisp = vector2D::zero;
-    scalar totalDist = 0;
+    Field<point2D> dualVertices(number_of_faces());
+
+    label dualVerti = 0;
+
+    // Find the dual point of each tetrahedron and assign it an index.
+    for
+    (
+        Triangulation::Finite_faces_iterator fit = finite_faces_begin();
+        fit != finite_faces_end();
+        ++fit
+    )
+    {
+        fit->faceIndex() = -1;
+
+        if
+        (
+            fit->vertex(0)->internalOrBoundaryPoint()
+         || fit->vertex(1)->internalOrBoundaryPoint()
+         || fit->vertex(2)->internalOrBoundaryPoint()
+        )
+        {
+            fit->faceIndex() = dualVerti;
+
+            dualVertices[dualVerti] = toPoint2D(circumcenter(fit));
+
+            dualVerti++;
+        }
+    }
+
+    dualVertices.setSize(dualVerti);
+
+    Field<vector2D> displacementAccumulator
+    (
+        startOfSurfacePointPairs_,
+        vector2D::zero
+    );
+
+    // Calculate target size and alignment for vertices
+    scalarField sizes
+    (
+        number_of_vertices(),
+        controls_.minCellSize
+    );
+
+    vector2D align(3,-6);
+
+    align /= mag(align);
+
+    Field<vector2D> alignments
+    (
+        number_of_vertices(),
+        align
+    );
 
     for
     (
@@ -355,186 +405,213 @@ void Foam::CV2D::newPoints(const scalar relaxation)
         ++vit
     )
     {
-        if (vit->internalPoint())
+        if (vit->internalOrBoundaryPoint())
         {
-            // Current dual-cell defining vertex ("centre")
-            point2DFromPoint defVert0 = toPoint2D(vit->point());
+            point2D vert = toPoint2D(vit->point());
 
-            Triangulation::Edge_circulator ec = incident_edges(vit);
-            Triangulation::Edge_circulator ecStart = ec;
+            // alignment determination
+            pointIndexHit pHit = qSurf_.tree().findNearest
+            (
+                toPoint3D(vert),
+                tols_.span2
+            );
 
-            // Circulate around the edges to find the first which is not
-            // infinite
-            do
+            if (pHit.hit())
             {
-                if (!is_infinite(ec)) break;
-            } while (++ec != ecStart);
-
-            // Store the start-end of the first non-infinte edge
-            point2D de0 = toPoint2D(circumcenter(ec->first));
-
-            // Keep track of the maximum edge length^2
-            scalar maxEdgeLen2 = 0.0;
-
-            // Keep track of the index of the longest edge
-            label edgecd0i = -1;
-
-            // Edge counter
-            label edgei = 0;
-
-            do
-            {
-                if (!is_infinite(ec))
-                {
-                    // Get the end of the current edge
-                    point2D de1 = toPoint2D
-                    (
-                        circumcenter(ec->first->neighbor(ec->second))
-                    );
-
-                    // Store the current edge vector
-                    edges[edgei] = de1 - de0;
-
-                    // Store the edge mid-point in the vertices array
-                    vertices[edgei] = 0.5*(de1 + de0);
-
-                    // Move the current edge end into the edge start for the
-                    // next iteration
-                    de0 = de1;
-
-                    // Keep track of the longest edge
-
-                    scalar edgeLen2 = magSqr(edges[edgei]);
-
-                    if (edgeLen2 > maxEdgeLen2)
-                    {
-                        maxEdgeLen2 = edgeLen2;
-                        edgecd0i = edgei;
-                    }
-
-                    edgei++;
-                }
-            } while (++ec != ecStart);
-
-            // Initialise cd0 such that the mesh will align
-            // in in the x-y directions
-            vector2D cd0(1, 0);
-
-            if (controls_.relaxOrientation)
-            {
-                // Get the longest edge from the array and use as the primary
-                // direction of the coordinate system of the "square" cell
-                cd0 = edges[edgecd0i];
+                alignments[vit->index()] = toPoint2D(faceNormals[pHit.index()]);
             }
 
-            if (controls_.nearWallAlignedDist > 0)
+            // size determination
+
+            if (vert.x() > 0)
             {
-                pointIndexHit pHit = qSurf_.tree().findNearest
+                sizes[vit->index()] *= 0.5;
+            }
+        }
+    }
+
+    // Info<< "Calculated alignments" << endl;
+
+    scalar cosAlignmentAcceptanceAngle = 0.68;
+
+    // Upper and lower edge length ratios for weight
+    scalar u = 1.0;
+    scalar l = 0.7;
+
+    PackedBoolList pointToBeRetained(startOfSurfacePointPairs_, true);
+
+    DynamicList<point2D> pointsToInsert;
+
+    for
+    (
+        Triangulation::Finite_edges_iterator eit = finite_edges_begin();
+        eit != finite_edges_end();
+        eit++
+    )
+    {
+        Vertex_handle vA = eit->first->vertex(cw(eit->second));
+        Vertex_handle vB = eit->first->vertex(ccw(eit->second));
+
+        if (!vA->internalOrBoundaryPoint() || !vB->internalOrBoundaryPoint())
+        {
+            continue;
+        }
+
+        const point2D& dualV1 = dualVertices[eit->first->faceIndex()];
+        const point2D& dualV2 =
+            dualVertices[eit->first->neighbor(eit->second)->faceIndex()];
+
+        scalar dualEdgeLength = mag(dualV1 - dualV2);
+
+        point2D dVA = toPoint2D(vA->point());
+        point2D dVB = toPoint2D(vB->point());
+
+        Field<vector2D> alignmentDirsA(2);
+
+        alignmentDirsA[0] = alignments[vA->index()];
+        alignmentDirsA[1] = vector2D
+        (
+           -alignmentDirsA[0].y(),
+            alignmentDirsA[0].x()
+        );
+
+        Field<vector2D> alignmentDirsB(2);
+
+        alignmentDirsB[0] = alignments[vB->index()];
+        alignmentDirsB[1] = vector2D
+        (
+           -alignmentDirsB[0].y(),
+            alignmentDirsB[0].x()
+        );
+
+        Field<vector2D> alignmentDirs(2);
+
+        forAll(alignmentDirsA, aA)
+        {
+            const vector2D& a(alignmentDirsA[aA]);
+
+            scalar maxDotProduct = 0.0;
+
+            forAll(alignmentDirsB, aB)
+            {
+                const vector2D& b(alignmentDirsB[aB]);
+
+                scalar dotProduct = a & b;
+
+                if (mag(dotProduct) > maxDotProduct)
+                {
+                    maxDotProduct = mag(dotProduct);
+
+                    alignmentDirs[aA] = a + sign(dotProduct)*b;
+
+                    alignmentDirs[aA] /= mag(alignmentDirs[aA]);
+                }
+            }
+        }
+
+        vector2D rAB = dVA - dVB;
+
+        scalar rABMag = mag(rAB);
+
+        forAll(alignmentDirs, aD)
+        {
+            vector2D& alignmentDir = alignmentDirs[aD];
+
+            if ((rAB & alignmentDir) < 0)
+            {
+                // swap the direction of the alignment so that has the
+                // same sense as rAB
+                alignmentDir *= -1;
+            }
+
+            scalar alignmentDotProd = ((rAB/rABMag) & alignmentDir);
+
+            if (alignmentDotProd > cosAlignmentAcceptanceAngle)
+            {
+                scalar targetFaceSize =
+                    0.5*(sizes[vA->index()] + sizes[vB->index()]);
+
+                alignmentDir *= 0.5*targetFaceSize;
+
+                vector2D delta = alignmentDir - 0.5*rAB;
+
+                if (dualEdgeLength < 0.7*targetFaceSize)
+                {
+                    delta *= 0;
+                }
+                else if (dualEdgeLength < targetFaceSize)
+                {
+                    delta *=
+                        (
+                            dualEdgeLength
+                           /(targetFaceSize*(u - l))
+                          - 1/((u/l) - 1)
+                        );
+                }
+
+                if
                 (
-                    toPoint3D(defVert0),
-                    controls_.nearWallAlignedDist2
-                );
-
-                if (pHit.hit())
+                    vA->internalPoint()
+                 && vB->internalPoint()
+                 && rABMag > 1.75*targetFaceSize
+                 && dualEdgeLength > 0.05*targetFaceSize
+                 && alignmentDotProd > 0.93
+                )
                 {
-                    cd0 = toPoint2D(faceNormals[pHit.index()]);
+                    // Point insertion
+                    pointsToInsert.append(0.5*(dVA + dVB));
                 }
-            }
-
-            // Rotate by 45deg needed to create an averaging procedure which
-            // encourages the cells to be square
-            cd0 = vector2D(cd0.x() + cd0.y(), cd0.y() - cd0.x());
-
-            // Normalise the primary coordinate direction
-            cd0 /= mag(cd0);
-
-            // Calculate the orthogonal coordinate direction
-            vector2D cd1(-cd0.y(), cd0.x());
-
-
-            // Restart the circulator
-            ec = ecStart;
-
-            // ... and the counter
-            edgei = 0;
-
-            // Initialise the displacement for the centre and sum-weights
-            vector2D disp = vector2D::zero;
-            scalar sumw = 0;
-
-            do
-            {
-                if (!is_infinite(ec))
+                else if
+                (
+                    (vA->internalPoint() || vB->internalPoint())
+                 && rABMag < 0.65*targetFaceSize
+                )
                 {
-                    // Pick up the current edge
-                    const vector2D& ei = edges[edgei];
+                    // Point removal
 
-                    // Calculate the centre to edge-centre vector
-                    vector2D deltai = vertices[edgei] - defVert0;
-
-                    // Set the weight for this edge contribution
-                    scalar w = 1;
-
-                    if (controls_.squares)
+                    // Only insert a point at the midpoint of the short edge
+                    // if neither attached point has already been identified
+                    // to be removed.
+                    if
+                    (
+                        pointToBeRetained[vA->index()] == true
+                     && pointToBeRetained[vB->index()] == true
+                    )
                     {
-                        w = magSqr(deltai.x()*ei.y() - deltai.y()*ei.x());
-                        // alternative weights
-                        //w = mag(deltai.x()*ei.y() - deltai.y()*ei.x());
-                        //w = magSqr(ei)*mag(deltai);
-
-                        // Use the following for an ~square mesh
-                        // Find the coordinate contributions for this edge delta
-                        scalar cd0deltai = cd0 & deltai;
-                        scalar cd1deltai = cd1 & deltai;
-
-                        // Create a "square" displacement
-                        if (mag(cd0deltai) > mag(cd1deltai))
-                        {
-                            disp += (w*cd0deltai)*cd0;
-                        }
-                        else
-                        {
-                            disp += (w*cd1deltai)*cd1;
-                        }
-                    }
-                    else
-                    {
-                        // Use this for a hexagon/pentagon mesh
-                        disp += w*deltai;
+                        pointsToInsert.append(0.5*(dVA + dVB));
                     }
 
-                    // Sum the weights
-                    sumw += w;
+                    if (vA->internalPoint())
+                    {
+                        pointToBeRetained[vA->index()] = false;
+                    }
+
+                    if (vB->internalPoint())
+                    {
+                        pointToBeRetained[vB->index()] = false;
+                    }
                 }
                 else
                 {
-                    FatalErrorIn("CV2D::newPoints() const")
-                        << "Infinite triangle found in internal mesh"
-                        << exit(FatalError);
+                    if (vA->internalPoint())
+                    {
+                        displacementAccumulator[vA->index()] += delta;
+                    }
+
+                    if (vB->internalPoint())
+                    {
+                        displacementAccumulator[vB->index()] += -delta;
+                    }
                 }
-
-                edgei++;
-
-            } while (++ec != ecStart);
-
-            // Calculate the average displacement
-            disp /= sumw;
-            totalDisp += disp;
-            totalDist += mag(disp);
-
-            // Move the point by a fraction of the average displacement
-            movePoint(vit, defVert0 + relaxation*disp);
+            }
         }
     }
 
-    Info << "\nTotal displacement = " << totalDisp
-         << " total distance = " << totalDist << endl;
-}
+    vector2D totalDisp = sum(displacementAccumulator);
+    scalar totalDist = sum(mag(displacementAccumulator));
 
-
-void Foam::CV2D::moveInternalPoints(const point2DField& newPoints)
-{
-    label pointI = 0;
+    // Relax the calculated displacement
+    displacementAccumulator *= relaxation;
 
     for
     (
@@ -545,10 +622,267 @@ void Foam::CV2D::moveInternalPoints(const point2DField& newPoints)
     {
         if (vit->internalPoint())
         {
-            movePoint(vit, newPoints[pointI++]);
+            if (!pointToBeRetained[vit->index()])
+            {
+                remove(vit);
+            }
+            else
+            {
+                movePoint
+                (
+                    vit,
+                    vit->point()
+                    + K::Vector_2
+                    (
+                        displacementAccumulator[vit->index()].x(),
+                        displacementAccumulator[vit->index()].y()
+                    )
+                );
+            }
         }
     }
+
+    removeSurfacePointPairs();
+
+    // Re-index internal points
+
+    label nVert = startOfInternalPoints_;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalPoint())
+        {
+            vit->index() = nVert++;
+        }
+    }
+
+    // Insert new points
+
+    Info<< "Inserting " << pointsToInsert.size() << " new points" << endl;
+
+    forAll(pointsToInsert, i)
+    {
+        insertPoint(pointsToInsert[i], Vb::INTERNAL_POINT);
+    }
+
+    Info<< "    Total displacement = " << totalDisp << nl
+        << "    Total distance = " << totalDist << nl
+        << "    Points added = " << pointsToInsert.size()
+        << endl;
+
+    insertSurfacePointPairs();
+    boundaryConform();
+
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Old Method
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     ++vit
+    // )
+    // {
+    //     if (vit->internalPoint())
+    //     {
+    //         // Current dual-cell defining vertex ("centre")
+    //         point2DFromPoint defVert0 = toPoint2D(vit->point());
+
+    //         Triangulation::Edge_circulator ec = incident_edges(vit);
+    //         Triangulation::Edge_circulator ecStart = ec;
+
+    //         // Circulate around the edges to find the first which is not
+    //         // infinite
+    //         do
+    //         {
+    //             if (!is_infinite(ec)) break;
+    //         } while (++ec != ecStart);
+
+    //         // Store the start-end of the first non-infinte edge
+    //         point2D de0 = toPoint2D(circumcenter(ec->first));
+
+    //         // Keep track of the maximum edge length^2
+    //         scalar maxEdgeLen2 = 0.0;
+
+    //         // Keep track of the index of the longest edge
+    //         label edgecd0i = -1;
+
+    //         // Edge counter
+    //         label edgei = 0;
+
+    //         do
+    //         {
+    //             if (!is_infinite(ec))
+    //             {
+    //                 // Get the end of the current edge
+    //                 point2D de1 = toPoint2D
+    //                 (
+    //                     circumcenter(ec->first->neighbor(ec->second))
+    //                 );
+
+    //                 // Store the current edge vector
+    //                 edges[edgei] = de1 - de0;
+
+    //                 // Store the edge mid-point in the vertices array
+    //                 vertices[edgei] = 0.5*(de1 + de0);
+
+    //                 // Move the current edge end into the edge start for the
+    //                 // next iteration
+    //                 de0 = de1;
+
+    //                 // Keep track of the longest edge
+
+    //                 scalar edgeLen2 = magSqr(edges[edgei]);
+
+    //                 if (edgeLen2 > maxEdgeLen2)
+    //                 {
+    //                     maxEdgeLen2 = edgeLen2;
+    //                     edgecd0i = edgei;
+    //                 }
+
+    //                 edgei++;
+    //             }
+    //         } while (++ec != ecStart);
+
+    //         // Initialise cd0 such that the mesh will align
+    //         // in in the x-y directions
+    //         vector2D cd0(1, 0);
+
+    //         if (controls_.relaxOrientation)
+    //         {
+    //             // Get the longest edge from the array and use as the primary
+    //             // direction of the coordinate system of the "square" cell
+    //             cd0 = edges[edgecd0i];
+    //         }
+
+    //         if (controls_.nearWallAlignedDist > 0)
+    //         {
+    //             pointIndexHit pHit = qSurf_.tree().findNearest
+    //             (
+    //                 toPoint3D(defVert0),
+    //                 controls_.nearWallAlignedDist2
+    //             );
+
+    //             if (pHit.hit())
+    //             {
+    //                 cd0 = toPoint2D(faceNormals[pHit.index()]);
+    //             }
+    //         }
+
+    //         // Rotate by 45deg needed to create an averaging procedure which
+    //         // encourages the cells to be square
+    //         cd0 = vector2D(cd0.x() + cd0.y(), cd0.y() - cd0.x());
+
+    //         // Normalise the primary coordinate direction
+    //         cd0 /= mag(cd0);
+
+    //         // Calculate the orthogonal coordinate direction
+    //         vector2D cd1(-cd0.y(), cd0.x());
+
+
+    //         // Restart the circulator
+    //         ec = ecStart;
+
+    //         // ... and the counter
+    //         edgei = 0;
+
+    //         // Initialise the displacement for the centre and sum-weights
+    //         vector2D disp = vector2D::zero;
+    //         scalar sumw = 0;
+
+    //         do
+    //         {
+    //             if (!is_infinite(ec))
+    //             {
+    //                 // Pick up the current edge
+    //                 const vector2D& ei = edges[edgei];
+
+    //                 // Calculate the centre to edge-centre vector
+    //                 vector2D deltai = vertices[edgei] - defVert0;
+
+    //                 // Set the weight for this edge contribution
+    //                 scalar w = 1;
+
+    //                 if (controls_.squares)
+    //                 {
+    //                     w = magSqr(deltai.x()*ei.y() - deltai.y()*ei.x());
+    //                     // alternative weights
+    //                     //w = mag(deltai.x()*ei.y() - deltai.y()*ei.x());
+    //                     //w = magSqr(ei)*mag(deltai);
+
+    //                     // Use the following for an ~square mesh
+    //                     // Find the coordinate contributions for this edge delta
+    //                     scalar cd0deltai = cd0 & deltai;
+    //                     scalar cd1deltai = cd1 & deltai;
+
+    //                     // Create a "square" displacement
+    //                     if (mag(cd0deltai) > mag(cd1deltai))
+    //                     {
+    //                         disp += (w*cd0deltai)*cd0;
+    //                     }
+    //                     else
+    //                     {
+    //                         disp += (w*cd1deltai)*cd1;
+    //                     }
+    //                 }
+    //                 else
+    //                 {
+    //                     // Use this for a hexagon/pentagon mesh
+    //                     disp += w*deltai;
+    //                 }
+
+    //                 // Sum the weights
+    //                 sumw += w;
+    //             }
+    //             else
+    //             {
+    //                 FatalErrorIn("CV2D::newPoints() const")
+    //                     << "Infinite triangle found in internal mesh"
+    //                     << exit(FatalError);
+    //             }
+
+    //             edgei++;
+
+    //         } while (++ec != ecStart);
+
+    //         // Calculate the average displacement
+    //         disp /= sumw;
+    //         totalDisp += disp;
+    //         totalDist += mag(disp);
+
+    //         // Move the point by a fraction of the average displacement
+    //         movePoint(vit, defVert0 + relaxation*disp);
+    //     }
+    // }
+
+    // Info << "\nTotal displacement = " << totalDisp
+    //      << " total distance = " << totalDist << endl;
 }
+
+
+// void Foam::CV2D::moveInternalPoints(const point2DField& newPoints)
+// {
+//     label pointI = 0;
+
+//     for
+//     (
+//         Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+//         vit != finite_vertices_end();
+//         ++vit
+//     )
+//     {
+//         if (vit->internalPoint())
+//         {
+//             movePoint(vit, newPoints[pointI++]);
+//         }
+//     }
+// }
 
 
 void Foam::CV2D::write() const

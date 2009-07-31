@@ -85,7 +85,7 @@ inline void Foam::CV2D::insertPointPair
         surfPt - ppDistn,
         number_of_vertices() + 1
     );
-    
+
     insertPoint(surfPt + ppDistn, master);
 }
 
@@ -136,10 +136,16 @@ inline Foam::point Foam::CV2D::toPoint3D(const Point& P) const
 }
 
 
-inline void Foam::CV2D::movePoint(const Vertex_handle& vh, const point2D& p)
+inline void Foam::CV2D::movePoint(const Vertex_handle& vh, const Point& P)
 {
-    vh->set_point(toPoint(p));
-    fast_restore_Delaunay(vh);
+    label i = vh->index();
+
+    move(vh, P);
+
+    vh->index() = i;
+
+    // vh->set_point(toPoint(p));
+    // fast_restore_Delaunay(vh);
 }
 
 

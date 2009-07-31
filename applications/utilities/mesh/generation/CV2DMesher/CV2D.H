@@ -29,7 +29,7 @@ Description
     Conformal-Voronoi 2D automatic mesher with grid or read initial points
     and point position relaxation with optional "squarification".
 
-    There are a substantial number of options to this mesher read from 
+    There are a substantial number of options to this mesher read from
     CV2DMesherDict file e.g.:
 
     // Min cell size used in tolerances when inserting points for
@@ -48,7 +48,7 @@ Description
     // Should the mesh be square-dominated or of unbiased hexagons
     squares      yes;
 
-    // Near-wall region where cells are aligned with the wall specified as a 
+    // Near-wall region where cells are aligned with the wall specified as a
     // number of cell layers
     nearWallAlignedDist 3;
 
@@ -124,6 +124,7 @@ SourceFiles
 #include "point2DFieldFwd.H"
 #include "dictionary.H"
 #include "Switch.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -338,7 +339,7 @@ private:
             const Triangulation::Finite_vertices_iterator& vit
         ) const;
 
-        //- Insert point-pairs at the nearest points on the surface to the 
+        //- Insert point-pairs at the nearest points on the surface to the
         //  control vertex of dual-cells which intersect the boundary in order
         //  to provide a boundary-layer mesh.
         //  NB: This is not guaranteed to close the boundary
@@ -374,7 +375,7 @@ private:
 
         void markNearBoundaryPoints();
 
-        //- Restore the Delaunay contraint 
+        //- Restore the Delaunay contraint
         void fast_restore_Delaunay(Vertex_handle vh);
 
         // Flip operations used by fast_restore_Delaunay
@@ -434,7 +435,7 @@ public:
                 const scalar nearness
             );
 
-            //- Create the initial mesh from the internal points in the given 
+            //- Create the initial mesh from the internal points in the given
             //  file.  Points outside the geometry are ignored.
             void insertPoints(const fileName& pointFileName);
 
@@ -461,11 +462,11 @@ public:
 
         // Point motion
 
-            inline void movePoint(const Vertex_handle& vh, const point2D& p);
+            inline void movePoint(const Vertex_handle& vh, const Point& P);
 
             //- Move the internal points to the given new locations and update
             //  the triangulation to ensure it is Delaunay
-            void moveInternalPoints(const point2DField& newPoints);
+            // void moveInternalPoints(const point2DField& newPoints);
 
             //- Calculate the displacements to create the new points
             void newPoints(const scalar relaxation);
