@@ -38,6 +38,12 @@ namespace Foam
 namespace incompressible
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+//! @cond fileScope
+static const scalar defaultCmu_(0.09);
+//! @endcond fileScope
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
@@ -116,7 +122,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
     const scalar Cmu =
-        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
+        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", defaultCmu_);
 
     const scalar Cmu25 = pow(Cmu, 0.25);
 
@@ -137,7 +143,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
     fvPatchField<scalar>::write(os);
     os.writeKeyword("mixingLength")
         << mixingLength_ << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<word>(os, "k", "k", kName_);    
+    writeEntryIfDifferent<word>(os, "k", "k", kName_);
     writeEntry("value", os);
 }
 

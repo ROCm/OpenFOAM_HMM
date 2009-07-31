@@ -38,6 +38,12 @@ namespace Foam
 namespace compressible
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+//! @cond fileScope
+static const scalar defaultCmu_(0.09);
+//! @endcond fileScope
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
@@ -48,7 +54,7 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    mixingLength_(0.0),
+    mixingLength_(0.001),
     kName_("k")
 {}
 
@@ -116,7 +122,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
     const scalar Cmu =
-        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
+        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", defaultCmu_);
 
     const scalar Cmu25 = pow(Cmu, 0.25);
 

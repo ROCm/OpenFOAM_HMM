@@ -38,6 +38,13 @@ namespace incompressible
 namespace LESModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+//! @cond fileScope
+static const scalar defaultKappa_(0.41);
+static const scalar defaultE_(9.8);
+//! @endcond fileScope
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 nuSgsWallFunctionFvPatchScalarField::
@@ -50,8 +57,8 @@ nuSgsWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF),
     UName_("U"),
     nuName_("nu"),
-    kappa_(0.41),
-    E_(9.8)
+    kappa_(defaultKappa_),
+    E_(defaultE_)
 {}
 
 
@@ -83,8 +90,8 @@ nuSgsWallFunctionFvPatchScalarField
     fixedValueFvPatchScalarField(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
+    E_(dict.lookupOrDefault<scalar>("E", defaultE_))
 {}
 
 
@@ -189,8 +196,8 @@ void nuSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
 
-    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
+    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
 
     writeEntry("value", os);
 }

@@ -40,6 +40,14 @@ namespace incompressible
 namespace RASModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+//! @cond fileScope
+static const scalar defaultCmu_(0.09);
+static const scalar defaultKappa_(0.41);
+static const scalar defaultE_(9.8);
+//! @endcond fileScope
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void omegaWallFunctionFvPatchScalarField::checkType()
@@ -70,9 +78,9 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     GName_("RASModel::G"),
     nuName_("nu"),
     nutName_("nut"),
-    Cmu_(0.09),
-    kappa_(0.41),
-    E_(9.8)
+    Cmu_(defaultCmu_),
+    kappa_(defaultKappa_),
+    E_(defaultE_)
 {
     checkType();
 }
@@ -113,9 +121,9 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     nuName_(dict.lookupOrDefault<word>("nu", "nu")),
     nutName_(dict.lookupOrDefault<word>("nut", "nut")),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
-    E_(dict.lookupOrDefault<scalar>("E", 9.8))
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", defaultCmu_)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
+    E_(dict.lookupOrDefault<scalar>("E", defaultE_))
 {
     checkType();
 }
@@ -225,9 +233,9 @@ void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
     writeEntryIfDifferent<word>(os, "nut", "nut", nutName_);
 
-    writeEntryIfDifferent<scalar>(os, "Cmu", 0.09, Cmu_);
-    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
+    writeEntryIfDifferent<scalar>(os, "Cmu", defaultCmu_, Cmu_);
+    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
 
     writeEntry("value", os);
 }
