@@ -409,7 +409,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
         {
             point2D vert = toPoint2D(vit->point());
 
-            // alignment determination
+            // alignment and size determination
             pointIndexHit pHit = qSurf_.tree().findNearest
             (
                 toPoint3D(vert),
@@ -419,14 +419,23 @@ void Foam::CV2D::newPoints(const scalar relaxation)
             if (pHit.hit())
             {
                 alignments[vit->index()] = toPoint2D(faceNormals[pHit.index()]);
+
+                scalar surfDist = mag(toPoint3D(vert) - pHit.hitPoint());
+
+                if (surfDist < 0.2)
+                {
+                    sizes[vit->index()] *= 0.4;
+                }
+                // else if (surfDist < 0.2)
+                // {
+                //     sizes[vit->index()] *= (6.0*surfDist - 1.4);
+                // }
             }
 
-            // size determination
-
-            if (vert.x() > 0)
-            {
-                sizes[vit->index()] *= 0.5;
-            }
+            // if (vert.x() > 0)
+            // {
+            //     sizes[vit->index()] *= 0.5;
+            // }
         }
     }
 
@@ -632,7 +641,7 @@ void Foam::CV2D::newPoints(const scalar relaxation)
                 (
                     vit,
                     vit->point()
-                    + K::Vector_2
+                  + K::Vector_2
                     (
                         displacementAccumulator[vit->index()].x(),
                         displacementAccumulator[vit->index()].y()
