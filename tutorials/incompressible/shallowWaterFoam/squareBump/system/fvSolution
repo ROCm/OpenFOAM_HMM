@@ -22,15 +22,14 @@ solvers
         preconditioner  DIC;
         tolerance       1e-6;
         relTol          0.01;
-    };
+    }
 
     hFinal
     {
-        solver          PCG;
-        preconditioner  DIC;
+        $h;
         tolerance       1e-8;
         relTol          0;
-    };
+    }
 
     hU
     {

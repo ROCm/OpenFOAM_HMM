@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,20 +17,22 @@ FoamFile
 
 solvers
 {
-    rho
+    "(rho|G)"
     {
         solver          PCG;
         preconditioner  DIC;
         tolerance       1e-05;
         relTol          0;
     }
-    U
+
+    "(U|h|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
         relTol          0;
     }
+
     p
     {
         solver          PCG;
@@ -38,60 +40,12 @@ solvers
         tolerance       1e-06;
         relTol          0;
     }
-    G
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-05;
-        relTol          0;
-    }
-    Yi
+
+    "(Yi|O2|N2|H2O)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-06;
-        relTol          0;
-    }
-    O2
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0;
-    }
-    N2
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0;
-    }
-    H2O
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-06;
-        relTol          0;
-    }
-    h
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-    epsilon
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
         relTol          0;
     }
 }

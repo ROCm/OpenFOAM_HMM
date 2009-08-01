@@ -1,14 +1,14 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "system";
     object      fvSolution;
@@ -37,16 +37,7 @@ solvers
         relTol          0.1;
     }
 
-    k
-    {
-        solver          smoothSolver;
-        smoother        GaussSeidel;
-        nSweeps         2;
-        tolerance       1e-07;
-        relTol          0.1;
-    }
-
-    epsilon
+    "(k|epsilon)"
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
@@ -68,8 +59,7 @@ relaxationFactors
     p               0.3;
     rho             1;
     U               0.7;
-    k               0.9;
-    epsilon         0.9;
+    "(k|epsilon)"   0.9;
     h               0.9;
 }
 

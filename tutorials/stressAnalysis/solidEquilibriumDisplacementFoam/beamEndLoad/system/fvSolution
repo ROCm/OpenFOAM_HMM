@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.6                                   |
+|  \\    /   O peration     | Version:  dev                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -17,25 +17,13 @@ FoamFile
 
 solvers
 {
-    D
+    "(D|Dcorr)"
     {
         solver          GAMG;
         tolerance       1e-06;
         relTol          0.99;
         smoother        GaussSeidel;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 6;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
-    }
-
-    Dcorr
-    {
-        solver          GAMG;
-        tolerance       1e-06;
-        relTol          0.99;
-        smoother        GaussSeidel;
-        cacheAgglomeration true;
+        cacheAgglomeration  true;
         nCellsInCoarsestLevel 6;
         agglomerator    faceAreaPair;
         mergeLevels     1;

@@ -17,14 +17,6 @@ FoamFile
 
 solvers
 {
-    pcorr
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       0.01;
-        relTol          0;
-    }
-
     p
     {
         solver          PCG;
@@ -33,11 +25,24 @@ solvers
         relTol          0.05;
     }
 
+    pcorr
+    {
+        $p;
+        tolerance       0.01;
+        relTol          0;
+    }
+
     pFinal
     {
-        solver          PCG;
-        preconditioner  DIC;
+        $p;
         tolerance       1e-06;
+        relTol          0;
+    }
+
+    cellMotionUx
+    {
+        $p;
+        tolerance       1e-08;
         relTol          0;
     }
 
@@ -46,14 +51,6 @@ solvers
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-05;
-        relTol          0;
-    }
-
-    cellMotionUx
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-08;
         relTol          0;
     }
 }
