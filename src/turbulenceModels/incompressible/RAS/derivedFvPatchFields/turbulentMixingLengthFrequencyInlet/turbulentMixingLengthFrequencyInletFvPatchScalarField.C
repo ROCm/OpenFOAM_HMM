@@ -38,12 +38,6 @@ namespace Foam
 namespace incompressible
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-//! @cond fileScope
-static const scalar defaultCmu_(0.09);
-//! @endcond fileScope
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
@@ -121,8 +115,11 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     // Lookup Cmu corresponding to the turbulence model selected
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu =
-        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", defaultCmu_);
+    const scalar Cmu = rasModel.coeffDict().lookupOrDefault<scalar>
+    (
+        "Cmu",
+        turbulenceModel::standardCmu
+    );
 
     const scalar Cmu25 = pow(Cmu, 0.25);
 

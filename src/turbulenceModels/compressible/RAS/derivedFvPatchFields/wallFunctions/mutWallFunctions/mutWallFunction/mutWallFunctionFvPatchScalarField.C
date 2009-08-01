@@ -40,14 +40,6 @@ namespace compressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-//! @cond fileScope
-static const scalar defaultCmu_(0.09);
-static const scalar defaultKappa_(0.41);
-static const scalar defaultE_(9.8);
-//! @endcond fileScope
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void mutWallFunctionFvPatchScalarField::checkType()
@@ -115,9 +107,9 @@ tmp<scalarField> mutWallFunctionFvPatchScalarField::calcMut() const
 
 void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
-    writeEntryIfDifferent<scalar>(os, "Cmu", defaultCmu_, Cmu_);
-    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
+    writeEntryIfDifferent<scalar>(os, "Cmu", turbulenceModel::standardCmu, Cmu_);
+    writeEntryIfDifferent<scalar>(os, "kappa", turbulenceModel::standardKappa, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", turbulenceModel::standardE, E_);
 }
 
 
@@ -130,9 +122,9 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Cmu_(defaultCmu_),
-    kappa_(defaultKappa_),
-    E_(defaultE_),
+    Cmu_(turbulenceModel::standardCmu),
+    kappa_(turbulenceModel::standardKappa),
+    E_(turbulenceModel::standardE),
     yPlusLam_(calcYPlusLam(kappa_, E_))
 {}
 
@@ -161,9 +153,9 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", defaultCmu_)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
-    E_(dict.lookupOrDefault<scalar>("E", defaultE_)),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", turbulenceModel::standardCmu)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", turbulenceModel::standardKappa)),
+    E_(dict.lookupOrDefault<scalar>("E", turbulenceModel::standardE)),
     yPlusLam_(calcYPlusLam(kappa_, E_))
 {}
 

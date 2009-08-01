@@ -67,7 +67,7 @@ alphaSgsWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Prt_(0.85)
+    Prt_(standardPrt)
 {
     checkType();
 }
@@ -96,7 +96,7 @@ alphaSgsWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Prt_(dict.lookupOrDefault<scalar>("Prt", 0.85))
+    Prt_(dict.lookupOrDefault<scalar>("Prt", standardPrt))
 {
     checkType();
 }

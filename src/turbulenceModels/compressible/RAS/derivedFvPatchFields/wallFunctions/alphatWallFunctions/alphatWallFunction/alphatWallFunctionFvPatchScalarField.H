@@ -28,6 +28,7 @@ Class
 Description
     Boundary condition for turbulent thermal diffusivity when using wall
     functions
+
     - replicates OpenFOAM v1.5 (and earlier) behaviour
     - Turbulent Prandtl number defaults to 0.85 if unspecified
 
@@ -68,6 +69,12 @@ class alphatWallFunctionFvPatchScalarField
 
 
 public:
+
+    // Public data
+
+        //- Standard value for turbulent Prandtl number %Prt
+        static const scalar standardPrt = 0.85;
+
 
     //- Runtime type information
     TypeName("compressible::alphatWallFunction");

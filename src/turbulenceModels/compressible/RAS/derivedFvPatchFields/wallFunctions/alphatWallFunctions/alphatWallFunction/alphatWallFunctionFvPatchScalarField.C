@@ -38,12 +38,6 @@ namespace compressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-//! @cond fileScope
-static const scalar defaultPrt_(0.85);
-//! @endcond fileScope
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 alphatWallFunctionFvPatchScalarField::
@@ -55,7 +49,7 @@ alphatWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     mutName_("mut"),
-    Prt_(defaultPrt_)
+    Prt_(standardPrt)
 {}
 
 
@@ -84,7 +78,7 @@ alphatWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     mutName_(dict.lookupOrDefault<word>("mut", "mut")),
-    Prt_(dict.lookupOrDefault<scalar>("Prt", defaultPrt_))
+    Prt_(dict.lookupOrDefault<scalar>("Prt", standardPrt))
 {}
 
 
@@ -128,7 +122,7 @@ void alphatWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
-    writeEntryIfDifferent<scalar>(os, "Prt", defaultPrt_, Prt_);
+    writeEntryIfDifferent<scalar>(os, "Prt", standardPrt, Prt_);
     writeEntry("value", os);
 }
 

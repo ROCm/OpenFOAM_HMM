@@ -40,14 +40,6 @@ namespace compressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-//! @cond fileScope
-static const scalar defaultCmu_(0.09);
-static const scalar defaultKappa_(0.41);
-static const scalar defaultE_(9.8);
-//! @endcond fileScope
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void omegaWallFunctionFvPatchScalarField::checkType()
@@ -79,9 +71,9 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     GName_("RASModel::G"),
     muName_("mu"),
     mutName_("mut"),
-    Cmu_(defaultCmu_),
-    kappa_(defaultKappa_),
-    E_(defaultE_)
+    Cmu_(turbulenceModel::standardCmu),
+    kappa_(turbulenceModel::standardKappa),
+    E_(turbulenceModel::standardE)
 {
     checkType();
 }
@@ -124,9 +116,9 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
     GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
     mutName_(dict.lookupOrDefault<word>("mut", "mut")),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", defaultCmu_)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
-    E_(dict.lookupOrDefault<scalar>("E", defaultE_))
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", turbulenceModel::standardCmu)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", turbulenceModel::standardKappa)),
+    E_(dict.lookupOrDefault<scalar>("E", turbulenceModel::standardE))
 {
     checkType();
 }
@@ -244,9 +236,9 @@ void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
     writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
 
-    writeEntryIfDifferent<scalar>(os, "Cmu", defaultCmu_, Cmu_);
-    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
+    writeEntryIfDifferent<scalar>(os, "Cmu", turbulenceModel::standardCmu, Cmu_);
+    writeEntryIfDifferent<scalar>(os, "kappa", turbulenceModel::standardKappa, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", turbulenceModel::standardE, E_);
 
     writeEntry("value", os);
 }

@@ -40,6 +40,7 @@ Description
             alphah      1.0;    // only for compressible
             alphahk     1.0;    // only for compressible
             alphaEps    0.76923;
+            Prt         1.0;    // only for compressible
         }
     @endverbatim
 

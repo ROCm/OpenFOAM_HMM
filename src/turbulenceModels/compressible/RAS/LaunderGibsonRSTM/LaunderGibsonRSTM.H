@@ -42,10 +42,10 @@ Description
             C2Ref       0.3;
             Cs          0.25;
             Ceps        0.15;
-            sigmah      1.0;    // only for compressible
             sigmaEps    1.3;
             sigmaR      0.81967;
             couplingFactor  0.0;
+            Prt         1.0;    // only for compressible
         }
     @endverbatim
 
@@ -105,7 +105,7 @@ class LaunderGibsonRSTM
 
         // Fields
 
-            wallDistReflection y_;
+            wallDistReflection yr_;
 
             volSymmTensorField R_;
             volScalarField k_;

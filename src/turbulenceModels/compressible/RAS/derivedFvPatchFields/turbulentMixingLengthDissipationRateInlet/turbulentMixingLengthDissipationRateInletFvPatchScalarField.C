@@ -110,8 +110,11 @@ void turbulentMixingLengthDissipationRateInletFvPatchScalarField::updateCoeffs()
     // Lookup Cmu corresponding to the turbulence model selected
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu =
-        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
+    const scalar Cmu = rasModel.coeffDict().lookupOrDefault<scalar>
+    (
+        "Cmu",
+        turbulenceModel::standardCmu
+    );
 
     const scalar Cmu75 = pow(Cmu, 0.75);
 
