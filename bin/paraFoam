@@ -62,10 +62,10 @@ do
         ;;
     -region)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
-        regionName=$2
+        regionName="$2"
         shift 2
         ;;
-    -touch)
+    -t | -touch)
         touchOnly=true
         shift
         ;;
@@ -89,7 +89,7 @@ fi
 if [ -n "$touchOnly" ]
 then
     touch "$caseFile"
-    echo "created '$caseFile'"
+    echo "created '$caseFile'" 1>&2
     exit 0
 fi
 
@@ -99,6 +99,7 @@ case "$caseName" in
     *)          parentDir="."  ;;
 esac
 
+
 # check existence of essential files
 for check in system/controlDict $fvControls/fvSchemes $fvControls/fvSolution
 do
@@ -106,28 +107,13 @@ do
 done
 
 
-case "$ParaView_VERSION" in
-2*)
-    trap "rm -f paraFoam.pvs $caseFile 2>/dev/null; exit 0" EXIT TERM INT
+# only create/remove caseFile if it didn't already exist
+[ -e $caseFile ] || {
+    trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
     touch "$caseFile"
+    echo "created temporary '$caseFile'" 1>&2
+}
 
-    # since we are now in the cwd, %CASE% is '$PWD/$caseFile'
-    sed -e s@%CASE%@$PWD/$caseFile@g \
-        $WM_PROJECT_DIR/bin/tools/paraFoam.pvs > paraFoam.pvs
+paraview --data="$caseFile"
 
-    paraview paraFoam.pvs
-    ;;
-
-*)
-    # only create/remove caseFile if it didn't already exist
-    [ -e $caseFile ] || {
-        trap "rm -f $caseFile 2>/dev/null; exit 0" EXIT TERM INT
-        touch "$caseFile"
-        echo "created temporary '$caseFile'"
-    }
-
-    paraview --data="$caseFile"
-    ;;
-
-esac
 #------------------------------------------------------------------------------
