@@ -46,16 +46,28 @@ alias wmSchedOFF='unset WM_SCHEDULER'
 
 # Change directory aliases
 # ~~~~~~~~~~~~~~~~~~~~~~~~
+alias foam='cd $WM_PROJECT_DIR'
 alias src='cd $FOAM_SRC'
+alias foamsrc='cd $FOAM_SRC/OpenFOAM'
+alias foamfv='cd $FOAM_SRC/finiteVolume'
+alias foam3rdParty='cd $WM_THIRD_PARTY_DIR'
+
+alias app='cd $FOAM_APP'
 alias lib='cd $FOAM_LIB'
 alias run='cd $FOAM_RUN'
-alias foam='cd $WM_PROJECT_DIR'
-alias foamsrc='cd $FOAM_SRC/$WM_PROJECT'
-alias foamfv='cd $FOAM_SRC/finiteVolume'
-alias app='cd $FOAM_APP'
-alias util='cd $FOAM_UTILITIES'
 alias sol='cd $FOAM_SOLVERS'
 alias tut='cd $FOAM_TUTORIALS'
-alias foam3rdParty='cd $WM_THIRD_PARTY_DIR'
+alias util='cd $FOAM_UTILITIES'
+
+# more consistent naming convention
+alias foamApps='cd $FOAM_APP'
+alias foamLib='cd $FOAM_LIB'
+alias foamRun='cd $FOAM_RUN'
+alias foamSol='cd $FOAM_SOLVERS'
+alias foamTut='cd $FOAM_TUTORIALS'
+alias foamUtils='cd $FOAM_UTILITIES'
+
+alias userApps='cd $WM_PROJECT_USER_DIR/applications'
+alias whichFoam='echo $WM_PROJECT_DIR'
 
 # -----------------------------------------------------------------------------
