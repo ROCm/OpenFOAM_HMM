@@ -55,12 +55,12 @@ else
 fi
 
 [ -e Make/files ] || {
-    echo "$Script: Creating files"
+    echo "$Script: Creating Make/files"
     $WM_DIR/scripts/makeFiles
 }
 
 [ -e Make/options ] || {
-    echo "$Script: Creating options"
+    echo "$Script: Creating Make/options"
     $WM_DIR/scripts/makeOptions
 }
 

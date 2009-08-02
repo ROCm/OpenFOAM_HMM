@@ -22,28 +22,61 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    className
-
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
+#include "CLASSNAME.H"
+#include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+template<TemplateClassArgument>
+Foam::CLASSNAME<TemplateArgument>::CLASSNAME(Istream& is)
+:
+    base1(is),
+    base2(is),
+    member1(is),
+    member2(is)
 {
-    #include "setRootCase.H"
-    #include "createTime.H"
+    // Check state of Istream
+    is.check("Foam::CLASSNAME<TemplateArgument>::CLASSNAME(Foam::Istream&)");
+}
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    Info << "End\n" << endl;
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-    return 0;
+template<TemplateClassArgument>
+Foam::Istream& Foam::operator>>
+(
+    Istream& is,
+    CLASSNAME<TemplateArgument>&
+)
+{
+    // Check state of Istream
+    is.check
+    (
+        "Foam::Istream& Foam::operator>>"
+        "(Foam::Istream&, Foam::CLASSNAME<TemplateArgument>&)"
+    );
+
+    return is;
+}
+
+
+template<TemplateClassArgument>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const CLASSNAME<TemplateArgument>&
+)
+{
+    // Check state of Ostream
+    os.check
+    (
+        "Foam::Ostream& Foam::operator<<"
+        "(Ostream&, const CLASSNAME<TemplateArgument>&)"
+    );
+
+    return os;
 }
 
 

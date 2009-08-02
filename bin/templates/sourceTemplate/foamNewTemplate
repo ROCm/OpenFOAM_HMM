@@ -24,13 +24,14 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     newSourceTemplate
+#     foamNewTemplate
 #
 # Description
 #     Create a new standard OpenFOAM templated source file
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
+Template="$WM_PROJECT_DIR/bin/templates/sourceTemplate/_TemplateTemplate"
 
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
@@ -46,51 +47,50 @@ USAGE
     exit 1
 }
 
-if [ "$#" -le 2 ]; then
-   usage "wrong number of arguments, expected 3 (or more)"
-fi
+# this implicitly covers a lone -help
+[ "$#" -gt 1 ] || usage
 
-unset suffix fileType
+
+className="$2"
+unset Type
+
 case "$1" in
+-h | -help)
+    usage
+    ;;
 C|H)
-   Template=Template
-   fileType=$1
-   className=$2
-   ;;
+    Type=".$1"
+    ;;
 I)
-   suffix=$1
-   Template=TemplateI
-   fileType=H
-   className=$2
-   ;;
+    Type="$1.H"
+    ;;
 IO)
-   suffix=$1
-   Template=TemplateIO
-   fileType=C
-   className=$2
-   ;;
+    Type="$1.C"
+    ;;
 *)
-   usage "unknown type"
-   ;;
+    usage "unknown type"
+    ;;
 esac
+[ "$#" -ge 3 ] || usage "wrong number of arguments"
+shift 2
+
+fileName="$className$Type"
 
 
-fileName=$className$suffix.$fileType
-
-if [ -e "$fileName" ]; then
-   echo "Cannot make $fileName, file exists"
-   exit 1
+echo "$Script: Creating new template interface file $fileName"
+if [ -e "$fileName" ]
+then
+    echo "   Error: file exists"
+    exit 1
 fi
 
-shift 2
-echo "$Script: Creating new interface file $fileName"
 
 # process class name
-sed -e "s/ClassName/$className/g" \
-    $WM_PROJECT_DIR/bin/foamTemplates/sourceTemplate/foamTemplate$Template.$fileType > $fileName.1
+sed -e "s/CLASSNAME/$className/g" $Template$Type > $fileName.1
+
 
 # process template arguments
-for tArg in $*
+for tArg
 do
     sed -e "s/TemplateClassArgument/class $tArg, TemplateClassArgument/g" \
         -e "s/TemplateArgument/$tArg, TemplateArgument/g" \
@@ -99,7 +99,8 @@ do
     mv $fileName.2 $fileName.1
 done
 
-# remove remaining ", Template argument"
+
+# remove remaining ", Template .."
 sed -e "s/, TemplateClassArgument//g" \
     -e "s/, TemplateArgument//g" \
     $fileName.1 > $fileName

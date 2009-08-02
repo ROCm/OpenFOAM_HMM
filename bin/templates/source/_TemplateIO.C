@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "className.H"
+#include "CLASSNAME.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::className::className(Istream& is)
+Foam::CLASSNAME::CLASSNAME(Istream& is)
 :
     base1(is),
     base2(is),
@@ -37,31 +37,31 @@ Foam::className::className(Istream& is)
     member2(is)
 {
     // Check state of Istream
-    is.check("Foam::className::className(Foam::Istream&)");
+    is.check("Foam::CLASSNAME::CLASSNAME(Foam::Istream&)");
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, className&)
+Foam::Istream& Foam::operator>>(Istream& is, CLASSNAME&)
 {
     // Check state of Istream
     is.check
     (
-        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::className&)"
+        "Foam::Istream& Foam::operator>>(Foam::Istream&, Foam::CLASSNAME&)"
     );
 
     return is;
 }
 
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const className&)
+Foam::Ostream& Foam::operator<<(Ostream& os, const CLASSNAME&)
 {
     // Check state of Ostream
     os.check
     (
         "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::className&)"
+        "const Foam::CLASSNAME&)"
     );
 
     return os;

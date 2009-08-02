@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::ClassName
+    Foam::CLASSNAME
 
 Description
 
 SourceFiles
-    ClassNameI.H
-    ClassName.C
-    ClassNameIO.C
+    CLASSNAMEI.H
+    CLASSNAME.C
+    CLASSNAMEIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef ClassName_H
-#define ClassName_H
+#ifndef CLASSNAME_H
+#define CLASSNAME_H
 
 #include ".H"
 
@@ -51,21 +51,21 @@ class someClass;
 // Forward declaration of friend functions and operators
 
 template<TemplateClassArgument>
-class ClassName;
+class CLASSNAME;
 
 template<TemplateClassArgument>
-Istream& operator>>(Istream&, ClassName<TemplateArgument>&);
+Istream& operator>>(Istream&, CLASSNAME<TemplateArgument>&);
 
 template<TemplateClassArgument>
-Ostream& operator<<(Ostream&, const ClassName<TemplateArgument>&);
+Ostream& operator<<(Ostream&, const CLASSNAME<TemplateArgument>&);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class ClassName Declaration
+                         Class CLASSNAME Declaration
 \*---------------------------------------------------------------------------*/
 
 template<TemplateClassArgument>
-class ClassName
+class CLASSNAME
 :
     public baseClassName
 {
@@ -77,10 +77,10 @@ class ClassName
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        ClassName(const ClassName<TemplateArgument>&);
+        CLASSNAME(const CLASSNAME<TemplateArgument>&);
 
         //- Disallow default bitwise assignment
-        void operator=(const ClassName<TemplateArgument>&);
+        void operator=(const CLASSNAME<TemplateArgument>&);
 
 
 public:
@@ -94,33 +94,33 @@ public:
     // Constructors
 
         //- Construct null
-        ClassName();
+        CLASSNAME();
 
         //- Construct from components
-        ClassName(const dataType& data);
+        CLASSNAME(const dataType& data);
 
         //- Construct from Istream
-        ClassName(Istream&);
+        CLASSNAME(Istream&);
 
         //- Construct as copy
-        ClassName(const ClassName<TemplateArgument>&);
+        CLASSNAME(const CLASSNAME<TemplateArgument>&);
 
 
     // Selectors
 
         //- Select null constructed
-        static autoPtr<ClassName<TemplateArgument> > New();
+        static autoPtr<CLASSNAME<TemplateArgument> > New();
 
 
     //- Destructor
-    ~ClassName();
+    ~CLASSNAME();
 
 
     // Member Functions
 
     // Member Operators
 
-        void operator=(const ClassName<TemplateArgument>&);
+        void operator=(const CLASSNAME<TemplateArgument>&);
 
 
     // Friend Functions
@@ -130,10 +130,10 @@ public:
     // IOstream Operators
 
         friend Istream& operator>> <TemplateArgument>
-        (Istream&, ClassName<TemplateArgument>&);
+        (Istream&, CLASSNAME<TemplateArgument>&);
 
         friend Ostream& operator<< <TemplateArgument>
-        (Ostream&, const ClassName<TemplateArgument>&);
+        (Ostream&, const CLASSNAME<TemplateArgument>&);
 };
 
 
@@ -143,12 +143,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "ClassNameI.H"
+#include "CLASSNAMEI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "ClassName.C"
+#   include "CLASSNAME.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

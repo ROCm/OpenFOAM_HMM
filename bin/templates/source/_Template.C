@@ -24,11 +24,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "className.H"
+#include "CLASSNAME.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-const dataType Foam::className::staticData();
+const dataType Foam::CLASSNAME::staticData();
 
 
 // * * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * //
@@ -42,21 +42,21 @@ const dataType Foam::className::staticData();
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::className::className()
+Foam::CLASSNAME::CLASSNAME()
 :
     baseClassName(),
     data_()
 {}
 
 
-Foam::className::className(const dataType& data)
+Foam::CLASSNAME::CLASSNAME(const dataType& data)
 :
     baseClassName(),
     data_(data)
 {}
 
 
-Foam::className::className(const className&)
+Foam::CLASSNAME::CLASSNAME(const CLASSNAME&)
 :
     baseClassName(),
     data_()
@@ -65,15 +65,15 @@ Foam::className::className(const className&)
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-Foam::autoPtr<Foam::className> Foam::className::New()
+Foam::autoPtr<Foam::CLASSNAME> Foam::CLASSNAME::New()
 {
-    return autoPtr<className>(new className);
+    return autoPtr<CLASSNAME>(new CLASSNAME);
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::className::~className()
+Foam::CLASSNAME::~CLASSNAME()
 {}
 
 
@@ -82,12 +82,12 @@ Foam::className::~className()
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-void Foam::className::operator=(const className& rhs)
+void Foam::CLASSNAME::operator=(const CLASSNAME& rhs)
 {
     // Check for assignment to self
     if (this == &rhs)
     {
-        FatalErrorIn("Foam::className::operator=(const Foam::className&)")
+        FatalErrorIn("Foam::CLASSNAME::operator=(const Foam::CLASSNAME&)")
             << "Attempted assignment to self"
             << abort(FatalError);
     }

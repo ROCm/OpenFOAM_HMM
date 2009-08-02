@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "ClassName.H"
+#include "CLASSNAME.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<TemplateClassArgument>
-const dataType Foam::ClassName<TemplateArgument>::staticData();
+const dataType Foam::CLASSNAME<TemplateArgument>::staticData();
 
 
 // * * * * * * * * * * * * Static Member Functions * * * * * * * * * * * * * //
@@ -38,7 +38,7 @@ const dataType Foam::ClassName<TemplateArgument>::staticData();
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<TemplateClassArgument>
-Foam::ClassName<TemplateArgument>::ClassName()
+Foam::CLASSNAME<TemplateArgument>::CLASSNAME()
 :
     baseClassName(),
     data_()
@@ -46,7 +46,7 @@ Foam::ClassName<TemplateArgument>::ClassName()
 
 
 template<TemplateClassArgument>
-Foam::ClassName<TemplateArgument>::ClassName(const dataType& data)
+Foam::CLASSNAME<TemplateArgument>::CLASSNAME(const dataType& data)
 :
     baseClassName(),
     data_(data)
@@ -54,12 +54,12 @@ Foam::ClassName<TemplateArgument>::ClassName(const dataType& data)
 
 
 template<TemplateClassArgument>
-Foam::ClassName<TemplateArgument>::ClassName
+Foam::CLASSNAME<TemplateArgument>::CLASSNAME
 (
-    const ClassName<TemplateArgument>&
+    const CLASSNAME<TemplateArgument>&
 )
 :
-    baseClassName(),
+    baseCLASSNAME(),
     data_()
 {}
 
@@ -67,12 +67,12 @@ Foam::ClassName<TemplateArgument>::ClassName
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 template<TemplateClassArgument>
-Foam::autoPtr<Foam::ClassName<TemplateArgument> >
-Foam::ClassName<TemplateArgument>::New()
+Foam::autoPtr<Foam::CLASSNAME<TemplateArgument> >
+Foam::CLASSNAME<TemplateArgument>::New()
 {
-    return autoPtr<ClassName<TemplateArgument> >
+    return autoPtr<CLASSNAME<TemplateArgument> >
     (
-        new ClassName<TemplateArgument>
+        new CLASSNAME<TemplateArgument>
     );
 }
 
@@ -80,7 +80,7 @@ Foam::ClassName<TemplateArgument>::New()
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<TemplateClassArgument>
-Foam::ClassName<TemplateArgument>::~ClassName()
+Foam::CLASSNAME<TemplateArgument>::~CLASSNAME()
 {}
 
 
@@ -96,9 +96,9 @@ Foam::ClassName<TemplateArgument>::~ClassName()
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
 template<TemplateClassArgument>
-void Foam::ClassName<TemplateArgument>::operator=
+void Foam::CLASSNAME<TemplateArgument>::operator=
 (
-    const ClassName<TemplateArgument>& rhs
+    const CLASSNAME<TemplateArgument>& rhs
 )
 {
     // Check for assignment to self
@@ -106,8 +106,8 @@ void Foam::ClassName<TemplateArgument>::operator=
     {
         FatalErrorIn
         (
-            "Foam::ClassName<TemplateArgument>::operator="
-            "(const Foam::ClassName<TemplateArgument>&)"
+            "Foam::CLASSNAME<TemplateArgument>::operator="
+            "(const Foam::CLASSNAME<TemplateArgument>&)"
         )   << "Attempted assignment to self"
             << abort(FatalError);
     }

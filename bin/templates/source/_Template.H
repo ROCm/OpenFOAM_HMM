@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::className
+    Foam::CLASSNAME
 
 Description
 
 SourceFiles
-    classNameI.H
-    className.C
-    classNameIO.C
+    CLASSNAMEI.H
+    CLASSNAME.C
+    CLASSNAMEIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef className_H
-#define className_H
+#ifndef CLASSNAME_H
+#define CLASSNAME_H
 
 #include ".H"
 
@@ -49,16 +49,16 @@ class Istream;
 class Ostream;
 
 // Forward declaration of friend functions and operators
-class className;
-Istream& operator>>(Istream&, className&);
-Ostream& operator<<(Ostream&, const className&);
+class CLASSNAME;
+Istream& operator>>(Istream&, CLASSNAME&);
+Ostream& operator<<(Ostream&, const CLASSNAME&);
 
 
 /*---------------------------------------------------------------------------*\
-                          Class className Declaration
+                         Class CLASSNAME Declaration
 \*---------------------------------------------------------------------------*/
 
-class className
+class CLASSNAME
 :
     public baseClassName
 {
@@ -71,10 +71,10 @@ class className
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
-        className(const className&);
+        CLASSNAME(const CLASSNAME&);
 
         //- Disallow default bitwise assignment
-        void operator=(const className&);
+        void operator=(const CLASSNAME&);
 
 
 public:
@@ -88,26 +88,26 @@ public:
     // Constructors
 
         //- Construct null
-        className();
+        CLASSNAME();
 
         //- Construct from components
-        className(const dataType& data);
+        CLASSNAME(const dataType& data);
 
         //- Construct from Istream
-        className(Istream&);
+        CLASSNAME(Istream&);
 
         //- Construct as copy
-        className(const className&);
+        CLASSNAME(const CLASSNAME&);
 
 
     // Selectors
 
         //- Select null constructed
-        static autoPtr<className> New();
+        static autoPtr<CLASSNAME> New();
 
 
     //- Destructor
-    ~className();
+    ~CLASSNAME();
 
 
     // Member Functions
@@ -123,7 +123,7 @@ public:
 
     // Member Operators
 
-        void operator=(const className&);
+        void operator=(const CLASSNAME&);
 
 
     // Friend Functions
@@ -132,8 +132,8 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, className&);
-        friend Ostream& operator<<(Ostream&, const className&);
+        friend Istream& operator>>(Istream&, CLASSNAME&);
+        friend Ostream& operator<<(Ostream&, const CLASSNAME&);
 };
 
 
@@ -143,7 +143,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "classNameI.H"
+#include "CLASSNAMEI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

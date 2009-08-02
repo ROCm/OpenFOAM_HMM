@@ -24,18 +24,18 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamNew
+#     foamNewSource
 #
 # Description
 #     Create a new standard OpenFOAM source file
 #
 #------------------------------------------------------------------------------
 Script=${0##*/}
+Template="$WM_PROJECT_DIR/bin/templates/source/_Template"
 
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
     cat<<USAGE
-
 usage: $Script <type> <class name>
 
 * create a new standard OpenFOAM source file
@@ -46,49 +46,56 @@ USAGE
     exit 1
 }
 
-if [ "$#" -ne 2 ]; then
-   usage "wrong number of arguments, expected 2"
-fi
 
-unset suffix fileType
+# this implicitly covers a lone -help
+[ "$#" -gt 1 ] || usage
+
+className="$2"
+unset subType Type
+
 case "$1" in
+-h | -help)
+    usage
+    ;;
 C|H)
-   template=foamTemplate
-   fileType=$1
-   ;;
+    Type=".$1"
+    ;;
 I)
-   suffix=$1
-   template=foamTemplateI
-   fileType=H
-   ;;
+    Type="$1.H"
+    ;;
 IO)
-   suffix=$1
-   template=foamTemplateIO
-   fileType=C
-   ;;
+    Type="$1.C"
+    ;;
 app|App)
-   template=foamAppTemplate
-   fileType=C
-   if [ ! -d Make ]; then
-       echo "foamNew: Creating Make/files and Make/options"
-       wmakeFilesAndOptions
-   fi
-   ;;
+    subType=App
+    Type=".C"
+    ;;
 *)
-   usage "unknown type"
-   ;;
+    usage "unknown type"
+    ;;
 esac
+[ "$#" -eq 2 ] || usage "wrong number of arguments"
+shift 2
 
 
-fileName=$2$suffix.$fileType
+fileName="$className$Type"
 
-if [ -e "$fileName" ]; then
-   echo "Cannot make $fileName, file exists"
-   exit 1
+
+echo "$Script: Creating new interface file $fileName"
+if [ -e "$fileName" ]
+then
+    echo "   Error: file exists"
+    exit 1
 fi
 
-echo $Script: Creating new interface file $fileName
-sed s/className/$2/g \
-    $WM_PROJECT_DIR/bin/foamTemplates/source/$template.$fileType > $fileName
+
+# process class name
+sed "s/CLASSNAME/$className/g" $Template$subType$Type > $fileName
+
+
+if [ "$subType" = App -a ! -d Make ]
+then
+    wmakeFilesAndOptions
+fi
 
 #------------------------------------------------------------------------------
