@@ -35,17 +35,11 @@
 
 PROGDIR=`dirname $0`
 PROGNAME=`basename $0`
-
-if [ -r $HOME/.${PROGNAME}.db ]; then
-    DBFILE=$HOME/.${PROGNAME}.db
-else
-    DBFILE=$PROGDIR/$PROGNAME.db
-fi
-
+DBFILE=${PROGNAME}.db
 
 printUsage() {
-cat <<LABUSAGE
-$PROGNAME - extracts xy files from Foam logs.
+cat <<USAGE
+$PROGNAME - extracts xy files from OpenFOAM logs.
 
 Usage: $PROGNAME [-n][-s] <log>
            extracts xy files from log
@@ -54,39 +48,46 @@ Usage: $PROGNAME [-n][-s] <log>
        $PROGNAME -h
            for a help message
 
-LABUSAGE
+USAGE
 }
 
 
 printHelp() {
 printUsage
 cat <<LABHELP
-The default is to extract for all the 'Solved for' variables the
-initial residual, the final residual and the number of iterations. On
-top of this a (user editable) database of standard non-solved for
-variables is used to extract data like Courant number, execution time.
+The default is to extract for all the 'Solved for' variables the initial
+residual, the final residual and the number of iterations. Additionally, a
+(user editable) database is used to extract data for standard non-solved for
+variables like Courant number, execution time.
 
-$PROGNAME -l shows all the possible variables but does not extract them.
+$PROGNAME -l lists all the possible variables without extract them.
 
-The program will generate and run an awk script which writes a set of
-files, logs/<var>_<subIter>, for every <var> specified, for every
-occurrence inside a time step.
+The program will generate and run an awk script which writes a set of files,
+logs/<var>_<subIter>, for every <var> specified, for every occurrence inside
+a time step.
 
-For variables that are 'Solved for' the initial residual name will 
-be <var>, the final residual will get name <var>FinalRes,
+For variables that are 'Solved for', the initial residual name will be
+<var>, the final residual receive the name <var>FinalRes,
 
 The files are a simple xy format with the first column Time (default)
 and the second the extracted values. Option -n creates single column
 files with the extracted data only.
 
 
-The query database is a simple text format with three entries per line, 
-separated with '/'. Column 1 is the name of the variable (cannot contain
-spaces), column 2 is the extended regular expression (egrep) to select
-the line and column 3 is the string (fgrep) to select the column inside the
-line. The value taken will be the first (non-space)word after this
-column. The database will either be \$HOME/.${PROGNAME}.db or if not
-found  $PROGDIR/${PROGNAME}.db.
+The query database is a simple text format with three entries per line,
+separated with '/' :
+  Column 1 is the name of the variable (cannot contain spaces).
+  Column 2 is the extended regular expression (egrep) to select the line.
+  Column 3 is the string (fgrep) to select the column inside the line.
+The value taken will be the first (non-space)word after this column.
+The database ($PROGNAME.db) will taken from these locations:
+
+    $HOME/.OpenFOAM/$WM_PROJECT_VERSION
+    $HOME/.OpenFOAM
+    $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION
+    $WM_PROJECT_INST_DIR/site
+    $WM_PROJECT_DIR/etc
+    $PROGDIR/tools
 
 Option -s suppresses the default information and only prints the extracted
 variables.
@@ -95,9 +96,28 @@ LABHELP
 }
 
 
+# The various places to be searched:
+for i in \
+    $HOME/.OpenFOAM/$WM_PROJECT_VERSION \
+    $HOME/.OpenFOAM \
+    $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION \
+    $WM_PROJECT_INST_DIR/site \
+    $WM_PROJECT_DIR/etc \
+    $PROGDIR/tools \
+    ;
+do
+    if [ -r $i/$DBFILE ]
+    then
+        DBFILE="$i/$DBFILE"
+        break
+    fi
+done
+
+
 
 myEcho() {
-  if [ "$VERBOSE" ]; then
+  if [ "$VERBOSE" ]
+  then
       echo "$*"
   fi
 }
@@ -112,7 +132,8 @@ getSolvedVars() {
 # getQueries dbFile queryName
 # Gets regular expressions for a certain queryName from the database
 getQueries() {
-    if [ ! -f "$1" ]; then
+    if [ ! -f "$1" ]
+    then
         echo "Cannot find dbFile $1"
         exit 1
     fi
@@ -123,7 +144,8 @@ getQueries() {
     NUMQ=`grep -v '^#' $1 | awk -F '/' "/$queryName/ {if (\"$queryName\" "'!= $1) next; print $3}'`
 
     #echo "For $queryName found line selection /$LINEQ/ , column selection /$NUMQ/" 1>&2
-    #if [ ! "$LINEQ" -o ! "$NUMQ" ]; then
+    #if [ ! "$LINEQ" -o ! "$NUMQ" ]
+    #then
     #    echo "Did not find query for $2 in database $1" 1>&2
     #fi
 }
@@ -164,9 +186,11 @@ getAllQueries() {
     do
         getQueries $1 "$var"
         line=`egrep "$LINEQ" $2`
-        if [ "$line" ]; then
+        if [ "$line" ]
+        then
             column=`echo "$line" | fgrep "$NUMQ"`
-            if [ "$column" ]; then
+            if [ "$column" ]
+            then
                 queries="$queries $var"
             fi
         fi
@@ -190,18 +214,23 @@ LISTONLY=''
 while getopts nslh flags
 do
     case $flags in
-        n)  TIMENAME=""
-            ;;
-        h)  printHelp
-            exit 0
-            ;;
-        s)  VERBOSE=""
-            ;;
-        l)  LISTONLY='yes'
-            ;;
-	    \?) printUsage
-            exit 1
-            ;;
+    n)
+        TIMENAME=""
+        ;;
+    h)
+        printHelp
+        exit 0
+        ;;
+    s)
+        VERBOSE=""
+        ;;
+    l)
+        LISTONLY='yes'
+        ;;
+    \?)
+        printUsage
+        exit 1
+        ;;
     esac
 done
 
@@ -209,18 +238,22 @@ done
 # Shift options
 shift `expr $OPTIND - 1`
 
-if [ ! -f $DBFILE ]; then
+if [ ! -f $DBFILE ]
+then
     echo "$PROGNAME: Cannot read database $DBFILE"
     exit 1
 fi
 
-if [ "$LISTONLY" ]; then
-    if [ $# -ne 1 ]; then
+if [ "$LISTONLY" ]
+then
+    if [ $# -ne 1 ]
+    then
         printUsage
         exit 1
     fi
     LOG=$1;
-    if [ ! -r $LOG ]; then
+    if [ ! -r $LOG ]
+    then
         echo "$PROGNAME: Cannot read log $LOG"
         exit 1
     fi
@@ -228,14 +261,16 @@ if [ "$LISTONLY" ]; then
     exit 0
 fi
 
-if [ $# -ne 1 ]; then
+if [ $# -ne 1 ]
+then
     printUsage
     exit 1
 fi
 
 CASEDIR=.
 LOG=$1
-if [ ! -r $LOG ]; then
+if [ ! -r $LOG ]
+then
     echo "$PROGNAME: Cannot read log $LOG"
     exit 1
 fi
@@ -243,17 +278,20 @@ fi
 QUERYNAMES=`getAllQueries $DBFILE $LOG`
 
 
-if [ ! "$CASEDIR" ]; then
+if [ ! "$CASEDIR" ]
+then
     printUsage
     exit 1
 fi
 
-if [ ! -d "$CASEDIR" ]; then
+if [ ! -d "$CASEDIR" ]
+then
     echo "$PROGNAME: Cannot read $CASEDIR"
     exit 1
 fi
 
-if [ ! -f "$LOG" ]; then
+if [ ! -f "$LOG" ]
+then
     echo "$PROGNAME: Cannot read log file $LOG"
     exit 1
 fi
@@ -361,19 +399,19 @@ cat <<LABSOLVE >> $AWKFILE
 
     varName=varNameVal[1]
     file=varName "_" subIter[varName]++
-    file="$CASEDIR/logs/" file 
+    file="$CASEDIR/logs/" file
     extract(\$0, "Initial residual = ", val)
     print $TIMENAME "\t" val[1] > file
 
     varName=varNameVal[1] "FinalRes"
     file=varName "_" subIter[varName]++
-    file="$CASEDIR/logs/" file 
+    file="$CASEDIR/logs/" file
     extract(\$0, "Final residual = ", val)
     print $TIMENAME "\t" val[1] > file
 
     varName=varNameVal[1] "Iters"
     file=varName "_" subIter[varName]++
-    file="$CASEDIR/logs/" file 
+    file="$CASEDIR/logs/" file
     extract(\$0, "No Iterations ", val)
     print $TIMENAME "\t" val[1] > file
 }
@@ -384,7 +422,8 @@ LABSOLVE
 for queryName in $QUERYNAMES
 do
     getQueries $DBFILE $queryName
-    if [ "$LINEQ" -a "$NUMQ" ]; then
+    if [ "$LINEQ" -a "$NUMQ" ]
+    then
         counter=${queryName}Cnt
 
         echo "#-- Extraction of $queryName" >> $AWKFILE
