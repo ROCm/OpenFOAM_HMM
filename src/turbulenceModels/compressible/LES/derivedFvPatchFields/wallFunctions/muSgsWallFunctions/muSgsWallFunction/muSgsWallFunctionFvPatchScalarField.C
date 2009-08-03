@@ -39,14 +39,6 @@ namespace compressible
 namespace LESModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-//! @cond fileScope
-static const scalar defaultKappa_(0.41);
-static const scalar defaultE_(9.8);
-//! @endcond fileScope
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
@@ -59,8 +51,8 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     UName_("U"),
     rhoName_("rho"),
     muName_("mu"),
-    kappa_(defaultKappa_),
-    E_(defaultE_)
+    kappa_(0.41),
+    E_(9.8)
 {}
 
 
@@ -92,8 +84,8 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     UName_(dict.lookupOrDefault<word>("U", "U")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
-    E_(dict.lookupOrDefault<scalar>("E", defaultE_))
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {}
 
 
@@ -205,8 +197,8 @@ void muSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
 
-    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
+    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
 
     writeEntry("value", os);
 }

@@ -40,14 +40,6 @@ namespace incompressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-//! @cond fileScope
-static const scalar defaultCmu_(0.09);
-static const scalar defaultKappa_(0.41);
-static const scalar defaultE_(9.8);
-//! @endcond fileScope
-
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void nutkWallFunctionFvPatchScalarField::checkType()
@@ -114,9 +106,9 @@ tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 
 void nutkWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
-    writeEntryIfDifferent<scalar>(os, "Cmu", defaultCmu_, Cmu_);
-    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
+    writeEntryIfDifferent<scalar>(os, "Cmu", 0.09, Cmu_);
+    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
 }
 
 
@@ -129,9 +121,9 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Cmu_(defaultCmu_),
-    kappa_(defaultKappa_),
-    E_(defaultE_),
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.8),
     yPlusLam_(calcYPlusLam(kappa_, E_))
 {
     checkType();
@@ -164,9 +156,9 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", defaultCmu_)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
-    E_(dict.lookupOrDefault<scalar>("E", defaultE_)),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
     yPlusLam_(calcYPlusLam(kappa_, E_))
 {
     checkType();

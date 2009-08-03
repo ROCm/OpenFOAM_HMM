@@ -46,13 +46,6 @@ scalar alphaSgsJayatillekeWallFunctionFvPatchScalarField::maxExp_ = 50.0;
 scalar alphaSgsJayatillekeWallFunctionFvPatchScalarField::tolerance_ = 0.01;
 label alphaSgsJayatillekeWallFunctionFvPatchScalarField::maxIters_ = 10;
 
-//! @cond fileScope
-static const scalar defaultPrt_(0.85);
-static const scalar defaultKappa_(0.41);
-static const scalar defaultE_(9.8);
-//! @endcond fileScope
-
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void alphaSgsJayatillekeWallFunctionFvPatchScalarField::checkType()
@@ -121,9 +114,9 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Prt_(defaultPrt_),
-    kappa_(defaultKappa_),
-    E_(defaultE_)
+    Prt_(0.85),
+    kappa_(0.41),
+    E_(9.8)
 {
     checkType();
 }
@@ -154,9 +147,9 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Prt_(dict.lookupOrDefault<scalar>("Prt", defaultPrt_)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
-    E_(dict.lookupOrDefault<scalar>("E", defaultE_))
+    Prt_(dict.lookupOrDefault<scalar>("Prt", 0.85)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {
     checkType();
 }
@@ -318,9 +311,9 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
 
-    writeEntryIfDifferent<scalar>(os, "Prt", defaultPrt_, Prt_);
-    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
+    writeEntryIfDifferent<scalar>(os, "Prt", 0.85, Prt_);
+    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
 
     writeEntry("value", os);
 }
