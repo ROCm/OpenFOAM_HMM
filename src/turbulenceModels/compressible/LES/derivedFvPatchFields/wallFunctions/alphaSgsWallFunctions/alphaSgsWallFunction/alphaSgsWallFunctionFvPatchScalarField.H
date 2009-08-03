@@ -70,12 +70,6 @@ class alphaSgsWallFunctionFvPatchScalarField
 
 public:
 
-    // Public data
-
-        //- Standard value for turbulent Prandtl number %Prt
-        static const scalar standardPrt = 0.85;
-
-
     //- Runtime type information
     TypeName("alphaSgsWallFunction");
 

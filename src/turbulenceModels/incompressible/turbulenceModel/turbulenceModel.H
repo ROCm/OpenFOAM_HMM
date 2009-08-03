@@ -96,18 +96,6 @@ private:
 
 public:
 
-    // Public data
-
-        //- Standard value for turbulence constant %Cmu
-        static const scalar standardCmu = 0.09;
-
-        //- Standard value for turbulence constant %kappa
-        static const scalar standardKappa = 0.41;
-
-        //- Standard value for turbulence constant %E
-        static const scalar standardE = 9.8;
-
-
     //- Runtime type information
     TypeName("turbulenceModel");
 

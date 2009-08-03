@@ -183,7 +183,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         )
     ),
 
-    yr_(mesh_),
+    y_(mesh_),
 
     R_
     (
@@ -371,7 +371,7 @@ void LaunderGibsonRSTM::correct()
 
     if (mesh_.changing())
     {
-        yr_.correct();
+        y_.correct();
     }
 
     volSymmTensorField P = -twoSymm(R_ & fvc::grad(U_));
@@ -436,10 +436,10 @@ void LaunderGibsonRSTM::correct()
         // wall reflection terms
       + symm
         (
-            I*((yr_.n() & reflect) & yr_.n())
-          - 1.5*(yr_.n()*(reflect & yr_.n())
-          + (yr_.n() & reflect)*yr_.n())
-        )*pow(Cmu_, 0.75)*rho_*pow(k_, 1.5)/(kappa_*yr_*epsilon_)
+            I*((y_.n() & reflect) & y_.n())
+          - 1.5*(y_.n()*(reflect & y_.n())
+          + (y_.n() & reflect)*y_.n())
+        )*pow(Cmu_, 0.75)*rho_*pow(k_, 1.5)/(kappa_*y_*epsilon_)
     );
 
     REqn().relax();

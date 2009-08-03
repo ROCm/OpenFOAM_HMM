@@ -40,6 +40,14 @@ namespace incompressible
 namespace RASModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+//! @cond fileScope
+static const scalar defaultCmu_(0.09);
+static const scalar defaultKappa_(0.41);
+static const scalar defaultE_(9.8);
+//! @endcond fileScope
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void nutWallFunctionFvPatchScalarField::checkType()
@@ -106,9 +114,9 @@ tmp<scalarField> nutWallFunctionFvPatchScalarField::calcNut() const
 
 void nutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
-    writeEntryIfDifferent<scalar>(os, "Cmu", turbulenceModel::standardCmu, Cmu_);
-    writeEntryIfDifferent<scalar>(os, "kappa", turbulenceModel::standardKappa, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", turbulenceModel::standardE, E_);
+    writeEntryIfDifferent<scalar>(os, "Cmu", defaultCmu_, Cmu_);
+    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
 }
 
 
@@ -121,9 +129,9 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Cmu_(turbulenceModel::standardCmu),
-    kappa_(turbulenceModel::standardKappa),
-    E_(turbulenceModel::standardE),
+    Cmu_(defaultCmu_),
+    kappa_(defaultKappa_),
+    E_(defaultE_),
     yPlusLam_(calcYPlusLam(kappa_, E_))
 {
     checkType();
@@ -156,9 +164,9 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Cmu_(dict.lookupOrDefault<scalar>("Cmu", turbulenceModel::standardCmu)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", turbulenceModel::standardKappa)),
-    E_(dict.lookupOrDefault<scalar>("E", turbulenceModel::standardE)),
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", defaultCmu_)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
+    E_(dict.lookupOrDefault<scalar>("E", defaultE_)),
     yPlusLam_(calcYPlusLam(kappa_, E_))
 {
     checkType();

@@ -46,6 +46,12 @@ scalar alphaSgsJayatillekeWallFunctionFvPatchScalarField::maxExp_ = 50.0;
 scalar alphaSgsJayatillekeWallFunctionFvPatchScalarField::tolerance_ = 0.01;
 label alphaSgsJayatillekeWallFunctionFvPatchScalarField::maxIters_ = 10;
 
+//! @cond fileScope
+static const scalar defaultPrt_(0.85);
+static const scalar defaultKappa_(0.41);
+static const scalar defaultE_(9.8);
+//! @endcond fileScope
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -115,9 +121,9 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    Prt_(standardPrt),
-    kappa_(turbulenceModel::standardKappa),
-    E_(turbulenceModel::standardE)
+    Prt_(defaultPrt_),
+    kappa_(defaultKappa_),
+    E_(defaultE_)
 {
     checkType();
 }
@@ -148,9 +154,9 @@ alphaSgsJayatillekeWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    Prt_(dict.lookupOrDefault<scalar>("Prt", standardPrt)),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", turbulenceModel::standardKappa)),
-    E_(dict.lookupOrDefault<scalar>("E", turbulenceModel::standardE))
+    Prt_(dict.lookupOrDefault<scalar>("Prt", defaultPrt_)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
+    E_(dict.lookupOrDefault<scalar>("E", defaultE_))
 {
     checkType();
 }
@@ -312,9 +318,9 @@ void alphaSgsJayatillekeWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
 
-    writeEntryIfDifferent<scalar>(os, "Prt", standardPrt, Prt_);
-    writeEntryIfDifferent<scalar>(os, "kappa", turbulenceModel::standardKappa, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", turbulenceModel::standardE, E_);
+    writeEntryIfDifferent<scalar>(os, "Prt", defaultPrt_, Prt_);
+    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
 
     writeEntry("value", os);
 }

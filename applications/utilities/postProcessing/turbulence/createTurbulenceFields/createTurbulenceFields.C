@@ -41,10 +41,6 @@ Source files:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// turbulence constants - file-scope
-static const scalar Cmu(0.09);
-
-
 int main(int argc, char *argv[])
 {
     timeSelector::addOptions();
@@ -108,6 +104,8 @@ int main(int argc, char *argv[])
 
         if (!IOobject("omega", runTime.timeName(), mesh).headerOk())
         {
+            const scalar Cmu = 0.09;
+
             Info<< "creating omega" << endl;
             volScalarField omega
             (

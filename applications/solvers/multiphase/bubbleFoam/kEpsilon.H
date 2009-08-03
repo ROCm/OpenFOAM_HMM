@@ -1,4 +1,4 @@
-if (turbulence)
+if(turbulence)
 {
     if (mesh.changing())
     {

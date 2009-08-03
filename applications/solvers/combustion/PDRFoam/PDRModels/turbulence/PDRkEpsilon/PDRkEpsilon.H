@@ -27,7 +27,7 @@ Class
 
 Description
     Standard k-epsilon turbulence model with additional source terms
-    corresponding to PDR basic drag model (@link basic.H @endlink)
+    corresponding to PDR basic drag model (\link basic.H \endlink)
 
     The default model coefficients correspond to the following:
     @verbatim
@@ -47,10 +47,10 @@ Description
     \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to
     interaction with unresolved obstacles.
 
-    In the \f$ \epsilon \f$ equation, \f$ C_{1} G_{R} \f$ is added as a source
+    In the \f$ \epsilon  \f$ equation \f$ C_{1} G_{R} \f$ is added as a source
     term.
 
-    In the \f$ \kappa \f$ equation, \f$ G_{R} \f$ is added as a source term.
+    In the \f$ \kappa \f$ equation \f$ G_{R} \f$ is added as a source term.
 
 SourceFiles
     PDRkEpsilon.C

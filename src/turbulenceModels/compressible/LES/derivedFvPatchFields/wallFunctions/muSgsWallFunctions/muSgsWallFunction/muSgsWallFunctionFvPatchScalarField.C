@@ -39,6 +39,14 @@ namespace compressible
 namespace LESModels
 {
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+//! @cond fileScope
+static const scalar defaultKappa_(0.41);
+static const scalar defaultE_(9.8);
+//! @endcond fileScope
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
@@ -51,8 +59,8 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     UName_("U"),
     rhoName_("rho"),
     muName_("mu"),
-    kappa_(turbulenceModel::standardKappa),
-    E_(turbulenceModel::standardE)
+    kappa_(defaultKappa_),
+    E_(defaultE_)
 {}
 
 
@@ -84,8 +92,8 @@ muSgsWallFunctionFvPatchScalarField::muSgsWallFunctionFvPatchScalarField
     UName_(dict.lookupOrDefault<word>("U", "U")),
     rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
     muName_(dict.lookupOrDefault<word>("mu", "mu")),
-    kappa_(dict.lookupOrDefault<scalar>("kappa", turbulenceModel::standardKappa)),
-    E_(dict.lookupOrDefault<scalar>("E", turbulenceModel::standardE))
+    kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
+    E_(dict.lookupOrDefault<scalar>("E", defaultE_))
 {}
 
 
@@ -197,8 +205,8 @@ void muSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
     writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
 
-    writeEntryIfDifferent<scalar>(os, "kappa", turbulenceModel::standardKappa, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", turbulenceModel::standardE, E_);
+    writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
+    writeEntryIfDifferent<scalar>(os, "E", defaultE_, E_);
 
     writeEntry("value", os);
 }
