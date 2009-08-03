@@ -851,8 +851,6 @@ void Foam::conformalVoronoiMesh::insertInitialPoints()
     }
 
     storeSizesAndAlignments(initPts);
-
-
 }
 
 
@@ -875,7 +873,11 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
     {
         sizeAndAlignmentLocations_[i] = topoint(initPts[i]);
 
-        storedSizes_[i] = targetCellSize(sizeAndAlignmentLocations_[i]);
+        storedSizes_[i] = cellSizeControl().cellSize
+        (
+            sizeAndAlignmentLocations_[i],
+            false
+        );
 
         storedAlignments_[i] = requiredAlignment(sizeAndAlignmentLocations_[i]);
     }
@@ -2246,8 +2248,6 @@ void Foam::conformalVoronoiMesh::move()
 
     // timeCheck();
 
-    // Info<< "    Calculated" << endl;
-
     Info<< nl << "    Looking up target cell alignment and size" << endl;
 
     scalar spanSqr = cvMeshControls().spanSqr();
@@ -2274,8 +2274,6 @@ void Foam::conformalVoronoiMesh::move()
     }
 
     timeCheck();
-
-    Info<< "    Looked up" << endl;
 
     Info<< nl << "    Looping over all dual faces" << endl;
 
@@ -2485,6 +2483,7 @@ void Foam::conformalVoronoiMesh::move()
                         {
                             displacementAccumulator[vA->index()] += delta;
                         }
+
                         if (vB->internalPoint())
                         {
                             displacementAccumulator[vB->index()] += -delta;
