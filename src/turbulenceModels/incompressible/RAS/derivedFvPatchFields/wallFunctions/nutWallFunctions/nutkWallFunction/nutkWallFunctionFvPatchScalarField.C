@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mutWallFunctionFvPatchScalarField.H"
+#include "nutkWallFunctionFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -35,7 +35,7 @@ License
 
 namespace Foam
 {
-namespace compressible
+namespace incompressible
 {
 namespace RASModels
 {
@@ -50,11 +50,11 @@ static const scalar defaultE_(9.8);
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void mutWallFunctionFvPatchScalarField::checkType()
+void nutkWallFunctionFvPatchScalarField::checkType()
 {
     if (!isA<wallFvPatch>(patch()))
     {
-        FatalErrorIn("mutWallFunctionFvPatchScalarField::checkType()")
+        FatalErrorIn("nutkWallFunctionFvPatchScalarField::checkType()")
             << "Invalid wall function specification" << nl
             << "    Patch type for patch " << patch().name()
             << " must be wall" << nl
@@ -64,7 +64,7 @@ void mutWallFunctionFvPatchScalarField::checkType()
 }
 
 
-scalar mutWallFunctionFvPatchScalarField::calcYPlusLam
+scalar nutkWallFunctionFvPatchScalarField::calcYPlusLam
 (
     const scalar kappa,
     const scalar E
@@ -81,39 +81,38 @@ scalar mutWallFunctionFvPatchScalarField::calcYPlusLam
 }
 
 
-tmp<scalarField> mutWallFunctionFvPatchScalarField::calcMut() const
+tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchI = patch().index();
+
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalarField& y = rasModel.y()[patchI];
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     const scalar Cmu25 = pow(Cmu_, 0.25);
 
-    tmp<scalarField> tmutw(new scalarField(patch().size(), 0.0));
-    scalarField& mutw = tmutw();
+    tmp<scalarField> tnutw(new scalarField(patch().size(), 0.0));
+    scalarField& nutw = tnutw();
 
-    forAll(mutw, faceI)
+    forAll(nutw, faceI)
     {
         label faceCellI = patch().faceCells()[faceI];
 
-        scalar yPlus =
-            Cmu25*y[faceI]*sqrt(k[faceCellI])/(muw[faceI]/rhow[faceI]);
+        scalar yPlus = Cmu25*y[faceI]*sqrt(k[faceCellI])/nuw[faceI];
 
         if (yPlus > yPlusLam_)
         {
-            mutw[faceI] = muw[faceI]*(yPlus*kappa_/log(E_*yPlus) - 1);
+            nutw[faceI] = nuw[faceI]*(yPlus*kappa_/log(E_*yPlus) - 1.0);
         }
     }
 
-    return tmutw;
+    return tnutw;
 }
 
 
-void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+void nutkWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
     writeEntryIfDifferent<scalar>(os, "Cmu", defaultCmu_, Cmu_);
     writeEntryIfDifferent<scalar>(os, "kappa", defaultKappa_, kappa_);
@@ -123,7 +122,7 @@ void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -134,12 +133,14 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
     kappa_(defaultKappa_),
     E_(defaultE_),
     yPlusLam_(calcYPlusLam(kappa_, E_))
-{}
+{
+    checkType();
+}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& ptf,
+    const nutkWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -150,10 +151,12 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
     kappa_(ptf.kappa_),
     E_(ptf.E_),
     yPlusLam_(ptf.yPlusLam_)
-{}
+{
+    checkType();
+}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -165,12 +168,14 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
     kappa_(dict.lookupOrDefault<scalar>("kappa", defaultKappa_)),
     E_(dict.lookupOrDefault<scalar>("E", defaultE_)),
     yPlusLam_(calcYPlusLam(kappa_, E_))
-{}
+{
+    checkType();
+}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& wfpsf
+    const nutkWallFunctionFvPatchScalarField& wfpsf
 )
 :
     fixedValueFvPatchScalarField(wfpsf),
@@ -178,12 +183,14 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_),
     yPlusLam_(wfpsf.yPlusLam_)
-{}
+{
+    checkType();
+}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& wfpsf,
+    const nutkWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -192,20 +199,22 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
     kappa_(wfpsf.kappa_),
     E_(wfpsf.E_),
     yPlusLam_(wfpsf.yPlusLam_)
-{}
+{
+    checkType();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void mutWallFunctionFvPatchScalarField::updateCoeffs()
+void nutkWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    operator==(calcMut());
+    operator==(calcNut());
 
     fixedValueFvPatchScalarField::updateCoeffs();
 }
 
 
-tmp<scalarField> mutWallFunctionFvPatchScalarField::yPlus() const
+tmp<scalarField> nutkWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchI = patch().index();
 
@@ -215,14 +224,13 @@ tmp<scalarField> mutWallFunctionFvPatchScalarField::yPlus() const
     const tmp<volScalarField> tk = rasModel.k();
     const volScalarField& k = tk();
     const scalarField kwc = k.boundaryField()[patchI].patchInternalField();
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
-    return pow(Cmu_, 0.25)*y*sqrt(kwc)/(muw/rhow);
+    return pow(Cmu_, 0.25)*y*sqrt(kwc)/nuw;
 }
 
 
-void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
+void nutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -232,12 +240,12 @@ void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, mutWallFunctionFvPatchScalarField);
+makePatchTypeField(fvPatchScalarField, nutkWallFunctionFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace compressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

@@ -24,24 +24,37 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mutSpalartAllmarasWallFunctionFvPatchScalarField.H"
+#include "nutUSpaldingWallFunctionFvPatchScalarField.H"
+#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "RASModel.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace compressible
+namespace incompressible
 {
 namespace RASModels
 {
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
+tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
+{
+    const label patchI = patch().index();
+
+    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
+    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
+
+    return max(scalar(0), sqr(calcUTau(magGradU))/magGradU - nuw);
+}
+
+
+tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 (
     const scalarField& magGradU
 ) const
@@ -51,25 +64,19 @@ tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
 
     const fvPatchVectorField& Uw =
         rasModel.U().boundaryField()[patch().index()];
+    const scalarField magUp = mag(Uw.patchInternalField() - Uw);
 
-    scalarField magUp = mag(Uw.patchInternalField() - Uw);
-
-    const fvPatchScalarField& rhow =
-        rasModel.rho().boundaryField()[patch().index()];
-
-    const fvPatchScalarField& muw =
-        rasModel.mu().boundaryField()[patch().index()];
-    const scalarField& mutw = *this;
+    const scalarField& nuw = rasModel.nu().boundaryField()[patch().index()];
+    const scalarField& nutw = *this;
 
     tmp<scalarField> tuTau(new scalarField(patch().size(), 0.0));
     scalarField& uTau = tuTau();
 
-    forAll(mutw, faceI)
+    forAll(uTau, facei)
     {
-        scalar magUpara = magUp[faceI];
+        scalar magUpara = magUp[facei];
 
-        scalar ut =
-            sqrt((mutw[faceI] + muw[faceI])*magGradU[faceI]/rhow[faceI]);
+        scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
 
         if (ut > VSMALL)
         {
@@ -82,12 +89,12 @@ tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
-                    - ut*y[faceI]/(muw[faceI]/rhow[faceI])
+                    - ut*y[facei]/nuw[facei]
                     + magUpara/ut
                     + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
-                    y[faceI]/(muw[faceI]/rhow[faceI])
+                    y[facei]/nuw[facei]
                   + magUpara/sqr(ut)
                   + 1/E_*kUu*fkUu/ut;
 
@@ -96,8 +103,7 @@ tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
                 ut = uTauNew;
 
             } while (ut > VSMALL && err > 0.01 && ++iter < 10);
-
-            uTau[faceI] = max(0.0, ut);
+            uTau[facei] = max(0.0, ut);
         }
     }
 
@@ -105,101 +111,81 @@ tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
 }
 
 
-tmp<scalarField>
-mutSpalartAllmarasWallFunctionFvPatchScalarField::calcMut() const
-{
-    const label patchI = patch().index();
-
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
-
-    return max(scalar(0), rhow*sqr(calcUTau(magGradU))/magGradU - muw);
-}
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+nutUSpaldingWallFunctionFvPatchScalarField::
+nutUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutWallFunctionFvPatchScalarField(p, iF)
+    nutkWallFunctionFvPatchScalarField(p, iF)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+nutUSpaldingWallFunctionFvPatchScalarField::
+nutUSpaldingWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& ptf,
+    const nutUSpaldingWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    mutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    nutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+nutUSpaldingWallFunctionFvPatchScalarField::
+nutUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    mutWallFunctionFvPatchScalarField(p, iF, dict)
+    nutkWallFunctionFvPatchScalarField(p, iF, dict)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+nutUSpaldingWallFunctionFvPatchScalarField::
+nutUSpaldingWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf
+    const nutUSpaldingWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    mutWallFunctionFvPatchScalarField(wfpsf)
+    nutkWallFunctionFvPatchScalarField(wfpsf)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+nutUSpaldingWallFunctionFvPatchScalarField::
+nutUSpaldingWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf,
+    const nutUSpaldingWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutWallFunctionFvPatchScalarField(wfpsf, iF)
+    nutkWallFunctionFvPatchScalarField(wfpsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField>
-mutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const
+tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchI = patch().index();
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalarField& y = rasModel.y()[patchI];
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
-    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
+    const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
-    return y*calcUTau(mag(Uw.snGrad()))/(muw/rhow);
+    return y*calcUTau(mag(Uw.snGrad()))/nuw;
 }
 
 
-void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
-(
-    Ostream& os
-) const
+void nutUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -209,12 +195,16 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, mutSpalartAllmarasWallFunctionFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    nutUSpaldingWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace compressible
+} // End namespace incompressible
 } // End namespace Foam
 
 // ************************************************************************* //

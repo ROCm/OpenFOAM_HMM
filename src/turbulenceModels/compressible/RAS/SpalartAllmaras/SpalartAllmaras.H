@@ -188,42 +188,10 @@ public:
         }
 
         //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        "k",
-                        runTime_.timeName(),
-                        mesh_
-                    ),
-                    mesh_,
-                    dimensionedScalar("0", dimensionSet(0, 2, -2, 0, 0), 0)
-                )
-            );
-        }
+        virtual tmp<volScalarField> k() const;
 
         //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        "epslion",
-                        runTime_.timeName(),
-                        mesh_
-                    ),
-                    mesh_,
-                    dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0), 0)
-                )
-            );
-        }
+        virtual tmp<volScalarField> epsilon() const;
 
         //- Return the Reynolds stress tensor
         virtual tmp<volSymmTensorField> R() const;

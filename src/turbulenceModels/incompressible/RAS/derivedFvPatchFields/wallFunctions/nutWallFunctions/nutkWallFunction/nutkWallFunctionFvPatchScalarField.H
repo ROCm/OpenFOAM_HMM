@@ -23,27 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::nutRoughWallFunctionFvPatchScalarField
+    Foam::incompressible::RASModels::nutkWallFunctionFvPatchScalarField
 
 Description
     Boundary condition for turbulent (kinematic) viscosity when using wall
-    functions for rough walls.
-
-    Manipulates the E parameter to account for roughness effects, based on
-    KsPlus.
-
-    - roughness height = sand-grain roughness (0 for smooth walls)
-    - roughness constant = 0.5-1.0 (0.5 default)
+    functions, based on turbulence kinetic energy.
+    - replicates OpenFOAM v1.5 (and earlier) behaviour
 
 SourceFiles
-    nutRoughWallFunctionFvPatchScalarField.C
+    nutkWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nutRoughWallFunctionFvPatchScalarField_H
-#define nutRoughWallFunctionFvPatchScalarField_H
+#ifndef nutkWallFunctionFvPatchScalarField_H
+#define nutkWallFunctionFvPatchScalarField_H
 
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,50 +50,62 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-           Class nutRoughWallFunctionFvPatchScalarField Declaration
+             Class nutkWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nutRoughWallFunctionFvPatchScalarField
+class nutkWallFunctionFvPatchScalarField
 :
-    public nutWallFunctionFvPatchScalarField
+    public fixedValueFvPatchScalarField
 {
 protected:
 
     // Protected data
 
-        //- Roughness height
-        scalarField Ks_;
+        //- Cmu coefficient
+        scalar Cmu_;
 
-        //- Roughness constant
-        scalarField Cs_;
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
+        //- Y+ at the edge of the laminar sublayer
+        scalar yPlusLam_;
 
 
     // Protected member functions
 
-        //- Compute the roughness function
-        virtual scalar fnRough(const scalar KsPlus, const scalar Cs) const;
+        //- Check the type of the patch
+        virtual void checkType();
+
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
+
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("nutRoughWallFunction");
+    TypeName("nutkWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nutRoughWallFunctionFvPatchScalarField
+        nutkWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nutRoughWallFunctionFvPatchScalarField
+        nutkWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -106,20 +113,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutRoughWallFunctionFvPatchScalarField
+        //  nutkWallFunctionFvPatchScalarField
         //  onto a new patch
-        nutRoughWallFunctionFvPatchScalarField
+        nutkWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&,
+            const nutkWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nutRoughWallFunctionFvPatchScalarField
+        nutkWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&
+            const nutkWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -127,14 +134,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughWallFunctionFvPatchScalarField(*this)
+                new nutkWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        nutRoughWallFunctionFvPatchScalarField
+        nutkWallFunctionFvPatchScalarField
         (
-            const nutRoughWallFunctionFvPatchScalarField&,
+            const nutkWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -146,24 +153,20 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutRoughWallFunctionFvPatchScalarField(*this, iF)
+                new nutkWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        // Mapping functions
+        // Evaluation functions
 
-            //- Map (and resize as needed) from self given a mapping object
-            virtual void autoMap(const fvPatchFieldMapper&);
+            //- Calculate and return the yPlus at the boundary
+            virtual tmp<scalarField> yPlus() const;
 
-            //- Reverse map the given fvPatchField onto this fvPatchField
-            virtual void rmap
-            (
-                const fvPatchScalarField&,
-                const labelList&
-            );
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
 
 
         // I-O

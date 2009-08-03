@@ -33,13 +33,13 @@ boundaryField
     }
     innerWall
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         U               Urel;
         value           uniform 0;
     }
     outerWall
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         U               Urel;
         value           uniform 0;
     }

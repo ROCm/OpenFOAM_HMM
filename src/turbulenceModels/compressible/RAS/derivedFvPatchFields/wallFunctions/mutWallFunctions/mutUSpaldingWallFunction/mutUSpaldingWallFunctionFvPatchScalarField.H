@@ -23,67 +23,66 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::
-    nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::mutUSpaldingWallFunctionFvPatchScalarField
 
 Description
     Wall function boundary condition for walls
 
 SourceFiles
-    nutSpalartAllmarasStandardWallFunctionFvPatchScalarField.C
+    mutUSpaldingWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
-#define nutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutUSpaldingWallFunctionFvPatchScalarField_H
+#define compressibleMutUSpaldingWallFunctionFvPatchScalarField_H
 
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "mutkWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-  Class nutSpalartAllmarasStandardWallFunctionFvPatchScalarField Declaration
+        Class mutUSpaldingWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+class mutUSpaldingWallFunctionFvPatchScalarField
 :
-    public nutWallFunctionFvPatchScalarField
+    public mutkWallFunctionFvPatchScalarField
 {
 protected:
 
     // Protected member functions
 
-        //- Calculate yPLus
-        virtual tmp<scalarField> calcYPlus(const scalarField& magUp) const;
-
         //- Calculate the turbulence viscosity
-        virtual tmp<scalarField> calcNut() const;
+        virtual tmp<scalarField> calcMut() const;
+
+        //- Calculate the friction velocity
+        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("nutSpalartAllmarasStandardWallFunction");
+    TypeName("mutUSpaldingWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        mutUSpaldingWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        mutUSpaldingWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -91,20 +90,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        //  mutUSpaldingWallFunctionFvPatchScalarField
         //  onto a new patch
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        mutUSpaldingWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField&,
+            const mutUSpaldingWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        mutUSpaldingWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField&
+            const mutUSpaldingWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -112,17 +111,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
-                (
-                    *this
-                )
+                new mutUSpaldingWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        mutUSpaldingWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField&,
+            const mutUSpaldingWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -134,11 +130,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
-                (
-                    *this,
-                    iF
-                )
+                new mutUSpaldingWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
@@ -161,7 +153,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace RASModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

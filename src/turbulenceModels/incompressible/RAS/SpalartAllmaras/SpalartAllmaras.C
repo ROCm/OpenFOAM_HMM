@@ -233,6 +233,10 @@ tmp<volScalarField> SpalartAllmaras::DnuTildaEff() const
 
 tmp<volScalarField> SpalartAllmaras::k() const
 {
+    WarningIn("tmp<volScalarField> SpalartAllmaras::k() const")
+        << "Turbulence kinetic energy not defined for Spalart-Allmaras model. "
+        << "Returning zero field" << endl;
+
     return tmp<volScalarField>
     (
         new volScalarField
@@ -252,6 +256,11 @@ tmp<volScalarField> SpalartAllmaras::k() const
 
 tmp<volScalarField> SpalartAllmaras::epsilon() const
 {
+    WarningIn("tmp<volScalarField> SpalartAllmaras::epsilon() const")
+        << "Turbulence kinetic energy dissipation rate not defined for "
+        << "Spalart-Allmaras model. Returning zero field"
+        << endl;
+
     return tmp<volScalarField>
     (
         new volScalarField

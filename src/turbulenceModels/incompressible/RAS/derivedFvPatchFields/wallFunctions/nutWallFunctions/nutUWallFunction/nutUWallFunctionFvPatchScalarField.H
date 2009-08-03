@@ -23,21 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::
-    nutSpalartAllmarasWallFunctionFvPatchScalarField
+    Foam::incompressible::RASModels::nutUWallFunctionFvPatchScalarField
 
 Description
-    Wall function boundary condition for walls
+    Wall function boundary condition for walls, based on velocity.
 
 SourceFiles
-    nutSpalartAllmarasWallFunctionFvPatchScalarField.C
+    nutUWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nutSpalartAllmarasWallFunctionFvPatchScalarField_H
-#define nutSpalartAllmarasWallFunctionFvPatchScalarField_H
+#ifndef nutUWallFunctionFvPatchScalarField_H
+#define nutUWallFunctionFvPatchScalarField_H
 
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "nutkWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,41 +48,41 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-           Class nutSpalartAllmarasWallFunctionFvPatch Declaration
+  Class nutUWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nutSpalartAllmarasWallFunctionFvPatchScalarField
+class nutUWallFunctionFvPatchScalarField
 :
-    public nutWallFunctionFvPatchScalarField
+    public nutkWallFunctionFvPatchScalarField
 {
 protected:
 
     // Protected member functions
 
+        //- Calculate yPLus
+        virtual tmp<scalarField> calcYPlus(const scalarField& magUp) const;
+
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
-
-        //- Calculate the friction velocity
-        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("nutSpalartAllmarasWallFunction");
+    TypeName("nutUWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nutSpalartAllmarasWallFunctionFvPatchScalarField
+        nutUWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nutSpalartAllmarasWallFunctionFvPatchScalarField
+        nutUWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -91,20 +90,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutSpalartAllmarasWallFunctionFvPatchScalarField
+        //  nutUWallFunctionFvPatchScalarField
         //  onto a new patch
-        nutSpalartAllmarasWallFunctionFvPatchScalarField
+        nutUWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const nutUWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nutSpalartAllmarasWallFunctionFvPatchScalarField
+        nutUWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasWallFunctionFvPatchScalarField&
+            const nutUWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -112,14 +111,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutSpalartAllmarasWallFunctionFvPatchScalarField(*this)
+                new nutUWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        nutSpalartAllmarasWallFunctionFvPatchScalarField
+        nutUWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const nutUWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -131,7 +130,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutSpalartAllmarasWallFunctionFvPatchScalarField(*this, iF)
+                new nutUWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 

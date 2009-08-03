@@ -33,7 +33,7 @@ boundaryField
     }
     walls
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         value           uniform 0;
     }
     frontBack
