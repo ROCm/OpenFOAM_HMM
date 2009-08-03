@@ -164,6 +164,11 @@ epsilonWallFunctionFvPatchScalarField::epsilonWallFunctionFvPatchScalarField
 
 void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
 {
+    if (updated())
+    {
+        return;
+    }
+
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalar yPlusLam = rasModel.yPlusLam(kappa_, E_);
     const scalarField& y = rasModel.y()[patch().index()];
@@ -212,6 +217,8 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
             G[faceCellI] = 0.0;
         }
     }
+
+    fixedInternalValueFvPatchField<scalar>::updateCoeffs();
 
     // TODO: perform averaging for cells sharing more than one boundary face
 }
