@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::compressible::RASModels::
-    mutSpalartAllmarasWallFunctionFvPatchScalarField
+    Foam::compressible::RASModels::mutkWallFunctionFvPatchScalarField
 
 Description
-    Wall function boundary condition for walls
+    Boundary condition for turbulent (kinematic) viscosity when using wall
+    functions, based on turbulence kinetic energy.
+    - replicates OpenFOAM v1.5 (and earlier) behaviour
 
 SourceFiles
-    mutSpalartAllmarasWallFunctionFvPatchScalarField.C
+    mutkWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef compressibleMutSpalartAllmarasWallFunctionFvPatchScalarField_H
-#define compressibleMutSpalartAllmarasWallFunctionFvPatchScalarField_H
+#ifndef compressibleMutWallFunctionFvPatchScalarField_H
+#define compressibleMutWallFunctionFvPatchScalarField_H
 
-#include "mutWallFunctionFvPatchScalarField.H"
+#include "fixedValueFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,41 +50,62 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-      Class mutSpalartAllmarasWallFunctionFvPatchScalarField Declaration
+             Class mutkWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class mutSpalartAllmarasWallFunctionFvPatchScalarField
+class mutkWallFunctionFvPatchScalarField
 :
-    public mutWallFunctionFvPatchScalarField
+    public fixedValueFvPatchScalarField
 {
 protected:
 
+    // Protected data
+
+        //- Cmu coefficient
+        scalar Cmu_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
+        //- Y+ at the edge of the laminar sublayer
+        scalar yPlusLam_;
+
+
     // Protected member functions
+
+        //- Check the type of the patch
+        virtual void checkType();
+
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcMut() const;
 
-        //- Calculate the friction velocity
-        virtual tmp<scalarField> calcUTau(const scalarField& magGradU) const;
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("mutSpalartAllmarasWallFunction");
+    TypeName("mutkWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        mutSpalartAllmarasWallFunctionFvPatchScalarField
+        mutkWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        mutSpalartAllmarasWallFunctionFvPatchScalarField
+        mutkWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -91,20 +113,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  mutSpalartAllmarasWallFunctionFvPatchScalarField
+        //  mutkWallFunctionFvPatchScalarField
         //  onto a new patch
-        mutSpalartAllmarasWallFunctionFvPatchScalarField
+        mutkWallFunctionFvPatchScalarField
         (
-            const mutSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const mutkWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        mutSpalartAllmarasWallFunctionFvPatchScalarField
+        mutkWallFunctionFvPatchScalarField
         (
-            const mutSpalartAllmarasWallFunctionFvPatchScalarField&
+            const mutkWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -112,14 +134,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new mutSpalartAllmarasWallFunctionFvPatchScalarField(*this)
+                new mutkWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        mutSpalartAllmarasWallFunctionFvPatchScalarField
+        mutkWallFunctionFvPatchScalarField
         (
-            const mutSpalartAllmarasWallFunctionFvPatchScalarField&,
+            const mutkWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -131,7 +153,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new mutSpalartAllmarasWallFunctionFvPatchScalarField(*this, iF)
+                new mutkWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
@@ -143,11 +165,14 @@ public:
             //- Calculate and return the yPlus at the boundary
             virtual tmp<scalarField> yPlus() const;
 
+            //- Update the coefficients associated with the patch field
+            virtual void updateCoeffs();
+
 
         // I-O
 
             //- Write
-            virtual void write(Ostream& os) const;
+            virtual void write(Ostream&) const;
 };
 
 

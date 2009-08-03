@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mutSpalartAllmarasWallFunctionFvPatchScalarField.H"
+#include "mutUSpaldingWallFunctionFvPatchScalarField.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "RASModel.H"
@@ -41,7 +41,7 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
+tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 (
     const scalarField& magGradU
 ) const
@@ -105,8 +105,7 @@ tmp<scalarField> mutSpalartAllmarasWallFunctionFvPatchScalarField::calcUTau
 }
 
 
-tmp<scalarField>
-mutSpalartAllmarasWallFunctionFvPatchScalarField::calcMut() const
+tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::calcMut() const
 {
     const label patchI = patch().index();
 
@@ -122,67 +121,66 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField::calcMut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+mutUSpaldingWallFunctionFvPatchScalarField::
+mutUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutWallFunctionFvPatchScalarField(p, iF)
+    mutkWallFunctionFvPatchScalarField(p, iF)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+mutUSpaldingWallFunctionFvPatchScalarField::
+mutUSpaldingWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& ptf,
+    const mutUSpaldingWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    mutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    mutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+mutUSpaldingWallFunctionFvPatchScalarField::
+mutUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    mutWallFunctionFvPatchScalarField(p, iF, dict)
+    mutkWallFunctionFvPatchScalarField(p, iF, dict)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+mutUSpaldingWallFunctionFvPatchScalarField::
+mutUSpaldingWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf
+    const mutUSpaldingWallFunctionFvPatchScalarField& wfpsf
 )
 :
-    mutWallFunctionFvPatchScalarField(wfpsf)
+    mutkWallFunctionFvPatchScalarField(wfpsf)
 {}
 
 
-mutSpalartAllmarasWallFunctionFvPatchScalarField::
-mutSpalartAllmarasWallFunctionFvPatchScalarField
+mutUSpaldingWallFunctionFvPatchScalarField::
+mutUSpaldingWallFunctionFvPatchScalarField
 (
-    const mutSpalartAllmarasWallFunctionFvPatchScalarField& wfpsf,
+    const mutUSpaldingWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    mutWallFunctionFvPatchScalarField(wfpsf, iF)
+    mutkWallFunctionFvPatchScalarField(wfpsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField>
-mutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const
+tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchI = patch().index();
 
@@ -196,10 +194,7 @@ mutSpalartAllmarasWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
-(
-    Ostream& os
-) const
+void mutUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -209,7 +204,11 @@ void mutSpalartAllmarasWallFunctionFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, mutSpalartAllmarasWallFunctionFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    mutUSpaldingWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

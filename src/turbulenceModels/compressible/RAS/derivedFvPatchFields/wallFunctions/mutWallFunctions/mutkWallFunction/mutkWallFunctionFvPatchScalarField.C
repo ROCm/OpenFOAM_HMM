@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mutWallFunctionFvPatchScalarField.H"
+#include "mutkWallFunctionFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -42,11 +42,11 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void mutWallFunctionFvPatchScalarField::checkType()
+void mutkWallFunctionFvPatchScalarField::checkType()
 {
     if (!isA<wallFvPatch>(patch()))
     {
-        FatalErrorIn("mutWallFunctionFvPatchScalarField::checkType()")
+        FatalErrorIn("mutkWallFunctionFvPatchScalarField::checkType()")
             << "Invalid wall function specification" << nl
             << "    Patch type for patch " << patch().name()
             << " must be wall" << nl
@@ -56,7 +56,7 @@ void mutWallFunctionFvPatchScalarField::checkType()
 }
 
 
-scalar mutWallFunctionFvPatchScalarField::calcYPlusLam
+scalar mutkWallFunctionFvPatchScalarField::calcYPlusLam
 (
     const scalar kappa,
     const scalar E
@@ -73,7 +73,7 @@ scalar mutWallFunctionFvPatchScalarField::calcYPlusLam
 }
 
 
-tmp<scalarField> mutWallFunctionFvPatchScalarField::calcMut() const
+tmp<scalarField> mutkWallFunctionFvPatchScalarField::calcMut() const
 {
     const label patchI = patch().index();
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
@@ -105,7 +105,7 @@ tmp<scalarField> mutWallFunctionFvPatchScalarField::calcMut() const
 }
 
 
-void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+void mutkWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
@@ -115,7 +115,7 @@ void mutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+mutkWallFunctionFvPatchScalarField::mutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -129,9 +129,9 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 {}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+mutkWallFunctionFvPatchScalarField::mutkWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& ptf,
+    const mutkWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -145,7 +145,7 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 {}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+mutkWallFunctionFvPatchScalarField::mutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -160,9 +160,9 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 {}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+mutkWallFunctionFvPatchScalarField::mutkWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& wfpsf
+    const mutkWallFunctionFvPatchScalarField& wfpsf
 )
 :
     fixedValueFvPatchScalarField(wfpsf),
@@ -173,9 +173,9 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 {}
 
 
-mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
+mutkWallFunctionFvPatchScalarField::mutkWallFunctionFvPatchScalarField
 (
-    const mutWallFunctionFvPatchScalarField& wfpsf,
+    const mutkWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -189,7 +189,7 @@ mutWallFunctionFvPatchScalarField::mutWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void mutWallFunctionFvPatchScalarField::updateCoeffs()
+void mutkWallFunctionFvPatchScalarField::updateCoeffs()
 {
     operator==(calcMut());
 
@@ -197,7 +197,7 @@ void mutWallFunctionFvPatchScalarField::updateCoeffs()
 }
 
 
-tmp<scalarField> mutWallFunctionFvPatchScalarField::yPlus() const
+tmp<scalarField> mutkWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchI = patch().index();
 
@@ -214,7 +214,7 @@ tmp<scalarField> mutWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
+void mutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -224,7 +224,7 @@ void mutWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, mutWallFunctionFvPatchScalarField);
+makePatchTypeField(fvPatchScalarField, mutkWallFunctionFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
