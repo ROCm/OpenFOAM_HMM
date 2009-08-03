@@ -23,19 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::LESModels::
-        nuSgsWallFunctionFvPatchScalarField
+    Foam::compressible::LESModels::
+        muSgsUSpaldingWallFunctionFvPatchScalarField
 
 Description
-    Spalart Allmaras wall function boundary condition for incompressible flows
+    Wall function boundary condition for walls, based on velocity, using
+    Spaldings law to give a continuous muSgs profile to the wall (y+ = 0).
 
 SourceFiles
-    nuSgsWallFunctionFvPatchScalarField.C
+    muSgsUSpaldingWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nuSgsWallFunctionFvPatchScalarField_H
-#define nuSgsWallFunctionFvPatchScalarField_H
+#ifndef muSgsUSpaldingWallFunctionFvPatchScalarField_H
+#define muSgsUSpaldingWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -43,16 +44,16 @@ SourceFiles
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace LESModels
 {
 
 /*---------------------------------------------------------------------------*\
-     Class nuSgsWallFunctionFvPatchScalarField Declaration
+       Class muSgsUSpaldingWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nuSgsWallFunctionFvPatchScalarField
+class muSgsUSpaldingWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
@@ -61,33 +62,36 @@ class nuSgsWallFunctionFvPatchScalarField
         //- Name of velocity field
         word UName_;
 
+        //- Name of density field
+        word rhoName_;
+
         //- Name of laminar viscosity field
-        word nuName_;
+        word muName_;
 
         //- Von Karman constant
         scalar kappa_;
 
-        //- E constant
+        //- E coefficient
         scalar E_;
 
 
 public:
 
     //- Runtime type information
-    TypeName("nuSgsWallFunction");
+    TypeName("muSgsUSpaldingWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nuSgsWallFunctionFvPatchScalarField
+        muSgsUSpaldingWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nuSgsWallFunctionFvPatchScalarField
+        muSgsUSpaldingWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -95,20 +99,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nuSgsWallFunctionFvPatchScalarField
+        //  muSgsUSpaldingWallFunctionFvPatchScalarField
         //  onto a new patch
-        nuSgsWallFunctionFvPatchScalarField
+        muSgsUSpaldingWallFunctionFvPatchScalarField
         (
-            const nuSgsWallFunctionFvPatchScalarField&,
+            const muSgsUSpaldingWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nuSgsWallFunctionFvPatchScalarField
+        muSgsUSpaldingWallFunctionFvPatchScalarField
         (
-            const nuSgsWallFunctionFvPatchScalarField&
+            const muSgsUSpaldingWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -116,14 +120,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nuSgsWallFunctionFvPatchScalarField(*this)
+                new muSgsUSpaldingWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        nuSgsWallFunctionFvPatchScalarField
+        muSgsUSpaldingWallFunctionFvPatchScalarField
         (
-            const nuSgsWallFunctionFvPatchScalarField&,
+            const muSgsUSpaldingWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -135,11 +139,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nuSgsWallFunctionFvPatchScalarField
-                (
-                    *this,
-                    iF
-                )
+                new muSgsUSpaldingWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
@@ -154,7 +154,6 @@ public:
                 const Pstream::commsTypes commsType=Pstream::blocking
             );
 
-
         // I-O
 
             //- Write
@@ -165,7 +164,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
