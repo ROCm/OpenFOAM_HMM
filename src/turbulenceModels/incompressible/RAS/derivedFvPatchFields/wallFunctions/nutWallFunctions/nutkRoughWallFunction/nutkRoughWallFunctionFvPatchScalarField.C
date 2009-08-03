@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nutRoughWallFunctionFvPatchScalarField.H"
+#include "nutkRoughWallFunctionFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -41,7 +41,7 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-scalar nutRoughWallFunctionFvPatchScalarField::fnRough
+scalar nutkRoughWallFunctionFvPatchScalarField::fnRough
 (
     const scalar KsPlus,
     const scalar Cs
@@ -64,7 +64,7 @@ scalar nutRoughWallFunctionFvPatchScalarField::fnRough
 }
 
 
-tmp<scalarField> nutRoughWallFunctionFvPatchScalarField::calcNut() const
+tmp<scalarField> nutkRoughWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchI = patch().index();
 
@@ -128,63 +128,63 @@ tmp<scalarField> nutRoughWallFunctionFvPatchScalarField::calcNut() const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
+nutkRoughWallFunctionFvPatchScalarField::nutkRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF),
+    nutkWallFunctionFvPatchScalarField(p, iF),
     Ks_(p.size(), 0.0),
     Cs_(p.size(), 0.0)
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
+nutkRoughWallFunctionFvPatchScalarField::nutkRoughWallFunctionFvPatchScalarField
 (
-    const nutRoughWallFunctionFvPatchScalarField& ptf,
+    const nutkRoughWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
+    nutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper),
     Ks_(ptf.Ks_, mapper),
     Cs_(ptf.Cs_, mapper)
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
+nutkRoughWallFunctionFvPatchScalarField::nutkRoughWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF, dict),
+    nutkWallFunctionFvPatchScalarField(p, iF, dict),
     Ks_("Ks", dict, p.size()),
     Cs_("Cs", dict, p.size())
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
+nutkRoughWallFunctionFvPatchScalarField::nutkRoughWallFunctionFvPatchScalarField
 (
-    const nutRoughWallFunctionFvPatchScalarField& rwfpsf
+    const nutkRoughWallFunctionFvPatchScalarField& rwfpsf
 )
 :
-    nutWallFunctionFvPatchScalarField(rwfpsf),
+    nutkWallFunctionFvPatchScalarField(rwfpsf),
     Ks_(rwfpsf.Ks_),
     Cs_(rwfpsf.Cs_)
 {}
 
 
-nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
+nutkRoughWallFunctionFvPatchScalarField::nutkRoughWallFunctionFvPatchScalarField
 (
-    const nutRoughWallFunctionFvPatchScalarField& rwfpsf,
+    const nutkRoughWallFunctionFvPatchScalarField& rwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(rwfpsf, iF),
+    nutkWallFunctionFvPatchScalarField(rwfpsf, iF),
     Ks_(rwfpsf.Ks_),
     Cs_(rwfpsf.Cs_)
 {}
@@ -192,34 +192,34 @@ nutRoughWallFunctionFvPatchScalarField::nutRoughWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void nutRoughWallFunctionFvPatchScalarField::autoMap
+void nutkRoughWallFunctionFvPatchScalarField::autoMap
 (
     const fvPatchFieldMapper& m
 )
 {
-    nutWallFunctionFvPatchScalarField::autoMap(m);
+    nutkWallFunctionFvPatchScalarField::autoMap(m);
     Ks_.autoMap(m);
     Cs_.autoMap(m);
 }
 
 
-void nutRoughWallFunctionFvPatchScalarField::rmap
+void nutkRoughWallFunctionFvPatchScalarField::rmap
 (
     const fvPatchScalarField& ptf,
     const labelList& addr
 )
 {
-    nutWallFunctionFvPatchScalarField::rmap(ptf, addr);
+    nutkWallFunctionFvPatchScalarField::rmap(ptf, addr);
 
-    const nutRoughWallFunctionFvPatchScalarField& nrwfpsf =
-        refCast<const nutRoughWallFunctionFvPatchScalarField>(ptf);
+    const nutkRoughWallFunctionFvPatchScalarField& nrwfpsf =
+        refCast<const nutkRoughWallFunctionFvPatchScalarField>(ptf);
 
     Ks_.rmap(nrwfpsf.Ks_, addr);
     Cs_.rmap(nrwfpsf.Cs_, addr);
 }
 
 
-void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
+void nutkRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -231,7 +231,11 @@ void nutRoughWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, nutRoughWallFunctionFvPatchScalarField);
+makePatchTypeField
+(
+    fvPatchScalarField,
+    nutkRoughWallFunctionFvPatchScalarField
+);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

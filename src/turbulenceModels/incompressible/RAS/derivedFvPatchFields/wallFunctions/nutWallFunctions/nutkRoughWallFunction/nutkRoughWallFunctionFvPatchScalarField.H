@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,21 +23,27 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::incompressible::RASModels::
-    nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+    Foam::incompressible::RASModels::nutkRoughWallFunctionFvPatchScalarField
 
 Description
-    Wall function boundary condition for walls
+    Boundary condition for turbulent (kinematic) viscosity when using wall
+    functions for rough walls, based on turbulence kinetic energy.
+
+    Manipulates the E parameter to account for roughness effects, based on
+    KsPlus.
+
+    - roughness height = sand-grain roughness (0 for smooth walls)
+    - roughness constant = 0.5-1.0 (0.5 default)
 
 SourceFiles
-    nutSpalartAllmarasStandardWallFunctionFvPatchScalarField.C
+    nutkRoughWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef nutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
-#define nutSpalartAllmarasStandardWallFunctionFvPatchScalarField_H
+#ifndef nutkRoughWallFunctionFvPatchScalarField_H
+#define nutkRoughWallFunctionFvPatchScalarField_H
 
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "nutkWallFunctionFvPatchScalarField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,19 +55,28 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-  Class nutSpalartAllmarasStandardWallFunctionFvPatchScalarField Declaration
+           Class nutkRoughWallFunctionFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+class nutkRoughWallFunctionFvPatchScalarField
 :
-    public nutWallFunctionFvPatchScalarField
+    public nutkWallFunctionFvPatchScalarField
 {
 protected:
 
+    // Protected data
+
+        //- Roughness height
+        scalarField Ks_;
+
+        //- Roughness constant
+        scalarField Cs_;
+
+
     // Protected member functions
 
-        //- Calculate yPLus
-        virtual tmp<scalarField> calcYPlus(const scalarField& magUp) const;
+        //- Compute the roughness function
+        virtual scalar fnRough(const scalar KsPlus, const scalar Cs) const;
 
         //- Calculate the turbulence viscosity
         virtual tmp<scalarField> calcNut() const;
@@ -70,20 +85,20 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("nutSpalartAllmarasStandardWallFunction");
+    TypeName("nutkRoughWallFunction");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        nutkRoughWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        nutkRoughWallFunctionFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -91,20 +106,20 @@ public:
         );
 
         //- Construct by mapping given
-        //  nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        //  nutkRoughWallFunctionFvPatchScalarField
         //  onto a new patch
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        nutkRoughWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField&,
+            const nutkRoughWallFunctionFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
         );
 
         //- Construct as copy
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        nutkRoughWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField&
+            const nutkRoughWallFunctionFvPatchScalarField&
         );
 
         //- Construct and return a clone
@@ -112,17 +127,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
-                (
-                    *this
-                )
+                new nutkRoughWallFunctionFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+        nutkRoughWallFunctionFvPatchScalarField
         (
-            const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField&,
+            const nutkRoughWallFunctionFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -134,27 +146,30 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
-                (
-                    *this,
-                    iF
-                )
+                new nutkRoughWallFunctionFvPatchScalarField(*this, iF)
             );
         }
 
 
     // Member functions
 
-        // Evaluation functions
+        // Mapping functions
 
-            //- Calculate and return the yPlus at the boundary
-            virtual tmp<scalarField> yPlus() const;
+            //- Map (and resize as needed) from self given a mapping object
+            virtual void autoMap(const fvPatchFieldMapper&);
+
+            //- Reverse map the given fvPatchField onto this fvPatchField
+            virtual void rmap
+            (
+                const fvPatchScalarField&,
+                const labelList&
+            );
 
 
         // I-O
 
             //- Write
-            virtual void write(Ostream& os) const;
+            virtual void write(Ostream&) const;
 };
 
 

@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "nutkWallFunctionFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -42,11 +42,11 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-void nutWallFunctionFvPatchScalarField::checkType()
+void nutkWallFunctionFvPatchScalarField::checkType()
 {
     if (!isA<wallFvPatch>(patch()))
     {
-        FatalErrorIn("nutWallFunctionFvPatchScalarField::checkType()")
+        FatalErrorIn("nutkWallFunctionFvPatchScalarField::checkType()")
             << "Invalid wall function specification" << nl
             << "    Patch type for patch " << patch().name()
             << " must be wall" << nl
@@ -56,7 +56,7 @@ void nutWallFunctionFvPatchScalarField::checkType()
 }
 
 
-scalar nutWallFunctionFvPatchScalarField::calcYPlusLam
+scalar nutkWallFunctionFvPatchScalarField::calcYPlusLam
 (
     const scalar kappa,
     const scalar E
@@ -73,7 +73,7 @@ scalar nutWallFunctionFvPatchScalarField::calcYPlusLam
 }
 
 
-tmp<scalarField> nutWallFunctionFvPatchScalarField::calcNut() const
+tmp<scalarField> nutkWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchI = patch().index();
 
@@ -104,7 +104,7 @@ tmp<scalarField> nutWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
-void nutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+void nutkWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 {
     os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
@@ -114,7 +114,7 @@ void nutWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -130,9 +130,9 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 }
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& ptf,
+    const nutkWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -148,7 +148,7 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 }
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -165,9 +165,9 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 }
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& wfpsf
+    const nutkWallFunctionFvPatchScalarField& wfpsf
 )
 :
     fixedValueFvPatchScalarField(wfpsf),
@@ -180,9 +180,9 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 }
 
 
-nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
+nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 (
-    const nutWallFunctionFvPatchScalarField& wfpsf,
+    const nutkWallFunctionFvPatchScalarField& wfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -198,7 +198,7 @@ nutWallFunctionFvPatchScalarField::nutWallFunctionFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void nutWallFunctionFvPatchScalarField::updateCoeffs()
+void nutkWallFunctionFvPatchScalarField::updateCoeffs()
 {
     operator==(calcNut());
 
@@ -206,7 +206,7 @@ void nutWallFunctionFvPatchScalarField::updateCoeffs()
 }
 
 
-tmp<scalarField> nutWallFunctionFvPatchScalarField::yPlus() const
+tmp<scalarField> nutkWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchI = patch().index();
 
@@ -222,7 +222,7 @@ tmp<scalarField> nutWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
+void nutkWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -232,7 +232,7 @@ void nutWallFunctionFvPatchScalarField::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-makePatchTypeField(fvPatchScalarField, nutWallFunctionFvPatchScalarField);
+makePatchTypeField(fvPatchScalarField, nutkWallFunctionFvPatchScalarField);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

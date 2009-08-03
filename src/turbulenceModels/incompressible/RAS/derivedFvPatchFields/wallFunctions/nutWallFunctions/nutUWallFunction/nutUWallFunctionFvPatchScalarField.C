@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nutSpalartAllmarasStandardWallFunctionFvPatchScalarField.H"
+#include "nutUWallFunctionFvPatchScalarField.H"
 #include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
@@ -41,8 +41,7 @@ namespace RASModels
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-tmp<scalarField>
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcNut() const
+tmp<scalarField> nutUWallFunctionFvPatchScalarField::calcNut() const
 {
     const label patchI = patch().index();
 
@@ -70,8 +69,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcNut() const
 }
 
 
-tmp<scalarField>
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
+tmp<scalarField> nutUWallFunctionFvPatchScalarField::calcYPlus
 (
     const scalarField& magUp
 ) const
@@ -111,67 +109,61 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::calcYPlus
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF)
+    nutkWallFunctionFvPatchScalarField(p, iF)
 {}
 
 
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
 (
-    const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& ptf,
+    const nutUWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
 )
 :
-    nutWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
+    nutkWallFunctionFvPatchScalarField(ptf, p, iF, mapper)
 {}
 
 
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const dictionary& dict
 )
 :
-    nutWallFunctionFvPatchScalarField(p, iF, dict)
+    nutkWallFunctionFvPatchScalarField(p, iF, dict)
 {}
 
 
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
 (
-    const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& sawfpsf
+    const nutUWallFunctionFvPatchScalarField& sawfpsf
 )
 :
-    nutWallFunctionFvPatchScalarField(sawfpsf)
+    nutkWallFunctionFvPatchScalarField(sawfpsf)
 {}
 
 
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+nutUWallFunctionFvPatchScalarField::nutUWallFunctionFvPatchScalarField
 (
-    const nutSpalartAllmarasStandardWallFunctionFvPatchScalarField& sawfpsf,
+    const nutUWallFunctionFvPatchScalarField& sawfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    nutWallFunctionFvPatchScalarField(sawfpsf, iF)
+    nutkWallFunctionFvPatchScalarField(sawfpsf, iF)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-tmp<scalarField>
-nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
+tmp<scalarField> nutUWallFunctionFvPatchScalarField::yPlus() const
 {
     const label patchI = patch().index();
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
@@ -182,10 +174,7 @@ nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::yPlus() const
 }
 
 
-void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
-(
-    Ostream& os
-) const
+void nutUWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeLocalEntries(os);
@@ -198,7 +187,7 @@ void nutSpalartAllmarasStandardWallFunctionFvPatchScalarField::write
 makePatchTypeField
 (
     fvPatchScalarField,
-    nutSpalartAllmarasStandardWallFunctionFvPatchScalarField
+    nutUWallFunctionFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
