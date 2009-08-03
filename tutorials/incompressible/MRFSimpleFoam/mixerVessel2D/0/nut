@@ -23,13 +23,13 @@ boundaryField
 {
     rotor
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         value           uniform 0;
     }
 
     stator
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         value           uniform 0;
     }
 

@@ -41,7 +41,7 @@ boundaryField
 
     defaultFaces
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         value           uniform 0;
     }
 }
