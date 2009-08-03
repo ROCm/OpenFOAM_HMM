@@ -200,6 +200,11 @@ nutkWallFunctionFvPatchScalarField::nutkWallFunctionFvPatchScalarField
 
 void nutkWallFunctionFvPatchScalarField::updateCoeffs()
 {
+    if (updated())
+    {
+        return;
+    }
+
     operator==(calcNut());
 
     fixedValueFvPatchScalarField::updateCoeffs();
