@@ -137,9 +137,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
     fvPatchField<scalar>::write(os);
     os.writeKeyword("mixingLength")
         << mixingLength_ << token::END_STATEMENT << nl;
-
-    writeEntryIfDifferent<word>(os, "k", "k", kName_);
-
+    os.writeKeyword("k") << kName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

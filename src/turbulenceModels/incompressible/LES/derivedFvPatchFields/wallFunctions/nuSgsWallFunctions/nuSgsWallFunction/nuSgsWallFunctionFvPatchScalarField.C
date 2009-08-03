@@ -188,10 +188,8 @@ void nuSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
     fvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
     writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
-
-    writeEntryIfDifferent<scalar>(os, "kappa", 0.41, kappa_);
-    writeEntryIfDifferent<scalar>(os, "E", 9.8, E_);
-
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

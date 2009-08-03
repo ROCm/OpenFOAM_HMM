@@ -48,8 +48,8 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 )
 :
     fixedValueFvPatchField<scalar>(p, iF),
-    mixingLength_(0.001),
-    kName_("k")
+    mixingLength_(0.0),
+    kName_("undefined-k")
 {}
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
@@ -137,7 +137,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::write
     fvPatchField<scalar>::write(os);
     os.writeKeyword("mixingLength")
         << mixingLength_ << token::END_STATEMENT << nl;
-    writeEntryIfDifferent<word>(os, "k", "k", kName_);    
+    os.writeKeyword("k") << kName_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 
