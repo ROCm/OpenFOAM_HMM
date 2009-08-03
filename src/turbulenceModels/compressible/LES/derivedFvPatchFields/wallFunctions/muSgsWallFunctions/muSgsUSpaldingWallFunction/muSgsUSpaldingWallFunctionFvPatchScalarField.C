@@ -24,7 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "nuSgsWallFunctionFvPatchScalarField.H"
+#include "muSgsUSpaldingWallFunctionFvPatchScalarField.H"
+#include "LESModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -33,15 +34,15 @@ License
 
 namespace Foam
 {
-namespace incompressible
+namespace compressible
 {
 namespace LESModels
 {
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-nuSgsWallFunctionFvPatchScalarField::
-nuSgsWallFunctionFvPatchScalarField
+muSgsUSpaldingWallFunctionFvPatchScalarField::
+muSgsUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -49,16 +50,17 @@ nuSgsWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF),
     UName_("U"),
-    nuName_("nu"),
+    rhoName_("rho"),
+    muName_("mu"),
     kappa_(0.41),
     E_(9.8)
 {}
 
 
-nuSgsWallFunctionFvPatchScalarField::
-nuSgsWallFunctionFvPatchScalarField
+muSgsUSpaldingWallFunctionFvPatchScalarField::
+muSgsUSpaldingWallFunctionFvPatchScalarField
 (
-    const nuSgsWallFunctionFvPatchScalarField& ptf,
+    const muSgsUSpaldingWallFunctionFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -66,14 +68,15 @@ nuSgsWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
     UName_(ptf.UName_),
-    nuName_(ptf.nuName_),
+    rhoName_(ptf.rhoName_),
+    muName_(ptf.muName_),
     kappa_(ptf.kappa_),
     E_(ptf.E_)
 {}
 
 
-nuSgsWallFunctionFvPatchScalarField::
-nuSgsWallFunctionFvPatchScalarField
+muSgsUSpaldingWallFunctionFvPatchScalarField::
+muSgsUSpaldingWallFunctionFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -82,44 +85,47 @@ nuSgsWallFunctionFvPatchScalarField
 :
     fixedValueFvPatchScalarField(p, iF, dict),
     UName_(dict.lookupOrDefault<word>("U", "U")),
-    nuName_(dict.lookupOrDefault<word>("nu", "nu")),
+    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
+    muName_(dict.lookupOrDefault<word>("mu", "mu")),
     kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
     E_(dict.lookupOrDefault<scalar>("E", 9.8))
 {}
 
 
-nuSgsWallFunctionFvPatchScalarField::
-nuSgsWallFunctionFvPatchScalarField
+muSgsUSpaldingWallFunctionFvPatchScalarField::
+muSgsUSpaldingWallFunctionFvPatchScalarField
 (
-    const nuSgsWallFunctionFvPatchScalarField& nwfpsf
+    const muSgsUSpaldingWallFunctionFvPatchScalarField& mwfpsf
 )
 :
-    fixedValueFvPatchScalarField(nwfpsf),
-    UName_(nwfpsf.UName_),
-    nuName_(nwfpsf.nuName_),
-    kappa_(nwfpsf.kappa_),
-    E_(nwfpsf.E_)
+    fixedValueFvPatchScalarField(mwfpsf),
+    UName_(mwfpsf.UName_),
+    rhoName_(mwfpsf.rhoName_),
+    muName_(mwfpsf.muName_),
+    kappa_(mwfpsf.kappa_),
+    E_(mwfpsf.E_)
 {}
 
 
-nuSgsWallFunctionFvPatchScalarField::
-nuSgsWallFunctionFvPatchScalarField
+muSgsUSpaldingWallFunctionFvPatchScalarField::
+muSgsUSpaldingWallFunctionFvPatchScalarField
 (
-    const nuSgsWallFunctionFvPatchScalarField& nwfpsf,
+    const muSgsUSpaldingWallFunctionFvPatchScalarField& mwfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(nwfpsf, iF),
-    UName_(nwfpsf.UName_),
-    nuName_(nwfpsf.nuName_),
-    kappa_(nwfpsf.kappa_),
-    E_(nwfpsf.E_)
+    fixedValueFvPatchScalarField(mwfpsf, iF),
+    UName_(mwfpsf.UName_),
+    rhoName_(mwfpsf.rhoName_),
+    muName_(mwfpsf.muName_),
+    kappa_(mwfpsf.kappa_),
+    E_(mwfpsf.E_)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void nuSgsWallFunctionFvPatchScalarField::evaluate
+void muSgsUSpaldingWallFunctionFvPatchScalarField::evaluate
 (
     const Pstream::commsTypes
 )
@@ -131,36 +137,40 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
 
     scalarField magUp = mag(U.patchInternalField() - U);
 
-    const scalarField& nuw =
-        patch().lookupPatchField<volScalarField, scalar>(nuName_);
+    const scalarField& muw =
+        patch().lookupPatchField<volScalarField, scalar>(muName_);
 
-    scalarField& nuSgsw = *this;
+    const scalarField& rhow =
+        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+
+    scalarField& muSgsw = *this;
 
     scalarField magFaceGradU = mag(U.snGrad());
 
-    forAll(nuSgsw, facei)
+    forAll(muSgsw, facei)
     {
         scalar magUpara = magUp[facei];
 
-        scalar utau = sqrt((nuSgsw[facei] + nuw[facei])*magFaceGradU[facei]);
+        scalar utau =
+            sqrt((muSgsw[facei] + muw[facei])*magFaceGradU[facei]/rhow[facei]);
 
-        if (utau > VSMALL)
+        if (utau > 0)
         {
             int iter = 0;
             scalar err = GREAT;
 
             do
             {
-                scalar kUu = min(kappa_*magUpara/utau, 50);
+                scalar kUu = kappa_*magUpara/utau;
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
-                    - utau/(ry[facei]*nuw[facei])
+                    - utau/(ry[facei]*muw[facei]/rhow[facei])
                     + magUpara/utau
                     + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
-                    - 1.0/(ry[facei]*nuw[facei])
+                    - 1.0/(ry[facei]*muw[facei]/rhow[facei])
                     - magUpara/sqr(utau)
                     - 1/E_*kUu*fkUu/utau;
 
@@ -170,24 +180,27 @@ void nuSgsWallFunctionFvPatchScalarField::evaluate
 
             } while (utau > VSMALL && err > 0.01 && ++iter < 10);
 
-            nuSgsw[facei] =
-                max(sqr(max(utau, 0))/magFaceGradU[facei] - nuw[facei], 0.0);
+            muSgsw[facei] =
+                max
+                (
+                    rhow[facei]*sqr(utau)/magFaceGradU[facei] - muw[facei],
+                    0.0
+                );
         }
         else
         {
-            nuSgsw[facei] = 0;
+            muSgsw[facei] = 0;
         }
     }
-
-    fixedValueFvPatchScalarField::evaluate();
 }
 
 
-void nuSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
+void muSgsUSpaldingWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "nu", "nu", nuName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
+    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
     os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
     os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
@@ -199,13 +212,13 @@ void nuSgsWallFunctionFvPatchScalarField::write(Ostream& os) const
 makePatchTypeField
 (
     fvPatchScalarField,
-    nuSgsWallFunctionFvPatchScalarField
+    muSgsUSpaldingWallFunctionFvPatchScalarField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace LESModels
-} // End namespace incompressible
+} // End namespace compressible
 } // End namespace Foam
 
 // ************************************************************************* //

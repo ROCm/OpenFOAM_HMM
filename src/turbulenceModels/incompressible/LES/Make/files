@@ -32,7 +32,7 @@ kOmegaSSTSAS/kOmegaSSTSAS.C
 wallFunctions=derivedFvPatchFields/wallFunctions
 
 nuSgsWallFunctions=$(wallFunctions)/nuSgsWallFunctions
-$(nuSgsWallFunctions)/nuSgsWallFunction/nuSgsWallFunctionFvPatchScalarField.C
+$(nuSgsWallFunctions)/nuSgsUSpaldingWallFunction/nuSgsUSpaldingWallFunctionFvPatchScalarField.C
 
 
 LIB = $(FOAM_LIBBIN)/libincompressibleLESModels

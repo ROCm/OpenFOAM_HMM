@@ -191,6 +191,11 @@ mutkWallFunctionFvPatchScalarField::mutkWallFunctionFvPatchScalarField
 
 void mutkWallFunctionFvPatchScalarField::updateCoeffs()
 {
+    if (updated())
+    {
+        return;
+    }
+
     operator==(calcMut());
 
     fixedValueFvPatchScalarField::updateCoeffs();
