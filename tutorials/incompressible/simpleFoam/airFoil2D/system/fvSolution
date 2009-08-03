@@ -31,7 +31,16 @@ solvers
         mergeLevels     1;
     }
 
-    "(U|nuTilda)"
+    U
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         2;
+        tolerance       1e-08;
+        relTol          0.1;
+    }
+
+    nuTilda
     {
         solver          smoothSolver;
         smoother        GaussSeidel;

@@ -29,7 +29,25 @@ solvers
         mergeLevels     1;
     }
 
-    "(U|k|epsilon)"
+    U
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         2;
+        tolerance       1e-07;
+        relTol          0.1;
+    }
+
+    k
+    {
+        solver          smoothSolver;
+        smoother        GaussSeidel;
+        nSweeps         2;
+        tolerance       1e-07;
+        relTol          0.1;
+    }
+
+    epsilon
     {
         solver          smoothSolver;
         smoother        GaussSeidel;
@@ -50,7 +68,8 @@ relaxationFactors
 {
     p               0.3;
     U               0.5;
-    "(k|epsilon)"   0.5;
+    k               0.5;
+    epsilon         0.5;
 }
 
 

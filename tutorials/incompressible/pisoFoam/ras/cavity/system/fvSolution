@@ -27,12 +27,45 @@ solvers
 
     pFinal
     {
-        $p;
+        solver          PCG;
+        preconditioner  DIC;
         tolerance       1e-06;
         relTol          0;
     }
 
-    "(U|k|epsilon|R|nuTilda)"
+    U
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    k
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    epsilon
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    R
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    nuTilda
     {
         solver          PBiCG;
         preconditioner  DILU;

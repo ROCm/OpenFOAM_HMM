@@ -25,7 +25,31 @@ solvers
         relTol          0;
     }
 
-    "(k|epsilon|R|nuTilda)"
+    k
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    epsilon
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    R
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    nuTilda
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -45,7 +69,9 @@ PISO
 relaxationFactors
 {
     U               0.5;
-    "(k|epsilon|R)" 0.7;
+    k               0.7;
+    epsilon         0.7;
+    R               0.7;
     nuTilda         0.7;
 }
 
