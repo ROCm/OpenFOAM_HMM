@@ -422,14 +422,15 @@ void Foam::CV2D::newPoints(const scalar relaxation)
 
                 scalar surfDist = mag(toPoint3D(vert) - pHit.hitPoint());
 
+                // if (surfDist < 0.2)
+                // {
+                //     sizes[vit->index()] *= 0.4;
+                // }
+
                 if (surfDist < 0.2)
                 {
-                    sizes[vit->index()] *= 0.4;
+                    sizes[vit->index()] *= (1 - 0.3)*surfDist/0.2 + 0.3;
                 }
-                // else if (surfDist < 0.2)
-                // {
-                //     sizes[vit->index()] *= (6.0*surfDist - 1.4);
-                // }
             }
 
             // if (vert.x() > 0)
