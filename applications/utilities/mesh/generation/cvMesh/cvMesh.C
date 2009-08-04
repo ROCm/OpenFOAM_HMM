@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
 
         mesh.move();
 
-        mesh.conformToSurface();
+        // mesh.conformToSurface();
     }
 
     mesh.writeMesh();

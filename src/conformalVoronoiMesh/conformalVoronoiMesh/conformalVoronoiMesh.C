@@ -74,6 +74,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     storedSizes_(),
     storedAlignments_(),
     sizeAndAlignmentTree_(),
+    surfaceConformationVertices_(),
     initialPointsMethod_
     (
         initialPointsMethod::New
@@ -104,6 +105,8 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
     insertInitialPoints();
 
     conformToSurface();
+
+    storeSurfaceConformation();
 
     if(cvMeshControls().objOutput())
     {
@@ -1310,6 +1313,61 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
         surfaceHits.append(surfHit);
 
         hitSurfaces.append(hitSurface);
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::storeSurfaceConformation()
+{
+    Info<< nl << "    Storing surface conformation." << endl;
+
+    surfaceConformationVertices_.setSize
+    (
+        number_of_vertices() - startOfSurfacePointPairs_
+    );
+
+    label surfPtI = 0;
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->index() >= startOfSurfacePointPairs_)
+        {
+            if (!vit->pairPoint())
+            {
+                FatalErrorIn("storeSurfaceConformation()")
+                    << "Trying to store a vertex that is not a surface point"
+                    << exit(FatalError);
+            }
+
+            surfaceConformationVertices_[surfPtI] = Vb(vit->point());
+
+            surfaceConformationVertices_[surfPtI].index() =
+            vit->index() - startOfSurfacePointPairs_;
+
+            surfaceConformationVertices_[surfPtI].type() =
+            vit->type() - startOfSurfacePointPairs_;
+
+            surfPtI++;
+        }
+    }
+
+    Info<< "    Stored " << surfaceConformationVertices_.size()
+        << " vertices" << endl;
+}
+
+
+void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
+{
+    Info<< nl << "    Reinserting stored surface conformation" << endl;
+
+    forAll(surfaceConformationVertices_, v)
+    {
+        insertVb(surfaceConformationVertices_[v], startOfSurfacePointPairs_);
     }
 }
 
@@ -2559,8 +2617,28 @@ void Foam::conformalVoronoiMesh::move()
     reinsertFeaturePoints();
     startOfInternalPoints_ = number_of_vertices();
 
+    timeCheck();
+
     Info<< nl << "    Reinserting entire tessellation" << endl;
     insertPoints(pointsToInsert);
+
+    timeCheck();
+
+    if (runTime_.timeIndex() % 10 == 0)
+    {
+        Info<< nl << "    Rebuilding surface conformation "
+            << "HARD CODED TO EVERY 10 STEPS" << endl;
+
+        conformToSurface();
+        storeSurfaceConformation();
+    }
+    else
+    {
+        startOfSurfacePointPairs_ = number_of_vertices();
+        reinsertSurfaceConformation();
+    }
+
+    timeCheck();
 }
 
 

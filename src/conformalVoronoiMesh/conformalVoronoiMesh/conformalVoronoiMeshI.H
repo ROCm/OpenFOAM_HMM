@@ -202,7 +202,7 @@ inline void Foam::conformalVoronoiMesh::insertPointPair
 }
 
 
-inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v)
+inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v, label offset)
 {
     const Point& Pt(v.point());
 
@@ -218,8 +218,16 @@ inline void Foam::conformalVoronoiMesh::insertVb(const Vb& v)
     }
     else
     {
-        vh->index() = v.index();
-        vh->type() = v.type();
+        vh->index() = v.index() + offset;
+
+        if (v.pairPoint())
+        {
+            vh->type() = v.type() + offset;
+        }
+        else
+        {
+            vh->type() = v.type();
+        }
     }
 }
 

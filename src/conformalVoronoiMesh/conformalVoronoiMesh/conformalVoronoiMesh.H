@@ -132,6 +132,10 @@ class conformalVoronoiMesh
         //- Search tree for size and alignment lookup points
         mutable autoPtr<indexedOctree<treeDataPoint> > sizeAndAlignmentTree_;
 
+        //- Store the surface and feature edge conformation locations to be
+        //  reinserted
+        List<Vb> surfaceConformationVertices_;
+
         //- Method for inserting initial points.  Runtime selectable.
         autoPtr<initialPointsMethod> initialPointsMethod_;
 
@@ -200,8 +204,9 @@ class conformalVoronoiMesh
             const vector& n
         );
 
-        //- Insert a Vb (a typedef of CGAL::indexedVertex<K>)
-        inline void insertVb(const Vb& v);
+        //- Insert a Vb (a typedef of CGAL::indexedVertex<K>) with the
+        //  possibility of an offset for the index and the type
+        inline void insertVb(const Vb& v, label offset = 0);
 
         //- Insert pairs of points on the surface with the given normals, at the
         //  specified spacing
@@ -361,6 +366,14 @@ class conformalVoronoiMesh
             pointField& existingEdgeLocations,
             autoPtr<indexedOctree<treeDataPoint> >& edgeLocationTree
         ) const;
+
+        //- Store the surface conformation with the indices offset to be
+        //  relative to zero
+        void storeSurfaceConformation();
+
+        //- Reinsert the surface conformation re-offsetting indices to be
+        //  relative to new number of internal vertices
+        void reinsertSurfaceConformation();
 
         //- Dual calculation
         void calcDualMesh
