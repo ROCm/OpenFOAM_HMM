@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "cellSplitter.H"
@@ -51,17 +49,12 @@ defineTypeNameAndDebug(cellSplitter, 0);
 void Foam::cellSplitter::getFaceInfo
 (
     const label faceI,
-    label& patchID,
+    labelPair& patchIDs,
     label& zoneID,
     label& zoneFlip
 ) const
 {
-    patchID = -1;
-
-    if (!mesh_.isInternalFace(faceI))
-    {
-        patchID = mesh_.boundaryMesh().whichPatch(faceI);
-    }
+    patchIDs = polyTopoChange::whichPatch(mesh_.boundaryMesh(), faceI);
 
     zoneID = mesh_.faceZones().whichZone(faceI);
 
@@ -172,17 +165,16 @@ void Foam::cellSplitter::setRefinement
 
         label anchorPoint = mesh_.cellPoints()[cellI][0];
 
-        label addedPointI =
-            meshMod.setAction
+        label addedPointI = meshMod.setAction
+        (
+            polyAddPoint
             (
-                polyAddPoint
-                (
-                    iter(),         // point
-                    anchorPoint,    // master point
-                    -1,             // zone for point
-                    true            // supports a cell
-                )
-            );
+                iter(),         // point
+                anchorPoint,    // master point
+                -1,             // zone for point
+                true            // supports a cell
+            )
+        );
         addedPoints_.insert(cellI, addedPointI);
 
         //Pout<< "Added point " << addedPointI
@@ -212,18 +204,17 @@ void Foam::cellSplitter::setRefinement
         // Add other pyramids
         for (label i = 1; i < cFaces.size(); i++)
         {    
-            label addedCellI =
-                meshMod.setAction
+            label addedCellI = meshMod.setAction
+            (
+                polyAddCell
                 (
-                    polyAddCell
-                    (
-                        -1,     // master point
-                        -1,     // master edge
-                        -1,     // master face
-                        cellI,  // master cell
-                        -1      // zone
-                    )
-                );
+                    -1,     // master point
+                    -1,     // master edge
+                    -1,     // master face
+                    cellI,  // master cell
+                    -1      // zone
+                )
+            );
 
             newCells[i] = addedCellI;
         }
@@ -310,7 +301,8 @@ void Foam::cellSplitter::setRefinement
                         false,                      // flux flip
                         -1,                         // patch for face
                         -1,                         // zone for face
-                        false                       // face zone flip
+                        false,                      // face zone flip
+                        -1                          // subPatch
                     )
                 );
             }
@@ -356,7 +348,8 @@ void Foam::cellSplitter::setRefinement
                         false,                      // flux flip
                         -1,                         // patch for face
                         -1,                         // zone for face
-                        false                       // face zone flip
+                        false,                      // face zone flip
+                        -1                          // subPatch
                     )
                 );
             }
@@ -411,7 +404,8 @@ void Foam::cellSplitter::setRefinement
                             -1,             // patch for face
                             false,          // remove from zone
                             -1,             // zone for face
-                            false           // face zone flip
+                            false,          // face zone flip
+                            -1              // subPatch
                         )
                     );
                 }
@@ -429,7 +423,8 @@ void Foam::cellSplitter::setRefinement
                             -1,             // patch for face
                             false,          // remove from zone
                             -1,             // zone for face
-                            false           // face zone flip
+                            false,          // face zone flip
+                            -1              // subPatch
                         )
                     );
                 }
@@ -439,8 +434,9 @@ void Foam::cellSplitter::setRefinement
             {
                 label newOwn = newOwner(faceI, cellToCells);
 
-                label patchID, zoneID, zoneFlip;
-                getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+                labelPair patchIDs;
+                label zoneID, zoneFlip;
+                getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
                 
                 meshMod.setAction
                 (
@@ -451,10 +447,11 @@ void Foam::cellSplitter::setRefinement
                         newOwn,         // owner
                         -1,             // neighbour
                         false,          // flux flip
-                        patchID,        // patch for face
+                        patchIDs[0],    // patch for face
                         false,          // remove from zone
                         zoneID,         // zone for face
-                        zoneFlip        // face zone flip
+                        zoneFlip,       // face zone flip
+                        patchIDs[1]
                     )
                 );
             }

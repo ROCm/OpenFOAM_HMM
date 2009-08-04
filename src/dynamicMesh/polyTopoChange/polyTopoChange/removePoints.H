@@ -60,38 +60,6 @@ class face;
 class removePoints
 {
 
-    // Private classes
-
-        //- Combine-reduce operator to combine data on faces. Takes care
-        //  of reverse orientation on coupled face.
-        template <class T, template<class> class CombineOp>
-        class faceEqOp
-        {
-
-        public:
-
-            void operator()(List<T>& x, const List<T>& y) const
-            {
-                if (y.size() > 0)
-                {
-                    if (x.size() == 0)
-                    {
-                        x = y;
-                    }
-                    else
-                    {
-                        label j = 0;
-                        forAll(x, i)
-                        {
-                            CombineOp<T>()(x[i], y[j]);
-                            j = y.rcIndex(j);
-                        }
-                    }
-                }
-            }
-        };
-
-
     // Private data
 
         //- Reference to mesh

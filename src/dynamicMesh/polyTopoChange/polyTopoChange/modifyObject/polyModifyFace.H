@@ -80,6 +80,9 @@ class polyModifyFace
         //- Face zone flip
         bool zoneFlip_;
 
+        //- Sub patch ID (for proc patches)
+        label subPatchID_;
+
 
 public:
 
@@ -102,7 +105,8 @@ public:
             patchID_(-1),
             removeFromZone_(false),
             zoneID_(-1),
-            zoneFlip_(false)
+            zoneFlip_(false),
+            subPatchID_(-1)
         {}
 
         //- Construct from components
@@ -116,7 +120,8 @@ public:
             const label patchID,
             const bool removeFromZone,
             const label zoneID,
-            const bool zoneFlip
+            const bool zoneFlip,
+            const label subPatchID
         )
         :
             face_(f),
@@ -127,7 +132,8 @@ public:
             patchID_(patchID),
             removeFromZone_(removeFromZone),
             zoneID_(zoneID),
-            zoneFlip_(zoneFlip)
+            zoneFlip_(zoneFlip),
+            subPatchID_(subPatchID)
         {
             if (face_.size() < 3)
             {
@@ -143,7 +149,8 @@ public:
                     "    const label patchID,\n"
                     "    const bool removeFromZone,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip\n"
+                    "    const bool zoneFlip,\n"
+                    "    const label subPatchID\n"
                     ")"
                 )   << "Invalid face: less than 3 points. This is not allowed\n"
                     << "Face: " << face_
@@ -167,7 +174,8 @@ public:
                     "    const label patchID,\n"
                     "    const bool removeFromZone,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip\n"
+                    "    const bool zoneFlip,\n"
+                    "    const label subPatchID\n"
                     ")"
                 )   << "Face contains invalid vertex ID: " << face_ << ".  "
                     << "This is not allowed.\n"
@@ -191,7 +199,8 @@ public:
                     "    const label patchID,\n"
                     "    const bool removeFromZone,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip\n"
+                    "    const bool zoneFlip,\n"
+                    "    const label subPatchID\n"
                     ")"
                 )   << "Face owner and neighbour are identical.  "
                     << "This is not allowed.\n"
@@ -216,7 +225,8 @@ public:
                     "    const label patchID,\n"
                     "    const bool removeFromZone,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip\n"
+                    "    const bool zoneFlip,\n"
+                    "    const label subPatchID\n"
                     ")"
                 )   << "Patch face has got a neighbour  "
                     << "This is not allowed.\n"
@@ -242,10 +252,37 @@ public:
                     "    const label patchID,\n"
                     "    const bool removeFromZone,\n"
                     "    const label zoneID,\n"
-                    "    const bool zoneFlip\n"
+                    "    const bool zoneFlip,\n"
+                    "    const label subPatchID\n"
                     ")"
                 )   << "Specified zone flip for a face that does not  "
                     << "belong to zone.  This is not allowed.\n"
+                    << "Face: " << face_
+                    << " faceID:" << faceID_
+                    << " owner:" << owner_
+                    << " neighbour:" << neighbour_
+                    << abort(FatalError);
+            }
+
+            if (patchID < 0 && subPatchID_ >= 0)
+            {
+                FatalErrorIn
+                (
+                    "polyModifyFace::polyModifyFace\n"
+                    "(\n"
+                    "    const face& f,\n"
+                    "    const label faceID,\n"
+                    "    const label owner,\n"
+                    "    const label neighbour,\n"
+                    "    const bool flipFaceFlux,\n"
+                    "    const label patchID,\n"
+                    "    const bool removeFromZone,\n"
+                    "    const label zoneID,\n"
+                    "    const bool zoneFlip,\n"
+                    "    const label subPatchID\n"
+                    ")"
+                )   << "Specified subPatchID on an internal face (patchID < 0"
+                    << ". This is not allowed.\n"
                     << "Face: " << face_
                     << " faceID:" << faceID_
                     << " owner:" << owner_
@@ -334,6 +371,12 @@ public:
         label zoneFlip() const
         {
             return zoneFlip_;
+        }
+
+        //- Boundary sub patch ID
+        label subPatchID() const
+        {
+            return subPatchID_;
         }
 };
 

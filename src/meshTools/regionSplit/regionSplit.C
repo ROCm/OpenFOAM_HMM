@@ -270,7 +270,7 @@ Foam::label Foam::regionSplit::calcRegionSplit
         {
             // Check that blockedFace is synced.
             boolList syncBlockedFace(blockedFace);
-            syncTools::swapFaceList(mesh_, syncBlockedFace, false);
+            syncTools::swapFaceList(mesh_, syncBlockedFace);
 
             forAll(syncBlockedFace, faceI)
             {

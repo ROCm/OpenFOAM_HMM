@@ -1124,7 +1124,8 @@ int main(int argc, char *argv[])
                 false,              // flipFaceFlux
                 -1,                 // patchID
                 faceZonei,          // zoneID
-                false               // zoneFlip
+                false,              // zoneFlip
+                -1                  // subPatchID
             );
 
             // Mark face as being done
@@ -1158,7 +1159,8 @@ int main(int argc, char *argv[])
                 false,              // flipFaceFlux
                 patchi,             // patchID
                 -1,                 // zoneID
-                false               // zoneFlip
+                false,              // zoneFlip
+                -1                  // subPatchID
             );
 
             // For baffles create the opposite face
@@ -1175,7 +1177,8 @@ int main(int argc, char *argv[])
                     false,              // flipFaceFlux
                     patchi,             // patchID
                     -1,                 // zoneID
-                    false               // zoneFlip
+                    false,              // zoneFlip
+                    -1                  // subPatchID
                 );
             }
 
@@ -1203,13 +1206,14 @@ int main(int argc, char *argv[])
                 faces[facei],
                 owner[facei],
                 neighbour[facei],
-                -1,                 //masterPointID
-                -1,                 //masterEdgeID
-                facei,              //masterFace
-                false,              //flipFaceFlux
-                -1,                 //patchID
-                -1,                 //zoneID
-                false               //zoneFlip
+                -1,                 // masterPointID
+                -1,                 // masterEdgeID
+                facei,              // masterFace
+                false,              // flipFaceFlux
+                -1,                 // patchID
+                -1,                 // zoneID
+                false,              // zoneFlip
+                -1                  // subPatchID
             );
         }
     }

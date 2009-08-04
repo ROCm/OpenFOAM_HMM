@@ -97,17 +97,12 @@ void Foam::hexRef8::reorder
 void Foam::hexRef8::getFaceInfo
 (
     const label faceI,
-    label& patchID,
+    labelPair& patchIDs,
     label& zoneID,
     label& zoneFlip
 ) const
 {
-    patchID = -1;
-
-    if (!mesh_.isInternalFace(faceI))
-    {
-        patchID = mesh_.boundaryMesh().whichPatch(faceI);
-    }
+    patchIDs = polyTopoChange::whichPatch(mesh_.boundaryMesh(), faceI);
 
     zoneID = mesh_.faceZones().whichZone(faceI);
 
@@ -132,9 +127,9 @@ Foam::label Foam::hexRef8::addFace
     const label nei
 ) const
 {
-    label patchID, zoneID, zoneFlip;
-
-    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+    labelPair patchIDs;
+    label zoneID, zoneFlip;
+    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
 
     label newFaceI = -1;
 
@@ -152,9 +147,10 @@ Foam::label Foam::hexRef8::addFace
                 -1,                         // master edge
                 faceI,                      // master face for addition
                 false,                      // flux flip
-                patchID,                    // patch for face
+                patchIDs[0],                // patch for face
                 zoneID,                     // zone for face
-                zoneFlip                    // face zone flip
+                zoneFlip,                   // face zone flip
+                patchIDs[1]                 // subPatch
             )
         );
     }
@@ -172,9 +168,10 @@ Foam::label Foam::hexRef8::addFace
                 -1,                         // master edge
                 faceI,                      // master face for addition
                 false,                      // flux flip
-                patchID,                    // patch for face
+                patchIDs[0],                // patch for face
                 zoneID,                     // zone for face
-                zoneFlip                    // face zone flip
+                zoneFlip,                   // face zone flip
+                patchIDs[1]                 // subPatch
             )
         );
     }
@@ -213,7 +210,8 @@ Foam::label Foam::hexRef8::addInternalFace
                 false,                      // flux flip
                 -1,                         // patch for face
                 -1,                         // zone for face
-                false                       // face zone flip
+                false,                      // face zone flip
+                -1                          // subPatch
             )
         );
     }
@@ -241,7 +239,8 @@ Foam::label Foam::hexRef8::addInternalFace
                 false,                      // flux flip
                 -1,                         // patch for face
                 -1,                         // zone for face
-                false                       // face zone flip
+                false,                      // face zone flip
+                -1                          // subPatch
             )
         );
 
@@ -276,7 +275,8 @@ Foam::label Foam::hexRef8::addInternalFace
         //        false,                      // flux flip
         //        -1,                         // patch for face
         //        -1,                         // zone for face
-        //        false                       // face zone flip
+        //        false,                      // face zone flip
+        //        -1                          // subPatch
         //    )
         //);
     }
@@ -293,9 +293,9 @@ void Foam::hexRef8::modFace
     const label nei
 ) const
 {
-    label patchID, zoneID, zoneFlip;
-
-    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+    labelPair patchIDs;
+    label zoneID, zoneFlip;
+    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
 
     if
     (
@@ -318,10 +318,11 @@ void Foam::hexRef8::modFace
                     own,                // owner
                     nei,                // neighbour
                     false,              // face flip
-                    patchID,            // patch for face
+                    patchIDs[0],        // patch for face
                     false,              // remove from zone
                     zoneID,             // zone for face
-                    zoneFlip            // face flip in zone
+                    zoneFlip,           // face flip in zone
+                    patchIDs[1]         // subPatch
                 )
             );
         }
@@ -336,10 +337,11 @@ void Foam::hexRef8::modFace
                     nei,                    // owner
                     own,                    // neighbour
                     false,                  // face flip
-                    patchID,                // patch for face
+                    patchIDs[0],            // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip                // face flip in zone
+                    zoneFlip,               // face flip in zone
+                    patchIDs[1]             // subPatch
                 )
             );
         }
@@ -401,8 +403,7 @@ Foam::scalar Foam::hexRef8::getLevel0EdgeLength() const
             mesh_,
             edgeLevel,
             ifEqEqOp<labelMax>(),
-            labelMin,
-            false               // no separation
+            labelMin
         );
 
         // Now use the edgeLevel with a valid value to determine the
@@ -1608,7 +1609,7 @@ Foam::label Foam::hexRef8::faceConsistentRefinement
     }
 
     // Swap to neighbour
-    syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
     // Now we have neighbour value see which cells need refinement
     forAll(neiLevel, i)
@@ -1690,7 +1691,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
     }
 
     // Swap to neighbour
-    syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
     // Now we have neighbour value see which cells need refinement
     forAll(neiLevel, i)
@@ -2359,8 +2360,7 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
             mesh_,
             maxPointCount,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
 
         // Update allFaceInfo from maxPointCount for all points to check
@@ -2499,9 +2499,9 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
         }
 
         // Swap to neighbour
-        syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
-        syncTools::swapBoundaryFaceList(mesh_, neiCount, false);
-        syncTools::swapBoundaryFaceList(mesh_, neiRefCount, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiLevel);
+        syncTools::swapBoundaryFaceList(mesh_, neiCount);
+        syncTools::swapBoundaryFaceList(mesh_, neiRefCount);
 
         // Now we have neighbour value see which cells need refinement
         forAll(neiLevel, i)
@@ -3129,8 +3129,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         mesh_,
         edgeMidPoint,
         maxEqOp<label>(),
-        labelMin,
-        false               // no separation
+        labelMin
     );
 
 
@@ -3152,13 +3151,12 @@ Foam::labelListList Foam::hexRef8::setRefinement
                 edgeMids[edgeI] = mesh_.edges()[edgeI].centre(mesh_.points());
             }
         }
-        syncTools::syncEdgeList
+        syncTools::syncEdgePositions
         (
             mesh_,
             edgeMids,
             maxEqOp<vector>(),
-            point(-GREAT, -GREAT, -GREAT),
-            true               // apply separation
+            point(-GREAT, -GREAT, -GREAT)
         );
 
 
@@ -3283,7 +3281,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         }
 
         // Swap.
-        syncTools::swapBoundaryFaceList(mesh_, newNeiLevel, false);
+        syncTools::swapBoundaryFaceList(mesh_, newNeiLevel);
 
         // So now we have information on the neighbour.
 
@@ -3315,8 +3313,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
     (
         mesh_,
         faceMidPoint,
-        maxEqOp<label>(),
-        false
+        maxEqOp<label>()
     );
 
 
@@ -3342,12 +3339,11 @@ Foam::labelListList Foam::hexRef8::setRefinement
                 bFaceMids[i] = mesh_.faceCentres()[faceI];
             }
         }
-        syncTools::syncBoundaryFaceList
+        syncTools::syncBoundaryFacePositions
         (
             mesh_,
             bFaceMids,
-            maxEqOp<vector>(),
-            true               // apply separation
+            maxEqOp<vector>()
         );
 
         forAll(faceMidPoint, faceI)
@@ -4382,7 +4378,7 @@ void Foam::hexRef8::checkMesh() const
         }
 
         // Replace data on coupled patches with their neighbour ones.
-        syncTools::swapBoundaryFaceList(mesh_, nei, false);
+        syncTools::swapBoundaryFaceList(mesh_, nei);
 
         const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
@@ -4437,7 +4433,7 @@ void Foam::hexRef8::checkMesh() const
         }
 
         // Replace data on coupled patches with their neighbour ones.
-        syncTools::swapBoundaryFaceList(mesh_, neiFaceAreas, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiFaceAreas);
 
         forAll(neiFaceAreas, i)
         {
@@ -4480,7 +4476,7 @@ void Foam::hexRef8::checkMesh() const
         }
 
         // Replace data on coupled patches with their neighbour ones.
-        syncTools::swapBoundaryFaceList(mesh_, nVerts, false);
+        syncTools::swapBoundaryFaceList(mesh_, nVerts);
 
         forAll(nVerts, i)
         {
@@ -4529,7 +4525,7 @@ void Foam::hexRef8::checkMesh() const
         // Replace data on coupled patches with their neighbour ones. Apply
         // rotation transformation (but not separation since is relative vector
         // to point on same face.
-        syncTools::swapBoundaryFaceList(mesh_, anchorPoints, false);
+        syncTools::swapBoundaryFaceList(mesh_, anchorPoints);
 
         forAll(anchorPoints, i)
         {
@@ -4634,7 +4630,7 @@ void Foam::hexRef8::checkRefinementLevels
         }
 
         // No separation
-        syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
         forAll(neiLevel, i)
         {
@@ -4676,8 +4672,7 @@ void Foam::hexRef8::checkRefinementLevels
             mesh_,
             syncPointLevel,
             minEqOp<label>(),
-            labelMax,
-            false               // no separation
+            labelMax
         );
 
 
@@ -4724,8 +4719,7 @@ void Foam::hexRef8::checkRefinementLevels
             mesh_,
             maxPointLevel,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
 
         // Check 2:1 across boundary points
@@ -4797,8 +4791,7 @@ void Foam::hexRef8::checkRefinementLevels
             mesh_,
             isHangingPoint,
             andEqOp<bool>(),        // only if all decide it is hanging point
-            true,                   // null
-            false                   // no separation
+            true                    // null
         );
 
         //OFstream str(mesh_.time().path()/"hangingPoints.obj");
@@ -5167,7 +5160,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         }
 
         // Swap to neighbour
-        syncTools::swapBoundaryFaceList(mesh_, neiLevel, false);
+        syncTools::swapBoundaryFaceList(mesh_, neiLevel);
 
         forAll(neiLevel, i)
         {
@@ -5298,7 +5291,8 @@ void Foam::hexRef8::setUnrefinement
             {
                 FatalErrorIn
                 (
-                    "hexRef8::setUnrefinement(const labelList&, polyTopoChange&)"
+                    "hexRef8::setUnrefinement"
+                    "(const labelList&, polyTopoChange&)"
                 )   << "Illegal cell level " << cellLevel_[cellI]
                     << " for cell " << cellI
                     << abort(FatalError);

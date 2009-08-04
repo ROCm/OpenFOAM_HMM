@@ -39,6 +39,7 @@ SourceFiles
 
 #include "Map.H"
 #include "edge.H"
+#include "labelPair.H"
 #include "typeInfo.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -73,7 +74,7 @@ class cellSplitter
         void getFaceInfo
         (
             const label faceI,
-            label& patchID,
+            labelPair& patchIDs,
             label& zoneID,
             label& zoneFlip
         ) const;

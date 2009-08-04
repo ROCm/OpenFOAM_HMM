@@ -176,13 +176,20 @@ class motionSmoother
 
     // Private Member Functions
 
-        //- Average of connected points.
+        //- Average value (not positions!) of connected points.
         template <class Type>
         tmp<GeometricField<Type, pointPatchField, pointMesh> > avg
         (
             const GeometricField<Type, pointPatchField, pointMesh>& fld,
-            const scalarField& edgeWeight,
-            const bool separation
+            const scalarField& edgeWeight
+        ) const;
+
+        //- Average postion of connected points.
+        template <class Type>
+        tmp<GeometricField<Type, pointPatchField, pointMesh> > avgPositions
+        (
+            const GeometricField<Type, pointPatchField, pointMesh>& fld,
+            const scalarField& edgeWeight
         ) const;
 
         //- Check constraints
@@ -199,15 +206,17 @@ class motionSmoother
             GeometricField<Type, pointPatchField, pointMesh>&
         ) const;
 
-        //- Test synchronisation of pointField
+        //- Test synchronisation of generic field (not positions!) on points
         template<class Type, class CombineOp>
         void testSyncField
         (
             const Field<Type>&,
             const CombineOp& cop,
-            const Type& zero,
-            const bool separation
+            const Type& zero
         ) const;
+
+        //- Test synchronisation of points
+        void testSyncPositions(const pointField&) const;
 
         //- Assemble tensors for multi-patch constraints
         void makePatchPatchAddressing();
@@ -461,14 +470,13 @@ public:
 
             // Helper functions to manipulate displacement vector.
 
-                //- Fully explicit smoothing of internal points with varying
-                //  diffusivity.
+                //- Fully explicit smoothing of fields (not positions)
+                //  of internal points with varying diffusivity.
                 template <class Type>
                 void smooth
                 (
                     const GeometricField<Type, pointPatchField, pointMesh>& fld,
                     const scalarField& edgeWeight,
-                    const bool separation,
                     GeometricField<Type, pointPatchField, pointMesh>& newFld
                 ) const;
 };

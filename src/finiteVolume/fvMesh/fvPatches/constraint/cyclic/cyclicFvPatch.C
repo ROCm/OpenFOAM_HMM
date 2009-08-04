@@ -27,6 +27,7 @@ License
 #include "cyclicFvPatch.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvMesh.H"
+#include "transform.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

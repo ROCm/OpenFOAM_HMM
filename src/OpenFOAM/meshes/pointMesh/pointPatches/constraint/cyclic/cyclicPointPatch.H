@@ -38,6 +38,7 @@ SourceFiles
 
 #include "coupledFacePointPatch.H"
 #include "cyclicPolyPatch.H"
+#include "pointBoundaryMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -123,6 +124,14 @@ public:
                 return cyclicPolyPatch_;
             }
 
+            //- Return neighbour point patch
+            const cyclicPointPatch& neighbPatch() const
+            {
+                label patchI = cyclicPolyPatch_.neighbPatchID();
+                const pointPatch& pp = this->boundaryMesh()[patchI];
+                return refCast<const cyclicPointPatch>(pp);
+            }
+
             //- Are the cyclic planes parallel
             bool parallel() const
             {
@@ -145,7 +154,8 @@ public:
         // Access functions for demand driven data
 
             //- Return the set of pairs of points that require transformation
-            //  and/or mapping
+            //  and/or mapping. First index is on this patch, second on the
+            //  neighbour patch.
             virtual const edgeList& transformPairs() const;
 };
 

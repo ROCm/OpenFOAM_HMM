@@ -335,15 +335,11 @@ void Foam::perfectInterface::setRefinement(polyTopoChange& ref) const
 
             label nbr = -1;
 
-            label patchI = -1;
+            labelPair patchIds = polyTopoChange::whichPatch(patches, faceI);
 
             if (mesh.isInternalFace(faceI))
             {
                 nbr = mesh.faceNeighbour()[faceI];
-            }
-            else
-            {
-                patchI = patches.whichPatch(faceI);
             }
 
             label zoneID = mesh.faceZones().whichZone(faceI);
@@ -366,10 +362,11 @@ void Foam::perfectInterface::setRefinement(polyTopoChange& ref) const
                     mesh.faceOwner()[faceI],    // owner
                     nbr,                        // neighbour
                     false,                      // face flip
-                    patchI,                     // patch for face
+                    patchIds[0],                // patch for face
                     false,                      // remove from zone
                     zoneID,                     // zone for face
-                    zoneFlip                    // face flip in zone
+                    zoneFlip,                   // face flip in zone
+                    patchIds[1]                 // subPatch
                 )
             );
         }
@@ -433,7 +430,8 @@ void Foam::perfectInterface::setRefinement(polyTopoChange& ref) const
                         -1,                     // patch for face
                         false,                  // remove from zone
                         faceZoneID_.index(),    // zone for face
-                        mfFlip[i]               // face flip in zone
+                        mfFlip[i],              // face flip in zone
+                        -1                      // subPatch
                     )
                 );
             }
@@ -451,7 +449,8 @@ void Foam::perfectInterface::setRefinement(polyTopoChange& ref) const
                         -1,                     // patch for face
                         false,                  // remove from zone
                         faceZoneID_.index(),    // zone for face
-                        !mfFlip[i]              // face flip in zone
+                        !mfFlip[i],             // face flip in zone
+                        -1                      // subPatch
                     )
                 );
             }

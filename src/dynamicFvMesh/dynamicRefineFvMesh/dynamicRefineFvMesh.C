@@ -83,7 +83,7 @@ void dynamicRefineFvMesh::calculateProtectedCells
     {
         neiLevel[faceI-nInternalFaces()] = cellLevel[faceOwner()[faceI]];
     }
-    syncTools::swapBoundaryFaceList(*this, neiLevel, false);
+    syncTools::swapBoundaryFaceList(*this, neiLevel);
 
 
     while (true)
@@ -121,7 +121,7 @@ void dynamicRefineFvMesh::calculateProtectedCells
             }
         }
 
-        syncTools::syncFaceList(*this, seedFace, orEqOp<bool>(), false);
+        syncTools::syncFaceList(*this, seedFace, orEqOp<bool>());
 
 
         // Extend unrefineableCell
@@ -836,7 +836,7 @@ void dynamicRefineFvMesh::extendMarkedCells(PackedList<1>& markedCell) const
         }
     }
 
-    syncTools::syncFaceList(*this, markedFace, orEqOp<bool>(), false);
+    syncTools::syncFaceList(*this, markedFace, orEqOp<bool>());
 
     // Update cells using any markedFace
     for (label faceI = 0; faceI < nInternalFaces(); faceI++)
@@ -919,7 +919,7 @@ dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
         {
             neiLevel[faceI] = cellLevel[faceOwner()[faceI]];
         }
-        syncTools::swapFaceList(*this, neiLevel, false);
+        syncTools::swapFaceList(*this, neiLevel);
 
 
         boolList protectedFace(nFaces(), false);
@@ -951,13 +951,7 @@ dynamicRefineFvMesh::dynamicRefineFvMesh(const IOobject& io)
             }
         }
 
-        syncTools::syncFaceList
-        (
-            *this,
-            protectedFace,
-            orEqOp<bool>(),
-            false
-        );
+        syncTools::syncFaceList(*this, protectedFace, orEqOp<bool>());
 
         for (label faceI = 0; faceI < nInternalFaces(); faceI++)
         {

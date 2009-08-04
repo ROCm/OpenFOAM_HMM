@@ -97,15 +97,16 @@ void Foam::slidingInterface::decoupleInterface
         (
             polyModifyFace
             (
-                newFace,                         // new face
-                masterPatchAddr[faceI],          // master face index
-                masterFc[faceI],                 // owner
-                -1,                              // neighbour
-                false,                           // flux flip
-                masterPatchID_.index(),          // patch ID
-                false,                           // remove from zone
-                masterFaceZoneID_.index(),       // zone ID
-                false                            // zone flip.  Face corrected
+                newFace,                        // new face
+                masterPatchAddr[faceI],         // master face index
+                masterFc[faceI],                // owner
+                -1,                             // neighbour
+                false,                          // flux flip
+                masterPatchID_.index(),         // patch ID
+                false,                          // remove from zone
+                masterFaceZoneID_.index(),      // zone ID
+                false,                          // zone flip.  Face corrected
+                -1                              //?TBD subPatch
             )
         );
 //         Pout << "Modifying master patch face no " << masterPatchAddr[faceI] << " face: " << faces[masterPatchAddr[faceI]] << " old owner: " << own[masterPatchAddr[faceI]] << " new owner: " << masterFc[faceI] << endl;
@@ -155,15 +156,16 @@ void Foam::slidingInterface::decoupleInterface
         (
             polyModifyFace
             (
-                newFace,                         // new face
-                slavePatchAddr[faceI],           // master face index
-                slaveFc[faceI],                  // owner
-                -1,                              // neighbour
-                false,                           // flux flip
-                slavePatchID_.index(),           // patch ID
-                false,                           // remove from zone
-                slaveFaceZoneID_.index(),        // zone ID
-                false                            // zone flip.  Face corrected
+                newFace,                        // new face
+                slavePatchAddr[faceI],          // master face index
+                slaveFc[faceI],                 // owner
+                -1,                             // neighbour
+                false,                          // flux flip
+                slavePatchID_.index(),          // patch ID
+                false,                          // remove from zone
+                slaveFaceZoneID_.index(),       // zone ID
+                false,                          // zone flip.  Face corrected
+                -1                              //?TBD subPatch
             )
         );
     }
@@ -231,6 +233,12 @@ void Foam::slidingInterface::decoupleInterface
 
 //             Pout << "Modifying master stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
 
+            labelPair patchIDs = polyTopoChange::whichPatch
+            (
+                mesh.boundaryMesh(),
+                curFaceID
+            );
+
             // Modify the face
             ref.setAction
             (
@@ -241,10 +249,11 @@ void Foam::slidingInterface::decoupleInterface
                     own[curFaceID],         // owner
                     nei[curFaceID],         // neighbour
                     false,                  // face flip
-                    mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
+                    patchIDs[0],            // patch for face
                     false,                  // remove from zone
                     modifiedFaceZone,       // zone for face
-                    modifiedFaceZoneFlip    // face flip in zone
+                    modifiedFaceZoneFlip,   // face flip in zone
+                    patchIDs[1]
                 )
             );
         }
@@ -354,6 +363,12 @@ void Foam::slidingInterface::decoupleInterface
 
 //             Pout << "Modifying slave stick-out face " << curFaceID << " old face: " << oldFace << " new face: " << newFace << endl;
 
+            labelPair patchIDs = polyTopoChange::whichPatch
+            (
+                mesh.boundaryMesh(),
+                curFaceID
+            );
+
             // Modify the face
             ref.setAction
             (
@@ -364,10 +379,11 @@ void Foam::slidingInterface::decoupleInterface
                     own[curFaceID],         // owner
                     nei[curFaceID],         // neighbour
                     false,                  // face flip
-                    mesh.boundaryMesh().whichPatch(curFaceID), // patch for face
+                    patchIDs[0],            // patch for face
                     false,                  // remove from zone
                     modifiedFaceZone,       // zone for face
-                    modifiedFaceZoneFlip    // face flip in zone
+                    modifiedFaceZoneFlip,   // face flip in zone
+                    patchIDs[1]
                 )
             );
         }

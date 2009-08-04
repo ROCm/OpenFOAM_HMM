@@ -132,7 +132,7 @@ public:
             //  associated with any faces
             virtual const labelList& loneMeshPoints() const;
 
-            //- Return point unit normals.  Not impelemented.
+            //- Return point unit normals. Not implemented.
             virtual const vectorField& pointNormals() const;
 };
 

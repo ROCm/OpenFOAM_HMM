@@ -154,34 +154,36 @@ void Foam::duplicatePoints::setRefinement
             const faceZone& fZone = mesh_.faceZones()[zoneID];
             zoneFlip = fZone.flipMap()[fZone.whichFace(faceI)];
         }
-
+        labelPair patchIDs = polyTopoChange::whichPatch(patches, faceI);
 
         if (mesh_.isInternalFace(faceI))
         {
             meshMod.modifyFace
             (
-                newFace,                    // modified face
-                faceI,                      // label of face being modified
-                mesh_.faceOwner()[faceI],   // owner
+                newFace,                        // modified face
+                faceI,                          // label of face being modified
+                mesh_.faceOwner()[faceI],       // owner
                 mesh_.faceNeighbour()[faceI],   // neighbour
-                false,                      // face flip
-                -1,                         // patch for face
-                zoneID,                     // zone for face
-                zoneFlip                    // face flip in zone
+                false,                          // face flip
+                -1,                             // patch for face
+                zoneID,                         // zone for face
+                zoneFlip,                       // face flip in zone
+                -1                              // subPatch
             );
         }
         else
         {
             meshMod.modifyFace
             (
-                newFace,                    // modified face
-                faceI,                      // label of face being modified
-                mesh_.faceOwner()[faceI],   // owner
-                -1,                         // neighbour
-                false,                      // face flip
-                patches.whichPatch(faceI),  // patch for face
-                zoneID,                     // zone for face
-                zoneFlip                    // face flip in zone
+                newFace,                        // modified face
+                faceI,                          // label of face being modified
+                mesh_.faceOwner()[faceI],       // owner
+                -1,                             // neighbour
+                false,                          // face flip
+                patchIDs[0],                    // patch for face
+                zoneID,                         // zone for face
+                zoneFlip,                       // face flip in zone
+                patchIDs[1]
             );
         }
     }

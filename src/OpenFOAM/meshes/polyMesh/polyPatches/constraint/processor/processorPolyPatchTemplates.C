@@ -24,51 +24,36 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "autoLayerDriver.H"
-#include "syncTools.H"
+#include "processorPolyPatch.H"
+#include "transformField.H"
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template<class Type>
-void Foam::autoLayerDriver::averageNeighbours
-(
-    const polyMesh& mesh,
-    const PackedList<1>& isMasterEdge,
-    const labelList& meshEdges,
-    const labelList& meshPoints,
-    const edgeList& edges,
-    const scalarField& invSumWeight,
-    const Field<Type>& data,
-    Field<Type>& average
-)
+template<class T>
+void Foam::processorPolyPatch::transform(Field<T>& l) const
 {
-    average = pTraits<Type>::zero;
-
-    forAll(edges, edgeI)
+    if (l.size() != size())
     {
-        if (isMasterEdge.get(meshEdges[edgeI]) == 1)
-        {
-            const edge& e = edges[edgeI];
-            //scalar eWeight = edgeWeights[edgeI];
-            scalar eWeight =  1.0;
-            label v0 = e[0];
-            label v1 = e[1];
-
-            average[v0] += eWeight*data[v1];
-            average[v1] += eWeight*data[v0];
-        }
+        FatalErrorIn("processorPolyPatch::transform(Field<T>&) const")
+            << "Size of field " << l.size() << " differs from patch size "
+            << size() << abort(FatalError);
     }
 
-    syncTools::syncPointList
-    (
-        mesh,
-        meshPoints,
-        average,
-        plusEqOp<Type>(),
-        pTraits<Type>::zero     // null value
-    );
+    forAll(patchIDs_, subI)
+    {
+        label patchI = patchIDs_[subI];
 
-    average *= invSumWeight;
+        if (patchI != -1)
+        {
+            // Get field on patch
+            typename Field<T>::subField subFld(subSlice(l, subI));
+
+            refCast<const coupledPolyPatch>
+            (
+                boundaryMesh()[patchI]
+            ).transform(subFld);
+        }
+    }
 }
 
 

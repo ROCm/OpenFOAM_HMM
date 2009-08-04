@@ -122,22 +122,25 @@ void Foam::Particle<ParticleType>::correctAfterParallelTransfer
 
     label subPatchI = ppp.whichSubPatch(facei_);
 
-    const coupledPolyPatch& cpp =
-        refCast<const coupledPolyPatch>
-        (cloud_.pMesh().boundaryMesh()[subPatchI]);
+    if (subPatchI != -1)
+    {
+        const coupledPolyPatch& cpp =
+            refCast<const coupledPolyPatch>
+            (cloud_.pMesh().boundaryMesh()[subPatchI]);
 
-    // We are on receiving end.
-    if (!cpp.parallel())
-    {
-        const tensor& T = cpp.forwardT();
-        transformPosition(T);
-        static_cast<ParticleType&>(*this).transformProperties(T);
-    }
-    else if (cpp.separated())
-    {
-        const vector d = -cpp.separation();
-        position_ += d;
-        static_cast<ParticleType&>(*this).transformProperties(d);
+        // We are on receiving end.
+        if (!cpp.parallel())
+        {
+            const tensor& T = cpp.forwardT();
+            transformPosition(T);
+            static_cast<ParticleType&>(*this).transformProperties(T);
+        }
+        else if (cpp.separated())
+        {
+            const vector d = -cpp.separation();
+            position_ += d;
+            static_cast<ParticleType&>(*this).transformProperties(d);
+        }
     }
 
     // Reset the face index for the next tracking operation
@@ -452,6 +455,8 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
 
     celli_ = cloud_.polyMesh_.faceOwner()[facei_];
 
+    // Now the particle is on the receiving side
+
     if (!cpp.parallel())
     {
         const tensor& T = cpp.reverseT();
@@ -461,10 +466,8 @@ void Foam::Particle<ParticleType>::hitCyclicPatch
     }
     else if (cpp.separated())
     {
-        const vector& d = cpp.separation();
-
-        position_ += d;
-        static_cast<ParticleType&>(*this).transformProperties(d);
+        position_ += cpp.separation();
+        static_cast<ParticleType&>(*this).transformProperties(cpp.separation());
     }
 }
 

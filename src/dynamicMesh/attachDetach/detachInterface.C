@@ -180,7 +180,8 @@ void Foam::attachDetach::detachInterface
                     masterPatchID_.index(),         // patch for face
                     false,                          // remove from zone
                     faceZoneID_.index(),            // zone for face
-                    !mfFlip[faceI]                  // face flip in zone
+                    !mfFlip[faceI],                 // face flip in zone
+                    -1                              // sub patch
                 )
             );
 
@@ -198,7 +199,8 @@ void Foam::attachDetach::detachInterface
                     false,                          // flip flux
                     slavePatchID_.index(),          // patch to add the face to
                     -1,                             // zone for face
-                    false                           // zone flip
+                    false,                          // zone flip
+                    -1                              // sub patch
                 )
             );
 // Pout << "Flip.  Modifying face: " << faces[curFaceID].reverseFace() << " next to cell: " << nei[curFaceID] << " and adding face: " << newFace << " next to cell: " << own[curFaceID] << endl;
@@ -218,7 +220,8 @@ void Foam::attachDetach::detachInterface
                     masterPatchID_.index(),   // patch for face
                     false,                    // remove from zone
                     faceZoneID_.index(),      // zone for face
-                    mfFlip[faceI]             // face flip in zone
+                    mfFlip[faceI],            // face flip in zone
+                    -1                        // sub patch
                 )
             );
 
@@ -236,7 +239,8 @@ void Foam::attachDetach::detachInterface
                     true,                           // flip flux
                     slavePatchID_.index(),          // patch to add the face to
                     -1,                             // zone for face
-                    false                           // face flip in zone
+                    false,                          // face flip in zone
+                    -1                              // sub patch
                 )
             );
 // Pout << "No flip.  Modifying face: " << faces[curFaceID] << " next to cell: " << own[curFaceID] << " and adding face: " << newFace << " next to cell: " << nei[curFaceID] << endl;
@@ -389,7 +393,8 @@ void Foam::attachDetach::detachInterface
                         -1,                         // patch for face
                         false,                      // remove from zone
                         -1,                         // zone for face
-                        false                       // face zone flip
+                        false,                      // face zone flip
+                        -1                          // sub patch
                     )
                 );
 // Pout << "modifying stick-out face. Internal Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " nei: " << nei[curFaceID] << endl;
@@ -408,7 +413,8 @@ void Foam::attachDetach::detachInterface
                         mesh.boundaryMesh().whichPatch(curFaceID), // patch
                         false,                        // remove from zone
                         -1,                           // zone for face
-                        false                         // face zone flip
+                        false,                        // face zone flip
+                        -1                            // sub patch
                     )
                 );   
 // Pout << "modifying stick-out face. Boundary Old face: " << oldFace << " new face: " << newFace << " own: " << own[curFaceID] << " patch: " << mesh.boundaryMesh().whichPatch(curFaceID) << endl;

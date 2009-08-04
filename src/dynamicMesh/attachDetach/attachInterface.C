@@ -119,7 +119,8 @@ void Foam::attachDetach::attachInterface
                     -1,                              // patch for face
                     false,                           // remove from zone
                     faceZoneID_.index(),             // zone for face
-                    mfFlip[faceI]                    // face flip in zone
+                    mfFlip[faceI],                   // face flip in zone
+                    -1                               // subpatch
                 )
             );
         }
@@ -138,7 +139,8 @@ void Foam::attachDetach::attachInterface
                     -1,                           // patch for face
                     false,                        // remove from zone
                     faceZoneID_.index(),          // zone for face
-                    !mfFlip[faceI]                // face flip in zone
+                    !mfFlip[faceI],               // face flip in zone
+                    -1                            // subpatch
                 )
             );
         }
@@ -207,7 +209,13 @@ void Foam::attachDetach::attachInterface
                     mesh.faceZones()[modifiedFaceZone].whichFace(curFaceID)
                 ];
         }
-            
+
+        labelPair patchIDs = polyTopoChange::whichPatch
+        (
+            mesh.boundaryMesh(),
+            curFaceID
+        );
+
         // Modify the face
         ref.setAction
         (
@@ -218,10 +226,11 @@ void Foam::attachDetach::attachInterface
                 own[curFaceID],         // owner
                 nei[curFaceID],         // neighbour
                 false,                  // face flip
-                mesh.boundaryMesh().whichPatch(curFaceID),// patch for face
+                patchIDs[0],            // patch for face
                 false,                  // remove from zone
                 modifiedFaceZone,       // zone for face
-                modifiedFaceZoneFlip    // face flip in zone
+                modifiedFaceZoneFlip,   // face flip in zone
+                patchIDs[1]
             )
         );
     }

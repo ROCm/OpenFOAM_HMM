@@ -39,8 +39,59 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::addPatchCellLayer, 0);
+namespace Foam
+{
 
+defineTypeNameAndDebug(addPatchCellLayer, 0);
+
+
+// To combineReduce a labelList. Filters out duplicates.
+class uniqueEqOp
+{
+
+public:
+
+    void operator()(labelList& x, const labelList& y) const
+    {
+        if (x.size() == 0)
+        {
+            if (y.size() > 0)
+            {
+                x = y;
+            }
+        }
+        else
+        {
+            forAll(y, yi)
+            {
+                if (findIndex(x, y[yi]) == -1)
+                {
+                    label sz = x.size();
+                    x.setSize(sz+1);
+                    x[sz] = y[yi];
+                }
+            }
+        }
+    }
+};
+// Dummy transform for List. Used in synchronisation
+class dummyTransformList
+{
+public:
+    void operator()(const coupledPolyPatch&, Field<labelList>&) const
+    {}
+};
+// Dummy template specialisation for pTraits<face>. Used in synchronisation
+template<>
+class pTraits<labelList>
+{
+public:
+
+    //- Component type
+    typedef label cmptType;
+};
+
+}
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -106,7 +157,7 @@ Foam::labelListList Foam::addPatchCellLayer::calcGlobalEdgeFaces
         globalEdgeFaces,
         uniqueEqOp(),
         labelList(),    // null value
-        false           // no separation
+        dummyTransformList() // dummy transform
     );
 
     // Extract pp part
@@ -321,7 +372,7 @@ Foam::labelPair Foam::addPatchCellLayer::getEdgeString
 Foam::label Foam::addPatchCellLayer::addSideFace
 (
     const indirectPrimitivePatch& pp,
-    const labelList& patchID,           // prestored patch per pp face
+    const List<labelPair>& patchIDs,     // prestored patch per pp face
     const labelListList& addedCells,    // per pp face the new extruded cell
     const face& newFace,
     const label ownFaceI,               // pp face that provides owner
@@ -365,7 +416,7 @@ Foam::label Foam::addPatchCellLayer::addSideFace
 
         // Loop over all faces connected to edge to inflate and
         // see if any boundary face (but not meshFaceI)
-        label otherPatchID = patchID[ownFaceI];
+        labelPair otherPatchID = patchIDs[ownFaceI];
 
         forAll(meshFaces, k)
         {
@@ -377,7 +428,7 @@ Foam::label Foam::addPatchCellLayer::addSideFace
              && !mesh_.isInternalFace(faceI)
             )
             {
-                otherPatchID = patches.whichPatch(faceI);
+                otherPatchID = polyTopoChange::whichPatch(patches, faceI);
                 break;
             }
         }
@@ -422,9 +473,10 @@ Foam::label Foam::addPatchCellLayer::addSideFace
                 inflateEdgeI,               // master edge
                 -1,                         // master face
                 false,                      // flux flip
-                otherPatchID,               // patch for face
+                otherPatchID[0],            // patch for face
                 zoneI,                      // zone for face
-                false                       // face zone flip
+                false,                      // face zone flip
+                otherPatchID[1]             // subPatch
             )
         );
     }
@@ -490,7 +542,8 @@ Foam::label Foam::addPatchCellLayer::addSideFace
                 false,                      // flux flip
                 -1,                         // patch for face
                 zoneI,                      // zone for face
-                false                       // face zone flip
+                false,                      // face zone flip
+                -1                          // subPatch
             )
         );
 
@@ -633,7 +686,7 @@ void Foam::addPatchCellLayer::setRefinement
         {
             labelList n(mesh_.nPoints(), 0);
             IndirectList<label>(n, meshPoints) = nPointLayers;
-            syncTools::syncPointList(mesh_, n, maxEqOp<label>(), 0, false);
+            syncTools::syncPointList(mesh_, n, maxEqOp<label>(), 0);
 
             // Non-synced
             forAll(meshPoints, i)
@@ -677,8 +730,7 @@ void Foam::addPatchCellLayer::setRefinement
                 mesh_,
                 nFromFace,
                 maxEqOp<label>(),
-                0,
-                false
+                0
             );
 
             forAll(nPointLayers, i)
@@ -715,8 +767,7 @@ void Foam::addPatchCellLayer::setRefinement
                 mesh_,
                 d,
                 minEqOp<vector>(),
-                wallPoint::greatPoint,
-                false
+                wallPoint::greatPoint
             );
 
             forAll(meshPoints, i)
@@ -942,14 +993,14 @@ void Foam::addPatchCellLayer::setRefinement
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
-    // Precalculated patchID for each patch face
-    labelList patchID(pp.size());
+    // Precalculated patchID (patch+subpatch) for each patch face
+    List<labelPair> patchIDs(pp.size());
 
     forAll(pp, patchFaceI)
     {
         label meshFaceI = pp.addressing()[patchFaceI];
 
-        patchID[patchFaceI] = patches.whichPatch(meshFaceI);
+        patchIDs[patchFaceI] = polyTopoChange::whichPatch(patches, meshFaceI);
     }
 
 
@@ -999,19 +1050,19 @@ void Foam::addPatchCellLayer::setRefinement
 
                 // Get new neighbour
                 label nei;
-                label patchI;
+                labelPair patchID;
 
                 if (i == addedCells[patchFaceI].size()-1)
                 {
                     // Top layer so is patch face.
                     nei = -1;
-                    patchI = patchID[patchFaceI];
+                    patchID = patchIDs[patchFaceI];
                 }
                 else
                 {
                     // Internal face between layer i and i+1
                     nei = addedCells[patchFaceI][i+1];
-                    patchI = -1;
+                    patchID = labelPair(-1, -1);
                 }
 
 
@@ -1026,15 +1077,16 @@ void Foam::addPatchCellLayer::setRefinement
                         -1,                         // master edge
                         meshFaceI,                  // master face for addition
                         false,                      // flux flip
-                        patchI,                     // patch for face
+                        patchID[0],                 // patch for face
                         zoneI,                      // zone for face
-                        false                       // face zone flip
+                        false,                      // face zone flip
+                        patchID[1]                  // subPatch
                     )
                 );
                 //Pout<< "Added inbetween face " << newFace
                 //    << " own:" << addedCells[patchFaceI][i]
                 //    << " nei:" << nei
-                //    << " patch:" << patchI
+                //    << " patch:" << patchID[0]
                 //    << endl;
             }
         }
@@ -1063,7 +1115,8 @@ void Foam::addPatchCellLayer::setRefinement
                     -1,                             // patch for face
                     false,                          // remove from zone
                     zoneI,                          // zone for face
-                    false                           // face flip in zone
+                    false,                          // face flip in zone
+                    -1                              // subPatch
                 )
             );
             //Pout<< "Modified old patch face " << meshFaceI
@@ -1121,8 +1174,7 @@ void Foam::addPatchCellLayer::setRefinement
             mesh_,
             meshEdgeLayers,
             maxEqOp<label>(),
-            0,                  // initial value
-            false               // no separation
+            0                   // initial value
         );
 
         forAll(meshEdges, edgeI)
@@ -1366,7 +1418,7 @@ void Foam::addPatchCellLayer::setRefinement
                         addSideFace
                         (
                             pp,
-                            patchID,
+                            patchIDs,
                             addedCells,
                             newFace,
                             patchFaceI,

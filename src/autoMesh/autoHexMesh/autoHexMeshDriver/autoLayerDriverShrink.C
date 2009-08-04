@@ -71,8 +71,7 @@ void Foam::autoLayerDriver::sumWeights
         meshPoints,
         invSumWeight,
         plusEqOp<scalar>(),
-        scalar(0.0),        // null value
-        false               // no separation
+        scalar(0.0)         // null value
     );
 
     forAll(invSumWeight, pointI)
@@ -525,8 +524,7 @@ void Foam::autoLayerDriver::findIsolatedRegions
             pp.meshPoints(),
             keptPoints,
             orEqOp<bool>(),
-            false,              // null value
-            false               // no separation
+            false               // null value
         );
 
         label nChanged = 0;
@@ -593,8 +591,7 @@ void Foam::autoLayerDriver::findIsolatedRegions
         pp.meshPoints(),
         isolatedPoint,
         plusEqOp<label>(),
-        0,       // null value
-        false    // no separation
+        0        // null value
     );
 
     // stop layer growth on isolated faces
@@ -729,8 +726,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             meshPoints,
             pointNormals,
             plusEqOp<vector>(),
-            vector::zero,       // null value
-            false               // no separation
+            vector::zero        // null value
         );
 
         syncTools::syncPointList
@@ -739,8 +735,7 @@ void Foam::autoLayerDriver::medialAxisSmoothingInfo
             meshPoints,
             nPointFaces,
             plusEqOp<label>(),
-            0,                  // null value
-            false               // no separation
+            0                   // null value
         );
 
         forAll(pointNormals, i)

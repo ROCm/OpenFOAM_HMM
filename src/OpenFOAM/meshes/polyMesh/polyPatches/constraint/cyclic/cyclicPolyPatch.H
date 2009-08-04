@@ -30,11 +30,10 @@ Description
 
     Note: morph patch face ordering uses geometric matching so with the
     following restrictions:
-        -halves should be flat planes.
+        -coupled patches should be flat planes.
         -no rotation in patch plane
 
-    Uses a featureCos to find the two halves (or should be fully
-    disconnected). Uses coupledPolyPatch::calcFaceTol to calculate
+    Uses coupledPolyPatch::calcFaceTol to calculate
     tolerance per face which might need tweaking.
 
     Switch on 'cyclicPolyPatch' debug flag to write .obj files to show
@@ -49,11 +48,12 @@ SourceFiles
 #define cyclicPolyPatch_H
 
 #include "coupledPolyPatch.H"
-#include "SubField.H"
-#include "FixedList.H"
+//#include "SubField.H"
+//#include "FixedList.H"
 #include "edgeList.H"
-#include "transform.H"
+//#include "transform.H"
 #include "polyBoundaryMesh.H"
+#include "diagTensorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -92,19 +92,6 @@ private:
         mutable label neighbPatchID_;
 
 
-        //- List of edges formed from connected points. e[0] is the point on
-        //  the first half of the patch, e[1] the corresponding point on the
-        //  second half.
-        mutable edgeList* coupledPointsPtr_;
-
-        //- List of connected edges. e[0] is the edge on the first half of the
-        //  patch, e[1] the corresponding edge on the second half.
-        mutable edgeList* coupledEdgesPtr_;
-
-        //- Morph:angle between normals of neighbouring faces.
-        //  Used to split cyclic into halves.
-        scalar featureCos_;
-
         //- Type of transformation - rotational or translational
         transformType transform_;
 
@@ -114,6 +101,18 @@ private:
         //- point on axis of rotation for rotational cyclics
         point rotationCentre_;
 
+
+        //- List of edges formed from connected points. e[0] is the point on
+        //  the first half of the patch, e[1] the corresponding point on the
+        //  second half.
+        mutable edgeList* coupledPointsPtr_;
+
+        //- List of connected edges. e[0] is the edge on the first half of the
+        //  patch, e[1] the corresponding edge on the second half.
+        mutable edgeList* coupledEdgesPtr_;
+
+        //- Temporary storage of owner side patch during ordering.
+        mutable autoPtr<primitivePatch> ownerPatchPtr_;
 
         // Transformation
 
@@ -152,21 +151,11 @@ private:
 
         // Face ordering
 
-            //- Find the two parts of the faces of pp using feature edges.
-            //  Returns true if successfull.
-            bool getGeometricHalves
-            (
-                const primitivePatch&,
-                labelList&,
-                labelList&
-            ) const;
-
             //- Calculate geometric factors of the two halves.
             void getCentresAndAnchors
             (
-                const primitivePatch&,
-                const faceList& half0Faces,
-                const faceList& half1Faces,
+                const primitivePatch& pp0,
+                const primitivePatch& pp1,
 
                 pointField& half0Ctrs,
                 pointField& half1Ctrs,
@@ -174,29 +163,9 @@ private:
                 scalarField& tols
             ) const;
 
-            //- Given matched faces matches the anchor point. Sets faceMap,
-            //  rotation. Returns true if all matched.
-            bool matchAnchors
-            (
-                const bool report,
-                const primitivePatch&,
-                const labelList&,
-                const pointField&,
-                const labelList&,
-                const faceList&,
-                const labelList&,
-                const scalarField&,
-
-                labelList& faceMap,
-                labelList& rotation
-            ) const;
-
             //- For rotational cases, try to find a unique face on each side
             //  of the cyclic.
-            label getConsistentRotationFace
-            (
-                const pointField& faceCentres
-            ) const;
+            label getConsistentRotationFace(const pointField&) const;
 
 
 protected:
@@ -364,73 +333,106 @@ public:
             return refCast<const cyclicPolyPatch>(pp);
         }
 
-        //- Return connected points (in patch local point indexing). Demand
-        //  driven calculation. Does primitivePatch::clearOut after calculation!
+        //- Return connected points (from patch local to neighbour patch local)
+        //  Demand driven calculation. Does primitivePatch::clearOut after
+        //  calculation!
         const edgeList& coupledPoints() const;
 
-        //- Return connected edges (in patch local edge indexing). Demand
-        //  driven calculation. Does primitivePatch::clearOut after calculation!
+        //- Return connected edges (from patch local to neighbour patch local).
+        //  Demand driven calculation. Does primitivePatch::clearOut after
+        //  calculation!
         const edgeList& coupledEdges() const;
 
-
-        //- Are the coupled planes separated
-        virtual bool separated() const
+        //- Transform a patch-based field on this side to a field on the
+        //  other side.
+        template<class T>
+        void transform(Field<T>& l) const
         {
-            return separated_;
+            if (!parallel())
+            {
+                transform(reverseT_, l);
+            }
+        }
+        virtual void transform(scalarField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(vectorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(sphericalTensorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(diagTensorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(symmTensorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(tensorField& l) const
+        {
+            transform(l);
         }
 
-        virtual const vector& separation() const
-        {
-            return separation_;
-        }
+        //- Transform a patch-based position on this side to a position
+        //  the other side.
+        virtual void transformPosition(pointField& l) const;
 
-        //- Are the cyclic planes parallel
-        virtual bool parallel() const
-        {
-            return parallel_;
-        }
 
-        //- Return face transformation tensor
-        virtual const tensor& forwardT() const
-        {
-            return forwardT_;
-        }
+        // Low level geometric information
 
-        //- Return neighbour-cell transformation tensor
-        virtual const tensor& reverseT() const
-        {
-            return reverseT_;
-        }
+            //- Are the coupled planes separated
+            virtual bool separated() const
+            {
+                return separated_;
+            }
+
+            virtual const vector& separation() const
+            {
+                return separation_;
+            }
+
+            //- Are the cyclic planes parallel
+            virtual bool parallel() const
+            {
+                return parallel_;
+            }
+
+            //- Return face transformation tensor
+            virtual const tensor& forwardT() const
+            {
+                return forwardT_;
+            }
+
+            //- Return neighbour-cell transformation tensor
+            virtual const tensor& reverseT() const
+            {
+                return reverseT_;
+            }
 
         label transformGlobalFace(const label facei) const
         {
             label offset = facei-start();
             label neighbStart = neighbPatch().start();
-            //label neighbSize = neighbPatch().size();
-            //label neighbOffset = facei-neighbStart;
 
             if (offset >= 0 && offset < size())
             {
                 return neighbStart+offset;
             }
-            //else if (neighbOffset >= 0 && neighbOffset < neighbSize)
-            //{
-            //    return start()+neighbOffset;
-            //}
             else
             {
                 FatalErrorIn
                 (
                     "cyclicPolyPatch::transformGlobalFace(const label) const"
                 )   << "Face " << facei << " not in patch " << name()
-                    //<< " nor in patch " << neighbPatch().name()
                     << exit(FatalError);
                 return -1;
             }
         }
-
-        ////- Transform a position on a (local) face
-        //virtual void transformPosition(point&, const label facei) const;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

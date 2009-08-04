@@ -300,7 +300,11 @@ label mergePatchFaces
                     const faceZone& fZone = mesh.faceZones()[zoneID];
                     zoneFlip = fZone.flipMap()[fZone.whichFace(newMasterI)];
                 }
-                label patchI = mesh.boundaryMesh().whichPatch(newMasterI);
+                labelPair patchIDs = polyTopoChange::whichPatch
+                (
+                    mesh.boundaryMesh(),
+                    newMasterI
+                );
 
 
                 Pout<< "Restoring new master face " << newMasterI
@@ -316,10 +320,11 @@ label mergePatchFaces
                         own,                            // owner
                         -1,                             // neighbour
                         false,                          // face flip
-                        patchI,                         // patch for face
+                        patchIDs[0],                    // patch for face
                         false,                          // remove from zone
                         zoneID,                         // zone for face
-                        zoneFlip                        // face flip in zone
+                        zoneFlip,                       // face flip in zone
+                        patchIDs[1]                     // subPatch
                     )
                 );
 
@@ -341,9 +346,10 @@ label mergePatchFaces
                             -1,                     // masterEdgeID,
                             newMasterI,             // masterFaceID,
                             false,                  // flipFaceFlux,
-                            patchI,                 // patchID,
+                            patchIDs[0],            // patchID,
                             zoneID,                 // zoneID,
-                            zoneFlip                // zoneFlip
+                            zoneFlip,               // zoneFlip
+                            patchIDs[1]             // subPatch
                         )
                     );
                 }

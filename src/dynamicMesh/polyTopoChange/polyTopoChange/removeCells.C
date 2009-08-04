@@ -131,8 +131,7 @@ Foam::labelList Foam::removeCells::getExposedFaces
         (
             mesh_,
             nCellsUsingFace,
-            plusEqOp<label>(),
-            false
+            plusEqOp<label>()
         );
     }
 
@@ -339,11 +338,12 @@ void Foam::removeCells::setRefinement
                         faceI,                  // label of face being modified
                         nei,                    // owner
                         -1,                     // neighbour
-                        false,                  // face flip
+                        true,                   // face flip
                         newPatchID[faceI],      // patch for face
                         false,                  // remove from zone
                         zoneID,                 // zone for face
-                        zoneFlip                // face flip in zone
+                        zoneFlip,               // face flip in zone
+                        -1
                     )
                 );
             }
@@ -389,7 +389,8 @@ void Foam::removeCells::setRefinement
                     newPatchID[faceI],      // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip                // face flip in zone
+                    zoneFlip,               // face flip in zone
+                    -1
                 )
             );
         }
@@ -432,7 +433,8 @@ void Foam::removeCells::setRefinement
                             newPatchID[faceI],      // patch for face
                             false,                  // remove from zone
                             zoneID,                 // zone for face
-                            zoneFlip                // face flip in zone
+                            zoneFlip,               // face flip in zone
+                            -1
                         )
                     );
                 }

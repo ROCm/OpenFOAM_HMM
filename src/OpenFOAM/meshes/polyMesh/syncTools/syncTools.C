@@ -29,6 +29,54 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Field<label>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<label>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<label>&
+) const
+{}
+
+
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Field<bool>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    Map<bool>&
+) const
+{}
+template<>
+void Foam::syncTools::transform::operator()
+(
+    const coupledPolyPatch&,
+    EdgeMap<bool>&
+) const
+{}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
 // Does anyone have couples? Since meshes might have 0 cells and 0 proc
 // boundaries need to reduce this info.
 bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
@@ -47,37 +95,12 @@ bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
 }
 
 
-void Foam::syncTools::checkTransform
-(
-    const processorPolyPatch& pp,
-    const bool applySeparation
-)
-{
-//    if (!pp.parallel() && pp.forwardT().size() > 1)
-//    {
-//        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
-//            << "Non-uniform transformation not supported for point or edge"
-//            << " fields." << endl
-//            << "Patch:" << pp.name()
-//            << abort(FatalError);
-//    }
-//    if (applySeparation && pp.separated() && pp.separation().size() > 1)
-//    {
-//        FatalErrorIn("syncTools::checkTransform(const coupledPolyPatch&)")
-//            << "Non-uniform separation vector not supported for point or edge"
-//            << " fields." << endl
-//            << "Patch:" << pp.name()
-//            << abort(FatalError);
-//    }
-}
-
-
 // Determines for every point whether it is coupled and if so sets only one.
 Foam::PackedList<1> Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
-    PackedList<1> isMasterPoint(mesh.nPoints(), 0);
+    PackedList<1> isMasterPoint(mesh.nPoints());
 
-    PackedList<1> donePoint(mesh.nPoints(), 0);
+    PackedList<1> donePoint(mesh.nPoints());
 
 
     // Do multiple shared points. Min. proc is master
@@ -196,9 +219,9 @@ Foam::PackedList<1> Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 // Determines for every edge whether it is coupled and if so sets only one.
 Foam::PackedList<1> Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 {
-    PackedList<1> isMasterEdge(mesh.nEdges(), 0);
+    PackedList<1> isMasterEdge(mesh.nEdges());
 
-    PackedList<1> doneEdge(mesh.nEdges(), 0);
+    PackedList<1> doneEdge(mesh.nEdges());
 
 
     // Do multiple shared edges. Min. proc is master
@@ -359,48 +382,6 @@ Foam::PackedList<1> Foam::syncTools::getMasterFaces(const polyMesh& mesh)
     }
 
     return isMasterFace;
-}
-
-
-template <>
-void Foam::syncTools::separateList
-(
-    const vector& separation,
-    UList<vector>& field
-)
-{
-    forAll(field, i)
-    {
-        field[i] += separation;
-    }
-}
-
-
-template <>
-void Foam::syncTools::separateList
-(
-    const vector& separation,
-    Map<vector>& field
-)
-{
-    forAllIter(Map<vector>, field, iter)
-    {
-        iter() += separation;
-    }
-}
-
-
-template <>
-void Foam::syncTools::separateList
-(
-    const vector& separation,
-    EdgeMap<vector>& field
-)
-{
-    forAllIter(EdgeMap<vector>, field, iter)
-    {
-        iter() += separation;
-    }
 }
 
 

@@ -57,17 +57,25 @@ public:
         }
     };
 };
-
-
 // Dummy transform for faces. Used in synchronisation
-void transformList
-(
-    const tensor& rotTensor,
-    UList<face>& field
-)
-{};
+class transformFace
+{
+public:
+    void operator()(const coupledPolyPatch&, Field<face>&) const
+    {}
+};
+// Dummy template specialisation for pTraits<face>. Used in synchronisation
+template<>
+class pTraits<face>
+{
+public:
+
+    //- Component type
+    typedef label cmptType;
+};
 
 }
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -264,8 +272,7 @@ void Foam::localPointRegion::calcPointRegions
         mesh,
         candidatePoint,
         orEqOp<bool>(),
-        false,              // nullValue
-        false               // applySeparation
+        false               // nullValue
     );
 
 
@@ -420,12 +427,18 @@ void Foam::localPointRegion::calcPointRegions
         // Transport minimum across coupled faces
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        syncTools::syncFaceList
+        SubList<face> l
+        (
+            minRegion,
+            mesh.nFaces()-mesh.nInternalFaces(),
+            mesh.nInternalFaces()
+        );
+        syncTools::syncBoundaryFaceList
         (
             mesh,
-            minRegion,
+            l,
             minEqOpFace(),
-            false               // applySeparation
+            transformFace()     // dummy transformation
         );
     }
 

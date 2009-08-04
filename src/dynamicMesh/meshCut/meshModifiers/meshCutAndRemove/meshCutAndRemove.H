@@ -106,7 +106,7 @@ class meshCutAndRemove
             const label faceI,
             label& own,
             label& nei,
-            label& patchID
+            labelPair& patchIDs
         ) const;
 
         //- Get zone information for face.
@@ -126,7 +126,7 @@ class meshCutAndRemove
             const face& newFace,
             const label owner,
             const label neighbour,
-            const label patchID
+            const labelPair& patchIDs
         );
 
         //- Modifies existing faceI for either new owner/neighbour or 
@@ -139,7 +139,7 @@ class meshCutAndRemove
             const face& newFace,
             const label owner,
             const label neighbour,
-            const label patchID
+            const labelPair& patchIDs
         );
 
         // Copies face starting from startFp. Jumps cuts. Marks visited

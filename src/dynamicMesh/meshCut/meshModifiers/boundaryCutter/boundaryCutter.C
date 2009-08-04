@@ -55,17 +55,12 @@ defineTypeNameAndDebug(boundaryCutter, 0);
 void Foam::boundaryCutter::getFaceInfo
 (
     const label faceI,
-    label& patchID,
+    labelPair& patchIDs,
     label& zoneID,
     label& zoneFlip
 ) const
 {
-    patchID = -1;
-
-    if (!mesh_.isInternalFace(faceI))
-    {
-        patchID = mesh_.boundaryMesh().whichPatch(faceI);
-    }
+    patchIDs = polyTopoChange::whichPatch(mesh_.boundaryMesh(), faceI);
 
     zoneID = mesh_.faceZones().whichZone(faceI);
 
@@ -158,8 +153,9 @@ void Foam::boundaryCutter::addFace
 ) const
 {
     // Information about old face
-    label patchID, zoneID, zoneFlip;
-    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+    label zoneID, zoneFlip;
+    labelPair patchIDs;
+    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
     label own = mesh_.faceOwner()[faceI];
     label masterPoint = mesh_.faces()[faceI][0];
     
@@ -169,15 +165,16 @@ void Foam::boundaryCutter::addFace
         (
             polyModifyFace
             (
-                newFace,       // face
+                newFace,        // face
                 faceI,
-                own,           // owner
-                -1,            // neighbour
-                false,         // flux flip
-                patchID,       // patch for face
-                false,         // remove from zone
-                zoneID,        // zone for face
-                zoneFlip       // face zone flip
+                own,            // owner
+                -1,             // neighbour
+                false,          // flux flip
+                patchIDs[0],    // patch for face
+                false,          // remove from zone
+                zoneID,         // zone for face
+                zoneFlip,       // face zone flip
+                patchIDs[1]     // subPatch ID
             )
         );
 
@@ -196,9 +193,10 @@ void Foam::boundaryCutter::addFace
                 -1,            // master edge
                 -1,            // master face for addition
                 false,         // flux flip
-                patchID,       // patch for face
+                patchIDs[0],   // patch for face
                 zoneID,        // zone for face
-                zoneFlip       // face zone flip
+                zoneFlip,      // face zone flip
+                patchIDs[1]
             )
         );
     }
@@ -275,10 +273,6 @@ bool Foam::boundaryCutter::splitFace
         // - find starting cut
         // - walk to next cut. Make face
         // - loop until face done.
-
-        // Information about old face
-        label patchID, zoneID, zoneFlip;
-        getFaceInfo(faceI, patchID, zoneID, zoneFlip);
 
         // Get face with new points on cut edges for ease of looping
         face extendedFace(addEdgeCutsToFace(faceI, edgeToAddedPoints));
@@ -578,8 +572,9 @@ void Foam::boundaryCutter::setRefinement
         label addedPointI = iter();
 
         // Information about old face
-        label patchID, zoneID, zoneFlip;
-        getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+        labelPair patchIDs;
+        label zoneID, zoneFlip;
+        getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
         label own = mesh_.faceOwner()[faceI];
         label masterPoint = mesh_.faces()[faceI][0];
 
@@ -607,10 +602,11 @@ void Foam::boundaryCutter::setRefinement
                         own,                        // owner
                         -1,                         // neighbour
                         false,                      // flux flip
-                        patchID,                    // patch for face
+                        patchIDs[0],                // patch for face
                         false,                      // remove from zone
                         zoneID,                     // zone for face
-                        zoneFlip                    // face zone flip
+                        zoneFlip,                   // face zone flip
+                        patchIDs[1]
                     )
                 );
             }
@@ -628,9 +624,10 @@ void Foam::boundaryCutter::setRefinement
                         -1,                         // master edge
                         -1,                         // master face for addition
                         false,                      // flux flip
-                        patchID,                    // patch for face
+                        patchIDs[0],                // patch for face
                         zoneID,                     // zone for face
-                        zoneFlip                    // face zone flip
+                        zoneFlip,                   // face zone flip
+                        patchIDs[1]
                     )
                 );
             }
@@ -661,8 +658,9 @@ void Foam::boundaryCutter::setRefinement
         face newFace(addEdgeCutsToFace(faceI, edgeToAddedPoints));
 
         // Information about old face
-        label patchID, zoneID, zoneFlip;
-        getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+        labelPair patchIDs;
+        label zoneID, zoneFlip;
+        getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
         label own = mesh_.faceOwner()[faceI];
         label masterPoint = mesh_.faces()[faceI][0];
 
@@ -710,10 +708,11 @@ void Foam::boundaryCutter::setRefinement
                 own,                        // owner
                 -1,                         // neighbour
                 false,                      // flux flip
-                patchID,                    // patch for face
+                patchIDs[0],                // patch for face
                 false,                      // remove from zone
                 zoneID,                     // zone for face
-                zoneFlip                    // face zone flip
+                zoneFlip,                   // face zone flip
+                patchIDs[1]
             )
         );
 
@@ -744,9 +743,10 @@ void Foam::boundaryCutter::setRefinement
                 -1,                         // master edge
                 -1,                         // master face for addition
                 false,                      // flux flip
-                patchID,                    // patch for face
+                patchIDs[0],                // patch for face
                 zoneID,                     // zone for face
-                zoneFlip                    // face zone flip
+                zoneFlip,                   // face zone flip
+                patchIDs[1]
             )
         );
 
@@ -806,8 +806,9 @@ void Foam::boundaryCutter::setRefinement
                     nei = mesh_.faceNeighbour()[faceI];
                 }
 
-                label patchID, zoneID, zoneFlip;
-                getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+                labelPair patchIDs;
+                label zoneID, zoneFlip;
+                getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
 
                 meshMod.setAction
                 (
@@ -818,10 +819,11 @@ void Foam::boundaryCutter::setRefinement
                         own,                // owner
                         nei,                // neighbour
                         false,              // face flip
-                        patchID,            // patch for face
+                        patchIDs[0],        // patch for face
                         false,              // remove from zone
                         zoneID,             // zone for face
-                        zoneFlip            // face flip in zone
+                        zoneFlip,           // face flip in zone
+                        patchIDs[1]
                     )
                 );
 

@@ -113,8 +113,7 @@ void pointSet::sync(const polyMesh& mesh)
         mesh,
         contents,
         orEqOp<bool>(),
-        false,          // null value
-        false           // no separation
+        false           // null value
     );
 
     // Convert back to labelHashSet

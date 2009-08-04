@@ -46,6 +46,76 @@ defineTypeNameAndDebug(motionSmoother, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
+void Foam::motionSmoother::testSyncPositions(const pointField& fld) const
+{
+    pointField syncedFld(fld);
+
+    syncTools::syncPointPositions
+    (
+        mesh_,
+        syncedFld,
+        minEqOp<point>(),           // combine op
+        point(GREAT,GREAT,GREAT)    // null
+    );
+
+    forAll(syncedFld, i)
+    {
+        if (syncedFld[i] != fld[i])
+        {
+            FatalErrorIn
+            (
+                "motionSmoother::testSyncPositions(const pointField&)"
+            )   << "On point " << i << " point:" << fld[i]
+                << " synchronised point:" << syncedFld[i]
+                << abort(FatalError);
+        }
+    }    
+}
+
+
+//Foam::tmp<Foam::scalarField> Foam::motionSmoother::sumWeights
+//(
+//    const scalarField& edgeWeight
+//) const
+//{
+//    tmp<scalarField> tsumWeight
+//    (
+//        new scalarField
+//        (
+//            mesh_.nPoints(),
+//            0.0
+//        )
+//    );
+//    scalarField& sumWeight = tsumWeight();
+//
+//    const edgeList& edges = mesh_.edges();
+//
+//    forAll(edges, edgeI)
+//    {
+//        if (isMasterEdge_.get(edgeI) == 1)
+//        {
+//            const edge& e = edges[edgeI];
+//            const scalar w = edgeWeight[edgeI];
+//            sumWeight[e[0]] += w;
+//            sumWeight[e[1]] += w;
+//        }
+//    }
+//
+//
+//    // Add coupled contributions
+//    // ~~~~~~~~~~~~~~~~~~~~~~~~~
+//    syncTools::syncPointList
+//    (
+//        mesh,
+//        sumWeight,
+//        plusEqOp<scalar>(),
+//        scalar(0)               // null value
+//    );
+//
+//    return tsumWeight;
+//}
+
+
 // From pointPatchInterpolation
 void Foam::motionSmoother::makePatchPatchAddressing()
 {
@@ -215,8 +285,7 @@ void Foam::motionSmoother::minSmooth
     tmp<pointScalarField> tavgFld = avg
     (
         fld,
-        scalarField(mesh_.nEdges(), 1.0),   // uniform weighting
-        false                               // fld is not position.
+        scalarField(mesh_.nEdges(), 1.0)    // uniform weighting
     );
     const pointScalarField& avgFld = tavgFld();
 
@@ -249,8 +318,7 @@ void Foam::motionSmoother::minSmooth
     tmp<pointScalarField> tavgFld = avg
     (
         fld,
-        scalarField(mesh_.nEdges(), 1.0),   // uniform weighting
-        false                               // fld is not position.
+        scalarField(mesh_.nEdges(), 1.0)    // uniform weighting
     );
     const pointScalarField& avgFld = tavgFld();
 
@@ -612,8 +680,7 @@ void Foam::motionSmoother::setDisplacement(pointField& patchDisp)
         mesh_,
         displacement_,
         maxMagEqOp(),   // combine op
-        vector::zero,   // null value
-        false           // no separation
+        vector::zero    // null value
     );
 
     // Adapt the fixedValue bc's (i.e. copy internal point data to
@@ -718,8 +785,7 @@ void Foam::motionSmoother::correctBoundaryConditions
         mesh_,
         displacement,
         maxMagEqOp(),           // combine op
-        vector::zero,           // null value
-        false                   // no separation
+        vector::zero            // null value
     );
 }
 
@@ -769,13 +835,7 @@ Foam::tmp<Foam::scalarField> Foam::motionSmoother::movePoints
     {
         Pout<< "motionSmoother::movePoints : testing sync of newPoints."
             << endl;
-        testSyncField
-        (
-            newPoints,
-            minEqOp<point>(),           // combine op
-            vector(GREAT,GREAT,GREAT),  // null
-            true                        // separation
-        );
+        testSyncPositions(newPoints);
     }
 
     tmp<scalarField> tsweptVol = mesh_.movePoints(newPoints);
@@ -874,8 +934,7 @@ bool Foam::motionSmoother::scaleMesh
         mesh_,
         displacement_,
         maxMagEqOp(),
-        vector::zero,   // null value
-        false           // no separation
+        vector::zero    // null value
     );
 
     // Set newPoints as old + scale*displacement
@@ -905,8 +964,7 @@ bool Foam::motionSmoother::scaleMesh
             (
                 totalDisplacement,
                 maxMagEqOp(),
-                vector::zero,   // null value
-                false           // separation
+                vector::zero    // null value
             );
         }
 
@@ -1035,8 +1093,7 @@ bool Foam::motionSmoother::scaleMesh
             mesh_,
             scale_,
             maxEqOp<scalar>(),
-            -GREAT,             // null value
-            false               // no separation
+            -GREAT              // null value
         );
         
 

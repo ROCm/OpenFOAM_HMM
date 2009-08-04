@@ -133,8 +133,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         (
             mesh,
             refinedBoundaryFace,
-            orEqOp<bool>(),
-            false
+            orEqOp<bool>()
         );
 
 
@@ -176,8 +175,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         (
             mesh,
             changedFace,
-            orEqOp<bool>(),
-            false
+            orEqOp<bool>()
         );
 
 
@@ -925,8 +923,8 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
         neiBndMaxLevel[bFaceI] = cellMaxLevel[own];
         neiBndMaxNormal[bFaceI] = cellMaxNormal[own];
     }
-    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxLevel, false);
-    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxNormal, false);
+    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxLevel);
+    syncTools::swapBoundaryFaceList(mesh_, neiBndMaxNormal);
 
     // Loop over all faces. Could only be checkFaces.. except if they're coupled
 

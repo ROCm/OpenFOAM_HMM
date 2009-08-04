@@ -330,9 +330,9 @@ void Foam::removeFaces::mergeFaces
         own = cellRegionMaster[cellRegion[own]];
     }
 
-    label patchID, zoneID, zoneFlip;
-
-    getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+    labelPair patchIDs;
+    label zoneID, zoneFlip;
+    getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
 
     label nei = -1;
 
@@ -391,7 +391,7 @@ void Foam::removeFaces::mergeFaces
         own,                // owner
         nei,                // neighbour
         false,              // face flip
-        patchID,            // patch for face
+        patchIDs,           // patch info for face
         false,              // remove from zone
         zoneID,             // zone for face
         zoneFlip,           // face flip in zone
@@ -417,18 +417,12 @@ void Foam::removeFaces::mergeFaces
 void Foam::removeFaces::getFaceInfo
 (
     const label faceI,
-
-    label& patchID,
+    labelPair& patchIDs,
     label& zoneID,
     label& zoneFlip
 ) const
 {
-    patchID = -1;
-
-    if (!mesh_.isInternalFace(faceI))
-    {
-        patchID = mesh_.boundaryMesh().whichPatch(faceI);
-    }
+    patchIDs = polyTopoChange::whichPatch(mesh_.boundaryMesh(), faceI);
 
     zoneID = mesh_.faceZones().whichZone(faceI);
 
@@ -480,7 +474,7 @@ void Foam::removeFaces::modFace
     const label own,
     const label nei,
     const bool flipFaceFlux,
-    const label newPatchID,
+    const labelPair& newPatchIDs,
     const bool removeFromZone,
     const label zoneID,
     const bool zoneFlip,
@@ -498,7 +492,7 @@ void Foam::removeFaces::modFace
 //                << "  own:" << own
 //                << "  nei:" << nei
 //                << "  flipFaceFlux:" << flipFaceFlux
-//                << "  newPatchID:" << newPatchID
+//                << "  newPatchIDs:" << newPatchIDs
 //                << "  removeFromZone:" << removeFromZone
 //                << "  zoneID:" << zoneID
 //                << "  zoneFlip:" << zoneFlip
@@ -514,10 +508,11 @@ void Foam::removeFaces::modFace
                 own,            // owner
                 nei,            // neighbour
                 flipFaceFlux,   // face flip
-                newPatchID,     // patch for face
+                newPatchIDs[0], // patch for face
                 removeFromZone, // remove from zone
                 zoneID,         // zone for face
-                zoneFlip        // face flip in zone
+                zoneFlip,       // face flip in zone
+                newPatchIDs[1]
             )
         );
     }
@@ -531,7 +526,7 @@ void Foam::removeFaces::modFace
 //                << "  own:" << nei
 //                << "  nei:" << own
 //                << "  flipFaceFlux:" << flipFaceFlux
-//                << "  newPatchID:" << newPatchID
+//                << "  newPatchIDs:" << newPatchIDs
 //                << "  removeFromZone:" << removeFromZone
 //                << "  zoneID:" << zoneID
 //                << "  zoneFlip:" << zoneFlip
@@ -547,10 +542,11 @@ void Foam::removeFaces::modFace
                 nei,            // owner
                 own,            // neighbour
                 flipFaceFlux,   // face flip
-                newPatchID,     // patch for face
+                newPatchIDs[0], // patch for face
                 removeFromZone, // remove from zone
                 zoneID,         // zone for face
-                zoneFlip        // face flip in zone
+                zoneFlip,       // face flip in zone
+                newPatchIDs[1]
             )
         );
     }
@@ -1087,8 +1083,7 @@ void Foam::removeFaces::setRefinement
             mesh_,
             nFacesPerEdge,
             maxEqOp<label>(),
-            labelMin,               // guaranteed to be overridden by maxEqOp
-            false                   // no separation
+            labelMin                // guaranteed to be overridden by maxEqOp
         );
 
         // Convert to labelHashSet
@@ -1190,8 +1185,7 @@ void Foam::removeFaces::setRefinement
         syncTools::swapFaceList
         (
             mesh_,
-            nbrFaceRegion,
-            false                   // no separation
+            nbrFaceRegion
         );
 
         labelList toNbrRegion(nRegions, -1);
@@ -1308,8 +1302,7 @@ void Foam::removeFaces::setRefinement
             mesh_,
             nEdgesPerPoint,
             maxEqOp<label>(),
-            labelMin,
-            false                   // no separation
+            labelMin 
         );
 
         forAll(nEdgesPerPoint, pointI)
@@ -1470,9 +1463,9 @@ void Foam::removeFaces::setRefinement
                 own = cellRegionMaster[cellRegion[own]];
             }
 
-            label patchID, zoneID, zoneFlip;
-
-            getFaceInfo(faceI, patchID, zoneID, zoneFlip);
+            labelPair patchIDs;
+            label zoneID, zoneFlip;
+            getFaceInfo(faceI, patchIDs, zoneID, zoneFlip);
 
             label nei = -1;
 
@@ -1503,7 +1496,7 @@ void Foam::removeFaces::setRefinement
                 own,                // owner
                 nei,                // neighbour
                 false,              // face flip
-                patchID,            // patch for face
+                patchIDs,           // patchinfo for face
                 false,              // remove from zone
                 zoneID,             // zone for face
                 zoneFlip,           // face flip in zone

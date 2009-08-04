@@ -125,40 +125,6 @@ class globalIndex;
 
 class addPatchCellLayer
 {
-    // Private classes
-
-        // To combineReduce a labelList. Filters out duplicates.
-        class uniqueEqOp
-        {
-
-        public:
-
-            void operator()(labelList& x, const labelList& y) const
-            {
-                if (x.size() == 0)
-                {
-                    if (y.size() > 0)
-                    {
-                        x = y;
-                    }
-                }
-                else
-                {
-                    forAll(y, yi)
-                    {
-                        if (findIndex(x, y[yi]) == -1)
-                        {
-                            label sz = x.size();
-                            x.setSize(sz+1);
-                            x[sz] = y[yi];
-                        }
-                    }
-                }
-            }
-        };
-
-
-
     // Private data
 
         //- Reference to mesh
@@ -223,7 +189,7 @@ class addPatchCellLayer
         label addSideFace
         (
             const indirectPrimitivePatch&,
-            const labelList& patchID,
+            const List<labelPair>& patchIDs,
             const labelListList& addedCells,
             const face& newFace,
             const label ownFaceI,

@@ -44,6 +44,7 @@ SourceFiles
 #include "Map.H"
 #include "boolList.H"
 #include "indirectPrimitivePatch.H"
+#include "labelPair.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -131,14 +132,13 @@ class removeFaces
             void getFaceInfo
             (
                 const label faceI,
-                label& patchID,
+                labelPair& patchIDs,
                 label& zoneID,
                 label& zoneFlip
             ) const;
 
             //- Return face with all pointsToRemove removed.
-            face filterFace(const labelHashSet& pointsToRemove, const label)
-             const;
+            face filterFace(const labelHashSet&, const label) const;
 
             //- Wrapper for meshMod.modifyFace. Reverses face if own>nei.
             void modFace
@@ -148,7 +148,7 @@ class removeFaces
                 const label own,
                 const label nei,
                 const bool flipFaceFlux,
-                const label newPatchID,
+                const labelPair& newPatchIDs,
                 const bool removeFromZone,
                 const label zoneID,
                 const bool zoneFlip,

@@ -291,6 +291,38 @@ public:
             return neighbFaceCellCentres_;
         }
 
+        //- Transform a patch-based field
+        template<class T>
+        void transform(Field<T>& l) const;
+
+        virtual void transform(scalarField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(vectorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(sphericalTensorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(diagTensorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(symmTensorField& l) const
+        {
+            transform(l);
+        }
+        virtual void transform(tensorField& l) const
+        {
+            transform(l);
+        }
+
+        //- Transform a patch-based position
+        virtual void transformPosition(pointField& l) const;
+
         //- Are the planes separated.
         virtual bool separated() const
         {
@@ -431,18 +463,16 @@ public:
             );
         }
 
-        //- Return neighbour point labels. This is for my local point (-1 or)
-        //  the corresponding local point on the other side. It is -1 if
-        //  there are multiple corresponding points on this or the other side
-        //  (can happen for cyclics being converted into proc patches)
-        const labelList& neighbPoints() const;
+//        //- Return neighbour point labels. This is for my local point (-1 or)
+//        //  the corresponding local point on the other side. It is -1 if
+//        //  there are multiple corresponding points on this or the other side
+//        //  (can happen for cyclics being converted into proc patches)
+//        const labelList& neighbPoints() const;
+//
+//        //- Return neighbour edge labels. This is for my local edge (-1 or) the
+//        //  corresponding local edge on the other side. See above for -1 cause.
+//        const labelList& neighbEdges() const;
 
-        //- Return neighbour edge labels. This is for my local edge (-1 or) the
-        //  corresponding local edge on the other side. See above for -1 cause.
-        const labelList& neighbEdges() const;
-
-        ////- Transform a position
-        //virtual void transformPosition(point&, const label facei) const;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)
@@ -469,6 +499,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "processorPolyPatchTemplates.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

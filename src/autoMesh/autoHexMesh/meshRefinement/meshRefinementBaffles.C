@@ -83,7 +83,8 @@ Foam::label Foam::meshRefinement::createBaffle
             ownPatch,                   // patch for face
             false,                      // remove from zone
             zoneID,                     // zone for face
-            zoneFlip                    // face flip in zone
+            zoneFlip,                   // face flip in zone
+            -1                          // sub patch
         )
     );
 
@@ -113,10 +114,11 @@ Foam::label Foam::meshRefinement::createBaffle
                 -1,                         // masterPointID
                 -1,                         // masterEdgeID
                 faceI,                      // masterFaceID,
-                false,                      // face flip
+                true,                       // face flip
                 neiPatch,                   // patch for face
                 zoneID,                     // zone for face
-                zoneFlip                    // face flip in zone
+                zoneFlip,                   // face flip in zone
+                -1                          // sub patch
             )
         );
     }
@@ -365,8 +367,8 @@ void Foam::meshRefinement::getBafflePatches
     //   might not be owner on the other processor but the neighbour is
     //   not used when creating baffles from proc faces.
     // - tolerances issues occasionally crop up.
-    syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>(), false);
-    syncTools::syncFaceList(mesh_, neiPatch, maxEqOp<label>(), false);
+    syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>());
+    syncTools::syncFaceList(mesh_, neiPatch, maxEqOp<label>());
 }
 
 
@@ -397,9 +399,9 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     if (debug)
     {
         labelList syncedOwnPatch(ownPatch);
-        syncTools::syncFaceList(mesh_, syncedOwnPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, syncedOwnPatch, maxEqOp<label>());
         labelList syncedNeiPatch(neiPatch);
-        syncTools::syncFaceList(mesh_, syncedNeiPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, syncedNeiPatch, maxEqOp<label>());
 
         forAll(syncedOwnPatch, faceI)
         {
@@ -586,8 +588,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryPoint,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncEdgeList
@@ -595,16 +596,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryEdge,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncFaceList
     (
         mesh_,
         isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
+        orEqOp<bool>()
     );
 
 
@@ -786,8 +785,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryPoint,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncEdgeList
@@ -795,16 +793,14 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
         mesh_,
         isBoundaryEdge,
         orEqOp<bool>(),
-        false,              // null value
-        false               // no separation
+        false               // null value
     );
 
     syncTools::syncFaceList
     (
         mesh_,
         isBoundaryFace,
-        orEqOp<bool>(),
-        false               // no separation
+        orEqOp<bool>()
     );
 
 
@@ -1131,8 +1127,7 @@ Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
     (
         mesh_,
         facePatch,
-        maxEqOp<label>(),
-        false               // no separation
+        maxEqOp<label>()
     );
 
     return facePatch;
@@ -1305,8 +1300,7 @@ Foam::List<Foam::labelPair> Foam::meshRefinement::filterDuplicateFaces
         mesh_,
         nBafflesPerEdge,
         plusEqOp<label>(),  // in-place add
-        0,                  // initial value
-        false               // no separation
+        0                   // initial value
     );
 
 
@@ -1402,7 +1396,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
                     -1,                     // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip                // face flip in zone
+                    zoneFlip,               // face flip in zone
+                    -1                      // sub patch
                 )
             );
         }
@@ -1431,7 +1426,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
                     -1,                     // patch for face
                     false,                  // remove from zone
                     zoneID,                 // zone for face
-                    zoneFlip                // face flip in zone
+                    zoneFlip,               // face flip in zone
+                    -1                      // sub patch
                 )
             );
         }
@@ -1646,7 +1642,7 @@ void Foam::meshRefinement::findCellZoneTopo
             blockedFace[faceI] = true;
         }
     }
-    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>(), false);
+    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>());
 
     // Set region per cell based on walking
     regionSplit cellRegion(mesh_, blockedFace);
@@ -2113,7 +2109,7 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
             blockedFace[faceI] = true;
         }
     }
-    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>(), false);
+    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>());
 
     // Set region per cell based on walking
     regionSplit cellRegion(mesh_, blockedFace);
@@ -2225,8 +2221,7 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
             mesh_,
             pointBaffle,
             maxEqOp<label>(),
-            -1,                 // null value
-            false               // no separation
+            -1                  // null value
         );
 
 
@@ -2251,7 +2246,7 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
                 }
             }
         }
-        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>());
 
 
         // 3. From faces to cells (cellRegion) and back to faces (ownPatch)
@@ -2300,7 +2295,7 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
 
         ownPatch.transfer(newOwnPatch);
 
-        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>(), false);
+        syncTools::syncFaceList(mesh_, ownPatch, maxEqOp<label>());
     }
 
 
@@ -2669,8 +2664,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         (
             mesh_,
             namedSurfaceIndex,
-            maxEqOp<label>(),
-            false
+            maxEqOp<label>()
         );
 
         // Print a bit
@@ -2712,7 +2706,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                     -1,                             // patch for face
                     false,                          // remove from zone
                     surfaceToFaceZone[surfI],       // zone for face
-                    false                           // face flip in zone
+                    false,                          // face flip in zone
+                    -1                              // sub patch
                 )
             );
         }
@@ -2742,7 +2737,8 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
                         patchI,                         // patch for face
                         false,                          // remove from zone
                         surfaceToFaceZone[surfI],       // zone for face
-                        false                           // face flip in zone
+                        false,                          // face flip in zone
+                        polyTopoChange::whichSubPatch(pp, faceI)    // sub patch
                     )
                 );
             }

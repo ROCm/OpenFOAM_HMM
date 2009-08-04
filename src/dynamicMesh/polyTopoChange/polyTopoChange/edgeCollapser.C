@@ -559,15 +559,15 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                     // Get current connectivity
                     label own = faceOwner[faceI];
                     label nei = -1;
-                    label patchID = -1;
+                    labelPair patchIDs = polyTopoChange::whichPatch
+                    (
+                        boundaryMesh,
+                        faceI
+                    );
 
                     if (mesh_.isInternalFace(faceI))
                     {
                         nei = faceNeighbour[faceI];
-                    }
-                    else
-                    {
-                        patchID = boundaryMesh.whichPatch(faceI);
                     }
 
                     meshMod.modifyFace
@@ -577,9 +577,10 @@ bool Foam::edgeCollapser::setRefinement(polyTopoChange& meshMod)
                         own,                        // owner
                         nei,                        // neighbour
                         false,                      // flipFaceFlux
-                        patchID,                    // patch
+                        patchIDs[0],                // patch
                         zoneID,
-                        zoneFlip
+                        zoneFlip,
+                        patchIDs[1]                 // subpatch for face
                     );
                     meshChanged = true;
                 }

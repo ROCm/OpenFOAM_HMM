@@ -39,6 +39,7 @@ SourceFiles
 #define coupledPolyPatch_H
 
 #include "polyPatch.H"
+#include "diagTensorField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -231,20 +232,34 @@ public:
                 return true;
             }
 
-            //- Are the planes separated.
-            virtual bool separated() const = 0;
+            //- Transform a patch-based field.
+            //!! TDB with macros?
+            virtual void transform(scalarField& l) const = 0;
+            virtual void transform(vectorField& l) const = 0;
+            virtual void transform(sphericalTensorField& l) const = 0;
+            virtual void transform(diagTensorField& l) const = 0;
+            virtual void transform(symmTensorField& l) const = 0;
+            virtual void transform(tensorField& l) const = 0;
 
-            //- If the planes are separated the separation vector.
-            virtual const vector& separation() const = 0;
+            //- Transform a patch-based position
+            virtual void transformPosition(pointField& l) const = 0;
 
-            //- Are the cyclic planes parallel.
-            virtual bool parallel() const = 0;
+            // Low level geometric information
 
-            //- Return face transformation tensor.
-            virtual const tensor& forwardT() const = 0;
+                //- Are the planes separated.
+                virtual bool separated() const = 0;
 
-            //- Return neighbour-cell transformation tensor.
-            virtual const tensor& reverseT() const = 0;
+                //- If the planes are separated the separation vector.
+                virtual const vector& separation() const = 0;
+
+                //- Are the cyclic planes parallel.
+                virtual bool parallel() const = 0;
+
+                //- Return face transformation tensor.
+                virtual const tensor& forwardT() const = 0;
+
+                //- Return neighbour-cell transformation tensor.
+                virtual const tensor& reverseT() const = 0;
 
 
         //- Initialise the calculation of the patch geometry

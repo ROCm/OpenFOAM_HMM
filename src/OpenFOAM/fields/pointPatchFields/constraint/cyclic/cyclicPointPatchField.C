@@ -26,6 +26,7 @@ License
 
 #include "cyclicPointPatchField.H"
 #include "Swap.H"
+#include "transformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -124,6 +125,13 @@ cyclicPointPatchField<Type>::cyclicPointPatchField
 template<class Type>
 void cyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
 {
+    // Get neighbouring pointPatch
+    const cyclicPointPatch& nbrPatch = cyclicPatch_.neighbPatch();
+
+    // Get neighbouring patch internal field. Written out since cannot get
+    // access to neighbouring patch field.
+    Field<Type> nbrPf(pField, nbrPatch.meshPoints());
+
     Field<Type> pf(this->patchInternalField(pField));
 
     const edgeList& pairs = cyclicPatch_.transformPairs();
@@ -132,16 +140,14 @@ void cyclicPointPatchField<Type>::swapAdd(Field<Type>& pField) const
     {
         forAll(pairs, pairi)
         {
-            Type tmp = pf[pairs[pairi][0]];
-            pf[pairs[pairi][0]] = transform(forwardT(), pf[pairs[pairi][1]]);
-            pf[pairs[pairi][1]] = transform(reverseT(), tmp);
+            pf[pairs[pairi][0]] = transform(forwardT(), nbrPf[pairs[pairi][1]]);
         }
     }
     else
     {
         forAll(pairs, pairi)
         {
-            Swap(pf[pairs[pairi][0]], pf[pairs[pairi][1]]);
+            pf[pairs[pairi][0]] = nbrPf[pairs[pairi][1]];
         }
     }
 

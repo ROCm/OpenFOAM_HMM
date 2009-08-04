@@ -445,8 +445,7 @@ Foam::labelList Foam::autoLayerDriver::collectFaces
     (
         mesh,
         selected,
-        orEqOp<bool>(),     // combine operator
-        false               // separation
+        orEqOp<bool>()      // combine operator
     );
 
     labelList selectedFaces(findIndices(selected, true));
@@ -492,8 +491,7 @@ Foam::labelList Foam::autoLayerDriver::growFaceCellFace
     (
         mesh,
         selected,
-        orEqOp<bool>(),     // combine operator
-        false               // separation
+        orEqOp<bool>()      // combine operator
     );
     return findIndices(selected, true);
 }
@@ -970,8 +968,7 @@ void Foam::autoLayerDriver::handleFeatureAngle
             mesh,
             edgeNormal,
             nomalsCombine(),
-            wallPoint::greatPoint,  // null value
-            false                   // no separation
+            wallPoint::greatPoint   // null value
         );
 
         label vertI = 0;
@@ -1261,8 +1258,7 @@ void Foam::autoLayerDriver::setNumLayers
         pp.meshPoints(),
         maxLayers,
         maxEqOp<label>(),
-        labelMin,           // null value
-        false               // no separation
+        labelMin            // null value
     );
     syncTools::syncPointList
     (
@@ -1270,8 +1266,7 @@ void Foam::autoLayerDriver::setNumLayers
         pp.meshPoints(),
         minLayers,
         minEqOp<label>(),
-        labelMax,           // null value
-        false               // no separation
+        labelMax            // null value
     );
 
     // Unmark any point with different min and max
@@ -1442,8 +1437,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
             pp.meshPoints(),
             maxPointLevel,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
     }
 
@@ -1491,8 +1485,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
             pp.meshPoints(),
             expansionRatio,
             minEqOp<scalar>(),
-            GREAT,              // null value
-            false               // no separation
+            GREAT               // null value
         );
         syncTools::syncPointList
         (
@@ -1500,8 +1493,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
             pp.meshPoints(),
             finalLayerRatio,
             minEqOp<scalar>(),
-            GREAT,              // null value
-            false               // no separation
+            GREAT               // null value
         );
         syncTools::syncPointList
         (
@@ -1509,8 +1501,7 @@ void Foam::autoLayerDriver::calculateLayerThickness
             pp.meshPoints(),
             relMinThickness,
             minEqOp<scalar>(),
-            GREAT,              // null value
-            false               // no separation
+            GREAT               // null value
         );
     }
 
@@ -1581,8 +1572,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             meshPoints,
             patchDisp,
             minEqOp<vector>(),
-            wallPoint::greatPoint,          // null value
-            false                           // no separation
+            wallPoint::greatPoint           // null value
         );
 
         // Unmark if displacement too small
@@ -1614,8 +1604,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             meshPoints,
             syncPatchNLayers,
             minEqOp<label>(),
-            labelMax,           // null value
-            false               // no separation
+            labelMax            // null value
         );
 
         // Reset if differs
@@ -1645,8 +1634,7 @@ void Foam::autoLayerDriver::syncPatchDisplacement
             meshPoints,
             syncPatchNLayers,
             maxEqOp<label>(),
-            labelMin,           // null value
-            false               // no separation
+            labelMin            // null value
         );
 
         // Reset if differs
@@ -1732,8 +1720,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
             meshPoints,
             pointNormals,
             plusEqOp<vector>(),
-            vector::zero,       // null value
-            false               // no separation
+            vector::zero        // null value
         );
 
         syncTools::syncPointList
@@ -1742,8 +1729,7 @@ void Foam::autoLayerDriver::getPatchDisplacement
             meshPoints,
             nPointFaces,
             plusEqOp<label>(),
-            0,                  // null value
-            false               // no separation
+            0                   // null value
         );
 
         forAll(pointNormals, i)
@@ -2175,8 +2161,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
                     pp.meshPoints(),
                     foundNeighbour,
                     orEqOp<bool>(),
-                    false,              // null value
-                    false               // no separation
+                    false               // null value
                 );
 
                 forAll(pp.meshPoints(), patchPointI)
@@ -2235,8 +2220,7 @@ void Foam::autoLayerDriver::setupLayerInfoTruncation
             pp.meshPoints(),
             nPatchPointLayers,
             maxEqOp<label>(),
-            0,                  // null value
-            false               // no separation
+            0                   // null value
         );
     }
 }

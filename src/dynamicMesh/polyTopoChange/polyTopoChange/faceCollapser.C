@@ -156,15 +156,15 @@ void Foam::faceCollapser::filterFace
     {
         label nei = -1;
 
-        label patchI = -1;
+        labelPair patchIDs = polyTopoChange::whichPatch
+        (
+            mesh_.boundaryMesh(),
+            faceI
+        );
 
         if (mesh_.isInternalFace(faceI))
         {
             nei = mesh_.faceNeighbour()[faceI];
-        }
-        else
-        {
-            patchI = mesh_.boundaryMesh().whichPatch(faceI);
         }
 
         // Get current zone info
@@ -188,10 +188,11 @@ void Foam::faceCollapser::filterFace
                 mesh_.faceOwner()[faceI],   // owner
                 nei,                        // neighbour
                 false,                      // face flip
-                patchI,                     // patch for face
+                patchIDs[0],                // patch for face
                 false,                      // remove from zone
                 zoneID,                     // zone for face
-                zoneFlip                    // face flip in zone
+                zoneFlip,                   // face flip in zone
+                patchIDs[1]
             )
         );
     }

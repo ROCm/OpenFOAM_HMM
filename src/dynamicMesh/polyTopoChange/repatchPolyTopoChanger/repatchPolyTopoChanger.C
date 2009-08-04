@@ -132,7 +132,8 @@ void Foam::repatchPolyTopoChanger::changePatchID
             patchID,                            // patch ID
             false,                              // remove from zone
             zoneID,                             // zone ID
-            zoneFlip                            // zone flip
+            zoneFlip,                           // zone flip
+            -1                                  //? subPatch TBD.
         )
     );
 }
@@ -164,6 +165,12 @@ void Foam::repatchPolyTopoChanger::setFaceZone
         }
     }
 
+    labelPair patchIDs = polyTopoChange::whichPatch
+    (
+        mesh_.boundaryMesh(),
+        faceID
+    );
+
     meshMod().setAction
     (
         polyModifyFace
@@ -173,10 +180,11 @@ void Foam::repatchPolyTopoChanger::setFaceZone
             mesh_.faceOwner()[faceID],          // owner
             mesh_.faceNeighbour()[faceID],      // neighbour
             false,                              // flip flux
-            mesh_.boundaryMesh().whichPatch(faceID),  // patch ID
+            patchIDs[0],                        // patch ID
             true,                               // remove from zone
             zoneID,                             // zone ID
-            zoneFlip                            // zone flip
+            zoneFlip,                           // zone flip
+            patchIDs[1]
         )
     );
 }
@@ -223,7 +231,11 @@ void Foam::repatchPolyTopoChanger::changeAnchorPoint
             << abort(FatalError);
     }
 
-    label patchID = mesh_.boundaryMesh().whichPatch(faceID);
+    labelPair patchIDs = polyTopoChange::whichPatch
+    (
+        mesh_.boundaryMesh(),
+        faceID
+    );
 
     const label zoneID = mesh_.faceZones().whichZone(faceID);
 
@@ -248,10 +260,11 @@ void Foam::repatchPolyTopoChanger::changeAnchorPoint
                 mesh_.faceOwner()[faceID],          // owner
                 -1,                                 // neighbour
                 false,                              // flip flux
-                patchID,                            // patch ID
+                patchIDs[0],                        // patch ID
                 false,                              // remove from zone
                 zoneID,                             // zone ID
-                zoneFlip                            // zone flip
+                zoneFlip,                           // zone flip
+                patchIDs[1]
             )
         );
     }
@@ -283,10 +296,11 @@ void Foam::repatchPolyTopoChanger::changeAnchorPoint
                 mesh_.faceOwner()[faceID],          // owner
                 -1,                                 // neighbour
                 false,                              // flip flux
-                patchID,                            // patch ID
+                patchIDs[0],                        // patch ID
                 false,                              // remove from zone
                 zoneID,                             // zone ID
-                zoneFlip                            // zone flip
+                zoneFlip,                           // zone flip
+                patchIDs[1]
             )
         );
     }

@@ -68,7 +68,7 @@ SourceFiles
 #include "labelList.H"
 #include "IOobject.H"
 #include "typeInfo.H"
-#include "pointField.H"
+#include "labelPair.H"
 #include "PtrList.H"
 #include "cellList.H"
 #include "Map.H"
@@ -76,6 +76,7 @@ SourceFiles
 #include "mapPolyMesh.H"
 #include "CompactListList.H"
 #include "PackedList.H"
+#include "primitivePatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -147,9 +148,8 @@ class polyTopoChange
             //- Patch for every external face (-1 for internal faces)
             DynamicList<label> region_;
 
-            //- Sub-patch (for processor faces). -1 for internal and non-
-            //  processor patches.
-            DynamicList<label> subRegion_;
+            //- Sub-patch (for processor faces).
+            Map<label> subRegion_;
 
             //- Owner for all faces
             DynamicList<label> faceOwner_;
@@ -261,6 +261,9 @@ class polyTopoChange
             const label patchI,
             const label zoneI
         ) const;
+
+        //- Return -1 or subRegion for face
+        label subRegion(const label faceI) const;
 
         //- Construct cells (in packed storage)
         void makeCells
@@ -374,6 +377,16 @@ class polyTopoChange
 
             //- Rotate face by number of positions
             static face rotateFace(const face& f, const label nPos);
+
+            //- Order patch faces and merge into overall ordering
+            bool orderAndMerge
+            (
+                const polyPatch&,
+                const primitivePatch&,
+                const label start,
+                labelList& oldToNew,
+                labelList& rotation
+            ) const;
 
             //- Do all coupled patch face reordering
             void reorderCoupledFaces
@@ -518,6 +531,12 @@ public:
             //- Remove/merge point.
             void removePoint(const label, const label);
 
+            //- Helper function to get patchID and subPatchID for a global face
+            static labelPair whichPatch(const polyBoundaryMesh&, const label);
+
+            //- Helper function to get subPatchID for a global face on a patch
+            static label whichSubPatch(const polyPatch&, const label);
+
             //- Add face to cells. Return new face label.
             //  own,nei<0, zoneID>=0 : add inactive face (to end of face list)
             label addFace
@@ -532,7 +551,7 @@ public:
                 const label patchID,
                 const label zoneID,
                 const bool zoneFlip,
-                const label subPatchID = -1
+                const label subPatchID
             );
 
             //- Modify vertices or cell of face.
@@ -546,7 +565,7 @@ public:
                 const label patchID,
                 const label zoneID,
                 const bool zoneFlip,
-                const label subPatchID = -1
+                const label subPatchID
             );
 
             //- Remove/merge face.
