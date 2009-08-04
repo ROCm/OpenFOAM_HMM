@@ -37,9 +37,9 @@ namespace Foam
                                                                               \
 defineNamedTemplateTypeNameAndDebug(fvsPatchTypeField, 0);                    \
 template<>                                                                    \
-int fvsPatchTypeField::disallowDefaultFvsPatchField                           \
+int fvsPatchTypeField::disallowGenericFvsPatchField                           \
 (                                                                             \
-    debug::debugSwitch("disallowDefaultFvsPatchField", 0)                     \
+    debug::debugSwitch("disallowGenericFvsPatchField", 0)                     \
 );                                                                            \
 defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patch);                \
 defineTemplateRunTimeSelectionTable(fvsPatchTypeField, patchMapper);          \
