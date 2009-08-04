@@ -96,8 +96,8 @@ public:
     //- Runtime type information
     TypeName("fvsPatchField");
 
-    //- Debug switch to disallow the use of
-    static int disallowDefaultFvsPatchField;
+    //- Debug switch to disallow the use of genericFvsPatchField
+    static int disallowGenericFvsPatchField;
 
 
     // Declare run-time constructor selection tables

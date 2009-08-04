@@ -43,12 +43,12 @@ Description
 
 #include "incompressible/RAS/derivedFvPatchFields/wallFunctions/epsilonWallFunctions/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.H"
 #include "incompressible/RAS/derivedFvPatchFields/wallFunctions/kqRWallFunctions/kqRWallFunction/kqRWallFunctionFvPatchField.H"
-#include "incompressible/RAS/derivedFvPatchFields/wallFunctions/nutWallFunctions/nutWallFunction/nutWallFunctionFvPatchScalarField.H"
+#include "incompressible/RAS/derivedFvPatchFields/wallFunctions/nutWallFunctions/nutkWallFunction/nutkWallFunctionFvPatchScalarField.H"
 #include "incompressible/RAS/derivedFvPatchFields/wallFunctions/omegaWallFunctions/omegaWallFunction/omegaWallFunctionFvPatchScalarField.H"
 
 #include "compressible/RAS/derivedFvPatchFields/wallFunctions/epsilonWallFunctions/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.H"
 #include "compressible/RAS/derivedFvPatchFields/wallFunctions/kqRWallFunctions/kqRWallFunction/kqRWallFunctionFvPatchField.H"
-#include "compressible/RAS/derivedFvPatchFields/wallFunctions/mutWallFunctions/mutWallFunction/mutWallFunctionFvPatchScalarField.H"
+#include "compressible/RAS/derivedFvPatchFields/wallFunctions/mutWallFunctions/mutkWallFunction/mutkWallFunctionFvPatchScalarField.H"
 #include "compressible/RAS/derivedFvPatchFields/wallFunctions/omegaWallFunctions/omegaWallFunction/omegaWallFunctionFvPatchScalarField.H"
 
 using namespace Foam;
@@ -234,7 +234,7 @@ void updateCompressibleCase(const fvMesh& mesh)
     (
         mesh,
         "mut",
-        compressible::RASModels::mutWallFunctionFvPatchScalarField::typeName,
+        compressible::RASModels::mutkWallFunctionFvPatchScalarField::typeName,
         "0"
     );
     replaceBoundaryType
@@ -286,7 +286,7 @@ void updateIncompressibleCase(const fvMesh& mesh)
     (
         mesh,
         "nut",
-        incompressible::RASModels::nutWallFunctionFvPatchScalarField::typeName,
+        incompressible::RASModels::nutkWallFunctionFvPatchScalarField::typeName,
         "0"
     );
     replaceBoundaryType

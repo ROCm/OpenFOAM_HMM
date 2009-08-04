@@ -27,8 +27,7 @@ solvers
 
     U
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $p;
         tolerance       1e-05;
         relTol          0;
     }

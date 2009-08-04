@@ -33,45 +33,20 @@ solvers
         relTol          0;
     }
 
-    U
+    "(U|e|R)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $p;
         tolerance       1e-05;
         relTol          0;
     }
 
-    e 
+    "(k|epsilon)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $p;
         tolerance       1e-08;
         relTol          0;
     }
 
-    epsilon
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    R
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
 }
 
 PISO

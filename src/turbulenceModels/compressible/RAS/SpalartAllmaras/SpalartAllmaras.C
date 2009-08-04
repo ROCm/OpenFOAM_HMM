@@ -249,6 +249,54 @@ SpalartAllmaras::SpalartAllmaras
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
+tmp<volScalarField> SpalartAllmaras::k() const
+{
+    WarningIn("tmp<volScalarField> SpalartAllmaras::k() const")
+        << "Turbulence kinetic energy not defined for Spalart-Allmaras model. "
+        << "Returning zero field"
+        << endl;
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "k",
+                runTime_.timeName(),
+                mesh_
+            ),
+            mesh_,
+            dimensionedScalar("0", dimensionSet(0, 2, -2, 0, 0), 0)
+        )
+    );
+}
+
+
+tmp<volScalarField> SpalartAllmaras::epsilon() const
+{
+    WarningIn("tmp<volScalarField> SpalartAllmaras::epsilon() const")
+        << "Turbulence kinetic energy dissipation rate not defined for "
+        << "Spalart-Allmaras model. Returning zero field"
+        << endl;
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "epslion",
+                runTime_.timeName(),
+                mesh_
+            ),
+            mesh_,
+            dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0), 0)
+        )
+    );
+}
+
+
 tmp<volSymmTensorField> SpalartAllmaras::R() const
 {
     return tmp<volSymmTensorField>

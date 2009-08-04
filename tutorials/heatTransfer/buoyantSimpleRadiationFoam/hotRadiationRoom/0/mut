@@ -23,22 +23,22 @@ boundaryField
 {
     box
     {
-        type            mutWallFunction;
+        type            mutkWallFunction;
         value           uniform 0;
     }
     floor
     {
-        type            mutWallFunction;
+        type            mutkWallFunction;
         value           uniform 0;
     }
     ceiling
     {
-        type            mutWallFunction;
+        type            mutkWallFunction;
         value           uniform 0;
     }
     fixedWalls
     {
-        type            mutWallFunction;
+        type            mutkWallFunction;
         value           uniform 0;
     }
 }
