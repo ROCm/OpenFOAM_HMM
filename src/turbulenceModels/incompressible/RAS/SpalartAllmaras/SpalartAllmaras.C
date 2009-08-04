@@ -335,6 +335,7 @@ bool SpalartAllmaras::read()
     if (RASModel::read())
     {
         sigmaNut_.readIfPresent(coeffDict());
+        kappa_.readIfPresent(coeffDict());
 
         Cb1_.readIfPresent(coeffDict());
         Cb2_.readIfPresent(coeffDict());

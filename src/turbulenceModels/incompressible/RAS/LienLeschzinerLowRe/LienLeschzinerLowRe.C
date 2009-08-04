@@ -241,6 +241,7 @@ bool LienLeschzinerLowRe::read()
         sigmak_.readIfPresent(coeffDict());
         sigmaEps_.readIfPresent(coeffDict());
         Cmu_.readIfPresent(coeffDict());
+        kappa_.readIfPresent(coeffDict());
         Am_.readIfPresent(coeffDict());
         Aepsilon_.readIfPresent(coeffDict());
         Amu_.readIfPresent(coeffDict());

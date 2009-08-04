@@ -30,10 +30,8 @@
 #     Uses finishedJobs/ and runningJobs/ and stateFile to print job info
 #
 #------------------------------------------------------------------------------
+Script=${0##*/}
 
-PROGNAME=`basename $0`
-TMPFILE=/tmp/${PROGNAME}$$.tmp
-TMPFILE2=/tmp/${PROGNAME}$$.tmp2
 JOBSTRING='%4s %8s %20s %10s %8s %4s %12s %12s %20s\n'
 DEFSTATEFILE=$HOME/.OpenFOAM/foamCheckJobs.out
 
@@ -44,18 +42,19 @@ DEFSTATEFILE=$HOME/.OpenFOAM/foamCheckJobs.out
 #
 #-------------------------------------------------------------------------------
 
-printUsage() {
-cat << LABEL
-Usage: $PROGNAME [stateFile]
+usage() {
+    cat<<USAGE
+Usage: $Script [stateFile]
 
-This program prints a table of all the running and finished jobs.
+This program prints a table of all running and finished jobs.
 
 It is normally used in conjunction with foamCheckJobs which outputs
 a "stateFile" containing the actual process status of all jobs.
 
-If stateFile is not supplied the default $DEFSTATEFILE
-is used.
-LABEL
+If stateFile is not supplied, the default is used:
+    $DEFSTATEFILE
+USAGE
+    exit 1
 }
 
 
@@ -81,7 +80,8 @@ getEntry() {
 # notEmpty directory
 # Returns 0 if directory contains files/directories
 notEmpty() {
-    if [ "`ls $1`" ]; then
+    if [ "`ls $1`" ]
+    then
         return 0
     else
         return 1
@@ -104,37 +104,47 @@ leftStr() {
 #
 #-------------------------------------------------------------------------------
 
-if [ ! "$FOAM_JOB_DIR" ]; then
-    echo "$PROGNAME : FOAM_JOB_DIR environment variable not set."
-    exit 1
-fi
-
-if [ ! -d "$FOAM_JOB_DIR" ]; then
-    echo "$PROGNAME : directory does not exist."
-    echo "            FOAM_JOB_DIR: $FOAM_JOB_DIR"
-fi
-if [ ! -d "$FOAM_JOB_DIR/runningJobs" -o ! -d "$FOAM_JOB_DIR/finishedJobs" ]; then
-    echo "$PROGNAME : invalid directory."
-    echo "            FOAM_JOB_DIR: $FOAM_JOB_DIR"
-fi
-
-
-if [ $# -eq 1 ]; then
-    if [ "$1" = '-h' ]; then
-        printUsage
-        exit 1
+if [ $# -eq 1 ]
+then
+    if [ "$1" = "-h" -o "$1" = "-help" ]
+    then
+        usage
     else
-        STATEFILE=$1
+        STATEFILE="$1"
     fi
-elif [ $# -eq 0 ]; then
+elif [ $# -eq 0 ]
+then
     STATEFILE=${STATEFILE:-$DEFSTATEFILE}
 else
-    printUsage
+    usage
+fi
+
+#- Check a few things
+
+if [ ! "$FOAM_JOB_DIR" ]
+then
+    echo "$Script : FOAM_JOB_DIR environment variable not set."
+    echo
+    exit 1
+fi
+if [ ! -d "$FOAM_JOB_DIR" ]
+then
+    echo "$Script : directory does not exist."
+    echo "    FOAM_JOB_DIR=$FOAM_JOB_DIR"
+    echo
+    exit 1
+fi
+if [ ! -d "$FOAM_JOB_DIR/runningJobs" -o ! -d "$FOAM_JOB_DIR/finishedJobs" ]
+then
+    echo "$Script : invalid directory."
+    echo "    FOAM_JOB_DIR=$FOAM_JOB_DIR"
+    echo
     exit 1
 fi
 
 
-if [ -f "$STATEFILE" ]; then
+if [ -f "$STATEFILE" ]
+then
     echo ""
     echo "Using process information from"
     echo "  $STATEFILE"
@@ -160,7 +170,8 @@ printJob '----' '----' '----' '-------' '---' '----' '-----' '---' '----'
 
 #-- print running
 echo "Running:"
-if notEmpty $FOAM_JOB_DIR/runningJobs; then
+if notEmpty $FOAM_JOB_DIR/runningJobs
+then
     for f in `ls -t $FOAM_JOB_DIR/runningJobs/*`
     do
         machinePid=`basename $f`
@@ -170,14 +181,15 @@ if notEmpty $FOAM_JOB_DIR/runningJobs; then
 
         pid=`echo $machinePid | sed -e 's/.*\.\([0-9][0-9]*\)$/\1/'`
 
-        if [ "$STATEFILE" ]; then
+        if [ "$STATEFILE" ]
+        then
             stat=`getEntry $STATEFILE $machinePid`
         fi
         stat=${stat:-'UNKN'}
 
         case=`getEntry $f 'case'`
         case=${case:-'---'}
-        case=`echo $case | sed -e 's!/.*!!'`       #strip of processorXXX ending
+        case=`echo $case | sed -e 's!/.*!!'`  # strip processorXXX ending
         case=`rightStr 20 "$case"`
 
         start=`getEntry $f 'startDate'`
@@ -187,7 +199,8 @@ if notEmpty $FOAM_JOB_DIR/runningJobs; then
         end='---'
 
         code=`getEntry $f 'code'`
-        if [ "$code" ]; then
+        if [ "$code" ]
+        then
             code=`basename $code`
         else
             code='---'
@@ -196,7 +209,8 @@ if notEmpty $FOAM_JOB_DIR/runningJobs; then
 
         nProcs=`getEntry $f 'nProcs'`
         nProcs=${nProcs:-'1'}
-        if [ $nProcs -eq 1 ]; then
+        if [ $nProcs -eq 1 ]
+        then
             nProcs='---'
         fi
         nProcs=`rightStr 3 "$nProcs"`
@@ -213,7 +227,8 @@ fi
 #-- print finished
 echo ""
 echo "Finished:"
-if notEmpty $FOAM_JOB_DIR/finishedJobs; then
+if notEmpty $FOAM_JOB_DIR/finishedJobs
+then
     for f in `ls -t $FOAM_JOB_DIR/finishedJobs/*`
     do
         machinePid=`basename $f`
@@ -227,13 +242,14 @@ if notEmpty $FOAM_JOB_DIR/finishedJobs; then
         end=${end:-'---'}
         end=`leftStr 12 "$end"`
 
-        if [ "$STATEFILE" ]; then
+        if [ "$STATEFILE" ]
+        then
             stat=`getEntry $STATEFILE $machinePid`
         fi
         stat=${stat:-'UNKN'}
 
         case=`getEntry $f case`
-        case=`echo $case | sed -e 's!/.*!!'`       #strip of processorXXX ending
+        case=`echo $case | sed -e 's!/.*!!'`  # strip processorXXX ending
         case=${case:-'---'}
         case=`rightStr 20 "$case"`
 
@@ -242,7 +258,8 @@ if notEmpty $FOAM_JOB_DIR/finishedJobs; then
         start=`leftStr 12 "$start"`
 
         code=`getEntry $f code`
-        if [ "$code" ]; then
+        if [ "$code" ]
+        then
             code=`basename $code`
         else
             code='---'
@@ -251,7 +268,8 @@ if notEmpty $FOAM_JOB_DIR/finishedJobs; then
 
         nProcs=`getEntry $f 'nProcs'`
         nProcs=${nProcs:-'1'}
-        if [ $nProcs -eq 1 ]; then
+        if [ $nProcs -eq 1 ]
+        then
             nProcs='---'
         fi
         nProcs=`rightStr 3 "$nProcs"`

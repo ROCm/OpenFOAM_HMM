@@ -29,6 +29,10 @@
 # Description
 #     
 #------------------------------------------------------------------------------
+if (! -f "$1" ) then
+    echo "No file: '$1'"
+    exit 1
+endif
 
 set tmpK = newK$$.dat
 cat $1 | grep "Solving for k" | grep -v "solution singularity" | sed s/,//g | awk 'BEGIN { NENTRIES = 0 }{NENTRIES++; printf("%f %e\n", NENTRIES, $8)}' - > $tmpK

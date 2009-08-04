@@ -293,6 +293,7 @@ bool LaunderGibsonRSTM::read()
     if (RASModel::read())
     {
         Cmu_.readIfPresent(coeffDict());
+        kappa_.readIfPresent(coeffDict());
         Clg1_.readIfPresent(coeffDict());
         Clg2_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());

@@ -304,7 +304,7 @@
         (
             "kappa",
             wallFunctionDict,
-            0.4187
+            0.41
         )
     );
 
@@ -314,7 +314,7 @@
         (
             "E",
             wallFunctionDict,
-            9.0
+            9.8
         )
     );
 

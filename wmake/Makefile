@@ -22,11 +22,11 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     Makefile
 #
 # Description
-#     Generic Makefile used by wmake
+#     A generic Makefile, used by wmake
 #
 #------------------------------------------------------------------------------
 

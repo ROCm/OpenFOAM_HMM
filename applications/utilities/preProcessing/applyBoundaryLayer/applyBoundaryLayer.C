@@ -41,6 +41,11 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// turbulence constants - file-scope
+static const scalar Cmu(0.09);
+static const scalar kappa(0.41);
+
+
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("ybl", "scalar");
@@ -48,7 +53,6 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("writenut", "");
 
 #   include "setRootCase.H"
-
 #   include "createTime.H"
 #   include "createMesh.H"
 
@@ -117,10 +121,6 @@ int main(int argc, char *argv[])
     phi = fvc::interpolate(U) & mesh.Sf();
     phi.write();
 
-    // Set turbulence constants
-    dimensionedScalar kappa("kappa", dimless, 0.4187);
-    dimensionedScalar Cmu("Cmu", dimless, 0.09);
-
     // Read and modify turbulence fields if present
 
     IOobject epsilonHeader
@@ -182,11 +182,11 @@ int main(int argc, char *argv[])
         Info<< "Reading field epsilon\n" << endl;
         volScalarField epsilon(epsilonHeader, mesh);
 
-        scalar ck0 = ::pow(Cmu.value(), 0.25)*kappa.value();
+        scalar ck0 = ::pow(Cmu, 0.25)*kappa;
         k = sqr(nut/(ck0*min(y, ybl)));
         k.correctBoundaryConditions();
 
-        scalar ce0 = ::pow(Cmu.value(), 0.75)/kappa.value();
+        scalar ce0 = ::pow(Cmu, 0.75)/kappa;
         epsilon = ce0*k*sqrt(k)/min(y, ybl);
         epsilon.correctBoundaryConditions();
 
