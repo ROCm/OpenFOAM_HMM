@@ -26,7 +26,8 @@ Class
     Foam::genericFvPatchField
 
 Description
-    Foam::genericFvPatchField
+    A generic version of calculatedFvPatchField, useful as a fallback for
+    handling unknown patch types.
 
 SourceFiles
     genericFvPatchField.C

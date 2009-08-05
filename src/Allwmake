@@ -32,6 +32,7 @@ decompositionMethods/Allwmake
 
 wmake libso meshTools
 wmake libso finiteVolume
+wmake libso genericPatchFields
 
 wmake libso sampling
 
