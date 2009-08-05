@@ -100,9 +100,9 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        if (!disallowDefaultFvsPatchField)
+        if (!disallowGenericFvsPatchField)
         {
-            cstrIter = dictionaryConstructorTablePtr_->find("default");
+            cstrIter = dictionaryConstructorTablePtr_->find("generic");
         }
 
         if (cstrIter == dictionaryConstructorTablePtr_->end())
@@ -120,7 +120,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
         }
     }
 
-    if 
+    if
     (
         !dict.found("patchType")
      || word(dict.lookup("patchType")) != p.type()

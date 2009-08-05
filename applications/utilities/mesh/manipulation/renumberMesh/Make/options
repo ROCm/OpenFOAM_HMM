@@ -8,4 +8,5 @@ EXE_LIBS = \
     -lmeshTools \
     -ldynamicMesh \
     -lfiniteVolume \
+    -lgenericPatchFields \
     -ldecompositionMethods

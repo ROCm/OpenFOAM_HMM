@@ -28,7 +28,7 @@ solvers
         agglomerator     faceAreaPair;
         nCellsInCoarsestLevel 10;
         mergeLevels      1;
-    };
+    }
 
     U
     {
@@ -37,7 +37,7 @@ solvers
         tolerance        1e-8;
         relTol           0.1;
         nSweeps          1;
-    };
+    }
 
     k
     {
@@ -46,7 +46,7 @@ solvers
         tolerance        1e-8;
         relTol           0.1;
         nSweeps          1;
-    };
+    }
 
     omega
     {
@@ -55,7 +55,7 @@ solvers
         tolerance        1e-8;
         relTol           0.1;
         nSweeps          1;
-    };
+    }
 }
 
 SIMPLE

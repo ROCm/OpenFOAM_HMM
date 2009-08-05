@@ -38,7 +38,7 @@
 #
 #------------------------------------------------------------------------------
 
-PROGNAME=${0##*/}
+Script=${0##*/}
 
 #-------------------------------------------------------------------------------
 #- User settings
@@ -48,9 +48,9 @@ NDAYSLIMIT=7
 #-------------------------------------------------------------------------------
 
 #- work file
-TMPFILE=/tmp/${PROGNAME}$$.tmp
+TMPFILE=/tmp/${Script}$$.tmp
 #- work dir. Needs to be accessible for all machines
-MACHDIR=$HOME/.OpenFOAM/${PROGNAME}
+MACHDIR=$HOME/.OpenFOAM/${Script}
 DEFSTATEFILE=$HOME/.OpenFOAM/foamCheckJobs.out
 
 
@@ -60,6 +60,29 @@ then
 else
     ECHO='echo'
 fi
+
+
+usage() {
+    cat<<USAGE
+Usage: $Script [stateFile]
+
+This program checks all the locks in the FOAM_JOB_DIR directory to see if
+their processes are still running. Processes will not release their
+lock if they exit abnormally. This program will try to obtain process
+information on the machine the process ran on and release the lock
+if the program is no longer running.
+
+Note: all machines have to be reachable using ssh.
+
+The output from checking all running jobs is collected in an optional
+file.
+
+FILES:
+    \$FOAM_JOB_DIR/runningJobs    locks for running  processes
+                  /finishedJobs  locks for finished processes
+USAGE
+    exit 1
+}
 
 
 #-------------------------------------------------------------------------------
@@ -83,7 +106,8 @@ getEntry() {
 # notEmpty directory
 # Returns 0 if directory contains files/directories
 notEmpty() {
-    if [ "`ls $1`" ]; then
+    if [ "`ls $1`" ]
+    then
         return 0
     else
         return 1
@@ -96,7 +120,8 @@ notEmpty() {
 #     ==> 13
 dayDiff() {
     date -d "$1" > /dev/null 2>&1
-    if [ $? -ne 0 ]; then
+    if [ $? -ne 0 ]
+    then
         #- option '-d' on date not supported. Give up.
         echo "0"
     else
@@ -119,12 +144,14 @@ dayDiff() {
 # Also handles 'slaves' entries in jobInfo:
 #   slaves           1 ( penfold.23766 );
 getAllJobs() {
-    if notEmpty $1; then
+    if notEmpty $1
+    then
         jobs=$1/*
         for f in $jobs
         do
             line=`grep '^[ ]*slaves' $f 2>/dev/null`
-            if [ $? -eq 0 ]; then
+            if [ $? -eq 0 ]
+            then
                 slaveJobs=`echo "$line" | sed -e 's/.*(\(.*\)).*/\1/'`
                 jobs="$jobs $slaveJobs"
             fi
@@ -138,34 +165,12 @@ getAllJobs() {
 # releaseLock jobId lockFile
 # Releases lock on jobId
 releaseLock () {
-    if [ -f $2 ]; then
+    if [ -f $2 ]
+    then
         #- move lock to finishedJobs
         mv $2 $FOAM_JOB_DIR/finishedJobs/
     fi
-    $ECHO "Lock on job $1 released."
-}
-
-
-printUsage() {
-cat << LABEL
-Usage: $PROGNAME [stateFile]
-
-This program checks all the locks in the license directory to see if
-their processes are still running. Processes will not release their
-lock if they exit abnormally. This program will try to obtain process
-information on the machine the process ran on and release the lock
-if the program is no longer running.
-
-Requirements: the environment variable FOAM_JOB_DIR needs to point to the
-license directory and all machines have to be reachable using ssh.
-
-The output from checking all running jobs is collected in an optional
-file.
-
-FILES:
-    \$FOAM_JOB_DIR/runningJobs    locks for running processes
-                  /finishedJobs     ,,      finished processes
-LABEL
+    echo "Lock on job $1 released."
 }
 
 
@@ -175,39 +180,50 @@ LABEL
 #
 #-------------------------------------------------------------------------------
 
-#- Check a few things
-
-if [ ! "$FOAM_JOB_DIR" ]; then
-    $ECHO "$PROGNAME : FOAM_JOB_DIR environment variable not set."
-    $ECHO "This should point to your central license directory."
-    exit 1
-fi
-
-if [ ! -d "$FOAM_JOB_DIR" ]; then
-    $ECHO "$PROGNAME : The license directory accoring to FOAM_JOB_DIR is not valid."
-    $ECHO "FOAM_JOB_DIR: $FOAM_JOB_DIR"
-    exit 1
-fi
-if [ ! -d "$FOAM_JOB_DIR/runningJobs" -o ! -d "$FOAM_JOB_DIR/finishedJobs" ]; then
-    $ECHO "$PROGNAME : The license directory according to FOAM_JOB_DIR is not valid."
-    $ECHO "FOAM_JOB_DIR: $FOAM_JOB_DIR"
-    exit 1
-fi
-
-
-if [ $# -eq 1 ]; then
-    STATEFILE=$1
-elif [ $# -eq 0 ]; then
+if [ $# -eq 1 ]
+then
+    if [ "$1" = "-h" -o "$1" = "-help" ]
+    then
+        usage
+    fi
+    STATEFILE="$1"
+elif [ $# -eq 0 ]
+then
     STATEFILE=${STATEFILE:-$DEFSTATEFILE}
 else
-    printUsage
+    usage
+fi
+
+
+#- Check a few things
+
+if [ ! "$FOAM_JOB_DIR" ]
+then
+    echo "$Script : FOAM_JOB_DIR environment variable not set."
+    echo
     exit 1
 fi
+
+if [ ! -d "$FOAM_JOB_DIR" ]
+then
+    echo "$Script : directory does not exist."
+    echo "    FOAM_JOB_DIR=$FOAM_JOB_DIR"
+    echo
+    exit 1
+fi
+if [ ! -d "$FOAM_JOB_DIR/runningJobs" -o ! -d "$FOAM_JOB_DIR/finishedJobs" ]
+then
+    echo "$Script : invalid directory."
+    echo "    FOAM_JOB_DIR=$FOAM_JOB_DIR"
+    echo
+    exit 1
+fi
+
+
 
 #- obtain rsh method
 RSH='ssh'
 echo "Using remote shell type : $RSH"
-
 echo ""
 echo "Collecting information on jobs in"
 echo "  $FOAM_JOB_DIR"
@@ -226,13 +242,14 @@ do
     pid=`echo $machinePid | sed -e 's/.*\.\([0-9][0-9]*\)$/\1/'`
 
     fgrep "$machine" $TMPFILE >/dev/null 2>&1
-    if [ $? -ne 0 ]; then
-        $ECHO "$machine" >> $TMPFILE
+    if [ $? -ne 0 ]
+    then
+        echo "$machine" >> $TMPFILE
     fi
 done
-$ECHO "Found machines:"
+echo "Found machines:"
 cat $TMPFILE
-$ECHO ""
+echo ""
 
 
 
@@ -243,31 +260,34 @@ cnt=1
 while true
 do
     machine=`sed -n -e "${cnt}p" $TMPFILE`
-    if [ ! "$machine" ]; then
+    if [ ! "$machine" ]
+    then
         break
     fi
 
     machFile=$MACHDIR/$machine
     rm -f $machFile
-    $ECHO "Contacting $machine to collect process information:"
-    if [ $machine = `hostname` ]; then
-        $ECHO "  foamProcessInfo $machFile"
+    echo "Contacting $machine to collect process information:"
+    if [ $machine = `hostname` ]
+    then
+        echo "  foamProcessInfo $machFile"
         foamProcessInfo $machFile >/dev/null 2>&1
     else
-        $ECHO "  $RSH $machine foamProcessInfo $machFile"
+        echo "  $RSH $machine foamProcessInfo $machFile"
         $RSH $machine foamProcessInfo $machFile >/dev/null 2>&1
     fi
-    if [ $? -ne 0 -o ! -s $machFile ]; then
-        $ECHO "** Failed collecting process information on $machine."
-        $ECHO "Check $machFile and run foamProcessInfo by hand"
+    if [ $? -ne 0 -o ! -s $machFile ]
+    then
+        echo "** Failed collecting process information on $machine."
+        echo "Check $machFile and run foamProcessInfo by hand"
         rm -f $machFile
     else
-        $ECHO "Succesfully collected information in $machFile ..."
+        echo "Succesfully collected information in $machFile ..."
     fi
 
     cnt=`expr $cnt + 1`
 done
-$ECHO ""
+echo ""
 
 
 #- Construct state for runningJobs; move non runnning jobs to finishedJobs
@@ -281,27 +301,32 @@ do
     pid=`echo $machinePid | sed -e 's/.*\.\([0-9][0-9]*\)$/\1/'`
 
     machFile=$MACHDIR/$machine
-    if [ -r $machFile ]; then
+    if [ -r $machFile ]
+    then
         entry=`grep "^$pid " $machFile 2>/dev/null`
-        if [ $? -ne 0 -o ! "$entry" ]; then
-            if [ "$releaseAll" ]; then
+        if [ $? -ne 0 -o ! "$entry" ]
+        then
+            if [ "$releaseAll" ]
+            then
                 releaseLock $machinePid $f
             else
-                $ECHO "Job $machinePid seems to be no longer running. Release lock? (y/a)\c"
+                echo "Job $machinePid seems to be no longer running. Release lock? (y/a)\c"
                 read answ
-                if [ "${answ:-y}" = 'y' ]; then
+                if [ "${answ:-y}" = 'y' ]
+                then
                     releaseLock $machinePid $f
-                elif [ "${answ:-y}" = 'a' ]; then
+                elif [ "${answ:-y}" = 'a' ]
+                then
                     releaseAll='yes'
                     releaseLock $machinePid $f
                 else
                     state='OTHR'
-                    $ECHO "$machinePid $state" >> $STATEFILE
+                    echo "$machinePid $state" >> $STATEFILE
                 fi
             fi
         else
             state=`echo "$entry" | awk '{print $2}'`
-            $ECHO "$machinePid $state" >> $STATEFILE
+            echo "$machinePid $state" >> $STATEFILE
         fi
     fi
 done
@@ -314,29 +339,33 @@ OLDFILES=`find $FOAM_JOB_DIR/finishedJobs -mtime +$NDAYSLIMIT -print`
 
 #- Construct state for finishedJobs and check on date of files.
 
-if notEmpty $FOAM_JOB_DIR/finishedJobs; then
+if notEmpty $FOAM_JOB_DIR/finishedJobs
+then
     dateNow=`date '+%b %d %Y'`
     for f in $FOAM_JOB_DIR/finishedJobs/*
     do
         sz=`ls -s $f | awk '{print $1}'`
-        if [ "$sz" -gt 0 ]; then
+        if [ "$sz" -gt 0 ]
+        then
             machinePid=`basename $f`
             machine=`echo $machinePid | sed -e 's/\.[0-9][0-9]*$//'`
             pid=`echo $machinePid | sed -e 's/.*\.\([0-9][0-9]*\)$/\1/'`
 
             end=`getEntry $f endDate`
-            if [ ! "$end" ]; then
+            if [ ! "$end" ]
+            then
                 state='ABRT'
             else
                 nDaysOld=`dayDiff  "$dateNow" "$end"`
-                if [ "$nDaysOld" -gt $NDAYSLIMIT ]; then
+                if [ "$nDaysOld" -gt $NDAYSLIMIT ]
+                then
                     OLDFILES="$OLDFILES $f"
                 fi
 
                 state='FINI'
             fi
 
-            $ECHO "$machinePid $state" >> $STATEFILE
+            echo "$machinePid $state" >> $STATEFILE
         fi
     done
 fi
@@ -345,11 +374,13 @@ fi
 #- Remove old locks
 
 nOldFiles=`echo "$OLDFILES" | wc -w`
-if [ "$nOldFiles" -gt 0 ]; then
-    $ECHO "You seem to have $nOldFiles locks older than $NDAYSLIMIT days in finishedJobs/"
+if [ "$nOldFiles" -gt 0 ]
+then
+    echo "You seem to have $nOldFiles locks older than $NDAYSLIMIT days in finishedJobs/"
     $ECHO "Do you want to remove these? (y)\c"
     read answ
-    if [ "${answ:-y}" = 'y' ]; then
+    if [ "${answ:-y}" = 'y' ]
+    then
         rm -f $OLDFILES
     fi
 fi
@@ -358,9 +389,9 @@ fi
 rm -f $TMPFILE
 rm -r $MACHDIR
 
-$ECHO ""
-$ECHO "Updated stateFile:"
-$ECHO "  $STATEFILE"
-$ECHO ""
+echo ""
+echo "Updated stateFile:"
+echo "  $STATEFILE"
+echo ""
 
 #------------------------------------------------------------------------------

@@ -17,15 +17,7 @@ FoamFile
 
 solvers
 {
-    p
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-15;
-        relTol          0;
-    }
-
-    U
+    "(p|U|e)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -37,14 +29,6 @@ solvers
     {
         solver          PCG;
         preconditioner  DIC;
-        tolerance       1e-15;
-        relTol          0;
-    }
-
-    e
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
         tolerance       1e-15;
         relTol          0;
     }

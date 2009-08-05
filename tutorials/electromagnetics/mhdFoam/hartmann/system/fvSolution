@@ -25,26 +25,17 @@ solvers
         relTol          0;
     }
 
-    U
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    B
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
     pB
     {
-        solver          PCG;
-        preconditioner  DIC;
+        $p;
+        tolerance       1e-05;
+        relTol          0;
+    }
+
+    "(U|B)"
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
         tolerance       1e-05;
         relTol          0;
     }

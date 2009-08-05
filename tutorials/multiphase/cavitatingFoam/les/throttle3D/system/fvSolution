@@ -8,7 +8,7 @@
 FoamFile
 {
     version     2.0;
-    format      binary;
+    format      ascii;
     class       dictionary;
     location    "system";
     object      fvSolution;
@@ -17,31 +17,7 @@ FoamFile
 
 solvers
 {
-    omega
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    rho
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    U
+    "(rho|U|k|omega)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -65,16 +41,9 @@ solvers
 
     pFinal
     {
-        solver          GAMG;
+        $p;
         tolerance       1e-08;
         relTol          0;
-        smoother        GaussSeidel;
-        nPreSweeps      0;
-        nPostSweeps     2;
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator    faceAreaPair;
-        mergeLevels     1;
     }
 }
 
