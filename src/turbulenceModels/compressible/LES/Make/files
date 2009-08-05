@@ -15,7 +15,7 @@ vanDriestDelta/vanDriestDelta.C
 wallFunctions=derivedFvPatchFields/wallFunctions
 
 muSgsWallFunctions=$(wallFunctions)/muSgsWallFunctions
-$(muSgsWallFunctions)/muSgsWallFunction/muSgsWallFunctionFvPatchScalarField.C
+$(muSgsWallFunctions)/muSgsUSpaldingWallFunction/muSgsUSpaldingWallFunctionFvPatchScalarField.C
 
 alphaSgsWallFunctions=$(wallFunctions)/alphaSgsWallFunctions
 $(alphaSgsWallFunctions)/alphaSgsWallFunction/alphaSgsWallFunctionFvPatchScalarField.C

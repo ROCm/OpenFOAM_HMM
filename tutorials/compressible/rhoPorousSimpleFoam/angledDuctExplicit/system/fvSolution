@@ -46,20 +46,9 @@ solvers
         relTol          0.1;
     }
 
-    k
+    "(k|epsilon)"
     {
-        solver          smoothSolver;
-        smoother        GaussSeidel;
-        nSweeps         2;
-        tolerance       1e-07;
-        relTol          0.1;
-    }
-
-    epsilon
-    {
-        solver          smoothSolver;
-        smoother        GaussSeidel;
-        nSweeps         2;
+        $U;
         tolerance       1e-07;
         relTol          0.1;
     }
@@ -76,8 +65,7 @@ relaxationFactors
     p               0.3;
     rho             0.05;
     U               0.7;
-    k               0.7;
-    epsilon         0.7;
+    "(k|epsilon)"   0.7;
     h               0.5;
 }
 

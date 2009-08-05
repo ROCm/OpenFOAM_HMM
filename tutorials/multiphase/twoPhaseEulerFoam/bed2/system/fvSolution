@@ -32,7 +32,7 @@ solvers
         mergeLevels     1;
     }
 
-    Ua
+    "(Ua|Ub|Theta|k|epsilon)"
     {
         solver          PBiCG;
         preconditioner  DILU;
@@ -40,51 +40,11 @@ solvers
         relTol          0;
     }
 
-    Ub
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    alpha
+    "(alpha|beta)"
     {
         solver          PBiCG;
         preconditioner  DILU;
         tolerance       1e-10;
-        relTol          0;
-    }
-
-    beta
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-10;
-        relTol          0;
-    }
-
-    Theta
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    epsilon
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
         relTol          0;
     }
 }
@@ -106,8 +66,7 @@ relaxationFactors
     alpha           1;
     beta            1;
     Theta           1;
-    k               1;
-    epsilon         1;
+    "(k|epsilon)"   1;
 }
 
 

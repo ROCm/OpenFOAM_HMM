@@ -33,42 +33,9 @@ solvers
         relTol          0;
     }
 
-    U
+    "(U|e|k|epsilon|R)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    e 
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    epsilon
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-08;
-        relTol          0;
-    }
-
-    R
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $p;
         tolerance       1e-08;
         relTol          0;
     }

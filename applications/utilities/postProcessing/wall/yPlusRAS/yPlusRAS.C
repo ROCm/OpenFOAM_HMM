@@ -38,11 +38,11 @@ Description
 
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
 #include "incompressible/RAS/RASModel/RASModel.H"
-#include "nutWallFunction/nutWallFunctionFvPatchScalarField.H"
+#include "nutkWallFunction/nutkWallFunctionFvPatchScalarField.H"
 
 #include "basicPsiThermo.H"
 #include "compressible/RAS/RASModel/RASModel.H"
-#include "mutWallFunction/mutWallFunctionFvPatchScalarField.H"
+#include "mutkWallFunction/mutkWallFunctionFvPatchScalarField.H"
 
 #include "wallDist.H"
 
@@ -56,7 +56,7 @@ void calcIncompressibleYPlus
     volScalarField& yPlus
 )
 {
-    typedef incompressible::RASModels::nutWallFunctionFvPatchScalarField
+    typedef incompressible::RASModels::nutkWallFunctionFvPatchScalarField
         wallFunctionPatchField;
 
     #include "createPhi.H"
@@ -108,7 +108,7 @@ void calcCompressibleYPlus
     volScalarField& yPlus
 )
 {
-    typedef compressible::RASModels::mutWallFunctionFvPatchScalarField
+    typedef compressible::RASModels::mutkWallFunctionFvPatchScalarField
         wallFunctionPatchField;
 
     IOobject rhoHeader

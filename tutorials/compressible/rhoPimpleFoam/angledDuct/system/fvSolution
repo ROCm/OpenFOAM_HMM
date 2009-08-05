@@ -17,10 +17,24 @@ FoamFile
 
 solvers
 {
-    rho
+    p
     {
         solver          PCG;
         preconditioner  DIC;
+        tolerance       1e-06;
+        relTol          0.01;
+    }
+
+    pFinal
+    {
+        $p;
+        tolerance       1e-06;
+        relTol          0;
+    }
+
+    rho
+    {
+        $p;
         tolerance       1e-05;
         relTol          0;
     }
@@ -33,77 +47,15 @@ solvers
         relTol          0.1;
     }
 
-    UFinal
+    h { $U; }
+
+    "(UFinal|hFinal|R|k|epsilon|omega)"
     {
-        solver          PBiCG;
-        preconditioner  DILU;
+        $U;
         tolerance       1e-05;
         relTol          0;
     }
 
-    p
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-06;
-        relTol          0.01;
-    }
-
-    pFinal
-    {
-        solver          PCG;
-        preconditioner  DIC;
-        tolerance       1e-06;
-        relTol          0;
-    }
-
-    h
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0.1;
-    }
-
-    hFinal
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    R
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    k
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    epsilon
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
-
-    omega
-    {
-        solver          PBiCG;
-        preconditioner  DILU;
-        tolerance       1e-05;
-        relTol          0;
-    }
 }
 
 PIMPLE
@@ -117,12 +69,11 @@ PIMPLE
 
 relaxationFactors
 {
-    U               0.7;
     p               0.3;
     rho             0.05;
+    U               0.7;
     h               0.7;
-    k               0.7;
-    omega           0.7;
+    "(k|epsilon|omega)"  0.7;
 }
 
 

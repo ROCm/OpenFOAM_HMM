@@ -17,11 +17,11 @@ alphatWallFunctions = $(wallFunctions)/alphatWallFunctions
 $(alphatWallFunctions)/alphatWallFunction/alphatWallFunctionFvPatchScalarField.C
 
 mutWallFunctions = $(wallFunctions)/mutWallFunctions
-$(mutWallFunctions)/mutWallFunction/mutWallFunctionFvPatchScalarField.C
-$(mutWallFunctions)/mutRoughWallFunction/mutRoughWallFunctionFvPatchScalarField.C
-$(mutWallFunctions)/mutSpalartAllmarasWallFunction/mutSpalartAllmarasWallFunctionFvPatchScalarField.C
-$(mutWallFunctions)/mutSpalartAllmarasStandardWallFunction/mutSpalartAllmarasStandardWallFunctionFvPatchScalarField.C
-$(mutWallFunctions)/mutSpalartAllmarasStandardRoughWallFunction/mutSpalartAllmarasStandardRoughWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutkRoughWallFunction/mutkRoughWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutkWallFunction/mutkWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutURoughWallFunction/mutURoughWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutUSpaldingWallFunction/mutUSpaldingWallFunctionFvPatchScalarField.C
+$(mutWallFunctions)/mutUWallFunction/mutUWallFunctionFvPatchScalarField.C
 
 epsilonWallFunctions = $(wallFunctions)/epsilonWallFunctions
 $(epsilonWallFunctions)/epsilonWallFunction/epsilonWallFunctionFvPatchScalarField.C

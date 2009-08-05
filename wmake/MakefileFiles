@@ -22,11 +22,11 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     MakefileFiles
 #
 # Description
-#     General, easy to use make system for multi-platform development.
+#     A Makefile for the 'files', used by wmake
 #
 #------------------------------------------------------------------------------
 
@@ -40,7 +40,7 @@ include $(RULES)/general
 include $(OBJECTS_DIR)/options
 
 #------------------------------------------------------------------------------
-# declare names of make system control files derived from file files
+# declare names of make system control files derived from file 'files'
 #------------------------------------------------------------------------------
 
 FILES   = $(WM_OPTIONS)/files
@@ -51,7 +51,7 @@ DFILES  = $(WM_OPTIONS)/dependencyFiles
 IFILES  = $(WM_OPTIONS)/includeDeps
 
 #------------------------------------------------------------------------------
-# Declare dependecy of all make system files on FILE
+# Declare dependecy of all make system files on FILES
 # Causes all derived files to be remade if any are changed or missing
 #------------------------------------------------------------------------------
 
