@@ -104,9 +104,7 @@ Foam::conformalVoronoiMesh::conformalVoronoiMesh
 
     insertInitialPoints();
 
-    conformToSurface();
-
-    storeSurfaceConformation();
+    buildSurfaceConformation(COARSE);
 
     if(cvMeshControls().objOutput())
     {
@@ -908,6 +906,358 @@ Foam::conformalVoronoiMesh::sizeAndAlignmentTree() const
     return sizeAndAlignmentTree_();
 }
 
+void Foam::conformalVoronoiMesh::setVertexSizeAndAlignment()
+{
+    Info<< nl << "    Looking up target cell alignment and size" << endl;
+
+    scalar spanSqr = cvMeshControls().spanSqr();
+
+    const indexedOctree<treeDataPoint>& tree = sizeAndAlignmentTree();
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        vit++
+    )
+    {
+        if (vit->internalOrBoundaryPoint())
+        {
+            point pt(topoint(vit->point()));
+
+            pointIndexHit info = tree.findNearest(pt, spanSqr);
+
+            vit->alignment() = storedAlignments_[info.index()];
+
+            vit->targetCellSize() = storedSizes_[info.index()];
+        }
+    }
+
+    // Info<< nl << "    Calculating target cell alignment and size" << endl;
+
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     vit++
+    // )
+    // {
+    //     if (vit->internalOrBoundaryPoint())
+    //     {
+    //         point pt(topoint(vit->point()));
+
+    //         vit->alignment() = requiredAlignment(pt);
+
+    //         vit->targetCellSize() = targetCellSize(pt);
+    //     }
+    // }
+}
+
+
+void Foam::conformalVoronoiMesh::conformToSurface()
+{
+    reconformationMode reconfMode = reconformationControl();
+
+    if (reconfMode == NONE)
+    {
+        // Reinsert stored surface conformation
+        reinsertSurfaceConformation();
+    }
+    else
+    {
+        // Rebuild, insert and store new surface conformation
+        buildSurfaceConformation(reconfMode);
+    }
+}
+
+Foam::conformalVoronoiMesh::reconformationMode
+Foam::conformalVoronoiMesh::reconformationControl() const
+{
+    if (!runTime_.run())
+    {
+        Info<< nl << "    Rebuilding surface conformation for final output"
+            << endl;
+
+        return FINE;
+    }
+    else if(runTime_.timeIndex() % 10 == 0)
+    {
+        Info<< nl << "    Rebuilding surface conformation "
+            << "HARD CODED TO EVERY 10 STEPS" << endl;
+
+        return COARSE;
+    }
+
+    return NONE;
+}
+
+void Foam::conformalVoronoiMesh::buildSurfaceConformation
+(
+    reconformationMode reconfMode
+)
+{
+    Info<< nl << "    Build surface conformation with option "
+        << reconfMode << endl;
+
+    timeCheck();
+
+    startOfSurfacePointPairs_ = number_of_vertices();
+
+    // Initialise containers to store the edge conformation locations
+    DynamicList<point> newEdgeLocations;
+
+    pointField existingEdgeLocations(0);
+
+    autoPtr<indexedOctree<treeDataPoint> > edgeLocationTree;
+
+    // Initialise the edgeLocationTree
+    buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
+
+    label initialTotalHits = 0;
+
+    // Initial surface protrusion conformation - nearest surface point
+    {
+        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
+        scalar edgeSearchDistCoeffSqr = sqr(1.1);
+        scalar surfacePtReplaceDistCoeffSqr = sqr(0.5);
+
+        DynamicList<pointIndexHit> surfaceHits;
+        DynamicList<label> hitSurfaces;
+
+        DynamicList<pointIndexHit> featureEdgeHits;
+        DynamicList<label> featureEdgeFeaturesHit;
+
+        for
+        (
+            Triangulation::Finite_vertices_iterator vit =
+            finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            if (vit->internalPoint())
+            {
+                point vert(topoint(vit->point()));
+                scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
+                pointIndexHit surfHit;
+                label hitSurface;
+
+                geometryToConformTo_.findSurfaceNearest
+                (
+                    vert,
+                    searchDistanceSqr,
+                    surfHit,
+                    hitSurface
+                );
+
+                if (surfHit.hit())
+                {
+                    vit->setNearBoundary();
+
+                    if (dualCellSurfaceAnyIntersection(vit))
+                    {
+                        addSurfaceAndEdgeHits
+                        (
+                            vit,
+                            vert,
+                            surfHit,
+                            hitSurface,
+                            surfacePtReplaceDistCoeffSqr,
+                            edgeSearchDistCoeffSqr,
+                            surfaceHits,
+                            hitSurfaces,
+                            featureEdgeHits,
+                            featureEdgeFeaturesHit,
+                            newEdgeLocations,
+                            existingEdgeLocations,
+                            edgeLocationTree
+                        );
+                    }
+                }
+            }
+        }
+
+        Info<< nl <<"    Initial conformation " << nl
+            << "    number_of_vertices " << number_of_vertices() << nl
+            << "    surfaceHits.size() " << surfaceHits.size() << nl
+            << "    featureEdgeHits.size() " << featureEdgeHits.size()
+            << endl;
+
+        insertSurfacePointPairs
+        (
+            surfaceHits,
+            hitSurfaces,
+            "surfaceConformationLocations_initial.obj"
+        );
+
+        insertEdgePointGroups
+        (
+            featureEdgeHits,
+            featureEdgeFeaturesHit,
+            "edgeConformationLocations_initial.obj"
+        );
+
+        initialTotalHits = surfaceHits.size() + featureEdgeHits.size();
+    }
+
+    label iterationNo = 0;
+
+    label maxIterations = 10;
+
+    Info<< nl << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
+
+    scalar iterationToIntialHitRatioLimit = 0.01;
+
+    label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
+
+    Info<< "    STOPPING ITERATIONS WHEN TOTAL NUMBER OF HITS DROPS BELOW "
+        << iterationToIntialHitRatioLimit << " (HARD CODED) OF INITIAL HITS ("
+        << hitLimit << ")"
+        << endl;
+
+    // Set totalHits to a large enough positive value to enter the while loop on
+    // the first iteration
+    label totalHits = initialTotalHits;
+
+    while
+    (
+        totalHits > 0
+     && totalHits > hitLimit
+     && iterationNo < maxIterations
+    )
+    {
+        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
+        scalar edgeSearchDistCoeffSqr = sqr(1.25);
+        scalar surfacePtReplaceDistCoeffSqr = sqr(0.7);
+
+        DynamicList<pointIndexHit> surfaceHits;
+        DynamicList<label> hitSurfaces;
+
+        DynamicList<pointIndexHit> featureEdgeHits;
+        DynamicList<label> featureEdgeFeaturesHit;
+
+        for
+        (
+            Triangulation::Finite_vertices_iterator vit =
+            finite_vertices_begin();
+            vit != finite_vertices_end();
+            vit++
+        )
+        {
+            // The initial surface conformation has already identified the
+            // nearBoundary set of vertices.  Previously inserted boundary
+            // points can also generate protrusions and must be assessed too.
+
+            if (vit->nearBoundary() || vit->ppMaster())
+            {
+                point vert(topoint(vit->point()));
+                pointIndexHit surfHit;
+                label hitSurface;
+
+                dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
+
+                if (surfHit.hit())
+                {
+                    addSurfaceAndEdgeHits
+                    (
+                        vit,
+                        vert,
+                        surfHit,
+                        hitSurface,
+                        surfacePtReplaceDistCoeffSqr,
+                        edgeSearchDistCoeffSqr,
+                        surfaceHits,
+                        hitSurfaces,
+                        featureEdgeHits,
+                        featureEdgeFeaturesHit,
+                        newEdgeLocations,
+                        existingEdgeLocations,
+                        edgeLocationTree
+                    );
+                }
+            }
+        }
+
+        Info<< nl <<"    iterationNo " << iterationNo << nl
+            << "    number_of_vertices " << number_of_vertices() << nl
+            << "    surfaceHits.size() " << surfaceHits.size() << nl
+            << "    featureEdgeHits.size() " << featureEdgeHits.size()
+            << endl;
+
+        totalHits = surfaceHits.size() + featureEdgeHits.size();
+
+        if (totalHits > 0)
+        {
+            insertSurfacePointPairs
+            (
+                surfaceHits,
+                hitSurfaces,
+                fileName
+                (
+                    "surfaceConformationLocations_" + name(iterationNo) + ".obj"
+                )
+            );
+
+            insertEdgePointGroups
+            (
+                featureEdgeHits,
+                featureEdgeFeaturesHit,
+                "edgeConformationLocations_" + name(iterationNo) + ".obj"
+            );
+        }
+
+        iterationNo++;
+
+        if (iterationNo == maxIterations)
+        {
+            WarningIn("conformalVoronoiMesh::conformToSurface()")
+                << "Maximum surface conformation iterations ("
+                << maxIterations <<  ") reached." << endl;
+        }
+
+        if (totalHits < hitLimit)
+        {
+            Info<< nl << "    totalHits (" << totalHits << ") less than limit ("
+                << hitLimit << "), stopping iterations" << endl;
+        }
+    }
+
+    // Info<< nl << "    After iterations, check penetrations" << endl;
+
+    // for
+    // (
+    //     Triangulation::Finite_vertices_iterator vit =
+    //     finite_vertices_begin();
+    //     vit != finite_vertices_end();
+    //     vit++
+    // )
+    // {
+    //     if (vit->internalOrBoundaryPoint())
+    //     {
+    //         point vert(topoint(vit->point()));
+    //         pointIndexHit surfHit;
+    //         label hitSurface;
+
+    //         dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
+
+    //         if (surfHit.hit())
+    //         {
+    //             Info<< nl << "Residual penetration: " << nl
+    //                 << vit->index() << nl
+    //                 << vit->type() << nl
+    //                 << vit->ppMaster() << nl
+    //                 << "nearFeaturePt "
+    //                 << nearFeaturePt(surfHit.hitPoint()) << nl
+    //                 << vert << nl
+    //                 << surfHit.hitPoint()
+    //                 << endl;
+    //         }
+    //     }
+    // }
+
+    storeSurfaceConformation();
+}
+
 
 bool Foam::conformalVoronoiMesh::dualCellSurfaceAnyIntersection
 (
@@ -1365,10 +1715,15 @@ void Foam::conformalVoronoiMesh::reinsertSurfaceConformation()
 {
     Info<< nl << "    Reinserting stored surface conformation" << endl;
 
+    startOfSurfacePointPairs_ = number_of_vertices();
+
     forAll(surfaceConformationVertices_, v)
     {
         insertVb(surfaceConformationVertices_[v], startOfSurfacePointPairs_);
     }
+
+    Info<< "    Reinserted " << number_of_vertices() - startOfSurfacePointPairs_
+        << " vertices" << endl;
 }
 
 
@@ -1981,268 +2336,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::conformalVoronoiMesh::conformToSurface()
-{
-    Info<< nl << "Conforming to surfaces" << endl;
-
-    timeCheck();
-
-    startOfSurfacePointPairs_ = number_of_vertices();
-
-    // Initialise containers to store the edge conformation locations
-    DynamicList<point> newEdgeLocations;
-
-    pointField existingEdgeLocations(0);
-
-    autoPtr<indexedOctree<treeDataPoint> > edgeLocationTree;
-
-    // Initialise the edgeLocationTree
-    buildEdgeLocationTree(edgeLocationTree, existingEdgeLocations);
-
-    label initialTotalHits = 0;
-
-    // Initial surface protrusion conformation - nearest surface point
-    {
-        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
-        scalar edgeSearchDistCoeffSqr = sqr(1.1);
-        scalar surfacePtReplaceDistCoeffSqr = sqr(0.5);
-
-        DynamicList<pointIndexHit> surfaceHits;
-        DynamicList<label> hitSurfaces;
-
-        DynamicList<pointIndexHit> featureEdgeHits;
-        DynamicList<label> featureEdgeFeaturesHit;
-
-        for
-        (
-            Triangulation::Finite_vertices_iterator vit =
-            finite_vertices_begin();
-            vit != finite_vertices_end();
-            vit++
-        )
-        {
-            if (vit->internalPoint())
-            {
-                point vert(topoint(vit->point()));
-                scalar searchDistanceSqr = surfaceSearchDistanceSqr(vert);
-                pointIndexHit surfHit;
-                label hitSurface;
-
-                geometryToConformTo_.findSurfaceNearest
-                (
-                    vert,
-                    searchDistanceSqr,
-                    surfHit,
-                    hitSurface
-                );
-
-                if (surfHit.hit())
-                {
-                    vit->setNearBoundary();
-
-                    if (dualCellSurfaceAnyIntersection(vit))
-                    {
-                        addSurfaceAndEdgeHits
-                        (
-                            vit,
-                            vert,
-                            surfHit,
-                            hitSurface,
-                            surfacePtReplaceDistCoeffSqr,
-                            edgeSearchDistCoeffSqr,
-                            surfaceHits,
-                            hitSurfaces,
-                            featureEdgeHits,
-                            featureEdgeFeaturesHit,
-                            newEdgeLocations,
-                            existingEdgeLocations,
-                            edgeLocationTree
-                        );
-                    }
-                }
-            }
-        }
-
-        Info<< nl <<"    Initial conformation " << nl
-            << "    number_of_vertices " << number_of_vertices() << nl
-            << "    surfaceHits.size() " << surfaceHits.size() << nl
-            << "    featureEdgeHits.size() " << featureEdgeHits.size()
-            << endl;
-
-        insertSurfacePointPairs
-        (
-            surfaceHits,
-            hitSurfaces,
-            "surfaceConformationLocations_initial.obj"
-        );
-
-        insertEdgePointGroups
-        (
-            featureEdgeHits,
-            featureEdgeFeaturesHit,
-            "edgeConformationLocations_initial.obj"
-        );
-
-        initialTotalHits = surfaceHits.size() + featureEdgeHits.size();
-    }
-
-    label iterationNo = 0;
-
-    label maxIterations = 10;
-
-    Info<< nl << "    MAX ITERATIONS HARD CODED TO "<< maxIterations << endl;
-
-    scalar iterationToIntialHitRatioLimit = 0.01;
-
-    label hitLimit = label(iterationToIntialHitRatioLimit*initialTotalHits);
-
-    Info<< "    STOPPING ITERATIONS WHEN TOTAL NUMBER OF HITS DROPS BELOW "
-        << iterationToIntialHitRatioLimit << " (HARD CODED) OF INITIAL HITS ("
-        << hitLimit << ")"
-        << endl;
-
-    // Set totalHits to a large enough positive value to enter the while loop on
-    // the first iteration
-    label totalHits = initialTotalHits;
-
-    while
-    (
-        totalHits > 0
-     && totalHits > hitLimit
-     && iterationNo < maxIterations
-    )
-    {
-        Info<< "    EDGE DISTANCE COEFFS HARD-CODED." << endl;
-        scalar edgeSearchDistCoeffSqr = sqr(1.25);
-        scalar surfacePtReplaceDistCoeffSqr = sqr(0.7);
-
-        DynamicList<pointIndexHit> surfaceHits;
-        DynamicList<label> hitSurfaces;
-
-        DynamicList<pointIndexHit> featureEdgeHits;
-        DynamicList<label> featureEdgeFeaturesHit;
-
-        for
-        (
-            Triangulation::Finite_vertices_iterator vit =
-            finite_vertices_begin();
-            vit != finite_vertices_end();
-            vit++
-        )
-        {
-            // The initial surface conformation has already identified the
-            // nearBoundary set of vertices.  Previously inserted boundary
-            // points can also generate protrusions and must be assessed too.
-
-            if (vit->nearBoundary() || vit->ppMaster())
-            {
-                point vert(topoint(vit->point()));
-                pointIndexHit surfHit;
-                label hitSurface;
-
-                dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
-
-                if (surfHit.hit())
-                {
-                    addSurfaceAndEdgeHits
-                    (
-                        vit,
-                        vert,
-                        surfHit,
-                        hitSurface,
-                        surfacePtReplaceDistCoeffSqr,
-                        edgeSearchDistCoeffSqr,
-                        surfaceHits,
-                        hitSurfaces,
-                        featureEdgeHits,
-                        featureEdgeFeaturesHit,
-                        newEdgeLocations,
-                        existingEdgeLocations,
-                        edgeLocationTree
-                    );
-                }
-            }
-        }
-
-        Info<< nl <<"    iterationNo " << iterationNo << nl
-            << "    number_of_vertices " << number_of_vertices() << nl
-            << "    surfaceHits.size() " << surfaceHits.size() << nl
-            << "    featureEdgeHits.size() " << featureEdgeHits.size()
-            << endl;
-
-        totalHits = surfaceHits.size() + featureEdgeHits.size();
-
-        if (totalHits > 0)
-        {
-            insertSurfacePointPairs
-            (
-                surfaceHits,
-                hitSurfaces,
-                fileName
-                (
-                    "surfaceConformationLocations_" + name(iterationNo) + ".obj"
-                )
-            );
-
-            insertEdgePointGroups
-            (
-                featureEdgeHits,
-                featureEdgeFeaturesHit,
-                "edgeConformationLocations_" + name(iterationNo) + ".obj"
-            );
-        }
-
-        iterationNo++;
-
-        if (iterationNo == maxIterations)
-        {
-            WarningIn("conformalVoronoiMesh::conformToSurface()")
-                << "Maximum surface conformation iterations ("
-                << maxIterations <<  ") reached." << endl;
-        }
-
-        if (totalHits < hitLimit)
-        {
-            Info<< nl << "    totalHits (" << totalHits << ") less than limit ("
-                << hitLimit << "), stopping iterations" << endl;
-        }
-    }
-
-    // Info<< nl << "    After iterations, check penetrations" << endl;
-
-    // for
-    // (
-    //     Triangulation::Finite_vertices_iterator vit =
-    //     finite_vertices_begin();
-    //     vit != finite_vertices_end();
-    //     vit++
-    // )
-    // {
-    //     if (vit->internalOrBoundaryPoint())
-    //     {
-    //         point vert(topoint(vit->point()));
-    //         pointIndexHit surfHit;
-    //         label hitSurface;
-
-    //         dualCellLargestSurfaceProtrusion(vit, surfHit, hitSurface);
-
-    //         if (surfHit.hit())
-    //         {
-    //             Info<< nl << "Residual penetration: " << nl
-    //                 << vit->index() << nl
-    //                 << vit->type() << nl
-    //                 << vit->ppMaster() << nl
-    //                 << "nearFeaturePt "
-    //                 << nearFeaturePt(surfHit.hitPoint()) << nl
-    //                 << vert << nl
-    //                 << surfHit.hitPoint()
-    //                 << endl;
-    //         }
-    //     }
-    // }
-}
-
-
 void Foam::conformalVoronoiMesh::move()
 {
     timeCheck();
@@ -2285,51 +2378,7 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck();
 
-    // Info<< nl << "    Calculating target cell alignment and size" << endl;
-
-    // for
-    // (
-    //     Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
-    //     vit != finite_vertices_end();
-    //     vit++
-    // )
-    // {
-    //     if (vit->internalOrBoundaryPoint())
-    //     {
-    //         point pt(topoint(vit->point()));
-
-    //         vit->alignment() = requiredAlignment(pt);
-
-    //         vit->targetCellSize() = targetCellSize(pt);
-    //     }
-    // }
-
-    // timeCheck();
-
-    Info<< nl << "    Looking up target cell alignment and size" << endl;
-
-    scalar spanSqr = cvMeshControls().spanSqr();
-
-    const indexedOctree<treeDataPoint>& tree = sizeAndAlignmentTree();
-
-    for
-    (
-        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
-        vit != finite_vertices_end();
-        vit++
-    )
-    {
-        if (vit->internalOrBoundaryPoint())
-        {
-            point pt(topoint(vit->point()));
-
-            pointIndexHit info = tree.findNearest(pt, spanSqr);
-
-            vit->alignment() = storedAlignments_[info.index()];
-
-            vit->targetCellSize() = storedSizes_[info.index()];
-        }
-    }
+    setVertexSizeAndAlignment();
 
     timeCheck();
 
@@ -2573,10 +2622,9 @@ void Foam::conformalVoronoiMesh::move()
     vector totalDisp = sum(displacementAccumulator);
     scalar totalDist = sum(mag(displacementAccumulator));
 
-    Info<< nl
-        << "    Total displacement = " << totalDisp << nl
-        << "    Total distance = " << totalDist << nl
-        << "    Points added = " << pointsAdded
+    Info<< "        Total displacement = " << totalDisp << nl
+        << "        Total distance = " << totalDist << nl
+        << "        Points added = " << pointsAdded
         << endl;
 
     // Relax the calculated displacement
@@ -2615,28 +2663,20 @@ void Foam::conformalVoronoiMesh::move()
     this->clear();
 
     reinsertFeaturePoints();
+
     startOfInternalPoints_ = number_of_vertices();
 
     timeCheck();
 
     Info<< nl << "    Reinserting entire tessellation" << endl;
+
     insertPoints(pointsToInsert);
+
+    startOfSurfacePointPairs_ = number_of_vertices();
 
     timeCheck();
 
-    if (runTime_.timeIndex() % 10 == 0)
-    {
-        Info<< nl << "    Rebuilding surface conformation "
-            << "HARD CODED TO EVERY 10 STEPS" << endl;
-
-        conformToSurface();
-        storeSurfaceConformation();
-    }
-    else
-    {
-        startOfSurfacePointPairs_ = number_of_vertices();
-        reinsertSurfaceConformation();
-    }
+    conformToSurface();
 
     timeCheck();
 }

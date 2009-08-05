@@ -84,6 +84,17 @@ class conformalVoronoiMesh
 :
     public HTriangulation
 {
+public:
+
+    enum reconformationMode
+    {
+        NONE,       // Do not rebuild the surface conformation
+        COARSE,     // Rebuild the conformation with coarse (fast) tolerances
+        FINE        // Rebuild the conformation with fine (slow) tolerances
+    };
+
+private:
+
     // Private data
 
         //- The time registry of the application
@@ -304,6 +315,21 @@ class conformalVoronoiMesh
         //- Demand driven construction of octree for and alignment points
         const indexedOctree<treeDataPoint>& sizeAndAlignmentTree() const;
 
+        //- Set the size and alignment data for each vertex
+        void setVertexSizeAndAlignment();
+
+        //- Insert the necessary point pairs to conform to the surface, either
+        //  from stored results, or trigger a re-conformation
+        void conformToSurface();
+
+        //- Decision making function for when to rebuild the surface
+        //  conformation
+        reconformationMode reconformationControl() const;
+
+        //- Create and insert the necessary point pairs to conform to the
+        //  surface, then store the result
+        void buildSurfaceConformation(reconformationMode reconfMode);
+
         //- Check to see if dual cell specified by given vertex iterator
         //  intersects the boundary and hence reqires a point-pair.
         bool dualCellSurfaceAnyIntersection
@@ -415,10 +441,8 @@ public:
 
     // Member Functions
 
-        //- Insert the necessary point pairs to conform to the surface
-        void conformToSurface();
-
-        //- Move the vertices
+        //- Move the vertices according to the controller, re-conforming to the
+        //  surface as required
         void move();
 
         //- Conversion functions between point (OpenFOAM) and Point (CGAL)

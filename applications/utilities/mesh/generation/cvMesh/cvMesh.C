@@ -62,8 +62,6 @@ int main(int argc, char *argv[])
         Info<< nl << "Time = " << runTime.timeName() << endl;
 
         mesh.move();
-
-        // mesh.conformToSurface();
     }
 
     mesh.writeMesh();
