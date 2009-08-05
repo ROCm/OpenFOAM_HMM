@@ -138,11 +138,19 @@ inline Foam::point Foam::CV2D::toPoint3D(const Point& P) const
 
 inline void Foam::CV2D::movePoint(const Vertex_handle& vh, const Point& P)
 {
-    label i = vh->index();
+    int i = vh->index();
+    int t = vh->type();
 
-    move(vh, P);
+    remove(vh);
 
-    vh->index() = i;
+    Vertex_handle newVh = insert(P);
+
+    newVh->index() = i;
+    newVh->type() = t;
+
+    // label i = vh->index();
+    // move(vh, P);
+    // vh->index() = i;
 
     // vh->set_point(toPoint(p));
     // fast_restore_Delaunay(vh);

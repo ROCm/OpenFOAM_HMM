@@ -46,7 +46,7 @@ namespace CGAL
 \*---------------------------------------------------------------------------*/
 
 template<class Gt, class Vb=CGAL::Triangulation_vertex_base_2<Gt> >
-class indexedVertex 
+class indexedVertex
 :
     public Vb
 {
