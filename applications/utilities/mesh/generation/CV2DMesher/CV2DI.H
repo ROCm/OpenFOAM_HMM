@@ -152,7 +152,7 @@ inline void Foam::CV2D::movePoint(const Vertex_handle& vh, const Point& P)
     // move(vh, P);
     // vh->index() = i;
 
-    // vh->set_point(toPoint(p));
+    // vh->set_point(P);
     // fast_restore_Delaunay(vh);
 }
 
