@@ -638,10 +638,10 @@ Foam::Time& Foam::Time::operator+=(const scalar deltaT)
 
 Foam::Time& Foam::Time::operator++()
 {
-    readModifiedObjects();
-
     if (!subCycling_)
     {
+        readModifiedObjects();
+
         if (timeIndex_ == startTimeIndex_)
         {
             functionObjects_.start();
