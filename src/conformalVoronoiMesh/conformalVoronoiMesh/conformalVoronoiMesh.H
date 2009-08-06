@@ -89,8 +89,8 @@ public:
     enum reconformationMode
     {
         NONE,       // Do not rebuild the surface conformation
-        COARSE,     // Rebuild the conformation with coarse (fast) tolerances
-        FINE        // Rebuild the conformation with fine (slow) tolerances
+        COARSE,     // Rebuild the conformation with coarse tolerances (faster)
+        FINE        // Rebuild the conformation with fine tolerances (slower)
     };
 
 private:

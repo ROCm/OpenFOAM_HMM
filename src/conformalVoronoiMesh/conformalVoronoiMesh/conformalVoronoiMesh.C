@@ -996,8 +996,31 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     reconformationMode reconfMode
 )
 {
-    Info<< nl << "    Build surface conformation with option "
-        << reconfMode << endl;
+    Info<< nl << "    Build surface conformation" << endl;
+
+    if (reconfMode == COARSE)
+    {
+        Info<< "        Coarse surface conformation" << endl;
+    }
+    else if (reconfMode == FINE)
+    {
+        Info<< "        Fine surface conformation" << endl;
+    }
+    else if (reconfMode == NONE)
+    {
+        WarningIn("buildSurfaceConformation(reconformationMode reconfMode)")
+            << "reconformationMode NONE specified, not building conformation"
+            << endl;
+
+        return;
+    }
+    else
+    {
+        WarningIn("buildSurfaceConformation(reconformationMode reconfMode)")
+            << "Unknown reconformationMode " << reconfMode << endl;
+
+        return;
+    }
 
     timeCheck();
 
