@@ -1239,8 +1239,9 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
 
         if (totalHits < hitLimit)
         {
-            Info<< nl << "    totalHits (" << totalHits << ") less than limit ("
-                << hitLimit << "), stopping iterations" << endl;
+            Info<< nl << "    Total hits (" << totalHits
+                << ") less than limit (" << hitLimit
+                << "), stopping iterations" << endl;
         }
     }
 
@@ -1691,7 +1692,7 @@ void Foam::conformalVoronoiMesh::addSurfaceAndEdgeHits
 
 void Foam::conformalVoronoiMesh::storeSurfaceConformation()
 {
-    Info<< nl << "    Storing surface conformation." << endl;
+    Info<< nl << "    Storing surface conformation" << endl;
 
     surfaceConformationVertices_.setSize
     (
