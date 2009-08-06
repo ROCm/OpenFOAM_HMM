@@ -28,6 +28,7 @@ Class
 Description
     A class for handling file names.
 
+    A fileName is a string of characters without whitespace or quotes.
     A fileName can be
       - constructed from a char*, a string or a word
       - concatenated by adding a '/' separator
