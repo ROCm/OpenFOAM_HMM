@@ -862,7 +862,7 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 {
     timeCheck();
 
-    Info << "    Initialise stored data" << endl;
+    Info << nl << "    Initialise stored size and alignment data" << endl;
 
     sizeAndAlignmentLocations_.setSize(initPts.size());
 
@@ -885,13 +885,9 @@ void Foam::conformalVoronoiMesh::storeSizesAndAlignments
 
     timeCheck();
 
-    Info<< "    Initialise sizeAndAlignmentTree_" << endl;
-
     buildSizeAndAlignmentTree();
 
     timeCheck();
-
-    Info<< "    Initialised" << endl;
 }
 
 
@@ -980,10 +976,15 @@ Foam::conformalVoronoiMesh::reconformationControl() const
 
         return FINE;
     }
-    else if(runTime_.timeIndex() % 10 == 0)
+    else if
+    (
+        runTime_.timeIndex()
+      % cvMeshControls().surfaceConformationRebuildFrequency()
+     == 0
+    )
     {
-        Info<< nl << "    Rebuilding surface conformation "
-            << "HARD CODED TO EVERY 10 STEPS" << endl;
+        Info<< nl << "    Rebuilding surface conformation for more iterations"
+            << endl;
 
         return COARSE;
     }
@@ -996,15 +997,13 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
     reconformationMode reconfMode
 )
 {
-    Info<< nl << "    Build surface conformation" << endl;
-
     if (reconfMode == COARSE)
     {
-        Info<< "        Coarse surface conformation" << endl;
+        Info<< nl << "    Build coarse surface conformation" << endl;
     }
     else if (reconfMode == FINE)
     {
-        Info<< "        Fine surface conformation" << endl;
+        Info<< nl << "    Build fine surface conformation" << endl;
     }
     else if (reconfMode == NONE)
     {
@@ -1100,10 +1099,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             }
         }
 
-        Info<< nl <<"    Initial conformation " << nl
-            << "    number_of_vertices " << number_of_vertices() << nl
-            << "    surfaceHits.size() " << surfaceHits.size() << nl
-            << "    featureEdgeHits.size() " << featureEdgeHits.size()
+        Info<< nl <<"    Initial conformation" << nl
+            << "        Number of vertices " << number_of_vertices() << nl
+            << "        Number of surface hits " << surfaceHits.size() << nl
+            << "        Number of edge hits " << featureEdgeHits.size()
             << endl;
 
         insertSurfacePointPairs
@@ -1201,10 +1200,10 @@ void Foam::conformalVoronoiMesh::buildSurfaceConformation
             }
         }
 
-        Info<< nl <<"    iterationNo " << iterationNo << nl
-            << "    number_of_vertices " << number_of_vertices() << nl
-            << "    surfaceHits.size() " << surfaceHits.size() << nl
-            << "    featureEdgeHits.size() " << featureEdgeHits.size()
+        Info<< nl <<"    Conformation iteration " << iterationNo << nl
+            << "        Number of vertices " << number_of_vertices() << nl
+            << "        Number of surface hits " << surfaceHits.size() << nl
+            << "        Number of edge hits " << featureEdgeHits.size()
             << endl;
 
         totalHits = surfaceHits.size() + featureEdgeHits.size();
@@ -2405,7 +2404,7 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck();
 
-    Info<< nl << "    Looping over all dual faces" << endl;
+    Info<< nl << "    Determining vertex displacements" << endl;
 
     vectorField cartesianDirections(3);
 
@@ -2645,11 +2644,6 @@ void Foam::conformalVoronoiMesh::move()
     vector totalDisp = sum(displacementAccumulator);
     scalar totalDist = sum(mag(displacementAccumulator));
 
-    Info<< "        Total displacement = " << totalDisp << nl
-        << "        Total distance = " << totalDist << nl
-        << "        Points added = " << pointsAdded
-        << endl;
-
     // Relax the calculated displacement
     displacementAccumulator *= relaxation;
 
@@ -2691,17 +2685,29 @@ void Foam::conformalVoronoiMesh::move()
 
     timeCheck();
 
-    Info<< nl << "    Reinserting entire tessellation" << endl;
+    Info<< nl << "    Inserting displaced tessellation" << endl;
 
     insertPoints(pointsToInsert);
 
     startOfSurfacePointPairs_ = number_of_vertices();
+
+    label pointsRemoved =
+        displacementAccumulator.size()
+      - number_of_vertices()
+      + pointsAdded;
 
     timeCheck();
 
     conformToSurface();
 
     timeCheck();
+
+    Info<< nl
+        << "    Total displacement = " << totalDisp << nl
+        << "    Total distance = " << totalDist << nl
+        << "    Points added = " << pointsAdded << nl
+        << "    Points removed = " << pointsRemoved
+        << endl;
 }
 
 

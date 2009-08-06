@@ -69,6 +69,9 @@ class cvControls
             //- Square of span_
             scalar spanSqr_;
 
+            //- Activate/deactivate detailed timeChecks during meshing
+            bool timeChecks_;
+
         // Surface conformation controls
 
             //- Point pair spacing coefficient - fraction of the local target
@@ -101,6 +104,9 @@ class cvControls
             //- Maximum quadrant angle allowed at a concave edge before
             //  additional "mitering" lines are added
             scalar maxQuadAngle_;
+
+            //- Now often to rebuild the surface conformation
+            label surfaceConformationRebuildFrequency_;
 
 
     // Motion control controls
@@ -175,6 +181,9 @@ public:
             //- Return spanSqr
             inline scalar spanSqr() const;
 
+            //- Return timeChecks
+            inline bool timeChecks() const;
+
             //- Return the pointPairDistanceCoeff
             inline scalar pointPairDistanceCoeff() const;
 
@@ -195,6 +204,9 @@ public:
 
             //- Return the maxQuadAngle
             inline scalar maxQuadAngle() const;
+
+            //- Return the surfaceConformationRebuildFrequency
+            inline label surfaceConformationRebuildFrequency() const;
 
             //- Return the objOutput Switch
             inline bool objOutput() const;

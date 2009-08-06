@@ -49,6 +49,8 @@ Foam::cvControls::cvControls
 
     spanSqr_ = sqr(span_);
 
+    timeChecks_ = false;
+
     // Surface conformation controls
 
     const dictionary& surfDict(cvMeshDict_.subDict("surfaceConformation"));
@@ -83,7 +85,13 @@ Foam::cvControls::cvControls
         surfDict.lookup("maxSurfaceProtrusionCoeff")
     );
 
-    maxQuadAngle_= readScalar(surfDict.lookup("maxQuadAngle"));
+    maxQuadAngle_ = readScalar(surfDict.lookup("maxQuadAngle"));
+
+    surfaceConformationRebuildFrequency_ = max
+    (
+        1,
+        readLabel(surfDict.lookup("surfaceConformationRebuildFrequency"))
+    );
 
     // Motion control controls
 

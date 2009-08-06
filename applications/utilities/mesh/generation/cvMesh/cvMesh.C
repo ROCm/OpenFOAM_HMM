@@ -62,11 +62,19 @@ int main(int argc, char *argv[])
         Info<< nl << "Time = " << runTime.timeName() << endl;
 
         mesh.move();
+
+        Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+            << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+            << nl << endl;
     }
 
     mesh.writeMesh();
 
-    Info<< nl << "End\n" << endl;
+    Info<< nl << "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
+        << "  ClockTime = " << runTime.elapsedClockTime() << " s"
+        << nl << endl;
+
+    Info<< nl << "End" << nl << endl;
 
     return 0;
 }

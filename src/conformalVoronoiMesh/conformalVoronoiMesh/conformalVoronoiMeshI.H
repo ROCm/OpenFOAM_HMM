@@ -28,8 +28,11 @@ License
 
 inline void Foam::conformalVoronoiMesh::timeCheck() const
 {
-    Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s, delta "
-        << runTime_.cpuTimeIncrement()<< "s ] --- " << endl;
+    if (cvMeshControls().timeChecks())
+    {
+        Info<< nl << "--- [ " << runTime_.elapsedCpuTime() << "s, delta "
+            << runTime_.cpuTimeIncrement()<< "s ] --- " << endl;
+    }
 }
 
 
