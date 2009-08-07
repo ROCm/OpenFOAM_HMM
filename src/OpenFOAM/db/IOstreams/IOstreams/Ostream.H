@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,9 @@ Description
     An Ostream is an abstract base class for all output systems
     (streams, files, token lists, etc).
 
+SourceFiles
+    Ostream.C
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef Ostream_H
@@ -42,6 +45,7 @@ Description
 namespace Foam
 {
 
+// Forward declaration of classes
 class token;
 
 /*---------------------------------------------------------------------------*\
@@ -60,11 +64,11 @@ protected:
         //- Number of spaces per indent level
         static const unsigned short indentSize_ = 4;
 
-        //- Current indent level
-        unsigned short indentLevel_;
-
         //- Indentation of the entry from the start of the keyword
         static const unsigned short entryIndentation_ = 16;
+
+        //- Current indent level
+        unsigned short indentLevel_;
 
 
 public:
@@ -84,10 +88,9 @@ public:
         {}
 
 
-    // Destructor
-
-        virtual ~Ostream()
-        {}
+    //- Destructor
+    virtual ~Ostream()
+    {}
 
 
     // Member functions
@@ -111,6 +114,14 @@ public:
 
             //- Write string
             virtual Ostream& write(const string&) = 0;
+
+            //- Write std::string surrounded by quotes.
+            //  Optional write without quotes.
+            virtual Ostream& writeQuoted
+            (
+                const std::string&,
+                const bool quoted=true
+            ) = 0;
 
             //- Write label
             virtual Ostream& write(const label) = 0;
@@ -148,9 +159,8 @@ public:
             //- Decrememt the indent level
             void decrIndent();
 
-            //- Write the keyword to the Ostream followed by
-            //  appropriate indentation
-            Ostream& writeKeyword(const keyType& keyword);
+            //- Write the keyword followed by an appropriate indentation
+            Ostream& writeKeyword(const keyType&);
 
 
         // Stream state functions
@@ -189,7 +199,6 @@ public:
 // --------------------------------------------------------------------
 // ------ Manipulators (not taking arguments)
 // --------------------------------------------------------------------
-#ifndef __CINT__
 
 typedef Ostream& (*OstreamManip)(Ostream&);
 
@@ -243,8 +252,6 @@ inline Ostream& endl(Ostream& os)
     os.endl();
     return os;
 }
-
-#endif
 
 
 // Useful aliases for tab and newline characters

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,6 @@ Description
 #include "vtkCellArray.h"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
 
 vtkPolyData* Foam::vtkPV3Foam::faceZoneVTKMesh
 (
@@ -111,7 +110,6 @@ vtkPolyData* Foam::vtkPV3Foam::faceZoneVTKMesh
 }
 
 
-
 vtkPolyData* Foam::vtkPV3Foam::pointZoneVTKMesh
 (
     const fvMesh& mesh,
@@ -147,5 +145,6 @@ vtkPolyData* Foam::vtkPV3Foam::pointZoneVTKMesh
 
     return vtkmesh;
 }
+
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 
 #include "removeEntry.H"
 #include "dictionary.H"
+#include "stringListOps.H"
 #include "IStringStream.H"
 #include "OStringStream.H"
 #include "addToMemberFunctionSelectionTable.H"
@@ -64,22 +65,12 @@ bool Foam::functionEntries::removeEntry::execute
     Istream& is
 )
 {
-    token currToken(is);
-    is.putBack(currToken);
+    wordList dictKeys = parentDict.toc();
+    labelList indices = findStrings<word>(readList<wordRe>(is), dictKeys);
 
-    if (currToken == token::BEGIN_LIST)
+    forAll(indices, indexI)
     {
-        wordList keys(is);
-
-        forAll(keys, keyI)
-        {
-            parentDict.remove(keys[keyI]);
-        }
-    }
-    else
-    {
-        word key(is);
-        parentDict.remove(key);
+        parentDict.remove(dictKeys[indices[indexI]]);
     }
 
     return true;

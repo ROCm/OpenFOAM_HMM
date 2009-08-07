@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,15 +30,10 @@ License
 #include "SortableList.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // Returns edgeI between two points.
-Foam::label primitiveMesh::getEdge
+Foam::label Foam::primitiveMesh::getEdge
 (
     List<DynamicList<label> >& pe,
     DynamicList<edge>& es,
@@ -76,7 +71,7 @@ Foam::label primitiveMesh::getEdge
 }
 
 
-void primitiveMesh::calcEdges(const bool doFaceEdges) const
+void Foam::primitiveMesh::calcEdges(const bool doFaceEdges) const
 {
     if (debug)
     {
@@ -113,7 +108,7 @@ void primitiveMesh::calcEdges(const bool doFaceEdges) const
         List<DynamicList<label> > pe(nPoints());
         forAll(pe, pointI)
         {
-            pe[pointI].setSize(primitiveMesh::edgesPerPoint_);
+            pe[pointI].setCapacity(primitiveMesh::edgesPerPoint_);
         }
 
         // Estimate edges storage
@@ -337,7 +332,7 @@ void primitiveMesh::calcEdges(const bool doFaceEdges) const
 
                         oldToNew[edgeI] = internal0EdgeI++;
                     }
-                }        
+                }
             }
             else
             {
@@ -460,8 +455,8 @@ void primitiveMesh::calcEdges(const bool doFaceEdges) const
 }
 
 
-label primitiveMesh::findFirstCommonElementFromSortedLists
-( 
+Foam::label Foam::primitiveMesh::findFirstCommonElementFromSortedLists
+(
     const labelList& list1,
     const labelList& list2
 )
@@ -494,7 +489,7 @@ label primitiveMesh::findFirstCommonElementFromSortedLists
             "primitiveMesh::findFirstCommonElementFromSortedLists"
             "(const labelList&, const labelList&)"
         )   << "No common elements in lists " << list1 << " and " << list2
-            << abort(FatalError);        
+            << abort(FatalError);
     }
     return result;
 }
@@ -502,7 +497,7 @@ label primitiveMesh::findFirstCommonElementFromSortedLists
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const edgeList& primitiveMesh::edges() const
+const Foam::edgeList& Foam::primitiveMesh::edges() const
 {
     if (!edgesPtr_)
     {
@@ -513,7 +508,7 @@ const edgeList& primitiveMesh::edges() const
     return *edgesPtr_;
 }
 
-const labelListList& primitiveMesh::pointEdges() const
+const Foam::labelListList& Foam::primitiveMesh::pointEdges() const
 {
     if (!pePtr_)
     {
@@ -525,7 +520,7 @@ const labelListList& primitiveMesh::pointEdges() const
 }
 
 
-const labelListList& primitiveMesh::faceEdges() const
+const Foam::labelListList& Foam::primitiveMesh::faceEdges() const
 {
     if (!fePtr_)
     {
@@ -576,7 +571,7 @@ const labelListList& primitiveMesh::faceEdges() const
 }
 
 
-void primitiveMesh::clearOutEdges()
+void Foam::primitiveMesh::clearOutEdges()
 {
     deleteDemandDrivenData(edgesPtr_);
     deleteDemandDrivenData(pePtr_);
@@ -586,7 +581,7 @@ void primitiveMesh::clearOutEdges()
 }
 
 
-const labelList& primitiveMesh::faceEdges
+const Foam::labelList& Foam::primitiveMesh::faceEdges
 (
     const label faceI,
     DynamicList<label>& storage
@@ -602,9 +597,9 @@ const labelList& primitiveMesh::faceEdges
         const face& f = faces()[faceI];
 
         storage.clear();
-        if (f.size() > storage.allocSize())
+        if (f.size() > storage.capacity())
         {
-            storage.setSize(f.size());
+            storage.setCapacity(f.size());
         }
 
         forAll(f, fp)
@@ -624,13 +619,13 @@ const labelList& primitiveMesh::faceEdges
 }
 
 
-const labelList& primitiveMesh::faceEdges(const label faceI) const
+const Foam::labelList& Foam::primitiveMesh::faceEdges(const label faceI) const
 {
     return faceEdges(faceI, labels_);
 }
 
 
-const labelList& primitiveMesh::cellEdges
+const Foam::labelList& Foam::primitiveMesh::cellEdges
 (
     const label cellI,
     DynamicList<label>& storage
@@ -652,15 +647,15 @@ const labelList& primitiveMesh::cellEdges
 
             forAll(fe, feI)
             {
-                labelSet_.insert(fe[feI]);    
+                labelSet_.insert(fe[feI]);
             }
         }
 
         storage.clear();
 
-        if (labelSet_.size() > storage.allocSize())
+        if (labelSet_.size() > storage.capacity())
         {
-            storage.setSize(labelSet_.size());
+            storage.setCapacity(labelSet_.size());
         }
 
         forAllConstIter(labelHashSet, labelSet_, iter)
@@ -673,14 +668,12 @@ const labelList& primitiveMesh::cellEdges
 }
 
 
-const labelList& primitiveMesh::cellEdges(const label cellI) const
+const Foam::labelList& Foam::primitiveMesh::cellEdges(const label cellI) const
 {
-    return cellEdges(cellI, labels_);;
+    return cellEdges(cellI, labels_);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,10 +23,34 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    PDRkEpsilon
+    Foam::compressible::RASModels::PDRkEpsilon
 
 Description
-    Standard k-epsilon turbulence model.
+    Standard k-epsilon turbulence model with additional source terms
+    corresponding to PDR basic drag model (\link basic.H \endlink)
+
+    The default model coefficients correspond to the following:
+    @verbatim
+        kEpsilonCoeffs
+        {
+            Cmu         0.09;
+            C1          1.44;
+            C2          1.92;
+            C3          -0.33;  // only for compressible
+            sigmak      1.0;    // only for compressible
+            sigmaEps    1.3;
+            Prt         1.0;    // only for compressible
+        }
+    @endverbatim
+
+    The turbulence source term \f$ G_{R} \f$ appears in the
+    \f$ \kappa-\epsilon \f$ equation for the generation of turbulence due to
+    interaction with unresolved obstacles.
+
+    In the \f$ \epsilon  \f$ equation \f$ C_{1} G_{R} \f$ is added as a source
+    term.
+
+    In the \f$ \kappa \f$ equation \f$ G_{R} \f$ is added as a source term.
 
 SourceFiles
     PDRkEpsilon.C
@@ -58,16 +82,21 @@ class PDRkEpsilon
 {
     // Private data
 
+    // Model coefficients
+
         dimensionedScalar Cmu_;
         dimensionedScalar C1_;
         dimensionedScalar C2_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar alphah_;
+        dimensionedScalar sigmak_;
+        dimensionedScalar sigmaEps_;
+        dimensionedScalar Prt_;
+
+    // Fields
 
         volScalarField k_;
         volScalarField epsilon_;
         volScalarField mut_;
+        volScalarField alphat_;
 
 
 public:
@@ -75,22 +104,22 @@ public:
     //- Runtime type information
     TypeName("PDRkEpsilon");
 
+
     // Constructors
 
-        //- from components
+        //- Construct from components
         PDRkEpsilon
         (
             const volScalarField& rho,
             const volVectorField& U,
             const surfaceScalarField& phi,
-            basicThermo& thermophysicalModel
+            const basicThermo& thermophysicalModel
         );
 
 
-    // Destructor
-
-        ~PDRkEpsilon()
-        {}
+    //- Destructor
+    virtual ~PDRkEpsilon()
+    {}
 
 
     // Member Functions
@@ -105,7 +134,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*mut_ + mu())
+                new volScalarField("DkEff", mut_/sigmak_ + mu())
             );
         }
 
@@ -114,7 +143,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -123,7 +152,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*mut_ + alpha())
+                new volScalarField("alphaEff", alphat_ + alpha())
             );
         }
 

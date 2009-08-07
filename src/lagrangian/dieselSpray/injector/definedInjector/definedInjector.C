@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -178,13 +178,14 @@ Foam::label Foam::definedInjector::nParcelsToInject
     return nParcels;
 }
 
-const Foam::vector Foam::definedInjector::position() const
+const Foam::vector Foam::definedInjector::position(const label n) const
 {
     return position_;
 }
 
 Foam::vector Foam::definedInjector::position
 (
+    const label n,
     const scalar time,
     const bool twoD,
     const scalar angleOfWedge,
@@ -227,12 +228,21 @@ Foam::vector Foam::definedInjector::position
     return position_;
 }
 
+Foam::label Foam::definedInjector::nHoles() const
+{
+    return 1;
+}
+
 Foam::scalar Foam::definedInjector::d() const
 {
     return d_;
 }
 
-const Foam::vector& Foam::definedInjector::direction() const
+const Foam::vector& Foam::definedInjector::direction
+(
+    const label i,
+    const scalar time
+) const
 {
     return direction_;
 }
@@ -342,6 +352,16 @@ void Foam::definedInjector::correctProfiles
         injectionPressureProfile_[i][1] = referencePressure + 0.5*rho*v*v;
         CdProfile_[i][1] = mfr/(v*rho*A);
     }
+}
+
+Foam::vector Foam::definedInjector::tan1(const label n) const
+{
+    return tangentialInjectionVector1_;
+}
+
+Foam::vector Foam::definedInjector::tan2(const label n) const
+{
+    return tangentialInjectionVector2_;
 }
 
 // ************************************************************************* //

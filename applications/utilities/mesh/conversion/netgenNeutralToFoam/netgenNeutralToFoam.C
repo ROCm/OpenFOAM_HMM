@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    read Neutral file format as written by Netgen4.4.
+    Converts neutral file format as written by Netgen v4.4.
 
     Example:
 
@@ -242,7 +242,7 @@ int main(int argc, char *argv[])
     }
 
 
-    if (vertsToBoundary.size() > 0)
+    if (vertsToBoundary.size())
     {
         // Didn't find cells connected to boundary faces.
         WarningIn(args.executable())
@@ -289,9 +289,7 @@ int main(int argc, char *argv[])
                 << patchNames[patchI] << "\t\t"
                 << allPatchFaces[patchI].size() << endl;
 
-            allPatchFaces[patchI].shrink();
             patchFaces[patchI].transfer(allPatchFaces[patchI]);
-            allPatchFaces[patchI].clear();
         }
 
         Info<< endl;
@@ -306,7 +304,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        points,
+        xferMove(points),
         cells,
         patchFaces,
         patchNames,

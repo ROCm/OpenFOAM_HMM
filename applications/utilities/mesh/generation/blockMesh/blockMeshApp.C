@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,21 +72,21 @@ using namespace Foam;
 int main(int argc, char *argv[])
 {
     argList::noParallel();
-
-#   include "addOptions.H"
+    argList::validOptions.insert("blockTopology", "");
+    argList::validOptions.insert("dict", "dictionary");
+#   include "addRegionOption.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
-#   include "checkOptions.H"
+
+    const word dictName("blockMeshDict");
 
     word regionName;
     fileName polyMeshDir;
-    word dictName("blockMeshDict");
-    fileName dictPath(runTime.constant());
 
-    if (args.options().found("region"))
+    if (args.optionFound("region"))
     {
         // constant/<region>/polyMesh/blockMeshDict
-        regionName  = args.options()["region"];
+        regionName  = args.option("region");
         polyMeshDir = regionName/polyMesh::meshSubDir;
 
         Info<< nl << "Generating mesh for region " << regionName << endl;
@@ -98,54 +98,62 @@ int main(int argc, char *argv[])
         polyMeshDir = polyMesh::meshSubDir;
     }
 
-    fileName dictLocal = polyMeshDir;
+    autoPtr<IOobject> meshDictIoPtr;
 
-    if (args.options().found("dict"))
+    if (args.optionFound("dict"))
     {
-        wordList elems(fileName(args.options()["dict"]).components());
-        dictName = elems[elems.size()-1];
-        dictPath = elems[0];
-        dictLocal = "";
+        fileName dictPath(args.option("dict"));
 
-        if (elems.size() == 1)
-        {
-            dictPath = ".";
-        }
-        else if (elems.size() > 2)
-        {
-            dictLocal = fileName(SubList<word>(elems, elems.size()-2, 1));
-        }
+        meshDictIoPtr.set
+        (
+            new IOobject
+            (
+                (
+                    isDir(dictPath)
+                  ? dictPath/dictName
+                  : dictPath
+                ),
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
+    }
+    else
+    {
+        meshDictIoPtr.set
+        (
+            new IOobject
+            (
+                dictName,
+                runTime.constant(),
+                polyMeshDir,
+                runTime,
+                IOobject::MUST_READ,
+                IOobject::NO_WRITE,
+                false
+            )
+        );
     }
 
-
-    IOobject meshDictIo
-    (
-        dictName,
-        dictPath,
-        dictLocal,
-        runTime,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE,
-        false
-    );
-
-    if (!meshDictIo.headerOk())
+    if (!meshDictIoPtr->headerOk())
     {
         FatalErrorIn(args.executable())
             << "Cannot open mesh description file\n    "
-            << meshDictIo.objectPath()
+            << meshDictIoPtr->objectPath()
             << nl
             << exit(FatalError);
     }
 
     Info<< nl << "Creating block mesh from\n    "
-        << meshDictIo.objectPath() << endl;
+        << meshDictIoPtr->objectPath() << nl << endl;
 
-    IOdictionary meshDict(meshDictIo);
-
+    IOdictionary meshDict(meshDictIoPtr());
     blockMesh blocks(meshDict);
 
-    if (writeTopo)
+
+    if (args.optionFound("blockTopology"))
     {
         // Write mesh as edges.
         {
@@ -201,7 +209,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        blocks.points(),
+        xferCopy(blocks.points()),           // could we re-use space?
         blocks.cells(),
         blocks.patches(),
         blocks.patchDicts(),
@@ -218,14 +226,7 @@ int main(int argc, char *argv[])
             meshDict.lookup("mergePatchPairs")
         );
 
-        if (mergePatchPairs.size())
-        {
-            FatalErrorIn(args.executable())
-                << "mergePatchPairs not currently supported."
-                << exit(FatalError);
-        }
-
-        //#include "mergePatchPairs.H"
+#       include "mergePatchPairs.H"
     }
     else
     {
@@ -260,7 +261,7 @@ int main(int argc, char *argv[])
             const labelListList& blockCells = b.cells();
             const word& zoneName = b.blockDef().zoneName();
 
-            if (zoneName.size() > 0)
+            if (zoneName.size())
             {
                 HashTable<label>::const_iterator iter = zoneMap.find(zoneName);
 
@@ -299,7 +300,7 @@ int main(int argc, char *argv[])
         {
             label zoneI = iter();
 
-            cz[zoneI]= new cellZone
+            cz[zoneI] = new cellZone
             (
                 iter.key(),
                 zoneCells[zoneI].shrink(),
@@ -322,7 +323,7 @@ int main(int argc, char *argv[])
     IOstream::defaultPrecision(10);
 
     Info << nl << "Writing polyMesh" << endl;
-    mesh.removeFiles(mesh.instance());
+    mesh.removeFiles();
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
@@ -330,7 +331,8 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< nl << "end" << endl;
+    Info<< nl << "End" << endl;
+
     return 0;
 }
 

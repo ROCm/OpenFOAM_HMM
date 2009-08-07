@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -38,20 +38,20 @@ packFile=${packDir}_${timeStamp}.gtgz
 
 if [ ! -d $packDir ]
 then
-   echo "Error: directory $packDir does not exist"
-   exit 1
+    echo "Error: directory $packDir does not exist" 1>&2
+    exit 1
 fi
 
 # add optional output directory
 if [ -d "$1" ]
 then
-   packFile="$1/$packFile"
+    packFile="$1/$packFile"
 fi
 
 if [ -f $packFile ]
 then
-   echo "Error: $packFile already exists"
-   exit 1
+    echo "Error: $packFile already exists" 1>&2
+    exit 1
 fi
 
 # Create time stamp file
@@ -86,10 +86,11 @@ find -H $packDir               \
  -a ! -name "log[0-9]*"        \
  -a ! -name "so_locations"     \
 | sed                          \
- -e "\@$packDir/.git/@d"       \
  -e "\@$packDir/lib/@d"        \
- -e '\@applications/bin/@d'       \
- -e '\@/t/@d'                     \
+ -e '\@/\.git/@d'              \
+ -e '\@applications/bin/@d'    \
+ -e '\@wmake/bin/@d'           \
+ -e '\@/t/@d'                  \
  -e '\@Make[.A-Za-z]*/[^/]*/@d'   \
  -e '\@doc/[Dd]oxygen/html@d'     \
  -e '\@doc/[Dd]oxygen/latex@d'    \
@@ -100,12 +101,12 @@ find -H $packDir               \
 
 tar czpf $packFile --files-from $tmpFile
 
-if [ $? = 0 ]
+if [ $? -eq 0 ]
 then
-   echo "Finished packing and compressing $packDir into file $packFile"
+    echo "Finished packing and compressing $packDir into file $packFile"
 else
-   echo "Error: failure packing $packDir into file $packFile"
-   rm -f $packFile 2>/dev/null
+    echo "Error: failure packing $packDir into file $packFile" 1>&2
+    rm -f $packFile 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,21 +36,7 @@ namespace Foam
     addToRunTimeSelectionTable(coordinateSystem, toroidalCS, dictionary);
 }
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::toroidalCS::toroidalCS
-(
-    const word& name,
-    const point& origin,
-    const vector& axis,
-    const vector& direction,
-    const scalar radius
-)
-:
-    coordinateSystem(name, origin, axis, direction),
-    radius_(radius)
-{}
 
 
 Foam::toroidalCS::toroidalCS
@@ -105,6 +91,7 @@ Foam::vector Foam::toroidalCS::localToGlobal
     );
 }
 
+
 Foam::tmp<Foam::vectorField> Foam::toroidalCS::localToGlobal
 (
     const vectorField& local,
@@ -129,6 +116,7 @@ Foam::tmp<Foam::vectorField> Foam::toroidalCS::localToGlobal
     return coordinateSystem::localToGlobal(lc, translate);
 }
 
+
 Foam::vector Foam::toroidalCS::globalToLocal
 (
     const vector& global,
@@ -142,6 +130,7 @@ Foam::vector Foam::toroidalCS::globalToLocal
 
     return vector::zero;
 }
+
 
 Foam::tmp<Foam::vectorField> Foam::toroidalCS::globalToLocal
 (
@@ -181,6 +170,5 @@ void Foam::toroidalCS::writeDict(Ostream& os, bool subDict) const
 	os << decrIndent << indent << token::END_BLOCK << endl;
     }
 }
-
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
     Foam::filteredLinear3Limiter
 
 Description
-    Class to generate weighting factors for the filtered-linear-3
+    Class to generate weighting factors for the filteredLinear
     differencing scheme.
 
     The aim is to remove high-frequency modes with "staggering"
@@ -79,7 +79,7 @@ public:
                 << "coefficient = " << k_
                 << " should be >= 0 and <= 1"
                 << exit(FatalIOError);
-        }    
+        }
     }
 
     scalar limiter

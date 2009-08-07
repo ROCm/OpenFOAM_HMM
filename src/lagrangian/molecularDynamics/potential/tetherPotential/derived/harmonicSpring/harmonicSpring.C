@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,13 +65,13 @@ harmonicSpring::harmonicSpring
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-scalar harmonicSpring::energy(const scalar r) const
+scalar harmonicSpring::energy(const vector r) const
 {
-    return 0.5*springConstant_*r*r;
+    return 0.5*springConstant_*magSqr(r);
 }
 
 
-scalar harmonicSpring::force(const scalar r) const
+vector harmonicSpring::force(const vector r) const
 {
     return -springConstant_*r;
 }

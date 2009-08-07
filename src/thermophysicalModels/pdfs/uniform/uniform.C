@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,29 +27,17 @@ License
 #include "uniform.H"
 #include "addToRunTimeSelectionTable.H"
 
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(uniform, 0);
-
-addToRunTimeSelectionTable
-(
-    pdf,
-    uniform,
-    dictionary
-);
+namespace Foam
+{
+    defineTypeNameAndDebug(uniform, 0);
+    addToRunTimeSelectionTable(pdf, uniform, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
-// Construct from components
-uniform::uniform
-(
-    const dictionary& dict,
-    Random& rndGen
-)
+Foam::uniform::uniform(const dictionary& dict, Random& rndGen)
 :
     pdf(dict, rndGen),
     pdfDict_(dict.subDict(typeName + "PDF")),
@@ -67,21 +55,22 @@ Foam::uniform::~uniform()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-scalar uniform::sample() const
+Foam::scalar Foam::uniform::sample() const
 {
     return (minValue_ + rndGen_.scalar01()*range_);
 }
 
-scalar uniform::minValue() const
+
+Foam::scalar Foam::uniform::minValue() const
 {
     return minValue_;
 }
 
-scalar uniform::maxValue() const
+
+Foam::scalar Foam::uniform::maxValue() const
 {
     return maxValue_;
 }
 
-// ************************************************************************* //
 
-}
+// ************************************************************************* //

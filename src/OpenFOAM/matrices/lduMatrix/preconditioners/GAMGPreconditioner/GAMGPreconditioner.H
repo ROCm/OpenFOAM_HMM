@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,17 +55,14 @@ class GAMGPreconditioner
     public GAMGSolver,
     public lduMatrix::preconditioner
 {
-    // Private data
+protected:
+    // Protected data
 
         //- Number of V-cycles to perform
         label nVcycles_;
 
-
-    // Private member functions
-
-        //- Read control parameters from the control dictionary
-        void readControls();
-
+        //- Read the control parameters from the controlDict_
+        virtual void readControls();
 
 public:
 
@@ -75,11 +72,11 @@ public:
 
     // Constructors
 
-        //- Construct for given solver and preconditioner data stream
+        //- Construct from matrix components and preconditioner solver controls
         GAMGPreconditioner
         (
-            const lduMatrix::solver& sol,
-            Istream& preconditionerData
+            const lduMatrix::solver&,
+            const dictionary& solverControls
         );
 
 
@@ -89,9 +86,6 @@ public:
 
 
     // Member Functions
-
-        //- Read and reset the preconditioner parameters from the given stream
-        virtual void read(Istream& preconditionerData);
 
         //- Return wA the preconditioned form of residual rA
         virtual void precondition

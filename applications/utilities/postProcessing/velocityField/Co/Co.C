@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ Application
 Description
     Calculates and writes the Co number as a surfaceScalarField obtained
     from field phi.
+
     The -noWrite option just outputs the max values without writing the
     field.
 
@@ -86,7 +87,7 @@ namespace Foam
 
 void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
 {
-    bool writeResults = !args.options().found("noWrite");
+    bool writeResults = !args.optionFound("noWrite");
 
     IOobject phiHeader
     (
@@ -179,6 +180,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     {
         Info<< "    No phi" << endl;
     }
+
+    Info<< "\nEnd\n" << endl;
 }
 
 // ************************************************************************* //

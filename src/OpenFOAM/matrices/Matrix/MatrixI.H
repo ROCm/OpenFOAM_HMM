@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,13 @@ inline Foam::autoPtr<Foam::Matrix<Form, Type> > Foam::Matrix<Form, Type>::clone(
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Form, class Type>
+inline const Foam::Matrix<Form, Type>& Foam::Matrix<Form, Type>::null()
+{
+    return *reinterpret_cast< Matrix<Form, Type>* >(0);
+}
+
 
 //- Return the number of rows
 template<class Form, class Type>

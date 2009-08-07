@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,8 +39,8 @@ inline Foam::label Foam::tetherPotentialList::tetherPotentialIndex
         (
             "Foam::tetherPotentialList::tetherPotentialIndex(const label a)"
         )
-            << "Attempting to access an undefined tetherPotential."
-            << abort(FatalError);
+        << "Attempting to access an undefined tetherPotential."
+        << abort(FatalError);
 
         return -1;
     }

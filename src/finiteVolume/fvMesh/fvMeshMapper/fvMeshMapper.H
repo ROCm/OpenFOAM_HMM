@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,7 +108,7 @@ public:
 
         //- Return reference to objectRegistry storing fields. Can be
         //  removed once fields stored on pointMesh.
-        const objectRegistry& db() const
+        const objectRegistry& thisDb() const
         {
             return mesh_;
         }

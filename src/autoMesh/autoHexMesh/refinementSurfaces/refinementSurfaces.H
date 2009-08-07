@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,6 @@ SourceFiles
 #ifndef refinementSurfaces_H
 #define refinementSurfaces_H
 
-#include "PackedList.H"
 #include "triSurfaceGeoMesh.H"
 #include "triSurfaceFields.H"
 #include "vectorList.H"
@@ -89,6 +88,9 @@ class refinementSurfaces
 
         //- From global region number to refinement level
         labelList maxLevel_;
+
+        //- From global region number to perpendicular angle
+        scalarField perpendicularAngle_;
 
 
     // Private Member Functions
@@ -151,7 +153,7 @@ public:
                 return cellZoneNames_;
             }
 
-            //- Get indices of named surfaces (surfaces with faceZoneName)
+            //- Get indices of unnamed surfaces (surfaces without faceZoneName)
             labelList getUnnamedSurfaces() const;
 
             //- Get indices of named surfaces (surfaces with faceZoneName)
@@ -176,6 +178,12 @@ public:
             const labelList& maxLevel() const
             {
                 return maxLevel_;
+            }
+
+            //- From global region number to perpendicular angle
+            const scalarField& perpendicularAngle() const
+            {
+                return perpendicularAngle_;
             }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
     if (debug)
     {
         Info<< "<beg> Foam::vtkPV3Foam::lagrangianVTKMesh - timePath "
-            << mesh.time().timePath()/"lagrangian"/cloudName << endl;
+            << mesh.time().timePath()/cloud::prefix/cloudName << endl;
         printMemory();
     }
 
@@ -63,7 +63,7 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
     (
         mesh,
         mesh.time().timeName(),
-        "lagrangian"/cloudName
+        cloud::prefix/cloudName
     );
 
     IOobject* positionsPtr = sprayObjs.lookup("positions");

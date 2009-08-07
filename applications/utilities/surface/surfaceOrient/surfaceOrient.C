@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     point visiblePoint(IStringStream(args.additionalArgs()[1])());
     Info<< "Visible point " << visiblePoint << endl;
 
-    bool orientInside = args.options().found("inside");
+    bool orientInside = args.optionFound("inside");
 
     if (orientInside)
     {

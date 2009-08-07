@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -259,13 +259,13 @@ bool domainDecomposition::writeDecomposition()
         (
             IOobject
             (
-                polyMesh::defaultRegion,
-                "constant",
+                this->polyMesh::name(),  // region name of undecomposed mesh
+                pointsInstance(),
                 processorDb
             ),
-            procPoints,
-            procFaces,
-            procCells
+            xferMove(procPoints),
+            xferMove(procFaces),
+            xferMove(procCells)
         );
 
         // Create processor boundary patches
@@ -296,7 +296,7 @@ bool domainDecomposition::writeDecomposition()
         (
             curPatchSizes.size()
           + curProcessorPatchSizes.size(),
-            reinterpret_cast<polyPatch*>(NULL)
+            reinterpret_cast<polyPatch*>(0)
         );
 
         label nPatches = 0;
@@ -363,7 +363,7 @@ forAll(procPatches, patchI)
             // Estimate size
             forAll(zonePoints, zoneI)
             {
-                zonePoints[zoneI].setSize(pz[zoneI].size() / nProcs_);
+                zonePoints[zoneI].setCapacity(pz[zoneI].size() / nProcs_);
             }
 
             // Use the pointToZone map to find out the single zone (if any),
@@ -432,8 +432,8 @@ forAll(procPatches, patchI)
             {
                 label procSize = fz[zoneI].size() / nProcs_;
 
-                zoneFaces[zoneI].setSize(procSize);
-                zoneFaceFlips[zoneI].setSize(procSize);
+                zoneFaces[zoneI].setCapacity(procSize);
+                zoneFaceFlips[zoneI].setCapacity(procSize);
             }
 
             // Go through all the zoned faces and find out if they
@@ -523,7 +523,7 @@ forAll(procPatches, patchI)
             // Estimate size
             forAll(zoneCells, zoneI)
             {
-                zoneCells[zoneI].setSize(cz[zoneI].size() / nProcs_);
+                zoneCells[zoneI].setCapacity(cz[zoneI].size() / nProcs_);
             }
 
             forAll (curCellLabels, celli)
@@ -629,7 +629,7 @@ forAll(procPatches, patchI)
             IOobject
             (
                 "pointProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,
@@ -644,7 +644,7 @@ forAll(procPatches, patchI)
             IOobject
             (
                 "faceProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,
@@ -659,7 +659,7 @@ forAll(procPatches, patchI)
             IOobject
             (
                 "cellProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,
@@ -674,7 +674,7 @@ forAll(procPatches, patchI)
             IOobject
             (
                 "boundaryProcAddressing",
-                "constant",
+                procMesh.facesInstance(),
                 procMesh.meshSubDir,
                 procMesh,
                 IOobject::NO_READ,

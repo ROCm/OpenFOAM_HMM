@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,9 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 InClass
-    Foam::fvScalarMatrix
+    Foam::fvMatrix
 
 Description
+    A scalar instance of fvMatrix
 
 SourceFiles
     fvScalarMatrix.C
@@ -56,13 +57,22 @@ void fvMatrix<scalar>::setComponentReference
 );
 
 template<>
-autoPtr<fvMatrix<scalar>::fvSolver> fvMatrix<scalar>::solver(Istream&);
+autoPtr<fvMatrix<scalar>::fvSolver> fvMatrix<scalar>::solver
+(
+    const dictionary&
+);
 
 template<>
-lduMatrix::solverPerformance fvMatrix<scalar>::fvSolver::solve(Istream&);
+lduMatrix::solverPerformance fvMatrix<scalar>::fvSolver::solve
+(
+    const dictionary&
+);
 
 template<>
-lduMatrix::solverPerformance fvMatrix<scalar>::solve(Istream&);
+lduMatrix::solverPerformance fvMatrix<scalar>::solve
+(
+    const dictionary&
+);
 
 template<>
 tmp<scalarField> fvMatrix<scalar>::residual() const;

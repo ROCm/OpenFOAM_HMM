@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,8 +29,8 @@ Description
     Foam::SIBS
 
 SourceFiles
-    SIBSCK.C
-    SIBSQS.C
+    SIMPR.C
+    polyExtrapolate.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -61,7 +61,7 @@ class SIBS
 
         mutable scalarField a_;
         mutable scalarSquareMatrix alpha_;
-        mutable scalarSquareMatrix d_p_;
+        mutable scalarRectangularMatrix d_p_;
         mutable scalarField x_p_;
         mutable scalarField err_;
 
@@ -75,30 +75,31 @@ class SIBS
         mutable scalar epsOld_, xNew_;
 
 
-void SIMPR
-(
-    const ODE& ode,
-    const scalar xStart,
-    const scalarField& y,
-    const scalarField& dydx,
-    const scalarField& dfdx,
-    const scalarSquareMatrix& dfdy,
-    const scalar deltaX,
-    const label nSteps,
-    scalarField& yEnd
-) const;
+    // Private member functions
 
+        void SIMPR
+        (
+            const ODE& ode,
+            const scalar xStart,
+            const scalarField& y,
+            const scalarField& dydx,
+            const scalarField& dfdx,
+            const scalarSquareMatrix& dfdy,
+            const scalar deltaX,
+            const label nSteps,
+            scalarField& yEnd
+        ) const;
 
-void polyExtrapolate
-(
-    const label iest,
-    const scalar xest,
-    const scalarField& yest,
-    scalarField& yz,
-    scalarField& dy,
-    scalarField& x_p,
-    scalarSquareMatrix& d_p
-) const;
+        void polyExtrapolate
+        (
+            const label iest,
+            const scalar xest,
+            const scalarField& yest,
+            scalarField& yz,
+            scalarField& dy,
+            scalarField& x_p,
+            scalarRectangularMatrix& d_p
+        ) const;
 
 
 public:

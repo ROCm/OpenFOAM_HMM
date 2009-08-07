@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,10 +31,6 @@ Description
 #include "Map.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -45,7 +41,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::visitPointRegion
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+visitPointRegion
 (
     const label pointI,
     const labelList& pFaces,
@@ -121,8 +120,10 @@ template
     class PointField,
     class PointType
 >
-typename PrimitivePatch<Face, FaceList, PointField, PointType>::surfaceTopo
-PrimitivePatch<Face, FaceList, PointField, PointType>::surfaceType() const
+
+typename Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::surfaceTopo
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+surfaceType() const
 {
     if (debug)
     {
@@ -173,7 +174,10 @@ template
     class PointField,
     class PointType
 >
-bool PrimitivePatch<Face, FaceList, PointField, PointType>::checkTopology
+
+bool
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+checkTopology
 (
     const bool report,
     labelHashSet* setPtr
@@ -241,8 +245,10 @@ template
     class PointField,
     class PointType
 >
+
 bool
-PrimitivePatch<Face, FaceList, PointField, PointType>::checkPointManifold
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+checkPointManifold
 (
     const bool report,
     labelHashSet* setPtr
@@ -327,12 +333,8 @@ PrimitivePatch<Face, FaceList, PointField, PointType>::checkPointManifold
         }
     }
 
-    return foundError; 
+    return foundError;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

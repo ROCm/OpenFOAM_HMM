@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -353,20 +353,7 @@ Foam::tmp<Foam::scalarField > Foam::lduMatrix::H1() const
 
         for (register label face=0; face<nFaces; face++)
         {
-            #ifdef ICC_IA64_PREFETCH
-            __builtin_prefetch (&uPtr[face+32],0,0);
-            __builtin_prefetch (&lPtr[face+32],0,0);
-            __builtin_prefetch (&lowerPtr[face+32],0,1);
-            __builtin_prefetch (&H1Ptr[uPtr[face+32]],0,1);
-            #endif
-
             H1Ptr[uPtr[face]] -= lowerPtr[face];
-        
-            #ifdef ICC_IA64_PREFETCH
-            __builtin_prefetch (&upperPtr[face+32],0,1);
-            __builtin_prefetch (&H1Ptr[lPtr[face+32]],0,1);
-                #endif
-
             H1Ptr[lPtr[face]] -= upperPtr[face];
         }
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,8 +30,10 @@ Description
 
 SourceFiles
     treeLeaf.C
-    octreeDataPointTreaLeaf.H       (specialization for points only )
-    octreeDataPointTreeLeaf.C       (   ,,                          )
+    octreeDataPointTreaLeaf.H       (specialization for points)
+    octreeDataPointTreeLeaf.C
+    octreeDataTriSurfaceTreeLeaf.H  (specialization for triSurface)
+    octreeDataTriSurfaceTreeLeaf.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,7 +44,7 @@ SourceFiles
 #include "treeElem.H"
 #include "boolList.H"
 #include "linePointRef.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -212,7 +214,7 @@ public:
                 const Type& shapes,
                 const point& sample,
                 treeBoundBox& tightest,
-                label& tightesti,
+                label& tightestI,
                 scalar& tightestDist
             ) const;
 
@@ -224,7 +226,7 @@ public:
                 const Type& shapes,
                 const linePointRef& ln,
                 treeBoundBox& tightest,
-                label& tightesti,   // index of nearest shape
+                label& tightestI,   // index of nearest shape
                 point& linePoint,   // nearest point on line
                 point& shapePoint   // nearest point on shape
             ) const;
@@ -250,7 +252,7 @@ public:
                 label& vertNo
             ) const;
 
-            //- debug: 
+            //- debug:
             label countLeaf(Ostream&, const label) const;
 
 
@@ -274,6 +276,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "octreeDataPointTreeLeaf.H"
+#include "octreeDataTriSurfaceTreeLeaf.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

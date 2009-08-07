@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -236,10 +236,27 @@ void Foam::fvPatchField<Type>::write(Ostream& os) const
 {
     os.writeKeyword("type") << type() << token::END_STATEMENT << nl;
 
-    if (patchType_ != word::null)
+    if (patchType_.size())
     {
         os.writeKeyword("patchType") << patchType_
             << token::END_STATEMENT << nl;
+    }
+}
+
+
+template<class Type>
+template<class EntryType>
+void Foam::fvPatchField<Type>::writeEntryIfDifferent
+(
+    Ostream& os,
+    const word& entryName,
+    const EntryType& value1,
+    const EntryType& value2
+) const
+{
+    if (value1 != value2)
+    {
+        os.writeKeyword(entryName) << value2 << token::END_STATEMENT << nl;
     }
 }
 

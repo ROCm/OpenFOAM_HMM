@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     PDRFoam
 
 Description
-    Compressible premixed/partially-premixed combustion solver with turbulence 
+    Compressible premixed/partially-premixed combustion solver with turbulence
     modelling.
 
     Combusting RANS code using the b-Xi two-equation model.
@@ -72,31 +72,31 @@ Description
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
-#   include "createTime.H"
-#   include "createDynamicFvMesh.H"
-#   include "readCombustionProperties.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "setInitialDeltaT.H"
+    #include "createTime.H"
+    #include "createDynamicFvMesh.H"
+    #include "readCombustionProperties.H"
+    #include "readGravitationalAcceleration.H"
+    #include "createFields.H"
+    #include "readPISOControls.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "setInitialDeltaT.H"
 
-scalar StCoNum = 0.0;
+    scalar StCoNum = 0.0;
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
 
-#       include "setDeltaT.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
@@ -119,9 +119,10 @@ scalar StCoNum = 0.0;
             fvc::makeAbsolute(phi, rho, U);
 
             // Test : disable refinement for some cells
-            PackedList<1>& protectedCell =
+            PackedBoolList& protectedCell =
                 refCast<dynamicRefineFvMesh>(mesh).protectedCell();
-            if (protectedCell.size() == 0)
+
+            if (protectedCell.empty())
             {
                 protectedCell.setSize(mesh.nCells());
                 protectedCell = 0;
@@ -135,7 +136,7 @@ scalar StCoNum = 0.0;
                 }
             }
 
-            //volScalarField pIndicator("pIndicator", 
+            //volScalarField pIndicator("pIndicator",
             //    p*(fvc::laplacian(p))
             //  / (
             //        magSqr(fvc::grad(p))
@@ -156,7 +157,7 @@ scalar StCoNum = 0.0;
 
 //        if (mesh.moving() || meshChanged)
 //        {
-//#           include "correctPhi.H"
+//            #include "correctPhi.H"
 //        }
 
             // Make the fluxes relative to the mesh motion
@@ -164,23 +165,23 @@ scalar StCoNum = 0.0;
         }
 
 
-#       include "rhoEqn.H"
-#       include "UEqn.H"
+        #include "rhoEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=1; corr<=nCorr; corr++)
         {
-#           include "bEqn.H"
-#           include "ftEqn.H"
-#           include "huEqn.H"
-#           include "hEqn.H"
+            #include "bEqn.H"
+            #include "ftEqn.H"
+            #include "huEqn.H"
+            #include "hEqn.H"
 
             if (!ign.ignited())
             {
                 hu == h;
             }
 
-#           include "pEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
@@ -194,7 +195,7 @@ scalar StCoNum = 0.0;
 
     Info<< "\n end\n";
 
-    return(0);
+    return 0;
 }
 
 

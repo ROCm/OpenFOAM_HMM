@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,9 +84,6 @@ class autoSnapDriver
 
         // Snapping
 
-             //- Split surfaces into non-zoned and zones ones
-            void getZonedSurfaces(labelList&, labelList&) const;
-
             //- Get faces to repatch. Returns map from face to patch.
             Map<label> getZoneBafflePatches(const bool allowBoundary) const;
 
@@ -95,12 +92,16 @@ class autoSnapDriver
             (
                 const scalar tol,
                 const pointField&,
-                PackedList<1>&
+                PackedBoolList&
             );
 
             //- Calculate displacement per patch point to smooth out patch.
             //  Quite complicated in determining which points to move where.
-            pointField smoothPatchDisplacement(const motionSmoother&) const;
+            pointField smoothPatchDisplacement
+            (
+                const motionSmoother&,
+                const List<labelPair>&
+            ) const;
 
             //- Check that face zones are synced
             void checkCoupledFaceZones() const;
@@ -168,9 +169,6 @@ public:
                 const snapParameters& snapParams,
                 const indirectPrimitivePatch&
             ) const;
-
-            ////- Get patches generated for surfaces.
-            //labelList getSurfacePatches() const;
 
             //- Smooth the mesh (patch and internal) to increase visibility
             //  of surface points (on castellated mesh) w.r.t. surface.

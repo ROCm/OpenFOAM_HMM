@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -40,29 +40,28 @@ Script=${0##*/}
 #
 for check in WM_OPTIONS WM_LINK_LANGUAGE WM_DIR
 do
-   eval test "\$$check" || {
-      echo "$Script error"
-      echo "    environment variable \$$check not set"
-      exit 1
-   }
+    eval test "\$$check" || {
+        echo "$Script error: environment variable \$$check not set" 1>&2
+        exit 1
+    }
 done
 
 if [ -d Make ]
 then
-   echo "$Script: Make directory already exists"
-   exit 1
+    echo "$Script error: Make directory already exists" 1>&2
+    exit 1
 else
-   mkdir Make
+    mkdir Make
 fi
 
 [ -e Make/files ] || {
-   echo "$Script: Creating files"
-   $WM_DIR/scripts/makeFiles
+    echo "$Script: Creating Make/files"
+    $WM_DIR/scripts/makeFiles
 }
 
 [ -e Make/options ] || {
-   echo "$Script: Creating options"
-   $WM_DIR/scripts/makeOptions
+    echo "$Script: Creating Make/options"
+    $WM_DIR/scripts/makeOptions
 }
 
 #------------------------------------------------------------------------------

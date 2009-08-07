@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,6 +92,15 @@ class orientedSurface
             const triSurface&,
             const labelList& changedEdges,
             labelList& flip
+        );
+
+        //- Walk from face across connected faces. Change orientation to be
+        //  consistent with startFaceI.
+        static void walkSurface
+        (
+            const triSurface& s,
+            const label startFaceI,
+            labelList& flipState
         );
 
         //- Given nearest point and face check orientation to nearest face

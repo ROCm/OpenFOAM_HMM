@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,7 +41,7 @@ namespace Foam
 
 void Foam::probes::findCells(const fvMesh& mesh)
 {
-    if (cellList_.size() == 0)
+    if (cellList_.empty())
     {
         cellList_.setSize(probeLocations_.size());
 
@@ -182,15 +182,24 @@ bool Foam::probes::checkFieldTypes()
     if (Pstream::master())
     {
         fileName probeDir;
+
+        fileName probeSubDir = name_;
+
+        if (obr_.name() != polyMesh::defaultRegion)
+        {
+            probeSubDir = probeSubDir/obr_.name();
+        }
+        probeSubDir = probeSubDir/obr_.time().timeName();
+
         if (Pstream::parRun())
         {
             // Put in undecomposed case
             // (Note: gives problems for distributed data running)
-            probeDir = obr_.time().path()/".."/name_/obr_.time().timeName();
+            probeDir = obr_.time().path()/".."/probeSubDir;
         }
         else
         {
-            probeDir = obr_.time().path()/name_/obr_.time().timeName();
+            probeDir = obr_.time().path()/probeSubDir;
         }
 
         // Close the file if any fields have been removed.
@@ -240,7 +249,7 @@ bool Foam::probes::checkFieldTypes()
 
                     forAll(probeLocations_, probeI)
                     {
-                        *sPtr<< setw(w) << probeLocations_[probeI][cmpt];
+                        *sPtr<< ' ' << setw(w) << probeLocations_[probeI][cmpt];
                     }
                     *sPtr << endl;
                 }
@@ -299,6 +308,12 @@ Foam::probes::~probes()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 void Foam::probes::execute()
+{
+    // Do nothing - only valid on write
+}
+
+
+void Foam::probes::end()
 {
     // Do nothing - only valid on write
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,9 +93,10 @@ public:
 
     // Constructors
 
+        //- Construct from polyMesh and data stream (provides component)
         velocityComponentLaplacianFvMotionSolver
         (
-            const polyMesh& mesh,
+            const polyMesh&,
             Istream& msData
         );
 

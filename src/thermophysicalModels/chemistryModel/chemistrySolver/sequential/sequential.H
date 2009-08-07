@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,19 +45,24 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class CompType, class ThermoType>
+class sequential;
+
 /*---------------------------------------------------------------------------*\
-                           Class sequential Declaration
+                         Class sequential Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class CompType, class ThermoType>
 class sequential
 :
-    public chemistrySolver
+    public chemistrySolver<CompType, ThermoType>
 {
     // Private data
 
         dictionary coeffsDict_;
 
-        // model constants
+        // Model constants
 
             scalar cTauChem_;
             Switch equil_;
@@ -75,14 +80,13 @@ public:
         //- Construct from components
         sequential
         (
-            const dictionary& dict,
-            chemistryModel& chemistry
+            ODEChemistryModel<CompType, ThermoType>& model,
+            const word& modelName
         );
 
 
-    // Destructor
-
-        ~sequential();
+    //- Destructor
+    virtual ~sequential();
 
 
     // Member Functions
@@ -102,6 +106,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "sequential.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

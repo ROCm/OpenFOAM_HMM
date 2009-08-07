@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -194,7 +194,7 @@ inline quaternion inv(const quaternion& q);
 //- Return a string representation of a quaternion
 word name(const quaternion&);
 
-//- Specify data associated with quaternion type is contiguous
+//- Data associated with quaternion type are contiguous
 template<>
 inline bool contiguous<quaternion>() {return true;}
 

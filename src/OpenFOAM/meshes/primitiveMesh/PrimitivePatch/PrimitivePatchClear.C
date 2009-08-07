@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,10 +29,6 @@ Description
 #include "PrimitivePatch.H"
 #include "demandDrivenData.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -43,7 +39,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::clearGeom()
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+clearGeom()
 {
     if (debug)
     {
@@ -65,7 +64,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::clearTopology()
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+clearTopology()
 {
     if (debug)
     {
@@ -91,10 +93,8 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::clearTopology()
     }
 
     deleteDemandDrivenData(boundaryPointsPtr_);
-
     deleteDemandDrivenData(pointEdgesPtr_);
     deleteDemandDrivenData(pointFacesPtr_);
-
     deleteDemandDrivenData(edgeLoopsPtr_);
 }
 
@@ -106,7 +106,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::clearPatchMeshAddr()
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+clearPatchMeshAddr()
 {
     if (debug)
     {
@@ -129,16 +132,15 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::clearOut()
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+clearOut()
 {
     clearGeom();
     clearTopology();
     clearPatchMeshAddr();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,11 @@ License
 #include "meshSearch.H"
 #include "polyMesh.H"
 #include "indexedOctree.H"
-#include "pointIndexHit.H"
 #include "DynamicList.H"
 #include "demandDrivenData.H"
+#include "treeDataCell.H"
+#include "treeDataFace.H"
+#include "treeDataPoint.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -100,8 +102,8 @@ Foam::label Foam::meshSearch::findNearestCellTree(const point& location) const
 {
     const indexedOctree<treeDataPoint>& tree = cellCentreTree();
 
-    scalar span = mag(tree.bb().max() - tree.bb().min());
-
+    scalar span = tree.bb().mag();
+    
     pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
 
     if (!info.hit())
@@ -177,7 +179,7 @@ Foam::label Foam::meshSearch::findNearestFaceTree(const point& location) const
     // Search nearest cell centre.
     const indexedOctree<treeDataPoint>& tree = cellCentreTree();
 
-    scalar span = mag(tree.bb().max() - tree.bb().min());
+    scalar span = tree.bb().mag();
 
     // Search with decent span
     pointIndexHit info = tree.findNearest(location, Foam::sqr(span));
@@ -460,8 +462,10 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
         }
 
         treeBoundBox overallBb(mesh_.points());
-
         Random rndGen(123456);
+        overallBb.extend(rndGen, 1E-4);
+        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         boundaryTreePtr_ = new indexedOctree<treeDataFace>
         (
@@ -471,7 +475,7 @@ const Foam::indexedOctree<Foam::treeDataFace>& Foam::meshSearch::boundaryTree()
                 mesh_,
                 bndFaces                    // boundary faces only
             ),
-            overallBb.extend(rndGen, 1E-3), // overall search domain
+            overallBb,                      // overall search domain
             8,                              // maxLevel
             10,                             // leafsize
             3.0                             // duplicity
@@ -492,6 +496,10 @@ const Foam::indexedOctree<Foam::treeDataCell>& Foam::meshSearch::cellTree()
         //
 
         treeBoundBox overallBb(mesh_.points());
+        Random rndGen(123456);
+        overallBb.extend(rndGen, 1E-4);
+        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         cellTreePtr_ = new indexedOctree<treeDataCell>
         (
@@ -522,6 +530,10 @@ const Foam::indexedOctree<Foam::treeDataPoint>&
         //
 
         treeBoundBox overallBb(mesh_.cellCentres());
+        Random rndGen(123456);
+        overallBb.extend(rndGen, 1E-4);
+        overallBb.min() -= point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
+        overallBb.max() += point(ROOTVSMALL, ROOTVSMALL, ROOTVSMALL);
 
         cellCentreTreePtr_ = new indexedOctree<treeDataPoint>
         (
@@ -803,7 +815,7 @@ Foam::label Foam::meshSearch::findNearestBoundaryFace
         {
             const indexedOctree<treeDataFace>& tree =  boundaryTree();
 
-            scalar span = mag(tree.bb().max() - tree.bb().min());
+            scalar span = tree.bb().mag();
 
             pointIndexHit info = boundaryTree().findNearest
             (

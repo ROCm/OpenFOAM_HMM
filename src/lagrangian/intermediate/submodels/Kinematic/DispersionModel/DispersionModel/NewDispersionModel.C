@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,10 +38,7 @@ Foam::DispersionModel<CloudType>::New
     CloudType& owner
 )
 {
-    word DispersionModelType
-    (
-        dict.lookup("DispersionModel")
-    );
+    word DispersionModelType(dict.lookup("DispersionModel"));
 
     Info<< "Selecting DispersionModel " << DispersionModelType << endl;
 
@@ -53,11 +50,14 @@ Foam::DispersionModel<CloudType>::New
         FatalErrorIn
         (
             "DispersionModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
         )   << "Unknown DispersionModelType type "
             << DispersionModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid DispersionModel types are :" << nl
+            << "    Valid DispersionModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

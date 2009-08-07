@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -194,7 +194,7 @@ void Foam::vtkFoam::updateSelectedRegions()
     // Read the selected patches and add to the region list
     for (int i=0; i<nRegions; i++)
     {
-        selectedRegions_[i] = 
+        selectedRegions_[i] =
             reader_->GetRegionSelection()->GetArraySetting(i);
     }
 }
@@ -282,7 +282,7 @@ void Foam::vtkFoam::convertMesh()
             else
             {
                 // A patch already existent in the list and which
-                // continues to exist found 
+                // continues to exist found
                 regioni++;
             }
         }
@@ -391,7 +391,7 @@ Foam::vtkFoam::vtkFoam(const char* const FileName, vtkFoamReader* reader)
 {
     fileName fullCasePath(fileName(FileName).path());
 
-    if (!dir(fullCasePath))
+    if (!isDir(fullCasePath))
     {
         return;
     }
@@ -572,7 +572,7 @@ void Foam::vtkFoam::Update()
         {
             Info<< "Reading Mesh" << endl;
         }
-        meshPtr_ = 
+        meshPtr_ =
             new fvMesh
             (
                 IOobject

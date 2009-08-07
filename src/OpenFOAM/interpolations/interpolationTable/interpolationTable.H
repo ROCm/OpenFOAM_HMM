@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,8 +102,16 @@ public:
         //- Construct null
         interpolationTable();
 
+        //- Construct from components
+        interpolationTable
+        (
+            const List<Tuple2<scalar, Type> >& values,
+            const boundsHandling bounds,
+            const fileName& fName
+        );
+
         //- Construct given the name of the file containing the table of data
-        interpolationTable(const fileName& fn);
+        interpolationTable(const fileName& fName);
 
         //- Construct by reading the fileName and boundsHandling from dictionary
         //  and read the table from that file.

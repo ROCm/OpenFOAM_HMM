@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ const Foam::quaternion Foam::quaternion::I(1, vector::zero);
 
 Foam::quaternion::quaternion(Istream& is)
 {
-    operator>>(is, *this);
+    is >> *this;
 }
 
 
@@ -46,9 +46,9 @@ Foam::quaternion::quaternion(Istream& is)
 
 Foam::word Foam::name(const quaternion& q)
 {
-    OStringStream osBuffer;
-    osBuffer << '(' << q.w() << ',' << q.v() << ')';
-    return osBuffer.str();
+    OStringStream buf;
+    buf << '(' << q.w() << ',' << q.v() << ')';
+    return buf.str();
 }
 
 

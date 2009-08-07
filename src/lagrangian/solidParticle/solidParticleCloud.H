@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,10 +108,10 @@ public:
             void move(const dimensionedVector& g);
 
 
-        // I-O
+        // Write
 
             //- Write fields
-            void writeFields() const;
+            virtual void writeFields() const;
 };
 
 

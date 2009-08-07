@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Hex 2x2x2 refiner
+    Refines a hex mesh by 2x2x2 cell splitting.
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,10 +58,12 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
+
     pointMesh pMesh(mesh);
 
     word cellSetName(args.args()[1]);
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     Info<< "Reading cells to refine from cellSet " << cellSetName
         << nl << endl;
@@ -177,6 +179,11 @@ int main(int argc, char *argv[])
     Pout<< "Refined from " << returnReduce(map().nOldCells(), sumOp<label>())
         << " to " << mesh.globalData().nTotalCells() << " cells." << nl << endl;
 
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+        meshCutter.setInstance(oldInstance);
+    }
     Info<< "Writing mesh to " << runTime.timeName() << endl;
 
     mesh.write();

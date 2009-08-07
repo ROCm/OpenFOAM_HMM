@@ -2,7 +2,7 @@
  =========                   |
  \\      /   F ield          | OpenFOAM: The Open Source CFD Toolbox
   \\    /    O peration      |
-   \\  /     A nd            | Copyright (C) 1991-2008 OpenCFD Ltd.
+   \\  /     A nd            | Copyright (C) 1991-2009 OpenCFD Ltd.
     \\/      M anipulation   |
 -------------------------------------------------------------------------------
 License
@@ -33,11 +33,11 @@ Usage
     echo dirName | dirToString
 
     e.g.
-        using csh
-        set baseDirName=`echo $dir | sed 's%^\./%%' | $rulesPath/dirToString`
+        using sh
+        baseDirName=`echo $dir | sed 's%^\./%%' | $bin/dirToString`
 
-        using ksh
-        baseDirName=`echo $dir | sed 's%^\./%%' | $rulesPath/dirToString`
+        using csh
+        set baseDirName=`echo $dir | sed 's%^\./%%' | $bin/dirToString`
 
 \*----------------------------------------------------------------------------*/
 
@@ -49,7 +49,7 @@ int main()
 {
     int c;
     int nextupper = 0;
-    
+
     while ((c=getchar()) != EOF)
     {
         if (c == '/')
@@ -66,7 +66,7 @@ int main()
             {
                 putchar(c);
             }
-            
+
             nextupper = 0;
         }
     }

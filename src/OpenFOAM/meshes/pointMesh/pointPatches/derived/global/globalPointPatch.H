@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-             Class globalPointPatch Declaration
+                      Class globalPointPatch Declaration
 \*---------------------------------------------------------------------------*/
 
 class globalPointPatch
@@ -57,11 +57,11 @@ class globalPointPatch
 {
     // Private data
 
-        ////- Reference to the basic globalMeshData
-        //const globalMeshData& globalMeshData_;
+        // //- Reference to the basic globalMeshData
+        // const globalMeshData& globalMeshData_;
 
         //- Index in the boundary mesh
-        label boundaryIndex_;
+        label index_;
 
 
     // Protected Member Functions
@@ -113,7 +113,7 @@ public:
         //- Construct from components
         globalPointPatch
         (
-            const pointBoundaryMesh& bm,
+            const pointBoundaryMesh&,
             const label index
         );
 
@@ -129,7 +129,7 @@ public:
         virtual const word& name() const
         {
             // There can only be a single patch of this type - therefore
-            // its name is hard-coded.  
+            // its name is hard-coded.
             return type();
         }
 
@@ -161,7 +161,7 @@ public:
         //- Return the index of this patch in the pointBoundaryMesh
         virtual label index() const
         {
-            return boundaryIndex_;
+            return index_;
         }
 
         //- Return mesh points

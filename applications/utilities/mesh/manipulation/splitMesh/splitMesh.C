@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,14 +50,11 @@ Description
 #include "attachDetach.H"
 #include "attachPolyTopoChanger.H"
 #include "regionSide.H"
+#include "primitiveFacePatch.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// Calculation engine for set of faces in a mesh
-typedef PrimitivePatch<face, List, const pointField&> facePatch;
-
 
 // Find edge between points v0 and v1.
 label findEdge(const primitiveMesh& mesh, const label v0, const label v1)
@@ -100,10 +97,10 @@ void checkPatch(const polyBoundaryMesh& bMesh, const word& name)
             << exit(FatalError);
     }
 
-    if (bMesh[patchI].size() != 0)
+    if (bMesh[patchI].size())
     {
         FatalErrorIn("checkPatch(const polyBoundaryMesh&, const word&)")
-            << "Patch " << name << " is present but not of zero size"
+            << "Patch " << name << " is present but non-zero size"
             << exit(FatalError);
     }
 }
@@ -124,11 +121,12 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     word setName(args.additionalArgs()[0]);
     word masterPatch(args.additionalArgs()[1]);
     word slavePatch(args.additionalArgs()[2]);
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     // List of faces to split
     faceSet facesSet(mesh, setName);
@@ -162,10 +160,16 @@ int main(int argc, char *argv[])
     // set of edges on side of this region. Use PrimitivePatch to find these.
     //
 
-    IndirectList<face> zoneFaces(mesh.faces(), faces);
-
     // Addressing on faces only in mesh vertices.
-    facePatch fPatch(zoneFaces(), mesh.points());
+    primitiveFacePatch fPatch
+    (
+        UIndirectList<face>
+        (
+            mesh.faces(),
+            faces
+        ),
+        mesh.points()
+    );
 
     const labelList& meshPoints = fPatch.meshPoints();
 
@@ -262,7 +266,12 @@ int main(int argc, char *argv[])
 
     splitter.attach();
 
-    Info << nl << "Writing polyMesh" << endl;
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
+
+    Info<< "Writing mesh to " << runTime.timeName() << endl;
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())

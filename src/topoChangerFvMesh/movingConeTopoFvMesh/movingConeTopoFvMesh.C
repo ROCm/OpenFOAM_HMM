@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,10 +88,10 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
 
     if
     (
-        pointZones().size() > 0
-     || faceZones().size() > 0
-     || cellZones().size() > 0
-     || topoChanger_.size() > 0
+        pointZones().size()
+     || faceZones().size()
+     || cellZones().size()
+     || topoChanger_.size()
     )
     {
         Info<< "void movingConeTopoFvMesh::addZonesAndModifiers() : "
@@ -133,7 +133,7 @@ void Foam::movingConeTopoFvMesh::addZonesAndModifiers()
                 << flipZone1[nZoneFaces1] << endl;
             nZoneFaces1++;
         }
-        else if 
+        else if
         (
             fc[faceI].x() > -0.00701
          && fc[faceI].x() < -0.00699
@@ -326,7 +326,7 @@ bool Foam::movingConeTopoFvMesh::update()
 
     vector curMotionVel_ =
         motionVelAmplitude_*
-        Foam::sin(time().value()*M_PI/motionVelPeriod_); 
+        Foam::sin(time().value()*M_PI/motionVelPeriod_);
 
     Pout<< "time:" << time().value() << " curMotionVel_:" << curMotionVel_
         << " curLeft:" << curLeft_ << " curRight:" << curRight_
@@ -343,7 +343,7 @@ bool Foam::movingConeTopoFvMesh::update()
             //    << endl;
 
             {
-                OFstream str(db().path()/"meshPoints.obj");
+                OFstream str(time().timePath()/"meshPoints.obj");
                 Pout<< "Writing mesh with meshPoints to " << str.name()
                     << endl;
 
@@ -361,7 +361,7 @@ bool Foam::movingConeTopoFvMesh::update()
                 }
             }
             {
-                OFstream str(db().path()/"preMotionPoints.obj");
+                OFstream str(time().timePath()/"preMotionPoints.obj");
                 Pout<< "Writing mesh with preMotionPoints to " << str.name()
                     << endl;
 

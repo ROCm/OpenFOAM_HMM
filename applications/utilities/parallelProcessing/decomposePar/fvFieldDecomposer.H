@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,15 +96,16 @@ public:
         };
 
 
-        //- Processor patch field decomposer class
+        //- Processor patch field decomposer class. Maps either owner or
+        //  neighbour data (no interpolate anymore - processorFvPatchField
+        //  holds neighbour data)
         class processorVolPatchFieldDecomposer
         :
             public fvPatchFieldMapper
         {
             // Private data
 
-                labelListList addressing_;
-                scalarListList weights_;
+                labelList directAddressing_;
 
         public:
 
@@ -120,27 +121,23 @@ public:
 
                 label size() const
                 {
-                    return addressing_.size();
+                    return directAddressing_.size();
                 }
 
                 bool direct() const
                 {
-                    return false;
+                    return true;
                 }
 
-                const labelListList& addressing() const
+                const unallocLabelList& directAddressing() const
                 {
-                    return addressing_;
-                }
-
-                const scalarListList& weights() const
-                {
-                    return weights_;
+                    return directAddressing_;
                 }
         };
 
 
-        //- Processor patch field decomposer class
+        //- Processor patch field decomposer class. Surface field is assumed
+        //  to have direction (so manipulates sign when mapping)
         class processorSurfacePatchFieldDecomposer
         :
             public fvPatchFieldMapper

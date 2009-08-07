@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,6 @@ SourceFiles
 #ifndef walkPatch_H
 #define walkPatch_H
 
-#include "label.H"
 #include "labelList.H"
 #include "primitivePatch.H"
 

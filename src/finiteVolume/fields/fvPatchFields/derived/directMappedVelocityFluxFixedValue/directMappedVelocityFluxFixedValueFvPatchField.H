@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,20 +56,6 @@ class directMappedVelocityFluxFixedValueFvPatchField
 
         //- Name of flux field
         word phiName_;
-
-
-   // Private member functions
-
-        // Helper function to return the new field values
-        void getNewValues
-        (
-            const directMappedPolyPatch& mpp,
-            const vectorField& sendUValues,
-            const scalarField& sendPhiValues,
-            vectorField& newUValues,
-            scalarField& newPhiValues
-        ) const;
-
 
 public:
 

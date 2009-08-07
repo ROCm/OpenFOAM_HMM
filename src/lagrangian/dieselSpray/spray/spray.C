@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,7 +36,7 @@ License
 #include "injectorModel.H"
 #include "wallModel.H"
 
-#include "combustionMixture.H"
+#include "basicMultiComponentMixture.H"
 
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
@@ -52,23 +52,22 @@ defineTemplateTypeNameAndDebug(IOPtrList<injector>, 0);
 // Construct from components
 Foam::spray::spray
 (
-    const volPointInterpolation& vpi,
     const volVectorField& U,
     const volScalarField& rho,
     const volScalarField& p,
     const volScalarField& T,
-    const combustionMixture& composition,
-    const PtrList<specieProperties>& gasProperties,
+    const basicMultiComponentMixture& composition,
+    const PtrList<gasThermoPhysics>& gasProperties,
     const dictionary&,
-    const dictionary& environmentalProperties
+    const dimensionedVector& g
 )
 :
     Cloud<parcel>(U.mesh(), false), // suppress className checking on positions
     runTime_(U.time()),
     time0_(runTime_.value()),
     mesh_(U.mesh()),
-    volPointInterpolation_(vpi),
     rndGen_(label(0)),
+    g_(g.value()),
 
     U_(U),
     rho_(rho),
@@ -86,6 +85,9 @@ Foam::spray::spray
             IOobject::NO_WRITE
         )
     ),
+
+    ambientPressure_(p_.average().value()),
+    ambientTemperature_(T_.average().value()),
 
     injectors_
     (
@@ -180,7 +182,6 @@ Foam::spray::spray
     ),
 
     subCycles_(readLabel(sprayProperties_.lookup("subCycles"))),
-    g_(dimensionedVector(environmentalProperties.lookup("g")).value()),
 
     gasProperties_(gasProperties),
     composition_(composition),
@@ -206,10 +207,7 @@ Foam::spray::spray
     srhos_(fuels_->components().size()),
 
     totalInjectedLiquidMass_(0.0),
-    injectedLiquidKE_(0.0),
-
-    ambientPressure_(p_.average().value()),
-    ambientTemperature_(T_.average().value())
+    injectedLiquidKE_(0.0)
 
 {
     // create the evaporation source fields
@@ -263,12 +261,12 @@ Foam::spray::spray
         {
             FatalErrorIn
             (
-                "spray::spray(const pointMesh& pMesh, const volVectorField& U, "
+                "spray::spray(const volVectorField& U, "
                 "const volScalarField& rho, const volScalarField& p, "
                 "const volScalarField& T, const combustionMixture& composition,"
-                "const PtrList<specieProperties>& gaseousFuelProperties, "
+                "const PtrList<gasThermoPhsyics>& gaseousFuelProperties, "
                 "const dictionary& thermophysicalProperties, "
-                "const dictionary& environmentalProperties)"
+                "const dimensionedScalar& g)"
             )   << "spray::(...) only one wedgePolyPatch found. "
                    "Please check you BC-setup."
                 << abort(FatalError);

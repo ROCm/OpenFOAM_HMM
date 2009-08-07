@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -154,7 +154,7 @@ tmp<GeometricField<scalar, PatchField, GeoMesh> > pow
             pow
             (
                 gsf1.dimensions(),
-                dimensionedScalar("1", 1.0, gsf2.dimensions())
+                dimensionedScalar("1", gsf2.dimensions(), 1.0)
             )
         )
     );
@@ -183,7 +183,7 @@ tmp<GeometricField<scalar, PatchField, GeoMesh> > pow
             pow
             (
                 gsf1.dimensions(),
-                dimensionedScalar("1", 1.0, gsf2.dimensions())
+                dimensionedScalar("1", gsf2.dimensions(), 1.0)
             )
         )
     );
@@ -214,7 +214,7 @@ tmp<GeometricField<scalar, PatchField, GeoMesh> > pow
             pow
             (
                 gsf1.dimensions(),
-                dimensionedScalar("1", 1.0, gsf2.dimensions())
+                dimensionedScalar("1", gsf2.dimensions(), 1.0)
             )
         )
     );
@@ -247,7 +247,7 @@ tmp<GeometricField<scalar, PatchField, GeoMesh> > pow
             pow
             (
                 gsf1.dimensions(),
-                dimensionedScalar("1", 1.0, gsf2.dimensions())
+                dimensionedScalar("1", gsf2.dimensions(), 1.0)
             )
         )
     );

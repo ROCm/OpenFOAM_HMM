@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,8 @@ Foam::DragModel<CloudType>::DragModel
     const dictionary& dict,
     CloudType& owner
 )
-:   dict_(dict),
+:
+    dict_(dict),
     owner_(owner)
 {}
 
@@ -63,22 +64,21 @@ const Foam::dictionary& Foam::DragModel<CloudType>::dict() const
 
 
 template<class CloudType>
-Foam::scalar Foam::DragModel<CloudType>::Cu
+Foam::scalar Foam::DragModel<CloudType>::utc
 (
     const vector& Ur,
     const scalar d,
     const scalar rhoc,
-    const scalar rhop,
     const scalar mu
 ) const
 {
     const scalar magUr = mag(Ur);
 
-    const scalar Re = rhoc*magUr*d/(mu + SMALL);
+    const scalar Re = rhoc*magUr*d/(mu + ROOTVSMALL);
 
-    const scalar cd = Cd(Re);
+    const scalar Cd = this->Cd(Re);
 
-    return 3.0*cd*rhoc*magUr/(4.0*d*rhop);
+    return Cd*rhoc*magUr/8.0;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open So
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -93,7 +93,7 @@ class fvMesh
         //- Current time index for cell volumes
         //  Note.  The whole mechanism will be replaced once the
         //  dimensionedField is created and the dimensionedField
-        //  will take care of the old-time levels.  
+        //  will take care of the old-time levels.
         mutable label curTimeIndex_;
 
         //- Cell volumes old time level
@@ -173,22 +173,21 @@ public:
         fvMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& allOwner,
-            const labelList& allNeighbour,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<labelList>& allOwner,
+            const Xfer<labelList>& allNeighbour,
             const bool syncPar = true
         );
 
-        //- Construct from components with cells rather than owner
-        //  and neighbourwithout boundary.
+        //- Construct without boundary from cells rather than owner/neighbour.
         //  Boundary is added using addPatches() member function
         fvMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const cellList& cells,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<cellList>& cells,
             const bool syncPar = true
         );
 
@@ -222,13 +221,13 @@ public:
                 return polyMesh::time();
             }
 
-            //- Return the object registry
-            virtual const objectRegistry& db() const
+            //- Return the object registry - resolve conflict polyMesh/lduMesh
+            virtual const objectRegistry& thisDb() const
             {
-                return *this;
+                return polyMesh::thisDb();
             }
 
-            //- Return reference to name 
+            //- Return reference to name
             //  Note: name() is currently ambiguous due to derivation from
             //  surfaceInterpolation
             const word& name() const
@@ -295,7 +294,7 @@ public:
             virtual void updateMesh(const mapPolyMesh& mpm);
 
             //- Move points, returns volumes swept by faces in motion
-            virtual tmp<scalarField> movePoints(const vectorField&);
+            virtual tmp<scalarField> movePoints(const pointField&);
 
             //- Map all fields in time using given map.
             virtual void mapFields(const mapPolyMesh& mpm);

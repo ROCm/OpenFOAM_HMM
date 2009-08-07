@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,18 +25,17 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ThermoCloud.H"
-#include "HeatTransferModel.H"
-
 #include "interpolationCellPoint.H"
 #include "ThermoParcel.H"
+
+#include "HeatTransferModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParcelType>
 Foam::ThermoCloud<ParcelType>::ThermoCloud
 (
-    const word& cloudType,
-    const volPointInterpolation& vpi,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
@@ -45,8 +44,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
 :
     KinematicCloud<ParcelType>
     (
-        cloudType,
-        vpi,
+        cloudName,
         rho,
         U,
         thermo.mu(),
@@ -72,11 +70,11 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         )
     ),
     radiation_(this->particleProperties().lookup("radiation")),
-    hTrans_
+    hsTrans_
     (
         IOobject
         (
-            this->name() + "hTrans",
+            this->name() + "hsTrans",
             this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
@@ -86,11 +84,11 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         this->mesh(),
         dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
     ),
-    hCoeff_
+    hcTrans_
     (
         IOobject
         (
-            this->name() + "hCoeff",
+            this->name() + "hcTrans",
             this->db().time().timeName(),
             this->db(),
             IOobject::NO_READ,
@@ -98,7 +96,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
             false
         ),
         this->mesh(),
-        dimensionedScalar("zero", dimensionSet(1, 2, -3, -1, 0), 0.0)
+        dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
     )
 {}
 
@@ -113,52 +111,86 @@ Foam::ThermoCloud<ParcelType>::~ThermoCloud()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::checkParcelProperties
+(
+    ParcelType& parcel,
+    const scalar lagrangianDt,
+    const bool fullyDescribed
+)
+{
+    KinematicCloud<ParcelType>::checkParcelProperties
+    (
+        parcel,
+        lagrangianDt,
+        fullyDescribed
+    );
+
+    if (!fullyDescribed)
+    {
+        parcel.T() = constProps_.T0();
+        parcel.cp() = constProps_.cp0();
+    }
+}
+
+
+template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
     KinematicCloud<ParcelType>::resetSourceTerms();
-    hTrans_.field() = 0.0;
-    hCoeff_.field() = 0.0;
+    hsTrans_.field() = 0.0;
+    hcTrans_.field() = 0.0;
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::preEvolve()
+{
+    KinematicCloud<ParcelType>::preEvolve();
+}
+
+
+template<class ParcelType>
+void Foam::ThermoCloud<ParcelType>::postEvolve()
+{
+    KinematicCloud<ParcelType>::postEvolve();
 }
 
 
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::evolve()
 {
+    preEvolve();
+
     const volScalarField& T = carrierThermo_.T();
     const volScalarField cp = carrierThermo_.Cp();
 
-    autoPtr<interpolation<scalar> > rhoInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > rhoInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->rho()
     );
 
-    autoPtr<interpolation<vector> > UInterpolator = interpolation<vector>::New
+    autoPtr<interpolation<vector> > UInterp = interpolation<vector>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->U()
     );
 
-    autoPtr<interpolation<scalar> > muInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > muInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         this->mu()
     );
 
-    autoPtr<interpolation<scalar> > TInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > TInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         T
     );
 
-    autoPtr<interpolation<scalar> > cpInterpolator = interpolation<scalar>::New
+    autoPtr<interpolation<scalar> > cpInterp = interpolation<scalar>::New
     (
         this->interpolationSchemes(),
-        this->vpi(),
         cp
     );
 
@@ -166,15 +198,15 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     (
         *this,
         constProps_,
-        rhoInterpolator(),
-        UInterpolator(),
-        muInterpolator(),
-        TInterpolator(),
-        cpInterpolator(),
+        rhoInterp(),
+        UInterp(),
+        muInterp(),
+        TInterp(),
+        cpInterp(),
         this->g().value()
     );
 
-    inject(td);
+    this->injection().inject(td);
 
     if (this->coupled())
     {
@@ -182,18 +214,15 @@ void Foam::ThermoCloud<ParcelType>::evolve()
     }
 
     Cloud<ParcelType>::move(td);
+
+    postEvolve();
 }
 
 
 template<class ParcelType>
-template<class TrackingData>
-void Foam::ThermoCloud<ParcelType>::inject
-(
-    TrackingData& td
-)
+void Foam::ThermoCloud<ParcelType>::info() const
 {
-    // Injection is same as for KinematicCloud<ParcelType>
-    KinematicCloud<ParcelType>::inject(td);
+    KinematicCloud<ParcelType>::info();
 }
 
 

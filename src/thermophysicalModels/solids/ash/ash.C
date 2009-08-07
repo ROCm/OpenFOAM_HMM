@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,19 +27,57 @@ License
 #include "ash.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(ash, 0);
+    addToRunTimeSelectionTable(solid, ash,);
+    addToRunTimeSelectionTable(solid, ash, Istream);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(ash, 0);
-addToRunTimeSelectionTable(solid, ash,);
-addToRunTimeSelectionTable(solid, ash, Istream);
+Foam::ash::ash()
+:
+    solid(2010, 710, 0.04, 0.0, 1.0)
+{
+    if (debug)
+    {
+        WarningIn("ash::ash()")
+            << "Properties of ash need to be checked!!!"
+            << endl;
+    }
+}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
+Foam::ash::ash(const solid& s)
+:
+    solid(s)
+{}
+
+
+Foam::ash::ash(Istream& is)
+:
+    solid(is)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::ash::writeData(Ostream& os) const
+{
+    solid::writeData(os);
+}
+
+
+// * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const ash& s)
+{
+    s.writeData(os);
+    return os;
+}
+
 
 // ************************************************************************* //

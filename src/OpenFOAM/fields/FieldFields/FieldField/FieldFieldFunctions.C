@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -430,10 +430,7 @@ Type max(const FieldField<Field, Type>& f)
     }
     else
     {
-        WarningIn("max(const FieldField<Field, Type>&) const")
-            << "empty fieldField, returning zero" << endl;
-
-        return pTraits<Type>::zero;
+        return pTraits<Type>::min;
     }
 }
 
@@ -464,10 +461,7 @@ Type min(const FieldField<Field, Type>& f)
     }
     else
     {
-        WarningIn("min(const FieldField<Field, Type>&) const")
-            << "empty fieldField, returning zero" << endl;
-
-        return pTraits<Type>::zero;
+        return pTraits<Type>::max;
     }
 }
 

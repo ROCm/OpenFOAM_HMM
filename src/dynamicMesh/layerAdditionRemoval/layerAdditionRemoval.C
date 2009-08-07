@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -80,13 +80,13 @@ void Foam::layerAdditionRemoval::checkDefinition()
             << abort(FatalError);
     }
 
-    if (topoChanger().mesh().faceZones()[faceZoneID_.index()].size() == 0)
+    if (topoChanger().mesh().faceZones()[faceZoneID_.index()].empty())
     {
         FatalErrorIn
         (
             "void Foam::layerAdditionRemoval::checkDefinition()"
-        )   << "Face extrusion zone contains no faces.  Please check your "
-            << "mesh definition."
+        )   << "Face extrusion zone contains no faces. "
+            << " Please check your mesh definition."
             << abort(FatalError);
     }
 

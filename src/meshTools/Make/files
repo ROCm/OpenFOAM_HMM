@@ -1,11 +1,7 @@
-/*
 cellClassification/cellClassification.C
 cellClassification/cellInfo.C
 
 cellQuality/cellQuality.C
-
-
-*/
 
 cellDist/cellDistFuncs.C
 cellDist/patchWave/patchWave.C
@@ -13,13 +9,12 @@ cellDist/wallPoint/wallPoint.C
 cellFeatures/cellFeatures.C
 
 coordinateSystems/coordinateSystem.C
+coordinateSystems/coordinateSystemNew.C
 coordinateSystems/coordinateSystems.C
-coordinateSystems/parabolicCylindricalCS.C
-coordinateSystems/toroidalCS.C
-coordinateSystems/cartesianCS.C
-coordinateSystems/newCoordinateSystem.C
 coordinateSystems/cylindricalCS.C
 coordinateSystems/sphericalCS.C
+coordinateSystems/parabolicCylindricalCS.C
+coordinateSystems/toroidalCS.C
 coordinateSystems/coordinateRotation/coordinateRotation.C
 coordinateSystems/coordinateRotation/EulerCoordinateRotation.C
 coordinateSystems/coordinateRotation/STARCDCoordinateRotation.C
@@ -58,21 +53,22 @@ indexedOctree/treeDataTriSurface.C
 searchableSurface = searchableSurface
 $(searchableSurface)/distributedTriSurfaceMesh.C
 $(searchableSurface)/searchableBox.C
+$(searchableSurface)/searchableCylinder.C
+$(searchableSurface)/searchablePlane.C
 $(searchableSurface)/searchablePlate.C
 $(searchableSurface)/searchableSphere.C
 $(searchableSurface)/searchableSurface.C
+$(searchableSurface)/searchableSurfaceCollection.C
 $(searchableSurface)/searchableSurfaces.C
 $(searchableSurface)/searchableSurfacesQueries.C
-$(searchableSurface)/triSurfaceMesh.C
 $(searchableSurface)/searchableSurfaceWithGaps.C
+$(searchableSurface)/triSurfaceMesh.C
 
 topoSets = sets/topoSets
 $(topoSets)/cellSet.C
 $(topoSets)/topoSet.C
 $(topoSets)/faceSet.C
 $(topoSets)/pointSet.C
-
-/*
 
 sets/topoSetSource/topoSetSource.C
 
@@ -91,6 +87,8 @@ $(cellSources)/nearestToCell/nearestToCell.C
 $(cellSources)/nbrToCell/nbrToCell.C
 $(cellSources)/zoneToCell/zoneToCell.C
 $(cellSources)/sphereToCell/sphereToCell.C
+$(cellSources)/cylinderToCell/cylinderToCell.C
+$(cellSources)/faceZoneToCell/faceZoneToCell.C
 
 faceSources = sets/faceSources
 $(faceSources)/faceToFace/faceToFace.C
@@ -111,6 +109,9 @@ $(pointSources)/faceToPoint/faceToPoint.C
 $(pointSources)/boxToPoint/boxToPoint.C
 $(pointSources)/surfaceToPoint/surfaceToPoint.C
 $(pointSources)/zoneToPoint/zoneToPoint.C
+$(pointSources)/nearestToPoint/nearestToPoint.C
+
+/*
 
 surfaceSets/surfaceSets.C
 
@@ -143,7 +144,10 @@ triSurface/triSurfaceTools/geompack/geompack.C
 
 twoDPointCorrector/twoDPointCorrector.C
 
+directMapped/directMappedPolyPatch/directMappedPatchBase.C
 directMapped/directMappedPolyPatch/directMappedPolyPatch.C
+directMapped/directMappedPolyPatch/directMappedWallPolyPatch.C
 directMapped/directMappedPointPatch/directMappedPointPatch.C
+directMapped/directMappedPointPatch/directMappedWallPointPatch.C
 
 LIB = $(FOAM_LIBBIN)/libmeshTools

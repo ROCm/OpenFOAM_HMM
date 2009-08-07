@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,24 +27,16 @@ License
 #include "pdf.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 namespace Foam
 {
-
-defineTypeNameAndDebug(pdf, 0);
-
-defineRunTimeSelectionTable(pdf, dictionary);
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
+    defineTypeNameAndDebug(pdf, 0);
+    defineRunTimeSelectionTable(pdf, dictionary);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-pdf::pdf
-(
-    const dictionary& dict,
-    Random& rndGen
-)
+Foam::pdf::pdf(const dictionary& dict, Random& rndGen)
 :
     dict_(dict),
     rndGen_(rndGen)
@@ -53,10 +45,8 @@ pdf::pdf
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-pdf::~pdf()
+Foam::pdf::~pdf()
 {}
 
 
 // ************************************************************************* //
-
-} // end namespace Foam

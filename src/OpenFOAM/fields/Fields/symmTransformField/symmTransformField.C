@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ void transform
     {
         TFOR_ALL_F_OP_FUNC_F_F
         (
-            Type, rtf, =, transform, tensor, trf, Type, tf
+            Type, rtf, =, transform, symmTensor, trf, Type, tf
         )
     }
 }

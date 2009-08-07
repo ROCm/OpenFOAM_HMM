@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,8 +61,6 @@ public:
 };
 
 
-#ifndef __CINT__
-
 template<class arg1, class arg2>
 class outerProduct
 {
@@ -120,52 +118,6 @@ public:
         arg2*int(pTraits<arg1>::rank)
     >::type type;
 };
-
-#else
-
-template<class arg1, class arg2>
-class outerProduct
-{
-public:
-
-    typedef arg1 type;
-};
-
-
-template<class arg1, class arg2>
-class crossProduct
-{
-public:
-
-    typedef arg1 type;
-};
-
-template<class arg1, class arg2>
-class innerProduct
-{
-public:
-
-    typedef arg1 type;
-};
-
-template<class arg1, class arg2>
-class scalarProduct
-{
-public:
-
-    typedef typename pTraits<arg1>::cmptType type;
-};
-
-
-template<class arg1, int arg2>
-class powProduct
-{
-public:
-
-    typedef arg1 type;
-};
-
-#endif
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

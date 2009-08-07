@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -96,7 +96,7 @@ bool Foam::syncTools::hasCouples(const polyBoundaryMesh& patches)
 
 
 // Determines for every point whether it is coupled and if so sets only one.
-Foam::PackedList<1> Foam::syncTools::getMasterPoints(const polyMesh& mesh)
+Foam::PackedBoolList Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 {
     PackedList<1> isMasterPoint(mesh.nPoints());
 
@@ -111,8 +111,7 @@ Foam::PackedList<1> Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 
     labelList minProc(mesh.globalData().nGlobalPoints(), labelMax);
 
-    IndirectList<label>(minProc, sharedPointAddr) =
-        Pstream::myProcNo();
+    UIndirectList<label>(minProc, sharedPointAddr) = Pstream::myProcNo();
 
     Pstream::listCombineGather(minProc, minEqOp<label>());
     Pstream::listCombineScatter(minProc);
@@ -217,7 +216,7 @@ Foam::PackedList<1> Foam::syncTools::getMasterPoints(const polyMesh& mesh)
 
 
 // Determines for every edge whether it is coupled and if so sets only one.
-Foam::PackedList<1> Foam::syncTools::getMasterEdges(const polyMesh& mesh)
+Foam::PackedBoolList Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 {
     PackedList<1> isMasterEdge(mesh.nEdges());
 
@@ -232,8 +231,7 @@ Foam::PackedList<1> Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
     labelList minProc(mesh.globalData().nGlobalEdges(), labelMax);
 
-    IndirectList<label>(minProc, sharedEdgeAddr) =
-        Pstream::myProcNo();
+    UIndirectList<label>(minProc, sharedEdgeAddr) = Pstream::myProcNo();
 
     Pstream::listCombineGather(minProc, minEqOp<label>());
     Pstream::listCombineScatter(minProc);
@@ -338,9 +336,9 @@ Foam::PackedList<1> Foam::syncTools::getMasterEdges(const polyMesh& mesh)
 
 
 // Determines for every face whether it is coupled and if so sets only one.
-Foam::PackedList<1> Foam::syncTools::getMasterFaces(const polyMesh& mesh)
+Foam::PackedBoolList Foam::syncTools::getMasterFaces(const polyMesh& mesh)
 {
-    PackedList<1> isMasterFace(mesh.nFaces(), 1);
+    PackedBoolList isMasterFace(mesh.nFaces(), 1);
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 

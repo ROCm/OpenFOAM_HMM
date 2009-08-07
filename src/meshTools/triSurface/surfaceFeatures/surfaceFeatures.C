@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -197,7 +197,7 @@ void Foam::surfaceFeatures::calcFeatPoints(const List<edgeStatus>& edgeStat)
             featurePoints.append(pointI);
         }
     }
-    featurePoints.shrink();
+
     featurePoints_.transfer(featurePoints);
 }
 
@@ -247,7 +247,7 @@ Foam::label Foam::surfaceFeatures::nextFeatEdge
 // prevPointI. Marks feature edges visited in featVisited by assigning them
 // the current feature line number. Returns cumulative length of edges walked.
 // Works in one of two modes:
-// - mark : step to edges with featVisited = -1. 
+// - mark : step to edges with featVisited = -1.
 //          Mark edges visited with currentFeatI.
 // - clear : step to edges with featVisited = currentFeatI
 //           Mark edges visited with -2 and erase from feature edges.
@@ -257,7 +257,7 @@ Foam::surfaceFeatures::labelScalar Foam::surfaceFeatures::walkSegment
     const List<edgeStatus>& edgeStat,
     const label startEdgeI,
     const label startPointI,
-    const label currentFeatI,     
+    const label currentFeatI,
     labelList& featVisited
 )
 {
@@ -360,7 +360,7 @@ Foam::surfaceFeatures::surfaceFeatures
     const labelList& featureEdges,
     const label externalStart,
     const label internalStart
-)    
+)
 :
     surf_(surf),
     featurePoints_(featurePoints),
@@ -457,7 +457,7 @@ Foam::labelList Foam::surfaceFeatures::selectFeatureEdges
 
     if (regionEdges)
     {
-        selectedEdges.setSize(selectedEdges.size() + nRegionEdges());
+        selectedEdges.setCapacity(selectedEdges.size() + nRegionEdges());
 
         for (label i = 0; i < externalStart_; i++)
         {
@@ -467,7 +467,7 @@ Foam::labelList Foam::surfaceFeatures::selectFeatureEdges
 
     if (externalEdges)
     {
-        selectedEdges.setSize(selectedEdges.size() + nExternalEdges());
+        selectedEdges.setCapacity(selectedEdges.size() + nExternalEdges());
 
         for (label i = externalStart_; i < internalStart_; i++)
         {
@@ -477,7 +477,7 @@ Foam::labelList Foam::surfaceFeatures::selectFeatureEdges
 
     if (internalEdges)
     {
-        selectedEdges.setSize(selectedEdges.size() + nInternalEdges());
+        selectedEdges.setCapacity(selectedEdges.size() + nInternalEdges());
 
         for (label i = internalStart_; i < featureEdges_.size(); i++)
         {
@@ -530,8 +530,8 @@ void Foam::surfaceFeatures::findFeatures(const scalar includedAngle)
 
                     // Check if convex or concave by looking at angle
                     // between face centres and normal
-                    vector f0Tof1 = 
-                        surf_[face1].centre(points) 
+                    vector f0Tof1 =
+                        surf_[face1].centre(points)
                         - surf_[face0].centre(points);
 
                     if ((f0Tof1 & faceNormals[face0]) > 0.0)
@@ -683,11 +683,11 @@ void Foam::surfaceFeatures::writeDict(Ostream& writeFile) const
 {
 
     dictionary featInfoDict;
-    featInfoDict.add("externalStart", externalStart_); 
+    featInfoDict.add("externalStart", externalStart_);
     featInfoDict.add("internalStart", internalStart_);
     featInfoDict.add("featureEdges", featureEdges_);
     featInfoDict.add("featurePoints", featurePoints_);
-    
+
     featInfoDict.write(writeFile);
 }
 
@@ -1152,7 +1152,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
 (
     const labelList& selectedEdges,
     const pointField& samples,
-    const vector& searchSpan,   // Search span 
+    const vector& searchSpan,   // Search span
     labelList& edgeLabel,
     labelList& edgeEndPoint,
     pointField& edgePoint
@@ -1163,7 +1163,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
     edgePoint.setSize(samples.size());
 
     const pointField& localPoints = surf_.localPoints();
-    
+
     octree<octreeDataEdges> ppTree
     (
         treeBoundBox(localPoints),  // overall search domain
@@ -1232,7 +1232,7 @@ void Foam::surfaceFeatures::nearestSurfEdge
     const labelList& selectedSampleEdges,
     const pointField& samplePoints,
 
-    const vector& searchSpan,   // Search span 
+    const vector& searchSpan,   // Search span
     labelList& edgeLabel,       // label of surface edge or -1
     pointField& pointOnEdge,    // point on above edge
     pointField& pointOnFeature  // point on sample edge
@@ -1242,7 +1242,6 @@ void Foam::surfaceFeatures::nearestSurfEdge
     pointOnEdge.setSize(selectedSampleEdges.size());
     pointOnFeature.setSize(selectedSampleEdges.size());
 
-    
 
     octree<octreeDataEdges> ppTree
     (

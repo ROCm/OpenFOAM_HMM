@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -163,24 +163,45 @@ public:
             const faceZoneMesh& zm
         );
 
+        //- Construct from components, transferring contents
+        faceZone
+        (
+            const word& name,
+            const Xfer<labelList>& addr,
+            const Xfer<boolList>& fm,
+            const label index,
+            const faceZoneMesh&
+        );
+
         //- Construct from dictionary
         faceZone
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
-            const faceZoneMesh& zm
+            const faceZoneMesh&
         );
 
         //- Construct given the original zone and resetting the
         //  face list and zone mesh information
         faceZone
         (
-            const faceZone& fz,
+            const faceZone&,
             const labelList& addr,
             const boolList& fm,
             const label index,
-            const faceZoneMesh& zm
+            const faceZoneMesh&
+        );
+
+        //- Construct given the original zone, resetting the
+        //  face list and zone mesh information
+        faceZone
+        (
+            const faceZone&,
+            const Xfer<labelList>& addr,
+            const Xfer<boolList>& fm,
+            const label index,
+            const faceZoneMesh&
         );
 
         //- Construct and return a clone, resetting the zone mesh
@@ -216,9 +237,9 @@ public:
         static autoPtr<faceZone> New
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
-            const faceZoneMesh& zm
+            const faceZoneMesh&
         );
 
 
@@ -280,6 +301,10 @@ public:
 
         //- Check zone definition. Return true if in error.
         bool checkDefinition(const bool report = false) const;
+
+        //- Check whether all procs have faces synchronised. Return
+        //  true if in error.
+        bool checkParallelSync(const bool report = false) const;
 
         //- Correct patch after moving points
         virtual void movePoints(const pointField&);

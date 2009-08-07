@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -27,30 +27,52 @@
 #     foamCleanPath
 #
 # Description
-#     Usage: foamCleanPath path [wildcard] .. [wildcard]
+#     Usage: foamCleanPath [-strip] path [wildcard] .. [wildcard]
 #
 #     Prints its argument (which should be a ':' separated path)
 #     without all
 #         - duplicate elements
-#         - non-accessible directories
 #         - elements whose start matches a wildcard
+#         - inaccessible directories (with the -strip option)
 #
 #     Note:
 #         - this routine will fail when directories have embedded spaces
 #         - false matches possible if a wildcard contains '.' (sed regex)
 #------------------------------------------------------------------------------
-if [ "$#" -lt 1 -o "$1" = "-h" -o "$1" = "-help" ]
-then
-   cat <<USAGE 1>&2
-Usage: ${0##*/} path [wildcard] .. [wildcard]
+usage() {
+    cat <<USAGE 1>&2
+usage: ${0##*/} [-strip] path [wildcard] .. [wildcard]
 
-    Prints its argument (which should be a ':' separated list) cleansed from
-      - duplicate elements
-      - non-accessible directories
-      - elements whose start matches one of the wildcard(s)
+  Prints its argument (which should be a ':' separated list) cleansed from
+    - duplicate elements
+    - elements whose start matches one of the wildcard(s)
+    - inaccessible directories (with the -strip option)
+
 USAGE
-   exit 1
-fi
+    exit 1
+}
+
+
+unset strip
+# parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)
+        usage
+        ;;
+    -strip)
+        strip=true
+        shift
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+
+[ "$#" -ge 1 ] || usage
 
 dirList="$1"
 shift
@@ -67,10 +89,10 @@ set -- $*
 # strip out wildcards via sed
 while [ "$#" -ge 1 ]
 do
-   wildcard=$1
-   shift
-   ##DEBUG echo "remove>$wildcard<" 1>&2
-   dirList=`echo "$dirList" | sed -e "s@${wildcard}[^:]*:@@g"`
+    wildcard=$1
+    shift
+    ##DEBUG echo "remove>$wildcard<" 1>&2
+    dirList=$(echo "$dirList" | sed -e "s@${wildcard}[^:]*:@@g")
 done
 
 # split on ':' (and on space as well to avoid any surprises)
@@ -83,18 +105,22 @@ set -- $dirList
 unset dirList
 for dir
 do
-   ##DEBUG echo "check>$dir<" 1>&2
-   #- dirs must exist
-   if [ -e "$dir" ]
-   then
-      #- no duplicate dirs
-      duplicate=`echo " $dirList " | sed -ne "s@ $dir @DUP@p"`
+    ##DEBUG echo "check>$dir<" 1>&2
+    #- dirs must exist
+    if [ -e "$dir" ]
+    then
+        #- no duplicate dirs
+        duplicate=$(echo " $dirList " | sed -ne "s@ $dir @DUP@p")
 
-      if [ ! "$duplicate" ]
-      then
-         dirList="$dirList $dir"
-      fi
-   fi
+        if [ ! "$duplicate" ]
+        then
+            dirList="$dirList $dir"
+        fi
+    elif [ "$strip" != true ]
+    then
+        # Print non-existing directories if not in 'strip' mode.
+        dirList="$dirList $dir"
+    fi
 done
 
 # parse on whitespace

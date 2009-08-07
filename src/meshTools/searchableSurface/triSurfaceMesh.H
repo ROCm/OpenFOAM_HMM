@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,11 @@ Class
 Description
     IOoject and searching on triSurface
 
+    Note: when constructing from dictionary has optional parameters:
+        - scale     : scaling factor.
+        - tolerance : relative tolerance for doing intersections
+                      (see triangle::intersection)
+
 SourceFiles
     triSurfaceMesh.C
 
@@ -42,6 +47,7 @@ SourceFiles
 #include "indexedOctree.H"
 #include "treeDataTriSurface.H"
 #include "treeDataEdge.H"
+#include "EdgeMap.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,6 +68,9 @@ private:
 
     // Private member data
 
+        //- Optional tolerance to use in searches
+        scalar tolerance_;
+
         //- Search tree (triangles)
         mutable autoPtr<indexedOctree<treeDataTriSurface> > tree_;
 
@@ -76,11 +85,26 @@ private:
 
     // Private Member Functions
 
+        ////- Helper: find instance of files without header
+        //static word findRawInstance
+        //(
+        //    const Time&,
+        //    const fileName&,
+        //    const word&
+        //);
+
         //- Check file existence
         static const fileName& checkFile
         (
             const fileName& fName,
             const fileName& objectName
+        );
+
+        //- Helper function for isSurfaceClosed
+        static bool addFaceToEdge
+        (
+            const edge&,
+            EdgeMap<label>&
         );
 
         //- Check whether surface is closed without calculating any permanent
@@ -105,10 +129,11 @@ public:
         //- Construct from triSurface
         triSurfaceMesh(const IOobject&, const triSurface&);
 
-        //- Construct read
+        //- Construct read.
         triSurfaceMesh(const IOobject& io);
 
-        //- Construct from dictionary (used by searchableSurface)
+        //- Construct from IO and dictionary (used by searchableSurface).
+        //  Dictionary may contain a 'scale' entry (eg, 0.001: mm -> m)
         triSurfaceMesh
         (
             const IOobject& io,

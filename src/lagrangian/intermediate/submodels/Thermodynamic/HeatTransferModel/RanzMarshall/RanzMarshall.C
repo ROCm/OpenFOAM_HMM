@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,6 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 \*---------------------------------------------------------------------------*/
-
-#include "error.H"
 
 #include "RanzMarshall.H"
 
@@ -65,7 +63,7 @@ Foam::scalar Foam::RanzMarshall<CloudType>::Nu
     const scalar Pr
 ) const
 {
-    return 2.0 + 0.6*pow(Re, 1.0/2.0)*pow(Pr, 1.0/3.0);
+    return 2.0 + 0.6*pow(Re, 0.5)*pow(Pr, 0.333);
 }
 
 

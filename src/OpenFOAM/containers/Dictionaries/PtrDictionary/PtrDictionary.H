@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,8 +27,10 @@ Class
 
 Description
     Template dictionary class which does not manages the storage
-    associated with it.  It is derived from DictionaryBase instantiated on
-    a non-memory managed form of intrusive doubly-linked list of T.
+    associated with it.
+
+    It is derived from DictionaryBase instantiated on a non-memory managed
+    form of intrusive doubly-linked list of T.
 
 SourceFiles
     PtrDictionary.C
@@ -47,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class PtrDictionary Declaration
+                        Class PtrDictionary Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T>

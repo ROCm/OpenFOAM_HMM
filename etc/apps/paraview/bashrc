@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -26,31 +26,42 @@
 #     paraview/bashrc
 #
 # Description
-#     Setup file for Paraview.
-#     Sourced from OpenFOAM-?.?/etc/bashrc
+#     Setup file for paraview-2.x
+#     Sourced from OpenFOAM-*/etc/bashrc
 #
 #------------------------------------------------------------------------------
 
-export CMAKE_HOME=$WM_THIRD_PARTY_DIR/cmake-2.4.6/platforms/$WM_ARCH
+# determine the cmake to be used
+unset CMAKE_HOME
+for cmake in cmake-2.6.4 cmake-2.6.2 cmake-2.4.6
+do
+    cmake=$WM_THIRD_PARTY_DIR/$cmake/platforms/$WM_ARCH
+    if [ -r $cmake ]
+    then
+        export CMAKE_HOME=$cmake
+        export PATH=$CMAKE_HOME/bin:$PATH
+        break
+    fi
+done
 
-if [ -r $CMAKE_HOME ]; then
-    export PATH=$CMAKE_HOME/bin:$PATH
-fi
-
+paraviewMajor=paraview-2.4
 export ParaView_VERSION=2.4.4
 
 export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/ParaView$ParaView_VERSION
-export ParaView_DIR=$ParaView_INST_DIR/lib/paraview-2.4
+export ParaView_DIR=$ParaView_INST_DIR/lib/$paraviewMajor
 
-if [ -r $ParaView_INST_DIR ]; then
+if [ -r $ParaView_INST_DIR ]
+then
     export PV_INTERFACE_PATH=$FOAM_UTILITIES/postProcessing/graphics/PVFoamReader/PVFoamReader/Make
 
     export PATH=$ParaView_INST_DIR/bin:$PATH
     export LD_LIBRARY_PATH=${ParaView_INST_DIR}/lib:${ParaView_INST_DIR}/lib/vtk:${LD_LIBRARY_PATH}
 fi
 
-if [ -r $ParaView_DIR ]; then
+if [ -r $ParaView_DIR ]
+then
     export VTK_DIR=$ParaView_DIR/VTK
 fi
 
+unset cmake paraviewMajor
 # -----------------------------------------------------------------------------

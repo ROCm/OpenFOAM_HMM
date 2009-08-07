@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,7 +44,7 @@ volScalarField Sevap
     dimensionedScalar("zero", dimensionSet(1, -3, -1, 0, 0), 0.0)
 );
 
-for(label i=0; i<Y.size(); i++)
+for (label i=0; i<Y.size(); i++)
 {
     if (dieselSpray.isLiquidFuel()[i])
     {

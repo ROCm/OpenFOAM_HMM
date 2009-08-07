@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -365,8 +365,7 @@ void Foam::removeFaces::mergeFaces
     }
 
     face mergedFace;
-    mergedFace.transfer(faceVerts.shrink());
-    faceVerts.clear();
+    mergedFace.transfer(faceVerts);
 
     if (reverseLoop)
     {
@@ -376,7 +375,7 @@ void Foam::removeFaces::mergeFaces
     //{
     //    Pout<< "Modifying masterface " << faceI
     //        << " from faces:" << faceLabels
-    //        << " old verts:" << IndirectList<face>(mesh_.faces(), faceLabels)
+    //        << " old verts:" << UIndirectList<face>(mesh_.faces(), faceLabels)
     //        << " for new verts:"
     //        << mergedFace
     //        << " possibly new owner " << own
@@ -570,7 +569,7 @@ Foam::removeFaces::removeFaces
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Removing face connects cells. This function works out a consistent set of
-// cell regions. 
+// cell regions.
 // - returns faces to remove. Can be extended with additional faces
 //   (if owner would become neighbour)
 // - sets cellRegion to -1 or to region number
@@ -689,7 +688,7 @@ Foam::label Foam::removeFaces::compatibleRemoves
 
 
     // Various checks
-    // - master is lowest numbered in any region 
+    // - master is lowest numbered in any region
     // - regions have more than 1 cell
     {
         labelList nCells(regionMaster.size(), 0);
@@ -759,8 +758,7 @@ Foam::label Foam::removeFaces::compatibleRemoves
         }
     }
 
-    newFacesToRemove.transfer(allFacesToRemove.shrink());
-    allFacesToRemove.clear();
+    newFacesToRemove.transfer(allFacesToRemove);
 
     return nUsedRegions;
 }
@@ -1097,7 +1095,7 @@ void Foam::removeFaces::setRefinement
             else if (nFacesPerEdge[edgeI] == 1)
             {
                 // 1: illegal. Tested above.
-            }            
+            }
             else if (nFacesPerEdge[edgeI] == 2)
             {
                 // 2: merge faces.
@@ -1213,7 +1211,7 @@ void Foam::removeFaces::setRefinement
                         << "The other side has region:" << nbrRegion
                         << endl
                         << "(region -1 means face is to be deleted)"
-                        << abort(FatalError);                
+                        << abort(FatalError);
                 }
             }
             else if (toNbrRegion[myRegion] == -1)
@@ -1234,9 +1232,9 @@ void Foam::removeFaces::setRefinement
                         << " with coupled neighbouring regions:"
                         << toNbrRegion[myRegion] << " and "
                         << nbrRegion
-                        << abort(FatalError);                
+                        << abort(FatalError);
                 }
-            }   
+            }
         }
     }
 
@@ -1351,7 +1349,7 @@ void Foam::removeFaces::setRefinement
             pointsToRemove
         )
     );
-    
+
     //
     // Now we know
     // - faceLabels         : faces to remove (sync since no boundary faces)
@@ -1360,7 +1358,7 @@ void Foam::removeFaces::setRefinement
     // - faceRegion         : connected face region of faces to be merged (sync)
     // - affectedFace       : faces with points removed and/or owner/neighbour
     //                        changed (non sync)
-    
+
 
     // Start modifying mesh and keep track of faces changed.
 

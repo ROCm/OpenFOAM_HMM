@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,7 @@ SourceFiles
 #include "labelList.H"
 #include "labelPair.H"
 #include "Pstream.H"
+#include "boolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -78,16 +79,6 @@ class mapDistribute
 
         //- Schedule
         mutable autoPtr<List<labelPair> > schedulePtr_;
-
-
-    // Private Member Functions
-
-        //- Disallow default bitwise copy construct
-        mapDistribute(const mapDistribute&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const mapDistribute&);
-
 
 
 public:
@@ -119,6 +110,9 @@ public:
             const labelList& recvProcs
         );
 
+        //- Construct copy
+        mapDistribute(const mapDistribute&);
+
 
     // Member Functions
 
@@ -130,14 +124,32 @@ public:
                 return constructSize_;
             }
 
+            //- Constructed data size
+            label& constructSize()
+            {
+                return constructSize_;
+            }
+
             //- From subsetted data back to original data
             const labelListList& subMap() const
             {
                 return subMap_;
             }
 
+            //- From subsetted data back to original data
+            labelListList& subMap()
+            {
+                return subMap_;
+            }
+
             //- From subsetted data to new reconstructed data
             const labelListList& constructMap() const
+            {
+                return constructMap_;
+            }
+
+            //- From subsetted data to new reconstructed data
+            labelListList& constructMap()
             {
                 return constructMap_;
             }
@@ -155,6 +167,12 @@ public:
 
         // Other
 
+            //- Compact maps. Gets per field a bool whether it is used (locally)
+            //  and works out itself what this side and sender side can remove
+            //  from maps.
+            void compact(const boolList& elemIsUsed);
+
+
             //- Distribute data. Note:schedule only used for Pstream::scheduled
             //  for now, all others just use send-to-all, receive-from-all.
             template<class T>
@@ -166,6 +184,21 @@ public:
                 const labelListList& subMap,
                 const labelListList& constructMap,
                 List<T>&
+            );
+
+            //- Distribute data. If multiple processors writing to same
+            //  position adds contributions using cop.
+            template<class T, class CombineOp>
+            static void distribute
+            (
+                const Pstream::commsTypes commsType,
+                const List<labelPair>& schedule,
+                const label constructSize,
+                const labelListList& subMap,
+                const labelListList& constructMap,
+                List<T>&,
+                const CombineOp& cop,
+                const T& nullValue
             );
 
             //- Distribute data using default commsType.
@@ -222,6 +255,11 @@ public:
                     "mapDistribute::updateMesh(const mapPolyMesh&)"
                 );
             }
+
+    // Member Operators
+
+        void operator=(const mapDistribute&);
+
 };
 
 

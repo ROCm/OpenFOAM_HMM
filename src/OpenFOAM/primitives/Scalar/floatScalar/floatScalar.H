@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,6 +61,7 @@ static const floatScalar floatScalarROOTVSMALL = 1.0e-18;
 
 
 #define Scalar floatScalar
+#define ScalarVGREAT floatScalarVGREAT
 #define ScalarVSMALL floatScalarVSMALL
 #define readScalar readFloatScalar
 
@@ -98,6 +99,7 @@ inline Scalar yn(const int n, const Scalar s)
 }
 
 #undef Scalar
+#undef ScalarVGREAT
 #undef ScalarVSMALL
 #undef readScalar
 #undef transFunc

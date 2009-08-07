@@ -7,6 +7,31 @@
 #include "pointSet.H"
 #include "IOmanip.H"
 
+bool Foam::checkSync(const wordList& names)
+{
+    List<wordList> allNames(Pstream::nProcs());
+    allNames[Pstream::myProcNo()] = names;
+    Pstream::gatherList(allNames);
+
+    bool hasError = false;
+
+    for (label procI = 1; procI < allNames.size(); procI++)
+    {
+        if (allNames[procI] != allNames[0])
+        {
+            hasError = true;
+
+            Info<< " ***Inconsistent zones across processors, "
+                   "processor 0 has zones:" << allNames[0]
+                << ", processor " << procI << " has zones:"
+                << allNames[procI]
+                << endl;
+        }
+    }
+    return hasError;
+}
+
+
 Foam::label Foam::checkTopology
 (
     const polyMesh& mesh,
@@ -23,6 +48,36 @@ Foam::label Foam::checkTopology
 
     // Check if the boundary processor patches are correct
     mesh.boundaryMesh().checkParallelSync(true);
+
+    // Check names of zones are equal
+    if (checkSync(mesh.cellZones().names()))
+    {
+        noFailedChecks++;
+    }
+    if (checkSync(mesh.faceZones().names()))
+    {
+        noFailedChecks++;
+    }
+    if (checkSync(mesh.pointZones().names()))
+    {
+        noFailedChecks++;
+    }
+
+    // Check contents of faceZones consistent
+    {
+        forAll(mesh.faceZones(), zoneI)
+        {
+            if (mesh.faceZones()[zoneI].checkParallelSync(false))
+            {
+                Info<< " ***FaceZone " << mesh.faceZones()[zoneI].name()
+                    << " is not correctly synchronised"
+                    << " acrosss coupled boundaries."
+                    << " (coupled faces both"
+                    << " present in set but with opposite flipmap)" << endl;
+                noFailedChecks++;
+            }
+        }
+    }
 
     {
         pointSet points(mesh, "unusedPoints", mesh.nPoints()/100);
@@ -102,6 +157,67 @@ Foam::label Foam::checkTopology
         }
     }
 
+    if (allTopology)
+    {
+        labelList nInternalFaces(mesh.nCells(), 0);
+
+        for (label faceI = 0; faceI < mesh.nInternalFaces(); faceI++)
+        {
+            nInternalFaces[mesh.faceOwner()[faceI]]++;
+            nInternalFaces[mesh.faceNeighbour()[faceI]]++;
+        }
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
+        forAll(patches, patchI)
+        {
+            if (patches[patchI].coupled())
+            {
+                const unallocLabelList& owners = patches[patchI].faceCells();
+
+                forAll(owners, i)
+                {
+                    nInternalFaces[owners[i]]++;
+                }
+            }
+        }
+
+        faceSet oneCells(mesh, "oneInternalFaceCells", mesh.nCells()/100);
+        faceSet twoCells(mesh, "twoInternalFacesCells", mesh.nCells()/100);
+
+        forAll(nInternalFaces, cellI)
+        {
+            if (nInternalFaces[cellI] <= 1)
+            {
+                oneCells.insert(cellI);
+            }
+            else if (nInternalFaces[cellI] == 2)
+            {
+                twoCells.insert(cellI);
+            }
+        }
+
+        label nOneCells = returnReduce(oneCells.size(), sumOp<label>());
+
+        if (nOneCells > 0)
+        {
+            Info<< "  <<Writing " << nOneCells
+                << " cells with with single non-boundary face to set "
+                << oneCells.name()
+                << endl;
+            oneCells.write();
+        }
+
+        label nTwoCells = returnReduce(twoCells.size(), sumOp<label>());
+
+        if (nTwoCells > 0)
+        {
+            Info<< "  <<Writing " << nTwoCells
+                << " cells with with single non-boundary face to set "
+                << twoCells.name()
+                << endl;
+            twoCells.write();
+        }
+    }
+
     {
         regionSplit rs(mesh);
 
@@ -109,7 +225,7 @@ Foam::label Foam::checkTopology
         {
             Info<< "    Number of regions: " << rs.nRegions() << " (OK)."
                 << endl;
-        
+
         }
         else
         {
@@ -177,7 +293,7 @@ Foam::label Foam::checkTopology
 
             primitivePatch::surfaceTopo pTyp = pp.surfaceType();
 
-            if (pp.size() == 0)
+            if (pp.empty())
             {
                 Pout<< setw(34) << "ok (empty)";
             }
@@ -214,7 +330,7 @@ Foam::label Foam::checkTopology
                 const pointField& pts = pp.points();
                 const labelList& mp = pp.meshPoints();
 
-                boundBox bb(vector::zero, vector::zero);
+                boundBox bb;   // zero-sized
                 if (returnReduce(mp.size(), sumOp<label>()) > 0)
                 {
                     bb.min() = pts[mp[0]];
@@ -232,7 +348,7 @@ Foam::label Foam::checkTopology
             Pout<< endl;
         }
 
-        if (points.size() > 0)
+        if (points.size())
         {
             Pout<< "  <<Writing " << points.size()
                 << " conflicting points to set "

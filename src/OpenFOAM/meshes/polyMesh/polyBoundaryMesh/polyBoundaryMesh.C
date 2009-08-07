@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,13 +28,12 @@ License
 #include "polyMesh.H"
 #include "primitiveMesh.H"
 #include "processorPolyPatch.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(polyBoundaryMesh, 0);
-}
+defineTypeNameAndDebug(Foam::polyBoundaryMesh, 0);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -250,7 +249,7 @@ Foam::polyBoundaryMesh::neighbourEdges() const
             }
         }
 
-        if (pointsToEdge.size() > 0)
+        if (pointsToEdge.size())
         {
             FatalErrorIn("polyBoundaryMesh::neighbourEdges() const")
                 << "Not all boundary edges of patches match up." << nl
@@ -420,13 +419,13 @@ Foam::labelHashSet Foam::polyBoundaryMesh::patchSet
 
     forAll(patchNames, i)
     {
-        // Treat the diven patch names as wild-cards and search the set
+        // Treat the given patch names as wild-cards and search the set
         // of all patch names for matches
         labelList patchIDs = findStrings(patchNames[i], allPatchNames);
 
-        if (patchIDs.size() == 0)
+        if (patchIDs.empty())
         {
-            WarningIn("polyBoundaryMesh::patchSet(const wordList& patchNames)")
+            WarningIn("polyBoundaryMesh::patchSet(const wordList&)")
                 << "Cannot find any patch names matching " << patchNames[i]
                 << endl;
         }
@@ -537,7 +536,7 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
 
     forAll (bm, patchI)
     {
-        if (bm[patchI].start() != nextPatchStart)
+        if (bm[patchI].start() != nextPatchStart && !boundaryError)
         {
             boundaryError = true;
 
@@ -546,7 +545,9 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
                 << " of type " <<  bm[patchI].type()
                 << ". The patch should start on face no " << nextPatchStart
                 << " and the patch specifies " << bm[patchI].start()
-                << "." << endl;
+                << "." << endl
+                << "Possibly consecutive patches have this same problem."
+                << " Suppressing future warnings." << endl;
         }
 
         nextPatchStart += bm[patchI].size();

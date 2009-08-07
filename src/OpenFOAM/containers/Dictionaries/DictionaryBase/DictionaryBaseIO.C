@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,15 +30,13 @@ Description
 #include "DictionaryBase.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * * //
 
 template<class IDLListType, class T>
-Ostream& operator<<(Ostream& os, const DictionaryBase<IDLListType, T>& dict)
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const DictionaryBase<IDLListType, T>& dict)
 {
     for
     (
@@ -53,7 +51,7 @@ Ostream& operator<<(Ostream& os, const DictionaryBase<IDLListType, T>& dict)
         if (!os.good())
         {
             Info
-                << "operator<<(Ostream& os, const DictionaryBase&) : "
+                << "operator<<(Ostream&, const DictionaryBase&) : "
                 << "Can't write entry for DictionaryBase"
                 << endl;
 
@@ -66,7 +64,5 @@ Ostream& operator<<(Ostream& os, const DictionaryBase<IDLListType, T>& dict)
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

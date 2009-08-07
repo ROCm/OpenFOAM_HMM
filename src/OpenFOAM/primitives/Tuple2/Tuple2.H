@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,9 @@ Class
 
 Description
     A 2-tuple.
+
+SeeAlso
+    Foam::Pair for storing two objects of identical types.
 
 \*---------------------------------------------------------------------------*/
 
@@ -67,7 +70,7 @@ inline Ostream& operator<<(Ostream&, const Tuple2<Type1, Type2>&);
 
 
 /*---------------------------------------------------------------------------*\
-                            class Tuple2 Declaration
+                           class Tuple2 Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type1, class Type2>
@@ -97,7 +100,7 @@ public:
         //- Construct from Istream
         inline Tuple2(Istream& is)
         {
-            operator>>(is, *this);
+            is >> *this;
         }
 
 
@@ -136,19 +139,13 @@ public:
 
     // Friend Operators
 
-        friend bool operator==
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend bool operator== <Type1, Type2>
         (
             const Tuple2<Type1, Type2>& a,
             const Tuple2<Type1, Type2>& b
         );
 
-        friend bool operator!=
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend bool operator!= <Type1, Type2>
         (
             const Tuple2<Type1, Type2>& a,
             const Tuple2<Type1, Type2>& b
@@ -158,20 +155,14 @@ public:
     // IOstream operators
 
         //- Read Tuple2 from Istream, discarding contents of existing Tuple2.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend Istream& operator>> <Type1, Type2>
         (
             Istream& is,
             Tuple2<Type1, Type2>& t2
         );
 
         // Write Tuple2 to Ostream.
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Type1, Type2>
-        #endif
+        friend Ostream& operator<< <Type1, Type2>
         (
             Ostream& os,
             const Tuple2<Type1, Type2>& t2
@@ -186,10 +177,7 @@ inline bool operator==
     const Tuple2<Type1, Type2>& b
 )
 {
-    return
-    (
-        (a.first() == b.first()) && (a.second() == b.second())
-    );
+    return (a.first() == b.first() && a.second() == b.second());
 }
 
 
@@ -200,7 +188,7 @@ inline bool operator!=
     const Tuple2<Type1, Type2>& b
 )
 {
-    return (!(a == b));
+    return !(a == b);
 }
 
 
@@ -224,7 +212,7 @@ inline Ostream& operator<<(Ostream& os, const Tuple2<Type1, Type2>& t2)
     os  << token::BEGIN_LIST
         << t2.f_ << token::SPACE << t2.s_
         << token::END_LIST;
-    
+
     return os;
 }
 

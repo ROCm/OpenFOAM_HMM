@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -204,24 +204,6 @@ else
 #
    echo "Parallel processing using $WM_MPLIB with $NPROCS processors"
    case "$WM_MPLIB" in
-   LAM)
-      lamPid=`getPID lamd`
-      if [ ! "$lamPid" ] ; then
-         echo "No LAM daemon running."
-         if [ -r system/machines ] ; then
-            echo "system/machines file exists"
-            echo "Try starting the LAM multicomputer with \"lamboot -v system/machines\""
-            exit 1
-         else
-            echo "Cannot find a 'machines' file for LAM in system/"
-            echo "required to start a LAM multicomputer"
-            consultGuide
-            exit 1
-         fi
-      else
-         echo "LAM daemon running (PID $lamPid).  Proceeding with MPI run."
-      fi
-      ;;
    OPENMPI)
       # add hostfile info
       for hostfile in \

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,27 @@ int main(int argc, char *argv[])
 {
     string test("$HOME kjhkjhkjh \" \\$HOME/tyetyery ${FOAM_RUN} \n ; hkjh ;$");
 
-    Info<< test << endl;
+    Info<< "string:" << test << nl << "hash:"
+        << unsigned(string::hash()(test)) << endl;
+
+    // test sub-strings via iterators
+    string::const_iterator iter  = test.end();
+    string::const_iterator iter2 = test.end();
+    string::size_type fnd = test.find('\\');
+
+    if (fnd != string::npos)
+    {
+        iter  = test.begin() + fnd;
+        iter2 = iter + 6;
+    }
+
+    Info<< "sub-string via iterators : >";
+    while (iter != iter2)
+    {
+        Info<< *iter;
+        iter++;
+    }
+    Info<< "<\n";
 
     Info<< string(test).replace("kj", "zzz") << endl;
     Info<< string(test).replace("kj", "") << endl;
@@ -48,11 +68,39 @@ int main(int argc, char *argv[])
     Info<< string(test).expand() << endl;
 
     string test2("~OpenFOAM/controlDict");
-    Info<< test2.expand() << endl;
+    Info<< test2 << " => " << test2.expand() << endl;
+
+    // replace controlDict with "newName"
+    {
+        string::size_type i = test2.rfind('/');
+
+        if (i == string::npos)
+        {
+            test2 = "newName";
+        }
+        else
+        {
+            // this uses the std::string::replace
+            test2.replace(i+1, string::npos, "newName");
+        }
+        Info<< "after replace: " << test2 << endl;
+
+        // do another replace
+        // this uses the Foam::string::replace
+        test2.replace("OpenFOAM", "openfoam");
+
+        Info<< "after replace: " << test2 << endl;
+    }
 
     string s;
     Sin.getLine(s);
-    Info<< s.expand() << endl;
+
+    string s2(s.expand());
+
+    cout<< "output string with " << s2.length() << " characters\n";
+    cout<< "ostream<<  >" << s2 << "<\n";
+    Info<< "Ostream<<  >" << s2 << "<\n";
+    Info<< "hash:" << hex << string::hash()(s2) << endl;
 
     Info << "End\n" << endl;
 

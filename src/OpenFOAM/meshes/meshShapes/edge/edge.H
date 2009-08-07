@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -133,13 +133,36 @@ public:
 };
 
 
-//- Hash<edge> specialisation
-//  Simple commutative hash.
+//- Hash specialization for hashing edges - a commutative hash value.
+//  Hash incrementally.
 template<>
-inline label Hash<edge>::operator()(const edge& e) const
+inline unsigned Hash<edge>::operator()(const edge& e, unsigned seed) const
 {
-    return e[0]*e[1] + e[0]+e[1];
+    unsigned val = seed;
+
+    if (e[0] < e[1])
+    {
+        val = Hash<label>()(e[0], val);
+        val = Hash<label>()(e[1], val);
+    }
+    else
+    {
+        val = Hash<label>()(e[1], val);
+        val = Hash<label>()(e[0], val);
+    }
+
+    return val;
 }
+
+
+//- Hash specialization for hashing edges - a commutative hash value.
+//  Hash incrementally.
+template<>
+inline unsigned Hash<edge>::operator()(const edge& e) const
+{
+    return Hash<edge>()(e, 0);
+}
+
 
 template<>
 inline bool contiguous<edge>()  {return true;}

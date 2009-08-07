@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,10 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fileName.H"
+#include "SubList.H"
+#include "IOobject.H"
 #include "IOstreams.H"
+#include "OSspecific.H"
 
 using namespace Foam;
 
@@ -49,15 +52,63 @@ int main()
 
     fileName pathName(wrdList);
 
-    Info<< "pathName = " << pathName << endl;
-    Info<< "pathName.name() = " << pathName.name() << endl;
-    Info<< "pathName.path() = " << pathName.path() << endl;
-    Info<< "pathName.ext() = " << pathName.ext() << endl;
+    Info<< "pathName = " << pathName << nl
+        << "pathName.name() = " << pathName.name() << nl
+        << "pathName.path() = " << pathName.path() << nl
+        << "pathName.ext()  = " << pathName.ext() << endl;
 
-    Info<< "pathName.components() = " << pathName.components() << endl;
-    Info<< "pathName.component(2) = " << pathName.component(2) << endl;
+    Info<< "pathName.components() = " << pathName.components() << nl
+        << "pathName.component(2) = " << pathName.component(2) << nl
+        << endl;
 
-    Info<< "end" << endl;
+    // try with different combination
+    // The final one should emit warnings
+    for (label start = 0; start <= wrdList.size(); ++start)
+    {
+        fileName instance, local;
+        word name;
+
+        fileName path(SubList<word>(wrdList, wrdList.size()-start, start));
+        fileName path2 = "." / path;
+
+        IOobject::fileNameComponents
+        (
+            path,
+            instance,
+            local,
+            name
+        );
+
+        Info<< "IOobject::fileNameComponents for " << path << nl
+            << "  instance = " << instance << nl
+            << "  local    = " << local << nl
+            << "  name     = " << name << endl;
+
+        IOobject::fileNameComponents
+        (
+            path2,
+            instance,
+            local,
+            name
+        );
+
+        Info<< "IOobject::fileNameComponents for " << path2 << nl
+            << "  instance = " << instance << nl
+            << "  local    = " << local << nl
+            << "  name     = " << name << endl;
+
+    }
+
+    // test findEtcFile
+    Info<< "\n\nfindEtcFile tests:" << nl
+        << " controlDict => " << findEtcFile("controlDict") << nl
+        << " badName => " << findEtcFile("badName") << endl;
+
+    Info<< "This should emit a fatal error:" << endl;
+    Info<< " badName(die) => " << findEtcFile("badName", true) << nl
+        << endl;
+
+    Info<< "\nEnd" << endl;
 
     return 0;
 }

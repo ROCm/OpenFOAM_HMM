@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,27 +37,26 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readThermodynamicProperties.H"
+    #include "readTransportProperties.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readThermodynamicProperties.H"
-#   include "readTransportProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
         fvVectorMatrix UEqn
         (
@@ -79,8 +78,8 @@ int main(int argc, char *argv[])
             surfaceScalarField phid
             (
                 "phid",
-                psi*
-                (
+                psi
+               *(
                     (fvc::interpolate(U) & mesh.Sf())
                   + fvc::ddtPhiCorr(rUA, rho, U, phi)
                 )
@@ -100,7 +99,7 @@ int main(int argc, char *argv[])
 
             phi += pEqn.flux();
 
-#           include "compressibleContinuityErrs.H"
+            #include "compressibleContinuityErrs.H"
 
             U -= rUA*fvc::grad(p);
             U.correctBoundaryConditions();
@@ -117,7 +116,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

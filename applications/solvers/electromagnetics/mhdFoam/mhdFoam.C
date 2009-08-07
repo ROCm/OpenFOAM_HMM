@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     mhdFoam
 
 Description
-    Solver for magnetohydrodynamics (MHD): incompressible, laminar flow of a 
+    Solver for magnetohydrodynamics (MHD): incompressible, laminar flow of a
     conducting fluid under the influence of a magnetic field.
 
     An applied magnetic field H acts as a driving force,
@@ -58,27 +58,25 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< nl << "Starting time loop" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
-#       include "readPISOControls.H"
-#       include "readBPISOControls.H"
+        #include "readPISOControls.H"
+        #include "readBPISOControls.H"
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "CourantNo.H"
+        #include "CourantNo.H"
 
         {
             fvVectorMatrix UEqn
@@ -101,7 +99,7 @@ int main(int argc, char *argv[])
 
                 U = rUA*UEqn.H();
 
-                phi = (fvc::interpolate(U) & mesh.Sf()) 
+                phi = (fvc::interpolate(U) & mesh.Sf())
                     + fvc::ddtPhiCorr(rUA, U, phi);
 
                 for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
@@ -120,7 +118,7 @@ int main(int argc, char *argv[])
                     }
                 }
 
-#               include "continuityErrs.H"
+                #include "continuityErrs.H"
 
                 U -= rUA*fvc::grad(p);
                 U.correctBoundaryConditions();
@@ -154,7 +152,7 @@ int main(int argc, char *argv[])
 
             phiB -= pBEqn.flux();
 
-#           include "magneticFieldErr.H"
+            #include "magneticFieldErr.H"
         }
 
         runTime.write();
@@ -162,7 +160,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

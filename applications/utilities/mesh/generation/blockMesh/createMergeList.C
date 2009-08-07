@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,14 +26,9 @@ License
 
 #include "blockMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-labelList blockMesh::createMergeList()
+Foam::labelList Foam::blockMesh::createMergeList()
 {
     Info<< nl << "Creating merge list " << flush;
 
@@ -98,7 +93,7 @@ labelList blockMesh::createMergeList()
         // the size of the block.
 
         boundBox bb(blockCells[blockPlabel].points(blockFaces, blockPoints));
-        const scalar mergeSqrDist = SMALL*magSqr(bb.max() - bb.min());
+        const scalar mergeSqrDist = SMALL*magSqr(bb.span());
 
         // This is an N^2 algorithm
 
@@ -277,7 +272,7 @@ labelList blockMesh::createMergeList()
                 if (cp[blockPfaceFacePointLabel] == -1)
                 {
                     FatalErrorIn("blockMesh::createMergeList()")
-                        << "Inconsistent point locations between block pair " 
+                        << "Inconsistent point locations between block pair "
                         << blockPlabel << " and " << blockNlabel << nl
                         << "    probably due to inconsistent grading."
                         << exit(FatalError);
@@ -560,10 +555,5 @@ labelList blockMesh::createMergeList()
 
     return MergeList;
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -26,7 +26,7 @@ if(turbulence)
       + fvm::div(phi, epsilon)
       - fvm::laplacian
         (
-            alphaEps*mut + mul, epsilon, 
+            alphaEps*mut + mul, epsilon,
             "laplacian(DepsilonEff,epsilon)"
         )
      ==
@@ -49,7 +49,11 @@ if(turbulence)
     (
         fvm::ddt(rho, k)
       + fvm::div(phi, k)
-      - fvm::laplacian(alphak*mut + mul, k, "laplacian(DkEff,k)")
+      - fvm::laplacian
+        (
+            alphak*mut + mul, k,
+            "laplacian(DkEff,k)"
+        )
      ==
         G
       - fvm::SuSp(Gcoef + 2.0/3.0*rho*divU, k)

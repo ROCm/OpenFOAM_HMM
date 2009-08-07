@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -116,13 +116,17 @@ private:
             //- Boundary mesh
             mutable polyBoundaryMesh boundary_;
 
-            //- Mesh bounding-box. created from points on construction
-            //  and updated when the mesh moves
+            //- Mesh bounding-box.
+            //  Created from points on construction, updated when the mesh moves
             boundBox bounds_;
+
+            //- vector of non-constrained directions in mesh
+            //  defined according to the presence of empty and wedge patches
+            mutable Vector<label> geometricD_;
 
             //- vector of valid directions in mesh
             //  defined according to the presence of empty patches
-            mutable Vector<label> directions_;
+            mutable Vector<label> solutionD_;
 
 
         // Zoning information
@@ -227,27 +231,26 @@ public:
         //- Construct from IOobject
         explicit polyMesh(const IOobject& io);
 
-        //- Construct from components without boundary.
+        //- Construct without boundary from components.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const labelList& owner,
-            const labelList& neighbour,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<labelList>& owner,
+            const Xfer<labelList>& neighbour,
             const bool syncPar = true
         );
 
-        //- Construct from components with cells rather than owner
-        //  and neighbourwithout boundary.
+        //- Construct without boundary with cells rather than owner/neighbour.
         //  Boundary is added using addPatches() member function
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
-            const faceList& faces,
-            const cellList& cells,
+            const Xfer<pointField>& points,
+            const Xfer<faceList>& faces,
+            const Xfer<cellList>& cells,
             const bool syncPar = true
         );
 
@@ -255,7 +258,7 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
+            const Xfer<pointField>& points,
             const cellShapeList& shapes,
             const faceListList& boundaryFaces,
             const wordList& boundaryPatchNames,
@@ -271,7 +274,7 @@ public:
         polyMesh
         (
             const IOobject& io,
-            const pointField& points,
+            const Xfer<pointField>& points,
             const cellShapeList& shapes,
             const faceListList& boundaryFaces,
             const PtrList<dictionary>& boundaryDicts,
@@ -290,8 +293,7 @@ public:
 
         // Database
 
-            //- Over-ride the objectRegistry dbDir
-            //  if this is single-region case
+            //- Override the objectRegistry dbDir for a single-region case
             virtual const fileName& dbDir() const;
 
             //- Return the local mesh directory (dbDir()/meshSubDir)
@@ -338,17 +340,22 @@ public:
                 return bounds_;
             }
 
-            //- Return the vector of valid directions in mesh
-            //  defined according to the presence of empty patches.
-            //  1 indicates valid direction and -1 an invalid direction.
-            const Vector<label>& directions() const;
+            //- Return the vector of geometric directions in mesh.
+            //  Defined according to the presence of empty and wedge patches.
+            //  1 indicates unconstrained direction and -1 a constrained
+            //  direction.
+            const Vector<label>& geometricD() const;
 
-            //- Return the number of valid geoemtric dimensions in the mesh
+            //- Return the number of valid geometric dimensions in the mesh
             label nGeometricD() const;
 
-            //- Return the number of valid solution dimensions in the mesh
-            //  For wedge cases this includes the circumferential direction
-            //  in case of swirl
+            //- Return the vector of solved-for directions in mesh.
+            //  Differs from geometricD in that it includes for wedge cases
+            //  the circumferential direction in case of swirl.
+            //  1 indicates valid direction and -1 an invalid direction.
+            const Vector<label>& solutionD() const;
+
+            //- Return the number of valid solved-for dimensions in the mesh
             label nSolutionD() const;
 
             //- Return point zone mesh
@@ -372,6 +379,11 @@ public:
             //- Return parallel info
             const globalMeshData& globalData() const;
 
+            //- Return the object registry
+            const objectRegistry& thisDb() const
+            {
+                return *this;
+            }
 
         // Mesh motion
 
@@ -463,11 +475,10 @@ public:
             //  patch ends at nActiveFaces) and change patches with addPatches.
             void resetPrimitives
             (
-                const label nUsedFaces,
-                const pointField& points,
-                const faceList& faces,
-                const labelList& owner,
-                const labelList& neighbour,
+                const Xfer<pointField>& points,
+                const Xfer<faceList>& faces,
+                const Xfer<labelList>& owner,
+                const Xfer<labelList>& neighbour,
                 const labelList& patchSizes,
                 const labelList& patchStarts,
                 const labelListList& subPatches,

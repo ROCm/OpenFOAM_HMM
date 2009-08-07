@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,8 +75,11 @@ public:
         //- Construct given size
         explicit inline cell(label);
 
-        //- Construct from components
-        explicit inline cell(const labelList& f);
+        //- Construct from list of labels
+        explicit inline cell(const UList<label>&);
+
+        //- Construct by transferring the parameter contents
+        explicit inline cell(const Xfer<labelList>&);
 
         //- Construct from Istream
         inline cell(Istream&);

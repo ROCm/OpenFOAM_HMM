@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,14 +26,9 @@ License
 
 #include "primitiveMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void primitiveMesh::calcPointPoints() const
+void Foam::primitiveMesh::calcPointPoints() const
 {
     if (debug)
     {
@@ -94,7 +89,7 @@ void primitiveMesh::calcPointPoints() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::pointPoints() const
+const Foam::labelListList& Foam::primitiveMesh::pointPoints() const
 {
     if (!ppPtr_)
     {
@@ -105,7 +100,7 @@ const labelListList& primitiveMesh::pointPoints() const
 }
 
 
-const labelList& primitiveMesh::pointPoints
+const Foam::labelList& Foam::primitiveMesh::pointPoints
 (
     const label pointI,
     DynamicList<label>& storage
@@ -122,9 +117,9 @@ const labelList& primitiveMesh::pointPoints
 
         storage.clear();
 
-        if (pEdges.size() > storage.allocSize())
+        if (pEdges.size() > storage.capacity())
         {
-            storage.setSize(pEdges.size());
+            storage.setCapacity(pEdges.size());
         }
 
         forAll(pEdges, i)
@@ -137,14 +132,15 @@ const labelList& primitiveMesh::pointPoints
 }
 
 
-const labelList& primitiveMesh::pointPoints(const label pointI) const
+const Foam::labelList& Foam::primitiveMesh::pointPoints
+(
+    const label pointI
+) const
 {
     return pointPoints(pointI, labels_);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -199,9 +199,9 @@ public:
         (
             const primitiveFacePatch& masterPatch,
             const primitiveFacePatch& slavePatch,
-            const labelList& slavePointPointHits,
-            const labelList& slavePointEdgeHits,
-            const List<objectHit>& slavePointFaceHits
+            const labelList& slavePointPointHits,// -1 or common point snapped to
+            const labelList& slavePointEdgeHits, // -1 or common edge snapped to
+            const List<objectHit>& slavePointFaceHits // master face snapped to
         );
 
 
@@ -276,6 +276,10 @@ public:
 
         //- Check if the patch is fully supported
         bool checkSupport() const;
+
+
+        //- Debugging: dump graphical representation to obj format file
+        void writeOBJ(const fileName&) const;
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,14 +48,14 @@ void processorFvPatch::makeWeights(scalarField& w) const
     {
         const processorPolyPatch& pp = procPolyPatch();
 
-Pout<< name() << " pp.neighbFaceAreas():" << pp.neighbFaceAreas()
-    << endl;
-
-Pout<< name() << " pp.neighbFaceCentres():" << pp.neighbFaceCentres()
-    << endl;
-
-Pout<< name() << " pp.neighbFaceCellCentres():" << pp.neighbFaceCellCentres()
-    << endl;
+//Pout<< name() << " pp.neighbFaceAreas():" << pp.neighbFaceAreas()
+//    << endl;
+//
+//Pout<< name() << " pp.neighbFaceCentres():" << pp.neighbFaceCentres()
+//    << endl;
+//
+//Pout<< name() << " pp.neighbFaceCellCentres():" << pp.neighbFaceCellCentres()
+//    << endl;
 
 
         // The face normals point in the opposite direction on the other side
@@ -77,21 +77,21 @@ Pout<< name() << " pp.neighbFaceCellCentres():" << pp.neighbFaceCellCentres()
     {
         w = 1.0;
     }
-Pout<< name() << " w:" << w
-    << endl;
+//Pout<< name() << " w:" << w
+//    << endl;
 }
 
 
 void processorFvPatch::makeDeltaCoeffs(scalarField& dc) const
 {
-Pout<< name() << " fvPatch::delta():" << fvPatch::delta()
-    << endl;
-
-Pout<< name() << " nf():" << nf()
-    << endl;
-
-Pout<< name() << " weights():" << weights()
-    << endl;
+//Pout<< name() << " fvPatch::delta():" << fvPatch::delta()
+//    << endl;
+//
+//Pout<< name() << " nf():" << nf()
+//    << endl;
+//
+//Pout<< name() << " weights():" << weights()
+//    << endl;
 
     if (Pstream::parRun())
     {
@@ -101,7 +101,7 @@ Pout<< name() << " weights():" << weights()
     {
         dc = 1.0/(nf() & fvPatch::delta());
     }
-Pout<< name() << " dc:" << dc << endl;
+//Pout<< name() << " dc:" << dc << endl;
 }
 
 
@@ -130,9 +130,9 @@ tmp<vectorField> processorFvPatch::delta() const
 
             label patchI = pp.patchIDs()[i];
 
-Pout<< name() << " delta:" << " subFc:" << subFc
-    << " subCc:" << subCc << " subDelta:" << subDelta
-    << endl;
+//Pout<< name() << " delta:" << " subFc:" << subFc
+//    << " subCc:" << subCc << " subDelta:" << subDelta
+//    << endl;
 
             if (patchI == -1)
             {
@@ -159,8 +159,8 @@ Pout<< name() << " delta:" << " subFc:" << subFc
                     );
                 }
             }
-Pout<< name() << " subDelta:" << subDelta
-    << endl;
+//Pout<< name() << " subDelta:" << subDelta
+//    << endl;
 
         }
     }

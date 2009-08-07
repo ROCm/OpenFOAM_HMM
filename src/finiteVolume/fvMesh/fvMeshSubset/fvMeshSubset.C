@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ namespace Foam
 
 bool Foam::fvMeshSubset::checkCellSubset() const
 {
-    if (!fvMeshSubsetPtr_.valid())
+    if (fvMeshSubsetPtr_.empty())
     {
         FatalErrorIn("bool fvMeshSubset::checkCellSubset() const")
             << "Mesh subset not set.  Please set the cell map using "
@@ -161,11 +161,11 @@ void Foam::fvMeshSubset::doCoupledPatches
                         nCellsUsingFace[pp.start()+i] = 3;
                         nUncoupled++;
                     }
-                }       
+                }
             }
         }
     }
- 
+
     // Do same for cyclics.
     forAll (oldPatches, oldPatchI)
     {
@@ -675,12 +675,11 @@ void Foam::fvMeshSubset::setCellSubset
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            newPoints,
-            newFaces,
-            newCells
+            xferMove(newPoints),
+            xferMove(newFaces),
+            xferMove(newCells)
         )
     );
-    pointMeshSubsetPtr_.clear();
 
 
     // Add old patches
@@ -1174,13 +1173,12 @@ void Foam::fvMeshSubset::setLargeCellSubset
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            newPoints,
-            newFaces,
-            newCells,
+            xferMove(newPoints),
+            xferMove(newFaces),
+            xferMove(newCells),
             syncPar           // parallel synchronisation
         )
     );
-    pointMeshSubsetPtr_.clear();
 
     // Add old patches
     List<polyPatch*> newBoundary(nbSize);
@@ -1330,7 +1328,7 @@ void Foam::fvMeshSubset::setLargeCellSubset
 
 
     // Add the fvPatches
-    fvMeshSubsetPtr_().addFvPatches(newBoundary);
+    fvMeshSubsetPtr_().addFvPatches(newBoundary, syncPar);
 
     // Subset and add any zones
     subsetZones();
@@ -1367,26 +1365,6 @@ fvMesh& Foam::fvMeshSubset::subMesh()
     checkCellSubset();
 
     return fvMeshSubsetPtr_();
-}
-
-
-const pointMesh& Foam::fvMeshSubset::subPointMesh() const
-{
-    if (!pointMeshSubsetPtr_.valid())
-    {
-        pointMeshSubsetPtr_.reset(new pointMesh(subMesh()));
-    }
-    return pointMeshSubsetPtr_();
-}
-
-
-pointMesh& Foam::fvMeshSubset::subPointMesh()
-{
-    if (!pointMeshSubsetPtr_.valid())
-    {
-        pointMeshSubsetPtr_.reset(new pointMesh(subMesh()));
-    }
-    return pointMeshSubsetPtr_();
 }
 
 

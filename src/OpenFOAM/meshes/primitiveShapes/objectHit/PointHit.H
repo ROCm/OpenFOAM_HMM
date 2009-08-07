@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -184,10 +184,7 @@ public:
 
     // Ostream operator
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <Point>
-        #endif
+        friend Ostream& operator<< <Point>
         (
             Ostream& os,
             const PointHit<Point>& b
@@ -202,7 +199,7 @@ inline Ostream& operator<<(Ostream& os, const PointHit<Point>& b)
         << b.rawPoint() << token::SPACE
         << b.distance() << token::SPACE
         << b.eligibleMiss();
-    
+
     return os;
 }
 

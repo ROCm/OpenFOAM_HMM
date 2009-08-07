@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anispulation  |
 -------------------------------------------------------------------------------
 License
@@ -306,23 +306,37 @@ autoPtr<mapPolyMesh> reorderMesh
     labelList patchStarts(patches.size());
     labelList oldPatchNMeshPoints(patches.size());
     labelListList patchPointMap(patches.size());
+    labelListList subPatches(patches.size());
+    labelListList subPatchStarts(patches.size());
+
     forAll(patches, patchI)
     {
         patchSizes[patchI] = patches[patchI].size();
         patchStarts[patchI] = patches[patchI].start();
         oldPatchNMeshPoints[patchI] = patches[patchI].nPoints();
         patchPointMap[patchI] = identity(patches[patchI].nPoints());
+
+        if (isA<processorPolyPatch>(patches[patchI]))
+        {
+            const processorPolyPatch& ppp = refCast<const processorPolyPatch>
+            (
+                patches[patchI]
+            );
+            subPatches[patchI] = ppp.patchIDs();
+            subPatchStarts[patchI] = ppp.starts();
+        }
     }
 
     mesh.resetPrimitives
     (
-        mesh.nFaces(),
-        mesh.points(),
-        newFaces,
-        newOwner,
-        newNeighbour,
+        Xfer<pointField>::null(),
+        xferMove(newFaces),
+        xferMove(newOwner),
+        xferMove(newNeighbour),
         patchSizes,
-        patchStarts
+        patchStarts,
+        subPatches,
+        subPatchStarts
     );
 
     return autoPtr<mapPolyMesh>
@@ -384,12 +398,10 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
-
-    const bool blockOrder = args.options().found("blockOrder");
-
+    const bool blockOrder = args.optionFound("blockOrder");
     if (blockOrder)
     {
         Info<< "Ordering cells into regions (using decomposition);"
@@ -397,15 +409,14 @@ int main(int argc, char *argv[])
             << endl;
     }
 
-    const bool orderPoints = args.options().found("orderPoints");
-
+    const bool orderPoints = args.optionFound("orderPoints");
     if (orderPoints)
     {
         Info<< "Ordering points into internal and boundary points." << nl
             << endl;
     }
 
-    const bool writeMaps = args.options().found("writeMaps");
+    const bool writeMaps = args.optionFound("writeMaps");
 
     if (writeMaps)
     {
@@ -413,7 +424,7 @@ int main(int argc, char *argv[])
             << endl;
     }
 
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     label band = getBand(mesh.faceOwner(), mesh.faceNeighbour());
 
@@ -632,6 +643,11 @@ int main(int argc, char *argv[])
             << endl;
     }
 
+
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     Info<< "Writing mesh to " << runTime.timeName() << endl;
 
     mesh.write();

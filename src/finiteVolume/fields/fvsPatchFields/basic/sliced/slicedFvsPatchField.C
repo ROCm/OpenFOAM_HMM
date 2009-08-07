@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,13 +56,7 @@ slicedFvsPatchField<Type>::slicedFvsPatchField
 )
 :
     fvsPatchField<Type>(p, iF)
-{
-    notImplemented
-    (
-        "slicedFvsPatchField<Type>::"
-        "slicedFvsPatchField(const fvPatch&, const Field<Type>&)"
-    );
-}
+{}
 
 
 template<class Type>

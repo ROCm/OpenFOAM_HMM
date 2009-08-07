@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,7 +74,7 @@ void volPointInterpolation::makeWeights()
             mesh().polyMesh::instance(),
             mesh()
         ),
-        pMesh(),
+        pointMesh::New(mesh()),
         dimensionedScalar("zero", dimless, 0)
     );
 
@@ -139,13 +139,10 @@ void volPointInterpolation::makeWeights()
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-volPointInterpolation::volPointInterpolation
-(
-    const fvMesh& vm,
-    const pointMesh& pm
-)
+volPointInterpolation::volPointInterpolation(const fvMesh& vm)
 :
-    boundaryInterpolator_(vm, pm)
+    MeshObject<fvMesh, volPointInterpolation>(vm),
+    boundaryInterpolator_(vm)
 {
     updateMesh();
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -106,9 +106,6 @@ void Foam::vtkPV3Foam::convertVolFields
         printMemory();
     }
 
-    // Construct interpolation on the raw mesh
-    pointMesh pMesh(mesh);
-    volPointInterpolation pInterp(mesh, pMesh);
 
     PtrList<PrimitivePatchInterpolation<primitivePatch> >
         ppInterpList(mesh.boundaryMesh().size());
@@ -128,23 +125,23 @@ void Foam::vtkPV3Foam::convertVolFields
 
     convertVolFields<scalar>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<vector>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<sphericalTensor>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<symmTensor>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
     convertVolFields<tensor>
     (
-        mesh, pInterp, ppInterpList, objects, output
+        mesh, ppInterpList, objects, output
     );
 
     if (debug)
@@ -269,7 +266,7 @@ void Foam::vtkPV3Foam::convertLagrangianFields
         (
             mesh,
             dbPtr_().timeName(),
-            "lagrangian"/cloudName
+            cloud::prefix/cloudName
         );
         pruneObjectList(objects, selectedFields);
 

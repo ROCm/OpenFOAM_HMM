@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,16 +46,13 @@ namespace radiation
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class cloudScatter Declaration
+                         Class cloudScatter Declaration
 \*---------------------------------------------------------------------------*/
 
 class cloudScatter
 :
     public scatterModel
 {
-
-private:
-
     // Private data
 
         //- Absorption model dictionary
@@ -82,13 +79,10 @@ public:
 
 
     // Destructor
-
-        ~cloudScatter();
+    virtual ~cloudScatter();
 
 
     // Member Operators
-
-        // Edit
 
         // Access
 

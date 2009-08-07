@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -126,11 +126,8 @@ Foam::face Foam::boundaryCutter::addEdgeCutsToFace
         }
     }
 
-    newFace.shrink();
-
     face returnFace;
     returnFace.transfer(newFace);
-    newFace.clear();
 
     if (debug)
     {
@@ -355,9 +352,7 @@ bool Foam::boundaryCutter::splitFace
             {
                 // Enough vertices to create a face from.
                 face tmpFace;
-                newFace.shrink();
                 tmpFace.transfer(newFace);
-                newFace.clear();
 
                 // Add face tmpFace
                 addFace(faceI, tmpFace, modifiedFace, meshMod);
@@ -375,9 +370,7 @@ bool Foam::boundaryCutter::splitFace
         {
             // Enough vertices to create a face from.
             face tmpFace;
-            newFace.shrink();
             tmpFace.transfer(newFace);
-            newFace.clear();
 
             // Add face tmpFace
             addFace(faceI, tmpFace, modifiedFace, meshMod);

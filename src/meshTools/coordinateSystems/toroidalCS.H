@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,10 @@ Class
     Foam::toroidalCS
 
 Description
-    Toroidal coordinate system
+    Toroidal coordinate system, always in degrees
+
+Note
+    The maintenance of this class may lag that of the main types.
 
 SourceFiles
     toroidalCS.C
@@ -91,27 +94,18 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from origin, rotation and radius
         toroidalCS
         (
             const word& name,
             const point& origin,
-            const vector& axis,
-            const vector& direction,
+            const coordinateRotation&,
             const scalar radius
         );
 
-        //- Construct from origin and rotation angles
-        toroidalCS
-        (
-            const word& name,
-            const point& origin,
-            const coordinateRotation& cr,
-            const scalar radius
-        );
 
         //- Construct from dictionary
-        toroidalCS(const word& name, const dictionary& dict);
+        toroidalCS(const word& name, const dictionary&);
 
 
     // Member Functions
@@ -126,7 +120,7 @@ public:
         virtual void write(Ostream&) const;
 
         //- Write dictionary
-        virtual void writeDict(Ostream&, bool subDict = true) const;
+        virtual void writeDict(Ostream&, bool subDict=true) const;
 };
 
 

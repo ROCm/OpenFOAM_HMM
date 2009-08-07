@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,61 +29,168 @@ License
 
 #include "HashSet.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Key, class Hash>
+template<class AnyType>
+Foam::HashSet<Key, Hash>::HashSet(const HashTable<AnyType, Key, Hash>& h)
+:
+    HashTable<nil, Key, Hash>(h.size())
 {
+    for
+    (
+        typename HashTable<AnyType, Key, Hash>::const_iterator cit = h.cbegin();
+        cit != h.cend();
+        ++cit
+    )
+    {
+        insert(cit.key());
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class Key, class Hash>
-bool HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& ht) const
+inline bool Foam::HashSet<Key, Hash>::operator[](const Key& key) const
 {
-    const HashTable<empty, Key, Hash>& a = *this;
+    return found(key);
+}
 
-    // Are all my elements in ht?
-    for
-    (
-        typename HashTable<empty, Key, Hash>::const_iterator iter = a.begin();
-        iter != a.end();
-        ++iter
-    )
+
+template<class Key, class Hash>
+bool Foam::HashSet<Key, Hash>::operator==(const HashSet<Key, Hash>& rhs) const
+{
+    // Are all lhs elements in rhs?
+    for (const_iterator iter = this->cbegin(); iter != this->cend(); ++iter)
     {
-        if (!ht.found(iter.key()))
+        if (!rhs.found(iter.key()))
         {
             return false;
         }
     }
 
-    // Are all ht elements in me?
-    for
-    (
-        typename HashTable<empty, Key, Hash>::const_iterator iter = ht.begin();
-        iter != ht.end();
-        ++iter
-    )
+    // Are all rhs elements in lhs?
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
     {
         if (!found(iter.key()))
         {
             return false;
         }
     }
+
     return true;
 }
 
 
 template<class Key, class Hash>
-bool HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& ht) const
+bool Foam::HashSet<Key, Hash>::operator!=(const HashSet<Key, Hash>& rhs) const
 {
-    return !(operator==(ht));
+    return !(operator==(rhs));
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator|=(const HashSet<Key, Hash>& rhs)
+{
+    // Add rhs elements into lhs
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
+    {
+        insert(iter.key());
+    }
+}
 
-} // End namespace Foam
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator&=(const HashSet<Key, Hash>& rhs)
+{
+    // Remove elements not also found in rhs
+    for (iterator iter = this->cbegin(); iter != this->cend(); ++iter)
+    {
+        if (!rhs.found(iter.key()))
+        {
+            erase(iter);
+        }
+    }
+}
+
+
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator^=(const HashSet<Key, Hash>& rhs)
+{
+    // Add missed rhs elements, remove duplicate elements
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
+    {
+        if (found(iter.key()))
+        {
+            erase(iter.key());
+        }
+        else
+        {
+            insert(iter.key());
+        }
+    }
+}
+
+
+// same as HashTable::erase()
+template<class Key, class Hash>
+void Foam::HashSet<Key, Hash>::operator-=(const HashSet<Key, Hash>& rhs)
+{
+    // Remove rhs elements from lhs
+    for (const_iterator iter = rhs.cbegin(); iter != rhs.cend(); ++iter)
+    {
+        erase(iter.key());
+    }
+}
+
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
+
+/* * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * */
+
+template<class Key, class Hash>
+Foam::HashSet<Key, Hash>
+Foam::operator|
+(
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
+)
+{
+    HashSet<Key, Hash> out(hash1);
+    out |= hash2;
+    return out;
+}
+
+
+template<class Key, class Hash>
+Foam::HashSet<Key, Hash>
+Foam::operator&
+(
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
+)
+{
+    HashSet<Key, Hash> out(hash1);
+    out &= hash2;
+    return out;
+}
+
+
+template<class Key, class Hash>
+Foam::HashSet<Key, Hash>
+Foam::operator^
+(
+    const HashSet<Key, Hash>& hash1,
+    const HashSet<Key, Hash>& hash2
+)
+{
+    HashSet<Key, Hash> out(hash1);
+    out ^= hash2;
+    return out;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 

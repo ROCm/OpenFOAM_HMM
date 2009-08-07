@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*--------------------------------*- C++ -*----------------------------------*\
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,6 +47,7 @@ Description
 #include "cyclicPolyPatch.H"
 #include "Swap.H"
 #include "IFstream.H"
+#include "readHexLabel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -54,7 +55,10 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Scalae factor used to scale points (optional command line argument)
+// Line number
+label lineNo = 1;
+
+// Scale factor used to scale points (optional command line argument)
 scalar scaleFactor = 1.0;
 
 label dimensionOfGrid = 0;
@@ -88,6 +92,9 @@ DynamicList<label> cellGroupZoneID;
 DynamicList<label> cellGroupStartIndex;
 DynamicList<label> cellGroupEndIndex;
 DynamicList<label> cellGroupType;
+
+// Special parsing of (incorrect) Cubit files
+bool cubitFile = false;
 
 
 void uniquify(word& name, HashSet<word>& patchNames)
@@ -131,8 +138,6 @@ one_space                  [ \t\f]
 space                      {one_space}*
 some_space                 {one_space}+
 cspace                     ","{space}
-nl                         (\n|\r)
-spaceNl                    ({space}|{nl})*
 
 alpha                      [_[:alpha:]]
 digit                      [[:digit:]]
@@ -146,7 +151,7 @@ quote                      \"
 dash                       "-"
 dotColonDash               [.:-]
 
-schemeSpecialInitial       [!$%&*/\\:<=>?~_^#.@]
+schemeSpecialInitial       [!$%&*/\\:<=>?~_^#.@']
 schemeSpecialSubsequent    [.+-]
 schemeSymbol               (({some_space}|{alpha}|{quote}|{schemeSpecialInitial})({alpha}|{quote}|{digit}|{schemeSpecialInitial}|{schemeSpecialSubsequent})*)
 
@@ -187,23 +192,23 @@ time                       ({digit}{digit}":"{digit}{digit}":"{digit}{digit})
 
 versionNumber              ({digit}|".")*
 
-header                     {spaceNl}"(1"{space}
-dimension                  {spaceNl}"(2"{space}
-points                     {spaceNl}"(10"{space}
-faces                      {spaceNl}"(13"{space}
-cells                      {spaceNl}"(12"{space}
-zoneVariant1               {spaceNl}"(39"{space}
-zoneVariant2               {spaceNl}"(45"{space}
-faceTree                   {spaceNl}"(59"{space}
+header                     {space}"(1"{space}
+dimension                  {space}"(2"{space}
+points                     {space}"(10"{space}
+faces                      {space}"(13"{space}
+cells                      {space}"(12"{space}
+zoneVariant1               {space}"(39"{space}
+zoneVariant2               {space}"(45"{space}
+faceTree                   {space}"(59"{space}
 
 comment                    "0"{space}
 unknownPeriodicFace        "17"{space}
 periodicFace               "18"{space}
 cellTree                   "58"{space}
 faceParents                "61"{space}
-ignoreBlocks               ("4"|"37"|"38"|"41"|"60"|"64"){space}
+ignoreBlocks               ("4"|"37"|"38"|"40"|"41"|"60"|"64"){space}
 
-redundantBlock             {spaceNl}({comment}|{unknownPeriodicFace}|{periodicFace}|{cellTree}|{faceParents}|{ignoreBlocks}){space}
+redundantBlock             {space}({comment}|{unknownPeriodicFace}|{periodicFace}|{cellTree}|{faceParents}|{ignoreBlocks}){space}
 
 endOfSection               {space}")"{space}
 
@@ -290,7 +295,7 @@ endOfSection               {space}")"{space}
         BEGIN(readPointHeader);
     }
 
-<readPointHeader>{spaceNl}{lbrac}{space}"0"{space}"1"{space} {
+<readPointHeader>{space}{lbrac}{space}"0"{space}"1"{space} {
         BEGIN(readNumberOfPoints);
     }
 
@@ -302,7 +307,7 @@ endOfSection               {space}")"{space}
         // Ignore rest of stream
     }
 
-<readPointHeader>{spaceNl}{lbrac} {
+<readPointHeader>{space}{lbrac} {
         BEGIN(readPointGroupData);
     }
 
@@ -342,7 +347,7 @@ endOfSection               {space}")"{space}
         BEGIN(readPointData);
     }
 
-<readPointData>{spaceNl}{lbrac}{spaceNl} {
+<readPointData>{space}{lbrac}{space} {
         Info<< ".  Reading points..." << flush;
         cmpt = 0;
         yy_push_state(readScalarList);
@@ -350,19 +355,32 @@ endOfSection               {space}")"{space}
 
 <readScalarList>{signedInteger}{space} {
         points[pointi][cmpt++] = scaleFactor*atol(YYText());
+
+        if (cmpt == pointGroupNumberOfComponents)
+        {
+            if (pointGroupNumberOfComponents == 2)
+            {
+                points[pointi].z() = 0.0;
+            }
+
+            cmpt = 0;
+            pointi++;
+        }
     }
 
 <readScalarList>{scalar}{space} {
         points[pointi][cmpt++] = scaleFactor*atof(YYText());
-    }
 
-<readScalarList>{spaceNl} {
-        if (pointGroupNumberOfComponents == 2)
+        if (cmpt == pointGroupNumberOfComponents)
         {
-            points[pointi].z() = 0.0;
+            if (pointGroupNumberOfComponents == 2)
+            {
+                points[pointi].z() = 0.0;
+            }
+
+            cmpt = 0;
+            pointi++;
         }
-        cmpt = 0;
-        pointi++;
     }
 
 <readScalarList>{endOfSection} {
@@ -372,12 +390,13 @@ endOfSection               {space}")"{space}
         if (pointi != pointGroupEndIndex[pointGroupEndIndex.size()-1]+1)
         {
             Warning
-                << "Problem with reading points: "
-                << "start index: "
+                << "Problem with reading points: " << nl
+                << "    start index: "
                 << pointGroupStartIndex[pointGroupStartIndex.size()-1]
                 << " end index: "
                 << pointGroupEndIndex[pointGroupEndIndex.size()-1]
-                << " last points read: " << pointi << endl;
+                << " last points read: " << pointi << nl
+                << "    on line " << lineNo << endl;
         }
 
         yy_pop_state();
@@ -387,7 +406,7 @@ endOfSection               {space}")"{space}
         BEGIN(readFaceHeader);
     }
 
-<readFaceHeader>{spaceNl}{lbrac}{space}"0"{space}"1"{space} {
+<readFaceHeader>{space}{lbrac}{space}"0"{space}"1"{space} {
         BEGIN(readNumberOfFaces);
     }
 
@@ -403,7 +422,7 @@ endOfSection               {space}")"{space}
         // Type and element type not read
     }
 
-<readFaceHeader>{spaceNl}{lbrac} {
+<readFaceHeader>{space}{lbrac} {
         BEGIN(readFaceGroupData);
     }
 
@@ -431,12 +450,12 @@ endOfSection               {space}")"{space}
             << faceGroupEndIndex[faceGroupEndIndex.size()-1] << flush;
     }
 
-<readNumberOfFaces,readFaceGroupData>{spaceNl}{endOfSection} {
+<readNumberOfFaces,readFaceGroupData>{space}{endOfSection} {
         BEGIN(readFaceData);
     }
 
-<readFaceData>{spaceNl}{lbrac} {
-        if (faceGroupElementType == 0)
+<readFaceData>{space}{lbrac} {
+        if (faceGroupElementType == 0 || faceGroupElementType > 4)
         {
             Info<< ".  Reading mixed faces..." << flush;
             yy_push_state(readFacesMixed);
@@ -448,7 +467,7 @@ endOfSection               {space}")"{space}
         }
     }
 
-<readFacesMixed>{spaceNl}{hexLabelList} {
+<readFacesMixed>{space}{hexLabelList} {
         face& curFaceLabels = faces[facei];
 
         // set size of label list
@@ -465,7 +484,7 @@ endOfSection               {space}")"{space}
         facei++;
     }
 
-<readFacesUniform>{spaceNl}{hexLabelList} {
+<readFacesUniform>{space}{hexLabelList} {
         face& curFaceLabels = faces[facei];
 
         // Set size of label list.
@@ -484,19 +503,20 @@ endOfSection               {space}")"{space}
         facei++;
     }
 
-<readFacesMixed,readFacesUniform>{spaceNl}{endOfSection} {
+<readFacesMixed,readFacesUniform>{space}{endOfSection} {
         Info<< "done." << endl;
 
         // check read of fluentFaces
         if (facei != faceGroupEndIndex[faceGroupEndIndex.size()-1]+1)
         {
             Warning
-                << "Problem with reading fluentFaces: "
-                << "start index: "
+                << "Problem with reading fluentFaces: " << nl
+                << "    start index: "
                 << faceGroupStartIndex[faceGroupStartIndex.size()-1]
                 << " end index: "
                 << faceGroupEndIndex[faceGroupEndIndex.size()-1]
-                << " last fluentFaces read: " << facei << endl;
+                << " last fluentFaces read: " << facei << nl
+                << "    on line " << lineNo << endl;
         }
 
         yy_pop_state();
@@ -507,7 +527,7 @@ endOfSection               {space}")"{space}
         BEGIN(readCellHeader);
     }
 
-<readCellHeader>{spaceNl}{lbrac}{space}"0"{space}"1"{space} {
+<readCellHeader>{space}{lbrac}{space}"0"{space}"1"{space} {
         BEGIN(readNumberOfCells);
     }
 
@@ -516,7 +536,7 @@ endOfSection               {space}")"{space}
         Info<< "Number of cells: " << nCells << endl;
     }
 
-<readCellHeader>{spaceNl}{lbrac} {
+<readCellHeader>{space}{lbrac} {
         BEGIN(readCellGroupData);
     }
 
@@ -526,7 +546,8 @@ endOfSection               {space}")"{space}
         // non-standard cell definition from Tgrid, which misses the type label.
 
         Warning
-            << "Tgrid syntax problem: " << YYText() << endl;
+            << "Tgrid syntax problem: " << YYText() << nl
+            << "    on line " << lineNo << endl;
 
         // read cell zone-ID, start and end-label
         cellGroupZoneID.append(strtol(YYText(), &endPtr, 16));
@@ -580,7 +601,7 @@ endOfSection               {space}")"{space}
         BEGIN(readCellData);
     }
 
-<readCellData>{spaceNl}{lbrac} {
+<readCellData>{space}{lbrac} {
         // Quickly scan to the end of the cell data block and discard
         register int c;
         while ((c = yyinput()) != 0 && c != ')')
@@ -601,15 +622,24 @@ endOfSection               {space}")"{space}
         BEGIN(readZoneHeader);
     }
 
-<readZoneHeader>{spaceNl}{lbrac} {
+<readZoneHeader>{space}{lbrac} {
         BEGIN(readZoneGroupData);
     }
 
-<readZoneGroupData>{space}{label}{space}{word}{space}{word}{space}{label}? {
+<readZoneGroupData>{space}{hexLabel}{space}{word}{space}{word}{space}{label}? {
         IStringStream zoneDataStream(YYText());
 
         // cell zone-ID not in hexadecimal!!! Inconsistency
-        label zoneID(readLabel(zoneDataStream));
+        label zoneID = -1;
+
+        if (cubitFile)
+        {
+            zoneID = readHexLabel(zoneDataStream);
+        }
+        else
+        {
+            zoneID = readLabel(zoneDataStream);
+        }
 
         groupType.insert(zoneID, word(zoneDataStream));
         groupName.insert(zoneID, word(zoneDataStream));
@@ -623,17 +653,18 @@ endOfSection               {space}")"{space}
         BEGIN(readZoneData);
     }
 
-<readZoneData>{spaceNl}{lbrac} {
+<readZoneData>{space}{lbrac} {
         Info<< ".  Reading zone data..." << flush;
         yy_push_state(readZoneBlock);
     }
 
-<readZoneBlock>{spaceNl}{schemeSymbolList} {
+<readZoneBlock>{space}{schemeSymbolList} {
     }
 
 <readZoneBlock>{lbrac} {
-        Warning
-            << "Found unknown block in zone: " << YYText() << endl;
+        //Warning
+        //    << "Found unknown block in zone: " << YYText() << nl
+        //    << "    on line " << lineNo << endl;
         yy_push_state(ignoreBlock);
     }
 
@@ -646,7 +677,7 @@ endOfSection               {space}")"{space}
 
  /*             ------ Reading end of section and others ------              */
 
-<readHeader,readDimension,readPointData,readFaceData,readCellData,readZoneData>{spaceNl}{endOfSection} {
+<readHeader,readDimension,readPointData,readFaceData,readCellData,readZoneData>{space}{endOfSection} {
         BEGIN(INITIAL);
     }
 
@@ -655,7 +686,8 @@ endOfSection               {space}")"{space}
 {lbrac}{label} {
         Warning
             << "Found unknown block of type: "
-            << Foam::string(YYText())(1, YYLeng()-1) << endl;
+            << Foam::string(YYText())(1, YYLeng()-1) << nl
+            << "    on line " << lineNo << endl;
 
         yy_push_state(ignoreBlock);
     }
@@ -664,40 +696,47 @@ endOfSection               {space}")"{space}
         yy_push_state(ignoreBlock);
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{quote}{text}{quote} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{quote}{text}{quote} {
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{schemeSymbol} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{schemeSymbol} {
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{lbrac} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{lbrac} {
         yy_push_state(ignoreEmbeddedBlock);
 
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{endOfSection} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{endOfSection} {
         yy_pop_state();
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{labelList} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{labelList} {
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{hexLabelList} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{hexLabelList} {
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{scalarList} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{scalarList} {
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{schemeSymbolList} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{schemeSymbolList} {
     }
 
-<ignoreBlock,ignoreEmbeddedBlock>{spaceNl}{text} {
+<ignoreBlock,ignoreEmbeddedBlock>{space}{text} {
     }
 
 
- /* ------              Ignore remaining space and \n s.             ------  */
+ /* ------              Count newlines.                              ------  */
 
-<*>{some_space}|\n|\r {
+<*>\n {
+        lineNo++;
+    }
+
+
+ /* ------              Ignore remaining space.                      ------  */
+
+<*>{some_space}|\r {
     }
 
 
@@ -706,7 +745,8 @@ endOfSection               {space}")"{space}
 <*>. {
         // This is a catch all.
         FatalErrorIn("fluentMeshToFoam::lexer")
-            << "Do not understand characters: " << YYText()
+            << "Do not understand characters: " << YYText() << nl
+            << "    on line " << lineNo
             << exit(FatalError);
     }
 
@@ -725,6 +765,7 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("scale", "scale factor");
     argList::validOptions.insert("ignoreCellGroups", "cell group names");
     argList::validOptions.insert("ignoreFaceGroups", "face group names");
+    argList::validOptions.insert("cubit", "");
 
     argList args(argc, argv);
 
@@ -733,22 +774,30 @@ int main(int argc, char *argv[])
         FatalError.exit();
     }
 
-    if (args.options().found("scale"))
-    {
-        scaleFactor = atof(args.options()["scale"].c_str());
-    }
+    args.optionReadIfPresent("scale", scaleFactor);
 
     HashSet<word> ignoreCellGroups;
-    if (args.options().found("ignoreCellGroups"))
+    if (args.optionFound("ignoreCellGroups"))
     {
-        IStringStream(args.options()["ignoreCellGroups"])() >> ignoreCellGroups;
+        args.optionLookup("ignoreCellGroups")() >> ignoreCellGroups;
     }
 
     HashSet<word> ignoreFaceGroups;
-    if (args.options().found("ignoreFaceGroups"))
+    if (args.optionFound("ignoreFaceGroups"))
     {
-        IStringStream(args.options()["ignoreFaceGroups"])() >> ignoreFaceGroups;
+        args.optionLookup("ignoreFaceGroups")() >> ignoreFaceGroups;
     }
+
+    cubitFile = args.options().found("cubit");
+
+    if (cubitFile)
+    {
+        Info<< nl
+            << "Assuming Cubit generated file"
+            << " (incorrect face orientation; hexadecimal zoneIDs)."
+            << nl << endl;
+    }
+
 
 #   include "createTime.H"
 
@@ -792,6 +841,8 @@ int main(int argc, char *argv[])
 
     // Pre-filtering: flip "owner" boundary or wrong oriented internal
     // faces and move to neighbour
+
+    boolList fm(faces.size(), false);
     forAll (faces, facei)
     {
         if
@@ -800,7 +851,11 @@ int main(int argc, char *argv[])
          || (neighbour[facei] != -1 && owner[facei] > neighbour[facei])
         )
         {
-            faces[facei] = faces[facei].reverseFace();
+            fm[facei] = true;
+            if (!cubitFile)
+            {
+                faces[facei] = faces[facei].reverseFace();
+            }
             Swap(owner[facei], neighbour[facei]);
         }
     }
@@ -856,10 +911,10 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        pointField(0),
-        faceList(0),
-        labelList(0),
-        labelList(0)
+        xferCopy(pointField()),
+        xferCopy(faceList()),
+        xferCopy(labelList()),
+        xferCopy(labelList())
     );
 
 
@@ -882,11 +937,8 @@ int main(int argc, char *argv[])
     // Check the face groups for boundary patches, baffles and faceZones
     // ignoring the interior zones in ignoreCellGroups
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    label nPatches = 0;
-    labelList patchIDs(faceGroupZoneID.size());
-
-    label nFaceZones = 0;
-    labelList faceZoneIDs(faceGroupZoneID.size());
+    DynamicList<label> patchIDs(faceGroupZoneID.size());
+    DynamicList<label> faceZoneIDs(faceGroupZoneID.size());
 
     forAll(faceGroupZoneID, fgi)
     {
@@ -900,13 +952,13 @@ int main(int argc, char *argv[])
             // Check the first element of neighbour for boundary group
             if (neighbour[start] == -1 || fluentGroupToFoamPatch.found(type))
             {
-                patchIDs[nPatches++] = fgi;
+                patchIDs.append(fgi);
             }
             else
             {
                 if (!ignoreFaceGroups.found(groupName[faceGroupZoneID[fgi] ]))
                 {
-                    faceZoneIDs[nFaceZones++] = fgi;
+                    faceZoneIDs.append(fgi);
                 }
             }
         }
@@ -928,20 +980,32 @@ int main(int argc, char *argv[])
         }
         else
         {
-            FatalErrorIn(args.executable())
-                << "Unknown FaceGroup " << zoneID << " not in a zone"
-                << exit(FatalError);
+            if (neighbour[start] == -1)
+            {
+                // Boundary face in unknown group. Create a patch for it.
+                groupType.insert(zoneID, "unknown");
+                groupName.insert(zoneID, "FaceGroup" + Foam::name(zoneID));
+                patchIDs.append(fgi);
+                Info<< "Created patch " << fgi << " for unknown FaceGroup "
+                    << zoneID << '.' << endl;
+            }
+            else
+            {
+                WarningIn(args.executable())
+                    << "Unknown FaceGroup " << zoneID << " not in a zone"
+                    << endl;
+            }
         }
     }
 
-    patchIDs.setSize(nPatches);
-    faceZoneIDs.setSize(nFaceZones);
+    patchIDs.shrink();
+    faceZoneIDs.shrink();
 
 
     // Add empty patches
     // ~~~~~~~~~~~~~~~~~
 
-    List<polyPatch*> newPatches(nPatches);
+    List<polyPatch*> newPatches(patchIDs.size());
     HashSet<word> patchNames;
 
     forAll(patchIDs, patchi)
@@ -1024,7 +1088,7 @@ int main(int argc, char *argv[])
     }
 
     // Face zones
-    mesh.faceZones().setSize(nFaceZones);
+    mesh.faceZones().setSize(faceZoneIDs.size());
     HashSet<word> faceZoneNames;
 
     forAll(faceZoneIDs, faceZonei)
@@ -1098,6 +1162,8 @@ int main(int argc, char *argv[])
     }
 
 
+    bool doneWarning = false;
+
     // Add faceZone faces
     forAll(faceZoneIDs, faceZonei)
     {
@@ -1113,20 +1179,37 @@ int main(int argc, char *argv[])
 
         for (label facei = start; facei <= end; facei++)
         {
-            meshMod.addFace
-            (
-                faces[facei],
-                owner[facei],
-                neighbour[facei],
-                -1,                 // masterPointID
-                -1,                 // masterEdgeID
-                facei,              // masterFace
-                false,              // flipFaceFlux
-                -1,                 // patchID
-                faceZonei,          // zoneID
-                false,              // zoneFlip
-                -1                  // subPatchID
-            );
+            if (owner[facei] >= nCells || neighbour[facei] >= nCells)
+            {
+                if (!doneWarning)
+                {
+                    WarningIn(args.executable())
+                        << "Ignoring internal face " << facei
+                        << " on FaceZone " << zoneID
+                        << " since owner " << owner[facei] << " or neighbour "
+                        << neighbour[facei] << " outside range of cells 0.."
+                        << nCells-1 << endl
+                        << "    Suppressing future warnings." << endl;
+                    doneWarning = true;
+                }
+            }
+            else
+            {
+                meshMod.addFace
+                (
+                    faces[facei],
+                    owner[facei],
+                    neighbour[facei],
+                    -1,                 // masterPointID
+                    -1,                 // masterEdgeID
+                    facei,              // masterFace
+                    false,              // flipFaceFlux
+                    -1,                 // patchID
+                    faceZonei,          // zoneID
+                    fm[facei],          // zoneFlip
+                    -1                  // subPatchID
+                );
+            }
 
             // Mark face as being done
             owner[facei] = -1;
@@ -1148,28 +1231,26 @@ int main(int argc, char *argv[])
 
         for (label facei = start; facei <= end; facei++)
         {
-            meshMod.addFace
-            (
-                faces[facei],
-                owner[facei],
-                -1,
-                -1,                 // masterPointID
-                -1,                 // masterEdgeID
-                facei,              // masterFace
-                false,              // flipFaceFlux
-                patchi,             // patchID
-                -1,                 // zoneID
-                false,              // zoneFlip
-                -1                  // subPatchID
-            );
-
-            // For baffles create the opposite face
-            if (neighbour[start] != -1)
+            if (owner[facei] >= nCells || neighbour[facei] >= nCells)
+            {
+                if (!doneWarning)
+                {
+                    WarningIn(args.executable())
+                        << "Ignoring patch face " << facei
+                        << " on FaceZone " << zoneID
+                        << " since owner " << owner[facei] << " or neighbour "
+                        << neighbour[facei] << " outside range of cells 0.."
+                        << nCells-1 << endl
+                        << "    Suppressing future warnings." << endl;
+                    doneWarning = true;
+                }
+            }
+            else
             {
                 meshMod.addFace
                 (
-                    faces[facei].reverseFace(),
-                    neighbour[facei],
+                    faces[facei],
+                    owner[facei],
                     -1,
                     -1,                 // masterPointID
                     -1,                 // masterEdgeID
@@ -1180,8 +1261,26 @@ int main(int argc, char *argv[])
                     false,              // zoneFlip
                     -1                  // subPatchID
                 );
-            }
 
+                // For baffles create the opposite face
+                if (neighbour[start] != -1)
+                {
+                    meshMod.addFace
+                    (
+                        faces[facei].reverseFace(),
+                        neighbour[facei],
+                        -1,
+                        -1,                 // masterPointID
+                        -1,                 // masterEdgeID
+                        facei,              // masterFace
+                        false,              // flipFaceFlux
+                        patchi,             // patchID
+                        -1,                 // zoneID
+                        false,              // zoneFlip
+                        -1
+                    );
+                }
+            }
             // Mark face as being done
             owner[facei] = -1;
         }
@@ -1201,20 +1300,36 @@ int main(int argc, char *argv[])
                     << exit(FatalError);
             }
 
-            meshMod.addFace
-            (
-                faces[facei],
-                owner[facei],
-                neighbour[facei],
-                -1,                 // masterPointID
-                -1,                 // masterEdgeID
-                facei,              // masterFace
-                false,              // flipFaceFlux
-                -1,                 // patchID
-                -1,                 // zoneID
-                false,              // zoneFlip
-                -1                  // subPatchID
-            );
+            if (owner[facei] >= nCells || neighbour[facei] >= nCells)
+            {
+                if (!doneWarning)
+                {
+                    WarningIn(args.executable())
+                        << "Ignoring internal face " << facei
+                        << " since owner " << owner[facei] << " or neighbour "
+                        << neighbour[facei] << " outside range of cells 0.."
+                        << nCells-1 << endl
+                        << "    Suppressing future warnings." << endl;
+                    doneWarning = true;
+                }
+            }
+            else
+            {
+                meshMod.addFace
+                (
+                    faces[facei],
+                    owner[facei],
+                    neighbour[facei],
+                    -1,                 //masterPointID
+                    -1,                 //masterEdgeID
+                    facei,              //masterFace
+                    false,              //flipFaceFlux
+                    -1,                 //patchID
+                    -1,                 //zoneID
+                    false,              //zoneFlip
+                    -1                  //subPatchID
+                );
+            }
         }
     }
 

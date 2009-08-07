@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -91,7 +91,7 @@ bool Foam::IOobject::readHeader(Istream& is)
             << "First token could not be read or is not the keyword 'FoamFile'"
             << nl << nl << "Check header is of the form:" << nl << endl;
 
-        writeHeader(Info);
+        writeHeader(SeriousError);
 
         return false;
     }

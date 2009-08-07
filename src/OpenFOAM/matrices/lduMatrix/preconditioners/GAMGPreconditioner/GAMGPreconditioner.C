@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ namespace Foam
 Foam::GAMGPreconditioner::GAMGPreconditioner
 (
     const lduMatrix::solver& sol,
-    Istream& preconditionerData
+    const dictionary& solverControls
 )
 :
     GAMGSolver
@@ -55,7 +55,7 @@ Foam::GAMGPreconditioner::GAMGPreconditioner
         sol.interfaceBouCoeffs(),
         sol.interfaceIntCoeffs(),
         sol.interfaces(),
-        preconditionerData
+        solverControls
     ),
     lduMatrix::preconditioner(sol),
     nVcycles_(2)
@@ -75,13 +75,7 @@ Foam::GAMGPreconditioner::~GAMGPreconditioner()
 void Foam::GAMGPreconditioner::readControls()
 {
     GAMGSolver::readControls();
-    controlDict_.readIfPresent("nVcycles", nVcycles_);
-}
-
-
-void Foam::GAMGPreconditioner::read(Istream& solverData)
-{
-    GAMGSolver::read(solverData);
+    nVcycles_ = controlDict_.lookupOrDefault<label>("nVcycles", 2);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2007 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,14 +26,16 @@ Application
     pimpleFoam
 
 Description
-    Large time-step transient solver for incompressible, turbulent flow using
-    the PIMPLE (merged PISO-SIMPLE) algorithm.
+    Large time-step transient solver for incompressible, flow using the PIMPLE
+    (merged PISO-SIMPLE) algorithm.
+
+    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASModel/RASModel.H"
+#include "singlePhaseTransportModel.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,14 +60,14 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        if (nOuterCorr != 1)
-        {
-            p.storePrevIter();
-        }
-
         // --- Pressure-velocity PIMPLE corrector loop
         for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
+            if (nOuterCorr != 1)
+            {
+                p.storePrevIter();
+            }
+
             #include "UEqn.H"
 
             // --- PISO loop

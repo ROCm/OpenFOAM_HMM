@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ void Foam::cuttingPlane::calcCutCells
 (
     const primitiveMesh& mesh,
     const scalarField& dotProducts,
-    const labelList& cellIdLabels
+    const UList<label>& cellIdLabels
 )
 {
     const labelListList& cellEdges = mesh.cellEdges();
@@ -103,11 +103,12 @@ void Foam::cuttingPlane::calcCutCells
 
 // Determine for each edge the intersection point. Calculates
 // - cutPoints_ : coordinates of all intersection points
-// - edgePoint  : per edge -1 or the index into cutPoints_
-Foam::labelList Foam::cuttingPlane::intersectEdges
+// - edgePoint  : per edge -1 or the index into cutPoints
+void Foam::cuttingPlane::intersectEdges
 (
     const primitiveMesh& mesh,
-    const scalarField& dotProducts
+    const scalarField& dotProducts,
+    List<label>& edgePoint
 )
 {
     // Use the dotProducts to find out the cut edges.
@@ -115,7 +116,7 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
     const pointField& points = mesh.points();
 
     // Per edge -1 or the label of the intersection point
-    labelList edgePoint(edges.size(), -1);
+    edgePoint.setSize(edges.size());
 
     DynamicList<point> dynCuttingPoints(4*cutCells_.size());
 
@@ -129,7 +130,9 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
          || (dotProducts[e[1]] < zeroish && dotProducts[e[0]] > positive)
         )
         {
-            // Edge is cut.
+            // Edge is cut
+            edgePoint[edgeI] = dynCuttingPoints.size();
+
             const point& p0 = points[e[0]];
             const point& p1 = points[e[1]];
 
@@ -139,7 +142,7 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
             {
                 dynCuttingPoints.append(p0);
             }
-            else if (alpha > 1.0)
+            else if (alpha >= 1.0)
             {
                 dynCuttingPoints.append(p1);
             }
@@ -147,15 +150,14 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
             {
                 dynCuttingPoints.append((1-alpha)*p0 + alpha*p1);
             }
-
-            edgePoint[edgeI] = dynCuttingPoints.size() - 1;
+        }
+        else
+        {
+            edgePoint[edgeI] = -1;
         }
     }
 
-    dynCuttingPoints.shrink();
-    cutPoints_.transfer(dynCuttingPoints);
-
-    return edgePoint;
+    this->storedPoints().transfer(dynCuttingPoints);
 }
 
 
@@ -164,7 +166,7 @@ Foam::labelList Foam::cuttingPlane::intersectEdges
 bool Foam::cuttingPlane::walkCell
 (
     const primitiveMesh& mesh,
-    const labelList& edgePoint,
+    const UList<label>& edgePoint,
     const label cellI,
     const label startEdgeI,
     DynamicList<label>& faceVerts
@@ -175,6 +177,7 @@ bool Foam::cuttingPlane::walkCell
 
     label nIter = 0;
 
+    faceVerts.clear();
     do
     {
         faceVerts.append(edgePoint[edgeI]);
@@ -255,11 +258,17 @@ bool Foam::cuttingPlane::walkCell
 void Foam::cuttingPlane::walkCellCuts
 (
     const primitiveMesh& mesh,
-    const labelList& edgePoint
+    const UList<label>& edgePoint
 )
 {
-    cutFaces_.setSize(cutCells_.size());
-    label cutFaceI = 0;
+    const pointField& cutPoints = this->points();
+
+    // use dynamic lists to handle triangulation and/or missed cuts
+    DynamicList<face>  dynCutFaces(cutCells_.size());
+    DynamicList<label> dynCutCells(cutCells_.size());
+
+    // scratch space for calculating the face vertices
+    DynamicList<label> faceVerts(10);
 
     forAll(cutCells_, i)
     {
@@ -290,7 +299,6 @@ void Foam::cuttingPlane::walkCellCuts
         }
 
         // Walk from starting edge around the circumference of the cell.
-        DynamicList<label> faceVerts(2*mesh.faces()[cellI].size());
         bool okCut = walkCell
         (
             mesh,
@@ -302,54 +310,46 @@ void Foam::cuttingPlane::walkCellCuts
 
         if (okCut)
         {
-            faceVerts.shrink();
+            face f(faceVerts);
 
-            face cutFace(faceVerts);
-
-            // Orient face.
-            if ((cutFace.normal(cutPoints_) && normal()) < 0)
+            // Orient face to point in the same direction as the plane normal
+            if ((f.normal(cutPoints) && normal()) < 0)
             {
-                cutFace = cutFace.reverseFace();
+                f = f.reverseFace();
             }
 
-            cutFaces_[cutFaceI++] = cutFace;
+            // the cut faces are usually quite ugly, so always triangulate
+            label nTri = f.triangles(cutPoints, dynCutFaces);
+            while (nTri--)
+            {
+                dynCutCells.append(cellI);
+            }
         }
     }
 
-    cutFaces_.setSize(cutFaceI);
+    this->storedFaces().transfer(dynCutFaces);
+    cutCells_.transfer(dynCutCells);
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct without cutting
-Foam::cuttingPlane::cuttingPlane(const plane& newPlane)
+Foam::cuttingPlane::cuttingPlane(const plane& pln)
 :
-    plane(newPlane)
+    plane(pln)
 {}
 
 
-// Construct from components
+// Construct from plane and mesh reference, restricted to a list of cells
 Foam::cuttingPlane::cuttingPlane
 (
+    const plane& pln,
     const primitiveMesh& mesh,
-    const plane& newPlane
+    const UList<label>& cellIdLabels
 )
 :
-    plane(newPlane)
-{
-    reCut(mesh);
-}
-
-// Construct from mesh reference and plane, restricted to a list of cells
-Foam::cuttingPlane::cuttingPlane
-(
-    const primitiveMesh& mesh,
-    const plane& newPlane,
-    const labelList& cellIdLabels
-)
-:
-    plane(newPlane)
+    plane(pln)
 {
     reCut(mesh, cellIdLabels);
 }
@@ -358,100 +358,50 @@ Foam::cuttingPlane::cuttingPlane
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// reCut mesh with existing planeDesc
-void Foam::cuttingPlane::reCut
-(
-    const primitiveMesh& mesh
-)
-{
-    cutCells_.clear();
-    cutPoints_.clear();
-    cutFaces_.clear();
-
-    scalarField dotProducts = (mesh.points() - refPoint()) & normal();
-
-    //// Perturb points cuts so edges are cut properly.
-    //const tmp<scalarField> tdotProducts = stabilise(rawDotProducts, SMALL);
-    //const scalarField& dotProducts = tdotProducts();
-
-    // Determine cells that are (probably) cut.
-    calcCutCells(mesh, dotProducts);
-
-    // Determine cutPoints and return list of edge cuts. (per edge -1 or
-    // the label of the intersection point (in cutPoints_)
-    labelList edgePoint(intersectEdges(mesh, dotProducts));
-
-    // Do topological walk around cell to find closed loop.
-    walkCellCuts(mesh, edgePoint);
-}
-
-
 // recut mesh with existing planeDesc
 void Foam::cuttingPlane::reCut
 (
     const primitiveMesh& mesh,
-    const labelList& cellIdLabels
+    const UList<label>& cellIdLabels
 )
 {
+    MeshStorage::clear();
     cutCells_.clear();
-    cutPoints_.clear();
-    cutFaces_.clear();
 
     scalarField dotProducts = (mesh.points() - refPoint()) & normal();
 
     // Determine cells that are (probably) cut.
     calcCutCells(mesh, dotProducts, cellIdLabels);
 
-    // Determine cutPoints and return list of edge cuts. (per edge -1 or
-    // the label of the intersection point (in cutPoints_)
-    labelList edgePoint(intersectEdges(mesh, dotProducts));
+    // Determine cutPoints and return list of edge cuts.
+    // per edge -1 or the label of the intersection point
+    labelList edgePoint;
+    intersectEdges(mesh, dotProducts, edgePoint);
 
     // Do topological walk around cell to find closed loop.
     walkCellCuts(mesh, edgePoint);
 }
 
 
-
-// Return plane used
-const Foam::plane& Foam::cuttingPlane::planeDesc() const
+// remap action on triangulation
+void Foam::cuttingPlane::remapFaces
+(
+    const UList<label>& faceMap
+)
 {
-    return static_cast<const plane&>(*this);
-}
-
-
-// Return vectorField of cutting points
-const Foam::pointField& Foam::cuttingPlane::points() const
-{
-    return cutPoints_;
-}
-
-
-// Return unallocFaceList of points in cells
-const Foam::faceList& Foam::cuttingPlane::faces() const
-{
-    return cutFaces_;
-}
-
-
-// Return labelList of cut cells
-const Foam::labelList& Foam::cuttingPlane::cells() const
-{
-    return cutCells_;
-}
-
-
-bool Foam::cuttingPlane::cut()
-{
-    if (cutCells_.size() > 0)
+    // recalculate the cells cut
+    if (&faceMap && faceMap.size())
     {
-        return true;
-    }
-    else
-    {
-        return false;
+        MeshStorage::remapFaces(faceMap);
+
+        List<label> newCutCells(faceMap.size());
+        forAll(faceMap, faceI)
+        {
+            newCutCells[faceI] = cutCells_[faceMap[faceI]];
+        }
+        cutCells_.transfer(newCutCells);
     }
 }
-
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
@@ -465,11 +415,9 @@ void Foam::cuttingPlane::operator=(const cuttingPlane& rhs)
             << abort(FatalError);
     }
 
+    static_cast<MeshStorage&>(*this) = rhs;
     static_cast<plane&>(*this) = rhs;
-
-    cutCells_ = rhs.cells();
-    cutPoints_ = rhs.points();
-    cutFaces_ = rhs.faces();
+    cutCells_ = rhs.cutCells();
 }
 
 

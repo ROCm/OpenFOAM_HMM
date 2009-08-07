@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ SourceFiles
 #ifndef volPointInterpolation_H
 #define volPointInterpolation_H
 
+#include "MeshObject.H"
 #include "pointPatchInterpolation.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -52,6 +53,8 @@ class pointMesh;
 \*---------------------------------------------------------------------------*/
 
 class volPointInterpolation
+:
+    public MeshObject<fvMesh, volPointInterpolation>
 {
     // Private data
 
@@ -83,7 +86,7 @@ public:
     // Constructors
 
         //- Constructor given fvMesh and pointMesh.
-        volPointInterpolation(const fvMesh&, const pointMesh&);
+        explicit volPointInterpolation(const fvMesh&);
 
 
     // Destructor
@@ -98,11 +101,6 @@ public:
             const fvMesh& mesh() const
             {
                 return boundaryInterpolator_.mesh();
-            }
-
-            const pointMesh& pMesh() const
-            {
-                return boundaryInterpolator_.pMesh();
             }
 
 

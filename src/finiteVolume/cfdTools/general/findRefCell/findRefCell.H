@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,15 @@ void setRefCell
     const volScalarField& field,
     const dictionary& dict,
     label& refCelli,
-    scalar& refValue
+    scalar& refValue,
+    const bool forceReference = false
+);
+
+//- Return the current value of field in the reference cell
+scalar getRefCellValue
+(
+    const volScalarField& field,
+    const label refCelli
 );
 
 }

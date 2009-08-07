@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ License
 #include "slicedVolFields.H"
 #include "slicedSurfaceFields.H"
 #include "SubField.H"
+#include "cyclicFvPatchFields.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -146,6 +147,27 @@ void fvMesh::makeC() const
         cellCentres(),
         faceCentres()
     );
+
+
+    // Need to correct for cyclics transformation since absolute quantity.
+    // Ok on processor patches since hold opposite cell centre (no
+    // transformation)
+    slicedVolVectorField& C = *CPtr_;
+
+    forAll(C.boundaryField(), patchi)
+    {
+        if (isA<cyclicFvPatchVectorField>(C.boundaryField()[patchi]))
+        {
+            // Note: cyclic is not slice but proper field
+            C.boundaryField()[patchi] == static_cast<const vectorField&>
+            (
+                static_cast<const List<vector>&>
+                (
+                    boundary_[patchi].patchSlice(faceCentres())
+                )
+            );
+        }
+    }
 }
 
 

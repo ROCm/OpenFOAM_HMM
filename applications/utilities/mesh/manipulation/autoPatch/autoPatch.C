@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     Info<< "Mesh read in = "
         << runTime.cpuTimeIncrement()
@@ -90,7 +91,7 @@ int main(int argc, char *argv[])
     boundaryMesh bMesh;
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     scalar minCos = Foam::cos(featureAngle * mathematicalConstant::pi/180.0);
 
@@ -243,6 +244,10 @@ int main(int argc, char *argv[])
     polyMeshRepatcher.repatch();
 
     // Write resulting mesh
+    if (overwrite)
+    {
+        mesh.setInstance(oldInstance);
+    }
     mesh.write();
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,28 +29,26 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Type>
-Foam::Table<Type>::Table
-(
-    const word& entryName,
-    const dictionary& dict
-)
+Foam::Table<Type>::Table(const word& entryName, Istream& is)
 :
-    DataEntry<Type>(typeName, entryName, dict),
-    table_(this->dict_.lookup("table"))
+    DataEntry<Type>(entryName),
+    table_(is)
 {
     if (!table_.size())
     {
-        FatalErrorIn
-        (
-             "Foam::Table<Type>::Table"
-             "("
-                 "const word& entryName,"
-                 "const dictionary& dict"
-             ")"
-        ) << "Table is invalid (empty)" << nl
-          << exit(FatalError);
+        FatalErrorIn("Foam::Table<Type>::Table(const Istream&)")
+            << "Table for entry " << this->name_ << " is invalid (empty)"
+            << nl << exit(FatalError);
     }
 }
+
+
+template<class Type>
+Foam::Table<Type>::Table(const Table<Type>& tbl)
+:
+    DataEntry<Type>(tbl),
+    table_(tbl.table_)
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -78,11 +76,14 @@ Type Foam::Table<Type>::value(const scalar x) const
         i++;
     }
 
-    // Linear interpolation to find value
-    return
+    // Linear interpolation to find value. Note constructor needed for
+    // Table<label> to convert intermediate scalar back to label.
+    return Type
+    (
         (x - table_[i].first())/(table_[i+1].first() - table_[i].first())
       * (table_[i+1].second() - table_[i].second())
-      + table_[i].second();
+      + table_[i].second()
+    );
 }
 
 
@@ -137,6 +138,11 @@ Type Foam::Table<Type>::integrate(const scalar x1, const scalar x2) const
 
     return sum;
 }
+
+
+// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
+
+#include "TableIO.C"
 
 
 // ************************************************************************* //

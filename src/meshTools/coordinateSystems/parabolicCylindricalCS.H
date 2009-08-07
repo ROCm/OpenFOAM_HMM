@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,9 @@ Description
 
     Notation: u = a.x() v = a.y() z = a.z();
 
+Note
+    The maintenance of this class may lag that of the main types.
+
 SourceFiles
     parabolicCylindricalCS.C
 
@@ -46,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                    Class parabolicCylindricalCS Declaration
+                   Class parabolicCylindricalCS Declaration
 \*---------------------------------------------------------------------------*/
 
 class parabolicCylindricalCS
@@ -93,32 +96,16 @@ public:
         //- Construct null
         parabolicCylindricalCS();
 
-        //- Construct from components
+        //- Construct from origin and rotation
         parabolicCylindricalCS
         (
             const word& name,
             const point& origin,
-            const vector& axis,
-            const vector& direction
-        );
-
-        //- Construct from origin and rotation angles
-        parabolicCylindricalCS
-        (
-            const word& name,
-            const point& origin,
-            const coordinateRotation& cr
+            const coordinateRotation&
         );
 
         //- Construct from dictionary
-        parabolicCylindricalCS
-        (
-            const word& name,
-            const dictionary& dict
-        );
-
-
-    // Member Functions
+        parabolicCylindricalCS(const word&, const dictionary&);
 
 };
 

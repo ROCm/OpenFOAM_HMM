@@ -65,5 +65,5 @@ int main()
     Info<< (symm(t7) && t7) - (0.5*(t7 + t7.T()) && t7) << endl;
     Info<< (t7 && symm(t7)) - (t7 && 0.5*(t7 + t7.T())) << endl;
 
-    return(0);
+    return 0;
 }

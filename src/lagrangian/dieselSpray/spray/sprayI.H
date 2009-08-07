@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,70 +36,84 @@ inline const Time& spray::runTime() const
     return runTime_;
 }
 
+
 inline const fvMesh& spray::mesh() const
 {
     return mesh_;
 }
+
 
 inline const volVectorField& spray::U() const
 {
     return U_;
 }
 
+
 inline const volScalarField& spray::rho() const
 {
     return rho_;
 }
+
 
 inline const volScalarField& spray::p() const
 {
     return p_;
 }
 
+
 inline const volScalarField& spray::T() const
 {
     return T_;
 }
+
 
 inline PtrList<injector>& spray::injectors()
 {
     return injectors_;
 }
 
+
 inline const PtrList<injector>& spray::injectors() const
 {
     return injectors_;
 }
+
 
 inline const atomizationModel& spray::atomization() const
 {
     return atomization_;
 }
 
+
 inline const breakupModel& spray::breakup() const
 {
     return breakupModel_;
 }
+
 
 inline const collisionModel& spray::collisions() const
 {
     return collisionModel_;
 }
 
+
 inline const dispersionModel& spray::dispersion() const
 {
     return dispersionModel_;
 }
+
 
 inline const dragModel& spray::drag() const
 {
     return drag_;
 }
 
+
 inline const evaporationModel& spray::evaporation() const
 {
     return evaporation_;
 }
+
 
 inline const heatTransferModel& spray::heatTransfer() const
 {
@@ -112,10 +126,12 @@ inline const injectorModel& spray::injection() const
     return injectorModel_;
 }
 
+
 inline const wallModel& spray::wall() const
 {
     return wall_;
 }
+
 
 inline tmp<volVectorField> spray::momentumSource() const
 {
@@ -145,6 +161,7 @@ inline tmp<volVectorField> spray::momentumSource() const
 
     return tsource;
 }
+
 
 inline tmp<volScalarField> spray::evaporationSource(const label si) const
 {
@@ -179,6 +196,7 @@ inline tmp<volScalarField> spray::evaporationSource(const label si) const
     return tsource;
 }
 
+
 inline tmp<volScalarField> spray::heatTransferSource() const
 {
     tmp<volScalarField> tsource
@@ -209,6 +227,7 @@ inline Random& spray::rndGen()
     return rndGen_;
 }
 
+
 inline label spray::subCycles() const
 {
     return subCycles_;
@@ -226,80 +245,96 @@ inline const liquidMixture& spray::fuels() const
     return fuels_;
 }
 
-inline const PtrList<specieProperties>& spray::gasProperties() const
+
+inline const PtrList<gasThermoPhysics>& spray::gasProperties() const
 {
     return gasProperties_;
 }
 
-inline const combustionMixture& spray::composition() const
+
+inline const basicMultiComponentMixture& spray::composition() const
 {
     return composition_;
 }
+
 
 inline const List<label>& spray::liquidToGasIndex() const
 {
     return liquidToGasIndex_;
 }
 
+
 inline const List<label>& spray::gasToLiquidIndex() const
 {
     return gasToLiquidIndex_;
 }
+
 
 inline const List<bool>& spray::isLiquidFuel() const
 {
     return isLiquidFuel_;
 }
 
+
 inline const bool& spray::twoD() const
 {
     return twoD_;
 }
+
 
 inline const vector& spray::axisOfSymmetry() const
 {
     return axisOfSymmetry_;
 }
 
+
 inline const vector& spray::axisOfWedge() const
 {
     return axisOfWedge_;
 }
+
 
 inline const vector& spray::axisOfWedgeNormal() const
 {
     return axisOfWedgeNormal_;
 }
 
+
 inline const scalar& spray::angleOfWedge() const
 {
     return angleOfWedge_;
 }
+
 
 inline const interpolation<vector>& spray::UInterpolator() const
 {
     return UInterpolator_;
 }
 
+
 inline const interpolation<scalar>& spray::rhoInterpolator() const
 {
     return rhoInterpolator_;
 }
+
 
 inline const interpolation<scalar>& spray::pInterpolator() const
 {
     return pInterpolator_;
 }
 
+
 inline const interpolation<scalar>& spray::TInterpolator() const
 {
     return TInterpolator_;
 }
 
+
 inline vectorField& spray::sms()
 {
     return sms_;
 }
+
 
 inline const vectorField& spray::sms() const
 {
@@ -312,6 +347,7 @@ inline scalarField& spray::shs()
     return shs_;
 }
 
+
 inline const scalarField& spray::shs() const
 {
     return shs_;
@@ -323,15 +359,18 @@ inline PtrList<scalarField>& spray::srhos()
     return srhos_;
 }
 
+
 inline const PtrList<scalarField>& spray::srhos() const
 {
     return srhos_;
 }
 
+
 inline const scalar& spray::ambientPressure() const
 {
     return ambientPressure_;
 }
+
 
 inline const scalar& spray::ambientTemperature() const
 {

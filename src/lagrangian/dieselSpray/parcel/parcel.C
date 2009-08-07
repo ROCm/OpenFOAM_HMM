@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,15 +34,14 @@ License
 #include "wallPolyPatch.H"
 #include "wedgePolyPatch.H"
 #include "processorPolyPatch.H"
-#include "combustionMixture.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+#include "basicMultiComponentMixture.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 namespace Foam
 {
-defineParticleTypeNameAndDebug(parcel, 0);
-defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
+    defineParticleTypeNameAndDebug(parcel, 0);
+    defineTemplateTypeNameAndDebug(Cloud<parcel>, 0);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -297,7 +296,7 @@ bool Foam::parcel::move(spray& sDB)
         ms() -= ms()*(oTotMass-m())/oTotMass;
 
         // remove parcel if it is 'small'
-        if (m() < 1.0e-20)
+        if (m() < 1.0e-12)
         {
             keepParcel = false;
 
@@ -574,6 +573,56 @@ void Foam::parcel::updateParcelProperties
             // Prevent droplet temperature to go too low
             // Mainly a numerical stability issue
             Tnew = max(200.0, Tnew);
+            scalar Td = Tnew;
+
+            scalar pAtSurface = fuels.pv(pg, Td, X());
+            scalar pCompare = 0.999*pg;
+            scalar boiling = pAtSurface >= pCompare;
+            if (boiling)
+            {
+                // can not go above boiling temperature
+                scalar Terr = 1.0e-3;
+                label n=0;
+                scalar dT = 1.0;
+                scalar pOld = pAtSurface;
+                while (dT > Terr)
+                {
+                    n++;
+                    pAtSurface = fuels.pv(pg, Td, X());
+                    if ((pAtSurface < pCompare) && (pOld < pCompare))
+                    {
+                        Td += dT;
+                    }
+                    else
+                    {
+                        if ((pAtSurface > pCompare) && (pOld > pCompare))
+                        {
+                            Td -= dT;
+                        }
+                        else
+                        {
+                            dT *= 0.5;
+                            if ((pAtSurface > pCompare) && (pOld < pCompare))
+                            {
+                                Td -= dT;
+                            }
+                            else
+                            {
+                                Td += dT;
+                            }
+                        }
+                    }
+                    pOld = pAtSurface;
+                    if (debug)
+                    {
+                        if (n>100)
+                        {
+                            Info << "n = " << n << ", T = " << Td << ", pv = " << pAtSurface << endl;
+                        }
+                    }
+                }
+                Tnew = Td;
+            }
         }
 
         // Evaporate droplet!
@@ -645,7 +694,5 @@ void Foam::parcel::transformProperties(const tensor& T)
 void Foam::parcel::transformProperties(const vector&)
 {}
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

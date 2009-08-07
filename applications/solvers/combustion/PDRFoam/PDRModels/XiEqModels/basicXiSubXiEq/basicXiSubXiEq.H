@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,11 +23,41 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    basicSubGrid
+    Foam::XiEqModels::basicSubGrid
 
 Description
     Basic sub-grid obstacle flame-wrinking enhancement factor model.
     Details supplied by J Puttock 2/7/06.
+
+    <b> Sub-grid flame area generation </b>
+
+    \f$ n = N - \hat{\dwea{\vec{U}}}.n_{s}.\hat{\dwea{\vec{U}}} \f$
+    \f$ n_{r} = \sqrt{n} \f$
+
+    where:
+
+        \f$ \hat{\dwea{\vec{U}}} = \dwea{\vec{U}} / \vert \dwea{\vec{U}}
+        \vert \f$
+
+        \f$ b = \hat{\dwea{\vec{U}}}.B.\hat{\dwea{\vec{U}}} / n_{r} \f$
+
+    where:
+
+        \f$ B \f$ is the file "B".
+
+        \f$ N \f$ is the file "N".
+
+        \f$  n_{s} \f$ is the file "ns".
+
+    The flame area enhancement factor \f$ \Xi_{sub} \f$ is expected to
+    approach:
+
+    \f[
+        \Xi_{{sub}_{eq}} =
+            1 + max(2.2 \sqrt{b}, min(0.34 \frac{\vert \dwea{\vec{U}}
+            \vert}{{\vec{U}}^{'}}, 1.6)) \times min(\frac{n}{4}, 1)
+    \f]
+
 
 SourceFiles
     basicSubGrid.C

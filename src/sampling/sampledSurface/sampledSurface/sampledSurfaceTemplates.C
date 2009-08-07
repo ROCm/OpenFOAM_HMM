@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,7 +29,7 @@ License
 template<class Type>
 bool Foam::sampledSurface::checkFieldSize(const Field<Type>& field) const
 {
-    if (faces().size() == 0 || field.size() == 0)
+    if (faces().empty() || field.empty())
     {
         return false;
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,7 +84,25 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
     {
         List<T>::operator=(list);
     }
+}
 
+
+template<class T>
+Foam::IOList<T>::IOList(const IOobject& io, const Xfer<List<T> >& list)
+:
+    regIOobject(io)
+{
+    List<T>::transfer(list());
+
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
+    }
 }
 
 
@@ -93,6 +111,16 @@ Foam::IOList<T>::IOList(const IOobject& io, const List<T>& list)
 template<class T>
 Foam::IOList<T>::~IOList()
 {}
+
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class T>
+bool Foam::IOList<T>::writeData(Ostream& os) const
+{
+    return (os << *this).good();
+}
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
@@ -108,13 +136,6 @@ template<class T>
 void Foam::IOList<T>::operator=(const List<T>& rhs)
 {
     List<T>::operator=(rhs);
-}
-
-
-template<class T>
-bool Foam::IOList<T>::writeData(Ostream& os) const
-{
-    return (os << *this).good();
 }
 
 

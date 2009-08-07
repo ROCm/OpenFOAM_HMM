@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,7 +73,7 @@ void inplaceReorder(const UList<label>& oldToNew, ListType&);
 template<class Container>
 void inplaceMapValue(const UList<label>& oldToNew, Container&);
 
-//- Recreate with mapped keys. Remove elements with negative key.
+//- Recreate with mapped keys. Do not map elements with negative key.
 template<class Container>
 void inplaceMapKey(const UList<label>& oldToNew, Container&);
 
@@ -90,17 +90,31 @@ void duplicateOrder(const UList<T>&, labelList& order);
 template<class T>
 void uniqueOrder(const UList<T>&, labelList& order);
 
-//- Extract elements of List whose region is certain value.
-//  Use e.g. to extract all selected elements:
-//    subset<boolList, labelList>(selectedElems, true, lst);
+//- Extract elements of List when select is a certain value.
+//  eg, to extract all selected elements:
+//    subset<bool, labelList>(selectedElems, true, lst);
 template<class T, class ListType>
-ListType subset(const UList<T>& regions, const T& region, const ListType&);
+ListType subset(const UList<T>& select, const T& value, const ListType&);
 
-//- Inplace extract elements of List whose region is certain value. Use e.g.
-//  to extract all selected elements:
-//  inplaceSubset<boolList, labelList>(selectedElems, true, lst);
+//- Inplace extract elements of List when select is a certain value.
+//  eg, to extract all selected elements:
+//    inplaceSubset<bool, labelList>(selectedElems, true, lst);
 template<class T, class ListType>
-void inplaceSubset(const UList<T>& regions, const T& region, ListType&);
+void inplaceSubset(const UList<T>& select, const T& value, ListType&);
+
+//- Extract elements of List when select is true
+//  eg, to extract all selected elements:
+//    subset<boolList, labelList>(selectedElems, lst);
+//  Note a labelHashSet could also be used for the bool-list
+template<class BoolListType, class ListType>
+ListType subset(const BoolListType& select, const ListType&);
+
+//- Inplace extract elements of List when select is true
+//  eg, to extract all selected elements:
+//    inplaceSubset<boolList, labelList>(selectedElems, lst);
+//  Note a labelHashSet could also be used for the bool-list
+template<class BoolListType, class ListType>
+void inplaceSubset(const BoolListType& select, ListType&);
 
 //- Invert one-to-one map. Unmapped elements will be -1.
 labelList invert(const label len, const UList<label>&);
@@ -108,8 +122,9 @@ labelList invert(const label len, const UList<label>&);
 //- Invert one-to-many map. Unmapped elements will be size 0.
 labelListList invertOneToMany(const label len, const UList<label>&);
 
-//- Invert many-to-many. Input and output types need to be inherited
-//  from List. E.g. faces to pointFaces.
+//- Invert many-to-many.
+//  Input and output types need to be inherited from List.
+//  eg, faces to pointFaces.
 template<class InList, class OutList>
 void invertManyToMany(const label len, const UList<InList>&, List<OutList>&);
 

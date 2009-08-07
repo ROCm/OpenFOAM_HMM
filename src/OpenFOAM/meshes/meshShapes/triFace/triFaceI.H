@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,9 +78,9 @@ inline Foam::triFace::triFace
 }
 
 
-inline Foam::triFace::triFace(const UList<label>& l)
+inline Foam::triFace::triFace(const UList<label>& lst)
 :
-    FixedList<label, 3>(l)
+    FixedList<label, 3>(lst)
 {}
 
 
@@ -96,7 +96,7 @@ inline Foam::label Foam::triFace::collapse()
 {
     // we cannot resize a FixedList, so mark duplicates with '-1'
     // (the lower vertex is retained)
-    // catch any '-1' - ie, if called twice
+    // catch any '-1' (eg, if called twice)
 
     label n = 3;
     if (operator[](0) == operator[](1) || operator[](1) == -1)
@@ -133,7 +133,7 @@ inline Foam::pointField Foam::triFace::points(const pointField& points) const
 
 inline Foam::face Foam::triFace::triFaceFace() const
 {
-    face f(3);
+    Foam::face f(3);
 
     f[0] = operator[](0);
     f[1] = operator[](1);
@@ -154,13 +154,13 @@ inline Foam::edgeList Foam::triFace::edges() const
     edgeList e(3);
 
     e[0].start() = operator[](0);
-    e[0].end() = operator[](1);
+    e[0].end()   = operator[](1);
 
     e[1].start() = operator[](1);
-    e[1].end() = operator[](2);
+    e[1].end()   = operator[](2);
 
     e[2].start() = operator[](2);
-    e[2].end() = operator[](0);
+    e[2].end()   = operator[](0);
 
     return e;
 }
@@ -213,7 +213,7 @@ inline Foam::scalar Foam::triFace::mag(const pointField& points) const
     return ::Foam::mag(normal(points));
 }
 
-
+// could also delegate to triPointRef(...).normal()
 inline Foam::vector Foam::triFace::normal(const pointField& points) const
 {
     return 0.5*
@@ -221,6 +221,19 @@ inline Foam::vector Foam::triFace::normal(const pointField& points) const
         (points[operator[](1)] - points[operator[](0)])
        ^(points[operator[](2)] - points[operator[](0)])
     );
+}
+
+
+inline Foam::label Foam::triFace::nTriangles() const
+{
+    return 1;
+}
+
+
+inline Foam::triFace Foam::triFace::reverseFace() const
+{
+    // The starting points of the original and reverse face are identical.
+    return triFace(operator[](0), operator[](2), operator[](1));
 }
 
 

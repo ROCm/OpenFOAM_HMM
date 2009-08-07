@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,11 +50,26 @@ class DispersionRASModel
 :
     public DispersionModel<CloudType>
 {
+protected:
 
-    // Private data
+    // Protected data
 
         //- Reference to the compressible turbulence model
         const compressible::RASModel& turbulence_;
+
+        // Locally cached turbulence fields
+
+            //- Turbulence k
+            const volScalarField* kPtr_;
+
+            //- Take ownership of the k field
+            bool ownK_;
+
+            //- Turbulence epsilon
+            const volScalarField* epsilonPtr_;
+
+            //- Take ownership of the epsilon field
+            bool ownEpsilon_;
 
 
 public:
@@ -73,12 +88,14 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~DispersionRASModel();
+    //- Destructor
+    virtual ~DispersionRASModel();
 
 
     // Member Functions
+
+        //- Cache carrier fields
+        virtual void cacheFields(const bool store);
 
         //- Return const access to the turbulence model
         const compressible::RASModel& turbulence() const

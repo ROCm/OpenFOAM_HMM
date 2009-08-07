@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,19 +36,16 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 namespace debug
 {
 
+//! @cond ignoreDocumentation - local scope
 dictionary* controlDictPtr_(NULL);
 dictionary* debugSwitchesPtr_(NULL);
 dictionary* infoSwitchesPtr_(NULL);
 dictionary* optimisationSwitchesPtr_(NULL);
 
-//- Class to ensure controlDictPtr_ is deleted at the end of the run
-//  @cond ignore documentation for this class
+// to ensure controlDictPtr_ is deleted at the end of the run
 class deleteControlDictPtr
 {
 public:
@@ -61,135 +58,110 @@ public:
         if (controlDictPtr_)
         {
             delete controlDictPtr_;
+            controlDictPtr_ = 0;
         }
     }
 };
-//! @endcond
 
 deleteControlDictPtr deleteControlDictPtr_;
+//! @endcond ignoreDocumentation
 
 
-dictionary& switchSet(const char* switchSetName, dictionary* switchSetPtr)
-{
-    if (!switchSetPtr)
-    {
-        if (!controlDict().found(switchSetName))
-        {
-            cerr<< "debug::switchSet(const char*, dictionary*): " << std::endl
-                << "    Cannot find " <<  switchSetName
-            << " in dictionary " << controlDictPtr_->name().c_str()
-            << std::endl << std::endl;
-
-            ::exit(1);
-        }
-
-        switchSetPtr =
-            const_cast<dictionary*>(&(controlDict().subDict(switchSetName)));
-    }
-
-    return *switchSetPtr;
-}
-
-
-int debugSwitch
-(
-    dictionary& switchSet,
-    const char* switchName,
-    const int defaultValue
-)
-{
-    if (switchSet.found(switchName))
-    {
-        return readInt(switchSet.lookup(switchName));
-    }
-    else
-    {
-        switchSet.add(switchName, defaultValue);
-        return defaultValue;
-    }
-}
-
-}
-
+} // End namespace debug
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionary& debug::controlDict()
+Foam::dictionary& Foam::debug::controlDict()
 {
     if (!controlDictPtr_)
     {
-        fileName controlDictFileName(dotFoam("controlDict"));
-
-        IFstream dictFile(controlDictFileName);
-
-        if (!dictFile.good())
-        {
-            cerr<< "debug::controlDict(): "
-                << "Cannot open essential file " << controlDictFileName.c_str()
-                << std::endl << std::endl;
-            ::exit(1);
-        }
-
-        controlDictPtr_ = new dictionary(dictFile);
+        controlDictPtr_ = new dictionary
+        (
+            IFstream(findEtcFile("controlDict", true))()
+        );
     }
 
     return *controlDictPtr_;
 }
 
 
-dictionary& debug::debugSwitches()
+Foam::dictionary& Foam::debug::switchSet
+(
+    const char* subDictName,
+    dictionary*& subDictPtr
+)
+{
+    if (!subDictPtr)
+    {
+        entry* ePtr = controlDict().lookupEntryPtr
+        (
+            subDictName, false, false
+        );
+
+        if (!ePtr || !ePtr->isDict())
+        {
+            cerr<< "debug::switchSet(const char*, dictionary*&):\n"
+                << "    Cannot find " <<  subDictName << " in dictionary "
+                << controlDict().name().c_str()
+                << std::endl << std::endl;
+
+            ::exit(1);
+        }
+
+        subDictPtr = &ePtr->dict();
+    }
+
+    return *subDictPtr;
+}
+
+
+Foam::dictionary& Foam::debug::debugSwitches()
 {
     return switchSet("DebugSwitches", debugSwitchesPtr_);
 }
 
 
-int debug::debugSwitch(const char* switchName, const int defaultValue)
-{
-    return debugSwitch
-    (
-        debugSwitches(),
-        switchName,
-        defaultValue
-    );
-}
-
-
-dictionary& debug::infoSwitches()
+Foam::dictionary& Foam::debug::infoSwitches()
 {
     return switchSet("InfoSwitches", infoSwitchesPtr_);
 }
 
 
-int debug::infoSwitch(const char* switchName, const int defaultValue)
-{
-    return debugSwitch
-    (
-        infoSwitches(),
-        switchName,
-        defaultValue
-    );
-}
-
-
-dictionary& debug::optimisationSwitches()
+Foam::dictionary& Foam::debug::optimisationSwitches()
 {
     return switchSet("OptimisationSwitches", optimisationSwitchesPtr_);
 }
 
 
-int debug::optimisationSwitch(const char* switchName, const int defaultValue)
+int Foam::debug::debugSwitch(const char* name, const int defaultValue)
 {
-    return debugSwitch
+    return debugSwitches().lookupOrAddDefault
     (
-        optimisationSwitches(),
-        switchName,
-        defaultValue
+        name, defaultValue, false, false
+    );
+}
+
+
+int Foam::debug::infoSwitch(const char* name, const int defaultValue)
+{
+    return infoSwitches().lookupOrAddDefault
+    (
+        name, defaultValue, false, false
+    );
+}
+
+
+int Foam::debug::optimisationSwitch(const char* name, const int defaultValue)
+{
+    return optimisationSwitches().lookupOrAddDefault
+    (
+        name, defaultValue, false, false
     );
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
 
 // ************************************************************************* //

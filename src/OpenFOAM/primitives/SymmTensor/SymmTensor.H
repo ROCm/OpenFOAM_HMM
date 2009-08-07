@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -78,6 +78,8 @@ public:
 
         static const SymmTensor zero;
         static const SymmTensor one;
+        static const SymmTensor max;
+        static const SymmTensor min;
 
 
     //- Component labeling enumeration
@@ -95,7 +97,7 @@ public:
         //- Construct given SphericalTensor
         inline SymmTensor(const SphericalTensor<Cmpt>&);
 
-        //- Construct given the nine components
+        //- Construct given the six components
         inline SymmTensor
         (
             const Cmpt txx, const Cmpt txy, const Cmpt txz,

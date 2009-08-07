@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,43 +30,40 @@ License
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 inline Foam::keyType::keyType()
 :
     word(),
-    isWildCard_(false)
+    isPattern_(false)
 {}
 
 
-//- Construct as copy
 inline Foam::keyType::keyType(const keyType& s)
 :
     word(s, false),
-    isWildCard_(s.isWildCard())
+    isPattern_(s.isPattern())
 {}
 
 
-//- Construct as copy of word
 inline Foam::keyType::keyType(const word& s)
 :
     word(s, false),
-    isWildCard_(false)
+    isPattern_(false)
 {}
 
 
-//- Construct as copy of string. Expect it to be regular expression
+// Construct as copy of string. Expect it to be regular expression
 inline Foam::keyType::keyType(const string& s)
 :
     word(s, false),
-    isWildCard_(true)
+    isPattern_(true)
 {}
 
 
-//- Construct as copy of character array
+// Construct as copy of character array
 inline Foam::keyType::keyType(const char* s)
 :
     word(s, false),
-    isWildCard_(false)
+    isPattern_(false)
 {}
 
 
@@ -74,58 +71,56 @@ inline Foam::keyType::keyType(const char* s)
 inline Foam::keyType::keyType
 (
     const std::string& s,
-    const bool isWildCard
+    const bool isPattern
 )
 :
     word(s, false),
-    isWildCard_(isWildCard)
+    isPattern_(isPattern)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::keyType::valid(char c)
+inline bool Foam::keyType::isPattern() const
 {
-    return c != '"';
-}
-
-
-bool Foam::keyType::isWildCard() const
-{
-    return isWildCard_;
+    return isPattern_;
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::keyType::operator=(const keyType& s)
+inline const Foam::keyType& Foam::keyType::operator=(const keyType& s)
 {
     // Bypass checking
     string::operator=(s);
-    isWildCard_ = s.isWildCard();
+    isPattern_ = s.isPattern_;
+    return *this;
 }
 
 
-inline void Foam::keyType::operator=(const word& s)
+inline const Foam::keyType& Foam::keyType::operator=(const word& s)
 {
     word::operator=(s);
-    isWildCard_ = false;
+    isPattern_ = false;
+    return *this;
 }
 
 
-inline void Foam::keyType::operator=(const string& s)
+inline const Foam::keyType& Foam::keyType::operator=(const string& s)
 {
     // Bypass checking
     string::operator=(s);
-    isWildCard_ = true;
+    isPattern_ = true;
+    return *this;
 }
 
 
-inline void Foam::keyType::operator=(const char* s)
+inline const Foam::keyType& Foam::keyType::operator=(const char* s)
 {
     // Bypass checking
     string::operator=(s);
-    isWildCard_ = false;
+    isPattern_ = false;
+    return *this;
 }
 
 

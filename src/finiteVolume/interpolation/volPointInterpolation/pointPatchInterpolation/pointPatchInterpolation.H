@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,6 @@ class pointPatchInterpolation
     // Private data
 
         const fvMesh& fvMesh_;
-        const pointMesh& pointMesh_;
 
         //- Primitive patch interpolators
         PtrList<primitivePatchInterpolation> patchInterpolators_;
@@ -101,7 +100,7 @@ public:
     // Constructors
 
         //- Constructor given fvMesh and pointMesh.
-        pointPatchInterpolation(const fvMesh&, const pointMesh&);
+        pointPatchInterpolation(const fvMesh&);
 
 
     // Destructor
@@ -116,11 +115,6 @@ public:
             const fvMesh& mesh() const
             {
                 return fvMesh_;
-            }
-
-            const pointMesh& pMesh() const
-            {
-                return pointMesh_;
             }
 
 

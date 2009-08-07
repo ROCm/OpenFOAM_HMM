@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ class specie
         //- Number of moles of this component in the mixture
         scalar nMoles_;
 
-        //- Molecular weight of specie
+        //- Molecular weight of specie [kg/kmol]
         scalar molWeight_;
 
 

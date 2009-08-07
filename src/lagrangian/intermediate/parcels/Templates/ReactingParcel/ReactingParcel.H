@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,9 +26,8 @@ Class
     Foam::ReactingParcel
 
 Description
-    Reactinf parcel class with one/two-way coupling with the continuous
-    phase. Includes thermo parcel sub-models, plus:
-    - combustion
+    Reacting parcel class with one/two-way coupling with the continuous
+    phase.
 
 SourceFiles
     ReactingParcelI.H
@@ -47,6 +46,7 @@ SourceFiles
 
 #include "ThermoParcel.H"
 #include "ReactingCloud.H"
+#include "reactingParcel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,9 +70,9 @@ Ostream& operator<<
 template<class ParcelType>
 class ReactingParcel
 :
+    public reactingParcel,
     public ThermoParcel<ParcelType>
 {
-
 public:
 
     //- Class to hold reacting particle constant properties
@@ -80,41 +80,40 @@ public:
     :
         public ThermoParcel<ParcelType>::constantProperties
     {
-
         // Private data
 
-            //- Vapourisation temperature [K]
+            //- Minimum pressure [Pa]
+            const scalar pMin_;
+
+            //- Constant volume flag - e.g. during mass transfer
+            Switch constantVolume_;
+
+            //- Vaporisation temperature [K]
             const scalar Tvap_;
 
             //- Boiling point [K]
             const scalar Tbp_;
 
-            //- Latent heat of devolatilisation [J/kg]
-            const scalar Ldevol_;
-
-            //- Constant volume flag - e.g. during mass transfer
-            Switch constantVolume_;
-
 
     public:
 
         //- Constructor
-        constantProperties(const dictionary& dict);
+        constantProperties(const dictionary& parentDict);
 
         // Access
 
-            //- Return const access to the vapourisation temperature
+            //- Return const access to the minimum pressure
+            inline scalar pMin() const;
+
+            //- Return const access to the constant volume flag
+            inline Switch constantVolume() const;
+
+            //- Return const access to the vaporisation temperature
             inline scalar Tvap() const;
 
             //- Return const access to the boiling point
             inline scalar Tbp() const;
-
-            //- Return const access to the latent heat of devolatilisation
-            inline scalar Ldevol() const;
-
-            //- Return const access to the constant volume flag
-            inline Switch constantVolume() const;
-    };
+   };
 
 
     //- Class used to pass reacting tracking data to the trackToFace function
@@ -162,7 +161,7 @@ public:
             //- Return const access to the constant properties
             inline const constantProperties& constProps() const;
 
-            //- Return conat access to the interpolator for continuous
+            //- Return const access to the interpolator for continuous
             //  phase pressure field
             inline const interpolation<scalar>& pInterp() const;
     };
@@ -178,20 +177,7 @@ protected:
             scalar mass0_;
 
             //- Mass fractions of mixture []
-            scalarField YMixture_;
-
-            //- Mass fractions of gases []
-            scalarField YGas_;
-
-            //- Mass fractions of liquids []
-            scalarField YLiquid_;
-
-            //- Mass fractions of solids []
-            scalarField YSolid_;
-
-            //- Flag to say that the particle is allowed to combust
-            //  Only true after volatile content falls below threshold value
-            bool canCombust_;
+            scalarField Y_;
 
 
         // Cell-based quantities
@@ -202,56 +188,70 @@ protected:
 
     // Protected member functions
 
-        //- Calculate mass transfer
+        //- Calculate Phase change
         template<class TrackData>
-        void calcMassTransfer
+        void calcPhaseChange
         (
             TrackData& td,
-            const scalar dt,
-            const scalar T0,
-            const scalar T1,
-            scalarList& dMassMT
+            const scalar dt,           // timestep
+            const label cellI,         // owner cell
+            const scalar d,            // diameter
+            const scalar T,            // temperature
+            const vector& U,           // velocity
+            const scalar mass,         // mass
+            const label idPhase,       // id of phase involved in phase change
+            const scalar YPhase,       // total mass fraction
+            const scalarField& YComponents, // component mass fractions
+            scalarField& dMassPC,      // mass transfer - local to particle
+            scalar& Sh,                // explicit particle enthalpy source
+            scalar& dhsTrans           // sensible enthalpy transfer to carrier
         );
 
-        //- Calculate surface reactions
-        template<class TrackData>
-        void calcSurfaceReactions
+        //- Update mass fraction
+        scalar updateMassFraction
         (
-            TrackData& td,
-            const scalar dt,
-            const label celli,
-            const scalar T0,
-            const scalar T1,
-            const scalarList& dMassMT,
-            scalarList& dMassSR,
-            scalar& dhRet
-        );
+            const scalar mass0,
+            const scalarField& dMass,
+            scalarField& Y
+        ) const;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("ReactingParcel");
+    // Static data members
+
+        //- String representation of properties
+        static string propHeader;
+
+        //- Runtime type information
+        TypeName("ReactingParcel");
+
 
     friend class Cloud<ParcelType>;
 
 
     // Constructors
 
+        //- Construct from owner, position, and cloud owner
+        //  Other properties initialised as null
+        inline ReactingParcel
+        (
+            ReactingCloud<ParcelType>& owner,
+            const vector& position,
+            const label cellI
+        );
+
         //- Construct from components
         inline ReactingParcel
         (
             ReactingCloud<ParcelType>& owner,
-            const label typeId,
             const vector& position,
-            const label celli,
+            const label cellI,
+            const label typeId,
+            const scalar nParticle0,
             const scalar d0,
             const vector& U0,
-            const scalar nParticle0,
-            const scalarField& YGas0,
-            const scalarField& YLiquid0,
-            const scalarField& YSolid0,
-            const scalarField& YMixture0,
+            const scalarField& Y0,
             const constantProperties& constProps
         );
 
@@ -263,10 +263,13 @@ public:
             bool readFields = true
         );
 
+        //- Construct as a copy
+        ReactingParcel(const ReactingParcel& p);
+
         //- Construct and return a clone
-        autoPtr<ParcelType> clone() const
+        autoPtr<ReactingParcel> clone() const
         {
-            return autoPtr<ParcelType>(new ReactingParcel<ParcelType>(*this));
+            return autoPtr<ReactingParcel>(new ReactingParcel(*this));
         }
 
 
@@ -274,74 +277,61 @@ public:
 
         // Access
 
-            //- Return const access to mass fractions of gases
-            inline const scalarField& YGas() const;
-
-            //- Return const access to mass fractions of liquids
-            inline const scalarField& YLiquid() const;
-
-            //- Return const access to mass fractions of solids
-            inline const scalarField& YSolid() const;
-
-            //- Return const access to mass fractions of mixture
-            inline const scalarField& YMixture() const;
-
             //- Return const access to initial mass
             inline scalar mass0() const;
+
+            //- Return const access to mass fractions of mixture
+            inline const scalarField& Y() const;
+
+            //- Return the owner cell pressure
+            inline scalar pc() const;
 
 
         // Edit
 
-            //- Return access to mass fractions of gases
-            inline scalarField& YGas();
-
-            //- Return access to mass fractions of liquids
-            inline scalarField& YLiquid();
-
-            //- Return access to mass fractions of solids
-            inline scalarField& YSolid();
-
-            //- Return access to mass fractions of mixture
-            inline scalarField& YMixture();
-
             //- Return access to initial mass
             inline scalar& mass0();
+
+            //- Return access to mass fractions of mixture
+            inline scalarField& Y();
 
 
         // Main calculation loop
 
-            //- Update cell based quantities
+            //- Set cell values
             template<class TrackData>
-            void updateCellQuantities
+            void setCellValues
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Coupled calculation with the continuous phase
+            //- Correct cell values using latest transfer information
             template<class TrackData>
-            void calcCoupled
+            void cellValueSourceCorrection
             (
                 TrackData& td,
                 const scalar dt,
-                const label celli
+                const label cellI
             );
 
-            //- Uncoupled calculation with the continuous phase
+            //- Update parcel properties over the time interval
             template<class TrackData>
-            void calcUncoupled
+            void calc
             (
                 TrackData& td,
                 const scalar dt,
-                const label
+                const label cellI
             );
 
 
         // I-O
 
+            //- Read
             static void readFields(ReactingCloud<ParcelType>& c);
 
+            //- Write
             static void writeFields(const ReactingCloud<ParcelType>& c);
 
 
@@ -374,4 +364,3 @@ public:
 #endif
 
 // ************************************************************************* //
-

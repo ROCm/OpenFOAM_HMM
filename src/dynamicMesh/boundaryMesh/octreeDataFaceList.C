@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -340,8 +340,8 @@ Foam::label Foam::octreeDataFaceList::getSampleType
             // Face intersection point lies on edge between two face triangles
 
             // Calculate edge normal as average of the two triangle normals
-            label fpPrev = (fp == 0 ? f.size()-1 : fp-1);
-            label fpNext = (fp + 1) % f.size();
+            label fpPrev = f.rcIndex(fp);
+            label fpNext = f.fcIndex(fp);
 
             vector e = points[f[fp]] - ctr;
             vector ePrev = points[f[fpPrev]] - ctr;
@@ -434,7 +434,7 @@ bool Foam::octreeDataFaceList::intersects
     // Disable picking up intersections behind us.
     scalar oldTol = intersection::setPlanarTol(0.0);
 
-    pointHit inter = 
+    pointHit inter =
         f.ray
         (
             start,
@@ -486,7 +486,7 @@ bool Foam::octreeDataFaceList::findTightest
     else
     {
         // Construct bb around sample and myFar
-        const point dist2(fabs(dist.x()), fabs(dist.y()), fabs(dist.z())); 
+        const point dist2(fabs(dist.x()), fabs(dist.y()), fabs(dist.z()));
 
         tightest.min() = sample - dist2;
         tightest.max() = sample + dist2;
@@ -558,7 +558,7 @@ Foam::scalar Foam::octreeDataFaceList::calcNearest
     }
     return nearHit.distance();
 }
-    
+
 
 void Foam::octreeDataFaceList::write
 (

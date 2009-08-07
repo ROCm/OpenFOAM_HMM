@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,6 @@ Description
 
 #include "PrimitivePatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -43,7 +39,9 @@ template
     class PointType
 >
 
-labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
+Foam::labelList
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+meshEdges
 (
     const edgeList& allEdges,
     const labelListList& cellEdges,
@@ -119,7 +117,9 @@ template
     class PointType
 >
 
-labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
+Foam::labelList
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+meshEdges
 (
     const edgeList& allEdges,
     const labelListList& pointEdges
@@ -133,7 +133,7 @@ labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
             << endl;
     }
 
-    // get reference to the list of edges on the patch 
+    // get reference to the list of edges on the patch
     const edgeList& PatchEdges = edges();
 
     // create the storage
@@ -157,7 +157,7 @@ labelList PrimitivePatch<Face, FaceList, PointField, PointType>::meshEdges
             {
                 meshEdges[edgeI] = pe[i];
                 break;
-            } 
+            }
         }
     }
 
@@ -175,7 +175,9 @@ template
     class PointType
 >
 
-label PrimitivePatch<Face, FaceList, PointField, PointType>::whichEdge
+Foam::label
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+whichEdge
 (
     const edge& e
 ) const
@@ -200,9 +202,5 @@ label PrimitivePatch<Face, FaceList, PointField, PointType>::whichEdge
     return -1;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

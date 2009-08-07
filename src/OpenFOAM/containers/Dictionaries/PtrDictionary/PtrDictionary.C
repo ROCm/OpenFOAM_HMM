@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,20 +26,15 @@ License
 
 #include "PtrDictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class T>
-PtrDictionary<T>::PtrDictionary()
+Foam::PtrDictionary<T>::PtrDictionary()
 {}
 
 
 template<class T>
-PtrDictionary<T>::PtrDictionary(const PtrDictionary& dict)
+Foam::PtrDictionary<T>::PtrDictionary(const PtrDictionary& dict)
 :
     DictionaryBase<DLPtrList<T>, T>(dict)
 {}
@@ -47,21 +42,19 @@ PtrDictionary<T>::PtrDictionary(const PtrDictionary& dict)
 
 template<class T>
 template<class INew>
-PtrDictionary<T>::PtrDictionary(Istream& is, const INew& iNew)
+Foam::PtrDictionary<T>::PtrDictionary(Istream& is, const INew& iNew)
 :
     DictionaryBase<DLPtrList<T>, T>(is, iNew)
 {}
 
 
 template<class T>
-PtrDictionary<T>::PtrDictionary(Istream& is)
+Foam::PtrDictionary<T>::PtrDictionary(Istream& is)
 :
     DictionaryBase<DLPtrList<T>, T>(is)
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,8 +129,8 @@ void inletOutletFvPatchField<Type>::updateCoeffs()
     const Field<scalar>& phip = this->patch().lookupPatchField
     (
         phiName_,
-        reinterpret_cast<const surfaceScalarField*>(NULL),
-        reinterpret_cast<const scalar*>(NULL)
+        reinterpret_cast<const surfaceScalarField*>(0),
+        reinterpret_cast<const scalar*>(0)
     );
 
     this->valueFraction() = 1.0 - pos(phip);

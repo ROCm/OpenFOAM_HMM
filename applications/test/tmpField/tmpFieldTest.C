@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,8 +23,10 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    
+    tmpFieldTest
+
 Description
+    Tests for possible memory leaks in the tmp<Field> algebra.
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,9 +45,6 @@ int main()
     {
         f1 = f2 + f3 + f2 + f3;
     }
-
-//    Info<< f1 << endl;
-
 
     Info<< "end" << endl;
 }

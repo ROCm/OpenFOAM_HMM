@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,13 @@ class GradientDispersionRAS
 :
     public DispersionRASModel<CloudType>
 {
+protected:
+
+    // Locally cached turbulence fields
+
+        //- Gradient of k
+        const volVectorField* gradkPtr_;
+
 
 public:
 
@@ -68,9 +75,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~GradientDispersionRAS();
+    //- Destructor
+    virtual ~GradientDispersionRAS();
 
 
     // Member Functions
@@ -78,8 +84,11 @@ public:
         //- Flag to indicate whether model activates injection model
         bool active() const;
 
+        //- Cache carrier fields
+        virtual void cacheFields(const bool store);
+
         //- Update (disperse particles)
-        vector update
+        virtual vector update
         (
             const scalar dt,
             const label celli,

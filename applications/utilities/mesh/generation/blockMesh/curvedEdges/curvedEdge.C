@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,26 +41,7 @@ namespace Foam
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(curvedEdge, 0);
-
-// Define the constructor function hash tables
-HashTable<curvedEdge::IstreamConstructorPtr_>*
-    curvedEdge::IstreamConstructorTablePtr_;
-
-
-// Hash table Constructor called from the table add functions.
-
-void curvedEdge::constructTables()
-{
-    static bool constructed = false;
-
-    if (!constructed)
-    {
-        curvedEdge::IstreamConstructorTablePtr_
-            = new HashTable<curvedEdge::IstreamConstructorPtr_>;
-
-        constructed = true;
-    }
-}
+defineRunTimeSelectionTable(curvedEdge, Istream);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -117,10 +98,11 @@ autoPtr<curvedEdge> curvedEdge::New(const pointField& points, Istream& is)
 
     word curvedEdgeType(is);
 
-    HashTable<IstreamConstructorPtr_>::iterator curvedEdgeConstructorIter =
-        IstreamConstructorTablePtr_->find(curvedEdgeType);
+    IstreamConstructorTable::iterator cstrIter =
+        IstreamConstructorTablePtr_
+            ->find(curvedEdgeType);
 
-    if (curvedEdgeConstructorIter == IstreamConstructorTablePtr_->end())
+    if (cstrIter == IstreamConstructorTablePtr_->end())
     {
         FatalErrorIn("curvedEdge::New(const pointField&, Istream&)")
             << "Unknown curvedEdge type " << curvedEdgeType << endl << endl
@@ -129,7 +111,7 @@ autoPtr<curvedEdge> curvedEdge::New(const pointField& points, Istream& is)
             << abort(FatalError);
     }
 
-    return autoPtr<curvedEdge>(curvedEdgeConstructorIter()(points, is));
+    return autoPtr<curvedEdge>(cstrIter()(points, is));
 }
 
 
@@ -175,7 +157,6 @@ Ostream& operator<<(Ostream& os, const curvedEdge& p)
 
     return os;
 }
-
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

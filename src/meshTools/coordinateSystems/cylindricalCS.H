@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,13 +45,18 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class cylindricalCS Declaration
+                        Class cylindricalCS Declaration
 \*---------------------------------------------------------------------------*/
 
 class cylindricalCS
 :
     public coordinateSystem
 {
+    // Private data members
+
+        //- Are angles in degrees? (default = true)
+        bool inDegrees_;
+
 
 protected:
 
@@ -90,30 +95,53 @@ public:
     // Constructors
 
         //- Construct null
-        cylindricalCS();
+        cylindricalCS(const bool inDegrees=true);
 
-        //- Construct from components
+        //- Construct copy
+        cylindricalCS
+        (
+            const coordinateSystem&,
+            const bool inDegrees=true
+        );
+
+        //- Construct copy with a different name
+        cylindricalCS
+        (
+            const word& name,
+            const coordinateSystem&,
+            const bool inDegrees=true
+        );
+
+        //- Construct from origin and rotation
+        cylindricalCS
+        (
+            const word& name,
+            const point& origin,
+            const coordinateRotation&,
+            const bool inDegrees=true
+        );
+
+        //- Construct from origin and 2 axes
         cylindricalCS
         (
             const word& name,
             const point& origin,
             const vector& axis,
-            const vector& direction
-        );
-
-        //- Construct from origin and rotation angles
-        cylindricalCS
-        (
-            const word& name,
-            const point& origin,
-            const coordinateRotation& cr
+            const vector& dirn,
+            const bool inDegrees=true
         );
 
         //- Construct from dictionary
-        cylindricalCS(const word& name, const dictionary& dict);
+        cylindricalCS(const word& name, const dictionary&);
 
 
     // Member Functions
+
+        //- Are angles in degrees?
+        bool  inDegrees() const;
+
+        //- Non-const access to inDegrees
+        bool& inDegrees();
 
 };
 

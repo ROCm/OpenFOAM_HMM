@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -75,7 +75,7 @@ void MapGeometricFields
 {
     HashTable<const GeometricField<Type, PatchField, GeoMesh>*> fields
     (
-        mapper.db().objectRegistry::lookupClass
+        mapper.thisDb().objectRegistry::lookupClass
             <GeometricField<Type, PatchField, GeoMesh> >()
     );
 
@@ -145,7 +145,7 @@ void MapGeometricFields
                 );
             }
 
-            field.instance() = field.mesh().db().time().timeName();
+            field.instance() = field.time().timeName();
         }
         else if (polyMesh::debug)
         {

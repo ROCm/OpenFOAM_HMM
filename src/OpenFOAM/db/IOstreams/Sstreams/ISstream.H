@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,9 +58,7 @@ class ISstream
     // Private data
 
         fileName name_;
-        #ifndef __CINT__
         istream& is_;
-        #endif
 
 
     // Private member functions
@@ -154,7 +152,9 @@ public:
             //- Read a word
             virtual Istream& read(word&);
 
-            // Read a string (including enclosing double-quotes)
+            //- Read a string (including enclosing double-quotes).
+            //  Backslashes are retained, except when escaping double-quotes
+            //  and an embedded newline character.
             virtual Istream& read(string&);
 
             //- Read a label

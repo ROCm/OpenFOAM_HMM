@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,11 +65,42 @@ void Foam::MRFZones::addCoriolis(fvVectorMatrix& UEqn) const
 }
 
 
+void Foam::MRFZones::addCoriolis
+(
+    const volScalarField& rho,
+    fvVectorMatrix& UEqn
+) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).addCoriolis(rho, UEqn);
+    }
+}
+
+
+void Foam::MRFZones::relativeVelocity(volVectorField& U) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).relativeVelocity(U);
+    }
+}
+
+
 void Foam::MRFZones::relativeFlux(surfaceScalarField& phi) const
 {
     forAll(*this, i)
     {
         operator[](i).relativeFlux(phi);
+    }
+}
+
+
+void Foam::MRFZones::absoluteFlux(surfaceScalarField& phi) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).absoluteFlux(phi);
     }
 }
 

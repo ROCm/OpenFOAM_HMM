@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ namespace pairPotentials
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class lennardJones Declaration
+                         Class lennardJones Declaration
 \*---------------------------------------------------------------------------*/
 
 class lennardJones
@@ -59,6 +59,7 @@ class lennardJones
 
         scalar sigma_;
         scalar epsilon_;
+
 
 public:
 
@@ -86,7 +87,7 @@ public:
 
         scalar unscaledEnergy(const scalar r) const;
 
-        //- Read transportProperties dictionary
+        //- Read dictionary
         bool read(const dictionary& pairPotentialProperties);
 };
 

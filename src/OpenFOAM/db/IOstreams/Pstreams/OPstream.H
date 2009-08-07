@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,8 +29,7 @@ Description
     Output inter-processor communications stream.
 
 SourceFiles
-    OPstreamI.H
-    OPwrite.C
+    OPstream.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class OPstream Declaration
+                          Class OPstream Declaration
 \*---------------------------------------------------------------------------*/
 
 class OPstream
@@ -70,7 +69,7 @@ class OPstream
         inline void writeToBuffer(const char&);
 
         //- Write data to the transfer buffer
-        inline void writeToBuffer(const void* data, size_t count);
+        inline void writeToBuffer(const void* data, size_t count, size_t align);
 
 
 public:
@@ -137,6 +136,14 @@ public:
             //- Write string
             Ostream& write(const string&);
 
+            //- Write std::string surrounded by quotes.
+            //  Optional write without quotes.
+            Ostream& writeQuoted
+            (
+                const std::string&,
+                const bool quoted=true
+            );
+
             //- Write label
             Ostream& write(const label);
 
@@ -160,7 +167,7 @@ public:
             void flush()
             {}
 
-            //- Add '\n' and flush stream
+            //- Add newline and flush stream
             void endl()
             {}
 
@@ -208,11 +215,6 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-// include inline implementaions
-#   include "OPstreamI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

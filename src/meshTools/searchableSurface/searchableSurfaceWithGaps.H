@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,13 @@ Class
 
 Description
     searchableSurface using multiple slightly shifted underlying surfaces
-    to make sure pierces don't go through gaps. 
+    to make sure pierces don't go through gaps:
+    - shift test vector with two small vectors (of size gap_) perpendicular
+      to the original.
+      Test with + and - this vector. Only if both register a hit is it seen
+      as one.
+    - extend the test vector slightly (with SMALL) to account for numerical
+      inaccuracies.
 
 SourceFiles
     searchableSurfaceWithGaps.C
@@ -148,6 +154,8 @@ public:
 
         // Multiple point queries.
 
+            //- Find nearest on original surface. Note:does not use perturbation
+            //  and hence might be inconsistent with intersections.
             virtual void findNearest
             (
                 const pointField& sample,

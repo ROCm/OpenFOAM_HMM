@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,6 @@ class StochasticDispersionRAS
 :
     public DispersionRASModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
@@ -68,18 +67,17 @@ public:
         );
 
 
-    // Destructor
-
-        ~StochasticDispersionRAS();
+    //- Destructor
+    virtual ~StochasticDispersionRAS();
 
 
     // Member Functions
 
         //- Flag to indicate whether model activates injection model
-        bool active() const;
+        virtual bool active() const;
 
         //- Update (disperse particles)
-        vector update
+        virtual vector update
         (
             const scalar dt,
             const label celli,

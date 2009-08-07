@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,7 +90,7 @@ public:
             )
         {}
 
-        //- Construct from Istream. 
+        //- Construct from Istream.
         //  The name of the flux field is read from the Istream and looked-up
         //  from the mesh objectRegistry
         linearUpwind
@@ -142,8 +142,9 @@ public:
         virtual tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >
         correction
         (
-            const GeometricField<Type, fvPatchField, volMesh>& vf
+            const GeometricField<Type, fvPatchField, volMesh>&
         ) const;
+
 };
 
 

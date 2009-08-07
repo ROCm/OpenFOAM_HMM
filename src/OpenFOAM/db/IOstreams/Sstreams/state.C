@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,19 +29,13 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "token.H"
 #include "int.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Print state of ostream.
 
-void state(ostream& to, const string& s)
+void Foam::state(ostream& to, const string& s)
 {
     state_value osState = state_value(to.rdstate());
 
@@ -82,7 +76,7 @@ void state(ostream& to, const string& s)
 
 
 //  Print state of istream.
-void state(istream& from, const string& s)
+void Foam::state(istream& from, const string& s)
 {
     state_value isState = state_value(from.rdstate());
 
@@ -125,9 +119,5 @@ void state(istream& from, const string& s)
     return;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,7 +39,6 @@ SourceFiles
 
 #include "vtkTopo.H"
 #include "fvMeshSubset.H"
-#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,9 +58,6 @@ class vtkMesh
 
         //- Reference to mesh
         fvMesh& baseMesh_;
-
-        //- Demand driven pointMesh
-        mutable autoPtr<pointMesh> pointMeshPtr_;
 
         //- Subsetting engine + sub-fvMesh
         fvMeshSubset subsetter_;
@@ -101,15 +97,6 @@ public:
                 return baseMesh_;
             }
 
-            const pointMesh& basePointMesh() const
-            {
-                if (!pointMeshPtr_.valid())
-                {
-                    pointMeshPtr_.reset(new pointMesh(baseMesh_));
-                }
-                return pointMeshPtr_();
-            }
-
             const fvMeshSubset& subsetter() const
             {
                 return subsetter_;
@@ -118,13 +105,13 @@ public:
             //- Check if running subMesh
             bool useSubMesh() const
             {
-                return setName_.size() > 0;
+                return setName_.size();
             }
 
             //- topology
             const vtkTopo& topo() const
             {
-                if (!topoPtr_.valid())
+                if (topoPtr_.empty())
                 {
                     topoPtr_.reset(new vtkTopo(mesh()));
                 }
@@ -144,19 +131,6 @@ public:
                 }
             }
 
-            //- Access either pointMesh of base or pointMesh of subset
-            const pointMesh& pMesh() const
-            {
-                if (useSubMesh())
-                {
-                    return subsetter_.subPointMesh();
-                }
-                else
-                {
-                    return basePointMesh();
-                }
-            }
-
             //- Number of field cells
             label nFieldCells() const
             {
@@ -166,7 +140,7 @@ public:
             //- Number of field points
             label nFieldPoints() const
             {
-                return pMesh().size() + topo().addPointCellLabels().size();
+                return mesh().nPoints() + topo().addPointCellLabels().size();
             }
 
 

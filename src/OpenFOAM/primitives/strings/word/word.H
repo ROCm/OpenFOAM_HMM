@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,7 +87,7 @@ public:
         inline word(const word&);
 
         //- Construct as copy of character array
-        inline word(const char*, const bool doStripInvalid = true);
+        inline word(const char*, const bool doStripInvalid=true);
 
         //- Construct as copy with a maximum number of characters
         inline word
@@ -98,10 +98,10 @@ public:
         );
 
         //- Construct as copy of string
-        inline word(const string&, const bool doStripInvalid = true);
+        inline word(const string&, const bool doStripInvalid=true);
 
         //- Construct as copy of std::string
-        inline word(const std::string&, const bool doStripInvalid = true);
+        inline word(const std::string&, const bool doStripInvalid=true);
 
         //- Construct from Istream
         word(Istream&);
@@ -117,10 +117,10 @@ public:
 
         // Assignment
 
-            inline void operator=(const word&);
-            inline void operator=(const string&);
-            inline void operator=(const std::string&);
-            inline void operator=(const char*);
+            inline const word& operator=(const word&);
+            inline const word& operator=(const string&);
+            inline const word& operator=(const std::string&);
+            inline const word& operator=(const char*);
 
 
     // Friend Operators

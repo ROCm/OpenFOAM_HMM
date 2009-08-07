@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,6 +32,7 @@ Description
     class, a tetrahedron cell shape model and a tetCell
 
 SourceFiles
+    tetCell.C
     tetCellI.H
 
 \*---------------------------------------------------------------------------*/
@@ -77,6 +78,9 @@ public:
             const label d
         );
 
+        //- Construct from FixedList
+        inline tetCell(const FixedList<label, 4>&);
+
         //- Construct from Istream
         inline tetCell(Istream&);
 
@@ -85,21 +89,21 @@ public:
 
         // Access
 
-            //- Return ith face
-            inline triFace face(const label facei) const;
+            //- Return i-th face
+            inline triFace face(const label faceI) const;
 
-            //- Return fisrt face adjacent to the given edge
-            inline label edgeFace(const label edgei) const;
+            //- Return first face adjacent to the given edge
+            inline label edgeFace(const label edgeI) const;
 
             //- Return face adjacent to the given face sharing the same edge
             inline label edgeAdjacentFace
             (
-                const label edgei,
-                const label facei
+                const label edgeI,
+                const label faceI
             ) const;
 
-            //- Return ith edge
-            inline edge tetEdge(const label edgei) const;
+            //- Return i-th edge
+            inline edge tetEdge(const label edgeI) const;
 
 
         // Operations

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -89,6 +89,9 @@ Usage
     @endverbatim
     The quoting is required to avoid shell expansions and to pass the
     information as a single argument.
+
+    @param -useTimeName \n
+    use the time index in the VTK file name instead of the time index
 
 Note
     mesh subset is handled by vtkMesh. Slight inconsistency in
@@ -225,8 +228,10 @@ labelList getSelectedPatches
 
 int main(int argc, char *argv[])
 {
-#   include "addTimeOptions.H"
+    timeSelector::addOptions();
+
 #   include "addRegionOption.H"
+
     argList::validOptions.insert("fields", "fields");
     argList::validOptions.insert("cellSet", "cellSet name");
     argList::validOptions.insert("faceSet", "faceSet name");
@@ -240,16 +245,16 @@ int main(int argc, char *argv[])
     argList::validOptions.insert("excludePatches","patches to exclude");
     argList::validOptions.insert("noFaceZones","");
     argList::validOptions.insert("noLinks","");
+    argList::validOptions.insert("useTimeName","");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-
-    bool doWriteInternal = !args.options().found("noInternal");
-    bool doFaceZones = !args.options().found("noFaceZones");
-    bool doLinks = !args.options().found("noLinks");
-
-    bool binary = !args.options().found("ascii");
+    bool doWriteInternal = !args.optionFound("noInternal");
+    bool doFaceZones     = !args.optionFound("noFaceZones");
+    bool doLinks         = !args.optionFound("noLinks");
+    bool binary          = !args.optionFound("ascii");
+    bool useTimeName     = args.optionFound("useTimeName");
 
     if (binary && (sizeof(floatScalar) != 4 || sizeof(label) != 4))
     {
@@ -259,7 +264,7 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    bool nearCellValue = args.options().found("nearCellValue");
+    bool nearCellValue = args.optionFound("nearCellValue");
 
     if (nearCellValue)
     {
@@ -268,7 +273,7 @@ int main(int argc, char *argv[])
             << nl << endl;
     }
 
-    bool noPointValues = args.options().found("noPointValues");
+    bool noPointValues = args.optionFound("noPointValues");
 
     if (noPointValues)
     {
@@ -276,12 +281,12 @@ int main(int argc, char *argv[])
             << "Outputting cell values only" << nl << endl;
     }
 
-    bool allPatches = args.options().found("allPatches");
+    bool allPatches = args.optionFound("allPatches");
 
     HashSet<word> excludePatches;
-    if (args.options().found("excludePatches"))
+    if (args.optionFound("excludePatches"))
     {
-        IStringStream(args.options()["excludePatches"])() >> excludePatches;
+        args.optionLookup("excludePatches")() >> excludePatches;
 
         Info<< "Not including patches " << excludePatches << nl << endl;
     }
@@ -289,9 +294,9 @@ int main(int argc, char *argv[])
     word cellSetName;
     string vtkName;
 
-    if (args.options().found("cellSet"))
+    if (args.optionFound("cellSet"))
     {
-        cellSetName = args.options()["cellSet"];
+        cellSetName = args.option("cellSet");
         vtkName = cellSetName;
     }
     else if (Pstream::parRun())
@@ -312,14 +317,8 @@ int main(int argc, char *argv[])
     }
 
 
-    instantList Times = runTime.times();
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
-
-    // Current mesh.
 #   include "createNamedMesh.H"
 
     // VTK/ directory in the case
@@ -333,13 +332,13 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
-    if (dir(fvPath))
+    if (isDir(fvPath))
     {
         if
         (
-            args.options().found("time")
-         || args.options().found("latestTime")
-         || cellSetName.size() > 0
+            args.optionFound("time")
+         || args.optionFound("latestTime")
+         || cellSetName.size()
          || regionName != polyMesh::defaultRegion
         )
         {
@@ -359,11 +358,21 @@ int main(int argc, char *argv[])
     // mesh wrapper; does subsetting and decomposition
     vtkMesh vMesh(mesh, cellSetName);
 
-    for (label timeI = startTime; timeI < endTime; timeI++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[timeI], timeI);
+        runTime.setTime(timeDirs[timeI], timeI);
 
-        Info<< "Time " << Times[timeI].name() << endl;
+        Info<< "Time: " << runTime.timeName() << endl;
+
+        word timeDesc = "";
+        if (useTimeName)
+        {
+            timeDesc = runTime.timeName();
+        }
+        else
+        {
+            timeDesc = name(runTime.timeIndex());
+        }
 
         // Check for new polyMesh/ and update mesh, fvMeshSubset and cell
         // decomposition.
@@ -382,10 +391,10 @@ int main(int argc, char *argv[])
 
 
         // If faceSet: write faceSet only (as polydata)
-        if (args.options().found("faceSet"))
+        if (args.optionFound("faceSet"))
         {
             // Load the faceSet
-            faceSet set(mesh, args.options()["faceSet"]);
+            faceSet set(mesh, args.option("faceSet"));
 
             // Filename as if patch with same name.
             mkDir(fvPath/set.name());
@@ -394,7 +403,7 @@ int main(int argc, char *argv[])
             (
                 fvPath/set.name()/set.name()
               + "_"
-              + name(timeI)
+              + timeDesc
               + ".vtk"
             );
 
@@ -405,10 +414,10 @@ int main(int argc, char *argv[])
             continue;
         }
         // If pointSet: write pointSet only (as polydata)
-        if (args.options().found("pointSet"))
+        if (args.optionFound("pointSet"))
         {
             // Load the pointSet
-            pointSet set(mesh, args.options()["pointSet"]);
+            pointSet set(mesh, args.option("pointSet"));
 
             // Filename as if patch with same name.
             mkDir(fvPath/set.name());
@@ -417,7 +426,7 @@ int main(int argc, char *argv[])
             (
                 fvPath/set.name()/set.name()
               + "_"
-              + name(timeI)
+              + timeDesc
               + ".vtk"
             );
 
@@ -433,9 +442,9 @@ int main(int argc, char *argv[])
         IOobjectList objects(mesh, runTime.timeName());
 
         HashSet<word> selectedFields;
-        if (args.options().found("fields"))
+        if (args.optionFound("fields"))
         {
-            IStringStream(args.options()["fields"])() >> selectedFields;
+            args.optionLookup("fields")() >> selectedFields;
         }
 
         // Construct the vol fields (on the original mesh if subsetted)
@@ -489,7 +498,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 psf
@@ -499,7 +508,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 pvf
@@ -509,7 +518,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 pSpheretf
@@ -519,7 +528,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 pSymmtf
@@ -529,7 +538,7 @@ int main(int argc, char *argv[])
             readFields
             (
                 vMesh,
-                vMesh.basePointMesh(),
+                pointMesh::New(vMesh.baseMesh()),
                 objects,
                 selectedFields,
                 ptf
@@ -554,7 +563,7 @@ int main(int argc, char *argv[])
             (
                 fvPath/vtkName
               + "_"
-              + name(timeI)
+              + timeDesc
               + ".vtk"
             );
 
@@ -598,7 +607,7 @@ int main(int argc, char *argv[])
                 writer.write(ptf);
 
                 // Interpolated volFields
-                volPointInterpolation pInterp(mesh, vMesh.pMesh());
+                volPointInterpolation pInterp(mesh);
                 writer.write(pInterp, vsf);
                 writer.write(pInterp, vvf);
                 writer.write(pInterp, vSpheretf);
@@ -613,7 +622,7 @@ int main(int argc, char *argv[])
         //
         //---------------------------------------------------------------------
 
-        if (args.options().found("surfaceFields"))
+        if (args.optionFound("surfaceFields"))
         {
             PtrList<surfaceScalarField> ssf;
             readFields
@@ -660,8 +669,8 @@ int main(int argc, char *argv[])
                     fvPath
                    /"surfaceFields"
                    /"surfaceFields"
-	           + "_"
-                   + name(timeI)
+                   + "_"
+                   + timeDesc
                    + ".vtk"
                 );
 
@@ -695,7 +704,7 @@ int main(int argc, char *argv[])
                 patchFileName =
                     fvPath/"allPatches"/cellSetName
                   + "_"
-                  + name(timeI)
+                  + timeDesc
                   + ".vtk";
             }
             else
@@ -703,7 +712,7 @@ int main(int argc, char *argv[])
                 patchFileName =
                     fvPath/"allPatches"/"allPatches"
                   + "_"
-                  + name(timeI)
+                  + timeDesc
                   + ".vtk";
             }
 
@@ -773,7 +782,7 @@ int main(int argc, char *argv[])
                         patchFileName =
                             fvPath/pp.name()/cellSetName
                           + "_"
-                          + name(timeI)
+                          + timeDesc
                           + ".vtk";
                     }
                     else
@@ -781,7 +790,7 @@ int main(int argc, char *argv[])
                         patchFileName =
                             fvPath/pp.name()/pp.name()
                           + "_"
-                          + name(timeI)
+                          + timeDesc
                           + ".vtk";
                     }
 
@@ -873,7 +882,7 @@ int main(int argc, char *argv[])
                     patchFileName =
                         fvPath/pp.name()/cellSetName
                       + "_"
-                      + name(timeI)
+                      + timeDesc
                       + ".vtk";
                 }
                 else
@@ -881,7 +890,7 @@ int main(int argc, char *argv[])
                     patchFileName =
                         fvPath/pp.name()/pp.name()
                       + "_"
-                      + name(timeI)
+                      + timeDesc
                       + ".vtk";
                 }
 
@@ -914,7 +923,7 @@ int main(int argc, char *argv[])
         (
             readDir
             (
-                runTime.timePath()/regionPrefix/"lagrangian",
+                runTime.timePath()/regionPrefix/cloud::prefix,
                 fileName::DIRECTORY
             )
         );
@@ -925,19 +934,19 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudDirs[i]
+                cloud::prefix/cloudDirs[i]
             );
 
             IOobject* positionsPtr = sprayObjs.lookup("positions");
 
             if (positionsPtr)
             {
-                mkDir(fvPath/"lagrangian"/cloudDirs[i]);
+                mkDir(fvPath/cloud::prefix/cloudDirs[i]);
 
                 fileName lagrFileName
                 (
-                    fvPath/"lagrangian"/cloudDirs[i]/cloudDirs[i]
-                  + "_" + name(timeI) + ".vtk"
+                    fvPath/cloud::prefix/cloudDirs[i]/cloudDirs[i]
+                  + "_" + timeDesc + ".vtk"
                 );
 
                 Info<< "    Lagrangian: " << lagrFileName << endl;

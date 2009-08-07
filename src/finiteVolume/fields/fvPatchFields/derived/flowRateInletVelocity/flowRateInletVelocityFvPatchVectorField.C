@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2006-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2006-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -159,14 +159,8 @@ void Foam::flowRateInletVelocityFvPatchVectorField::write(Ostream& os) const
 {
     fvPatchField<vector>::write(os);
     os.writeKeyword("flowRate") << flowRate_ << token::END_STATEMENT << nl;
-    if (phiName_ != "phi")
-    {
-        os.writeKeyword("phi") << phiName_ << token::END_STATEMENT << nl;
-    }
-    if (rhoName_ != "rho")
-    {
-        os.writeKeyword("rho") << rhoName_ << token::END_STATEMENT << nl;
-    }
+    writeEntryIfDifferent<word>(os, "phi", "phi", phiName_);
+    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
     writeEntry("value", os);
 }
 

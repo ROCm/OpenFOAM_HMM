@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,22 +57,7 @@ Foam::tmp<Foam::Field<Type> > Foam::lduMatrix::H(const Field<Type>& psi) const
 
         for (register label face=0; face<nFaces; face++)
         {
-            #ifdef ICC_IA64_PREFETCH
-            __builtin_prefetch (&uPtr[face+32],0,0);
-            __builtin_prefetch (&lPtr[face+32],0,0);
-            __builtin_prefetch (&lowerPtr[face+32],0,1);
-            __builtin_prefetch (&psiPtr[lPtr[face+32]],0,1);
-            __builtin_prefetch (&HpsiPtr[uPtr[face+32]],0,1);
-            #endif
-
             HpsiPtr[uPtr[face]] -= lowerPtr[face]*psiPtr[lPtr[face]];
-        
-            #ifdef ICC_IA64_PREFETCH
-            __builtin_prefetch (&upperPtr[face+32],0,1);
-            __builtin_prefetch (&psiPtr[uPtr[face+32]],0,1);
-            __builtin_prefetch (&HpsiPtr[lPtr[face+32]],0,1);
-                #endif
-
             HpsiPtr[lPtr[face]] -= upperPtr[face]*psiPtr[uPtr[face]];
         }
     }
@@ -94,22 +79,33 @@ template<class Type>
 Foam::tmp<Foam::Field<Type> >
 Foam::lduMatrix::faceH(const Field<Type>& psi) const
 {
-    const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
-    const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
-
-    // Take refereces to addressing
-    const unallocLabelList& l = lduAddr().lowerAddr();
-    const unallocLabelList& u = lduAddr().upperAddr();
-
-    tmp<Field<Type> > tfaceHpsi(new Field<Type> (Lower.size()));
-    Field<Type> & faceHpsi = tfaceHpsi();
-
-    for (register label face=0; face<l.size(); face++)
+    if (lowerPtr_ || upperPtr_)
     {
-        faceHpsi[face] = Upper[face]*psi[u[face]] - Lower[face]*psi[l[face]];
-    }
+        const scalarField& Lower = const_cast<const lduMatrix&>(*this).lower();
+        const scalarField& Upper = const_cast<const lduMatrix&>(*this).upper();
 
-    return tfaceHpsi;
+        const unallocLabelList& l = lduAddr().lowerAddr();
+        const unallocLabelList& u = lduAddr().upperAddr();
+
+        tmp<Field<Type> > tfaceHpsi(new Field<Type> (Lower.size()));
+        Field<Type> & faceHpsi = tfaceHpsi();
+
+        for (register label face=0; face<l.size(); face++)
+        {
+            faceHpsi[face] = Upper[face]*psi[u[face]] - Lower[face]*psi[l[face]];
+        }
+
+        return tfaceHpsi;
+    }
+    else
+    {
+        FatalErrorIn("lduMatrix::faceH(const Field<Type>& psi) const")
+            << "Cannot calculate faceH"
+               " the matrix does not have any off-diagonal coefficients."
+            << exit(FatalError);
+
+        return tmp<Field<Type> >(NULL);
+    }
 }
 
 

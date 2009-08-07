@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,6 +43,7 @@ SourceFiles
 
 #include "UList.H"
 #include "autoPtr.H"
+#include "Xfer.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -58,14 +59,17 @@ template<class T> class List;
 
 template<class T> Istream& operator>>(Istream&, List<T>&);
 
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 template<class T> class PtrList;
 template<class T> class SLList;
 template<class T, unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
- class DynamicList;
+    class DynamicList;
+template<class T> class SortableList;
 template<class T> class IndirectList;
+template<class T> class UIndirectList;
 template<class T> class BiIndirectList;
 
+typedef UList<label> unallocLabelList;
 
 /*---------------------------------------------------------------------------*\
                            Class List Declaration
@@ -77,7 +81,18 @@ class List
     public UList<T>
 {
 
+protected:
+
+    //- Override size to be inconsistent with allocated storage.
+    //  Use with care.
+    inline void size(const label);
+
 public:
+
+    // Static Member Functions
+
+        //- Return a null List
+        inline static const List<T>& null();
 
     // Constructors
 
@@ -93,15 +108,21 @@ public:
         //- Copy constructor.
         List(const List<T>&);
 
+        //- Construct by transferring the parameter contents
+        List(const Xfer< List<T> >&);
+
         //- Construct as copy or re-use as specified.
         List(List<T>&, bool reUse);
+
+        //- Construct as subset.
+        List(const UList<T>&, const unallocLabelList& mapAddressing);
 
         //- Construct given start and end iterators.
         template<class InputIterator>
         List(InputIterator first, InputIterator last);
 
         //- Construct as copy of FixedList<T, Size>
-        template<label Size>
+        template<unsigned Size>
         List(const FixedList<T, Size>&);
 
         //- Construct as copy of PtrList<T>
@@ -112,6 +133,9 @@ public:
 
         //- Construct as copy of IndirectList<T>
         List(const IndirectList<T>&);
+
+        //- Construct as copy of UIndirectList<T>
+        List(const UIndirectList<T>&);
 
         //- Construct as copy of BiIndirectList<T>
         List(const BiIndirectList<T>&);
@@ -134,19 +158,19 @@ public:
         typedef SubList<T> subList;
 
 
-    // Member functions
-
-        //- Return a null List
-        static const List<T>& null();
+    // Member Functions
 
         //- Return the number of elements in the UList.
         inline label size() const;
 
-        //- Override size to be inconsistent with allocated storage.
-        //  Use with care.
-        inline label& size();
 
         // Edit
+
+            //- Reset size of List.
+            inline void resize(const label);
+
+            //- Reset size of List and value for new elements.
+            inline void resize(const label, const T&);
 
             //- Reset size of List.
             void setSize(const label);
@@ -157,14 +181,27 @@ public:
             //- Clear the list, i.e. set size to zero.
             void clear();
 
-            //- Transfer the contents of the argument List into this List
+            //- Append a List at the end of this list
+            inline void append(const UList<T>&);
+
+            //- Append a UIndirectList at the end of this list
+            inline void append(const UIndirectList<T>&);
+
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             void transfer(List<T>&);
 
-            //- Transfer the contents of the argument List into this List
+            //- Transfer the contents of the argument List into this list
             //  and annull the argument list.
             template<unsigned SizeInc, unsigned SizeMult, unsigned SizeDiv>
             void transfer(DynamicList<T, SizeInc, SizeMult, SizeDiv>&);
+
+            //- Transfer the contents of the argument List into this list
+            //  and annull the argument list.
+            void transfer(SortableList<T>&);
+
+            //- Transfer contents to the Xfer container
+            inline Xfer< List<T> > xfer();
 
             //- Return subscript-checked element of UList.
             inline T& newElmt(const label);
@@ -183,6 +220,9 @@ public:
         //- Assignment from IndirectList operator. Takes linear time.
         void operator=(const IndirectList<T>&);
 
+        //- Assignment from UIndirectList operator. Takes linear time.
+        void operator=(const UIndirectList<T>&);
+
         //- Assignment from BiIndirectList operator. Takes linear time.
         void operator=(const BiIndirectList<T>&);
 
@@ -193,25 +233,20 @@ public:
     // Istream operator
 
         //- Read List from Istream, discarding contents of existing List.
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <T>
-        #endif
+        friend Istream& operator>> <T>
         (Istream&, List<T>&);
 };
 
 
+//- Read a bracket-delimited list, or handle a single value as list of size 1.
+//  For example,
+//  @code
+//      wList = readList<word>(IStringStream("(patch1 patch2 patch3)")());
+//      wList = readList<word>(IStringStream("patch0")());
+//  @endcode
+//  Mostly useful for handling command-line arguments.
 template<class T>
-void sort(List<T>& a);
-
-template<class T, class Cmp>
-void sort(List<T>& a, const Cmp&);
-
-template<class T>
-void stableSort(List<T>& a);
-
-template<class T, class Cmp>
-void stableSort(List<T>& a, const Cmp&);
+List<T> readList(Istream&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

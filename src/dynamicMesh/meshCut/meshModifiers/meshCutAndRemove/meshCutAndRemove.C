@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,13 +38,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(meshCutAndRemove, 0);
-
-}
-
+defineTypeNameAndDebug(Foam::meshCutAndRemove, 0);
 
 // * * * * * * * * * * * * * Private Static Functions  * * * * * * * * * * * //
 
@@ -82,24 +76,11 @@ bool Foam::meshCutAndRemove::isIn
         return false;
     }
 
-    label nextIndex = (index + 1) % cuts.size();
-
-    if (cuts[nextIndex] == twoCuts[1])
-    {
-        return true;
-    }
-
-
-    label prevIndex = (index == 0 ? cuts.size()-1 : index - 1);
-
-    if (cuts[prevIndex] == twoCuts[1])
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
+    return
+    (
+        cuts[cuts.fcIndex(index)] == twoCuts[1]
+     || cuts[cuts.rcIndex(index)] == twoCuts[1]
+    );
 }
 
 
@@ -116,12 +97,12 @@ Foam::label Foam::meshCutAndRemove::findCutCell
     {
         label cellI = cellLabels[labelI];
 
-        if (cuts.cellLoops()[cellI].size() > 0)
+        if (cuts.cellLoops()[cellI].size())
         {
             return cellI;
         }
     }
-    return -1;        
+    return -1;
 }
 
 
@@ -151,7 +132,7 @@ Foam::label Foam::meshCutAndRemove::findInternalFacePoint
         }
     }
 
-    if (pointLabels.size() == 0)
+    if (pointLabels.empty())
     {
         FatalErrorIn("meshCutAndRemove::findInternalFacePoint(const labelList&)")
             << "Empty pointLabels" << abort(FatalError);
@@ -212,7 +193,7 @@ void Foam::meshCutAndRemove::faceCells
 
     own = mesh().faceOwner()[faceI];
 
-    if (cellLoops[own].size() > 0 && (firstCommon(f, anchorPts[own]) == -1))
+    if (cellLoops[own].size() && firstCommon(f, anchorPts[own]) == -1)
     {
         // owner has been split and this is the removed part.
         own = -1;
@@ -224,7 +205,7 @@ void Foam::meshCutAndRemove::faceCells
     {
         nei = mesh().faceNeighbour()[faceI];
 
-        if (cellLoops[nei].size() > 0 && (firstCommon(f, anchorPts[nei]) == -1))
+        if (cellLoops[nei].size() && firstCommon(f, anchorPts[nei]) == -1)
         {
             nei = -1;
         }
@@ -512,11 +493,11 @@ Foam::face Foam::meshCutAndRemove::addEdgeCutsToFace(const label faceI) const
 
     forAll(f, fp)
     {
-        // Duplicate face vertex .
+        // Duplicate face vertex.
         newFace[newFp++] = f[fp];
 
         // Check if edge has been cut.
-        label fp1 = (fp + 1) % f.size();
+        label fp1 = f.fcIndex(fp);
 
         HashTable<label, edge, Hash<edge> >::const_iterator fnd =
             addedPoints_.find(edge(f[fp], f[fp1]));
@@ -568,7 +549,7 @@ Foam::face Foam::meshCutAndRemove::loopToFace
 
             newFace[newFaceI++] = vertI;
 
-            label nextCut = loop[(fp+1) % loop.size()];
+            label nextCut = loop[loop.fcIndex(fp)];
 
             if (!isEdge(nextCut))
             {
@@ -715,7 +696,7 @@ void Foam::meshCutAndRemove::setRefinement
         {
             const labelList& loop = cellLoops[cellI];
 
-            if (loop.size() > 0)
+            if (loop.size())
             {
                 // Cell is cut. Uses only anchor points and loop itself.
                 forAll(loop, fp)
@@ -744,7 +725,7 @@ void Foam::meshCutAndRemove::setRefinement
                 {
                     usedPoint[cPoints[i]] = true;
                 }
-            }   
+            }
         }
 
 
@@ -826,7 +807,7 @@ void Foam::meshCutAndRemove::setRefinement
     {
         const labelList& loop = cellLoops[cellI];
 
-        if (loop.size() > 0)
+        if (loop.size())
         {
             if (cutPatch[cellI] < 0 || cutPatch[cellI] >= patches.size())
             {
@@ -923,7 +904,7 @@ void Foam::meshCutAndRemove::setRefinement
 
         // Renumber face to include split edges.
         face newFace(addEdgeCutsToFace(faceI));
-        
+
         // Edge splitting the face. Convert edge to new vertex numbering.
         const edge& splitEdge = iter();
 
@@ -989,7 +970,7 @@ void Foam::meshCutAndRemove::setRefinement
         label f0Own = -1;
         label f1Own = -1;
 
-        if (cellLoops[own].size() == 0)
+        if (cellLoops[own].empty())
         {
             // Owner side is not split so keep both halves.
             f0Own = own;
@@ -1036,7 +1017,7 @@ void Foam::meshCutAndRemove::setRefinement
 
         if (nei != -1)
         {
-            if (cellLoops[nei].size() == 0)
+            if (cellLoops[nei].empty())
             {
                 f0Nei = nei;
                 f1Nei = nei;
@@ -1102,7 +1083,7 @@ void Foam::meshCutAndRemove::setRefinement
         bool modifiedFaceI = false;
 
         if (f0Own == -1)
-        {   
+        {
             if (f0Nei != -1)
             {
                 // f0 becomes external face (note:modFace will reverse face)
@@ -1130,7 +1111,7 @@ void Foam::meshCutAndRemove::setRefinement
         // f1 is added face (if at all)
 
         if (f1Own == -1)
-        {   
+        {
             if (f1Nei == -1)
             {
                 // f1 not needed.
@@ -1247,7 +1228,7 @@ void Foam::meshCutAndRemove::setRefinement
         {
             const labelList& eFaces = mesh().edgeFaces()[edgeI];
 
-            forAll(eFaces, i)    
+            forAll(eFaces, i)
             {
                 label faceI = eFaces[i];
 
@@ -1421,7 +1402,7 @@ void Foam::meshCutAndRemove::updateMesh(const mapPolyMesh& map)
                     (debug & 2)
                  && (e != newE || newAddedPointI != addedPointI)
                 )
-                {        
+                {
                     Pout<< "meshCutAndRemove::updateMesh :"
                         << " updating addedPoints for edge " << e
                         << " from " << addedPointI

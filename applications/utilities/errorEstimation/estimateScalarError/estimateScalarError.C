@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,24 +39,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
 
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
-
-    Info<< "\nEstimating error in scalar transport equation\n" << endl;
-
 #   include "createTime.H"
 
-    // Get times list
-    instantList Times = runTime.times();
-
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
 #   include "createMesh.H"
 
-    Info<< "Reading transportProperties\n" << endl;
+    Info<< "\nEstimating error in scalar transport equation\n"
+        << "Reading transportProperties\n" << endl;
 
     IOdictionary transportProperties
     (
@@ -79,9 +72,9 @@ int main(int argc, char *argv[])
     );
 
 
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(timeDirs[timeI], timeI);
 
         Info<< "Time = " << runTime.timeName() << endl;
 
@@ -134,7 +127,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

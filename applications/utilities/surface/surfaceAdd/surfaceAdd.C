@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
     fileName inFileName2(args.additionalArgs()[1]);
     fileName outFileName(args.additionalArgs()[2]);
 
-    bool addPoint = args.options().found("points");
-    bool mergeRegions = args.options().found("mergeRegions");
+    bool addPoint     = args.optionFound("points");
+    bool mergeRegions = args.optionFound("mergeRegions");
 
     if (addPoint)
     {
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
             << nl << endl;
 
         Info<< "Surface  : " << inFileName1<< nl
-            << "Points   : " << args.options()["points"] << nl
+            << "Points   : " << args.option("points") << nl
             << "Writing  : " << outFileName << nl << endl;
     }
     else
@@ -111,8 +111,8 @@ int main(int argc, char *argv[])
 
     if (addPoint)
     {
-        IFstream pointStr(args.options()["points"]);
-        pointField extraPoints(pointStr);
+        IFstream pointsFile(args.option("points"));
+        pointField extraPoints(pointsFile);
 
         Info<< "Additional Points:" << extraPoints.size() << endl;
 
@@ -252,7 +252,7 @@ int main(int argc, char *argv[])
                 newPatches[newPatchI++] = surface2.patches()[ patchI];
             }
         }
- 
+
 
         Info<< "New patches:" << nl;
         forAll(newPatches, patchI)

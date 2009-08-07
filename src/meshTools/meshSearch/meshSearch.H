@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,9 +37,6 @@ SourceFiles
 #ifndef meshSearch_H
 #define meshSearch_H
 
-#include "treeDataCell.H"
-#include "treeDataFace.H"
-#include "treeDataPoint.H"
 #include "pointIndexHit.H"
 #include "Cloud.H"
 #include "passiveParticle.H"
@@ -51,6 +48,10 @@ namespace Foam
 
 // Forward declaration of classes
 class polyMesh;
+class treeDataCell;
+class treeDataFace;
+class treeDataPoint;
+template<class Type> class indexedOctree;
 
 /*---------------------------------------------------------------------------*\
                            Class meshSearch Declaration

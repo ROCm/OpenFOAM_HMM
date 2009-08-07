@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -105,9 +105,9 @@ Foam::processorPolyPatch::processorPolyPatch
     starts_(starts),
     neighbFaceCentres_(),
     neighbFaceAreas_(),
-    neighbFaceCellCentres_(),
-    neighbPointsPtr_(NULL),
-    neighbEdgesPtr_(NULL)
+    neighbFaceCellCentres_()
+//    neighbPointsPtr_(NULL),
+//    neighbEdgesPtr_(NULL)
 {
     checkSubPatches();
 }
@@ -128,9 +128,9 @@ Foam::processorPolyPatch::processorPolyPatch
     starts_(dict.lookup("starts")),
     neighbFaceCentres_(),
     neighbFaceAreas_(),
-    neighbFaceCellCentres_(),
-    neighbPointsPtr_(NULL),
-    neighbEdgesPtr_(NULL)
+    neighbFaceCellCentres_()
+//    neighbPointsPtr_(NULL),
+//    neighbEdgesPtr_(NULL)
 {
     checkSubPatches();
 }
@@ -149,9 +149,9 @@ Foam::processorPolyPatch::processorPolyPatch
     starts_(pp.starts_),
     neighbFaceCentres_(),
     neighbFaceAreas_(),
-    neighbFaceCellCentres_(),
-    neighbPointsPtr_(NULL),
-    neighbEdgesPtr_(NULL)
+    neighbFaceCellCentres_()
+//    neighbPointsPtr_(NULL),
+//    neighbEdgesPtr_(NULL)
 {}
 
 
@@ -173,9 +173,9 @@ Foam::processorPolyPatch::processorPolyPatch
     starts_(starts),
     neighbFaceCentres_(),
     neighbFaceAreas_(),
-    neighbFaceCellCentres_(),
-    neighbPointsPtr_(NULL),
-    neighbEdgesPtr_(NULL)
+    neighbFaceCellCentres_()
+//    neighbPointsPtr_(NULL),
+//    neighbEdgesPtr_(NULL)
 {
     checkSubPatches();
 }
@@ -185,8 +185,8 @@ Foam::processorPolyPatch::processorPolyPatch
 
 Foam::processorPolyPatch::~processorPolyPatch()
 {
-    deleteDemandDrivenData(neighbPointsPtr_);
-    deleteDemandDrivenData(neighbEdgesPtr_);
+//    deleteDemandDrivenData(neighbPointsPtr_);
+//    deleteDemandDrivenData(neighbEdgesPtr_);
 }
 
 
@@ -362,56 +362,56 @@ void Foam::processorPolyPatch::initUpdateMesh()
 {
     polyPatch::initUpdateMesh();
 
-    deleteDemandDrivenData(neighbPointsPtr_);
-    deleteDemandDrivenData(neighbEdgesPtr_);
-
-    if (Pstream::parRun())
-    {
-        // Express all points as patch face and index in face.
-        labelList pointFace(nPoints());
-        labelList pointIndex(nPoints());
-
-        for (label patchPointI = 0; patchPointI < nPoints(); patchPointI++)
-        {
-            label faceI = pointFaces()[patchPointI][0];
-
-            pointFace[patchPointI] = faceI;
-
-            const face& f = localFaces()[faceI];
-
-            pointIndex[patchPointI] = findIndex(f, patchPointI);
-        }
-
-        // Express all edges as patch face and index in face.
-        labelList edgeFace(nEdges());
-        labelList edgeIndex(nEdges());
-
-        for (label patchEdgeI = 0; patchEdgeI < nEdges(); patchEdgeI++)
-        {
-            label faceI = edgeFaces()[patchEdgeI][0];
-
-            edgeFace[patchEdgeI] = faceI;
-
-            const labelList& fEdges = faceEdges()[faceI];
-
-            edgeIndex[patchEdgeI] = findIndex(fEdges, patchEdgeI);
-        }
-
-        OPstream toNeighbProc
-        (
-            Pstream::blocking,
-            neighbProcNo(),
-            8*sizeof(label)             // four headers of labelList
-          + 2*nPoints()*sizeof(label)   // two point-based labellists
-          + 2*nEdges()*sizeof(label)    // two edge-based labelLists
-        );
-
-        toNeighbProc
-            << pointFace
-            << pointIndex
-            << edgeFace
-            << edgeIndex;
-    }
+//    deleteDemandDrivenData(neighbPointsPtr_);
+//    deleteDemandDrivenData(neighbEdgesPtr_);
+//
+//    if (Pstream::parRun())
+//    {
+//        // Express all points as patch face and index in face.
+//        labelList pointFace(nPoints());
+//        labelList pointIndex(nPoints());
+//
+//        for (label patchPointI = 0; patchPointI < nPoints(); patchPointI++)
+//        {
+//            label faceI = pointFaces()[patchPointI][0];
+//
+//            pointFace[patchPointI] = faceI;
+//
+//            const face& f = localFaces()[faceI];
+//
+//            pointIndex[patchPointI] = findIndex(f, patchPointI);
+//        }
+//
+//        // Express all edges as patch face and index in face.
+//        labelList edgeFace(nEdges());
+//        labelList edgeIndex(nEdges());
+//
+//        for (label patchEdgeI = 0; patchEdgeI < nEdges(); patchEdgeI++)
+//        {
+//            label faceI = edgeFaces()[patchEdgeI][0];
+//
+//            edgeFace[patchEdgeI] = faceI;
+//
+//            const labelList& fEdges = faceEdges()[faceI];
+//
+//            edgeIndex[patchEdgeI] = findIndex(fEdges, patchEdgeI);
+//        }
+//
+//        OPstream toNeighbProc
+//        (
+//            Pstream::blocking,
+//            neighbProcNo(),
+//            8*sizeof(label)             // four headers of labelList
+//          + 2*nPoints()*sizeof(label)   // two point-based labellists
+//          + 2*nEdges()*sizeof(label)    // two edge-based labelLists
+//        );
+//
+//        toNeighbProc
+//            << pointFace
+//            << pointIndex
+//            << edgeFace
+//            << edgeIndex;
+//    }
 }
 
 
@@ -420,99 +420,99 @@ void Foam::processorPolyPatch::updateMesh()
     // For completeness
     polyPatch::updateMesh();
 
-    if (Pstream::parRun())
-    {
-        labelList nbrPointFace;
-        labelList nbrPointIndex;
-        labelList nbrEdgeFace;
-        labelList nbrEdgeIndex;
-
-        {
-            // Note cannot predict exact size since opposite nPoints might
-            // be different from one over here.
-            IPstream fromNeighbProc(Pstream::blocking, neighbProcNo());
-
-            fromNeighbProc
-                >> nbrPointFace
-                >> nbrPointIndex
-                >> nbrEdgeFace
-                >> nbrEdgeIndex;
-        }
-
-        // Convert neighbour faces and indices into face back into
-        // my edges and points.
-
-        // Convert points.
-        // ~~~~~~~~~~~~~~~
-
-        neighbPointsPtr_ = new labelList(nPoints(), -1);
-        labelList& neighbPoints = *neighbPointsPtr_;
-
-        forAll(nbrPointFace, nbrPointI)
-        {
-            // Find face and index in face on this side.
-            const face& f = localFaces()[nbrPointFace[nbrPointI]];
-            label index = (f.size() - nbrPointIndex[nbrPointI]) % f.size();
-            label patchPointI = f[index];
-
-            if (neighbPoints[patchPointI] == -1)
-            {
-                // First reference of point
-                neighbPoints[patchPointI] = nbrPointI;
-            }
-            else if (neighbPoints[patchPointI] >= 0)
-            {
-                // Point already visited. Mark as duplicate.
-                neighbPoints[patchPointI] = -2;
-            }
-        }
-
-        // Reset all duplicate entries to -1.
-        forAll(neighbPoints, patchPointI)
-        {
-            if (neighbPoints[patchPointI] == -2)
-            {
-                neighbPoints[patchPointI] = -1;
-            }
-        }
-
-        // Convert edges.
-        // ~~~~~~~~~~~~~~
-
-        neighbEdgesPtr_ = new labelList(nEdges(), -1);
-        labelList& neighbEdges = *neighbEdgesPtr_;
-
-        forAll(nbrEdgeFace, nbrEdgeI)
-        {
-            // Find face and index in face on this side.
-            const labelList& f = faceEdges()[nbrEdgeFace[nbrEdgeI]];
-            label index = (f.size() - nbrEdgeIndex[nbrEdgeI] - 1) % f.size();
-            label patchEdgeI = f[index];
-
-            if (neighbEdges[patchEdgeI] == -1)
-            {
-                // First reference of edge
-                neighbEdges[patchEdgeI] = nbrEdgeI;
-            }
-            else if (neighbEdges[patchEdgeI] >= 0)
-            {
-                // Edge already visited. Mark as duplicate.
-                neighbEdges[patchEdgeI] = -2;
-            }
-        }
-
-        // Reset all duplicate entries to -1.
-        forAll(neighbEdges, patchEdgeI)
-        {
-            if (neighbEdges[patchEdgeI] == -2)
-            {
-                neighbEdges[patchEdgeI] = -1;
-            }
-        }
-
-        // Remove any addressing used for shared points/edges calculation
-        primitivePatch::clearOut();
-    }
+//    if (Pstream::parRun())
+//    {
+//        labelList nbrPointFace;
+//        labelList nbrPointIndex;
+//        labelList nbrEdgeFace;
+//        labelList nbrEdgeIndex;
+//
+//        {
+//            // Note cannot predict exact size since opposite nPoints might
+//            // be different from one over here.
+//            IPstream fromNeighbProc(Pstream::blocking, neighbProcNo());
+//
+//            fromNeighbProc
+//                >> nbrPointFace
+//                >> nbrPointIndex
+//                >> nbrEdgeFace
+//                >> nbrEdgeIndex;
+//        }
+//
+//        // Convert neighbour faces and indices into face back into
+//        // my edges and points.
+//
+//        // Convert points.
+//        // ~~~~~~~~~~~~~~~
+//
+//        neighbPointsPtr_ = new labelList(nPoints(), -1);
+//        labelList& neighbPoints = *neighbPointsPtr_;
+//
+//        forAll(nbrPointFace, nbrPointI)
+//        {
+//            // Find face and index in face on this side.
+//            const face& f = localFaces()[nbrPointFace[nbrPointI]];
+//            label index = (f.size() - nbrPointIndex[nbrPointI]) % f.size();
+//            label patchPointI = f[index];
+//
+//            if (neighbPoints[patchPointI] == -1)
+//            {
+//                // First reference of point
+//                neighbPoints[patchPointI] = nbrPointI;
+//            }
+//            else if (neighbPoints[patchPointI] >= 0)
+//            {
+//                // Point already visited. Mark as duplicate.
+//                neighbPoints[patchPointI] = -2;
+//            }
+//        }
+//
+//        // Reset all duplicate entries to -1.
+//        forAll(neighbPoints, patchPointI)
+//        {
+//            if (neighbPoints[patchPointI] == -2)
+//            {
+//                neighbPoints[patchPointI] = -1;
+//            }
+//        }
+//
+//        // Convert edges.
+//        // ~~~~~~~~~~~~~~
+//
+//        neighbEdgesPtr_ = new labelList(nEdges(), -1);
+//        labelList& neighbEdges = *neighbEdgesPtr_;
+//
+//        forAll(nbrEdgeFace, nbrEdgeI)
+//        {
+//            // Find face and index in face on this side.
+//            const labelList& f = faceEdges()[nbrEdgeFace[nbrEdgeI]];
+//            label index = (f.size() - nbrEdgeIndex[nbrEdgeI] - 1) % f.size();
+//            label patchEdgeI = f[index];
+//
+//            if (neighbEdges[patchEdgeI] == -1)
+//            {
+//                // First reference of edge
+//                neighbEdges[patchEdgeI] = nbrEdgeI;
+//            }
+//            else if (neighbEdges[patchEdgeI] >= 0)
+//            {
+//                // Edge already visited. Mark as duplicate.
+//                neighbEdges[patchEdgeI] = -2;
+//            }
+//        }
+//
+//        // Reset all duplicate entries to -1.
+//        forAll(neighbEdges, patchEdgeI)
+//        {
+//            if (neighbEdges[patchEdgeI] == -2)
+//            {
+//                neighbEdges[patchEdgeI] = -1;
+//            }
+//        }
+//
+//        // Remove any addressing used for shared points/edges calculation
+//        primitivePatch::clearOut();
+//    }
 }
 
 
@@ -538,6 +538,55 @@ void Foam::processorPolyPatch::updateMesh()
 //    }
 //    return *neighbEdgesPtr_;
 //}
+
+
+const Foam::labelListList& Foam::processorPolyPatch::subMeshPoints() const
+{
+    if (!subMeshPointsPtr_.valid())
+    {
+        subMeshPointsPtr_.reset(new labelListList(patchIDs_.size()));
+        labelListList& meshPoints = subMeshPointsPtr_();
+
+        forAll(patchIDs_, subI)
+        {
+            meshPoints[subI] = subPatch(subI)().meshPoints();
+        }
+    }
+    return subMeshPointsPtr_();
+}
+
+
+const Foam::labelListList& Foam::processorPolyPatch::reverseSubMeshPoints()
+ const
+{
+    if (!reverseSubMeshPointsPtr_.valid())
+    {
+        reverseSubMeshPointsPtr_.reset(new labelListList(patchIDs_.size()));
+        labelListList& meshPoints = reverseSubMeshPointsPtr_();
+
+        forAll(patchIDs_, subI)
+        {
+            label subStart = starts()[subI];
+            label subSize = starts()[subI+1]-subStart;
+
+            faceList reverseFaces(subSize);
+            forAll(reverseFaces, i)
+            {
+                reverseFaces[i] = operator[](subStart+i).reverseFace();
+            }
+            meshPoints[subI] = primitivePatch
+            (
+                faceSubList
+                (
+                    reverseFaces,
+                    reverseFaces.size()
+                ),
+                points()
+            ).meshPoints();
+        }
+    }
+    return reverseSubMeshPointsPtr_();
+}
 
 
 Foam::label Foam::processorPolyPatch::whichSubPatch(const label facei) const
@@ -781,7 +830,7 @@ bool Foam::processorPolyPatch::order
                     << " : "
                     << "Cannot find point on face " << pp[oldFaceI]
                     << " with vertices "
-                    << IndirectList<point>(pp.points(), pp[oldFaceI])()
+                    << UIndirectList<point>(pp.points(), pp[oldFaceI])()
                     << " that matches point " << wantedAnchor
                     << " when matching the halves of processor patch " << name()
                     << "Continuing with incorrect face ordering from now on!"

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,10 @@ void Foam::vtkPV3Foam::updateInfoFields
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::updateInfoFields" << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::updateInfoFields <"
+            << meshType::Mesh::typeName
+            << "> [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]"
+            << endl;
     }
 
     stringList enabledEntries;

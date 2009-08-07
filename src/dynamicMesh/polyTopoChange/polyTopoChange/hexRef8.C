@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,13 +51,13 @@ namespace Foam
     defineTypeNameAndDebug(hexRef8, 0);
 
     //- Reduction class. If x and y are not equal assign value.
-    template< int value >
+    template<int value>
     class ifEqEqOp
     {
         public:
-        void operator()( label& x, const label& y ) const
+        void operator()(label& x, const label& y) const
         {
-            x = (x==y) ? x:value;
+            x = (x==y) ? x : value;
         }
     };
 }
@@ -533,7 +533,7 @@ Foam::label Foam::hexRef8::getAnchorCell
     const label pointI
 ) const
 {
-    if (cellAnchorPoints[cellI].size() > 0)
+    if (cellAnchorPoints[cellI].size())
     {
         label index = findIndex(cellAnchorPoints[cellI], pointI);
 
@@ -747,7 +747,7 @@ Foam::label Foam::hexRef8::findLevel
 
             FatalErrorIn("hexRef8::findLevel(..)")
                 << "face:" << f
-                << " level:" << IndirectList<label>(pointLevel_, f)()
+                << " level:" << UIndirectList<label>(pointLevel_, f)()
                 << " startFp:" << startFp
                 << " wantedLevel:" << wantedLevel
                 << abort(FatalError);
@@ -775,7 +775,7 @@ Foam::label Foam::hexRef8::findLevel
 
     FatalErrorIn("hexRef8::findLevel(..)")
         << "face:" << f
-        << " level:" << IndirectList<label>(pointLevel_, f)()
+        << " level:" << UIndirectList<label>(pointLevel_, f)()
         << " startFp:" << startFp
         << " wantedLevel:" << wantedLevel
         << abort(FatalError);
@@ -824,7 +824,7 @@ void Foam::hexRef8::checkInternalOrientation
 )
 {
     face compactFace(identity(newFace.size()));
-    pointField compactPoints(IndirectList<point>(meshMod.points(), newFace)());
+    pointField compactPoints(meshMod.points(), newFace);
 
     vector n(compactFace.normal(compactPoints));
 
@@ -870,7 +870,7 @@ void Foam::hexRef8::checkBoundaryOrientation
 )
 {
     face compactFace(identity(newFace.size()));
-    pointField compactPoints(IndirectList<point>(meshMod.points(), newFace)());
+    pointField compactPoints(meshMod.points(), newFace);
 
     vector n(compactFace.normal(compactPoints));
 
@@ -1080,8 +1080,7 @@ Foam::label Foam::hexRef8::storeMidPointInfo
         }
 
         face newFace;
-        newFace.transfer(newFaceVerts.shrink());
-        newFaceVerts.clear();
+        newFace.transfer(newFaceVerts);
 
         label anchorCell0 = getAnchorCell
         (
@@ -1310,11 +1309,11 @@ void Foam::hexRef8::createInternalFaces
                             << "cell:" << cellI << " cLevel:" << cLevel
                             << " cell points:" << cPoints
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, cPoints)()
+                            << UIndirectList<label>(pointLevel_, cPoints)()
                             << " face:" << faceI
                             << " f:" << f
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, f)()
+                            << UIndirectList<label>(pointLevel_, f)()
                             << " faceAnchorLevel:" << faceAnchorLevel[faceI]
                             << " faceMidPoint:" << faceMidPoint[faceI]
                             << " faceMidPointI:" << faceMidPointI
@@ -1383,11 +1382,11 @@ void Foam::hexRef8::createInternalFaces
                             << "cell:" << cellI << " cLevel:" << cLevel
                             << " cell points:" << cPoints
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, cPoints)()
+                            << UIndirectList<label>(pointLevel_, cPoints)()
                             << " face:" << faceI
                             << " f:" << f
                             << " pointLevel:"
-                            << IndirectList<label>(pointLevel_, f)()
+                            << UIndirectList<label>(pointLevel_, f)()
                             << " faceAnchorLevel:" << faceAnchorLevel[faceI]
                             << " faceMidPoint:" << faceMidPoint[faceI]
                             << " faceMidPointI:" << faceMidPointI
@@ -1556,7 +1555,7 @@ void Foam::hexRef8::walkFaceFromMid
 Foam::label Foam::hexRef8::faceConsistentRefinement
 (
     const bool maxSet,
-    PackedList<1>& refineCell
+    PackedBoolList& refineCell
 ) const
 {
     label nChanged = 0;
@@ -1645,7 +1644,7 @@ void Foam::hexRef8::checkWantedRefinementLevels
     const labelList& cellsToRefine
 ) const
 {
-    PackedList<1> refineCell(mesh_.nCells(), 0);
+    PackedBoolList refineCell(mesh_.nCells());
     forAll(cellsToRefine, i)
     {
         refineCell.set(cellsToRefine[i], 1);
@@ -2030,7 +2029,7 @@ Foam::labelList Foam::hexRef8::consistentRefinement
     // maxSet = true  : select cells to refine
 
     // Go to straight boolList.
-    PackedList<1> refineCell(mesh_.nCells(), 0);
+    PackedBoolList refineCell(mesh_.nCells());
     forAll(cellsToRefine, i)
     {
         refineCell.set(cellsToRefine[i], 1);
@@ -2432,8 +2431,8 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement
 
 
         // Transfer into seedFaces, seedFacesInfo
-        seedFaces.setSize(changedFacesInfo.size());
-        seedFacesInfo.setSize(changedFacesInfo.size());
+        seedFaces.setCapacity(changedFacesInfo.size());
+        seedFacesInfo.setCapacity(changedFacesInfo.size());
 
         forAllConstIter(Map<refinementData>, changedFacesInfo, iter)
         {
@@ -2875,7 +2874,9 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
     }
 
     // 2. Extend to 2:1. I don't understand yet why this is not done
-    PackedList<1> refineCell(mesh_.nCells(), 0);
+    // 2. Extend to 2:1. For non-cube cells the scalar distance does not work
+    // so make sure it at least provides 2:1.
+    PackedBoolList refineCell(mesh_.nCells());
     forAll(allCellInfo, cellI)
     {
         label wanted = allCellInfo[cellI].wantedLevel(cc[cellI]);
@@ -2886,6 +2887,25 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         }
     }
     faceConsistentRefinement(true, refineCell);
+
+    while (true)
+    {
+        label nChanged = faceConsistentRefinement(true, refineCell);
+
+        reduce(nChanged, sumOp<label>());
+
+        if (debug)
+        {
+            Pout<< "hexRef8::consistentSlowRefinement2 : Changed " << nChanged
+                << " refinement levels due to 2:1 conflicts."
+                << endl;
+        }
+
+        if (nChanged == 0)
+        {
+            break;
+        }
+    }
 
     // 3. Convert back to labelList.
     label nRefined = 0;
@@ -2933,12 +2953,12 @@ Foam::labelList Foam::hexRef8::consistentSlowRefinement2
         }
 
         // Extend to 2:1
-        PackedList<1> refineCell(mesh_.nCells(), 0);
+        PackedBoolList refineCell(mesh_.nCells());
         forAll(newCellsToRefine, i)
         {
             refineCell.set(newCellsToRefine[i], 1);
         }
-        const PackedList<1> savedRefineCell(refineCell);
+        const PackedBoolList savedRefineCell(refineCell);
 
         label nChanged = faceConsistentRefinement(true, refineCell);
 
@@ -3487,7 +3507,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                         << " lower level" << endl
                         << "cellPoints:" << cPoints << endl
                         << "pointLevels:"
-                        << IndirectList<label>(pointLevel_, cPoints)() << endl
+                        << UIndirectList<label>(pointLevel_, cPoints)() << endl
                         << abort(FatalError);
                 }
             }
@@ -3559,7 +3579,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
     }
 
     // Get all affected faces.
-    PackedList<1> affectedFace(mesh_.nFaces(), 0);
+    PackedBoolList affectedFace(mesh_.nFaces());
 
     {
         forAll(cellMidPoint, cellI)
@@ -3662,8 +3682,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                     );
 
                     // Convert dynamiclist to face.
-                    newFace.transfer(faceVerts.shrink());
-                    faceVerts.clear();
+                    newFace.transfer(faceVerts);
 
                     //Pout<< "Split face:" << faceI << " verts:" << f
                     //    << " into quad:" << newFace << endl;
@@ -3786,8 +3805,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
                     }
 
                     face newFace;
-                    newFace.transfer(newFaceVerts.shrink());
-
+                    newFace.transfer(newFaceVerts);
 
                     // The point with the lowest level should be an anchor
                     // point of the neighbouring cells.
@@ -3968,10 +3986,8 @@ Foam::labelListList Foam::hexRef8::setRefinement
         }
     }
 
-    pointLevel_.transfer(newPointLevel.shrink());
-    newPointLevel.clear();
-    cellLevel_.transfer(newCellLevel.shrink());
-    newCellLevel.clear();
+    pointLevel_.transfer(newPointLevel);
+    cellLevel_.transfer(newCellLevel);
 
     // Mark files as changed
     setInstance(mesh_.facesInstance());
@@ -3997,7 +4013,7 @@ Foam::labelListList Foam::hexRef8::setRefinement
         {
             const labelList& addedCells = cellAddedCells[cellI];
 
-            if (addedCells.size() > 0)
+            if (addedCells.size())
             {
                 // Cell was split.
                 history_.storeSplit(cellI, addedCells);
@@ -4355,8 +4371,7 @@ void Foam::hexRef8::distribute(const mapDistributePolyMesh& map)
 
 void Foam::hexRef8::checkMesh() const
 {
-    const boundBox& meshBb = mesh_.globalData().bb();
-    const scalar smallDim = 1E-6*mag(meshBb.max() - meshBb.min());
+    const scalar smallDim = 1E-6 * mesh_.globalData().bb().mag();
 
     if (debug)
     {
@@ -4454,7 +4469,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << faceI
                     << " on patch " << patchI
                     << " " << mesh_.boundaryMesh()[patchI].name()
-                    << " coords:" << IndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
                     << " has face area:" << magArea
                     << " (coupled) neighbour face area differs:"
                     << neiFaceAreas[i]
@@ -4496,7 +4511,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << faceI
                     << " on patch " << patchI
                     << " " << mesh_.boundaryMesh()[patchI].name()
-                    << " coords:" << IndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
                     << " has size:" << f.size()
                     << " (coupled) neighbour face has size:"
                     << nVerts[i]
@@ -4546,7 +4561,7 @@ void Foam::hexRef8::checkMesh() const
                     << "Coupled face " << faceI
                     << " on patch " << patchI
                     << " " << mesh_.boundaryMesh()[patchI].name()
-                    << " coords:" << IndirectList<point>(mesh_.points(), f)()
+                    << " coords:" << UIndirectList<point>(mesh_.points(), f)()
                     << " has anchor vector:" << anchorVec
                     << " (coupled) neighbour face anchor vector differs:"
                     << anchorPoints[i]
@@ -4759,68 +4774,70 @@ void Foam::hexRef8::checkRefinementLevels
     }
 
 
-    // Hanging points
-    {
-        // Any patches with points having only two edges.
-
-        boolList isHangingPoint(mesh_.nPoints(), false);
-
-        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-        forAll(patches, patchI)
-        {
-            const polyPatch& pp = patches[patchI];
-
-            const labelList& meshPoints = pp.meshPoints();
-
-            forAll(meshPoints, i)
-            {
-                label pointI = meshPoints[i];
-
-                const labelList& pEdges = mesh_.pointEdges()[pointI];
-
-                if (pEdges.size() == 2)
-                {
-                    isHangingPoint[pointI] = true;
-                }
-            }
-        }
-
-        syncTools::syncPointList
-        (
-            mesh_,
-            isHangingPoint,
-            andEqOp<bool>(),        // only if all decide it is hanging point
-            true                    // null
-        );
-
-        //OFstream str(mesh_.time().path()/"hangingPoints.obj");
-
-        label nHanging = 0;
-
-        forAll(isHangingPoint, pointI)
-        {
-            if (isHangingPoint[pointI])
-            {
-                nHanging++;
-
-                Pout<< "Hanging boundary point " << pointI
-                    << " at " << mesh_.points()[pointI]
-                    << endl;
-                //meshTools::writeOBJ(str, mesh_.points()[pointI]);
-            }
-        }
-
-        if (returnReduce(nHanging, sumOp<label>()) > 0)
-        {
-            FatalErrorIn
-            (
-                "hexRef8::checkRefinementLevels(const label)"
-            )   << "Detected a point used by two edges only (hanging point)"
-                << nl << "This is not allowed"
-                << abort(FatalError);
-        }
-    }
+    //- Gives problems after first splitting off inside mesher.
+    //// Hanging points
+    //{
+    //    // Any patches with points having only two edges.
+    //
+    //    boolList isHangingPoint(mesh_.nPoints(), false);
+    //
+    //    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+    //
+    //    forAll(patches, patchI)
+    //    {
+    //        const polyPatch& pp = patches[patchI];
+    //
+    //        const labelList& meshPoints = pp.meshPoints();
+    //
+    //        forAll(meshPoints, i)
+    //        {
+    //            label pointI = meshPoints[i];
+    //
+    //            const labelList& pEdges = mesh_.pointEdges()[pointI];
+    //
+    //            if (pEdges.size() == 2)
+    //            {
+    //                isHangingPoint[pointI] = true;
+    //            }
+    //        }
+    //    }
+    //
+    //    syncTools::syncPointList
+    //    (
+    //        mesh_,
+    //        isHangingPoint,
+    //        andEqOp<bool>(),        // only if all decide it is hanging point
+    //        true,                   // null
+    //        false                   // no separation
+    //    );
+    //
+    //    //OFstream str(mesh_.time().path()/"hangingPoints.obj");
+    //
+    //    label nHanging = 0;
+    //
+    //    forAll(isHangingPoint, pointI)
+    //    {
+    //        if (isHangingPoint[pointI])
+    //        {
+    //            nHanging++;
+    //
+    //            Pout<< "Hanging boundary point " << pointI
+    //                << " at " << mesh_.points()[pointI]
+    //                << endl;
+    //            //meshTools::writeOBJ(str, mesh_.points()[pointI]);
+    //        }
+    //    }
+    //
+    //    if (returnReduce(nHanging, sumOp<label>()) > 0)
+    //    {
+    //        FatalErrorIn
+    //        (
+    //            "hexRef8::checkRefinementLevels(const label)"
+    //        )   << "Detected a point used by two edges only (hanging point)"
+    //            << nl << "This is not allowed"
+    //            << abort(FatalError);
+    //    }
+    //}
 }
 
 
@@ -5061,7 +5078,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
     // maxSet = true: select points to refine
 
     // Maintain boolList for pointsToUnrefine and cellsToUnrefine
-    PackedList<1> unrefinePoint(mesh_.nPoints(), 0);
+    PackedBoolList unrefinePoint(mesh_.nPoints());
 
     forAll(pointsToUnrefine, i)
     {
@@ -5076,7 +5093,7 @@ Foam::labelList Foam::hexRef8::consistentUnrefinement
         // Construct cells to unrefine
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        PackedList<1> unrefineCell(mesh_.nCells(), 0);
+        PackedBoolList unrefineCell(mesh_.nCells());
 
         forAll(unrefinePoint, pointI)
         {

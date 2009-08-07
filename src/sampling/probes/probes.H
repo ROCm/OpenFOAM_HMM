@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,9 +175,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~probes();
+    //- Destructor
+    virtual ~probes();
 
 
     // Member Functions
@@ -188,20 +187,35 @@ public:
             return name_;
         }
 
+        //- Return names of fields to probe
+        virtual const wordList& fieldNames() const
+        {
+            return fieldNames_;
+        }
+
+        //- Return locations to probe
+        virtual const vectorField& probeLocations() const
+        {
+            return probeLocations_;
+        }
+
         //- Cells to be probed (obtained from the locations)
         const labelList& cells() const
         {
             return cellList_;
         }
 
+        //- Execute, currently does nothing
+        virtual void execute();
+
+        //- Execute at the final time-loop, currently does nothing
+        virtual void end();
+
         //- Sample and write
         virtual void write();
 
         //- Read the probes
         virtual void read(const dictionary&);
-
-        //- Execute
-        virtual void execute();
 
         //- Update for changes of mesh
         virtual void updateMesh(const mapPolyMesh&)

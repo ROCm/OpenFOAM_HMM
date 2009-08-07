@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,12 +102,13 @@ void fixedEnthalpyFvPatchScalarField::updateCoeffs()
     (
         "thermophysicalProperties"
     );
-    
+
     const label patchi = patch().index();
 
-    fvPatchScalarField& Tw = 
+    fvPatchScalarField& Tw =
         const_cast<fvPatchScalarField&>(thermo.T().boundaryField()[patchi]);
     Tw.evaluate();
+
     operator==(thermo.h(Tw, patchi));
 
     fixedValueFvPatchScalarField::updateCoeffs();

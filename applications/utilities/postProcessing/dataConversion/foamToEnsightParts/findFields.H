@@ -1,42 +1,42 @@
-// check the final time directory for
+// check the final time directory for the following:
 
 // 1. volume fields
 HashTable<word> volumeFields;
 
 // 2. the fields for each cloud:
-HashTable<HashTable<word> > cloudFields;
+HashTable< HashTable<word> > cloudFields;
 
-if (timeDirs.size() > 1)
+if (timeDirs.size())
 {
     IOobjectList objs(mesh, timeDirs[timeDirs.size()-1].name());
 
     forAllConstIter(IOobjectList, objs, fieldIter)
     {
         const IOobject& obj = *fieldIter();
+        const word& fieldName = obj.name();
+        const word& fieldType = obj.headerClassName();
 
-        if
-        (
-            obj.headerClassName() == volScalarField::typeName
-         || obj.headerClassName() == volVectorField::typeName
-        )
+        if (fieldName.size() > 2 && fieldName(fieldName.size()-2, 2) == "_0")
         {
-            // Add field and field type
-            volumeFields.insert
-            (
-                obj.name(),
-                obj.headerClassName()
-            );
+            // ignore _0 fields
+        }
+        else if (volFieldTypes.found(fieldType))
+        {
+            // simply ignore types that we don't handle
+            volumeFields.insert(fieldName, fieldType);
         }
     }
 
-    // now check for lagrangian/<cloudName>
 
+    //
+    // now check for lagrangian/<cloudName>
+    //
     fileNameList cloudDirs = readDir
     (
         runTime.path()
-      / timeDirs[timeDirs.size() - 1].name()
+      / timeDirs[timeDirs.size()-1].name()
       / regionPrefix
-      / "lagrangian",
+      / cloud::prefix,
         fileName::DIRECTORY
     );
 
@@ -47,41 +47,58 @@ if (timeDirs.size() > 1)
         // Create a new hash table for each cloud
         cloudFields.insert(cloudName, HashTable<word>());
 
-        // Identify the new cloud in the hash table
+        // Identify the new cloud within the hash table
         HashTable<HashTable<word> >::iterator cloudIter =
             cloudFields.find(cloudName);
 
-        IOobjectList cloudObjs
+        IOobjectList objs
         (
             mesh,
-            timeDirs[timeDirs.size() - 1].name(),
-            "lagrangian"/cloudName
+            timeDirs[timeDirs.size()-1].name(),
+            cloud::prefix/cloudName
         );
 
         bool hasPositions = false;
-        forAllConstIter(IOobjectList, cloudObjs, fieldIter)
+        forAllConstIter(IOobjectList, objs, fieldIter)
         {
             const IOobject obj = *fieldIter();
+            const word& fieldName = obj.name();
+            const word& fieldType = obj.headerClassName();
 
-            if (obj.name() == "positions")
+            if (fieldName == "positions")
             {
                 hasPositions = true;
             }
-            else
+            else if (cloudFieldTypes.found(fieldType))
             {
-                // Add field and field type
-                cloudIter().insert
-                (
-                    obj.name(),
-                    obj.headerClassName()
-                );
+                // simply ignore types that we don't handle
+                cloudIter().insert(fieldName, fieldType);
             }
         }
 
-        // drop this cloud if it has no positions
-        if (!hasPositions)
+        // drop this cloud if it has no positions or is otherwise empty
+        if (!hasPositions || cloudIter().empty())
         {
+            Info<< "removing cloud " << cloudName << endl;
             cloudFields.erase(cloudIter);
+        }
+    }
+
+    //
+    // verify that the variable is present for all times
+    //
+    for (label i=0; volumeFields.size() && i < timeDirs.size(); ++i)
+    {
+        IOobjectList objs(mesh, timeDirs[i].name());
+
+        forAllIter(HashTable<word>, volumeFields, fieldIter)
+        {
+            const word& fieldName = fieldIter.key();
+
+            if (!objs.found(fieldName))
+            {
+                volumeFields.erase(fieldIter);
+            }
         }
     }
 }

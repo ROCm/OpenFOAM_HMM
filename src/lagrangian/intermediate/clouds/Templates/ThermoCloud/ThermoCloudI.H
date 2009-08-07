@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,14 @@ License
 #include "radiationConstants.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParcelType>
+inline const typename ParcelType::constantProperties&
+Foam::ThermoCloud<ParcelType>::constProps() const
+{
+    return constProps_;
+}
+
 
 template<class ParcelType>
 inline const Foam::basicThermo&
@@ -69,31 +77,23 @@ inline bool Foam::ThermoCloud<ParcelType>::radiation() const
 
 template<class ParcelType>
 inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hTrans()
+Foam::ThermoCloud<ParcelType>::hsTrans()
 {
-    return hTrans_;
-}
-
-
-template<class ParcelType>
-inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
-Foam::ThermoCloud<ParcelType>::hCoeff()
-{
-    return hCoeff_;
+    return hsTrans_;
 }
 
 
 template<class ParcelType>
 inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
-Foam::ThermoCloud<ParcelType>::Sh1() const
+Foam::ThermoCloud<ParcelType>::Shs() const
 {
-    tmp<DimensionedField<scalar, volMesh> > tSh1
+    tmp<DimensionedField<scalar, volMesh> > tShs
     (
         new DimensionedField<scalar, volMesh>
         (
             IOobject
             (
-                this->name() + "Sh1",
+                this->name() + "Shs",
                 this->db().time().timeName(),
                 this->mesh(),
                 IOobject::NO_READ,
@@ -110,30 +110,86 @@ Foam::ThermoCloud<ParcelType>::Sh1() const
         )
     );
 
-    scalarField& Sh1 = tSh1().field();
-    Sh1 = hTrans_/(this->mesh().V()*this->db().time().deltaT());
+    scalarField& Shs = tShs().field();
+    Shs = hsTrans_/(this->mesh().V()*this->db().time().deltaT());
 
-    return tSh1;
+    return tShs;
 }
 
 
 template<class ParcelType>
-inline Foam::tmp<Foam::fvScalarMatrix>
-Foam::ThermoCloud<ParcelType>::Sh2(volScalarField& h) const
+inline Foam::DimensionedField<Foam::scalar, Foam::volMesh>&
+Foam::ThermoCloud<ParcelType>::hcTrans()
 {
-    const volScalarField cp = carrierThermo_.Cp();
+    return hcTrans_;
+}
 
-    if (debug)
-    {
-        Info<< "hTrans min/max = "
-            << min(hTrans_) << ", " << max(hTrans_) << endl;
-        Info<< "hCoeff min/max = "
-            << min(hCoeff_) << ", " << max(hCoeff_) << endl;
-    }
 
-    return hTrans_/(this->mesh().V()*this->db().time().deltaT())
-         - fvm::Sp(hCoeff_/(cp*this->mesh().V()), h)
-         + hCoeff_/(cp*this->mesh().V())*h;
+template<class ParcelType>
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::ThermoCloud<ParcelType>::Shc() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tShc
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "Shc",
+                this->db().time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            this->mesh(),
+            dimensionedScalar
+            (
+                "zero",
+                dimMass/dimLength/pow3(dimTime),
+                0.0
+            )
+        )
+    );
+
+    scalarField& Shc = tShc().field();
+    Shc = hcTrans_/(this->mesh().V()*this->db().time().deltaT());
+
+    return tShc;
+}
+
+
+template<class ParcelType>
+inline Foam::tmp<Foam::DimensionedField<Foam::scalar, Foam::volMesh> >
+Foam::ThermoCloud<ParcelType>::Sh() const
+{
+    tmp<DimensionedField<scalar, volMesh> > tSh
+    (
+        new DimensionedField<scalar, volMesh>
+        (
+            IOobject
+            (
+                this->name() + "Sh",
+                this->db().time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            this->mesh(),
+            dimensionedScalar
+            (
+                "zero",
+                dimMass/dimLength/pow3(dimTime),
+                0.0
+            )
+        )
+    );
+
+    scalarField& Sh = tSh().field();
+    Sh = (hsTrans_ + hcTrans_)/(this->mesh().V()*this->db().time().deltaT());
+
+    return tSh;
 }
 
 

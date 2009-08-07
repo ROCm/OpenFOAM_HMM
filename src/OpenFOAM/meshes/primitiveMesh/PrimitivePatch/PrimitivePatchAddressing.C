@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,11 +39,6 @@ Description
 #include "DynamicList.H"
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template
@@ -53,8 +48,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
- const
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcAddressing() const
 {
     if (debug)
     {
@@ -211,7 +208,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
 
             forAll (neiFaces, nfI)
             {
-                if (neiFaces[nfI].size() > 0 && neiFaces[nfI][0] < minNei)
+                if (neiFaces[nfI].size() && neiFaces[nfI][0] < minNei)
                 {
                     nextNei = nfI;
                     minNei = neiFaces[nfI][0];
@@ -298,7 +295,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
 
     forAll (faceFaces, faceI)
     {
-        faceFaces[faceI].transfer(ff[faceI].shrink());
+        faceFaces[faceI].transfer(ff[faceI]);
     }
 
 
@@ -310,9 +307,5 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcAddressing()
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

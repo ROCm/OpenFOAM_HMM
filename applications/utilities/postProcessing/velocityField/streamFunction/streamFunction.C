@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Application
     streamFunction
 
 Description
-    Calculates and writes the stream function of velocity field U at each time 
+    Calculates and writes the stream function of velocity field U at each time
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,27 +42,20 @@ Description
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
 
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
-
 #   include "createTime.H"
 
-    // Get times list
-    instantList Times = runTime.times();
-
-    // set startTime and endTime depending on -time and -latestTime options
-#   include "checkTimeOptions.H"
-
-    runTime.setTime(Times[startTime], startTime);
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
 #   include "createMeshNoClear.H"
 
     pointMesh pMesh(mesh);
 
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(timeDirs[timeI], timeI);
 
         Info<< nl << "Time: " << runTime.timeName() << endl;
 
@@ -467,7 +460,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info<< "End\n" << endl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

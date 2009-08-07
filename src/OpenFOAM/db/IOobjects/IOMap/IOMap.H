@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -66,11 +66,14 @@ public:
         //- Construct from IOobject
         IOMap(const IOobject&);
 
+        //- Construct from IOobject and size of Map
+        IOMap(const IOobject&, const label);
+
         //- Construct from IOobject and a Map
         IOMap(const IOobject&, const Map<T>&);
 
-        //- Construct from IOobject and size of Map
-        IOMap(const IOobject&, const label);
+        //- Construct by transferring the Map contents
+        IOMap(const IOobject&, const Xfer<Map<T> >&);
 
 
     // Destructor

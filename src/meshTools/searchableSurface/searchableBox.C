@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,10 +32,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(searchableBox, 0);
-addToRunTimeSelectionTable(searchableSurface, searchableBox, dict);
-
+    defineTypeNameAndDebug(searchableBox, 0);
+    addToRunTimeSelectionTable(searchableSurface, searchableBox, dict);
 }
 
 
@@ -172,7 +170,20 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(bb)
-{}
+{
+    if (!contains(midpoint()))
+    {
+        FatalErrorIn
+        (
+            "Foam::searchableBox::searchableBox\n"
+            "(\n"
+            "    const IOobject& io,\n"
+            "    const treeBoundBox& bb\n"
+            ")\n"
+        )   << "Illegal bounding box specification : "
+            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+    }
+}
 
 
 Foam::searchableBox::searchableBox
@@ -183,7 +194,20 @@ Foam::searchableBox::searchableBox
 :
     searchableSurface(io),
     treeBoundBox(dict.lookup("min"), dict.lookup("max"))
-{}
+{
+    if (!contains(midpoint()))
+    {
+        FatalErrorIn
+        (
+            "Foam::searchableBox::searchableBox\n"
+            "(\n"
+            "    const IOobject& io,\n"
+            "    const treeBoundBox& bb\n"
+            ")\n"
+        )   << "Illegal bounding box specification : "
+            << static_cast<const treeBoundBox>(*this) << exit(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -196,7 +220,7 @@ Foam::searchableBox::~searchableBox()
 
 const Foam::wordList& Foam::searchableBox::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(1);
         regions_[0] = "region0";
@@ -211,7 +235,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearest
     const scalar nearestDistSqr
 ) const
 {
-    return findNearest(mid(), sample, nearestDistSqr);
+    return findNearest(midpoint(), sample, nearestDistSqr);
 }
 
 
@@ -221,7 +245,7 @@ Foam::pointIndexHit Foam::searchableBox::findNearestOnEdge
     const scalar nearestDistSqr
 ) const
 {
-    const point bbMid(mid());
+    const point bbMid(midpoint());
 
     // Outside point projected onto cube. Assume faces 0..5.
     pointIndexHit info(true, sample, -1);
@@ -383,7 +407,7 @@ void Foam::searchableBox::findNearest
 {
     info.setSize(samples.size());
 
-    const point bbMid(mid());
+    const point bbMid(midpoint());
 
     forAll(samples, i)
     {
@@ -482,7 +506,6 @@ void Foam::searchableBox::findLineAll
                 pt = inter.hitPoint() + smallVec[pointI];
             }
 
-            hits.shrink();
             info[pointI].transfer(hits);
         }
         else

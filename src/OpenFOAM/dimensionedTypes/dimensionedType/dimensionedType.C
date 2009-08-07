@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,6 +34,20 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template <class Type>
+dimensioned<Type> dimensioned<Type>::lookupOrDefault
+(
+    const word& name,
+    const dictionary& dict,
+    const Type& defaultValue,
+    const dimensionSet& dims
+)
+{
+    Type value = dict.lookupOrDefault<Type>(name, defaultValue);
+    return dimensioned<Type>(name, dims, value);
+}
+
 
 template <class Type>
 dimensioned<Type> dimensioned<Type>::lookupOrAddToDict

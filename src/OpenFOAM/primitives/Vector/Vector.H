@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,6 +81,8 @@ public:
         static const char* componentNames[];
         static const Vector zero;
         static const Vector one;
+        static const Vector max;
+        static const Vector min;
 
 
     //- Component labeling enumeration

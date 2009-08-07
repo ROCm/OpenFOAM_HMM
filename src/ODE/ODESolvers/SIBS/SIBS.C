@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -71,8 +71,8 @@ void Foam::SIBS::solve
     const ODE& ode,
     scalar& x,
     scalarField& y,
-    scalarField& dydx, 
-    const scalar eps, 
+    scalarField& dydx,
+    const scalar eps,
     const scalarField& yScale,
     const scalar hTry,
     scalar& hDid,
@@ -96,7 +96,7 @@ void Foam::SIBS::solve
         {
             for (register label k=0; k<iq; k++)
             {
-                alpha_[k][iq] = 
+                alpha_[k][iq] =
                     pow(eps1, (a_[k + 1] - a_[iq + 1])
                    /((a_[iq + 1] - a_[0] + 1.0)*(2*k + 3)));
             }

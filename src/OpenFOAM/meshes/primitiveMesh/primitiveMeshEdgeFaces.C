@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,9 @@ License
 #include "primitiveMesh.H"
 #include "ListOps.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::edgeFaces() const
+const Foam::labelListList& Foam::primitiveMesh::edgeFaces() const
 {
     if (!efPtr_)
     {
@@ -60,7 +55,7 @@ const labelListList& primitiveMesh::edgeFaces() const
 }
 
 
-const labelList& primitiveMesh::edgeFaces
+const Foam::labelList& Foam::primitiveMesh::edgeFaces
 (
     const label edgeI,
     DynamicList<label>& storage
@@ -106,14 +101,10 @@ const labelList& primitiveMesh::edgeFaces
 }
 
 
-const labelList& primitiveMesh::edgeFaces(const label edgeI) const
+const Foam::labelList& Foam::primitiveMesh::edgeFaces(const label edgeI) const
 {
     return edgeFaces(edgeI, labels_);
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

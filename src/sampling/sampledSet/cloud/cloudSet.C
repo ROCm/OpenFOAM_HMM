@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -156,7 +156,7 @@ Foam::cloudSet::~cloudSet()
 
 Foam::point Foam::cloudSet::getRefPoint(const List<point>& pts) const
 {
-    if (pts.size() > 0)
+    if (pts.size())
     {
         // Use first samplePt as starting point
         return pts[0];

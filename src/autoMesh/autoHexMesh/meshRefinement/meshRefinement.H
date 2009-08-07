@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,6 +36,7 @@ SourceFiles
     meshRefinement.C
     meshRefinementBaffles.C
     meshRefinementMerge.C
+    meshRefinementProblemCells.C
     meshRefinementRefine.C
 
 \*---------------------------------------------------------------------------*/
@@ -46,11 +47,11 @@ SourceFiles
 #include "hexRef8.H"
 #include "mapPolyMesh.H"
 #include "autoPtr.H"
-#include "pointIOField.H"
 #include "labelPair.H"
 #include "indirectPrimitivePatch.H"
 #include "pointFieldsFwd.H"
 #include "Tuple2.H"
+#include "pointIndexHit.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -109,6 +110,12 @@ private:
         //- tolerance used for sorting coordinates (used in 'less' routine)
         const scalar mergeDistance_;
 
+        //- overwrite the mesh?
+        const bool overwrite_;
+
+        //- Instance of mesh upon construction. Used when in overwrite_ mode.
+        const word oldInstance_;
+
         //- All surface-intersection interaction
         const refinementSurfaces& surfaces_;
 
@@ -123,6 +130,10 @@ private:
 
         //- user supplied face based data.
         List<Tuple2<mapType, labelList> > userFaceData_;
+
+        //- Meshed patches - are treated differently. Stored as wordList since
+        //  order changes.
+        wordList meshedPatches_;
 
 
     // Private Member Functions
@@ -161,9 +172,6 @@ private:
 
         //- Find any intersection of surface. Store in surfaceIndex_.
         void updateIntersections(const labelList& changedFaces);
-
-        //- Set instance of all local IOobjects
-        void setInstance(const fileName&);
 
         //- Remove cells. Put exposedFaces into exposedPatchIDs.
         autoPtr<mapPolyMesh> doRemoveCells
@@ -345,6 +353,8 @@ private:
                 polyTopoChange& meshMod
             ) const;
 
+        // Problem cell handling
+
             //- Helper function to mark face as being on 'boundary'. Used by
             //  markFacesOnProblemCells
             void markBoundaryFace
@@ -355,20 +365,53 @@ private:
                 boolList& isBoundaryPoint
             ) const;
 
-            //- Returns list with for every internal face -1 or the patch
-            //  they should be baffled into.
-            labelList markFacesOnProblemCells
+            void findNearest
             (
-                const labelList& globalToPatch
+                const labelList& meshFaces,
+                List<pointIndexHit>& nearestInfo,
+                labelList& nearestSurface,
+                labelList& nearestRegion,
+                vectorField& nearestNormal
+            ) const;
+
+            Map<label> findEdgeConnectedProblemCells
+            (
+                const scalarField& perpendicularAngle,
+                const labelList&
+            ) const;
+
+            bool isCollapsedFace
+            (
+                const pointField&,
+                const pointField& neiCc,
+                const scalar minFaceArea,
+                const scalar maxNonOrtho,
+                const label faceI
+            ) const;
+
+            bool isCollapsedCell
+            (
+                const pointField&,
+                const scalar volFraction,
+                const label cellI
             ) const;
 
             //- Returns list with for every internal face -1 or the patch
-            //  they should be baffled into.
-            labelList markFacesOnProblemCellsGeometric
+            //  they should be baffled into. If removeEdgeConnectedCells is set
+            //  removes cells based on perpendicularAngle.
+            labelList markFacesOnProblemCells
             (
                 const dictionary& motionDict,
+                const bool removeEdgeConnectedCells,
+                const scalarField& perpendicularAngle,
                 const labelList& globalToPatch
             ) const;
+
+            ////- Initial test of marking faces using geometric information.
+            //labelList markFacesOnProblemCellsGeometric
+            //(
+            //    const dictionary& motionDict
+            //) const;
 
 
         // Baffle merging
@@ -382,12 +425,24 @@ private:
 
             //- Finds zone per cell for cells inside closed named surfaces.
             //  (uses geometric test for insideness)
+            //  Adapts namedSurfaceIndex so all faces on boundary of cellZone
+            //  have corresponding faceZone.
             void findCellZoneGeometric
             (
                 const labelList& closedNamedSurfaces,
-                const labelList& namedSurfaceIndex,
+                labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
+            ) const;
+
+            //- Determines cell zone from cell region information.
+            bool calcRegionToZone
+            (
+                const label surfZoneI,
+                const label ownRegion,
+                const label neiRegion,
+
+                labelList& regionToCellZone
             ) const;
 
             //- Finds zone per cell. Uses topological walk with all faces
@@ -398,6 +453,12 @@ private:
                 const labelList& namedSurfaceIndex,
                 const labelList& surfaceToCellZone,
                 labelList& cellToZone
+            ) const;
+
+            void makeConsistentFaceIndex
+            (
+                const labelList& cellToZone,
+                labelList& namedSurfaceIndex
             ) const;
 
 
@@ -420,6 +481,7 @@ public:
         (
             fvMesh& mesh,
             const scalar mergeDistance,
+            const bool overwrite,
             const refinementSurfaces&,
             const shellSurfaces&
         );
@@ -442,6 +504,18 @@ public:
             scalar mergeDistance() const
             {
                 return mergeDistance_;
+            }
+
+            //- Overwrite the mesh?
+            bool overwrite() const
+            {
+                return overwrite_;
+            }
+
+            //- (points)instance of mesh upon construction
+            const word& oldInstance() const
+            {
+                return oldInstance_;
             }
 
             //- reference to surface search engines
@@ -523,9 +597,6 @@ public:
             //- Get points on surfaces with intersection and boundary faces.
             labelList intersectedPoints() const;
 
-            //- Get added patches (inverse of globalToPatch)
-            static labelList addedPatches(const labelList& globalToPatch);
-
             //- Create patch from set of patches
             static autoPtr<indirectPrimitivePatch> makePatch
             (
@@ -587,6 +658,8 @@ public:
             void baffleAndSplitMesh
             (
                 const bool handleSnapProblems,
+                const bool removeEdgeConnectedCells,
+                const scalarField& perpendicularAngle,
                 const bool mergeFreeStanding,
                 const dictionary& motionDict,
                 Time& runTime,
@@ -631,8 +704,15 @@ public:
 
         // Other topo changes
 
-            //- Helper function to add patch to mesh
+            //- Helper:add patch to mesh. Update all registered fields.
+            //  Use addMeshedPatch to add patches originating from surfaces.
             static label addPatch(fvMesh&, const word& name, const word& type);
+
+            //- Add patch originating from meshing. Update meshedPatches_.
+            label addMeshedPatch(const word& name, const word& type);
+
+            //- Get patchIDs for patches added in addMeshedPatch.
+            labelList meshedPatches() const;
 
             //- Split mesh. Keep part containing point.
             autoPtr<mapPolyMesh> splitMeshRegions(const point& keepPoint);
@@ -642,7 +722,11 @@ public:
 
             //- Update for external change to mesh. changedFaces are in new mesh
             //  face labels.
-            void updateMesh(const mapPolyMesh&, const labelList& changedFaces);
+            void updateMesh
+            (
+                const mapPolyMesh&,
+                const labelList& changedFaces
+            );
 
 
             // Restoring : is where other processes delete and reinsert data.
@@ -699,6 +783,13 @@ public:
 
             //- Print some mesh stats.
             void printMeshInfo(const bool, const string&) const;
+
+            //- Replacement for Time::timeName() : return oldInstance (if
+            //  overwrite_)
+            word timeName() const;
+
+            //- Set instance of all local IOobjects
+            void setInstance(const fileName&);
 
             //- Write mesh and all data
             bool write() const;

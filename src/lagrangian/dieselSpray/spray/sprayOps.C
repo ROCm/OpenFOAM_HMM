@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,33 +49,13 @@ void spray::evolve()
         srhos_[i].setSize(rho_.size());
     }
 
-    UInterpolator_ = interpolation<vector>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        U_
-    );
+    UInterpolator_ = interpolation<vector>::New(interpolationSchemes_, U_);
 
-    rhoInterpolator_ = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        rho_
-    );
+    rhoInterpolator_ = interpolation<scalar>::New(interpolationSchemes_, rho_);
 
-    pInterpolator_ = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        p_
-    );
+    pInterpolator_ = interpolation<scalar>::New(interpolationSchemes_, p_);
 
-    TInterpolator_ = interpolation<scalar>::New
-    (
-        interpolationSchemes_,
-        volPointInterpolation_,
-        T_
-    );
+    TInterpolator_ = interpolation<scalar>::New(interpolationSchemes_, T_);
 
     calculateAmbientPressure();
     calculateAmbientTemperature();
@@ -85,7 +65,7 @@ void spray::evolve()
     inject();
     atomizationLoop();
     breakupLoop();
-            
+
     UInterpolator_.clear();
     rhoInterpolator_.clear();
     pInterpolator_.clear();
@@ -109,12 +89,7 @@ void spray::move()
 
 void spray::breakupLoop()
 {
-    for
-    (
-        spray::iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllIter(spray::iterator, *this, elmnt)
     {
         // interpolate...
         vector velocity = UInterpolator().interpolate
@@ -148,12 +123,7 @@ void spray::breakupLoop()
 
 void spray::atomizationLoop()
 {
-    for
-    (
-        spray::iterator elmnt = begin();
-        elmnt != end();
-        ++elmnt
-    )
+    forAllIter(spray::iterator, *this, elmnt)
     {
         // interpolate...
         vector velocity = UInterpolator().interpolate

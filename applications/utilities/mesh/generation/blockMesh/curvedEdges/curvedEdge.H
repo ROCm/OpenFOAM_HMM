@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,51 +63,23 @@ protected:
 
 public:
 
-    // Constructor Hash tables
-
-        //- Construct from Istream function pointer type
-        typedef autoPtr<curvedEdge> (*IstreamConstructorPtr_)
-            (const pointField&, Istream&);
-
-        //- Construct from Istream function pointer table pointer
-        static HashTable<IstreamConstructorPtr_>*
-            IstreamConstructorTablePtr_;
+    //- Runtime type information
+    TypeName("curvedEdge");
 
 
-    // Hash table constructor classes and functions
+    // Declare run-time constructor selection tables
 
-        //- Hash table Constructor.
-        //  Must be called from the table add functions below.
-        static void constructTables();
-
-
-        //- Class to add constructor from Istream to Hash table
-        template<class curvedEdgeType>
-        class addIstreamConstructorToTable
-        {
-        public:
-
-            static autoPtr<curvedEdge> New
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            curvedEdge,
+            Istream,
             (
                 const pointField& points,
                 Istream& is
-            )
-            {
-                return autoPtr<curvedEdge>(new curvedEdgeType(points, is));
-            }
-
-            addIstreamConstructorToTable()
-            {
-                curvedEdge::constructTables();
-
-                curvedEdge::IstreamConstructorTablePtr_
-                    ->insert(curvedEdgeType::typeName, New);
-            }
-        };
-
-
-    //- Runtime type information
-    TypeName("curvedEdge");
+            ),
+            (points, is)
+        );
 
 
     // Constructors

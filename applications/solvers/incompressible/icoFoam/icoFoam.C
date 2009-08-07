@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,24 +36,23 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "CourantNo.H"
+        #include "readPISOControls.H"
+        #include "CourantNo.H"
 
         fvVectorMatrix UEqn
         (
@@ -92,7 +91,7 @@ int main(int argc, char *argv[])
                 }
             }
 
-#           include "continuityErrs.H"
+            #include "continuityErrs.H"
 
             U -= rUA*fvc::grad(p);
             U.correctBoundaryConditions();
@@ -107,7 +106,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

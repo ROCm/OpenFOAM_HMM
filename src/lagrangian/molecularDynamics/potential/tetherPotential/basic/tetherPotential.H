@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,6 +40,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "runTimeSelectionTables.H"
 #include "autoPtr.H"
+#include "vector.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -47,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                Class tetherPotential Declaration
+                      Class tetherPotential Declaration
 \*---------------------------------------------------------------------------*/
 
 class tetherPotential
@@ -119,9 +120,9 @@ public:
 
     // Member Functions
 
-        virtual scalar energy (const scalar r) const = 0;
+        virtual scalar energy (const vector r) const = 0;
 
-        virtual scalar force (const scalar r) const = 0;
+        virtual vector force (const vector r) const = 0;
 
         const dictionary& tetherPotentialProperties() const
         {

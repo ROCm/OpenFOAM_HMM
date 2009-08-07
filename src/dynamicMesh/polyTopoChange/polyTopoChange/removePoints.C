@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,6 +35,7 @@ License
 #include "syncTools.H"
 #include "wallPoint.H"  // only to use 'greatPoint'
 #include "faceSet.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -73,23 +74,23 @@ public:
 };
 
 
-// Dummy transform for List. Used in synchronisation.
-template <class T>
-class dummyTransformList
-{
-public:
-    void operator()(const coupledPolyPatch&, Field<List<T> >&) const
-    {}
-};
-// Dummy template specialisation. Used in synchronisation.
-template<>
-class pTraits<boolList>
-{
-public:
-
-    //- Component type
-    typedef label cmptType;
-};
+//// Dummy transform for List. Used in synchronisation.
+//template <class T>
+//class dummyTransformList
+//{
+//public:
+//    void operator()(const coupledPolyPatch&, Field<List<T> >&) const
+//    {}
+//};
+//// Dummy template specialisation. Used in synchronisation.
+//template<>
+//class pTraits<boolList>
+//{
+//public:
+//
+//    //- Component type
+//    typedef label cmptType;
+//};
 
 
 }
@@ -402,7 +403,7 @@ void Foam::removePoints::setRefinement
                 // Points from the mesh
                 List<point> meshPoints
                 (
-                    IndirectList<point>
+                    UIndirectList<point>
                     (
                         mesh_.points(),
                         mesh_.faces()[savedFaceLabels_[saveI]]  // mesh face
@@ -680,7 +681,7 @@ void Foam::removePoints::getUnrefimentSet
             mesh_,
             faceVertexRestore,
             faceEqOp<bool, orEqOp>(),   // special operator to handle faces
-            dummyTransformList<bool>()  // dummy transform
+            Foam::dummyTransform()      // no transformation
         );
 
         // So now if any of the points-to-restore is used by any coupled face

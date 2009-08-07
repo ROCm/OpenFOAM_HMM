@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -218,7 +218,7 @@ Foam::laminarFlameSpeedModels::Gulders::operator()() const
             dimensionedScalar
             (
                 hhuCombustionThermo_.lookup("stoichiometricAirFuelMassRatio")
-            )*ft/(scalar(1) - ft)
+            )*ft/((1 + SMALL) - ft)
         );
     }
     else

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,7 @@ Description
     fluentMeshWithInternalFaces).
 
     A use of the cell zone information, is for field initialization with the
-    "setFields" utility. see the classes:  topoSetSource, zoneToCell.  
+    "setFields" utility. see the classes:  topoSetSource, zoneToCell.
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
@@ -166,7 +166,7 @@ label findInternalFace(const primitiveMesh& mesh, const labelList& meshF)
         if (nMatched == meshF.size())
         {
             return faceI;
-        }        
+        }
     }
     return -1;
 }
@@ -657,6 +657,16 @@ void readCells
     << "    tet  :" << nTet << endl
     << endl;
 
+    if (cells.size() == 0)
+    {
+        FatalErrorIn("readCells(..)")
+            << "No cells read from file " << inFile.name() << nl
+            << "Does your file specify any 3D elements (hex=" << MSHHEX
+            << ", prism=" << MSHPRISM << ", pyramid=" << MSHPYR
+            << ", tet=" << MSHTET << ")?" << nl
+            << "Perhaps you have not exported the 3D elements?"
+            << exit(FatalError);
+    }
 
     Info<< "CellZones:" << nl
         << "Zone\tSize" << endl;
@@ -667,7 +677,7 @@ void readCells
 
         const labelList& zCells = zoneCells[zoneI];
 
-        if (zCells.size() > 0)
+        if (zCells.size())
         {
             Info<< "    " << zoneI << '\t' << zCells.size() << endl;
         }
@@ -689,7 +699,7 @@ int main(int argc, char *argv[])
 
     fileName mshName(args.additionalArgs()[0]);
 
-    bool keepOrientation = args.options().found("keepOrientation");
+    bool keepOrientation = args.optionFound("keepOrientation");
 
     // Storage for points
     pointField points;
@@ -778,7 +788,7 @@ int main(int argc, char *argv[])
 
     forAll(zoneCells, zoneI)
     {
-        if (zoneCells[zoneI].size() > 0)
+        if (zoneCells[zoneI].size())
         {
             nValidCellZones++;
         }
@@ -835,7 +845,7 @@ int main(int argc, char *argv[])
             runTime.constant(),
             runTime
         ),
-        points,
+        xferMove(points),
         cells,
         boundaryFaces,
         boundaryPatchNames,
@@ -910,7 +920,7 @@ int main(int argc, char *argv[])
 
         const labelList& zFaces = zoneFaces[zoneI];
 
-        if (zFaces.size() > 0)
+        if (zFaces.size())
         {
             nValidFaceZones++;
 
@@ -940,7 +950,7 @@ int main(int argc, char *argv[])
 
         forAll(zoneCells, zoneI)
         {
-            if (zoneCells[zoneI].size() > 0)
+            if (zoneCells[zoneI].size())
             {
                 label physReg = zoneToPhys[zoneI];
 
@@ -951,7 +961,7 @@ int main(int argc, char *argv[])
                 {
                     zoneName = iter();
                 }
-    
+
                 Info<< "Writing zone " << zoneI << " to cellZone "
                     << zoneName << " and cellSet"
                     << endl;
@@ -979,7 +989,7 @@ int main(int argc, char *argv[])
 
         forAll(zoneFaces, zoneI)
         {
-            if (zoneFaces[zoneI].size() > 0)
+            if (zoneFaces[zoneI].size())
             {
                 label physReg = zoneToPhys[zoneI];
 
@@ -1011,7 +1021,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    if (cz.size() > 0 || fz.size() > 0)
+    if (cz.size() || fz.size())
     {
         mesh.addZones(List<pointZone*>(0), fz, cz);
     }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "janafThermo.H"
+#include "specie.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -130,11 +131,35 @@ inline Foam::scalar Foam::janafThermo<equationOfState>::h
 ) const
 {
     const coeffArray& a = coeffs(T);
-    return
-    this->RR*
+    return this->RR*
     (
         ((((a[4]/5.0*T + a[3]/4.0)*T + a[2]/3.0)*T + a[1]/2.0)*T + a[0])*T
       + a[5]
+    );
+}
+
+
+template<class equationOfState>
+inline Foam::scalar Foam::janafThermo<equationOfState>::hs
+(
+    const scalar T
+) const
+{
+    return h(T) - hc();
+}
+
+
+template<class equationOfState>
+inline Foam::scalar Foam::janafThermo<equationOfState>::hc() const
+{
+    const coeffArray& a = lowCpCoeffs_;
+    const scalar& Tstd = specie::Tstd;
+    return this->RR*
+    (
+        (
+            (((a[4]/5.0*Tstd + a[3]/4.0)*Tstd + a[2]/3.0)*Tstd + a[1]/2.0)*Tstd
+          + a[0]
+        )*Tstd + a[5]
     );
 }
 

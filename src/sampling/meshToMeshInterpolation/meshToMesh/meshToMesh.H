@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,6 @@ SourceFiles
 #define meshtoMesh_H
 
 #include "fvMesh.H"
-#include "pointMesh.H"
 #include "HashTable.H"
 #include "fvPatchMapper.H"
 #include "scalarList.H"
@@ -80,9 +79,6 @@ class meshToMesh
 
         //- toMesh patch labels which cut the from-mesh
         HashTable<label> cuttingPatches_;
-
-        //- Point mesh used for interpolation
-        pointMesh fromPointMesh_;
 
         //- Cell addressing
         labelList cellAddressing_;

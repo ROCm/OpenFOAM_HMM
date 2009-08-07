@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
+#include "SortableList.H"
+#include "ListOps.H"
 
 using namespace Foam;
 
@@ -35,18 +36,101 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    labelList a(5);
-    a[0] = 7;
-    a[1] = 4;
-    a[2] = 1;
-    a[3] = 2;
-    a[4] = 9;
+    labelList orig(8);
+    orig[0] = 7;
+    orig[1] = 9;
+    orig[2] = 1;
+    orig[3] = 2;
+    orig[4] = 4;
+    orig[5] = 7;
+    orig[6] = 4;
+    orig[7] = 0;
 
-    Info << "before: " << a << endl;
+    labelList order;
+
+    labelList a(orig);
+    sortedOrder(a, order);
+
+    Info<< "unsorted: " << a << endl;
     sort(a);
-    Info << "after: " << a << endl;
+    Info<< "sorted:   " << a << endl;
+    Info<< "indices:  " << order << endl;
 
-    Info << "End\n" << endl;
+    SortableList<label> b(orig);
+    Info<< "unsorted: " << orig << endl;
+    Info<< "sorted:   " << b << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    Info<< "shrunk:   " << b.shrink() << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    // repeat by assignment
+    b = orig;
+    Info<< "unsorted: " << b << endl;
+    b.sort();
+
+    Info<< "sorted:   " << b << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    // find unique/duplicate values
+    b = orig;
+
+    Info<< "unsorted: " << b << endl;
+    uniqueOrder(b, order);
+    Info<< "unique:  " << order << endl;
+    duplicateOrder(b, order);
+    Info<< "duplicate:" << order << endl;
+
+    // sort reverse
+    Info<< "unsorted: " << b << endl;
+    b.reverseSort();
+    Info<< "rsort:    " << b << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    // transfer assignment
+    a = orig;
+    b.transfer(a);
+    Info<< "unsorted: " << b << endl;
+    b.sort();
+
+    Info<< "sorted:   " << b << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    a.transfer(b);
+
+    Info<< "plain:    " << a << endl;
+    Info<< "sorted:   " << b << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    // sort/duplicate/unique with identical values
+    b.setSize(8);
+    b = 5;
+
+    Info<< "unsorted: " << b << endl;
+
+    uniqueOrder(b, order);
+    Info<< "unique:  " << order << endl;
+    duplicateOrder(b, order);
+    Info<< "duplicate:" << order << endl;
+    b.sort();
+
+    Info<< "sorted:   " << b << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    // with a single value
+    b.setSize(1);
+
+    Info<< "unsorted: " << b << endl;
+    uniqueOrder(b, order);
+    Info<< "unique:  " << order << endl;
+    duplicateOrder(b, order);
+    Info<< "duplicate:" << order << endl;
+    b.sort();
+
+    Info<< "sorted:   " << b << endl;
+    Info<< "indices:  " << b.indices() << endl;
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

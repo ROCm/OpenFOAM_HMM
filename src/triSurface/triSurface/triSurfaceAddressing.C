@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -112,7 +112,7 @@ void triSurface::calcSortedEdgeFaces() const
 
             faceAngles.sort();
 
-            sortedEdgeFaces[edgeI] = IndirectList<label>
+            sortedEdgeFaces[edgeI] = UIndirectList<label>
             (
                 myFaceNbs,
                 faceAngles.indices()
@@ -179,7 +179,7 @@ void triSurface::calcEdgeOwner() const
                     << "Edge " << edgeI << " vertices:" << e
                     << " is used by faces " << myFaces
                     << " vertices:"
-                    << IndirectList<labelledTri>(localFaces(), myFaces)()
+                    << UIndirectList<labelledTri>(localFaces(), myFaces)()
                     << " none of which use the edge vertices in the same order"
                     << nl << "I give up" << abort(FatalError);
             }

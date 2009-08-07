@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,10 +25,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "EulerCoordinateRotation.H"
-#include "dictionary.H"
-#include "addToRunTimeSelectionTable.H"
+
 #include "Switch.H"
 #include "mathematicalConstants.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -120,7 +120,7 @@ Foam::EulerCoordinateRotation::EulerCoordinateRotation
 :
     coordinateRotation()
 {
-    calcTransform( phiAngle, thetaAngle, psiAngle, inDegrees );
+    calcTransform(phiAngle, thetaAngle, psiAngle, inDegrees);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,9 +27,11 @@ Class
 
 Description
     Outlet-stabilised interpolation scheme which applies upwind differencing
-    to the faces of teh cells adjacent to outlets.  This is particularly
-    useful to stabilise the velocity at entrainment boundaries for LES
-    cases using linear or other centred differencing schemes.
+    to the faces of the cells adjacent to outlets.
+
+    This is particularly useful to stabilise the velocity at entrainment
+    boundaries for LES cases using linear or other centred differencing
+    schemes.
 
 SourceFiles
     outletStabilised.C
@@ -138,7 +140,7 @@ public:
 
             forAll(vf.boundaryField(), patchi)
             {
-                if 
+                if
                 (
                     isA<zeroGradientFvPatchField<Type> >
                         (vf.boundaryField()[patchi])
@@ -187,7 +189,7 @@ public:
         {
             if (tScheme_().corrected())
             {
-                tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tcorr = 
+                tmp<GeometricField<Type, fvsPatchField, surfaceMesh> > tcorr =
                     tScheme_().correction(vf);
 
                 GeometricField<Type, fvsPatchField, surfaceMesh>& corr = tcorr();
@@ -197,7 +199,7 @@ public:
 
                 forAll(vf.boundaryField(), patchi)
                 {
-                    if 
+                    if
                     (
                         isA<zeroGradientFvPatchField<Type> >
                             (vf.boundaryField()[patchi])
@@ -230,7 +232,7 @@ public:
             }
             else
             {
-                return 
+                return
                     tmp<GeometricField<Type, fvsPatchField, surfaceMesh> >(NULL);
             }
         }

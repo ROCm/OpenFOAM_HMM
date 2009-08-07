@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -32,25 +32,26 @@
 #------------------------------------------------------------------------------
 
 timeStamp=$(date +%Y-%m-%d)
-packDir=ThirdParty
+packDir=${WM_THIRD_PARTY_DIR:-ThirdParty}
+packDir=${packDir##*/}
 packFile=${packDir}.General_${timeStamp}.gtgz
 
 if [ ! -d $packDir ]
 then
-   echo "Error: directory $packDir does not exist"
-   exit 1
+    echo "Error: directory $packDir does not exist"
+    exit 1
 fi
 
 # add optional output directory
 if [ -d "$1" ]
 then
-   packFile="$1/$packFile"
+    packFile="$1/$packFile"
 fi
 
 if [ -f $packFile ]
 then
-   echo "Error: $packFile already exists"
-   exit 1
+    echo "Error: $packFile already exists"
+    exit 1
 fi
 
 # Create time stamp file
@@ -62,7 +63,7 @@ echo $timeStamp 2>/dev/null > $packDir/.timeStamp
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 echo
-echo "Packing $packDir into $packFile"
+echo "Packing $packDir source files into $packFile"
 echo
 
 foamPackSource $packDir $packFile

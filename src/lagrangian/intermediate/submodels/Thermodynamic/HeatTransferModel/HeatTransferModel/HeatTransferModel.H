@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,7 +24,6 @@ License
 
 Class
     Foam::HeatTransferModel
-
 
 Description
     Templated heat transfer model class
@@ -54,7 +53,6 @@ namespace Foam
 template<class CloudType>
 class HeatTransferModel
 {
-
     // Private data
 
         //- The cloud dictionary
@@ -63,7 +61,7 @@ class HeatTransferModel
         //- Reference to the owner cloud class
         CloudType& owner_;
 
-        //- The coefficents dictionary
+        //- The coefficients dictionary
         const dictionary coeffDict_;
 
 
@@ -88,6 +86,9 @@ public:
 
     // Constructors
 
+        //- Construct null from owner
+        HeatTransferModel(CloudType& owner);
+
         //- Construct from dictionary
         HeatTransferModel
         (
@@ -97,18 +98,16 @@ public:
         );
 
 
-    // Destructor
+    //- Destructor
+    virtual ~HeatTransferModel();
 
-        virtual ~HeatTransferModel();
 
-
-    // Selector
-
-        static autoPtr<HeatTransferModel<CloudType> > New
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+    //- Selector
+    static autoPtr<HeatTransferModel<CloudType> > New
+    (
+        const dictionary& dict,
+        CloudType& owner
+    );
 
 
     // Access
@@ -139,7 +138,7 @@ public:
         virtual scalar Pr() const = 0;
 
         //- Return heat transfer coefficient
-        scalar h
+        virtual scalar h
         (
             const scalar dp,
             const vector& Ur,
@@ -151,7 +150,7 @@ public:
         ) const;
 
         //- Return linearised coefficient for temperature equation
-        scalar Cu
+        virtual scalar Cu
         (
             const scalar dp,
             const vector& Ur,
@@ -188,6 +187,20 @@ public:
     HeatTransferModel<CloudType<ParcelType> >::                               \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
+
+
+#define makeHeatTransferModelThermoType(SS, CloudType, ParcelType, ThermoType)\
+                                                                              \
+    defineNamedTemplateTypeNameAndDebug                                       \
+    (                                                                         \
+        SS<CloudType<ParcelType<ThermoType> > >,                              \
+        0                                                                     \
+    );                                                                        \
+                                                                              \
+    HeatTransferModel<CloudType<ParcelType<ThermoType> > >::                  \
+        adddictionaryConstructorToTable                                       \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
+            add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

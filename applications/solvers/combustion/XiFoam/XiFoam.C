@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,8 @@ Application
     XiFoam
 
 Description
-    Compressible premixed/partially-premixed combustion solver with turbulence
-    modelling.
+    Solver for compressible premixed/partially-premixed combustion with
+    turbulence modelling.
 
     Combusting RANS code using the b-Xi two-equation model.
     Xi may be obtained by either the solution of the Xi transport
@@ -52,7 +52,7 @@ Description
 
 #include "fvCFD.H"
 #include "hhuCombustionThermo.H"
-#include "compressible/RASModel/RASModel.H"
+#include "turbulenceModel.H"
 #include "laminarFlameSpeed.H"
 #include "ignition.H"
 #include "Switch.H"
@@ -61,55 +61,58 @@ Description
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readCombustionProperties.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "readPISOControls.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readCombustionProperties.H"
+    #include "readGravitationalAcceleration.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "rhoEqn.H"
-#       include "UEqn.H"
-
-        // --- PISO loop
-        for (int corr=1; corr<=nCorr; corr++)
+        // --- Pressure-velocity PIMPLE corrector loop
+        for (int oCorr=0; oCorr<nOuterCorr; oCorr++)
         {
-#           include "ftEqn.H"
-#           include "bEqn.H"
-#           include "huEqn.H"
-#           include "hEqn.H"
+            #include "rhoEqn.H"
+            #include "UEqn.H"
+
+            #include "ftEqn.H"
+            #include "bEqn.H"
+            #include "huEqn.H"
+            #include "hEqn.H"
 
             if (!ign.ignited())
             {
                 hu == h;
             }
 
-#           include "pEqn.H"
+            // --- PISO loop
+            for (int corr=1; corr<=nCorr; corr++)
+            {
+                #include "pEqn.H"
+            }
+
+            turbulence->correct();
         }
 
-        turbulence->correct();
-
-        rho = thermo->rho();
+        rho = thermo.rho();
 
         runTime.write();
 
@@ -120,7 +123,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

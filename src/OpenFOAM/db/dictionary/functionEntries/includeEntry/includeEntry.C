@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,8 +62,7 @@ namespace functionEntries
 }
 }
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 (
@@ -73,6 +72,7 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
     fileName fName(is);
     fName.expand();
 
+    // relative name
     if (fName.size() && fName[0] != '/')
     {
         fName = fileName(is.name()).path()/fName;
@@ -82,17 +82,19 @@ Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 }
 
 
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
 bool Foam::functionEntries::includeEntry::execute
 (
     dictionary& parentDict,
     Istream& is
 )
 {
-    IFstream fileStream(includeFileName(is));
+    IFstream ifs(includeFileName(is));
 
-    if (fileStream)
+    if (ifs)
     {
-        parentDict.read(fileStream);
+        parentDict.read(ifs);
         return true;
     }
     else
@@ -100,15 +102,16 @@ bool Foam::functionEntries::includeEntry::execute
         FatalIOErrorIn
         (
             "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict,Istream& is)",
+            "(dictionary& parentDict, Istream&)",
             is
-        )   << "Cannot open include file " << fileStream.name()
+        )   << "Cannot open include file " << ifs.name()
             << " while reading dictionary " << parentDict.name()
             << exit(FatalIOError);
 
         return false;
     }
 }
+
 
 bool Foam::functionEntries::includeEntry::execute
 (
@@ -117,11 +120,11 @@ bool Foam::functionEntries::includeEntry::execute
     Istream& is
 )
 {
-    IFstream fileStream(includeFileName(is));
+    IFstream ifs(includeFileName(is));
 
-    if (fileStream)
+    if (ifs)
     {
-        entry.read(parentDict, fileStream);
+        entry.read(parentDict, ifs);
         return true;
     }
     else
@@ -129,9 +132,9 @@ bool Foam::functionEntries::includeEntry::execute
         FatalIOErrorIn
         (
             "functionEntries::includeEntry::includeEntry"
-            "(dictionary& parentDict, primitiveEntry& entry, Istream& is)",
+            "(dictionary& parentDict, primitiveEntry&, Istream&)",
             is
-        )   << "Cannot open include file " << fileStream.name()
+        )   << "Cannot open include file " << ifs.name()
             << " while reading dictionary " << parentDict.name()
             << exit(FatalIOError);
 

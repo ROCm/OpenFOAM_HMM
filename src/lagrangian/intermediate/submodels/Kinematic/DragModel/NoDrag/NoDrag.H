@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
     Foam::NoDrag
 
 Description
-    Dummy drag model for 'no drag'
+    Dummy drag model for 'none'
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,11 +48,10 @@ class NoDrag
 :
     public DragModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("NoDrag");
+    TypeName("none");
 
 
     // Constructors
@@ -60,14 +59,13 @@ public:
         //- Construct from dictionary
         NoDrag
         (
-            const dictionary& dict,
-            CloudType& owner
+            const dictionary&,
+            CloudType&
         );
 
 
-    // Destructor
-
-        ~NoDrag();
+    //- Destructor
+    virtual ~NoDrag();
 
 
     // Member Functions

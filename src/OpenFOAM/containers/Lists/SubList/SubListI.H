@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,9 +53,9 @@ inline Foam::SubList<T>::SubList
 {
 #   ifdef FULLDEBUG
 
-    // Artificially allowing the start of a zero-sized subList to be
-    // one past the end of the original list.  
-    if (subSize > 0)
+    // Artificially allow the start of a zero-sized subList to be
+    // one past the end of the original list.
+    if (subSize)
     {
         list.checkStart(startIndex);
         list.checkSize(startIndex + subSize);
@@ -73,10 +73,9 @@ inline Foam::SubList<T>::SubList
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
-const Foam::SubList<T>& Foam::SubList<T>::null()
+inline const Foam::SubList<T>& Foam::SubList<T>::null()
 {
-    SubList<T>* nullPtr = reinterpret_cast<SubList<T>*>(NULL);
-    return *nullPtr;
+    return *reinterpret_cast< SubList<T>* >(0);
 }
 
 
@@ -85,7 +84,14 @@ const Foam::SubList<T>& Foam::SubList<T>::null()
 template<class T>
 inline Foam::SubList<T>::operator const Foam::List<T>&() const
 {
-    return *reinterpret_cast<const List<T>*>(this);
+    return *reinterpret_cast< const List<T>* >(this);
+}
+
+
+template<class T>
+inline void Foam::SubList<T>::operator=(const T& t)
+{
+    UList<T>::operator=(t);
 }
 
 

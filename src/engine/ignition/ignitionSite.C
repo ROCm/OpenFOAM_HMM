@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,14 +37,17 @@ namespace Foam
 
 void ignitionSite::findIgnitionCells(const fvMesh& mesh)
 {
+    // Bit tricky: generate C and V before shortcutting if cannot find
+    // cell locally. mesh.C generation uses parallel communication.
+    const volVectorField& centres = mesh.C();
+    const scalarField& vols = mesh.V();
+
     label ignCell = mesh.findCell(location_);
     if (ignCell == -1)
     {
         return;
     }
 
-    const volVectorField& centres = mesh.C();
-    const scalarField& vols = mesh.V();
     scalar radius = diameter_/2.0;
 
     cells_.setSize(1);

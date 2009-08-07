@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,20 +43,25 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class CompType, class ThermoType>
+class EulerImplicit;
+
 /*---------------------------------------------------------------------------*\
                        Class EulerImplicit Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class CompType, class ThermoType>
 class EulerImplicit
 :
-    public chemistrySolver
+    public chemistrySolver<CompType, ThermoType>
 {
     // Private data
 
         dictionary coeffsDict_;
 
-        // model constants
-    
+        // Model constants
+
             scalar cTauChem_;
             Switch equil_;
 
@@ -72,14 +77,13 @@ public:
         //- Construct from components
         EulerImplicit
         (
-            const dictionary& dict,
-            chemistryModel& chemistry
+            ODEChemistryModel<CompType, ThermoType>& model,
+            const word& modelName
         );
 
 
-    // Destructor
-
-        ~EulerImplicit();
+    //- Destructor
+    virtual ~EulerImplicit();
 
 
     // Member Functions
@@ -99,6 +103,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "EulerImplicit.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

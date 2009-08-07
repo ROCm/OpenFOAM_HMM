@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,6 +51,12 @@ namespace Foam
 // Forward declaration of classes
 class polyPatch;
 class polyMesh;
+class wallPoint;
+
+// Forward declaration of friend functions and operators
+Ostream& operator<<(Ostream&, const wallPoint&);
+Istream& operator>>(Istream&, wallPoint&);
+
 
 /*---------------------------------------------------------------------------*\
                            Class wallPoint Declaration
@@ -78,11 +84,14 @@ class wallPoint
             const scalar tol
         );
 
+
 public:
+
     // Static data members
 
         //- initial point far away.
         static point greatPoint;
+
 
     // Constructors
 
@@ -101,6 +110,7 @@ public:
         (
             const wallPoint&
         );
+
 
     // Member Functions
 
@@ -184,11 +194,11 @@ public:
                 const scalar tol
             );
 
+
     // Member Operators
 
         // Needed for List IO
         inline bool operator==(const wallPoint&) const;
-
         inline bool operator!=(const wallPoint&) const;
 
 

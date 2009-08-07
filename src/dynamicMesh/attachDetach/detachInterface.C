@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,6 +73,37 @@ void Foam::attachDetach::detachInterface
     const polyMesh& mesh = topoChanger().mesh();
     const faceZoneMesh& zoneMesh = mesh.faceZones();
 
+    // Check that zone is in increasing order (needed since adding faces
+    // in same order - otherwise polyTopoChange face ordering will mess up
+    // correspondence)
+    if (debug)
+    {
+        const labelList& faceLabels = zoneMesh[faceZoneID_.index()];
+        if (faceLabels.size() > 0)
+        {
+            for (label i = 1; i < faceLabels.size(); i++)
+            {
+                if (faceLabels[i] <= faceLabels[i-1])
+                {
+                    FatalErrorIn
+                    (
+                        "attachDetach::detachInterface"
+                        "(polyTopoChange&) const"
+                    )   << "faceZone " << zoneMesh[faceZoneID_.index()].name()
+                        << " does not have mesh face labels in"
+                        << " increasing order." << endl
+                        << "Face label " << faceLabels[i]
+                        << " at position " << i
+                        << " is smaller than the previous value "
+                        << faceLabels[i-1]
+                        << exit(FatalError);
+                }
+            }
+        }
+    }
+
+
+
     const primitiveFacePatch& masterFaceLayer = zoneMesh[faceZoneID_.index()]();
     const pointField& points = mesh.points();
     const labelListList& meshEdgeFaces = mesh.edgeFaces();
@@ -109,14 +140,11 @@ void Foam::attachDetach::detachInterface
 
         if (edgeIsInternal)
         {
-// Pout<< "Internal edge found: (" << mp[zoneLocalEdges[curEdgeID].start()] << " " << mp[zoneLocalEdges[curEdgeID].end()] << ")" << endl;
+            const edge& e = zoneLocalEdges[curEdgeID];
 
             // Reset the point creation
-            addedPoints[zoneLocalEdges[curEdgeID].start()] =
-                mp[zoneLocalEdges[curEdgeID].start()];
-
-            addedPoints[zoneLocalEdges[curEdgeID].end()] =
-                mp[zoneLocalEdges[curEdgeID].end()];
+            addedPoints[e.start()] = mp[e.start()];
+            addedPoints[e.end()] = mp[e.end()];
         }
     }
 // Pout << "addedPoints before point creation: " << addedPoints << endl;
@@ -137,7 +165,10 @@ void Foam::attachDetach::detachInterface
                         true                       // supports a cell
                     )
                 );
-// Pout << "Adding point " << points[mp[pointI]] << " for original point " << mp[pointI] << endl;
+            //Pout<< "Adding point " << addedPoints[pointI]
+            //    << " coord1:" << points[mp[pointI]]
+            //    << " coord2:" << masterFaceLayer.localPoints()[pointI]
+            //    << " for original point " << mp[pointI] << endl;
         }
     }
 
@@ -186,6 +217,7 @@ void Foam::attachDetach::detachInterface
             );
 
             // Add renumbered face into the slave patch
+            //label addedFaceI =
             ref.setAction
             (
                 polyAddFace
@@ -203,7 +235,15 @@ void Foam::attachDetach::detachInterface
                     -1                              // sub patch
                 )
             );
-// Pout << "Flip.  Modifying face: " << faces[curFaceID].reverseFace() << " next to cell: " << nei[curFaceID] << " and adding face: " << newFace << " next to cell: " << own[curFaceID] << endl;
+            //{
+            //    pointField newPts(ref.points());
+            //Pout<< "Flip.  Modifying face: " << ref.faces()[curFaceID]
+            //    << " fc:" <<  ref.faces()[curFaceID].centre(newPts)
+            //    << " next to cell: " << nei[curFaceID]
+            //    << " and adding face: " << newFace
+            //    << " fc:" << ref.faces()[addedFaceI].centre(newPts)
+            //    << " next to cell: " << own[curFaceID] << endl;
+            //}
         }
         else
         {
@@ -226,6 +266,7 @@ void Foam::attachDetach::detachInterface
             );
 
             // Add renumbered face into the slave patch
+            //label addedFaceI =
             ref.setAction
             (
                 polyAddFace
@@ -243,7 +284,15 @@ void Foam::attachDetach::detachInterface
                     -1                              // sub patch
                 )
             );
-// Pout << "No flip.  Modifying face: " << faces[curFaceID] << " next to cell: " << own[curFaceID] << " and adding face: " << newFace << " next to cell: " << nei[curFaceID] << endl;
+            //{
+            //    pointField newPts(ref.points());
+            //Pout<< "No flip.  Modifying face: " << ref.faces()[curFaceID]
+            //    << " fc:" <<  ref.faces()[curFaceID].centre(newPts)
+            //    << " next to cell: " << own[curFaceID]
+            //    << " and adding face: " << newFace
+            //    << " fc:" << ref.faces()[addedFaceI].centre(newPts)
+            //    << " next to cell: " << nei[curFaceID] << endl;
+            //}
         }
     }
 

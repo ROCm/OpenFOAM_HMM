@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,12 +48,12 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
         {
             if (procI != Pstream::myProcNo())
             {
-                if (subMap[procI].size() > 0)
+                if (subMap[procI].size())
                 {
                     // I need to send to procI
                     commsSet.insert(labelPair(Pstream::myProcNo(), procI));
                 }
-                if (constructMap[procI].size() > 0)
+                if (constructMap[procI].size())
                 {
                     // I need to receive from procI
                     commsSet.insert(labelPair(procI, Pstream::myProcNo()));
@@ -124,7 +124,7 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
     );
 
     // Processors involved in my schedule
-    return IndirectList<labelPair>(allComms, mySchedule);
+    return UIndirectList<labelPair>(allComms, mySchedule);
 
 
     //if (debug)
@@ -152,7 +152,7 @@ Foam::List<Foam::labelPair> Foam::mapDistribute::schedule
 
 const Foam::List<Foam::labelPair>& Foam::mapDistribute::schedule() const
 {
-    if (!schedulePtr_.valid())
+    if (schedulePtr_.empty())
     {
         schedulePtr_.reset
         (
@@ -205,7 +205,7 @@ Foam::mapDistribute::mapDistribute
     const labelList& recvProcs
 )
 :
-    constructSize_(sendProcs.size()),
+    constructSize_(0),
     schedulePtr_()
 {
     if (sendProcs.size() != recvProcs.size())
@@ -266,8 +266,179 @@ Foam::mapDistribute::mapDistribute
         {
             // I am the receiver.
             constructMap_[sendProc][nRecv[sendProc]++] = sampleI;
+            // Largest entry inside constructMap
+            constructSize_ = sampleI+1;
         }
     }
+}
+
+
+Foam::mapDistribute::mapDistribute(const mapDistribute& map)
+:
+    constructSize_(map.constructSize_),
+    subMap_(map.subMap_),
+    constructMap_(map.constructMap_),
+    schedulePtr_()
+{}
+
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::mapDistribute::compact(const boolList& elemIsUsed)
+{
+    // 1. send back to sender. Have him delete the corresponding element
+    //    from the submap and do the same to the constructMap locally
+    //    (and in same order).
+
+    // Send elemIsUsed field to neighbour. Use nonblocking code from
+    // mapDistribute but in reverse order.
+    {
+        List<boolList> sendFields(Pstream::nProcs());
+
+        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        {
+            const labelList& map = constructMap_[domain];
+
+            if (domain != Pstream::myProcNo() && map.size())
+            {
+                boolList& subField = sendFields[domain];
+                subField.setSize(map.size());
+                forAll(map, i)
+                {
+                    subField[i] = elemIsUsed[map[i]];
+                }
+
+                OPstream::write
+                (
+                    Pstream::nonBlocking,
+                    domain,
+                    reinterpret_cast<const char*>(subField.begin()),
+                    subField.size()*sizeof(bool)
+                );
+            }
+        }
+
+        // Set up receives from neighbours
+
+        List<boolList> recvFields(Pstream::nProcs());
+
+        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        {
+            const labelList& map = subMap_[domain];
+
+            if (domain != Pstream::myProcNo() && map.size())
+            {
+                recvFields[domain].setSize(map.size());
+                IPstream::read
+                (
+                    Pstream::nonBlocking,
+                    domain,
+                    reinterpret_cast<char*>(recvFields[domain].begin()),
+                    recvFields[domain].size()*sizeof(bool)
+                );
+            }
+        }
+
+
+        // Set up 'send' to myself - write directly into recvFields
+
+        {
+            const labelList& map = constructMap_[Pstream::myProcNo()];
+
+            recvFields[Pstream::myProcNo()].setSize(map.size());
+            forAll(map, i)
+            {
+                recvFields[Pstream::myProcNo()][i] = elemIsUsed[map[i]];
+            }
+        }
+
+
+        // Wait for all to finish
+
+        OPstream::waitRequests();
+        IPstream::waitRequests();
+
+
+        // Compact out all submap entries that are referring to unused elements
+        for (label domain = 0; domain < Pstream::nProcs(); domain++)
+        {
+            const labelList& map = subMap_[domain];
+
+            labelList newMap(map.size());
+            label newI = 0;
+
+            forAll(map, i)
+            {
+                if (recvFields[domain][i])
+                {
+                    // So element is used on destination side
+                    newMap[newI++] = map[i];
+                }
+            }
+            if (newI < map.size())
+            {
+                newMap.setSize(newI);
+                subMap_[domain].transfer(newMap);
+            }
+        }
+    }
+
+
+    // 2. remove from construct map - since end-result (element in elemIsUsed)
+    //    not used.
+
+    label maxConstructIndex = -1;
+
+    for (label domain = 0; domain < Pstream::nProcs(); domain++)
+    {
+        const labelList& map = constructMap_[domain];
+
+        labelList newMap(map.size());
+        label newI = 0;
+
+        forAll(map, i)
+        {
+            label destinationI = map[i];
+
+            // Is element is used on destination side
+            if (elemIsUsed[destinationI])
+            {
+                maxConstructIndex = max(maxConstructIndex, destinationI);
+
+                newMap[newI++] = destinationI;
+            }
+        }
+        if (newI < map.size())
+        {
+            newMap.setSize(newI);
+            constructMap_[domain].transfer(newMap);
+        }
+    }
+
+    constructSize_ = maxConstructIndex+1;
+
+    // Clear the schedule (note:not necessary if nothing changed)
+    schedulePtr_.clear();
+}
+
+
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
+
+void Foam::mapDistribute::operator=(const mapDistribute& rhs)
+{
+    // Check for assignment to self
+    if (this == &rhs)
+    {
+        FatalErrorIn
+        (
+            "Foam::mapDistribute::operator=(const Foam::mapDistribute&)"
+        )   << "Attempted assignment to self"
+            << abort(FatalError);
+    }
+    constructSize_ = rhs.constructSize_;
+    subMap_ = rhs.subMap_;
+    constructMap_ = rhs.constructMap_;
+    schedulePtr_.clear();
 }
 
 

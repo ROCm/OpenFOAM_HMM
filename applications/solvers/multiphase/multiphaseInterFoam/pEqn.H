@@ -10,35 +10,35 @@
         (fvc::interpolate(U) & mesh.Sf()) + fvc::ddtPhiCorr(rUA, rho, U, phi)
     );
 
+    adjustPhi(phiU, U, p);
+
     phi = phiU +
         (
-            mixture.surfaceTensionForce()
-          - ghf*fvc::snGrad(rho)
-        )*rUAf*mesh.magSf();
-
-    adjustPhi(phi, U, pd);
+            mixture.surfaceTensionForce()*mesh.magSf()
+          + fvc::interpolate(rho)*(g & mesh.Sf())
+        )*rUAf;
 
     for(int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        fvScalarMatrix pdEqn
+        fvScalarMatrix pEqn
         (
-            fvm::laplacian(rUAf, pd) == fvc::div(phi)
+            fvm::laplacian(rUAf, p) == fvc::div(phi)
         );
 
-        pdEqn.setReference(pdRefCell, pdRefValue);
+        pEqn.setReference(pRefCell, pRefValue);
 
         if (corr == nCorr-1)
         {
-            pdEqn.solve(mesh.solver(pd.name() + "Final"));
+            pEqn.solve(mesh.solver(p.name() + "Final"));
         }
         else
         {
-            pdEqn.solve(mesh.solver(pd.name()));
+            pEqn.solve(mesh.solver(p.name()));
         }
 
         if (nonOrth == nNonOrthCorr)
         {
-            phi -= pdEqn.flux();
+            phi -= pEqn.flux();
         }
     }
 

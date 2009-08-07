@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -72,7 +72,7 @@ Foam::radiation::cloudAbsorptionEmission::~cloudAbsorptionEmission()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::cloudAbsorptionEmission::aDisp() const
+Foam::radiation::cloudAbsorptionEmission::aDisp(const label) const
 {
     tmp<volScalarField> ta
     (
@@ -107,7 +107,7 @@ Foam::radiation::cloudAbsorptionEmission::aDisp() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::cloudAbsorptionEmission::eDisp() const
+Foam::radiation::cloudAbsorptionEmission::eDisp(const label bandI) const
 {
     tmp<volScalarField> te
     (
@@ -132,7 +132,7 @@ Foam::radiation::cloudAbsorptionEmission::eDisp() const
 
 
 Foam::tmp<Foam::volScalarField>
-Foam::radiation::cloudAbsorptionEmission::EDisp() const
+Foam::radiation::cloudAbsorptionEmission::EDisp(const label bandI) const
 {
     tmp<volScalarField> tE
     (

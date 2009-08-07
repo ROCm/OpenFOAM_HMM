@@ -141,8 +141,8 @@
         transportProperties.lookup("Ct")
     );
 
-#   include "createPhia.H"
-#   include "createPhib.H"
+    #include "createPhia.H"
+    #include "createPhib.H"
 
     surfaceScalarField phi
     (
@@ -156,8 +156,18 @@
       + fvc::interpolate(beta)*phib
     );
 
+    volScalarField rho
+    (
+        IOobject
+        (
+            "rho",
+            runTime.timeName(),
+            mesh
+        ),
+        alpha*rhoa + beta*rhob
+    );
 
-#   include "createRASTurbulence.H"
+    #include "createRASTurbulence.H"
 
     Info<< "Calculating field DDtUa and DDtUb\n" << endl;
 

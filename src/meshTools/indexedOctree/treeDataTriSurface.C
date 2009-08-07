@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -21,8 +21,6 @@ License
     You should have received a copy of the GNU General Public License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
-
-Description
 
 \*---------------------------------------------------------------------------*/
 
@@ -220,13 +218,13 @@ Foam::label Foam::treeDataTriSurface::getVolumeType
         max
         (
             Foam::sqr(GREAT),
-            Foam::magSqr(treeBb.max() - treeBb.min())
+            Foam::magSqr(treeBb.span())
         )
     );
 
     if (!pHit.hit())
     {
-        FatalErrorIn("treeDataTriSurface::getVolumeType")
+        FatalErrorIn("treeDataTriSurface::getVolumeType(..)")
             << "treeBb:" << treeBb
             << " sample:" << sample
             << " pHit:" << pHit
@@ -238,7 +236,8 @@ Foam::label Foam::treeDataTriSurface::getVolumeType
         surface_,
         sample,
         pHit.index(),
-        pHit.hitPoint()
+        pHit.hitPoint(),
+        indexedOctree<treeDataTriSurface>::perturbTol()
     );
 
     if (t == triSurfaceTools::UNKNOWN)
@@ -255,11 +254,12 @@ Foam::label Foam::treeDataTriSurface::getVolumeType
     }
     else
     {
-        FatalErrorIn("treeDataTriSurface::getVolumeType")
+        FatalErrorIn("treeDataTriSurface::getVolumeType(..)")
             << "problem" << abort(FatalError);
         return indexedOctree<treeDataTriSurface>::UNKNOWN;
     }
 }
+
 
 // Check if any point on triangle is inside cubeBb.
 bool Foam::treeDataTriSurface::overlaps
@@ -305,6 +305,7 @@ bool Foam::treeDataTriSurface::overlaps
     // Now we have the difficult case: all points are outside but connecting
     // edges might go through cube. Use fast intersection of bounding box.
 
+    //return triangleFuncs::intersectBbExact(p0, p1, p2, cubeBb);
     return triangleFuncs::intersectBb(p0, p1, p2, cubeBb);
 }
 
@@ -445,7 +446,15 @@ bool Foam::treeDataTriSurface::intersects
 
     const vector dir(end - start);
 
-    pointHit inter = tri.intersection(start, dir, intersection::HALF_RAY);
+    // Use relative tolerance (from octree) to determine intersection.
+
+    pointHit inter = tri.intersection
+    (
+        start,
+        dir,
+        intersection::HALF_RAY,
+        indexedOctree<treeDataTriSurface>::perturbTol()
+    );
 
     if (inter.hit() && inter.distance() <= 1)
     {
@@ -459,6 +468,16 @@ bool Foam::treeDataTriSurface::intersects
     {
         return false;
     }
+
+
+    //- Using exact intersections
+    //pointHit info = f.tri(points).intersectionExact(start, end);
+    //
+    //if (info.hit())
+    //{
+    //    intersectionPoint = info.hitPoint();
+    //}
+    //return info.hit();
 }
 
 

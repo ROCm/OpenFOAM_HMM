@@ -1,13 +1,16 @@
 Info<< nl << "Reading thermophysicalProperties" << endl;
-autoPtr<hCombustionThermo> thermo
+autoPtr<psiChemistryModel> pChemistry
 (
-    hCombustionThermo::New(mesh)
+    psiChemistryModel::New(mesh)
 );
+psiChemistryModel& chemistry = pChemistry();
 
-combustionMixture& composition = thermo->composition();
+hCombustionThermo& thermo = chemistry.thermo();
+
+basicMultiComponentMixture& composition = thermo.composition();
 PtrList<volScalarField>& Y = composition.Y();
 
-word inertSpecie(thermo->lookup("inertSpecie"));
+word inertSpecie(thermo.lookup("inertSpecie"));
 
 volScalarField rho
 (
@@ -17,7 +20,7 @@ volScalarField rho
         runTime.timeName(),
         mesh
     ),
-    thermo->rho()
+    thermo.rho()
 );
 
 Info<< "Reading field U\n" << endl;
@@ -35,10 +38,9 @@ volVectorField U
 );
 
 
-volScalarField& p = thermo->p();
-const volScalarField& psi = thermo->psi();
-const volScalarField& T = thermo->T();
-volScalarField& h = thermo->h();
+volScalarField& p = thermo.p();
+const volScalarField& psi = thermo.psi();
+volScalarField& h = thermo.h();
 
 
 #include "compressibleCreatePhi.H"
@@ -58,46 +60,26 @@ volScalarField kappa
 );
 
 Info << "Creating turbulence model.\n" << nl;
-autoPtr<compressible::RASModel> turbulence
+autoPtr<compressible::turbulenceModel> turbulence
 (
-    compressible::RASModel::New
+    compressible::turbulenceModel::New
     (
         rho,
         U,
         phi,
-        thermo()
+        thermo
     )
 );
 
 Info<< "Creating field DpDt\n" << endl;
-volScalarField DpDt = 
+volScalarField DpDt =
     fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
-
-Info << "Constructing chemical mechanism" << endl;
-chemistryModel chemistry
-(
-    thermo(),
-    rho
-);
 
 multivariateSurfaceInterpolationScheme<scalar>::fieldTable fields;
 
-for(label i=0; i<Y.size(); i++)
+forAll (Y, i)
 {
     fields.add(Y[i]);
 }
 fields.add(h);
 
-volScalarField dQ
-(
-    IOobject
-    (
-        "dQ",
-        runTime.timeName(),
-        mesh,
-        IOobject::NO_READ,
-        IOobject::AUTO_WRITE
-    ),
-    mesh,
-    dimensionedScalar("zero", dimensionSet(1,-3,-1,0,0,0,0), 0.0)
-);

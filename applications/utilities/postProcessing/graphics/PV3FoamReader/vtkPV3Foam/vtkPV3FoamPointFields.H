@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -132,7 +132,6 @@ void Foam::vtkPV3Foam::convertPointFields
 }
 
 
-
 template<class Type>
 void Foam::vtkPV3Foam::convertPointFieldBlock
 (
@@ -162,7 +161,6 @@ void Foam::vtkPV3Foam::convertPointFieldBlock
 }
 
 
-
 template<class Type>
 void Foam::vtkPV3Foam::convertPointField
 (
@@ -190,16 +188,15 @@ void Foam::vtkPV3Foam::convertPointField
     }
 
     vtkFloatArray *pointData = vtkFloatArray::New();
-    pointData->SetNumberOfTuples( nPoints + addPointCellLabels.size() );
-    pointData->SetNumberOfComponents( nComp );
-    pointData->Allocate( nComp*(nPoints + addPointCellLabels.size()) );
-    pointData->SetName( tf.name().c_str() );
-
+    pointData->SetNumberOfTuples(nPoints + addPointCellLabels.size());
+    pointData->SetNumberOfComponents(nComp);
+    pointData->Allocate(nComp*(nPoints + addPointCellLabels.size()));
+    pointData->SetName(tf.name().c_str());
 
     if (debug)
     {
         Info<< "convert convertPointField: "
-            << tf.name()
+            << ptf.name()
             << " size = " << nPoints
             << " nComp=" << nComp
             << " nTuples = " << (nPoints + addPointCellLabels.size())
@@ -269,6 +266,7 @@ void Foam::vtkPV3Foam::convertPointField
 
     pointData->Delete();
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

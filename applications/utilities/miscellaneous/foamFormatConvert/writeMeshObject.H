@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,16 @@ inline bool writeMeshObject(const word& name, Time& runTime)
         Info<< "        Reading " << io.headerClassName()
             << " : " << name << endl;
 
+        // Switch off type checking (for reading e.g. faceZones as
+        // generic list of dictionaries).
+        const word oldTypeName = T::typeName;
+        const_cast<word&>(T::typeName) = word::null;
+
         T meshObject(io);
+
+        const_cast<word&>(T::typeName) = oldTypeName;
+        // Fake type back to what was in field
+        const_cast<word&>(meshObject.type()) = io.headerClassName();
 
         Info<< "        Writing " << name << endl;
         writeOk = meshObject.regIOobject::write();

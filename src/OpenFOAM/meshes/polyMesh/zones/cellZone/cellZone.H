@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -128,26 +128,45 @@ public:
             const word& name,
             const labelList& addr,
             const label index,
-            const cellZoneMesh& zm
+            const cellZoneMesh&
+        );
+
+        //- Construct from components, transferring contents
+        cellZone
+        (
+            const word& name,
+            const Xfer<labelList>& addr,
+            const label index,
+            const cellZoneMesh&
         );
 
         //- Construct from dictionary
         cellZone
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
-            const cellZoneMesh& zm
+            const cellZoneMesh&
         );
 
         //- Construct given the original zone and resetting the
         //  cell list and zone mesh information
         cellZone
         (
-            const cellZone& cz,
+            const cellZone&,
             const labelList& addr,
             const label index,
-            const cellZoneMesh& zm
+            const cellZoneMesh&
+        );
+
+        //- Construct given the original zone, resetting the
+        //  cell list and zone mesh information
+        cellZone
+        (
+            const cellZone&,
+            const Xfer<labelList>& addr,
+            const label index,
+            const cellZoneMesh&
         );
 
         //- Construct and return a clone, resetting the zone mesh
@@ -182,7 +201,7 @@ public:
         static autoPtr<cellZone> New
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index,
             const cellZoneMesh&
         );

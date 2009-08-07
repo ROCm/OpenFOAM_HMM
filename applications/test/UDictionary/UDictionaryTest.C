@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    
+
 Description
 
 \*---------------------------------------------------------------------------*/
@@ -113,7 +113,20 @@ int main(int argc, char *argv[])
 
     Info<< dict2 << endl;
 
-    Info<< nl << "Bye." << endl;
+
+    Info<< nl << "Testing transfer: " << nl << endl;
+    Info<< "original: " << dict2 << endl;
+
+    UDictionary<ent> newDict;
+    newDict.transfer(dict2);
+
+    Info<< nl << "source: " << dict2 << nl
+        << "keys: " << dict2.toc() << nl
+        << "target: " << newDict << nl
+        << "keys: " << newDict.toc() << endl;
+
+    Info<< nl << "Done." << endl;
+
     return 0;
 }
 

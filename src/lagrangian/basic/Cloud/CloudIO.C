@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -67,13 +67,7 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh),
     polyMesh_(pMesh),
-    allFaces_(pMesh.faces()),
-    points_(pMesh.points()),
-    cellFaces_(pMesh.cells()),
-    allFaceCentres_(pMesh.faceCentres()),
-    owner_(pMesh.faceOwner()),
-    neighbour_(pMesh.faceNeighbour()),
-    meshInfo_(polyMesh_)
+    particleCount_(0)
 {
     initCloud(checkClass);
 }
@@ -89,19 +83,32 @@ Foam::Cloud<ParticleType>::Cloud
 :
     cloud(pMesh, cloudName),
     polyMesh_(pMesh),
-    allFaces_(pMesh.faces()),
-    points_(pMesh.points()),
-    cellFaces_(pMesh.cells()),
-    allFaceCentres_(pMesh.faceCentres()),
-    owner_(pMesh.faceOwner()),
-    neighbour_(pMesh.faceNeighbour()),
-    meshInfo_(polyMesh_)
+    particleCount_(0)
 {
     initCloud(checkClass);
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParticleType>
+Foam::IOobject Foam::Cloud<ParticleType>::fieldIOobject
+(
+    const word& fieldName,
+    const IOobject::readOption r
+) const
+{
+    return IOobject
+    (
+        fieldName,
+        time().timeName(),
+        *this,
+        r,
+        IOobject::NO_WRITE,
+        false
+    );
+}
+
 
 template<class ParticleType>
 template<class DataType>
@@ -116,41 +123,12 @@ void Foam::Cloud<ParticleType>::checkFieldIOobject
         FatalErrorIn
         (
             "void Cloud<ParticleType>::checkFieldIOobject"
-            "(Cloud<ParticleType>, IOField<DataType>)"
+            "(const Cloud<ParticleType>&, const IOField<DataType>&) const"
         )   << "Size of " << data.name()
             << " field " << data.size()
             << " does not match the number of particles " << c.size()
             << abort(FatalError);
     }
-}
-
-
-template<class ParticleType>
-Foam::IOobject Foam::Cloud<ParticleType>::fieldIOobject
-(
-    const word& fieldName
-) const
-{
-    return IOobject
-    (
-        fieldName,
-        time().timeName(),
-        *this,
-        IOobject::MUST_READ,
-        IOobject::NO_WRITE,
-        false
-    );
-}
-
-
-template<class ParticleType>
-template<class Type>
-Foam::tmp<Foam::IOField<Type> > Foam::Cloud<ParticleType>::readField
-(
-    const word& fieldName
-) const
-{
-    return tmp<IOField<Type> >(new IOField<Type>(fieldIOobject(fieldName)));
 }
 
 

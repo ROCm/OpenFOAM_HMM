@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,21 +32,16 @@ Description
 
 #include "blockMesh.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from IOdictionary
-blockMesh::blockMesh(IOdictionary& meshDescription)
+Foam::blockMesh::blockMesh(IOdictionary& meshDescription)
 :
     topologyPtr_(createTopology(meshDescription)),
-    scale_(readScalar(meshDescription.lookup("convertToMeters"))),
     blockOffsets_(createBlockOffsets()),
     mergeList_(createMergeList()),
-    points_(createPoints()),
+    points_(createPoints(meshDescription)),
     cells_(createCells()),
     patches_(createPatches())
 {}
@@ -54,7 +49,7 @@ blockMesh::blockMesh(IOdictionary& meshDescription)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-blockMesh::~blockMesh()
+Foam::blockMesh::~blockMesh()
 {
     delete topologyPtr_;
 }
@@ -62,7 +57,7 @@ blockMesh::~blockMesh()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const polyMesh& blockMesh::topology() const
+const Foam::polyMesh& Foam::blockMesh::topology() const
 {
     if (!topologyPtr_)
     {
@@ -75,13 +70,7 @@ const polyMesh& blockMesh::topology() const
 }
 
 
-const curvedEdgeList& blockMesh::edges() const
-{
-    return edges_;
-}
-
-
-PtrList<dictionary> blockMesh::patchDicts() const
+Foam::PtrList<Foam::dictionary> Foam::blockMesh::patchDicts() const
 {
     const polyPatchList& patchTopologies = topology().boundaryMesh();
 
@@ -99,13 +88,58 @@ PtrList<dictionary> blockMesh::patchDicts() const
 }
 
 
-label blockMesh::numZonedBlocks() const
+//Foam::wordList Foam::blockMesh::patchNames() const
+//{
+//    const polyPatchList& patchTopologies = topology().boundaryMesh();
+//    wordList names(patchTopologies.size());
+//
+//    forAll (names, patchI)
+//    {
+//        names[patchI] = patchTopologies[patchI].name();
+//    }
+//
+//    return names;
+//}
+//
+//
+//Foam::wordList Foam::blockMesh::patchTypes() const
+//{
+//    const polyPatchList& patchTopologies = topology().boundaryMesh();
+//    wordList types(patchTopologies.size());
+//
+//    forAll (types, patchI)
+//    {
+//        types[patchI] = patchTopologies[patchI].type();
+//    }
+//
+//    return types;
+//}
+//
+//
+//Foam::wordList Foam::blockMesh::patchPhysicalTypes() const
+//{
+//    const polyPatchList& patchTopologies = topology().boundaryMesh();
+//    wordList physicalTypes(patchTopologies.size());
+//
+//    forAll (physicalTypes, patchI)
+//    {
+//        OStringStream os;
+//        patchTopologies[patchI].write(os);
+//        IStringStream is(os.str());
+//        patchDicts.set(patchI, new dictionary(is));
+//        patchDicts[patchI].set("name", patchTopologies[patchI].name());
+//    }
+//    return patchDicts;
+//}
+
+
+Foam::label Foam::blockMesh::numZonedBlocks() const
 {
     label num = 0;
 
     forAll(*this, blockI)
     {
-        if (operator[](blockI).blockDef().zoneName().size() > 0)
+        if (operator[](blockI).blockDef().zoneName().size())
         {
             num++;
         }
@@ -115,7 +149,7 @@ label blockMesh::numZonedBlocks() const
 }
 
 
-void blockMesh::writeTopology(Ostream& os) const
+void Foam::blockMesh::writeTopology(Ostream& os) const
 {
     const pointField& pts = topology().points();
 
@@ -135,10 +169,5 @@ void blockMesh::writeTopology(Ostream& os) const
         os << "l " << e.start() + 1 << ' ' << e.end() + 1 << endl;
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

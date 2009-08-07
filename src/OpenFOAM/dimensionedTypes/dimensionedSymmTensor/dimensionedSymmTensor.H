@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,6 +59,7 @@ dimensionedSymmTensor twoSymm(const dimensionedSymmTensor&);
 dimensionedSymmTensor dev(const dimensionedSymmTensor&);
 dimensionedSymmTensor dev2(const dimensionedSymmTensor&);
 dimensionedScalar det(const dimensionedSymmTensor&);
+dimensionedSymmTensor cof(const dimensionedSymmTensor&);
 dimensionedSymmTensor inv(const dimensionedSymmTensor&);
 
 

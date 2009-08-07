@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,7 @@ Description
     @endverbatim
 
 Note
-    Shared points (parallel): a processor can have points which are part of
+    - Shared points (parallel): a processor can have points which are part of
     pp on another processor but have no pp itself (i.e. it has points
     and/or edges but no faces of pp). Hence we have to be careful when e.g.
     synchronising displacements that the value from the processor which has
@@ -61,9 +61,12 @@ Note
     else. The combine operator used will give preference to non-zero
     values.
 
-    Various routines take baffles. These are sets of boundary faces that
+    - Various routines take baffles. These are sets of boundary faces that
     are treated as a single internal face. This is a hack used to apply
     movement to internal faces.
+
+    - Mesh constraints are looked up from the supplied dictionary. (uses
+    recursive lookup)
 
 SourceFiles
     motionSmoother.C
@@ -75,8 +78,8 @@ SourceFiles
 #define motionSmoother_H
 
 #include "pointFields.H"
-#include "labelHashSet.H"
-#include "PackedList.H"
+#include "HashSet.H"
+#include "PackedBoolList.H"
 #include "indirectPrimitivePatch.H"
 #include "className.H"
 #include "twoDPointCorrector.H"
@@ -159,11 +162,11 @@ class motionSmoother
         pointField oldPoints_;
 
         //- Is mesh point on boundary or not
-        PackedList<1> isInternalPoint_;
+        PackedBoolList isInternalPoint_;
 
         //- Is edge master (always except if on coupled boundary and on
         //  lower processor)
-        PackedList<1> isMasterEdge_;
+        PackedBoolList isMasterEdge_;
 
         //- 2-D motion corrector
         twoDPointCorrector twoDCorrector_;
@@ -229,7 +232,7 @@ class motionSmoother
         //- explicit smoothing and min on all affected internal points
         void minSmooth
         (
-            const PackedList<1>& isAffectedPoint,
+            const PackedBoolList& isAffectedPoint,
             const pointScalarField& fld,
             pointScalarField& newFld
         ) const;
@@ -237,7 +240,7 @@ class motionSmoother
         //- same but only on selected points (usually patch points)
         void minSmooth
         (
-            const PackedList<1>& isAffectedPoint,
+            const PackedBoolList& isAffectedPoint,
             const labelList& meshPoints,
             const pointScalarField& fld,
             pointScalarField& newFld
@@ -273,7 +276,7 @@ class motionSmoother
             const faceSet& wrongFaces,
 
             labelList& affectedFaces,
-            PackedList<1>& isAffectedPoint
+            PackedBoolList& isAffectedPoint
         ) const;
 
         //- Disallow default bitwise copy construct
@@ -332,6 +335,8 @@ public:
 
             //- Patch labels that are being adapted
             const labelList& adaptPatchIDs() const;
+
+            const dictionary& paramDict() const;
 
             //- Reference to displacement field
             pointVectorField& displacement();
@@ -400,6 +405,17 @@ public:
             (
                 labelList& checkFaces,
                 const List<labelPair>& baffles,
+                const bool smoothMesh = true,
+                const label nAllow = 0
+            );
+
+            //- Move mesh with externally provided mesh constraints
+            bool scaleMesh
+            (
+                labelList& checkFaces,
+                const List<labelPair>& baffles,
+                const dictionary& paramDict,
+                const dictionary& meshQualityDict,
                 const bool smoothMesh = true,
                 const label nAllow = 0
             );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,8 +136,8 @@ Foam::sampledSurface::New
     {
         FatalErrorIn
         (
-            "sampledSurface::New(const word&, "
-            "const polyMesh&, const dictionary&)"
+            "sampledSurface::New"
+            "(const word&, const polyMesh&, const dictionary&)"
         )   << "Unknown sample type " << sampleType
             << endl << endl
             << "Valid sample types : " << endl
@@ -145,10 +145,7 @@ Foam::sampledSurface::New
             << exit(FatalError);
     }
 
-    return autoPtr<sampledSurface>
-    (
-        cstrIter()(name, mesh, dict)
-    );
+    return autoPtr<sampledSurface>(cstrIter()(name, mesh, dict));
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -156,13 +153,11 @@ Foam::sampledSurface::New
 Foam::sampledSurface::sampledSurface
 (
     const word& name,
-    const polyMesh& mesh,
-    const bool triangulate
+    const polyMesh& mesh
 )
 :
     name_(name),
     mesh_(mesh),
-    triangulate_(triangulate),
     interpolate_(false),
     SfPtr_(NULL),
     magSfPtr_(NULL),
@@ -181,7 +176,6 @@ Foam::sampledSurface::sampledSurface
 :
     name_(name),
     mesh_(mesh),
-    triangulate_(dict.lookupOrDefault("triangulate", true)),
     interpolate_(dict.lookupOrDefault("interpolate", false)),
     SfPtr_(NULL),
     magSfPtr_(NULL),

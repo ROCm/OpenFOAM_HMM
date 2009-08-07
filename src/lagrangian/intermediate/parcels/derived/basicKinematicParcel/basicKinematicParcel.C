@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -41,24 +41,35 @@ namespace Foam
 Foam::basicKinematicParcel::basicKinematicParcel
 (
     KinematicCloud<basicKinematicParcel>& owner,
-    const label typeId,
     const vector& position,
-    const label celli,
+    const label cellI
+)
+:
+    KinematicParcel<basicKinematicParcel>(owner, position, cellI)
+{}
+
+
+Foam::basicKinematicParcel::basicKinematicParcel
+(
+    KinematicCloud<basicKinematicParcel>& owner,
+    const vector& position,
+    const label cellI,
+    const label typeId,
+    const scalar nParticle0,
     const scalar d0,
     const vector& U0,
-    const scalar nParticle0,
     const constantProperties& constProps
 )
 :
     KinematicParcel<basicKinematicParcel>
     (
         owner,
-        typeId,
         position,
-        celli,
+        cellI,
+        typeId,
+        nParticle0,
         d0,
         U0,
-        nParticle0,
         constProps
     )
 {}
@@ -72,6 +83,15 @@ Foam::basicKinematicParcel::basicKinematicParcel
 )
 :
     KinematicParcel<basicKinematicParcel>(cloud, is, readFields)
+{}
+
+
+Foam::basicKinematicParcel::basicKinematicParcel
+(
+    const basicKinematicParcel& p
+)
+:
+    KinematicParcel<basicKinematicParcel>(p)
 {}
 
 

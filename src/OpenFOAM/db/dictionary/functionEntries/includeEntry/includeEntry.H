@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,8 +34,8 @@ Description
         #include "includeFile"
     @endverbatim
 
-    The usual expansion of environment variables and other constructs (eg,
-    the @c ~OpenFOAM/ expansion) is retained.
+    The usual expansion of environment variables and other constructs
+    (eg, the @c ~OpenFOAM/ expansion) is retained.
 
 See Also
     fileName, string::expand()
@@ -58,7 +58,7 @@ namespace functionEntries
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class includeEntry Declaration
+                        Class includeEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class includeEntry
@@ -67,37 +67,37 @@ class includeEntry
 {
     // Private Member Functions
 
-        //- Read the include fileName from Istream, expand and return
-        static fileName includeFileName(Istream& is);
-
         //- Disallow default bitwise copy construct
         includeEntry(const includeEntry&);
 
         //- Disallow default bitwise assignment
         void operator=(const includeEntry&);
 
+protected:
+
+    // Protected Member Functions
+
+        //- Read the include fileName from Istream, expand and return
+        static fileName includeFileName(Istream&);
+
 
 public:
 
     //- Runtime type information
-    TypeName("include");
+    ClassName("include");
 
 
     // Member Functions
 
         //- Execute the functionEntry in a sub-dict context
-        static bool execute
-        (
-            dictionary& parentDict,
-            Istream& is
-        );
+        static bool execute(dictionary& parentDict, Istream&);
 
         //- Execute the functionEntry in a primitiveEntry context
         static bool execute
         (
             const dictionary& parentDict,
-            primitiveEntry& entry,
-            Istream& is
+            primitiveEntry&,
+            Istream&
         );
 
 };

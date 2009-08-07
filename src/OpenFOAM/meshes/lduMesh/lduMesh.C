@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,16 +29,14 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(lduMesh, 0);
-}
+defineTypeNameAndDebug(Foam::lduMesh, 0);
+
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::objectRegistry& Foam::lduMesh::db() const
+const Foam::objectRegistry& Foam::lduMesh::thisDb() const
 {
-    notImplemented("lduMesh::db() const");
+    notImplemented("lduMesh::thisDb() const");
     const objectRegistry* orPtr_ = NULL;
     return *orPtr_;
 }

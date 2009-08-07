@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,8 +57,8 @@ Foam::calcTypes::mag::~mag()
 
 void Foam::calcTypes::mag::init()
 {
-    Foam::argList::validArgs.append("mag");
-    argList::validArgs.append("fieldName1 .. fieldNameN");
+    argList::validArgs.append("mag");
+    argList::validArgs.append("fieldName");
 }
 
 
@@ -68,14 +68,7 @@ void Foam::calcTypes::mag::preCalc
     const Time& runTime,
     const fvMesh& mesh
 )
-{
-    if (args.additionalArgs().size() < 2)
-    {
-        Info<< nl << "must specify one or more fields" << nl;
-        args.printUsage();
-        FatalError.exit();
-    }
-}
+{}
 
 
 void Foam::calcTypes::mag::calc
@@ -85,44 +78,39 @@ void Foam::calcTypes::mag::calc
     const fvMesh& mesh
 )
 {
-    const stringList& params = args.additionalArgs();
+    const word& fieldName = args.additionalArgs()[1];
 
-    for (label fieldi=1; fieldi<params.size(); fieldi++)
+    IOobject fieldHeader
+    (
+        fieldName,
+        runTime.timeName(),
+        mesh,
+        IOobject::MUST_READ
+    );
+
+    // Check field exists
+    if (fieldHeader.headerOk())
     {
-        const word fieldName(params[fieldi]);
+        bool processed = false;
 
-        IOobject fieldHeader
-        (
-            fieldName,
-            runTime.timeName(),
-            mesh,
-            IOobject::MUST_READ
-        );
+        writeMagField<scalar>(fieldHeader, mesh, processed);
+        writeMagField<vector>(fieldHeader, mesh, processed);
+        writeMagField<sphericalTensor>(fieldHeader, mesh, processed);
+        writeMagField<symmTensor>(fieldHeader, mesh, processed);
+        writeMagField<tensor>(fieldHeader, mesh, processed);
 
-        // Check field exists
-        if (fieldHeader.headerOk())
+        if (!processed)
         {
-            bool processed = false;
-
-            writeMagField<scalar>(fieldHeader, mesh, processed);
-            writeMagField<vector>(fieldHeader, mesh, processed);
-            writeMagField<sphericalTensor>(fieldHeader, mesh, processed);
-            writeMagField<symmTensor>(fieldHeader, mesh, processed);
-            writeMagField<tensor>(fieldHeader, mesh, processed);
-
-            if (!processed)
-            {
-                 FatalError
-                     << "Unable to process " << fieldName << nl
-                     << "No call to mag for fields of type "
-                     << fieldHeader.headerClassName() << nl << nl
-                     << exit(FatalError);
-            }
+            FatalError
+                << "Unable to process " << fieldName << nl
+                << "No call to mag for fields of type "
+                << fieldHeader.headerClassName() << nl << nl
+                << exit(FatalError);
         }
-        else
-        {
-            Info<< "    No " << fieldName << endl;
-        }
+    }
+    else
+    {
+        Info<< "    No " << fieldName << endl;
     }
 }
 

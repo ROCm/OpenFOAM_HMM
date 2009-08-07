@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -159,9 +159,10 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     word setName(args.additionalArgs()[0]);
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
 
     Info<< "Reading cell set from " << setName << endl << endl;
@@ -171,9 +172,9 @@ int main(int argc, char *argv[])
 
     label patchI = -1;
 
-    if (args.options().found("patch"))
+    if (args.optionFound("patch"))
     {
-        word patchName(args.options()["patch"]);
+        word patchName(args.option("patch"));
 
         patchI = mesh.boundaryMesh().findPatchID(patchName);
 
@@ -276,7 +277,7 @@ int main(int argc, char *argv[])
     // Read point fields and subset
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    pointMesh pMesh(mesh);
+    const pointMesh& pMesh = pointMesh::New(mesh);
 
     wordList pointScalarNames(objects.names(pointScalarField::typeName));
     PtrList<pointScalarField> pointScalarFlds(pointScalarNames.size());
@@ -331,8 +332,12 @@ int main(int argc, char *argv[])
     {
         runTime++;
     }
+    else
+    {
+        mesh.setInstance(oldInstance);
+    }
 
-    Info<< "Writing subsetted mesh and fields to time " << runTime.value()
+    Info<< "Writing subsetted mesh and fields to time " << runTime.timeName()
         << endl;
     subsetter.subMesh().write();
 

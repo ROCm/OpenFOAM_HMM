@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 
 const Foam::edgeFaceCirculator Foam::edgeFaceCirculator::endConstIter
 (
-    *reinterpret_cast<primitiveMesh*>(NULL),    // primitiveMesh
+    *reinterpret_cast<primitiveMesh*>(0),       // primitiveMesh
     -1,                                         // faceLabel
     false,                                      // ownerSide
     -1,                                         // index

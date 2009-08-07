@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,10 @@ Application
     changeDictionary
 
 Description
-    Simple dictionary changing tool. Can be used to e.g. change the patch
-    type. Reads dictionaries (fields) and entries to change from a dictionary.
+    Utility to change dictionary entries, e.g. can be used to change the patch
+    type in the field and polyMesh/boundary files.
+
+    Reads dictionaries (fields) and entries to change from a dictionary.
     E.g. to make the @em movingWall a @em fixedValue for @em p, the
     @c system/changeDictionaryDict would contain the following:
     @verbatim

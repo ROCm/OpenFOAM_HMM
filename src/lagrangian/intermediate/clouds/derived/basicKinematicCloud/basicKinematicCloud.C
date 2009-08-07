@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,15 +38,14 @@ namespace Foam
 
 Foam::basicKinematicCloud::basicKinematicCloud
 (
-    const word& cloudType,
-    const volPointInterpolation& vpi,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const volScalarField& mu,
     const dimensionedVector& g
 )
 :
-    KinematicCloud<basicKinematicParcel>(cloudType, vpi, rho, U, mu, g)
+    KinematicCloud<basicKinematicParcel>(cloudName, rho, U, mu, g)
 {
     basicKinematicParcel::readFields(*this);
 }
@@ -64,5 +63,6 @@ void Foam::basicKinematicCloud::writeFields() const
 {
     basicKinematicParcel::writeFields(*this);
 }
+
 
 // ************************************************************************* //

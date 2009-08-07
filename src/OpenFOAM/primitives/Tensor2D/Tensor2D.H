@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,6 +74,9 @@ public:
 
         static const Tensor2D zero;
         static const Tensor2D one;
+        static const Tensor2D max;
+        static const Tensor2D min;
+
 
     //- Component labeling enumeration
     enum components { XX, XY, YX, YY };

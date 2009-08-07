@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,8 +47,8 @@ SourceFiles
 #ifndef messageStream_H
 #define messageStream_H
 
-#include "string.H"
 #include "label.H"
+#include "string.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -182,12 +182,9 @@ public:
         );
 
         //- Convert to Ostream for << operations
-        #ifndef __CINT__
         operator OSstream&();
-        #endif
 
         //- Explicitly convert to Ostream for << operations
-        //  needed in cint
         OSstream& operator()()
         {
             return operator OSstream&();

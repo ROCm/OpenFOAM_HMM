@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,11 +92,11 @@ class porousZone
 {
     // Private data
 
-        //- Reference to the finite volume mesh this zone is part of
-        const fvMesh& mesh_;
-
         //- Name of this zone
         word name_;
+
+        //- Reference to the finite volume mesh this zone is part of
+        const fvMesh& mesh_;
 
         //- Dictionary containing the parameters
         dictionary dict_;
@@ -104,7 +104,7 @@ class porousZone
         //- Cell zone ID
         label cellZoneID_;
 
-        //- Coordinate system (Cartesian)
+        //- Coordinate system used for the zone (Cartesian)
         coordinateSystem coordSys_;
 
         //- porosity of the zone (0 < porosity <= 1)
@@ -189,7 +189,7 @@ public:
     // Constructors
 
         //- Construct from components
-        porousZone(const fvMesh&, const word& name, const dictionary&);
+        porousZone(const word& name, const fvMesh&, const dictionary&);
 
         //- Return clone
         autoPtr<porousZone> clone() const
@@ -199,12 +199,8 @@ public:
         }
 
 
-        //- Return a pointer to a new porousZone created on freestore
-        //  from Istream
-        //  Has the ability to rewrite coordinate systems as required
+        //- Return pointer to new porousZone created on freestore from Istream
         class iNew
-        :
-            public coordinateSystems
         {
             //- Reference to the finite volume mesh this zone is part of
             const fvMesh& mesh_;
@@ -213,13 +209,6 @@ public:
 
             iNew(const fvMesh& mesh)
             :
-                coordinateSystems(),
-                mesh_(mesh)
-            {}
-
-            iNew(const fvMesh& mesh, const coordinateSystems& cs)
-            :
-                coordinateSystems(cs),
                 mesh_(mesh)
             {}
 
@@ -227,9 +216,8 @@ public:
             {
                 word name(is);
                 dictionary dict(is);
-                rewriteDict(dict, true);
 
-                return autoPtr<porousZone>(new porousZone(mesh_, name, dict));
+                return autoPtr<porousZone>(new porousZone(name, mesh_, dict));
             }
         };
 

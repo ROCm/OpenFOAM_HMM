@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -236,13 +236,13 @@ Foam::labelList Foam::polyDualMesh::collectPatchSideFace
     if (pointToDualPoint[meshPointI] >= 0)
     {
         // Number of pFaces + 2 boundary edge + feature point
-        dualFace.setSize(pFaces.size()+2+1);
+        dualFace.setCapacity(pFaces.size()+2+1);
         // Store dualVertex for feature edge
         dualFace.append(pointToDualPoint[meshPointI]);
     }
     else
     {
-        dualFace.setSize(pFaces.size()+2);
+        dualFace.setCapacity(pFaces.size()+2);
     }
 
     // Store dual vertex for starting edge.
@@ -412,11 +412,9 @@ void Foam::polyDualMesh::collectPatchInternalFace
         }
     }
 
-    dualFace2.transfer(dualFace.shrink());
-    dualFace.clear();
+    dualFace2.transfer(dualFace);
 
-    featEdgeIndices2.transfer(featEdgeIndices.shrink());
-    featEdgeIndices.clear();
+    featEdgeIndices2.transfer(featEdgeIndices);
 
     if (reverseFace)
     {
@@ -760,7 +758,7 @@ void Foam::polyDualMesh::calcDual
 
         allBoundary.checkPointManifold(true, &nonManifoldPoints);
 
-        if (nonManifoldPoints.size() > 0)
+        if (nonManifoldPoints.size())
         {
             nonManifoldPoints.write();
 
@@ -958,13 +956,13 @@ void Foam::polyDualMesh::calcDual
         if (edgeToDualPoint[edgeI] >= 0)
         {
             // Number of cells + 2 boundary faces + feature edge point
-            dualFace.setSize(mesh.edgeCells()[edgeI].size()+2+1);
+            dualFace.setCapacity(mesh.edgeCells()[edgeI].size()+2+1);
             // Store dualVertex for feature edge
             dualFace.append(edgeToDualPoint[edgeI]);
         }
         else
         {
-            dualFace.setSize(mesh.edgeCells()[edgeI].size()+2);
+            dualFace.setCapacity(mesh.edgeCells()[edgeI].size()+2);
         }
 
         // Store dual vertex for starting face.
@@ -1153,7 +1151,7 @@ void Foam::polyDualMesh::calcDual
         dynDualOwner.shrink();
         dynDualNeighbour.shrink();
         dynDualRegion.shrink();
-    
+
         OFstream str("dualInternalFaces.obj");
         Pout<< "polyDualMesh::calcDual : dumping internal faces to "
             << str.name() << endl;
@@ -1165,7 +1163,7 @@ void Foam::polyDualMesh::calcDual
         forAll(dynDualFaces, dualFaceI)
         {
             const face& f = dynDualFaces[dualFaceI];
-    
+
             str<< 'f';
             forAll(f, fp)
             {
@@ -1231,7 +1229,7 @@ void Foam::polyDualMesh::calcDual
         forAll(dualFaces, dualFaceI)
         {
             const face& f = dualFaces[dualFaceI];
-    
+
             str<< 'f';
             forAll(f, fp)
             {
@@ -1349,11 +1347,10 @@ void Foam::polyDualMesh::calcDual
     // Assign to mesh.
     resetPrimitives
     (
-        dualFaces.size(),
-        dualPoints,
-        dualFaces,
-        dualOwner,
-        dualNeighbour,
+        xferMove(dualPoints),
+        xferMove(dualFaces),
+        xferMove(dualOwner),
+        xferMove(dualNeighbour),
         patchSizes,
         patchStarts
     );
@@ -1404,9 +1401,9 @@ Foam::polyDualMesh::polyDualMesh
     polyMesh
     (
         mesh,
-        pointField(0),
-        faceList(0),
-        cellList(0)
+        xferCopy(pointField()),   // to prevent any warnings "points not allocated"
+        xferCopy(faceList()),     // to prevent any warnings "faces  not allocated"
+        xferCopy(cellList())
     ),
     cellPoint_
     (
@@ -1449,9 +1446,9 @@ Foam::polyDualMesh::polyDualMesh
     polyMesh
     (
         mesh,
-        pointField(0),  // to prevent any warnings "points not allocated"
-        faceList(0),    //            ,,            faces ,,
-        cellList(0)
+        xferCopy(pointField()),   // to prevent any warnings "points not allocated"
+        xferCopy(faceList()),     // to prevent any warnings "faces  not allocated"
+        xferCopy(cellList())
     ),
     cellPoint_
     (
@@ -1483,7 +1480,6 @@ Foam::polyDualMesh::polyDualMesh
     labelList featureEdges, featurePoints;
 
     calcFeatures(mesh, featureCos, featureEdges, featurePoints);
-
     calcDual(mesh, featureEdges, featurePoints);
 }
 
@@ -1592,8 +1588,7 @@ void Foam::polyDualMesh::calcFeatures
             allFeaturePoints.append(allBoundary.meshPoints()[pointI]);
         }
     }
-    featurePoints.transfer(allFeaturePoints.shrink());
-    allFeaturePoints.clear();
+    featurePoints.transfer(allFeaturePoints);
 
     if (debug)
     {
@@ -1635,8 +1630,7 @@ void Foam::polyDualMesh::calcFeatures
             allFeatureEdges.append(meshEdges[edgeI]);
         }
     }
-    featureEdges.transfer(allFeatureEdges.shrink());
-    allFeatureEdges.clear();
+    featureEdges.transfer(allFeatureEdges);
 }
 
 
@@ -1644,18 +1638,6 @@ void Foam::polyDualMesh::calcFeatures
 
 Foam::polyDualMesh::~polyDualMesh()
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

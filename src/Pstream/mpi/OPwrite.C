@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -129,17 +129,15 @@ bool Foam::OPstream::write
 
 void Foam::OPstream::waitRequests()
 {
-    if (OPstream_outstandingRequests_.size() > 0)
+    if (OPstream_outstandingRequests_.size())
     {
-        List<MPI_Status> status(OPstream_outstandingRequests_.size());
-
         if
         (
             MPI_Waitall
             (
                 OPstream_outstandingRequests_.size(),
                 OPstream_outstandingRequests_.begin(),
-                status.begin()
+                MPI_STATUSES_IGNORE
             )
         )
         {
@@ -169,9 +167,7 @@ bool Foam::OPstream::finishedRequest(const label i)
     }
 
     int flag;
-    MPI_Status status;
-
-    MPI_Test(&OPstream_outstandingRequests_[i], &flag, &status);
+    MPI_Test(&OPstream_outstandingRequests_[i], &flag, MPI_STATUS_IGNORE);
 
     return flag != 0;
 }

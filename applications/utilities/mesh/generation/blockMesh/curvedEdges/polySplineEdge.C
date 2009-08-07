@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,6 +26,7 @@ License
 
 #include "polySplineEdge.H"
 #include "BSpline.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -34,8 +35,7 @@ namespace Foam
     defineTypeNameAndDebug(polySplineEdge, 0);
 
     // Add the curvedEdge constructor functions to the hash tables
-    curvedEdge::addIstreamConstructorToTable<polySplineEdge>
-        addPolySplineEdgeIstreamConstructorToTable_;
+    addToRunTimeSelectionTable(curvedEdge, polySplineEdge, Istream);
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -175,9 +175,8 @@ void turbulentInletFvPatchField<Type>::updateCoeffs()
             ranGen_.randomise(randomField[facei]);
         }
 
-        // Correction-factor proposed by Yi Wang to compensate for the loss
-        // of RMS fluctuation due to the temporal correlation introduced by
-        // the alpha parameter.
+        // Correction-factor to compensate for the loss of RMS fluctuation
+        // due to the temporal correlation introduced by the alpha parameter.
         scalar rmsCorr = sqrt(12*(2*alpha_ - sqr(alpha_)))/alpha_;
 
         patchField =
@@ -206,6 +205,7 @@ void turbulentInletFvPatchField<Type>::write(Ostream& os) const
     os.writeKeyword("fluctuationScale")
         << fluctuationScale_ << token::END_STATEMENT << nl;
     referenceField_.writeEntry("referenceField", os);
+    os.writeKeyword("alpha") << alpha_ << token::END_STATEMENT << nl;
     this->writeEntry("value", os);
 }
 

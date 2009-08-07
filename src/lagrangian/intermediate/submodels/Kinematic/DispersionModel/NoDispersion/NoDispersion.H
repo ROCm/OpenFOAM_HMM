@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,7 @@ Class
     Foam::NoDispersion
 
 Description
-    No turbulent dispersion of the parcels
+    Place holder for 'none' option
 
 \*---------------------------------------------------------------------------*/
 
@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class NoDispersion Declaration
+                       Class NoDispersion Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
@@ -49,11 +49,10 @@ class NoDispersion
 :
     public DispersionModel<CloudType>
 {
-
 public:
 
     //- Runtime type information
-    TypeName("NoDispersion");
+    TypeName("none");
 
 
     // Constructors
@@ -66,18 +65,20 @@ public:
         );
 
 
-    // Destructor
-
-        ~NoDispersion();
+    //- Destructor
+    virtual ~NoDispersion();
 
 
     // Member Functions
 
         //- Flag to indicate whether model activates injection model
-        bool active() const;
+        virtual bool active() const;
+
+        //- Cache carrier fields
+        virtual void cacheFields(const bool store);
 
         //- Update (disperse particles)
-        vector update
+        virtual vector update
         (
             const scalar dt,
             const label celli,

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -215,6 +215,15 @@ void Foam::attachDetach::attachInterface
             mesh.boundaryMesh(),
             curFaceID
         );
+        label neiCell;
+        if (patchIDs[0] == -1)
+        {
+            neiCell = nei[curFaceID];
+        }
+        else
+        {
+            neiCell = -1;
+        }
 
         // Modify the face
         ref.setAction
@@ -224,7 +233,7 @@ void Foam::attachDetach::attachInterface
                 newFace,                // modified face
                 curFaceID,              // label of face being modified
                 own[curFaceID],         // owner
-                nei[curFaceID],         // neighbour
+                neiCell,                // neighbour
                 false,                  // face flip
                 patchIDs[0],            // patch for face
                 false,                  // remove from zone

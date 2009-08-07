@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -35,10 +35,7 @@ Foam::autoPtr<Foam::DragModel<CloudType> > Foam::DragModel<CloudType>::New
     CloudType& owner
 )
 {
-    word DragModelType
-    (
-        dict.lookup("DragModel")
-    );
+    word DragModelType(dict.lookup("DragModel"));
 
     Info<< "Selecting DragModel " << DragModelType << endl;
 
@@ -50,12 +47,14 @@ Foam::autoPtr<Foam::DragModel<CloudType> > Foam::DragModel<CloudType>::New
         FatalErrorIn
         (
             "DragModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
-        )
-            << "Unknown DragModelType type "
+            "("
+                "const dictionary&,"
+                "CloudType&"
+            ")"
+        )   << "Unknown DragModelType type "
             << DragModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid DragModel types are :" << nl
+            << "    Valid DragModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }

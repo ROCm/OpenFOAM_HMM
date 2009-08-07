@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -299,7 +299,6 @@ fvMeshSubset::interpolate
 (
     const GeometricField<Type, pointPatchField, pointMesh>& vf,
     const pointMesh& sMesh,
-    const objectRegistry& reg,
     const labelList& patchMap,
     const labelList& pointMap
 )
@@ -385,7 +384,7 @@ fvMeshSubset::interpolate
             (
                 "subset"+vf.name(),
                 vf.time().timeName(),
-                reg,
+                sMesh.thisDb(),
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
@@ -409,8 +408,7 @@ tmp<GeometricField<Type, pointPatchField, pointMesh> > fvMeshSubset::interpolate
     return interpolate
     (
         sf,
-        subPointMesh(),     // subsetted point mesh
-        subMesh(),          // registry (pointfields are stored on the polyMesh)
+        pointMesh::New(subMesh()),     // subsetted point mesh
         patchMap(),
         pointMap()
     );

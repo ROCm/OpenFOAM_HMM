@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,7 @@ License
 #include "mapPolyMesh.H"
 #include "globalIndex.H"
 #include "indirectPrimitivePatch.H"
+#include "dummyTransform.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -45,7 +46,7 @@ public:
 
     void operator()(face& x, const face& y) const
     {
-        if (x.size() > 0)
+        if (x.size())
         {
             label j = 0;
             forAll(x, i)
@@ -56,22 +57,6 @@ public:
             }
         }
     };
-};
-// Dummy transform for faces. Used in synchronisation
-class transformFace
-{
-public:
-    void operator()(const coupledPolyPatch&, Field<face>&) const
-    {}
-};
-// Dummy template specialisation for pTraits<face>. Used in synchronisation
-template<>
-class pTraits<face>
-{
-public:
-
-    //- Component type
-    typedef label cmptType;
 };
 
 }
@@ -142,7 +127,7 @@ void Foam::localPointRegion::countPointRegions
         {
             const face& f = mesh.faces()[faceI];
 
-            if (minRegion[faceI].size() == 0)
+            if (minRegion[faceI].empty())
             {
                 FatalErrorIn("localPointRegion::countPointRegions(..)")
                     << "Face from candidateFace without minRegion set." << endl
@@ -371,7 +356,7 @@ void Foam::localPointRegion::calcPointRegions
             {
                 label faceI = cFaces[cFaceI];
 
-                if (minRegion[faceI].size() > 0)
+                if (minRegion[faceI].size())
                 {
                     const face& f = mesh.faces()[faceI];
 
@@ -398,7 +383,7 @@ void Foam::localPointRegion::calcPointRegions
             {
                 label faceI = cFaces[cFaceI];
 
-                if (minRegion[faceI].size() > 0)
+                if (minRegion[faceI].size())
                 {
                     const face& f = mesh.faces()[faceI];
 
@@ -438,7 +423,7 @@ void Foam::localPointRegion::calcPointRegions
             mesh,
             l,
             minEqOpFace(),
-            transformFace()     // dummy transformation
+            Foam::dummyTransform()  // dummy transformation
         );
     }
 

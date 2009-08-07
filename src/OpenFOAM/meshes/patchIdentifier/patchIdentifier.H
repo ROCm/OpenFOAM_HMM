@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ class patchIdentifier
         word name_;
 
         //- Index of patch in boundary
-        label boundaryIndex_;
+        label index_;
 
         //- Optional physical type
         mutable word physicalType_;
@@ -86,14 +86,14 @@ public:
         patchIdentifier
         (
             const word& name,
-            const dictionary& dict,
+            const dictionary&,
             const label index
         );
 
         //- Construct from geometric patch, resetting the index
         patchIdentifier
         (
-            const patchIdentifier& p,
+            const patchIdentifier&,
             const label index
         );
 
@@ -132,13 +132,13 @@ public:
         //- Return the index of this patch in the boundaryMesh
         label index() const
         {
-            return boundaryIndex_;
+            return index_;
         }
 
         //- Return the index of this patch in the boundaryMesh for modification
         label& index()
         {
-            return boundaryIndex_;
+            return index_;
         }
 
         //- Write patchIdentifier as a dictionary

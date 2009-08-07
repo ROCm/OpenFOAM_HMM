@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,6 @@ License
 #include "cellSet.H"
 #include "syncTools.H"
 #include "motionSmoother.H"
-#include "pointMesh.H"
 #include "refinementParameters.H"
 #include "snapParameters.H"
 #include "layerParameters.H"
@@ -47,10 +46,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(autoHexMeshDriver, 0);
-
-} // End namespace Foam
+    defineTypeNameAndDebug(autoHexMeshDriver, 0);
+}
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -60,7 +57,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
  const
 {
     const boundBox& meshBb = mesh_.bounds();
-    scalar mergeDist = mergeTol*mag(meshBb.max() - meshBb.min());
+    scalar mergeDist = mergeTol * meshBb.mag();
     scalar writeTol = std::pow
     (
         scalar(10.0),
@@ -97,11 +94,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
 //)
 //{
 //    // Determine outside point.
-//    boundBox overallBb
-//    (
-//        point(GREAT, GREAT, GREAT),
-//        point(-GREAT, -GREAT, -GREAT)
-//    );
+//    boundBox overallBb = boundBox::invertedBox;
 //
 //    bool hasSurface = false;
 //
@@ -123,7 +116,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
 //
 //    if (hasSurface)
 //    {
-//        const point outsidePt(2*overallBb.max() - overallBb.min());
+//        const point outsidePt = 2 * overallBb.span();
 //
 //        //Info<< "Using point " << outsidePt << " to orient shells" << endl;
 //
@@ -155,6 +148,7 @@ Foam::scalar Foam::autoHexMeshDriver::getMergeDistance(const scalar mergeTol)
 Foam::autoHexMeshDriver::autoHexMeshDriver
 (
     fvMesh& mesh,
+    const bool overwrite,
     const dictionary& dict,
     const dictionary& decomposeDict
 )
@@ -230,10 +224,10 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
             (
                 IOobject
                 (
-                    "abc",                      // dummy name
-                    mesh_.time().constant(),    // directory
-                    "triSurface",               // instance
-                    mesh_.time(),               // registry
+                    "abc",                                      // dummy name
+                    mesh_.time().findInstance("triSurface", word::null),// inst
+                    "triSurface",                               // local
+                    mesh_.time(),                               // registry
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE
                 ),
@@ -299,6 +293,41 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     meshRefinement::checkCoupledFaceZones(mesh_);
 
 
+    // Refinement engine
+    // ~~~~~~~~~~~~~~~~~
+
+    {
+        Info<< nl
+            << "Determining initial surface intersections" << nl
+            << "-----------------------------------------" << nl
+            << endl;
+
+        // Main refinement engine
+        meshRefinerPtr_.reset
+        (
+            new meshRefinement
+            (
+                mesh,
+                mergeDist_,         // tolerance used in sorting coordinates
+                overwrite,
+                surfaces(),
+                shells()
+            )
+        );
+        Info<< "Calculated surface intersections in = "
+            << mesh_.time().cpuTimeIncrement() << " s" << endl;
+
+        // Some stats
+        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
+
+        meshRefinerPtr_().write
+        (
+            debug_&meshRefinement::OBJINTERSECTIONS,
+            mesh_.time().path()/meshRefinerPtr_().timeName()
+        );
+    }
+
+
     // Add all the surface regions as patches
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -324,25 +353,17 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
 
             Info<< surfaces().names()[surfI] << ':' << nl << nl;
 
-            //const triSurfaceMesh& s = surfaces()[surfI];
-            //const geometricSurfacePatchList& regions = s.patches();
-            //labelList nTrisPerRegion(surfaces().countRegions(s));
-
             forAll(regNames, i)
             {
-                //if (nTrisPerRegion[i] > 0)
-                //{
-                    label patchI = meshRefinement::addPatch
-                    (
-                        mesh,
-                        regNames[i],
-                        wallPolyPatch::typeName
-                    );
+                label patchI = meshRefinerPtr_().addMeshedPatch
+                (
+                    regNames[i],
+                    wallPolyPatch::typeName
+                );
 
-                    Info<< patchI << '\t' << regNames[i] << nl;
+                Info<< patchI << '\t' << regNames[i] << nl;
 
-                    globalToPatch_[surfaces().globalRegion(surfI, i)] = patchI;
-                //}
+                globalToPatch_[surfaces().globalRegion(surfI, i)] = patchI;
             }
 
             Info<< nl;
@@ -358,7 +379,7 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
     ////  in when snapping)
     //
     //labelList namedSurfaces(surfaces().getNamedSurfaces());
-    //if (namedSurfaces.size() > 0)
+    //if (namedSurfaces.size())
     //{
     //    Info<< nl
     //        << "Introducing cyclics for faceZones" << nl
@@ -418,40 +439,6 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
         // Mesh distribution engine (uses tolerance to reconstruct meshes)
         distributorPtr_.reset(new fvMeshDistribute(mesh_, mergeDist_));
     }
-
-
-    // Refinement engine
-    // ~~~~~~~~~~~~~~~~~
-
-    {
-        Info<< nl
-            << "Determining initial surface intersections" << nl
-            << "-----------------------------------------" << nl
-            << endl;
-
-        // Main refinement engine
-        meshRefinerPtr_.reset
-        (
-            new meshRefinement
-            (
-                mesh,
-                mergeDist_,         // tolerance used in sorting coordinates
-                surfaces(),
-                shells()
-            )
-        );
-        Info<< "Calculated surface intersections in = "
-            << mesh_.time().cpuTimeIncrement() << " s" << endl;
-
-        // Some stats
-        meshRefinerPtr_().printMeshInfo(debug_, "Initial mesh");
-
-        meshRefinerPtr_().write
-        (
-            debug_&meshRefinement::OBJINTERSECTIONS,
-            mesh_.time().path()/mesh_.time().timeName()
-        );
-    }
 }
 
 
@@ -462,7 +449,7 @@ void Foam::autoHexMeshDriver::writeMesh(const string& msg) const
     const meshRefinement& meshRefiner = meshRefinerPtr_();
 
     meshRefiner.printMeshInfo(debug_, msg);
-    Info<< "Writing mesh to time " << mesh_.time().timeName() << endl;
+    Info<< "Writing mesh to time " << meshRefiner.timeName() << endl;
 
     meshRefiner.write(meshRefinement::MESH|meshRefinement::SCALARLEVELS, "");
     if (debug_ & meshRefinement::OBJINTERSECTIONS)
@@ -470,7 +457,7 @@ void Foam::autoHexMeshDriver::writeMesh(const string& msg) const
         meshRefiner.write
         (
             meshRefinement::OBJINTERSECTIONS,
-            mesh_.time().path()/mesh_.time().timeName()
+            mesh_.time().path()/meshRefiner.timeName()
         );
     }
     Info<< "Written mesh in = "
@@ -536,11 +523,7 @@ void Foam::autoHexMeshDriver::doMesh()
         const dictionary& shrinkDict = dict_.subDict("shrinkDict");
         PtrList<dictionary> surfaceDicts(dict_.lookup("surfaces"));
 
-        autoLayerDriver layerDriver
-        (
-            meshRefinerPtr_(),
-            globalToPatch_
-        );
+        autoLayerDriver layerDriver(meshRefinerPtr_());
 
         // Get all the layer specific params
         layerParameters layerParams

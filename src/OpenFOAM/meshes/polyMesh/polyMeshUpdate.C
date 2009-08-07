@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,6 +31,7 @@ Description
 #include "mapPolyMesh.H"
 #include "Time.H"
 #include "globalMeshData.H"
+#include "pointMesh.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -65,6 +66,25 @@ void Foam::polyMesh::updateMesh(const mapPolyMesh& mpm)
 
         // Map the list
         newMotionPoints.map(oldMotionPoints, mpm.pointMap());
+    }
+
+    // Reset valid directions (could change by faces put into empty patches)
+    geometricD_ = Vector<label>::zero;
+    solutionD_ = Vector<label>::zero;
+
+
+    // Hack until proper callbacks. Below are all the polyMesh-MeshObjects.
+
+    // pointMesh
+    if (thisDb().foundObject<pointMesh>(pointMesh::typeName))
+    {
+        const_cast<pointMesh&>
+        (
+            thisDb().lookupObject<pointMesh>
+            (
+                pointMesh::typeName
+            )
+        ).updateMesh(mpm);
     }
 }
 

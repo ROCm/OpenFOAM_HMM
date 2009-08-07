@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,13 +61,18 @@ void Foam::Time::readDict()
 
     if (oldWriteInterval != writeInterval_)
     {
-        switch(writeControl_)
+        switch (writeControl_)
         {
             case wcRunTime:
             case wcAdjustableRunTime:
                 // Recalculate outputTimeIndex_ to be in units of current
                 // writeInterval.
-                outputTimeIndex_ *= oldWriteInterval/writeInterval_;
+                outputTimeIndex_ = label
+                (
+                    outputTimeIndex_
+                  * oldWriteInterval
+                  / writeInterval_
+                );
             break;
 
             default:
@@ -175,11 +180,7 @@ void Foam::Time::readDict()
     }
 
     controlDict_.readIfPresent("graphFormat", graphFormat_);
-
-    if (controlDict_.found("runTimeModifiable"))
-    {
-        runTimeModifiable_ = Switch(controlDict_.lookup("runTimeModifiable"));
-    }
+    controlDict_.readIfPresent("runTimeModifiable", runTimeModifiable_);
 }
 
 
@@ -263,25 +264,14 @@ bool Foam::Time::writeObject
         timeDict.add("deltaT", deltaT_);
         timeDict.add("deltaT0", deltaT0_);
 
-        timeDict.regIOobject::writeObject
-        (
-            fmt,
-            ver,
-            cmp
-        );
-
-        bool writeOK = objectRegistry::writeObject
-        (
-            fmt,
-            ver,
-            cmp
-        );
+        timeDict.regIOobject::writeObject(fmt, ver, cmp);
+        bool writeOK = objectRegistry::writeObject(fmt, ver, cmp);
 
         if (writeOK && purgeWrite_)
         {
             previousOutputTimes_.push(timeName());
 
-            while(previousOutputTimes_.size() > purgeWrite_)
+            while (previousOutputTimes_.size() > purgeWrite_)
             {
                 rmDir(objectRegistry::path(previousOutputTimes_.pop()));
             }
@@ -305,7 +295,7 @@ bool Foam::Time::writeNow()
 
 bool Foam::Time::writeAndEnd()
 {
-    stopAt_ = saWriteNow;
+    stopAt_  = saWriteNow;
     endTime_ = value();
 
     return writeNow();

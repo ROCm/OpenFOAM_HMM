@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,14 @@ Class
     Foam::timeActivatedExplicitSource
 
 Description
-    Creates a cell set source that is activated at timeStart_ for duration_
+    Base class for field sources. Provides:
+    - name
+    - references to mesh and time
+    - dimensions
+    - volume type
+    - startTime
+    - duration
+    - read (from <sourceName>Properties dictionary)
 
 SourceFiles
     timeActivatedExplicitSource.C
@@ -36,11 +43,11 @@ SourceFiles
 #ifndef timeActivatedExplicitSource_H
 #define timeActivatedExplicitSource_H
 
+#include "IOdictionary.H"
 #include "autoPtr.H"
-#include "topoSetSource.H"
-#include "cellSet.H"
 #include "fvMesh.H"
 #include "Time.H"
+#include "NamedEnum.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,46 +55,25 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class timeActivatedExplicitSource Declaration
+                Class timeActivatedExplicitSource Declaration
 \*---------------------------------------------------------------------------*/
 
 class timeActivatedExplicitSource
+:
+    public IOdictionary
 {
-    // Private data
+public:
 
-        //- Properties dictionary
-        IOdictionary dict_;
+    enum volumeType
+    {
+        vtSpecific,
+        vtAbsolute
+    };
 
-        //- Reference to the mesh
-        const fvMesh& mesh_;
+    static const NamedEnum<volumeType, 2> volumeTypeNames_;
 
-        //- Reference to time database
-        const Time& runTime_;
 
-        //- Name of cell source
-        word cellSource_;
-
-        //- Time start [s]
-        scalar timeStart_;
-
-        //- Duration [s]
-        scalar duration_;
-
-        //- Value when "on"
-        dimensionedScalar onValue_;
-
-        //- Value when "off"
-        dimensionedScalar offValue_;
-
-        //- Current source value
-        dimensionedScalar currentValue_;
-
-        //- The method by which the cells will be selecetd
-        autoPtr<topoSetSource> cellSelector_;
-
-        //- The set of selected cells
-        cellSet selectedCellSet_;
-
+private:
 
     // Private Member Functions
 
@@ -98,33 +84,82 @@ class timeActivatedExplicitSource
         void operator=(const timeActivatedExplicitSource&);
 
 
+protected:
+
+    // Protected data
+
+        //- Reference to the mesh
+        const fvMesh& mesh_;
+
+        //- Reference to time database
+        const Time& runTime_;
+
+
+        // Source properties
+
+            //- Name of the source
+            word name_;
+
+            //- Active flag
+            Switch active_;
+
+            //- Dimensions
+            const dimensionSet dimensions_;
+
+            //- Volume type
+            volumeType volumeType_;
+
+            //- Time start [s]
+            scalar timeStart_;
+
+            //- Duration [s]
+            scalar duration_;
+
+
 public:
 
     // Constructors
 
         //- Construct from explicit source name and mesh
-        timeActivatedExplicitSource(const word&, const fvMesh&);
+        timeActivatedExplicitSource
+        (
+            const word&,
+            const fvMesh&,
+            const dimensionSet&
+        );
 
 
     // Member Functions
 
         // Access
 
+            //- Return the reference to the mesh
+            virtual const fvMesh& mesh() const;
+
+            //- Return the reference to the time database
+            virtual const Time& runTime() const;
+
+            //- Return the source name
+            virtual const word& name() const;
+
+            //- Return the active flag
+            virtual const Switch& active() const;
+
+            //- Return the dimensions
+            virtual const dimensionSet& dimensions() const;
+
+            //- Return the volume type
+            virtual const volumeType& volume() const;
+
             //- Return the start time
-            scalar timeStart() const;
+            virtual scalar timeStart() const;
 
             //- Return the duration
-            scalar duration() const;
-
-            //- Return the current value of the source
-            const dimensionedScalar& currentValue() const;
-
-            //- Return a tmp field of the source
-            tmp<DimensionedField<scalar, volMesh> > Su() const;
+            virtual scalar duration() const;
 
 
-        //- Update
-        void update();
+        //- Read properties dictionary
+        virtual bool read();
 };
 
 

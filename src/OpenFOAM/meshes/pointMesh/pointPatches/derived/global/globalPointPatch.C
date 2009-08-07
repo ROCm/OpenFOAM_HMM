@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,35 +25,28 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "globalPointPatch.H"
-#include "globalMeshData.H"
-#include "triFace.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(globalPointPatch, 0);
+defineTypeNameAndDebug(Foam::globalPointPatch, 0);
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-globalPointPatch::globalPointPatch
+Foam::globalPointPatch::globalPointPatch
 (
     const pointBoundaryMesh& bm,
-    const label bi
+    const label index
 )
 :
     pointPatch(bm),
     coupledPointPatch(bm),
-    boundaryIndex_(bi)
+    index_(index)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-globalPointPatch::~globalPointPatch()
+Foam::globalPointPatch::~globalPointPatch()
 {}
 
 
@@ -61,7 +54,5 @@ globalPointPatch::~globalPointPatch()
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

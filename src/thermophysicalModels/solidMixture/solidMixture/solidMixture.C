@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,7 +34,7 @@ Foam::solidMixture::solidMixture
     const dictionary& thermophysicalProperties
 )
 :
-    components_(thermophysicalProperties.lookup("solidFuelComponents")),
+    components_(thermophysicalProperties.lookup("solidComponents")),
     properties_(components_.size())
 {
 

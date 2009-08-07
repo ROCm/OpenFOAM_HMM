@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -57,6 +57,35 @@ LESdelta::LESdelta(const word& name, const fvMesh& mesh)
         calculatedFvPatchScalarField::typeName
     )
 {}
+
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+autoPtr<LESdelta> LESdelta::New
+(
+    const word& name,
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    word deltaType(dict.lookup("delta"));
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(deltaType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "LESdelta::New(const fvMesh&, const dictionary&)"
+        )   << "Unknown LESdelta type " << deltaType << endl << endl
+            << "Valid LESdelta types are :" << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<LESdelta>(cstrIter()(name, mesh, dict));
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,16 +37,11 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(topoCellLooper, 0);
-
-addToRunTimeSelectionTable(cellLooper, topoCellLooper, word);
-
-
+   defineTypeNameAndDebug(topoCellLooper, 0);
+   addToRunTimeSelectionTable(cellLooper, topoCellLooper, word);
 }
 
 // Angle for polys to be considered splitHexes.
@@ -67,7 +62,7 @@ void Foam::topoCellLooper::subsetList
 {
     if (startI == 0)
     {
-        // Truncate (setsize decides itself not to do anything if nothing
+        // Truncate (setSize decides itself not to do anything if nothing
         // changed)
         if (freeI < 0)
         {
@@ -75,7 +70,7 @@ void Foam::topoCellLooper::subsetList
                 << "startI:" << startI << "  freeI:" << freeI
                 << "  lst:" << lst << abort(FatalError);
         }
-        lst.setSize(freeI);
+        lst.setCapacity(freeI);
     }
     else
     {
@@ -93,7 +88,7 @@ void Foam::topoCellLooper::subsetList
                 << "  lst:" << lst << abort(FatalError);
         }
 
-        lst.setSize(freeI - startI);
+        lst.setCapacity(freeI - startI);
     }
 }
 
@@ -228,7 +223,7 @@ Foam::labelList Foam::topoCellLooper::getSuperEdge
 
     do
     {
-        vertI = mesh().edges()[edgeI].otherVertex(vertI);    
+        vertI = mesh().edges()[edgeI].otherVertex(vertI);
 
         superVerts[superVertI++] = vertI;
 
@@ -237,7 +232,7 @@ Foam::labelList Foam::topoCellLooper::getSuperEdge
         edgeI = meshTools::otherEdge(mesh(), fEdges, edgeI, vertI);
     }
     while (!features.isFeaturePoint(prevEdgeI, edgeI));
-  
+
     superVerts.setSize(superVertI);
 
     return superVerts;
@@ -500,7 +495,7 @@ void Foam::topoCellLooper::walkSplitHex
                 nextEdgeI,
                 nextVertI
             );
-            
+
             edgeI = nextEdgeI;
             vertI = nextVertI;
         }
@@ -515,15 +510,14 @@ void Foam::topoCellLooper::walkSplitHex
             {
                 // Normal vertex on edge of face. Get edges connected to it
                 // which are not on faceI.
-                labelList nextEdges =
-                    getVertEdgesNonFace
-                    (
-                        cellI,
-                        faceI,
-                        vertI
-                    );
+                labelList nextEdges = getVertEdgesNonFace
+                (
+                    cellI,
+                    faceI,
+                    vertI
+                );
 
-                if (nextEdges.size() == 0)
+                if (nextEdges.empty())
                 {
                     // Cross to other face (there is only one since no edges)
                     const labelList& pFaces = mesh().pointFaces()[vertI];
@@ -615,7 +609,7 @@ void Foam::topoCellLooper::walkSplitHex
                 labelList nextFaces =
                     getVertFacesNonEdge
                     (
-                        cellI, 
+                        cellI,
                         edgeI,
                         vertI
                     );
@@ -720,7 +714,7 @@ bool Foam::topoCellLooper::cut
     if (mesh().cellShapes()[cellI].model() == hex_)
     {
         // Let parent handle hex case.
-        return 
+        return
             hexCellLooper::cut
             (
                 refDir,
@@ -752,7 +746,7 @@ bool Foam::topoCellLooper::cut
 
             if (edgeI != -1)
             {
-                // Found non-feature edge. Start walking from vertex on edge. 
+                // Found non-feature edge. Start walking from vertex on edge.
                 vertI = mesh().edges()[edgeI].start();
             }
             else
@@ -792,9 +786,6 @@ bool Foam::topoCellLooper::cut
             }
             else
             {
-                localLoop.shrink();
-                localLoopWeights.shrink();
-
                 loop.transfer(localLoop);
                 loopWeights.transfer(localLoopWeights);
 
@@ -804,17 +795,16 @@ bool Foam::topoCellLooper::cut
         else
         {
             // Let parent handle poly case.
-            return
-                hexCellLooper::cut
-                (
-                    refDir,
-                    cellI,
-                    vertIsCut,
-                    edgeIsCut,
-                    edgeWeight,
-                    loop,
-                    loopWeights
-                );
+            return hexCellLooper::cut
+            (
+                refDir,
+                cellI,
+                vertIsCut,
+                edgeIsCut,
+                edgeWeight,
+                loop,
+                loopWeights
+            );
         }
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -94,7 +94,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
     (
         readDir
         (
-            meshSource.time().timePath()/"lagrangian",
+            meshSource.time().timePath()/cloud::prefix,
             fileName::DIRECTORY
         )
     );
@@ -106,7 +106,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
         (
             meshSource,
             meshSource.time().timeName(),
-            "lagrangian"/cloudDirs[cloudI]
+            cloud::prefix/cloudDirs[cloudI]
         );
 
         IOobject* positionsPtr = objects.lookup("positions");
@@ -206,7 +206,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
             // Do closer inspection for unmapped particles
             // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-            if (unmappedSource.size() > 0)
+            if (unmappedSource.size())
             {
                 meshSearch targetSearcher(meshTarget, false);
 
@@ -223,6 +223,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
                         {
                             unmappedSource.erase(sourceParticleI);
                             addParticles.append(sourceParticleI);
+			    iter().cell()=targetCell;
                             targetParcels.addParticle
                             (
                                 sourceParcels.remove(&iter())
@@ -237,7 +238,7 @@ void mapLagrangian(const meshToMesh& meshToMeshInterp)
             Info<< "    after additional mesh searching found "
                 << targetParcels.size() << " parcels in target mesh." << endl;
 
-            if (addParticles.size() > 0)
+            if (addParticles.size())
             {
                 IOPosition<passiveParticle>(targetParcels).write();
 

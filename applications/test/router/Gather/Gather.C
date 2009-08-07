@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,23 +59,24 @@ Gather<T0>::Gather(const T0& localData, const bool redistribute)
             // Receive data
             for
             (
-                int slave=Pstream::firstSlave(), procIndex = 1;
-                slave<=Pstream::lastSlave();
+                int slave = Pstream::firstSlave(), procIndex = 1;
+                slave <= Pstream::lastSlave();
                 slave++, procIndex++
             )
             {
-                IPstream fromSlave(slave);
+                IPstream fromSlave(Pstream::scheduled, slave);
                 fromSlave >> this->operator[](procIndex);
             }
+
             // Send data
             for
             (
-                int slave=Pstream::firstSlave(), procIndex = 1;
-                slave<=Pstream::lastSlave();
+                int slave = Pstream::firstSlave(), procIndex = 1;
+                slave <= Pstream::lastSlave();
                 slave++, procIndex++
             )
             {
-                OPstream toSlave(slave);
+                OPstream toSlave(Pstream::scheduled, slave);
 
                 if (redistribute)
                 {
@@ -92,12 +93,13 @@ Gather<T0>::Gather(const T0& localData, const bool redistribute)
         {
             // Slave: send my local data to master
             {
-                OPstream toMaster(Pstream::masterNo());
+                OPstream toMaster(Pstream::scheduled, Pstream::masterNo());
                 toMaster << localData;
             }
+
             // Receive data from master
             {
-                IPstream fromMaster(Pstream::masterNo());
+                IPstream fromMaster(Pstream::scheduled, Pstream::masterNo());
                 if (redistribute)
                 {
                     fromMaster >> *this;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,17 @@ Application
     redistributeMeshPar
 
 Description
-    Parallel redecomposition of mesh.
+    Redistributes existing decomposed mesh and fields according to the current
+    settings in the decomposeParDict file.
+
+    Must be run on maximum number of source and destination processors.
+    Balances mesh and writes new mesh to new time directory.
+
+    Can also work like decomposePar:
+
+        mkdir processor0
+        cp -r constant processor0
+        mpirun -np ddd redistributeMeshPar -parallel
 
 \*---------------------------------------------------------------------------*/
 
@@ -70,10 +80,10 @@ autoPtr<fvMesh> createMesh
             runTime,
             IOobject::MUST_READ
         ),
-        pointField(0),
-        faceList(0),
-        labelList(0),
-        labelList(0)
+        xferCopy(pointField()),
+        xferCopy(faceList()),
+        xferCopy(labelList()),
+        xferCopy(labelList())
     );
 
     if (!haveMesh)
@@ -240,11 +250,9 @@ scalar getMergeDistance
 )
 {
     scalar mergeTol = defaultMergeTol;
-    if (args.options().found("mergeTol"))
-    {
-        mergeTol = readScalar(IStringStream(args.options()["mergeTol"])());
-    }
-    scalar writeTol = 
+    args.optionReadIfPresent("mergeTol", mergeTol);
+
+    scalar writeTol =
         Foam::pow(scalar(10.0), -scalar(IOstream::defaultPrecision()));
 
     Info<< "Merge tolerance : " << mergeTol << nl
@@ -263,7 +271,7 @@ scalar getMergeDistance
             << exit(FatalError);
     }
 
-    scalar mergeDist = mergeTol*mag(bb.max() - bb.min());
+    scalar mergeDist = mergeTol * bb.mag();
 
     Info<< "Overall meshes bounding box : " << bb << nl
         << "Relative tolerance          : " << mergeTol << nl
@@ -276,26 +284,15 @@ scalar getMergeDistance
 
 void printMeshData(Ostream& os, const polyMesh& mesh)
 {
-    os  << "Number of points:           "
-        << mesh.points().size() << nl
-        << "          edges:            "
-        << mesh.edges().size() << nl
-        << "          faces:            "
-        << mesh.faces().size() << nl
-        << "          internal faces:   "
-        << mesh.faceNeighbour().size() << nl
-        << "          cells:            "
-        << mesh.cells().size() << nl
-        << "          boundary patches: "
-        << mesh.boundaryMesh().size() << nl
-        << "          point zones:      "
-        << mesh.pointZones().size() << nl
-
-        << "          face zones:       "
-        << mesh.faceZones().size() << nl
-
-        << "          cell zones:       "
-        << mesh.cellZones().size() << nl;
+    os  << "Number of points:           " << mesh.points().size() << nl
+        << "          edges:            " << mesh.edges().size() << nl
+        << "          faces:            " << mesh.faces().size() << nl
+        << "          internal faces:   " << mesh.faceNeighbour().size() << nl
+        << "          cells:            " << mesh.cells().size() << nl
+        << "          boundary patches: " << mesh.boundaryMesh().size() << nl
+        << "          point zones:      " << mesh.pointZones().size() << nl
+        << "          face zones:       " << mesh.faceZones().size() << nl
+        << "          cell zones:       " << mesh.cellZones().size() << nl;
 }
 
 
@@ -308,7 +305,7 @@ void writeDecomposition
 )
 {
     Info<< "Writing wanted cell distribution to volScalarField " << name
-        << " for postprocessing purposes." << nl << endl;    
+        << " for postprocessing purposes." << nl << endl;
 
     volScalarField procCells
     (
@@ -513,7 +510,7 @@ int main(int argc, char *argv[])
 #   include "setRootCase.H"
 
     // Create processor directory if non-existing
-    if (!Pstream::master() && !dir(args.path()))
+    if (!Pstream::master() && !isDir(args.path()))
     {
         Pout<< "Creating case directory " << args.path() << endl;
         mkDir(args.path());
@@ -535,7 +532,7 @@ int main(int argc, char *argv[])
     const fileName meshDir = runTime.path()/masterInstDir/polyMesh::meshSubDir;
 
     boolList haveMesh(Pstream::nProcs(), false);
-    haveMesh[Pstream::myProcNo()] = dir(meshDir);
+    haveMesh[Pstream::myProcNo()] = isDir(meshDir);
     Pstream::gatherList(haveMesh);
     Pstream::scatterList(haveMesh);
     Info<< "Per processor mesh availability : " << haveMesh << endl;

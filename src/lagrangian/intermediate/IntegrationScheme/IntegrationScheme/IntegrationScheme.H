@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -110,6 +110,7 @@ public:
 
 
 private:
+
     // Private data
 
         //- Name of the Integration variable
@@ -152,11 +153,7 @@ public:
     // Constructors
 
         //- Construct from components
-        IntegrationScheme
-        (
-            const word& phiName,
-            const dictionary& dict
-        );
+        IntegrationScheme(const word& phiName, const dictionary& dict);
 
 
     // Selectors
@@ -170,8 +167,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~IntegrationScheme();
+    virtual ~IntegrationScheme();
 
 
     // Member Functions

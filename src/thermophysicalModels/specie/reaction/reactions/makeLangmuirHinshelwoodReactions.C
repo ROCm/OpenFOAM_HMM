@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,17 +26,16 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeReactionJanaf.H"
+#include "makeReactionThermo.H"
+#include "reactionTypes.H"
 #include "LangmuirHinshelwoodReactionRate.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-    makeIRReactions(LangmuirHinshelwoodReactionRate)
-
+    makeIRReactions(gasThermoPhysics, LangmuirHinshelwoodReactionRate)
+    makeIRReactions(icoPoly8ThermoPhysics, LangmuirHinshelwoodReactionRate)
 }
 
 // ************************************************************************* //

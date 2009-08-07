@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,6 @@ meshToMesh::meshToMesh
     fromMesh_(meshFrom),
     toMesh_(meshTo),
     patchMap_(patchMap),
-    fromPointMesh_(meshFrom),
     cellAddressing_(toMesh_.nCells()),
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
     inverseDistanceWeightsPtr_(NULL)
@@ -123,7 +122,6 @@ meshToMesh::meshToMesh
 :
     fromMesh_(meshFrom),
     toMesh_(meshTo),
-    fromPointMesh_(meshFrom),
     cellAddressing_(toMesh_.nCells()),
     boundaryAddressing_(toMesh_.boundaryMesh().size()),
     inverseDistanceWeightsPtr_(NULL)

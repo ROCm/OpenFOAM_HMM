@@ -1,4 +1,3 @@
-
 # create a plugin that adds a reader to the ParaView GUI
 # it is added in the file dialog when doing opens/saves.
 
@@ -8,6 +7,8 @@
 # the pqReader.xml file contains xml defining readers with their
 # file extensions and descriptions.
 
+cmake_minimum_required(VERSION 2.4)
+
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
 
@@ -16,13 +17,13 @@ LINK_DIRECTORIES(
 )
 
 INCLUDE_DIRECTORIES(
-    $ENV{FOAM_SRC}/OpenFOAM/lnInclude
-    $ENV{FOAM_SRC}/finiteVolume/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
+    $ENV{WM_PROJECT_DIR}/src/finiteVolume/lnInclude
     ${PROJECT_SOURCE_DIR}/../vtkPV3Foam
 )
 
 ADD_DEFINITIONS(
-    -D$ENV{WM_PRECISION_OPTION}
+    -DWM_$ENV{WM_PRECISION_OPTION}
 )
 
 # Set output library destination to plugin folder
@@ -52,3 +53,4 @@ TARGET_LINK_LIBRARIES(
     finiteVolume
     vtkPV3Foam
 )
+#-----------------------------------------------------------------------------

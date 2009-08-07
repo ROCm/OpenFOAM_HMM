@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -143,8 +143,6 @@ public:
             const scalar vapourSurfaceEnthalpy,
             const scalar vapourFarEnthalpy,
             const scalar cpGas,
-            const scalar Xs,
-            const scalar Xf,
             const scalar temperature,
             const scalar kLiq
         ) const = 0;

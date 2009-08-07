@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,12 +28,16 @@ Application
 Description
     Solver for 2 incompressible, isothermal immiscible fluids with phase-change
     (e.g. cavitation).  Uses a VOF (volume of fluid) phase-fraction based
-    interface capturing approach.  The momentum and other fluid properties are
-    of the "mixture" and a single momentum equation is solved.
+    interface capturing approach.
+
+    The momentum and other fluid properties are of the "mixture" and a
+    single momentum equation is solved.
 
     The set of phase-change models provided are designed to simulate cavitation
     but other mechanisms of phase-change are supported within this solver
     framework.
+
+    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
 \*---------------------------------------------------------------------------*/
 
@@ -42,7 +46,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "phaseChangeTwoPhaseMixture.H"
-#include "incompressible/LESModel/LESModel.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -51,7 +55,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
@@ -60,7 +64,7 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
@@ -75,9 +79,7 @@ int main(int argc, char *argv[])
 
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-        twoPhaseProperties->correct();
-
-        #include "gammaEqnSubCycle.H"
+        #include "alphaEqnSubCycle.H"
 
         turbulence->correct();
 
@@ -95,6 +97,8 @@ int main(int argc, char *argv[])
             #include "continuityErrs.H"
         }
 
+        twoPhaseProperties->correct();
+
         runTime.write();
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
@@ -104,7 +108,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

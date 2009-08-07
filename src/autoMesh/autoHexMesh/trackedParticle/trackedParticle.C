@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,7 +56,7 @@ Foam::trackedParticle::trackedParticle
     bool readFields
 )
 :
-    ExactParticle<trackedParticle>(c, is)
+    ExactParticle<trackedParticle>(c, is, readFields)
 {
     if (readFields)
     {
@@ -112,6 +112,28 @@ bool Foam::trackedParticle::move(trackedParticle::trackData& td)
     }
 
     return td.keepParticle;
+}
+
+
+bool Foam::trackedParticle::hitPatch
+(
+    const polyPatch&,
+    trackedParticle::trackData& td,
+    const label patchI
+)
+{
+    return false;
+}
+
+
+bool Foam::trackedParticle::hitPatch
+(
+    const polyPatch&,
+    int&,
+    const label
+)
+{
+    return false;
 }
 
 

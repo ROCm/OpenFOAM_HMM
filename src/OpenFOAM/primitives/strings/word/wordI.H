@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -119,42 +119,47 @@ inline bool Foam::word::valid(char c)
 {
     return
     (
-          !isspace(c)
-     && c != '"'
-     && c != '/'
-     && c != ';'
-     && c != '{'
-     && c != '}'
+        !isspace(c)
+     && c != '"'   // string quote
+     && c != '\''  // string quote
+     && c != '/'   // path separator
+     && c != ';'   // end statement
+     && c != '{'   // beg subdict
+     && c != '}'   // end subdict
     );
 }
 
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-inline void Foam::word::operator=(const word& q)
+inline const Foam::word& Foam::word::operator=(const word& q)
 {
     string::operator=(q);
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const string& q)
+inline const Foam::word& Foam::word::operator=(const string& q)
 {
     string::operator=(q);
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const std::string& q)
+inline const Foam::word& Foam::word::operator=(const std::string& q)
 {
     string::operator=(q);
     stripInvalid();
+    return *this;
 }
 
 
-inline void Foam::word::operator=(const char* q)
+inline const Foam::word& Foam::word::operator=(const char* q)
 {
     string::operator=(q);
     stripInvalid();
+    return *this;
 }
 
 
@@ -162,16 +167,16 @@ inline void Foam::word::operator=(const char* q)
 
 inline Foam::word Foam::operator&(const word& a, const word& b)
 {
-    if (!b.size())
-    {
-        return a;
-    }
-    else
+    if (b.size())
     {
         string ub = b;
         ub.string::operator[](0) = char(toupper(ub.string::operator[](0)));
 
         return a + ub;
+    }
+    else
+    {
+        return a;
     }
 }
 

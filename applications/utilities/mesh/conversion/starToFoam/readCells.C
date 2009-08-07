@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,7 +48,7 @@ void starMesh::addRegularCell
     label regularTypeFlag = -1;
 
     // grab the shape from the table
-    const cellModel* curModelPtr = reinterpret_cast<cellModel*>(NULL);
+    const cellModel* curModelPtr = reinterpret_cast<cellModel*>(0);
 
     if      // Tetrahedron
     (
@@ -130,7 +130,7 @@ void starMesh::addSAMMcell
 
     // grab the shape from the table
     label sammTypeFlag = -1;
-    const cellModel* curModelPtr = reinterpret_cast<cellModel*>(NULL);
+    const cellModel* curModelPtr = reinterpret_cast<cellModel*>(0);
 
     switch (typeFlag)
     {

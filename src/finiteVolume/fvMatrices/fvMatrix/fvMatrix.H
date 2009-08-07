@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -198,7 +198,7 @@ public:
 
     //- Solver class returned by the solver function
     //  used for systems in which it is useful to cache the solver for reuse
-    //  e.g. is the solver is potentialy expensive to construct (AMG) and can
+    //  e.g. if the solver is potentialy expensive to construct (AMG) and can
     //  be used several times (PISO)
     class fvSolver
     {
@@ -220,8 +220,8 @@ public:
         // Member functions
 
             //- Solve returning the solution statistics.
-            //  Solver controls read from Istream
-            lduMatrix::solverPerformance solve(Istream&);
+            //  Use the given solver controls
+            lduMatrix::solverPerformance solve(const dictionary&);
 
             //- Solve returning the solution statistics.
             //  Solver controls read from fvSolution
@@ -326,7 +326,7 @@ public:
             //- Set reference level for solution
             void setReference
             (
-                const label cell,
+                const label celli,
                 const Type& value,
                 const bool forceReference = false
             );
@@ -359,16 +359,16 @@ public:
             );
 
             //- Construct and return the solver
-            //  Solver controls read from Istream
-            autoPtr<fvSolver> solver(Istream&);
+            //  Use the given solver controls
+            autoPtr<fvSolver> solver(const dictionary&);
 
             //- Construct and return the solver
             //  Solver controls read from fvSolution
             autoPtr<fvSolver> solver();
 
             //- Solve returning the solution statistics.
-            //  Solver controls read from Istream
-            lduMatrix::solverPerformance solve(Istream&);
+            //  Use the given solver controls
+            lduMatrix::solverPerformance solve(const dictionary&);
 
             //- Solve returning the solution statistics.
             //  Solver controls read from fvSolution
@@ -518,16 +518,20 @@ void checkMethod
 
 
 //- Solve returning the solution statistics given convergence tolerance
-//  Solver controls read Istream
+//  Use the given solver controls
 template<class Type>
-lduMatrix::solverPerformance solve(fvMatrix<Type>&, Istream&);
+lduMatrix::solverPerformance solve(fvMatrix<Type>&, const dictionary&);
 
 
 //- Solve returning the solution statistics given convergence tolerance,
 //  deleting temporary matrix after solution.
-//  Solver controls read Istream
+//  Use the given solver controls
 template<class Type>
-lduMatrix::solverPerformance solve(const tmp<fvMatrix<Type> >&, Istream&);
+lduMatrix::solverPerformance solve
+(
+    const tmp<fvMatrix<Type> >&,
+    const dictionary&
+);
 
 
 //- Solve returning the solution statistics given convergence tolerance
@@ -541,6 +545,18 @@ lduMatrix::solverPerformance solve(fvMatrix<Type>&);
 //  Solver controls read fvSolution
 template<class Type>
 lduMatrix::solverPerformance solve(const tmp<fvMatrix<Type> >&);
+
+
+//- Return the correction form of the given matrix
+//  by subtracting the matrix multiplied by the current field
+template<class Type>
+tmp<fvMatrix<Type> > correction(const fvMatrix<Type>&);
+
+
+//- Return the correction form of the given temporary matrix
+//  by subtracting the matrix multiplied by the current field
+template<class Type>
+tmp<fvMatrix<Type> > correction(const tmp<fvMatrix<Type> >&);
 
 
 // * * * * * * * * * * * * * * * Global operators  * * * * * * * * * * * * * //

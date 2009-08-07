@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -92,20 +92,20 @@ public:
 
         //- Construct on freestore as copy with reference to the
         //  dictionary the copy belongs to
-        virtual Foam::autoPtr<entry> clone
+        virtual autoPtr<entry> clone
         (
             const dictionary& parentDict
         ) const = 0;
 
         //- Construct on freestore as copy
         //  Note: the parent directory is set to dictionary::null
-        virtual Foam::autoPtr<entry> clone() const;
+        virtual autoPtr<entry> clone() const;
 
         //- Construct from Istream and insert into dictionary
         static bool New(dictionary& parentDict, Istream& is);
 
         //- Construct on freestore from Istream and return
-        static Foam::autoPtr<entry> New(Istream& is);
+        static autoPtr<entry> New(Istream& is);
 
 
     // Destructor

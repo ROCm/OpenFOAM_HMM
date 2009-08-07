@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,7 +62,7 @@ void pointPatchInterpolation::interpolate
     // patch
 
     const fvBoundaryMesh& bm = fvMesh_.boundary();
-    const pointBoundaryMesh& pbm = pointMesh_.boundary();
+    const pointBoundaryMesh& pbm = pointMesh::New(fvMesh_).boundary();
 
     forAll(bm, patchi)
     {

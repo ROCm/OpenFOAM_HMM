@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,8 +42,7 @@ addToRunTimeSelectionTable(LESdelta, cubeRootVolDelta, dictionary);
 
 void cubeRootVolDelta::calcDelta()
 {
-    const Vector<label>& directions = mesh().directions();
-    label nD = (directions.nComponents + cmptSum(directions))/2;
+    label nD = mesh().nGeometricD();
 
     if (nD == 3)
     {
@@ -55,14 +54,15 @@ void cubeRootVolDelta::calcDelta()
             << "Case is 2D, LES is not strictly applicable\n"
             << endl;
 
+        const Vector<label>& directions = mesh().geometricD();
+
         scalar thickness = 0.0;
         for (direction dir=0; dir<directions.nComponents; dir++)
         {
             if (directions[dir] == -1)
             {
-                boundBox bb(mesh().points(), false);
-
-                thickness = (bb.max() - bb.min())[dir];
+                thickness = mesh().bounds().span()[dir];
+                break;
             }
         }
 

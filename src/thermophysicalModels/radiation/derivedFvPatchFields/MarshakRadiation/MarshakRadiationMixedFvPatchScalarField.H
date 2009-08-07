@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Class
     Foam::MarshakRadiationFvPatchScalarField
 
 Description
-    Radiation temperature taken from calculated temperaure
+    Marshak boundary for radiation G field
+    - radiation temperature taken from patch value
 
 SourceFiles
     MarshakRadiationFvPatchScalarField.C

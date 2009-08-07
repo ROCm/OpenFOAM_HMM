@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,13 +33,11 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-//- Construct null
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor()
 {}
 
 
-//- Construct given VectorSpace
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor
 (
@@ -50,7 +48,6 @@ inline SymmTensor<Cmpt>::SymmTensor
 {}
 
 
-//- Construct given SphericalTensor
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
 {
@@ -60,7 +57,6 @@ inline SymmTensor<Cmpt>::SymmTensor(const SphericalTensor<Cmpt>& st)
 }
 
 
-//- Construct from components
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor
 (
@@ -75,7 +71,6 @@ inline SymmTensor<Cmpt>::SymmTensor
 }
 
 
-//- Construct from Istream
 template <class Cmpt>
 inline SymmTensor<Cmpt>::SymmTensor(Istream& is)
 :
@@ -159,7 +154,6 @@ inline Cmpt& SymmTensor<Cmpt>::zz()
 }
 
 
-//- Return symmetric tensor transpose
 template <class Cmpt>
 inline const SymmTensor<Cmpt>& SymmTensor<Cmpt>::T() const
 {
@@ -262,7 +256,7 @@ inline Cmpt magSqr(const SymmTensor<Cmpt>& st)
 }
 
 
-//- Return the strace of a symmetric tensor
+//- Return the trace of a symmetric tensor
 template <class Cmpt>
 inline Cmpt tr(const SymmTensor<Cmpt>& st)
 {
@@ -286,7 +280,7 @@ inline const SymmTensor<Cmpt>& symm(const SymmTensor<Cmpt>& st)
 }
 
 
-//- Return the stwice the symmetric part of a symmetric tensor
+//- Return twice the symmetric part of a symmetric tensor
 template <class Cmpt>
 inline SymmTensor<Cmpt> twoSymm(const SymmTensor<Cmpt>& st)
 {
@@ -323,22 +317,19 @@ inline Cmpt det(const SymmTensor<Cmpt>& st)
 }
 
 
-//- Return the cofactor tensor of a symmetric tensor
+//- Return the cofactor symmetric tensor of a symmetric tensor
 template <class Cmpt>
-inline SymmTensor<Cmpt> cofactors(const SymmTensor<Cmpt>& st)
+inline SymmTensor<Cmpt> cof(const SymmTensor<Cmpt>& st)
 {
     return SymmTensor<Cmpt>
     (
         st.yy()*st.zz() - st.yz()*st.yz(),
         st.xz()*st.yz() - st.xy()*st.zz(),
-        st.xy()*st.yz() - st.yy()*st.xz(),
+        st.xy()*st.yz() - st.xz()*st.yy(),
 
-        st.xz()*st.yz() - st.xy()*st.zz(),
         st.xx()*st.zz() - st.xz()*st.xz(),
         st.xy()*st.xz() - st.xx()*st.yz(),
 
-        st.xy()*st.yz() - st.xz()*st.yy(),
-        st.xy()*st.xz() - st.xx()*st.yz(),
         st.xx()*st.yy() - st.xy()*st.xy()
     );
 }
@@ -370,7 +361,7 @@ inline SymmTensor<Cmpt> inv(const SymmTensor<Cmpt>& st)
 }
 
 
-//- Return the 1spt invariant of a symmetric tensor
+//- Return the 1st invariant of a symmetric tensor
 template <class Cmpt>
 inline Cmpt invariantI(const SymmTensor<Cmpt>& st)
 {
@@ -462,14 +453,9 @@ operator&(const SphericalTensor<Cmpt>& spt1, const SymmTensor<Cmpt>& st2)
 {
     return SymmTensor<Cmpt>
     (
-        spt1.ii()*st2.xx(),
-        spt1.ii()*st2.xy(),
-        spt1.ii()*st2.xz(),
-
-                          spt1.ii()*st2.yy(),
-                          spt1.ii()*st2.yz(),
-
-                                            spt1.ii()*st2.zz()
+        spt1.ii()*st2.xx(), spt1.ii()*st2.xy(), spt1.ii()*st2.xz(),
+                            spt1.ii()*st2.yy(), spt1.ii()*st2.yz(),
+                                                spt1.ii()*st2.zz()
     );
 }
 
@@ -481,14 +467,9 @@ operator&(const SymmTensor<Cmpt>& st1, const SphericalTensor<Cmpt>& spt2)
 {
     return SymmTensor<Cmpt>
     (
-        st1.xx()*spt2.ii(),
-                          st1.xy()*spt2.ii(),
-                                            st1.xz()*spt2.ii(),
-
-                          st1.yy()*spt2.ii(),
-                                            st1.yz()*spt2.ii(),
-
-                                            st1.zz()*spt2.ii()
+        st1.xx()*spt2.ii(), st1.xy()*spt2.ii(), st1.xz()*spt2.ii(),
+                            st1.yy()*spt2.ii(), st1.yz()*spt2.ii(),
+                                                st1.zz()*spt2.ii()
     );
 }
 
@@ -539,7 +520,6 @@ public:
     typedef SymmTensor<Cmpt> type;
 };
 
-#ifndef __CINT__
 template<class Cmpt>
 class innerProduct<SymmTensor<Cmpt>, SymmTensor<Cmpt> >
 {
@@ -547,7 +527,6 @@ public:
 
     typedef SymmTensor<Cmpt> type;
 };
-
 
 template<class Cmpt>
 class innerProduct<SymmTensor<Cmpt>, Vector<Cmpt> >
@@ -597,7 +576,7 @@ public:
 
     typedef SymmTensor<Cmpt> type;
 };
-#endif
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

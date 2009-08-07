@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,7 @@ Foam::smoothSolver::smoothSolver
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& solverData
+    const dictionary& solverControls
 )
 :
     lduMatrix::solver
@@ -59,9 +59,8 @@ Foam::smoothSolver::smoothSolver
         interfaceBouCoeffs,
         interfaceIntCoeffs,
         interfaces,
-        solverData
-    ),
-    nSweeps_(1)
+        solverControls
+    )
 {
     readControls();
 }
@@ -72,7 +71,7 @@ Foam::smoothSolver::smoothSolver
 void Foam::smoothSolver::readControls()
 {
     lduMatrix::solver::readControls();
-    controlDict_.readIfPresent("nSweeps", nSweeps_);
+    nSweeps_ = controlDict_.lookupOrDefault<label>("nSweeps", 1);
 }
 
 
@@ -96,7 +95,7 @@ Foam::lduMatrix::solverPerformance Foam::smoothSolver::solve
             interfaceBouCoeffs_,
             interfaceIntCoeffs_,
             interfaces_,
-            controlDict_.lookup("smoother")
+            controlDict_
         );
 
         smootherPtr->smooth
@@ -144,7 +143,7 @@ Foam::lduMatrix::solverPerformance Foam::smoothSolver::solve
                 interfaceBouCoeffs_,
                 interfaceIntCoeffs_,
                 interfaces_,
-                controlDict_.lookup("smoother")
+                controlDict_
             );
 
             // Smoothing loop

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ License
 #include "boundaryRegion.H"
 #include "IOMap.H"
 #include "OFstream.H"
+#include "stringListOps.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -94,6 +95,31 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names() const
 }
 
 
+Foam::Map<Foam::word> Foam::boundaryRegion::names
+(
+    const List<wordRe>& patterns
+) const
+{
+    Map<word> lookup;
+
+    forAllConstIter(Map<dictionary>, *this, iter)
+    {
+        word lookupName = iter().lookupOrDefault<word>
+        (
+            "Label",
+            "boundaryRegion_" + Foam::name(iter.key())
+        );
+
+        if (findStrings(patterns, lookupName))
+        {
+            lookup.insert(iter.key(), lookupName);
+        }
+    }
+
+    return lookup;
+}
+
+
 Foam::Map<Foam::word> Foam::boundaryRegion::boundaryTypes() const
 {
     Map<word> lookup;
@@ -113,7 +139,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::boundaryTypes() const
 
 Foam::label Foam::boundaryRegion::findIndex(const word& name) const
 {
-    if (!name.size())
+    if (name.empty())
     {
         return -1;
     }
@@ -228,7 +254,7 @@ void Foam::boundaryRegion::operator=(const Map<dictionary>& rhs)
 
 void Foam::boundaryRegion::rename(const dictionary& mapDict)
 {
-    if (!mapDict.size())
+    if (mapDict.empty())
     {
         return;
     }

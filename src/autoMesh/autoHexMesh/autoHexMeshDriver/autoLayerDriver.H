@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,9 +100,6 @@ class autoLayerDriver
 
         //- Mesh+surface
         meshRefinement& meshRefiner_;
-
-        //- From surface region to patch
-        const labelList globalToPatch_;
 
 
 
@@ -255,9 +252,12 @@ class autoLayerDriver
                 (
                     const indirectPrimitivePatch& pp,
                     const labelList& patchIDs,
+
                     const scalarField& patchExpansionRatio,
-                    const scalarField& patchFinalLayerRatio,
-                    const scalarField& patchRelMinThickness,
+                    const bool relativeSizes,
+                    const scalarField& patchFinalLayerThickness,
+                    const scalarField& patchMinThickness,
+
                     const labelList& cellLevel,
                     const labelList& patchNLayers,
                     const scalar edge0Len,
@@ -370,7 +370,7 @@ class autoLayerDriver
                 static void averageNeighbours
                 (
                     const polyMesh& mesh,
-                    const PackedList<1>& isMasterEdge,
+                    const PackedBoolList& isMasterEdge,
                     const labelList& meshEdges,
                     const labelList& meshPoints,
                     const edgeList& edges,
@@ -382,7 +382,7 @@ class autoLayerDriver
                 //- Calculate inverse sum of edge weights (currently always 1.0)
                 void sumWeights
                 (
-                    const PackedList<1>& isMasterEdge,
+                    const PackedBoolList& isMasterEdge,
                     const labelList& meshEdges,
                     const labelList& meshPoints,
                     const edgeList& edges,
@@ -393,7 +393,7 @@ class autoLayerDriver
                 void smoothField
                 (
                     const motionSmoother& meshMover,
-                    const PackedList<1>& isMasterEdge,
+                    const PackedBoolList& isMasterEdge,
                     const labelList& meshEdges,
                     const scalarField& fieldMin,
                     const label& nSmoothDisp,
@@ -404,7 +404,7 @@ class autoLayerDriver
                 void smoothPatchNormals
                 (
                     const motionSmoother& meshMover,
-                    const PackedList<1>& isMasterEdge,
+                    const PackedBoolList& isMasterEdge,
                     const labelList& meshEdges,
                     const label nSmoothDisp,
                     pointField& normals
@@ -414,7 +414,7 @@ class autoLayerDriver
                 void smoothNormals
                 (
                     const label nSmoothDisp,
-                    const PackedList<1>& isMasterEdge,
+                    const PackedBoolList& isMasterEdge,
                     const labelList& fixedPoints,
                     pointVectorField& normals
                 ) const;
@@ -444,7 +444,7 @@ class autoLayerDriver
                 void findIsolatedRegions
                 (
                     const indirectPrimitivePatch& pp,
-                    const PackedList<1>& isMasterEdge,
+                    const PackedBoolList& isMasterEdge,
                     const labelList& meshEdges,
                     const scalar minCosLayerTermination,
                     scalarField& field,
@@ -470,6 +470,7 @@ class autoLayerDriver
                 void shrinkMeshMedialDistance
                 (
                     motionSmoother& meshMover,
+                    const dictionary& meshQualityDict,
                     const label nSmoothThickness,
                     const scalar maxThicknessToMedialRatio,
                     const label nAllowableErrors,
@@ -505,11 +506,7 @@ public:
     // Constructors
 
         //- Construct from components
-        autoLayerDriver
-        (
-            meshRefinement& meshRefiner,
-            const labelList& globalToPatch
-        );
+        autoLayerDriver(meshRefinement& meshRefiner);
 
 
     // Member Functions

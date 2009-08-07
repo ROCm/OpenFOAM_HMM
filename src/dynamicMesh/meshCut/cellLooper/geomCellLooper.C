@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,7 +31,7 @@ License
 #include "meshTools.H"
 #include "SortableList.H"
 #include "triSurfaceTools.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "ListOps.H"
 #include "transform.H"
 
@@ -53,7 +53,6 @@ namespace Foam
 {
 
 defineTypeNameAndDebug(geomCellLooper, 0);
-
 addToRunTimeSelectionTable(cellLooper, geomCellLooper, word);
 
 }
@@ -187,8 +186,8 @@ bool Foam::geomCellLooper::edgeEndsCut
 
     const edge& e = mesh().edges()[edgeI];
 
-    label prevCut = loop[(index == 0 ? loop.size()-1 : index-1)];
-    label nextCut = loop[(index == loop.size()-1 ? 0 : index+1)];
+    const label prevCut = loop[loop.rcIndex(index)];
+    const label nextCut = loop[loop.fcIndex(index)];
 
     if (!isEdge(prevCut) && !isEdge(nextCut))
     {
@@ -360,7 +359,7 @@ bool Foam::geomCellLooper::cut
                 }
                 else
                 {
-                    // Cut through edge end point. Might be duplicate 
+                    // Cut through edge end point. Might be duplicate
                     // since connected edge might also be snapped to same
                     // endpoint so only insert if unique.
                     label cut = vertToEVert(cutVertI);

@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -48,15 +48,19 @@ logReport () {
     UzSS=`grep -E "Uz[:| ]*solution singularity" $1`
     completed=`grep -E "^[\t ]*[eE]nd" $1`
 
-    if [ "$fatalError" ] ; then
+    if [ "$fatalError" ]
+    then
         echo "$appAndCase: ** FOAM FATAL ERROR **"
         return
-    elif [ "$UxSS" -a "$UySS" -a "$UzSS" ] ; then
+    elif [ "$UxSS" -a "$UySS" -a "$UzSS" ]
+    then
         echo "$appAndCase: ** Solution singularity **"
         return
-    elif [ "$completed" ] ; then
+    elif [ "$completed" ]
+    then
         completionTime=`tail -10 $log | grep Execution | cut -d= -f2 | sed 's/^[ \t]*//'`
-        if [ "$completionTime" ] ; then
+        if [ "$completionTime" ]
+        then
             completionTime="in $completionTime"
         fi
         echo "$appAndCase: completed $completionTime"
@@ -89,6 +93,5 @@ do
 done
 
 find . -name "log.*" -exec cat {} \; >> logs
-
 
 # ----------------------------------------------------------------- end-of-file

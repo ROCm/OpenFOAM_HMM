@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,7 +55,7 @@ void pointPatchInterpolation::makePatchPatchAddressing()
     }
 
     const fvBoundaryMesh& bm = fvMesh_.boundary();
-    const pointBoundaryMesh& pbm = pointMesh_.boundary();
+    const pointBoundaryMesh& pbm = pointMesh::New(fvMesh_).boundary();
 
     // first count the total number of patch-patch points
 
@@ -188,7 +188,7 @@ void pointPatchInterpolation::makePatchPatchWeights()
             fvMesh_.polyMesh::instance(),
             fvMesh_
         ),
-        pointMesh_,
+        pointMesh::New(fvMesh_),
         dimensionedScalar("zero", dimless, 0)
     );
 
@@ -213,13 +213,12 @@ void pointPatchInterpolation::makePatchPatchWeights()
 
                 if (!isA<emptyFvPatch>(bm[patchi]) && !bm[patchi].coupled())
                 {
-                    pw[nFacesAroundPoint] =
-                        1.0/mag
-                        (
-                            pointLoc
-                          - centres.boundaryField()[patchi]
-                                [bm[patchi].patch().whichFace(curFaces[facei])]
-                        );
+                    vector d =
+                        pointLoc
+                      - centres.boundaryField()[patchi]
+                            [bm[patchi].patch().whichFace(curFaces[facei])];
+
+                    pw[nFacesAroundPoint] = 1.0/(mag(d)+VSMALL);
 
                     nFacesAroundPoint++;
                 }
@@ -285,14 +284,9 @@ void pointPatchInterpolation::makePatchPatchWeights()
 
 // * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * * //
 
-pointPatchInterpolation::pointPatchInterpolation
-(
-    const fvMesh& vm,
-    const pointMesh& pm
-)
+pointPatchInterpolation::pointPatchInterpolation(const fvMesh& vm)
 :
-    fvMesh_(vm),
-    pointMesh_(pm)
+    fvMesh_(vm)
 {
     updateMesh();
 }

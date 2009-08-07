@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,9 +100,9 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        if (!disallowDefaultFvsPatchField)
+        if (!disallowGenericFvsPatchField)
         {
-            cstrIter = dictionaryConstructorTablePtr_->find("default");
+            cstrIter = dictionaryConstructorTablePtr_->find("generic");
         }
 
         if (cstrIter == dictionaryConstructorTablePtr_->end())
@@ -120,7 +120,7 @@ tmp<fvsPatchField<Type> > fvsPatchField<Type>::New
         }
     }
 
-    if 
+    if
     (
         !dict.found("patchType")
      || word(dict.lookup("patchType")) != p.type()

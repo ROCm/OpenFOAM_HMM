@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,7 +45,7 @@ void Foam::fvMatrix<Foam::scalar>::setComponentReference
             internalCoeffs_[patchi][facei] +=
                 diag()[psi_.mesh().boundary()[patchi].faceCells()[facei]];
 
-            boundaryCoeffs_[patchi][facei] += 
+            boundaryCoeffs_[patchi][facei] +=
                 diag()[psi_.mesh().boundary()[patchi].faceCells()[facei]]
                *value;
         }
@@ -57,12 +57,12 @@ template<>
 Foam::autoPtr<Foam::fvMatrix<Foam::scalar>::fvSolver>
 Foam::fvMatrix<Foam::scalar>::solver
 (
-    Istream& solverControls
+    const dictionary& solverControls
 )
 {
     if (debug)
     {
-        Info<< "fvMatrix<scalar>::solver(Istream& solverControls) : "
+        Info<< "fvMatrix<scalar>::solver(const dictionary& solverControls) : "
                "solver for fvMatrix<scalar>"
             << endl;
     }
@@ -96,7 +96,7 @@ Foam::fvMatrix<Foam::scalar>::solver
 template<>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 (
-    Istream& solverControls
+    const dictionary& solverControls
 )
 {
     scalarField saveDiag = fvMat_.diag();
@@ -105,8 +105,10 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
     scalarField totalSource = fvMat_.source();
     fvMat_.addBoundarySource(totalSource, false);
 
+    // assign new solver controls
     solver_->read(solverControls);
-    lduMatrix::solverPerformance solverPerf = 
+
+    lduMatrix::solverPerformance solverPerf =
         solver_->solve(fvMat_.psi().internalField(), totalSource);
 
     solverPerf.print();
@@ -122,12 +124,12 @@ Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::fvSolver::solve
 template<>
 Foam::lduMatrix::solverPerformance Foam::fvMatrix<Foam::scalar>::solve
 (
-    Istream& solverControls
+    const dictionary& solverControls
 )
 {
     if (debug)
     {
-        Info<< "fvMatrix<scalar>::solve(Istream& solverControls) : "
+        Info<< "fvMatrix<scalar>::solve(const dictionary& solverControls) : "
                "solving fvMatrix<scalar>"
             << endl;
     }

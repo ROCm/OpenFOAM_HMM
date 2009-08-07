@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -47,7 +47,14 @@ linearNormal::linearNormal(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
     thickness_(readScalar(coeffDict_.lookup("thickness")))
-{}
+{
+    if (thickness_ <= 0)
+    {
+        FatalErrorIn("linearNormal(const dictionary&)")
+            << "thickness should be positive : " << thickness_
+            << exit(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

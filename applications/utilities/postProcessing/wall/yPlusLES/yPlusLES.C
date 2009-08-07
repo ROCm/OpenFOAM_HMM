@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,8 +32,9 @@ Description
 
 #include "fvCFD.H"
 #include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/LESModel/LESModel.H"
+#include "LESModel.H"
 #include "nearWallDist.H"
+#include "wallDist.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +50,18 @@ int main(int argc, char *argv[])
     {
         runTime.setTime(timeDirs[timeI], timeI);
         Info<< "Time = " << runTime.timeName() << endl;
-        mesh.readUpdate();
+        fvMesh::readUpdateState state = mesh.readUpdate();
+
+        // Wall distance
+        if (timeI == 0 || state != fvMesh::UNCHANGED)
+        {
+            Info<< "Calculating wall distance\n" << endl;
+            wallDist y(mesh, true);
+            Info<< "Writing wall distance to field "
+                << y.name() << nl << endl;
+            y.write();
+        }
+
 
         volScalarField yPlus
         (
@@ -115,6 +127,9 @@ int main(int argc, char *argv[])
                     << " average: " << average(Yp) << nl << endl;
             }
         }
+
+        Info<< "Writing yPlus to field "
+            << yPlus.name() << nl << endl;
 
         yPlus.write();
     }

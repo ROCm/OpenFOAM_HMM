@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -87,8 +87,17 @@ private:
             const bool preserveCouples
         );
 
-        //- Disallow default bitwise copy construct
-        SlicedGeometricField(const SlicedGeometricField&);
+        //- Slice the given field and a create a PtrList of SlicedPatchField
+        //  from which the boundary field is built
+        tmp<FieldField<PatchField, Type> >  slicedBoundaryField
+        (
+            const Mesh& mesh,
+            const FieldField<PatchField, Type>& bField,
+            const bool preserveCouples
+        );
+
+        ////- Disallow default bitwise copy construct
+        //SlicedGeometricField(const SlicedGeometricField&);
 
         //- Disallow default bitwise assignment
         void operator=(const SlicedGeometricField&);
@@ -126,6 +135,27 @@ public:
             const Field<Type>& completeIField,
             const Field<Type>& completeBField,
             const bool preserveCouples=true
+        );
+
+        //- Construct from GeometricField. Reuses full internal and
+        //  patch fields except on couples (preserveCouples=true).
+        SlicedGeometricField
+        (
+            const IOobject&,
+            const GeometricField<Type, PatchField, GeoMesh>&,
+            const bool preserveCouples=true
+        );
+
+        //- Construct as copy
+        SlicedGeometricField
+        (
+            const SlicedGeometricField
+            <
+                Type,
+                PatchField,
+                SlicedPatchField,
+                GeoMesh
+            >&
         );
 
 

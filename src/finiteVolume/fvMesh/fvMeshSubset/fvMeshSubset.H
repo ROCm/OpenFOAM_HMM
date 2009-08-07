@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,7 +60,7 @@ SourceFiles
 #include "fvPatchFieldMapper.H"
 #include "pointPatchFieldMapper.H"
 #include "GeometricField.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "surfaceMesh.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -171,8 +171,6 @@ private:
         //- Subset mesh pointer
         autoPtr<fvMesh> fvMeshSubsetPtr_;
 
-        mutable autoPtr<pointMesh> pointMeshSubsetPtr_;
-
         //- Point mapping array
         labelList pointMap_;
 
@@ -278,11 +276,6 @@ public:
 
             fvMesh& subMesh();
 
-            //- Return reference to demand-driven subset pointMesh
-            const pointMesh& subPointMesh() const;
-
-            pointMesh& subPointMesh();
-
             //- Return point map
             const labelList& pointMap() const;
 
@@ -342,7 +335,6 @@ public:
             (
                 const GeometricField<Type, pointPatchField, pointMesh>&,
                 const pointMesh& sMesh,
-                const objectRegistry& reg,
                 const labelList& patchMap,
                 const labelList& pointMap
             );

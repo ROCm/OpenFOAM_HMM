@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 #   include "setRoots.H"
 #   include "createTimes.H"
 
-    Info<< "Reading master mesh for time = " << runTimeMaster.value() << endl;
+    Info<< "Reading master mesh for time = " << runTimeMaster.timeName() << endl;
 
     Info<< "Create mesh\n" << endl;
     mergePolyMesh masterMesh
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
     );
 
 
-    Info<< "Reading mesh to add for time = " << runTimeToAdd.value() << endl;
+    Info<< "Reading mesh to add for time = " << runTimeToAdd.timeName() << endl;
 
     Info<< "Create mesh\n" << endl;
     polyMesh meshToAdd
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 
     runTimeMaster++;
 
-    Info<< "Writing combined mesh to " << runTimeMaster.value() << endl;
+    Info<< "Writing combined mesh to " << runTimeMaster.timeName() << endl;
 
     masterMesh.addMesh(meshToAdd);
     masterMesh.merge();

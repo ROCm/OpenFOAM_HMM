@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -102,23 +102,7 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
         }
     }
 
-
-    if (hitFacei != -1)
-    {
-        if (trackFraction > 1.0)
-        {
-            // Nearest intersection beyond endPosition so we hit endPosition.
-            this->position_ = endPosition;
-            this->facei_ = -1;
-            return 1.0;
-        }
-        else
-        {
-            this->position_ = intersection;
-            this->facei_ = hitFacei;
-        }
-    }
-    else
+    if (hitFacei == -1)
     {
         // Did not find any intersection. Fall back to original approximate
         // algorithm
@@ -129,8 +113,23 @@ Foam::scalar Foam::ExactParticle<ParticleType>::trackToFace
         );
     }
 
+    if (trackFraction >= (1.0-SMALL))
+    {
+        // Nearest intersection beyond endPosition so we hit endPosition.
+        trackFraction = 1.0;
+        this->position_ = endPosition;
+        this->facei_ = -1;
+        return 1.0;
+    }
+    else
+    {
+        this->position_ = intersection;
+        this->facei_ = hitFacei;
+    }
 
-    // Normal situation (trackFraction 0..1)
+
+    // Normal situation (trackFraction 0..1). Straight copy
+    // of Particle::trackToFace.
 
     bool internalFace = this->cloud().internalFace(this->facei_);
 

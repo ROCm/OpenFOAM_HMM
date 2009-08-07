@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -374,9 +374,9 @@ Foam::mirrorFvMesh::mirrorFvMesh(const IOobject& io)
     mirrorMeshPtr_ = new fvMesh
     (
         io,
-        newPoints,
-        newFaces,
-        newCells
+        xferMove(newPoints),
+        xferMove(newFaces),
+        xferMove(newCells)
     );
 
     fvMesh& pMesh = *mirrorMeshPtr_;

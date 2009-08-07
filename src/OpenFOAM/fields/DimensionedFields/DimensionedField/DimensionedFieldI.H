@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,6 +30,14 @@ namespace Foam
 {
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class Type, class GeoMesh>
+inline const DimensionedField<Type, GeoMesh>&
+DimensionedField<Type, GeoMesh>::null()
+{
+    return *reinterpret_cast< DimensionedField<Type, GeoMesh>* >(0);
+}
+
 
 template<class Type, class GeoMesh>
 inline const typename GeoMesh::Mesh&

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -419,7 +419,31 @@ Foam::edgeFaceCirculator Foam::edgeFaceCirculator::begin() const
 }
 
 
+Foam::edgeFaceCirculator Foam::edgeFaceCirculator::cbegin() const
+{
+    edgeFaceCirculator iter
+    (
+        mesh_,
+        faceLabel_,
+        ownerSide_,
+        index_,
+        isBoundaryEdge_
+    );
+
+    if (isBoundaryEdge_)
+    {
+        iter.setCanonical();
+    }
+    return iter;
+}
+
+
 const Foam::edgeFaceCirculator& Foam::edgeFaceCirculator::end() const
+{
+    return endConstIter;
+}
+
+const Foam::edgeFaceCirculator& Foam::edgeFaceCirculator::cend() const
 {
     return endConstIter;
 }

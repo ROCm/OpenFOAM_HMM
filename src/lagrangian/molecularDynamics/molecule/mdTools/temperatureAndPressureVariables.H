@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,17 +30,21 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-vector accumulatedTotalMomentum(vector::zero);
+vector accumulatedTotalLinearMomentum(vector::zero);
 
 scalar accumulatedTotalMass = 0.0;
 
-scalar accumulatedTotalKE = 0.0;
+scalar accumulatedTotalAngularKE = 0.0;
+
+scalar accumulatedTotalLinearKE = 0.0;
 
 scalar accumulatedTotalPE = 0.0;
 
 scalar accumulatedTotalrDotfSum = 0.0;
 
 label accumulatedNMols = 0;
+
+label accumulatedDOFs = 0;
 
 scalar averageTemperature = 0.0;
 

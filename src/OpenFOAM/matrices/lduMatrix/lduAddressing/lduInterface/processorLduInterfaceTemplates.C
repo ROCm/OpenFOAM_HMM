@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -172,7 +172,7 @@ void Foam::processorLduInterface::compressedSend
     const UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && f.size() && Pstream::floatTransfer)
+    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer && f.size())
     {
         static const label nCmpts = sizeof(Type)/sizeof(scalar);
         label nm1 = (f.size() - 1)*nCmpts;
@@ -243,7 +243,7 @@ void Foam::processorLduInterface::compressedReceive
     UList<Type>& f
 ) const
 {
-    if (sizeof(scalar) != sizeof(float) && f.size() && Pstream::floatTransfer)
+    if (sizeof(scalar) != sizeof(float) && Pstream::floatTransfer && f.size())
     {
         static const label nCmpts = sizeof(Type)/sizeof(scalar);
         label nm1 = (f.size() - 1)*nCmpts;

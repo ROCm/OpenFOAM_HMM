@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,17 +27,11 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "blockMesh.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-labelList blockMesh::createBlockOffsets()
+Foam::labelList Foam::blockMesh::createBlockOffsets()
 {
     Info<< nl << "Creating block offsets" << endl;
 
@@ -63,10 +57,4 @@ labelList blockMesh::createBlockOffsets()
     return BlockOffsets;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
 // ************************************************************************* //
-

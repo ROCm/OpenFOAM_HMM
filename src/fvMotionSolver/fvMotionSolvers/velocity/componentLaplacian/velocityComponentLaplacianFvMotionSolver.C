@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,6 +28,7 @@ License
 #include "motionDiffusivity.H"
 #include "fvmLaplacian.H"
 #include "addToRunTimeSelectionTable.H"
+#include "volPointInterpolation.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -66,7 +67,7 @@ velocityComponentLaplacianFvMotionSolver
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        pointMesh_
+        pointMesh::New(fvMesh_)
     ),
     cellMotionU_
     (
@@ -129,7 +130,11 @@ Foam::velocityComponentLaplacianFvMotionSolver::
 Foam::tmp<Foam::pointField>
 Foam::velocityComponentLaplacianFvMotionSolver::curPoints() const
 {
-    vpi_.interpolate(cellMotionU_, pointMotionU_);
+    volPointInterpolation::New(fvMesh_).interpolate
+    (
+        cellMotionU_,
+        pointMotionU_
+    );
 
     tmp<pointField> tcurPoints(new pointField(fvMesh_.points()));
 

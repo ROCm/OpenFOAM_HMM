@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,14 +56,12 @@ processorVolPatchFieldDecomposer
     const unallocLabelList& addressingSlice
 )
 :
-    addressing_(addressingSlice.size()),
-    weights_(addressingSlice.size())
+    directAddressing_(addressingSlice.size())
 {
-    const scalarField& weights = mesh.weights().internalField();
     const labelList& own = mesh.faceOwner();
     const labelList& neighb = mesh.faceNeighbour();
 
-    forAll (addressing_, i)
+    forAll (directAddressing_, i)
     {
         // Subtract one to align addressing.  
         label ai = mag(addressingSlice[i]) - 1;
@@ -72,15 +70,18 @@ processorVolPatchFieldDecomposer
         {
             // This is a regular face. it has been an internal face
             // of the original mesh and now it has become a face
-            // on the parallel boundary
-            addressing_[i].setSize(2);
-            weights_[i].setSize(2);
+            // on the parallel boundary.
+            // Give face the value of the neighbour.
 
-            addressing_[i][0] = own[ai];
-            addressing_[i][1] = neighb[ai];
-
-            weights_[i][0] = weights[ai];
-            weights_[i][1] = 1.0 - weights[ai];
+            if (addressingSlice[i] >= 0)
+            {
+                // I have the owner so use the neighbour value
+                directAddressing_[i] = neighb[ai];
+            }
+            else
+            {
+                directAddressing_[i] = own[ai];
+            }
         }
         else
         {
@@ -89,13 +90,8 @@ processorVolPatchFieldDecomposer
             // do the interpolation properly (I would need to look
             // up the different (face) list of data), so I will
             // just grab the value from the owner cell
-            // 
-            addressing_[i].setSize(1);
-            weights_[i].setSize(1);
 
-            addressing_[i][0] = own[ai];
-
-            weights_[i][0] = 1.0;
+            directAddressing_[i] = own[ai];
         }
     }
 }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,15 +30,9 @@ License
 #include "ListLoopM.H"
 #include "contiguous.H"
 
+#include <algorithm>
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class T>
-const Foam::UList<T>& Foam::UList<T>::null()
-{
-    UList<T>* nullPtr = reinterpret_cast<UList<T>*>(NULL);
-    return *nullPtr;
-}
-
 
 template<class T>
 void Foam::UList<T>::assign(const UList<T>& a)
@@ -121,6 +115,34 @@ Foam::label Foam::UList<T>::byteSize() const
     }
 
     return this->size_*sizeof(T);
+}
+
+
+template<class T>
+void Foam::sort(UList<T>& a)
+{
+    std::sort(a.begin(), a.end());
+}
+
+
+template<class T, class Cmp>
+void Foam::sort(UList<T>& a, const Cmp& cmp)
+{
+    std::sort(a.begin(), a.end(), cmp);
+}
+
+
+template<class T>
+void Foam::stableSort(UList<T>& a)
+{
+    std::stable_sort(a.begin(), a.end());
+}
+
+
+template<class T, class Cmp>
+void Foam::stableSort(UList<T>& a, const Cmp& cmp)
+{
+    std::stable_sort(a.begin(), a.end(), cmp);
 }
 
 

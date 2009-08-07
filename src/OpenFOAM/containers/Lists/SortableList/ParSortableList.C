@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -125,7 +125,7 @@ void Foam::ParSortableList<Type>::checkAndSend
 
 // Construct from List, sorting the elements
 template <class Type>
-Foam::ParSortableList<Type>::ParSortableList(const List<Type>& values)
+Foam::ParSortableList<Type>::ParSortableList(const UList<Type>& values)
 :
     List<Type>(values),
     indices_(0),

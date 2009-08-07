@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,14 +26,14 @@ Application
     reactingFoam
 
 Description
-    Chemical reaction code.
+    Solver for combustion with chemical reactions.
 
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
 #include "hCombustionThermo.H"
-#include "compressible/RASModel/RASModel.H"
-#include "chemistryModel.H"
+#include "turbulenceModel.H"
+#include "psiChemistryModel.H"
 #include "chemistrySolver.H"
 #include "multivariateScheme.H"
 
@@ -41,52 +41,55 @@ Description
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readChemistryProperties.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "readTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readChemistryProperties.H"
+    #include "readGravitationalAcceleration.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info << "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readTimeControls.H"
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readTimeControls.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "chemistry.H"
-#       include "rhoEqn.H"
-#       include "UEqn.H"
+        #include "chemistry.H"
+        #include "rhoEqn.H"
+        #include "UEqn.H"
 
         for (label ocorr=1; ocorr <= nOuterCorr; ocorr++)
         {
-#           include "YEqn.H"
+            #include "YEqn.H"
 
-#           define Db turbulence->alphaEff()
-#           include "hEqn.H"
+            #define Db turbulence->alphaEff()
+            #include "hEqn.H"
 
             // --- PISO loop
             for (int corr=1; corr<=nCorr; corr++)
             {
-#               include "pEqn.H"
+                #include "pEqn.H"
             }
         }
 
         turbulence->correct();
 
-        rho = thermo->rho();
+        if (runTime.write())
+        {
+            chemistry.dQ()().write();
+        }
 
         runTime.write();
 
@@ -97,7 +100,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,29 +26,20 @@ License
 
 #include "UPtrDictionary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Null constructor
 template<class T>
-UPtrDictionary<T>::UPtrDictionary()
+Foam::UPtrDictionary<T>::UPtrDictionary()
 {}
 
 
-// Copy constructor
 template<class T>
-UPtrDictionary<T>::UPtrDictionary(const UPtrDictionary& dict)
+Foam::UPtrDictionary<T>::UPtrDictionary(const UPtrDictionary& dict)
 :
     DictionaryBase<DLList<T*>, T>(dict)
 {}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

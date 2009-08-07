@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,27 +22,19 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Constant properties thermodynamics package derived from the basic
-    thermo package data type specieThermo.
-
 \*---------------------------------------------------------------------------*/
 
 #include "eConstThermo.H"
 #include "IOstreams.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-eConstThermo::eConstThermo(Istream& is)
+template<class equationOfState>
+Foam::eConstThermo<equationOfState>::eConstThermo(Istream& is)
 :
-    specieThermo(is),
-    CV(readScalar(is)),
-    Hf(readScalar(is))
+    equationOfState(is),
+    Cv_(readScalar(is)),
+    Hf_(readScalar(is))
 {
     is.check("eConstThermo::eConstThermo(Istream& is)");
 }
@@ -50,17 +42,19 @@ eConstThermo::eConstThermo(Istream& is)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Ostream& operator<<(Ostream& os, const eConstThermo& ct)
+template<class equationOfState>
+Foam::Ostream& Foam::operator<<
+(
+    Ostream& os,
+    const eConstThermo<equationOfState>& ct
+)
 {
-    os << (const specieThermo&)ct << tab << ct.CV << tab << ct.Hf;
+    os  << static_cast<const equationOfState&>(ct) << tab
+        << ct.Cv_ << tab << ct.Hf_;
 
     os.check("Ostream& operator<<(Ostream& os, const eConstThermo& ct)");
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,15 +33,11 @@ Description
 {
     dimensionedScalar totalMass = fvc::domainIntegrate(rho);
 
-    scalar sumLocalContErr = 
-    (
-        fvc::domainIntegrate(mag(rho - thermo->rho()))/totalMass
-    ).value();
+    scalar sumLocalContErr =
+        (fvc::domainIntegrate(mag(rho - thermo.rho()))/totalMass).value();
 
-    scalar globalContErr = 
-    (
-        fvc::domainIntegrate(rho - thermo->rho())/totalMass
-    ).value();
+    scalar globalContErr =
+        (fvc::domainIntegrate(rho - thermo.rho())/totalMass).value();
 
     cumulativeContErr += globalContErr;
 

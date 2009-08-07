@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,7 +63,7 @@ class geometricSurfacePatch
         word name_;
 
         //- Index of patch in boundary
-        label boundaryIndex_;
+        label index_;
 
 public:
 
@@ -125,7 +125,7 @@ public:
         //- Return the index of this patch in the boundaryMesh
         label index() const
         {
-            return boundaryIndex_;
+            return index_;
         }
 
         //- Write

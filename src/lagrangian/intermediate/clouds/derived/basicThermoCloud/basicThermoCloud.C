@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,15 +38,14 @@ namespace Foam
 
 Foam::basicThermoCloud::basicThermoCloud
 (
-    const word& cloudType,
-    const volPointInterpolation& vpi,
+    const word& cloudName,
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
     basicThermo& thermo
 )
 :
-    ThermoCloud<basicThermoParcel>(cloudType, vpi, rho, U, g, thermo)
+    ThermoCloud<basicThermoParcel>(cloudName, rho, U, g, thermo)
 {
     basicThermoParcel::readFields(*this);
 }

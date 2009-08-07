@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,9 +39,10 @@ SourceFiles
 #ifndef Matrix_H
 #define Matrix_H
 
-#include "List.H"
-#include "label.H"
 #include "bool.H"
+#include "label.H"
+#include "uLabel.H"
+#include "List.H"
 #include "autoPtr.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -88,6 +89,12 @@ class Matrix
 
 public:
 
+    // Static Member Functions
+
+        //- Return a null Matrix
+        inline static const Matrix<Form, Type>& null();
+
+
     // Constructors
 
         //- Null constructor.
@@ -115,11 +122,7 @@ public:
         ~Matrix();
 
 
-    // Member functions
-
-        //- Return a null Matrix
-        static const Matrix<Form, Type>& null();
-
+    // Member Functions
 
         // Access
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -114,6 +114,22 @@ Foam::cellZone::cellZone
 {}
 
 
+Foam::cellZone::cellZone
+(
+    const word& name,
+    const Xfer<labelList>& addr,
+    const label index,
+    const cellZoneMesh& zm
+)
+:
+    labelList(addr),
+    name_(name),
+    index_(index),
+    zoneMesh_(zm),
+    cellLookupMapPtr_(NULL)
+{}
+
+
 // Construct from dictionary
 Foam::cellZone::cellZone
 (
@@ -137,6 +153,21 @@ Foam::cellZone::cellZone
 (
     const cellZone& cz,
     const labelList& addr,
+    const label index,
+    const cellZoneMesh& zm
+)
+:
+    labelList(addr),
+    name_(cz.name()),
+    index_(index),
+    zoneMesh_(zm),
+    cellLookupMapPtr_(NULL)
+{}
+
+Foam::cellZone::cellZone
+(
+    const cellZone& cz,
+    const Xfer<labelList>& addr,
     const label index,
     const cellZoneMesh& zm
 )

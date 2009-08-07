@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,8 @@ Class
     Foam::eConstThermo
 
 Description
-    Constant properties thermodynamics package derived from the basic
-    thermo package data type specieThermo.
+    Constant properties thermodynamics package templated on an equation of
+    state
 
 SourceFiles
     eConstThermoI.H
@@ -86,28 +86,30 @@ Ostream& operator<<
 
 
 /*---------------------------------------------------------------------------*\
-                           Class eConstThermo Declaration
+                        Class eConstThermo Declaration
 \*---------------------------------------------------------------------------*/
 
+template<class equationOfState>
 class eConstThermo
 :
-    public specieThermo
+    public equationOfState
 {
     // Private data
 
-        scalar CV;
-        scalar Hf;
+        scalar Cv_;
+        scalar Hf_;
 
 
     // Private member functions
 
-        //- construct from components
+        //- Construct from components
         inline eConstThermo
         (
-            const specieThermo& st,
+            const equationOfState& st,
             const scalar cv,
             const scalar hf
         );
+
 
 public:
 
@@ -136,24 +138,20 @@ public:
             //- Enthalpy [J/kmol]
             inline scalar h(const scalar T) const;
 
+            //- Sensible Enthalpy [J/kmol]
+            inline scalar hs(const scalar T) const;
+
+            //- Chemical enthalpy [J/kmol]
+            inline scalar hc() const;
+
             //- Entropy [J/(kmol K)]
             inline scalar s(const scalar T) const;
 
 
-        // Some derived properties
-        // Other derived properties obtained from specieThermo base type
-
-            //- Temperature from Enthalpy given an initial temperature T0
-            inline scalar TH(const scalar h, const scalar T0) const;
-
-            //- Temperature from internal energy given an initial temperature T0
-            inline scalar TE(const scalar e, const scalar T0) const;
-
-
     // Member operators
 
-        inline void operator+=(const hConstThermo&);
-        inline void operator-=(const hConstThermo&);
+        inline void operator+=(const eConstThermo&);
+        inline void operator-=(const eConstThermo&);
 
 
     // Friend operators
@@ -187,7 +185,8 @@ public:
 
         friend Ostream& operator<< <equationOfState>
         (
-            Ostream&, const eConstThermo&
+            Ostream&,
+            const eConstThermo&
         );
 };
 
@@ -199,6 +198,10 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "eConstThermoI.H"
+
+#ifdef NoRepository
+#   include "eConstThermo.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

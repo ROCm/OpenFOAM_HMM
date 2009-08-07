@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -60,8 +60,6 @@ SourceFiles
 namespace Foam
 {
 
-class patchZones;
-
 /*---------------------------------------------------------------------------*\
                       Class cyclicPolyPatch Declaration
 \*---------------------------------------------------------------------------*/
@@ -91,15 +89,21 @@ private:
         //- Index of other half
         mutable label neighbPatchID_;
 
-
         //- Type of transformation - rotational or translational
         transformType transform_;
 
-        //- Axis of rotation for rotational cyclics
-        vector rotationAxis_;
+        // For rotation
 
-        //- point on axis of rotation for rotational cyclics
-        point rotationCentre_;
+            //- Axis of rotation for rotational cyclics
+            vector rotationAxis_;
+
+            //- point on axis of rotation for rotational cyclics
+            point rotationCentre_;
+
+        // For translation
+
+            //- Translation vector
+            vector separationVector_;
 
 
         //- List of edges formed from connected points. e[0] is the point on

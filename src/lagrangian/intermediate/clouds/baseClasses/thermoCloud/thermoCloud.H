@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,6 +29,7 @@ Description
     Virtual abstract base class for templated ThermoCloud
 
 SourceFiles
+    thermoCloud.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -48,7 +49,6 @@ namespace Foam
 
 class thermoCloud
 {
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -69,9 +69,8 @@ public:
         thermoCloud();
 
 
-    // Destructors
-
-        virtual ~thermoCloud();
+    //- Destructor
+    virtual ~thermoCloud();
 
 
     // Member Functions

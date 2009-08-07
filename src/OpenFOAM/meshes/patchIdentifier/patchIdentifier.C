@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,7 +37,7 @@ Foam::patchIdentifier::patchIdentifier
 )
 :
     name_(name),
-    boundaryIndex_(index),
+    index_(index),
     physicalType_(physicalType)
 {}
 
@@ -50,7 +50,7 @@ Foam::patchIdentifier::patchIdentifier
 )
 :
     name_(name),
-    boundaryIndex_(index)
+    index_(index)
 {
     dict.readIfPresent("physicalType", physicalType_);
 }
@@ -63,7 +63,7 @@ Foam::patchIdentifier::patchIdentifier
 )
 :
     name_(p.name_),
-    boundaryIndex_(index),
+    index_(index),
     physicalType_(p.physicalType_)
 {}
 

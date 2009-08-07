@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,15 +68,15 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
 
     fileName kivaFileName("otape17");
-    if (args.options().found("file"))
+    if (args.optionFound("file"))
     {
-        kivaFileName = args.options()["file"];
+        kivaFileName = args.option("file");
     }
 
     kivaVersions kivaVersion = kiva3v;
-    if (args.options().found("version"))
+    if (args.optionFound("version"))
     {
-        word kivaVersionName = args.options()["version"];
+        word kivaVersionName = args.option("version");
 
         if (kivaVersionName == "kiva3")
         {
@@ -99,10 +99,7 @@ int main(int argc, char *argv[])
     }
 
     scalar zHeadMin = -GREAT;
-    if (args.options().found("zHeadMin"))
-    {
-        zHeadMin = atof(args.options()["zHeadMin"].c_str());
-    }
+    args.optionReadIfPresent("zHeadMin", zHeadMin);
 
 #   include "readKivaGrid.H"
 

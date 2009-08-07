@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,12 +37,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-defineTypeNameAndDebug(cellCuts, 0);
-
-}
+defineTypeNameAndDebug(Foam::cellCuts, 0);
 
 
 // * * * * * * * * * * * * * Private Static Functions  * * * * * * * * * * * //
@@ -379,7 +374,7 @@ void Foam::cellCuts::calcFaceCuts() const
         label cutI = 0;
 
         // Do point-edge-point walk over face and collect all cuts.
-        // Problem is that we want to start from one of the endpoints of a 
+        // Problem is that we want to start from one of the endpoints of a
         // string of connected cuts; we don't want to start somewhere in the
         // middle.
 
@@ -392,17 +387,16 @@ void Foam::cellCuts::calcFaceCuts() const
 
             if (pointIsCut_[v0])
             {
-                label fpMin1 = (fp == 0 ? f.size()-1 : fp-1);
-                label vMin1 = f[fpMin1];
+                label vMin1 = f[f.rcIndex(fp)];
 
-                if 
+                if
                 (
                     !pointIsCut_[vMin1]
                  && !edgeIsCut_[findEdge(faceI, v0, vMin1)]
                 )
                 {
                     cuts[cutI++] = vertToEVert(v0);
-                    startFp = (fp+1) % f.size();
+                    startFp = f.fcIndex(fp);
                     break;
                 }
             }
@@ -413,7 +407,7 @@ void Foam::cellCuts::calcFaceCuts() const
         {
             forAll(f, fp)
             {
-                label fp1 = (fp+1) % f.size();
+                label fp1 = f.fcIndex(fp);
 
                 label v0 = f[fp];
                 label v1 = f[fp1];
@@ -443,7 +437,7 @@ void Foam::cellCuts::calcFaceCuts() const
 
         forAll(f, i)
         {
-            label fp1 = (fp+1) % f.size();
+            label fp1 = f.fcIndex(fp);
 
             // Get the three items: current vertex, next vertex and edge
             // inbetween
@@ -664,7 +658,7 @@ bool Foam::cellCuts::crossEdge
         return true;
     }
     else
-    {    
+    {
         // No success. Restore state (i.e. backtrack)
         nVisited = oldNVisited;
 
@@ -799,7 +793,7 @@ bool Foam::cellCuts::walkFace
 
 
 
-// Walk across cuts (cut edges or cut vertices) of cell. Stops when hit cut 
+// Walk across cuts (cut edges or cut vertices) of cell. Stops when hit cut
 // already visited. Returns true when loop of 3 or more vertices found.
 bool Foam::cellCuts::walkCell
 (
@@ -1207,7 +1201,7 @@ Foam::labelList Foam::cellCuts::nonAnchorPoints
 
         if
         (
-            findIndex(anchorPoints, pointI) == -1 
+            findIndex(anchorPoints, pointI) == -1
          && findIndex(loop, vertToEVert(pointI)) == -1
         )
         {
@@ -1561,7 +1555,7 @@ bool Foam::cellCuts::calcAnchors
                 }
                 prevStat = eStat;
             }
-        }        
+        }
     }
 
 
@@ -2012,7 +2006,7 @@ void Foam::cellCuts::setFromCellLoops()
     {
         const labelList& loop = cellLoops_[cellI];
 
-        if (loop.size() > 0)
+        if (loop.size())
         {
             // Storage for cross-face cuts
             Map<edge> faceSplitCuts(loop.size());
@@ -2140,7 +2134,7 @@ bool Foam::cellCuts::setFromCellLoop
         // Storage for points on one side of cell
         labelList anchorPoints;
 
-        okLoop = 
+        okLoop =
             validLoop(cellI, loop, loopWeights, faceSplitCuts, anchorPoints);
 
         if (okLoop)
@@ -2203,7 +2197,7 @@ void Foam::cellCuts::setFromCellLoops
 
         const labelList& loop = cellLoops[cellLabelI];
 
-        if (loop.size() > 0)
+        if (loop.size())
         {
             const scalarField& loopWeights = cellLoopWeights[cellLabelI];
 
@@ -2296,7 +2290,7 @@ void Foam::cellCuts::setFromCellCutter
         }
     }
 
-    if (debug && invalidCutCells.size() > 0)
+    if (debug && invalidCutCells.size())
     {
         invalidCutCells.shrink();
         invalidCutLoops.shrink();
@@ -2408,7 +2402,7 @@ void Foam::cellCuts::setFromCellCutter
         }
     }
 
-    if (debug && invalidCutCells.size() > 0)
+    if (debug && invalidCutCells.size())
     {
         invalidCutCells.shrink();
         invalidCutLoops.shrink();
@@ -2458,7 +2452,7 @@ void Foam::cellCuts::orientPlanesAndLoops()
     {
         const labelList& loop = cellLoops_[cellI];
 
-        if (loop.size() > 0 && cellAnchorPoints_[cellI].size() == 0)
+        if (loop.size() && cellAnchorPoints_[cellI].empty())
         {
             // Leave anchor points empty if illegal loop.
             calcAnchors
@@ -2477,9 +2471,9 @@ void Foam::cellCuts::orientPlanesAndLoops()
     }
     forAll(cellAnchorPoints_, cellI)
     {
-        if (cellLoops_[cellI].size() > 0)
+        if (cellLoops_[cellI].size())
         {
-            if (cellAnchorPoints_[cellI].size() == 0)
+            if (cellAnchorPoints_[cellI].empty())
             {
                 FatalErrorIn("orientPlanesAndLoops()")
                     << "No anchor points for cut cell " << cellI << endl
@@ -2499,7 +2493,7 @@ void Foam::cellCuts::orientPlanesAndLoops()
 
     forAll(cellLoops_, cellI)
     {
-        if (cellLoops_[cellI].size() > 0)
+        if (cellLoops_[cellI].size())
         {
             nLoops_++;
         }
@@ -2545,7 +2539,7 @@ void Foam::cellCuts::calcLoopsAndAddressing(const labelList& cutCells)
         {
             const labelList& loop = cellLoops_[cellI];
 
-            if (loop.size() > 0)
+            if (loop.size())
             {
                 Pout<< "cell:" << cellI << "  ";
                 writeCuts(Pout, loop, loopWeights(loop));
@@ -2632,7 +2626,7 @@ void Foam::cellCuts::check() const
 
         const labelList& loop = cellLoops_[cellI];
 
-        if (loop.size() > 0 && anchors.size() == 0)
+        if (loop.size() && anchors.empty())
         {
             FatalErrorIn("cellCuts::check()")
                 << "cell:" << cellI << " loop:" << loop
@@ -2671,11 +2665,7 @@ void Foam::cellCuts::check() const
             label own = mesh().faceOwner()[faceI];
             label nei = mesh().faceNeighbour()[faceI];
 
-            if
-            (
-                cellLoops_[own].size() == 0
-             && cellLoops_[nei].size() == 0
-            )
+            if (cellLoops_[own].empty() && cellLoops_[nei].empty())
             {
                 FatalErrorIn("cellCuts::check()")
                     << "Internal face:" << faceI << " cut by " << iter()
@@ -2689,7 +2679,7 @@ void Foam::cellCuts::check() const
         {
             label own = mesh().faceOwner()[faceI];
 
-            if (cellLoops_[own].size() == 0)
+            if (cellLoops_[own].empty())
             {
                 FatalErrorIn("cellCuts::check()")
                     << "Boundary face:" << faceI << " cut by " << iter()
@@ -3016,7 +3006,7 @@ void Foam::cellCuts::flip(const label cellI)
             mesh().cellPoints()[cellI],
             cellAnchorPoints_[cellI],
             loop
-        );  
+        );
 }
 
 

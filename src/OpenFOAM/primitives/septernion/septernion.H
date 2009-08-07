@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -159,7 +159,7 @@ inline septernion inv(const septernion& tr);
 word name(const septernion&);
 
 
-//- Specify data associated with septernion type is contiguous
+//- Data associated with septernion type are contiguous
 template<>
 inline bool contiguous<septernion>() {return true;}
 

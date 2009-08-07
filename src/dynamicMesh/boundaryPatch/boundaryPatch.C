@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,14 +45,6 @@ Foam::boundaryPatch::boundaryPatch
 {}
 
 
-Foam::boundaryPatch::boundaryPatch(const boundaryPatch& sp)
-:
-    patchIdentifier(sp.name(), sp.index(), sp.physicalType()),
-    size_(sp.size()),
-    start_(sp.start())
-{}
-
-
 Foam::boundaryPatch::boundaryPatch
 (
     const word& name,
@@ -63,6 +55,22 @@ Foam::boundaryPatch::boundaryPatch
     patchIdentifier(name, dict, index),
     size_(readLabel(dict.lookup("nFaces"))),
     start_(readLabel(dict.lookup("startFace")))
+{}
+
+
+Foam::boundaryPatch::boundaryPatch(const boundaryPatch& p)
+:
+    patchIdentifier(p.name(), p.index(), p.physicalType()),
+    size_(p.size()),
+    start_(p.start())
+{}
+
+
+Foam::boundaryPatch::boundaryPatch(const boundaryPatch& p, const label index)
+:
+    patchIdentifier(p.name(), index, p.physicalType()),
+    size_(p.size()),
+    start_(p.start())
 {}
 
 
@@ -90,9 +98,9 @@ void Foam::boundaryPatch::write(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const boundaryPatch& sp)
+Foam::Ostream& Foam::operator<<(Ostream& os, const boundaryPatch& p)
 {
-    sp.write(os);
+    p.write(os);
     os.check("Ostream& operator<<(Ostream& f, const boundaryPatch&)");
     return os;
 }

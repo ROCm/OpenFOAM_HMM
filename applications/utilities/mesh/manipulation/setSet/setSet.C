@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,12 +31,11 @@ Description
 #include "Time.H"
 #include "polyMesh.H"
 #include "globalMeshData.H"
-#include "topoSetSource.H"
-#include "topoSet.H"
 #include "IStringStream.H"
-#include "topoSet.H"
 #include "cellSet.H"
 #include "faceSet.H"
+#include "pointSet.H"
+#include "topoSetSource.H"
 #include "OFstream.H"
 #include "IFstream.H"
 #include "demandDrivenData.H"
@@ -48,8 +47,8 @@ Description
 
 
 #if READLINE != 0
-#include <readline/readline.h>
-#include <readline/history.h>
+# include <readline/readline.h>
+# include <readline/history.h>
 #endif
 
 using namespace Foam;
@@ -89,7 +88,7 @@ void backup
     const word& toName
 )
 {
-    if (fromSet.size() > 0)
+    if (fromSet.size())
     {
         Pout<< "    Backing up " << fromName << " into " << toName << endl;
 
@@ -284,7 +283,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
         polyMesh::meshSubDir/"sets"
     );
     IOobjectList cellSets(objects.lookupClass(cellSet::typeName));
-    if (cellSets.size() > 0)
+    if (cellSets.size())
     {
         os  << "cellSets:" << endl;
         forAllConstIter(IOobjectList, cellSets, iter)
@@ -294,7 +293,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
         }
     }
     IOobjectList faceSets(objects.lookupClass(faceSet::typeName));
-    if (faceSets.size() > 0)
+    if (faceSets.size())
     {
         os  << "faceSets:" << endl;
         forAllConstIter(IOobjectList, faceSets, iter)
@@ -304,7 +303,7 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
         }
     }
     IOobjectList pointSets(objects.lookupClass(pointSet::typeName));
-    if (pointSets.size() > 0)
+    if (pointSets.size())
     {
         os  << "pointSets:" << endl;
         forAllConstIter(IOobjectList, pointSets, iter)
@@ -347,7 +346,7 @@ bool doCommand
     bool ok = true;
 
     // Set to work on
-    autoPtr<topoSet> currentSetPtr(NULL);
+    autoPtr<topoSet> currentSetPtr;
 
     word sourceType;
 
@@ -367,7 +366,7 @@ bool doCommand
         {
             r = IOobject::NO_READ;
 
-            backup(mesh, setName, setName + "_old");
+            //backup(mesh, setName, setName + "_old");
 
             currentSetPtr = topoSet::New(setType, mesh, setName, typSize);
         }
@@ -383,7 +382,7 @@ bool doCommand
             currentSet.resize(max(currentSet.size(), typSize));
         }
 
-        if (!currentSetPtr.valid())
+        if (currentSetPtr.empty())
         {
             Pout<< "    Cannot construct/load set "
                 << topoSet::localPath(mesh, setName) << endl;
@@ -399,11 +398,11 @@ bool doCommand
                 << "  Action:" << actionName
                 << endl;
 
-            if ((r == IOobject::MUST_READ) && (action != topoSetSource::LIST))
-            {
-                // currentSet has been read so can make copy.
-                backup(mesh, setName, currentSet, setName + "_old");
-            }
+            //if ((r == IOobject::MUST_READ) && (action != topoSetSource::LIST))
+            //{
+            //    // currentSet has been read so can make copy.
+            //    backup(mesh, setName, currentSet, setName + "_old");
+            //}
 
             switch (action)
             {
@@ -522,7 +521,7 @@ bool doCommand
 
         Pout<< fIOErr.message().c_str() << endl;
 
-        if (sourceType.size() != 0)
+        if (sourceType.size())
         {
             Pout<< topoSetSource::usage(sourceType).c_str();
         }
@@ -533,7 +532,7 @@ bool doCommand
 
         Pout<< fErr.message().c_str() << endl;
 
-        if (sourceType.size() != 0)
+        if (sourceType.size())
         {
             Pout<< topoSetSource::usage(sourceType).c_str();
         }
@@ -558,7 +557,8 @@ void printMesh(const Time& runTime, const polyMesh& mesh)
         << "  cells:" << mesh.nCells()
         << "  faces:" << mesh.nFaces()
         << "  points:" << mesh.nPoints()
-        << "  patches:" << mesh.boundaryMesh().size() << nl;
+        << "  patches:" << mesh.boundaryMesh().size()
+        << "  bb:" << mesh.bounds() << nl;
 }
 
 
@@ -571,7 +571,7 @@ commandStatus parseType
     IStringStream& is
 )
 {
-    if (setType.size() == 0)
+    if (setType.empty())
     {
         Pout<< "Type 'help' for usage information" << endl;
 
@@ -591,24 +591,10 @@ commandStatus parseType
     }
     else if (setType == "time")
     {
-        scalar time = readScalar(is);
-
+        scalar requestedTime = readScalar(is);
         instantList Times = runTime.times();
 
-        int nearestIndex = -1;
-        scalar nearestDiff = Foam::GREAT;
-
-        forAll(Times, timeIndex)
-        {
-            if (Times[timeIndex].name() == "constant") continue;
-
-            scalar diff = fabs(Times[timeIndex].value() - time);
-            if (diff < nearestDiff)
-            {
-                nearestDiff = diff;
-                nearestIndex = timeIndex;
-            }
-        }
+        label nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
 
         Pout<< "Changing time from " << runTime.timeName()
             << " to " << Times[nearestIndex].name()
@@ -646,7 +632,8 @@ commandStatus parseType
             }
             default:
             {
-                FatalErrorIn("parseType") << "Illegal mesh update state "
+                FatalErrorIn("parseType")
+                    << "Illegal mesh update state "
                     << stat  << abort(FatalError);
                 break;
             }
@@ -689,7 +676,7 @@ commandStatus parseAction(const word& actionName)
 {
     commandStatus stat = INVALID;
 
-    if (actionName.size() != 0)
+    if (actionName.size())
     {
         try
         {
@@ -714,14 +701,16 @@ commandStatus parseAction(const word& actionName)
 
 int main(int argc, char *argv[])
 {
+#   include "addRegionOption.H"
+#   include "addTimeOptions.H"
+
     argList::validOptions.insert("noVTK", "");
     argList::validOptions.insert("batch", "file");
-#   include "addTimeOptions.H"
 
 #   include "setRootCase.H"
 #   include "createTime.H"
 
-    bool writeVTK = !args.options().found("noVTK");
+    bool writeVTK = !args.optionFound("noVTK");
 
     // Get times list
     instantList Times = runTime.times();
@@ -730,7 +719,7 @@ int main(int argc, char *argv[])
 
     runTime.setTime(Times[startTime], startTime);
 
-#   include "createPolyMesh.H"
+#   include "createNamedPolyMesh.H"
 
     // Print some mesh info
     printMesh(runTime, mesh);
@@ -738,13 +727,14 @@ int main(int argc, char *argv[])
 
     std::ifstream* fileStreamPtr(NULL);
 
-    if (args.options().found("batch"))
+    if (args.optionFound("batch"))
     {
-        fileName batchFile(args.options()["batch"]);
+        fileName batchFile(args.option("batch"));
 
         Pout<< "Reading commands from file " << batchFile << endl;
 
-        if (!exists(batchFile))
+        // we cannot handle .gz files
+        if (!isFile(batchFile, false))
         {
             FatalErrorIn(args.executable())
                 << "Cannot open file " << batchFile << exit(FatalError);
@@ -790,7 +780,7 @@ int main(int argc, char *argv[])
 
             std::getline(*fileStreamPtr, rawLine);
 
-            if (rawLine.size() > 0)
+            if (rawLine.size())
             {
                 Pout<< "Doing:" << rawLine << endl;
             }
@@ -819,7 +809,7 @@ int main(int argc, char *argv[])
 #           endif
         }
 
-        if (rawLine.size() == 0 || rawLine[0] == '#')
+        if (rawLine.empty() || rawLine[0] == '#')
         {
             continue;
         }
@@ -861,7 +851,7 @@ int main(int argc, char *argv[])
         delete fileStreamPtr;
     }
 
-    Pout << nl << "End" << endl;
+    Pout<< "\nEnd" << endl;
 
     return 0;
 }

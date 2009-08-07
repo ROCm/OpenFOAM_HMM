@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,7 +30,7 @@ License
 #include "dragModel.H"
 #include "evaporationModel.H"
 #include "heatTransferModel.H"
-#include "combustionMixture.H"
+#include "basicMultiComponentMixture.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -86,14 +86,16 @@ void parcel::setRelaxationTimes
     W = 1.0/W;
 
     scalarField Xf(Nf, 0.0);
+    scalarField Yf(Nf, 0.0);
     scalarField psat(Nf, 0.0);
     scalarField msat(Nf, 0.0);
 
     for(label i=0; i<Nf; i++)
     {
         label j = sDB.liquidToGasIndex()[i];
-        scalar Y = sDB.composition().Y()[j][celli];        
+        scalar Y = sDB.composition().Y()[j][celli];
         scalar Wi = sDB.gasProperties()[j].W();
+        Yf[i] = Y;
         Xf[i] = Y*W/Wi;
         psat[i] = fuels.properties()[i].pv(pressure, temperature);
         msat[i] = min(1.0, psat[i]/pressure)*Wi/W;
@@ -116,19 +118,35 @@ void parcel::setRelaxationTimes
     scalar rhoFuelVap = pressureAtSurface*fuels.W(X())/(specie::RR*Tf);
 
     scalarField Xs(sDB.fuels().Xs(pressure, temperature, T(), Xf, X()));
+    scalarField Ys(Nf, 0.0);
+    scalar Wliq = 0.0;
+
+    for(label i=0; i<Nf; i++)
+    {
+        label j = sDB.liquidToGasIndex()[i];
+        scalar Wi = sDB.gasProperties()[j].W();
+        Wliq += Xs[i]*Wi;
+    }
+
+    for(label i=0; i<Nf; i++)
+    {
+        label j = sDB.liquidToGasIndex()[i];
+        scalar Wi = sDB.gasProperties()[j].W();
+        Ys[i] = Xs[i]*Wi/Wliq;
+    }
 
     scalar Reynolds = Re(Up, nuf);
     scalar Prandtl = Pr(cpMixture, muf, kMixture);
 
     // calculate the characteritic times
-      
+
     if(liquidCore_> 0.5)
     {
 //      no drag for parcels in the liquid core..
         tauMomentum = GREAT;
     }
     else
-    {    
+    {
         tauMomentum = sDB.drag().relaxationTime
         (
             Urel(Up),
@@ -200,10 +218,10 @@ void parcel::setRelaxationTimes
             {
                 scalar Nusselt =
                     sDB.heatTransfer().Nu(Reynolds, Prandtl);
-                
+
 //              calculating the boiling temperature of the liquid at ambient pressure
                 scalar tBoilingSurface = Td;
-                
+
                 label Niter = 0;
                 scalar deltaT = 10.0;
                 scalar dp0 = fuels.properties()[i].pv(pressure, tBoilingSurface) - pressure;
@@ -237,17 +255,16 @@ void parcel::setRelaxationTimes
                     }
                     dp0 = dp;
                 }
-                
-                label j = sDB.liquidToGasIndex()[i];
+
                 scalar vapourSurfaceEnthalpy = 0.0;
                 scalar vapourFarEnthalpy = 0.0;
-                
+
                 for(label k = 0; k < sDB.gasProperties().size(); k++)
                 {
                     vapourSurfaceEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(tBoilingSurface);
                     vapourFarEnthalpy += sDB.composition().Y()[k][celli]*sDB.gasProperties()[k].H(temperature);
                 }
-               
+
                 scalar kLiquid = fuels.properties()[i].K(pressure, 0.5*(tBoilingSurface+T()));
 
                 tauBoiling[i] = sDB.evaporation().boilingTime
@@ -266,8 +283,6 @@ void parcel::setRelaxationTimes
                     vapourSurfaceEnthalpy,
                     vapourFarEnthalpy,
                     cpMixture,
-                    Xs[i],
-                    Xf[j],
                     temperature,
                     kLiquid
                 );

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,7 +50,7 @@ namespace Foam
 class fvMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class LESdelta Declaration
+                          Class LESdelta Declaration
 \*---------------------------------------------------------------------------*/
 
 class LESdelta
@@ -99,7 +99,7 @@ public:
     // Constructors
 
         //- Construct from name and mesh
-        LESdelta(const word& name, const fvMesh& mesh);
+        LESdelta(const word& name, const fvMesh&);
 
 
     // Selectors
@@ -108,15 +108,14 @@ public:
         static autoPtr<LESdelta> New
         (
             const word& name,
-            const fvMesh& mesh,
-            const dictionary& LESdeltaDict
+            const fvMesh&,
+            const dictionary&
         );
 
 
-    // Destructor
-
-        virtual ~LESdelta()
-        {}
+    //- Destructor
+    virtual ~LESdelta()
+    {}
 
 
     // Member Functions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,10 +30,7 @@ Description
 
 #include "PrimitivePatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -44,8 +41,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops()
- const
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcEdgeLoops() const
 {
     if (debug)
     {
@@ -95,7 +94,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops()
     // Current loop number.
     label loopI = 0;
 
-    for (;;)
+    while (true)
     {
         // Find edge not yet given a loop number.
         label currentEdgeI = -1;
@@ -151,8 +150,6 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::calcEdgeLoops()
         while (currentEdgeI != -1);
 
         // Done all for current loop. Transfer to edgeLoops.
-        loop.shrink();
-
         edgeLoops[loopI].transfer(loop);
 
         loopI++;
@@ -177,8 +174,10 @@ template
     class PointField,
     class PointType
 >
-const labelListList&
-PrimitivePatch<Face, FaceList, PointField, PointType>::edgeLoops() const
+
+const Foam::labelListList&
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+edgeLoops() const
 {
     if (!edgeLoopsPtr_)
     {
@@ -188,8 +187,5 @@ PrimitivePatch<Face, FaceList, PointField, PointType>::edgeLoops() const
     return *edgeLoopsPtr_;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

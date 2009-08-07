@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,10 +36,7 @@ Foam::HeatTransferModel<CloudType>::New
     CloudType& owner
 )
 {
-    word HeatTransferModelType
-    (
-        dict.lookup("HeatTransferModel")
-    );
+    word HeatTransferModelType(dict.lookup("HeatTransferModel"));
 
     Info<< "Selecting HeatTransferModel " << HeatTransferModelType << endl;
 
@@ -51,12 +48,14 @@ Foam::HeatTransferModel<CloudType>::New
         FatalErrorIn
         (
             "HeatTransferModel<CloudType>::New"
-            "(const dictionary&, CloudType&)"
-        )
-            << "Unknown HeatTransferModelType type "
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown HeatTransferModelType type "
             << HeatTransferModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid HeatTransferModel types are :" << nl
+            << "    Valid HeatTransferModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
     }
 

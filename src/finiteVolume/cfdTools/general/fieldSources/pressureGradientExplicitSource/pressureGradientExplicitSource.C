@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,31 +26,57 @@ License
 
 #include "pressureGradientExplicitSource.H"
 #include "volFields.H"
+#include "IFstream.H"
+
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::pressureGradientExplicitSource::writeGradP() const
+{
+    // Only write on output time
+    if (mesh_.time().outputTime())
+    {
+        IOdictionary propsDict
+        (
+            IOobject
+            (
+                sourceName_ + "Properties",
+                mesh_.time().timeName(),
+                "uniform",
+                mesh_,
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            )
+        );
+        propsDict.add("gradient", gradP_);
+        propsDict.regIOobject::write();
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
 (
     const word& sourceName,
-    const fvMesh& mesh,
     volVectorField& U
 )
 :
+    sourceName_(sourceName),
+    mesh_(U.mesh()),
+    U_(U),
     dict_
     (
         IOobject
         (
             sourceName + "Properties",
-            mesh.time().constant(),
-            mesh,
+            mesh_.time().constant(),
+            mesh_,
             IOobject::MUST_READ,
             IOobject::NO_WRITE
         )
     ),
-    mesh_(mesh),
-    U_(U),
     Ubar_(dict_.lookup("Ubar")),
-    gradPini_(readScalar(dict_.lookup("gradPini"))),
+    gradPini_(dict_.lookup("gradPini")),
     gradP_(gradPini_),
     flowDir_(Ubar_/mag(Ubar_)),
     cellSource_(dict_.lookup("cellSource")),
@@ -59,15 +85,15 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
         topoSetSource::New
         (
             cellSource_,
-            mesh,
+            mesh_,
             dict_.subDict(cellSource_ + "Coeffs")
         )
     ),
     selectedCellSet_
     (
-        mesh,
-        "pressureGradientExplicitSourceCellSet",
-        mesh.nCells()/10 + 1  // Reasonable size estimate.
+        mesh_,
+        sourceName_ + "CellSet",
+        mesh_.nCells()/10 + 1  // Reasonable size estimate.
     )
 {
     // Create the cell set
@@ -78,9 +104,24 @@ Foam::pressureGradientExplicitSource::pressureGradientExplicitSource
     );
 
     // Give some feedback
-    Info<< "pressureGradientExplicitSource(" << sourceName << ")" << nl
-        << "Selected " << returnReduce(selectedCellSet_.size(), sumOp<label>())
-        << " cells." << endl;
+    Info<< "    Selected "
+        << returnReduce(selectedCellSet_.size(), sumOp<label>())
+        << " cells" << endl;
+
+    // Read the initial pressure gradient from file if it exists
+    IFstream propsFile
+    (
+        mesh_.time().timeName()/"uniform"/(sourceName_ + "Properties")
+    );
+
+    if (propsFile.good())
+    {
+        Info<< "    Reading pressure gradient from file" << endl;
+        dictionary propsDict(dictionary::null, propsFile);
+        propsDict.lookup("gradient") >> gradP_;
+    }
+
+    Info<< "    Initial pressure gradient = " << gradP_ << nl << endl;
 }
 
 
@@ -95,14 +136,14 @@ Foam::pressureGradientExplicitSource::Su() const
         (
             IOobject
             (
-                "pressureGradientExplicitSource",
+                sourceName_,
                 mesh_.time().timeName(),
                 mesh_,
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
             mesh_,
-            dimensionedVector("zero", dimVelocity/dimTime, vector::zero)
+            dimensionedVector("zero", gradP_.dimensions(), vector::zero)
         )
     );
 
@@ -112,7 +153,7 @@ Foam::pressureGradientExplicitSource::Su() const
     {
         label cellI = iter.key();
 
-        sourceField[cellI] = flowDir_*gradP_;
+        sourceField[cellI] = flowDir_*gradP_.value();
     }
 
     return tSource;
@@ -160,10 +201,12 @@ void Foam::pressureGradientExplicitSource::update()
     }
 
     // Update pressure gradient
-    gradP_ += gradPplus;
+    gradP_.value() += gradPplus;
 
     Info<< "Uncorrected Ubar = " << magUbarAve << tab
-        << "Pressure gradient = " << gradP_ << endl;
+        << "Pressure gradient = " << gradP_.value() << endl;
+
+    writeGradP();
 }
 
 

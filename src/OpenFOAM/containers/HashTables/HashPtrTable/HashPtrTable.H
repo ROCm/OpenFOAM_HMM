@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,21 +51,15 @@ class Ostream;
 
 template<class T, class Key, class Hash> class HashPtrTable;
 
-template<class T, class Key, class Hash> Istream& operator>>
-(
-    Istream&,
-    HashPtrTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Istream& operator>>(Istream&, HashPtrTable<T, Key, Hash>&);
 
-template<class T, class Key, class Hash> Ostream& operator<<
-(
-    Ostream&,
-    const HashPtrTable<T, Key, Hash>&
-);
+template<class T, class Key, class Hash>
+Ostream& operator<<(Ostream&, const HashPtrTable<T, Key, Hash>&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class HashPtrTable Declaration
+                        Class HashPtrTable Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class T, class Key=word, class Hash=string::hash>
@@ -89,7 +83,7 @@ public:
     // Constructors
 
         //- Construct given initial table size
-        HashPtrTable(label size = 100);
+        HashPtrTable(const label size = 128);
 
         //- Construct from Istream using given Istream constructor class
         template<class INew>
@@ -128,19 +122,13 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>
-        #ifndef __CINT__
-        <T, Key, Hash>
-        #endif
+        friend Istream& operator>> <T, Key, Hash>
         (
             Istream&,
             HashPtrTable<T, Key, Hash>&
         );
 
-        friend Ostream& operator<<
-        #ifndef __CINT__
-        <T, Key, Hash>
-        #endif
+        friend Ostream& operator<< <T, Key, Hash>
         (
             Ostream&,
             const HashPtrTable<T, Key, Hash>&

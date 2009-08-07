@@ -9,20 +9,24 @@ if(turbulence)
     volScalarField G = 2*nutb*(tgradUb() && dev(symm(tgradUb())));
     tgradUb.clear();
 
-#   include "wallFunctions.H"
+    #include "wallFunctions.H"
 
     // Dissipation equation
     fvScalarMatrix epsEqn
     (
         fvm::ddt(beta, epsilon)
       + fvm::div(phib, epsilon)
-      - fvm::laplacian(alphaEps*nuEffb, epsilon)
+      - fvm::laplacian
+        (
+            alphaEps*nuEffb, epsilon,
+            "laplacian(DepsilonEff,epsilon)"
+        )
       ==
          C1*beta*G*epsilon/k
        - fvm::Sp(C2*beta*epsilon/k, epsilon)
     );
 
-#   include "wallDissipation.H"
+    #include "wallDissipation.H"
 
     epsEqn.relax();
     epsEqn.solve();
@@ -35,7 +39,11 @@ if(turbulence)
     (
         fvm::ddt(beta, k)
       + fvm::div(phib, k)
-      - fvm::laplacian(alphak*nuEffb, k)
+      - fvm::laplacian
+        (
+            alphak*nuEffb, k,
+            "laplacian(DkEff,k)"
+        )
       ==
         beta*G
       - fvm::Sp(beta*epsilon/k, k)
@@ -48,8 +56,7 @@ if(turbulence)
     //- Re-calculate turbulence viscosity
     nutb = Cmu*sqr(k)/epsilon;
 
-#   include "wallViscosity.H"
-
+    #include "wallViscosity.H"
 }
 
 nuEffa = sqr(Ct)*nutb + nua;

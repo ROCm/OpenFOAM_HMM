@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,25 +45,28 @@ void spray::inject()
     // Inject the parcels for each injector sequentially
     forAll(injectors_, i)
     {
-        const injectorType& it = injectors_[i].properties();
+        autoPtr<injectorType>& it = injectors()[i].properties();
+        if (!it->pressureIndependentVelocity())
+        {
+            scalar referencePressure = p().average().value();
+            it->correctProfiles(fuels(), referencePressure);
+        }
+
+        const label nHoles = it->nHoles();
 
         // parcels have the same mass during a timestep
-        scalar mass = it.mass(time0, time, twoD_, angleOfWedge_);
+        scalar mass = it->mass(time0, time, twoD_, angleOfWedge_);
 
-        label Np = it.nParcelsToInject(time0, time);
+        label Np = it->nParcelsToInject(time0, time);
 
         if (mass > 0)
         {
             Np = max(1, Np);
-            scalar mp = mass/Np;
-        
-            // constT is only larger than zero for the first 
+            scalar mp = mass/Np/nHoles;
+
+            // constT is only larger than zero for the first
             // part of the injection
-            scalar constT = max
-            (
-                0.0,
-                it.tsoi() - time0
-            );
+            scalar constT = max(0.0, it->tsoi() - time0);
 
             // deltaT is the duration of injection during this timestep
             scalar deltaT = min
@@ -71,8 +74,8 @@ void spray::inject()
                 runTime_.deltaT().value(),
                 min
                 (
-                    time - it.tsoi(),
-                    it.teoi() - time0
+                    time - it->tsoi(),
+                    it->teoi() - time0
                 )
             );
 
@@ -81,87 +84,90 @@ void spray::inject()
                 // calculate the time of injection for parcel 'j'
                 scalar toi = time0 + constT + deltaT*j/scalar(Np);
 
-                // calculate the velocity of the injected parcel
-                vector injectionPosition = it.position
-                (
-                    toi,
-                    twoD_,
-                    angleOfWedge_,
-                    axisOfSymmetry_,
-                    axisOfWedge_,
-                    axisOfWedgeNormal_,
-                    rndGen_
-                );
-                
-                scalar diameter = injection().d0(i, toi);
-                vector direction = injection().direction(i, toi, diameter);
-                vector U = injection().velocity(i, toi)*direction;
-
-                scalar symComponent = direction & axisOfSymmetry_;
-                vector normal = direction - symComponent*axisOfSymmetry_;
-                normal /= mag(normal);
-
-                // should be set from dict or model
-                scalar deviation = breakup().y0();
-                scalar ddev = breakup().yDot0();
-
-                label injectorCell = mesh_.findCell(injectionPosition);
-                
-#               include "findInjectorCell.H"
-
-                if (injectorCell >= 0)
+                for(label n=0; n<nHoles; n++)
                 {
-                    scalar liquidCore = 1.0;
-                
-                    // construct the parcel that is to be injected
 
-                    parcel* pPtr = new parcel
+                    // calculate the velocity of the injected parcel
+                    vector injectionPosition = it->position
                     (
-                        *this,
-                        injectionPosition,
-                        injectorCell,
-                        normal,
-                        diameter,
-                        it.T(toi),
-                        mp,
-                        deviation,
-                        ddev,
-                        0.0,
-                        0.0,
-                        0.0,
-                        liquidCore,
-                        scalar(i),
-                        U,
-                        vector::zero,
-                        it.X(),
-                        fuels_->components()
+                        n,
+                        toi,
+                        twoD_,
+                        angleOfWedge_,
+                        axisOfSymmetry_,
+                        axisOfWedge_,
+                        axisOfWedgeNormal_,
+                        rndGen_
                     );
 
-                    injectedLiquidKE_ += 0.5*pPtr->m()*pow(mag(U), 2.0);
-                    
-                    scalar dt = time - toi;
+                    scalar diameter = injection().d0(i, toi);
+                    vector direction =
+                        injection().direction(i, n, toi, diameter);
+                    vector U = injection().velocity(i, toi)*direction;
 
-                    pPtr->stepFraction() =
-                        (runTime_.deltaT().value() - dt)
-                       /runTime_.deltaT().value();
+                    scalar symComponent = direction & axisOfSymmetry_;
+                    vector normal = direction - symComponent*axisOfSymmetry_;
+                    normal /= mag(normal);
 
-                    bool keepParcel = pPtr->move
-                    (
-                        *this
-                    );
+                    // should be set from dict or model
+                    scalar deviation = breakup().y0();
+                    scalar ddev = breakup().yDot0();
 
-                    if (keepParcel)
+                    label injectorCell = mesh_.findCell(injectionPosition);
+
+#                   include "findInjectorCell.H"
+
+                    if (injectorCell >= 0)
                     {
-                        addParticle(pPtr);
-                    }
-                    else
-                    {
-                        delete pPtr;
-                    }
-                }
-            }
-        }
-    }
+                        scalar liquidCore = 1.0;
+
+                        // construct the parcel that is to be injected
+
+                        parcel* pPtr = new parcel
+                        (
+                            *this,
+                            injectionPosition,
+                            injectorCell,
+                            normal,
+                            diameter,
+                            it->T(toi),
+                            mp,
+                            deviation,
+                            ddev,
+                            0.0,
+                            0.0,
+                            0.0,
+                            liquidCore,
+                            scalar(i),
+                            U,
+                            vector::zero,
+                            it->X(),
+                            fuels_->components()
+                        );
+
+                        injectedLiquidKE_ += 0.5*pPtr->m()*magSqr(U);
+
+                        scalar dt = time - toi;
+
+                        pPtr->stepFraction() =
+                            (runTime_.deltaT().value() - dt)
+                           /runTime_.deltaT().value();
+
+                        bool keepParcel = pPtr->move(*this);
+
+                        if (keepParcel)
+                        {
+                            addParticle(pPtr);
+                        }
+                        else
+                        {
+                            delete pPtr;
+                        }
+                    } // if (injectorCell....
+                } // for(label n=0...
+            } // for(label j=0....
+        } // if (mass>0)...
+    } // forAll(injectors)...
 
     time0_ = time;
 }

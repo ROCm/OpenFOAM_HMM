@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -51,7 +51,7 @@ void starMesh::writeMesh()
                 runTime_.constant(),
                 runTime_
             ),
-            points_,
+            xferCopy(points_),           // we could probably re-use the data
             cellShapes_,
             boundary_,
             patchNames_,
@@ -82,9 +82,9 @@ void starMesh::writeMesh()
                 runTime_.constant(),
                 runTime_
             ),
-            points_,
-            meshFaces_,
-            cellPolys_
+            xferCopy(points_),           // we could probably re-use the data
+            xferCopy(meshFaces_),
+            xferCopy(cellPolys_)
         );
 
         // adding patches also checks the mesh

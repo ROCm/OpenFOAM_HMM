@@ -1,8 +1,8 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,6 +27,7 @@ Application
 
 Description
     Calculates and writes the flowType of velocity field U.
+
     The -noWrite option has no meaning.
 
     The flow type parameter is obtained according to the following equation:
@@ -87,6 +88,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     {
         Info<< "    No U" << endl;
     }
+
+    Info<< "\nEnd\n" << endl;
 }
 
 

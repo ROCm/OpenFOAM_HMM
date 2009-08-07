@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,6 +68,8 @@ class searchableSurfaces
         //- Indices of all surfaces. Precalculated and stored.
         labelList allSurfaces_;
 
+
+    // Private Member Functions
 
         //- Disallow default bitwise copy construct
         searchableSurfaces(const searchableSurfaces&);

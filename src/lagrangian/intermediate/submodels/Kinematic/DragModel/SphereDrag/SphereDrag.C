@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,10 +56,7 @@ bool Foam::SphereDrag<CloudType>::active() const
 
 
 template <class CloudType>
-Foam::scalar Foam::SphereDrag<CloudType>::Cd
-(
-    const scalar Re
-) const
+Foam::scalar Foam::SphereDrag<CloudType>::Cd(const scalar Re) const
 {
     scalar Cd;
     if (Re < SMALL)

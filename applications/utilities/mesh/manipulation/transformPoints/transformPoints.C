@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,7 +27,10 @@ Application
 
 Description
     Transforms the mesh points in the polyMesh directory according to the
-    options:
+    translate, rotate and scale options.
+
+Usage
+    Options are:
 
     -translate vector
         Translates the points by the given vector,
@@ -35,14 +38,22 @@ Description
     -rotate (vector vector)
         Rotates the points from the first vector to the second,
 
+     or -yawPitchRoll (yawdegrees pitchdegrees rolldegrees)
+     or -rollPitchYaw (rolldegrees pitchdegrees yawdegrees)
+
     -scale vector
         Scales the points by the given vector.
 
     The any or all of the three options may be specified and are processed
     in the above order.
 
-    With -rotateFields (in combination with -rotate) it will also
-    read & transform vector & tensor fields.
+    With -rotateFields (in combination with -rotate/yawPitchRoll/rollPitchYaw)
+    it will also read & transform vector & tensor fields.
+
+    Note:
+    yaw (rotation about z)
+    pitch (rotation about y)
+    roll (rotation about x)
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,6 +69,7 @@ Description
 #include "IStringStream.H"
 
 using namespace Foam;
+using namespace Foam::mathematicalConstant;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -131,9 +143,11 @@ int main(int argc, char *argv[])
 {
     argList::validOptions.insert("translate", "vector");
     argList::validOptions.insert("rotate", "(vector vector)");
+    argList::validOptions.insert("rollPitchYaw", "(roll pitch yaw)");
+    argList::validOptions.insert("yawPitchRoll", "(yaw pitch roll)");
     argList::validOptions.insert("rotateFields", "");
     argList::validOptions.insert("scale", "vector");
- 
+
 #   include "setRootCase.H"
 #   include "createTime.H"
 
@@ -152,7 +166,7 @@ int main(int argc, char *argv[])
     );
 
 
-    if (args.options().size() == 0)
+    if (args.options().empty())
     {
         FatalErrorIn(args.executable())
             << "No options supplied, please use one or more of "
@@ -160,18 +174,18 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    if (args.options().found("translate"))
+    if (args.optionFound("translate"))
     {
-        vector transVector(IStringStream(args.options()["translate"])());
+        vector transVector(args.optionLookup("translate")());
 
         Info<< "Translating points by " << transVector << endl;
 
         points += transVector;
     }
 
-    if (args.options().found("rotate"))
+    if (args.optionFound("rotate"))
     {
-        Pair<vector> n1n2(IStringStream(args.options()["rotate"])());
+        Pair<vector> n1n2(args.optionLookup("rotate")());
         n1n2[0] /= mag(n1n2[0]);
         n1n2[1] /= mag(n1n2[1]);
         tensor T = rotationTensor(n1n2[0], n1n2[1]);
@@ -180,15 +194,67 @@ int main(int argc, char *argv[])
 
         points = transform(T, points);
 
-        if (args.options().found("rotateFields"))
+        if (args.optionFound("rotateFields"))
         {
             rotateFields(runTime, T);
         }
     }
-
-    if (args.options().found("scale"))
+    else if (args.optionFound("rollPitchYaw"))
     {
-        vector scaleVector(IStringStream(args.options()["scale"])());
+        vector v(args.optionLookup("rollPitchYaw")());
+
+        Info<< "Rotating points by" << nl
+            << "    roll  " << v.x() << nl
+            << "    pitch " << v.y() << nl
+            << "    yaw   " << v.z() << endl;
+
+
+        // Convert to radians
+        v *= pi/180.0;
+
+        quaternion R(v.x(), v.y(), v.z());
+
+        Info<< "Rotating points by quaternion " << R << endl;
+        points = transform(R, points);
+
+        if (args.optionFound("rotateFields"))
+        {
+            rotateFields(runTime, R.R());
+        }
+    }
+    else if (args.optionFound("yawPitchRoll"))
+    {
+        vector v(args.optionLookup("yawPitchRoll")());
+
+        Info<< "Rotating points by" << nl
+            << "    yaw   " << v.x() << nl
+            << "    pitch " << v.y() << nl
+            << "    roll  " << v.z() << endl;
+
+
+        // Convert to radians
+        v *= pi/180.0;
+
+        scalar yaw = v.x();
+        scalar pitch = v.y();
+        scalar roll = v.z();
+
+        quaternion R = quaternion(vector(0, 0, 1), yaw);
+        R *= quaternion(vector(0, 1, 0), pitch);
+        R *= quaternion(vector(1, 0, 0), roll);
+
+        Info<< "Rotating points by quaternion " << R << endl;
+        points = transform(R, points);
+
+        if (args.optionFound("rotateFields"))
+        {
+            rotateFields(runTime, R.R());
+        }
+    }
+
+    if (args.optionFound("scale"))
+    {
+        vector scaleVector(args.optionLookup("scale")());
 
         Info<< "Scaling points by " << scaleVector << endl;
 
@@ -203,7 +269,7 @@ int main(int argc, char *argv[])
     Info << "Writing points into directory " << points.path() << nl << endl;
     points.write();
 
-    return(0);
+    return 0;
 }
 
 

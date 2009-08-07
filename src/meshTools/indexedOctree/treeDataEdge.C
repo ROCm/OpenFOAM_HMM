@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,15 +22,14 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "treeDataEdge.H"
 #include "indexedOctree.H"
-#include "polyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+defineTypeNameAndDebug(Foam::treeDataEdge, 0);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -135,7 +134,7 @@ void Foam::treeDataEdge::findNearest
     {
         label index = indices[i];
 
-        const edge& e = edges_[index];
+        const edge& e = edges_[edgeLabels_[index]];
 
         pointHit nearHit = e.line(points_).nearestDist(sample);
 
@@ -171,7 +170,7 @@ void Foam::treeDataEdge::findNearest
     {
         label index = indices[i];
 
-        const edge& e = edges_[index];
+        const edge& e = edges_[edgeLabels_[index]];
 
         // Note: could do bb test ? Worthwhile?
 

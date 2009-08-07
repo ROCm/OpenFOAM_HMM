@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -34,10 +34,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(mergePolyMesh, 1);
-}
+defineTypeNameAndDebug(Foam::mergePolyMesh, 1);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -142,9 +139,9 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
 
     // Point zones
     wordList curPointZoneNames = pointZones().names();
-    if (curPointZoneNames.size() > 0)
+    if (curPointZoneNames.size())
     {
-        pointZoneNames_.setSize(2*curPointZoneNames.size());
+        pointZoneNames_.setCapacity(2*curPointZoneNames.size());
     }
 
     forAll (curPointZoneNames, zoneI)
@@ -155,9 +152,9 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     // Face zones
     wordList curFaceZoneNames = faceZones().names();
 
-    if (curFaceZoneNames.size() > 0)
+    if (curFaceZoneNames.size())
     {
-        faceZoneNames_.setSize(2*curFaceZoneNames.size());
+        faceZoneNames_.setCapacity(2*curFaceZoneNames.size());
     }
     forAll (curFaceZoneNames, zoneI)
     {
@@ -167,9 +164,9 @@ Foam::mergePolyMesh::mergePolyMesh(const IOobject& io)
     // Cell zones
     wordList curCellZoneNames = cellZones().names();
 
-    if (curCellZoneNames.size() > 0)
+    if (curCellZoneNames.size())
     {
-        cellZoneNames_.setSize(2*curCellZoneNames.size());
+        cellZoneNames_.setCapacity(2*curCellZoneNames.size());
     }
     forAll (curCellZoneNames, zoneI)
     {
@@ -333,11 +330,11 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
         newOwn = own[faceI];
         if (newOwn > -1) newOwn = renumberCells[newOwn];
 
-        if (newPatch > -1) 
+        if (newPatch > -1)
         {
             newNei = -1;
-        } 
-        else 
+        }
+        else
         {
             newNei = nei[faceI];
             newNei = renumberCells[newNei];
@@ -373,7 +370,7 @@ void Foam::mergePolyMesh::addMesh(const polyMesh& m)
                 )
             );
     }
-        
+
 }
 
 

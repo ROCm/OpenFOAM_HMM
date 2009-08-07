@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class interpolationCellPoint Declaration
+                   Class interpolationCellPoint Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
@@ -50,9 +50,12 @@ class interpolationCellPoint
 :
     public interpolation<Type>
 {
-    // Private data
+protected:
 
-        GeometricField<Type, pointPatchField, pointMesh> psip_;
+    // Protected data
+
+        //- Interpolated volfield
+        const GeometricField<Type, pointPatchField, pointMesh> psip_;
 
 
 public:
@@ -66,7 +69,6 @@ public:
         //- Construct from components
         interpolationCellPoint
         (
-            const volPointInterpolation& pInterp,
             const GeometricField<Type, fvPatchField, volMesh>& psi
         );
 
@@ -79,7 +81,7 @@ public:
         //- Interpolate field to the given point in the given cell
         inline Type interpolate
         (
-            const vector& position, 
+            const vector& position,
             const label nCell,
             const label facei = -1
         ) const;

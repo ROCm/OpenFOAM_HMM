@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,9 @@ License
 #include "primitiveMesh.H"
 #include "cell.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void primitiveMesh::calcPointCells() const
+void Foam::primitiveMesh::calcPointCells() const
 {
     // Loop through cells and mark up points
 
@@ -111,7 +106,7 @@ void primitiveMesh::calcPointCells() const
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const labelListList& primitiveMesh::pointCells() const
+const Foam::labelListList& Foam::primitiveMesh::pointCells() const
 {
     if (!pcPtr_)
     {
@@ -122,7 +117,7 @@ const labelListList& primitiveMesh::pointCells() const
 }
 
 
-const labelList& primitiveMesh::pointCells
+const Foam::labelList& Foam::primitiveMesh::pointCells
 (
     const label pointI,
     DynamicList<label>& storage
@@ -155,33 +150,34 @@ const labelList& primitiveMesh::pointCells
         }
 
         // Filter duplicates
-        sort(storage);
-
-        label n = 1;
-
-        for (label i = 1; i < storage.size(); i++)
+        if (storage.size() > 1)
         {
-            if (storage[i] != storage[i-1])
-            {
-                storage[n++] = storage[i];
-            }
-        }
+            sort(storage);
 
-        storage.size() = n;
+            label n = 1;
+            for (label i = 1; i < storage.size(); i++)
+            {
+                if (storage[i-1] != storage[i])
+                {
+                    storage[n++] = storage[i];
+                }
+            }
+
+            // truncate addressed list
+            storage.setSize(n);
+        }
 
         return storage;
     }
 }
 
 
-const labelList& primitiveMesh::pointCells(const label pointI) const
+const Foam::labelList& Foam::primitiveMesh::pointCells(const label pointI) const
 {
     return pointCells(pointI, labels_);
 }
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

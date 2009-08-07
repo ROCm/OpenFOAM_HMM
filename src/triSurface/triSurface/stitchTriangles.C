@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,7 @@ bool triSurface::stitchTriangles
                 << " points down to " << newPoints.size() << endl;
         }
 
-        pointField& ps = const_cast<pointField&>(points());
+        pointField& ps = storedPoints();
 
         // Set the coordinates to the merged ones
         ps = newPoints;

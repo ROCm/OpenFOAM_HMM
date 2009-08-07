@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -88,6 +88,17 @@ dimensionedScalar det(const dimensionedTensor& dt)
         "det("+dt.name()+')',
         pow(dt.dimensions(), tensor::dim),
         det(dt.value())
+    );
+}
+
+
+dimensionedTensor cof(const dimensionedTensor& dt)
+{
+    return dimensionedTensor
+    (
+        "cof("+dt.name()+')',
+        dt.dimensions(),
+        cof(dt.value())
     );
 }
 

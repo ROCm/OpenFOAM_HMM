@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ namespace Foam
 class dictionary;
 
 /*---------------------------------------------------------------------------*\
-                           Class primitiveEntry Declaration
+                       Class primitiveEntry Declaration
 \*---------------------------------------------------------------------------*/
 
 class primitiveEntry
@@ -66,41 +66,35 @@ class primitiveEntry
     public entry,
     public ITstream
 {
-
-public:
-
     // Private member functions
 
         //- Append the given token to this entry
         void append
         (
             const token& currToken,
-            const dictionary& dict,
-            Istream& is
+            const dictionary&,
+            Istream&
         );
 
         //- Append the given tokens starting at the current tokenIndex
-        void append(const tokenList& varTokens);
+        void append(const tokenList&);
 
         //- Expand the given variable (keyword starts with $)
-        bool expandVariable(const word& keyword, const dictionary& dict);
+        bool expandVariable(const word&, const dictionary&);
 
         //- Expand the given function (keyword starts with #)
         bool expandFunction
         (
-            const word& keyword,
-            const dictionary& dict,
-            Istream& is
+            const word&,
+            const dictionary&,
+            Istream&
         );
 
-        //- Read tokens from the given stream
-        bool read(const dictionary& dict, Istream&);
-
         //- Read the complete entry from the given stream
-        void readEntry(const dictionary& dict, Istream&);
+        void readEntry(const dictionary&, Istream&);
 
-        //- Insert the given tokens at token i
-        void insert(const tokenList& varTokens, const label i);
+        //- Insert the given tokens at token posI
+        void insert(const tokenList&, const label posI);
 
 
 public:
@@ -108,13 +102,13 @@ public:
     // Constructors
 
         //- Construct from keyword and a Istream
-        primitiveEntry(const keyType& keyword, Istream&);
+        primitiveEntry(const keyType&, Istream&);
 
-        //- Construct from keyword, parent dictionary and a Istream
-        primitiveEntry(const keyType& keyword, const dictionary&, Istream&);
+        //- Construct from keyword, parent dictionary and Istream
+        primitiveEntry(const keyType&, const dictionary& parentDict, Istream&);
 
         //- Construct from keyword and a ITstream
-        primitiveEntry(const keyType& keyword, const ITstream&);
+        primitiveEntry(const keyType&, const ITstream&);
 
         //- Construct from keyword and a token
         primitiveEntry(const keyType&, const token&);
@@ -169,6 +163,9 @@ public:
         //  calling this function generates a FatalError
         dictionary& dict();
 
+        //- Read tokens from the given stream
+        bool read(const dictionary&, Istream&);
+
         // Write
         void write(Ostream&) const;
 
@@ -182,7 +179,7 @@ public:
 
 
 template<>
-Ostream& operator<<(Ostream& os, const InfoProxy<primitiveEntry>& ip);
+Ostream& operator<<(Ostream&, const InfoProxy<primitiveEntry>&);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

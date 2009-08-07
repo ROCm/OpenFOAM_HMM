@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 #include "polyMesh.H"
 #include "wallPoint.H"
 #include "MeshWave.H"
-
+#include "globalMeshData.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -187,7 +187,7 @@ void Foam::patchWave::correct()
         mesh(),
         changedFaces,
         faceDist,
-        mesh().nCells() // max iterations
+        mesh().globalData().nTotalCells()   // max iterations
     );
 
 

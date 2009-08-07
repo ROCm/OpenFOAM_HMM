@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,9 +26,10 @@ Class
     Foam::localMax
 
 Description
-    LocalMax-mean differencing scheme class.  This scheme interpolates 1/field
-    using a scheme specified at run-time and return the reciprocal of the
-    interpolate.
+    LocalMax-mean differencing scheme class.
+
+    This scheme interpolates 1/field using a scheme specified at run-time
+    and return the reciprocal of the interpolate.
 
 SourceFiles
     localMax.C

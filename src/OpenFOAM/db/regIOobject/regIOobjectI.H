@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ inline bool Foam::regIOobject::ownedByRegistry() const
 }
 
 
-void Foam::regIOobject::store()
+inline void Foam::regIOobject::store()
 {
     ownedByRegistry_ = true;
 }
@@ -43,7 +43,7 @@ inline Type& Foam::regIOobject::store(Type* tPtr)
 {
     if (!tPtr)
     {
-        FatalErrorIn("Type& store(Type*)")
+        FatalErrorIn("Type& regIOobject::store(Type*)")
             << "object deallocated"
             << abort(FatalError);
     }
@@ -63,20 +63,31 @@ inline Type& Foam::regIOobject::store(autoPtr<Type>& atPtr)
     {
         FatalErrorIn
             (
-                "Type& store(autoPtr<Type>&)"
+                "Type& regIOobject::store(autoPtr<Type>&)"
             )   << "object deallocated"
                 << abort(FatalError);
     }
 
     tPtr->regIOobject::ownedByRegistry_ = true;
-    
+
     return *tPtr;
 }
 
 
-void Foam::regIOobject::release()
+inline void Foam::regIOobject::release()
 {
     ownedByRegistry_ = false;
+}
+
+
+inline Foam::label Foam::regIOobject::eventNo() const
+{
+    return eventNo_;
+}
+
+inline Foam::label& Foam::regIOobject::eventNo()
+{
+    return eventNo_;
 }
 
 

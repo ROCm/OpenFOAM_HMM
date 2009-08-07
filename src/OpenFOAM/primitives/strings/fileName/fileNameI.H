@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,17 +74,17 @@ inline Foam::fileName::fileName(const string& str)
 }
 
 
-inline Foam::fileName::fileName(const std::string& stdStr)
+inline Foam::fileName::fileName(const std::string& str)
 :
-    string(stdStr)
+    string(str)
 {
     stripInvalid();
 }
 
 
-inline Foam::fileName::fileName(const char* chars)
+inline Foam::fileName::fileName(const char* str)
 :
-    string(chars)
+    string(str)
 {
     stripInvalid();
 }
@@ -94,7 +94,12 @@ inline Foam::fileName::fileName(const char* chars)
 
 inline bool Foam::fileName::valid(char c)
 {
-    return(!isspace(c) && c != '"');
+    return
+    (
+        !isspace(c)
+     && c != '"'   // string quote
+     && c != '\''  // string quote
+    );
 }
 
 

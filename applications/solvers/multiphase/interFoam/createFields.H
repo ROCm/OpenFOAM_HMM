@@ -1,9 +1,9 @@
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -12,12 +12,12 @@
         mesh
     );
 
-    Info<< "Reading field gamma\n" << endl;
-    volScalarField gamma
+    Info<< "Reading field alpha1\n" << endl;
+    volScalarField alpha1
     (
         IOobject
         (
-            "gamma",
+            "alpha1",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -44,7 +44,7 @@
 
 
     Info<< "Reading transportProperties\n" << endl;
-    twoPhaseMixture twoPhaseProperties(U, phi, "gamma");
+    twoPhaseMixture twoPhaseProperties(U, phi);
 
     const dimensionedScalar& rho1 = twoPhaseProperties.rho1();
     const dimensionedScalar& rho2 = twoPhaseProperties.rho2();
@@ -60,15 +60,15 @@
             mesh,
             IOobject::READ_IF_PRESENT
         ),
-        gamma*rho1 + (scalar(1) - gamma)*rho2,
-        gamma.boundaryField().types()
+        alpha1*rho1 + (scalar(1) - alpha1)*rho2,
+        alpha1.boundaryField().types()
     );
     rho.oldTime();
 
 
     // Mass flux
     // Initialisation does not matter because rhoPhi is reset after the
-    // gamma solution before it is used in the U equation.
+    // alpha1 solution before it is used in the U equation.
     surfaceScalarField rhoPhi
     (
         IOobject
@@ -83,29 +83,17 @@
     );
 
 
-    Info<< "Calculating field g.h\n" << endl;
-    volScalarField gh("gh", g & mesh.C());
-    surfaceScalarField ghf("gh", g & mesh.Cf());
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
+    setRefCell(p, mesh.solutionDict().subDict("PISO"), pRefCell, pRefValue);
 
 
-    volScalarField p
+    // Construct interface from alpha1 distribution
+    interfaceProperties interface(alpha1, U, twoPhaseProperties);
+
+
+    // Construct incompressible turbulence model
+    autoPtr<incompressible::turbulenceModel> turbulence
     (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pd + rho*gh
+        incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
     );
-
-
-    label pdRefCell = 0;
-    scalar pdRefValue = 0.0;
-    setRefCell(pd, mesh.solutionDict().subDict("PISO"), pdRefCell, pdRefValue);
-
-
-    // Construct interface from gamma distribution
-    interfaceProperties interface(gamma, U, twoPhaseProperties);

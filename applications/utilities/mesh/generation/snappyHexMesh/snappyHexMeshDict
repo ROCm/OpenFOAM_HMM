@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -131,6 +131,12 @@ castellatedMeshControls
                     level (3 3);
                 }
             }
+
+            // Optional angle to detect small-large cell situation perpendicular
+            // to the surface. Is the angle of face w.r.t the local surface
+            // normal. Use on flat(ish) surfaces only. Otherwise
+            // leave out or set to negative number.
+            //perpendicularAngle 10;
         }
     }
 
@@ -203,6 +209,10 @@ snapControls
 // Settings for the layer addition.
 addLayersControls
 {
+    // Are the thickness parameters below relative to the undistorted
+    // size of the refined cell outside layer (true) or absolute sizes (false).
+    relativeSizes true;
+
     // Per final patch (so not geometry!) the layer information
     layers
     {
@@ -220,15 +230,15 @@ addLayersControls
     // Expansion factor for layer mesh
     expansionRatio 1.0;
 
+
     //- Wanted thickness of final added cell layer. If multiple layers
-    //  is the
-    //  thickness of the layer furthest away from the wall.
-    //  Relative to undistorted size of cell outside layer.
-    finalLayerRatio 0.3;
+    //  is the thickness of the layer furthest away from the wall.
+    //  See relativeSizes parameter.
+    finalLayerThickness 0.3;
 
     //- Minimum thickness of cell layer. If for any reason layer
     //  cannot be above minThickness do not add layer.
-    //  Relative to undistorted size of cell outside layer.
+    //  See relativeSizes parameter.
     minThickness 0.25;
 
     //- If points get not extruded do nGrow layers of connected faces that are
@@ -268,6 +278,14 @@ addLayersControls
 
     // Create buffer region for new layer terminations
     nBufferCellsNoExtrude 0;
+
+
+    // Overall max number of layer addition iterations
+    nLayerIter 50;
+
+    // Max number of iterations after which relaxed meshQuality controls
+    // get used.
+    nRelaxedIter 20;
 }
 
 
@@ -292,6 +310,7 @@ meshQualityControls
     minFlatness 0.5;
 
     //- Minimum pyramid volume. Is absolute volume of cell pyramid.
+    //  Set to a sensible fraction of the smallest cell volume expected.
     //  Set to very negative number (e.g. -1E30) to disable.
     minVol 1e-13;
 
@@ -315,6 +334,12 @@ meshQualityControls
     //must be >0 for Fluent compatibility
     minTriangleTwist -1;
 
+    //- if >0 : preserve single cells with all points on the surface if the
+    //  resulting volume after snapping (by approximation) is larger than
+    //  minVolCollapseRatio times old volume (i.e. not collapsed to flat cell).
+    //  If <0 : delete always.
+    //minVolCollapseRatio 0.5;
+
 
     // Advanced
 
@@ -322,6 +347,16 @@ meshQualityControls
     nSmoothScale 4;
     //- amount to scale back displacement at error points
     errorReduction 0.75;
+
+
+
+    // Optional : some meshing phases allow usage of relaxed rules.
+    // See e.g. addLayersControls::nRelaxedIter.
+    relaxed
+    {
+        //- Maximum non-orthogonality allowed. Set to 180 to disable.
+        maxNonOrtho 75;
+    }
 }
 
 

@@ -1,9 +1,14 @@
 {
     for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
     {
-        solve
+        tmp<fvScalarMatrix> TEqn
         (
-            fvm::ddt(rhosCps[i], Ts[i]) - fvm::laplacian(Ks[i], Ts[i])
+            fvm::ddt(rho*cp, T)
+          - fvm::laplacian(K, T)
         );
+        TEqn().relax();
+        TEqn().solve();
     }
+
+    Info<< "Min/max T:" << min(T) << ' ' << max(T) << endl;
 }

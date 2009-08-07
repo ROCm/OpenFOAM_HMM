@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
         scalar magS = mag(s);
 
         scalar cosDDotS =
-            Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+            Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
             *180.0/mathematicalConstant::pi;
 
         result[own[faceI]] = max(cosDDotS, result[own[faceI]]);
@@ -94,7 +94,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
             scalar magS = mag(s);
 
             scalar cosDDotS =
-                Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+                Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
                *180.0/mathematicalConstant::pi;
 
             result[faceCells[faceI]] = max(cosDDotS, result[faceCells[faceI]]);
@@ -209,7 +209,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
         scalar magS = mag(s);
 
         scalar cosDDotS =
-            Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+            Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
             *180.0/mathematicalConstant::pi;
 
         result[faceI] = cosDDotS;
@@ -235,7 +235,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
             scalar magS = mag(s);
 
             scalar cosDDotS =
-                Foam::acos((d & s)/(mag(d)*magS + VSMALL))
+                Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
                *180.0/mathematicalConstant::pi;
 
             result[globalFaceI++] = cosDDotS;

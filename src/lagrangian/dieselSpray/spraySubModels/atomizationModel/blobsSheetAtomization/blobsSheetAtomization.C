@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,7 +28,7 @@ License
 
 #include "blobsSheetAtomization.H"
 #include "addToRunTimeSelectionTable.H"
-#include "combustionMixture.H"
+#include "basicMultiComponentMixture.H"
 
 #include "RosinRammler.H"
 
@@ -112,7 +112,22 @@ void blobsSheetAtomization::atomizeParcel
     const injectorType& it =
         spray_.injectors()[label(p.injector())].properties();
 
-    const vector itPosition = it.position();
+    vector itPosition(vector::zero);
+    label nHoles = it.nHoles();
+    if (nHoles > 1)
+    {
+        for(label i=0; i<nHoles;i++)
+        {
+            itPosition += it.position(i);
+        }
+        itPosition /= nHoles;
+    }
+    else
+    {
+        itPosition = it.position(0);
+    }
+//    const vector itPosition = it.position();
+
 
     scalar lBU = B_ * sqrt
     (

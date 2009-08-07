@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,12 +38,12 @@ SourceFiles
 
 #include "labelIOList.H"
 #include "face.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "DynamicList.H"
 #include "primitivePatch.H"
 #include "removeFaces.H"
 #include "refinementHistory.H"
-#include "PackedList.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -185,8 +185,6 @@ class hexRef8
             const bool searchForward,
             const label wantedLevel
         ) const;
-        //- Gets level such that the face has four points <= level.
-        label getAnchorLevel(const label faceI) const;
 
         ////- Print levels of list of points.
         //void printLevels(Ostream&, const labelList&) const;
@@ -298,7 +296,7 @@ class hexRef8
         label faceConsistentRefinement
         (
             const bool maxSet,
-            PackedList<1>& refineCell
+            PackedBoolList& refineCell
         ) const;
 
         //- Check wanted refinement for 2:1 consistency
@@ -369,6 +367,9 @@ public:
             }
 
         // Refinement
+
+            //- Gets level such that the face has four points <= level.
+            label getAnchorLevel(const label faceI) const;
 
             //- Given valid mesh and current cell level and proposed
             //  cells to refine calculate any clashes (due to 2:1) and return

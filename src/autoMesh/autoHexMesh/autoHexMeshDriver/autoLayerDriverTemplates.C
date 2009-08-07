@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,7 +33,7 @@ template<class Type>
 void Foam::autoLayerDriver::averageNeighbours
 (
     const polyMesh& mesh,
-    const PackedList<1>& isMasterEdge,
+    const PackedBoolList& isMasterEdge,
     const labelList& meshEdges,
     const labelList& meshPoints,
     const edgeList& edges,

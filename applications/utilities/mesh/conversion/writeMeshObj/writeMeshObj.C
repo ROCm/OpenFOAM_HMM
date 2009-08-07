@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -37,6 +37,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "argList.H"
+#include "timeSelector.H"
 #include "Time.H"
 #include "polyMesh.H"
 #include "OFstream.H"
@@ -336,24 +337,25 @@ void writePointCells
 
 int main(int argc, char *argv[])
 {
+    timeSelector::addOptions();
     argList::validOptions.insert("patchFaces", "");
     argList::validOptions.insert("cell", "cellI");
     argList::validOptions.insert("face", "faceI");
     argList::validOptions.insert("point", "pointI");
     argList::validOptions.insert("cellSet", "setName");
     argList::validOptions.insert("faceSet", "setName");
+#   include "addRegionOption.H"
 
-#   include "addTimeOptions.H"
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
 
-    bool patchFaces = args.options().found("patchFaces");
-    bool doCell = args.options().found("cell");
-    bool doPoint = args.options().found("point");
-    bool doFace = args.options().found("face");
-    bool doCellSet = args.options().found("cellSet");
-    bool doFaceSet = args.options().found("faceSet");
+    bool patchFaces = args.optionFound("patchFaces");
+    bool doCell     = args.optionFound("cell");
+    bool doPoint    = args.optionFound("point");
+    bool doFace     = args.optionFound("face");
+    bool doCellSet  = args.optionFound("cellSet");
+    bool doFaceSet  = args.optionFound("faceSet");
 
 
     Info<< "Writing mesh objects as .obj files such that the object"
@@ -361,50 +363,39 @@ int main(int argc, char *argv[])
         << "(for points, faces, cells) is consistent with"
         << " Foam numbering (starting from 0)." << endl << endl;
 
-    // Get times list
-    instantList Times = runTime.times();
+    instantList timeDirs = timeSelector::select0(runTime, args);
 
-#   include "checkTimeOptions.H"
+#   include "createNamedPolyMesh.H"
 
-    runTime.setTime(Times[startTime], startTime);
-
-#   include "createPolyMesh.H"
-
-    bool firstCheck = true;
-
-    for (label i=startTime; i<endTime; i++)
+    forAll(timeDirs, timeI)
     {
-        runTime.setTime(Times[i], i);
+        runTime.setTime(timeDirs[timeI], timeI);
 
         Info<< "Time = " << runTime.timeName() << endl;
 
         polyMesh::readUpdateState state = mesh.readUpdate();
 
-        if (firstCheck || state != polyMesh::UNCHANGED)
+        if (!timeI || state != polyMesh::UNCHANGED)
         {
             if (patchFaces)
             {
                 writePatchFaces(mesh, runTime.timeName());
-
             }
             else if (doCell)
             {
-                label cellI =
-                    readLabel(IStringStream(args.options()["cell"])());
+                label cellI = args.optionRead<label>("cell");
 
                 writePoints(mesh, cellI, runTime.timeName());
             }
             else if (doPoint)
             {
-                label pointI =
-                    readLabel(IStringStream(args.options()["point"])());
+                label pointI = args.optionRead<label>("point");
 
                 writePointCells(mesh, pointI, runTime.timeName());
             }
             else if (doFace)
             {
-                label faceI =
-                    readLabel(IStringStream(args.options()["face"])());
+                label faceI = args.optionRead<label>("face");
 
                 fileName fName
                 (
@@ -426,7 +417,7 @@ int main(int argc, char *argv[])
             }
             else if (doCellSet)
             {
-                word setName(args.options()["cellSet"]);
+                word setName(args.option("cellSet"));
 
                 cellSet cells(mesh, setName);
 
@@ -438,7 +429,7 @@ int main(int argc, char *argv[])
             }
             else if (doFaceSet)
             {
-                word setName(args.options()["faceSet"]);
+                word setName(args.option("faceSet"));
 
                 faceSet faces(mesh, setName);
 
@@ -487,9 +478,7 @@ int main(int argc, char *argv[])
             Info << "No mesh." << endl;
         }
 
-        firstCheck = false;
-
-        Info << endl << endl;
+        Info << nl << endl;
     }
 
 

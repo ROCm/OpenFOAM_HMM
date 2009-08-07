@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,7 +68,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         const label nInternalFaces = mesh.nInternalFaces();
 
         // Mark refined cells on old mesh
-        PackedList<1> oldRefineCell(map.nOldCells(), 0u);
+        PackedBoolList oldRefineCell(map.nOldCells());
 
         forAll(oldCellsToRefine, i)
         {
@@ -76,7 +76,7 @@ Foam::labelList Foam::meshRefinement::getChangedFaces
         }
 
         // Mark refined faces
-        PackedList<1> refinedInternalFace(nInternalFaces, 0u);
+        PackedBoolList refinedInternalFace(nInternalFaces);
 
         // 1. Internal faces
 
@@ -326,14 +326,14 @@ Foam::label Foam::meshRefinement::markFeatureRefinement
     // Database to pass into trackedParticle::move
     trackedParticle::trackData td(cloud, maxFeatureLevel);
 
-    // Track all particles to their end position.
+    // Track all particles to their end position (= starting feature point)
     cloud.move(td);
 
     // Reset level
     maxFeatureLevel = -1;
 
     // Whether edge has been visited.
-    List<PackedList<1> > featureEdgeVisited(featureMeshes.size());
+    List<PackedBoolList> featureEdgeVisited(featureMeshes.size());
 
     forAll(featureMeshes, featI)
     {
@@ -833,7 +833,7 @@ Foam::label Foam::meshRefinement::markSurfaceCurvatureRefinement
     // minLevel) and cache per cell the max surface level and the local normal
     // on that surface.
     labelList cellMaxLevel(mesh_.nCells(), -1);
-    vectorField cellMaxNormal(mesh_.nCells());
+    vectorField cellMaxNormal(mesh_.nCells(), vector::zero);
 
     {
         // Per segment the normals of the surfaces
@@ -1224,6 +1224,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
     {
         mesh_.movePoints(map().preMotionPoints());
     }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
 
     // Update intersection info
     updateMesh(map, getChangedFaces(map, cellsToRefine));
@@ -1235,7 +1245,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::refine
 // Do refinement of consistent set of cells followed by truncation and
 // load balancing.
 Foam::autoPtr<Foam::mapDistributePolyMesh>
- Foam::meshRefinement::refineAndBalance
+Foam::meshRefinement::refineAndBalance
 (
     const string& msg,
     decompositionMethod& decomposer,
@@ -1249,12 +1259,12 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
     if (debug)
     {
         Pout<< "Writing refined but unbalanced " << msg
-            << " mesh to time " << mesh_.time().timeName() << endl;
+            << " mesh to time " << timeName() << endl;
         write
         (
             debug,
             mesh_.time().path()
-           /mesh_.time().timeName()
+           /timeName()
         );
         Pout<< "Dumped debug data in = "
             << mesh_.time().cpuTimeIncrement() << " s" << endl;
@@ -1292,12 +1302,11 @@ Foam::autoPtr<Foam::mapDistributePolyMesh>
         if (debug)
         {
             Pout<< "Writing balanced " << msg
-                << " mesh to time " << mesh_.time().timeName() << endl;
+                << " mesh to time " << timeName() << endl;
             write
             (
                 debug,
-                mesh_.time().path()
-               /mesh_.time().timeName()
+                mesh_.time().path()/timeName()
             );
             Pout<< "Dumped debug data in = "
                 << mesh_.time().cpuTimeIncrement() << " s" << endl;

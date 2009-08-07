@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,7 +59,7 @@ const NamedEnum<shellSurfaces::refineMode, 3> shellSurfaces::refineModeNames_;
 
 void Foam::shellSurfaces::setAndCheckLevels
 (
-    const scalar shellI,
+    const label shellI,
     const List<Tuple2<scalar, label> >& distLevels
 )
 {
@@ -158,11 +158,7 @@ void Foam::shellSurfaces::setAndCheckLevels
 void Foam::shellSurfaces::orient()
 {
     // Determine outside point.
-    boundBox overallBb
-    (
-        point(GREAT, GREAT, GREAT),
-        point(-GREAT, -GREAT, -GREAT)
-    );
+    boundBox overallBb = boundBox::invertedBox;
 
     bool hasSurface = false;
 
@@ -174,7 +170,7 @@ void Foam::shellSurfaces::orient()
         {
             const triSurfaceMesh& shell = refCast<const triSurfaceMesh>(s);
 
-            if (shell.triSurface::size() > 0)
+            if (shell.triSurface::size())
             {
                 const pointField& points = shell.points();
 
@@ -197,7 +193,7 @@ void Foam::shellSurfaces::orient()
 
     if (hasSurface)
     {
-        const point outsidePt(2*overallBb.max() - overallBb.min());
+        const point outsidePt = overallBb.max() + overallBb.span();
 
         //Info<< "Using point " << outsidePt << " to orient shells" << endl;
 

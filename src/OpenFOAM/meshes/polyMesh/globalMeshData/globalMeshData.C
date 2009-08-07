@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,10 +40,7 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-namespace Foam
-{
-    defineTypeNameAndDebug(globalMeshData, 0);
-}
+defineTypeNameAndDebug(Foam::globalMeshData, 0);
 
 // Geometric matching tolerance. Factor of mesh bounding box.
 const Foam::scalar Foam::globalMeshData::matchTol_ = 1E-8;
@@ -393,12 +390,11 @@ void Foam::globalMeshData::calcSharedEdges() const
             }
         }
     }
-    dynSharedEdgeLabels.shrink();
+
     sharedEdgeLabelsPtr_ = new labelList();
     labelList& sharedEdgeLabels = *sharedEdgeLabelsPtr_;
     sharedEdgeLabels.transfer(dynSharedEdgeLabels);
 
-    dynSharedEdgeAddr.shrink();
     sharedEdgeAddrPtr_ = new labelList();
     labelList& sharedEdgeAddr = *sharedEdgeAddrPtr_;
     sharedEdgeAddr.transfer(dynSharedEdgeAddr);
@@ -609,7 +605,7 @@ Foam::pointField Foam::globalMeshData::sharedPoints() const
 
             toMaster
                 << sharedPointAddr_ 
-                << IndirectList<point>(mesh_.points(), sharedPointLabels_)();
+                << UIndirectList<point>(mesh_.points(), sharedPointLabels_)();
         }
 
         // Receive sharedPoints
@@ -640,7 +636,7 @@ Foam::pointField Foam::globalMeshData::geometricSharedPoints() const
     combineReduce(sharedPoints, plusEqOp<pointField>());
 
     // Merge tolerance
-    scalar tolDim = matchTol_*mag(bb_.max() - bb_.min());
+    scalar tolDim = matchTol_ * bb_.mag();
 
     // And see how many are unique
     labelList pMap;
@@ -705,17 +701,16 @@ void Foam::globalMeshData::updateMesh()
     // Do processor patch addressing
     initProcAddr();
 
-    // Bounding box (does communication)
-    bb_ = boundBox(mesh_.points(), true);
+    // Note: boundBox does reduce
+    bb_ = boundBox(mesh_.points());
 
-    scalar tolDim = matchTol_*mag(bb_.max() - bb_.min());
+    scalar tolDim = matchTol_ * bb_.mag();
 
     if (debug)
     {
         Pout<< "globalMeshData : bb_:" << bb_
             << " merge dist:" << tolDim << endl;
     }
-
 
 
     // Option 1. Topological
@@ -747,7 +742,7 @@ void Foam::globalMeshData::updateMesh()
     // processor faces (on highest numbered processor) before summing.
     nTotalFaces_ = mesh_.nFaces();
 
-    // Do not count processorpatch faces that are coincident.
+    // Do not count processor-patch faces that are coincident.
     forAll(processorPatches_, i)
     {
         label patchI = processorPatches_[i];

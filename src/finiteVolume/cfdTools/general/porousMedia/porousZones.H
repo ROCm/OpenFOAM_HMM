@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ Description
     cat1
     {
         coordinateSystem    system_10;
-        porosity        0.781;
+        porosity    0.781;
         Darcy
         {
             d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
@@ -84,9 +84,6 @@ class porousZones
         //- Reference to the finite volume mesh this zone is part of
         const fvMesh& mesh_;
 
-        //- Reference to constant coordinate systems
-        coordinateSystems csList_;
-
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -104,12 +101,9 @@ public:
 
     // Constructors
 
-        //- Construct from fvMesh and coordinate systems list
-        porousZones(const fvMesh& mesh, const coordinateSystems& cs);
-
         //- Construct from fvMesh
         //  with automatically constructed coordinate systems list
-        porousZones(const fvMesh& mesh);
+        porousZones(const fvMesh&);
 
 
     // Member Functions

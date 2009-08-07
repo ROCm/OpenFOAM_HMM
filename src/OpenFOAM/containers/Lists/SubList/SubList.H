@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -59,16 +59,22 @@ class SubList
 
 public:
 
+    // Static Member Functions
+
+        //- Return a null SubList
+        inline static const SubList<T>& null();
+
+
     // Constructors
 
-        //- Construct from UList and SubList size
+        //- Construct from UList and sub-list size
         inline SubList
         (
             const UList<T>& list,
             const label subSize
         );
 
-        //- Construct from UList, start and end indices
+        //- Construct from UList, sub-list size and start index
         inline SubList
         (
             const UList<T>& list,
@@ -77,16 +83,13 @@ public:
         );
 
 
-    // Member functions
-
-        //- Return a null SubList
-        static inline const SubList<T>& null();
-
-
     // Member operators
 
         //- Allow cast to a const List<T>&
         inline operator const Foam::List<T>&() const;
+
+        //- Assignment of all entries to the given value
+        inline void operator=(const T&);
 };
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -82,13 +82,15 @@ class processorPolyPatch
         //- Processor-neighbbour patch neighbour cell centres
         vectorField neighbFaceCellCentres_;
 
-        //- Corresponding neighbouring local point label for every local point
-        //  (so localPoints()[i] == neighb.localPoints()[neighbPoints_[i]])
-        mutable labelList* neighbPointsPtr_;
+        //- Corresponding mesh point per local point
+        mutable autoPtr<labelListList> subMeshPointsPtr_;
 
-        //- Corresponding neighbouring local edge label for every local edge
-        //  (so edges()[i] == neighb.edges()[neighbEdges_[i]])
-        mutable labelList* neighbEdgesPtr_;
+        //- Corresponding mesh point per local point on reverse patch
+        mutable autoPtr<labelListList> reverseSubMeshPointsPtr_;
+
+//        //- Corresponding neighbouring local edge label for every local edge
+//        //  (so edges()[i] == neighb.edges()[neighbEdges_[i]])
+//        mutable labelList* neighbEdgesPtr_;
 
 
     // Private member functions
@@ -463,16 +465,15 @@ public:
             );
         }
 
-//        //- Return neighbour point labels. This is for my local point (-1 or)
-//        //  the corresponding local point on the other side. It is -1 if
-//        //  there are multiple corresponding points on this or the other side
-//        //  (can happen for cyclics being converted into proc patches)
-//        const labelList& neighbPoints() const;
-//
 //        //- Return neighbour edge labels. This is for my local edge (-1 or) the
 //        //  corresponding local edge on the other side. See above for -1 cause.
 //        const labelList& neighbEdges() const;
 
+        //- Mesh point labels per local point per sub patch.
+        const labelListList& subMeshPoints() const;
+
+        //- Mesh point labels per local point on reversed faces per sub patch.
+        const labelListList& reverseSubMeshPoints() const;
 
         //- Initialize ordering for primitivePatch. Does not
         //  refer to *this (except for name() and type() etc.)

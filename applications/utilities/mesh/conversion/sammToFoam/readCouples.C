@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -136,7 +136,7 @@ void sammMesh::readCouples()
 
             forAll (curFaces, faceI)
             {
-                if (curFaces[faceI].size() == 0)
+                if (curFaces[faceI].empty())
                 {
                     zeroSizeFound++;
                 }
@@ -153,7 +153,7 @@ void sammMesh::readCouples()
 
                 forAll (oldFaces, faceI)
                 {
-                    if (oldFaces[faceI].size() > 0)
+                    if (oldFaces[faceI].size())
                     {
                         curFaces[nFaces] = oldFaces[faceI];
 

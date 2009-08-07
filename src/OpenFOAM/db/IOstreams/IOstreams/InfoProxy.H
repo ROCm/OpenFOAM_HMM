@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,19 +52,14 @@ class InfoProxy
 {
 public:
 
-    #ifndef __MAKECINT__
     const T& t_;
-    #endif
 
     InfoProxy(const T& t)
     :
         t_(t)
     {}
-    
-    friend Ostream& operator<<
-    #ifndef __CINT__
-    <T>
-    #endif
+
+    friend Ostream& operator<< <T>
     (Ostream&, const InfoProxy<T>&);
 };
 

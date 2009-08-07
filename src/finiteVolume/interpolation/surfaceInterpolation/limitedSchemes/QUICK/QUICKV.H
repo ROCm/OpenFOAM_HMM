@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -81,8 +81,7 @@ public:
 
         scalar phiCD = gradfV & (cdWeight*phiP + (1 - cdWeight)*phiN);
 
-        scalar phif;
-        scalar phiU;
+        scalar phiU, phif;
 
         if (faceFlux > 0)
         {
@@ -95,7 +94,7 @@ public:
             phif = 0.5*(phiCD + phiU - cdWeight*(gradfV & (d & gradcN)));
         }
 
-        // Calculate the effective limiter for the linearUpwind interpolation
+        // Calculate the effective limiter for the QUICK interpolation
         scalar QLimiter = (phif - phiU)/stabilise(phiCD - phiU, SMALL);
 
         // Limit the limiter between upwind and downwind

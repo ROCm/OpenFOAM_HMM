@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,10 +23,11 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    KTS
+    Foam::XiGModels::KTS
 
 Description
-    Simple Kolmogorov time-scale model for the flame-wrinling generation rate.
+    Simple Kolmogorov time-scale (KTS) model for the flame-wrinling generation
+    rate.
 
 SourceFiles
     KTS.C

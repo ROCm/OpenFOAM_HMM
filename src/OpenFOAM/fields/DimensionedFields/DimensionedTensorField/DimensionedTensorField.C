@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -45,6 +45,7 @@ UNARY_FUNCTION(tensor, tensor, skew, transform)
 UNARY_FUNCTION(tensor, tensor, dev, transform)
 UNARY_FUNCTION(tensor, tensor, dev2, transform)
 UNARY_FUNCTION(scalar, tensor, det, transform)
+UNARY_FUNCTION(tensor, tensor, cof, cof)
 UNARY_FUNCTION(tensor, tensor, inv, inv)
 UNARY_FUNCTION(vector, tensor, eigenValues, sign)
 UNARY_FUNCTION(tensor, tensor, eigenVectors, transform)

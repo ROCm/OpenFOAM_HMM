@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,14 +27,10 @@ License
 #include "primitiveMesh.H"
 #include "demandDrivenData.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void primitiveMesh::printAllocated() const
+void Foam::primitiveMesh::printAllocated() const
 {
     Pout<< "primitiveMesh allocated :" << endl;
 
@@ -98,7 +94,7 @@ void primitiveMesh::printAllocated() const
     {
         Pout<< "    Point-point" << endl;
     }
-    
+
     if (cpPtr_)
     {
         Pout<< "    Cell-point" << endl;
@@ -128,7 +124,7 @@ void primitiveMesh::printAllocated() const
 }
 
 
-void primitiveMesh::clearGeom()
+void Foam::primitiveMesh::clearGeom()
 {
     if (debug)
     {
@@ -144,7 +140,7 @@ void primitiveMesh::clearGeom()
 }
 
 
-void primitiveMesh::clearAddressing()
+void Foam::primitiveMesh::clearAddressing()
 {
     if (debug)
     {
@@ -173,15 +169,11 @@ void primitiveMesh::clearAddressing()
 }
 
 
-void primitiveMesh::clearOut()
+void Foam::primitiveMesh::clearOut()
 {
     clearGeom();
     clearAddressing();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

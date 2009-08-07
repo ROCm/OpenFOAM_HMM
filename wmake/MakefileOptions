@@ -2,9 +2,9 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
-#-------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 # License
 #     This file is part of OpenFOAM.
 #
@@ -22,11 +22,11 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     MakefileOptions
 #
 # Description
-#     General, easy to use make system for multi-platform development.
+#     A Makefile for the 'options', used by wmake
 #
 #------------------------------------------------------------------------------
 
@@ -37,13 +37,13 @@ include $(GENERAL_RULES)/general
 include $(RULES)/general
 
 #------------------------------------------------------------------------------
-# declare names of make system control files derived from file files
+# declare names of make system control files derived from file 'options'
 #------------------------------------------------------------------------------
 
 OPTIONS = $(WM_OPTIONS)/options
 
 #------------------------------------------------------------------------------
-# Declare dependecy of all make system files on FILE
+# Declare dependency of all make system files on OPTIONS
 # Causes all derived files to be remade if any are changed or missing
 #------------------------------------------------------------------------------
 

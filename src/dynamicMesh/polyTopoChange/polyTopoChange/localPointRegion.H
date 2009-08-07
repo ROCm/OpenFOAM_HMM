@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ SourceFiles
 #include "typeInfo.H"
 #include "Map.H"
 #include "labelList.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "faceList.H"
 #include "boolList.H"
 
@@ -159,7 +159,7 @@ public:
             //    return nRegions_;
             //}
 
-            //- Per point that is to duplicated to the local index
+            //- Per point that is to be duplicated the local index
             const Map<label>& meshPointMap() const
             {
                 return meshPointMap_;

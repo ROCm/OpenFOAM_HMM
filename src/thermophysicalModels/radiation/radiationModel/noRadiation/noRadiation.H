@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -54,7 +54,6 @@ class noRadiation
 :
     public radiationModel
 {
-
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -67,7 +66,7 @@ class noRadiation
 public:
 
     //- Runtime type information
-    TypeName("noRadiation");
+    TypeName("none");
 
 
     // Constructors
@@ -76,17 +75,16 @@ public:
         noRadiation(const volScalarField& T);
 
 
-    // Destructor
-
-        ~noRadiation();
+    //- Destructor
+    virtual ~noRadiation();
 
 
     // Member functions
 
         // Edit
 
-            //- Update radiation source
-            void correct();
+            //- Solve radiation equation(s)
+            void calculate();
 
             //- Read radiationProperties dictionary
             bool read();

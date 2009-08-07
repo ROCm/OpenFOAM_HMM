@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,8 +31,7 @@ License
 template<class T>
 Foam::IOMap<T>::IOMap(const IOobject& io)
 :
-    regIOobject(io),
-    Map<T>()
+    regIOobject(io)
 {
     if
     (
@@ -83,6 +82,25 @@ Foam::IOMap<T>::IOMap(const IOobject& io, const Map<T>& map)
     else
     {
         Map<T>::operator=(map);
+    }
+}
+
+
+template<class T>
+Foam::IOMap<T>::IOMap(const IOobject& io, const Xfer<Map<T> >& map)
+:
+    regIOobject(io)
+{
+    Map<T>::transfer(map());
+
+    if
+    (
+        io.readOpt() == IOobject::MUST_READ
+     || (io.readOpt() == IOobject::READ_IF_PRESENT && headerOk())
+    )
+    {
+        readStream(typeName) >> *this;
+        close();
     }
 }
 

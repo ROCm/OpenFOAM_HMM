@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,10 +74,7 @@ void Foam::readerDatabase::getPolyHedra()
         }
     }
 
-    polys.shrink();
-
     Info<< "Found " << polys.size() << " polyhedral cells " << endl;
-
     polys_.transfer(polys);
 }
 
@@ -153,7 +150,7 @@ const Foam::fvMesh& Foam::readerDatabase::mesh() const
             << "No mesh set" << abort(FatalError);
     }
 
-    if (setName_.size() == 0)
+    if (setName_.empty())
     {
         return *meshPtr_;
     }
@@ -268,7 +265,7 @@ void Foam::readerDatabase::loadMesh()
         IOobject::AUTO_WRITE
     );
 
-    if (setName_.size() != 0)
+    if (setName_.size())
     {
         Info<< "Subsetting mesh based on cellSet " << setName_ << endl;
 
@@ -297,9 +294,9 @@ Foam::polyMesh::readUpdateState Foam::readerDatabase::setTime
         // Update loaded mesh
         meshChange = meshPtr_->readUpdate();
 
-        if ((setName_.size() != 0) && (meshChange != polyMesh::UNCHANGED))
+        if (setName_.size() && meshChange != polyMesh::UNCHANGED)
         {
-            Info<< "Subsetting mesh based on " << setName_ << endl;        
+            Info<< "Subsetting mesh based on " << setName_ << endl;
 
             fvMeshSubset& mesh = *meshPtr_;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -69,7 +69,7 @@ class phaseModel
         volVectorField U_;
 
         //- Fluxes
-        surfaceScalarField* phiPtr_;
+        autoPtr<surfaceScalarField> phiPtr_;
 
 
 public:
@@ -133,12 +133,12 @@ public:
 
         const surfaceScalarField& phi() const
         {
-            return *phiPtr_;
+            return phiPtr_();
         }
 
         surfaceScalarField& phi()
         {
-            return *phiPtr_;
+            return phiPtr_();
         }
 };
 

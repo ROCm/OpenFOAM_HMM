@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -115,8 +115,8 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
     const fvPatchField<scalar>& psip = this->patch().lookupPatchField
     (
         psiName_,
-        reinterpret_cast<const volScalarField*>(NULL),
-        reinterpret_cast<const scalar*>(NULL)
+        reinterpret_cast<const volScalarField*>(0),
+        reinterpret_cast<const scalar*>(0)
     );
 
     const surfaceScalarField& phi =
@@ -126,8 +126,8 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
     fvsPatchField<scalar> phip = this->patch().lookupPatchField
     (
         this->phiName_,
-        reinterpret_cast<const surfaceScalarField*>(NULL),
-        reinterpret_cast<const scalar*>(NULL)
+        reinterpret_cast<const surfaceScalarField*>(0),
+        reinterpret_cast<const scalar*>(0)
     );
 
     if (phi.dimensions() == dimDensity*dimVelocity*dimArea)
@@ -135,8 +135,8 @@ tmp<scalarField> waveTransmissiveFvPatchField<Type>::advectionSpeed() const
         const fvPatchScalarField& rhop = this->patch().lookupPatchField
         (
             this->rhoName_,
-            reinterpret_cast<const volScalarField*>(NULL),
-            reinterpret_cast<const scalar*>(NULL)
+            reinterpret_cast<const volScalarField*>(0),
+            reinterpret_cast<const scalar*>(0)
         );
 
         phip /= rhop;
@@ -172,7 +172,7 @@ void waveTransmissiveFvPatchField<Type>::write(Ostream& os) const
     {
         os.writeKeyword("fieldInf") << this->fieldInf_
             << token::END_STATEMENT << nl;
-        os.writeKeyword("lInf") << this->lInf_ 
+        os.writeKeyword("lInf") << this->lInf_
             << token::END_STATEMENT << nl;
     }
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -74,19 +74,7 @@ int main(int argc, char *argv[])
 {
 #   include "setRootCase.H"
 #   include "createTime.H"
-
-    Info<< "Reading mesh for time = " << runTime.value() << endl;
-
-    Info<< "Create mesh\n" << endl;
-    polyMesh mesh
-    (
-        IOobject
-        (
-            polyMesh::defaultRegion,
-            runTime.timeName(),
-            runTime
-        )
-    );
+#   include "createPolyMesh.H"
 
     Info<< "Reading cellSetDict\n" << endl;
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -147,25 +147,6 @@ public:
         point& pInter0,
         point& pInter1
     );
-
-
-    //- Classify point on triangle plane w.r.t. triangle edges.
-    //  - inside/outside (returned)
-    //  - near point (0, 1, 2)
-    //  - near edge (0, 1, 2). Note: edges are counted from starting vertex
-    //    so e.g. edge 2 is from f[2] to f[0]
-    static bool classify
-    (
-        const point& baseVertex,
-        const vector& E0,
-        const vector& E1,
-        const vector& n,
-        const point& pInter,
-        const scalar tol,
-        label& nearType,
-        label& nearLabel
-    );
-
 };
 
 

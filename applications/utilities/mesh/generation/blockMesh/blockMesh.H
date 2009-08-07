@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -62,8 +62,6 @@ class blockMesh
 
         polyMesh* topologyPtr_;
 
-        scalar scale_;
-
         labelList blockOffsets_;
         labelList mergeList_;
 
@@ -118,7 +116,7 @@ class blockMesh
         labelList createBlockOffsets();
         labelList createMergeList();
 
-        pointField createPoints();
+        pointField createPoints(const dictionary&);
         cellShapeList createCells();
 
         faceList createPatchFaces(const polyPatch& patchTopologyFaces);
@@ -147,7 +145,10 @@ public:
 
             const polyMesh& topology() const;
 
-            const curvedEdgeList& edges() const;
+            const curvedEdgeList& edges() const
+            {
+                return edges_;
+            }
 
             const pointField& points() const
             {

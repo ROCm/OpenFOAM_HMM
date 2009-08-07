@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,19 +26,15 @@ InClass
     Foam::contiguous
 
 Description
-    Template function which specifies if the data of the type is contiguous
-    or not.
+    Template function to specify if the data of a type are contiguous.
 
     The default function specifies that data are not contiguous.
-    This is specialised for the types (e.g. primitives) for which their
-    data are contiguous.
+    This is specialised for the types (eg, primitives) with contiguous data.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef contiguous_H
 #define contiguous_H
-
-#include "label.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -48,18 +44,17 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Forward declaration of friend functions and operators
-template<class T, label Size> class FixedList;
+template<class T, unsigned Size> class FixedList;
 template<class T> class Pair;
 
 
-// Assume the data associated with type T is not contiguous
+//- Assume the data associated with type T are not contiguous
 template<class T>
-inline bool contiguous()                        {return false;}
+inline bool contiguous()                                   {return false;}
 
 
-
-// Specify data associated with primitive types (and simple fixed size
-// containers - only size 2 defined here) is contiguous
+// Data associated with primitive types (and simple fixed size containers
+//  - only size 2 defined here) are contiguous
 
 template<>
 inline bool contiguous<bool>()                              {return true;}
@@ -143,7 +138,7 @@ inline bool contiguous<float>()                             {return true;}
 template<>
 inline bool contiguous<FixedList<float, 2> >()              {return true;}
 template<>
-inline bool contiguous<Pair<float> >()                       {return true;}
+inline bool contiguous<Pair<float> >()                      {return true;}
 
 template<>
 inline bool contiguous<double>()                            {return true;}

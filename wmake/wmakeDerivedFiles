@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #-------------------------------------------------------------------------------
 # License
@@ -34,14 +34,14 @@
 
 if [ ! -d "$WM_OPTIONS" ]
 then
-    echo "The $WM_OPTIONS directory does not exist, exiting"
+    echo "The $WM_OPTIONS directory does not exist, exiting" 1>&2
     exit 1
 fi
 
 # change to the $WM_OPTIONS directory
 cd $WM_OPTIONS 2>/dev/null || {
-   echo "Could not change to directory '$WM_OPTIONS'"
-   exit 1
+    echo "Could not change to directory '$WM_OPTIONS'" 1>&2
+    exit 1
 }
 
 # Find and keep macro definitions in files list
@@ -52,9 +52,6 @@ grep -v "=" files > filesPlusBlank
 
 # Add a newline to files to make sure the last line is followed by a newline
 echo "" >> filesPlusBlank
-
-# Search for java files in filesPlusBlank
-nJava=`grep "\.java" filesPlusBlank | wc -l`
 
 
 # Remove commented lines blank lines, and trailing blanks from files
@@ -81,17 +78,10 @@ rm tmpSourceFile
 
 # make objectFiles
 # ~~~~~~~~~~~~~~~~
-if [ $nJava -ne 0 ]
-then
-    sed -e 's%^%$(CLASSES_DIR)/%'  \
-        -e 's%\.[a-zA-Z]*$%\.class%'    \
-        files.$$ > tmpObjectFiles
-else
-    sed -e 's%.*/%%'               \
-        -e 's%^%$(OBJECTS_DIR)/%'  \
-        -e 's%\.[a-zA-Z]*$%\.o%'    \
-        files.$$ > tmpObjectFiles
-fi
+sed -e 's%.*/%%'               \
+    -e 's%^%$(OBJECTS_DIR)/%'  \
+    -e 's%\.[a-zA-Z]*$%\.o%'    \
+    files.$$ > tmpObjectFiles
 
 echo "OBJECTS = " > tmpObjectFiles2
 cat tmpObjectFiles >> tmpObjectFiles2

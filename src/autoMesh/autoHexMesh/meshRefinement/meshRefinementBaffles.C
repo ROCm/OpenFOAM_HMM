@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,9 +44,6 @@ License
 #include "OFstream.H"
 #include "regionSplit.H"
 #include "removeCells.H"
-#include "motionSmoother.H"
-#include "polyMeshGeometry.H"
-#include "IOmanip.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -104,6 +101,12 @@ Foam::label Foam::meshRefinement::createBaffle
                 << " ownPatch:" << ownPatch << abort(FatalError);
         }
 
+        bool reverseFlip = false;
+        if (zoneID >= 0)
+        {
+            reverseFlip = !zoneFlip;
+        }
+
         dupFaceI = meshMod.setAction
         (
             polyAddFace
@@ -117,7 +120,7 @@ Foam::label Foam::meshRefinement::createBaffle
                 true,                       // face flip
                 neiPatch,                   // patch for face
                 zoneID,                     // zone for face
-                zoneFlip,                   // face flip in zone
+                reverseFlip,                // face flip in zone
                 -1                          // sub patch
             )
         );
@@ -206,7 +209,7 @@ Foam::label Foam::meshRefinement::getBafflePatch
 
     WarningIn
     (
-        "meshRefinement::getBafflePatch(const labelList& const label)"
+        "meshRefinement::getBafflePatch(const labelList&, const label)"
     )   << "Could not find boundary face neighbouring internal face "
         << faceI << " with face centre " << mesh_.faceCentres()[faceI]
         << nl
@@ -231,7 +234,13 @@ void Foam::meshRefinement::getBafflePatches
     label vertI = 0;
     if (debug&OBJINTERSECTIONS)
     {
-        str.reset(new OFstream(mesh_.time().path()/"intersections.obj"));
+        str.reset
+        (
+            new OFstream
+            (
+                mesh_.time().path()/timeName()/"intersections.obj"
+            )
+        );
 
         Pout<< "getBafflePatches : Writing surface intersections to file "
             << str().name() << nl << endl;
@@ -246,7 +255,7 @@ void Foam::meshRefinement::getBafflePatches
     label baffleI = 0;
     forAll(cellZoneNames, surfI)
     {
-        if (cellZoneNames[surfI].size() > 0)
+        if (cellZoneNames[surfI].size())
         {
             if (debug)
             {
@@ -460,6 +469,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
     {
         mesh_.movePoints(map().preMotionPoints());
     }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
 
     //- Redo the intersections on the newly create baffle faces. Note that
     //  this changes also the cell centre positions.
@@ -504,635 +523,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::createBaffles
 
     return map;
 }
-
-
-void Foam::meshRefinement::markBoundaryFace
-(
-    const label faceI,
-    boolList& isBoundaryFace,
-    boolList& isBoundaryEdge,
-    boolList& isBoundaryPoint
-) const
-{
-    isBoundaryFace[faceI] = true;
-
-    const labelList& fEdges = mesh_.faceEdges(faceI);
-
-    forAll(fEdges, fp)
-    {
-        isBoundaryEdge[fEdges[fp]] = true;
-    }
-
-    const face& f = mesh_.faces()[faceI];
-
-    forAll(f, fp)
-    {
-        isBoundaryPoint[f[fp]] = true;
-    }
-}
-
-
-// Returns list with for every internal face -1 or the patch they should
-// be baffled into. Gets run after createBaffles so all the surface
-// intersections have already been turned into baffles. Used to remove cells
-// by baffling all their faces and have the splitMeshRegions chuck away non
-// used regions.
-Foam::labelList Foam::meshRefinement::markFacesOnProblemCells
-(
-    const labelList& globalToPatch
-) const
-{
-    const labelList& cellLevel = meshCutter_.cellLevel();
-    const labelList& pointLevel = meshCutter_.pointLevel();
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-
-    // Per internal face (boundary faces not used) the patch that the
-    // baffle should get (or -1)
-    labelList facePatch(mesh_.nFaces(), -1);
-
-    // Mark all points and edges on baffle patches (so not on any inlets,
-    // outlets etc.)
-    boolList isBoundaryPoint(mesh_.nPoints(), false);
-    boolList isBoundaryEdge(mesh_.nEdges(), false);
-    boolList isBoundaryFace(mesh_.nFaces(), false);
-
-    // Fill boundary data. All elements on meshed patches get marked.
-    // Get the labels of added patches.
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
-
-    forAll(adaptPatchIDs, i)
-    {
-        label patchI = adaptPatchIDs[i];
-
-        const polyPatch& pp = patches[patchI];
-
-        label faceI = pp.start();
-
-        forAll(pp, j)
-        {
-            markBoundaryFace
-            (
-                faceI,
-                isBoundaryFace,
-                isBoundaryEdge,
-                isBoundaryPoint
-            );
-
-            faceI++;
-        }
-    }
-
-    syncTools::syncPointList
-    (
-        mesh_,
-        isBoundaryPoint,
-        orEqOp<bool>(),
-        false               // null value
-    );
-
-    syncTools::syncEdgeList
-    (
-        mesh_,
-        isBoundaryEdge,
-        orEqOp<bool>(),
-        false               // null value
-    );
-
-    syncTools::syncFaceList
-    (
-        mesh_,
-        isBoundaryFace,
-        orEqOp<bool>()
-    );
-
-
-    // For each cell count the number of anchor points that are on
-    // the boundary:
-    // 8 : check the number of (baffle) boundary faces. If 3 or more block
-    //     off the cell since the cell would get squeezed down to a diamond
-    //     (probably; if the 3 or more faces are unrefined (only use the
-    //      anchor points))
-    // 7 : store. Used to check later on whether there are points with
-    //     3 or more of these cells. (note that on a flat surface a boundary
-    //     point will only have 4 cells connected to it)
-
-    // Does cell have exactly 7 of its 8 anchor points on the boundary?
-    PackedList<1> hasSevenBoundaryAnchorPoints(mesh_.nCells(), 0u);
-    // If so what is the remaining non-boundary anchor point?
-    labelHashSet nonBoundaryAnchors(mesh_.nCells()/10000);
-
-    // On-the-fly addressing storage.
-    DynamicList<label> dynFEdges;
-    DynamicList<label> dynCPoints;
-
-    // Count of faces marked for baffling
-    label nBaffleFaces = 0;
-
-    forAll(cellLevel, cellI)
-    {
-        const labelList& cPoints = mesh_.cellPoints(cellI, dynCPoints);
-
-        // Get number of anchor points (pointLevel == cellLevel)
-
-        label nBoundaryAnchors = 0;
-        label nNonAnchorBoundary = 0;
-        label nonBoundaryAnchor = -1;
-
-        forAll(cPoints, i)
-        {
-            label pointI = cPoints[i];
-
-            if (pointLevel[pointI] <= cellLevel[cellI])
-            {
-                // Anchor point
-                if (isBoundaryPoint[pointI])
-                {
-                    nBoundaryAnchors++;
-                }
-                else
-                {
-                    // Anchor point which is not on the surface
-                    nonBoundaryAnchor = pointI;
-                }
-            }
-            else if (isBoundaryPoint[pointI])
-            {
-                nNonAnchorBoundary++;
-            }
-        }
-
-        if (nBoundaryAnchors == 8)
-        {
-            const cell& cFaces = mesh_.cells()[cellI];
-
-            // Count boundary faces.
-            label nBfaces = 0;
-
-            forAll(cFaces, cFaceI)
-            {
-                if (isBoundaryFace[cFaces[cFaceI]])
-                {
-                    nBfaces++;
-                }
-            }
-
-            // If nBfaces > 1 make all non-boundary non-baffle faces baffles.
-            // We assume that this situation is where there is a single
-            // cell sticking out which would get flattened.
-
-            // Eugene: delete cell no matter what.
-            //if (nBfaces > 1)
-            {
-                forAll(cFaces, cf)
-                {
-                    label faceI = cFaces[cf];
-
-                    if (facePatch[faceI] == -1 && mesh_.isInternalFace(faceI))
-                    {
-                        facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                        nBaffleFaces++;
-
-                        // Mark face as a 'boundary'
-                        markBoundaryFace
-                        (
-                            faceI,
-                            isBoundaryFace,
-                            isBoundaryEdge,
-                            isBoundaryPoint
-                        );
-                    }
-                }
-            }
-        }
-        else if (nBoundaryAnchors == 7)
-        {
-            // Mark the cell. Store the (single!) non-boundary anchor point.
-            hasSevenBoundaryAnchorPoints.set(cellI, 1u);
-            nonBoundaryAnchors.insert(nonBoundaryAnchor);
-        }
-    }
-
-
-    // Loop over all points. If a point is connected to 4 or more cells
-    // with 7 anchor points on the boundary set those cell's non-boundary faces
-    // to baffles
-
-    DynamicList<label> dynPCells;
-
-    forAllConstIter(labelHashSet, nonBoundaryAnchors, iter)
-    {
-        label pointI = iter.key();
-
-        const labelList& pCells = mesh_.pointCells(pointI, dynPCells);
-
-        // Count number of 'hasSevenBoundaryAnchorPoints' cells.
-        label n = 0;
-
-        forAll(pCells, i)
-        {
-            if (hasSevenBoundaryAnchorPoints.get(pCells[i]) == 1u)
-            {
-                n++;
-            }
-        }
-
-        if (n > 3)
-        {
-            // Point in danger of being what? Remove all 7-cells.
-            forAll(pCells, i)
-            {
-                label cellI = pCells[i];
-
-                if (hasSevenBoundaryAnchorPoints.get(cellI) == 1u)
-                {
-                    const cell& cFaces = mesh_.cells()[cellI];
-
-                    forAll(cFaces, cf)
-                    {
-                        label faceI = cFaces[cf];
-
-                        if
-                        (
-                            facePatch[faceI] == -1
-                         && mesh_.isInternalFace(faceI)
-                        )
-                        {
-                            facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                            nBaffleFaces++;
-
-                            // Mark face as a 'boundary'
-                            markBoundaryFace
-                            (
-                                faceI,
-                                isBoundaryFace,
-                                isBoundaryEdge,
-                                isBoundaryPoint
-                            );
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-
-    // Sync all. (note that pointdata and facedata not used anymore but sync
-    // anyway)
-
-    syncTools::syncPointList
-    (
-        mesh_,
-        isBoundaryPoint,
-        orEqOp<bool>(),
-        false               // null value
-    );
-
-    syncTools::syncEdgeList
-    (
-        mesh_,
-        isBoundaryEdge,
-        orEqOp<bool>(),
-        false               // null value
-    );
-
-    syncTools::syncFaceList
-    (
-        mesh_,
-        isBoundaryFace,
-        orEqOp<bool>()
-    );
-
-
-    // Find faces with all edges on the boundary and make them baffles
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
-    {
-        if (facePatch[faceI] == -1)
-        {
-            const labelList& fEdges = mesh_.faceEdges(faceI, dynFEdges);
-            label nFaceBoundaryEdges = 0;
-
-            forAll(fEdges, fe)
-            {
-                if (isBoundaryEdge[fEdges[fe]])
-                {
-                    nFaceBoundaryEdges++;
-                }
-            }
-
-            if (nFaceBoundaryEdges == fEdges.size())
-            {
-                facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                nBaffleFaces++;
-
-                // Do NOT update boundary data since this would grow blocked
-                // faces across gaps.
-            }
-        }
-    }
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        if (pp.coupled())
-        {
-            label faceI = pp.start();
-
-            forAll(pp, i)
-            {
-                if (facePatch[faceI] == -1)
-                {
-                    const labelList& fEdges = mesh_.faceEdges(faceI, dynFEdges);
-                    label nFaceBoundaryEdges = 0;
-
-                    forAll(fEdges, fe)
-                    {
-                        if (isBoundaryEdge[fEdges[fe]])
-                        {
-                            nFaceBoundaryEdges++;
-                        }
-                    }
-
-                    if (nFaceBoundaryEdges == fEdges.size())
-                    {
-                        facePatch[faceI] = getBafflePatch(facePatch, faceI);
-                        nBaffleFaces++;
-
-                        // Do NOT update boundary data since this would grow
-                        // blocked faces across gaps.
-                    }
-                }
-
-                faceI++;
-            }
-        }
-    }
-
-    Info<< "markFacesOnProblemCells : marked "
-        << returnReduce(nBaffleFaces, sumOp<label>())
-        << " additional internal faces to be converted into baffles."
-        << endl;
-
-    return facePatch;
-}
-//XXXXXXXXXXXXXX
-// Mark faces to be baffled to prevent snapping problems. Does
-// test to find nearest surface and checks which faces would get squashed.
-Foam::labelList Foam::meshRefinement::markFacesOnProblemCellsGeometric
-(
-    const dictionary& motionDict,
-    const labelList& globalToPatch
-) const
-{
-    // Get the labels of added patches.
-    labelList adaptPatchIDs(meshRefinement::addedPatches(globalToPatch));
-
-    // Construct addressing engine.
-    autoPtr<indirectPrimitivePatch> ppPtr
-    (
-        meshRefinement::makePatch
-        (
-            mesh_,
-            adaptPatchIDs
-        )
-    );
-    const indirectPrimitivePatch& pp = ppPtr();
-    const pointField& localPoints = pp.localPoints();
-    const labelList& meshPoints = pp.meshPoints();
-
-    // Find nearest (non-baffle) surface
-    pointField newPoints(mesh_.points());
-    {
-        List<pointIndexHit> hitInfo;
-        labelList hitSurface;
-        surfaces_.findNearest
-        (
-            surfaces_.getUnnamedSurfaces(),
-            localPoints,
-            scalarField(localPoints.size(), sqr(GREAT)),    // sqr of attraction
-            hitSurface,
-            hitInfo
-        );
-    
-        forAll(hitInfo, i)
-        {
-            if (hitInfo[i].hit())
-            {
-                //label pointI = meshPoints[i];
-                //Pout<< "   " << pointI << " moved from "
-                //    << mesh_.points()[pointI] << " by "
-                //    << mag(hitInfo[i].hitPoint()-mesh_.points()[pointI])
-                //    << endl;
-                newPoints[meshPoints[i]] = hitInfo[i].hitPoint();
-            }
-        }
-    }
-
-    // Per face (internal or coupled!) the patch that the
-    // baffle should get (or -1).
-    labelList facePatch(mesh_.nFaces(), -1);
-    // Count of baffled faces
-    label nBaffleFaces = 0;
-
-
-//    // Sync position? Or not since same face on both side so just sync
-//    // result of baffle.
-//
-//    const scalar minArea(readScalar(motionDict.lookup("minArea")));
-//
-//    Pout<< "markFacesOnProblemCellsGeometric : Comparing to minArea:"
-//        << minArea << endl;
-//
-//    pointField facePoints;
-//    for (label faceI = mesh_.nInternalFaces(); faceI < mesh_.nFaces(); faceI++)
-//    {
-//        const face& f = mesh_.faces()[faceI];
-//
-//        bool usesPatchPoint = false;
-//
-//        facePoints.setSize(f.size());
-//        forAll(f, fp)
-//        {
-//            Map<label>::const_iterator iter = pp.meshPointMap().find(f[fp]);
-//
-//            if (iter != pp.meshPointMap().end())
-//            {
-//                facePoints[fp] = newPosition[iter()];
-//                usesPatchPoint = true;
-//            }
-//            else
-//            {
-//                facePoints[fp] = mesh_.points()[f[fp]];
-//            }
-//        }
-//
-//        if (usesPatchPoint)
-//        {
-//            // Check area of face wrt original area
-//            face identFace(identity(f.size()));
-//
-//            if (identFace.mag(facePoints) < minArea)
-//            {
-//                facePatch[faceI] = getBafflePatch(facePatch, faceI);
-//                nBaffleFaces++;
-//            }
-//        }
-//    }
-//
-//
-//    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-//    forAll(patches, patchI)
-//    {
-//        const polyPatch& pp = patches[patchI];
-//
-//        if (pp.coupled())
-//        {
-//            forAll(pp, i)
-//            {
-//                label faceI = pp.start()+i;
-//
-//                const face& f = mesh_.faces()[faceI];
-//
-//                bool usesPatchPoint = false;
-//
-//                facePoints.setSize(f.size());
-//                forAll(f, fp)
-//                {
-//                    Map<label>::const_iterator iter =
-//                        pp.meshPointMap().find(f[fp]);
-//
-//                    if (iter != pp.meshPointMap().end())
-//                    {
-//                        facePoints[fp] = newPosition[iter()];
-//                        usesPatchPoint = true;
-//                    }
-//                    else
-//                    {
-//                        facePoints[fp] = mesh_.points()[f[fp]];
-//                    }
-//                }
-//
-//                if (usesPatchPoint)
-//                {
-//                    // Check area of face wrt original area
-//                    face identFace(identity(f.size()));
-//
-//                    if (identFace.mag(facePoints) < minArea)
-//                    {
-//                        facePatch[faceI] = getBafflePatch(facePatch, faceI);
-//                        nBaffleFaces++;
-//                    }
-//                }
-//            }
-//        }
-//    }
-
-    {
-        pointField oldPoints(mesh_.points());
-        mesh_.movePoints(newPoints);
-        faceSet wrongFaces(mesh_, "wrongFaces", 100);
-        {
-            //motionSmoother::checkMesh(false, mesh_, motionDict, wrongFaces);
-
-            // Just check the errors from squashing
-            // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-            const labelList allFaces(identity(mesh_.nFaces()));
-            label nWrongFaces = 0;
-
-            scalar minArea(readScalar(motionDict.lookup("minArea")));
-            if (minArea > -SMALL)
-            {
-                polyMeshGeometry::checkFaceArea
-                (
-                    false,
-                    minArea,
-                    mesh_,
-                    mesh_.faceAreas(),
-                    allFaces,
-                    &wrongFaces
-                );
-
-                label nNewWrongFaces = returnReduce
-                (
-                    wrongFaces.size(),
-                    sumOp<label>()
-                );
-
-                Info<< "    faces with area < "
-                    << setw(5) << minArea
-                    << " m^2                            : "
-                    << nNewWrongFaces-nWrongFaces << endl;
-
-                nWrongFaces = nNewWrongFaces;
-            }
-
-//            scalar minDet(readScalar(motionDict.lookup("minDeterminant")));
-            scalar minDet = 0.01;
-            if (minDet > -1)
-            {
-                polyMeshGeometry::checkCellDeterminant
-                (
-                    false,
-                    minDet,
-                    mesh_,
-                    mesh_.faceAreas(),
-                    allFaces,
-                    polyMeshGeometry::affectedCells(mesh_, allFaces),
-                    &wrongFaces
-                );
-
-                label nNewWrongFaces = returnReduce
-                (
-                    wrongFaces.size(),
-                    sumOp<label>()
-                );
-
-                Info<< "    faces on cells with determinant < "
-                    << setw(5) << minDet << "                : "
-                    << nNewWrongFaces-nWrongFaces << endl;
-
-                nWrongFaces = nNewWrongFaces;
-            }
-        }
-
-
-        forAllConstIter(faceSet, wrongFaces, iter)
-        {
-            label patchI = mesh_.boundaryMesh().whichPatch(iter.key());
-
-            if (patchI == -1 || mesh_.boundaryMesh()[patchI].coupled())
-            {
-                facePatch[iter.key()] = getBafflePatch(facePatch, iter.key());
-                nBaffleFaces++;
-
-                //Pout<< "    " << iter.key()
-                //    //<< " on patch " << mesh_.boundaryMesh()[patchI].name()
-                //    << " is destined for patch " << facePatch[iter.key()]
-                //    << endl;
-            }
-        }
-        // Restore points.
-        mesh_.movePoints(oldPoints);
-    }
-
-
-    Info<< "markFacesOnProblemCellsGeometric : marked "
-        << returnReduce(nBaffleFaces, sumOp<label>())
-        << " additional internal and coupled faces"
-        << " to be converted into baffles." << endl;
-
-    syncTools::syncFaceList
-    (
-        mesh_,
-        facePatch,
-        maxEqOp<label>()
-    );
-
-    return facePatch;
-}
-//XXXXXXXX
 
 
 // Return a list of coupled face pairs, i.e. faces that use the same vertices.
@@ -1444,6 +834,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
     {
         mesh_.movePoints(map().preMotionPoints());
     }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
 
     // Update intersections. Recalculate intersections on merged faces since
     // this seems to give problems? Note: should not be nessecary since
@@ -1476,7 +876,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeBaffles
 void Foam::meshRefinement::findCellZoneGeometric
 (
     const labelList& closedNamedSurfaces,   // indices of closed surfaces
-    const labelList& namedSurfaceIndex,     // per face index of named surface
+    labelList& namedSurfaceIndex,           // per face index of named surface
     const labelList& surfaceToCellZone,     // cell zone index per surface
 
     labelList& cellToZone
@@ -1613,6 +1013,132 @@ void Foam::meshRefinement::findCellZoneGeometric
             }
         }
     }
+
+
+    // Adapt the namedSurfaceIndex
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // for if any cells were not completely covered.
+
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    {
+        label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
+        label neiZone = cellToZone[mesh_.faceNeighbour()[faceI]];
+
+        if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
+        {
+            // Give face the zone of max cell zone
+            namedSurfaceIndex[faceI] = findIndex
+            (
+                surfaceToCellZone,
+                max(ownZone, neiZone)
+            );
+        }
+    }
+
+    labelList neiCellZone(mesh_.nFaces()-mesh_.nInternalFaces());
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
+                neiCellZone[faceI-mesh_.nInternalFaces()] = ownZone;
+            }
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone);
+
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                label ownZone = cellToZone[mesh_.faceOwner()[faceI]];
+                label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+
+                if (namedSurfaceIndex[faceI] == -1 && (ownZone != neiZone))
+                {
+                    // Give face the max cell zone
+                    namedSurfaceIndex[faceI] = findIndex
+                    (
+                        surfaceToCellZone,
+                        max(ownZone, neiZone)
+                    );
+                }
+            }
+        }
+    }
+
+    // Sync
+    syncTools::syncFaceList(mesh_, namedSurfaceIndex, maxEqOp<label>());
+}
+
+
+bool Foam::meshRefinement::calcRegionToZone
+(
+    const label surfZoneI,
+    const label ownRegion,
+    const label neiRegion,
+
+    labelList& regionToCellZone
+) const
+{
+    bool changed = false;
+
+    // Check whether inbetween different regions
+    if (ownRegion != neiRegion)
+    {
+        // Jump. Change one of the sides to my type.
+
+        // 1. Interface between my type and unset region.
+        // Set region to keepRegion
+
+        if (regionToCellZone[ownRegion] == -2)
+        {
+            if (regionToCellZone[neiRegion] == surfZoneI)
+            {
+                // Face between unset and my region. Put unset
+                // region into keepRegion
+                regionToCellZone[ownRegion] = -1;
+                changed = true;
+            }
+            else if (regionToCellZone[neiRegion] != -2)
+            {
+                // Face between unset and other region.
+                // Put unset region into my region
+                regionToCellZone[ownRegion] = surfZoneI;
+                changed = true;
+            }
+        }
+        else if (regionToCellZone[neiRegion] == -2)
+        {
+            if (regionToCellZone[ownRegion] == surfZoneI)
+            {
+                // Face between unset and my region. Put unset
+                // region into keepRegion
+                regionToCellZone[neiRegion] = -1;
+                changed = true;
+            }
+            else if (regionToCellZone[ownRegion] != -2)
+            {
+                // Face between unset and other region.
+                // Put unset region into my region
+                regionToCellZone[neiRegion] = surfZoneI;
+                changed = true;
+            }
+        }
+    }
+    return changed;
 }
 
 
@@ -1642,7 +1168,7 @@ void Foam::meshRefinement::findCellZoneTopo
             blockedFace[faceI] = true;
         }
     }
-    syncTools::syncFaceList(mesh_, blockedFace, orEqOp<bool>());
+    // No need to sync since namedSurfaceIndex already is synced
 
     // Set region per cell based on walking
     regionSplit cellRegion(mesh_, blockedFace);
@@ -1705,7 +1231,20 @@ void Foam::meshRefinement::findCellZoneTopo
     // by changing cell zone every time we cross a surface.
     while (true)
     {
+        // Synchronise regionToCellZone.
+        // Note:
+        // - region numbers are identical on all processors
+        // - keepRegion is identical ,,
+        // - cellZones are identical ,,
+        // This done at top of loop to account for geometric matching
+        // not being synchronised.
+        Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
+        Pstream::listCombineScatter(regionToCellZone);
+
+
         bool changed = false;
+
+        // Internal faces
 
         for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
         {
@@ -1713,53 +1252,67 @@ void Foam::meshRefinement::findCellZoneTopo
 
             if (surfI != -1)
             {
-                // Get cell zone that surface cells are in
-                label surfZoneI = surfaceToCellZone[surfI];
+                // Calculate region to zone from cellRegions on either side
+                // of internal face.
+                bool changedCell = calcRegionToZone
+                (
+                    surfaceToCellZone[surfI],
+                    cellRegion[mesh_.faceOwner()[faceI]],
+                    cellRegion[mesh_.faceNeighbour()[faceI]],
+                    regionToCellZone
+                );
 
-                // Check whether inbetween different regions
-                label ownRegion = cellRegion[mesh_.faceOwner()[faceI]];
-                label neiRegion = cellRegion[mesh_.faceNeighbour()[faceI]];
+                changed = changed | changedCell;
+            }
+        }
 
-                if (ownRegion != neiRegion)
+        // Boundary faces
+
+        const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+        // Get coupled neighbour cellRegion
+        labelList neiCellRegion(mesh_.nFaces()-mesh_.nInternalFaces());
+        forAll(patches, patchI)
+        {
+            const polyPatch& pp = patches[patchI];
+
+            if (pp.coupled())
+            {
+                forAll(pp, i)
                 {
-                    // Jump. Change one of the sides to my type.
+                    label faceI = pp.start()+i;
+                    neiCellRegion[faceI-mesh_.nInternalFaces()] =
+                        cellRegion[mesh_.faceOwner()[faceI]];
+                }
+            }
+        }
+        syncTools::swapBoundaryFaceList(mesh_, neiCellRegion);
 
-                    // 1. Interface between my type and unset region.
-                    // Set region to keepRegion
+        // Calculate region to zone from cellRegions on either side of coupled
+        // face.
+        forAll(patches, patchI)
+        {
+            const polyPatch& pp = patches[patchI];
 
-                    if (regionToCellZone[ownRegion] == -2)
+            if (pp.coupled())
+            {
+                forAll(pp, i)
+                {
+                    label faceI = pp.start()+i;
+
+                    label surfI = namedSurfaceIndex[faceI];
+
+                    if (surfI != -1)
                     {
-                        if (regionToCellZone[neiRegion] == surfZoneI)
-                        {
-                            // Face between unset and my region. Put unset
-                            // region into keepRegion
-                            regionToCellZone[ownRegion] = -1;
-                            changed = true;
-                        }
-                        else if (regionToCellZone[neiRegion] != -2)
-                        {
-                            // Face between unset and other region.
-                            // Put unset region into my region
-                            regionToCellZone[ownRegion] = surfZoneI;
-                            changed = true;
-                        }
-                    }
-                    else if (regionToCellZone[neiRegion] == -2)
-                    {
-                        if (regionToCellZone[ownRegion] == surfZoneI)
-                        {
-                            // Face between unset and my region. Put unset
-                            // region into keepRegion
-                            regionToCellZone[neiRegion] = -1;
-                            changed = true;
-                        }
-                        else if (regionToCellZone[ownRegion] != -2)
-                        {
-                            // Face between unset and other region.
-                            // Put unset region into my region
-                            regionToCellZone[neiRegion] = surfZoneI;
-                            changed = true;
-                        }
+                        bool changedCell = calcRegionToZone
+                        (
+                            surfaceToCellZone[surfI],
+                            cellRegion[mesh_.faceOwner()[faceI]],
+                            neiCellRegion[faceI-mesh_.nInternalFaces()],
+                            regionToCellZone
+                        );
+
+                        changed = changed | changedCell;
                     }
                 }
             }
@@ -1770,15 +1323,6 @@ void Foam::meshRefinement::findCellZoneTopo
             break;
         }
     }
-
-
-    // Synchronise regionToCellZone.
-    // Note:
-    // - region numbers are identical on all processors
-    // - keepRegion is identical ,,
-    // - cellZones are identical ,,
-    Pstream::listCombineGather(regionToCellZone, maxEqOp<label>());
-    Pstream::listCombineScatter(regionToCellZone);
 
 
     forAll(regionToCellZone, regionI)
@@ -1814,12 +1358,96 @@ void Foam::meshRefinement::findCellZoneTopo
 }
 
 
+// Make namedSurfaceIndex consistent with cellToZone - clear out any blocked
+// faces inbetween same cell zone.
+void Foam::meshRefinement::makeConsistentFaceIndex
+(
+    const labelList& cellToZone,
+    labelList& namedSurfaceIndex
+) const
+{
+    const labelList& faceOwner = mesh_.faceOwner();
+    const labelList& faceNeighbour = mesh_.faceNeighbour();
+
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    {
+        label ownZone = cellToZone[faceOwner[faceI]];
+        label neiZone = cellToZone[faceNeighbour[faceI]];
+
+        if (ownZone == neiZone && namedSurfaceIndex[faceI] != -1)
+        {
+            namedSurfaceIndex[faceI] = -1;
+        }
+        else if (ownZone != neiZone && namedSurfaceIndex[faceI] == -1)
+        {
+            FatalErrorIn("meshRefinement::zonify()")
+                << "Different cell zones on either side of face " << faceI
+                << " at " << mesh_.faceCentres()[faceI]
+                << " but face not marked with a surface."
+                << abort(FatalError);
+        }
+    }
+
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    // Get coupled neighbour cellZone
+    labelList neiCellZone(mesh_.nFaces()-mesh_.nInternalFaces());
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                neiCellZone[faceI-mesh_.nInternalFaces()] =
+                    cellToZone[mesh_.faceOwner()[faceI]];
+            }
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone);
+
+    // Use coupled cellZone to do check
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+
+                label ownZone = cellToZone[faceOwner[faceI]];
+                label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+
+                if (ownZone == neiZone && namedSurfaceIndex[faceI] != -1)
+                {
+                    namedSurfaceIndex[faceI] = -1;
+                }
+                else if (ownZone != neiZone && namedSurfaceIndex[faceI] == -1)
+                {
+                    FatalErrorIn("meshRefinement::zonify()")
+                        << "Different cell zones on either side of face "
+                        << faceI << " at " << mesh_.faceCentres()[faceI]
+                        << " but face not marked with a surface."
+                        << abort(FatalError);
+                }
+            }
+        }
+    }
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 // Split off unreachable areas of mesh.
 void Foam::meshRefinement::baffleAndSplitMesh
 (
     const bool handleSnapProblems,
+    const bool removeEdgeConnectedCells,
+    const scalarField& perpendicularAngle,
     const bool mergeFreeStanding,
     const dictionary& motionDict,
     Time& runTime,
@@ -1873,7 +1501,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        Pout<< "Writing baffled mesh to time " << mesh_.time().timeName()
+        Pout<< "Writing baffled mesh to time " << timeName()
             << endl;
         write(debug, runTime.path()/"baffles");
         Pout<< "Dumped debug data in = "
@@ -1897,48 +1525,27 @@ void Foam::meshRefinement::baffleAndSplitMesh
         (
             markFacesOnProblemCells
             (
+                motionDict,
+                removeEdgeConnectedCells,
+                perpendicularAngle,
                 globalToPatch
             )
-            //markFacesOnProblemCellsGeometric
-            //(
-            //    motionDict,
-            //    globalToPatch
-            //)
+            //markFacesOnProblemCellsGeometric(motionDict)
         );
         Info<< "Analyzed problem cells in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
 
         if (debug)
         {
-            // Dump all these faces to a faceSet.
-            faceSet problemGeom(mesh_, "problemFacesGeom", 100);
-
-            const labelList facePatchGeom
-            (
-                markFacesOnProblemCellsGeometric
-                (
-                    motionDict,
-                    globalToPatch
-                )
-            );
-            forAll(facePatchGeom, faceI)
-            {
-                if (facePatchGeom[faceI] != -1)
-                {
-                    problemGeom.insert(faceI);
-                }
-            }
-            Pout<< "Dumping " << problemGeom.size()
-                << " problem faces to " << problemGeom.objectPath() << endl;
-            problemGeom.write();
-
-
             faceSet problemTopo(mesh_, "problemFacesTopo", 100);
 
             const labelList facePatchTopo
-            (    
+            (
                 markFacesOnProblemCells
                 (
+                    motionDict,
+                    removeEdgeConnectedCells,
+                    perpendicularAngle,
                     globalToPatch
                 )
             );
@@ -1977,7 +1584,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
         if (debug)
         {
             Pout<< "Writing extra baffled mesh to time "
-                << mesh_.time().timeName() << endl;
+                << timeName() << endl;
             write(debug, runTime.path()/"extraBaffles");
             Pout<< "Dumped debug data in = "
                 << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
@@ -2012,9 +1619,9 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
     if (debug)
     {
-        Pout<< "Writing subsetted mesh to time " << mesh_.time().timeName()
+        Pout<< "Writing subsetted mesh to time " << timeName()
             << endl;
-        write(debug, runTime.path()/runTime.timeName());
+        write(debug, runTime.path()/timeName());
         Pout<< "Dumped debug data in = "
             << runTime.cpuTimeIncrement() << " s\n" << nl << endl;
     }
@@ -2073,7 +1680,7 @@ void Foam::meshRefinement::baffleAndSplitMesh
 
 
 // Split off (with optional buffer layers) unreachable areas of mesh.
-Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
+Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMesh
 (
     const label nBufferLayers,
     const labelList& globalToPatch,
@@ -2134,8 +1741,8 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
     {
         FatalErrorIn
         (
-            "meshRefinement::findCellZoneTopo"
-            "(const point&, const labelList&, const labelList&, labelList&)"
+            "meshRefinement::splitMesh"
+            "(const label, const labelList&, const point&)"
         )   << "Point " << keepPoint
             << " is not inside the mesh." << nl
             << "Bounding box of the mesh:" << mesh_.globalData().bb()
@@ -2154,7 +1761,7 @@ Foam::autoPtr<Foam::mapPolyMesh>  Foam::meshRefinement::splitMesh
 
     // Patch for exposed faces for lack of anything sensible.
     label defaultPatch = 0;
-    if (globalToPatch.size() > 0)
+    if (globalToPatch.size())
     {
         defaultPatch = globalToPatch[0];
     }
@@ -2399,6 +2006,16 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::dupNonManifoldPoints()
     {
         mesh_.movePoints(map().preMotionPoints());
     }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
 
     // Update intersections. Is mapping only (no faces created, positions stay
     // same) so no need to recalculate intersections.
@@ -2596,16 +2213,14 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
         {
             label faceI = testFaces[i];
 
-            label own = mesh_.faceOwner()[faceI];
-
             if (mesh_.isInternalFace(faceI))
             {
-                start[i] = cellCentres[own];
-                end[i] = cellCentres[mesh_.faceNeighbour()[faceI]];
+                start[i] = cellCentres[faceOwner[faceI]];
+                end[i] = cellCentres[faceNeighbour[faceI]];
             }
             else
             {
-                start[i] = cellCentres[own];
+                start[i] = cellCentres[faceOwner[faceI]];
                 end[i] = neiCc[faceI-mesh_.nInternalFaces()];
             }
         }
@@ -2681,72 +2296,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     }
 
 
-    // Topochange container
-    polyTopoChange meshMod(mesh_);
-
-
-    // Put the faces into the correct zone
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
-    {
-        label surfI = namedSurfaceIndex[faceI];
-
-        if (surfI != -1)
-        {
-            meshMod.setAction
-            (
-                polyModifyFace
-                (
-                    mesh_.faces()[faceI],           // modified face
-                    faceI,                          // label of face
-                    faceOwner[faceI],               // owner
-                    faceNeighbour[faceI],           // neighbour
-                    false,                          // face flip
-                    -1,                             // patch for face
-                    false,                          // remove from zone
-                    surfaceToFaceZone[surfI],       // zone for face
-                    false,                          // face flip in zone
-                    -1                              // sub patch
-                )
-            );
-        }
-    }
-
-    forAll(patches, patchI)
-    {
-        const polyPatch& pp = patches[patchI];
-
-        label faceI = pp.start();
-
-        forAll(pp, i)
-        {
-            label surfI = namedSurfaceIndex[faceI];
-
-            if (surfI != -1)
-            {
-                meshMod.setAction
-                (
-                    polyModifyFace
-                    (
-                        mesh_.faces()[faceI],           // modified face
-                        faceI,                          // label of face
-                        faceOwner[faceI],               // owner
-                        -1,                             // neighbour
-                        false,                          // face flip
-                        patchI,                         // patch for face
-                        false,                          // remove from zone
-                        surfaceToFaceZone[surfI],       // zone for face
-                        false,                          // face flip in zone
-                        polyTopoChange::whichSubPatch(pp, faceI)    // sub patch
-                    )
-                );
-            }
-            faceI++;
-        }
-    }
-
-
     // Put the cells into the correct zone
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2763,7 +2312,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     // Set using geometric test
     // ~~~~~~~~~~~~~~~~~~~~~~~~
 
-    if (closedNamedSurfaces.size() > 0)
+    if (closedNamedSurfaces.size())
     {
         findCellZoneGeometric
         (
@@ -2773,7 +2322,6 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
             cellToZone
         );
     }
-
 
     // Set using walking
     // ~~~~~~~~~~~~~~~~~
@@ -2791,8 +2339,124 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     }
 
 
-    // Actually move the cells to their zone
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    //// Make sure namedSurfaceIndex is unset inbetween same cell cell zones.
+    //makeConsistentFaceIndex(cellToZone, namedSurfaceIndex);
+
+
+    // Topochange container
+    polyTopoChange meshMod(mesh_);
+
+
+    // Put the faces into the correct zone
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    for (label faceI = 0; faceI < mesh_.nInternalFaces(); faceI++)
+    {
+        label surfI = namedSurfaceIndex[faceI];
+
+        if (surfI != -1)
+        {
+            // Orient face zone to have slave cells in max cell zone.
+            label ownZone = cellToZone[faceOwner[faceI]];
+            label neiZone = cellToZone[faceNeighbour[faceI]];
+
+            bool flip;
+            if (ownZone == max(ownZone, neiZone))
+            {
+                flip = false;
+            }
+            else
+            {
+                flip = true;
+            }
+
+            meshMod.setAction
+            (
+                polyModifyFace
+                (
+                    mesh_.faces()[faceI],           // modified face
+                    faceI,                          // label of face
+                    faceOwner[faceI],               // owner
+                    faceNeighbour[faceI],           // neighbour
+                    false,                          // face flip
+                    -1,                             // patch for face
+                    false,                          // remove from zone
+                    surfaceToFaceZone[surfI],       // zone for face
+                    flip,                           // face flip in zone
+                    -1                              // sub patch
+                )
+            );
+        }
+    }
+
+    // Get coupled neighbour cellZone. Set to -1 on non-coupled patches.
+    labelList neiCellZone(mesh_.nFaces()-mesh_.nInternalFaces(), -1);
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        if (pp.coupled())
+        {
+            forAll(pp, i)
+            {
+                label faceI = pp.start()+i;
+                neiCellZone[faceI-mesh_.nInternalFaces()] =
+                    cellToZone[mesh_.faceOwner()[faceI]];
+            }
+        }
+    }
+    syncTools::swapBoundaryFaceList(mesh_, neiCellZone);
+
+    // Set owner as no-flip
+    forAll(patches, patchI)
+    {
+        const polyPatch& pp = patches[patchI];
+
+        label faceI = pp.start();
+
+        forAll(pp, i)
+        {
+            label surfI = namedSurfaceIndex[faceI];
+
+            if (surfI != -1)
+            {
+                label ownZone = cellToZone[faceOwner[faceI]];
+                label neiZone = neiCellZone[faceI-mesh_.nInternalFaces()];
+
+                bool flip;
+                if (ownZone == max(ownZone, neiZone))
+                {
+                    flip = false;
+                }
+                else
+                {
+                    flip = true;
+                }
+
+                meshMod.setAction
+                (
+                    polyModifyFace
+                    (
+                        mesh_.faces()[faceI],           // modified face
+                        faceI,                          // label of face
+                        faceOwner[faceI],               // owner
+                        -1,                             // neighbour
+                        false,                          // face flip
+                        patchI,                         // patch for face
+                        false,                          // remove from zone
+                        surfaceToFaceZone[surfI],       // zone for face
+                        flip,                           // face flip in zone
+                        polyTopoChange::whichSubPatch(pp, faceI)    // sub patch
+                    )
+                );
+            }
+            faceI++;
+        }
+    }
+
+
+    // Put the cells into the correct zone
+    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
     forAll(cellToZone, cellI)
     {
@@ -2823,6 +2487,19 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::zonify
     {
         mesh_.movePoints(map().preMotionPoints());
     }
+    else
+    {
+        // Delete mesh volumes.
+        mesh_.clearOut();
+    }
+
+    if (overwrite())
+    {
+        mesh_.setInstance(oldInstance());
+    }
+
+    // None of the faces has changed, only the zones. Still...
+    updateMesh(map, labelList());
 
     return map;
 }

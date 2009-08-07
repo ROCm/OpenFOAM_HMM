@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,14 @@ Foam::pointIndexHit Foam::searchableSphere::findNearest
 
     if (nearestDistSqr > sqr(magN-radius_))
     {
-        info.rawPoint() = centre_ + n/magN*radius_;
+        if (magN < ROOTVSMALL)
+        {
+            info.rawPoint() = centre_ + vector(1,0,0)/magN*radius_;
+        }
+        else
+        {
+            info.rawPoint() = centre_ + n/magN*radius_;
+        }
         info.setHit();
         info.setIndex(0);
     }
@@ -151,7 +158,7 @@ Foam::searchableSphere::~searchableSphere()
 
 const Foam::wordList& Foam::searchableSphere::regions() const
 {
-    if (regions_.size() == 0)
+    if (regions_.empty())
     {
         regions_.setSize(1);
         regions_[0] = "region0";
@@ -292,7 +299,8 @@ void Foam::searchableSphere::getNormal
         if (info[i].hit())
         {
             normal[i] = info[i].hitPoint() - centre_;
-            normal[i] /= mag(normal[i]);
+
+            normal[i] /= mag(normal[i])+VSMALL;
         }
         else
         {

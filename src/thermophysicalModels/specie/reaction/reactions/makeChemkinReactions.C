@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,7 +26,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "makeReactionJanaf.H"
+#include "reactionTypes.H"
+#include "makeReactionThermo.H"
 
 #include "ArrheniusReactionRate.H"
 #include "thirdBodyArrheniusReactionRate.H"
@@ -47,21 +48,39 @@ namespace Foam
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTemplateTypeNameAndDebug(reaction, 0);
-defineTemplateRunTimeSelectionTable(reaction, Istream);
+defineTemplateTypeNameAndDebug(gasReaction, 0);
+defineTemplateRunTimeSelectionTable(gasReaction, Istream);
 
 
 // * * * * * * * * * * * * * Make CHEMKIN reactions  * * * * * * * * * * * * //
 
-makeIRNReactions(ArrheniusReactionRate)
-makeIRNReactions(LandauTellerReactionRate)
-makeIRNReactions(thirdBodyArrheniusReactionRate)
-makeIRReactions(JanevReactionRate)
-makeIRReactions(powerSeriesReactionRate)
+makeIRNReactions(gasThermoPhysics, ArrheniusReactionRate)
+makeIRNReactions(gasThermoPhysics, LandauTellerReactionRate)
+makeIRNReactions(gasThermoPhysics, thirdBodyArrheniusReactionRate)
+makeIRReactions(gasThermoPhysics, JanevReactionRate)
+makeIRReactions(gasThermoPhysics, powerSeriesReactionRate)
 
-makePressureDependentReactions(ArrheniusReactionRate, LindemannFallOffFunction)
-makePressureDependentReactions(ArrheniusReactionRate, TroeFallOffFunction)
-makePressureDependentReactions(ArrheniusReactionRate, SRIFallOffFunction)
+makePressureDependentReactions
+(
+    gasThermoPhysics,
+    ArrheniusReactionRate,
+    LindemannFallOffFunction
+)
+
+makePressureDependentReactions
+(
+    gasThermoPhysics,
+    ArrheniusReactionRate,
+    TroeFallOffFunction
+)
+
+makePressureDependentReactions
+(
+    gasThermoPhysics,
+    ArrheniusReactionRate,
+    SRIFallOffFunction
+)
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

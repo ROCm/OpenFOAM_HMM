@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -31,37 +31,36 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "incompressible/singlePhaseTransportModel/singlePhaseTransportModel.H"
-#include "incompressible/RASModel/RASModel.H"
+#include "singlePhaseTransportModel.H"
+#include "RASModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readSIMPLEControls.H"
-#       include "initConvergenceCheck.H"
+        #include "readSIMPLEControls.H"
+        #include "initConvergenceCheck.H"
 
         p.storePrevIter();
 
         // Pressure-velocity SIMPLE corrector
         {
-#           include "UEqn.H"
-#           include "pEqn.H"
+            #include "UEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
@@ -72,12 +71,12 @@ int main(int argc, char *argv[])
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
             << nl << endl;
 
-#       include "convergenceCheck.H"
+        #include "convergenceCheck.H"
     }
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

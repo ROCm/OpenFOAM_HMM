@@ -15,6 +15,7 @@ $(autoHexMeshDriver)/pointData/pointData.C
 $(autoHexMesh)/meshRefinement/meshRefinementBaffles.C
 $(autoHexMesh)/meshRefinement/meshRefinement.C
 $(autoHexMesh)/meshRefinement/meshRefinementMerge.C
+$(autoHexMesh)/meshRefinement/meshRefinementProblemCells.C
 $(autoHexMesh)/meshRefinement/meshRefinementRefine.C
 $(autoHexMesh)/refinementSurfaces/refinementSurfaces.C
 $(autoHexMesh)/shellSurfaces/shellSurfaces.C

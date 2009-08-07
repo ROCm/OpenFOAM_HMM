@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -64,7 +64,7 @@ SourceFiles
 #include "cellShapeList.H"
 #include "labelList.H"
 #include "boolList.H"
-#include "labelHashSet.H"
+#include "HashSet.H"
 #include "Map.H"
 #include "EdgeMap.H"
 
@@ -372,6 +372,17 @@ public:
             const label nFaces,
             const label nCells,
             cellList& cells
+        );
+
+
+        //- Reset this primitiveMesh given the primitive array sizes and cells
+        void reset
+        (
+            const label nPoints,
+            const label nInternalFaces,
+            const label nFaces,
+            const label nCells,
+            const Xfer<cellList>& cells
         );
 
 

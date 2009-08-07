@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,45 +43,43 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readGravitationalAcceleration.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readEnvironmentalProperties.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Time = " << runTime.timeName() << nl << endl;
 
-#       include "readPISOControls.H"
-#       include "compressibleCourantNo.H"
+        #include "readPISOControls.H"
+        #include "compressibleCourantNo.H"
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
-#       include "calcVdj.H"
+        #include "calcVdj.H"
 
-#       include "UEqn.H"
+        #include "UEqn.H"
 
-#       include "alphaEqn.H"
+        #include "alphaEqn.H"
 
-#       include "correctViscosity.H"
+        #include "correctViscosity.H"
 
 
         // --- PISO loop
         for (int corr=0; corr<nCorr; corr++)
         {
-#           include "pEqn.H"
+            #include "pEqn.H"
         }
 
-#       include "kEpsilon.H"
+        #include "kEpsilon.H"
 
         runTime.write();
 
@@ -92,7 +90,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

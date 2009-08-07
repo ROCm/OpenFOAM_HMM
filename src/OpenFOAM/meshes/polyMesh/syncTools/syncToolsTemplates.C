@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -121,20 +121,9 @@ void Foam::syncTools::syncPointMap
                 forAll(procPatch.patchIDs(), subI)
                 {
                     label subPatchI = procPatch.patchIDs()[subI];
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
 
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            procPatch,
-                            subSize,
-                            subStart
-                        ),
-                        procPatch.points()
-                    );  
-                    const labelList& subMeshPts = subPatch.meshPoints();
+                    const labelList& subMeshPts =
+                        procPatch.subMeshPoints()[subI];
 
                     Map<T>& subPatchInfo = patchInfo[subI];
                     subPatchInfo.resize(subMeshPts.size()/20);
@@ -196,24 +185,8 @@ void Foam::syncTools::syncPointMap
 
                 forAll(procPatch.patchIDs(), subI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    faceList reverseFaces(subSize);
-                    forAll(reverseFaces, i)
-                    {
-                        reverseFaces[i] = procPatch[subStart+i].reverseFace();
-                    }
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            reverseFaces,
-                            reverseFaces.size()
-                        ),
-                        procPatch.points()
-                    );
-                    const labelList& subMeshPts = subPatch.meshPoints();
+                    const labelList& subMeshPts =
+                        procPatch.reverseSubMeshPoints()[subI];
 
                     const Map<T>& nbrSubInfo = nbrPatchInfo[subI];
 
@@ -507,7 +480,7 @@ void Foam::syncTools::syncEdgeMap
                     const edgeList& subEdges = subPatch.edges();
 
                     EdgeMap<T>& subPatchInfo = patchInfo[subI];
-                    subPatchInfo.setSize(subEdges.size());
+                    subPatchInfo.resize(subEdges.size());
 
                     forAll(subEdges, i)
                     {
@@ -568,24 +541,8 @@ void Foam::syncTools::syncEdgeMap
 
                 forAll(procPatch.patchIDs(), subI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    faceList reverseFaces(subSize);
-                    forAll(reverseFaces, i)
-                    {
-                        reverseFaces[i] = procPatch[subStart+i].reverseFace();
-                    }
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            reverseFaces,
-                            reverseFaces.size()
-                        ),
-                        procPatch.points()
-                    );
-                    const labelList& subMeshPts = subPatch.meshPoints();
+                    const labelList& subMeshPts =
+                        procPatch.subMeshPoints()[subI];
 
                     const EdgeMap<T>& nbrSubInfo = nbrPatchInfo[subI];
 
@@ -627,7 +584,7 @@ void Foam::syncTools::syncEdgeMap
                 const edgeList& edgesA = cycPatch.edges();
                 const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
                 const labelList& meshPtsB = nbrPatch.meshPoints();
-                const labelList& edgesB = nbrPatch.edges();
+                const edgeList& edgesB = nbrPatch.edges();
 
                 // Extract local values. Create map from edge to value.
                 Map<T> half0Values(edgesA.size() / 20);
@@ -924,20 +881,9 @@ void Foam::syncTools::syncPointList
                 forAll(procPatch.patchIDs(), subI)
                 {
                     label subPatchI = procPatch.patchIDs()[subI];
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
 
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            procPatch,
-                            subSize,
-                            subStart
-                        ),
-                        procPatch.points()
-                    );  
-                    const labelList& subMeshPts = subPatch.meshPoints();
+                    const labelList& subMeshPts =
+                        procPatch.subMeshPoints()[subI];
 
                     List<T>& subPatchInfo = patchInfo[subI];
                     subPatchInfo.setSize(subMeshPts.size());
@@ -994,25 +940,8 @@ void Foam::syncTools::syncPointList
 
                 forAll(procPatch.patchIDs(), subI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    faceList reverseFaces(subSize);
-                    forAll(reverseFaces, i)
-                    {
-                        reverseFaces[i] = procPatch[subStart+i].reverseFace();
-                    }
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            reverseFaces,
-                            reverseFaces.size()
-                        ),
-                        procPatch.points()
-                    );
-                    const labelList& subMeshPts = subPatch.meshPoints();
-
+                    const labelList& subMeshPts =
+                        procPatch.reverseSubMeshPoints()[subI];
                     const List<T>& nbrSubInfo = nbrPatchInfo[subI];
 
                     forAll(subMeshPts, i)
@@ -1042,8 +971,8 @@ void Foam::syncTools::syncPointList
                 const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
                 const labelList& nbrMeshPoints = nbrPatch.meshPoints();
 
-                List<T> half0Values(coupledPoints.size());
-                List<T> half1Values(coupledPoints.size());
+                Field<T> half0Values(coupledPoints.size());
+                Field<T> half1Values(coupledPoints.size());
 
                 forAll(coupledPoints, i)
                 {
@@ -1052,11 +981,13 @@ void Foam::syncTools::syncPointList
                     half1Values[i] = pointValues[nbrMeshPoints[e[1]]];
                 }
 
-                SubField<T> slice0(half0Values, half0Values.size());
-                SubField<T> slice1(half1Values, half1Values.size());
+                //SubField<T> slice0(half0Values, half0Values.size());
+                //SubField<T> slice1(half1Values, half1Values.size());
+                //top(cycPatch, reinterpret_cast<Field<T>&>(slice0));
+                //top(nbrPatch, reinterpret_cast<Field<T>&>(slice1));
 
-                top(cycPatch, reinterpret_cast<Field<T>&>(slice0));
-                top(nbrPatch, reinterpret_cast<Field<T>&>(slice1));
+                top(cycPatch, half0Values);
+                top(nbrPatch, half1Values);
 
                 forAll(coupledPoints, i)
                 {
@@ -1331,8 +1262,8 @@ void Foam::syncTools::syncEdgeList
                 const cyclicPolyPatch& nbrPatch = cycPatch.neighbPatch();
                 const labelList& nbrMeshEdges = nbrPatch.meshEdges();
 
-                List<T> half0Values(coupledEdges.size());
-                List<T> half1Values(coupledEdges.size());
+                Field<T> half0Values(coupledEdges.size());
+                Field<T> half1Values(coupledEdges.size());
 
                 forAll(coupledEdges, i)
                 {
@@ -1341,11 +1272,13 @@ void Foam::syncTools::syncEdgeList
                     half1Values[i] = edgeValues[nbrMeshEdges[e[1]]];
                 }
 
-                SubField<T> slice0(half0Values, half0Values.size());
-                SubField<T> slice1(half1Values, half1Values.size());
+                //SubField<T> slice0(half0Values, half0Values.size());
+                //SubField<T> slice1(half1Values, half1Values.size());
+                //top(cycPatch, reinterpret_cast<Field<T>&>(slice0));
+                //top(nbrPatch, reinterpret_cast<Field<T>&>(slice1));
 
-                top(cycPatch, reinterpret_cast<Field<T>&>(slice0));
-                top(nbrPatch, reinterpret_cast<Field<T>&>(slice1));
+                top(cycPatch, half0Values);
+                top(nbrPatch, half1Values);
 
                 forAll(coupledEdges, i)
                 {
@@ -1453,7 +1386,7 @@ void Foam::syncTools::syncBoundaryFaceList
                 else
                 {
                     OPstream toNbr(Pstream::blocking, procPatch.neighbProcNo());
-                    toNbr << 
+                    toNbr <<
                         SubList<T>(faceValues, procPatch.size(), patchStart);
                 }
             }
@@ -1544,13 +1477,13 @@ void Foam::syncTools::syncBoundaryFaceList
                 label sz = cycPatch.size();
 
                 // Transform (copy of) data on both sides
-                List<T> ownVals(SubList<T>(faceValues, sz, ownStart));
-                SubField<T> ownSlice(ownVals, ownVals.size());
-                top(cycPatch, reinterpret_cast<Field<T>&>(ownSlice));
+                Field<T> ownVals(SubList<T>(faceValues, sz, ownStart));
+                //SubField<T> ownSlice(ownVals, ownVals.size());
+                top(cycPatch, ownVals);
 
-                List<T> nbrVals(SubList<T>(faceValues, sz, nbrStart));
-                SubField<T> nbrSlice(nbrVals, nbrVals.size());
-                top(nbrPatch, reinterpret_cast<Field<T>&>(nbrSlice));
+                Field<T> nbrVals(SubList<T>(faceValues, sz, nbrStart));
+                //SubField<T> nbrSlice(nbrVals, nbrVals.size());
+                top(nbrPatch, nbrVals);
 
                 label i0 = ownStart;
                 forAll(nbrVals, i)
@@ -1571,7 +1504,7 @@ void Foam::syncTools::syncBoundaryFaceList
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-template <int nBits, class CombineOp>
+template <unsigned nBits, class CombineOp>
 void Foam::syncTools::syncFaceList
 (
     const polyMesh& mesh,
@@ -1583,7 +1516,7 @@ void Foam::syncTools::syncFaceList
     {
         FatalErrorIn
         (
-            "syncTools<int nBits, class CombineOp>::syncFaceList"
+            "syncTools<unsigned nBits, class CombineOp>::syncFaceList"
             "(const polyMesh&, PackedList<nBits>&, const CombineOp&)"
         )   << "Number of values " << faceValues.size()
             << " is not equal to the number of faces in the mesh "
@@ -1696,7 +1629,7 @@ void Foam::syncTools::syncFaceList
 }
 
 
-template <int nBits>
+template <unsigned nBits>
 void Foam::syncTools::swapFaceList
 (
     const polyMesh& mesh,
@@ -1707,7 +1640,7 @@ void Foam::syncTools::swapFaceList
 }
 
 
-template <int nBits, class CombineOp>
+template <unsigned nBits, class CombineOp>
 void Foam::syncTools::syncPointList
 (
     const polyMesh& mesh,
@@ -1720,7 +1653,7 @@ void Foam::syncTools::syncPointList
     {
         FatalErrorIn
         (
-            "syncTools<int nBits, class CombineOp>::syncPointList"
+            "syncTools<unsigned nBits, class CombineOp>::syncPointList"
             "(const polyMesh&, PackedList<nBits>&, const CombineOp&"
             ", const unsigned int)"
         )   << "Number of values " << pointValues.size()
@@ -1754,20 +1687,8 @@ void Foam::syncTools::syncPointList
 
                 forAll(procPatch.patchIDs(), subI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            procPatch,
-                            subSize,
-                            subStart
-                        ),
-                        procPatch.points()
-                    );  
-                    const labelList& subMeshPts = subPatch.meshPoints();
+                    const labelList& subMeshPts =
+                        procPatch.subMeshPoints()[subI];
 
                     List<unsigned int>& subInfo = patchInfo[subI];
                     subInfo.setSize(subMeshPts.size());
@@ -1810,25 +1731,8 @@ void Foam::syncTools::syncPointList
 
                 forAll(procPatch.patchIDs(), subI)
                 {
-                    label subStart = procPatch.starts()[subI];
-                    label subSize = procPatch.starts()[subI+1]-subStart;
-
-                    faceList reverseFaces(subSize);
-                    forAll(reverseFaces, i)
-                    {
-                        reverseFaces[i] = procPatch[subStart+i].reverseFace();
-                    }
-                    primitivePatch subPatch
-                    (
-                        faceSubList
-                        (
-                            reverseFaces,
-                            reverseFaces.size()
-                        ),
-                        procPatch.points()
-                    );
-                    const labelList& subMeshPts = subPatch.meshPoints();
-
+                    const labelList& subMeshPts =
+                        procPatch.reverseSubMeshPoints()[subI];
                     const List<unsigned int>& nbrSubInfo = nbrPatchInfo[subI];
 
                     forAll(subMeshPts, i)
@@ -1909,7 +1813,7 @@ void Foam::syncTools::syncPointList
 }
 
 
-template <int nBits, class CombineOp>
+template <unsigned nBits, class CombineOp>
 void Foam::syncTools::syncEdgeList
 (
     const polyMesh& mesh,
@@ -1922,7 +1826,7 @@ void Foam::syncTools::syncEdgeList
     {
         FatalErrorIn
         (
-            "syncTools<int nBits, class CombineOp>::syncEdgeList"
+            "syncTools<unsigned nBits, class CombineOp>::syncEdgeList"
             "(const polyMesh&, PackedList<nBits>&, const CombineOp&"
             ", const unsigned int)"
         )   << "Number of values " << edgeValues.size()

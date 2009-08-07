@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -55,8 +55,9 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
-    bool overwrite = args.options().found("overwrite");
+    bool overwrite = args.optionFound("overwrite");
 
     word setName(args.additionalArgs()[0]);
 
@@ -166,6 +167,10 @@ int main(int argc, char *argv[])
     if (!overwrite)
     {
         runTime++;
+    }
+    else
+    {
+        mesh.setInstance(oldInstance);
     }
 
     // Take over refinement levels and write to new time directory.

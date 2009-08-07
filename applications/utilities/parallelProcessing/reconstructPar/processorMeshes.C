@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -200,12 +200,6 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
     // Read the field for all the processors
     PtrList<pointIOField> procsPoints(meshes_.size());
 
-    fileName regionPrefix = "";
-    if (meshName_ != fvMesh::defaultRegion)
-    {
-        regionPrefix = meshName_;
-    }
-
     forAll (meshes_, procI)
     {
         procsPoints.set
@@ -217,7 +211,7 @@ void Foam::processorMeshes::reconstructPoints(fvMesh& mesh)
                 (
                     "points",
                     meshes_[procI].time().timeName(),
-                    regionPrefix/polyMesh::meshSubDir,
+                    polyMesh::meshSubDir,
                     meshes_[procI],
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE

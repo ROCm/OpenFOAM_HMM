@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,18 +58,13 @@ class JobInfo
     public dictionary
 {
     // Private data
-
-        fileName runningJobsDir_;
-        fileName finishedJobsDir_;
-        fileName jobFileName_;
         fileName runningJobPath_;
         fileName finishedJobPath_;
-
-        cpuTime cpuTime_;
+        cpuTime  cpuTime_;
 
     // Private member functions
 
-        bool write(Ostream& JobInfoFile) const;
+        bool write(Ostream&) const;
         void end(const word& terminationType);
 
 

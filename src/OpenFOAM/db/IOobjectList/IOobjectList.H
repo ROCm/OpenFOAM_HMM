@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -63,7 +63,7 @@ public:
     // Constructors
 
         //- Construct given an initial estimate for the number of entries
-        explicit IOobjectList(const label nIoObjects = 100);
+        explicit IOobjectList(const label nIoObjects = 128);
 
         //- Construct from objectRegistry and instance path
         IOobjectList

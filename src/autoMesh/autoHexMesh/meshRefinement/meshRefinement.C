@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,12 +84,15 @@ void Foam::meshRefinement::calcNeighbourData
 
     const polyBoundaryMesh& patches = mesh_.boundaryMesh();
 
+    labelHashSet addedPatchIDSet(meshedPatches());
+
     forAll(patches, patchI)
     {
         const polyPatch& pp = patches[patchI];
 
         const unallocLabelList& faceCells = pp.faceCells();
         const vectorField::subField faceCentres = pp.faceCentres();
+        const vectorField::subField faceAreas = pp.faceAreas();
 
         label bFaceI = pp.start()-mesh_.nInternalFaces();
 
@@ -99,6 +102,36 @@ void Foam::meshRefinement::calcNeighbourData
             {
                 neiLevel[bFaceI] = cellLevel[faceCells[i]];
                 neiCc[bFaceI] = cellCentres[faceCells[i]];
+                bFaceI++;
+            }
+        }
+        else if (addedPatchIDSet.found(patchI))
+        {
+            // Face was introduced from cell-cell intersection. Try to
+            // reconstruct other side cell(centre). Three possibilities:
+            // - cells same size.
+            // - preserved cell smaller. Not handled.
+            // - preserved cell larger.
+            forAll(faceCells, i)
+            {
+                // Extrapolate the face centre.
+                vector fn = faceAreas[i];
+                fn /= mag(fn)+VSMALL;
+
+                label own = faceCells[i];
+                label ownLevel = cellLevel[own];
+                label faceLevel = meshCutter_.getAnchorLevel(pp.start()+i);
+
+                // Normal distance from face centre to cell centre
+                scalar d = ((faceCentres[i] - cellCentres[own]) & fn);
+                if (faceLevel > ownLevel)
+                {
+                    // Other cell more refined. Adjust normal distance
+                    d *= 0.5;
+                }
+                neiLevel[bFaceI] = cellLevel[ownLevel];
+                // Calculate other cell centre by extrapolation
+                neiCc[bFaceI] = faceCentres[i] + d*fn;
                 bFaceI++;
             }
         }
@@ -126,7 +159,7 @@ void Foam::meshRefinement::updateIntersections(const labelList& changedFaces)
     const pointField& cellCentres = mesh_.cellCentres();
 
     // Stats on edges to test. Count proc faces only once.
-    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
     {
         label nMasterFaces = 0;
@@ -431,6 +464,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::doRemoveCells
         mesh_.clearOut();
     }
 
+    if (overwrite_)
+    {
+        mesh_.setInstance(oldInstance_);
+    }
+
     // Update local mesh data
     cellRemover.updateMesh(map);
 
@@ -545,7 +583,7 @@ void Foam::meshRefinement::calcLocalRegions
             }
         }
     }
-    localCc.shrink();
+
     localPoints.transfer(localCc);
 
     if (localPoints.size() != globalToLocalRegion.size())
@@ -783,12 +821,15 @@ Foam::meshRefinement::meshRefinement
 (
     fvMesh& mesh,
     const scalar mergeDistance,
+    const bool overwrite,
     const refinementSurfaces& surfaces,
     const shellSurfaces& shells
 )
 :
     mesh_(mesh),
     mergeDistance_(mergeDistance),
+    overwrite_(overwrite),
+    oldInstance_(mesh.pointsInstance()),
     surfaces_(surfaces),
     shells_(shells),
     meshCutter_
@@ -864,7 +905,7 @@ Foam::meshRefinement::meshRefinement
 Foam::label Foam::meshRefinement::countHits() const
 {
     // Stats on edges to test. Count proc faces only once.
-    PackedList<1> isMasterFace(syncTools::getMasterFaces(mesh_));
+    PackedBoolList isMasterFace(syncTools::getMasterFaces(mesh_));
 
     label nHits = 0;
 
@@ -1059,7 +1100,7 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 
                 forAll(fzNames, surfI)
                 {
-                    if (fzNames[surfI].size() > 0)
+                    if (fzNames[surfI].size())
                     {
                         // Get zone
                         label zoneI = fZones.findZoneID(fzNames[surfI]);
@@ -1165,8 +1206,6 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::meshRefinement::balance
 // Helper function to get intersected faces
 Foam::labelList Foam::meshRefinement::intersectedFaces() const
 {
-    // Mark all faces that will become baffles
-
     label nBoundaryFaces = 0;
 
     forAll(surfaceIndex_, faceI)
@@ -1192,15 +1231,12 @@ Foam::labelList Foam::meshRefinement::intersectedFaces() const
 
 
 // Helper function to get points used by faces
-Foam::labelList Foam::meshRefinement::intersectedPoints
-(
-//    const labelList& globalToPatch
-) const
+Foam::labelList Foam::meshRefinement::intersectedPoints() const
 {
     const faceList& faces = mesh_.faces();
 
     // Mark all points on faces that will become baffles
-    PackedList<1> isBoundaryPoint(mesh_.nPoints(), 0u);
+    PackedBoolList isBoundaryPoint(mesh_.nPoints(), 0u);
     label nBoundaryPoints = 0;
 
     forAll(surfaceIndex_, faceI)
@@ -1220,9 +1256,10 @@ Foam::labelList Foam::meshRefinement::intersectedPoints
     }
 
     //// Insert all meshed patches.
-    //forAll(globalToPatch, i)
+    //labelList adaptPatchIDs(meshedPatches());
+    //forAll(adaptPatchIDs, i)
     //{
-    //    label patchI = globalToPatch[i];
+    //    label patchI = adaptPatchIDs[i];
     //
     //    if (patchI != -1)
     //    {
@@ -1258,27 +1295,6 @@ Foam::labelList Foam::meshRefinement::intersectedPoints
     }
 
     return boundaryPoints;
-}
-
-
-Foam::labelList Foam::meshRefinement::addedPatches
-(
-    const labelList& globalToPatch
-)
-{
-    labelList patchIDs(globalToPatch.size());
-    label addedI = 0;
-
-    forAll(globalToPatch, i)
-    {
-        if (globalToPatch[i] != -1)
-        {
-            patchIDs[addedI++] = globalToPatch[i];
-        }
-    }
-    patchIDs.setSize(addedI);
-
-    return patchIDs;
 }
 
 
@@ -1371,7 +1387,7 @@ Foam::tmp<Foam::pointVectorField> Foam::meshRefinement::makeDisplacementField
             IOobject
             (
                 "pointDisplacement",
-                mesh.time().timeName(),
+                mesh.time().timeName(), //timeName(),
                 mesh,
                 IOobject::NO_READ,
                 IOobject::AUTO_WRITE
@@ -1652,6 +1668,53 @@ Foam::label Foam::meshRefinement::addPatch
 }
 
 
+Foam::label Foam::meshRefinement::addMeshedPatch
+(
+    const word& name,   
+    const word& type
+)
+{
+    label meshedI = findIndex(meshedPatches_, name);
+
+    if (meshedI != -1)
+    {
+        // Already there. Get corresponding polypatch
+        return mesh_.boundaryMesh().findPatchID(name);
+    }
+    else
+    {
+        // Add patch
+        label patchI = addPatch(mesh_, name, type);
+
+        // Store
+        label sz = meshedPatches_.size();
+        meshedPatches_.setSize(sz+1);
+        meshedPatches_[sz] = name;
+
+        return patchI;
+    }
+}
+
+
+Foam::labelList Foam::meshRefinement::meshedPatches() const
+{
+    labelList patchIDs(meshedPatches_.size());
+    forAll(meshedPatches_, i)
+    {
+        patchIDs[i] = mesh_.boundaryMesh().findPatchID(meshedPatches_[i]);
+
+        if (patchIDs[i] == -1)
+        {
+            FatalErrorIn("meshRefinement::meshedPatches() const")
+                << "Problem : did not find patch " << meshedPatches_[i]
+                << abort(FatalError);
+        }
+    }
+
+    return patchIDs;
+}
+
+
 Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 (
     const point& keepPoint
@@ -1712,7 +1775,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::splitMeshRegions
 
     labelList exposedFaces(cellRemover.getExposedFaces(cellsToRemove));
 
-    if (exposedFaces.size() > 0)
+    if (exposedFaces.size())
     {
         FatalErrorIn
         (
@@ -1775,6 +1838,13 @@ void Foam::meshRefinement::distribute(const mapDistributePolyMesh& map)
                 faceMap,
                 pointMap
             );
+
+            if (faceMap.valid())
+            {
+                // (ab)use the instance() to signal current modification time
+                geometry[i].instance() = geometry[i].time().timeName();
+            }
+
             faceMap.clear();
             pointMap.clear();
         }
@@ -1913,6 +1983,34 @@ bool Foam::meshRefinement::write() const
      && meshCutter_.write()
      && surfaceIndex_.write();
 
+
+    // Make sure that any distributed surfaces (so ones which probably have
+    // been changed) get written as well.
+    // Note: should ideally have some 'modified' flag to say whether it
+    // has been changed or not.
+    searchableSurfaces& geometry =
+        const_cast<searchableSurfaces&>(surfaces_.geometry());
+
+    forAll(geometry, i)
+    {
+        searchableSurface& s = geometry[i];
+
+        // Check if instance() of surface is not constant or system.
+        // Is good hint that surface is distributed.
+        if
+        (
+            s.instance() != s.time().system()
+         && s.instance() != s.time().caseSystem()
+         && s.instance() != s.time().constant()
+         && s.instance() != s.time().caseConstant()
+        )
+        {
+            // Make sure it gets written to current time, not constant.
+            s.instance() = s.time().timeName();
+            writeOk = writeOk && s.write();
+        }
+    }
+
     return writeOk;
 }
 
@@ -1964,6 +2062,20 @@ void Foam::meshRefinement::printMeshInfo(const bool debug, const string& msg)
 }
 
 
+//- Return either time().constant() or oldInstance
+Foam::word Foam::meshRefinement::timeName() const
+{
+    if (overwrite_ && mesh_.time().timeIndex() == 0)
+    {
+        return oldInstance_;
+    }
+    else
+    {
+        return mesh_.time().timeName();
+    }
+}
+
+
 void Foam::meshRefinement::dumpRefinementLevel() const
 {
     volScalarField volRefLevel
@@ -1971,7 +2083,7 @@ void Foam::meshRefinement::dumpRefinementLevel() const
         IOobject
         (
             "cellLevel",
-            mesh_.time().timeName(),
+            timeName(),
             mesh_,
             IOobject::NO_READ,
             IOobject::AUTO_WRITE,
@@ -1991,14 +2103,14 @@ void Foam::meshRefinement::dumpRefinementLevel() const
     volRefLevel.write();
 
 
-    pointMesh pMesh(mesh_);
+    const pointMesh& pMesh = pointMesh::New(mesh_);
 
     pointScalarField pointRefLevel
     (
         IOobject
         (
             "pointLevel",
-            mesh_.time().timeName(),
+            timeName(),
             mesh_,
             IOobject::NO_READ,
             IOobject::NO_WRITE,
@@ -2112,7 +2224,7 @@ void Foam::meshRefinement::write
     {
         dumpRefinementLevel();
     }
-    if (flag&OBJINTERSECTIONS && prefix.size()>0)
+    if (flag & OBJINTERSECTIONS && prefix.size())
     {
         dumpIntersections(prefix);
     }

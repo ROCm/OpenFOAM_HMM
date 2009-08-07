@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -56,6 +56,7 @@ class uniform
     // Private data
 
         dictionary pdfDict_;
+
         //- min and max values of the distribution
         scalar minValue_;
         scalar maxValue_;
@@ -67,7 +68,7 @@ class uniform
 public:
 
     //- Runtime type information
-        TypeName("uniform");
+    TypeName("uniform");
 
 
     // Constructors
@@ -80,28 +81,26 @@ public:
         );
 
 
-    // Destructor
-
-        ~uniform();
+    //- Destructor
+    virtual ~uniform();
 
 
     // Member Functions
 
-    scalar sample() const;
+         //- Sample the pdf
+        virtual scalar sample() const;
 
-    scalar minValue() const;
-    scalar maxValue() const;
+        //- Return the minimum value
+        virtual scalar minValue() const;
 
+        //- Return the maximum value
+        virtual scalar maxValue() const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-//#include "uniformI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

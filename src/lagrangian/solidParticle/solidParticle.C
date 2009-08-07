@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -84,17 +84,36 @@ bool Foam::solidParticle::move(solidParticle::trackData& td)
 
         if (onBoundary() && td.keepParticle)
         {
-            if (face() > -1)
+            if (isType<processorPolyPatch>(pbMesh[patch(face())]))
             {
-                if (isType<processorPolyPatch>(pbMesh[patch(face())]))
-                {
-                    td.switchProcessor = true;
-                }
+                td.switchProcessor = true;
             }
         }
     }
 
     return td.keepParticle;
+}
+
+
+bool Foam::solidParticle::hitPatch
+(
+    const polyPatch&,
+    solidParticle::trackData&,
+    const label
+)
+{
+    return false;
+}
+
+
+bool Foam::solidParticle::hitPatch
+(
+    const polyPatch&,
+    int&,
+    const label
+)
+{
+    return false;
 }
 
 

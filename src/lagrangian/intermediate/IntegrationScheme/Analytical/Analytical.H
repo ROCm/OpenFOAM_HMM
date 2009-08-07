@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -49,7 +49,6 @@ class Analytical
 :
     public IntegrationScheme<Type>
 {
-
 public:
 
     //- Runtime type information
@@ -59,16 +58,11 @@ public:
     // Constructors
 
         //- Construct from components
-        Analytical
-        (
-            const word& phiName,
-            const dictionary& dict
-        );
+        Analytical(const word& phiName, const dictionary& dict);
 
 
     //- Destructor
-
-        virtual ~Analytical();
+    virtual ~Analytical();
 
 
     // Member Functions

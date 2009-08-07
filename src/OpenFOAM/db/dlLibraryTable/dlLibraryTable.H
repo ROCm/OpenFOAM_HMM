@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,9 +36,9 @@ SourceFiles
 #ifndef dlLibraryTable_H
 #define dlLibraryTable_H
 
-#include "HashTable.H"
 #include "label.H"
-#include "pTraits.H"
+#include "Hash.H"
+#include "HashTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,30 +46,8 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class dlLibraryTable Declaration
+                       Class dlLibraryTable Declaration
 \*---------------------------------------------------------------------------*/
-
-//- A means of hashing pointer addresses
-template<>
-class Hash<void*>
-{
-
-public:
-
-    Hash()
-    {}
-
-    long operator()(const void* const& p) const
-    {
-        return long(p);
-    }
-
-    label operator()(const void* const& p, const label tableSize) const
-    {
-        return abs(operator()(p)) % tableSize;
-    }
-};
-
 
 class dlLibraryTable
 :

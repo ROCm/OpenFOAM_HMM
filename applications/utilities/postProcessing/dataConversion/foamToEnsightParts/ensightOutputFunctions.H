@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,9 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-
-    miscellaneous collection of functions and template related
-    to Ensight data
+    Miscellaneous collection of functions and template related to Ensight data
 
 SourceFiles
     ensightOutputFunctions.C
@@ -36,6 +34,7 @@ SourceFiles
 #define ensightOutputFunctions_H
 
 #include "ensightFile.H"
+#include "Cloud.H"
 #include "polyMesh.H"
 #include "IOobject.H"
 

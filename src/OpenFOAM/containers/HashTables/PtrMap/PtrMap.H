@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,7 +58,7 @@ public:
     // Constructors
 
         //- Construct given initial map size
-        PtrMap(label size = 100)
+        PtrMap(const label size = 128)
         :
             HashPtrTable<T, label, Hash<label> >(size)
         {}

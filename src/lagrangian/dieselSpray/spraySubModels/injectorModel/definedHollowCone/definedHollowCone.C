@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -65,9 +65,7 @@ definedHollowConeInjector::definedHollowConeInjector
         )
     ),
     innerConeAngle_(definedHollowConeDict_.lookup("innerConeAngle")),
-    outerConeAngle_(definedHollowConeDict_.lookup("outerConeAngle")),
-    tan1_(sm.injectors().size()),
-    tan2_(sm.injectors().size())
+    outerConeAngle_(definedHollowConeDict_.lookup("outerConeAngle"))
 {
 
     // convert CA to real time - inner cone angle
@@ -92,7 +90,7 @@ definedHollowConeInjector::definedHollowConeInjector
     }
  
     // check number of entries in innerConeAngle list
-    if (innerConeAngle_.size() < 1)
+    if (innerConeAngle_.empty())
     {
         FatalError << "definedHollowConeInjector::definedHollowConeInjector"
              << "(const dictionary& dict, spray& sm)\n"
@@ -101,32 +99,12 @@ definedHollowConeInjector::definedHollowConeInjector
     }
 
     // check number of entries in outerConeAngle list
-    if (outerConeAngle_.size() < 1)
+    if (outerConeAngle_.empty())
     {
         FatalError << "definedHollowConeInjector::definedHollowConeInjector"
              << "(const dictionary& dict, spray& sm)\n"
              << "Number of entries in outerConeAngle must be greater than zero"
              << abort(FatalError);
-    }
-
-    // initialise injectors
-    forAll(sm.injectors(), i)
-    {
-        Random rndGen(label(0));
-        vector dir = sm.injectors()[i].properties()->direction();
-        scalar magV = 0.0;
-        vector tangent;
-        
-        while (magV < SMALL)
-        {
-            vector testThis = rndGen.vector01();
-            
-            tangent = testThis - (testThis & dir)*dir;
-            magV = mag(tangent);
-        }
-        
-        tan1_[i] = tangent/magV;
-        tan2_[i] = dir ^ tan1_[i];
     }
 
     scalar referencePressure = sm.p().average().value();
@@ -162,6 +140,7 @@ scalar definedHollowConeInjector::d0
 vector definedHollowConeInjector::direction
 (
     const label n,
+    const label hole,
     const scalar t,
     const scalar d
 ) const
@@ -201,13 +180,13 @@ vector definedHollowConeInjector::direction
     {
         normal = alpha*
         (
-            tan1_[n]*cos(beta) +
-            tan2_[n]*sin(beta)
+            injectors_[n].properties()->tan1(hole)*cos(beta) +
+            injectors_[n].properties()->tan2(hole)*sin(beta)
         );
     }
     
     // set the direction of injection by adding the normal vector
-    vector dir = dcorr*injectors_[n].properties()->direction() + normal;
+    vector dir = dcorr*injectors_[n].properties()->direction(hole, t) + normal;
     // normailse direction vector
     dir /= mag(dir);
 

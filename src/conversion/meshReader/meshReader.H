@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -290,13 +290,6 @@ protected:
 
         //- Subclasses are required to supply this information
         virtual bool readGeometry(const scalar scaleFactor = 1.0) = 0;
-
-        //- Return mesh points
-        pointField& points() const
-        {
-            return const_cast<pointField&>(points_);
-        }
-
 
 public:
 

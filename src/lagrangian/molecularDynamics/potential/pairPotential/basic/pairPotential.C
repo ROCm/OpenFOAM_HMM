@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -27,15 +27,14 @@ License
 #include "pairPotential.H"
 #include "energyScalingFunction.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTypeNameAndDebug(pairPotential, 0);
+    defineRunTimeSelectionTable(pairPotential, dictionary);
+}
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(pairPotential, 0);
-defineRunTimeSelectionTable(pairPotential, dictionary);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -94,16 +93,16 @@ void Foam::pairPotential::setLookupTables()
 }
 
 
-Foam::scalar Foam::pairPotential::forceLookup(const scalar r) const
+Foam::scalar Foam::pairPotential::force(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
-    label k(k_rIJ);
+    label k = label(k_rIJ);
 
     if (k < 0)
     {
         FatalErrorIn("pairPotential.C") << nl
-            << "r less than rMin" << nl
+            << "r less than rMin in pair potential " << name_ << nl
             << abort(FatalError);
     }
 
@@ -131,16 +130,16 @@ Foam::pairPotential::forceTable() const
 }
 
 
-Foam::scalar Foam::pairPotential::energyLookup(const scalar r) const
+Foam::scalar Foam::pairPotential::energy(const scalar r) const
 {
     scalar k_rIJ = (r - rMin_)/dr_;
 
-    label k(k_rIJ);
+    label k = label(k_rIJ);
 
     if (k < 0)
     {
         FatalErrorIn("pairPotential.C") << nl
-            << "r less than rMin" << nl
+            << "r less than rMin in pair potential " << name_ << nl
             << abort(FatalError);
     }
 
@@ -229,9 +228,5 @@ bool Foam::pairPotential::read(const dictionary& pairPotentialProperties)
     return true;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

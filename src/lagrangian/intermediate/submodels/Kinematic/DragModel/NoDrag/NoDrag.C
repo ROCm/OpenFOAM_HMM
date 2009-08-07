@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,11 +29,7 @@ License
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::NoDrag<CloudType>::NoDrag
-(
-    const dictionary& dict,
-    CloudType& owner
-)
+Foam::NoDrag<CloudType>::NoDrag(const dictionary& dict, CloudType& owner)
 :
     DragModel<CloudType>(dict, owner)
 {}
@@ -56,10 +52,7 @@ bool Foam::NoDrag<CloudType>::active() const
 
 
 template<class CloudType>
-Foam::scalar Foam::NoDrag<CloudType>::Cd
-(
-    const scalar
-) const
+Foam::scalar Foam::NoDrag<CloudType>::Cd(const scalar) const
 {
     return 0.0;
 }

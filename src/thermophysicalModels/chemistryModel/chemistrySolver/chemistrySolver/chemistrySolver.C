@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,29 +29,24 @@ License
 namespace Foam
 {
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(chemistrySolver, 0);
-defineRunTimeSelectionTable(chemistrySolver, dictionary);
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-Foam::chemistrySolver::chemistrySolver
+template<class CompType, class ThermoType>
+Foam::chemistrySolver<CompType, ThermoType>::chemistrySolver
 (
-    const Foam::dictionary& dict,
-    Foam::chemistryModel& chemistry
+    ODEChemistryModel<CompType, ThermoType>& model,
+    const word& modelName
 )
 :
-    dict_(dict),
-    chemistry_(chemistry)
+    model_(model),
+    name_(modelName)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::chemistrySolver::~chemistrySolver()
+template<class CompType, class ThermoType>
+Foam::chemistrySolver<CompType, ThermoType>::~chemistrySolver()
 {}
 
 

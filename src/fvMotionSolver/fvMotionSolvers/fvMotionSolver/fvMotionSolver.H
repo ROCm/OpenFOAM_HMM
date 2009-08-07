@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,12 +40,15 @@ SourceFiles
 #define fvMotionSolver_H
 
 #include "motionSolver.H"
-#include "volPointInterpolation.H"
+#include "pointFieldsFwd.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
+class fvMesh;
+class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
                            Class fvMotionSolver Declaration
@@ -62,13 +65,6 @@ protected:
 
         //- The fvMesh to be moved
         const fvMesh& fvMesh_;
-
-        //- Point mesh needed by the volPointInterpolation
-        mutable pointMesh pointMesh_;
-
-        //- Vol-point interpolator used to obtain the point motion from
-        //  the cell-centre motion
-        mutable volPointInterpolation vpi_;
 
 
     // Protected member functions

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -53,7 +53,7 @@ autoPtr<radiationModel> radiationModel::New
             (
                 "radiationProperties",
                 T.mesh().time().constant(),
-                T.mesh().db(),
+                T.mesh().objectRegistry::db(),
                 IOobject::MUST_READ,
                 IOobject::NO_WRITE
             )
@@ -75,7 +75,7 @@ autoPtr<radiationModel> radiationModel::New
             "radiationModel::New(const volScalarField&)"
         )   << "Unknown radiationModel type " << radiationModelTypeName
             << nl << nl
-            << "Valid radiationModel types are :" << nl
+            << "Valid radiationModel types are:" << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }

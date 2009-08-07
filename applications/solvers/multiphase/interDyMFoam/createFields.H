@@ -1,9 +1,9 @@
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -12,12 +12,12 @@
         mesh
     );
 
-    Info<< "Reading field gamma\n" << endl;
-    volScalarField gamma
+    Info<< "Reading field alpha1\n" << endl;
+    volScalarField alpha1
     (
         IOobject
         (
-            "gamma",
+            "alpha1",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -44,7 +44,7 @@
 
 
     Info<< "Reading transportProperties\n" << endl;
-    twoPhaseMixture twoPhaseProperties(U, phi, "gamma");
+    twoPhaseMixture twoPhaseProperties(U, phi);
 
     const dimensionedScalar& rho1 = twoPhaseProperties.rho1();
     const dimensionedScalar& rho2 = twoPhaseProperties.rho2();
@@ -60,15 +60,15 @@
             mesh,
             IOobject::READ_IF_PRESENT
         ),
-        gamma*rho1 + (scalar(1) - gamma)*rho2,
-        gamma.boundaryField().types()
+        alpha1*rho1 + (scalar(1) - alpha1)*rho2,
+        alpha1.boundaryField().types()
     );
     rho.oldTime();
 
 
     // Mass flux
     // Initialisation does not matter because rhoPhi is reset after the
-    // gamma solution before it is used in the U equation.
+    // alpha1 solution before it is used in the U equation.
     surfaceScalarField rhoPhi
     (
         IOobject
@@ -83,67 +83,30 @@
     );
 
 
-    // Construct interface from gamma distribution
-    interfaceProperties interface(gamma, U, twoPhaseProperties);
+    // Construct interface from alpha1 distribution
+    interfaceProperties interface(alpha1, U, twoPhaseProperties);
 
-    // Construct incompressible RAS model
-    autoPtr<incompressible::RASModel> turbulence
+    // Construct incompressible turbulence model
+    autoPtr<incompressible::turbulenceModel> turbulence
     (
-        incompressible::RASModel::New(U, phi, twoPhaseProperties)
+        incompressible::turbulenceModel::New(U, phi, twoPhaseProperties)
     );
 
-    wordList pcorrTypes(pd.boundaryField().types());
+    wordList pcorrTypes
+    (
+        p.boundaryField().size(),
+        zeroGradientFvPatchScalarField::typeName
+    );
 
-    for (label i=0; i<pd.boundaryField().size(); i++)
+    for (label i=0; i<p.boundaryField().size(); i++)
     {
-        if (pd.boundaryField()[i].fixesValue())
+        if (p.boundaryField()[i].fixesValue())
         {
             pcorrTypes[i] = fixedValueFvPatchScalarField::typeName;
         }
     }
 
 
-    volScalarField p
-    (
-        IOobject
-        (
-            "p",
-            runTime.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        pd + rho*(g & mesh.C())
-    );
-
-    autoPtr<probes> pRefProbe;
-    label pdRefCell = 0;
-    scalar pdRefValue = 0.0;
+    label pRefCell = 0;
     scalar pRefValue = 0.0;
-
-    if (pd.needReference())
-    {
-        pRefProbe.set
-        (
-            new probes
-            (
-                "pRefProbe",
-                mesh,
-                mesh.solutionDict().subDict("PISO").subDict("pRefProbe")
-            )
-        );
-
-        pRefValue = readScalar
-        (
-            mesh.solutionDict().subDict("PISO").lookup("pRefValue")
-        );
-
-        pdRefCell = pRefProbe->cells()[0];
-
-        p += dimensionedScalar
-        (
-            "p",
-            p.dimensions(),
-            pRefValue - pRefProbe->sample<scalar>("p")()[0]
-        );
-    }
+    setRefCell(p, mesh.solutionDict().subDict("PISO"), pRefCell, pRefValue);

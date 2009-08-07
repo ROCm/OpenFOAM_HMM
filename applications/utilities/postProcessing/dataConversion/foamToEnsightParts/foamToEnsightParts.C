@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,16 @@ Usage
     @param -ascii \n
     Write Ensight data in ASCII format instead of "C Binary"
 
-    @param -zeroTime \n
-    Include the often incomplete initial conditions.
+    @param -noZero \n
+    Exclude the often incomplete initial conditions.
+
+    @param -index \<start\>\n
+    Ignore the time index contained in the time file and use a
+    simple indexing when creating the @c Ensight/data/######## files.
+
+    @param -noMesh \n
+    Suppress writing the geometry. Can be useful for converting partial
+    results for a static geometry.
 
 Note
     - no parallel data.
@@ -66,28 +74,28 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    // with -constant and -zeroTime
+    // enable -constant
+    // probably don't need -zeroTime though, since the fields are vetted
+    // afterwards anyhow
     timeSelector::addOptions(true, false);
     argList::noParallel();
     argList::validOptions.insert("ascii", "");
+    argList::validOptions.insert("index",  "start");
+    argList::validOptions.insert("noMesh", "");
 
-    const word volFieldTypes[] =
-    {
-        volScalarField::typeName,
-        volVectorField::typeName,
-        volSphericalTensorField::typeName,
-        volSymmTensorField::typeName,
-        volTensorField::typeName,
-        word::null
-    };
+    // the volume field types that we handle
+    wordHashSet volFieldTypes;
+    volFieldTypes.insert(volScalarField::typeName);
+    volFieldTypes.insert(volVectorField::typeName);
+    volFieldTypes.insert(volSphericalTensorField::typeName);
+    volFieldTypes.insert(volSymmTensorField::typeName);
+    volFieldTypes.insert(volTensorField::typeName);
 
-    const word sprayFieldTypes[] =
-    {
-        scalarIOField::typeName,
-        vectorIOField::typeName,
-        tensorIOField::typeName,
-        word::null
-    };
+    // the lagrangian field types that we handle
+    wordHashSet cloudFieldTypes;
+    cloudFieldTypes.insert(scalarIOField::typeName);
+    cloudFieldTypes.insert(vectorIOField::typeName);
+    cloudFieldTypes.insert(tensorIOField::typeName);
 
     const char* geometryName = "geometry";
 
@@ -99,10 +107,22 @@ int main(int argc, char *argv[])
 
     // default to binary output, unless otherwise specified
     IOstream::streamFormat format = IOstream::BINARY;
-    if (args.options().found("ascii"))
+    if (args.optionFound("ascii"))
     {
         format = IOstream::ASCII;
     }
+
+    // control for renumbering iterations
+    bool optIndex = false;
+    label indexingNumber = 0;
+    if (args.optionFound("index"))
+    {
+        optIndex = true;
+        indexingNumber = args.optionRead<label>("index");
+    }
+
+    // always write the geometry, unless the -noMesh option is specified
+    bool optNoMesh = args.optionFound("noMesh");
 
     fileName ensightDir = args.rootPath()/args.globalCaseName()/"Ensight";
     fileName dataDir = ensightDir/"data";
@@ -112,7 +132,7 @@ int main(int argc, char *argv[])
     // Ensight and Ensight/data directories must exist
     // do not remove old data - we might wish to convert new results
     // or a particular time interval
-    if (dir(ensightDir))
+    if (isDir(ensightDir))
     {
         Info<<"Warning: reusing existing directory" << nl
             << "    " << ensightDir << endl;
@@ -144,7 +164,13 @@ int main(int argc, char *argv[])
 
 #   include "checkHasMovingMesh.H"
 #   include "findFields.H"
-#   include "validateFields.H"
+
+    if (hasMovingMesh && optNoMesh)
+    {
+        Info<< "mesh is moving: ignoring '-noMesh' option" << endl;
+        optNoMesh = false;
+    }
+
 
     // map times used
     Map<scalar>  timeIndices;
@@ -192,15 +218,18 @@ int main(int argc, char *argv[])
                 partsList.recalculate(mesh);
             }
 
-            fileName geomDir;
-            if (hasMovingMesh)
+            if (!optNoMesh)
             {
-                geomDir = dataDir/subDir;
-            }
+                fileName geomDir;
+                if (hasMovingMesh)
+                {
+                    geomDir = dataDir/subDir;
+                }
 
-            ensightGeoFile geoFile(ensightDir/geomDir/geometryName, format);
-            partsList.writeGeometry(geoFile);
-            Info << nl;
+                ensightGeoFile geoFile(ensightDir/geomDir/geometryName, format);
+                partsList.writeGeometry(geoFile);
+                Info<< nl;
+            }
         }
 
         Info<< "write volume field (" << flush;
@@ -290,7 +319,14 @@ int main(int argc, char *argv[])
         {
             const word& cloudName = cloudIter.key();
 
-            if (!dir(runTime.timePath()/regionPrefix/"lagrangian"/cloudName))
+            if
+            (
+                !isDir
+                (
+                    runTime.timePath()/regionPrefix/
+                    cloud::prefix/cloudName
+                )
+            )
             {
                 continue;
             }
@@ -299,7 +335,7 @@ int main(int argc, char *argv[])
             (
                 mesh,
                 runTime.timeName(),
-                "lagrangian"/cloudName
+                cloud::prefix/cloudName
             );
 
             // check that the positions field is present for this time
@@ -331,7 +367,8 @@ int main(int argc, char *argv[])
                 if (!fieldObject)
                 {
                     Info<< "missing "
-                        << runTime.timeName()/"lagrangian"/cloudName/fieldName
+                        << runTime.timeName()/cloud::prefix/cloudName
+                        / fieldName
                         << endl;
                     continue;
                 }

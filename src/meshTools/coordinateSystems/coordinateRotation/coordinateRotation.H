@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -73,14 +73,13 @@ Deprecated
 
 #include "vector.H"
 #include "tensor.H"
+#include "dictionary.H"
 #include "runTimeSelectionTables.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-class dictionary;
 
 /*---------------------------------------------------------------------------*\
                     Class coordinateRotation Declaration
@@ -93,7 +92,8 @@ class coordinateRotation
     // Private data
 
         //- the combination of local axes to be used
-        enum axisOrder {
+        enum axisOrder
+        {
             e1e2,
             e2e3,
             e3e1
@@ -129,6 +129,11 @@ public:
         //- Construct from dictionary
         coordinateRotation(const dictionary&);
 
+        //- Return clone
+        autoPtr<coordinateRotation> clone() const
+        {
+            return autoPtr<coordinateRotation>(new coordinateRotation(*this));
+        }
 
     // Declare run-time constructor selection table
 

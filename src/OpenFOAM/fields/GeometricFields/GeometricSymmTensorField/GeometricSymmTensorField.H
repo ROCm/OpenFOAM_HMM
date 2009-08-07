@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,6 +58,7 @@ UNARY_FUNCTION(symmTensor, symmTensor, twoSymm, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev, transform)
 UNARY_FUNCTION(symmTensor, symmTensor, dev2, transform)
 UNARY_FUNCTION(scalar, symmTensor, det, transform)
+UNARY_FUNCTION(symmTensor, symmTensor, cof, cof)
 UNARY_FUNCTION(symmTensor, symmTensor, inv, inv)
 
 

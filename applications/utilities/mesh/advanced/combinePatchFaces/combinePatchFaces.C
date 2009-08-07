@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -177,7 +177,7 @@ label mergePatchFaces
         List<faceList> allFaceSetsFaces(allFaceSets.size());
         forAll(allFaceSets, setI)
         {
-            allFaceSetsFaces[setI] = IndirectList<face>
+            allFaceSetsFaces[setI] = UIndirectList<face>
             (
                 mesh.faces(),
                 allFaceSets[setI]
@@ -447,25 +447,19 @@ int main(int argc, char *argv[])
 #   include "createTime.H"
     runTime.functionObjects().off();
 #   include "createPolyMesh.H"
+    const word oldInstance = mesh.pointsInstance();
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
     scalar minCos = Foam::cos(featureAngle*mathematicalConstant::pi/180.0);
 
     scalar concaveAngle = defaultConcaveAngle;
-
-    if (args.options().found("concaveAngle"))
-    {
-        concaveAngle = readScalar
-        (
-            IStringStream(args.options()["concaveAngle"])()
-        );
-    }
+    args.optionReadIfPresent("concaveAngle", concaveAngle);
 
     scalar concaveSin = Foam::sin(concaveAngle*mathematicalConstant::pi/180.0);
 
-    bool snapMeshDict = args.options().found("snapMesh");
-    bool overwrite = args.options().found("overwrite");
+    bool snapMeshDict = args.optionFound("snapMesh");
+    bool overwrite = args.optionFound("overwrite");
 
     Info<< "Merging all faces of a cell" << nl
         << "    - which are on the same patch" << nl
@@ -508,6 +502,11 @@ int main(int argc, char *argv[])
 
     if (nChanged > 0)
     {
+        if (overwrite)
+        {
+            mesh.setInstance(oldInstance);
+        }
+
         Info<< "Writing morphed mesh to time " << runTime.timeName() << endl;
 
         mesh.write();

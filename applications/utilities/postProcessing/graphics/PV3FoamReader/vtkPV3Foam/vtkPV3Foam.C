@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,12 +90,21 @@ void Foam::vtkPV3Foam::reduceMemory()
 
 
 
-int Foam::vtkPV3Foam::setTime(const double& requestedTime)
+int Foam::vtkPV3Foam::setTime(int nRequest, const double requestTimes[])
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3Foam::setTime(" << requestedTime << ")"
-            << endl;
+        Info<< "<beg> Foam::vtkPV3Foam::setTime(";
+        for (int requestI = 0; requestI < nRequest; ++requestI)
+        {
+            if (requestI)
+            {
+                Info<< ", ";
+            }
+
+            Info<< requestTimes[requestI];
+        }
+        Info << ") - previousIndex = " << timeIndex_ << endl;
     }
 
     Time& runTime = dbPtr_();
@@ -103,11 +112,22 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
     // Get times list
     instantList Times = runTime.times();
 
-    int nearestIndex = Time::findClosestTimeIndex(Times, requestedTime);
+    int nearestIndex = timeIndex_;
+    for (int requestI = 0; requestI < nRequest; ++requestI)
+    {
+        int index = Time::findClosestTimeIndex(Times, requestTimes[requestI]);
+        if (index >= 0 && index != timeIndex_)
+        {
+            nearestIndex = index;
+            break;
+        }
+    }
+
     if (nearestIndex < 0)
     {
         nearestIndex = 0;
     }
+
 
     // see what has changed
     if (timeIndex_ != nearestIndex)
@@ -138,10 +158,11 @@ int Foam::vtkPV3Foam::setTime(const double& requestedTime)
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3Foam::setTime() - selected time "
-            << Times[nearestIndex].name() << " index=" << nearestIndex
-            << " meshChanged=" << meshChanged_
-            << " fieldsChanged=" << fieldsChanged_ << endl;
+        Info<< "<end> Foam::vtkPV3Foam::setTime() - selectedTime="
+            << Times[nearestIndex].name() << " index=" << timeIndex_
+            << "/" << Times.size()
+            << " meshChanged=" << Switch(meshChanged_)
+            << " fieldsChanged=" << Switch(fieldsChanged_) << endl;
     }
 
     return nearestIndex;
@@ -228,7 +249,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
     // avoid argList and get rootPath/caseName directly from the file
     fileName fullCasePath(fileName(FileName).path());
 
-    if (!dir(fullCasePath))
+    if (!isDir(fullCasePath))
     {
         return;
     }
@@ -240,11 +261,15 @@ Foam::vtkPV3Foam::vtkPV3Foam
     // Set the case as an environment variable - some BCs might use this
     if (fullCasePath.name().find("processor", 0) == 0)
     {
-        setEnv("FOAM_CASE", fullCasePath.path(), true);
+        const fileName globalCase = fullCasePath.path();
+
+        setEnv("FOAM_CASE", globalCase, true);
+        setEnv("FOAM_CASENAME", globalCase.name(), true);
     }
     else
     {
         setEnv("FOAM_CASE", fullCasePath, true);
+        setEnv("FOAM_CASENAME", fullCasePath.name(), true);
     }
 
     // look for 'case{region}.OpenFOAM'
@@ -278,6 +303,7 @@ Foam::vtkPV3Foam::vtkPV3Foam
     {
         Info<< "fullCasePath=" << fullCasePath << nl
             << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+            << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << nl
             << "region=" << meshRegion_ << endl;
     }
 
@@ -441,7 +467,6 @@ void Foam::vtkPV3Foam::Update
         cout<< "<beg> Foam::vtkPV3Foam::Update - output with "
             << output->GetNumberOfBlocks() << " and "
             << lagrangianOutput->GetNumberOfBlocks() << " blocks\n";
-
         output->Print(cout);
         lagrangianOutput->Print(cout);
         printMemory();
@@ -480,8 +505,10 @@ void Foam::vtkPV3Foam::Update
         reader_->UpdateProgress(0.7);
     }
 
+#ifdef VTKPV3FOAM_DUALPORT
     // restart port1 at block=0
     blockNo = 0;
+#endif
     convertMeshLagrangian(lagrangianOutput, blockNo);
 
     reader_->UpdateProgress(0.8);
@@ -492,11 +519,15 @@ void Foam::vtkPV3Foam::Update
     convertLagrangianFields(lagrangianOutput);
     reader_->UpdateProgress(0.95);
 
+    meshChanged_ = fieldsChanged_ = false;
+}
+
+
+void Foam::vtkPV3Foam::CleanUp()
+{
     // reclaim some memory
     reduceMemory();
     reader_->UpdateProgress(1.0);
-
-    meshChanged_ = fieldsChanged_ = false;
 }
 
 
@@ -518,7 +549,7 @@ double* Foam::vtkPV3Foam::findTimes(int& nTimeSteps)
 
             if
             (
-                file(runTime.path()/timeName/meshDir_/"points")
+                isFile(runTime.path()/timeName/meshDir_/"points")
              && IOobject("points", timeName, meshDir_, runTime).headerOk()
             )
             {
@@ -617,8 +648,10 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         {
             const labelList& eFaces = edgeFaces[edgeI];
 
-            if (eFaces.size() != 2)
+            if (eFaces.size() == 1)
             {
+                // Note: could also do ones with > 2 faces but this gives
+                // too many zones for baffles
                 featEdge[edgeI] = true;
             }
             else if (mag(n[eFaces[0]] & n[eFaces[1]]) < 0.5)
@@ -657,29 +690,55 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
         }
     }
 
+    // Count number of zones we're actually going to display. This is truncated
+    // to a max per patch
+
+    const label MAXPATCHZONES = 20;
+
+    label displayZoneI = 0;
+
+    forAll(pbMesh, patchI)
+    {
+        displayZoneI += min(MAXPATCHZONES, nZones[patchI]);
+    }
+
+
     zoneCentre.shrink();
 
     if (debug)
     {
         Info<< "patch zone centres = " << zoneCentre << nl
+            << "displayed zone centres = " << displayZoneI << nl
             << "zones per patch = " << nZones << endl;
     }
 
     // Set the size of the patch labels to max number of zones
-    patchTextActorsPtrs_.setSize(zoneCentre.size());
+    patchTextActorsPtrs_.setSize(displayZoneI);
 
     if (debug)
     {
         Info<< "constructing patch labels" << endl;
     }
 
+    // Actor index
+    displayZoneI = 0;
+
+    // Index in zone centres
     label globalZoneI = 0;
+
     forAll(pbMesh, patchI)
     {
         const polyPatch& pp = pbMesh[patchI];
 
         // Only selected patches will have a non-zero number of zones
-        for (label i=0; i<nZones[patchI]; i++)
+        label nDisplayZones = min(MAXPATCHZONES, nZones[patchI]);
+        label increment = 1;
+        if (nZones[patchI] >= MAXPATCHZONES)
+        {
+            increment = nZones[patchI]/MAXPATCHZONES;
+        }
+
+        for (label i = 0; i < nDisplayZones; i++)
         {
             if (debug)
             {
@@ -717,14 +776,15 @@ void Foam::vtkPV3Foam::addPatchNames(vtkRenderer* renderer)
 
             // Maintain a list of text labels added so that they can be
             // removed later
-            patchTextActorsPtrs_[globalZoneI] = txt;
+            patchTextActorsPtrs_[displayZoneI] = txt;
 
-            globalZoneI++;
+            globalZoneI += increment;
+            displayZoneI++;
         }
     }
 
     // Resize the patch names list to the actual number of patch names added
-    patchTextActorsPtrs_.setSize(globalZoneI);
+    patchTextActorsPtrs_.setSize(displayZoneI);
 
     if (debug)
     {

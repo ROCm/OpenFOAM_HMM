@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,7 +43,7 @@ namespace Foam
 typedef PointIndexHit<point> pointIndexHit;
 
 
-//- Specify data associated with pointIndexHit type is contiguous
+//- Data associated with pointIndexHit type are contiguous
 template<>
 inline bool contiguous<pointIndexHit>() {return contiguous<point>();}
 

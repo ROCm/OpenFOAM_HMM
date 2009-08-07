@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -43,25 +43,24 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "readMechanicalProperties.H"
+    #include "readThermalProperties.H"
+    #include "readSolidDisplacementFoamControls.H"
+    #include "createFields.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "readMechanicalProperties.H"
-#   include "readThermalProperties.H"
-#   include "readSolidDisplacementFoamControls.H"
-#   include "createFields.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nCalculating displacement field\n" << endl;
 
-    for (runTime++; !runTime.end(); runTime++)
+    while (runTime.loop())
     {
         Info<< "Iteration: " << runTime.value() << nl << endl;
 
-#       include "readSolidDisplacementFoamControls.H"
+        #include "readSolidDisplacementFoamControls.H"
 
         int iCorr = 0;
         scalar initialResidual = 0;
@@ -91,7 +90,7 @@ int main(int argc, char *argv[])
                     const volScalarField& T = Tptr();
                     DEqn += fvc::grad(threeKalpha*T);
                 }
-                
+
                 //DEqn.setComponentReference(1, 0, vector::X, 0);
                 //DEqn.setComponentReference(1, 0, vector::Z, 0);
 
@@ -123,7 +122,7 @@ int main(int argc, char *argv[])
 
         } while (initialResidual > convergenceTolerance && ++iCorr < nCorr);
 
-#       include "calculateStress.H"
+        #include "calculateStress.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
@@ -132,7 +131,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

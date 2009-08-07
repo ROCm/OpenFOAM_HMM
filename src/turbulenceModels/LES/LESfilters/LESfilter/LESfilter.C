@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,7 +38,36 @@ namespace Foam
 defineTypeNameAndDebug(LESfilter, 0);
 defineRunTimeSelectionTable(LESfilter, dictionary);
 
+
+// * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
+
+autoPtr<LESfilter> LESfilter::New
+(
+    const fvMesh& mesh,
+    const dictionary& dict
+)
+{
+    word filterType(dict.lookup("filter"));
+
+    dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(filterType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "LESfilter::New(const fvMesh&, const dictionary&)"
+        )   << "Unknown LESfilter type " << filterType << endl << endl
+            << "Valid LESfilter types are :" << endl
+            << dictionaryConstructorTablePtr_->toc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<LESfilter>(cstrIter()(mesh, dict));
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 
 } // End namespace Foam
 

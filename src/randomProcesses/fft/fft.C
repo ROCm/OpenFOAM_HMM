@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -48,8 +48,9 @@ void fft::transform
 {
     forAll(nn, idim)
     {
-        scalar pow2 = log(scalar(nn[idim]))/log(scalar(2));
-        if ((pow2 - int(pow2 + 0.5)) > SMALL)
+        // Check for power of two
+        unsigned int dimCount = nn[idim];
+        if (!dimCount || (dimCount & (dimCount - 1)))
         {
             FatalErrorIn
             (

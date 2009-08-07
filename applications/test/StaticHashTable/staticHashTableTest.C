@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,12 +22,8 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-
 \*---------------------------------------------------------------------------*/
 
-#include <iostream>
 #include "StaticHashTable.H"
 #include "IOstreams.H"
 #include "IStringStream.H"
@@ -35,103 +31,139 @@ Description
 
 using namespace Foam;
 
+// use define so we can easily test other implementations
+#define HASHTABLE_CLASS StaticHashTable
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 //  Main program:
 
 int main()
 {
-    //for (;;)
+    HASHTABLE_CLASS<double> table1(13);
+
+    table1.insert("aaa", 1.0);
+    table1.insert("aba", 2.0);
+    table1.insert("aca", 3.0);
+    table1.insert("ada", 4.0);
+    table1.insert("aeq", 5.0);
+    table1.insert("aaw", 6.0);
+    table1.insert("abs", 7.0);
+    table1.insert("acr", 8.0);
+    table1.insert("adx", 9.0);
+    table1.insert("aec", 10.0);
+
+    table1.erase("aaw");
+    table1.erase("abs");
+
+    Info<< "\ntable1 toc: " << table1.toc() << endl;
+    table1.printInfo(Info)
+        << "table1 [" << table1.size() << "] " << endl;
+    forAllIter(HASHTABLE_CLASS<double>, table1, iter)
     {
-    StaticHashTable<double> myTable(10);
+        Info<< iter.key() << " => " << iter() << nl;
+    }
 
-    myTable.insert("aaa", 1.0);
-    myTable.insert("aba", 2.0);
-    myTable.insert("aca", 3.0);
-    myTable.insert("ada", 4.0);
-    myTable.insert("aeq", 5.0);
-    myTable.insert("aaw", 6.0);
-    myTable.insert("abs", 7.0);
-    myTable.insert("acr", 8.0);
-    myTable.insert("adx", 9.0);
-    myTable.insert("aec", 10.0);
+    table1.set("acr", 108);
+    table1.set("adx", 109);
+    table1.set("aec", 100);
+    table1("aaw") -= 1000;
+    table1("aeq") += 1000;
 
-    Pout<< "Foam output operator:" << nl << endl;
-    Pout<< myTable << endl;
+    Info<< "\noverwrote some values table1: " << table1 << endl;
 
-    //myTable.erase("aaw");
-    //myTable.erase("abs");
-    //std::cerr << "Size now:" << myTable.size() << '\n';
-
-    Pout<< "toc:" << nl << endl;
-    Pout<< myTable.toc() << endl;
-
-
-    std::cerr << myTable.find("aaa")() << '\n';
-    std::cerr << myTable.find("aba")() << '\n';
-    std::cerr << myTable.find("aca")() << '\n';
-    std::cerr << myTable.find("ada")() << '\n';
-    std::cerr << myTable.find("aeq")() << '\n';
-    std::cerr << myTable.find("aaw")() << '\n';
-    std::cerr << myTable.find("abs")() << '\n';
-    std::cerr << myTable.find("acr")() << '\n';
-    std::cerr << myTable.find("adx")() << '\n';
-    std::cerr << myTable.find("aec")() << '\n';
-
-    std::cerr << myTable["aaa"] << '\n';
+    Info<< "\ntest find:" << endl;
+    Info<< table1.find("aaa")() << nl
+        << table1.find("aba")() << nl
+        << table1.find("aca")() << nl
+        << table1.find("ada")() << nl
+        << table1.find("aeq")() << nl
+        << table1.find("acr")() << nl
+        << table1.find("adx")() << nl
+        << table1.find("aec")() << nl
+        << table1["aaa"] << nl;
 
     {
         OStringStream os;
+        os << table1;
+        HASHTABLE_CLASS<double> readTable(IStringStream(os.str())(), 100);
 
-        os << myTable;
-
-        IStringStream is(os.str());
-
-        Pout<< "Foam Istream constructor:" << nl << endl;
-        StaticHashTable<double> readTable(is, 100);
-
-        Pout<< readTable << endl;
+        Info<< "Istream constructor:" << readTable << endl;
     }
 
-    std::cerr << "\ncopy construct of table\n" << std::endl;
 
-    StaticHashTable<double> myTable1(myTable);
-    Pout<< "myTable1:" << myTable1 << endl;
+    HASHTABLE_CLASS<double> table2(table1);
+    HASHTABLE_CLASS<double> table3(table1.xfer());
 
-    std::cerr << "\nassignment of table\n" << std::endl;
+    Info<< "\ncopy table1 -> table2" << nl
+        << "transfer table1 -> table3 via the xfer() method" << nl;
 
-    StaticHashTable<double> myTable2(100);
-    myTable2.transfer(myTable);
+    Info<< "\ntable1" << table1 << nl
+        << "\ntable2" << table2 << nl
+        << "\ntable3" << table3 << nl;
 
-    //Pout<< "myTable:" << myTable << endl;
-
-    forAllConstIter(StaticHashTable<double>, myTable2, iter2)
+    Info<< "\nerase table2 by iterator" << nl;
+    forAllIter(HASHTABLE_CLASS<double>, table2, iter)
     {
-        std::cerr << *iter2 << '\n';
+        Info<< "erasing " << iter.key() << " => " << iter() << " ... ";
+        table2.erase(iter);
+        Info<< "erased" << endl;
     }
 
-    std::cerr << "\ntable resize 1\n" << std::endl;
+    Info<< "\ntable1" << table1 << nl
+        << "\ntable2" << table2 << nl
+        << "\ntable3" << table3 << nl;
 
-    myTable2.resize(1);
-    
-    forAllConstIter(StaticHashTable<double>, myTable2, iter2)
-    {
-        std::cerr << *iter2 << '\n';
-    }
+    table3.resize(1);
+    Info<< "\nresize(1) table3" << nl;
+    table3.printInfo(Info)
+        << table3 << nl;
 
-    std::cerr << "\ntable size 10000\n" << std::endl;
+    table3.resize(10000);
+    Info<< "\nresize(10000) table3" << nl;
+    table3.printInfo(Info)
+        << table3 << nl;
 
-    myTable2.resize(10000);
-    
-    forAllConstIter(StaticHashTable<double>, myTable2, iter2)
-    {
-        std::cerr << *iter2 << '\n';
-    }
+    HASHTABLE_CLASS<double> table4;
 
-    }
+    table4 = table3;
+    Info<< "\ncopy table3 -> table4 " << table4 << nl;
+
+    Info<< "\nclear table4 ... ";
+    table4.clear();
+    Info<< "[" << table4.size() << "] " << table4 << nl;
+
+    table1 = table3;
+    Info<< "\ncopy table3 -> table1 (previously transferred)" << table1 << nl;
+
+    Info<< "test table1 == table3 : " << (table1 == table3) << nl;
+    table1.erase(table1.begin());
+    Info<< "removed an element - test table1 != table3 : "
+        << (table1 != table3) << nl;
+
+    // insert a few things into table2
+    table2.set("ada", 14.0);
+    table2.set("aeq", 15.0);
+    table2.set("aaw", 16.0);
+    table2.set("abs", 17.0);
+    table2.set("adx", 20.0);
+
+    Info<< "\ntable1" << table1 << nl
+        << "\ntable2" << table2 << nl;
+
+    label nErased = table1.erase(table2);
+
+    Info<< "\nerase table2 keys from table1 (removed "
+        << nErased << " elements)" << nl
+        << "\ntable1" << table1 << nl
+        << "\ntable2" << table2 << nl;
 
 
-    std::cerr << "\nBye.\n";
+    Info<< "\ntable3" << table3
+        << "\nclearStorage table3 ... ";
+    table3.clearStorage();
+    Info<< table3 << nl;
+
+    Info<< "\nDone\n";
 
     return 0;
 }

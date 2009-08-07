@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -70,7 +70,7 @@ void meshToMesh::calculateInverseDistanceWeights() const
             if
             (
                 m < directHitTol                            // Direct hit
-             || neighbours.size() == 0
+             || neighbours.empty()
             )
             {
                 invDistCoeffs[celli].setSize(1);

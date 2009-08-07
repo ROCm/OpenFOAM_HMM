@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -61,7 +61,6 @@ SourceFiles
 
 #include "label.H"
 #include "boolList.H"
-#include "labelList.H"
 #include "scalarField.H"
 #include "pointFields.H"
 #include "tensor.H"
@@ -74,7 +73,7 @@ namespace Foam
 {
 
 // Forward declaration of classes
-class pointMesh;
+class polyMesh;
 
 
 /*---------------------------------------------------------------------------*\
@@ -104,7 +103,7 @@ class PointEdgeWave
     // Private data
 
         //- Reference to mesh
-        const pointMesh& pMesh_;
+        const polyMesh& mesh_;
 
         //- Wall information for all points
         List<Type>& allPointInfo_;
@@ -272,7 +271,7 @@ public:
         //  (maxIter can be 0)
         PointEdgeWave
         (
-            const pointMesh& pMesh,
+            const polyMesh& mesh,
             const labelList& initialPoints,
             const List<Type>& initialPointsInfo,
             List<Type>& allPointInfo,

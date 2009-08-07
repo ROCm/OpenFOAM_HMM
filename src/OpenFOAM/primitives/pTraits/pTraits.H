@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,9 @@ Class
     Foam::pTraits
 
 Description
-    Traits class for primitives.  All primitives need a specialised
-    version of this class
+    Traits class for primitives.
+
+    All primitives need a specialised version of this class
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,22 +46,22 @@ class Istream;
                            Class pTraits Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class primitive>
+template<class PrimitiveType>
 class pTraits
 :
-    public primitive
+    public PrimitiveType
 {
 
 public:
 
-    pTraits(const primitive& p)
+    pTraits(const PrimitiveType& p)
     :
-        primitive(p)
+        PrimitiveType(p)
     {}
 
     pTraits(Istream& is)
     :
-        primitive(is)
+        PrimitiveType(is)
     {}
 };
 

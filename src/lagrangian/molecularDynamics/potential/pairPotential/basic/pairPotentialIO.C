@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,12 +38,12 @@ bool Foam::pairPotential::writeEnergyAndForceTables(Ostream& os) const
 
     forAll(eTab, e)
     {
-        os<< eTab[e].first()
-          << token::SPACE
-          << eTab[e].second()
-          << token::SPACE
-          << fTab[e].second()
-          << nl;
+        os  << eTab[e].first()
+            << token::SPACE
+            << eTab[e].second()
+            << token::SPACE
+            << fTab[e].second()
+            << nl;
     }
 
     return os.good();

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,11 +138,11 @@ void Foam::enrichedPatch::calcMasterPointFaces() const
     forAll (mpfToc, mpfTocI)
     {
         labelList l;
-        l.transfer(mpf.find(mpfToc[mpfTocI])().shrink());
+        l.transfer(mpf.find(mpfToc[mpfTocI])());
 
         masterPointFaceAddr.insert(mpfToc[mpfTocI], l);
     }
-//     Pout << "masterPointFaceAddr: " << masterPointFaceAddr << endl;
+    // Pout<< "masterPointFaceAddr: " << masterPointFaceAddr << endl;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -52,7 +52,6 @@ class basicKinematicCloud
 :
     public KinematicCloud<basicKinematicParcel>
 {
-
     // Private member functions
 
         //- Disallow default bitwise copy construct
@@ -73,8 +72,7 @@ public:
         //- Construct from components
         basicKinematicCloud
         (
-            const word& cloudType,
-            const volPointInterpolation& vpi,
+            const word& cloudName,
             const volScalarField& rho,
             const volVectorField& U,
             const volScalarField& mu,
@@ -83,14 +81,13 @@ public:
 
 
     //- Destructor
-
-        ~basicKinematicCloud();
+    ~basicKinematicCloud();
 
 
     // Member functions
 
         //- Write fields
-        void writeFields() const;
+        virtual void writeFields() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

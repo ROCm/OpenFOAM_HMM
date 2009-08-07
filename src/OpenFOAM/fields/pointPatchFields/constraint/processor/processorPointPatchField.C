@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -100,6 +100,7 @@ void processorPointPatchField<Type>::initSwapAdd(Field<Type>& pField) const
 {
     if (Pstream::parRun())
     {
+        // Get internal field into my point order
         Field<Type> pf(this->patchInternalField(pField));
 
         OPstream::write
@@ -130,10 +131,9 @@ void processorPointPatchField<Type>::swapAdd(Field<Type>& pField) const
 
         if (doTransform())
         {
+            const processorPolyPatch& ppp = procPatch_.procPolyPatch();
             const labelList& nonGlobalPatchPoints =
                 procPatch_.nonGlobalPatchPoints();
-
-            const processorPolyPatch& ppp = procPatch_.procPolyPatch();
 
             // Mark patch that transformed point:
             // -3  : global patch point so handled in different patch

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -168,6 +168,21 @@ public:
             //- Track all particles to their end point
             bool move(trackData&);
 
+
+            //- Overridable function to handle the particle hitting a patch
+            //  Executed before other patch-hitting functions
+            bool hitPatch
+            (
+                const polyPatch&,
+                trackedParticle::trackData& td,
+                const label patchI
+            );
+            bool hitPatch
+            (
+                const polyPatch&,
+                int&,
+                const label patchI
+           );
 
             //- Overridable function to handle the particle hitting a wedge
             void hitWedgePatch

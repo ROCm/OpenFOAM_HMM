@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -268,7 +268,12 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
         // Calculate the geometry for the patches (transformation tensors etc.)
         boundary_.calcGeometry();
 
+        // Derived info
+        bounds_ = boundBox(points_);
+        geometricD_ = Vector<label>::zero;
+        solutionD_ = Vector<label>::zero;
 
+        // Zones
         pointZoneMesh newPointZones
         (
             IOobject
@@ -284,11 +289,27 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
-        pointZones_.setSize(newPointZones.size());
-        forAll (pointZones_, pzI)
+        label oldSize = pointZones_.size();
+
+        if (newPointZones.size() <= pointZones_.size())
         {
-            pointZones_[pzI] = newPointZones[pzI];
+            pointZones_.setSize(newPointZones.size());
         }
+
+        // Reset existing ones
+        forAll (pointZones_, czI)
+        {
+            pointZones_[czI] = newPointZones[czI];
+        }
+
+        // Extend with extra ones
+        pointZones_.setSize(newPointZones.size());
+
+        for (label czI = oldSize; czI < newPointZones.size(); czI++)
+        {
+            pointZones_.set(czI, newPointZones[czI].clone(pointZones_));
+        }
+
 
         faceZoneMesh newFaceZones
         (
@@ -305,7 +326,14 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
-        faceZones_.setSize(newFaceZones.size());
+        oldSize = faceZones_.size();
+
+        if (newFaceZones.size() <= faceZones_.size())
+        {
+            faceZones_.setSize(newFaceZones.size());
+        }
+
+        // Reset existing ones
         forAll (faceZones_, fzI)
         {
             faceZones_[fzI].resetAddressing
@@ -314,6 +342,15 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 newFaceZones[fzI].flipMap()
             );
         }
+
+        // Extend with extra ones
+        faceZones_.setSize(newFaceZones.size());
+
+        for (label fzI = oldSize; fzI < newFaceZones.size(); fzI++)
+        {
+            faceZones_.set(fzI, newFaceZones[fzI].clone(faceZones_));
+        }
+
 
         cellZoneMesh newCellZones
         (
@@ -330,11 +367,27 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
             *this
         );
 
-        cellZones_.setSize(newCellZones.size());
+        oldSize = cellZones_.size();
+
+        if (newCellZones.size() <= cellZones_.size())
+        {
+            cellZones_.setSize(newCellZones.size());
+        }
+
+        // Reset existing ones
         forAll (cellZones_, czI)
         {
             cellZones_[czI] = newCellZones[czI];
         }
+
+        // Extend with extra ones
+        cellZones_.setSize(newCellZones.size());
+
+        for (label czI = oldSize; czI < newCellZones.size(); czI++)
+        {
+            cellZones_.set(czI, newCellZones[czI].clone(cellZones_));
+        }
+
 
         if (boundaryChanged)
         {
@@ -370,6 +423,13 @@ Foam::polyMesh::readUpdateState Foam::polyMesh::readUpdate()
                 false
             )
         );
+
+        // Derived info
+        bounds_ = boundBox(points_);
+
+        // Rotation can cause direction vector to change
+        geometricD_ = Vector<label>::zero;
+        solutionD_ = Vector<label>::zero;
         
         return polyMesh::POINTS_MOVED;
     }

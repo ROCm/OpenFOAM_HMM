@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,13 +26,16 @@ Class
     Foam::triSurfaceGeoMesh
 
 Description
-    The triSurface geoMesh
+    The triSurface GeoMesh (for holding fields).
+
+    Similar to the volGeoMesh used for the Finite Volume discretization.
 
 \*---------------------------------------------------------------------------*/
 
 #ifndef triSurfaceGeoMesh_H
 #define triSurfaceGeoMesh_H
 
+#include "GeoMesh.H"
 #include "triSurface.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -43,32 +46,36 @@ namespace Foam
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 class triSurfaceGeoMesh
+:
+    public GeoMesh<triSurface>
 {
-    const triSurface& s_;
 
 public:
 
-    typedef triSurface Mesh;
+    // Constructors
 
-    triSurfaceGeoMesh(const triSurface& s)
-    :
-        s_(s)
-    {}
+        //- Construct from triSurface reference
+        explicit triSurfaceGeoMesh(const triSurface& mesh)
+        :
+            GeoMesh<triSurface>(mesh)
+        {}
 
-    //- Return size
-    label size() const
-    {
-        return size(s_);
-    }
 
-    //- Return size
-    static label size(const Mesh& mesh)
-    {
-        return mesh.size();
-    }
+    // Member Functions
+
+        //- Return size
+        static label size(const triSurface& mesh)
+        {
+            return mesh.size();
+        }
+
+        //- Return size
+        label size() const
+        {
+            return size(mesh_);
+        }
 
 };
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

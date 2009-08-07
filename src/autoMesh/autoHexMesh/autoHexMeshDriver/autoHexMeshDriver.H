@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -38,8 +38,6 @@ SourceFiles
 
 #include "autoPtr.H"
 #include "dictionary.H"
-#include "pointField.H"
-#include "boolList.H"
 #include "wallPoint.H"
 #include "searchableSurfaces.H"
 #include "refinementSurfaces.H"
@@ -176,6 +174,7 @@ public:
         autoHexMeshDriver
         (
             fvMesh& mesh,
+            const bool overwrite,
             const dictionary& meshDict,
             const dictionary& decomposeDict
         );

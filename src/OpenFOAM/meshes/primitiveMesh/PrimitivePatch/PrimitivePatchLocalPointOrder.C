@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -30,11 +30,6 @@ Description
 #include "SLList.H"
 #include "boolList.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template
@@ -44,8 +39,10 @@ template
     class PointField,
     class PointType
 >
-void PrimitivePatch<Face, FaceList, PointField, PointType>::
- calcLocalPointOrder() const
+
+void
+Foam::PrimitivePatch<Face, FaceList, PointField, PointType>::
+calcLocalPointOrder() const
 {
     // Note: Cannot use bandCompressing as point-point addressing does
     // not exist and is not considered generally useful.
@@ -127,7 +124,7 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::
                         }
                     }
                 }
-            } while (faceOrder.size() > 0);
+            } while (faceOrder.size());
         }
     }
 
@@ -139,10 +136,5 @@ void PrimitivePatch<Face, FaceList, PointField, PointType>::
             << endl;
     }
 }
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -1,9 +1,9 @@
-    Info<< "Reading field pd\n" << endl;
-    volScalarField pd
+    Info<< "Reading field p\n" << endl;
+    volScalarField p
     (
         IOobject
         (
-            "pd",
+            "p",
             runTime.timeName(),
             mesh,
             IOobject::MUST_READ,
@@ -45,10 +45,13 @@
     rho.oldTime();
 
 
-    Info<< "Calculating field g.h\n" << endl;
-    surfaceScalarField ghf("gh", g & mesh.Cf());
+    label pRefCell = 0;
+    scalar pRefValue = 0.0;
+    setRefCell(p, mesh.solutionDict().subDict("PISO"), pRefCell, pRefValue);
 
 
-    label pdRefCell = 0;
-    scalar pdRefValue = 0.0;
-    setRefCell(pd, mesh.solutionDict().subDict("PISO"), pdRefCell, pdRefValue);
+    // Construct incompressible turbulence model
+    autoPtr<incompressible::turbulenceModel> turbulence
+    (
+        incompressible::turbulenceModel::New(U, phi, mixture)
+    );

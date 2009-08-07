@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -108,31 +108,19 @@ void reitzKHRT::breakupParcel
 
     // frequency of the fastest growing KH-wave
     scalar omegaKH =
-    (
-        0.34 + 0.38*pow(weGas, 1.5)
-    )/
-    (
-        (1 + ohnesorge)*(1 + 1.4*pow(taylor, 0.6))
-    )*sqrt(sigma/(rhoLiquid*pow(r, 3)) );
+        (0.34 + 0.38*pow(weGas, 1.5))
+       /((1 + ohnesorge)*(1 + 1.4*pow(taylor, 0.6)))
+       *sqrt(sigma/(rhoLiquid*pow(r, 3)));
 
-    // ... and the corresponding KH wave-length.
+    // corresponding KH wave-length.
     scalar lambdaKH =
-    9.02*r*
-    (
-        1.0 + 0.45*sqrt(ohnesorge)
-    )*
-    (
-        1.0 + 0.4*pow(taylor, 0.7)
-    )/
-    pow
-    (
-        (
-            1.0 + 0.865*pow(weGas, 1.67)
-        ),
-        0.6
-    );
+        9.02
+       *r
+       *(1.0 + 0.45*sqrt(ohnesorge))
+       *(1.0 + 0.4*pow(taylor, 0.7))
+       /pow(1.0 + 0.865*pow(weGas, 1.67), 0.6);
 
-    // the characteristic Kelvin-Helmholtz breakup time
+    // characteristic Kelvin-Helmholtz breakup time
     scalar tauKH = 3.726*b1_*r/(omegaKH*lambdaKH);
 
     // stable KH diameter
@@ -140,7 +128,6 @@ void reitzKHRT::breakupParcel
 
     // the frequency of the fastest growing RT wavelength.
     scalar helpVariable = mag(gt*(rhoLiquid - rhoGas));
-
     scalar omegaRT = sqrt
     (
         2.0*pow(helpVariable, 1.5)
@@ -148,12 +135,9 @@ void reitzKHRT::breakupParcel
     );
 
     // RT wave number
-    scalar KRT = sqrt
-    (
-        helpVariable/(3.0*sigma + VSMALL)
-    );
+    scalar KRT = sqrt(helpVariable/(3.0*sigma + VSMALL));
 
-    // the wavelength of the fastest growing Raleigh-Taylor frequency
+    // wavelength of the fastest growing RT frequency
     scalar lambdaRT = 2.0*mathematicalConstant::pi*cRT_/(KRT + VSMALL);
 
     // if lambdaRT < diameter, then RT waves are growing on the surface
@@ -163,13 +147,13 @@ void reitzKHRT::breakupParcel
         p.ct() += deltaT;
     }
 
-    // the characteristic RT breakup time
+    // characteristic RT breakup time
     scalar tauRT = cTau_/(omegaRT + VSMALL);
 
     // check if we have RT breakup
     if ((p.ct() > tauRT) && (lambdaRT < p.d()))
     {
-        // the RT breakup creates diameter/lmbdaRT new droplets
+        // the RT breakup creates diameter/lambdaRT new droplets
         p.ct() = -GREAT;
         scalar multiplier = p.d()/lambdaRT;
         scalar nDrops = multiplier*Np;
@@ -178,7 +162,7 @@ void reitzKHRT::breakupParcel
     // otherwise check for KH breakup
     else if (dc < p.d())
     {
-        // no breakup below weber = 12
+        // no breakup below Weber = 12
         if (weGas > weberLimit_)
         {
 
@@ -188,27 +172,24 @@ void reitzKHRT::breakupParcel
             // reduce the diameter according to the rate-equation
             p.d() = (fraction*dc + p.d())/(1.0 + fraction);
 
-            scalar dc3 = pow(dc, 3.0);
-            scalar ms = rhoLiquid*Np*dc3*mathematicalConstant::pi/6.0;
+            scalar ms = rhoLiquid*Np*pow3(dc)*mathematicalConstant::pi/6.0;
             p.ms() += ms;
 
-            label nParcels = spray_.injectors()[injector].properties()->nParcelsToInject
-            (
-                spray_.injectors()[injector].properties()->tsoi(),
-                spray_.injectors()[injector].properties()->teoi()
-            );
+            // Total number of parcels for the whole injection event
+            label nParcels =
+                spray_.injectors()[injector].properties()->nParcelsToInject
+                (
+                    spray_.injectors()[injector].properties()->tsoi(),
+                    spray_.injectors()[injector].properties()->teoi()
+                );
 
-            scalar averageParcelMass = spray_.injectors()[injector].properties()->mass()/nParcels;
+            scalar averageParcelMass =
+                spray_.injectors()[injector].properties()->mass()/nParcels;
 
-            // NN. Since the parcel doesn't know from which injector
-            // it comes we use the first one to obtain a 'reference' mass
-            if
-            (
-                (p.ms()/averageParcelMass > msLimit_)
-            )
+            if (p.ms()/averageParcelMass > msLimit_)
             {
                 // set the initial ms value to -GREAT. This prevents
-                // new droplets from being formed from the childDroplet
+                // new droplets from being formed from the child droplet
                 // from the KH instability
 
                 // mass of stripped child parcel

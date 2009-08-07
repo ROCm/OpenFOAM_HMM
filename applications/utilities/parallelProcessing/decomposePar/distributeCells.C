@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -44,35 +44,6 @@ void domainDecomposition::distributeCells()
 
     labelHashSet sameProcFaces;
 
-    if (decompositionDict_.found("preservePatches"))
-    {
-        wordList pNames(decompositionDict_.lookup("preservePatches"));
-
-        Info<< "Keeping owner and neighbour of faces in patches " << pNames
-            << " on same processor" << endl;
-
-        const polyBoundaryMesh& patches = boundaryMesh();
-
-        forAll(pNames, i)
-        {
-            label patchI = patches.findPatchID(pNames[i]);
-
-            if (patchI == -1)
-            {
-                FatalErrorIn("domainDecomposition::distributeCells()")
-                    << "Unknown preservePatch " << pNames[i]
-                    << endl << "Valid patches are " << patches.names()
-                    << exit(FatalError);
-            }
-
-            const polyPatch& pp = patches[patchI];
-
-            forAll(pp, i)
-            {
-                sameProcFaces.insert(pp.start() + i);
-            }
-        }
-    }
     if (decompositionDict_.found("preserveFaceZones"))
     {
         wordList zNames(decompositionDict_.lookup("preserveFaceZones"));
@@ -103,14 +74,6 @@ void domainDecomposition::distributeCells()
         }
     }
 
-    if (sameProcFaces.size() > 0)
-    {
-        Info<< "Selected " << sameProcFaces.size()
-            << " faces whose owner and neighbour cell should be kept on the"
-            << " same processor" << endl;
-    }
-
-
 
     // Construct decomposition method and either do decomposition on
     // cell centres or on agglomeration
@@ -122,12 +85,16 @@ void domainDecomposition::distributeCells()
         *this
     );
 
-    if (sameProcFaces.size() == 0)
+    if (sameProcFaces.empty())
     {
         cellToProc_ = decomposePtr().decompose(cellCentres());
     }
     else
     {
+        Info<< "Selected " << sameProcFaces.size()
+            << " faces whose owner and neighbour cell should be kept on the"
+            << " same processor" << endl;
+
         // Faces where owner and neighbour are not 'connected' (= all except
         // sameProcFaces)
         boolList blockedFace(nFaces(), true);

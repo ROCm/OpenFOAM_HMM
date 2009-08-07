@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,8 +26,8 @@ Class
     Foam::smoothDelta
 
 Description
-    Smoothed delta which takes a given simple geometric delta and applies 
-    smoothing to it such that the ratio of deltas between two cells is no 
+    Smoothed delta which takes a given simple geometric delta and applies
+    smoothing to it such that the ratio of deltas between two cells is no
     larger than a specified amount, typically 1.15.
 
 SourceFiles
@@ -233,19 +233,18 @@ public:
         );
 
 
-    // Destructor
-
-        ~smoothDelta()
-        {}
+    //- Destructor
+    virtual ~smoothDelta()
+    {}
 
 
     // Member Functions
 
         //- Read the LESdelta dictionary
-        void read(const dictionary&);
+        virtual void read(const dictionary&);
 
         // Correct values
-        void correct();
+        virtual void correct();
 };
 
 

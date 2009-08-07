@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -68,11 +68,6 @@ private:
         List<pair> innerConeAngle_;
         List<pair> outerConeAngle_;
 
-        // two perpendicular vectors, perpendicular to injection direction
-        List<vector> tan1_;
-        List<vector> tan2_;
-
-
 public:
 
     //- Runtime type information
@@ -102,7 +97,8 @@ public:
         //- Return the spray angle of the injector
         vector direction
         (
-            const label injector, 
+            const label injector,
+            const label hole,
             const scalar time,
             const scalar d
         ) const;

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -33,35 +33,35 @@ Description
 #include "fvCFD.H"
 #include "engineTime.H"
 #include "engineMesh.H"
-#include "basicThermo.H"
-#include "RASModel.H"
+#include "basicPsiThermo.H"
+#include "turbulenceModel.H"
 #include "OFstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 int main(int argc, char *argv[])
 {
-#   include "setRootCase.H"
+    #include "setRootCase.H"
 
-#   include "createEngineTime.H"
-#   include "createEngineMesh.H"
-#   include "createFields.H"
-#   include "initContinuityErrs.H"
-#   include "readEngineTimeControls.H"
-#   include "compressibleCourantNo.H"
-#   include "setInitialDeltaT.H"
-#   include "startSummary.H"
+    #include "createEngineTime.H"
+    #include "createEngineMesh.H"
+    #include "createFields.H"
+    #include "initContinuityErrs.H"
+    #include "readEngineTimeControls.H"
+    #include "compressibleCourantNo.H"
+    #include "setInitialDeltaT.H"
+    #include "startSummary.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
     {
-#       include "readPISOControls.H"
-#       include "readEngineTimeControls.H"
-#       include "compressibleCourantNo.H"
-#       include "setDeltaT.H"
+        #include "readPISOControls.H"
+        #include "readEngineTimeControls.H"
+        #include "compressibleCourantNo.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
@@ -70,22 +70,22 @@ int main(int argc, char *argv[])
 
         mesh.move();
 
-#       include "rhoEqn.H"
+        #include "rhoEqn.H"
 
-#       include "UEqn.H"
+        #include "UEqn.H"
 
         // --- PISO loop
         for (int corr=1; corr<=nCorr; corr++)
         {
-#           include "hEqn.H"
-#           include "pEqn.H"
+            #include "hEqn.H"
+            #include "pEqn.H"
         }
 
         turbulence->correct();
 
         runTime.write();
 
-#       include "logSummary.H"
+        #include "logSummary.H"
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"
@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

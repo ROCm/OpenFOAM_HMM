@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -76,11 +76,11 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         if (is.format() == IOstream::ASCII || !contiguous<T>())
         {
             // Read beginning of contents
-            char listDelimiter = is.readBeginList("List");
+            char delimiter = is.readBeginList("List");
 
             if (s)
             {
-                if (listDelimiter == token::BEGIN_LIST)
+                if (delimiter == token::BEGIN_LIST)
                 {
                     for (register label i=0; i<s; i++)
                     {
@@ -117,7 +117,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         {
             if (s)
             {
-                is.read(reinterpret_cast<char*>(L.begin()), s*sizeof(T));
+                is.read(reinterpret_cast<char*>(L.data()), s*sizeof(T));
 
                 is.fatalCheck
                 (
@@ -131,7 +131,7 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
         if (firstToken.pToken() != token::BEGIN_LIST)
         {
             FatalIOErrorIn("operator>>(Istream&, List<T>&)", is)
-                << "incorrect first token, expected '(' or '{', found "
+                << "incorrect first token, expected '(', found "
                 << firstToken.info()
                 << exit(FatalIOError);
         }
@@ -155,5 +155,38 @@ Foam::Istream& Foam::operator>>(Istream& is, List<T>& L)
 
     return is;
 }
+
+
+template<class T>
+Foam::List<T> Foam::readList(Istream& is)
+{
+    List<T> L;
+    token firstToken(is);
+    is.putBack(firstToken);
+
+    if (firstToken.isPunctuation())
+    {
+        if (firstToken.pToken() != token::BEGIN_LIST)
+        {
+            FatalIOErrorIn("readList<T>(Istream&)", is)
+                << "incorrect first token, expected '(', found "
+                << firstToken.info()
+                << exit(FatalIOError);
+        }
+
+        // read via a singly-linked list
+        L = SLList<T>(is);
+    }
+    else
+    {
+        // create list with a single item
+        L.setSize(1);
+
+        is >> L[0];
+    }
+
+    return L;
+}
+
 
 // ************************************************************************* //

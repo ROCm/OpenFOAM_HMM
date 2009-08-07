@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -90,8 +90,8 @@ void Foam::slidingInterface::checkDefinition()
     // Check the sizes and set up state
     if
     (
-        mesh.faceZones()[masterFaceZoneID_.index()].size() == 0
-     || mesh.faceZones()[slaveFaceZoneID_.index()].size() == 0
+        mesh.faceZones()[masterFaceZoneID_.index()].empty()
+     || mesh.faceZones()[slaveFaceZoneID_.index()].empty()
     )
     {
         FatalErrorIn("void slidingInterface::checkDefinition()")
@@ -431,7 +431,7 @@ void Foam::slidingInterface::modifyMotionPoints(pointField& motionPoints) const
     // Get point from the cut zone
     const labelList& cutPoints = mesh.pointZones()[cutPointZoneID_.index()];
 
-    if (cutPoints.size() > 0 && !projectedSlavePointsPtr_)
+    if (cutPoints.size() && !projectedSlavePointsPtr_)
     {
         return;
     }
@@ -664,14 +664,15 @@ void Foam::slidingInterface::updateMesh(const mapPolyMesh& m)
     masterPatchID_.update(mesh.boundaryMesh());
     slavePatchID_.update(mesh.boundaryMesh());
 
-    if (!attached())
-    {
-        calcAttachedAddressing();
-    }
-    else
-    {
-        renumberAttachedAddressing(m);
-    }
+//MJ:Disabled updating
+//    if (!attached())
+//    {
+//        calcAttachedAddressing();
+//    }
+//    else
+//    {
+//        renumberAttachedAddressing(m);
+//    }
 }
 
 

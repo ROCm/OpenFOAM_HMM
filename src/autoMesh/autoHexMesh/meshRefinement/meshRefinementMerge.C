@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,10 +28,6 @@ License
 #include "combineFaces.H"
 #include "polyTopoChange.H"
 #include "removePoints.H"
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -106,6 +102,11 @@ Foam::label Foam::meshRefinement::mergePatchFaces
         {
             // Delete mesh volumes. No other way to do this?
             mesh_.clearOut();
+        }
+
+        if (overwrite())
+        {
+            mesh_.setInstance(oldInstance());
         }
 
         faceCombiner.updateMesh(map);
@@ -201,6 +202,11 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::meshRefinement::mergeEdges
         {
             // Delete mesh volumes. No other way to do this?
             mesh_.clearOut();
+        }
+
+        if (overwrite())
+        {
+            mesh_.setInstance(oldInstance());
         }
 
         pointRemover.updateMesh(map);

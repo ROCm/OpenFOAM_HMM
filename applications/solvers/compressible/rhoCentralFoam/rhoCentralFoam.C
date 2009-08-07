@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -32,7 +32,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "basicThermo.H"
+#include "basicPsiThermo.H"
 #include "zeroGradientFvPatchFields.H"
 #include "fixedRhoFvPatchScalarField.H"
 
@@ -40,18 +40,17 @@ Description
 
 int main(int argc, char *argv[])
 {
+    #include "setRootCase.H"
 
-#   include "setRootCase.H"
+    #include "createTime.H"
+    #include "createMesh.H"
+    #include "createFields.H"
+    #include "readThermophysicalProperties.H"
+    #include "readTimeControls.H"
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
-#   include "readThermophysicalProperties.H"
-#   include "readTimeControls.H"
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#   include "readFluxScheme.H"
+    #include "readFluxScheme.H"
 
     dimensionedScalar v_zero("v_zero",dimVolume/dimTime, 0.0);
 
@@ -77,10 +76,10 @@ int main(int argc, char *argv[])
         surfaceScalarField rPsi_neg =
             fvc::interpolate(rPsi, neg, "reconstruct(T)");
 
-        surfaceScalarField h_pos =
-            fvc::interpolate(h, pos, "reconstruct(T)");
-        surfaceScalarField h_neg =
-            fvc::interpolate(h, neg, "reconstruct(T)");
+        surfaceScalarField e_pos =
+            fvc::interpolate(e, pos, "reconstruct(T)");
+        surfaceScalarField e_neg =
+            fvc::interpolate(e, neg, "reconstruct(T)");
 
         surfaceVectorField U_pos = rhoU_pos/rho_pos;
         surfaceVectorField U_neg = rhoU_neg/rho_neg;
@@ -91,7 +90,7 @@ int main(int argc, char *argv[])
         surfaceScalarField phiv_pos = U_pos & mesh.Sf();
         surfaceScalarField phiv_neg = U_neg & mesh.Sf();
 
-        volScalarField c = sqrt(thermo->Cp()/thermo->Cv()*rPsi);
+        volScalarField c = sqrt(thermo.Cp()/thermo.Cv()*rPsi);
         surfaceScalarField cSf_pos = fvc::interpolate(c, pos, "reconstruct(T)")*mesh.magSf();
         surfaceScalarField cSf_neg = fvc::interpolate(c, neg, "reconstruct(T)")*mesh.magSf();
 
@@ -102,9 +101,9 @@ int main(int argc, char *argv[])
 
         surfaceScalarField amaxSf("amaxSf", max(mag(am), mag(ap)));
 
-#       include "compressibleCourantNo.H"
-#       include "readTimeControls.H"
-#       include "setDeltaT.H"
+        #include "compressibleCourantNo.H"
+        #include "readTimeControls.H"
+        #include "setDeltaT.H"
 
         runTime++;
 
@@ -133,8 +132,8 @@ int main(int argc, char *argv[])
           + (a_pos*p_pos + a_neg*p_neg)*mesh.Sf();
 
         surfaceScalarField phiEp =
-            aphiv_pos*rho_pos*(h_pos + 0.5*magSqr(U_pos))
-          + aphiv_neg*rho_neg*(h_neg + 0.5*magSqr(U_neg))
+            aphiv_pos*(rho_pos*(e_pos + 0.5*magSqr(U_pos)) + p_pos)
+          + aphiv_neg*(rho_neg*(e_neg + 0.5*magSqr(U_neg)) + p_neg)
           + aSf*p_pos - aSf*p_neg;
 
         volTensorField tauMC("tauMC", mu*dev2(fvc::grad(U)().T()));
@@ -157,7 +156,7 @@ int main(int argc, char *argv[])
         {
             solve
             (
-                fvm::ddt(rho, U) - fvc::ddt(rho,U)
+                fvm::ddt(rho, U) - fvc::ddt(rho, U)
               - fvm::laplacian(mu, U)
               - fvc::div(tauMC)
             );
@@ -181,28 +180,27 @@ int main(int argc, char *argv[])
           - fvc::div(sigmaDotU)
         );
 
-        h = (rhoE + p)/rho - 0.5*magSqr(U);
-        h.correctBoundaryConditions();
-        thermo->correct();
+        e = rhoE/rho - 0.5*magSqr(U);
+        e.correctBoundaryConditions();
+        thermo.correct();
         rhoE.boundaryField() =
             rho.boundaryField()*
             (
-                h.boundaryField() + 0.5*magSqr(U.boundaryField())
-            )
-          - p.boundaryField();
+                e.boundaryField() + 0.5*magSqr(U.boundaryField())
+            );
 
         if (!inviscid)
         {
-            volScalarField k("k", thermo->Cp()*mu/Pr);
+            volScalarField k("k", thermo.Cp()*mu/Pr);
             solve
             (
-                fvm::ddt(rho, h) - fvc::ddt(rho, h)
-              - fvm::laplacian(thermo->alpha(), h)
-              + fvc::laplacian(thermo->alpha(), h)
+                fvm::ddt(rho, e) - fvc::ddt(rho, e)
+              - fvm::laplacian(thermo.alpha(), e)
+              + fvc::laplacian(thermo.alpha(), e)
               - fvc::laplacian(k, T)
             );
-            thermo->correct();
-            rhoE = rho*(h + 0.5*magSqr(U)) - p;
+            thermo.correct();
+            rhoE = rho*(e + 0.5*magSqr(U));
         }
 
         p.dimensionedInternalField() =
@@ -220,7 +218,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 // ************************************************************************* //

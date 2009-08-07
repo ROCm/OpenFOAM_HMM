@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,12 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
-#include "passiveParticle.H"
-#include "Cloud.H"
+#include "passiveParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,8 +36,45 @@ namespace Foam
 defineParticleTypeNameAndDebug(passiveParticle, 0);
 defineTemplateTypeNameAndDebug(Cloud<passiveParticle>, 0);
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+};
 
-} // End namespace Foam
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+Foam::passiveParticleCloud::passiveParticleCloud
+(
+    const polyMesh& mesh,
+    const word& cloudName
+)
+:
+    Cloud<passiveParticle>(mesh, cloudName, false)
+{
+    readFields();
+}
+
+
+Foam::passiveParticleCloud::passiveParticleCloud
+(
+    const polyMesh& mesh,
+    const word& cloudName,
+    const IDLList<passiveParticle>& particles
+)
+:
+    Cloud<passiveParticle>(mesh, cloudName, particles)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::passiveParticleCloud::readFields()
+{
+    passiveParticle::readFields(*this);
+}
+
+
+void Foam::passiveParticleCloud::writeFields() const
+{
+    passiveParticle::writeFields(*this);
+}
+
 
 // ************************************************************************* //

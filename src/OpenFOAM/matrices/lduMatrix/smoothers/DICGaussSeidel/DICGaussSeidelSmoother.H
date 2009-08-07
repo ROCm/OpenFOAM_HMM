@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -26,9 +26,9 @@ Class
     Foam::DICGaussSeidelSmoother
 
 Description
-    Combined DIC/GaussSeidel smoother for symmetric
-    matrices in which DIC smoothing is followed by GaussSeidel to ensure that
-    any "spikes" created by the DIC sweeps are smoothed-out. 
+    Combined DIC/GaussSeidel smoother for symmetric matrices in which DIC
+    smoothing is followed by GaussSeidel to ensure that any "spikes" created
+    by the DIC sweeps are smoothed-out.
 
 SourceFiles
     DICGaussSeidelSmoother.C
@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class DICGaussSeidelSmoother Declaration
+                   Class DICGaussSeidelSmoother Declaration
 \*---------------------------------------------------------------------------*/
 
 class DICGaussSeidelSmoother
@@ -57,6 +57,7 @@ class DICGaussSeidelSmoother
     // Private data
 
         DICSmoother dicSmoother_;
+
         GaussSeidelSmoother gsSmoother_;
 
 

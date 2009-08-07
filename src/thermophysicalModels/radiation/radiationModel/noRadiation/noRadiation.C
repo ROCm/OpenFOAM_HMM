@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -50,10 +50,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::radiation::noRadiation::noRadiation(const volScalarField& T)
 :
-    radiationModel(typeName, T)
+    radiationModel(T)
 {}
 
 
@@ -71,7 +70,7 @@ bool Foam::radiation::noRadiation::read()
 }
 
 
-void Foam::radiation::noRadiation::correct()
+void Foam::radiation::noRadiation::calculate()
 {
     // Do nothing
 }

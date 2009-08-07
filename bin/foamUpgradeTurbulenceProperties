@@ -3,7 +3,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -37,7 +37,7 @@
 #------------------------------------------------------------------------------
 
 usage() {
-   cat<<USAGE
+    cat<<USAGE
 
 usage: ${0##*/} <turbulenceProperties>
 
@@ -57,42 +57,42 @@ USAGE
 #
 convertDict()
 {
-   echo "Identified $1 turbulence model in '$3'"
-   outputPath=`dirname $3`
+    echo "Identified $1 turbulence model in '$3'"
+    outputPath=`dirname $3`
 
-   if [ -e "$outputPath/$1Properties" ]
-   then
-      echo "Error: file already exists $outputPath/$1Properties'"
-   else
-      sed -e "s/turbulenceProperties/$1Properties/" \
-          -e "s/$2/$1Model/" \
-          -e "s/[a-zA-Z0-9]* [ ]*\[[0-9 ]*\]//" \
-          $3 > "$outputPath/$1Properties"
+    if [ -e "$outputPath/$1Properties" ]
+    then
+        echo "Error: file already exists $outputPath/$1Properties'" 1>&2
+    else
+        sed -e "s/turbulenceProperties/$1Properties/" \
+            -e "s/$2/$1Model/" \
+            -e "s/[a-zA-Z0-9]* [ ]*\[[0-9 ]*\]//" \
+            $3 > "$outputPath/$1Properties"
 
-      echo "    wrote $outputPath/$1Properties"
-   fi
+        echo "    wrote $outputPath/$1Properties"
+    fi
 }
 
 [ $# -ge 1 ] || usage
 
 for turbDict
 do
-   # Identify type of turbulence model and convert
-   if [ -f $turbDict ]
-   then
-      if grep turbulenceModel $turbDict >/dev/null 2>&1
-      then
-          convertDict RAS turbulenceModel $turbDict
-      elif grep LESmodel $turbDict >/dev/null 2>&1
-      then
-          convertDict LES LESmodel $turbDict
-      else
-          echo "Unable to determine turbulence model type in '$turbDict'"
-          echo "    - nothing changed"
-      fi
-   else
-      echo "Error: file '$turbDict' does not exist"
-   fi
+    # Identify type of turbulence model and convert
+    if [ -f $turbDict ]
+    then
+        if grep turbulenceModel $turbDict >/dev/null 2>&1
+        then
+            convertDict RAS turbulenceModel $turbDict
+        elif grep LESmodel $turbDict >/dev/null 2>&1
+        then
+            convertDict LES LESmodel $turbDict
+        else
+            echo "Unable to determine turbulence model type in '$turbDict'" 1>&2
+            echo "    - nothing changed" 1>&2
+        fi
+    else
+        echo "Error: file '$turbDict' does not exist" 1>&2
+    fi
 done
 
 #------------------------------------------------------------------------------

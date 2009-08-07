@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -36,8 +36,8 @@ SourceFiles
 #ifndef readHexLabel_H
 #define readHexLabel_H
 
-#include "ISstream.H"
 #include "label.H"
+#include "ISstream.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 //- Read a hex label from an input stream
-label readHexLabel(ISstream& is);
+label readHexLabel(ISstream&);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

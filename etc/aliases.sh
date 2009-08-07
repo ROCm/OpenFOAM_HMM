@@ -2,7 +2,7 @@
 # =========                 |
 # \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
 #  \\    /   O peration     |
-#   \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+#   \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
 #    \\/     M anipulation  |
 #------------------------------------------------------------------------------
 # License
@@ -56,5 +56,6 @@ alias app='cd $FOAM_APP'
 alias util='cd $FOAM_UTILITIES'
 alias sol='cd $FOAM_SOLVERS'
 alias tut='cd $FOAM_TUTORIALS'
+alias foam3rdParty='cd $WM_THIRD_PARTY_DIR'
 
 # -----------------------------------------------------------------------------

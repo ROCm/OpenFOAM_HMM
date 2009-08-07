@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -374,7 +374,7 @@ void Foam::GAMGSolver::initVcycle
             interfaceBouCoeffs_,
             interfaceIntCoeffs_,
             interfaces_,
-            controlDict_.lookup("smoother")
+            controlDict_
         )
     );
 
@@ -408,7 +408,7 @@ void Foam::GAMGSolver::initVcycle
                 interfaceLevelsBouCoeffs_[leveli],
                 interfaceLevelsIntCoeffs_[leveli],
                 interfaceLevels_[leveli],
-                controlDict_.lookup("smoother")
+                controlDict_
             )
         );
     }

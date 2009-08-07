@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -28,9 +28,6 @@ Class
 Description
 
 SourceFiles
-    passiveParticleI.H
-    passiveParticle.C
-    passiveParticleIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -47,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class passiveParticle Declaration
+                      Class passiveParticle Declaration
 \*---------------------------------------------------------------------------*/
 
 class passiveParticle
@@ -78,7 +75,13 @@ public:
             bool readFields = true
         )
         :
-            Particle<passiveParticle>(c, is)
+            Particle<passiveParticle>(c, is, readFields)
+        {}
+
+        //- Construct as copy
+        passiveParticle(const passiveParticle& p)
+        :
+            Particle<passiveParticle>(p)
         {}
 
         //- Construct and return a clone

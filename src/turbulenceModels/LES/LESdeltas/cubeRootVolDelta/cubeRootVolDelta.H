@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -83,19 +83,18 @@ public:
         );
 
 
-    // Destructor
-
-        ~cubeRootVolDelta()
-        {}
+    //- Destructor
+    virtual ~cubeRootVolDelta()
+    {}
 
 
     // Member Functions
 
         //- Read the LESdelta dictionary
-        void read(const dictionary&);
+        virtual void read(const dictionary&);
 
         // Correct values
-        void correct();
+        virtual void correct();
 };
 
 

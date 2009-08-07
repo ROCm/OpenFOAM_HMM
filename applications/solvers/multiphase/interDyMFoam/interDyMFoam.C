@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -39,8 +39,7 @@ Description
 #include "subCycle.H"
 #include "interfaceProperties.H"
 #include "twoPhaseMixture.H"
-#include "incompressible/RASModel/RASModel.H"
-#include "probes.H"
+#include "turbulenceModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,7 +48,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
@@ -58,8 +57,7 @@ int main(int argc, char *argv[])
     #include "CourantNo.H"
     #include "setInitialDeltaT.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
     Info<< "\nStarting time loop\n" << endl;
 
     while (runTime.run())
@@ -88,9 +86,6 @@ int main(int argc, char *argv[])
                 << " s" << endl;
         }
 
-        volScalarField gh("gh", g & mesh.C());
-        surfaceScalarField ghf("ghf", g & mesh.Cf());
-
         if (mesh.changing() && correctPhi)
         {
             #include "correctPhi.H"
@@ -106,7 +101,7 @@ int main(int argc, char *argv[])
 
         twoPhaseProperties.correct();
 
-        #include "gammaEqnSubCycle.H"
+        #include "alphaEqnSubCycle.H"
 
         #include "UEqn.H"
 
@@ -114,18 +109,6 @@ int main(int argc, char *argv[])
         for (int corr=0; corr<nCorr; corr++)
         {
             #include "pEqn.H"
-        }
-
-        p = pd + rho*gh;
-
-        if (pd.needReference())
-        {
-            p += dimensionedScalar
-            (
-                "p",
-                p.dimensions(),
-                pRefValue - pRefProbe->sample<scalar>("p")()[0]
-            );
         }
 
         turbulence->correct();
@@ -139,7 +122,7 @@ int main(int argc, char *argv[])
 
     Info<< "End\n" << endl;
 
-    return(0);
+    return 0;
 }
 
 

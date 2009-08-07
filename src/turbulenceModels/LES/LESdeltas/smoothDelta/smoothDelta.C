@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -138,7 +138,7 @@ void smoothDelta::calcDelta()
         changedFacesInfo,
         faceDeltaData,
         cellDeltaData,
-        mesh_.nCells()  // max iterations
+        mesh_.globalData().nTotalCells()    // max iterations
     );
 
     forAll(delta_, cellI)

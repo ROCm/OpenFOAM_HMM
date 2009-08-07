@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -46,7 +46,7 @@ Foam::PCG::PCG
     const FieldField<Field, scalar>& interfaceBouCoeffs,
     const FieldField<Field, scalar>& interfaceIntCoeffs,
     const lduInterfaceFieldPtrsList& interfaces,
-    Istream& solverData
+    const dictionary& solverControls
 )
 :
     lduMatrix::solver
@@ -56,7 +56,7 @@ Foam::PCG::PCG
         interfaceBouCoeffs,
         interfaceIntCoeffs,
         interfaces,
-        solverData
+        solverControls
     )
 {}
 
@@ -70,12 +70,10 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
     const direction cmpt
 ) const
 {
-    word preconditionerName(controlDict_.lookup("preconditioner"));
-
     // --- Setup class containing solver performance data
     lduMatrix::solverPerformance solverPerf
     (
-        preconditionerName + typeName,
+        lduMatrix::preconditioner::getName(controlDict_) + typeName,
         fieldName_
     );
 
@@ -119,7 +117,7 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
         lduMatrix::preconditioner::New
         (
             *this,
-            controlDict_.lookup("preconditioner")
+            controlDict_
         );
 
         // --- Solver iteration
@@ -136,17 +134,8 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
 
             if (solverPerf.nIterations() == 0)
             {
-                #ifdef ICC_IA64_PREFETCH
-                #pragma ivdep
-                #endif
-
                 for (register label cell=0; cell<nCells; cell++)
                 {
-                    #ifdef ICC_IA64_PREFETCH
-                    __builtin_prefetch (&pAPtr[cell+96],0,1);
-                    __builtin_prefetch (&wAPtr[cell+96],0,1);
-                    #endif
-
                     pAPtr[cell] = wAPtr[cell];
                 }
             }
@@ -154,17 +143,8 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
             {
                 scalar beta = wArA/wArAold;
 
-                #ifdef ICC_IA64_PREFETCH
-                #pragma ivdep
-                #endif
-
                 for (register label cell=0; cell<nCells; cell++)
                 {
-                    #ifdef ICC_IA64_PREFETCH
-                    __builtin_prefetch (&pAPtr[cell+96],0,1);
-                    __builtin_prefetch (&wAPtr[cell+96],0,1);
-                    #endif
-
                     pAPtr[cell] = wAPtr[cell] + beta*pAPtr[cell];
                 }
             }
@@ -184,19 +164,8 @@ Foam::lduMatrix::solverPerformance Foam::PCG::solve
 
             scalar alpha = wArA/wApA;
 
-            #ifdef ICC_IA64_PREFETCH
-            #pragma ivdep
-            #endif
-
             for (register label cell=0; cell<nCells; cell++)
             {
-                #ifdef ICC_IA64_PREFETCH
-                __builtin_prefetch (&pAPtr[cell+96],0,1);
-                __builtin_prefetch (&wAPtr[cell+96],0,1);
-                __builtin_prefetch (&psiPtr[cell+96],0,1);
-                __builtin_prefetch (&rAPtr[cell+96],0,1);
-                #endif
-
                 psiPtr[cell] += alpha*pAPtr[cell];
                 rAPtr[cell] -= alpha*wAPtr[cell];
             }

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2008 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,8 +58,8 @@ autoPtr<energyScalingFunction> energyScalingFunction::New
         (
             "energyScalingFunction::New()"
         )   << "Unknown energyScalingFunction type "
-            << energyScalingFunctionTypeName << endl << endl
-            << "Valid  energyScalingFunctions are : " << endl
+            << energyScalingFunctionTypeName << nl << nl
+            << "Valid  energyScalingFunctions are: " << nl
             << dictionaryConstructorTablePtr_->toc()
             << exit(FatalError);
     }
