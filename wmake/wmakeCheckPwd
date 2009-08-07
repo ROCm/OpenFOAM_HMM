@@ -24,7 +24,7 @@
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
 # Script
-#     foamCheckPwd
+#     wmakeCheckPwd
 #
 # Description
 #     Check that the current working directory is equal to a particular
@@ -80,19 +80,24 @@ done
 dirName="$1"
 
 
-# trival checks first
+# trivial checks first
 [ "$PWD" = "$dirName" ] && exit 0
-[ -d "$dirName" ] || exit 1
+
+[ -d "$dirName" ] || {
+    [ "$quietOpt" = true ] || echo "Error: Directory does not exist $dirName"
+    exit 1
+}
 
 
 # use /bin/pwd to get the absolute path (could be linked)
 thisDir=$(/bin/pwd)
-dirName=$(cd $dirName 2>/dev/null && /bin/pwd)
+target=$(cd $dirName 2>/dev/null && /bin/pwd)
 
 # okay
-[ "$thisDir" = "$dirName" ] && exit 0
+[ "$thisDir" = "$target" ] && exit 0
 
 # some other error
+[ "$quietOpt" = true ] || echo "Error: Current directory is not $dirName"
 exit 1
 
 #------------------------------------------------------------------------------
