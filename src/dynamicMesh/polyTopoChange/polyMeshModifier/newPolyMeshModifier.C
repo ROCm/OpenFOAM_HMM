@@ -64,7 +64,7 @@ autoPtr<polyMeshModifier> polyMeshModifier::New
             dict
         )   << "Unknown polyMeshModifier type " << patchType << endl << endl
             << "Valid polyMeshModifier types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 

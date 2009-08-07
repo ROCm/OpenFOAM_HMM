@@ -89,7 +89,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         )   << "Unknown function type "
             << functionType << nl << nl
             << "Valid functions are : " << nl
-            << dictionaryConstructorTablePtr_->toc() << endl
+            << dictionaryConstructorTablePtr_->sortedToc() << endl
             << exit(FatalError);
     }
 

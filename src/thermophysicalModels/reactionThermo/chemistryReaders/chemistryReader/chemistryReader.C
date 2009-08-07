@@ -55,7 +55,7 @@ Foam::chemistryReader<ThermoType>::New
         )   << "Unknown chemistryReader type "
             << chemistryReaderTypeName << nl << nl
             << "Valid  chemistryReaders are: " << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

@@ -56,7 +56,7 @@ autoPtr<pairPotential> pairPotential::New
         )   << "Unknown pairPotential type "
             << pairPotentialTypeName << nl << nl
             << "Valid  pairPotentials are: " << nl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

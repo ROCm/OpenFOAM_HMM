@@ -64,7 +64,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
         )   << "Unknown decompositionMethod "
             << decompositionMethodTypeName << endl << endl
             << "Valid decompositionMethods are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -96,7 +96,7 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
         )   << "Unknown decompositionMethod "
             << decompositionMethodTypeName << endl << endl
             << "Valid decompositionMethods are : " << endl
-            << dictionaryMeshConstructorTablePtr_->toc()
+            << dictionaryMeshConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

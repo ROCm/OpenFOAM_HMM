@@ -65,7 +65,7 @@ tmp<divScheme<Type> > divScheme<Type>::New
             schemeData
         )   << "Div scheme not specified" << endl << endl
             << "Valid div schemes are :" << endl
-            << IstreamConstructorTablePtr_->toc()
+            << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
@@ -82,7 +82,7 @@ tmp<divScheme<Type> > divScheme<Type>::New
             schemeData
         )   << "unknown div scheme " << schemeName << endl << endl
             << "Valid div schemes are :" << endl
-            << IstreamConstructorTablePtr_->toc()
+            << IstreamConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 

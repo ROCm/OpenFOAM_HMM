@@ -163,7 +163,7 @@ public:
             virtual void calculate() = 0;
 
             //- Read radiationProperties dictionary
-            virtual bool read() = 0;
+            virtual bool read();
 
 
         // Access

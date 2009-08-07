@@ -55,7 +55,7 @@ Foam::autoPtr<Foam::solidBodyMotionFunction> Foam::solidBodyMotionFunction::New
         )   << "Unknown solidBodyMotionFunction type "
             << solidBodyMotionFunctionTypeName << endl << endl
             << "Valid  solidBodyMotionFunctions are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

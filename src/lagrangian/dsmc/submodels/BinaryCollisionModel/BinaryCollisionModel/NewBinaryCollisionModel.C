@@ -56,7 +56,7 @@ Foam::BinaryCollisionModel<CloudType>::New
             << BinaryCollisionModelType
             << ", constructor not in hash table" << nl << nl
             << "    Valid BinaryCollisionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
     return autoPtr<BinaryCollisionModel<CloudType> >

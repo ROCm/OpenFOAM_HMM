@@ -65,7 +65,7 @@ tmp<snGradScheme<Type> > snGradScheme<Type>::New
         )   << "Discretisation scheme not specified"
             << endl << endl
             << "Valid schemes are :" << endl
-            << MeshConstructorTablePtr_->toc()
+            << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
@@ -83,7 +83,7 @@ tmp<snGradScheme<Type> > snGradScheme<Type>::New
         )   << "Unknown discretisation scheme " << schemeName
             << endl << endl
             << "Valid schemes are :" << endl
-            << MeshConstructorTablePtr_->toc()
+            << MeshConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
