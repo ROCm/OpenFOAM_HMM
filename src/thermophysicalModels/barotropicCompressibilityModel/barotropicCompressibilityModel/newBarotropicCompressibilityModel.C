@@ -55,7 +55,7 @@ Foam::barotropicCompressibilityModel::New
         )   << "Unknown barotropicCompressibilityModel type "
             << bcModelTypeName << endl << endl
             << "Valid  barotropicCompressibilityModels are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
