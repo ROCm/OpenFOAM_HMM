@@ -102,7 +102,7 @@ char Foam::ISstream::nextValid()
 
 Foam::Istream& Foam::ISstream::read(token& t)
 {
-    static char numberBuffer[100];
+    static char charBuffer[128];
 
     // Return the put back token if it exists
     if (Istream::getBack(t))
@@ -113,7 +113,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
     // Assume that the streams supplied are in working order.
     // Lines are counted by '\n'
 
-    // Get next 'valid character': i.e. proceed through any white space
+    // Get next 'valid character': i.e. proceed through any whitespace
     // and/or comments until a semantically valid character is hit upon.
 
     char c = nextValid();
@@ -144,13 +144,14 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case token::COMMA :
         case token::ASSIGN :
         case token::ADD :
-     // case token::SUBTRACT : // Handled later as the posible start of a number
+     // case token::SUBTRACT : // Handled later as the possible start of a number
         case token::MULTIPLY :
         case token::DIVIDE :
         {
             t = token::punctuationToken(c);
             return *this;
         }
+
 
         // Strings: enclosed by double quotes.
         case token::BEGIN_STRING :
@@ -170,21 +171,24 @@ Foam::Istream& Foam::ISstream::read(token& t)
             return *this;
         }
 
+
         // Numbers: do not distinguish at this point between Types.
+        //
+        // we ideally wish to match the equivalent of this regular expression
+        //
+        //    /^[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)([Ee][-+]?[0-9]+)?$/
+        //
         case '-' :
         case '.' :
         case '0' : case '1' : case '2' : case '3' : case '4' :
         case '5' : case '6' : case '7' : case '8' : case '9' :
         {
-            bool isScalar = false;
+            // has a floating point or digit
+            bool isScalar = (c == '.');
+            bool hasDigit = isdigit(c);
 
-            if (c == '.')
-            {
-                isScalar = true;
-            }
-
-            int i=0;
-            numberBuffer[i++] = c;
+            unsigned int nChar = 0;
+            charBuffer[nChar++] = c;
 
             while
             (
@@ -199,14 +203,23 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 )
             )
             {
-                numberBuffer[i++] = c;
+                charBuffer[nChar++] = c;
+                if (nChar >= sizeof(charBuffer))
+                {
+                    nChar--;
+                    break;
+                }
 
-                if (!isdigit(c))
+                if (isdigit(c))
+                {
+                    hasDigit = true;
+                }
+                else
                 {
                     isScalar = true;
                 }
             }
-            numberBuffer[i] = '\0';
+            charBuffer[nChar] = '\0';
 
             setState(is_.rdstate());
 
@@ -214,26 +227,31 @@ Foam::Istream& Foam::ISstream::read(token& t)
             {
                 is_.putback(c);
 
-                if (i == 1 && numberBuffer[0] == '-')
+                if (hasDigit)
                 {
-                    t = token::punctuationToken(token::SUBTRACT);
+                    if (!isScalar)
+                    {
+                        long lt = atol(charBuffer);
+                        t = label(lt);
+
+                        // return as a scalar if doesn't fit in a label
+                        isScalar = (t.labelToken() != lt);
+                    }
+
+                    if (isScalar)
+                    {
+                        t = scalar(atof(charBuffer));
+                    }
                 }
-                else if (isScalar)
+                else if (nChar == 1 && charBuffer[0] == '-')
                 {
-                    t = scalar(atof(numberBuffer));
+                    // a single '-' is punctuation
+                    t = token::punctuationToken(token::SUBTRACT);
                 }
                 else
                 {
-                    long lt = atol(numberBuffer);
-                    t = label(lt);
-
-                    // If the integer is too large to be represented as a label
-                    // return it as a scalar
-                    if (t.labelToken() != lt)
-                    {
-                        isScalar = true;
-                        t = scalar(atof(numberBuffer));
-                    }
+                    // some really bad sequence - eg, ".+E"
+                    t.setBad();
                 }
             }
             else
@@ -243,6 +261,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
             return *this;
         }
+
 
         // Should be a word (which can be a single character)
         default:
