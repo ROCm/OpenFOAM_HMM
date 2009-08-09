@@ -186,7 +186,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
             // has a digit
             bool hasDigit = isdigit(c);
 
-            // has a decimal point - cannot be label
+            // has contents that cannot be label
             bool notLabel = (c == '.');
 
             // has contents that cannot be scalar
@@ -195,26 +195,60 @@ Foam::Istream& Foam::ISstream::read(token& t)
             unsigned int nChar = 0;
             charBuffer[nChar++] = c;
 
+            // the location of the last '[Ee]' exponent
+            unsigned int exponent = 0;
+
             while (is_.get(c))
             {
                 if (isdigit(c))
                 {
                     hasDigit = true;
                 }
-                else if
-                (
-                    c == '+'
-                 || c == '-'
-                 || c == '.'
-                 || c == 'E'
-                 || c == 'e'
-                )
-                {
-                    notLabel = true;
-                }
                 else if (isalpha(c))
                 {
-                    notLabel = notScalar = true;
+                    notLabel = true;
+
+                    if (c == 'E' || c == 'e')
+                    {
+                        if (exponent || !hasDigit)
+                        {
+                            // mantissa had no digits,
+                            // or already saw '[Ee]' before
+                            notScalar = true;
+                        }
+
+                        // remember this location
+                        exponent = nChar;
+                    }
+                    else
+                    {
+                        notScalar = true;
+                    }
+                }
+                else if (c == '+' || c == '-')
+                {
+                    notLabel = true;
+
+                    // only allowed once in exponent
+                    if (!exponent || exponent+1 != nChar)
+                    {
+                        notScalar = true;
+                    }
+                    else
+                    {
+                        // require some digits again
+                        hasDigit = false;
+                    }
+                }
+                else if (c == '.')
+                {
+                    // notLabel means we already saw '.' or '[Ee]' before
+                    // cannot have '.' again
+                    if (notLabel)
+                    {
+                        notScalar = true;
+                    }
+                    notLabel = true;
                 }
                 else
                 {
@@ -224,7 +258,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 charBuffer[nChar++] = c;
                 if (nChar >= sizeof(charBuffer))
                 {
-                    // runaway argument
+                    // runaway argument - avoid buffer overflow
                     t.setBad();
                     return *this;
                 }
@@ -271,7 +305,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 }
                 else
                 {
-                    // some else - treat as word
+                    // some else: must be a word
                     t = new word(charBuffer);
                 }
             }
