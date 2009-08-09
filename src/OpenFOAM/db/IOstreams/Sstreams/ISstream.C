@@ -174,7 +174,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
         // Numbers: do not distinguish at this point between Types.
         //
-        // we ideally wish to match the equivalent of this regular expression
+        // ideally match the equivalent of this regular expression
         //
         //    /^[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)([Ee][-+]?[0-9]+)?$/
         //
@@ -183,43 +183,58 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case '0' : case '1' : case '2' : case '3' : case '4' :
         case '5' : case '6' : case '7' : case '8' : case '9' :
         {
-            // has a floating point or digit
-            bool isScalar = (c == '.');
+            // has a digit
             bool hasDigit = isdigit(c);
+
+            // has a decimal point - cannot be label
+            bool notLabel = (c == '.');
+
+            // has contents that cannot be scalar
+            bool notScalar = false;
 
             unsigned int nChar = 0;
             charBuffer[nChar++] = c;
 
-            while
-            (
-                is_.get(c)
-             && (
-                    isdigit(c)
-                 || c == '.'
-                 || c == 'e'
-                 || c == 'E'
-                 || c == '+'
-                 || c == '-'
-                )
-            )
+            while (is_.get(c))
             {
-                charBuffer[nChar++] = c;
-                if (nChar >= sizeof(charBuffer))
-                {
-                    nChar--;
-                    break;
-                }
-
                 if (isdigit(c))
                 {
                     hasDigit = true;
                 }
+                else if
+                (
+                    c == '+'
+                 || c == '-'
+                 || c == '.'
+                 || c == 'E'
+                 || c == 'e'
+                )
+                {
+                    notLabel = true;
+                }
+                else if (isalpha(c))
+                {
+                    notLabel = notScalar = true;
+                }
                 else
                 {
-                    isScalar = true;
+                    break;
+                }
+
+                charBuffer[nChar++] = c;
+                if (nChar >= sizeof(charBuffer))
+                {
+                    // runaway argument
+                    t.setBad();
+                    return *this;
                 }
             }
             charBuffer[nChar] = '\0';
+
+            if (!hasDigit)
+            {
+                notLabel = notScalar = true;
+            }
 
             setState(is_.rdstate());
 
@@ -227,31 +242,37 @@ Foam::Istream& Foam::ISstream::read(token& t)
             {
                 is_.putback(c);
 
-                if (hasDigit)
-                {
-                    if (!isScalar)
-                    {
-                        long lt = atol(charBuffer);
-                        t = label(lt);
-
-                        // return as a scalar if doesn't fit in a label
-                        isScalar = (t.labelToken() != lt);
-                    }
-
-                    if (isScalar)
-                    {
-                        t = scalar(atof(charBuffer));
-                    }
-                }
-                else if (nChar == 1 && charBuffer[0] == '-')
+                if (nChar == 1 && charBuffer[0] == '-')
                 {
                     // a single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
                 }
+                else if (notScalar)
+                {
+                    // not label or scalar: must be a word
+                    t = new word(charBuffer);
+                }
+                else if (notLabel)
+                {
+                    // not label: must be a scalar
+                    t = scalar(atof(charBuffer));
+                }
+                else if (hasDigit)
+                {
+                    // has digit: treat as a label
+                    long lt = atol(charBuffer);
+                    t = label(lt);
+
+                    // return as a scalar if doesn't fit in a label
+                    if (t.labelToken() != lt)
+                    {
+                        t = scalar(atof(charBuffer));
+                    }
+                }
                 else
                 {
-                    // some really bad sequence - eg, ".+E"
-                    t.setBad();
+                    // some else - treat as word
+                    t = new word(charBuffer);
                 }
             }
             else
