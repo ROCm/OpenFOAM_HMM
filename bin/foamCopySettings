@@ -82,20 +82,13 @@ fileList=$(find -H $srcDir -mindepth 1 -maxdepth 1 -not -name "processor*")
 # avoid polyMesh and processor* directories
 rsync="rsync --exclude polyMesh --exclude processor*"
 
-
 #
-# get any extra options
-# only extract lines starting with --option xxx
+# get any extra user options
+# extract lines starting with '--longOption'
 #
 if rcFile=$(foamEtcFile $Script.rc)
 then
-    userOpts=$(
-        cat $rcFile | while read userOpts
-        do
-            [ "${userOpts##--}" != "${userOpts}" ] && echo $userOpts
-        done
-    )
-    rsync="$rsync $userOpts"
+    rsync="$rsync "$(sed -ne '/^ *--/p' $rcFile | tr '\n' ' ')
 fi
 
 
