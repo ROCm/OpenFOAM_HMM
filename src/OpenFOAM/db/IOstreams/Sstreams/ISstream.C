@@ -176,7 +176,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
         //
         // ideally match the equivalent of this regular expression
         //
-        //    /^[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)([Ee][-+]?[0-9]+)?$/
+        //    /[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)([Ee][-+]?[0-9]+)?/
         //
         case '-' :
         case '.' :
@@ -186,17 +186,17 @@ Foam::Istream& Foam::ISstream::read(token& t)
             // has a digit
             bool hasDigit = isdigit(c);
 
-            // has contents that cannot be label
-            bool notLabel = (c == '.');
-
-            // has contents that cannot be scalar
-            bool notScalar = false;
+            // 0 = before a decimal
+            // 1 = at/after a decimal
+            // 2 = in exponent
+            int floatState = 0;
+            if (c == '.')
+            {
+                floatState = 1;
+            }
 
             unsigned int nChar = 0;
             charBuffer[nChar++] = c;
-
-            // the location of the last '[Ee]' exponent
-            unsigned int exponent = 0;
 
             while (is_.get(c))
             {
@@ -204,51 +204,50 @@ Foam::Istream& Foam::ISstream::read(token& t)
                 {
                     hasDigit = true;
                 }
-                else if (isalpha(c))
-                {
-                    notLabel = true;
-
-                    if (c == 'E' || c == 'e')
-                    {
-                        if (exponent || !hasDigit)
-                        {
-                            // mantissa had no digits,
-                            // or already saw '[Ee]' before
-                            notScalar = true;
-                        }
-
-                        // remember this location
-                        exponent = nChar;
-                    }
-                    else
-                    {
-                        notScalar = true;
-                    }
-                }
-                else if (c == '+' || c == '-')
-                {
-                    notLabel = true;
-
-                    // only allowed once in exponent
-                    if (!exponent || exponent+1 != nChar)
-                    {
-                        notScalar = true;
-                    }
-                    else
-                    {
-                        // require some digits again
-                        hasDigit = false;
-                    }
-                }
                 else if (c == '.')
                 {
-                    // notLabel means we already saw '.' or '[Ee]' before
-                    // cannot have '.' again
-                    if (notLabel)
+                    // saw '.' or '[Ee]' before
+                    // bad position - stop parsing
+                    if (floatState)
                     {
-                        notScalar = true;
+                        break;
                     }
-                    notLabel = true;
+                    floatState = 1;
+                }
+                else if (c == 'E' || c == 'e')
+                {
+                    // saw '[Ee]' before, or mantissa had no digits
+                    // bad position - stop parsing
+                    if (floatState > 1 || !hasDigit)
+                    {
+                        break;
+                    }
+                    floatState = 2;
+                    // require some digits again
+                    hasDigit = false;
+
+                    charBuffer[nChar++] = c;
+                    if (nChar >= sizeof(charBuffer))
+                    {
+                        // runaway argument - avoid buffer overflow
+                        t.setBad();
+                        return *this;
+                    }
+
+                    if (is_.get(c))
+                    {
+                        hasDigit = isdigit(c);
+
+                        if (!hasDigit && c != '+' && c != '-')
+                        {
+                            // not digit or [-+] - stop parsing
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
                 }
                 else
                 {
@@ -265,11 +264,6 @@ Foam::Istream& Foam::ISstream::read(token& t)
             }
             charBuffer[nChar] = '\0';
 
-            if (!hasDigit)
-            {
-                notLabel = notScalar = true;
-            }
-
             setState(is_.rdstate());
 
             if (!is_.bad())
@@ -281,19 +275,19 @@ Foam::Istream& Foam::ISstream::read(token& t)
                     // a single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
                 }
-                else if (notScalar)
+                else if (!hasDigit)
                 {
-                    // not label or scalar: must be a word
-                    t = new word(charBuffer);
+                    // no digits is an error
+                    t.setBad();
                 }
-                else if (notLabel)
+                else if (floatState)
                 {
-                    // not label: must be a scalar
+                    // scalar
                     t = scalar(atof(charBuffer));
                 }
-                else if (hasDigit)
+                else
                 {
-                    // has digit: treat as a label
+                    // label
                     long lt = atol(charBuffer);
                     t = label(lt);
 
@@ -302,11 +296,6 @@ Foam::Istream& Foam::ISstream::read(token& t)
                     {
                         t = scalar(atof(charBuffer));
                     }
-                }
-                else
-                {
-                    // some else: must be a word
-                    t = new word(charBuffer);
                 }
             }
             else
