@@ -183,76 +183,26 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case '0' : case '1' : case '2' : case '3' : case '4' :
         case '5' : case '6' : case '7' : case '8' : case '9' :
         {
-            // has a digit
-            bool hasDigit = isdigit(c);
-
-            // 0 = before a decimal
-            // 1 = at/after a decimal
-            // 2 = in exponent
-            int floatState = 0;
-            if (c == '.')
-            {
-                floatState = 1;
-            }
+            bool asLabel = (c != '.');
 
             unsigned int nChar = 0;
             charBuffer[nChar++] = c;
 
-            while (is_.get(c))
+            // get everything that could reasonable look like a number
+            while
+            (
+                is_.get(c)
+             && (
+                    isdigit(c)
+                 || c == '+'
+                 || c == '-'
+                 || c == '.'
+                 || c == 'E'
+                 || c == 'e'
+                )
+            )
             {
-                if (isdigit(c))
-                {
-                    hasDigit = true;
-                }
-                else if (c == '.')
-                {
-                    // saw '.' or '[Ee]' before
-                    // bad position - stop parsing
-                    if (floatState)
-                    {
-                        break;
-                    }
-                    floatState = 1;
-                }
-                else if (c == 'E' || c == 'e')
-                {
-                    // saw '[Ee]' before, or mantissa had no digits
-                    // bad position - stop parsing
-                    if (floatState > 1 || !hasDigit)
-                    {
-                        break;
-                    }
-                    floatState = 2;
-                    // require some digits again
-                    hasDigit = false;
-
-                    charBuffer[nChar++] = c;
-                    if (nChar >= sizeof(charBuffer))
-                    {
-                        // runaway argument - avoid buffer overflow
-                        t.setBad();
-                        return *this;
-                    }
-
-                    if (is_.get(c))
-                    {
-                        hasDigit = isdigit(c);
-
-                        if (!hasDigit && c != '+' && c != '-')
-                        {
-                            // not digit or [-+] - stop parsing
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    break;
-                }
+                asLabel = asLabel && isdigit(c);
 
                 charBuffer[nChar++] = c;
                 if (nChar >= sizeof(charBuffer))
@@ -265,7 +215,6 @@ Foam::Istream& Foam::ISstream::read(token& t)
             charBuffer[nChar] = '\0';
 
             setState(is_.rdstate());
-
             if (!is_.bad())
             {
                 is_.putback(c);
@@ -275,26 +224,30 @@ Foam::Istream& Foam::ISstream::read(token& t)
                     // a single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
                 }
-                else if (!hasDigit)
-                {
-                    // no digits is an error
-                    t.setBad();
-                }
-                else if (floatState)
-                {
-                    // scalar
-                    t = scalar(atof(charBuffer));
-                }
                 else
                 {
-                    // label
-                    long lt = atol(charBuffer);
-                    t = label(lt);
+                    char *endptr;
 
-                    // return as a scalar if doesn't fit in a label
-                    if (t.labelToken() != lt)
+                    if (asLabel)
                     {
-                        t = scalar(atof(charBuffer));
+                        long longval = strtol(charBuffer, &endptr, 10);
+                        t = label(longval);
+
+                        // return as a scalar if doesn't fit in a label
+                        if (t.labelToken() != longval)
+                        {
+                            t = scalar(strtod(charBuffer, &endptr));
+                        }
+                    }
+                    else
+                    {
+                        t = scalar(strtod(charBuffer, &endptr));
+                    }
+
+                    // nothing converted (bad format), or trailing junk
+                    if (endptr == charBuffer || *endptr != '\0')
+                    {
+                        t.setBad();
                     }
                 }
             }
