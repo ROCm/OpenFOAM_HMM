@@ -65,7 +65,7 @@ Foam::Istream& Foam::operator>>(Istream& is, long& l)
     {
         is.setBad();
         FatalIOErrorIn("operator>>(Istream&, long&)", is)
-            << "wrong token type - expected long found " << t.info()
+            << "wrong token type - expected long, found " << t.info()
             << exit(FatalIOError);
 
         return is;

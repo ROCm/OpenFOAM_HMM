@@ -18,21 +18,27 @@
 #ifndef GLOBAL_EXTERN_H
 #define GLOBAL_EXTERN_H
 
+#ifdef  __cplusplus
+extern "C" {
+#endif
+
 /*--------------------------------
  * Set the reader version define
  * (only one can be set at a time)
  *--------------------------------*/
+#if 0
+#define USERD_API_100
+#define USERD_API_200
+#define USERD_API_201
+#define USERD_API_202
 #define USERD_API_203
-
-/*----------------------------------------
- * Set this appropriately:
- *  DO_ENSIGHT  if using for EnSight itself
- *  DO_READER   if using in a reader
- *----------------------------------------*/
-#if 1
-#define DO_READER
-#else
-#define DO_ENSIGHT
+#define USERD_API_204
+#define USERD_API_205
+#define USERD_API_206
+#define USERD_API_207
+#define USERD_API_208
+#define USERD_API_209
+#define USERD_API_210
 #endif
 
 /*---------------------------------------*/
@@ -73,6 +79,28 @@
 
 #define Z_MAX_SETS              (300)
 
+#define Z_MX_MATERIALS          (60)
+
+#define Z_MXVARIABLEDESC  20 /*Interface Variables Max Name.*/
+
+/* Useful macros for handling IEEE floats */
+#define FLT_SGN_MASK 0x80000000U
+#define FLT_EXP_MASK 0x7F800000U
+#define FLT_MAN_MASK 0x007FFFFFU
+#define FLT_EXP_BIAS 127
+#define FLT_EXP_SHIFT 23
+
+#define FLT_IS_FINITE(v) \
+    (((*((unsigned int*)&(v))) & FLT_EXP_MASK) != FLT_EXP_MASK)
+
+#define FLT_IS_NAN(v) \
+    ((((*((unsigned int*)&(v))) & FLT_EXP_MASK) == FLT_EXP_MASK) && \
+    ((((*((unsigned int*)&(v))) & FLT_MAN_MASK) != 0U)
+
+#define FLT_IS_INF(v) \
+    ((((*((unsigned int*)&(v))) & FLT_EXP_MASK) == FLT_EXP_MASK) && \
+    ((((*((unsigned int*)&(v))) & FLT_MAN_MASK) == 0U)
+
 #ifndef GLOBALDEFS_H
 /*-----------------------------------*/
 /* Unstructured coordinate structure */
@@ -80,6 +108,12 @@
 typedef struct {
   float xyz[3];
 }CRD;
+/*-----------------------------------*/
+/* Unstructured double coordinate structure */
+/*-----------------------------------*/
+typedef struct {
+  double xyz[3];
+}DBLCRD;
 #endif
 
 /*----------------*/ 
@@ -95,6 +129,23 @@ enum z_var_type
   MAX_Z_VAR_TYPES
 };
 
+/*-------------------
+ * Vector Glyph enums
+ *-------------------*/
+enum vg_time {
+  VG_STATIC,
+  VG_TRANSIENT,
+  VG_UNDEF,
+  VG_NEAREST,
+  VG_INTERPOLATE
+};
+
+enum vg_type {
+  VG_FORCE,
+  VG_MOMENT
+};
+
+
 /*---------------
  * Element Types
  *---------------
@@ -104,7 +155,7 @@ enum z_var_type
  *            to_int_elem_type routines
  * in userd_read.c
  *----------------------------------------*/
-#if (defined USERD_API_100 || defined USERD_API_200) && defined DO_READER
+#if (defined USERD_API_100 || defined USERD_API_200)
 enum z_elem_types {
   Z_POINT,         /* 00:  1 node point element */
   Z_BAR02,         /* 01:  2 node bar           */
@@ -124,7 +175,7 @@ enum z_elem_types {
   Z_MAXTYPE
 };
 
-#elif defined USERD_API_201 && defined DO_READER
+#elif defined USERD_API_201
 enum z_elem_types {
   Z_POINT,         /* 00:  1 node point element              */
   Z_G_POINT,       /* 01:  1 node point element (ghost call) */
@@ -265,17 +316,97 @@ enum  z_material_file_index
   Z_MAT_INDEX,
   Z_MIX_INDEX,
   Z_MIX_VALUE,
+  Z_SPE_VALUE,
   Z_NUM_MAT_FILES
 };
 
+/*-------------------------------------------
+ *  Material type enum
+ *
+ * (Must be comparable to matset_via_file_type
+ *  in mat_defs.h of EnSight server)
+ *--------------------------------------------*/
+enum  z_matset_via_file_type
+{
+  Z_MISET_VIA_SPARSE_MIX,  /* Original method prior to 07Feb07:mel*/
+  Z_MISET_VIA_ESCAL_VARS,  /* Materials via element scalar variables*/
+  Z_MISET_VIA_MAX_FTYPES
+};
+
+
+/* ---------------------------------------
+ *  Extra GUI size stuff
+ *  _EGS
+ *  This is the maximum number of
+ *  Extra GUI items that you are
+ *  allowed of each type.
+ *
+ *  Don't change these values!
+ * ------------------------------------- */
+#define Z_MAX_NUM_GUI_PULL_ITEMS 20 /* max num GUI pulldowns */
+#define Z_LEN_GUI_PULL_STR    80    /* max length of GUI pulldown string */
+#define Z_LEN_GUI_FIELD_STR  256    /* max length of field string */
+#define Z_LEN_GUI_TITLE_STR   40    /* max length of title string */
+
+/* ---------------------------------------
+ *  Extra data function defines (for "target")
+ *
+ *  Don't change these values!
+ * ------------------------------------- */
+#define DATA_TARGET_NONE               0
+#define DATA_TARGET_SERVER             1
+#define DATA_TARGET_SOS                2
+#define DATA_TARGET_CLIENT             3
+#define DATA_TARGET_PYTHON    0x10000000
+#define DATA_TARGET_CMDLANG   0x20000000
+#define DATA_TARGET_UNDEF_VAL 0x40000000
+#define DATA_TARGET_OTHER     0x00000000
+#define DATA_TARGET_MASK      0x0000000f
+
+/* ---------------------------------------
+ *  Failed elemenet enums
+ * --------------------------------------- */
+
+enum z_element_failure_criteria
+{
+  Z_ELE_FAILED_NONE,
+  Z_ELE_FAILED_GREATER,
+  Z_ELE_FAILED_LESS,
+  Z_ELE_FAILED_EQUAL,
+  Z_ELE_FAILED_NOT_EQUAL,
+  Z_ELE_FAILED_MANY
+};
+
+
+enum z_element_failure_logic
+{
+  Z_ELE_FAILED_LOGIC_NONE,
+  Z_ELE_FAILED_LOGIC_AND,
+  Z_ELE_FAILED_LOGIC_OR,
+  Z_ELE_FAILED_LOGIC_MANY
+};
 
 /*----------------------------------------------------------
- * For readers, we need to include the prototype header file
+ * We include the prototype header file
  *----------------------------------------------------------*/
-#if defined DO_READER
 #include "global_extern_proto.h"
-#endif
      
+/* ---------------------
+ * export the file pointer  if windows
+ *   because windows can't open a file in the
+ *   server and pass the FILE * pointer properly.
+ * --------------------- */
+#ifdef WIN32
+typedef struct _USERD_globals_struct {
+   char arch_filename[256];
+   unsigned long arch_fileptr;
+} _USERD_globals;
+#endif
+
+#ifdef __cplusplus
+}
+#endif
+
 /*--------------------------------------------------------------------*/
 #endif /*GLOBAL_EXTERN_H*/
 

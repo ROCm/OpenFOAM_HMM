@@ -63,7 +63,7 @@ Foam::Istream& Foam::operator>>(Istream& is, unsigned long& val)
     {
         is.setBad();
         FatalIOErrorIn("operator>>(Istream&, unsigned long&)", is)
-            << "wrong token type - expected unsigned long found " << t.info()
+            << "wrong token type - expected unsigned long, found " << t.info()
             << exit(FatalIOError);
 
         return is;
