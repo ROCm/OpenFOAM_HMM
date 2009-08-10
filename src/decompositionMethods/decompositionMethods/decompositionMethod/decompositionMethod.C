@@ -25,8 +25,6 @@ License
 InClass
     decompositionMethod
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "decompositionMethod.H"
@@ -106,12 +104,24 @@ Foam::autoPtr<Foam::decompositionMethod> Foam::decompositionMethod::New
 
 Foam::labelList Foam::decompositionMethod::decompose
 (
+    const pointField& points
+)
+{
+    scalarField weights(0);
+
+    return decompose(points, weights);
+}
+
+
+Foam::labelList Foam::decompositionMethod::decompose
+(
     const labelList& fineToCoarse,
-    const pointField& coarsePoints
+    const pointField& coarsePoints,
+    const scalarField& coarseWeights
 )
 {
     // Decompose based on agglomerated points
-    labelList coarseDistribution(decompose(coarsePoints));
+    labelList coarseDistribution(decompose(coarsePoints, coarseWeights));
 
     // Rework back into decomposition for original mesh_
     labelList fineDistribution(fineToCoarse.size());
@@ -122,6 +132,18 @@ Foam::labelList Foam::decompositionMethod::decompose
     }
 
     return fineDistribution;
+}
+
+
+Foam::labelList Foam::decompositionMethod::decompose
+(
+    const labelList& fineToCoarse,
+    const pointField& coarsePoints
+)
+{
+    scalarField coarseWeights(0);
+
+    return decompose(fineToCoarse, coarsePoints, coarseWeights);
 }
 
 
@@ -167,6 +189,18 @@ void Foam::decompositionMethod::calcCellCells
     {
         cellCells[coarseI].transfer(dynCellCells[coarseI]);
     }
+}
+
+
+Foam::labelList Foam::decompositionMethod::decompose
+(
+    const labelListList& globalCellCells,
+    const pointField& cc
+)
+{
+    scalarField cWeights(0);
+
+    return decompose(globalCellCells, cc, cWeights);
 }
 
 
