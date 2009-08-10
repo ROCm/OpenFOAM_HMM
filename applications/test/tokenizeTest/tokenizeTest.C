@@ -22,60 +22,66 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
+Application
 
+Description
+    Test the tokenizing of various things
 \*---------------------------------------------------------------------------*/
 
-#include "IndirectList.H"
+#include "argList.H"
+#include "IOobject.H"
 #include "IOstreams.H"
+#include "IFstream.H"
+#include "IStringStream.H"
 
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-// Main program:
+//  Main program:
 
 int main(int argc, char *argv[])
 {
-    List<double> completeList(10);
+    argList::noParallel();
+    argList::validArgs.insert("string .. stringN");
+    argList::validOptions.insert("file", "name");
 
-    forAll(completeList, i)
+    argList args(argc, argv, false, true);
+
+    forAll(args.additionalArgs(), argI)
     {
-        completeList[i] = 0.1*i;
+        const string& rawArg = args.additionalArgs()[argI];
+        Info<< "input string: " << rawArg << nl;
+
+        IStringStream is(rawArg);
+        
+        while (is.good())
+        {
+            token tok(is);
+            Info<< "token: " << tok.info() << endl;
+        }
+        
+        Info<< nl;
+        IOobject::writeDivider(Info);
+    }  
+    
+    
+    if (args.optionFound("file"))
+    {
+        IFstream is(args.option("file"));
+        
+        Info<< "tokenizing file: " << args.option("file") << nl;
+
+        while (is.good())
+        {
+            token tok(is);
+            Info<< "token: " << tok.info() << endl;
+        }
+        
+        Info<< nl;
+        IOobject::writeDivider(Info);
     }
-
-    Info<< "raw : " << completeList << nl
-        << endl;
-
-
-    List<label> addresses(5);
-    addresses[0] = 1;
-    addresses[1] = 0;
-    addresses[2] = 7;
-    addresses[3] = 8;
-    addresses[4] = 5;
-
-    IndirectList<double> idl(completeList, addresses);
-
-    Info<< "addr: " << idl.addressing() << nl
-        << "list: " << idl() << nl
-        << endl;
-
-    addresses[4] = 1;
-    addresses[3] = 0;
-    addresses[2] = 7;
-    addresses[1] = 8;
-    addresses[0] = 5;
-
-    idl.resetAddressing(addresses.xfer());
-
-    Info<< "addr: " << idl.addressing() << nl
-        << "list: " << idl() << nl
-        << endl;
-
-    Info << "End\n" << endl;
 
     return 0;
 }
-
 
 // ************************************************************************* //

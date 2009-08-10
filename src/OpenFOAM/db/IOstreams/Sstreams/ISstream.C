@@ -176,84 +176,33 @@ Foam::Istream& Foam::ISstream::read(token& t)
         //
         // ideally match the equivalent of this regular expression
         //
-        //    /^[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)([Ee][-+]?[0-9]+)?$/
+        //    /[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)([Ee][-+]?[0-9]+)?/
         //
         case '-' :
         case '.' :
         case '0' : case '1' : case '2' : case '3' : case '4' :
         case '5' : case '6' : case '7' : case '8' : case '9' :
         {
-            // has a digit
-            bool hasDigit = isdigit(c);
-
-            // has contents that cannot be label
-            bool notLabel = (c == '.');
-
-            // has contents that cannot be scalar
-            bool notScalar = false;
+            bool asLabel = (c != '.');
 
             unsigned int nChar = 0;
             charBuffer[nChar++] = c;
 
-            // the location of the last '[Ee]' exponent
-            unsigned int exponent = 0;
-
-            while (is_.get(c))
+            // get everything that could reasonable look like a number
+            while
+            (
+                is_.get(c)
+             && (
+                    isdigit(c)
+                 || c == '+'
+                 || c == '-'
+                 || c == '.'
+                 || c == 'E'
+                 || c == 'e'
+                )
+            )
             {
-                if (isdigit(c))
-                {
-                    hasDigit = true;
-                }
-                else if (isalpha(c))
-                {
-                    notLabel = true;
-
-                    if (c == 'E' || c == 'e')
-                    {
-                        if (exponent || !hasDigit)
-                        {
-                            // mantissa had no digits,
-                            // or already saw '[Ee]' before
-                            notScalar = true;
-                        }
-
-                        // remember this location
-                        exponent = nChar;
-                    }
-                    else
-                    {
-                        notScalar = true;
-                    }
-                }
-                else if (c == '+' || c == '-')
-                {
-                    notLabel = true;
-
-                    // only allowed once in exponent
-                    if (!exponent || exponent+1 != nChar)
-                    {
-                        notScalar = true;
-                    }
-                    else
-                    {
-                        // require some digits again
-                        hasDigit = false;
-                    }
-                }
-                else if (c == '.')
-                {
-                    // notLabel means we already saw '.' or '[Ee]' before
-                    // cannot have '.' again
-                    if (notLabel)
-                    {
-                        notScalar = true;
-                    }
-                    notLabel = true;
-                }
-                else
-                {
-                    break;
-                }
+                asLabel = asLabel && isdigit(c);
 
                 charBuffer[nChar++] = c;
                 if (nChar >= sizeof(charBuffer))
@@ -265,13 +214,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
             }
             charBuffer[nChar] = '\0';
 
-            if (!hasDigit)
-            {
-                notLabel = notScalar = true;
-            }
-
             setState(is_.rdstate());
-
             if (!is_.bad())
             {
                 is_.putback(c);
@@ -281,32 +224,31 @@ Foam::Istream& Foam::ISstream::read(token& t)
                     // a single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
                 }
-                else if (notScalar)
-                {
-                    // not label or scalar: must be a word
-                    t = new word(charBuffer);
-                }
-                else if (notLabel)
-                {
-                    // not label: must be a scalar
-                    t = scalar(atof(charBuffer));
-                }
-                else if (hasDigit)
-                {
-                    // has digit: treat as a label
-                    long lt = atol(charBuffer);
-                    t = label(lt);
-
-                    // return as a scalar if doesn't fit in a label
-                    if (t.labelToken() != lt)
-                    {
-                        t = scalar(atof(charBuffer));
-                    }
-                }
                 else
                 {
-                    // some else: must be a word
-                    t = new word(charBuffer);
+                    char *endptr;
+
+                    if (asLabel)
+                    {
+                        long longval = strtol(charBuffer, &endptr, 10);
+                        t = label(longval);
+
+                        // return as a scalar if doesn't fit in a label
+                        if (t.labelToken() != longval)
+                        {
+                            t = scalar(strtod(charBuffer, &endptr));
+                        }
+                    }
+                    else
+                    {
+                        t = scalar(strtod(charBuffer, &endptr));
+                    }
+
+                    // nothing converted (bad format), or trailing junk
+                    if (endptr == charBuffer || *endptr != '\0')
+                    {
+                        t.setBad();
+                    }
                 }
             }
             else
