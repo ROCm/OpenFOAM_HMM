@@ -43,6 +43,10 @@ int main(int argc, char *argv[])
         completeList[i] = 0.1*i;
     }
 
+    Info<< "raw : " << completeList << nl
+        << endl;
+
+
     List<label> addresses(5);
     addresses[0] = 1;
     addresses[1] = 0;
@@ -52,14 +56,23 @@ int main(int argc, char *argv[])
 
     IndirectList<double> idl(completeList, addresses);
 
-    forAll(idl, i)
-    {
-        Info<< idl[i] << token::SPACE;
-    }
+    Info<< "addr: " << idl.addressing() << nl
+        << "list: " << idl() << nl
+        << endl;
 
-    Info<< endl;
+    addresses[4] = 1;
+    addresses[3] = 0;
+    addresses[2] = 7;
+    addresses[1] = 8;
+    addresses[0] = 5;
 
-    Info << "\nEnd\n" << endl;
+    idl.resetAddressing(addresses.xfer());
+
+    Info<< "addr: " << idl.addressing() << nl
+        << "list: " << idl() << nl
+        << endl;
+
+    Info << "End\n" << endl;
 
     return 0;
 }
