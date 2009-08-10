@@ -84,7 +84,7 @@ Istream& operator>>(Istream& is, Scalar& s)
     {
         is.setBad();
         FatalIOErrorIn("operator>>(Istream&, Scalar&)", is)
-            << "wrong token type - expected Scalar found " << t.info()
+            << "wrong token type - expected Scalar, found " << t.info()
             << exit(FatalIOError);
 
         return is;
