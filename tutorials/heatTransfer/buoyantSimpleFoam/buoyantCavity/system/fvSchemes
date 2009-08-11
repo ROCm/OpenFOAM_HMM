@@ -27,11 +27,11 @@ gradSchemes
 divSchemes
 {
     default         none;
-    div(phi,U)      Gauss limitedLinear 0.5;
-    div(phi,h)      Gauss limitedLinear 0.5;
-    div(phi,k)      Gauss limitedLinear 0.5;
-    div(phi,epsilon) Gauss limitedLinear 0.5;
-    div(phi,omega) Gauss limitedLinear 0.5;
+    div(phi,U)      Gauss limitedLinear 0.2;
+    div(phi,h)      Gauss limitedLinear 0.2;
+    div(phi,k)      Gauss limitedLinear 0.2;
+    div(phi,epsilon) Gauss limitedLinear 0.2;
+    div(phi,omega) Gauss limitedLinear 0.2;
     div((muEff*dev2(grad(U).T()))) Gauss linear;
 }
 

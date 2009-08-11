@@ -51,9 +51,9 @@ SIMPLE
 relaxationFactors
 {
     p               0.3;
-    U               0.5;
+    U               0.7;
     h               0.7;
-    "(k|epsilon|R)" 0.7;
+    "(k|epsilon|omega)" 0.7;
 }
 
 
