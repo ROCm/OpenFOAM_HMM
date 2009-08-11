@@ -72,16 +72,20 @@ namespace Foam
 
 int main(int argc, char *argv[])
 {
-#   include "addRegionOption.H"
-#   include "setRootCase.H"
-#   include "createTime.H"
-#   include "createNamedMesh.H"
+    argList::validOptions.insert("constant", "");
+    #include "addRegionOption.H"
+
+    #include "setRootCase.H"
+    #include "createTime.H"
+    #include "createNamedMesh.H"
 
     fileName regionPrefix = "";
     if (regionName != fvMesh::defaultRegion)
     {
         regionPrefix = regionName;
     }
+
+    bool constant = args.options().found("constant");
 
     // Get the replacement rules from a dictionary
     IOdictionary dict
@@ -196,12 +200,23 @@ int main(int argc, char *argv[])
             Info<< "Loading dictionary " << fieldName << endl;
             const word oldTypeName = IOdictionary::typeName;
             const_cast<word&>(IOdictionary::typeName) = word::null;
+
+            word instance = "";
+            if (constant)
+            {
+                instance = runTime.constant();
+            }
+            else
+            {
+                instance = runTime.timeName();
+            }
+
             IOdictionary fieldDict
             (
                 IOobject
                 (
                     fieldName,
-                    runTime.timeName(),
+                    instance,
                     mesh,
                     IOobject::MUST_READ,
                     IOobject::NO_WRITE,
