@@ -1,0 +1,4 @@
+
+surfaceRemoveBaffles.C
+
+EXE = $(FOAM_APPBIN)/surfaceRemoveBaffles
