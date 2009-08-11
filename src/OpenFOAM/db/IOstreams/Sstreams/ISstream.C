@@ -42,7 +42,7 @@ char Foam::ISstream::nextValid()
         while (get(c) && isspace(c))
         {}
 
-        // Return if stream is bad
+        // Return if stream is bad - ie, previous get() failed
         if (bad() || isspace(c))
         {
             return 0;
@@ -335,17 +335,6 @@ Foam::Istream& Foam::ISstream::read(word& str)
 
     while (get(c) && word::valid(c))
     {
-        if (fail())
-        {
-            buf[errLen] = buf[nChar] = '\0';
-
-            FatalIOErrorIn("ISstream::read(word&)", *this)
-                << "problem while reading word '" << buf << "'\n"
-                << exit(FatalIOError);
-
-            return *this;
-        }
-
         if (c == token::BEGIN_LIST)
         {
             listDepth++;
@@ -374,6 +363,19 @@ Foam::Istream& Foam::ISstream::read(word& str)
 
             return *this;
         }
+    }
+
+    // we could probably skip this check
+    if (bad())
+    {
+        buf[errLen] = buf[nChar] = '\0';
+
+        FatalIOErrorIn("ISstream::read(word&)", *this)
+            << "problem while reading word '" << buf << "...' after "
+            << nChar << " characters\n"
+            << exit(FatalIOError);
+
+        return *this;
     }
 
     if (nChar == 0)
@@ -413,7 +415,7 @@ Foam::Istream& Foam::ISstream::read(string& str)
     if (c != token::BEGIN_STRING)
     {
         FatalIOErrorIn("ISstream::read(string&)", *this)
-            << "Incorrect start of string character"
+            << "Incorrect start of string character found : " << c
             << exit(FatalIOError);
 
         return *this;
