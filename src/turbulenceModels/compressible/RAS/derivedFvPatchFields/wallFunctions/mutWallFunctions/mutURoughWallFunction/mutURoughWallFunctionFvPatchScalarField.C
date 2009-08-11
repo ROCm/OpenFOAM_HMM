@@ -70,8 +70,7 @@ tmp<scalarField> mutURoughWallFunctionFvPatchScalarField::calcYPlus
             // of the wall will depend on yPlus
             forAll(yPlus, facei)
             {
-                const scalar magUpara = magUp[facei];
-                const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
+                const scalar Re = rho[facei]*magUp[facei]*y[facei]/muw[facei];
                 const scalar kappaRe = kappa_*Re;
 
                 scalar yp = yPlusLam_;
@@ -142,8 +141,7 @@ tmp<scalarField> mutURoughWallFunctionFvPatchScalarField::calcYPlus
         // Smooth Walls
         forAll(yPlus, facei)
         {
-            const scalar magUpara = magUp[facei];
-            const scalar Re = rho[facei]*magUpara*y[facei]/muw[facei];
+            const scalar Re = rho[facei]*magUp[facei]*y[facei]/muw[facei];
             const scalar kappaRe = kappa_*Re;
 
             scalar yp = yPlusLam_;
@@ -193,7 +191,8 @@ tmp<scalarField> mutURoughWallFunctionFvPatchScalarField::calcMut() const
     {
         if (yPlus[facei] > yPlusLam_)
         {
-            const scalar Re = rho[facei]*magUp[facei]*y[facei]/muw[facei];
+            const scalar Re =
+                rho[facei]*magUp[facei]*y[facei]/muw[facei] + ROOTVSMALL;
             mutw[facei] = muw[facei]*(sqr(yPlus[facei])/Re - 1);
         }
     }
