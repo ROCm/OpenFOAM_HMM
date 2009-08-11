@@ -102,7 +102,7 @@ char Foam::ISstream::nextValid()
 
 Foam::Istream& Foam::ISstream::read(token& t)
 {
-    static char numberBuffer[100];
+    static char charBuffer[128];
 
     // Return the put back token if it exists
     if (Istream::getBack(t))
@@ -113,7 +113,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
     // Assume that the streams supplied are in working order.
     // Lines are counted by '\n'
 
-    // Get next 'valid character': i.e. proceed through any white space
+    // Get next 'valid character': i.e. proceed through any whitespace
     // and/or comments until a semantically valid character is hit upon.
 
     char c = nextValid();
@@ -144,13 +144,14 @@ Foam::Istream& Foam::ISstream::read(token& t)
         case token::COMMA :
         case token::ASSIGN :
         case token::ADD :
-     // case token::SUBTRACT : // Handled later as the posible start of a number
+     // case token::SUBTRACT : // Handled later as the possible start of a number
         case token::MULTIPLY :
         case token::DIVIDE :
         {
             t = token::punctuationToken(c);
             return *this;
         }
+
 
         // Strings: enclosed by double quotes.
         case token::BEGIN_STRING :
@@ -170,69 +171,83 @@ Foam::Istream& Foam::ISstream::read(token& t)
             return *this;
         }
 
+
         // Numbers: do not distinguish at this point between Types.
+        //
+        // ideally match the equivalent of this regular expression
+        //
+        //    /[-+]?([0-9]+\.?[0-9]*|\.[0-9]+)([Ee][-+]?[0-9]+)?/
+        //
         case '-' :
         case '.' :
         case '0' : case '1' : case '2' : case '3' : case '4' :
         case '5' : case '6' : case '7' : case '8' : case '9' :
         {
-            bool isScalar = false;
+            bool asLabel = (c != '.');
 
-            if (c == '.')
-            {
-                isScalar = true;
-            }
+            unsigned int nChar = 0;
+            charBuffer[nChar++] = c;
 
-            int i=0;
-            numberBuffer[i++] = c;
-
+            // get everything that could reasonable look like a number
             while
             (
                 is_.get(c)
              && (
                     isdigit(c)
-                 || c == '.'
-                 || c == 'e'
-                 || c == 'E'
                  || c == '+'
                  || c == '-'
+                 || c == '.'
+                 || c == 'E'
+                 || c == 'e'
                 )
             )
             {
-                numberBuffer[i++] = c;
+                asLabel = asLabel && isdigit(c);
 
-                if (!isdigit(c))
+                charBuffer[nChar++] = c;
+                if (nChar >= sizeof(charBuffer))
                 {
-                    isScalar = true;
+                    // runaway argument - avoid buffer overflow
+                    t.setBad();
+                    return *this;
                 }
             }
-            numberBuffer[i] = '\0';
+            charBuffer[nChar] = '\0';
 
             setState(is_.rdstate());
-
             if (!is_.bad())
             {
                 is_.putback(c);
 
-                if (i == 1 && numberBuffer[0] == '-')
+                if (nChar == 1 && charBuffer[0] == '-')
                 {
+                    // a single '-' is punctuation
                     t = token::punctuationToken(token::SUBTRACT);
-                }
-                else if (isScalar)
-                {
-                    t = scalar(atof(numberBuffer));
                 }
                 else
                 {
-                    long lt = atol(numberBuffer);
-                    t = label(lt);
+                    char *endptr;
 
-                    // If the integer is too large to be represented as a label
-                    // return it as a scalar
-                    if (t.labelToken() != lt)
+                    if (asLabel)
                     {
-                        isScalar = true;
-                        t = scalar(atof(numberBuffer));
+                        long longval = strtol(charBuffer, &endptr, 10);
+                        t = label(longval);
+
+                        // return as a scalar if doesn't fit in a label
+                        if (t.labelToken() != longval)
+                        {
+                            t = scalar(strtod(charBuffer, &endptr));
+                        }
+                    }
+                    else
+                    {
+                        t = scalar(strtod(charBuffer, &endptr));
+                    }
+
+                    // nothing converted (bad format), or trailing junk
+                    if (endptr == charBuffer || *endptr != '\0')
+                    {
+                        t.setBad();
                     }
                 }
             }
@@ -243,6 +258,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
 
             return *this;
         }
+
 
         // Should be a word (which can be a single character)
         default:

@@ -56,7 +56,7 @@ Foam::autoPtr<Foam::XiGModel> Foam::XiGModel::New
         )   << "Unknown XiGModel type "
             << XiGModelTypeName << endl << endl
             << "Valid  XiGModels are : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

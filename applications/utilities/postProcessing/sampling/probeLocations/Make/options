@@ -7,6 +7,7 @@ EXE_INC = \
 
 EXE_LIBS = \
     -lfiniteVolume \
+    -lgenericPatchFields \
     -lmeshTools \
     -lsampling \
     -ltriSurface \

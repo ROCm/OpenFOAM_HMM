@@ -60,6 +60,7 @@ class metisDecomp
         (
             const List<int>& adjncy,
             const List<int>& xadj,
+            const scalarField& cellWeights,
             List<int>& finalDecomp
         );
 
@@ -100,7 +101,11 @@ public:
 
         //- Return for every coordinate the wanted processor number. Use the
         //  mesh connectivity (if needed)
-        virtual labelList decompose(const pointField&);
+        virtual labelList decompose
+        (
+            const pointField& points,
+            const scalarField& pointWeights
+        );
 
         //- Return for every coordinate the wanted processor number. Gets
         //  passed agglomeration map (from fine to coarse cells) and coarse cell
@@ -109,7 +114,8 @@ public:
         virtual labelList decompose
         (
             const labelList& agglom,
-            const pointField&
+            const pointField& regionPoints,
+            const scalarField& regionWeights
         );
 
         //- Return for every coordinate the wanted processor number. Explicitly
@@ -122,10 +128,21 @@ public:
         virtual labelList decompose
         (
             const labelListList& globalCellCells,
-            const pointField& cc
+            const pointField& cc,
+            const scalarField& cWeights
         );
 
-        //- Helper to convert cellcells into Metis storage
+        //- Helper to convert connectivity (supplied as owner,neighbour) into
+        //  Metis storage
+        static void calcMetisCSR
+        (
+            const polyMesh& mesh,
+            List<int>& adjncy,
+            List<int>& xadj
+        );
+
+        //- Helper to convert connectivity (supplied as cellcells) into
+        //  Metis storage
         static void calcMetisCSR
         (
             const labelListList& globalCellCells,

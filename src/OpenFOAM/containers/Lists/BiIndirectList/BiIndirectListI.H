@@ -40,6 +40,20 @@ inline Foam::BiIndirectList<T>::BiIndirectList
 {}
 
 
+template<class T>
+inline Foam::BiIndirectList<T>::BiIndirectList
+(
+    const UList<T>& posList,
+    const UList<T>& negList,
+    const Xfer< List<label> >& addr
+)
+:
+    posList_(const_cast<UList<T>&>(posList)),
+    negList_(const_cast<UList<T>&>(negList)),
+    addressing_(addr)
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class T>
@@ -79,9 +93,22 @@ inline const Foam::List<Foam::label>& Foam::BiIndirectList<T>::addressing()
 
 
 template<class T>
-inline Foam::List<Foam::label>& Foam::BiIndirectList<T>::addressing()
+inline void Foam::BiIndirectList<T>::resetAddressing
+(
+    const UList<label>& addr
+)
 {
-    return addressing_;
+    addressing_ = addr;
+}
+
+
+template<class T>
+inline void Foam::BiIndirectList<T>::resetAddressing
+(
+    const Xfer< List<label> >& addr
+)
+{
+    addressing_.transfer(addr());
 }
 
 

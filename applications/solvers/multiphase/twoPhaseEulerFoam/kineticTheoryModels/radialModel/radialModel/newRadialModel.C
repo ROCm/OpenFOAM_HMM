@@ -49,7 +49,7 @@ Foam::autoPtr<Foam::radialModel> Foam::radialModel::New
             << radialModelType
             << ", constructor not in hash table" << endl << endl
             << "    Valid radialModelType types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->toc() << abort(FatalError);
+        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
     }
 
     return autoPtr<radialModel>(cstrIter()(dict));

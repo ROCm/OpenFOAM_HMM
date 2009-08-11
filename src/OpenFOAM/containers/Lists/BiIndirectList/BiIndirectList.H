@@ -69,6 +69,14 @@ public:
             const UList<label>&
         );
 
+        //- Construct given the complete list and by transferring addressing
+        inline BiIndirectList
+        (
+            const UList<T>& posList,
+            const UList<T>& negList,
+            const Xfer< List<label> >&
+        );
+
 
     // Member Functions
 
@@ -80,11 +88,16 @@ public:
             inline const UList<T>& posList() const;
             inline const UList<T>& negList() const;
             inline const List<label>& addressing() const;
-            inline List<label>& addressing();
 
             //- Calculate index given whether index is into posList or negList
             inline static label posIndex(const label);
             inline static label negIndex(const label);
+
+        // Edit
+
+            //- Reset addressing
+            inline void resetAddressing(const UList<label>&);
+            inline void resetAddressing(const Xfer< List<label> >&);
 
 
         // Member Operators

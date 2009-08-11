@@ -55,7 +55,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
             << patchFieldType
             << endl << endl
             << "Valid patchField types are :" << endl
-            << pointPatchConstructorTablePtr_->toc()
+            << pointPatchConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -111,7 +111,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
             )   << "Unknown patchField type " << patchFieldType
                 << " for patch type " << p.type() << endl << endl
                 << "Valid patchField types are :" << endl
-                << dictionaryConstructorTablePtr_->toc()
+                << dictionaryConstructorTablePtr_->sortedToc()
                 << exit(FatalIOError);
         }
     }
@@ -182,7 +182,7 @@ Foam::autoPtr<Foam::pointPatchField<Type> > Foam::pointPatchField<Type>::New
         )   << "unknown patchTypefield type "
             << ptf.type() << endl << endl
             << "Valid patchField types are :" << endl
-            << patchMapperConstructorTablePtr_->toc()
+            << patchMapperConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

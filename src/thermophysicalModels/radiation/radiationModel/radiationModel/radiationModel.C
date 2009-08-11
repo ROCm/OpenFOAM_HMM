@@ -27,7 +27,7 @@ License
 #include "radiationModel.H"
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
-#include "fvm.H"
+#include "fvmSup.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -111,6 +111,9 @@ bool Foam::radiation::radiationModel::read()
     {
         lookup("radiation") >> radiation_;
         coeffs_ = subDict(type() + "Coeffs");
+
+        lookup("solverFreq") >> solverFreq_,
+        solverFreq_ = max(1, solverFreq_);
 
         return true;
     }

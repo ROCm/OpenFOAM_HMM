@@ -56,6 +56,7 @@ int main()
     table1.erase("abs");
 
     Info<< "\ntable1 toc: " << table1.toc() << endl;
+    Info<< "\ntable1 sortedToc: " << table1.sortedToc() << endl;
     table1.printInfo(Info)
         << "table1 [" << table1.size() << "] " << endl;
     forAllIter(HASHTABLE_CLASS<double>, table1, iter)

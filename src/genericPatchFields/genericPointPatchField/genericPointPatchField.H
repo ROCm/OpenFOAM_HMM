@@ -26,7 +26,8 @@ Class
     Foam::genericPointPatchField
 
 Description
-    Foam::genericPointPatchField
+    A generic version of calculatedPointPatchField, useful as a fallback for
+    handling unknown patch types.
 
 SourceFiles
     genericPointPatchField.C

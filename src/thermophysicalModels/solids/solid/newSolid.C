@@ -51,7 +51,7 @@ Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
             FatalErrorIn("solid::New(Istream&)")
                 << "Unknown solid type " << solidType << nl << nl
                 << "Valid solid types are:" << endl
-                << ConstructorTablePtr_->toc()
+                << ConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }
 
@@ -67,7 +67,7 @@ Foam::autoPtr<Foam::solid> Foam::solid::New(Istream& is)
             FatalErrorIn("solid::New(Istream&)")
                 << "Unknown solid type " << solidType << nl << nl
                 << "Valid solid types are:" << endl
-                << IstreamConstructorTablePtr_->toc()
+                << IstreamConstructorTablePtr_->sortedToc()
                 << exit(FatalError);
         }
 
