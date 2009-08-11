@@ -78,7 +78,15 @@ inline void Foam::IPstream::readFromBuffer
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::IPstream::~IPstream()
-{}
+{
+    if (bufPosition_ < messageSize_)
+    {
+        FatalErrorIn("IPstream::~IPstream()")
+            << "Message not fully consumed. messageSize:" << messageSize_
+            << " bytes of which only " << bufPosition_
+            << " consumed." << Foam::abort(FatalError);
+    }
+}
 
 
 
