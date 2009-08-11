@@ -60,8 +60,8 @@ Foam::argList::initValidTables dummyInitValidTables;
 // transform sequences with "(" ... ")" into string lists in the process
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
-    int level = 0;
     int nArgs = 0;
+    int listDepth = 0;
     string tmpString;
 
     // note: we also re-write directly into args_
@@ -70,16 +70,16 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
     {
         if (strcmp(argv[argI], "(") == 0)
         {
-            level++;
+            listDepth++;
             tmpString += "(";
         }
         else if (strcmp(argv[argI], ")") == 0)
         {
-            if (level >= 1)
+            if (listDepth)
             {
-                level--;
+                listDepth--;
                 tmpString += ")";
-                if (level == 0)
+                if (listDepth == 0)
                 {
                     args_[nArgs++] = tmpString;
                     tmpString.clear();
@@ -90,7 +90,7 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
                 args_[nArgs++] = argv[argI];
             }
         }
-        else if (level)
+        else if (listDepth)
         {
             // quote each string element
             tmpString += "\"";
