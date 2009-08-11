@@ -63,7 +63,7 @@ tmp<scalarField> nutURoughWallFunctionFvPatchScalarField::calcNut() const
     {
         if (yPlus[facei] > yPlusLam_)
         {
-            const scalar Re = magUp[facei]*y[facei]/nuw[facei];
+            const scalar Re = magUp[facei]*y[facei]/nuw[facei] + ROOTVSMALL;
             nutw[facei] = nuw[facei]*(sqr(yPlus[facei])/Re - 1);
         }
     }

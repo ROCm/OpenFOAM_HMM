@@ -47,7 +47,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcNut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField magGradU = mag(Uw.snGrad()) + ROOTVSMALL;
     const scalarField& nuw = rasModel.nu().boundaryField()[patchI];
 
     return max(scalar(0), sqr(calcUTau(magGradU))/magGradU - nuw);
@@ -74,9 +74,8 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
     forAll(uTau, facei)
     {
-        scalar magUpara = magUp[facei];
-
-        scalar ut = sqrt((nutw[facei] + nuw[facei])*magGradU[facei]);
+        scalar ut =
+            sqrt((nutw[facei] + nuw[facei])*magGradU[facei]) + ROOTVSMALL;
 
         if (ut > VSMALL)
         {
@@ -85,17 +84,17 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
             do
             {
-                scalar kUu = min(kappa_*magUpara/ut, 50);
+                scalar kUu = min(kappa_*magUp[facei]/ut, 50);
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
                     - ut*y[facei]/nuw[facei]
-                    + magUpara/ut
+                    + magUp[facei]/ut
                     + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
                     y[facei]/nuw[facei]
-                  + magUpara/sqr(ut)
+                  + magUp[facei]/sqr(ut)
                   + 1/E_*kUu*fkUu/ut;
 
                 scalar uTauNew = ut + f/df;
@@ -103,6 +102,7 @@ tmp<scalarField> nutUSpaldingWallFunctionFvPatchScalarField::calcUTau
                 ut = uTauNew;
 
             } while (ut > VSMALL && err > 0.01 && ++iter < 10);
+
             uTau[facei] = max(0.0, ut);
         }
     }
