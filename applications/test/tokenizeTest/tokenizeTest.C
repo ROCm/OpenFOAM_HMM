@@ -33,6 +33,7 @@ Description
 #include "IOstreams.H"
 #include "IFstream.H"
 #include "IStringStream.H"
+#include "cpuTime.H"
 
 using namespace Foam;
 
@@ -44,41 +45,76 @@ int main(int argc, char *argv[])
     argList::noParallel();
     argList::validArgs.insert("string .. stringN");
     argList::validOptions.insert("file", "name");
+    argList::validOptions.insert("repeat", "count");
 
     argList args(argc, argv, false, true);
 
-    forAll(args.additionalArgs(), argI)
-    {
-        const string& rawArg = args.additionalArgs()[argI];
-        Info<< "input string: " << rawArg << nl;
+    label repeat = 1;
+    args.optionReadIfPresent<label>("repeat", repeat);
 
-        IStringStream is(rawArg);
-        
-        while (is.good())
+    cpuTime timer;
+
+    for (label count = 0; count < repeat; ++count)
+    {
+        forAll(args.additionalArgs(), argI)
         {
-            token tok(is);
-            Info<< "token: " << tok.info() << endl;
+            const string& rawArg = args.additionalArgs()[argI];
+            if (count == 0)
+            {
+                Info<< "input string: " << rawArg << nl;
+            }
+
+            IStringStream is(rawArg);
+
+            while (is.good())
+            {
+                token tok(is);
+                if (count == 0)
+                {
+                    Info<< "token: " << tok.info() << endl;
+                }
+            }
+
+            if (count == 0)
+            {
+                Info<< nl;
+                IOobject::writeDivider(Info);
+            }
         }
-        
-        Info<< nl;
-        IOobject::writeDivider(Info);
-    }  
-    
-    
+    }
+
+    Info<< "tokenized args " << repeat << " times in "
+        << timer.cpuTimeIncrement() << " s\n\n";
+
     if (args.optionFound("file"))
     {
-        IFstream is(args.option("file"));
-        
-        Info<< "tokenizing file: " << args.option("file") << nl;
-
-        while (is.good())
+        for (label count = 0; count < repeat; ++count)
         {
-            token tok(is);
-            Info<< "token: " << tok.info() << endl;
+            IFstream is(args.option("file"));
+
+            if (count == 0)
+            {
+                Info<< "tokenizing file: " << args.option("file") << nl;
+            }
+
+            while (is.good())
+            {
+                token tok(is);
+                if (count == 0)
+                {
+                    Info<< "token: " << tok.info() << endl;
+                }
+            }
+
+            if (count == 0)
+            {
+                Info<< nl;
+                IOobject::writeDivider(Info);
+            }
         }
-        
-        Info<< nl;
-        IOobject::writeDivider(Info);
+
+        Info<< "tokenized file " << repeat << " times in "
+            << timer.cpuTimeIncrement() << " s\n\n";
     }
 
     return 0;
