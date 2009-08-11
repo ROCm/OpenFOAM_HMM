@@ -48,7 +48,6 @@ int main(int argc, char *argv[])
     fileName surfFileName(args.additionalArgs()[0]);
     Info<< "Reading surface from " << surfFileName << endl;
 
-
     fileName outFileName(args.additionalArgs()[1]);
     fileName outFileBaseName = outFileName.lessExt();
     word outExtension = outFileName.ext();
@@ -60,6 +59,8 @@ int main(int argc, char *argv[])
 
     label iterationNo = 0;
     label iterationLimit = 10;
+
+    Info<< "Splitting off baffle parts " << endl;
 
     do
     {
@@ -151,7 +152,7 @@ int main(int argc, char *argv[])
 
         if (iterationNo == iterationLimit)
         {
-            WarningIn("surfaceRemoveBaffles")
+            WarningIn("surfaceSplitByTopology")
             << "Iteration limit of " << iterationLimit << "reached" << endl;
         }
 
@@ -162,6 +163,54 @@ int main(int argc, char *argv[])
     Info<< "Writing new surface to " << outFileName << endl;
 
     surf.write(outFileName);
+
+    labelList faceZone;
+
+    const labelListList& edFaces = surf.edgeFaces();
+
+    boolList multipleEdges(edFaces.size(), false);
+
+    forAll(multipleEdges, i)
+    {
+        if (edFaces[i].size() > 2)
+        {
+            multipleEdges[i] = true;
+        }
+    }
+
+    label nZones = surf.markZones(multipleEdges, faceZone);
+
+    Info<< "Splitting remaining multiply connected parts" << endl;
+
+    for (label z = 0; z < nZones; z++)
+    {
+
+        boolList include(faceZone.size(), false);
+        labelList pointMap;
+        labelList faceMap;
+
+        forAll(faceZone, f)
+        {
+            if (faceZone[f] == z)
+            {
+                include[f] = true;
+            }
+        }
+
+        triSurface zoneSurf = surf.subsetMesh(include, pointMap, faceMap);
+
+
+        fileName remainingPartFileName =
+            outFileBaseName
+          + "_multiplePart_"
+          + name(z)
+          + "." + outExtension;
+
+        Info<< "    Writing mulitple part "
+            << z << " to " << remainingPartFileName << endl;
+
+        zoneSurf.write(remainingPartFileName);
+    }
 
     Info << "End\n" << endl;
 
