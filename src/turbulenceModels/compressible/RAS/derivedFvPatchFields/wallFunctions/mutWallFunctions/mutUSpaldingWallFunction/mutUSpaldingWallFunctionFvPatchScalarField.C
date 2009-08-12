@@ -66,10 +66,9 @@ tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
     forAll(mutw, faceI)
     {
-        scalar magUpara = magUp[faceI];
-
         scalar ut =
-            sqrt((mutw[faceI] + muw[faceI])*magGradU[faceI]/rhow[faceI]);
+            sqrt((mutw[faceI] + muw[faceI])*magGradU[faceI]/rhow[faceI])
+          + ROOTVSMALL;
 
         if (ut > VSMALL)
         {
@@ -78,17 +77,17 @@ tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::calcUTau
 
             do
             {
-                scalar kUu = min(kappa_*magUpara/ut, 50);
+                scalar kUu = min(kappa_*magUp[faceI]/ut, 50);
                 scalar fkUu = exp(kUu) - 1 - kUu*(1 + 0.5*kUu);
 
                 scalar f =
                     - ut*y[faceI]/(muw[faceI]/rhow[faceI])
-                    + magUpara/ut
+                    + magUp[faceI]/ut
                     + 1/E_*(fkUu - 1.0/6.0*kUu*sqr(kUu));
 
                 scalar df =
                     y[faceI]/(muw[faceI]/rhow[faceI])
-                  + magUpara/sqr(ut)
+                  + magUp[faceI]/sqr(ut)
                   + 1/E_*kUu*fkUu/ut;
 
                 scalar uTauNew = ut + f/df;
@@ -111,7 +110,7 @@ tmp<scalarField> mutUSpaldingWallFunctionFvPatchScalarField::calcMut() const
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
-    const scalarField magGradU = mag(Uw.snGrad());
+    const scalarField magGradU = mag(Uw.snGrad()) + ROOTVSMALL;
     const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
     const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
