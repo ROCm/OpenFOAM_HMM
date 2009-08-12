@@ -17,7 +17,7 @@ FoamFile
 
 solvers
 {
-    "(p|rho)"
+    p
     {
         solver          PCG;
         preconditioner  DIC;
@@ -25,7 +25,39 @@ solvers
         relTol          0;
     }
 
-    "(U|k|epsilon|Alpha)"
+    U
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-07;
+        relTol          0;
+    }
+
+    k
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-07;
+        relTol          0;
+    }
+
+    epsilon
+    {
+        solver          PBiCG;
+        preconditioner  DILU;
+        tolerance       1e-07;
+        relTol          0;
+    }
+
+    rho
+    {
+        solver          PCG;
+        preconditioner  DIC;
+        tolerance       1e-07;
+        relTol          0;
+    }
+
+    Alpha
     {
         solver          PBiCG;
         preconditioner  DILU;
