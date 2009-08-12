@@ -45,38 +45,44 @@ char Foam::ISstream::nextValid()
         // Return if stream is bad - ie, previous get() failed
         if (bad() || isspace(c))
         {
-            return 0;
+            break;
         }
 
         // Is this the start of a C/C++ comment?
         if (c == '/')
         {
-            // If cannot get another character, return this one
             if (!get(c))
             {
+                // cannot get another character - return this one
                 return '/';
             }
 
             if (c == '/')
             {
-                // This is the start of a C++ style one-line comment
+                // C++ style single-line comment - skip through past end-of-line
                 while (get(c) && c != '\n')
                 {}
             }
             else if (c == '*')
             {
-                // This is the start of a C style comment
+                // within a C-style comment
                 while (true)
                 {
+                    // search for end of C-style comment - '*/'
                     if (get(c) && c == '*')
                     {
-                        if (get(c) && c == '/')
+                        if (get(c))
                         {
-                            break;
-                        }
-                        else
-                        {
-                            putback(c);
+                            if (c == '/')
+                            {
+                                // matched '*/'
+                                break;
+                            }
+                            else if (c == '*')
+                            {
+                                // check again
+                                putback(c);
+                            }
                         }
                     }
 
@@ -86,17 +92,21 @@ char Foam::ISstream::nextValid()
                     }
                 }
             }
-            else  // A lone '/' so return it.
+            else
             {
+                // The '/' did not start a C/C++ comment - return it
                 putback(c);
                 return '/';
             }
         }
-        else  // c is a valid character so return it
+        else
         {
+            // a valid character - return it
             return c;
         }
     }
+
+    return 0;
 }
 
 
@@ -277,8 +287,8 @@ Foam::Istream& Foam::ISstream::read(token& t)
 //                        }
                     }
 
-                    // nothing converted (bad format), or trailing junk
-                    if (endptr == buf || *endptr != '\0')
+                    // not everything converted: bad format or trailing junk
+                    if (*endptr)
                     {
                         t.setBad();
                     }
@@ -289,7 +299,7 @@ Foam::Istream& Foam::ISstream::read(token& t)
         }
 
 
-        // Should be a word (which can be a single character)
+        // Should be a word (which can also be a single character)
         default:
         {
             putback(c);
