@@ -58,9 +58,9 @@ cat <<LABHELP
 The default is to extract for all the 'Solved for' variables the initial
 residual, the final residual and the number of iterations. Additionally, a
 (user editable) database is used to extract data for standard non-solved for
-variables like Courant number, execution time.
+variables like Courant number, and execution time.
 
-$PROGNAME -l lists all the possible variables without extract them.
+$PROGNAME -l lists all the possible variables without extracting them.
 
 The program will generate and run an awk script which writes a set of files,
 logs/<var>_<subIter>, for every <var> specified, for every occurrence inside
@@ -69,7 +69,7 @@ a time step.
 For variables that are 'Solved for', the initial residual name will be
 <var>, the final residual receive the name <var>FinalRes,
 
-The files are a simple xy format with the first column Time (default)
+The files are output in a simple xy format with the first column Time (default)
 and the second the extracted values. Option -n creates single column
 files with the extracted data only.
 
@@ -112,7 +112,6 @@ do
         break
     fi
 done
-
 
 
 myEcho() {
@@ -171,6 +170,7 @@ getSolveQueryList() {
     done
 }
 
+
 # getAllQueries dbFile logFile
 # Gets all queries from database and from logfile
 getAllQueries() {
@@ -201,6 +201,7 @@ getAllQueries() {
         echo "$q"
     done | sort -u
 }
+
 
 #-----------------------------
 # Main
@@ -314,8 +315,6 @@ myEcho ""
 # Generate Awk program
 #-----------------------------
 
-
-
 #-- header
 
 rm -f $AWKFILE; touch $AWKFILE
@@ -353,9 +352,6 @@ function extract(inLine,columnSel,outVar,
 }
 
 LABEL
-
-
-
 
 
 #-- Generate code for iteration separator (increments 'Iteration')
@@ -418,6 +414,7 @@ cat <<LABSOLVE >> $AWKFILE
 
 LABSOLVE
 
+
 #-- generate code to process queries
 for queryName in $QUERYNAMES
 do
@@ -436,7 +433,6 @@ do
         echo "" >> $AWKFILE
     fi
 done
-
 
 
 #-----------------------------
