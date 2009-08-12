@@ -286,7 +286,7 @@ Foam::mapDistribute::mapDistribute(const mapDistribute& map)
 
 void Foam::mapDistribute::compact(const boolList& elemIsUsed)
 {
-    // 1. send back to sender. Have him delete the corresponding element
+    // 1. send back to sender. Have sender delete the corresponding element
     //    from the submap and do the same to the constructMap locally
     //    (and in same order).
 
