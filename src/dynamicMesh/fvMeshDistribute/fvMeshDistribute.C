@@ -1418,18 +1418,18 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
                 nOldPoints,
                 nOldFaces,
                 nOldCells,
-                oldPatchStarts,
-                oldPatchNMeshPoints,
+                oldPatchStarts.xfer(),
+                oldPatchNMeshPoints.xfer(),
 
-                labelListList(1, identity(mesh_.nPoints())),//subPointMap
-                labelListList(1, identity(mesh_.nFaces())), //subFaceMap
-                labelListList(1, identity(mesh_.nCells())), //subCellMap
-                labelListList(1, identity(patches.size())), //subPatchMap
+                labelListList(1, identity(mesh_.nPoints())).xfer(),//subPointMap
+                labelListList(1, identity(mesh_.nFaces())).xfer(), //subFaceMap
+                labelListList(1, identity(mesh_.nCells())).xfer(), //subCellMap
+                labelListList(1, identity(patches.size())).xfer(), //subPatchMap
 
-                labelListList(1, identity(mesh_.nPoints())),//constructPointMap
-                labelListList(1, identity(mesh_.nFaces())), //constructFaceMap
-                labelListList(1, identity(mesh_.nCells())), //constructCellMap
-                labelListList(1, identity(patches.size()))  //constructPatchMap
+                labelListList(1, identity(mesh_.nPoints())).xfer(),//pointMap
+                labelListList(1, identity(mesh_.nFaces())).xfer(), //faceMap
+                labelListList(1, identity(mesh_.nCells())).xfer(), //cellMap
+                labelListList(1, identity(patches.size())).xfer()  //patchMap
             )
         );
     }
@@ -2207,19 +2207,18 @@ Foam::autoPtr<Foam::mapDistributePolyMesh> Foam::fvMeshDistribute::distribute
             nOldPoints,
             nOldFaces,
             nOldCells,
-            oldPatchStarts,
-            oldPatchNMeshPoints,
+            oldPatchStarts.xfer(),
+            oldPatchNMeshPoints.xfer(),
 
-            subPointMap,
-            subFaceMap,
-            subCellMap,
-            subPatchMap,
+            subPointMap.xfer(),
+            subFaceMap.xfer(),
+            subCellMap.xfer(),
+            subPatchMap.xfer(),
 
-            constructPointMap,
-            constructFaceMap,
-            constructCellMap,
-            constructPatchMap,
-            true                // reuse storage
+            constructPointMap.xfer(),
+            constructFaceMap.xfer(),
+            constructCellMap.xfer(),
+            constructPatchMap.xfer()
         )
     );
 }
