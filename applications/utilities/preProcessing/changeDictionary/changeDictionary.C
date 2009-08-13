@@ -72,7 +72,7 @@ namespace Foam
 
 int main(int argc, char *argv[])
 {
-    argList::validOptions.insert("constant", "");
+    argList::validOptions.insert("instance", "instance");
     #include "addRegionOption.H"
 
     #include "setRootCase.H"
@@ -85,7 +85,11 @@ int main(int argc, char *argv[])
         regionPrefix = regionName;
     }
 
-    bool constant = args.options().found("constant");
+    word instance = runTime.timeName();
+    if (args.options().found("instance"))
+    {
+        instance = args.options()["instance"];
+    }
 
     // Get the replacement rules from a dictionary
     IOdictionary dict
@@ -200,16 +204,6 @@ int main(int argc, char *argv[])
             Info<< "Loading dictionary " << fieldName << endl;
             const word oldTypeName = IOdictionary::typeName;
             const_cast<word&>(IOdictionary::typeName) = word::null;
-
-            word instance = "";
-            if (constant)
-            {
-                instance = runTime.constant();
-            }
-            else
-            {
-                instance = runTime.timeName();
-            }
 
             IOdictionary fieldDict
             (
