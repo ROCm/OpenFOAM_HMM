@@ -61,24 +61,38 @@ Foam::IPstream::IPstream
 
     MPI_Status status;
 
+    // Cannot use buf_.size() since appends a few bytes extra
+    label realBufSize = bufSize;
+
     // If the buffer size is not specified, probe the incomming message
     // and set it
     if (!bufSize)
     {
+        if (commsType == nonBlocking)
+        {
+            FatalErrorIn
+            (
+                "IPstream::IPstream(const commsTypes, const int, "
+                "const label, streamFormat, versionNumber)"
+            )   << "Can use nonBlocking mode only with pre-allocated buffers"
+                << Foam::abort(FatalError);
+        }
+
         MPI_Probe(procID(fromProcNo_), msgType(), MPI_COMM_WORLD, &status);
         MPI_Get_count(&status, MPI_BYTE, &messageSize_);
 
         buf_.setSize(messageSize_);
+        realBufSize = buf_.size();
     }
 
-    messageSize_ = read(commsType, fromProcNo_, buf_.begin(), buf_.size());
+    messageSize_ = read(commsType, fromProcNo_, buf_.begin(), realBufSize);
 
     if (!messageSize_)
     {
         FatalErrorIn
         (
-            "IPstream::IPstream(const int fromProcNo, "
-            "const label bufSize, streamFormat format, versionNumber version)"
+            "IPstream::IPstream(const commsTypes, const int, "
+            "const label, streamFormat, versionNumber)"
         )   << "read failed"
             << Foam::abort(FatalError);
     }
@@ -173,7 +187,8 @@ Foam::label Foam::IPstream::read
 
         IPstream_outstandingRequests_.append(request);
 
-        return 1;
+        // Assume the message is completely received.
+        return bufSize;
     }
     else
     {
