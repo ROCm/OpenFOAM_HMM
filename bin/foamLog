@@ -82,6 +82,7 @@ separated with '/' :
 The value taken will be the first (non-space)word after this column.
 The database ($PROGNAME.db) will taken from these locations:
 
+    .
     $HOME/.OpenFOAM/$WM_PROJECT_VERSION
     $HOME/.OpenFOAM
     $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION
@@ -98,6 +99,7 @@ LABHELP
 
 # The various places to be searched:
 for i in \
+    . \
     $HOME/.OpenFOAM/$WM_PROJECT_VERSION \
     $HOME/.OpenFOAM \
     $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION \
