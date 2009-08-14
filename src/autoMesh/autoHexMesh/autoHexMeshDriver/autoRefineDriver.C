@@ -28,8 +28,6 @@ License
 #include "meshRefinement.H"
 #include "fvMesh.H"
 #include "Time.H"
-#include "boundBox.H"
-#include "mapDistributePolyMesh.H"
 #include "cellSet.H"
 #include "syncTools.H"
 #include "refinementParameters.H"
