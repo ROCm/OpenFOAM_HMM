@@ -34,6 +34,7 @@ License
 #include "featureEdgeMesh.H"
 #include "refinementSurfaces.H"
 #include "shellSurfaces.H"
+#include "mapDistributePolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
