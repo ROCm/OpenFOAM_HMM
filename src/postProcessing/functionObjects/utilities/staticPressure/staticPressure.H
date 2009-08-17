@@ -106,9 +106,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~staticPressure();
+    //- Destructor
+    virtual ~staticPressure();
 
 
     // Member Functions

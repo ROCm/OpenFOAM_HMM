@@ -98,9 +98,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~dsmcFields();
+    //- Destructor
+    virtual ~dsmcFields();
 
 
     // Member Functions

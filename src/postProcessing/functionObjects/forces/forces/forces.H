@@ -190,9 +190,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~forces();
+    //- Destructor
+    virtual ~forces();
 
 
     // Member Functions
