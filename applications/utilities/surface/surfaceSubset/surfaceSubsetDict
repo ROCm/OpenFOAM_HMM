@@ -16,7 +16,7 @@ FoamFile
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // Select triangles by label
-faces ();
+faces #include "badFaces";
 
 // Select triangles using given points (local point numbering)
 localPoints ( );
