@@ -45,59 +45,9 @@ namespace Foam
     addToRunTimeSelectionTable(cellZone, cellZone, dictionary);
 }
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-const Foam::Map<Foam::label>& Foam::cellZone::cellLookupMap() const
-{
-    if (!cellLookupMapPtr_)
-    {
-        calcCellLookupMap();
-    }
-
-    return *cellLookupMapPtr_;
-}
-
-
-void Foam::cellZone::calcCellLookupMap() const
-{
-    if (debug)
-    {
-        Info<< "void cellZone::calcCellLookupMap() const : "
-            << "Calculating cell lookup map"
-            << endl;
-    }
-
-    if (cellLookupMapPtr_)
-    {
-        FatalErrorIn
-        (
-            "void cellZone::calcCellLookupMap() const"
-        )   << "cell lookup map already calculated"
-            << abort(FatalError);
-    }
-
-    const labelList& addr = *this;
-
-    cellLookupMapPtr_ = new Map<label>(2*addr.size());
-    Map<label>& clm = *cellLookupMapPtr_;
-
-    forAll (addr, cellI)
-    {
-        clm.insert(addr[cellI], cellI);
-    }
-
-    if (debug)
-    {
-        Info<< "void cellZone::calcCellLookupMap() const : "
-            << "Finished calculating cell lookup map"
-            << endl;
-    }
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::cellZone::cellZone
 (
     const word& name,
@@ -106,11 +56,8 @@ Foam::cellZone::cellZone
     const cellZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(name),
-    index_(index),
-    zoneMesh_(zm),
-    cellLookupMapPtr_(NULL)
+    zone(name, addr, index),
+    zoneMesh_(zm)
 {}
 
 
@@ -122,15 +69,11 @@ Foam::cellZone::cellZone
     const cellZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(name),
-    index_(index),
-    zoneMesh_(zm),
-    cellLookupMapPtr_(NULL)
+    zone(name, addr, index),
+    zoneMesh_(zm)
 {}
 
 
-// Construct from dictionary
 Foam::cellZone::cellZone
 (
     const word& name,
@@ -139,16 +82,11 @@ Foam::cellZone::cellZone
     const cellZoneMesh& zm
 )
 :
-    labelList(dict.lookup("cellLabels")),
-    name_(name),
-    index_(index),
-    zoneMesh_(zm),
-    cellLookupMapPtr_(NULL)
+    zone("cell", name, dict, index),
+    zoneMesh_(zm)
 {}
 
 
-// Construct given the original zone and resetting the
-//  cell list and zone mesh information
 Foam::cellZone::cellZone
 (
     const cellZone& cz,
@@ -157,11 +95,8 @@ Foam::cellZone::cellZone
     const cellZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(cz.name()),
-    index_(index),
-    zoneMesh_(zm),
-    cellLookupMapPtr_(NULL)
+    zone(cz, addr, index),
+    zoneMesh_(zm)
 {}
 
 Foam::cellZone::cellZone
@@ -172,38 +107,22 @@ Foam::cellZone::cellZone
     const cellZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(cz.name()),
-    index_(index),
-    zoneMesh_(zm),
-    cellLookupMapPtr_(NULL)
+    zone(cz, addr, index),
+    zoneMesh_(zm)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cellZone::~cellZone()
-{
-    clearAddressing();
-}
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::label Foam::cellZone::whichCell(const label globalCellID) const
 {
-    const Map<label>& clm = cellLookupMap();
-
-    Map<label>::const_iterator clmIter = clm.find(globalCellID);
-
-    if (clmIter == clm.end())
-    {
-        return -1;
-    }
-    else
-    {
-        return clmIter();
-    }
+    return zone::localID(globalCellID);
 }
 
 
@@ -213,45 +132,9 @@ const Foam::cellZoneMesh& Foam::cellZone::zoneMesh() const
 }
 
 
-void Foam::cellZone::clearAddressing()
-{
-    deleteDemandDrivenData(cellLookupMapPtr_);
-}
-
-
 bool Foam::cellZone::checkDefinition(const bool report) const
 {
-    const labelList& addr = *this;
-
-    bool boundaryError = false;
-
-    forAll(addr, i)
-    {
-        if (addr[i] < 0 || addr[i] >= zoneMesh_.mesh().nCells())
-        {
-            boundaryError = true;
-
-            if (report)
-            {
-                SeriousErrorIn
-                (
-                    "bool cellZone::checkDefinition("
-                    "const bool report) const"
-                )   << "Zone " << name()
-                    << " contains invalid cell label " << addr[i] << nl
-                    << "Valid cell labels are 0.."
-                    << zoneMesh_.mesh().nCells()-1 << endl;
-            }
-        }
-    }
-    return boundaryError;
-}
-
-
-void Foam::cellZone::write(Ostream& os) const
-{
-    os  << nl << name()
-        << nl << static_cast<const labelList&>(*this);
+    return zone::checkDefinition(zoneMesh_.mesh().nCells(), report);
 }
 
 
@@ -284,10 +167,10 @@ void Foam::cellZone::operator=(const labelList& addr)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const cellZone& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const cellZone& cz)
 {
-    p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const cellZone& p");
+    cz.write(os);
+    os.check("Ostream& operator<<(Ostream& os, const cellZone& cz");
     return os;
 }
 
