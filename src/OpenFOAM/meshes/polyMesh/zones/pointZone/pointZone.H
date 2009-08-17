@@ -202,18 +202,12 @@ public:
         //- Helper function to re-direct to zone::localID(...)
         label whichPoint(const label globalPointID) const;
 
-        //- Clear addressing
-        virtual void clearAddressing();
-
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
 
         //- Correct patch after moving points
         virtual void movePoints(const pointField&)
         {}
-
-        //- Write
-        virtual void write(Ostream&) const;
 
         //- Write dictionary
         virtual void writeDict(Ostream&) const;

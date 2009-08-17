@@ -201,14 +201,8 @@ public:
         //- Return zoneMesh reference
         const cellZoneMesh& zoneMesh() const;
 
-        //- Clear addressing
-        virtual void clearAddressing();
-
         //- Check zone definition. Return true if in error.
         virtual bool checkDefinition(const bool report = false) const;
-
-        //- Write
-        virtual void write(Ostream&) const;
 
         //- Write dictionary
         virtual void writeDict(Ostream&) const;
