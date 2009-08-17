@@ -30,7 +30,7 @@ License
 
 Foam::labelList Foam::blockMesh::createMergeList()
 {
-    Info<< nl << "Creating merge list " << flush;
+    Info<< nl << "Creating merge list" << flush;
 
     labelList MergeList(nPoints_, -1);
 
