@@ -244,6 +244,7 @@ class PointEdgeWave
         //- Disallow default bitwise assignment
         void operator=(const PointEdgeWave&);
 
+
 public:
 
     // Static Functions
@@ -259,7 +260,6 @@ public:
         {
             propagationTol_ = tol;
         }
-
 
 
     // Constructors

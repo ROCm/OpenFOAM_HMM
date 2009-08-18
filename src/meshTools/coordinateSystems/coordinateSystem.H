@@ -166,6 +166,7 @@ class coordinateSystem
         //- Global-to-Local transformation tensor
         tensor Rtr_;
 
+
 protected:
 
     // Protected Member Functions
@@ -193,6 +194,7 @@ protected:
             const vectorField&,
             bool translate
         ) const;
+
 
 public:
 
@@ -249,6 +251,7 @@ public:
             return autoPtr<coordinateSystem>(new coordinateSystem(*this));
         }
 
+
     // Declare run-time constructor selection table
 
         declareRunTimeSelectionTable
@@ -276,6 +279,7 @@ public:
             (name, origin, cr)
         );
 
+
     // Selectors
 
         //- Select constructed from dictionary
@@ -297,160 +301,170 @@ public:
         //- Select constructed from Istream
         static autoPtr<coordinateSystem> New(Istream& is);
 
-    // Destructor
 
-        virtual ~coordinateSystem();
+    //- Destructor
+    virtual ~coordinateSystem();
 
 
     // Member Functions
 
-      // Access
+        // Access
 
-        //- Return name
-        const word& name() const
-        {
-            return name_;
-        }
+            //- Return name
+            const word& name() const
+            {
+                return name_;
+            }
 
-        //- Return non-constant access to the optional note
-        string& note()
-        {
-            return note_;
-        }
+            //- Return non-constant access to the optional note
+            string& note()
+            {
+                return note_;
+            }
 
-        //- Return the optional note
-        const string& note() const
-        {
-            return note_;
-        }
+            //- Return the optional note
+            const string& note() const
+            {
+                return note_;
+            }
 
-        //- Return origin
-        const point& origin() const
-        {
-            return origin_;
-        }
+            //- Return origin
+            const point& origin() const
+            {
+                return origin_;
+            }
 
-        //- Return coordinate rotation
-        const coordinateRotation& rotation() const
-        {
-            return R_;
-        }
+            //- Return coordinate rotation
+            const coordinateRotation& rotation() const
+            {
+                return R_;
+            }
 
-        //- Return local-to-global transformation tensor
-        const tensor& R() const
-        {
-            return R_;
-        }
+            //- Return local-to-global transformation tensor
+            const tensor& R() const
+            {
+                return R_;
+            }
 
-        //- Return local Cartesian x-axis
-        const vector& e1() const
-        {
-           return Rtr_.x();
-        }
+            //- Return local Cartesian x-axis
+            const vector& e1() const
+            {
+                return Rtr_.x();
+            }
 
-        //- Return local Cartesian y-axis
-        const vector& e2() const
-        {
-           return Rtr_.y();
-        }
+            //- Return local Cartesian y-axis
+            const vector& e2() const
+            {
+                return Rtr_.y();
+            }
 
-        //- Return local Cartesian z-axis
-        const vector& e3() const
-        {
-           return Rtr_.z();
-        }
+            //- Return local Cartesian z-axis
+            const vector& e3() const
+            {
+                return Rtr_.z();
+            }
 
-        //- Return axis (e3: local Cartesian z-axis)
-        // @deprecated method e3 is preferred
-        const vector& axis() const
-        {
-           return Rtr_.z();
-        }
+            //- Return axis (e3: local Cartesian z-axis)
+            // @deprecated method e3 is preferred
+            const vector& axis() const
+            {
+                return Rtr_.z();
+            }
 
-        //- Return direction (e1: local Cartesian x-axis)
-        // @deprecated method e1 is preferred
-        const vector& direction() const
-        {
-            return Rtr_.x();
-        }
+            //- Return direction (e1: local Cartesian x-axis)
+            // @deprecated method e1 is preferred
+            const vector& direction() const
+            {
+                return Rtr_.x();
+            }
 
-        //- Return as dictionary of entries
-        //  @param [in] ignoreType drop type (cartesian, cylindrical, etc)
-        //  when generating the dictionary
-        virtual dictionary dict(bool ignoreType=false) const;
+            //- Return as dictionary of entries
+            //  @param [in] ignoreType drop type (cartesian, cylindrical, etc)
+            //  when generating the dictionary
+            virtual dictionary dict(bool ignoreType=false) const;
 
 
-      // Edit
+        // Edit
 
-        //- Rename
-        virtual void rename(const word& newName)
-        {
-            name_ = newName;
-        }
+            //- Rename
+            virtual void rename(const word& newName)
+            {
+                name_ = newName;
+            }
 
-        //- Edit access to origin
-        point& origin()
-        {
-            return origin_;
-        }
+            //- Edit access to origin
+            point& origin()
+            {
+                return origin_;
+            }
 
-      // Write
 
-        //- Write
-        virtual void write(Ostream&) const;
+        // Write
 
-        //- Write dictionary
-        virtual void writeDict(Ostream&, bool subDict=true) const;
+            //- Write
+            virtual void write(Ostream&) const;
 
-      // Transformations
+            //- Write dictionary
+            virtual void writeDict(Ostream&, bool subDict=true) const;
 
-        //- Convert from position in local coordinate system to global Cartesian position
-        point globalPosition(const point& local) const
-        {
-            return localToGlobal(local, true);
-        }
 
-        //- Convert from position in local coordinate system to global Cartesian position
-        tmp<pointField> globalPosition(const pointField& local) const
-        {
-            return localToGlobal(local, true);
-        }
+        // Transformations
 
-        //- Convert from vector components in local coordinate system to global Cartesian vector
-        vector globalVector(const vector& local) const
-        {
-            return localToGlobal(local, false);
-        }
+            //- Convert from position in local coordinate system to global
+            //  Cartesian position
+            point globalPosition(const point& local) const
+            {
+                return localToGlobal(local, true);
+            }
 
-        //- Convert from vector components in local coordinate system to global Cartesian vector
-        tmp<vectorField> globalVector(const vectorField& local) const
-        {
-            return localToGlobal(local, false);
-        }
+            //- Convert from position in local coordinate system to global
+            //  Cartesian position
+            tmp<pointField> globalPosition(const pointField& local) const
+            {
+                return localToGlobal(local, true);
+            }
 
-        //- Convert from global Cartesian position to position in local coordinate system
-        point localPosition(const point& global) const
-        {
-            return globalToLocal(global, true);
-        }
+            //- Convert from vector components in local coordinate system to
+            //  global Cartesian vector
+            vector globalVector(const vector& local) const
+            {
+                return localToGlobal(local, false);
+            }
 
-        //- Convert from global Cartesian position to position in local coordinate system
-        tmp<pointField> localPosition(const pointField& global) const
-        {
-            return globalToLocal(global, true);
-        }
+            //- Convert from vector components in local coordinate system to
+            //  global Cartesian vector
+            tmp<vectorField> globalVector(const vectorField& local) const
+            {
+                return localToGlobal(local, false);
+            }
 
-        //- Convert from global Cartesian vector to components in local coordinate system
-        vector localVector(const vector& global) const
-        {
-            return globalToLocal(global, false);
-        }
+            //- Convert from global Cartesian position to position in local
+            //  coordinate system
+            point localPosition(const point& global) const
+            {
+                return globalToLocal(global, true);
+            }
 
-        //- Convert from global Cartesian vector to components in local coordinate system
-        tmp<vectorField> localVector(const vectorField& global) const
-        {
-            return globalToLocal(global, false);
-        }
+            //- Convert from global Cartesian position to position in local
+            //  coordinate system
+            tmp<pointField> localPosition(const pointField& global) const
+            {
+                return globalToLocal(global, true);
+            }
+
+            //- Convert from global Cartesian vector to components in local
+            //  coordinate system
+            vector localVector(const vector& global) const
+            {
+                return globalToLocal(global, false);
+            }
+
+            //- Convert from global Cartesian vector to components in local
+            //  coordinate system
+            tmp<vectorField> localVector(const vectorField& global) const
+            {
+                return globalToLocal(global, false);
+            }
 
 
     // Member Operators
@@ -466,6 +480,7 @@ public:
             const coordinateSystem&,
             const coordinateSystem&
         );
+
 
     // IOstream Operators
 

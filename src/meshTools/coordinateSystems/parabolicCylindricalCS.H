@@ -85,6 +85,7 @@ protected:
             bool translate
         ) const;
 
+
 public:
 
     //- Runtime type information
@@ -106,7 +107,6 @@ public:
 
         //- Construct from dictionary
         parabolicCylindricalCS(const word&, const dictionary&);
-
 };
 
 

@@ -345,6 +345,9 @@ $(globalMeshData)/globalIndex.C
 
 $(polyMesh)/syncTools/syncTools.C
 
+zone = $(polyMesh)/zones/zone
+$(zone)/zone.C
+
 cellZone = $(polyMesh)/zones/cellZone
 $(cellZone)/cellZone.C
 $(cellZone)/newCellZone.C
