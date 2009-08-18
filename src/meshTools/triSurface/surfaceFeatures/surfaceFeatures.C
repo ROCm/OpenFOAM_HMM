@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "surfaceFeatures.H"
@@ -1097,8 +1095,8 @@ Foam::Map<Foam::pointIndexHit> Foam::surfaceFeatures::nearestEdges
 
             // Step to next sample point using local distance.
             // Truncate to max 1/minSampleDist samples per feature edge.
-//            s += max(minSampleDist*eMag, sampleDist[e.start()]);
-s += 0.01*eMag;
+            // s += max(minSampleDist*eMag, sampleDist[e.start()]);
+            s += 0.01*eMag;
 
             if (s >= (1-minSampleDist)*eMag)
             {
