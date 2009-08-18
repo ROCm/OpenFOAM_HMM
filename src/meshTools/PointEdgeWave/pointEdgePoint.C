@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "pointEdgePoint.H"
@@ -31,8 +29,6 @@ Description
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 Foam::point Foam::pointEdgePoint::greatPoint(GREAT, GREAT, GREAT);
-
-
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
@@ -45,9 +41,11 @@ Foam::Ostream& Foam::operator<<
     return os << wDist.origin() << wDist.distSqr();
 }
 
+
 Foam::Istream& Foam::operator>>(Foam::Istream& is, Foam::pointEdgePoint& wDist)
 {
     return is >> wDist.origin_ >> wDist.distSqr_;
 }
+
 
 // ************************************************************************* //

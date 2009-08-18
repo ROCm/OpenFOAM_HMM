@@ -41,13 +41,10 @@ SourceFiles
 #ifndef faceZone_H
 #define faceZone_H
 
-#include "typeInfo.H"
-#include "dictionary.H"
-#include "labelList.H"
+#include "zone.H"
 #include "faceZoneMeshFwd.H"
 #include "boolList.H"
 #include "primitiveFacePatch.H"
-#include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,19 +65,16 @@ Ostream& operator<<(Ostream&, const faceZone&);
 
 class faceZone
 :
-    public labelList
+    public zone
 {
-    // Private data
 
-        //- Name of zone
-        word name_;
+protected:
+
+    // Protected data
 
         //- Flip map for all faces in the zone.  Set to true if the
         //  face needs to be flipped to achieve the correct orientation.
         boolList flipMap_;
-
-        //- Index of zone
-        label index_;
 
         //- Reference to zone list
         const faceZoneMesh& zoneMesh_;
@@ -100,9 +94,6 @@ class faceZone
             //- Global edge addressing
             mutable labelList* mePtr_;
 
-            //- Map of face labels in zone for fast location lookup
-            mutable Map<label>* faceLookupMapPtr_;
-
 
     // Private Member Functions
 
@@ -117,9 +108,6 @@ class faceZone
 
         //- Return map of local face indices
         const Map<label>& faceLookupMap() const;
-
-        //- Build map of local face indices
-        void calcFaceLookupMap() const;
 
         //- Calculate master and slave face layer
         void calcCellLayers() const;
@@ -244,17 +232,10 @@ public:
 
 
     //- Destructor
-
-        virtual ~faceZone();
+    virtual ~faceZone();
 
 
     // Member Functions
-
-        //- Return name
-        const word& name() const
-        {
-            return name_;
-        }
 
         //- Return face flip map
         const boolList& flipMap() const
@@ -262,19 +243,11 @@ public:
             return flipMap_;
         }
 
-        //- Map storing the local face index for every global face index.
-        //  Used to find out the index of face in the zone from the known global
-        //  face index.  If the face is not in the zone, returns -1
-        label whichFace(const label globalFaceID) const;
+        //- Helper function to re-direct to zone::localID(...)
+        label whichFace(const label globalCellID) const;
 
         //- Return reference to primitive patch
         const primitiveFacePatch& operator()() const;
-
-        //- Return the index of this zone in zone list
-        label index() const
-        {
-            return index_;
-        }
 
         //- Return zoneMesh reference
         const faceZoneMesh& zoneMesh() const;
@@ -294,23 +267,23 @@ public:
 
 
         //- Clear addressing
-        void clearAddressing();
+        virtual void clearAddressing();
 
         //- Reset addressing and flip map (clearing demand-driven data)
-        void resetAddressing(const labelList&, const boolList&);
+        virtual void resetAddressing(const labelList&, const boolList&);
 
         //- Check zone definition. Return true if in error.
-        bool checkDefinition(const bool report = false) const;
+        virtual bool checkDefinition(const bool report = false) const;
 
         //- Check whether all procs have faces synchronised. Return
         //  true if in error.
-        bool checkParallelSync(const bool report = false) const;
+        virtual bool checkParallelSync(const bool report = false) const;
 
         //- Correct patch after moving points
         virtual void movePoints(const pointField&);
 
         //- Update for changes in topology
-        void updateMesh(const mapPolyMesh& mpm);
+        virtual void updateMesh(const mapPolyMesh& mpm);
 
         //- Write
         virtual void write(Ostream&) const;
@@ -319,8 +292,9 @@ public:
         virtual void writeDict(Ostream&) const;
 
 
-    // Ostream Operator
+    // I-O
 
+        //- Ostream Operator
         friend Ostream& operator<<(Ostream&, const faceZone&);
 };
 

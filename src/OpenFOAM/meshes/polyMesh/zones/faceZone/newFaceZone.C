@@ -22,14 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "faceZone.H"
 #include "dictionary.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -61,7 +57,7 @@ Foam::autoPtr<Foam::faceZone> Foam::faceZone::New
             "const label, const faceZoneMesh&)",
             dict
         )   << "Unknown faceZone type " << zoneType << endl << endl
-            << "Valid faceZone types are :" << endl
+            << "Valid faceZone types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -69,7 +65,5 @@ Foam::autoPtr<Foam::faceZone> Foam::faceZone::New
     return autoPtr<faceZone>(cstrIter()(name, dict, index, zm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

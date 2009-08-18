@@ -22,14 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "cellZone.H"
 #include "dictionary.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -61,7 +57,7 @@ Foam::autoPtr<Foam::cellZone> Foam::cellZone::New
             "const label, const cellZoneMesh&)",
             dict
         )   << "Unknown cellZone type " << zoneType << endl << endl
-            << "Valid cellZone types are :" << endl
+            << "Valid cellZone types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
@@ -69,7 +65,5 @@ Foam::autoPtr<Foam::cellZone> Foam::cellZone::New
     return autoPtr<cellZone>(cstrIter()(name, dict, index, zm));
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

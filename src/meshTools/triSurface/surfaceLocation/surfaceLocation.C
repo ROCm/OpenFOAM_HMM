@@ -27,15 +27,6 @@ License
 #include "surfaceLocation.H"
 #include "triSurface.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 Foam::vector Foam::surfaceLocation::normal(const triSurface& s) const
@@ -70,12 +61,6 @@ Foam::vector Foam::surfaceLocation::normal(const triSurface& s) const
         return s.pointNormals()[index()];
     }
 }
-
-
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
 
 
 // * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //

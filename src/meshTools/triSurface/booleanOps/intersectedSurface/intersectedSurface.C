@@ -205,7 +205,6 @@ void Foam::intersectedSurface::printVisit
 }
 
 
-
 // Check if the two vertices that f0 and f1 share are in the same order on
 // both faces.
 bool Foam::intersectedSurface::sameEdgeOrder
