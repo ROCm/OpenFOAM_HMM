@@ -66,71 +66,33 @@ Foam::mapDistributePolyMesh::mapDistributePolyMesh
     const label nOldPoints,
     const label nOldFaces,
     const label nOldCells,
-    const labelList& oldPatchStarts,
-    const labelList& oldPatchNMeshPoints,
+    const Xfer<labelList>& oldPatchStarts,
+    const Xfer<labelList>& oldPatchNMeshPoints,
 
     // how to subset pieces of mesh to send across
-    const labelListList& subPointMap,
-    const labelListList& subFaceMap,
-    const labelListList& subCellMap,
-    const labelListList& subPatchMap,
+    const Xfer<labelListList>& subPointMap,
+    const Xfer<labelListList>& subFaceMap,
+    const Xfer<labelListList>& subCellMap,
+    const Xfer<labelListList>& subPatchMap,
 
     // how to reconstruct received mesh
-    const labelListList& constructPointMap,
-    const labelListList& constructFaceMap,
-    const labelListList& constructCellMap,
-    const labelListList& constructPatchMap
+    const Xfer<labelListList>& constructPointMap,
+    const Xfer<labelListList>& constructFaceMap,
+    const Xfer<labelListList>& constructCellMap,
+    const Xfer<labelListList>& constructPatchMap
 )
 :
     mesh_(mesh),
     nOldPoints_(nOldPoints),
     nOldFaces_(nOldFaces),
     nOldCells_(nOldCells),
-    oldPatchSizes_(oldPatchStarts.size()),
+    oldPatchSizes_(oldPatchStarts().size()),
     oldPatchStarts_(oldPatchStarts),
     oldPatchNMeshPoints_(oldPatchNMeshPoints),
     pointMap_(mesh.nPoints(), subPointMap, constructPointMap),
     faceMap_(mesh.nFaces(), subFaceMap, constructFaceMap),
     cellMap_(mesh.nCells(), subCellMap, constructCellMap),
     patchMap_(mesh.boundaryMesh().size(), subPatchMap, constructPatchMap)
-{
-    calcPatchSizes();
-}
-
-
-//- (optionally destructively) construct from components
-Foam::mapDistributePolyMesh::mapDistributePolyMesh
-(
-    const polyMesh& mesh,
-    const label nOldPoints,
-    const label nOldFaces,
-    const label nOldCells,
-    labelList& oldPatchStarts,
-    labelList& oldPatchNMeshPoints,
-
-    labelListList& subPointMap,
-    labelListList& subFaceMap,
-    labelListList& subCellMap,
-    labelListList& subPatchMap,
-    labelListList& constructPointMap,
-    labelListList& constructFaceMap,
-    labelListList& constructCellMap,
-    labelListList& constructPatchMap,
-    const bool reUse                // clone or reuse
-)
-:
-    mesh_(mesh),
-    nOldPoints_(nOldPoints),
-    nOldFaces_(nOldFaces),
-    nOldCells_(nOldCells),
-    oldPatchSizes_(oldPatchStarts.size()),
-    oldPatchStarts_(oldPatchStarts, reUse),
-    oldPatchNMeshPoints_(oldPatchNMeshPoints, reUse),
-
-    pointMap_(mesh.nPoints(), subPointMap, constructPointMap, reUse),
-    faceMap_(mesh.nFaces(), subFaceMap, constructFaceMap, reUse),
-    cellMap_(mesh.nCells(), subCellMap, constructCellMap, reUse),
-    patchMap_(mesh.boundaryMesh().size(), subPatchMap, constructPatchMap, reUse)
 {
     calcPatchSizes();
 }

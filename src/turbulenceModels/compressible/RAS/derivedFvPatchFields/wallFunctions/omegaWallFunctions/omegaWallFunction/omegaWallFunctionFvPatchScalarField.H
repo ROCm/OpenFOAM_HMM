@@ -55,25 +55,12 @@ class omegaWallFunctionFvPatchScalarField
 :
     public fixedInternalValueFvPatchField<scalar>
 {
-    // Private data
+protected:
 
-        //- Name of velocity field
-        word UName_;
-
-        //- Name of density field
-        word rhoName_;
-
-        //- Name of turbulence kinetic energy field
-        word kName_;
+    // Protected data
 
         //- Name of turbulence generation field
         word GName_;
-
-        //- Name of laminar viscosity field
-        word muName_;
-
-        //- Name of turbulent viscosity field
-        word mutName_;
 
         //- Cmu coefficient
         scalar Cmu_;
@@ -84,11 +71,20 @@ class omegaWallFunctionFvPatchScalarField
         //- E coefficient
         scalar E_;
 
+        //- Y+ at the edge of the laminar sublayer
+        scalar yPlusLam_;
 
-    // Private member functions
+
+    // Protected member functions
 
         //- Check the type of the patch
-        void checkType();
+        virtual void checkType();
+
+        //- Calculate the Y+ at the edge of the laminar sublayer
+        virtual scalar calcYPlusLam(const scalar kappa, const scalar E) const;
+
+        //- Write local wall function variables
+        virtual void writeLocalEntries(Ostream&) const;
 
 
 public:
@@ -171,7 +167,7 @@ public:
         // I-O
 
             //- Write
-            void write(Ostream&) const;
+            virtual void write(Ostream&) const;
 };
 
 

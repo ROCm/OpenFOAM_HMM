@@ -120,42 +120,20 @@ public:
             const label nOldPoints,
             const label nOldFaces,
             const label nOldCells,
-            const labelList& oldPatchStarts,
-            const labelList& oldPatchNMeshPoints,
+            const Xfer<labelList>& oldPatchStarts,
+            const Xfer<labelList>& oldPatchNMeshPoints,
 
             // how to subset pieces of mesh to send across
-            const labelListList& subPointMap,
-            const labelListList& subFaceMap,
-            const labelListList& subCellMap,
-            const labelListList& subPatchMap,
+            const Xfer<labelListList>& subPointMap,
+            const Xfer<labelListList>& subFaceMap,
+            const Xfer<labelListList>& subCellMap,
+            const Xfer<labelListList>& subPatchMap,
 
             // how to reconstruct received mesh
-            const labelListList& constructPointMap,
-            const labelListList& constructFaceMap,
-            const labelListList& constructCellMap,
-            const labelListList& constructPatchMap
-        );
-
-        //- (optionally destructively) construct from components
-        //  Note that mesh has to be changed already!
-        mapDistributePolyMesh
-        (
-            const polyMesh& mesh,
-            const label nOldPoints,
-            const label nOldFaces,
-            const label nOldCells,
-            labelList& oldPatchStarts,
-            labelList& oldPatchNMeshPoints,
-
-            labelListList& subPointMap,
-            labelListList& subFaceMap,
-            labelListList& subCellMap,
-            labelListList& subPatchMap,
-            labelListList& constructPointMap,
-            labelListList& constructFaceMap,
-            labelListList& constructCellMap,
-            labelListList& constructPatchMap,
-            const bool reUse                // clone or reuse
+            const Xfer<labelListList>& constructPointMap,
+            const Xfer<labelListList>& constructFaceMap,
+            const Xfer<labelListList>& constructCellMap,
+            const Xfer<labelListList>& constructPatchMap
         );
 
 
