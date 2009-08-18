@@ -12,6 +12,7 @@
       - fvm::laplacian(muEff, U)
       - (fvc::grad(U) & fvc::grad(muEff))
     //- fvc::div(muEff*(fvc::interpolate(dev(fvc::grad(U))) & mesh.Sf()))
+    //- fvc::div(rho*turbulence->nuEff()*dev(fvc::grad(U)().T()))
     );
 
     if (oCorr == nOuterCorr-1)
