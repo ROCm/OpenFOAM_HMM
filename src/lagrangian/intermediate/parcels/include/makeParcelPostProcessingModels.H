@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "NoPostProcessing.H"
 #include "PatchPostProcessing.H"
@@ -38,18 +38,18 @@ License
 
 #define makeParcelPostProcessingModels(ParcelType)                            \
                                                                               \
-    makePostProcessingModel(KinematicCloud<ParcelType>);                      \
+    makePostProcessingModel(InteractingKinematicCloud<ParcelType>);                      \
                                                                               \
     makePostProcessingModelType                                               \
     (                                                                         \
         NoPostProcessing,                                                     \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \
     makePostProcessingModelType                                               \
     (                                                                         \
         PatchPostProcessing,                                                  \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType                                                            \
     );
 

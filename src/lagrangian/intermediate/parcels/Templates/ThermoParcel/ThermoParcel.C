@@ -37,7 +37,7 @@ void Foam::ThermoParcel<ParcelType>::setCellValues
     const label cellI
 )
 {
-    KinematicParcel<ParcelType>::setCellValues(td, dt, cellI);
+    InteractingKinematicParcel<ParcelType>::setCellValues(td, dt, cellI);
 
     cpc_ = td.cpInterp().interpolate(this->position(), cellI);
 
@@ -224,7 +224,7 @@ Foam::ThermoParcel<ParcelType>::ThermoParcel
     const ThermoParcel<ParcelType>& p
 )
 :
-    KinematicParcel<ParcelType>(p),
+    InteractingKinematicParcel<ParcelType>(p),
     T_(p.T_),
     cp_(p.cp_),
     Tc_(p.Tc_),

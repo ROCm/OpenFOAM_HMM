@@ -49,10 +49,14 @@ License
     defineTemplateTypeNameAndDebug(Particle<ParcelType##ThermoType>, 0);      \
     defineTemplateTypeNameAndDebug(Cloud<ParcelType##ThermoType>, 0);         \
                                                                               \
-    defineParcelTypeNameAndDebug(KinematicParcel<ParcelType##ThermoType>, 0); \
+    defineParcelTypeNameAndDebug                                              \
+    (                                                                         \
+        InteractingKinematicParcel<ParcelType##ThermoType>,                   \
+        0                                                                     \
+    );                                                                        \
     defineTemplateTypeNameAndDebug                                            \
     (                                                                         \
-        KinematicParcel<ParcelType##ThermoType>,                              \
+        InteractingKinematicParcel<ParcelType##ThermoType>,                   \
         0                                                                     \
     );                                                                        \
     defineParcelTypeNameAndDebug(ThermoParcel<ParcelType##ThermoType>, 0);    \
@@ -60,7 +64,11 @@ License
     defineParcelTypeNameAndDebug(ReactingParcel<ParcelType##ThermoType>, 0);  \
     defineTemplateTypeNameAndDebug(ReactingParcel<ParcelType##ThermoType>, 0);\
                                                                               \
-    defineParcelTypeNameAndDebug(KinematicCloud<ParcelType##ThermoType>, 0);  \
+    defineParcelTypeNameAndDebug                                              \
+    (                                                                         \
+        InteractingKinematicCloud<ParcelType##ThermoType>,                    \
+        0                                                                     \
+    );                                                                        \
     defineParcelTypeNameAndDebug(ThermoCloud<ParcelType##ThermoType>, 0);     \
     defineParcelTypeNameAndDebug(ReactingCloud<ParcelType##ThermoType>, 0);
 

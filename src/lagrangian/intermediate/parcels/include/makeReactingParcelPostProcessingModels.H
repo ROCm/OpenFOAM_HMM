@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "NoPostProcessing.H"
 #include "PatchPostProcessing.H"
@@ -60,19 +60,19 @@ License
 
 #define makeReactingPostProcessingModelThermoType(ParcelType, ThermoType)     \
                                                                               \
-    makePostProcessingModel(KinematicCloud<ParcelType<ThermoType> >);         \
+    makePostProcessingModel(InteractingKinematicCloud<ParcelType<ThermoType> >);         \
                                                                               \
     makePostProcessingModelThermoType                                         \
     (                                                                         \
         NoPostProcessing,                                                     \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePostProcessingModelThermoType                                         \
     (                                                                         \
         PatchPostProcessing,                                                  \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

@@ -42,7 +42,7 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     basicThermo& thermo
 )
 :
-    KinematicCloud<ParcelType>
+    InteractingKinematicCloud<ParcelType>
     (
         cloudName,
         rho,
@@ -118,7 +118,7 @@ void Foam::ThermoCloud<ParcelType>::checkParcelProperties
     const bool fullyDescribed
 )
 {
-    KinematicCloud<ParcelType>::checkParcelProperties
+    InteractingKinematicCloud<ParcelType>::checkParcelProperties
     (
         parcel,
         lagrangianDt,
@@ -136,7 +136,7 @@ void Foam::ThermoCloud<ParcelType>::checkParcelProperties
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 {
-    KinematicCloud<ParcelType>::resetSourceTerms();
+    InteractingKinematicCloud<ParcelType>::resetSourceTerms();
     hsTrans_.field() = 0.0;
     hcTrans_.field() = 0.0;
 }
@@ -145,14 +145,14 @@ void Foam::ThermoCloud<ParcelType>::resetSourceTerms()
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::preEvolve()
 {
-    KinematicCloud<ParcelType>::preEvolve();
+    InteractingKinematicCloud<ParcelType>::preEvolve();
 }
 
 
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::postEvolve()
 {
-    KinematicCloud<ParcelType>::postEvolve();
+    InteractingKinematicCloud<ParcelType>::postEvolve();
 }
 
 
@@ -222,7 +222,7 @@ void Foam::ThermoCloud<ParcelType>::evolve()
 template<class ParcelType>
 void Foam::ThermoCloud<ParcelType>::info() const
 {
-    KinematicCloud<ParcelType>::info();
+    InteractingKinematicCloud<ParcelType>::info();
 }
 
 

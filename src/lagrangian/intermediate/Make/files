@@ -19,17 +19,25 @@ $(BASECLOUDS)/reactingMultiphaseCloud/reactingMultiphaseCloud.C
 
 
 /* Cloud container/injection mechanisms */
-$(DERIVEDCLOUDS)/basicKinematicCloud/basicKinematicCloud.C
+//$(DERIVEDCLOUDS)/basicKinematicCloud/basicKinematicCloud.C
+$(DERIVEDCLOUDS)/basicInteractingKinematicCloud/basicInteractingKinematicCloud.C
 $(DERIVEDCLOUDS)/basicThermoCloud/basicThermoCloud.C
 $(DERIVEDCLOUDS)/BasicReactingCloud/defineBasicReactingCloud.C
 $(DERIVEDCLOUDS)/BasicReactingMultiphaseCloud/defineBasicReactingMultiphaseCloud.C
 
 
 /* kinematic parcel sub-models */
-KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
-$(KINEMATICPARCEL)/basicKinematicParcel.C
-$(KINEMATICPARCEL)/defineBasicKinematicParcel.C
-$(KINEMATICPARCEL)/makeBasicKinematicParcelSubmodels.C
+// KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
+// $(KINEMATICPARCEL)/basicKinematicParcel.C
+// $(KINEMATICPARCEL)/defineBasicKinematicParcel.C
+// $(KINEMATICPARCEL)/makeBasicKinematicParcelSubmodels.C
+
+
+/* interactingKinematic parcel sub-models */
+INTERACTINGKINEMATICPARCEL=$(DERIVEDPARCELS)/basicInteractingKinematicParcel
+$(INTERACTINGKINEMATICPARCEL)/basicInteractingKinematicParcel.C
+$(INTERACTINGKINEMATICPARCEL)/defineBasicInteractingKinematicParcel.C
+$(INTERACTINGKINEMATICPARCEL)/makeBasicInteractingKinematicParcelSubmodels.C
 
 
 /* thermo parcel sub-models */

@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "LocalInteraction.H"
 #include "Rebound.H"
@@ -61,26 +61,26 @@ License
 
 #define makeReactingPatchInteractionModelThermoType(ParcelType, ThermoType)   \
                                                                               \
-    makePatchInteractionModel(KinematicCloud<ParcelType<ThermoType> >);       \
+    makePatchInteractionModel(InteractingKinematicCloud<ParcelType<ThermoType> >);       \
                                                                               \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
         LocalInteraction,                                                     \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
         Rebound,                                                     \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
         StandardWallInteraction,                                              \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "NoDrag.H"
 #include "SphereDrag.H"
@@ -38,10 +38,10 @@ License
 
 #define makeParcelDragModels(ParcelType)                                     \
                                                                              \
-    makeDragModel(KinematicCloud<ParcelType>);                               \
+    makeDragModel(InteractingKinematicCloud<ParcelType>);                               \
                                                                              \
-    makeDragModelType(NoDrag, KinematicCloud, ParcelType);                   \
-    makeDragModelType(SphereDrag, KinematicCloud, ParcelType);
+    makeDragModelType(NoDrag, InteractingKinematicCloud, ParcelType);                   \
+    makeDragModelType(SphereDrag, InteractingKinematicCloud, ParcelType);
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -32,7 +32,7 @@ inline Foam::ThermoParcel<ParcelType>::constantProperties::constantProperties
     const dictionary& parentDict
 )
 :
-    KinematicParcel<ParcelType>::constantProperties(parentDict),
+    InteractingKinematicParcel<ParcelType>::constantProperties(parentDict),
     T0_(dimensionedScalar(this->dict().lookup("T0")).value()),
     TMin_(dimensionedScalar(this->dict().lookup("TMin")).value()),
     cp0_(dimensionedScalar(this->dict().lookup("cp0")).value()),
@@ -54,7 +54,7 @@ inline Foam::ThermoParcel<ParcelType>::trackData::trackData
     const vector& g
 )
 :
-    KinematicParcel<ParcelType>::trackData
+    InteractingKinematicParcel<ParcelType>::trackData
     (
         cloud,
         constProps,
@@ -78,7 +78,7 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
     const label cellI
 )
 :
-    KinematicParcel<ParcelType>(owner, position, cellI),
+    InteractingKinematicParcel<ParcelType>(owner, position, cellI),
     T_(0.0),
     cp_(0.0),
     Tc_(0.0),
@@ -99,7 +99,7 @@ inline Foam::ThermoParcel<ParcelType>::ThermoParcel
     const constantProperties& constProps
 )
 :
-    KinematicParcel<ParcelType>
+    InteractingKinematicParcel<ParcelType>
     (
         owner,
         position,

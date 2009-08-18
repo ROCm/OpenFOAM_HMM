@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "LocalInteraction.H"
 #include "Rebound.H"
@@ -39,24 +39,24 @@ License
 
 #define makeParcelPatchInteractionModels(ParcelType)                          \
                                                                               \
-    makePatchInteractionModel(KinematicCloud<ParcelType>);                    \
+    makePatchInteractionModel(InteractingKinematicCloud<ParcelType>);                    \
                                                                               \
     makePatchInteractionModelType                                             \
     (                                                                         \
         LocalInteraction,                                                     \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \
     makePatchInteractionModelType                                             \
     (                                                                         \
         Rebound,                                                              \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType                                                            \
     );                                                                        \
     makePatchInteractionModelType                                             \
     (                                                                         \
         StandardWallInteraction,                                              \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType                                                            \
     );
 

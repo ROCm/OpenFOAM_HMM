@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "NoDispersion.H"
 #include "GradientDispersionRAS.H"
@@ -61,32 +61,32 @@ License
 
 #define makeReactingDispersionModelThermoType(ParcelType, ThermoType)         \
                                                                               \
-    makeDispersionModel(KinematicCloud<ParcelType<ThermoType> >);             \
+    makeDispersionModel(InteractingKinematicCloud<ParcelType<ThermoType> >);             \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        DispersionRASModel<KinematicCloud<ParcelType<ThermoType> > >,         \
+        DispersionRASModel<InteractingKinematicCloud<ParcelType<ThermoType> > >,         \
         0                                                                     \
     );                                                                        \
                                                                               \
     makeDispersionModelThermoType                                             \
     (                                                                         \
         NoDispersion,                                                         \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeDispersionModelThermoType                                             \
     (                                                                         \
         GradientDispersionRAS,                                                \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeDispersionModelThermoType                                             \
     (                                                                         \
         StochasticDispersionRAS,                                              \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

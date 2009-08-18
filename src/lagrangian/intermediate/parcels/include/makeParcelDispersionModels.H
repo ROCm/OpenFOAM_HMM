@@ -29,7 +29,7 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "NoDispersion.H"
 #include "GradientDispersionRAS.H"
@@ -39,30 +39,30 @@ License
 
 #define makeParcelDispersionModels(ParcelType)                                \
                                                                               \
-    makeDispersionModel(KinematicCloud<ParcelType>);                          \
+    makeDispersionModel(InteractingKinematicCloud<ParcelType>);               \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
-        DispersionRASModel<KinematicCloud<ParcelType> >,                      \
+        DispersionRASModel<InteractingKinematicCloud<ParcelType> >,           \
         0                                                                     \
     );                                                                        \
                                                                               \
     makeDispersionModelType                                                   \
     (                                                                         \
         NoDispersion,                                                         \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeDispersionModelType                                                   \
     (                                                                         \
         GradientDispersionRAS,                                                \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeDispersionModelType                                                   \
     (                                                                         \
         StochasticDispersionRAS,                                              \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );
 

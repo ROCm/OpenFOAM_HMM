@@ -30,7 +30,7 @@ License
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
-#include "KinematicCloud.H"
+#include "InteractingKinematicCloud.H"
 
 #include "NoDrag.H"
 #include "SphereDrag.H"
@@ -58,19 +58,19 @@ License
 
 #define makeReactingDragModelThermoType(ParcelType, ThermoType)               \
                                                                               \
-    makeDragModel(KinematicCloud<ParcelType<ThermoType> >);                   \
+    makeDragModel(InteractingKinematicCloud<ParcelType<ThermoType> >);                   \
                                                                               \
     makeDragModelThermoType                                                   \
     (                                                                         \
         NoDrag,                                                               \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makeDragModelThermoType                                                   \
     (                                                                         \
         SphereDrag,                                                           \
-        KinematicCloud,                                                       \
+        InteractingKinematicCloud,                                                       \
         ParcelType,                                                           \
         ThermoType                                                            \
     );
