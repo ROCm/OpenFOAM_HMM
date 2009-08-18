@@ -130,7 +130,6 @@ void Foam::Time::setControls()
             FatalIOErrorIn("Time::setControls()", controlDict_)
                 << "expected startTime, firstTime or latestTime"
                 << " found '" << startFrom << "'"
-                //<< "' in dictionary " << controlDict_.name()
                 << exit(FatalIOError);
         }
     }
