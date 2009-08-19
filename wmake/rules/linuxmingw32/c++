@@ -6,7 +6,7 @@ CC          = mingw32-g++
 
 include $(RULES)/c++$(WM_COMPILE_OPTION)
 
-ptFLAGS     = -DNoRepository -ftemplate-depth-60
+ptFLAGS     = -DNoRepository -ftemplate-depth-40
 
 c++FLAGS    = $(GFLAGS) $(c++WARN) $(c++OPT) $(c++DBUG) $(ptFLAGS) $(LIB_HEADER_DIRS)
 
