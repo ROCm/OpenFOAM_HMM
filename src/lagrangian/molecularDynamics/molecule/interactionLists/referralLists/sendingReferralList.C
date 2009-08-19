@@ -71,7 +71,8 @@ void Foam::sendingReferralList::operator=(const sendingReferralList& rhs)
     {
         FatalErrorIn
         (
-            "Foam::distribution::operator=(const Foam::distribution&)"
+            "Foam::sendingReferralList::" \
+            "operator=(const Foam::sendingReferralList&)"
         )
             << "Attempted assignment to self"
             << abort(FatalError);
