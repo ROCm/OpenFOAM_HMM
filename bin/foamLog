@@ -452,5 +452,6 @@ done
 #-----------------------------
 myEcho "Generated XY files for:"
 getAllQueries $DBFILE $LOG
+myEcho "End"
 
 #------------------------------------------------------------------------------

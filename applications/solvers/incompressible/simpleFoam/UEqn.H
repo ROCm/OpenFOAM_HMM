@@ -14,4 +14,3 @@
     ).initialResidual();
 
     maxResidual = max(eqnResidual, maxResidual);
-
