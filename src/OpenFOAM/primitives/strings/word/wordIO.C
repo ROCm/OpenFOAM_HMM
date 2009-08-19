@@ -65,7 +65,8 @@ Foam::Istream& Foam::operator>>(Istream& is, word& w)
         {
             is.setBad();
             FatalIOErrorIn("operator>>(Istream&, word&)", is)
-                << "wrong token type - expected word found non-word characters "
+                << "wrong token type - expected word, found "
+                "non-word characters "
                 << t.info()
                 << exit(FatalIOError);
             return is;
@@ -75,7 +76,7 @@ Foam::Istream& Foam::operator>>(Istream& is, word& w)
     {
         is.setBad();
         FatalIOErrorIn("operator>>(Istream&, word&)", is)
-            << "wrong token type - expected word found "
+            << "wrong token type - expected word, found "
             << t.info()
             << exit(FatalIOError);
 

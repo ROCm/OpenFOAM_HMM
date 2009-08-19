@@ -1,4 +1,4 @@
-if(turbulence)
+if (turbulence)
 {
     if (mesh.changing())
     {
@@ -15,9 +15,9 @@ if(turbulence)
     tgradU.clear();
 
     volScalarField Gcoef =
-        alphak*Cmu*k*(g & fvc::grad(rho))/(epsilon + epsilon0);
+        Cmu*k/sigmak*(g & fvc::grad(rho))/(epsilon + epsilon0);
 
-#   include "wallFunctions.H"
+    #include "wallFunctions.H"
 
     // Dissipation equation
     fvScalarMatrix epsEqn
@@ -26,7 +26,7 @@ if(turbulence)
       + fvm::div(phi, epsilon)
       - fvm::laplacian
         (
-            alphaEps*mut + mul, epsilon,
+            mut/sigmaEps + mul, epsilon,
             "laplacian(DepsilonEff,epsilon)"
         )
      ==
@@ -35,7 +35,7 @@ if(turbulence)
       - fvm::Sp(C2*rho*epsilon/k, epsilon)
     );
 
-#   include "wallDissipation.H"
+    #include "wallDissipation.H"
 
     epsEqn.relax();
     epsEqn.solve();
@@ -51,7 +51,7 @@ if(turbulence)
       + fvm::div(phi, k)
       - fvm::laplacian
         (
-            alphak*mut + mul, k,
+            mut/sigmak + mul, k,
             "laplacian(DkEff,k)"
         )
      ==
@@ -66,7 +66,7 @@ if(turbulence)
     //- Re-calculate viscosity
     mut = rho*Cmu*sqr(k)/(epsilon + epsilon0);
 
-#   include "wallViscosity.H"
+    #include "wallViscosity.H"
 }
 
 mu = mut + mul;

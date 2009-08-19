@@ -45,7 +45,6 @@ SourceFiles
 #include "tensor.H"
 #include "pTraits.H"
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -69,6 +68,7 @@ class pointEdgePoint
         //- normal distance (squared) from point to origin
         scalar distSqr_;
 
+
     // Private Member Functions
 
         //- Evaluate distance to point. Update distSqr, origin from whomever
@@ -89,12 +89,14 @@ class pointEdgePoint
             const scalar tol
         );
 
+
 public:
 
     // Static data members
 
         //- initial point far away.
         static point greatPoint;
+
 
     // Constructors
 

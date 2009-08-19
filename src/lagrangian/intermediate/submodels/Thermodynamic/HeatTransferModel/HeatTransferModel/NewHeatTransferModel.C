@@ -56,7 +56,7 @@ Foam::HeatTransferModel<CloudType>::New
             << HeatTransferModelType
             << ", constructor not in hash table" << nl << nl
             << "    Valid HeatTransferModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
     return autoPtr<HeatTransferModel<CloudType> >(cstrIter()(dict, owner));

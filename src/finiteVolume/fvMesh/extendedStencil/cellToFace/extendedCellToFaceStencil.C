@@ -280,9 +280,8 @@ Foam::extendedCellToFaceStencil::calcDistributeMap
         new mapDistribute
         (
             nCompact,
-            sendCompact,
-            recvCompact,
-            true            // reuse send/recv maps.
+            sendCompact.xfer(),
+            recvCompact.xfer()
         )
     );
 

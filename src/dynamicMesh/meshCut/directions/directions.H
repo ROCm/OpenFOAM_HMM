@@ -74,7 +74,7 @@ public:
         {
             TAN1,
             TAN2,
-            NORMAL,
+            NORMAL
         };
 
 private:

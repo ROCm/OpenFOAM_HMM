@@ -28,7 +28,7 @@ License
 
 #include "calculatedFvPatchField.H"
 #include "alphatWallFunctionFvPatchScalarField.H"
-#include "mutWallFunctionFvPatchScalarField.H"
+#include "mutkWallFunctionFvPatchScalarField.H"
 #include "epsilonWallFunctionFvPatchScalarField.H"
 #include "kqRWallFunctionFvPatchField.H"
 #include "omegaWallFunctionFvPatchScalarField.H"
@@ -146,7 +146,7 @@ tmp<volScalarField> autoCreateMut
             if (isType<wallFvPatch>(bm[patchI]))
             {
                 mutBoundaryTypes[patchI] =
-                    RASModels::mutWallFunctionFvPatchScalarField::typeName;
+                    RASModels::mutkWallFunctionFvPatchScalarField::typeName;
             }
             else
             {

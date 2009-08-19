@@ -68,33 +68,13 @@ public:
         mapDistributeLagrangian
         (
             const label nNewParticles,
-            const labelListList& subParticleMap,
-            const labelListList& constructParticleMap,
-            const labelListList& constructCellLabels
+            const Xfer<labelListList>& subParticleMap,
+            const Xfer<labelListList>& constructParticleMap,
+            const Xfer<labelListList>& constructCellLabels
         )
         :
             particleMap_(nNewParticles, subParticleMap, constructParticleMap),
             constructCellLabels_(constructCellLabels)
-        {}
-
-        //- Construct from components and steal storage
-        mapDistributeLagrangian
-        (
-            const label nNewParticles,
-            labelListList& subParticleMap,
-            labelListList& constructParticleMap,
-            labelListList& constructCellLabels,
-            const bool reUse
-        )
-        :
-            particleMap_
-            (
-                nNewParticles,
-                subParticleMap,
-                constructParticleMap,
-                reUse
-            ),
-            constructCellLabels_(constructCellLabels, reUse)
         {}
 
 

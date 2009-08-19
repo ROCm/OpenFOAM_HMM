@@ -172,29 +172,13 @@ const Foam::List<Foam::labelPair>& Foam::mapDistribute::schedule() const
 Foam::mapDistribute::mapDistribute
 (
     const label constructSize,
-    const labelListList& subMap,
-    const labelListList& constructMap
+    const Xfer<labelListList>& subMap,
+    const Xfer<labelListList>& constructMap
 )
 :
     constructSize_(constructSize),
     subMap_(subMap),
     constructMap_(constructMap),
-    schedulePtr_()
-{}
-
-
-//- (optionally destructively) construct from components
-Foam::mapDistribute::mapDistribute
-(
-    const label constructSize,
-    labelListList& subMap,
-    labelListList& constructMap,
-    const bool reUse                // clone or reuse
-)
-:
-    constructSize_(constructSize),
-    subMap_(subMap, reUse),
-    constructMap_(constructMap, reUse),
     schedulePtr_()
 {}
 
@@ -286,7 +270,7 @@ Foam::mapDistribute::mapDistribute(const mapDistribute& map)
 
 void Foam::mapDistribute::compact(const boolList& elemIsUsed)
 {
-    // 1. send back to sender. Have him delete the corresponding element
+    // 1. send back to sender. Have sender delete the corresponding element
     //    from the submap and do the same to the constructMap locally
     //    (and in same order).
 

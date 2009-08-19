@@ -27,7 +27,7 @@ License
 #include "backwardsCompatibilityWallFunctions.H"
 
 #include "calculatedFvPatchField.H"
-#include "nutWallFunctionFvPatchScalarField.H"
+#include "nutkWallFunctionFvPatchScalarField.H"
 #include "epsilonWallFunctionFvPatchScalarField.H"
 #include "kqRWallFunctionFvPatchField.H"
 #include "omegaWallFunctionFvPatchScalarField.H"
@@ -75,7 +75,7 @@ tmp<volScalarField> autoCreateNut
             if (isType<wallFvPatch>(bm[patchI]))
             {
                 nutBoundaryTypes[patchI] =
-                    RASModels::nutWallFunctionFvPatchScalarField::typeName;
+                    RASModels::nutkWallFunctionFvPatchScalarField::typeName;
             }
             else
             {

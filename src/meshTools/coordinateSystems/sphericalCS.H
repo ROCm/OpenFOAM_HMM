@@ -85,6 +85,7 @@ protected:
             bool translate
         ) const;
 
+
 public:
 
     //- Runtime type information
@@ -141,7 +142,6 @@ public:
 
         //- Non-const access to inDegrees
         bool& inDegrees();
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

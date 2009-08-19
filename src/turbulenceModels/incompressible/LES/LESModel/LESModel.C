@@ -82,6 +82,10 @@ LESModel::LESModel
     delta_(LESdelta::New("delta", U.mesh(), *this))
 {
     readIfPresent("k0", k0_);
+
+    // Force the construction of the mesh deltaCoeffs which may be needed
+    // for the construction of the derived models and BCs
+    mesh_.deltaCoeffs();
 }
 
 
@@ -129,7 +133,7 @@ autoPtr<LESModel> LESModel::New
         )   << "Unknown LESModel type " << modelName
             << endl << endl
             << "Valid LESModel types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

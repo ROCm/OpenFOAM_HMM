@@ -53,7 +53,7 @@ Foam::radiation::absorptionEmissionModel::New
             << absorptionEmissionModelType
             << ", constructor not in hash table" << nl << nl
             << "    Valid absorptionEmissionModel types are :" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
     return autoPtr<absorptionEmissionModel>(cstrIter()(dict, mesh));

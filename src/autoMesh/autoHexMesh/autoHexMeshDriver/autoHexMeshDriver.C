@@ -28,12 +28,9 @@ License
 #include "fvMesh.H"
 #include "Time.H"
 #include "boundBox.H"
-#include "globalIndex.H"
 #include "wallPolyPatch.H"
-#include "mapDistributePolyMesh.H"
 #include "cellSet.H"
 #include "syncTools.H"
-#include "motionSmoother.H"
 #include "refinementParameters.H"
 #include "snapParameters.H"
 #include "layerParameters.H"
@@ -225,7 +222,9 @@ Foam::autoHexMeshDriver::autoHexMeshDriver
                 IOobject
                 (
                     "abc",                                      // dummy name
-                    mesh_.time().findInstance("triSurface", word::null),// inst
+                    //mesh_.time().findInstance("triSurface", word::null),
+                                                                // instance
+                    mesh_.time().constant(),                    // instance
                     "triSurface",                               // local
                     mesh_.time(),                               // registry
                     IOobject::MUST_READ,

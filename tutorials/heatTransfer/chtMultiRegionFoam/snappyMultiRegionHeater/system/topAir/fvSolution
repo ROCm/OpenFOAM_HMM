@@ -22,7 +22,8 @@ solvers
         preconditioner  DIC;
         tolerance       1e-8;
         relTol          0;
-    };
+    }
+
     p
     {
         solver           GAMG;
@@ -35,64 +36,34 @@ solvers
         nCellsInCoarsestLevel 10;
         agglomerator     faceAreaPair;
         mergeLevels      1;
-    };
+    }
+
     pFinal
     {
-        solver           GAMG;
+        $p;
         tolerance        1e-8;
         relTol           0;
+    }
 
-        smoother         GaussSeidel;
-
-        cacheAgglomeration true;
-        nCellsInCoarsestLevel 10;
-        agglomerator     faceAreaPair;
-        mergeLevels      1;
-    };
     U
     {
         solver           PBiCG;
         preconditioner   DILU;
         tolerance        1e-08;
         relTol           0;
-    };
+    }
 
     h
     {
-        solver           PBiCG;
-        preconditioner   DILU;
+        $U;
         tolerance        1e-08;
         relTol           0.1;
-    };
-    hFinal
-    {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
+    }
 
-    k
+    "(hFinal|k|epsilon|R)"
     {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
-    epsilon
-    {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
-    R
-    {
-        solver           PBiCG;
-        preconditioner   DILU;
-        tolerance        1e-08;
-        relTol           0;
-    };
+        $U;
+    }
 }
 
 PISO

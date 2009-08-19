@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    A subset of mesh faces.
-
 \*---------------------------------------------------------------------------*/
 
 #include "faceZone.H"
@@ -95,54 +92,6 @@ void Foam::faceZone::calcFaceZonePatch() const
     {
         Info<< "void faceZone::calcFaceZonePatch() const : "
             << "Finished calculating primitive patch"
-            << endl;
-    }
-}
-
-
-const Foam::Map<Foam::label>& Foam::faceZone::faceLookupMap() const
-{
-    if (!faceLookupMapPtr_)
-    {
-        calcFaceLookupMap();
-    }
-
-    return *faceLookupMapPtr_;
-}
-
-
-void Foam::faceZone::calcFaceLookupMap() const
-{
-    if (debug)
-    {
-        Info<< "void faceZone::calcFaceLookupMap() const : "
-            << "Calculating face lookup map"
-            << endl;
-    }
-
-    if (faceLookupMapPtr_)
-    {
-        FatalErrorIn
-        (
-            "void faceZone::calcFaceLookupMap() const"
-        )   << "face lookup map already calculated"
-            << abort(FatalError);
-    }
-
-    const labelList& addr = *this;
-
-    faceLookupMapPtr_ = new Map<label>(2*addr.size());
-    Map<label>& flm = *faceLookupMapPtr_;
-
-    forAll (addr, faceI)
-    {
-        flm.insert(addr[faceI], faceI);
-    }
-
-    if (debug)
-    {
-        Info<< "void faceZone::calcFaceLookupMap() const : "
-            << "Finished calculating face lookup map"
             << endl;
     }
 }
@@ -228,16 +177,13 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(name),
+    zone(name, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
@@ -252,22 +198,18 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(name),
+    zone(name, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
 
 
-// Construct from dictionary
 Foam::faceZone::faceZone
 (
     const word& name,
@@ -276,23 +218,18 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(dict.lookup("faceLabels")),
-    name_(name),
+    zone("face", name, dict, index),
     flipMap_(dict.lookup("flipMap")),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
 
 
-// Construct given the original zone and resetting the
-// face list and zone mesh information
 Foam::faceZone::faceZone
 (
     const faceZone& fz,
@@ -302,16 +239,13 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(fz.name()),
+    zone(fz, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
@@ -326,16 +260,13 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    labelList(addr),
-    name_(fz.name()),
+    zone(fz, addr, index),
     flipMap_(fm),
-    index_(index),
     zoneMesh_(zm),
     patchPtr_(NULL),
     masterCellsPtr_(NULL),
     slaveCellsPtr_(NULL),
-    mePtr_(NULL),
-    faceLookupMapPtr_(NULL)
+    mePtr_(NULL)
 {
     checkAddressing();
 }
@@ -351,26 +282,15 @@ Foam::faceZone::~faceZone()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::label Foam::faceZone::whichFace(const label globalFaceID) const
-{
-    const Map<label>& flm = faceLookupMap();
-
-    Map<label>::const_iterator flmIter = flm.find(globalFaceID);
-
-    if (flmIter == flm.end())
-    {
-        return -1;
-    }
-    else
-    {
-        return flmIter();
-    }
-}
-
-
 const Foam::faceZoneMesh& Foam::faceZone::zoneMesh() const
 {
     return zoneMesh_;
+}
+
+
+Foam::label Foam::faceZone::whichFace(const label globalFaceID) const
+{
+    return zone::localID(globalFaceID);
 }
 
 
@@ -450,13 +370,14 @@ const Foam::labelList& Foam::faceZone::meshEdges() const
 
 void Foam::faceZone::clearAddressing()
 {
+    zone::clearAddressing();
+
     deleteDemandDrivenData(patchPtr_);
 
     deleteDemandDrivenData(masterCellsPtr_);
     deleteDemandDrivenData(slaveCellsPtr_);
 
     deleteDemandDrivenData(mePtr_);
-    deleteDemandDrivenData(faceLookupMapPtr_);
 }
 
 
@@ -504,30 +425,7 @@ void Foam::faceZone::updateMesh(const mapPolyMesh& mpm)
 
 bool Foam::faceZone::checkDefinition(const bool report) const
 {
-    const labelList& addr = *this;
-
-    bool boundaryError = false;
-
-    forAll(addr, i)
-    {
-        if (addr[i] < 0 || addr[i] >= zoneMesh().mesh().faces().size())
-        {
-            boundaryError = true;
-
-            if (report)
-            {
-                SeriousErrorIn
-                (
-                    "bool faceZone::checkDefinition("
-                    "const bool report) const"
-                )   << "Zone " << name()
-                    << " contains invalid face label " << addr[i] << nl
-                    << "Valid face labels are 0.."
-                    << zoneMesh().mesh().faces().size()-1 << endl;
-            }
-        }
-    }
-    return boundaryError;
+    return zone::checkDefinition(zoneMesh().mesh().faces().size(), report);
 }
 
 
@@ -642,10 +540,10 @@ void Foam::faceZone::writeDict(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& p)
+Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& fz)
 {
-    p.write(os);
-    os.check("Ostream& operator<<(Ostream& f, const faceZone& p");
+    fz.write(os);
+    os.check("Ostream& operator<<(Ostream& os, const faceZone& fz");
     return os;
 }
 

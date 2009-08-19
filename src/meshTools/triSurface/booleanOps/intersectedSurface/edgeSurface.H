@@ -117,7 +117,6 @@ private:
         void calcPointEdges();
 
 
-
 public:
 
     ClassName("edgeSurface");

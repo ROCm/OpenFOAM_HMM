@@ -42,20 +42,35 @@ Foam::DynamicList<MPI_Request> OPstream_outstandingRequests_;
 
 Foam::OPstream::~OPstream()
 {
-    if
-    (
-       !write
-        (
-            commsType_,
-            toProcNo_,
-            buf_.begin(),
-            bufPosition_
-        )
-    )
+    if (commsType_ == nonBlocking)
     {
-        FatalErrorIn("OPstream::~OPstream()")
-            << "MPI_Bsend cannot send outgoing message"
-            << Foam::abort(FatalError);
+        // alloc nonBlocking only if empty buffer. This denotes the buffer
+        // having been transfered out.
+        if (bufPosition_ > 0)
+        {
+            FatalErrorIn("OPstream::~OPstream()")
+                << "OPstream contains buffer so cannot be used with nonBlocking"
+                << " since destructor would destroy buffer whilst possibly"
+                << " still sending." << Foam::abort(FatalError);
+        }
+    }
+    else
+    {
+        if
+        (
+           !write
+            (
+                commsType_,
+                toProcNo_,
+                buf_.begin(),
+                bufPosition_
+            )
+        )
+        {
+            FatalErrorIn("OPstream::~OPstream()")
+                << "MPI cannot send outgoing message"
+                << Foam::abort(FatalError);
+        }
     }
 }
 

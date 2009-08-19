@@ -88,7 +88,11 @@ RASModel::RASModel
     omegaSmall_("omegaSmall", omega0_.dimensions(), SMALL),
 
     y_(mesh_)
-{}
+{
+    // Force the construction of the mesh deltaCoeffs which may be needed
+    // for the construction of the derived models and BCs
+    mesh_.deltaCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
@@ -137,7 +141,7 @@ autoPtr<RASModel> RASModel::New
         )   << "Unknown RASModel type " << modelName
             << endl << endl
             << "Valid RASModel types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

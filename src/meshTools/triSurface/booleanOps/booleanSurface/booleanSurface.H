@@ -82,6 +82,7 @@ class booleanSurface
             INSIDE
         };
 
+
     // Private data
 
         //- From new to old face + surface:
@@ -89,6 +90,7 @@ class booleanSurface
         //     <0 : to face on surface2. Negate and offset by one to get
         //          face2 (e.g. face2I = -faceMap[]-1)
         labelList faceMap_;
+
 
     // Private Member Functions
 
@@ -151,6 +153,7 @@ class booleanSurface
             labelList& side
         );
 
+
 public:
 
     ClassName("booleanSurface");
@@ -175,7 +178,7 @@ public:
         booleanSurface();
 
         //- Construct from surfaces and face labels to keep.
-        //  Walks from provided seed faces without crossing intersection line 
+        //  Walks from provided seed faces without crossing intersection line
         //  to determine faces to keep.
         booleanSurface
         (
@@ -233,8 +236,6 @@ public:
             }
             return -faceMap_[faceI]-1;
         }
-
-
 };
 
 
