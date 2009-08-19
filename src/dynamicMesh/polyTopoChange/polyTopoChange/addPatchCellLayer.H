@@ -26,7 +26,8 @@ Class
     Foam::addPatchCellLayer
 
 Description
-    Adds layers of cells to outside of polyPatch.
+    Adds layers of cells to outside of polyPatch. Can optionally create
+    stand-alone extruded mesh (addToMesh=false).
 
     Call setRefinement with offset vector for every patch point and number
     of layers per patch face and number of layers per patch point.
@@ -164,6 +165,9 @@ class addPatchCellLayer
         //- Reference to mesh
         const polyMesh& mesh_;
 
+        //- Add layers to existing mesh or create new mesh
+        const bool addToMesh_;
+
         //- For all patchpoints: list of added points (size 0 or nLayers)
         //  First point in list is one nearest to original point in patch,
         //  last one is the new point on the surface.
@@ -253,7 +257,7 @@ public:
     // Constructors
 
         //- Construct from mesh.
-        addPatchCellLayer(const polyMesh& mesh);
+        addPatchCellLayer(const polyMesh& mesh, const bool addToMesh = true);
 
 
     // Member Functions
