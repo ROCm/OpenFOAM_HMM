@@ -55,8 +55,8 @@ Foam::faceZonesIntegration::faceZonesIntegration
     obr_(obr),
     active_(true),
     log_(false),
-    faceZonesSet_(),
-    fItems_(),
+    zoneNames_(),
+    fieldNames_(),
     filePtr_(NULL)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
@@ -94,9 +94,9 @@ void Foam::faceZonesIntegration::read(const dictionary& dict)
     {
         log_ = dict.lookupOrDefault<Switch>("log", false);
 
-        dict.lookup("fields") >> fItems_;
+        dict.lookup("fields") >> fieldNames_;
 
-        dict.lookup("faceZones") >> faceZonesSet_;
+        dict.lookup("faceZones") >> zoneNames_;
     }
 }
 
@@ -132,11 +132,11 @@ void Foam::faceZonesIntegration::makeFile()
             mkDir(faceZonesIntegrationDir);
 
             // Open new file at start up
-            filePtr_.resize(fItems_.size());
+            filePtr_.resize(fieldNames_.size());
 
-            forAll(fItems_, Ifields)
+            forAll(fieldNames_, fieldI)
             {
-                const word& fieldName = fItems_[Ifields];
+                const word& fieldName = fieldNames_[fieldI];
 
                 OFstream* sPtr = new OFstream
                     (
@@ -163,10 +163,9 @@ void Foam::faceZonesIntegration::writeFileHeader()
 
         os  << "#Time " << setw(w);
 
-        forAll (faceZonesSet_, zoneI)
+        forAll (zoneNames_, zoneI)
         {
-            const word name = faceZonesSet_[zoneI];
-            os  << name << setw(w);
+            os  << zoneNames_[zoneI] << setw(w);
         }
 
         os  << nl << endl;
@@ -192,9 +191,9 @@ void Foam::faceZonesIntegration::write()
     {
         makeFile();
 
-        forAll(fItems_, fieldI)
+        forAll(fieldNames_, fieldI)
         {
-            const word& fieldName = fItems_[fieldI];
+            const word& fieldName = fieldNames_[fieldI];
 
             const surfaceScalarField& sField =
                 obr_.lookupObject<surfaceScalarField>(fieldName);
@@ -203,17 +202,17 @@ void Foam::faceZonesIntegration::write()
 
             // 1. integrate over all face zones
 
-            scalarField integralVals(faceZonesSet_.size());
+            scalarField integralVals(zoneNames_.size());
 
-            forAll(faceZonesSet_, setI)
+            forAll(integralVals, zoneI)
             {
-                const word name = faceZonesSet_[setI];
+                const word& name = zoneNames_[zoneI];
 
                 label zoneID = mesh.faceZones().findZoneID(name);
 
                 const faceZone& fZone = mesh.faceZones()[zoneID];
 
-                integralVals[setI] = returnReduce
+                integralVals[zoneI] = returnReduce
                 (
                     calcIntegral(sField, fZone),
                     sumOp<scalar>()
@@ -231,15 +230,15 @@ void Foam::faceZonesIntegration::write()
 
                 os  << obr_.time().value();
 
-                forAll(integralVals, setI)
+                forAll(integralVals, zoneI)
                 {
-                    os  << ' ' << setw(w) << integralVals[setI];
+                    os  << ' ' << setw(w) << integralVals[zoneI];
 
                     if (log_)
                     {
                         Info<< "faceZonesIntegration output:" << nl
-                            << "    Integration[" << setI << "] "
-                            << integralVals[setI] << endl;
+                            << "    Integration[" << zoneI << "] "
+                            << integralVals[zoneI] << endl;
                     }
                 }
 

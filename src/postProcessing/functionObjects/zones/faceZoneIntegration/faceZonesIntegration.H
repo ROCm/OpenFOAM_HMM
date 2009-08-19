@@ -82,11 +82,11 @@ protected:
             //- Switch to send output to Info as well as to file
             Switch log_;
 
-            //- faceZones to integrate over
-            wordList faceZonesSet_;
+            //- List of face zone names to integrate over
+            wordList zoneNames_;
 
             //- Names of the surface fields
-            wordList fItems_;
+            wordList fieldNames_;
 
 
         //- Current open files
