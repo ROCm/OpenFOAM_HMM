@@ -43,12 +43,8 @@ SourceFiles
 #ifndef pointZone_H
 #define pointZone_H
 
-#include "labelList.H"
-#include "typeInfo.H"
-#include "dictionary.H"
+#include "zone.H"
 #include "pointZoneMeshFwd.H"
-#include "Map.H"
-#include "pointField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -67,36 +63,21 @@ Ostream& operator<<(Ostream&, const pointZone&);
 
 class pointZone
 :
-    public labelList
+    public zone
 {
+
+protected:
+
     // Private data
-
-        //- Name of zone
-        word name_;
-
-        //- Index of zone
-        label index_;
 
         //- Reference to zone list
         const pointZoneMesh& zoneMesh_;
-
-
-        // Demand-driven private data
-
-            //- Map of point labels in zone for fast location lookup
-            mutable Map<label>* pointLookupMapPtr_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
         pointZone(const pointZone&);
-
-        //- Return map of local point indices
-        const Map<label>& pointLookupMap() const;
-
-        //- Build map of local point indices
-        void calcPointLookupMap() const;
 
 
 public:
@@ -210,45 +191,23 @@ public:
 
 
     //- Destructor
-
-        virtual ~pointZone();
+    virtual ~pointZone();
 
 
     // Member Functions
 
-        //- Return name
-        const word& name() const
-        {
-            return name_;
-        }
-
-        //- Map storing the local point index for every global point
-        //  index.  Used to find out the index of point in the zone from
-        //  the known global point index.  If the point is not in the
-        //  zone, returns -1
-        label whichPoint(const label globalPointID) const;
-
-        //- Return the index of this zone in zone list
-        label index() const
-        {
-            return index_;
-        }
-
         //- Return zoneMesh reference
         const pointZoneMesh& zoneMesh() const;
 
-        //- Clear addressing
-        void clearAddressing();
+        //- Helper function to re-direct to zone::localID(...)
+        label whichPoint(const label globalPointID) const;
 
         //- Check zone definition. Return true if in error.
-        bool checkDefinition(const bool report = false) const;
+        virtual bool checkDefinition(const bool report = false) const;
 
         //- Correct patch after moving points
         virtual void movePoints(const pointField&)
         {}
-
-        //- Write
-        virtual void write(Ostream&) const;
 
         //- Write dictionary
         virtual void writeDict(Ostream&) const;
@@ -263,8 +222,9 @@ public:
         void operator=(const labelList&);
 
 
-    // Ostream Operator
+    // I-O
 
+        //- Ostream Operator
         friend Ostream& operator<<(Ostream&, const pointZone&);
 };
 

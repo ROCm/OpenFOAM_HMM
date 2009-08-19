@@ -7,8 +7,7 @@
     scalar epsilon = turbulence->epsilon()()[cellId];
 //    scalar omega = turbulence->omega()()[cellId];
     scalar k = turbulence->k()()[cellId];
-    scalar Up =
-        flowDirection & (U[cellId] - U.boundaryField()[patchId][faceId]);
+    scalar magUp = mag(U[cellId] - U.boundaryField()[patchId][faceId]);
 
     scalar tauw = flowDirection & R & wallNormal;
 
@@ -16,7 +15,7 @@
 
     scalar yPlus = uTau*y[cellId]/(nu + ROOTVSMALL);
 
-    scalar uPlus = Up/(uTau + ROOTVSMALL);
+    scalar uPlus = magUp/(uTau + ROOTVSMALL);
 
     scalar nutPlus = nut/nu;
 
@@ -26,7 +25,7 @@
 
 //    scalar omegaPlus = omega*nu/(sqr(uTau) + ROOTVSMALL);
 
-    scalar Rey = Up*y[cellId]/nu;
+    scalar Rey = magUp*y[cellId]/nu;
 
     Info<< "Rey = " << Rey << ", uTau = " << uTau << ", nut+ = " << nutPlus
         << ", y+ = " << yPlus << ", u+ = " << uPlus

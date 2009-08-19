@@ -64,6 +64,7 @@ class coordinateSystems
         //- Disallow default bitwise assignment
         void operator=(const coordinateSystems&);
 
+
 public:
 
     //- Runtime type information
@@ -88,10 +89,12 @@ public:
             const Xfer<PtrList<coordinateSystem> >&
         );
 
+
     // Selectors
 
         //- Return previously registered or read construct from "constant"
         static const coordinateSystems& New(const objectRegistry&);
+
 
     // Member Functions
 

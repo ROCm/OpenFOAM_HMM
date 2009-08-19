@@ -42,12 +42,8 @@ SourceFiles
 #ifndef cellZone_H
 #define cellZone_H
 
-#include "labelList.H"
-#include "typeInfo.H"
-#include "dictionary.H"
+#include "zone.H"
 #include "cellZoneMeshFwd.H"
-#include "pointFieldFwd.H"
-#include "Map.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -66,35 +62,21 @@ Ostream& operator<<(Ostream&, const cellZone&);
 
 class cellZone
 :
-    public labelList
+    public zone
 {
-    // Private data
 
-        //- Name of zone
-        word name_;
+protected:
 
-        //- Index of zone
-        label index_;
+    // Protected data
 
         //- Reference to zone list
         const cellZoneMesh& zoneMesh_;
-
-        // Demand-driven private data
-
-            //- Map of cell labels in zone for fast location lookup
-            mutable Map<label>* cellLookupMapPtr_;
 
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
         cellZone(const cellZone&);
-
-        //- Return map of local cell indices
-        const Map<label>& cellLookupMap() const;
-
-        //- Build map of local cell indices
-        void calcCellLookupMap() const;
 
 
 public:
@@ -208,45 +190,19 @@ public:
 
 
     //- Destructor
-
-        virtual ~cellZone();
+    virtual ~cellZone();
 
 
     // Member Functions
 
-        //- Return name
-        const word& name() const
-        {
-            return name_;
-        }
-
-        //- Map storing the local cell index for every global cell
-        //  index.  Used to find out the index of cell in the zone from
-        //  the known global cell index.  If the cell is not in the
-        //  zone, returns -1
+        //- Helper function to re-direct to zone::localID(...)
         label whichCell(const label globalCellID) const;
-
-        //- Return the index of this zone in zone list
-        label index() const
-        {
-            return index_;
-        }
 
         //- Return zoneMesh reference
         const cellZoneMesh& zoneMesh() const;
 
-        //- Clear addressing
-        void clearAddressing();
-
         //- Check zone definition. Return true if in error.
-        bool checkDefinition(const bool report = false) const;
-
-        //- Correct patch after moving points
-        virtual void movePoints(const pointField&)
-        {}
-
-        //- Write
-        virtual void write(Ostream&) const;
+        virtual bool checkDefinition(const bool report = false) const;
 
         //- Write dictionary
         virtual void writeDict(Ostream&) const;
@@ -261,8 +217,9 @@ public:
         void operator=(const labelList&);
 
 
-    // Ostream Operator
+    // I-O
 
+        //- Ostream Operator
         friend Ostream& operator<<(Ostream&, const cellZone&);
 };
 

@@ -57,7 +57,7 @@ class dictionary;
 class mapPolyMesh;
 
 /*---------------------------------------------------------------------------*\
-                           Class faceZonesIntegration Declaration
+                    Class faceZonesIntegration Declaration
 \*---------------------------------------------------------------------------*/
 
 class faceZonesIntegration
@@ -65,43 +65,44 @@ class faceZonesIntegration
 
 protected:
 
-    // Private data
+    // Protected data
 
         //- Name of this set of face zone integration,
-        //  Also used as the name of the probes directory.
+        //  Also used as the name of the output directory.
         word name_;
 
         const objectRegistry& obr_;
 
+
         // Read from dictionary
 
-            //- on/off switch
+            //- On/off switch
             bool active_;
 
             //- Switch to send output to Info as well as to file
             Switch log_;
 
-            //- faceZones to integrate over
-            wordList faceZonesSet_;
+            //- List of face zone names to integrate over
+            wordList zoneNames_;
 
             //- Names of the surface fields
-            wordList fItems_;
+            wordList fieldNames_;
 
 
         //- Current open files
-        HashPtrTable<OFstream> faceZonesIntegrationFilePtr_;
+        HashPtrTable<OFstream> filePtr_;
 
 
 
-    // Private Member Functions
+    // Protected Member Functions
 
         //- If the integration file has not been created create it
         void makeFile();
 
-        scalar calcFaceZonesIntegral
+        scalar calcIntegral
         (
-            const surfaceScalarField& fD,
-            const faceZone& fz
+            const surfaceScalarField& sField,
+            const faceZone& fZone
         ) const;
 
 
@@ -134,9 +135,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~faceZonesIntegration();
+    //- Destructor
+    virtual ~faceZonesIntegration();
 
 
     // Member Functions

@@ -120,6 +120,7 @@ protected:
         //- Prime-squared average
         static const word EXT_PRIME2MEAN;
 
+
     // Private data
 
         //- Name of this set of field averages.
@@ -143,6 +144,7 @@ protected:
         //- List of field average items, describing what averages to be
         //  calculated and output
         List<fieldAverageItem> faItems_;
+
 
         // Lists of averages
 
@@ -220,7 +222,7 @@ protected:
             ) const;
 
 
-        // IO
+        // I-O
 
             //- Write averages
             virtual void writeAverages() const;
@@ -272,8 +274,7 @@ public:
 
 
     //- Destructor
-
-        virtual ~fieldAverage();
+    virtual ~fieldAverage();
 
 
     // Member Functions

@@ -131,6 +131,7 @@ class edgeIntersections
             boolList& affectedEdges
         ) const;
 
+
 public:
 
     ClassName("edgeIntersections");

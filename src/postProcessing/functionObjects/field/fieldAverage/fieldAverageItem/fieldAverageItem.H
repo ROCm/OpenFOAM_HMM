@@ -116,9 +116,8 @@ public:
         fieldAverageItem(const fieldAverageItem&);
 
 
-    // Destructor
-
-        ~fieldAverageItem();
+    //- Destructor
+    ~fieldAverageItem();
 
 
     // Member Functions
@@ -166,6 +165,7 @@ public:
 
         void operator=(const fieldAverageItem&);
 
+
     // Friend Operators
 
         friend bool operator==
@@ -189,6 +189,7 @@ public:
         {
             return !(a == b);
         }
+
 
     // IOstream Operators
 

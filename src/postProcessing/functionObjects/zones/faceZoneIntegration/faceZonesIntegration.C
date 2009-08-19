@@ -55,9 +55,9 @@ Foam::faceZonesIntegration::faceZonesIntegration
     obr_(obr),
     active_(true),
     log_(false),
-    faceZonesSet_(),
-    fItems_(),
-    faceZonesIntegrationFilePtr_(NULL)
+    zoneNames_(),
+    fieldNames_(),
+    filePtr_(NULL)
 {
     // Check if the available mesh is an fvMesh otherise deactivate
     if (!isA<fvMesh>(obr_))
@@ -94,9 +94,9 @@ void Foam::faceZonesIntegration::read(const dictionary& dict)
     {
         log_ = dict.lookupOrDefault<Switch>("log", false);
 
-        dict.lookup("fields") >> fItems_;
+        dict.lookup("fields") >> fieldNames_;
 
-        dict.lookup("faceZones") >> faceZonesSet_;
+        dict.lookup("faceZones") >> zoneNames_;
     }
 }
 
@@ -104,7 +104,7 @@ void Foam::faceZonesIntegration::read(const dictionary& dict)
 void Foam::faceZonesIntegration::makeFile()
 {
     // Create the face Zone file if not already created
-    if (faceZonesIntegrationFilePtr_.empty())
+    if (filePtr_.empty())
     {
         if (debug)
         {
@@ -132,18 +132,18 @@ void Foam::faceZonesIntegration::makeFile()
             mkDir(faceZonesIntegrationDir);
 
             // Open new file at start up
-            faceZonesIntegrationFilePtr_.resize(fItems_.size());
+            filePtr_.resize(fieldNames_.size());
 
-            forAll(fItems_, Ifields)
+            forAll(fieldNames_, fieldI)
             {
-                const word& fieldName = fItems_[Ifields];
+                const word& fieldName = fieldNames_[fieldI];
 
                 OFstream* sPtr = new OFstream
                     (
                         faceZonesIntegrationDir/fieldName
                     );
 
-                faceZonesIntegrationFilePtr_.insert(fieldName, sPtr);
+                filePtr_.insert(fieldName, sPtr);
             }
 
             // Add headers to output data
@@ -155,18 +155,17 @@ void Foam::faceZonesIntegration::makeFile()
 
 void Foam::faceZonesIntegration::writeFileHeader()
 {
-    forAllIter(HashPtrTable<OFstream>, faceZonesIntegrationFilePtr_, iter)
+    forAllIter(HashPtrTable<OFstream>, filePtr_, iter)
     {
         unsigned int w = IOstream::defaultPrecision() + 7;
 
-        OFstream& os = *faceZonesIntegrationFilePtr_[iter.key()];
+        OFstream& os = *filePtr_[iter.key()];
 
         os  << "#Time " << setw(w);
 
-        forAll (faceZonesSet_, zoneI)
+        forAll (zoneNames_, zoneI)
         {
-            const word name = faceZonesSet_[zoneI];
-            os  << name << setw(w);
+            os  << zoneNames_[zoneI] << setw(w);
         }
 
         os  << nl << endl;
@@ -192,30 +191,30 @@ void Foam::faceZonesIntegration::write()
     {
         makeFile();
 
-        forAll(fItems_, fieldI)
+        forAll(fieldNames_, fieldI)
         {
-            const word& fieldName = fItems_[fieldI];
+            const word& fieldName = fieldNames_[fieldI];
 
-            const surfaceScalarField& fD =
+            const surfaceScalarField& sField =
                 obr_.lookupObject<surfaceScalarField>(fieldName);
 
-            const fvMesh& mesh = fD.mesh();
+            const fvMesh& mesh = sField.mesh();
 
             // 1. integrate over all face zones
 
-            scalarField integralVals(faceZonesSet_.size());
+            scalarField integralVals(zoneNames_.size());
 
-            forAll(faceZonesSet_, setI)
+            forAll(integralVals, zoneI)
             {
-                const word name = faceZonesSet_[setI];
+                const word& name = zoneNames_[zoneI];
 
                 label zoneID = mesh.faceZones().findZoneID(name);
 
-                const faceZone& fz = mesh.faceZones()[zoneID];
+                const faceZone& fZone = mesh.faceZones()[zoneID];
 
-                integralVals[setI] = returnReduce
+                integralVals[zoneI] = returnReduce
                 (
-                    calcFaceZonesIntegral(fD, fz),
+                    calcIntegral(sField, fZone),
                     sumOp<scalar>()
                 );
             }
@@ -225,24 +224,21 @@ void Foam::faceZonesIntegration::write()
 
             // 2. Write only on master
 
-            if
-            (
-                Pstream::master()
-             && faceZonesIntegrationFilePtr_.found(fieldName)
-            )
+            if (Pstream::master() && filePtr_.found(fieldName))
             {
-                OFstream& os = *faceZonesIntegrationFilePtr_(fieldName);
+                OFstream& os = *filePtr_(fieldName);
 
                 os  << obr_.time().value();
 
-                forAll(integralVals, setI)
+                forAll(integralVals, zoneI)
                 {
-                    os  << ' ' << setw(w) << integralVals[setI];
+                    os  << ' ' << setw(w) << integralVals[zoneI];
 
                     if (log_)
                     {
                         Info<< "faceZonesIntegration output:" << nl
-                            << "    Integration" << integralVals[setI] << endl;
+                            << "    Integration[" << zoneI << "] "
+                            << integralVals[zoneI] << endl;
                     }
                 }
 
@@ -253,45 +249,47 @@ void Foam::faceZonesIntegration::write()
 }
 
 
-Foam::scalar Foam::faceZonesIntegration::calcFaceZonesIntegral
+Foam::scalar Foam::faceZonesIntegration::calcIntegral
 (
-    const surfaceScalarField& fD,
-    const faceZone& fz
+    const surfaceScalarField& sField,
+    const faceZone& fZone
 ) const
 {
-    scalar dm = 0.0;
-    const fvMesh& mesh = fD.mesh();
+    scalar sum = 0.0;
+    const fvMesh& mesh = sField.mesh();
 
-    forAll (fz, i)
+    forAll (fZone, i)
     {
-        label faceI = fz[i];
+        label faceI = fZone[i];
 
         if (mesh.isInternalFace(faceI))
         {
-            if (fz.flipMap()[i])
+            if (fZone.flipMap()[i])
             {
-                dm -= fD[faceI];
+                sum -= sField[faceI];
             }
             else
             {
-                dm += fD[faceI];
+                sum += sField[faceI];
             }
         }
         else
         {
             label patchI = mesh.boundaryMesh().whichPatch(faceI);
             const polyPatch& pp = mesh.boundaryMesh()[patchI];
+            const fvsPatchScalarField& bField = sField.boundaryField()[patchI];
             if (isA<processorPolyPatch>(pp))
             {
                 if (refCast<const processorPolyPatch>(pp).owner())
                 {
-                    if (fz.flipMap()[i])
+                    label patchFaceI = pp.whichFace(faceI);
+                    if (fZone.flipMap()[i])
                     {
-                        dm -= fD.boundaryField()[patchI][pp.whichFace(faceI)];
+                        sum -= bField[patchFaceI];
                     }
                     else
                     {
-                        dm += fD.boundaryField()[patchI][pp.whichFace(faceI)];
+                        sum += bField[patchFaceI];
                     }
                 }
             }
@@ -300,32 +298,32 @@ Foam::scalar Foam::faceZonesIntegration::calcFaceZonesIntegral
                 label patchFaceI = faceI - pp.start();
                 if (patchFaceI < pp.size()/2)
                 {
-                    if (fz.flipMap()[i])
+                    if (fZone.flipMap()[i])
                     {
-                        dm -= fD.boundaryField()[patchI][patchFaceI];
+                        sum -= bField[patchFaceI];
                     }
                     else
                     {
-                        dm += fD.boundaryField()[patchI][patchFaceI];
+                        sum += bField[patchFaceI];
                     }
                 }
             }
             else if (!isA<emptyPolyPatch>(pp))
             {
                 label patchFaceI = faceI - pp.start();
-                if (fz.flipMap()[i])
+                if (fZone.flipMap()[i])
                 {
-                    dm -= fD.boundaryField()[patchI][patchFaceI];
+                    sum -= bField[patchFaceI];
                 }
                 else
                 {
-                    dm += fD.boundaryField()[patchI][patchFaceI];
+                    sum += bField[patchFaceI];
                 }
             }
         }
     }
 
-    return dm;
+    return sum;
 }
 
 

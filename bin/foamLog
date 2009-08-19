@@ -58,9 +58,9 @@ cat <<LABHELP
 The default is to extract for all the 'Solved for' variables the initial
 residual, the final residual and the number of iterations. Additionally, a
 (user editable) database is used to extract data for standard non-solved for
-variables like Courant number, execution time.
+variables like Courant number, and execution time.
 
-$PROGNAME -l lists all the possible variables without extract them.
+$PROGNAME -l lists all the possible variables without extracting them.
 
 The program will generate and run an awk script which writes a set of files,
 logs/<var>_<subIter>, for every <var> specified, for every occurrence inside
@@ -69,7 +69,7 @@ a time step.
 For variables that are 'Solved for', the initial residual name will be
 <var>, the final residual receive the name <var>FinalRes,
 
-The files are a simple xy format with the first column Time (default)
+The files are output in a simple xy format with the first column Time (default)
 and the second the extracted values. Option -n creates single column
 files with the extracted data only.
 
@@ -82,6 +82,7 @@ separated with '/' :
 The value taken will be the first (non-space)word after this column.
 The database ($PROGNAME.db) will taken from these locations:
 
+    .
     $HOME/.OpenFOAM/$WM_PROJECT_VERSION
     $HOME/.OpenFOAM
     $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION
@@ -98,6 +99,7 @@ LABHELP
 
 # The various places to be searched:
 for i in \
+    . \
     $HOME/.OpenFOAM/$WM_PROJECT_VERSION \
     $HOME/.OpenFOAM \
     $WM_PROJECT_INST_DIR/site/$WM_PROJECT_VERSION \
@@ -112,7 +114,6 @@ do
         break
     fi
 done
-
 
 
 myEcho() {
@@ -171,6 +172,7 @@ getSolveQueryList() {
     done
 }
 
+
 # getAllQueries dbFile logFile
 # Gets all queries from database and from logfile
 getAllQueries() {
@@ -201,6 +203,7 @@ getAllQueries() {
         echo "$q"
     done | sort -u
 }
+
 
 #-----------------------------
 # Main
@@ -314,8 +317,6 @@ myEcho ""
 # Generate Awk program
 #-----------------------------
 
-
-
 #-- header
 
 rm -f $AWKFILE; touch $AWKFILE
@@ -353,9 +354,6 @@ function extract(inLine,columnSel,outVar,
 }
 
 LABEL
-
-
-
 
 
 #-- Generate code for iteration separator (increments 'Iteration')
@@ -418,6 +416,7 @@ cat <<LABSOLVE >> $AWKFILE
 
 LABSOLVE
 
+
 #-- generate code to process queries
 for queryName in $QUERYNAMES
 do
@@ -438,7 +437,6 @@ do
 done
 
 
-
 #-----------------------------
 # Run awk program on log
 #-----------------------------
@@ -454,5 +452,6 @@ done
 #-----------------------------
 myEcho "Generated XY files for:"
 getAllQueries $DBFILE $LOG
+myEcho "End"
 
 #------------------------------------------------------------------------------

@@ -79,7 +79,6 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
             << "    (Actual type " << actualTypeName_ << ")" << nl
             << "\n    Please add the 'value' entry to the write function "
                "of the user-defined boundary-condition\n"
-               "    or link the boundary-condition into libfoamUtil.so"
             << exit(FatalIOError);
     }
 
