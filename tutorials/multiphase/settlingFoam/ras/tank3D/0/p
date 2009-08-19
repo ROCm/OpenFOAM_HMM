@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,102 +20,116 @@ internalField   uniform 0;
 
 boundaryField
 {
-    SYMP3           
+    SYMP3
     {
-        type            symmetryPlane;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    INLE1           
-    {
-        type            zeroGradient;
-    }
-
-    OUTL9           
+    INLE1
     {
         type            zeroGradient;
     }
 
-    OUTL10          
+    OUTL9
     {
         type            zeroGradient;
     }
 
-    OUTL11          
+    OUTL10
     {
         type            zeroGradient;
     }
 
-    OUTL12          
+    OUTL11
     {
         type            zeroGradient;
     }
 
-    WALL6           
+    OUTL12
     {
         type            zeroGradient;
     }
 
-    WALL8           
+    WALL6
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL61          
+    WALL8
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL62          
+    WALL61
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL63          
+    WALL62
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL64          
+    WALL63
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL65          
+    WALL64
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL66          
+    WALL65
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL67          
+    WALL66
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL68          
+    WALL67
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL69          
+    WALL68
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL7           
+    WALL69
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    WALL70          
+    WALL7
     {
-        type            zeroGradient;
+        type            buoyantPressure;
+        value           uniform 0;
     }
 
-    OUTL15          
+    WALL70
+    {
+        type            buoyantPressure;
+        value           uniform 0;
+    }
+
+    OUTL15
     {
         type            fixedValue;
         value           uniform 0;

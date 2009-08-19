@@ -46,3 +46,5 @@
         << "  Max(alpha) = " << max(alpha).value()
         << endl;
 }
+
+rho = alpha*rhoa + beta*rhob;

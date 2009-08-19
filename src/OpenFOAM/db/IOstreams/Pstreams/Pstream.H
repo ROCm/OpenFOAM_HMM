@@ -350,6 +350,31 @@ public:
                 return oldCommsType;
             }
 
+            //- Transfer buffer
+            const List<char>& buf() const
+            {
+                return buf_;
+            }
+
+            //- Transfer buffer
+            List<char>& buf()
+            {
+                return buf_;
+            }
+
+            //- Current buffer read/write location
+            int bufPosition() const
+            {
+                return bufPosition_;
+            }
+
+            //- Current buffer read/write location
+            int& bufPosition()
+            {
+                return bufPosition_;
+            }
+
+
         //- Exit program
         static void exit(int errnum = 1);
 

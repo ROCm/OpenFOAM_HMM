@@ -76,12 +76,13 @@ class MeshedSurfaceProxy
 
         const List<label>& faceMap_;
 
+
 public:
+
+    // Static
 
         //- Runtime type information
         ClassName("MeshedSurfaceProxy");
-
-    // Static
 
         //- The file format types that can be written via MeshedSurfaceProxy
         static wordHashSet writeTypes();
@@ -100,6 +101,7 @@ public:
             const List<surfZone>& = List<surfZone>(),
             const List<label>& faceMap = List<label>()
         );
+
 
     // Destructor
 
@@ -127,53 +129,50 @@ public:
 
     // Member Functions
 
-    // Access
+        // Access
 
-        //- Return const access to the points
-        inline const pointField& points() const
-        {
-            return points_;
-        }
+            //- Return const access to the points
+            inline const pointField& points() const
+            {
+                return points_;
+            }
 
-        //- Return const access to the faces
-        inline const List<Face>& faces() const
-        {
-            return faces_;
-        }
+            //- Return const access to the faces
+            inline const List<Face>& faces() const
+            {
+                return faces_;
+            }
 
-        //- Const access to the surface zones.
-        //  If zones are defined, they must be contiguous and cover the entire
-        //  surface.
-        inline const List<surfZone>& surfZones() const
-        {
-            return zones_;
-        }
+            //- Const access to the surface zones.
+            //  If zones are defined, they must be contiguous and cover the
+            //  entire surface
+            inline const List<surfZone>& surfZones() const
+            {
+                return zones_;
+            }
 
-        //- Const access to the faceMap, zero-sized when unused
-        inline const List<label>& faceMap() const
-        {
-            return faceMap_;
-        }
+            //- Const access to the faceMap, zero-sized when unused
+            inline const List<label>& faceMap() const
+            {
+                return faceMap_;
+            }
 
-        //- Use faceMap?
-        inline bool useFaceMap() const
-        {
-            return faceMap_.size() == faces_.size();
-        }
+            //- Use faceMap?
+            inline bool useFaceMap() const
+            {
+                return faceMap_.size() == faces_.size();
+            }
 
-    // Write
+        // Write
 
-        //- Generic write routine. Chooses writer based on extension.
-        virtual void write(const fileName& name) const
-        {
-            write(name, *this);
-        }
+            //- Generic write routine. Chooses writer based on extension.
+            virtual void write(const fileName& name) const
+            {
+                write(name, *this);
+            }
 
-        //- Write to database
-        virtual void write(const Time&, const word& surfName = "") const;
-
-    //??        void writeStats(Ostream& os) const;
-
+            //- Write to database
+            virtual void write(const Time&, const word& surfName = "") const;
 };
 
 

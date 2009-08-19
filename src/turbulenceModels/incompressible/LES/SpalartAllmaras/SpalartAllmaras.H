@@ -71,7 +71,7 @@ protected:
 
     // Protected data
 
-        dimensionedScalar alphaNut_;
+        dimensionedScalar sigmaNut_;
         dimensionedScalar kappa_;
 
 

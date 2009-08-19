@@ -70,7 +70,6 @@ Foam::word Foam::surfMesh::meshSubDir = "surfMesh";
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-
 Foam::surfMesh::surfMesh(const IOobject& io, const word& surfName)
 :
     surfaceRegistry(io.db(), (surfName.size() ? surfName : io.name())),
@@ -215,6 +214,7 @@ Foam::surfMesh::surfMesh
     }
 }
 
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::surfMesh::~surfMesh()
@@ -269,7 +269,6 @@ void Foam::surfMesh::resetPrimitives
         checkZones();
     }
 }
-
 
 
 void Foam::surfMesh::transfer
@@ -330,20 +329,24 @@ Foam::label Foam::surfMesh::nPoints() const
     return this->points().size();
 }
 
+
 Foam::label Foam::surfMesh::nFaces() const
 {
     return this->faces().size();
 }
+
 
 const Foam::pointField& Foam::surfMesh::points() const
 {
     return this->storedIOPoints();
 }
 
+
 const Foam::faceList& Foam::surfMesh::faces() const
 {
     return this->storedIOFaces();
 }
+
 
 void Foam::surfMesh::checkZones()
 {

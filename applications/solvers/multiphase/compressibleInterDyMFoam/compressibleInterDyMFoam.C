@@ -27,11 +27,13 @@ Application
 
 Description
     Solver for 2 compressible, isothermal immiscible fluids using a VOF
-    (volume of fluid) phase-fraction based interface capturing approach.
-    The momentum and other fluid properties are of the "mixture" and a single
-    momentum equation is solved.
+    (volume of fluid) phase-fraction based interface capturing approach,
+    with optional mesh motion and mesh topology changes including adaptive
+    re-meshing.
 
-    Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
+    The momentum and other fluid properties are of the "mixture" and a
+    single momentum equation is solved.  Turbulence modelling is generic,
+    i.e. laminar, RAS or LES may be selected.
 
 \*---------------------------------------------------------------------------*/
 
@@ -50,7 +52,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createDynamicFvMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"
@@ -102,12 +104,6 @@ int main(int argc, char *argv[])
         if (mesh.changing() && checkMeshCourantNo)
         {
             #include "meshCourantNo.H"
-        }
-
-        if (mesh.changing())
-        {
-            gh = g & mesh.C();
-            ghf = g & mesh.Cf();
         }
 
         turbulence->correct();

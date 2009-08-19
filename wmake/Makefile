@@ -22,14 +22,16 @@
 #     along with OpenFOAM; if not, write to the Free Software Foundation,
 #     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 #
-# Script
+# File
 #     Makefile
 #
 # Description
-#     Generic Makefile used by wmake
+#     A generic Makefile, used by wmake
 #
 #------------------------------------------------------------------------------
-# Set shell the Makefile uses to the Bourne shell
+
+#------------------------------------------------------------------------------
+# The Makefile use a POSIX shell
 #------------------------------------------------------------------------------
 
 SHELL      = /bin/sh
@@ -106,7 +108,7 @@ SEXE            = a.out
 
 GENERAL_RULES = $(WM_DIR)/rules/General
 RULES         = $(WM_DIR)/rules/$(WM_ARCH)$(WM_COMPILER)
-UTILBIN       = $(WM_DIR)/utilbin/$(WM_ARCH)$(WM_COMPILER)
+BIN           = $(WM_DIR)/bin/$(WM_ARCH)$(WM_COMPILER)
 
 include $(GENERAL_RULES)/general
 include $(RULES)/general

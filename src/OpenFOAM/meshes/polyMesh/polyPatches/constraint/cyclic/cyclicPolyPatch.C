@@ -1112,6 +1112,13 @@ bool Foam::cyclicPolyPatch::order
         return false;
     }
 
+    if (pp.size()&1)
+    {
+        FatalErrorIn("cyclicPolyPatch::order(..)")
+            << "Size of cyclic " << name() << " should be a multiple of 2"
+            << ". It is " << pp.size() << abort(FatalError);
+    }
+
     label halfSize = pp.size()/2;
 
     // Supplied primitivePatch already with new points.
@@ -1298,7 +1305,7 @@ bool Foam::cyclicPolyPatch::order
     {
         label baffleI = 0;
 
-        forAll(*this, faceI)
+        forAll(pp, faceI)
         {
             const face& f = pp.localFaces()[faceI];
             const labelList& pFaces = pp.pointFaces()[f[0]];

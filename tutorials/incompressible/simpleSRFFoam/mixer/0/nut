@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -33,13 +33,13 @@ boundaryField
     }
     innerWall
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         U               Urel;
         value           uniform 0;
     }
     outerWall
     {
-        type            nutWallFunction;
+        type            nutkWallFunction;
         U               Urel;
         value           uniform 0;
     }

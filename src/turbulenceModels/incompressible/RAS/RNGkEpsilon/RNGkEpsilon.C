@@ -26,7 +26,6 @@ License
 
 #include "RNGkEpsilon.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -82,22 +81,22 @@ RNGkEpsilon::RNGkEpsilon
             1.68
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
-            1.39
+            0.71942
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            1.39
+            0.71942
         )
     ),
     eta0_
@@ -156,7 +155,7 @@ RNGkEpsilon::RNGkEpsilon
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -224,8 +223,8 @@ bool RNGkEpsilon::read()
         Cmu_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
         eta0_.readIfPresent(coeffDict());
         beta_.readIfPresent(coeffDict());
 
@@ -295,7 +294,7 @@ void RNGkEpsilon::correct()
 
 
     // Re-calculate viscosity
-    nut_ == Cmu_*sqr(k_)/epsilon_;
+    nut_ = Cmu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 }
 

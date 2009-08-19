@@ -50,8 +50,7 @@ Foam::OutputFilterFunctionObject<OutputFilter>::OutputFilterFunctionObject
     const dictionary& dict
 )
 :
-    functionObject(),
-    name_(name),
+    functionObject(name),
     time_(t),
     dict_(dict),
     regionName_(polyMesh::defaultRegion),
@@ -92,7 +91,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
             (
                 new IOOutputFilter<OutputFilter>
                 (
-                    name_,
+                    name(),
                     time_.lookupObject<objectRegistry>(regionName_),
                     dictName_
                 )
@@ -104,7 +103,7 @@ bool Foam::OutputFilterFunctionObject<OutputFilter>::start()
             (
                 new OutputFilter
                 (
-                    name_,
+                    name(),
                     time_.lookupObject<objectRegistry>(regionName_),
                     dict_
                 )

@@ -23,15 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    trackedReactingParcelFoam
+    porousExplicitSourceReactingParcelFoam
 
 Description
-    - reacting parcel cloud tracking
+    Transient PISO solver for compressible, laminar or turbulent flow with
+    reacting Lagrangian parcels for porous media, including explicit sources
+
+    The solver includes:
+    - reacting parcel cloud
     - porous media
     - point mass sources
     - polynomial based, incompressible thermodynamics (f(T))
 
-    Note: ddtPhiCorr not used here - not well defined for porous calcs
+    Note: ddtPhiCorr not used here when porous zones are active
+    - not well defined for porous calculations
 
 \*---------------------------------------------------------------------------*/
 
@@ -55,7 +60,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readChemistryProperties.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "createRadiationModel.H"
     #include "createClouds.H"
@@ -74,6 +79,7 @@ int main(int argc, char *argv[])
     {
         #include "readTimeControls.H"
         #include "readPISOControls.H"
+        #include "readAdditionalSolutionControls.H"
         #include "compressibleCourantNo.H"
         #include "setDeltaT.H"
 
@@ -88,28 +94,23 @@ int main(int argc, char *argv[])
         #include "chemistry.H"
         #include "rhoEqn.H"
         #include "UEqn.H"
+        #include "YEqn.H"
+        #include "hEqn.H"
 
-        // --- PIMPLE loop
-        for (int oCorr=1; oCorr<=nOuterCorr; oCorr++)
+        // --- PISO loop
+        for (int corr=0; corr<nCorr; corr++)
         {
-            #include "YEqn.H"
-            #include "hEqn.H"
-
-            // --- PISO loop
-            for (int corr=1; corr<=nCorr; corr++)
-            {
-                #include "pEqn.H"
-            }
-
-            Info<< "T gas min/max   = " << min(T).value() << ", "
-                << max(T).value() << endl;
+            #include "pEqn.H"
         }
 
         turbulence->correct();
 
         rho = thermo.rho();
 
-        runTime.write();
+        if (runTime.write())
+        {
+            chemistry.dQ()().write();
+        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

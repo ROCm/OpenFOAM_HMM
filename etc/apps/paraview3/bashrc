@@ -47,7 +47,7 @@ do
 done
 
 paraviewMajor=paraview-3.6
-export ParaView_VERSION=3.6
+export ParaView_VERSION=3.6.1
 
 export ParaView_INST_DIR=$WM_THIRD_PARTY_DIR/paraview-$ParaView_VERSION
 export ParaView_DIR=$ParaView_INST_DIR/platforms/$WM_ARCH$WM_COMPILER

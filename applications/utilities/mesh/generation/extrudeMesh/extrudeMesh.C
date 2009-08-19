@@ -23,8 +23,9 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Extrude mesh from existing patch (flipped so has inwards pointing
-    normals) or from patch read from file.
+    Extrude mesh from existing patch (by default outwards facing normals;
+    optional flips faces) or from patch read from file.
+
     Note: Merges close points so be careful.
 
     Type of extrusion prescribed by run-time selectable model.
@@ -78,6 +79,7 @@ int main(int argc, char *argv[])
     if (sourceType == "patch")
     {
         fileName sourceCasePath(dict.lookup("sourceCase"));
+        sourceCasePath.expand();
         fileName sourceRootDir = sourceCasePath.path();
         fileName sourceCaseDir = sourceCasePath.name();
         word patchName(dict.lookup("sourcePatch"));
@@ -107,14 +109,11 @@ int main(int argc, char *argv[])
 
         const polyPatch& pp = mesh.boundaryMesh()[patchID];
         fMesh.reset(new faceMesh(pp.localFaces(), pp.localPoints()));
-        fMesh().flip();
 
         {
-            fileName surfName(patchName + ".sMesh");
-
-            Info<< "Writing (flipped) patch as surfaceMesh to "
+            fileName surfName(runTime.path()/patchName + ".sMesh");
+            Info<< "Writing patch as surfaceMesh to "
                 << surfName << nl << endl;
-
             OFstream os(surfName);
             os << fMesh() << nl;
         }
@@ -139,6 +138,20 @@ int main(int argc, char *argv[])
         FatalErrorIn(args.executable())
             << "Illegal 'constructFrom' specification. Should either be "
             << "patch or surface." << exit(FatalError);
+    }
+
+    Switch flipNormals(dict.lookup("flipNormals"));
+
+    if (flipNormals)
+    {
+        Info<< "Flipping faces." << nl << endl;
+
+        faceList faces(fMesh().size());
+        forAll(faces, i)
+        {
+            faces[i] = fMesh()[i].reverseFace();
+        }
+        fMesh.reset(new faceMesh(faces, fMesh().localPoints()));
     }
 
 

@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -27,6 +27,7 @@ Application
 
 Description
     Calculates and writes the vorticity of velocity field U.
+
     The -noWrite option just outputs the max/min values without writing
     the field.
 
@@ -93,6 +94,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     {
         Info<< "    No U" << endl;
     }
+
+    Info<< "\nEnd\n" << endl;
 }
+
 
 // ************************************************************************* //

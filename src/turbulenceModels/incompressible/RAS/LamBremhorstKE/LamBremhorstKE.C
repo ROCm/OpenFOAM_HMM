@@ -27,6 +27,8 @@ License
 #include "LamBremhorstKE.H"
 #include "addToRunTimeSelectionTable.H"
 
+#include "backwardsCompatibilityWallFunctions.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -79,13 +81,13 @@ LamBremhorstKE::LamBremhorstKE
             1.92
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
             "alphaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
 
@@ -112,7 +114,7 @@ LamBremhorstKE::LamBremhorstKE
             IOobject::MUST_READ,
             IOobject::AUTO_WRITE
         ),
-        mesh_
+        autoCreateEpsilon("epsilon", mesh_)
     ),
 
     y_(mesh_),
@@ -125,8 +127,22 @@ LamBremhorstKE::LamBremhorstKE
        *(scalar(1) + 20.5/(Rt_ + SMALL))
     ),
 
-    nut_(Cmu_*fMu_*sqr(k_)/(epsilon_ + epsilonSmall_))
+    nut_
+    (
+        IOobject
+        (
+            "nut",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateNut("nut", mesh_)
+    )
 {
+    nut_ = Cmu_*fMu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_.correctBoundaryConditions();
+
     printCoeffs();
 }
 
@@ -191,7 +207,7 @@ bool LamBremhorstKE::read()
         Cmu_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -216,19 +232,20 @@ void LamBremhorstKE::correct()
         y_.correct();
     }
 
-    volScalarField G = nut_*2*magSqr(symm(fvc::grad(U_)));
+    volScalarField G("RASModel::G", nut_*2*magSqr(symm(fvc::grad(U_))));
 
     // Calculate parameters and coefficients for low-Reynolds number model
 
     Rt_ = sqr(k_)/(nu()*epsilon_);
     volScalarField Ry = sqrt(k_)*y_/nu();
 
-    fMu_ = sqr(scalar(1) - exp(-0.0165*Ry))
-        *(scalar(1) + 20.5/(Rt_ + SMALL));
+    fMu_ = sqr(scalar(1) - exp(-0.0165*Ry))*(scalar(1) + 20.5/(Rt_ + SMALL));
 
     volScalarField f1 = scalar(1) + pow(0.05/(fMu_ + SMALL), 3);
     volScalarField f2 = scalar(1) - exp(-sqr(Rt_));
 
+    // Update espsilon and G at the wall
+    epsilon_.boundaryField().updateCoeffs();
 
     // Dissipation equation
 
@@ -243,6 +260,9 @@ void LamBremhorstKE::correct()
     );
 
     epsEqn().relax();
+
+    epsEqn().boundaryManipulate(epsilon_.boundaryField());
+
     solve(epsEqn);
     bound(epsilon_, epsilon0_);
 
@@ -265,6 +285,7 @@ void LamBremhorstKE::correct()
 
     // Re-calculate viscosity
     nut_ = Cmu_*fMu_*sqr(k_)/epsilon_;
+    nut_.correctBoundaryConditions();
 }
 
 

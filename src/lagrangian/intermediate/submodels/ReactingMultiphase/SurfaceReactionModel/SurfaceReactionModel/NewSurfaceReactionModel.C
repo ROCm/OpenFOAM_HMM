@@ -57,7 +57,7 @@ Foam::SurfaceReactionModel<CloudType>::New
             << SurfaceReactionModelType
             << ", constructor not in hash table" << nl << nl
             << "    Valid SurfaceReactionModel types are:" << nl
-            << dictionaryConstructorTablePtr_->toc() << exit(FatalError);
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
     return autoPtr<SurfaceReactionModel<CloudType> >(cstrIter()(dict, owner));

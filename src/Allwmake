@@ -1,12 +1,20 @@
 #!/bin/sh
 cd ${0%/*} || exit 1    # run from this directory
+
+wmakeCheckPwd "$WM_PROJECT_DIR/src" || {
+    echo "Error: Current directory is not \$WM_PROJECT_DIR/src"
+    echo "    The environment variables are inconsistent with the installation."
+    echo "    Check the OpenFOAM entries in your dot-files and source them."
+    exit 1
+}
+
 set -x
 
 # update OpenFOAM version strings if required
 wmakePrintBuild -check || /bin/rm -f OpenFOAM/Make/$WM_OPTIONS/global.? 2>/dev/null
 
-wmakeLnInclude -f OpenFOAM
-wmakeLnInclude -f OSspecific/$WM_OSTYPE
+wmakeLnInclude OpenFOAM
+wmakeLnInclude OSspecific/$WM_OSTYPE
 Pstream/Allwmake
 
 wmake libo  OSspecific/$WM_OSTYPE
@@ -23,6 +31,7 @@ decompositionMethods/Allwmake
 
 wmake libso meshTools
 wmake libso finiteVolume
+wmake libso genericPatchFields
 
 wmake libso sampling
 

@@ -60,6 +60,16 @@ GenEddyVisc::GenEddyVisc
         )
     ),
 
+    Prt_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Prt",
+            coeffDict_,
+            1.0
+        )
+    ),
+
     k_
     (
         IOobject
@@ -135,6 +145,7 @@ bool GenEddyVisc::read()
     if (LESModel::read())
     {
         ce_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
 
         return true;
     }

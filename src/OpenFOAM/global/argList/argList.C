@@ -60,26 +60,26 @@ Foam::argList::initValidTables dummyInitValidTables;
 // transform sequences with "(" ... ")" into string lists in the process
 bool Foam::argList::regroupArgv(int& argc, char**& argv)
 {
-    int level = 0;
     int nArgs = 0;
+    int listDepth = 0;
     string tmpString;
 
     // note: we also re-write directly into args_
     // and use a second pass to sort out args/options
-    for (int argi=0; argi < argc; argi++)
+    for (int argI = 0; argI < argc; argI++)
     {
-        if (strcmp(argv[argi], "(") == 0)
+        if (strcmp(argv[argI], "(") == 0)
         {
-            level++;
+            listDepth++;
             tmpString += "(";
         }
-        else if (strcmp(argv[argi], ")") == 0)
+        else if (strcmp(argv[argI], ")") == 0)
         {
-            if (level >= 1)
+            if (listDepth)
             {
-                level--;
+                listDepth--;
                 tmpString += ")";
-                if (level == 0)
+                if (listDepth == 0)
                 {
                     args_[nArgs++] = tmpString;
                     tmpString.clear();
@@ -87,19 +87,19 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
             }
             else
             {
-                args_[nArgs++] = argv[argi];
+                args_[nArgs++] = argv[argI];
             }
         }
-        else if (level)
+        else if (listDepth)
         {
             // quote each string element
             tmpString += "\"";
-            tmpString += argv[argi];
+            tmpString += argv[argI];
             tmpString += "\"";
         }
         else
         {
-            args_[nArgs++] = argv[argi];
+            args_[nArgs++] = argv[argI];
         }
     }
 
@@ -117,6 +117,10 @@ bool Foam::argList::regroupArgv(int& argc, char**& argv)
 // get rootPath_ / globalCase_ from one of the following forms
 //   * [-case dir]
 //   * cwd
+//
+// Also export FOAM_CASE and FOAM_CASENAME environment variables
+// so they can be used immediately (eg, in decomposeParDict)
+//
 void Foam::argList::getRootCase()
 {
     fileName casePath;
@@ -127,21 +131,50 @@ void Foam::argList::getRootCase()
     if (iter != options_.end())
     {
         casePath = iter();
-        casePath.removeRepeated('/');
-        casePath.removeTrailing('/');
+        casePath.clean();
+
+        if (casePath.empty() || casePath == ".")
+        {
+            // handle degenerate form and '-case .' like no -case specified
+            casePath = cwd();
+            options_.erase("case");
+        }
+        else if (casePath[0] != '/' && casePath.name() == "..")
+        {
+            // avoid relative cases ending in '..' - makes for very ugly names
+            casePath = cwd()/casePath;
+            casePath.clean();
+        }
     }
     else
     {
         // nothing specified, use the current dir
         casePath = cwd();
-
-        // we could add this back in as '-case'?
-        // options_.set("case", casePath);
     }
 
     rootPath_   = casePath.path();
     globalCase_ = casePath.name();
     case_       = globalCase_;
+
+
+    // Set the case and case-name as an environment variable
+    if (rootPath_[0] == '/')
+    {
+        // absolute path - use as-is
+        setEnv("FOAM_CASE", rootPath_/globalCase_, true);
+        setEnv("FOAM_CASENAME", globalCase_, true);
+    }
+    else
+    {
+        // qualify relative path
+        fileName casePath = cwd()/rootPath_/globalCase_;
+        casePath.clean();
+
+        setEnv("FOAM_CASE", casePath, true);
+        setEnv("FOAM_CASENAME", casePath.name(), true);
+    }
+
+
 }
 
 
@@ -166,11 +199,11 @@ Foam::argList::argList
 {
     // Check if this run is a parallel run by searching for any parallel option
     // If found call runPar (might filter argv)
-    for (int argi=0; argi<argc; argi++)
+    for (int argI = 0; argI < argc; argI++)
     {
-        if (argv[argi][0] == '-')
+        if (argv[argI][0] == '-')
         {
-            const char *optionName = &argv[argi][1];
+            const char *optionName = &argv[argI][1];
 
             if (validParOptions.found(optionName))
             {
@@ -192,14 +225,14 @@ Foam::argList::argList
     int nArgs = 1;
     string argListString = args_[0];
 
-    for (int argi = 1; argi < args_.size(); argi++)
+    for (int argI = 1; argI < args_.size(); argI++)
     {
         argListString += ' ';
-        argListString += args_[argi];
+        argListString += args_[argI];
 
-        if (args_[argi][0] == '-')
+        if (args_[argI][0] == '-')
         {
-            const char *optionName = &args_[argi][1];
+            const char *optionName = &args_[argI][1];
 
             if
             (
@@ -213,8 +246,8 @@ Foam::argList::argList
                 )
             )
             {
-                argi++;
-                if (argi >= args_.size())
+                argI++;
+                if (argI >= args_.size())
                 {
                     FatalError
                         << "option " << "'-" << optionName << '\''
@@ -223,8 +256,8 @@ Foam::argList::argList
                 }
 
                 argListString += ' ';
-                argListString += args_[argi];
-                options_.insert(optionName, args_[argi]);
+                argListString += args_[argI];
+                options_.insert(optionName, args_[argI]);
             }
             else
             {
@@ -233,9 +266,9 @@ Foam::argList::argList
         }
         else
         {
-            if (nArgs != argi)
+            if (nArgs != argI)
             {
-                args_[nArgs] = args_[argi];
+                args_[nArgs] = args_[argI];
             }
             nArgs++;
         }
@@ -521,9 +554,6 @@ Foam::argList::argList
         jobInfo.add("slaves", slaveProcs);
     }
     jobInfo.write();
-
-    // Set the case as an environment variable
-    setEnv("FOAM_CASE", rootPath_/globalCase_, true);
 
     // Switch on signal trapping. We have to wait until after Pstream::init
     // since this sets up its own ones.

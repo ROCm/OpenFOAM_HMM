@@ -2,7 +2,8 @@
 # Source tutorial run functions
 . $WM_PROJECT_DIR/bin/tools/RunFunctions
 
-application="rasInterFoam"
+# Set application name
+application="interFoam"
 
 setDamBreakFine ()
 {
@@ -37,7 +38,6 @@ cd damBreakFine
     runApplication blockMesh
     runApplication setFields
     runApplication decomposePar
-    hostname > system/machines
-    runParallel $application 4 system/machines
+    runParallel $application 4
     runApplication reconstructPar
 cd ..

@@ -33,16 +33,14 @@ License
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(liquid, 0);
-defineRunTimeSelectionTable(liquid,);
-defineRunTimeSelectionTable(liquid, Istream);
+    defineTypeNameAndDebug(liquid, 0);
+    defineRunTimeSelectionTable(liquid,);
+    defineRunTimeSelectionTable(liquid, Istream);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-autoPtr<liquid> liquid::New(Istream& is)
+Foam::autoPtr<Foam::liquid> Foam::liquid::New(Istream& is)
 {
     if (debug)
     {
@@ -64,9 +62,9 @@ autoPtr<liquid> liquid::New(Istream& is)
         {
             FatalErrorIn("liquid::New(Istream&)")
                 << "Unknown liquid type " << liquidType
-                << endl << endl
-                << "Valid liquid types are :" << endl
-                << ConstructorTablePtr_->toc()
+                << nl << nl
+                << "Valid liquid types are:" << nl
+                << ConstructorTablePtr_->sortedToc()
                 << abort(FatalError);
         }
 
@@ -82,8 +80,8 @@ autoPtr<liquid> liquid::New(Istream& is)
             FatalErrorIn("liquid::New(Istream&)")
                 << "Unknown liquid type " << liquidType
                 << endl << endl
-                << "Valid liquid types are :" << endl
-                << IstreamConstructorTablePtr_->toc()
+                << "Valid liquid types are:" << nl
+                << IstreamConstructorTablePtr_->sortedToc()
                 << abort(FatalError);
         }
 
@@ -101,9 +99,5 @@ autoPtr<liquid> liquid::New(Istream& is)
     }
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

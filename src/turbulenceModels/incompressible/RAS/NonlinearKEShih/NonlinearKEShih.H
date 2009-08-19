@@ -49,7 +49,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class NonlinearKEShih Declaration
+                      Class NonlinearKEShih Declaration
 \*---------------------------------------------------------------------------*/
 
 class NonlinearKEShih
@@ -58,29 +58,38 @@ class NonlinearKEShih
 {
     // Private data
 
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar alphak_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar A1_;
-        dimensionedScalar A2_;
-        dimensionedScalar Ctau1_;
-        dimensionedScalar Ctau2_;
-        dimensionedScalar Ctau3_;
-        dimensionedScalar alphaKsi_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilon_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmak_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar A1_;
+            dimensionedScalar A2_;
+            dimensionedScalar Ctau1_;
+            dimensionedScalar Ctau2_;
+            dimensionedScalar Ctau3_;
+            dimensionedScalar alphaKsi_;
 
-        volTensorField gradU_;
-        volScalarField eta_;
-        volScalarField ksi_;
-        volScalarField Cmu_;
-        volScalarField fEta_;
+            dimensionedScalar kappa_;
+            dimensionedScalar E_;
 
-        volScalarField nut_;
 
-        volSymmTensorField nonlinearStress_;
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilon_;
+
+            volTensorField gradU_;
+            volScalarField eta_;
+            volScalarField ksi_;
+            volScalarField Cmu_;
+            volScalarField fEta_;
+
+            volScalarField nut_;
+
+            volSymmTensorField nonlinearStress_;
+
 
 public:
 
@@ -116,7 +125,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DkEff", alphak_*nut_ + nu())
+                new volScalarField("DkEff", nut_/sigmak_ + nu())
             );
         }
 
@@ -125,7 +134,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

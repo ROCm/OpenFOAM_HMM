@@ -55,6 +55,7 @@ namespace fileFormats
 class STARCDsurfaceFormatCore
 {
 protected:
+
     // Protected Member Functions
 
     static bool readHeader(IFstream&, const word&);
@@ -72,7 +73,6 @@ protected:
         const label nFaces,
         const UList<surfZone>&
     );
-
 };
 
 
@@ -80,8 +80,6 @@ protected:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

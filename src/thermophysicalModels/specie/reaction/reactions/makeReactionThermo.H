@@ -46,7 +46,7 @@ Description
 #include "perfectGas.H"
 
 #include "polynomialTransport.H"
-#include "polynomialThermo.H"
+#include "hPolynomialThermo.H"
 #include "icoPolynomial.H"
 
 #include "addToRunTimeSelectionTable.H"

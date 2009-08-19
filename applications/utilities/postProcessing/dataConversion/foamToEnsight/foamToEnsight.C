@@ -492,6 +492,8 @@ int main(int argc, char *argv[])
         delete ensightCaseFilePtr;
     }
 
+    Info<< "End\n" << endl;
+
     return 0;
 }
 

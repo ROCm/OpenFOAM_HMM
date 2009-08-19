@@ -47,6 +47,23 @@ const ThermoType& Foam::multiComponentMixture<ThermoType>::constructSpeciesData
 }
 
 
+template<class ThermoType>
+void Foam::multiComponentMixture<ThermoType>::correctMassFractions()
+{
+    volScalarField Yt = Y_[0];
+
+    for (label n=1; n<Y_.size(); n++)
+    {
+        Yt += Y_[n];
+    }
+
+    forAll (Y_, n)
+    {
+        Y_[n] /= Yt;
+    }
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ThermoType>
@@ -70,6 +87,8 @@ Foam::multiComponentMixture<ThermoType>::multiComponentMixture
             new ThermoType(*specieThermoData[species_[i]])
         );
     }
+
+    correctMassFractions();
 }
 
 
@@ -83,7 +102,9 @@ Foam::multiComponentMixture<ThermoType>::multiComponentMixture
     basicMultiComponentMixture(thermoDict, thermoDict.lookup("species"), mesh),
     speciesData_(species_.size()),
     mixture_("mixture", constructSpeciesData(thermoDict))
-{}
+{
+    correctMassFractions();
+}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

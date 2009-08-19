@@ -23,8 +23,8 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Calculate the dual of a polyMesh. Adheres to all the feature&patch edges.
-
+    Calculate the dual of a polyMesh. Adheres to all the feature and patch
+    edges.
 
 Usage
 

@@ -26,7 +26,8 @@ License
 
 #include "SpalartAllmaras.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallDist.H"
+
+#include "backwardsCompatibilityWallFunctions.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -114,20 +115,29 @@ SpalartAllmaras::SpalartAllmaras
 :
     RASModel(typeName, rho, U, phi, thermophysicalModel),
 
-    alphaNut_
+    sigmaNut_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaNut",
+            "sigmaNut",
             coeffDict_,
-            1.5
+            0.66666
         )
     ),
-    alphah_
+    kappa_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphah",
+            "kappa",
+            coeffDict_,
+            0.41
+        )
+    ),
+    Prt_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Prt",
             coeffDict_,
             1.0
         )
@@ -151,7 +161,7 @@ SpalartAllmaras::SpalartAllmaras
             0.622
         )
     ),
-    Cw1_(Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_)),
+    Cw1_(Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_),
     Cw2_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -215,13 +225,77 @@ SpalartAllmaras::SpalartAllmaras
         mesh_
     ),
 
+    alphat_
+    (
+        IOobject
+        (
+            "alphat",
+            runTime_.timeName(),
+            mesh_,
+            IOobject::NO_READ,
+            IOobject::AUTO_WRITE
+        ),
+        autoCreateAlphat("alphat", mesh_)
+    ),
+
     d_(mesh_)
 {
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
+
     printCoeffs();
 }
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+tmp<volScalarField> SpalartAllmaras::k() const
+{
+    WarningIn("tmp<volScalarField> SpalartAllmaras::k() const")
+        << "Turbulence kinetic energy not defined for Spalart-Allmaras model. "
+        << "Returning zero field"
+        << endl;
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "k",
+                runTime_.timeName(),
+                mesh_
+            ),
+            mesh_,
+            dimensionedScalar("0", dimensionSet(0, 2, -2, 0, 0), 0)
+        )
+    );
+}
+
+
+tmp<volScalarField> SpalartAllmaras::epsilon() const
+{
+    WarningIn("tmp<volScalarField> SpalartAllmaras::epsilon() const")
+        << "Turbulence kinetic energy dissipation rate not defined for "
+        << "Spalart-Allmaras model. Returning zero field"
+        << endl;
+
+    return tmp<volScalarField>
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "epslion",
+                runTime_.timeName(),
+                mesh_
+            ),
+            mesh_,
+            dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0), 0)
+        )
+    );
+}
+
 
 tmp<volSymmTensorField> SpalartAllmaras::R() const
 {
@@ -279,12 +353,13 @@ bool SpalartAllmaras::read()
 {
     if (RASModel::read())
     {
-        alphaNut_.readIfPresent(coeffDict());
-        alphah_.readIfPresent(coeffDict());
+        sigmaNut_.readIfPresent(coeffDict());
+        kappa_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
 
         Cb1_.readIfPresent(coeffDict());
         Cb2_.readIfPresent(coeffDict());
-        Cw1_ = Cb1_/sqr(kappa_) + alphaNut_*(1.0 + Cb2_);
+        Cw1_ = Cb1_/sqr(kappa_) + (1.0 + Cb2_)/sigmaNut_;
         Cw2_.readIfPresent(coeffDict());
         Cw3_.readIfPresent(coeffDict());
         Cv1_.readIfPresent(coeffDict());
@@ -305,6 +380,12 @@ void SpalartAllmaras::correct()
     {
         // Re-calculate viscosity
         mut_ = rho_*nuTilda_*fv1(chi());
+        mut_.correctBoundaryConditions();
+
+        // Re-calculate thermal diffusivity
+        alphat_ = mut_/Prt_;
+        alphat_.correctBoundaryConditions();
+
         return;
     }
 
@@ -327,7 +408,7 @@ void SpalartAllmaras::correct()
         fvm::ddt(rho_, nuTilda_)
       + fvm::div(phi_, nuTilda_)
       - fvm::laplacian(DnuTildaEff(), nuTilda_)
-      - alphaNut_*Cb2_*rho_*magSqr(fvc::grad(nuTilda_))
+      - Cb2_/sigmaNut_*rho_*magSqr(fvc::grad(nuTilda_))
      ==
         Cb1_*rho_*Stilda*nuTilda_
       - fvm::Sp(Cw1_*fw(Stilda)*nuTilda_*rho_/sqr(d_), nuTilda_)
@@ -338,8 +419,13 @@ void SpalartAllmaras::correct()
     bound(nuTilda_, dimensionedScalar("0", nuTilda_.dimensions(), 0.0));
     nuTilda_.correctBoundaryConditions();
 
+    // Re-calculate viscosity
     mut_.internalField() = fv1*nuTilda_.internalField()*rho_.internalField();
     mut_.correctBoundaryConditions();
+
+    // Re-calculate thermal diffusivity
+    alphat_ = mut_/Prt_;
+    alphat_.correctBoundaryConditions();
 }
 
 

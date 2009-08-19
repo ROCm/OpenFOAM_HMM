@@ -102,18 +102,12 @@ autoPtr<turbulenceModel> turbulenceModel::New
         )   << "Unknown turbulenceModel type " << modelName
             << endl << endl
             << "Valid turbulenceModel types are :" << endl
-            << turbulenceModelConstructorTablePtr_->toc()
+            << turbulenceModelConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
     return autoPtr<turbulenceModel>(cstrIter()(U, phi, transport));
 }
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-turbulenceModel::~turbulenceModel()
-{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

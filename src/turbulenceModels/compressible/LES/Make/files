@@ -9,11 +9,13 @@ dynOneEqEddy/dynOneEqEddy.C
 DeardorffDiffStress/DeardorffDiffStress.C
 SpalartAllmaras/SpalartAllmaras.C
 
+vanDriestDelta/vanDriestDelta.C
+
 /* Wall functions */
 wallFunctions=derivedFvPatchFields/wallFunctions
 
 muSgsWallFunctions=$(wallFunctions)/muSgsWallFunctions
-$(muSgsWallFunctions)/muSgsWallFunction/muSgsWallFunctionFvPatchScalarField.C
+$(muSgsWallFunctions)/muSgsUSpaldingWallFunction/muSgsUSpaldingWallFunctionFvPatchScalarField.C
 
 alphaSgsWallFunctions=$(wallFunctions)/alphaSgsWallFunctions
 $(alphaSgsWallFunctions)/alphaSgsWallFunction/alphaSgsWallFunctionFvPatchScalarField.C

@@ -62,7 +62,7 @@ namespace functionEntries
 }
 }
 
-// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+// * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 Foam::fileName Foam::functionEntries::includeEntry::includeFileName
 (
@@ -111,6 +111,7 @@ bool Foam::functionEntries::includeEntry::execute
         return false;
     }
 }
+
 
 bool Foam::functionEntries::includeEntry::execute
 (

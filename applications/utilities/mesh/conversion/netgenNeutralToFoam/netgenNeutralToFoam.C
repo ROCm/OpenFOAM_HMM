@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    read Neutral file format as written by Netgen4.4.
+    Converts neutral file format as written by Netgen v4.4.
 
     Example:
 

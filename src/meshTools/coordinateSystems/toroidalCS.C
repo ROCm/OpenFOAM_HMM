@@ -158,8 +158,8 @@ void Foam::toroidalCS::writeDict(Ostream& os, bool subDict) const
 {
     if (subDict)
     {
-	os  << indent << name() << nl
-	    << indent << token::BEGIN_BLOCK << incrIndent << nl;
+        os  << indent << name() << nl
+            << indent << token::BEGIN_BLOCK << incrIndent << nl;
     }
 
     coordinateSystem::writeDict(os, false);
@@ -167,8 +167,9 @@ void Foam::toroidalCS::writeDict(Ostream& os, bool subDict) const
 
     if (subDict)
     {
-	os << decrIndent << indent << token::END_BLOCK << endl;
+        os << decrIndent << indent << token::END_BLOCK << endl;
     }
 }
+
 
 // ************************************************************************* //

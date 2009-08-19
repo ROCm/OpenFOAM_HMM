@@ -366,7 +366,6 @@ DebugSwitches
     directMappedVelocityFlux 0;
     directionMixed      0;
     directional         0;
-    disallowDefaultFvsPatchField 0;
     disallowGenericFvPatchField 0;
     disallowGenericPointPatchField 0;
     disallowGenericPolyPatch    0;
@@ -424,7 +423,7 @@ DebugSwitches
     filteredLinear3     0;
     filteredLinear3V    0;
     fixedEnthalpy       0;
-    fixedFluxBuoyantPressure 0;
+    buoyantPressure 0;
     fixedFluxBoussinesqBuoyantPressure 0;
     fixedFluxPressure   0;
     fixedGradient       0;
@@ -520,7 +519,7 @@ DebugSwitches
     kOmega              0;
     kOmegaSST           0;
     kOmegaSSTSAS        0;
-    kQRWallFunction     0;
+    kqRWallFunction     0;
     kinematicCloud      0;
     labelField          0;
     labelList           0;

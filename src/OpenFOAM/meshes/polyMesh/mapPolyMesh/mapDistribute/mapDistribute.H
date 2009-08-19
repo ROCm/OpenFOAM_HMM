@@ -83,23 +83,36 @@ class mapDistribute
 
 public:
 
+    // Public classes
+
+        //- combineReduce operator for lists. Used for counting.
+        class listEq
+        {
+
+        public:
+
+            template<class T>
+            void operator()(T& x, const T& y) const
+            {
+                forAll(y, i)
+                {
+                    if (y[i].size())
+                    {
+                        x[i] = y[i];
+                    }
+                }
+            }
+        };
+
+
     // Constructors
 
         //- Construct from components
         mapDistribute
         (
             const label constructSize,
-            const labelListList& subMap,
-            const labelListList& constructMap
-        );
-
-        //- (optionally destructively) construct from components
-        mapDistribute
-        (
-            const label constructSize,
-            labelListList& subMap,
-            labelListList& constructMap,
-            const bool reUse                // clone or reuse
+            const Xfer<labelListList>& subMap,
+            const Xfer<labelListList>& constructMap
         );
 
         //- Construct from reverse addressing: per data item the send
@@ -205,11 +218,7 @@ public:
             template<class T>
             void distribute(List<T>& fld) const
             {
-                if
-                (
-                    Pstream::defaultCommsType == Pstream::nonBlocking
-                 && contiguous<T>()
-                )
+                if (Pstream::defaultCommsType == Pstream::nonBlocking)
                 {
                     distribute
                     (

@@ -67,14 +67,18 @@ class includeEntry
 {
     // Private Member Functions
 
-        //- Read the include fileName from Istream, expand and return
-        static fileName includeFileName(Istream&);
-
         //- Disallow default bitwise copy construct
         includeEntry(const includeEntry&);
 
         //- Disallow default bitwise assignment
         void operator=(const includeEntry&);
+
+protected:
+
+    // Protected Member Functions
+
+        //- Read the include fileName from Istream, expand and return
+        static fileName includeFileName(Istream&);
 
 
 public:

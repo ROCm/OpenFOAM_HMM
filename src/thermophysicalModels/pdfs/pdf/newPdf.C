@@ -28,10 +28,7 @@ License
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
-namespace Foam 
-{
-
-autoPtr<Foam::pdf> Foam::pdf::New
+Foam::autoPtr<Foam::pdf> Foam::pdf::New
 (
     const dictionary& dict,
     Random& rndGen
@@ -47,15 +44,14 @@ autoPtr<Foam::pdf> Foam::pdf::New
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn("pdf::New(const dictionary&, Random&)")
-            << "unknown pdf type " << pdfType << endl << endl
-            << "Valid pdf types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << "unknown pdf type " << pdfType << nl << nl
+            << "Valid pdf types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
     return autoPtr<pdf>(cstrIter()(dict, rndGen));
 }
 
-// ************************************************************************* //
 
-}
+// ************************************************************************* //

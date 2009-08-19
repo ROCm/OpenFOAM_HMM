@@ -33,6 +33,7 @@ Description
         LaunderGibsonRSTMCoeffs
         {
             Cmu         0.09;
+            kappa       0.41;
             Clg1        1.8;
             Clg2        0.6;
             C1          1.44;
@@ -41,9 +42,9 @@ Description
             C2Ref       0.3;
             Cs          0.25;
             Ceps        0.15;
-            alphah      1.0;    // only for compressible
-            alphaEps    0.76923;
-            alphaR      1.22;
+            sigmah      1.0;    // only for compressible
+            sigmaEps    1.3;
+            sigmaR      0.81967;
             couplingFactor  0.0;
         }
     @endverbatim
@@ -79,32 +80,38 @@ class LaunderGibsonRSTM
 {
     // Private data
 
-        dimensionedScalar Cmu_;
+        // Model coefficients
 
-        dimensionedScalar Clg1_;
-        dimensionedScalar Clg2_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar kappa_;
 
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar Cs_;
-        dimensionedScalar Ceps_;
+            dimensionedScalar Clg1_;
+            dimensionedScalar Clg2_;
 
-        dimensionedScalar C1Ref_;
-        dimensionedScalar C2Ref_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar Cs_;
+            dimensionedScalar Ceps_;
 
-        dimensionedScalar couplingFactor_;
+            dimensionedScalar C1Ref_;
+            dimensionedScalar C2Ref_;
 
-        dimensionedScalar alphaR_;
-        dimensionedScalar alphaEps_;
-        dimensionedScalar alphah_;
+            dimensionedScalar couplingFactor_;
 
-        wallDistReflection y_;
+            dimensionedScalar sigmaR_;
+            dimensionedScalar sigmaEps_;
+            dimensionedScalar Prt_;
 
-        volSymmTensorField R_;
-        volScalarField k_;
-        volScalarField epsilon_;
-        volScalarField mut_;
-        volScalarField alphat_;
+
+        // Fields
+
+            wallDistReflection y_;
+
+            volSymmTensorField R_;
+            volScalarField k_;
+            volScalarField epsilon_;
+            volScalarField mut_;
+            volScalarField alphat_;
 
 
 public:
@@ -136,7 +143,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DREff", alphaR_*mut_ + mu())
+                new volScalarField("DREff", mut_/sigmaR_ + mu())
             );
         }
 
@@ -145,7 +152,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*mut_ + mu())
+                new volScalarField("DepsilonEff", mut_/sigmaEps_ + mu())
             );
         }
 
@@ -160,7 +167,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*alphat_ + alpha())
+                new volScalarField("alphaEff", alphat_ + alpha())
             );
         }
 

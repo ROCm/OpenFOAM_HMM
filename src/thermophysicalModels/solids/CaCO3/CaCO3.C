@@ -27,16 +27,14 @@ License
 #include "CaCO3.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTypeNameAndDebug(CaCO3, 0);
-addToRunTimeSelectionTable(solid, CaCO3,);
-addToRunTimeSelectionTable(solid, CaCO3, Istream);
+    defineTypeNameAndDebug(CaCO3, 0);
+    addToRunTimeSelectionTable(solid, CaCO3,);
+    addToRunTimeSelectionTable(solid, CaCO3, Istream);
+}
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -44,9 +42,12 @@ Foam::CaCO3::CaCO3()
 :
     solid(2710, 850, 1.3, 0.0, 1.0)
 {
-    WarningIn("CaCO3::CaCO3()")
-        << "Properties of CaCO3 need to be checked!!!"
-        << endl;
+    if (debug)
+    {
+        WarningIn("CaCO3::CaCO3()")
+            << "Properties of CaCO3 need to be checked!!!"
+            << endl;
+    }
 }
 
 
@@ -72,15 +73,11 @@ void Foam::CaCO3::writeData(Ostream& os) const
 
 // * * * * * * * * * * * * * * IOStream operators  * * * * * * * * * * * * * //
 
-Foam::Ostream& operator<<(Ostream& os, const CaCO3& s)
+Foam::Ostream& Foam::operator<<(Ostream& os, const CaCO3& s)
 {
     s.writeData(os);
     return os;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

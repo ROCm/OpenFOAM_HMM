@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -29,14 +29,15 @@ Description
     Boundary condition for turbulent thermal diffusivity when using wall
     functions
     - replicates OpenFOAM v1.5 (and earlier) behaviour
+    - Turbulent Prandtl number defaults to 0.85 if unspecified
 
 SourceFiles
     alphatWallFunctionFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef alphatWallFunctionFvPatchScalarField_H
-#define alphatWallFunctionFvPatchScalarField_H
+#ifndef compressibleAlphatWallFunctionFvPatchScalarField_H
+#define compressibleAlphatWallFunctionFvPatchScalarField_H
 
 #include "fixedValueFvPatchFields.H"
 
@@ -62,11 +63,14 @@ class alphatWallFunctionFvPatchScalarField
         //- Name of turbulent viscosity field
         word mutName_;
 
+        //- Turbulent Prandtl number
+        scalar Prt_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("compressible::alphatWallFunction");
+    TypeName("alphatWallFunction");
 
 
     // Constructors
@@ -143,7 +147,7 @@ public:
         // I-O
 
             //- Write
-            void write(Ostream&) const;
+            virtual void write(Ostream&) const;
 };
 
 

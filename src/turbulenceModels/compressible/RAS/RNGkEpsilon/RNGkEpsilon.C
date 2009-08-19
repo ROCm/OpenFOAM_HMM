@@ -26,7 +26,6 @@ License
 
 #include "RNGkEpsilon.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -92,29 +91,29 @@ RNGkEpsilon::RNGkEpsilon
             -0.33
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
-            1.39
+            0.71942
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            1.39
+            0.71942
         )
     ),
-    alphah_
+    Prt_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphah",
+            "Prt",
             coeffDict_,
             1.0
         )
@@ -187,10 +186,10 @@ RNGkEpsilon::RNGkEpsilon
         autoCreateAlphat("alphat", mesh_)
     )
 {
-    mut_ == Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    mut_ = Cmu_*rho_*sqr(k_)/(epsilon_ + epsilonSmall_);
     mut_.correctBoundaryConditions();
 
-    alphat_ == mut_/Prt_;
+    alphat_ = mut_/Prt_;
     alphat_.correctBoundaryConditions();
 
     printCoeffs();
@@ -257,9 +256,9 @@ bool RNGkEpsilon::read()
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
         C3_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
-        alphah_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
+        Prt_.readIfPresent(coeffDict());
         eta0_.readIfPresent(coeffDict());
         beta_.readIfPresent(coeffDict());
 
@@ -277,7 +276,7 @@ void RNGkEpsilon::correct()
     if (!turbulence_)
     {
         // Re-calculate viscosity
-        mut_ == rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+        mut_ = rho_*Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
         mut_.correctBoundaryConditions();
 
         // Re-calculate thermal diffusivity
@@ -349,7 +348,7 @@ void RNGkEpsilon::correct()
 
 
     // Re-calculate viscosity
-    mut_ == rho_*Cmu_*sqr(k_)/epsilon_;
+    mut_ = rho_*Cmu_*sqr(k_)/epsilon_;
     mut_.correctBoundaryConditions();
 
     // Re-calculate thermal diffusivity

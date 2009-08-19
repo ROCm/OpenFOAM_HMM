@@ -26,7 +26,7 @@ Class
     Foam::rhoChemistryModel
 
 Description
-    Chemistry model for compressibility-based thermodynamics
+    Chemistry model for density-based thermodynamics
 
 SourceFiles
     rhoChemistryModelI.H

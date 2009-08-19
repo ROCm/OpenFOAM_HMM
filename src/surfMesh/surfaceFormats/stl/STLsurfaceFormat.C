@@ -28,8 +28,6 @@ License
 #include "ListOps.H"
 #include "triPointRef.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class Face>
@@ -440,6 +438,7 @@ void Foam::fileFormats::STLsurfaceFormat<Face>::writeBinary
         );
     }
 }
+
 
 template<class Face>
 void Foam::fileFormats::STLsurfaceFormat<Face>::write

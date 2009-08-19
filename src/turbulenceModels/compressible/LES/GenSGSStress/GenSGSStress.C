@@ -64,6 +64,16 @@ GenSGSStress::GenSGSStress
         )
     ),
 
+    Prt_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "Prt",
+            coeffDict_,
+            1.0
+        )
+    ),
+
     B_
     (
         IOobject

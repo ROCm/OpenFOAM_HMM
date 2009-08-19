@@ -26,7 +26,6 @@ License
 
 #include "realizableKE.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -123,22 +122,22 @@ realizableKE::realizableKE
             1.9
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
             1.0
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.833333
+            1.2
         )
     ),
 
@@ -182,7 +181,7 @@ realizableKE::realizableKE
     bound(k_, k0_);
     bound(epsilon_, epsilon0_);
 
-    nut_ == rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = rCmu(fvc::grad(U_))*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -249,8 +248,8 @@ bool realizableKE::read()
         Cmu_.readIfPresent(coeffDict());
         A0_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
 
         return true;
     }
@@ -324,7 +323,7 @@ void realizableKE::correct()
 
 
     // Re-calculate viscosity
-    nut_ == rCmu(gradU, S2, magS)*sqr(k_)/epsilon_;
+    nut_ = rCmu(gradU, S2, magS)*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 }
 

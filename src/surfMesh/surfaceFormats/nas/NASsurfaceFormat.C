@@ -28,11 +28,6 @@ License
 #include "IFstream.H"
 #include "IStringStream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -392,5 +387,6 @@ bool Foam::fileFormats::NASsurfaceFormat<Face>::read
 
     return true;
 }
+
 
 // ************************************************************************* //

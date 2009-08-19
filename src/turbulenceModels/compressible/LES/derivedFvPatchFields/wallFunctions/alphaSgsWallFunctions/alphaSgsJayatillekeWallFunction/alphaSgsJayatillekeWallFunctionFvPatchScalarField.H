@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -58,9 +58,21 @@ class alphaSgsJayatillekeWallFunctionFvPatchScalarField
 {
     // Private data
 
-        static scalar maxExp_;
-        static scalar tolerance_;
-        static label maxIters_;
+        //- Turbulent Prandtl number
+        scalar Prt_;
+
+        //- Von Karman constant
+        scalar kappa_;
+
+        //- E coefficient
+        scalar E_;
+
+
+        // Solution parameters
+
+            static scalar maxExp_;
+            static scalar tolerance_;
+            static label maxIters_;
 
 
     // Private member functions
@@ -75,9 +87,7 @@ class alphaSgsJayatillekeWallFunctionFvPatchScalarField
         scalar yPlusTherm
         (
             const scalar P,
-            const scalar Prat,
-            const scalar E,
-            const scalar kappa
+            const scalar Prat
         ) const;
 
 
@@ -163,6 +173,12 @@ public:
             (
                 const Pstream::commsTypes commsType=Pstream::Pstream::blocking
             );
+
+
+        // I-O
+
+            //- Write
+            void write(Ostream&) const;
 };
 
 

@@ -56,20 +56,11 @@
     );
 
 
-    dimensionedScalar rhoc
-    (
-        transportProperties.lookup("rhoc")
-    );
+    dimensionedScalar rhoc(transportProperties.lookup("rhoc"));
 
-    dimensionedScalar rhod
-    (
-        transportProperties.lookup("rhod")
-    );
+    dimensionedScalar rhod(transportProperties.lookup("rhod"));
 
-    dimensionedScalar muc
-    (
-        transportProperties.lookup("muc")
-    );
+    dimensionedScalar muc(transportProperties.lookup("muc"));
 
     dimensionedScalar plasticViscosityCoeff
     (
@@ -96,10 +87,7 @@
         transportProperties.lookup("yieldStressOffset")
     );
 
-    Switch BinghamPlastic
-    (
-        transportProperties.lookup("BinghamPlastic")
-    );
+    Switch BinghamPlastic(transportProperties.lookup("BinghamPlastic"));
 
     volScalarField rho
     (
@@ -147,8 +135,8 @@
             IOobject::NO_READ,
             IOobject::AUTO_WRITE
         ),
-        muc +
-        plasticViscosity
+        muc
+      + plasticViscosity
         (
             plasticViscosityCoeff,
             plasticViscosityExponent,
@@ -176,10 +164,7 @@
 
     Info<< "Selecting Drift-Flux model " << endl;
 
-    word VdjModel
-    (
-        transportProperties.lookup("VdjModel")
-    );
+    word VdjModel(transportProperties.lookup("VdjModel"));
 
     Info<< tab << VdjModel << " selected\n" << endl;
 
@@ -188,26 +173,13 @@
         transportProperties.subDict(VdjModel + "Coeffs")
     );
 
-    dimensionedVector V0
-    (
-        VdjModelCoeffs.lookup("V0")
-    );
+    dimensionedVector V0(VdjModelCoeffs.lookup("V0"));
 
-    dimensionedScalar a
-    (
-        VdjModelCoeffs.lookup("a")
-    );
+    dimensionedScalar a(VdjModelCoeffs.lookup("a"));
 
-    dimensionedScalar a1
-    (
-        VdjModelCoeffs.lookup("a1")
-    );
+    dimensionedScalar a1(VdjModelCoeffs.lookup("a1"));
 
-    dimensionedScalar alphaMin
-    (
-        VdjModelCoeffs.lookup("alphaMin")
-    );
-
+    dimensionedScalar alphaMin(VdjModelCoeffs.lookup("alphaMin"));
 
 
     IOdictionary RASProperties
@@ -223,61 +195,98 @@
     );
 
 
-    Switch turbulence
+    Switch turbulence(RASProperties.lookup("turbulence"));
+
+    dictionary kEpsilonDict(RASProperties.subDictPtr("kEpsilonCoeffs"));
+
+    dimensionedScalar Cmu
     (
-        RASProperties.lookup("turbulence")
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "Cmu",
+            kEpsilonDict,
+            0.09
+        )
     );
 
-    const dictionary& kEpsilonCoeffs
+    dimensionedScalar C1
     (
-        RASProperties.subDict("kEpsilonCoeffs")
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "C1",
+            kEpsilonDict,
+            1.44
+        )
     );
 
-
-    scalar Cmu
+    dimensionedScalar C2
     (
-        readScalar(kEpsilonCoeffs.lookup("Cmu"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "C2",
+            kEpsilonDict,
+            1.92
+        )
     );
 
-    scalar C1
+    dimensionedScalar C3
     (
-        readScalar(kEpsilonCoeffs.lookup("C1"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "C3",
+            kEpsilonDict,
+            0.85
+        )
     );
 
-    scalar C2
+    dimensionedScalar sigmak
     (
-        readScalar(kEpsilonCoeffs.lookup("C2"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "sigmak",
+            kEpsilonDict,
+            1.0
+        )
     );
 
-    scalar C3
+    dimensionedScalar sigmaEps
     (
-        readScalar(kEpsilonCoeffs.lookup("C3"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "sigmaEps",
+            kEpsilonDict,
+            1.3
+        )
     );
 
-    scalar alphak
+    dictionary wallFunctionDict(RASProperties.subDictPtr("wallFunctionCoeffs"));
+
+    dimensionedScalar kappa
     (
-        readScalar(kEpsilonCoeffs.lookup("alphak"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "kappa",
+            wallFunctionDict,
+            0.41
+        )
     );
 
-    scalar alphaEps
+    dimensionedScalar E
     (
-        readScalar(kEpsilonCoeffs.lookup("alphaEps"))
+        dimensionedScalar::lookupOrAddToDict
+        (
+            "E",
+            wallFunctionDict,
+            9.8
+        )
     );
 
-    const dictionary& wallFunctionCoeffs
-    (
-        RASProperties.subDict("wallFunctionCoeffs")
-    );
+    if (RASProperties.lookupOrDefault<Switch>("printCoeffs", false))
+    {
+        Info<< "kEpsilonCoeffs" << kEpsilonDict << nl
+            << "wallFunctionCoeffs" << wallFunctionDict << endl;
+    }
 
-    scalar kappa
-    (
-        readScalar(wallFunctionCoeffs.lookup("kappa"))
-    );
-
-    scalar E
-    (
-        readScalar(wallFunctionCoeffs.lookup("E"))
-    );
 
     nearWallDist y(mesh);
 

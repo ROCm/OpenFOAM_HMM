@@ -33,8 +33,6 @@ License
 
 #undef DEBUG_STLBINARY
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // check binary by getting the header and number of facets
@@ -275,5 +273,6 @@ void Foam::fileFormats::STLsurfaceFormatCore::writeHeaderBINARY
     os.write(reinterpret_cast<char*>(&nTris), sizeof(unsigned int));
 
 }
+
 
 // ************************************************************************* //

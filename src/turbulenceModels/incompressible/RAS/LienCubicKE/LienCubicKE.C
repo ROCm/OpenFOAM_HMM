@@ -26,7 +26,6 @@ License
 
 #include "LienCubicKE.H"
 #include "addToRunTimeSelectionTable.H"
-#include "wallFvPatch.H"
 
 #include "backwardsCompatibilityWallFunctions.H"
 
@@ -73,22 +72,22 @@ LienCubicKE::LienCubicKE
             1.92
         )
     ),
-    alphak_
+    sigmak_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphak",
+            "sigmak",
             coeffDict_,
             1.0
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
     A1_
@@ -227,7 +226,7 @@ LienCubicKE::LienCubicKE
         )
     )
 {
-    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_;
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_) + C5viscosity_;
     nut_.correctBoundaryConditions();
 
     printCoeffs();
@@ -294,8 +293,8 @@ bool LienCubicKE::read()
     {
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
-        alphak_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmak_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
         A1_.readIfPresent(coeffDict());
         A2_.readIfPresent(coeffDict());
         Ctau1_.readIfPresent(coeffDict());
@@ -382,7 +381,7 @@ void LienCubicKE::correct()
         - 2.0*pow(Cmu_, 3.0)*pow(k_, 4.0)/pow(epsilon_, 3.0)
        *(magSqr(gradU_ + gradU_.T()) - magSqr(gradU_ - gradU_.T()));
 
-    nut_ == Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
+    nut_ = Cmu_*sqr(k_)/epsilon_ + C5viscosity_;
     nut_.correctBoundaryConditions();
 
     nonlinearStress_ = symm

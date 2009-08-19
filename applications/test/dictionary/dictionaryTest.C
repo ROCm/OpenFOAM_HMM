@@ -29,6 +29,7 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
+#include "argList.H"
 #include "IOstreams.H"
 #include "IOobject.H"
 #include "IFstream.H"
@@ -41,6 +42,15 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
+    argList::noParallel();
+    argList args(argc, argv);
+
+    Info<< nl
+        << "FOAM_CASE=" << getEnv("FOAM_CASE") << nl
+        << "FOAM_CASENAME=" << getEnv("FOAM_CASENAME") << nl
+        << endl;
+
+
     {
         dictionary dict1(IFstream("testDict")());
         Info<< "dict1: " << dict1 << nl

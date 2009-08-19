@@ -5,65 +5,13 @@
     // pressure solution - done in 2 parts. Part 1:
     thermo.rho() -= psi*p;
 
-    if (pressureImplicitPorosity)
+    volScalarField rAU = 1.0/UEqn.A();
+    U = rAU*UEqn.H();
+
+    if (pZones.size() > 0)
     {
-        U = trTU()&UEqn.H();
-    }
-    else
-    {
-        U = trAU()*UEqn.H();
-    }
-
-    if (transonic)
-    {
-        surfaceScalarField phiv = fvc::interpolate(U) & mesh.Sf();
-
-        phi = fvc::interpolate(rho)*phiv;
-
-        surfaceScalarField phid("phid", fvc::interpolate(psi)*phiv);
-
-        for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
-        {
-            tmp<fvScalarMatrix> lapTerm;
-
-            if (pressureImplicitPorosity)
-            {
-                lapTerm = fvm::laplacian(rho*trTU(), p);
-            }
-            else
-            {
-                lapTerm = fvm::laplacian(rho*trAU(), p);
-            }
-
-            fvScalarMatrix pEqn
-            (
-                fvc::ddt(rho) + fvc::div(phi)
-              + correction(psi*fvm::ddt(p) + fvm::div(phid, p))
-              - lapTerm()
-            ==
-                parcels.Srho()
-              + pointMassSources.Su()
-            );
-
-            if
-            (
-                oCorr == nOuterCorr-1
-             && corr == nCorr-1
-             && nonOrth == nNonOrthCorr
-            )
-            {
-                pEqn.solve(mesh.solver("pFinal"));
-            }
-            else
-            {
-                pEqn.solve();
-            }
-
-            if (nonOrth == nNonOrthCorr)
-            {
-                phi == pEqn.flux();
-            }
-        }
+        // ddtPhiCorr not well defined for cases with porosity
+        phi = fvc::interpolate(rho)*(fvc::interpolate(U) & mesh.Sf());
     }
     else
     {
@@ -71,50 +19,34 @@
             fvc::interpolate(rho)
            *(
                 (fvc::interpolate(U) & mesh.Sf())
-//            + fvc::ddtPhiCorr(trAU(), rho, U, phi)
+              + fvc::ddtPhiCorr(rAU, rho, U, phi)
             );
+    }
 
-        for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    for (int nonOrth=0; nonOrth<=nNonOrthCorr; nonOrth++)
+    {
+        fvScalarMatrix pEqn
+        (
+            fvc::ddt(rho) + psi*correction(fvm::ddt(p))
+          + fvc::div(phi)
+          - fvm::laplacian(rho*rAU, p)
+        ==
+            parcels.Srho()
+          + pointMassSources.Su()
+        );
+
+        if (corr == nCorr-1 && nonOrth == nNonOrthCorr)
         {
-            tmp<fvScalarMatrix> lapTerm;
+            pEqn.solve(mesh.solver("pFinal"));
+        }
+        else
+        {
+            pEqn.solve();
+        }
 
-            if (pressureImplicitPorosity)
-            {
-                lapTerm = fvm::laplacian(rho*trTU(), p);
-            }
-            else
-            {
-                lapTerm = fvm::laplacian(rho*trAU(), p);
-            }
-
-            fvScalarMatrix pEqn
-            (
-                fvc::ddt(rho) + psi*correction(fvm::ddt(p))
-              + fvc::div(phi)
-              - lapTerm()
-            ==
-                parcels.Srho()
-              + pointMassSources.Su()
-            );
-
-            if
-            (
-                oCorr == nOuterCorr-1
-             && corr == nCorr-1
-             && nonOrth == nNonOrthCorr
-            )
-            {
-                pEqn.solve(mesh.solver("pFinal"));
-            }
-            else
-            {
-                pEqn.solve();
-            }
-
-            if (nonOrth == nNonOrthCorr)
-            {
-                phi += pEqn.flux();
-            }
+        if (nonOrth == nNonOrthCorr)
+        {
+            phi += pEqn.flux();
         }
     }
 
@@ -124,15 +56,6 @@
     #include "rhoEqn.H"
     #include "compressibleContinuityErrs.H"
 
-    if (pressureImplicitPorosity)
-    {
-        U -= trTU()&fvc::grad(p);
-    }
-    else
-    {
-        U -= trAU()*fvc::grad(p);
-    }
+    U -= rAU*fvc::grad(p);
     U.correctBoundaryConditions();
-
-    DpDt = fvc::DDt(surfaceScalarField("phiU", phi/fvc::interpolate(rho)), p);
 }

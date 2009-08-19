@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,33 +22,33 @@ boundaryField
 {
     minX
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         value           1e5;
     }
     maxX
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         value           1e5;
     }
 
     minY
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         value           1e5;
     }
     maxY
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         value           1e5;
     }
     minZ
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         value           1e5;
     }
     maxZ
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         value           1e5;
     }
 }

@@ -73,6 +73,7 @@ class surfZone
         //- Start label of this group in the face list
         label start_;
 
+
 public:
 
     //- Runtime type information
@@ -166,6 +167,7 @@ public:
 
         //- compare.
         bool operator==(const surfZone&) const;
+
 
     // IOstream Operators
 

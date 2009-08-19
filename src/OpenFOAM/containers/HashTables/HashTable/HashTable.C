@@ -231,7 +231,6 @@ Foam::HashTable<T, Key, Hash>::find
 }
 
 
-// Return the table of contents
 template<class T, class Key, class Hash>
 Foam::List<Key> Foam::HashTable<T, Key, Hash>::toc() const
 {
@@ -244,6 +243,16 @@ Foam::List<Key> Foam::HashTable<T, Key, Hash>::toc() const
     }
 
     return tofc;
+}
+
+
+template<class T, class Key, class Hash>
+Foam::List<Key> Foam::HashTable<T, Key, Hash>::sortedToc() const
+{
+    List<Key> sortedList = this->toc();
+    sort(sortedList);
+
+    return sortedList;
 }
 
 

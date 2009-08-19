@@ -27,7 +27,7 @@ Application
 
 Description
     Solver for n incompressible fluids which captures the interfaces and
-    includes surface-tension and contact-angle effects for each.
+    includes surface-tension and contact-angle effects for each phase.
 
     Turbulence modelling is generic, i.e. laminar, RAS or LES may be selected.
 
@@ -44,7 +44,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readPISOControls.H"
     #include "initContinuityErrs.H"
     #include "createFields.H"

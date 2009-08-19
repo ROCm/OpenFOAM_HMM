@@ -50,7 +50,7 @@ Foam::interpolation<Type>::New
         )   << "Unknown interpolation type " << interpolationType
             << " for field " << psi.name() << nl << nl
             << "Valid interpolation types : " << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

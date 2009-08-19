@@ -23,11 +23,13 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Application
-    kinematicParcelFoam
+    uncoupledKinematicParcelFoam
 
 Description
-    Transient solver for a single kinematicCloud. Uses pre-calculated velocity
-    field to evolve a cloud.
+    Transient solver for the passive transport of a single kinematic
+    particle could.
+
+    Uses a pre- calculated velocity field to evolve the cloud.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,7 +47,7 @@ int main(int argc, char *argv[])
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createMesh.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "compressibleCourantNo.H"
 

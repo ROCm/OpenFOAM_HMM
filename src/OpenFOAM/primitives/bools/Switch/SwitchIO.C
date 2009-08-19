@@ -74,7 +74,7 @@ Foam::Istream& Foam::operator>>(Istream& is, Switch& s)
     {
         is.setBad();
         FatalIOErrorIn("operator>>(Istream&, bool/Switch&)", is)
-            << "wrong token type - expected bool found " << t
+            << "wrong token type - expected bool, found " << t
             << exit(FatalIOError);
 
         return is;

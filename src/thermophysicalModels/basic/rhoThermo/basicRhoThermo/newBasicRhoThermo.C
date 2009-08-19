@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Selection function for 'basic' density-based thermodynamics
-
 \*---------------------------------------------------------------------------*/
 
 #include "basicRhoThermo.H"
@@ -67,7 +64,7 @@ Foam::autoPtr<Foam::basicRhoThermo> Foam::basicRhoThermo::New
         FatalErrorIn("basicRhoThermo::New(const fvMesh&)")
             << "Unknown basicRhoThermo type " << thermoTypeName << nl << nl
             << "Valid basicRhoThermo types are:" << nl
-            << fvMeshConstructorTablePtr_->toc() << nl
+            << fvMeshConstructorTablePtr_->sortedToc() << nl
             << exit(FatalError);
     }
 

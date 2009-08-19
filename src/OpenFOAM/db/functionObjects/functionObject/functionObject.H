@@ -57,6 +57,12 @@ class Time;
 
 class functionObject
 {
+    // Private data
+
+        //- Name
+        const word name_;
+
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -88,8 +94,8 @@ public:
 
     // Constructors
 
-        //- Construct null
-        functionObject();
+        //- Construct from components
+        functionObject(const word& name);
 
         //- Return clone
         autoPtr<functionObject> clone() const
@@ -136,6 +142,9 @@ public:
 
 
     // Member Functions
+
+        //- Name
+        virtual const word& name() const;
 
         //- Called at the start of the time-loop
         virtual bool start() = 0;

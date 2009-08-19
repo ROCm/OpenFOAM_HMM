@@ -81,7 +81,10 @@ Foam::porousZone::porousZone
 {
     Info<< "Creating porous zone: " << name_ << endl;
 
-    if (cellZoneID_ == -1 && !Pstream::parRun())
+    bool foundZone = (cellZoneID_ != -1);
+    reduce(foundZone, orOp<bool>());
+
+    if (!foundZone && Pstream::master())
     {
         FatalErrorIn
         (
@@ -90,6 +93,7 @@ Foam::porousZone::porousZone
         )   << "cannot find porous cellZone " << name_
             << exit(FatalError);
     }
+
 
     // porosity
     if (dict_.readIfPresent("porosity", porosity_))
@@ -368,6 +372,12 @@ void Foam::porousZone::writeDict(Ostream& os, bool subDict) const
     {
         os  << indent << zoneName() << nl
             << indent << token::BEGIN_BLOCK << incrIndent << nl;
+    }
+
+    if (dict_.found("note"))
+    {
+        os.writeKeyword("note") << string(dict_.lookup("note"))
+            << token::END_STATEMENT << nl;
     }
 
     coordSys_.writeDict(os, true);

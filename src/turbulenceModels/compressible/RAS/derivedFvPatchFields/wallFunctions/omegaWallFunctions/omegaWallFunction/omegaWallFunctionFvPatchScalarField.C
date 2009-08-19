@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -40,7 +40,7 @@ namespace compressible
 namespace RASModels
 {
 
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 void omegaWallFunctionFvPatchScalarField::checkType()
 {
@@ -56,6 +56,32 @@ void omegaWallFunctionFvPatchScalarField::checkType()
 }
 
 
+scalar omegaWallFunctionFvPatchScalarField::calcYPlusLam
+(
+    const scalar kappa,
+    const scalar E
+) const
+{
+    scalar ypl = 11.0;
+
+    for (int i=0; i<10; i++)
+    {
+        ypl = log(E*ypl)/kappa;
+    }
+
+    return ypl;
+}
+
+
+void omegaWallFunctionFvPatchScalarField::writeLocalEntries(Ostream& os) const
+{
+    writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
+    os.writeKeyword("Cmu") << Cmu_ << token::END_STATEMENT << nl;
+    os.writeKeyword("kappa") << kappa_ << token::END_STATEMENT << nl;
+    os.writeKeyword("E") << E_ << token::END_STATEMENT << nl;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
@@ -65,12 +91,12 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(p, iF),
-    UName_("U"),
-    rhoName_("rho"),
-    kName_("k"),
     GName_("RASModel::G"),
-    muName_("mu"),
-    mutName_("mut")
+    Cmu_(0.09),
+    kappa_(0.41),
+    E_(9.8),
+    yPlusLam_(calcYPlusLam(kappa_, E_))
+
 {
     checkType();
 }
@@ -85,12 +111,11 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(ptf, p, iF, mapper),
-    UName_(ptf.UName_),
-    rhoName_(ptf.rhoName_),
-    kName_(ptf.kName_),
     GName_(ptf.GName_),
-    muName_(ptf.muName_),
-    mutName_(ptf.mutName_)
+    Cmu_(ptf.Cmu_),
+    kappa_(ptf.kappa_),
+    E_(ptf.E_),
+    yPlusLam_(ptf.yPlusLam_)
 {
     checkType();
 }
@@ -104,12 +129,11 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(p, iF, dict),
-    UName_(dict.lookupOrDefault<word>("U", "U")),
-    rhoName_(dict.lookupOrDefault<word>("rho", "rho")),
-    kName_(dict.lookupOrDefault<word>("k", "k")),
     GName_(dict.lookupOrDefault<word>("G", "RASModel::G")),
-    muName_(dict.lookupOrDefault<word>("mu", "mu")),
-    mutName_(dict.lookupOrDefault<word>("mut", "mut"))
+    Cmu_(dict.lookupOrDefault<scalar>("Cmu", 0.09)),
+    kappa_(dict.lookupOrDefault<scalar>("kappa", 0.41)),
+    E_(dict.lookupOrDefault<scalar>("E", 9.8)),
+    yPlusLam_(calcYPlusLam(kappa_, E_))
 {
     checkType();
 }
@@ -121,12 +145,11 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(owfpsf),
-    UName_(owfpsf.UName_),
-    rhoName_(owfpsf.rhoName_),
-    kName_(owfpsf.kName_),
     GName_(owfpsf.GName_),
-    muName_(owfpsf.muName_),
-    mutName_(owfpsf.mutName_)
+    Cmu_(owfpsf.Cmu_),
+    kappa_(owfpsf.kappa_),
+    E_(owfpsf.E_),
+    yPlusLam_(owfpsf.yPlusLam_)
 {
     checkType();
 }
@@ -139,12 +162,12 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 )
 :
     fixedInternalValueFvPatchField<scalar>(owfpsf, iF),
-    UName_(owfpsf.UName_),
-    rhoName_(owfpsf.rhoName_),
-    kName_(owfpsf.kName_),
     GName_(owfpsf.GName_),
-    muName_(owfpsf.muName_),
-    mutName_(owfpsf.mutName_)
+    Cmu_(owfpsf.Cmu_),
+    kappa_(owfpsf.kappa_),
+    E_(owfpsf.E_),
+    yPlusLam_(owfpsf.yPlusLam_)
+
 {
     checkType();
 }
@@ -154,39 +177,43 @@ omegaWallFunctionFvPatchScalarField::omegaWallFunctionFvPatchScalarField
 
 void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 {
+    if (updated())
+    {
+        return;
+    }
+
+    const label patchI = patch().index();
+
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-
-    const scalar Cmu = rasModel.Cmu().value();
-    const scalar Cmu25 = pow(Cmu, 0.25);
-
-    const scalar kappa = rasModel.kappa().value();
-    const scalar yPlusLam = rasModel.yPlusLam();
-
     const scalarField& y = rasModel.y()[patch().index()];
+
+    const scalar Cmu25 = pow(Cmu_, 0.25);
 
     volScalarField& G = const_cast<volScalarField&>
         (db().lookupObject<volScalarField>(GName_));
 
-    volScalarField& omega = const_cast<volScalarField&>
-        (db().lookupObject<volScalarField>(dimensionedInternalField().name()));
+    DimensionedField<scalar, volMesh>& omega =
+        const_cast<DimensionedField<scalar, volMesh>&>
+        (
+            dimensionedInternalField()
+        );
 
-    const scalarField& k = db().lookupObject<volScalarField>(kName_);
+    const tmp<volScalarField> tk = rasModel.k();
+    const volScalarField& k = tk();
 
-    const scalarField& rhow =
-        patch().lookupPatchField<volScalarField, scalar>(rhoName_);
+    const scalarField& rhow = rasModel.rho().boundaryField()[patchI];
 
-    const scalarField& muw =
-        patch().lookupPatchField<volScalarField, scalar>(muName_);
+    const scalarField& muw = rasModel.mu().boundaryField()[patchI];
 
-    const scalarField& mutw =
-        patch().lookupPatchField<volScalarField, scalar>(mutName_);
+    const tmp<volScalarField> tmut = rasModel.mut();
+    const volScalarField& mut = tmut();
+    const scalarField& mutw = mut.boundaryField()[patchI];
 
-    const fvPatchVectorField& Uw =
-        patch().lookupPatchField<volVectorField, vector>(UName_);
+    const fvPatchVectorField& Uw = rasModel.U().boundaryField()[patchI];
 
     const scalarField magGradUw = mag(Uw.snGrad());
 
-    // Set epsilon and G
+    // Set omega and G
     forAll(mutw, faceI)
     {
         label faceCellI = patch().faceCells()[faceI];
@@ -195,21 +222,23 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
             Cmu25*y[faceI]*sqrt(k[faceCellI])
            /(muw[faceI]/rhow[faceI]);
 
-        omega[faceCellI] = sqrt(k[faceCellI])/(Cmu25*kappa*y[faceI]);
+        omega[faceCellI] = sqrt(k[faceCellI])/(Cmu25*kappa_*y[faceI]);
 
-        if (yPlus > yPlusLam)
+        if (yPlus > yPlusLam_)
         {
             G[faceCellI] =
                 (mutw[faceI] + muw[faceI])
                *magGradUw[faceI]
                *Cmu25*sqrt(k[faceCellI])
-               /(kappa*y[faceI]);
+               /(kappa_*y[faceI]);
         }
         else
         {
             G[faceCellI] = 0.0;
         }
     }
+
+    fixedInternalValueFvPatchField<scalar>::updateCoeffs();
 
     // TODO: perform averaging for cells sharing more than one boundary face
 }
@@ -218,12 +247,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
 void omegaWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fixedInternalValueFvPatchField<scalar>::write(os);
-    writeEntryIfDifferent<word>(os, "U", "U", UName_);
-    writeEntryIfDifferent<word>(os, "rho", "rho", rhoName_);
-    writeEntryIfDifferent<word>(os, "k", "k", kName_);
-    writeEntryIfDifferent<word>(os, "G", "RASModel::G", GName_);
-    writeEntryIfDifferent<word>(os, "mu", "mu", muName_);
-    writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
+    writeLocalEntries(os);
     writeEntry("value", os);
 }
 

@@ -36,7 +36,9 @@ int Foam::functionObject::debug(Foam::debug::debugSwitch("functionObject", 0));
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::functionObject::functionObject()
+Foam::functionObject::functionObject(const word& name)
+:
+    name_(name)
 {}
 
 
@@ -87,7 +89,7 @@ Foam::autoPtr<Foam::functionObject> Foam::functionObject::New
         )   << "Unknown function type "
             << functionType << nl << nl
             << "Valid functions are : " << nl
-            << dictionaryConstructorTablePtr_->toc() << endl
+            << dictionaryConstructorTablePtr_->sortedToc() << endl
             << exit(FatalError);
     }
 
@@ -102,6 +104,12 @@ Foam::functionObject::~functionObject()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+const Foam::word& Foam::functionObject::name() const
+{
+    return name_;
+}
+
 
 bool Foam::functionObject::end()
 {

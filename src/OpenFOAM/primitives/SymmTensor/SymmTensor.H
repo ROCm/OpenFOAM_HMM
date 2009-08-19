@@ -97,7 +97,7 @@ public:
         //- Construct given SphericalTensor
         inline SymmTensor(const SphericalTensor<Cmpt>&);
 
-        //- Construct given the nine components
+        //- Construct given the six components
         inline SymmTensor
         (
             const Cmpt txx, const Cmpt txy, const Cmpt txz,

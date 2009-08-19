@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      http://www.OpenFOAM.org               |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -22,21 +22,21 @@ boundaryField
 {
     floor
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         rho             rhok;
         value           uniform 0;
     }
 
     ceiling
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         rho             rhok;
         value           uniform 0;
     }
 
     fixedWalls
     {
-        type            fixedFluxBuoyantPressure;
+        type            buoyantPressure;
         rho             rhok;
         value           uniform 0;
     }

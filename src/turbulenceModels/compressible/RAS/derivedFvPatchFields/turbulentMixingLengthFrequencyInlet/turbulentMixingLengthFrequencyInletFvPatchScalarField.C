@@ -49,7 +49,7 @@ turbulentMixingLengthFrequencyInletFvPatchScalarField
 :
     fixedValueFvPatchField<scalar>(p, iF),
     mixingLength_(0.0),
-    kName_("undefined-k")
+    kName_("k")
 {}
 
 turbulentMixingLengthFrequencyInletFvPatchScalarField::
@@ -115,7 +115,9 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     // Lookup Cmu corresponding to the turbulence model selected
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu = readScalar(rasModel.coeffDict().lookup("Cmu"));
+    const scalar Cmu =
+        rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
+
     const scalar Cmu25 = pow(Cmu, 0.25);
 
     const fvPatchField<scalar>& kp =

@@ -177,6 +177,7 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::preEvolve()
 {
     this->dispersion().cacheFields(true);
+    forces_.cacheFields(true);
 }
 
 
@@ -189,6 +190,7 @@ void Foam::KinematicCloud<ParcelType>::postEvolve()
     }
 
     this->dispersion().cacheFields(false);
+    forces_.cacheFields(false);
 
     this->postProcessing().post();
 }
@@ -247,10 +249,10 @@ template<class ParcelType>
 void Foam::KinematicCloud<ParcelType>::info() const
 {
     Info<< "Cloud: " << this->name() << nl
-        << "    Parcels added during this run   = "
+        << "    Total number of parcels added   = "
         << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
             << nl
-        << "    Mass introduced during this run = "
+        << "    Total mass introduced           = "
         << returnReduce(this->injection().massInjected(), sumOp<scalar>())
             << nl
         << "    Current number of parcels       = "

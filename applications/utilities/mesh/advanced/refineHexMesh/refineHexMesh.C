@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Hex 2x2x2 refiner
+    Refines a hex mesh by 2x2x2 cell splitting.
 
 \*---------------------------------------------------------------------------*/
 

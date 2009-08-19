@@ -132,6 +132,7 @@ $(dictionaryEntry)/dictionaryEntryIO.C
 functionEntries = $(dictionary)/functionEntries
 $(functionEntries)/functionEntry/functionEntry.C
 $(functionEntries)/includeEntry/includeEntry.C
+$(functionEntries)/includeIfPresentEntry/includeIfPresentEntry.C
 $(functionEntries)/inputModeEntry/inputModeEntry.C
 $(functionEntries)/removeEntry/removeEntry.C
 
@@ -344,6 +345,9 @@ $(globalMeshData)/globalIndex.C
 
 $(polyMesh)/syncTools/syncTools.C
 
+zone = $(polyMesh)/zones/zone
+$(zone)/zone.C
+
 cellZone = $(polyMesh)/zones/cellZone
 $(cellZone)/cellZone.C
 $(cellZone)/newCellZone.C
@@ -449,7 +453,11 @@ meshTools = meshes/meshTools
 $(meshTools)/matchPoints.C
 $(meshTools)/mergePoints.C
 
+fields/UniformDimensionedFields/uniformDimensionedFields.C
+fields/cloud/cloud.C
+
 Fields = fields/Fields
+
 $(Fields)/labelField/labelField.C
 $(Fields)/scalarField/scalarField.C
 $(Fields)/sphericalTensorField/sphericalTensorField.C
@@ -457,8 +465,6 @@ $(Fields)/diagTensorField/diagTensorField.C
 $(Fields)/symmTensorField/symmTensorField.C
 $(Fields)/tensorField/tensorField.C
 $(Fields)/complexFields/complexFields.C
-
-fields/cloud/cloud.C
 
 $(Fields)/labelField/labelIOField.C
 $(Fields)/scalarField/scalarIOField.C
@@ -475,7 +481,6 @@ $(pointPatchFields)/pointPatchField/pointPatchFields.C
 
 basicPointPatchFields = $(pointPatchFields)/basic
 $(basicPointPatchFields)/calculated/calculatedPointPatchFields.C
-$(basicPointPatchFields)/generic/genericPointPatchFields.C
 $(basicPointPatchFields)/coupled/coupledPointPatchFields.C
 $(basicPointPatchFields)/value/valuePointPatchFields.C
 $(basicPointPatchFields)/fixedValue/fixedValuePointPatchFields.C

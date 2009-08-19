@@ -118,13 +118,13 @@ LRR::LRR
             0.15
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
     couplingFactor_
@@ -186,7 +186,7 @@ LRR::LRR
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
@@ -266,7 +266,7 @@ bool LRR::read()
         C2_.readIfPresent(coeffDict());
         Cs_.readIfPresent(coeffDict());
         Ceps_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
 
         couplingFactor_.readIfPresent(coeffDict());
 
@@ -380,7 +380,7 @@ void LRR::correct()
 
 
     // Re-calculate viscosity
-    nut_ == Cmu_*sqr(k_)/epsilon_;
+    nut_ = Cmu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 
 

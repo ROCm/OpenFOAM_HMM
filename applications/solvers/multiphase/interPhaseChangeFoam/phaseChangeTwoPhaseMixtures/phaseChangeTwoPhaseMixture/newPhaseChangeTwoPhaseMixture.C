@@ -70,7 +70,7 @@ Foam::phaseChangeTwoPhaseMixture::New
         )   << "Unknown phaseChangeTwoPhaseMixture type "
             << phaseChangeTwoPhaseMixtureTypeName << endl << endl
             << "Valid  phaseChangeTwoPhaseMixtures are : " << endl
-            << componentsConstructorTablePtr_->toc()
+            << componentsConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

@@ -66,7 +66,8 @@ alphaSgsWallFunctionFvPatchScalarField
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(p, iF)
+    fixedValueFvPatchScalarField(p, iF),
+    Prt_(0.85)
 {
     checkType();
 }
@@ -81,7 +82,8 @@ alphaSgsWallFunctionFvPatchScalarField
     const fvPatchFieldMapper& mapper
 )
 :
-    fixedValueFvPatchScalarField(ptf, p, iF, mapper)
+    fixedValueFvPatchScalarField(ptf, p, iF, mapper),
+    Prt_(ptf.Prt_)
 {}
 
 
@@ -93,7 +95,8 @@ alphaSgsWallFunctionFvPatchScalarField
     const dictionary& dict
 )
 :
-    fixedValueFvPatchScalarField(p, iF, dict)
+    fixedValueFvPatchScalarField(p, iF, dict),
+    Prt_(dict.lookupOrDefault<scalar>("Prt", 0.85))
 {
     checkType();
 }
@@ -102,10 +105,11 @@ alphaSgsWallFunctionFvPatchScalarField
 alphaSgsWallFunctionFvPatchScalarField::
 alphaSgsWallFunctionFvPatchScalarField
 (
-    const alphaSgsWallFunctionFvPatchScalarField& tppsf
+    const alphaSgsWallFunctionFvPatchScalarField& awfpsf
 )
 :
-    fixedValueFvPatchScalarField(tppsf)
+    fixedValueFvPatchScalarField(awfpsf),
+    Prt_(awfpsf.Prt_)
 {
     checkType();
 }
@@ -114,11 +118,13 @@ alphaSgsWallFunctionFvPatchScalarField
 alphaSgsWallFunctionFvPatchScalarField::
 alphaSgsWallFunctionFvPatchScalarField
 (
-    const alphaSgsWallFunctionFvPatchScalarField& tppsf,
+    const alphaSgsWallFunctionFvPatchScalarField& awfpsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
-    fixedValueFvPatchScalarField(tppsf, iF)
+    fixedValueFvPatchScalarField(awfpsf, iF),
+    Prt_(awfpsf.Prt_)
+
 {
     checkType();
 }
@@ -133,14 +139,10 @@ void alphaSgsWallFunctionFvPatchScalarField::evaluate
 {
     const LESModel& lesModel = db().lookupObject<LESModel>("LESProperties");
 
-    // Turbulent Prandtl number
-    const scalar Prt = lesModel.Prt().value();
-
-    // Get the turbulent viscosity at the wall
     const scalarField muSgsw =
         lesModel.muSgs()().boundaryField()[patch().index()];
 
-    operator==(muSgsw/Prt);
+    operator==(muSgsw/Prt_);
 }
 
 

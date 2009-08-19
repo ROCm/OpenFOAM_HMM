@@ -27,41 +27,71 @@
 #     wmakeLnIncludeAll
 #
 # Description
-#     Find directories containing a Make/ directory and execute
-#     'wmakeLnInclude -f' for each one
+#     Find directories with a 'Make/files' that contains a 'LIB =' directive
+#     and execute 'wmakeLnInclude -f' for each one
 #
 #------------------------------------------------------------------------------
-# default is pwd
-if [ "$#" -eq 0 ]
-then
-    set -- .
-elif [ "$1" = "-h" -o "$1" = "-help" ]
-then
-    echo "Usage: ${0##*/} [dir1] .. [dirN]"
-    echo
-    echo "    Find directories containing a Make/ directory and"
-    echo "    execute 'wmakeLnInclude -f' for each one"
-    echo
-    exit 1
-fi
+usage() {
+    while [ "$#" -ge 1 ]; do echo "$1"; shift; done
+    cat<<USAGE
 
+usage: ${0##*/} [dir1 .. dirN]
+
+    Find directories with a 'Make/files' that contains a 'LIB =' directive
+    and execute 'wmakeLnInclude -f' for each one
+
+USAGE
+    exit 1
+}
+
+#------------------------------------------------------------------------------
+findName=lnInclude
+
+# simple parse options
+while [ "$#" -gt 0 ]
+do
+    case "$1" in
+    -h | -help)   # provide immediate help
+        usage
+        ;;
+    -*)
+        usage "unknown option: '$*'"
+        ;;
+    *)
+        break
+        ;;
+    esac
+done
+
+
+# default to searching from pwd
+[ "$#" -gt 0 ] || set -- .
 
 for checkDir
 do
     if [ -d $checkDir ]
     then
         echo "searching: $checkDir for 'Make' directories"
+        echo "---------"
     else
         echo "skipping non-dir: $checkDir"
+        echo "----------------"
         continue
     fi
 
-    find $checkDir -depth -type d -name Make -print | while read dir
+    find $checkDir -depth -type d -name Make -print | while read makeDir
     do
-        dir=${dir%/Make}    # trim /Make directory from the end
-        if [ -d "$dir" ]
+        topDir=${makeDir%/Make}    # trim /Make from the end
+        if [ -d "$topDir" ]
         then
-            wmakeLnInclude -f $dir
+            if grep -e '^ *LIB *=' "$makeDir/files" >/dev/null 2>&1
+            then
+                wmakeLnInclude -f $topDir
+            elif [ -d "$topDir/lnInclude" ]
+            then
+                echo "removing spurious $topDir/lnInclude"
+                rm -rf "$topDir/lnInclude"
+            fi
         fi
     done
 done

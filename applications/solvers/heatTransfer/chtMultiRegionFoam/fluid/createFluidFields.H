@@ -4,6 +4,7 @@
     PtrList<volScalarField> KFluid(fluidRegions.size());
     PtrList<volVectorField> UFluid(fluidRegions.size());
     PtrList<surfaceScalarField> phiFluid(fluidRegions.size());
+    PtrList<uniformDimensionedVectorField> gFluid(fluidRegions.size());
     PtrList<compressible::turbulenceModel> turbulence(fluidRegions.size());
     PtrList<volScalarField> DpDtFluid(fluidRegions.size());
 
@@ -92,6 +93,23 @@
                 ),
                 linearInterpolate(rhoFluid[i]*UFluid[i])
                     & fluidRegions[i].Sf()
+            )
+        );
+
+        Info<< "    Adding to gFluid\n" << endl;
+        gFluid.set
+        (
+            i,
+            new uniformDimensionedVectorField
+            (
+                IOobject
+                (
+                    "g",
+                    runTime.constant(),
+                    fluidRegions[i],
+                    IOobject::MUST_READ,
+                    IOobject::NO_WRITE
+                )
             )
         );
 

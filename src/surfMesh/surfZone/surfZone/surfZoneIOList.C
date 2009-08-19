@@ -153,9 +153,4 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIOList& L)
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
-
 // ************************************************************************* //

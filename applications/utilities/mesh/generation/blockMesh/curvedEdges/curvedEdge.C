@@ -107,7 +107,7 @@ autoPtr<curvedEdge> curvedEdge::New(const pointField& points, Istream& is)
         FatalErrorIn("curvedEdge::New(const pointField&, Istream&)")
             << "Unknown curvedEdge type " << curvedEdgeType << endl << endl
             << "Valid curvedEdge types are" << endl
-            << IstreamConstructorTablePtr_->toc()
+            << IstreamConstructorTablePtr_->sortedToc()
             << abort(FatalError);
     }
 

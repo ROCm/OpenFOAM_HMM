@@ -28,8 +28,6 @@ License
 #include "Keyed.H"
 #include "IFstream.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class Face>
@@ -100,5 +98,6 @@ bool Foam::fileFormats::FTRsurfaceFormat<Face>::read
     this->storedZoneToc().transfer(newZones);
     return true;
 }
+
 
 // ************************************************************************* //

@@ -54,8 +54,9 @@ Description
             Cw3         2.0;
             Cv1         7.1;
             Cv2         5.0;
-            alphaNut    1.5;
-            alphah      1.0;    // only for compressible
+            sigmaNut    0.66666;
+            Prt         1.0;    // only for compressible
+            kappa       0.41;
         }
     @endverbatim
 
@@ -81,7 +82,7 @@ namespace RASModels
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class SpalartAllmaras Declaration
+                      Class SpalartAllmaras Declaration
 \*---------------------------------------------------------------------------*/
 
 class SpalartAllmaras
@@ -90,20 +91,29 @@ class SpalartAllmaras
 {
     // Private data
 
-        dimensionedScalar alphaNut_;
-        dimensionedScalar alphah_;
+        // Model coefficients
 
-        dimensionedScalar Cb1_;
-        dimensionedScalar Cb2_;
-        dimensionedScalar Cw1_;
-        dimensionedScalar Cw2_;
-        dimensionedScalar Cw3_;
-        dimensionedScalar Cv1_;
-        dimensionedScalar Cv2_;
+            dimensionedScalar sigmaNut_;
+            dimensionedScalar kappa_;
+            dimensionedScalar Prt_;
 
-        volScalarField nuTilda_;
-        volScalarField mut_;
+            dimensionedScalar Cb1_;
+            dimensionedScalar Cb2_;
+            dimensionedScalar Cw1_;
+            dimensionedScalar Cw2_;
+            dimensionedScalar Cw3_;
+            dimensionedScalar Cv1_;
+            dimensionedScalar Cv2_;
 
+
+        // Fields
+
+            volScalarField nuTilda_;
+            volScalarField mut_;
+            volScalarField alphat_;
+
+
+        //- Wall distance
         wallDist d_;
 
 
@@ -157,7 +167,7 @@ public:
                 new volScalarField
                 (
                     "DnuTildaEff",
-                    alphaNut_*rho_*nuTilda_ + mu()
+                    rho_*nuTilda_/sigmaNut_ + mu()
                 )
             );
         }
@@ -173,47 +183,15 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("alphaEff", alphah_*mut_ + alpha())
+                new volScalarField("alphaEff", alphat_ + alpha())
             );
         }
 
         //- Return the turbulence kinetic energy
-        virtual tmp<volScalarField> k() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        "k",
-                        runTime_.timeName(),
-                        mesh_
-                    ),
-                    mesh_,
-                    dimensionedScalar("0", dimensionSet(0, 2, -2, 0, 0), 0)
-                )
-            );
-        }
+        virtual tmp<volScalarField> k() const;
 
         //- Return the turbulence kinetic energy dissipation rate
-        virtual tmp<volScalarField> epsilon() const
-        {
-            return tmp<volScalarField>
-            (
-                new volScalarField
-                (
-                    IOobject
-                    (
-                        "epslion",
-                        runTime_.timeName(),
-                        mesh_
-                    ),
-                    mesh_,
-                    dimensionedScalar("0", dimensionSet(0, 2, -3, 0, 0), 0)
-                )
-            );
-        }
+        virtual tmp<volScalarField> epsilon() const;
 
         //- Return the Reynolds stress tensor
         virtual tmp<volSymmTensorField> R() const;

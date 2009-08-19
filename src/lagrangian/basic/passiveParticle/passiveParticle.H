@@ -28,9 +28,6 @@ Class
 Description
 
 SourceFiles
-    passiveParticleI.H
-    passiveParticle.C
-    passiveParticleIO.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -78,7 +75,7 @@ public:
             bool readFields = true
         )
         :
-            Particle<passiveParticle>(c, is)
+            Particle<passiveParticle>(c, is, readFields)
         {}
 
         //- Construct as copy

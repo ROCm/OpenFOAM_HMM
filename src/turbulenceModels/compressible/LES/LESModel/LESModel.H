@@ -33,13 +33,13 @@ Class
     Foam::compressible::LESModel
 
 Description
-    Class for all compressible flow LES SGS models.
+    Base class for all compressible flow LES SGS models.
 
-    This class defines the basic interface for a compressible flow SGS model,
-    and encapsulates data of value to all possible models. In particular
-    this includes references to all the dependent fields (rho, U, phi),
-    the physical viscosity mu, and the LESProperties dictionary,
-    which contains the model selection and model coefficients.
+    This class defines the basic interface for a compressible flow SGS
+    model, and encapsulates data of value to all possible models.
+    In particular this includes references to all the dependent fields
+    (rho, U, phi), the physical viscosity mu, and the LESProperties
+    dictionary, which contains the model selection and model coefficients.
 
 SourceFiles
     LESModel.C
@@ -86,19 +86,6 @@ protected:
         dimensionedScalar k0_;
 
         autoPtr<LESdelta> delta_;
-
-        // Wall function properties
-
-            //- Wall function dictionary
-            dictionary wallFunctionDict_;
-
-            dimensionedScalar kappa_;
-
-            dimensionedScalar E_;
-
-            dimensionedScalar Cmu_;
-
-            dimensionedScalar Prt_;
 
 
     // Protected Member Functions
@@ -173,55 +160,34 @@ public:
 
     // Member Functions
 
-        //- Const access to the coefficients dictionary,
-        //  which provides info. about choice of models,
-        //  and all related data (particularly model coefficients).
-        inline const dictionary& coeffDict() const
-        {
-            return coeffDict_;
-        }
+        // Access
 
-        //- Return the value of k0 which k is not allowed to be less than
-        const dimensionedScalar& k0() const
-        {
-            return k0_;
-        }
+            //- Const access to the coefficients dictionary,
+            //  which provides info. about choice of models,
+            //  and all related data (particularly model coefficients).
+            inline const dictionary& coeffDict() const
+            {
+                return coeffDict_;
+            }
 
-        //- Allow k0 to be changed
-        dimensionedScalar& k0()
-        {
-            return k0_;
-        }
+            //- Return the value of k0 which k is not allowed to be less than
+            const dimensionedScalar& k0() const
+            {
+                return k0_;
+            }
 
-        //- Access function to filter width
-        inline const volScalarField& delta() const
-        {
-            return delta_();
-        }
+            //- Allow k0 to be changed
+            dimensionedScalar& k0()
+            {
+                return k0_;
+            }
 
-        //- Return kappa for use in wall-functions
-        dimensionedScalar kappa() const
-        {
-            return kappa_;
-        }
+            //- Access function to filter width
+            inline const volScalarField& delta() const
+            {
+                return delta_();
+            }
 
-        //- Return E for use in wall-functions
-        dimensionedScalar E() const
-        {
-            return E_;
-        }
-
-        //- Return Cmu for use in wall-functions
-        dimensionedScalar Cmu() const
-        {
-            return Cmu_;
-        }
-
-        //- Return turbulent Prandtl number for use in wall-functions
-        dimensionedScalar Prt() const
-        {
-            return Prt_;
-        }
 
         //- Return the SGS turbulent kinetic energy.
         virtual tmp<volScalarField> k() const = 0;

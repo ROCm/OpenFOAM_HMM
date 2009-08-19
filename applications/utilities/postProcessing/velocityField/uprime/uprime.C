@@ -1,4 +1,4 @@
-/*---------------------------------------------------------------------------*\
+/*---------------------------------------------------------------------------* \
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
@@ -27,6 +27,7 @@ Application
 
 Description
     Calculates and writes the scalar field of uprime (sqrt(2/3 k)).
+
     The -noWrite option just outputs the max/min values without writing
     the field.
 
@@ -80,6 +81,9 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     {
         Info<< "    No k" << endl;
     }
+
+    Info<< "\nEnd\n" << endl;
 }
+
 
 // ************************************************************************* //

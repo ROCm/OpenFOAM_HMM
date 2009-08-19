@@ -106,7 +106,7 @@ vanDriestDelta::vanDriestDelta
     (
         LESdelta::New("geometricDelta", mesh, dd.subDict(type() + "Coeffs"))
     ),
-    kappa_(dd.lookupOrDefault<scalar>("kappa", 0.4187)),
+    kappa_(dd.lookupOrDefault<scalar>("kappa", 0.41)),
     Aplus_
     (
         dd.subDict(type() + "Coeffs").lookupOrDefault<scalar>("Aplus", 26.0)

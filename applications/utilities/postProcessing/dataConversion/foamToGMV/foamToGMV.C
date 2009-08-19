@@ -24,6 +24,7 @@ License
 
 Description
     Translates foam output to GMV readable files.
+
     A free post-processor with available binaries from
     http://www-xdiv.lanl.gov/XCM/gmv/
 
@@ -88,7 +89,7 @@ int main(int argc, char *argv[])
         }
     }
 
-    Info << nl << "Translation Complete." << nl;
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

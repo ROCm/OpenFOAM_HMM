@@ -246,11 +246,9 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::omega
         {
             pr *= pow(cr, exp - 1.0);
         }
-
     }
 
     return pf*cf - pr*cr;
-
 }
 
 
@@ -468,10 +466,27 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
         this->thermo().rho()
     );
 
-    label nCells = rho.size();
-    label nReaction = reactions_.size();
+    tmp<volScalarField> tsource
+    (
+        new volScalarField
+        (
+            IOobject
+            (
+                "tc",
+                this->time().timeName(),
+                this->mesh(),
+                IOobject::NO_READ,
+                IOobject::NO_WRITE
+            ),
+            this->mesh(),
+            dimensionedScalar("zero", dimTime, SMALL),
+            zeroGradientFvPatchScalarField::typeName
+        )
+    );
 
-    scalarField t(nCells, SMALL);
+    scalarField& t = tsource();
+
+    label nReaction = reactions_.size();
 
     if (this->chemistry_)
     {
@@ -509,25 +524,7 @@ Foam::ODEChemistryModel<CompType, ThermoType>::tc() const
         }
     }
 
-    tmp<volScalarField> tsource
-    (
-        new volScalarField
-        (
-            IOobject
-            (
-                "tc",
-                this->mesh_.time().timeName(),
-                this->mesh_,
-                IOobject::NO_READ,
-                IOobject::NO_WRITE
-            ),
-            this->mesh_,
-            dimensionedScalar("zero", dimTime, 0.0),
-            zeroGradientFvPatchScalarField::typeName
-        )
-    );
 
-    tsource().internalField() = t;
     tsource().correctBoundaryConditions();
 
     return tsource;
@@ -682,7 +679,7 @@ Foam::scalar Foam::ODEChemistryModel<CompType, ThermoType>::solve
 
     forAll(rho, celli)
     {
-        for (label i=0; i<nSpecie(); i++)
+        for (label i=0; i<nSpecie_; i++)
         {
             RR_[i][celli] = 0.0;
         }

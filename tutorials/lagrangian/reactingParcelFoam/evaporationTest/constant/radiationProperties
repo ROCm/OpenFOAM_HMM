@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5.x                                 |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -20,10 +20,6 @@ radiation       off;
 radiationModel  none;
 
 solverFreq      10;
-
-noRadiation
-{
-}
 
 P1Coeffs
 {
@@ -49,7 +45,10 @@ binaryAbsorptionEmissionCoeffs
         absorptionEmissionModel cloudAbsorptionEmission;
         cloudAbsorptionEmissionCoeffs
         {
-            cloudNames      ( coalCloud1 limestoneCloud1 );
+            cloudNames
+            (
+                reactingCloud1
+            );
         }
     }
 }
@@ -58,7 +57,10 @@ scatterModel    cloudScatter;
 
 cloudScatterCoeffs
 {
-    cloudNames      ( coalCloud1 limestoneCloud1 );
+    cloudNames
+    (
+        reactingCloud1
+    );
 }
 
 

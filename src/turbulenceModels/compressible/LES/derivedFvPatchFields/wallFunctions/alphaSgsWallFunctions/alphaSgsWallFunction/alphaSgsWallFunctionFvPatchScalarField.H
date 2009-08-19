@@ -56,6 +56,12 @@ class alphaSgsWallFunctionFvPatchScalarField
 :
     public fixedValueFvPatchScalarField
 {
+    // Private data
+
+        //- Turbulent Prandtl number
+        scalar Prt_;
+
+
     // Private member functions
 
         //- Check the type of the patch

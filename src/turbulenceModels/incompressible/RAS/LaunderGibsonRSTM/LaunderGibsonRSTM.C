@@ -64,6 +64,15 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             0.09
         )
     ),
+    kappa_
+    (
+        dimensioned<scalar>::lookupOrAddToDict
+        (
+            "kappa",
+            coeffDict_,
+            0.41
+        )
+    ),
     Clg1_
     (
         dimensioned<scalar>::lookupOrAddToDict
@@ -118,22 +127,22 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
             0.15
         )
     ),
-    alphaR_
+    sigmaR_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaR",
+            "sigmaR",
             coeffDict_,
-            1.22
+            0.81967
         )
     ),
-    alphaEps_
+    sigmaEps_
     (
         dimensioned<scalar>::lookupOrAddToDict
         (
-            "alphaEps",
+            "sigmaEps",
             coeffDict_,
-            0.76923
+            1.3
         )
     ),
     C1Ref_
@@ -215,7 +224,7 @@ LaunderGibsonRSTM::LaunderGibsonRSTM
         autoCreateNut("nut", mesh_)
     )
 {
-    nut_ == Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
+    nut_ = Cmu_*sqr(k_)/(epsilon_ + epsilonSmall_);
     nut_.correctBoundaryConditions();
 
     if (couplingFactor_.value() < 0.0 || couplingFactor_.value() > 1.0)
@@ -284,14 +293,15 @@ bool LaunderGibsonRSTM::read()
     if (RASModel::read())
     {
         Cmu_.readIfPresent(coeffDict());
+        kappa_.readIfPresent(coeffDict());
         Clg1_.readIfPresent(coeffDict());
         Clg2_.readIfPresent(coeffDict());
         C1_.readIfPresent(coeffDict());
         C2_.readIfPresent(coeffDict());
         Cs_.readIfPresent(coeffDict());
         Ceps_.readIfPresent(coeffDict());
-        alphaR_.readIfPresent(coeffDict());
-        alphaEps_.readIfPresent(coeffDict());
+        sigmaR_.readIfPresent(coeffDict());
+        sigmaEps_.readIfPresent(coeffDict());
         C1Ref_.readIfPresent(coeffDict());
         C2Ref_.readIfPresent(coeffDict());
 
@@ -421,7 +431,7 @@ void LaunderGibsonRSTM::correct()
 
 
     // Re-calculate turbulent viscosity
-    nut_ == Cmu_*sqr(k_)/epsilon_;
+    nut_ = Cmu_*sqr(k_)/epsilon_;
     nut_.correctBoundaryConditions();
 
 

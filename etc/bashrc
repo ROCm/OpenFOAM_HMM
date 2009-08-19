@@ -33,8 +33,7 @@
 #------------------------------------------------------------------------------
 
 export WM_PROJECT=OpenFOAM
-# export WM_PROJECT_VERSION=1.5.x
-: ${WM_PROJECT_VERSION:=dev}; export WM_PROJECT_VERSION
+export WM_PROJECT_VERSION=dev
 
 ################################################################################
 # USER EDITABLE PART
@@ -74,7 +73,7 @@ export WM_PROJECT_USER_DIR=$HOME/$WM_PROJECT/$USER-$WM_PROJECT_VERSION
 
 # Location of third-party software
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty
+export WM_THIRD_PARTY_DIR=$WM_PROJECT_INST_DIR/ThirdParty-$WM_PROJECT_VERSION
 
 
 # Operating System/Platform
@@ -102,10 +101,7 @@ export WM_COMPILER_LIB_ARCH=
 # WM_COMPILE_OPTION = Opt | Debug | Prof
 : ${WM_COMPILE_OPTION:=Opt}; export WM_COMPILE_OPTION
 
-# WM_JAVAC_OPTION = Opt | Debug
-: ${WM_JAVAC_OPTION:=Opt}; export WM_JAVAC_OPTION
-
-# WM_MPLIB = | OPENMPI | LAM | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
+# WM_MPLIB = | OPENMPI | MPICH | MPICH-GM | HPMPI | GAMMA | MPI | QSMPI
 : ${WM_MPLIB:=OPENMPI}; export WM_MPLIB
 
 

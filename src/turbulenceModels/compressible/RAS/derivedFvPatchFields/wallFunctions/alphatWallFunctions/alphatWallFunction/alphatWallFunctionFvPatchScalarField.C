@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "alphatWallFunctionFvPatchScalarField.H"
-#include "RASModel.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "addToRunTimeSelectionTable.H"
@@ -49,7 +48,8 @@ alphatWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF),
-    mutName_("mut")
+    mutName_("mut"),
+    Prt_(0.85)
 {}
 
 
@@ -63,7 +63,8 @@ alphatWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(ptf, p, iF, mapper),
-    mutName_(ptf.mutName_)
+    mutName_(ptf.mutName_),
+    Prt_(ptf.Prt_)
 {}
 
 
@@ -76,7 +77,8 @@ alphatWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(p, iF, dict),
-    mutName_(dict.lookupOrDefault<word>("mut", "mut"))
+    mutName_(dict.lookupOrDefault<word>("mut", "mut")),
+    Prt_(dict.lookupOrDefault<scalar>("Prt", 0.85))
 {}
 
 
@@ -87,7 +89,8 @@ alphatWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(awfpsf),
-    mutName_(awfpsf.mutName_)
+    mutName_(awfpsf.mutName_),
+    Prt_(awfpsf.Prt_)
 {}
 
 
@@ -99,7 +102,8 @@ alphatWallFunctionFvPatchScalarField
 )
 :
     fixedValueFvPatchScalarField(awfpsf, iF),
-    mutName_(awfpsf.mutName_)
+    mutName_(awfpsf.mutName_),
+    Prt_(awfpsf.Prt_)
 {}
 
 
@@ -107,13 +111,17 @@ alphatWallFunctionFvPatchScalarField
 
 void alphatWallFunctionFvPatchScalarField::updateCoeffs()
 {
-    const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
-    const scalar Prt = rasModel.Prt().value();
+    if (updated())
+    {
+        return;
+    }
 
     const scalarField& mutw =
         patch().lookupPatchField<volScalarField, scalar>(mutName_);
 
-    operator==(mutw/Prt);
+    operator==(mutw/Prt_);
+
+    fixedValueFvPatchScalarField::updateCoeffs();
 }
 
 
@@ -121,6 +129,7 @@ void alphatWallFunctionFvPatchScalarField::write(Ostream& os) const
 {
     fvPatchField<scalar>::write(os);
     writeEntryIfDifferent<word>(os, "mut", "mut", mutName_);
+    os.writeKeyword("Prt") << Prt_ << token::END_STATEMENT << nl;
     writeEntry("value", os);
 }
 

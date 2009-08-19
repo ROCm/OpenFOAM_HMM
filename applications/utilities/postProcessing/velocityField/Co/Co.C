@@ -28,6 +28,7 @@ Application
 Description
     Calculates and writes the Co number as a surfaceScalarField obtained
     from field phi.
+
     The -noWrite option just outputs the max values without writing the
     field.
 
@@ -179,6 +180,8 @@ void Foam::calc(const argList& args, const Time& runTime, const fvMesh& mesh)
     {
         Info<< "    No phi" << endl;
     }
+
+    Info<< "\nEnd\n" << endl;
 }
 
 // ************************************************************************* //

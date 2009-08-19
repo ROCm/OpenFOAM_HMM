@@ -37,9 +37,7 @@ Description
             C1          1.44;
             C2          1.92;
             C3          -0.33;
-            alphah      1.0;    // only for compressible
-            alphahk     1.0;    // only for compressible
-            alphaEps    0.76923;
+            sigmaEps    1.3;
         }
     @endverbatim
 
@@ -72,15 +70,19 @@ class LaunderSharmaKE
 {
     // Private data
 
-        dimensionedScalar Cmu_;
-        dimensionedScalar C1_;
-        dimensionedScalar C2_;
-        dimensionedScalar alphaEps_;
+        // Model coefficients
 
-        volScalarField k_;
-        volScalarField epsilonTilda_;
+            dimensionedScalar Cmu_;
+            dimensionedScalar C1_;
+            dimensionedScalar C2_;
+            dimensionedScalar sigmaEps_;
 
-        volScalarField nut_;
+
+        // Fields
+
+            volScalarField k_;
+            volScalarField epsilonTilda_;
+            volScalarField nut_;
 
 
     // Private member functions
@@ -132,7 +134,7 @@ public:
         {
             return tmp<volScalarField>
             (
-                new volScalarField("DepsilonEff", alphaEps_*nut_ + nu())
+                new volScalarField("DepsilonEff", nut_/sigmaEps_ + nu())
             );
         }
 

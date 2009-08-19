@@ -27,8 +27,6 @@ License
 #include "surfZoneIdentifier.H"
 #include "dictionary.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::surfZoneIdentifier::surfZoneIdentifier()
@@ -76,6 +74,7 @@ Foam::surfZoneIdentifier::surfZoneIdentifier
     index_(index),
     geometricType_(p.geometricType())
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -135,5 +134,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const surfZoneIdentifier& p)
     );
     return os;
 }
+
 
 // ************************************************************************* //

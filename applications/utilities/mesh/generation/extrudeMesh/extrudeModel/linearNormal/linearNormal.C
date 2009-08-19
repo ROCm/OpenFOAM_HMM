@@ -47,7 +47,14 @@ linearNormal::linearNormal(const dictionary& dict)
 :
     extrudeModel(typeName, dict),
     thickness_(readScalar(coeffDict_.lookup("thickness")))
-{}
+{
+    if (thickness_ <= 0)
+    {
+        FatalErrorIn("linearNormal(const dictionary&)")
+            << "thickness should be positive : " << thickness_
+            << exit(FatalError);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

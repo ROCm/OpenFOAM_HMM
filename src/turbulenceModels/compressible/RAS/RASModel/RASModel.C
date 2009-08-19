@@ -47,8 +47,7 @@ void RASModel::printCoeffs()
 {
     if (printCoeffs_)
     {
-        Info<< type() << "Coeffs" << coeffDict_ << nl
-            << "wallFunctionCoeffs" << wallFunctionDict_ << endl;
+        Info<< type() << "Coeffs" << coeffDict_ << endl;
     }
 }
 
@@ -82,46 +81,6 @@ RASModel::RASModel
     printCoeffs_(lookupOrDefault<Switch>("printCoeffs", false)),
     coeffDict_(subDictPtr(type + "Coeffs")),
 
-    wallFunctionDict_(subDictPtr("wallFunctionCoeffs")),
-    kappa_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "kappa",
-            wallFunctionDict_,
-            0.4187
-        )
-    ),
-    E_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "E",
-            wallFunctionDict_,
-            9.0
-        )
-    ),
-    Cmu_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "Cmu",
-            wallFunctionDict_,
-            0.09
-        )
-    ),
-    Prt_
-    (
-        dimensioned<scalar>::lookupOrAddToDict
-        (
-            "Prt",
-            wallFunctionDict_,
-            0.85
-        )
-    ),
-
-    yPlusLam_(yPlusLam(kappa_.value(), E_.value())),
-
     k0_("k0", dimVelocity*dimVelocity, SMALL),
     epsilon0_("epsilon", k0_.dimensions()/dimTime, SMALL),
     epsilonSmall_("epsilonSmall", epsilon0_.dimensions(), SMALL),
@@ -129,7 +88,11 @@ RASModel::RASModel
     omegaSmall_("omegaSmall", omega0_.dimensions(), SMALL),
 
     y_(mesh_)
-{}
+{
+    // Force the construction of the mesh deltaCoeffs which may be needed
+    // for the construction of the derived models and BCs
+    mesh_.deltaCoeffs();
+}
 
 
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
@@ -178,7 +141,7 @@ autoPtr<RASModel> RASModel::New
         )   << "Unknown RASModel type " << modelName
             << endl << endl
             << "Valid RASModel types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -204,7 +167,7 @@ scalar RASModel::yPlusLam(const scalar kappa, const scalar E) const
 }
 
 
-tmp<scalarField> RASModel::yPlus(const label patchNo) const
+tmp<scalarField> RASModel::yPlus(const label patchNo, const scalar Cmu) const
 {
     const fvPatch& curPatch = mesh_.boundary()[patchNo];
 
@@ -213,7 +176,7 @@ tmp<scalarField> RASModel::yPlus(const label patchNo) const
 
     if (isType<wallFvPatch>(curPatch))
     {
-        Yp = pow(Cmu_.value(), 0.25)
+        Yp = pow(Cmu, 0.25)
             *y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
            /(
@@ -255,18 +218,6 @@ bool RASModel::read()
         {
             coeffDict_ <<= *dictPtr;
         }
-
-        if (const dictionary* dictPtr = subDictPtr("wallFunctionCoeffs"))
-        {
-            wallFunctionDict_ <<= *dictPtr;
-        }
-
-        kappa_.readIfPresent(wallFunctionDict_);
-        E_.readIfPresent(wallFunctionDict_);
-        Cmu_.readIfPresent(wallFunctionDict_);
-        Prt_.readIfPresent(wallFunctionDict_);
-
-        yPlusLam_ = yPlusLam(kappa_.value(), E_.value());
 
         k0_.readIfPresent(*this);
         epsilon0_.readIfPresent(*this);

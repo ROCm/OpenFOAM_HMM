@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  dev                                   |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -23,25 +23,25 @@ boundaryField
 {
     ground
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
 
     igloo_region0
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
 
     twoFridgeFreezers_seal_0
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
 
     twoFridgeFreezers_herring_1
     {
-        type            kQRWallFunction;
+        type            kqRWallFunction;
         value           uniform 0.1;
     }
 }

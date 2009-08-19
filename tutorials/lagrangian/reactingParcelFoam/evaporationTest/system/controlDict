@@ -1,7 +1,7 @@
 /*--------------------------------*- C++ -*----------------------------------*\
 | =========                 |                                                 |
 | \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox           |
-|  \\    /   O peration     | Version:  1.5.x                                 |
+|  \\    /   O peration     | Version:  1.6                                   |
 |   \\  /    A nd           | Web:      www.OpenFOAM.org                      |
 |    \\/     M anipulation  |                                                 |
 \*---------------------------------------------------------------------------*/
@@ -15,19 +15,21 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+application     reactingParcelFoam;
+
 startFrom       startTime;
 
 startTime       0;
 
 stopAt          endTime;
 
-endTime         1;
+endTime         0.5;
 
-deltaT          0.001;
+deltaT          1e-03;
 
 writeControl    adjustableRunTime;
 
-writeInterval   0.1;
+writeInterval   0.05;
 
 purgeWrite      0;
 
@@ -47,7 +49,7 @@ adjustTimeStep  yes;
 
 maxCo           0.3;
 
-maxDeltaT       1e-3;
+maxDeltaT       1e-03;
 
 
 // ************************************************************************* //

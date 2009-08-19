@@ -22,14 +22,10 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "pointZone.H"
 #include "dictionary.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -61,14 +57,13 @@ Foam::autoPtr<Foam::pointZone> Foam::pointZone::New
             "const label, const pointZoneMesh&)",
             dict
         )   << "Unknown pointZone type " << zoneType << endl << endl
-            << "Valid pointZone types are :" << endl
-            << dictionaryConstructorTablePtr_->toc()
+            << "Valid pointZone types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
             << exit(FatalIOError);
     }
 
     return autoPtr<pointZone>(cstrIter()(name, dict, index, zm));
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

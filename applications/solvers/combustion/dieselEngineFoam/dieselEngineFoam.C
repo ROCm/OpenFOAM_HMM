@@ -26,7 +26,7 @@ Application
     dieselFoam
 
 Description
-    Diesel engine spray and combustion code.
+    Solver for diesel engine spray and combustion.
 
 \*---------------------------------------------------------------------------*/
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
     #include "createEngineTime.H"
     #include "createEngineMesh.H"
     #include "createFields.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "readCombustionProperties.H"
     #include "createSpray.H"
     #include "initContinuityErrs.H"
@@ -124,7 +124,10 @@ int main(int argc, char *argv[])
 
         rho = thermo.rho();
 
-        runTime.write();
+        if (runTime.write())
+        {
+            chemistry.dQ()().write();
+        }
 
         Info<< "ExecutionTime = " << runTime.elapsedCpuTime() << " s"
             << "  ClockTime = " << runTime.elapsedClockTime() << " s"

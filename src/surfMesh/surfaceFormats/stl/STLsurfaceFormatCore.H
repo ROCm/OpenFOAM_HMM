@@ -71,6 +71,7 @@ class STLsurfaceFormatCore
         //- The solid count, in the order of their first appearance
         List<label> sizes_;
 
+
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
@@ -88,6 +89,7 @@ class STLsurfaceFormatCore
         //- Read BINARY
         bool readBINARY(istream&, const off_t);
 
+
 public:
 
     // Static Data
@@ -95,19 +97,23 @@ public:
         //- The number of bytes in the STL binary header
         static const unsigned int headerSize = 80;
 
+
     // Static Member Functions
 
         //- Write "STL binary file" and number of triangles to stream
         static void writeHeaderBINARY(ostream&, unsigned int);
+
 
     // Constructors
 
         //- Read from file, filling in the information
         STLsurfaceFormatCore(const fileName&);
 
+
     // Destructor
 
         ~STLsurfaceFormatCore();
+
 
     // Member Functions
 
@@ -150,7 +156,6 @@ public:
         {
             return sizes_;
         }
-
 };
 
 
@@ -158,8 +163,6 @@ public:
 
 } // End namespace fileFormats
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

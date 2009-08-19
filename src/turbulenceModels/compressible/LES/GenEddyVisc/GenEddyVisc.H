@@ -68,7 +68,13 @@ class GenEddyVisc
 
 protected:
 
+    // Model coefficients
+
         dimensionedScalar ce_;
+        dimensionedScalar Prt_;
+
+
+    // Fields
 
         volScalarField k_;
         volScalarField muSgs_;

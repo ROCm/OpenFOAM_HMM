@@ -111,10 +111,7 @@ Foam::coordinateSystem::coordinateSystem
 }
 
 
-Foam::coordinateSystem::coordinateSystem
-(
-    const dictionary& dict
-)
+Foam::coordinateSystem::coordinateSystem(const dictionary& dict)
 :
     name_(type()),
     note_(),
@@ -322,15 +319,16 @@ void Foam::coordinateSystem::writeDict(Ostream& os, bool subDict) const
         os.writeKeyword("note") << note_ << token::END_STATEMENT << nl;
     }
 
-    os.writeKeyword("origin") << origin_  << token::END_STATEMENT << nl;
-    os.writeKeyword("e1")     << e1()     << token::END_STATEMENT << nl;
-    os.writeKeyword("e3")     << e3()     << token::END_STATEMENT << nl;
+    os.writeKeyword("origin") << origin_ << token::END_STATEMENT << nl;
+    os.writeKeyword("e1") << e1() << token::END_STATEMENT << nl;
+    os.writeKeyword("e3") << e3() << token::END_STATEMENT << nl;
 
     if (subDict)
     {
-        os << decrIndent << indent << token::END_BLOCK << endl;
+        os  << decrIndent << indent << token::END_BLOCK << endl;
     }
 }
+
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

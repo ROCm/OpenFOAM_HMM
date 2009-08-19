@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "topoSetSource.H"
@@ -60,7 +58,7 @@ autoPtr<topoSetSource> topoSetSource::New
         )   << "Unknown topoSetSource type " << topoSetSourceType
             << endl << endl
             << "Valid topoSetSource types : " << endl
-            << wordConstructorTablePtr_->toc()
+            << wordConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 
@@ -89,7 +87,7 @@ autoPtr<topoSetSource> topoSetSource::New
         )   << "Unknown topoSetSource type " << topoSetSourceType
             << endl << endl
             << "Valid topoSetSource types : " << endl
-            << istreamConstructorTablePtr_->toc()
+            << istreamConstructorTablePtr_->sortedToc()
             << exit(FatalError);
     }
 

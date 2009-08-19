@@ -63,17 +63,25 @@ class OutputFilterFunctionObject
 {
     // Private data
 
-        word name_;
+        //- Reference to the time database
         const Time& time_;
+
+        //- Input dictionary
         dictionary dict_;
+
+        //- Name of region
         word regionName_;
+
+        //- Optional dictionary name to supply required inputs
         word dictName_;
 
         //- Switch for the execution of the functionObject
         bool enabled_;
 
+        //- Output controls
         outputFilterOutputControl outputControl_;
 
+        //- Pointer to the output filter
         autoPtr<OutputFilter> ptr_;
 
 
@@ -108,31 +116,72 @@ public:
 
     // Member Functions
 
-        //- Return name
-        virtual const word& name() const
-        {
-            return name_;
-        }
+        // Access
 
-        //- Switch the function object on
-        virtual void on();
+            //- Return time database
+            virtual const Time& time() const
+            {
+                return time_;
+            }
 
-        //- Switch the function object off
-        virtual void off();
+            //- Return the input dictionary
+            virtual const dictionary& dict() const
+            {
+                return dict_;
+            }
+
+            //- Return the region name
+            virtual const word& regionName() const
+            {
+                return regionName_;
+            }
+
+            //- Return the optional dictionary name
+            virtual const word& dictName() const
+            {
+                return dictName_;
+            }
+
+            //- Return the enabled flag
+            virtual bool enabled() const
+            {
+                return enabled_;
+            }
+
+            //- Return the output control object
+            virtual const outputFilterOutputControl& outputControl() const
+            {
+                return outputControl_;
+            }
+
+            //- Return the output filter
+            virtual const OutputFilter& outputFilter() const
+            {
+                return ptr_();
+            }
 
 
-        //- Called at the start of the time-loop
-        virtual bool start();
+        // Function object control
 
-        //- Called at each ++ or += of the time-loop
-        virtual bool execute();
+            //- Switch the function object on
+            virtual void on();
 
-        //- Called when Time::run() determines that the time-loop exits
-        virtual bool end();
+            //- Switch the function object off
+            virtual void off();
 
 
-        //- Read and set the function object if its data have changed
-        virtual bool read(const dictionary&);
+            //- Called at the start of the time-loop
+            virtual bool start();
+
+            //- Called at each ++ or += of the time-loop
+            virtual bool execute();
+
+            //- Called when Time::run() determines that the time-loop exits
+            virtual bool end();
+
+
+            //- Read and set the function object if its data have changed
+            virtual bool read(const dictionary&);
 };
 
 

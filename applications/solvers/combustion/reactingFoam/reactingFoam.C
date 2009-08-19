@@ -26,7 +26,7 @@ Application
     reactingFoam
 
 Description
-    Chemical reaction code.
+    Solver for combustion with chemical reactions.
 
 \*---------------------------------------------------------------------------*/
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
     #include "createTime.H"
     #include "createMesh.H"
     #include "readChemistryProperties.H"
-    #include "readEnvironmentalProperties.H"
+    #include "readGravitationalAcceleration.H"
     #include "createFields.H"
     #include "initContinuityErrs.H"
     #include "readTimeControls.H"
@@ -86,7 +86,10 @@ int main(int argc, char *argv[])
 
         turbulence->correct();
 
-        rho = thermo.rho();
+        if (runTime.write())
+        {
+            chemistry.dQ()().write();
+        }
 
         runTime.write();
 

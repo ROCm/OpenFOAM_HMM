@@ -28,14 +28,13 @@ License
 #include "meshRefinement.H"
 #include "fvMesh.H"
 #include "Time.H"
-#include "boundBox.H"
-#include "mapDistributePolyMesh.H"
 #include "cellSet.H"
 #include "syncTools.H"
 #include "refinementParameters.H"
 #include "featureEdgeMesh.H"
 #include "refinementSurfaces.H"
 #include "shellSurfaces.H"
+#include "mapDistributePolyMesh.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -78,8 +77,9 @@ Foam::label Foam::autoRefineDriver::readFeatureEdges
                 IOobject
                 (
                     featFileName,                       // name
-                    mesh.time().findInstance("triSurface", featFileName),
-                                                        // instance
+                    //mesh.time().findInstance("triSurface", featFileName),
+                    //                                    // instance
+                    mesh.time().constant(),             // instance
                     "triSurface",                       // local
                     mesh.time(),                        // registry
                     IOobject::MUST_READ,

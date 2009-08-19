@@ -35,12 +35,12 @@ tmpFile=${TMPDIR:-/tmp}/foamPackFiles.$$
 
 if [ $# -ne 2 ]
 then
-   echo "Usage : ${0##*/} directory tarFile"
-   echo ""
-   echo "Packs all .C and .H files and Make/options and Make/files into"
-   echo "<tarFile>"
-   echo ""
-   exit 1
+    echo "Usage : ${0##*/} directory tarFile"
+    echo ""
+    echo "Packs all .C and .H files and Make/options and Make/files into"
+    echo "<tarFile>"
+    echo ""
+    exit 1
 fi
 
 # canonical form (no double and no trailing dashes)
@@ -49,14 +49,14 @@ packFile=$2
 
 if [ ! -d $packDir ]
 then
-   echo "Error: directory $packDir does not exist"
-   exit 1
+    echo "Error: directory $packDir does not exist"
+    exit 1
 fi
 
 if [ -f $packFile ]
 then
-   echo "Error: $packFile already exists"
-   exit 1
+    echo "Error: $packFile already exists"
+    exit 1
 fi
 
 # Clean up on termination and on Ctrl-C
@@ -78,24 +78,29 @@ find -H $packDir               \
  -a ! -name "log[0-9]*"        \
  -a ! -name "libccmio*"        \
 | sed                          \
- -e "\@$packDir/.git/@d"       \
- -e "\@/.tags/@d"              \
  -e "\@$packDir/lib/@d"        \
- -e "\@libccmio.*/@d"          \
+ -e '\@/\.git/@d'              \
+ -e '\@/\.tags/@d'             \
  -e '\@applications/bin/@d'    \
+ -e '\@wmake/bin/@d'           \
  -e '\@/t/@d'                  \
  -e '\@/Make[.A-Za-z]*/[^/]*/@d'\
  -e '\@/platforms/@d'          \
+ -e '\@libccmio.*/@d'          \
  > $tmpFile
+
+
+# provide some feedback
+wc $tmpFile | awk '{print "Packing",$1,"files - this could take some time ..."}'
 
 tar czpf $packFile --files-from $tmpFile
 
-if [ $? = 0 ]
+if [ $? -eq 0 ]
 then
-   echo "Finished packing and compressing $packDir into file $packFile"
+    echo "Finished packing and compressing $packDir into file $packFile"
 else
-   echo "Error: failure packing $packDir into file $packFile"
-   rm -f $packFile 2>/dev/null
+    echo "Error: failure packing $packDir into file $packFile"
+    rm -f $packFile 2>/dev/null
 fi
 
 #------------------------------------------------------------------------------

@@ -27,7 +27,10 @@ Application
 
 Description
     Transforms the mesh points in the polyMesh directory according to the
-    options:
+    translate, rotate and scale options.
+
+Usage
+    Options are:
 
     -translate vector
         Translates the points by the given vector,
