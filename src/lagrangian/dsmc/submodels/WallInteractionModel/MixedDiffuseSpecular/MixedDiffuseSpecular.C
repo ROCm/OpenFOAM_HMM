@@ -24,32 +24,33 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "MaxwellianThermal.H"
+#include "MixedDiffuseSpecular.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::MaxwellianThermal<CloudType>::MaxwellianThermal
+Foam::MixedDiffuseSpecular<CloudType>::MixedDiffuseSpecular
 (
     const dictionary& dict,
     CloudType& cloud
 )
 :
-    WallInteractionModel<CloudType>(dict, cloud, typeName)
+    WallInteractionModel<CloudType>(dict, cloud, typeName),
+    diffuseFraction_(readScalar(this->coeffDict().lookup("diffuseFraction")))
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::MaxwellianThermal<CloudType>::~MaxwellianThermal()
+Foam::MixedDiffuseSpecular<CloudType>::~MixedDiffuseSpecular()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template <class CloudType>
-void Foam::MaxwellianThermal<CloudType>::correct
+void Foam::MixedDiffuseSpecular<CloudType>::correct
 (
     const wallPolyPatch& wpp,
     const label faceId,
@@ -70,44 +71,48 @@ void Foam::MaxwellianThermal<CloudType>::correct
     // Normal velocity magnitude
     scalar U_dot_nw = U & nw;
 
-    // Wall tangential velocity (flow direction)
-    vector Ut = U - U_dot_nw*nw;
-
     CloudType& cloud(this->owner());
 
     Random& rndGen(cloud.rndGen());
 
-    while (mag(Ut) < SMALL)
+    if (diffuseFraction_ > rndGen.scalar01())
     {
-        // If the incident velocity is parallel to the face normal, no
-        // tangential direction can be chosen.  Add a perturbation to the
-        // incoming velocity and recalculate.
+        // Diffuse reflection
 
-        U = vector
-        (
-            U.x()*(0.8 + 0.2*rndGen.scalar01()),
-            U.y()*(0.8 + 0.2*rndGen.scalar01()),
-            U.z()*(0.8 + 0.2*rndGen.scalar01())
-        );
+        // Wall tangential velocity (flow direction)
+        vector Ut = U - U_dot_nw*nw;
 
-        U_dot_nw = U & nw;
+        while (mag(Ut) < SMALL)
+        {
+            // If the incident velocity is parallel to the face normal, no
+            // tangential direction can be chosen.  Add a perturbation to the
+            // incoming velocity and recalculate.
 
-        Ut = U - U_dot_nw*nw;
-    }
+            U = vector
+            (
+                U.x()*(0.8 + 0.2*rndGen.scalar01()),
+                U.y()*(0.8 + 0.2*rndGen.scalar01()),
+                U.z()*(0.8 + 0.2*rndGen.scalar01())
+            );
 
-    // Wall tangential unit vector
-    vector tw1 = Ut/mag(Ut);
+            U_dot_nw = U & nw;
 
-    // Other tangential unit vector
-    vector tw2 = nw^tw1;
+            Ut = U - U_dot_nw*nw;
+        }
 
-    scalar T = cloud.boundaryT().boundaryField()[wppIndex][wppLocalFace];
+        // Wall tangential unit vector
+        vector tw1 = Ut/mag(Ut);
 
-    scalar mass = cloud.constProps(typeId).mass();
+        // Other tangential unit vector
+        vector tw2 = nw^tw1;
 
-    scalar iDof = cloud.constProps(typeId).internalDegreesOfFreedom();
+        scalar T = cloud.boundaryT().boundaryField()[wppIndex][wppLocalFace];
 
-    U =
+        scalar mass = cloud.constProps(typeId).mass();
+
+        scalar iDof = cloud.constProps(typeId).internalDegreesOfFreedom();
+
+        U =
         sqrt(CloudType::kb*T/mass)
        *(
             rndGen.GaussNormal()*tw1
@@ -115,9 +120,20 @@ void Foam::MaxwellianThermal<CloudType>::correct
           - sqrt(-2.0*log(max(1 - rndGen.scalar01(), VSMALL)))*nw
         );
 
-    U += cloud.boundaryU().boundaryField()[wppIndex][wppLocalFace];
+        U += cloud.boundaryU().boundaryField()[wppIndex][wppLocalFace];
 
-    Ei = cloud.equipartitionInternalEnergy(T, iDof);
+        Ei = cloud.equipartitionInternalEnergy(T, iDof);
+    }
+    else
+    {
+        // Specular reflection
+
+        if (U_dot_nw > 0.0)
+        {
+            U -= 2.0*U_dot_nw*nw;
+        }
+    }
+
 }
 
 
