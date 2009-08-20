@@ -3176,7 +3176,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 (
     autoPtr<fvMesh>& newMeshPtr,
     const IOobject& io,
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const bool syncParallel,
     const bool orderCells,
     const bool orderPoints
