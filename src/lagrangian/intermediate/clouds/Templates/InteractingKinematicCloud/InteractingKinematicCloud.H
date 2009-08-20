@@ -73,6 +73,9 @@ template<class CloudType>
 class InjectionModel;
 
 template<class CloudType>
+class CollisionModel;
+
+template<class CloudType>
 class PostProcessingModel;
 
 template<class CloudType>
@@ -164,6 +167,10 @@ protected:
             //- Injector model
             autoPtr<InjectionModel<InteractingKinematicCloud<ParcelType> > >
                 injectionModel_;
+
+            //- Collision model
+            autoPtr<CollisionModel<InteractingKinematicCloud<ParcelType> > >
+                collisionModel_;
 
             //- Patch interaction model
             autoPtr
@@ -305,6 +312,15 @@ public:
                 //- Return reference to the injection model
                 inline InjectionModel<InteractingKinematicCloud<ParcelType> >&
                     injection();
+
+                //- Return const access to the collision model
+                inline
+                const CollisionModel<InteractingKinematicCloud<ParcelType> >&
+                    collision() const;
+
+                //- Return reference to the collision model
+                inline CollisionModel<InteractingKinematicCloud<ParcelType> >&
+                    collision();
 
                 //- Return const-access to the patch interaction model
                 inline

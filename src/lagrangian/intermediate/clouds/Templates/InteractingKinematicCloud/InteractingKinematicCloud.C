@@ -31,6 +31,7 @@ License
 #include "DispersionModel.H"
 #include "DragModel.H"
 #include "InjectionModel.H"
+#include "CollisionModel.H"
 #include "PatchInteractionModel.H"
 #include "PostProcessingModel.H"
 
@@ -93,6 +94,14 @@ Foam::InteractingKinematicCloud<ParcelType>::InteractingKinematicCloud
     injectionModel_
     (
         InjectionModel<InteractingKinematicCloud<ParcelType> >::New
+        (
+            particleProperties_,
+            *this
+        )
+    ),
+    collisionModel_
+    (
+        CollisionModel<InteractingKinematicCloud<ParcelType> >::New
         (
             particleProperties_,
             *this
@@ -238,6 +247,8 @@ void Foam::InteractingKinematicCloud<ParcelType>::evolve()
     {
         resetSourceTerms();
     }
+
+    this->collision().collide();
 
     Cloud<ParcelType>::move(td);
 

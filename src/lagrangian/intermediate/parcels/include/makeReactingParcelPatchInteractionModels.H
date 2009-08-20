@@ -61,26 +61,29 @@ License
 
 #define makeReactingPatchInteractionModelThermoType(ParcelType, ThermoType)   \
                                                                               \
-    makePatchInteractionModel(InteractingKinematicCloud<ParcelType<ThermoType> >);       \
+    makePatchInteractionModel                                                 \
+    (                                                                         \
+        InteractingKinematicCloud<ParcelType<ThermoType> >                    \
+    );                                                                        \
                                                                               \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
         LocalInteraction,                                                     \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
-        Rebound,                                                     \
-        InteractingKinematicCloud,                                                       \
+        Rebound,                                                              \
+        InteractingKinematicCloud,                                            \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePatchInteractionModelThermoType                                       \
     (                                                                         \
         StandardWallInteraction,                                              \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

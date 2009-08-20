@@ -26,10 +26,11 @@ License
 
 #include "basicInteractingKinematicParcel.H"
 
-// InteractingKinematic
+// Kinematic
 #include "makeParcelDispersionModels.H"
 #include "makeParcelDragModels.H"
 #include "makeParcelInjectionModels.H"
+#include "makeParcelCollisionModels.H"
 #include "makeParcelPatchInteractionModels.H"
 #include "makeParcelPostProcessingModels.H"
 
@@ -41,6 +42,7 @@ namespace Foam
     makeParcelDispersionModels(basicInteractingKinematicParcel);
     makeParcelDragModels(basicInteractingKinematicParcel);
     makeParcelInjectionModels(basicInteractingKinematicParcel);
+    makeParcelCollisionModels(basicInteractingKinematicParcel);
     makeParcelPatchInteractionModels(basicInteractingKinematicParcel);
     makeParcelPostProcessingModels(basicInteractingKinematicParcel);
 };

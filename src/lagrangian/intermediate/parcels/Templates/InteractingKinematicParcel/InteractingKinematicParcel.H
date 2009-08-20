@@ -209,6 +209,9 @@ protected:
             //- Velocity of Parcel [m/s]
             vector U_;
 
+            //- Force on particle due to collisions [N]
+            vector f_;
+
             //- Density [kg/m3]
             scalar rho_;
 
@@ -324,6 +327,9 @@ public:
             //- Return const access to velocity
             inline const vector& U() const;
 
+            //- Return const access to force
+            inline const vector& f() const;
+
             //- Return const access to density
             inline scalar rho() const;
 
@@ -347,6 +353,9 @@ public:
 
             //- Return access to velocity
             inline vector& U();
+
+            //- Return access to force
+            inline vector& f();
 
             //- Return access to density
             inline scalar& rho();

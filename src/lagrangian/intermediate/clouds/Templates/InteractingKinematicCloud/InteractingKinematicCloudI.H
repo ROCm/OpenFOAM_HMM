@@ -175,6 +175,22 @@ Foam::InteractingKinematicCloud<ParcelType>::injection()
 
 
 template<class ParcelType>
+inline const Foam::CollisionModel<Foam::InteractingKinematicCloud<ParcelType> >&
+Foam::InteractingKinematicCloud<ParcelType>::collision() const
+{
+    return collisionModel_();
+}
+
+
+template<class ParcelType>
+inline Foam::CollisionModel<Foam::InteractingKinematicCloud<ParcelType> >&
+Foam::InteractingKinematicCloud<ParcelType>::collision()
+{
+    return collisionModel_();
+}
+
+
+template<class ParcelType>
 inline Foam::PostProcessingModel<Foam::InteractingKinematicCloud<ParcelType> >&
 Foam::InteractingKinematicCloud<ParcelType>::postProcessing()
 {

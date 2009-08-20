@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,34 +24,34 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
+#include "CollisionModel.H"
 
-// Kinematic
-#include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
-
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class CloudType>
+const Foam::dictionary& Foam::CollisionModel<CloudType>::dict() const
 {
-    // Kinematic sub-models
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelDragModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelCollisionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
+    return dict_;
+}
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-};
+
+template<class CloudType>
+const CloudType& Foam::CollisionModel<CloudType>::owner() const
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+CloudType& Foam::CollisionModel<CloudType>::owner()
+{
+    return owner_;
+}
+
+
+template<class CloudType>
+const Foam::dictionary& Foam::CollisionModel<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
 
 
 // ************************************************************************* //

@@ -38,9 +38,9 @@ License
 
 #define makeParcelDragModels(ParcelType)                                     \
                                                                              \
-    makeDragModel(InteractingKinematicCloud<ParcelType>);                               \
+    makeDragModel(InteractingKinematicCloud<ParcelType>);                    \
                                                                              \
-    makeDragModelType(NoDrag, InteractingKinematicCloud, ParcelType);                   \
+    makeDragModelType(NoDrag, InteractingKinematicCloud, ParcelType);        \
     makeDragModelType(SphereDrag, InteractingKinematicCloud, ParcelType);
 
 

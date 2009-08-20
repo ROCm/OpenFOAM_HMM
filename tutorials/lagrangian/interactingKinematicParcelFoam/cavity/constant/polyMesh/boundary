@@ -20,20 +20,20 @@ FoamFile
     movingWall
     {
         type            wall;
-        nFaces          80;
-        startFace       12640;
+        nFaces          20;
+        startFace       760;
     }
     fixedWalls
     {
         type            wall;
-        nFaces          240;
-        startFace       12720;
+        nFaces          60;
+        startFace       780;
     }
     frontAndBack
     {
         type            empty;
-        nFaces          12800;
-        startFace       12960;
+        nFaces          800;
+        startFace       840;
     }
 )
 

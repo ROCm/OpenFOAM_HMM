@@ -30,6 +30,7 @@ License
 #include "makeReactingParcelDispersionModels.H"
 #include "makeReactingParcelDragModels.H"
 #include "makeReactingMultiphaseParcelInjectionModels.H" // MP variant
+#include "makeReactingParcelCollisionModels.H"
 #include "makeReactingParcelPatchInteractionModels.H"
 #include "makeReactingParcelPostProcessingModels.H"
 
@@ -52,6 +53,7 @@ namespace Foam
     makeReactingDispersionModels(BasicReactingMultiphaseParcel);
     makeReactingDragModels(BasicReactingMultiphaseParcel);
     makeReactingMultiphaseInjectionModels(BasicReactingMultiphaseParcel);
+    makeReactingCollisionModels(BasicReactingMultiphaseParcel);
     makeReactingPatchInteractionModels(BasicReactingMultiphaseParcel);
     makeReactingPostProcessingModels(BasicReactingMultiphaseParcel);
 

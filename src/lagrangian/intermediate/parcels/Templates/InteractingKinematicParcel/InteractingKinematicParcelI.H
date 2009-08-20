@@ -77,6 +77,7 @@ inline Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     nParticle_(0),
     d_(0.0),
     U_(vector::zero),
+    f_(vector::zero),
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -104,6 +105,7 @@ inline Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     nParticle_(nParticle0),
     d_(d0),
     U_(U0),
+    f_(vector::zero),
     rho_(constProps.rho0()),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -232,6 +234,14 @@ Foam::InteractingKinematicParcel<ParcelType>::U() const
 
 
 template <class ParcelType>
+inline const Foam::vector&
+Foam::InteractingKinematicParcel<ParcelType>::f() const
+{
+    return f_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::InteractingKinematicParcel<ParcelType>::rho() const
 {
     return rho_;
@@ -278,6 +288,13 @@ template <class ParcelType>
 inline Foam::vector& Foam::InteractingKinematicParcel<ParcelType>::U()
 {
     return U_;
+}
+
+
+template <class ParcelType>
+inline Foam::vector& Foam::InteractingKinematicParcel<ParcelType>::f()
+{
+    return f_;
 }
 
 

@@ -24,56 +24,60 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeReactingParcelDragModels_H
-#define makeReactingParcelDragModels_H
+#ifndef makeReactingParcelCollisionModels_H
+#define makeReactingParcelCollisionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "thermoPhysicsTypes.H"
 #include "InteractingKinematicCloud.H"
 
-#include "NoDrag.H"
-#include "SphereDrag.H"
+#include "NoCollision.H"
+#include "DeterministicPairForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeReactingDragModels(ParcelType)                                    \
+#define makeReactingCollisionModels(ParcelType)                               \
                                                                               \
-    makeReactingDragModelThermoType                                           \
+    makeReactingCollisionModelThermoType                                      \
     (                                                                         \
         ParcelType,                                                           \
         constGasThermoPhysics                                                 \
     );                                                                        \
-    makeReactingDragModelThermoType                                           \
+                                                                              \
+    makeReactingCollisionModelThermoType                                      \
     (                                                                         \
         ParcelType,                                                           \
         gasThermoPhysics                                                      \
     );                                                                        \
-    makeReactingDragModelThermoType                                           \
+                                                                              \
+    makeReactingCollisionModelThermoType                                      \
     (                                                                         \
         ParcelType,                                                           \
         icoPoly8ThermoPhysics                                                 \
     );
 
 
-#define makeReactingDragModelThermoType(ParcelType, ThermoType)               \
+#define makeReactingCollisionModelThermoType(ParcelType, ThermoType)          \
                                                                               \
-    makeDragModel(InteractingKinematicCloud<ParcelType<ThermoType> >);        \
+    makeCollisionModel(InteractingKinematicCloud<ParcelType<ThermoType> >);   \
                                                                               \
-    makeDragModelThermoType                                                   \
+    makeCollisionModelThermoType                                              \
     (                                                                         \
-        NoDrag,                                                               \
+        NoCollision,                                                          \
         InteractingKinematicCloud,                                            \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
-    makeDragModelThermoType                                                   \
+                                                                              \
+    makeCollisionModelThermoType                                              \
     (                                                                         \
-        SphereDrag,                                                           \
+        DeterministicPairForce,                                               \
         InteractingKinematicCloud,                                            \
-        ParcelType,                                                           \
+        ParcelType,                                                            \
         ThermoType                                                            \
     );
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

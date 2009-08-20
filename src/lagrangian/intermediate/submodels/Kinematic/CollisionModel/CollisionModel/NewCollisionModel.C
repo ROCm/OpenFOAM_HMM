@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,42 +24,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "BasicReactingParcel.H"
-
-// Kinematic
-#include "makeReactingParcelDispersionModels.H"
-#include "makeReactingParcelDragModels.H"
-#include "makeReactingParcelInjectionModels.H"
-#include "makeReactingParcelCollisionModels.H"
-#include "makeReactingParcelPatchInteractionModels.H"
-#include "makeReactingParcelPostProcessingModels.H"
-
-// Thermodynamic
-#include "makeReactingParcelHeatTransferModels.H"
-
-// Reacting
-#include "makeReactingParcelCompositionModels.H"
-#include "makeReactingParcelPhaseChangeModels.H"
+#include "CollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
+template<class CloudType>
+Foam::autoPtr<Foam::CollisionModel<CloudType> >
+Foam::CollisionModel<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner
+)
 {
-    // Kinematic sub-models
-    makeReactingDispersionModels(BasicReactingParcel);
-    makeReactingDragModels(BasicReactingParcel);
-    makeReactingInjectionModels(BasicReactingParcel);
-    makeReactingCollisionModels(BasicReactingParcel);
-    makeReactingPatchInteractionModels(BasicReactingParcel);
-    makeReactingPostProcessingModels(BasicReactingParcel);
+    word CollisionModelType(dict.lookup("CollisionModel"));
 
-    // Thermo sub-models
-    makeReactingHeatTransferModels(BasicReactingParcel);
+    Info<< "Selecting CollisionModel " << CollisionModelType << endl;
 
-    // Reacting sub-models
-    makeReactingCompositionModels(BasicReactingParcel);
-    makeReactingPhaseChangeModels(BasicReactingParcel);
-};
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(CollisionModelType);
+
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "CollisionModel<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown CollisionModelType type "
+            << CollisionModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid CollisionModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+    }
+
+    return autoPtr<CollisionModel<CloudType> >(cstrIter()(dict, owner));
+}
 
 
 // ************************************************************************* //

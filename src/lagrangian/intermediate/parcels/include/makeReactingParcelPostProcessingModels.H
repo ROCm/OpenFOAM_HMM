@@ -60,19 +60,22 @@ License
 
 #define makeReactingPostProcessingModelThermoType(ParcelType, ThermoType)     \
                                                                               \
-    makePostProcessingModel(InteractingKinematicCloud<ParcelType<ThermoType> >);         \
+    makePostProcessingModel                                                   \
+    (                                                                         \
+        InteractingKinematicCloud<ParcelType<ThermoType> >                    \
+    );                                                                        \
                                                                               \
     makePostProcessingModelThermoType                                         \
     (                                                                         \
         NoPostProcessing,                                                     \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType,                                                           \
         ThermoType                                                            \
     );                                                                        \
     makePostProcessingModelThermoType                                         \
     (                                                                         \
         PatchPostProcessing,                                                  \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType,                                                           \
         ThermoType                                                            \
     );

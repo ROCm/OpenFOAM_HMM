@@ -24,41 +24,35 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelPatchInteractionModels_H
-#define makeParcelPatchInteractionModels_H
+#ifndef makeParcelCollisionModels_H
+#define makeParcelCollisionModels_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #include "InteractingKinematicCloud.H"
 
-#include "LocalInteraction.H"
-#include "Rebound.H"
-#include "StandardWallInteraction.H"
+#include "NoCollision.H"
+#include "DeterministicPairForce.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPatchInteractionModels(ParcelType)                          \
+#define makeParcelCollisionModels(ParcelType)                                 \
                                                                               \
-    makePatchInteractionModel(InteractingKinematicCloud<ParcelType>);         \
+    makeCollisionModel(InteractingKinematicCloud<ParcelType>);                \
                                                                               \
-    makePatchInteractionModelType                                             \
+    makeCollisionModelType                                                    \
     (                                                                         \
-        LocalInteraction,                                                     \
+        NoCollision,                                                          \
         InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
-    makePatchInteractionModelType                                             \
+                                                                              \
+    makeCollisionModelType                                                    \
     (                                                                         \
-        Rebound,                                                              \
+        DeterministicPairForce,                                               \
         InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
-    makePatchInteractionModelType                                             \
-    (                                                                         \
-        StandardWallInteraction,                                              \
-        InteractingKinematicCloud,                                            \
-        ParcelType                                                            \
-    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,34 +24,54 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "basicThermoParcel.H"
+#include "NoCollision.H"
 
-// Kinematic
-#include "makeParcelDispersionModels.H"
-#include "makeParcelDragModels.H"
-#include "makeParcelInjectionModels.H"
-#include "makeParcelCollisionModels.H"
-#include "makeParcelPatchInteractionModels.H"
-#include "makeParcelPostProcessingModels.H"
+// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
-// Thermodynamic
-#include "makeParcelHeatTransferModels.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
+template<class CloudType>
+void Foam::NoCollision<CloudType>::evaluatePair
+(
+    typename CloudType::parcelType& pA,
+    typename CloudType::parcelType& pB
+) const
 {
-    // Kinematic sub-models
-    makeParcelDispersionModels(basicThermoParcel);
-    makeParcelDragModels(basicThermoParcel);
-    makeParcelInjectionModels(basicThermoParcel);
-    makeParcelCollisionModels(basicThermoParcel);
-    makeParcelPatchInteractionModels(basicThermoParcel);
-    makeParcelPostProcessingModels(basicThermoParcel);
 
-    // Thermo sub-models
-    makeParcelHeatTransferModels(basicThermoParcel);
-};
+}
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::NoCollision<CloudType>::NoCollision
+(
+    const dictionary& dict,
+    CloudType& owner
+)
+:
+    CollisionModel<CloudType>(dict, owner, typeName)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::NoCollision<CloudType>::~NoCollision()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::NoCollision<CloudType>::active() const
+{
+    return true;
+}
+
+
+template<class CloudType>
+void Foam::NoCollision<CloudType>::collide()
+{
+
+}
 
 
 // ************************************************************************* //

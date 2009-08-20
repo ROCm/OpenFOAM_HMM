@@ -15,6 +15,9 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+//CollisionModel  NoCollision;
+CollisionModel  DeterministicPairForce;
+
 InjectionModel  ManualInjection;
 
 DragModel       SphereDrag;
@@ -56,6 +59,10 @@ particleForces
     virtualMass     off;
     pressureGradient off;
 }
+
+NoCollisionCoeffs {}
+
+DeterministicPairForceCoeffs {}
 
 ManualInjectionCoeffs
 {

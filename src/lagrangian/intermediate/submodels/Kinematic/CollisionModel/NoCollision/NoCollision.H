@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,37 +22,87 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Class
+    Foam::NoCollision
+
+Description
+
+SourceFiles
+    NoCollision.C
+
 \*---------------------------------------------------------------------------*/
 
-#ifndef makeParcelPostProcessingModels_H
-#define makeParcelPostProcessingModels_H
+#ifndef NoCollision_H
+#define NoCollision_H
+
+#include "CollisionModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "InteractingKinematicCloud.H"
+namespace Foam
+{
 
-#include "NoPostProcessing.H"
-#include "PatchPostProcessing.H"
+/*---------------------------------------------------------------------------*\
+                     Class NoCollision Declaration
+\*---------------------------------------------------------------------------*/
+
+template<class CloudType>
+class NoCollision
+:
+    public CollisionModel<CloudType>
+{
+
+protected:
+
+    // Protected member functions
+
+        //- Calculate the pair force between parcels
+        virtual void evaluatePair
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("NoCollision");
+
+
+    // Constructors
+
+        //- Construct from dictionary
+        NoCollision
+        (
+            const dictionary& dict,
+            CloudType& owner
+        );
+
+
+    //- Destructor
+    virtual ~NoCollision();
+
+
+    // Member Functions
+
+        //- Flag to indicate whether model activates injection model
+        virtual bool active() const;
+
+        // Collision function
+        virtual void collide();
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeParcelPostProcessingModels(ParcelType)                            \
-                                                                              \
-    makePostProcessingModel(InteractingKinematicCloud<ParcelType>);           \
-                                                                              \
-    makePostProcessingModelType                                               \
-    (                                                                         \
-        NoPostProcessing,                                                     \
-        InteractingKinematicCloud,                                            \
-        ParcelType                                                            \
-    );                                                                        \
-    makePostProcessingModelType                                               \
-    (                                                                         \
-        PatchPostProcessing,                                                  \
-        InteractingKinematicCloud,                                            \
-        ParcelType                                                            \
-    );
+} // End namespace Foam
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "NoCollision.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

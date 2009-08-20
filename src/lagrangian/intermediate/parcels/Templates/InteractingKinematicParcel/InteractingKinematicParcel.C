@@ -106,6 +106,7 @@ void Foam::InteractingKinematicParcel<ParcelType>::calc
     // Explicit momentum source for particle
     vector Su = vector::zero;
 
+
     // Momentum transfer from the particle to the carrier phase
     vector dUTrans = vector::zero;
 
@@ -158,14 +159,14 @@ const Foam::vector Foam::InteractingKinematicParcel<ParcelType>::calcVelocity
         mass*td.cloud().forces().calcCoupled(cellI, dt, rhoc_, rho, Uc_, U);
     const vector FNonCoupled =
         mass*td.cloud().forces().calcNonCoupled(cellI, dt, rhoc_, rho, Uc_, U);
-
+    const vector& FCollision = f();
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
     const scalar As = this->areaS(d);
-    const vector ap = Uc_ + (FCoupled + FNonCoupled + Su)/(utc*As);
+    const vector ap = Uc_ + (FCoupled + FNonCoupled + FCollision + Su)/(utc*As);
     const scalar bp = 6.0*utc/(rho*d);
 
     IntegrationScheme<vector>::integrationResult Ures =
@@ -196,6 +197,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     nParticle_(p.nParticle_),
     d_(p.d_),
     U_(p.U_),
+    f_(p.f_),
     rho_(p.rho_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),

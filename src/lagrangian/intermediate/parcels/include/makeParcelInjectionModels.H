@@ -43,48 +43,48 @@ License
 
 #define makeParcelInjectionModels(ParcelType)                                 \
                                                                               \
-    makeInjectionModel(InteractingKinematicCloud<ParcelType>);                           \
+    makeInjectionModel(InteractingKinematicCloud<ParcelType>);                \
                                                                               \
     makeInjectionModelType                                                    \
     (                                                                         \
         ConeInjection,                                                        \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeInjectionModelType                                                    \
     (                                                                         \
         ConeInjectionMP,                                                      \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeInjectionModelType                                                    \
     (                                                                         \
         FieldActivatedInjection,                                              \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeInjectionModelType                                                    \
     (                                                                         \
         KinematicLookupTableInjection,                                        \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeInjectionModelType                                                    \
     (                                                                         \
         ManualInjection,                                                      \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeInjectionModelType                                                    \
     (                                                                         \
         NoInjection,                                                          \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
     makeInjectionModelType                                                    \
     (                                                                         \
         PatchInjection,                                                       \
-        InteractingKinematicCloud,                                                       \
+        InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );
 
