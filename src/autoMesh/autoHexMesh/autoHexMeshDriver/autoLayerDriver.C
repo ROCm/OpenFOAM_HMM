@@ -2987,6 +2987,7 @@ void Foam::autoLayerDriver::addLayers
         (
             invExpansionRatio,
             pp,
+            labelList(0),       // exposed patchIDs, not used for adding layers
             nPatchFaceLayers,   // layers per face
             nPatchPointLayers,  // layers per point
             firstDisp,          // thickness of layer nearest internal mesh
