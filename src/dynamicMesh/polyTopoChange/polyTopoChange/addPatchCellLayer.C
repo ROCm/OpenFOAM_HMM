@@ -558,6 +558,7 @@ void Foam::addPatchCellLayer::setRefinement
 (
     const scalarField& expansionRatio,
     const indirectPrimitivePatch& pp,
+    const labelList& exposedPatchID,
     const labelList& nFaceLayers,
     const labelList& nPointLayers,
     const vectorField& firstLayerDisp,
@@ -973,11 +974,6 @@ void Foam::addPatchCellLayer::setRefinement
                         ownZoneI        // zone for cell
                     )
                 );
-
-                //Pout<< "For patchFace:" << patchFaceI
-                //    << " meshFace:" << pp.addressing()[patchFaceI]
-                //    << " layer:" << i << " added cell:"
-                //    << addedCells[patchFaceI][i] << endl;
             }
         }
     }
@@ -998,7 +994,6 @@ void Foam::addPatchCellLayer::setRefinement
         if (addedCells[patchFaceI].size())
         {
             layerFaces_[patchFaceI].setSize(addedCells[patchFaceI].size() + 1);
-            layerFaces_[patchFaceI][0] = meshFaceI;
 
             label zoneI = mesh_.faceZones().whichZone(meshFaceI);
 
@@ -1059,18 +1054,13 @@ void Foam::addPatchCellLayer::setRefinement
                         nei,                        // neighbour
                         -1,                         // master point
                         -1,                         // master edge
-                        meshFaceI,                  // master face for addition
+                        (addToMesh_ ? meshFaceI : -1), // master face
                         false,                      // flux flip
                         patchI,                     // patch for face
                         zoneI,                      // zone for face
                         false                       // face zone flip
                     )
                 );
-                //Pout<< "Added inbetween face " << newFace
-                //    << " own:" << addedCells[patchFaceI][i]
-                //    << " nei:" << nei
-                //    << " patch:" << patchI
-                //    << endl;
             }
         }
     }
@@ -1079,7 +1069,6 @@ void Foam::addPatchCellLayer::setRefinement
     // Modify old patch faces to be on the inside
     //
 
-    labelList copiedPatchFaces;
     if (addToMesh_)
     {
         forAll(pp, patchFaceI)
@@ -1087,6 +1076,8 @@ void Foam::addPatchCellLayer::setRefinement
             if (addedCells[patchFaceI].size())
             {
                 label meshFaceI = pp.addressing()[patchFaceI];
+
+                layerFaces_[patchFaceI][0] = meshFaceI;
 
                 label zoneI = mesh_.faceZones().whichZone(meshFaceI);
 
@@ -1105,17 +1096,13 @@ void Foam::addPatchCellLayer::setRefinement
                         false                           // face flip in zone
                     )
                 );
-                //Pout<< "Modified old patch face " << meshFaceI
-                //    << " own:" << mesh_.faceOwner()[meshFaceI]
-                //    << " nei:" << addedCells[patchFaceI][0]
-                //    << endl;
             }
         }
     }
     else
     {
-        // If creating new mesh: copy existing patch points
-        copiedPatchFaces.setSize(pp.size());
+        // If creating new mesh: reverse original faces and put them
+        // in the exposed patch ID.
         forAll(pp, patchFaceI)
         {
             if (nFaceLayers[patchFaceI] > 0)
@@ -1136,7 +1123,7 @@ void Foam::addPatchCellLayer::setRefinement
                     f[fp] = copiedPatchPoints[f[fp]];
                 }
 
-                copiedPatchFaces[patchFaceI] = meshMod.setAction
+                layerFaces_[patchFaceI][0] = meshMod.setAction
                 (
                     polyAddFace
                     (
@@ -1147,7 +1134,7 @@ void Foam::addPatchCellLayer::setRefinement
                         -1,                         // masterEdge
                         -1,                         // masterFace
                         true,                       // face flip
-                        patchID[patchFaceI],        // patch for face
+                        exposedPatchID[patchFaceI], // patch for face
                         zoneI,                      // zone for face
                         zoneFlip                    // face flip in zone
                     )
@@ -1155,7 +1142,6 @@ void Foam::addPatchCellLayer::setRefinement
             }
         }
     }
-
 
 
 
