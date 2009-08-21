@@ -54,9 +54,38 @@ void Foam::DeterministicPairForce<CloudType>::evaluatePair
     typename CloudType::parcelType& pB
 ) const
 {
-    Info<< "PARTICLE FORCES HARD CODED AS TEST" << endl;
-    pA.f() += -20.0*pB.mass()*pB.U();
-    pB.f() += -20.0*pA.mass()*pA.U();
+    vector deltaP = (pB.position() - pA.position());
+
+    scalar deltaN = 0.5*(pA.d() + pB.d()) - mag(deltaP);
+
+    if (deltaN > 0)
+    {
+        //Particles in collision
+
+        vector n = deltaP/mag(deltaP);
+
+        vector Urel = pA.U() - pB.U();
+
+        // Effective radius
+        scalar R = 0.5*pA.d()*pB.d()/(pA.d() + pB.d());
+
+        // Effective mass
+        scalar M = pA.mass()*pB.mass()/(pA.mass() + pB.mass());
+
+        scalar E = 5e3;
+        scalar sigma = 0.25;
+        scalar alpha = 0.2;
+        scalar b = 1.0;
+
+        scalar Estar = E/(2.0*(1-sqr(sigma)));
+        scalar kN = (4.0/3.0)*sqrt(R)*Estar;
+        scalar etaN = alpha*sqrt(M*kN)*pow(deltaN, 0.25);
+
+        vector normalForce = -(kN*pow(deltaN, b) + etaN*(Urel & n))*n;
+
+        pA.f() += normalForce;
+        pB.f() -= normalForce;
+    }
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -70,7 +99,7 @@ Foam::DeterministicPairForce<CloudType>::DeterministicPairForce
 :
     CollisionModel<CloudType>(dict, owner, typeName),
     cellOccupancy_(owner.mesh().nCells()),
-    il_(owner.mesh(), 1e-6, false)
+    il_(owner.mesh(), 1e-8, true)
 {
     Info<< "SEARCH DISTANCE SQR HARD CODED" << endl;
 }
@@ -146,8 +175,8 @@ void Foam::DeterministicPairForce<CloudType>::collide()
         }
     }
 
-    Info<< "ADD COLLISIONS WITH WALLS HERE, DOES NOT NEED TO BE A TRACKING"
-        << "OPERATION.  CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY"
+    Info<< "ADD COLLISIONS WITH WALLS HERE, DOES NOT NEED TO BE A TRACKING "
+        << "OPERATION.  CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY "
         << "WALL FORCE MODEL" << endl;
 }
 
