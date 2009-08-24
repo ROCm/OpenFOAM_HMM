@@ -335,16 +335,18 @@ Foam::label Foam::addPatchCellLayer::addSideFace
     label inflateEdgeI = -1;
 
     // Check mesh faces using edge
-    forAll(meshFaces, i)
+    if (addToMesh_)
     {
-        if (mesh_.isInternalFace(meshFaces[i]))
+        forAll(meshFaces, i)
         {
-            // meshEdge uses internal faces so ok to inflate from it
-            inflateEdgeI = meshEdgeI;
-            break;
+            if (mesh_.isInternalFace(meshFaces[i]))
+            {
+                // meshEdge uses internal faces so ok to inflate from it
+                inflateEdgeI = meshEdgeI;
+                break;
+            }
         }
     }
-
 
     // Get my mesh face and its zone.
     label meshFaceI = pp.addressing()[ownFaceI];
@@ -504,9 +506,14 @@ Foam::label Foam::addPatchCellLayer::addSideFace
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from mesh
-Foam::addPatchCellLayer::addPatchCellLayer(const polyMesh& mesh)
+Foam::addPatchCellLayer::addPatchCellLayer
+(
+    const polyMesh& mesh,
+    const bool addToMesh
+)
 :
     mesh_(mesh),
+    addToMesh_(addToMesh),
     addedPoints_(0),
     layerFaces_(0)
 {}
@@ -551,6 +558,7 @@ void Foam::addPatchCellLayer::setRefinement
 (
     const scalarField& expansionRatio,
     const indirectPrimitivePatch& pp,
+    const labelList& exposedPatchID,
     const labelList& nFaceLayers,
     const labelList& nPointLayers,
     const vectorField& firstLayerDisp,
@@ -827,6 +835,19 @@ void Foam::addPatchCellLayer::setRefinement
     }
 
 
+    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
+
+    // Precalculated patchID for each patch face
+    labelList patchID(pp.size());
+
+    forAll(pp, patchFaceI)
+    {
+        label meshFaceI = pp.addressing()[patchFaceI];
+
+        patchID[patchFaceI] = patches.whichPatch(meshFaceI);
+    }
+
+
     // From master point (in patch point label) to added points (in mesh point
     // label)
     addedPoints_.setSize(pp.nPoints());
@@ -857,6 +878,33 @@ void Foam::addPatchCellLayer::setRefinement
     // Create new points
     //
 
+    // If creating new mesh: copy existing patch points
+    labelList copiedPatchPoints;
+    if (!addToMesh_)
+    {
+        copiedPatchPoints.setSize(firstLayerDisp.size());
+        forAll(firstLayerDisp, patchPointI)
+        {
+            if (addedPoints_[patchPointI].size())
+            {
+                label meshPointI = meshPoints[patchPointI];
+                label zoneI = mesh_.pointZones().whichZone(meshPointI);
+                copiedPatchPoints[patchPointI] = meshMod.setAction
+                (
+                    polyAddPoint
+                    (
+                        mesh_.points()[meshPointI],         // point
+                        -1,         // master point
+                        zoneI,      // zone for point
+                        true        // supports a cell
+                    )
+                );
+            }
+        }
+    }
+
+
+    // Create points for additional layers
     forAll(firstLayerDisp, patchPointI)
     {
         if (addedPoints_[patchPointI].size())
@@ -878,7 +926,7 @@ void Foam::addPatchCellLayer::setRefinement
                     polyAddPoint
                     (
                         pt,         // point
-                        meshPointI, // master point
+                        (addToMesh_ ? meshPointI : -1), // master point
                         zoneI,      // zone for point
                         true        // supports a cell
                     )
@@ -922,31 +970,12 @@ void Foam::addPatchCellLayer::setRefinement
                         -1,             // master point
                         -1,             // master edge
                         -1,             // master face
-                        mesh_.faceOwner()[meshFaceI],   // master cell id
+                        (addToMesh_ ? mesh_.faceOwner()[meshFaceI] : -1),//master
                         ownZoneI        // zone for cell
                     )
                 );
-
-                //Pout<< "For patchFace:" << patchFaceI
-                //    << " meshFace:" << pp.addressing()[patchFaceI]
-                //    << " layer:" << i << " added cell:"
-                //    << addedCells[patchFaceI][i]
-                //    << endl;
             }
         }
-    }
-
-
-    const polyBoundaryMesh& patches = mesh_.boundaryMesh();
-
-    // Precalculated patchID for each patch face
-    labelList patchID(pp.size());
-
-    forAll(pp, patchFaceI)
-    {
-        label meshFaceI = pp.addressing()[patchFaceI];
-
-        patchID[patchFaceI] = patches.whichPatch(meshFaceI);
     }
 
 
@@ -965,7 +994,6 @@ void Foam::addPatchCellLayer::setRefinement
         if (addedCells[patchFaceI].size())
         {
             layerFaces_[patchFaceI].setSize(addedCells[patchFaceI].size() + 1);
-            layerFaces_[patchFaceI][0] = meshFaceI;
 
             label zoneI = mesh_.faceZones().whichZone(meshFaceI);
 
@@ -981,7 +1009,12 @@ void Foam::addPatchCellLayer::setRefinement
                     if (addedPoints_[f[fp]].empty())
                     {
                         // Keep original point
-                        newFace[fp] = meshPoints[f[fp]];
+                        newFace[fp] =
+                        (
+                            addToMesh_
+                          ? meshPoints[f[fp]]
+                          : copiedPatchPoints[f[fp]]
+                        );
                     }
                     else
                     {
@@ -1021,18 +1054,13 @@ void Foam::addPatchCellLayer::setRefinement
                         nei,                        // neighbour
                         -1,                         // master point
                         -1,                         // master edge
-                        meshFaceI,                  // master face for addition
+                        (addToMesh_ ? meshFaceI : -1), // master face
                         false,                      // flux flip
                         patchI,                     // patch for face
                         zoneI,                      // zone for face
                         false                       // face zone flip
                     )
                 );
-                //Pout<< "Added inbetween face " << newFace
-                //    << " own:" << addedCells[patchFaceI][i]
-                //    << " nei:" << nei
-                //    << " patch:" << patchI
-                //    << endl;
             }
         }
     }
@@ -1040,35 +1068,81 @@ void Foam::addPatchCellLayer::setRefinement
     //
     // Modify old patch faces to be on the inside
     //
-    forAll(pp, patchFaceI)
+
+    if (addToMesh_)
     {
-        if (addedCells[patchFaceI].size())
+        forAll(pp, patchFaceI)
         {
-            label meshFaceI = pp.addressing()[patchFaceI];
+            if (addedCells[patchFaceI].size())
+            {
+                label meshFaceI = pp.addressing()[patchFaceI];
 
-            label zoneI = mesh_.faceZones().whichZone(meshFaceI);
+                layerFaces_[patchFaceI][0] = meshFaceI;
 
-            meshMod.setAction
-            (
-                polyModifyFace
+                label zoneI = mesh_.faceZones().whichZone(meshFaceI);
+
+                meshMod.setAction
                 (
-                    pp[patchFaceI],                 // modified face
-                    meshFaceI,                      // label of face
-                    mesh_.faceOwner()[meshFaceI],   // owner
-                    addedCells[patchFaceI][0],      // neighbour
-                    false,                          // face flip
-                    -1,                             // patch for face
-                    false,                          // remove from zone
-                    zoneI,                          // zone for face
-                    false                           // face flip in zone
-                )
-            );
-            //Pout<< "Modified old patch face " << meshFaceI
-            //    << " own:" << mesh_.faceOwner()[meshFaceI]
-            //    << " nei:" << addedCells[patchFaceI][0]
-            //    << endl;
+                    polyModifyFace
+                    (
+                        pp[patchFaceI],                 // modified face
+                        meshFaceI,                      // label of face
+                        mesh_.faceOwner()[meshFaceI],   // owner
+                        addedCells[patchFaceI][0],      // neighbour
+                        false,                          // face flip
+                        -1,                             // patch for face
+                        false,                          // remove from zone
+                        zoneI,                          // zone for face
+                        false                           // face flip in zone
+                    )
+                );
+            }
         }
     }
+    else
+    {
+        // If creating new mesh: reverse original faces and put them
+        // in the exposed patch ID.
+        forAll(pp, patchFaceI)
+        {
+            if (nFaceLayers[patchFaceI] > 0)
+            {
+                label meshFaceI = pp.addressing()[patchFaceI];
+                label zoneI = mesh_.faceZones().whichZone(meshFaceI);
+                bool zoneFlip = false;
+                if (zoneI != -1)
+                {
+                    const faceZone& fz = mesh_.faceZones()[zoneI];
+                    zoneFlip = !fz.flipMap()[fz.whichFace(meshFaceI)];
+                }
+
+                // Reverse and renumber old patch face.
+                face f(pp.localFaces()[patchFaceI].reverseFace());
+                forAll(f, fp)
+                {
+                    f[fp] = copiedPatchPoints[f[fp]];
+                }
+
+                layerFaces_[patchFaceI][0] = meshMod.setAction
+                (
+                    polyAddFace
+                    (
+                        f,                          // modified face
+                        addedCells[patchFaceI][0],  // owner
+                        -1,                         // neighbour
+                        -1,                         // masterPoint
+                        -1,                         // masterEdge
+                        -1,                         // masterFace
+                        true,                       // face flip
+                        exposedPatchID[patchFaceI], // patch for face
+                        zoneI,                      // zone for face
+                        zoneFlip                    // face flip in zone
+                    )
+                );
+            }
+        }
+    }
+
 
 
     //
@@ -1255,7 +1329,16 @@ void Foam::addPatchCellLayer::setRefinement
                         forAll(stringedVerts, stringedI)
                         {
                             label v = stringedVerts[stringedI];
-                            addVertex(meshPoints[v], newFace, newFp);
+                            addVertex
+                            (
+                                (
+                                    addToMesh_
+                                  ? meshPoints[v]
+                                  : copiedPatchPoints[v]
+                                ),
+                                newFace,
+                                newFp
+                            );
                         }
                     }
                     else
@@ -1276,7 +1359,16 @@ void Foam::addPatchCellLayer::setRefinement
                             }
                             else
                             {
-                                addVertex(meshPoints[v], newFace, newFp);
+                                addVertex
+                                (
+                                    (
+                                        addToMesh_
+                                      ? meshPoints[v]
+                                      : copiedPatchPoints[v]
+                                    ),
+                                    newFace,
+                                    newFp
+                                );
                             }
                         }
                     }
@@ -1316,7 +1408,16 @@ void Foam::addPatchCellLayer::setRefinement
                         }
                         else
                         {
-                            addVertex(meshPoints[v], newFace, newFp);
+                            addVertex
+                            (
+                                (
+                                    addToMesh_
+                                  ? meshPoints[v]
+                                  : copiedPatchPoints[v]
+                                ),
+                                newFace,
+                                newFp
+                            );
                         }
                     }
 
