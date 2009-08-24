@@ -1,9 +1,0 @@
-fieldValue/fieldValue.C
-
-face/faceSource.C
-face/faceSourceFunctionObject.C
-
-cell/cellSource.C
-cell/cellSourceFunctionObject.C
-
-LIB = $(FOAM_LIBBIN)/libfieldValueFunctionObjects

@@ -6,4 +6,10 @@ fieldAverage/fieldAverageFunctionObject/fieldAverageFunctionObject.C
 fieldMinMax/fieldMinMax.C
 fieldMinMax/fieldMinMaxFunctionObject.C
 
+fieldValues/fieldValue/fieldValue.C
+fieldValues/face/faceSource.C
+fieldValues/face/faceSourceFunctionObject.C
+fieldValues/cell/cellSource.C
+fieldValues/cell/cellSourceFunctionObject.C
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects

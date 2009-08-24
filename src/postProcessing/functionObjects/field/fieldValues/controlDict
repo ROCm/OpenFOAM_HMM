@@ -50,7 +50,7 @@ functions
     faceObj1
     {
         type            faceSource;
-        functionObjectLibs ("libfieldValueFunctionObjects.so");
+        functionObjectLibs ("libfieldFunctionObjects.so");
         enabled         true;
         outputControl   outputTime;
         log             true;
@@ -71,7 +71,7 @@ functions
     faceObj2
     {
         type            faceSource;
-        functionObjectLibs ("libfieldValueFunctionObjects.so");
+        functionObjectLibs ("libfieldFunctionObjects.so");
         enabled         true;
         outputControl   outputTime;
         log             true;
@@ -88,7 +88,7 @@ functions
     cellObj1
     {
         type            cellSource;
-        functionObjectLibs ("libfieldValueFunctionObjects.so");
+        functionObjectLibs ("libfieldFunctionObjects.so");
         enabled         true;
         outputControl   outputTime;
         log             true;
