@@ -22,6 +22,7 @@ FoamFile
 //      jplot
 //      gnuplot
 //      raw
+//      vtk
 setFormat raw;
 
 // Surface output format. Choice of

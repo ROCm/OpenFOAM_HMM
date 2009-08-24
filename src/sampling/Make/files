@@ -18,6 +18,7 @@ $(setWriters)/writers.C
 $(setWriters)/gnuplot/gnuplotSetWriterRunTime.C
 $(setWriters)/jplot/jplotSetWriterRunTime.C
 $(setWriters)/raw/rawSetWriterRunTime.C
+$(setWriters)/vtk/vtkSetWriterRunTime.C
 $(setWriters)/xmgrace/xmgraceSetWriterRunTime.C
 
 cuttingPlane/cuttingPlane.C

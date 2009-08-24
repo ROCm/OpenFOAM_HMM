@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::gnuplotSetWriter
+    Foam::vtkSetWriter
 
 Description
 
 SourceFiles
-    gnuplotSetWriter.C
+    vtkSetWriter.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef gnuplotSetWriter_H
-#define gnuplotSetWriter_H
+#ifndef vtkSetWriter_H
+#define vtkSetWriter_H
 
 #include "writer.H"
 
@@ -43,11 +43,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class gnuplotSetWriter Declaration
+                     Class vtkSetWriter Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class Type>
-class gnuplotSetWriter
+class vtkSetWriter
 :
     public writer<Type>
 {
@@ -55,17 +55,17 @@ class gnuplotSetWriter
 public:
 
     //- Runtime type information
-    TypeName("gnuplot");
+    TypeName("vtk");
 
 
     // Constructors
 
         //- Construct null
-        gnuplotSetWriter();
+        vtkSetWriter();
 
 
     //- Destructor
-    virtual ~gnuplotSetWriter();
+    virtual ~vtkSetWriter();
 
 
     // Member Functions
@@ -102,7 +102,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "gnuplotSetWriter.C"
+#   include "vtkSetWriter.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
