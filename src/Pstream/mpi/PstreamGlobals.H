@@ -22,68 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Namespace
+    Foam::PstreamGlobals
+
 Description
-    Read token and binary block from IPstream
+    Global functions and variables for working with parallel streams,
+    but principally for gamma/mpi
+
+SourceFiles
+    PstreamGlobals.C
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "IPstream.H"
+#ifndef PstreamGlobals_H
+#define PstreamGlobals_H
+
+#include "mpi.h"
+
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
-
-Foam::IPstream::IPstream
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    const label bufSize,
-    streamFormat format,
-    versionNumber version
-)
-:
-    Pstream(commsType, bufSize),
-    Istream(format, version),
-    fromProcNo_(fromProcNo),
-    messageSize_(0)
+namespace Foam
 {
-     notImplemented
-     (
-         "IPsream::IPstream"
-         "("
-             "const commsTypes,"
-             "const int fromProcNo," 
-             "const label bufSize,"
-             "streamFormat, versionNumber"
-         ")"
-     );
-}
 
+/*---------------------------------------------------------------------------*\
+                           Class PstreamGlobals Declaration
+\*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-int Foam::IPstream::read
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    char* buf,
-    const std::streamsize bufSize
-)
+namespace PstreamGlobals
 {
-    notImplemented
-    (
-        "IPstream::read"
-        "("
-            "const commsTypes,"
-            "const int fromProcNo,"
-            "char* buf,"
-            "const label bufSize"
-        ")"
-     );
 
-     return 0;
-}
+extern DynamicList<MPI_Request> outstandingRequests_;
 
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
