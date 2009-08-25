@@ -63,6 +63,7 @@ fields
 //      curve               specified points, not nessecary on line, uses
 //                          tracking
 //      cloud               specified points, uses findCell
+//      triSurfaceMeshPointSet  points of triSurface
 //
 // axis: how to write point coordinate. Choice of
 // - x/y/z: x/y/z coordinate only

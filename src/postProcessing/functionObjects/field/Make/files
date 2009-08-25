@@ -12,4 +12,10 @@ fieldValues/face/faceSourceFunctionObject.C
 fieldValues/cell/cellSource.C
 fieldValues/cell/cellSourceFunctionObject.C
 
+streamLine/streamLine.C
+streamLine/streamLineParticle.C
+streamLine/streamLineParticleCloud.C
+streamLine/streamLineFunctionObject.C
+
+
 LIB = $(FOAM_LIBBIN)/libfieldFunctionObjects

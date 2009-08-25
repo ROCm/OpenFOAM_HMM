@@ -46,11 +46,7 @@ bool Foam::fieldValues::cellSource::setFieldValues
     {
         const vf& field = obr_.lookupObject<vf>(fieldName);
 
-        forAll(values, i)
-        {
-            label cellI = cellId_[i];
-            values[i] = field[cellI];
-        }
+        values = UIndirectList<Type>(field, cellId_);
 
         return true;
     }
@@ -158,16 +154,7 @@ Foam::tmp<Foam::Field<Type> > Foam::fieldValues::cellSource::filterField
     const Field<Type>& field
 ) const
 {
-    tmp<Field<Type> > tvalues(new Field<Type>(cellId_.size()));
-    Field<Type>& values = tvalues();
-
-    forAll(values, i)
-    {
-        label cellI = cellId_[i];
-        values[i] = field[cellI];
-    }
-
-    return tvalues;
+    return tmp<Field<Type> >(new Field<Type>(field, cellId_));
 }
 
 
