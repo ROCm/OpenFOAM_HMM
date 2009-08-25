@@ -199,10 +199,13 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
     {
         if (lifeTime_ == 0)
         {
-            //Pout<< "Removing stagnant particle:"
-            //    << static_cast<Particle<streamLineParticle> >(*this)
-            //    << " sampled positions:" << sampledPositions_.size()
-            //    << endl;
+            if (debug)
+            {
+                Pout<< "streamLineParticle : Removing stagnant particle:"
+                    << static_cast<Particle<streamLineParticle> >(*this)
+                    << " sampled positions:" << sampledPositions_.size()
+                    << endl;
+            }
             td.keepParticle = false;
         }
         else
@@ -211,10 +214,13 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
             sampledPositions_.append(position());
             interpolateFields(td, position(), cell());
 
-            //Pout<< "Removing particle:"
-            //    << static_cast<Particle<streamLineParticle> >(*this)
-            //    << " sampled positions:" << sampledPositions_.size()
-            //    << endl;
+            if (debug)
+            {
+                Pout<< "streamLineParticle : Removing particle:"
+                    << static_cast<Particle<streamLineParticle> >(*this)
+                    << " sampled positions:" << sampledPositions_.size()
+                    << endl;
+            }
         }
 
         // Transfer particle data into trackData.
@@ -350,6 +356,7 @@ void Foam::streamLineParticle::hitWallPatch
 )
 {
     // Keep particle
+    td.keepParticle = false;
 }
 
 

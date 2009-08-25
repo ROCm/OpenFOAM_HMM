@@ -76,7 +76,7 @@ void Foam::streamLine::track()
     }
     label nSeeds = returnReduce(particles.size(), sumOp<label>());
     Info<< "Seeded " << nSeeds
-        << " particles." << nl << endl;
+        << " particles." << endl;
 
 
     // Read or lookup fields
@@ -326,6 +326,8 @@ void Foam::streamLine::read(const dictionary& dict)
 void Foam::streamLine::execute()
 {
 //    const Time& runTime = const_cast<Time&>(obr_.time());
+//    Pout<< "**streamLine::execute : time:" << runTime.timeName() << endl;
+//    Pout<< "**streamLine::execute : time:" << runTime.timeIndex() << endl;
 //
 //    bool isOutputTime = false;
 //
