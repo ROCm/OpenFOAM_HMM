@@ -66,9 +66,11 @@ pressureSwirlInjector::pressureSwirlInjector
 
     if (sm.injectors().size() != coneAngle_.size())
     {
-        FatalError << "pressureSwirlInjector::pressureSwirlInjector"
-            << "(const dictionary& dict, spray& sm)\n"
-            << "Wrong number of entries in innerAngle"
+        FatalErrorIn
+        (
+            "pressureSwirlInjector::pressureSwirlInjector"
+            "(const dictionary& dict, spray& sm)"
+        )   << "Wrong number of entries in innerAngle" << nl
             << abort(FatalError);
     }
 
@@ -77,9 +79,12 @@ pressureSwirlInjector::pressureSwirlInjector
     // correct velocityProfile
     forAll(sm.injectors(), i)
     {
-        sm.injectors()[i].properties()->correctProfiles(sm.fuels(), referencePressure);
+        sm.injectors()[i].properties()->correctProfiles
+        (
+            sm.fuels(),
+            referencePressure
+        );
     }
-
 }
 
 
@@ -93,34 +98,35 @@ pressureSwirlInjector::~pressureSwirlInjector()
 
 scalar pressureSwirlInjector::d0
 (
-    const label n, 
+    const label n,
     const scalar t
 ) const
 {
     const injectorType& it = injectors_[n].properties();
 
     scalar c = rndGen_.scalar01();
-    angle_ = coneAngle_[n]  + 2.0 * coneInterval_[n] * (0.5 - c) ;
+    angle_ = coneAngle_[n] + 2.0*coneInterval_[n]*(0.5 - c);
 
     angle_ *= mathematicalConstant::pi/360.0;
 
     scalar injectedMassFlow = it.massFlowRate(t);
-    
-    scalar cosAngle = cos(angle_);   
 
-    scalar rhoFuel = sm_.fuels().rho(sm_.ambientPressure(), it.T(t), it.X()); 
-    scalar injectorDiameter = it.d();  
-     
+    scalar cosAngle = cos(angle_);
+
+    scalar rhoFuel = sm_.fuels().rho(sm_.ambientPressure(), it.T(t), it.X());
+    scalar injectorDiameter = it.d();
+
     scalar deltaPressure = deltaPressureInj(t,n);
     scalar kV = kv(n, injectedMassFlow, deltaPressure);
-    scalar v = kV * sqrt(2.0*deltaPressure/rhoFuel);    
+    scalar v = kV*sqrt(2.0*deltaPressure/rhoFuel);
 
-    u_ = v * cosAngle;
-    
+    u_ = v*cosAngle;
+
     scalar A = injectedMassFlow/(mathematicalConstant::pi*rhoFuel*u_);
 
     return (injectorDiameter-sqrt(pow(injectorDiameter,2)-4.0*A))/2.0;
 }
+
 
 vector pressureSwirlInjector::direction
 (
@@ -130,39 +136,42 @@ vector pressureSwirlInjector::direction
     const scalar d
 ) const
 {
-
     scalar alpha = sin(angle_);
     scalar dcorr = cos(angle_);
     scalar beta = 2.0*mathematicalConstant::pi*rndGen_.scalar01();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
-    
+
     if (sm_.twoD())
     {
         scalar reduce = 0.01;
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *= (1.0-2.0*reduce)*sm_.angleOfWedge()/(2.0*mathematicalConstant::pi);
+        beta *=
+            (1.0-2.0*reduce)*sm_.angleOfWedge()/(2.0*mathematicalConstant::pi);
         beta += reduce*sm_.angleOfWedge();
-        normal = alpha*
-        (
-            sm_.axisOfWedge()*cos(beta) +
-            sm_.axisOfWedgeNormal()*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                sm_.axisOfWedge()*cos(beta)
+              + sm_.axisOfWedgeNormal()*sin(beta)
+            );
     }
     else
     {
-        normal = alpha*
-        (
-            injectors_[n].properties()->tan1(hole)*cos(beta) +
-            injectors_[n].properties()->tan2(hole)*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                injectors_[n].properties()->tan1(hole)*cos(beta)
+              + injectors_[n].properties()->tan2(hole)*sin(beta)
+            );
     }
-    
+
     // set the direction of injection by adding the normal vector
-    vector dir = dcorr*injectors_[n].properties()->direction(hole, time) + normal;
+    vector dir =
+        dcorr*injectors_[n].properties()->direction(hole, time) + normal;
     dir /= mag(dir);
 
     return dir;
@@ -178,12 +187,9 @@ scalar pressureSwirlInjector::velocity
     return u_*sqrt(1.0 + pow(tan(angle_),2.0));
 }
 
-scalar pressureSwirlInjector::averageVelocity
-(
-    const label i
-) const
-{    
 
+scalar pressureSwirlInjector::averageVelocity(const label i) const
+{
     const injectorType& it = sm_.injectors()[i].properties();
 
     scalar dt = it.teoi() - it.tsoi();
@@ -193,7 +199,7 @@ scalar pressureSwirlInjector::averageVelocity
     scalar injectionPressure = averagePressure(i);
 
     scalar Tav = it.integrateTable(it.T())/dt;
-    scalar rhoFuel = sm_.fuels().rho(sm_.ambientPressure(), Tav, it.X());  
+    scalar rhoFuel = sm_.fuels().rho(sm_.ambientPressure(), Tav, it.X());
 
     scalar kV = kv(i, injectedMassFlow, injectionPressure);
 
@@ -208,7 +214,6 @@ scalar pressureSwirlInjector::kv
     const scalar dPressure
 ) const
 {
-
     const injectorType& it = injectors_[inj].properties();
 
     scalar coneAngle = coneAngle_[inj];
@@ -218,29 +223,32 @@ scalar pressureSwirlInjector::kv
     scalar cosAngle = cos(coneAngle);
     scalar Tav = it.integrateTable(it.T())/(it.teoi()-it.tsoi());
 
-    scalar rhoFuel = sm_.fuels().rho(sm_.ambientPressure(), Tav, it.X()); 
-    scalar injectorDiameter = it.d();  
-     
+    scalar rhoFuel = sm_.fuels().rho(sm_.ambientPressure(), Tav, it.X());
+    scalar injectorDiameter = it.d();
+
     scalar kv = max
     (
-        maxKv_[inj], 
+        maxKv_[inj],
         4.0*massFlow
-        *
-        sqrt(rhoFuel/2.0/dPressure)
-        /
-        (mathematicalConstant::pi*pow(injectorDiameter, 2.0)*rhoFuel*cosAngle)
+       *sqrt(rhoFuel/2.0/dPressure)
+       /(mathematicalConstant::pi*sqr(injectorDiameter)*rhoFuel*cosAngle)
     );
 
-    return min(1.0, kv);   
+    return min(1.0, kv);
 }
 
 
-
-
-scalar pressureSwirlInjector::deltaPressureInj(const scalar time, const label inj) const
+scalar pressureSwirlInjector::deltaPressureInj
+(
+    const scalar time,
+    const label inj
+) const
 {
-    return injectors_[inj].properties()->injectionPressure(time) - sm_.ambientPressure();   
+    return
+        injectors_[inj].properties()->injectionPressure(time)
+      - sm_.ambientPressure();
 }
+
 
 scalar pressureSwirlInjector::averagePressure(const label inj) const
 {
@@ -250,6 +258,9 @@ scalar pressureSwirlInjector::averagePressure(const label inj) const
     scalar dt = it.teoi() - it.tsoi();
     return it.integrateTable(it.injectionPressureProfile())/dt;
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 

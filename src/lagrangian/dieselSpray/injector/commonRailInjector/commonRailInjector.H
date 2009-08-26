@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class commonRailInjector Declaration
+                     Class commonRailInjector Declaration
 \*---------------------------------------------------------------------------*/
 
 class commonRailInjector
@@ -110,16 +110,11 @@ public:
     // Constructors
 
         //- Construct from components
-        commonRailInjector
-        (
-            const Time& t,
-            const dictionary& dict
-        );
+        commonRailInjector(const Time& t, const dictionary& dict);
 
 
-    // Destructor
-
-        ~commonRailInjector();
+    //- Destructor
+    virtual ~commonRailInjector();
 
 
     // Member Functions
@@ -146,7 +141,7 @@ public:
             const vector& axisOfWedgeNormal,
             Random& rndGen
         ) const;
-    
+
         //- Return the number of holes
         label nHoles() const;
 
@@ -201,14 +196,14 @@ public:
         {
             return injectionPressureProfile_;
         }
-    
+
         scalar injectionPressure(const scalar time) const;
 
         List<pair> velocityProfile() const
         {
             return velocityProfile_;
         }
-        
+
         scalar velocity(const scalar time) const;
 
         List<pair> CdProfile() const;
@@ -227,7 +222,6 @@ public:
         {
             return pressureIndependentVelocity_;
         }
-
 };
 
 

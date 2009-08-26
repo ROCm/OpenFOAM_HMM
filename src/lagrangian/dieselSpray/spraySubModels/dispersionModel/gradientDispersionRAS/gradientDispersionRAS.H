@@ -28,7 +28,7 @@ Class
 Description
     The velocity is perturbed in the direction of -grad(k), with a
     Gaussian random number distribution with variance sigma.
-    where sigma is defined below 
+    where sigma is defined below
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class gradientDispersionRAS Declaration
+                  Class gradientDispersionRAS Declaration
 \*---------------------------------------------------------------------------*/
 
 class gradientDispersionRAS
@@ -60,16 +60,11 @@ public:
     // Constructors
 
         //- Construct from components
-        gradientDispersionRAS
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        gradientDispersionRAS(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~gradientDispersionRAS();
+    //- Destructor
+    virtual ~gradientDispersionRAS();
 
 
     // Member Functions

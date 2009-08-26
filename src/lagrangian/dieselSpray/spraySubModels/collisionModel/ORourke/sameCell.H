@@ -62,7 +62,7 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
     if ( prob < coalesceProb && coalescence_) {
 
         // How 'many' of the droplets coalesce
-        // NN. This is the kiva way ... which actually works best
+        // This is the kiva way ... which actually works best
 
         scalar zz = collProb;
         scalar vnu = nu*collProb;
@@ -92,7 +92,7 @@ if (( xx > collProb) && (mMin > VSMALL) && (mMax > VSMALL)) {
         scalar d3 = pow(dMax, 3) + nProb*pow(dMin,3);
         pMax().d() = cbrt(d3);
         pMax().U() = (momMax + (1.0-newMinMass/mMin)*momMin)/newMaxMass;
-        
+
         // update the liquid molar fractions
         scalarField Ymin = spray_.fuels().Y(pMin().X());
         scalarField Ymax = spray_.fuels().Y(pMax().X());

@@ -53,12 +53,12 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class injectorType Declaration
+                       Class injectorType Declaration
 \*---------------------------------------------------------------------------*/
 
 class injectorType
 {
-        typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
+    typedef VectorSpace<Vector<scalar>, scalar, 2> pair;
 
 public:
 
@@ -79,15 +79,11 @@ public:
             (t, dict)
         );
 
-    
+
     // Constructors
 
         //- Construct from components
-        injectorType
-        (
-            const Time& t,
-            const dictionary& dict
-        );
+        injectorType(const Time& t, const dictionary& dict);
 
 
     // Selectors
@@ -99,13 +95,12 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~injectorType();
+    //- Destructor
+    virtual ~injectorType();
 
 
     // Member Functions
-    
+
         //- Return number of particles to inject
         virtual label nParcelsToInject
         (
@@ -131,14 +126,14 @@ public:
 
         //- Return the number of holes
         virtual label nHoles() const = 0;
-    
+
         //- Return the injector diameter
         virtual scalar d() const = 0;
 
         //- Return the injection direction for hole i
         virtual const vector& direction
         (
-            const label i, 
+            const label i,
             const scalar time
         ) const = 0;
 
@@ -172,7 +167,7 @@ public:
         //- Return the instantaneous velocity
         virtual scalar velocity(const scalar time) const = 0;
 
-        //- Return the discharge coefficient        
+        //- Return the discharge coefficient
         virtual List<pair> CdProfile() const = 0;
 
         //- Return the instantaneous discharge coefficient
@@ -197,10 +192,12 @@ public:
 
         virtual bool pressureIndependentVelocity() const = 0;
 
-        //- Return a vector perpendicular to the injection direction and tan2 for hole n
+        //- Return a vector perpendicular to the injection direction and tan2
+        //  for hole n
         virtual vector tan1(const label n) const = 0;
 
-        //- Return a vector perpendicular to the injection direction and tan1 for hole n
+        //- Return a vector perpendicular to the injection direction and tan1
+        //  for hole n
         virtual vector tan2(const label n) const = 0;
 
         scalar getTableValue
@@ -225,7 +222,6 @@ public:
             const liquidMixture& fuel,
             const scalar referencePressure
         ) = 0;
-
 };
 
 

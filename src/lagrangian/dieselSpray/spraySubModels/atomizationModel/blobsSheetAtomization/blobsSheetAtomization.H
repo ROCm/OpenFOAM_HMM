@@ -54,7 +54,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class blobsSheetAtomization Declaration
+                    Class blobsSheetAtomization Declaration
 \*---------------------------------------------------------------------------*/
 
 class blobsSheetAtomization
@@ -70,6 +70,7 @@ private:
         scalar angle_;
         Random& rndGen_;
 
+
 public:
 
     //- Runtime type information
@@ -79,16 +80,11 @@ public:
     // Constructors
 
         //- Construct from components
-        blobsSheetAtomization
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        blobsSheetAtomization(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~blobsSheetAtomization();
+    //- Destructor
+    virtual ~blobsSheetAtomization();
 
 
     // Member Operators
@@ -100,8 +96,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const;
-
-
 };
 
 

@@ -28,7 +28,7 @@ Class
 Description
     saturate evaporation model.
     Characteristic time is calculated to immediately saturate the cell
-    It should be mentioned that this is coupled with the (implicit) way 
+    It should be mentioned that this is coupled with the (implicit) way
     evaporation is done in parcel, since the evaporation time depends
     on the integration step
 
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class saturateEvaporationModel Declaration
+                  Class saturateEvaporationModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class saturateEvaporationModel
@@ -59,24 +59,21 @@ private:
 
         dictionary evapDict_;
 
+
 public:
 
     //- Runtime type information
-        TypeName("saturateEvaporationModel");
+    TypeName("saturateEvaporationModel");
 
 
     // Constructors
 
         //- Construct from dictionary
-        saturateEvaporationModel
-        (
-            const dictionary& dict
-        );
+        saturateEvaporationModel(const dictionary& dict);
 
 
-    // Destructor
-
-        ~saturateEvaporationModel();
+    //- Destructor
+    virtual ~saturateEvaporationModel();
 
 
     // Member Functions
@@ -115,15 +112,15 @@ public:
             const scalar Nusselt,
             const scalar deltaTemp,
             const scalar diameter,
-            const scalar, 
-            const scalar, 
-            const scalar, 
-            const scalar, 
-            const scalar, 
-            const scalar, 
-            const scalar, 
-            const scalar, 
-            const scalar 
+            const scalar,
+            const scalar,
+            const scalar,
+            const scalar,
+            const scalar,
+            const scalar,
+            const scalar,
+            const scalar,
+            const scalar
         ) const;
 
         inline label nEvapIter() const;

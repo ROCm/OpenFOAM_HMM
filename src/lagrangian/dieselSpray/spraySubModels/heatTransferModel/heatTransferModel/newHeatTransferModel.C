@@ -41,26 +41,22 @@ autoPtr<heatTransferModel> heatTransferModel::New
     const dictionary& dict
 )
 {
-    word heatTransferModelType
-    (
-        dict.lookup("heatTransferModel")
-    );
+    word heatTransferModelType(dict.lookup("heatTransferModel"));
 
-    Info<< "Selecting heatTransferModel "
-         << heatTransferModelType << endl;
+    Info<< "Selecting heatTransferModel " << heatTransferModelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(heatTransferModelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "heatTransferModel::New(const dictionary&) : " << endl
-            << "    unknown heatTransferModelType type "
+        FatalErrorIn("heatTransferModel::New(const dictionary&)")
+            << "Unknown heatTransferModelType type "
             << heatTransferModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid heatTransferModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid heatTransferModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<heatTransferModel>(cstrIter()(dict));

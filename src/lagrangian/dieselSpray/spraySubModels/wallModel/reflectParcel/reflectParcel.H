@@ -50,16 +50,18 @@ class reflectParcel
 {
 
 private:
+
     // Private data
 
         const volVectorField& U_;
 
         dictionary coeffsDict_;
 
-    // model constants
+        // model constants
 
-    //- Elasticity constant v^2_out = elasticity * v^2_in
-        scalar elasticity_;
+            //- Elasticity constant v^2_out = elasticity*v^2_in
+            scalar elasticity_;
+
 
 public:
 
@@ -78,22 +80,15 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~reflectParcel();
+    //- Destructor
+    virtual ~reflectParcel();
 
 
     // Member Functions
 
         //- Return true if parcel is to be kept, and false if it is to be
         // removed
-        bool wallTreatment
-        (
-            parcel& parcel,
-            const label facei
-        ) const;
-
-
+        bool wallTreatment(parcel& parcel, const label facei) const;
 };
 
 

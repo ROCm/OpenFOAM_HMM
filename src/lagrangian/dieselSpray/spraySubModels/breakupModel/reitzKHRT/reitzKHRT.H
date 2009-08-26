@@ -68,6 +68,7 @@ private:
         scalar msLimit_;
         scalar weberLimit_;
 
+
 public:
 
     //- Runtime type information
@@ -77,16 +78,11 @@ public:
     // Constructors
 
         //- Construct from components
-        reitzKHRT
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        reitzKHRT(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~reitzKHRT();
+    //- Destructor
+    virtual ~reitzKHRT();
 
 
     // Member Operators
@@ -98,7 +94,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const;
-
 };
 
 

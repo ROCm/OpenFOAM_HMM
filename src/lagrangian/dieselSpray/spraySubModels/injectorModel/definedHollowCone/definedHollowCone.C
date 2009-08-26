@@ -67,53 +67,62 @@ definedHollowConeInjector::definedHollowConeInjector
     innerConeAngle_(definedHollowConeDict_.lookup("innerConeAngle")),
     outerConeAngle_(definedHollowConeDict_.lookup("outerConeAngle"))
 {
-
     // convert CA to real time - inner cone angle
     forAll(innerConeAngle_, i)
     {
-        innerConeAngle_[i][0] = sm.runTime().userTimeToTime(innerConeAngle_[i][0]);
+        innerConeAngle_[i][0] =
+            sm.runTime().userTimeToTime(innerConeAngle_[i][0]);
     }
     // convert CA to real time - outer cone angle
     forAll(outerConeAngle_, i)
     {
-        outerConeAngle_[i][0] = sm.runTime().userTimeToTime(outerConeAngle_[i][0]);
+        outerConeAngle_[i][0] =
+            sm.runTime().userTimeToTime(outerConeAngle_[i][0]);
     }
 
     // check number of injectors
     if (sm.injectors().size() != 1)
     {
-        Info << "Warning!!!\n"
-             << "definedHollowConeInjector::definedHollowConeInjector"
-             << "(const dictionary& dict, spray& sm)\n"
-             << "Same inner/outer cone angle profiles applied to each injector"
-             << endl;
+        WarningIn
+        (
+            "definedHollowConeInjector::definedHollowConeInjector"
+            "(const dictionary& dict, spray& sm)"
+        )   << "Same inner/outer cone angle profiles applied to each injector"
+            << endl;
     }
- 
+
     // check number of entries in innerConeAngle list
     if (innerConeAngle_.empty())
     {
-        FatalError << "definedHollowConeInjector::definedHollowConeInjector"
-             << "(const dictionary& dict, spray& sm)\n"
-             << "Number of entries in innerConeAngle must be greater than zero"
-             << abort(FatalError);
+        FatalErrorIn
+        (
+            "definedHollowConeInjector::definedHollowConeInjector"
+            "(const dictionary& dict, spray& sm)"
+        )   << "Number of entries in innerConeAngle must be greater than zero"
+            << abort(FatalError);
     }
 
     // check number of entries in outerConeAngle list
     if (outerConeAngle_.empty())
     {
-        FatalError << "definedHollowConeInjector::definedHollowConeInjector"
-             << "(const dictionary& dict, spray& sm)\n"
-             << "Number of entries in outerConeAngle must be greater than zero"
-             << abort(FatalError);
+        FatalErrorIn
+        (
+            "definedHollowConeInjector::definedHollowConeInjector"
+            "(const dictionary& dict, spray& sm)"
+        )   << "Number of entries in outerConeAngle must be greater than zero"
+            << abort(FatalError);
     }
 
     scalar referencePressure = sm.p().average().value();
     // correct pressureProfile
     forAll(sm.injectors(), i)
     {
-        sm.injectors()[i].properties()->correctProfiles(sm.fuels(), referencePressure);
+        sm.injectors()[i].properties()->correctProfiles
+        (
+            sm.fuels(),
+            referencePressure
+        );
     }
-
 }
 
 
@@ -127,7 +136,7 @@ definedHollowConeInjector::~definedHollowConeInjector()
 
 scalar definedHollowConeInjector::d0
 (
-    const label n, 
+    const label n,
     const scalar t
 ) const
 {
@@ -145,7 +154,6 @@ vector definedHollowConeInjector::direction
     const scalar d
 ) const
 {
-
     const injectorType& it = injectors_[n].properties();
 
     // interpolate to find inner and outer angles at time, t
@@ -153,7 +161,7 @@ vector definedHollowConeInjector::direction
     scalar angleOuter = it.getTableValue(outerConeAngle_, t);
 
     // use random number to generate angle between inner/outer cone angles
-    scalar angle = angleInner + rndGen_.scalar01()*(angleOuter-angleInner);
+    scalar angle = angleInner + rndGen_.scalar01()*(angleOuter - angleInner);
 
     scalar alpha = sin(angle*mathematicalConstant::pi/360.0);
     scalar dcorr = cos(angle*mathematicalConstant::pi/360.0);
@@ -161,38 +169,41 @@ vector definedHollowConeInjector::direction
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
-    
+
     if (sm_.twoD())
     {
         scalar reduce = 0.01;
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *= (1.0-2.0*reduce)*sm_.angleOfWedge()/(2.0*mathematicalConstant::pi);
+        beta *=
+            (1.0-2.0*reduce)*sm_.angleOfWedge()/(2.0*mathematicalConstant::pi);
         beta += reduce*sm_.angleOfWedge();
-        normal = alpha*
-        (
-            sm_.axisOfWedge()*cos(beta) +
-            sm_.axisOfWedgeNormal()*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                sm_.axisOfWedge()*cos(beta)
+              + sm_.axisOfWedgeNormal()*sin(beta)
+            );
     }
     else
     {
-        normal = alpha*
-        (
-            injectors_[n].properties()->tan1(hole)*cos(beta) +
-            injectors_[n].properties()->tan2(hole)*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                injectors_[n].properties()->tan1(hole)*cos(beta)
+              + injectors_[n].properties()->tan2(hole)*sin(beta)
+            );
     }
-    
+
     // set the direction of injection by adding the normal vector
     vector dir = dcorr*injectors_[n].properties()->direction(hole, t) + normal;
     // normailse direction vector
     dir /= mag(dir);
 
     return dir;
-
 }
+
 
 scalar definedHollowConeInjector::velocity
 (
@@ -215,15 +226,14 @@ scalar definedHollowConeInjector::velocity
     }
 }
 
-scalar definedHollowConeInjector::averageVelocity
-(
-    const label i
-) const
-{    
+
+scalar definedHollowConeInjector::averageVelocity(const label i) const
+{
     const injectorType& it = sm_.injectors()[i].properties();
     scalar dt = it.teoi() - it.tsoi();
     return it.integrateTable(it.velocityProfile())/dt;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
