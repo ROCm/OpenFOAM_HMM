@@ -22,68 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Read token and binary block from IPstream
-
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "IPstream.H"
+#include "PstreamGlobals.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
-
-Foam::IPstream::IPstream
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    const label bufSize,
-    streamFormat format,
-    versionNumber version
-)
-:
-    Pstream(commsType, bufSize),
-    Istream(format, version),
-    fromProcNo_(fromProcNo),
-    messageSize_(0)
+namespace Foam
 {
-     notImplemented
-     (
-         "IPsream::IPstream"
-         "("
-             "const commsTypes,"
-             "const int fromProcNo," 
-             "const label bufSize,"
-             "streamFormat, versionNumber"
-         ")"
-     );
-}
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// Outstanding non-blocking operations.
+//! @cond fileScope
+DynamicList<MPI_Request> PstreamGlobals::outstandingRequests_;
+//! @endcond fileScope
 
-int Foam::IPstream::read
-(
-    const commsTypes commsType,
-    const int fromProcNo,
-    char* buf,
-    const std::streamsize bufSize
-)
-{
-    notImplemented
-    (
-        "IPstream::read"
-        "("
-            "const commsTypes,"
-            "const int fromProcNo,"
-            "char* buf,"
-            "const label bufSize"
-        ")"
-     );
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-     return 0;
-}
-
+} // End namespace Foam
 
 // ************************************************************************* //

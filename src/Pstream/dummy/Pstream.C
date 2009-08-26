@@ -61,6 +61,17 @@ void Foam::Pstream::abort()
 void Foam::reduce(scalar&, const sumOp<scalar>&)
 {}
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+
+void Foam::Pstream::waitRequests()
+{}
+
+
+bool Foam::Pstream::finishedRequest(const label i)
+{
+    notImplemented("Pstream::finishedRequest()");
+    return false;
+}
+
 
 // ************************************************************************* //

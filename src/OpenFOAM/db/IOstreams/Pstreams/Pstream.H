@@ -264,6 +264,12 @@ public:
         //  Spawns slave processes and initialises inter-communication
         static bool init(int& argc, char**& argv);
 
+        //- Non-blocking comms: wait until all have finished.
+        static void waitRequests();
+
+        //- Non-blocking comms: has request i finished?
+        static bool finishedRequest(const label i);
+
         //- Is this a parallel run?
         static bool parRun()
         {
