@@ -24,10 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "ORourkeCollisionModel.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

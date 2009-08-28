@@ -28,7 +28,8 @@ License
 
 #include "RutlandFlashBoil.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
@@ -228,7 +229,7 @@ scalar RutlandFlashBoil::boilingTime
 
             for (label k=0; k < Niter; k++)
             {
-                expSum += exp(sqr(-k*mathematicalConstant::pi*sqrt(F)/2.0));
+                expSum += exp(sqr(-k*constant::math::pi*sqrt(F)/2.0));
                 if (mag(expSum-expSumOld)/expSum < 1.0e-3)
                 {
                     break;
@@ -256,8 +257,7 @@ scalar RutlandFlashBoil::boilingTime
         }
 
         scalar Gf =
-            4.0*alfaS*dTLB*mathematicalConstant::pi*sqr(diameter/2.0)
-           /heatOfVapour;
+            4.0*alfaS*dTLB*constant::math::pi*sqr(diameter/2.0)/heatOfVapour;
 
         // calculation of the heat transfer vapourization at superheated
         // conditions (temperature>tBoilingSurface)
@@ -269,8 +269,7 @@ scalar RutlandFlashBoil::boilingTime
                 mag((vapourFarEnthalpy-vapourSurfaceEnthalpy)/heatOfVapour);
 
             // 2.0? or 1.0? try 1!
-            scalar B =
-                1.0*mathematicalConstant::pi*kappa/cpGas*diameter*NusseltCorr;
+            scalar B = 1.0*constant::math::pi*kappa/cpGas*diameter*NusseltCorr;
             scalar nPos = B*log(1.0 + A)/Gf + 1.0;
             scalar nNeg = (1.0/A)*(exp(Gf/B) - 1.0 - A) + 1.0;
 
@@ -343,9 +342,7 @@ scalar RutlandFlashBoil::boilingTime
             }
         }
 
-        time =
-            ((4.0/3.0)*mathematicalConstant::pi*pow3(diameter/2.0))
-           *liquidDensity/(G+Gf);
+        time = (constant::math::pi*pow3(diameter)/6.0)*liquidDensity/(G + Gf);
 
         time = max(VSMALL, time);
     }

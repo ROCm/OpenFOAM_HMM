@@ -26,9 +26,9 @@ License
 
 #include "SDA.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
-using namespace Foam::mathematicalConstant;
+using namespace Foam::constant::math;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -70,18 +70,18 @@ Foam::septernion Foam::solidBodyMotionFunctions::SDA::transformation() const
     scalar time = time_.value();
 
     scalar Tpi = Tp_ + dTp_*(time/dTi_);   // Current roll period [sec]
-    scalar wr = 2*pi/Tpi; // Current Freq [/sec]
+    scalar wr = twoPi/Tpi; // Current Freq [/sec]
 
     // Current Phase for roll [rad]
     scalar r = dTp_/dTi_;
     scalar u = Tp_ + r*time;
-    scalar phr = 2*pi*((Tp_/u - 1) + log(mag(u)) - log(Tp_))/r;
+    scalar phr = twoPi*((Tp_/u - 1) + log(mag(u)) - log(Tp_))/r;
 
     // Current Phase for Sway [rad]
     scalar phs = phr + pi;
 
     // Current Phase for Heave [rad]
-    scalar phh = phr + pi/2;
+    scalar phh = phr + piByTwo;
 
     scalar rollA = max(rollAmax_*exp(-sqr(Tpi - Tpn_)/(2*Q_)), rollAmin_);
 

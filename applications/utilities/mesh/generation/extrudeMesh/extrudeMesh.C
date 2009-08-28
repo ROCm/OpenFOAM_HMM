@@ -39,7 +39,6 @@ Description
 #include "polyTopoChange.H"
 #include "polyTopoChanger.H"
 #include "edgeCollapser.H"
-#include "mathematicalConstants.H"
 #include "globalMeshData.H"
 #include "perfectInterface.H"
 #include "addPatchCellLayer.H"

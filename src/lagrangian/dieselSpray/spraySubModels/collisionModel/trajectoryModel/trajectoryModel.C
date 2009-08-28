@@ -26,6 +26,7 @@ License
 
 #include "trajectoryModel.H"
 #include "addToRunTimeSelectionTable.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

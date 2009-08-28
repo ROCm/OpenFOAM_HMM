@@ -26,6 +26,7 @@ License
 
 #include "LiquidEvaporation.H"
 #include "specie.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -148,7 +149,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
     scalarField Xc = calcXc(cellI);
 
     // droplet surface area
-    scalar A = mathematicalConstant::pi*sqr(d);
+    scalar A = constant::math::pi*sqr(d);
 
     // Reynolds number
     scalar Re = mag(Ur)*d/(nuc + ROOTVSMALL);

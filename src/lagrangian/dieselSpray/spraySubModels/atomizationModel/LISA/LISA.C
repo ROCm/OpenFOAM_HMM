@@ -27,7 +27,7 @@ License
 #include "LISA.H"
 #include "addToRunTimeSelectionTable.H"
 #include "basicMultiComponentMixture.H"
-
+#include "mathConstants.H"
 #include "RosinRammler.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -155,7 +155,7 @@ void LISA::atomizeParcel
 
     scalar massFlow = it.massFlowRate(max(0.0,elapsedTime-time));
 
-    scalar hSheet = massFlow/(mathematicalConstant::pi*d*rhoFuel*mag(p.U()));
+    scalar hSheet = massFlow/(constant::math::pi*d*rhoFuel*mag(p.U()));
 
     p.d() = min(hSheet,p.d());
 
@@ -249,7 +249,7 @@ void LISA::atomizeParcel
 
     scalar kL = 1.0/(dL*sqrt(0.5 + 1.5*muFuel/sqrt(rhoFuel*sigma*dL)));
 
-    scalar dD = cbrt(3.0*mathematicalConstant::pi*sqr(dL)/kL);
+    scalar dD = cbrt(3.0*constant::math::pi*sqr(dL)/kL);
 
     scalar lisaExp = 0.27;
     scalar ambientPressure = 1.0e+5;

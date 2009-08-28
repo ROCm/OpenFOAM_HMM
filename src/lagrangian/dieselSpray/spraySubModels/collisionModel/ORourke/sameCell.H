@@ -31,7 +31,7 @@ scalar nMin = pMin().N(rhoMin);
 
 scalar mdMin = mMin/nMin;
 
-scalar nu0 = 0.25*mathematicalConstant::pi*sumD*sumD*magVRel*dt/vols_[cell1];
+scalar nu0 = 0.25*constant::math::pi*sumD*sumD*magVRel*dt/vols_[cell1];
 scalar nu = nMin*nu0;
 scalar collProb = exp(-nu);
 scalar xx = rndGen_.scalar01();

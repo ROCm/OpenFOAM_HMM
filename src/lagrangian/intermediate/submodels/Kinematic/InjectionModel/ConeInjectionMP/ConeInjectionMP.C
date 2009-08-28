@@ -26,6 +26,7 @@ License
 
 #include "ConeInjectionMP.H"
 #include "DataEntry.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -246,7 +247,7 @@ void Foam::ConeInjectionMP<CloudType>::setProperties
     // set particle velocity
     const label i = parcelI%positions_.size();
 
-    const scalar deg2Rad = mathematicalConstant::pi/180.0;
+    const scalar deg2Rad = constant::math::pi/180.0;
 
     scalar t = time - this->SOI_;
     scalar ti = thetaInner_().value(t);
@@ -256,8 +257,7 @@ void Foam::ConeInjectionMP<CloudType>::setProperties
     coneAngle *= deg2Rad;
     scalar alpha = sin(coneAngle);
     scalar dcorr = cos(coneAngle);
-    scalar beta =
-        2.0*mathematicalConstant::pi*this->owner().rndGen().scalar01();
+    scalar beta = constant::math::twoPi*this->owner().rndGen().scalar01();
 
     vector normal = alpha*(tanVec1_[i]*cos(beta) + tanVec2_[i]*sin(beta));
     vector dirVec = dcorr*axes_[i];

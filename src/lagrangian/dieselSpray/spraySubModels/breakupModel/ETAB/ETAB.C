@@ -26,7 +26,7 @@ License
 
 #include "ETAB.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -128,7 +128,7 @@ void ETAB::breakupParcel
             scalar quad = -y2/a;
             if (quad < 0)
             {
-                phi = 2*mathematicalConstant::pi - phit;
+                phi = constant::math::twoPi - phit;
             }
 
             scalar tb = 0;
@@ -139,11 +139,11 @@ void ETAB::breakupParcel
 
                 if (theta < phi)
                 {
-                    if (2*mathematicalConstant::pi - theta >= phi)
+                    if (constant::math::twoPi - theta >= phi)
                     {
                         theta = -theta;
                     }
-                    theta += 2*mathematicalConstant::pi;
+                    theta += constant::math::twoPi;
                 }
                 tb = (theta-phi)*romega;
 

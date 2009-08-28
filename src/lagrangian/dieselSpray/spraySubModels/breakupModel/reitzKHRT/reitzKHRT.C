@@ -26,7 +26,7 @@ License
 
 #include "reitzKHRT.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -137,7 +137,7 @@ void reitzKHRT::breakupParcel
     scalar KRT = sqrt(helpVariable/(3.0*sigma + VSMALL));
 
     // wavelength of the fastest growing RT frequency
-    scalar lambdaRT = 2.0*mathematicalConstant::pi*cRT_/(KRT + VSMALL);
+    scalar lambdaRT = constant::math::twoPi*cRT_/(KRT + VSMALL);
 
     // if lambdaRT < diameter, then RT waves are growing on the surface
     // and we start to keep track of how long they have been growing
@@ -170,7 +170,7 @@ void reitzKHRT::breakupParcel
             // reduce the diameter according to the rate-equation
             p.d() = (fraction*dc + p.d())/(1.0 + fraction);
 
-            scalar ms = rhoLiquid*Np*pow3(dc)*mathematicalConstant::pi/6.0;
+            scalar ms = rhoLiquid*Np*pow3(dc)*constant::math::pi/6.0;
             p.ms() += ms;
 
             // Total number of parcels for the whole injection event

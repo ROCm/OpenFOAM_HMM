@@ -26,7 +26,7 @@ License
 
 #include "hollowCone.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,9 +130,9 @@ vector hollowConeInjector::direction
 {
     scalar angle =
         innerAngle_[n] + rndGen_.scalar01()*(outerAngle_[n]-innerAngle_[n]);
-    scalar alpha = sin(angle*mathematicalConstant::pi/360.0);
-    scalar dcorr = cos(angle*mathematicalConstant::pi/360.0);
-    scalar beta = 2.0*mathematicalConstant::pi*rndGen_.scalar01();
+    scalar alpha = sin(angle*constant::math::pi/360.0);
+    scalar dcorr = cos(angle*constant::math::pi/360.0);
+    scalar beta = constant::math::twoPi*rndGen_.scalar01();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
@@ -143,8 +143,7 @@ vector hollowConeInjector::direction
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *=
-            (1.0-2.0*reduce)*sm_.angleOfWedge()/(2.0*mathematicalConstant::pi);
+        beta *= (1.0 - 2.0*reduce)*sm_.angleOfWedge()/(constant::math::twoPi);
         beta += reduce*sm_.angleOfWedge();
         normal =
             alpha

@@ -30,8 +30,9 @@ License
 
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
-#include "mathematicalConstants.H"
-#include "radiationConstants.H"
+#include "constants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -135,8 +136,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     {
         nRay_ = 4*nPhi_*nTheta_;
         IRay_.setSize(nRay_);
-        scalar deltaPhi = mathematicalConstant::pi/(2.0*nPhi_);
-        scalar deltaTheta = mathematicalConstant::pi/nTheta_;
+        scalar deltaPhi = math::pi/(2.0*nPhi_);
+        scalar deltaTheta = math::pi/nTheta_;
         label i = 0;
         for (label n = 1; n <= nTheta_; n++)
         {
@@ -168,11 +169,11 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     {
         if (mesh_.nSolutionD() == 2)    //2D (X & Y)
         {
-            scalar thetai = mathematicalConstant::pi/2.0;
-            scalar deltaTheta = mathematicalConstant::pi;
+            scalar thetai = math::piByTwo;
+            scalar deltaTheta = math::pi;
             nRay_ = 4*nPhi_;
             IRay_.setSize(nRay_);
-            scalar deltaPhi = mathematicalConstant::pi/(2.0*nPhi_);
+            scalar deltaPhi = math::pi/(2.0*nPhi_);
             label i = 0;
             for (label m = 1; m <= 4*nPhi_; m++)
             {
@@ -198,11 +199,11 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         }
         else    //1D (X)
         {
-            scalar thetai = mathematicalConstant::pi/2.0;
-            scalar deltaTheta = mathematicalConstant::pi;
+            scalar thetai = math::piByTwo;
+            scalar deltaTheta = math::pi;
             nRay_ = 2;
             IRay_.setSize(nRay_);
-            scalar deltaPhi = mathematicalConstant::pi;
+            scalar deltaPhi = math::pi;
             label i = 0;
             for (label m = 1; m <= 2; m++)
             {
@@ -329,7 +330,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::fvDOM::Rp() const
                 IOobject::NO_WRITE,
                 false
             ),
-            4.0*a_*radiation::sigmaSB //absorptionEmission_->a()
+            4.0*a_*physicoChemical::sigma //absorptionEmission_->a()
         )
     );
 }

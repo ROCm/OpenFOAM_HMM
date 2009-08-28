@@ -27,7 +27,7 @@ License
 #include "definedInjector.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Random.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam
@@ -226,7 +226,7 @@ Foam::vector Foam::definedInjector::position
     {
         // otherwise, disc injection
         scalar iRadius = d_*rndGen.scalar01();
-        scalar iAngle = 2.0*mathematicalConstant::pi*rndGen.scalar01();
+        scalar iAngle = constant::math::twoPi*rndGen.scalar01();
 
         return
         (
@@ -280,7 +280,7 @@ Foam::scalar Foam::definedInjector::mass
     // correct mass if calculation is 2D
     if (twoD)
     {
-        mInj *= 0.5*angleOfWedge/mathematicalConstant::pi;
+        mInj *= 0.5*angleOfWedge/constant::math::pi;
     }
 
     return mInj;
@@ -374,7 +374,7 @@ void Foam::definedInjector::correctProfiles
     const scalar referencePressure
 )
 {
-    scalar A = 0.25*mathematicalConstant::pi*pow(d_, 2.0);
+    scalar A = 0.25*constant::math::pi*sqr(d_);
     scalar pDummy = 1.0e+5;
     scalar rho = fuel.rho(pDummy, T_, X_);
 

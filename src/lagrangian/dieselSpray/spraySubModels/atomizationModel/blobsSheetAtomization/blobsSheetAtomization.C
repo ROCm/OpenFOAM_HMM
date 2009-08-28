@@ -24,12 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "blobsSheetAtomization.H"
 #include "addToRunTimeSelectionTable.H"
 #include "basicMultiComponentMixture.H"
-
+#include "mathConstants.H"
 #include "RosinRammler.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -129,7 +127,7 @@ void blobsSheetAtomization::atomizeParcel
     scalar lBU =
         B_*sqrt
         (
-            rhoFuel*sigma*p.d()*cos(angle_*mathematicalConstant::pi/360.0)
+            rhoFuel*sigma*p.d()*cos(angle_*constant::math::pi/360.0)
            /sqr(rhoAverage*U)
         );
 

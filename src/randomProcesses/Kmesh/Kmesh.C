@@ -27,7 +27,7 @@ License
 #include "Kmesh.H"
 #include "polyMesh.H"
 #include "volFields.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -57,14 +57,11 @@ Foam::Kmesh::Kmesh(const fvMesh& mesh)
     vectorField(mesh.V().size()),
     NN(vector::dim)
 {
-    const scalar pi = mathematicalConstant::pi;
-    const scalar twoPi = 2.0*pi;
-
     boundBox box = mesh.bounds();
     L = box.span();
 
     vector cornerCellCentre = ::Foam::max(mesh.C().internalField());
-    vector cellL = 2 * (box.max() - cornerCellCentre);
+    vector cellL = 2*(box.max() - cornerCellCentre);
 
     vector rdeltaByL;
     label nTot = 1;
@@ -92,15 +89,15 @@ Foam::Kmesh::Kmesh(const fvMesh& mesh)
 
     for (i=0; i<NN[0]; i++)
     {
-        scalar k1 = (i - NN[0]/2)*twoPi/L[0];
+        scalar k1 = (i - NN[0]/2)*constant::math::twoPi/L[0];
 
         for (label j=0; j<NN[1]; j++)
         {
-            scalar k2 = (j - NN[1]/2)*twoPi/L[1];
+            scalar k2 = (j - NN[1]/2)*constant::math::twoPi/L[1];
 
             for (label k=0; k<NN[2]; k++)
             {
-                scalar k3 = (k - NN[2]/2)*twoPi/L[2];
+                scalar k3 = (k - NN[2]/2)*constant::math::twoPi/L[2];
 
                 (*this)[rep(i, j, k, NN)] = vector(k1, k2, k3);
             }

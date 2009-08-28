@@ -26,7 +26,7 @@ License
 
 #include "definedPressureSwirl.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -174,7 +174,7 @@ scalar definedPressureSwirlInjector::d0
 
     // end modifications
 
-    angle_ *= mathematicalConstant::pi/360.0;
+    angle_ *= constant::math::pi/360.0;
 
     scalar injectedMassFlow = it.massFlowRate(t);
 
@@ -191,7 +191,7 @@ scalar definedPressureSwirlInjector::d0
 
     u_ = v*cosAngle;
 
-    scalar A = injectedMassFlow/(mathematicalConstant::pi*rhoFuel*u_);
+    scalar A = injectedMassFlow/(constant::math::pi*rhoFuel*u_);
 
     // Not using the authors definition for sheet thickness
     // modified by multiplying the sheet tickness for the cone angle cosinus.
@@ -216,7 +216,7 @@ vector definedPressureSwirlInjector::direction
 {
     scalar alpha = sin(angle_);
     scalar dcorr = cos(angle_);
-    scalar beta = 2.0*mathematicalConstant::pi*rndGen_.scalar01();
+    scalar beta = constant::math::twoPi*rndGen_.scalar01();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
@@ -227,8 +227,7 @@ vector definedPressureSwirlInjector::direction
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *=
-            (1.0-2.0*reduce)*sm_.angleOfWedge()/(2.0*mathematicalConstant::pi);
+        beta *= (1.0 - 2.0*reduce)*sm_.angleOfWedge()/(constant::math::twoPi);
         beta += reduce*sm_.angleOfWedge();
         normal =
             alpha
@@ -297,7 +296,7 @@ scalar definedPressureSwirlInjector::kv
 
     scalar coneAngle = it.getTableValue(coneAngle_, t);
 
-    coneAngle *= mathematicalConstant::pi/360.0;
+    coneAngle *= constant::math::pi/360.0;
 
     scalar cosAngle = cos(coneAngle);
     scalar Tav = it.integrateTable(it.T())/(it.teoi() - it.tsoi());
@@ -310,7 +309,7 @@ scalar definedPressureSwirlInjector::kv
         it.getTableValue(maxKv_, t),
         4.0*massFlow
        *sqrt(rhoFuel/2.0/dPressure)
-       /(mathematicalConstant::pi*sqr(injectorDiameter)*rhoFuel*cosAngle)
+       /(constant::math::pi*sqr(injectorDiameter)*rhoFuel*cosAngle)
     );
 
     return min(1.0, kv);

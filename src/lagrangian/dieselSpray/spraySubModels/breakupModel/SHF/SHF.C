@@ -26,7 +26,7 @@ License
 
 #include "SHF.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -196,7 +196,7 @@ void SHF::breakupParcel
 
                 px =
                     x
-                   /(2.0*sqrt(2.0*mathematicalConstant::pi)*sigma_)
+                   /(2.0*sqrt(constant::math::twoPi)*sigma_)
                    *exp(-0.5*sqr((x-mu_)/sigma_));
 
             } while (y >= px);
@@ -227,7 +227,7 @@ void SHF::breakupParcel
 
                 px =
                     x
-                   /(2.0*sqrt(2.0*mathematicalConstant::pi)*sigma_)
+                   /(2.0*sqrt(constant::math::twoPi)*sigma_)
                    *exp(-0.5*sqr((x-mu_)/sigma_));
             } while (y >= px);
 

@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "spray.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -106,7 +106,7 @@ scalar spray::liquidMass() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());
@@ -148,7 +148,7 @@ scalar spray::liquidEnthalpy() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());
@@ -193,7 +193,7 @@ scalar spray::liquidTotalEnthalpy() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());
@@ -218,7 +218,7 @@ scalar spray::liquidKineticEnergy() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());

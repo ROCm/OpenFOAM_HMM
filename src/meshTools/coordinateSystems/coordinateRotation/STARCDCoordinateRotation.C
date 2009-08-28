@@ -27,7 +27,7 @@ License
 #include "STARCDCoordinateRotation.H"
 
 #include "Switch.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -60,9 +60,9 @@ void Foam::STARCDCoordinateRotation::calcTransform
 
     if (inDegrees)
     {
-        x *= mathematicalConstant::pi/180.0;
-        y *= mathematicalConstant::pi/180.0;
-        z *= mathematicalConstant::pi/180.0;
+        x *= constant::math::pi/180.0;
+        y *= constant::math::pi/180.0;
+        z *= constant::math::pi/180.0;
     }
 
     tensor::operator=

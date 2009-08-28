@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactingParcel.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
@@ -257,7 +258,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         }
         else
         {
-            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
+            this->d_ = cbrt(mass1/this->rho_*6.0/constant::math::pi);
         }
     }
 }

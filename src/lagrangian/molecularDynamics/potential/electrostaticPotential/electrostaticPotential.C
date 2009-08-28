@@ -25,13 +25,13 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "electrostaticPotential.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::electrostaticPotential::electrostaticPotential()
 :
-    prefactor(1.0/(4.0 * mathematicalConstant::pi * 8.854187817e-12))
+    prefactor(1.0/(4.0*constant::math::pi*8.854187817e-12))
 {}
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //

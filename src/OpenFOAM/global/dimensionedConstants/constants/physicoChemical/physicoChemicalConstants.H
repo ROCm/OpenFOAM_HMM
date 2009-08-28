@@ -49,7 +49,7 @@ namespace physicoChemical
     //- Group name for physico-chemical constants
     extern const char* group;
 
-    //- Universal gas constant: default SI units: [J/kg/K]
+    //- Universal gas constant: default SI units: [J/mol/K]
     extern const dimensionedScalar R;
 
     //- Faraday constant: default SI units: [C/mol]
