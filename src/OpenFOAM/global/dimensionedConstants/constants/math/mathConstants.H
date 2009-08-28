@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,78 +22,41 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Global
-    dimensionedConstants
+Namespace
+    Foam::constant::math
 
 Description
-    Dictionary reading and supplying the dimensioned constants used within
-    OpenFOAM particularly for thermodynamics.  The values are read from the
-    OpenFOAM controlDict and should be changed to run with a different set of
-    units from the default SI units.
-
-SourceFiles
-    dimensionedConstants.C
+    mathematical constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedConstants_H
-#define dimensionedConstants_H
+#ifndef mathConstants_H
+#define mathConstants_H
 
-#include "dictionary.H"
-#include "dimensionedScalar.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-dictionary& dimensionedConstants();
-
-
-dimensionedScalar dimensionedConstant(const word& group, const word& varName);
-
-
-template<class T>
-T dimensionedConstant
-(
-    const word& group,
-    const word& varName,
-    const T& defaultValue
-)
+namespace constant
 {
-    dictionary& dict = dimensionedConstants();
-
-    const word unitSet(dict.lookup("unitSet"));
-
-    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
-
-    if (unitDict.found(group))
-    {
-        dictionary& groupDict = unitDict.subDict(group);
-        if (groupDict.found(varName))
-        {
-            return pTraits<T>(groupDict.lookup(varName));
-        }
-        else
-        {
-            groupDict.add(varName, defaultValue);
-            return defaultValue;
-        }
-    }
-    else
-    {
-        unitDict.add(group, dictionary::null);
-        unitDict.subDict(group).add(varName, defaultValue);
-
-        return defaultValue;
-    }
-}
-
+namespace math
+{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    static word group = "math";
+
+    const scalar e(M_E);
+    const scalar pi(M_PI);
+    const scalar twoPi(2*pi);
+    const scalar piByTwo(0.5*pi);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace math
+} // end namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -101,3 +64,6 @@ T dimensionedConstant
 #endif
 
 // ************************************************************************* //
+
+
+

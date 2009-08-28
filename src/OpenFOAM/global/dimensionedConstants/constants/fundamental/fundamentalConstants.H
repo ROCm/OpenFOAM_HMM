@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,78 +22,76 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Global
-    dimensionedConstants
-
 Description
-    Dictionary reading and supplying the dimensioned constants used within
-    OpenFOAM particularly for thermodynamics.  The values are read from the
-    OpenFOAM controlDict and should be changed to run with a different set of
-    units from the default SI units.
-
-SourceFiles
-    dimensionedConstants.C
+    Fundamental dimensioned constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedConstants_H
-#define dimensionedConstants_H
+#ifndef fundamentalConstants_H
+#define fundamentalConstants_H
 
-#include "dictionary.H"
 #include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace constant
+{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionary& dimensionedConstants();
-
-
-dimensionedScalar dimensionedConstant(const word& group, const word& varName);
-
-
-template<class T>
-T dimensionedConstant
-(
-    const word& group,
-    const word& varName,
-    const T& defaultValue
-)
+namespace universal
 {
-    dictionary& dict = dimensionedConstants();
+    //- Speed of light in a vacuum
+    extern const dimensionedScalar c;
 
-    const word unitSet(dict.lookup("unitSet"));
+    //- Newtonian constant of gravitation
+    extern const dimensionedScalar G;
 
-    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
-
-    if (unitDict.found(group))
-    {
-        dictionary& groupDict = unitDict.subDict(group);
-        if (groupDict.found(varName))
-        {
-            return pTraits<T>(groupDict.lookup(varName));
-        }
-        else
-        {
-            groupDict.add(varName, defaultValue);
-            return defaultValue;
-        }
-    }
-    else
-    {
-        unitDict.add(group, dictionary::null);
-        unitDict.subDict(group).add(varName, defaultValue);
-
-        return defaultValue;
-    }
+    //- Planck constant
+    extern const dimensionedScalar h;
 }
 
+namespace electromagnetic
+{
+    //- Elementary charge
+    extern const dimensionedScalar e;
+}
+
+namespace atomic
+{
+    //- Electron mass
+    extern const dimensionedScalar me;
+
+    //- Proton mass
+    extern const dimensionedScalar mp;
+}
+
+namespace physicoChemical
+{
+    //- Atomic mass unit
+    extern const dimensionedScalar mu;
+
+    //- Avagadro number
+    extern const dimensionedScalar NA;
+
+    //- Boltzmann constant
+    extern const dimensionedScalar k;
+}
+
+namespace standard
+{
+    //- Standard pressure
+    extern const dimensionedScalar Pstd;
+
+    //- Standard temperature
+    extern const dimensionedScalar Tstd;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

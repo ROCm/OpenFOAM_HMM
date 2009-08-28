@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,47 +24,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "universalConstants.H"
+#include "mathConstants.H"
+
 #include "dimensionedConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-dictionary* dimensionedConstantsPtr_(NULL);
-
-dictionary& dimensionedConstants()
-{
-    return debug::switchSet
-    (
-        "DimensionedConstants",
-        dimensionedConstantsPtr_
-    );
-}
+const char* Foam::constant::universal::group = "universal";
 
 
-dimensionedScalar dimensionedConstant
+const Foam::dimensionedScalar Foam::constant::universal::hr
 (
-    const word& group,
-    const word& varName
-)
-{
-    dictionary& dict = dimensionedConstants();
+    dimensionedConstant
+    (
+        group,
+        "hr",
+        dimensionedScalar
+        (
+            "hr",
+            h/(dimensionedScalar("C", dimless, constant::math::twoPi))
+        )
+    )
+);
 
-    const word unitSet(dict.lookup("unitSet"));
-
-    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
-
-    dictionary& groupDict = unitDict.subDict(group);
-
-    return dimensionedScalar(groupDict.lookup(varName));
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //
+

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,49 +22,38 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Namespace
+    Foam::constant
+
+Description
+    Collection of constants
+
 \*---------------------------------------------------------------------------*/
 
-#include "dimensionedConstants.H"
+#ifndef constants_H
+#define constants_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
+// Dimensionless coefficents
+
+// Mathematical constants
+#include "mathConstants.H"
+
+
+// Dimensioned constants
+
+// Fundamental constants
+#include "fundamentalConstants.H"
+
+// Derived constants
+#include "universalConstants.H"
+#include "electromagneticConstants.H"
+#include "atomicConstants.H"
+#include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-dictionary* dimensionedConstantsPtr_(NULL);
-
-dictionary& dimensionedConstants()
-{
-    return debug::switchSet
-    (
-        "DimensionedConstants",
-        dimensionedConstantsPtr_
-    );
-}
-
-
-dimensionedScalar dimensionedConstant
-(
-    const word& group,
-    const word& varName
-)
-{
-    dictionary& dict = dimensionedConstants();
-
-    const word unitSet(dict.lookup("unitSet"));
-
-    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
-
-    dictionary& groupDict = unitDict.subDict(group);
-
-    return dimensionedScalar(groupDict.lookup(varName));
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+#endif
 
 // ************************************************************************* //
