@@ -355,7 +355,7 @@ void Foam::streamLineParticle::hitWallPatch
     streamLineParticle::trackData& td
 )
 {
-    // Keep particle
+    // Remove particle
     td.keepParticle = false;
 }
 
