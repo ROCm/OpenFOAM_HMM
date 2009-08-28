@@ -131,6 +131,19 @@ void Foam::Pstream::exit(int errnum)
     delete[] buff;
 #   endif
 
+    if (PstreamGlobals::outstandingRequests_.size())
+    {
+        label n = PstreamGlobals::outstandingRequests_.size();
+        PstreamGlobals::outstandingRequests_.clear();
+
+        WarningIn("Pstream::exit(int)")
+            << "There are still " << n << " outstanding MPI_Requests." << endl
+            << "This means that your code exited before doing a"
+            << " Pstream::waitRequests()." << endl
+            << "This should not happen for a normal code exit."
+            << endl;
+    }
+
     if (errnum == 0)
     {
         MPI_Finalize();
