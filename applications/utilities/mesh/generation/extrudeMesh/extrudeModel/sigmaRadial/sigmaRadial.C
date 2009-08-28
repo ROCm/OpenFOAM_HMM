@@ -49,7 +49,13 @@ sigmaRadial::sigmaRadial(const dictionary& dict)
     RTbyg_(readScalar(coeffDict_.lookup("RTbyg"))),
     pRef_(readScalar(coeffDict_.lookup("pRef"))),
     pStrat_(readScalar(coeffDict_.lookup("pStrat")))
-{}
+{
+    if (mag(expansionRatio() - 1.0) > SMALL)
+    {
+        WarningIn("sigmaRadial::sigmaRadial(const dictionary&)")
+            << "Ignoring expansionRatio setting." << endl;
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

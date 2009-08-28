@@ -43,6 +43,7 @@ Foam::extrudeModel::extrudeModel
 )
 :
     nLayers_(readLabel(dict.lookup("nLayers"))),
+    expansionRatio_(readScalar(dict.lookup("expansionRatio"))),
     dict_(dict),
     coeffDict_(dict.subDict(modelType + "Coeffs"))
 {}
@@ -59,6 +60,29 @@ Foam::extrudeModel::~extrudeModel()
 Foam::label Foam::extrudeModel::nLayers() const
 {
     return nLayers_;
+}
+
+
+Foam::scalar Foam::extrudeModel::expansionRatio() const
+{
+    return expansionRatio_;
+}
+
+
+Foam::scalar Foam::extrudeModel::sumThickness(const label layer) const
+{
+    // 1+r+r^2+ .. +r^(n-1) = (1-r^n)/(1-r)
+
+    if (mag(1.0-expansionRatio_) < SMALL)
+    {
+        return scalar(layer)/nLayers_;
+    }
+    else
+    {
+        return
+            (1.0-pow(expansionRatio_, layer))
+          / (1.0-pow(expansionRatio_, nLayers_));
+    }
 }
 
 

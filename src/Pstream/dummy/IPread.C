@@ -86,17 +86,4 @@ int Foam::IPstream::read
 }
 
 
-void Foam::IPstream::waitRequests()
-{}
-
-
-bool Foam::IPstream::finishedRequest(const label)
-{
-    notImplemented("IPstream::finishedRequest()");
-    return false;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // ************************************************************************* //

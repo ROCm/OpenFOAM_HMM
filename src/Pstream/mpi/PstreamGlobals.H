@@ -22,21 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::faceMesh
+Namespace
+    Foam::PstreamGlobals
 
 Description
-    Storage for surface mesh i.e. points and faces.
+    Global functions and variables for working with parallel streams,
+    but principally for gamma/mpi
 
 SourceFiles
+    PstreamGlobals.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceMesh_H
-#define faceMesh_H
+#ifndef PstreamGlobals_H
+#define PstreamGlobals_H
 
-#include "PrimitivePatch.H"
-#include "faceList.H"
+#include "mpi.h"
+
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,62 +47,14 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class faceMesh Declaration
+                           Class PstreamGlobals Declaration
 \*---------------------------------------------------------------------------*/
 
-class faceMesh
-:
-    public PrimitivePatch<face, List, pointField>
+namespace PstreamGlobals
 {
-    // Private member functions
 
-        PrimitivePatch<face, List, pointField> read(Istream& is)
-        {
-            pointField points(is);
-            faceList faces(is);
-            return PrimitivePatch<face, Foam::List, pointField>(faces, points);
-        }
+extern DynamicList<MPI_Request> outstandingRequests_;
 
-
-public:
-
-    // Constructors
-
-        //- Construct from components
-        faceMesh(const faceList& faces, const pointField& points)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(faces, points)
-        {}
-
-        //- Construct from Istream
-        faceMesh(Istream& is)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(read(is))
-        {}
-
-
-    // Member Functions
-
-        void flip()
-        {
-            forAll(*this, i)
-            {
-                face& f = operator[](i);
-                f = f.reverseFace();
-            }
-            clearOut();
-        }
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream& os, const faceMesh& fm)
-        {
-            return os
-                << fm.points()
-                << token::NL
-                << static_cast<PrimitivePatch<face, Foam::List, pointField> >
-                   (fm);
-        }
 };
 
 

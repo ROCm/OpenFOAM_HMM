@@ -65,17 +65,4 @@ bool Foam::OPstream::write
 }
 
 
-void Foam::OPstream::waitRequests()
-{}
-
-
-bool Foam::OPstream::finishedRequest(const label)
-{
-    notImplemented("OPstream::finishedRequest()");
-    return false;
-}
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // ************************************************************************* //

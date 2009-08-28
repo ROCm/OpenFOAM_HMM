@@ -63,7 +63,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from dictionary
         sigmaRadial(const dictionary& dict);
 
 

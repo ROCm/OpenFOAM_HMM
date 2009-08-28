@@ -749,6 +749,11 @@ void Foam::polyTopoChange::getFaceOrder
                 " const"
             )   << "Did not determine new position"
                 << " for face " << faceI
+                << " owner " << faceOwner_[faceI]
+                << " neighbour " << faceNeighbour_[faceI]
+                << " region " << region_[faceI] << endl
+                << "This is usually caused by not specifying a patch for"
+                << " a boundary face."
                 << abort(FatalError);
         }
     }
@@ -3176,7 +3181,7 @@ Foam::autoPtr<Foam::mapPolyMesh> Foam::polyTopoChange::makeMesh
 (
     autoPtr<fvMesh>& newMeshPtr,
     const IOobject& io,
-    const fvMesh& mesh,
+    const polyMesh& mesh,
     const bool syncParallel,
     const bool orderCells,
     const bool orderPoints

@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include        "initialConditions"
+#include        "include/initialConditions"
 
 dimensions      [0 2 -2 0 0 0 0];
 
@@ -43,7 +43,7 @@ boundaryField
         type            zeroGradient;
     }
 
-    #include "frontBackUpperPatches"
+    #include "include/frontBackUpperPatches"
 }
 
 // ************************************************************************* //

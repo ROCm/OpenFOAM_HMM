@@ -72,7 +72,8 @@ point linearNormal::operator()
     const label layer
 ) const
 {
-    scalar d = thickness_*layer/nLayers_;
+    //scalar d = thickness_*layer/nLayers_;
+    scalar d = thickness_*sumThickness(layer);
     return surfacePoint + d*surfaceNormal;
 }
 
