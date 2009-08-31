@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,90 +23,87 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::DeterministicPairForce
+    Foam::directInteractionList
 
 Description
 
 SourceFiles
-    DeterministicPairForce.C
+    directInteractionListI.H
+    directInteractionList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DeterministicPairForce_H
-#define DeterministicPairForce_H
+#ifndef directInteractionList_H
+#define directInteractionList_H
 
-#include "CollisionModel.H"
-#include "interactionLists.H"
+#include "polyMesh.H"
+#include "List.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ParticleType>
+class interactionLists;
+
 /*---------------------------------------------------------------------------*\
-                     Class DeterministicPairForce Declaration
+                           Class directInteractionList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class DeterministicPairForce
+template<class ParticleType>
+class directInteractionList
 :
-    public CollisionModel<CloudType>
+    public labelListList
 {
     // Private data
 
-        //- Cell occupancy information for each parcel
-        List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
-
-        //- Interactions lists determining which cells are in
-        //  interaction range of each other
-        interactionLists<typename CloudType::parcelType> il_;
+        const interactionLists<ParticleType>& il_;
 
 
-    // Private member functions
+    // Private Member Functions
 
-        //- Build the cell occupancy information for each parcel
-        void buildCellOccupancy();
-
-
-protected:
-
-    // Protected member functions
-
-        //- Calculate the pair force between parcels
-        virtual void evaluatePair
+        void buildDirectInteractionList
         (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
-        ) const;
+            bool pointPointListBuild
+        );
+
+        //- Disallow default bitwise copy construct
+        directInteractionList(const directInteractionList&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const directInteractionList&);
 
 
 public:
 
-    //- Runtime type information
-    TypeName("DeterministicPairForce");
-
-
     // Constructors
 
-        //- Construct from dictionary
-        DeterministicPairForce
+        //- Construct lists by searching the mesh
+        directInteractionList
         (
-            const dictionary& dict,
-            CloudType& owner
+            const interactionLists<ParticleType>& il,
+            bool pointPointListBuild
+        );
+
+        //- Construct from file
+        directInteractionList
+        (
+            const interactionLists<ParticleType>& il
         );
 
 
-    //- Destructor
-    virtual ~DeterministicPairForce();
+    // Destructor
+
+        ~directInteractionList();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
+        // Access
 
-        // Collision function
-        virtual void collide();
+        inline const interactionLists<ParticleType>& il() const;
 };
 
 
@@ -116,8 +113,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "directInteractionListI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #ifdef NoRepository
-#   include "DeterministicPairForce.C"
+#   include "directInteractionList.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

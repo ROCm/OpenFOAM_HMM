@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,20 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::DeterministicPairForce
+    Foam::sendingReferralList
 
 Description
 
 SourceFiles
-    DeterministicPairForce.C
+    sendingReferralListI.H
+    sendingReferralList.C
+    sendingReferralListIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DeterministicPairForce_H
-#define DeterministicPairForce_H
+#ifndef sendingReferralList_H
+#define sendingReferralList_H
 
-#include "CollisionModel.H"
-#include "interactionLists.H"
+#include "labelList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -44,69 +45,81 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class DeterministicPairForce Declaration
+                      Class sendingReferralList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class DeterministicPairForce
+class sendingReferralList
 :
-    public CollisionModel<CloudType>
+    public labelList
 {
     // Private data
 
-        //- Cell occupancy information for each parcel
-        List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
-
-        //- Interactions lists determining which cells are in
-        //  interaction range of each other
-        interactionLists<typename CloudType::parcelType> il_;
-
-
-    // Private member functions
-
-        //- Build the cell occupancy information for each parcel
-        void buildCellOccupancy();
-
-
-protected:
-
-    // Protected member functions
-
-        //- Calculate the pair force between parcels
-        virtual void evaluatePair
-        (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
-        ) const;
+        label destinationProc_;
 
 
 public:
 
-    //- Runtime type information
-    TypeName("DeterministicPairForce");
-
-
     // Constructors
 
-        //- Construct from dictionary
-        DeterministicPairForce
+        //- Construct null
+        sendingReferralList();
+
+        //- Construct from components
+        sendingReferralList
         (
-            const dictionary& dict,
-            CloudType& owner
+            const label destinationProc,
+            const labelList& cellsToSend
         );
 
+        //- Construct as copy
+        sendingReferralList(const sendingReferralList&);
 
-    //- Destructor
-    virtual ~DeterministicPairForce();
+
+    // Destructor
+
+        ~sendingReferralList();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
+        // Access
 
-        // Collision function
-        virtual void collide();
+            inline label destinationProc() const;
+
+
+    // Member Operators
+
+        void operator=(const sendingReferralList&);
+
+
+    // Friend Operators
+
+        friend bool operator==
+        (
+            const sendingReferralList& a,
+            const sendingReferralList& b
+        );
+
+        inline friend bool operator!=
+        (
+            const sendingReferralList& a,
+            const sendingReferralList& b
+        );
+
+
+    // IOstream Operators
+
+        friend Istream& operator>>
+        (
+            Istream&,
+            sendingReferralList&
+        );
+
+        friend Ostream& operator<<
+        (
+            Ostream&,
+            const sendingReferralList&
+        );
 };
 
 
@@ -116,9 +129,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#ifdef NoRepository
-#   include "DeterministicPairForce.C"
-#endif
+#include "sendingReferralListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,90 +23,81 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::DeterministicPairForce
+    Foam::referredCellList
 
 Description
 
 SourceFiles
-    DeterministicPairForce.C
+    referredCellListI.H
+    referredCellList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DeterministicPairForce_H
-#define DeterministicPairForce_H
+#ifndef referredCellList_H
+#define referredCellList_H
 
-#include "CollisionModel.H"
-#include "interactionLists.H"
+#include "referredCell.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+template<class ParticleType>
+class interactionLists;
+
 /*---------------------------------------------------------------------------*\
-                     Class DeterministicPairForce Declaration
+                      Class referredCellList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class DeterministicPairForce
+template<class ParticleType>
+class referredCellList
 :
-    public CollisionModel<CloudType>
+    public List<referredCell<ParticleType> >
 {
     // Private data
 
-        //- Cell occupancy information for each parcel
-        List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
-
-        //- Interactions lists determining which cells are in
-        //  interaction range of each other
-        interactionLists<typename CloudType::parcelType> il_;
+        const interactionLists<ParticleType>& il_;
 
 
-    // Private member functions
+    // Private Member Functions
 
-        //- Build the cell occupancy information for each parcel
-        void buildCellOccupancy();
-
-
-protected:
-
-    // Protected member functions
-
-        //- Calculate the pair force between parcels
-        virtual void evaluatePair
+        void buildReferredCellList
         (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
-        ) const;
+            bool pointPointListBuild
+        );
 
 
 public:
 
-    //- Runtime type information
-    TypeName("DeterministicPairForce");
-
-
     // Constructors
 
-        //- Construct from dictionary
-        DeterministicPairForce
+        //- Construct lists by searching the mesh
+        referredCellList
         (
-            const dictionary& dict,
-            CloudType& owner
+            interactionLists<ParticleType>& il,
+            bool pointPointListBuild
         );
 
+        //- Construct from file
+        referredCellList (interactionLists<ParticleType>& il);
 
-    //- Destructor
-    virtual ~DeterministicPairForce();
+    referredCellList();
+
+    // Destructor
+
+        ~referredCellList();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
+        void referParticles
+        (
+            const List<DynamicList<ParticleType*> >& cellOccupancy
+        );
 
-        // Collision function
-        virtual void collide();
+        inline const interactionLists<ParticleType>& il() const;
 };
 
 
@@ -116,8 +107,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+#include "referredCellListI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 #ifdef NoRepository
-#   include "DeterministicPairForce.C"
+#   include "referredCellList.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

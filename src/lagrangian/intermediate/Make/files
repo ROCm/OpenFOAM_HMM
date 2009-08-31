@@ -84,4 +84,9 @@ phaseProperties/phaseProperties/phasePropertiesIO.C
 phaseProperties/phasePropertiesList/phasePropertiesList.C
 
 
+// /* interation lists */
+referralLists = interactionLists/referralLists
+$(referralLists)/sendingReferralList.C
+$(referralLists)/receivingReferralList.C
+
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate

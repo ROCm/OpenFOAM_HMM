@@ -72,7 +72,7 @@ void Foam::DeterministicPairForce<CloudType>::evaluatePair
         // Effective mass
         scalar M = pA.mass()*pB.mass()/(pA.mass() + pB.mass());
 
-        scalar E = 5e3;
+        scalar E = 5e5;
         scalar sigma = 0.25;
         scalar alpha = 0.2;
         scalar b = 1.0;
@@ -99,7 +99,7 @@ Foam::DeterministicPairForce<CloudType>::DeterministicPairForce
 :
     CollisionModel<CloudType>(dict, owner, typeName),
     cellOccupancy_(owner.mesh().nCells()),
-    il_(owner.mesh(), 1e-8, true)
+    il_(owner.mesh(), 2.6e-5, true)
 {
     Info<< "SEARCH DISTANCE SQR HARD CODED" << endl;
 }
@@ -134,7 +134,7 @@ void Foam::DeterministicPairForce<CloudType>::collide()
 
     buildCellOccupancy();
 
-    const directInteractionList& dil(il_.dil());
+    const directInteractionList<typename CloudType::parcelType>& dil(il_.dil());
 
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;

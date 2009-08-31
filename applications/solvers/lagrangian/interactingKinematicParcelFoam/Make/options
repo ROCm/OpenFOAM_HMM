@@ -19,6 +19,4 @@ EXE_LIBS = \
     -lcompressibleRASModels \
     -lcompressibleLESModels \
     -lfiniteVolume \
-    -lmeshTools \
-    -lmolecule \
-    -lpotential
+    -lmeshTools
