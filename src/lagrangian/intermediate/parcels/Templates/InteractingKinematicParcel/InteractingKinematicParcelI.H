@@ -374,7 +374,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::InteractingKinematicParcel<ParcelType>::volume(const scalar d) const
 {
-    return mathematicalConstant::pi/6.0*pow3(d);
+    return constant::math::pi/6.0*pow3(d);
 }
 
 
@@ -404,7 +404,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::InteractingKinematicParcel<ParcelType>::areaS(const scalar d) const
 {
-    return mathematicalConstant::pi*d*d;
+    return constant::math::pi*d*d;
 }
 
 

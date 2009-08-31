@@ -49,7 +49,7 @@ SourceFiles
 #include "autoPtr.H"
 #include "interpolationCellPoint.H"
 #include "contiguous.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 #include "InteractingKinematicCloud.H"
 
