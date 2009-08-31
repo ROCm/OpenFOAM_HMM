@@ -36,15 +36,9 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-autoPtr<dragModel> dragModel::New
-(
-    const dictionary& dict
-)
+autoPtr<dragModel> dragModel::New(const dictionary& dict)
 {
-    word dragModelType
-    (
-        dict.lookup("dragModel")
-    );
+    word dragModelType(dict.lookup("dragModel"));
 
     Info<< "Selecting dragModel "
          << dragModelType << endl;
@@ -54,13 +48,12 @@ autoPtr<dragModel> dragModel::New
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "dragModel::New(const dictionary&) : " << endl
-            << "    unknown dragModelType type "
-            << dragModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid dragModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn("dragModel::New(const dictionary&)")
+            << "Unknown dragModelType type " << dragModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid dragModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<dragModel>(cstrIter()(dict));

@@ -43,7 +43,7 @@ Description
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
 #include "cyclicPolyPatch.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 using namespace Foam;
 

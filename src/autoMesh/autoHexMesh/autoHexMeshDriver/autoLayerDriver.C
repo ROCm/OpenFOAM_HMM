@@ -34,7 +34,7 @@ Description
 #include "removePoints.H"
 #include "pointFields.H"
 #include "motionSmoother.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"
@@ -2479,17 +2479,11 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
     const dictionary& motionDict
 )
 {
-    scalar minCos = Foam::cos
-    (
-        layerParams.featureAngle()
-      * mathematicalConstant::pi/180.0
-    );
+    scalar minCos =
+        Foam::cos(layerParams.featureAngle()*constant::math::pi/180.0);
 
-    scalar concaveCos = Foam::cos
-    (
-        layerParams.concaveAngle()
-      * mathematicalConstant::pi/180.0
-    );
+    scalar concaveCos =
+        Foam::cos(layerParams.concaveAngle()*constant::math::pi/180.0);
 
     Info<< nl
         << "Merging all faces of a cell" << nl
@@ -2588,7 +2582,7 @@ void Foam::autoLayerDriver::addLayers
     (
         pp,
         meshEdges,
-        layerParams.featureAngle()*mathematicalConstant::pi/180.0,
+        layerParams.featureAngle()*constant::math::pi/180.0,
 
         patchDisp,
         patchNLayers,
@@ -2987,6 +2981,7 @@ void Foam::autoLayerDriver::addLayers
         (
             invExpansionRatio,
             pp,
+            labelList(0),       // exposed patchIDs, not used for adding layers
             nPatchFaceLayers,   // layers per face
             nPatchPointLayers,  // layers per point
             firstDisp,          // thickness of layer nearest internal mesh

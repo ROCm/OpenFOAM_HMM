@@ -428,7 +428,7 @@ Foam::meshSearch::meshSearch(const polyMesh& mesh, const bool faceDecomp)
 :
     mesh_(mesh),
     faceDecomp_(faceDecomp),
-    cloud_(mesh_, IDLList<passiveParticle>()),
+    cloud_(mesh_, "meshSearchCloud", IDLList<passiveParticle>()),
     boundaryTreePtr_(NULL),
     cellTreePtr_(NULL),
     cellCentreTreePtr_(NULL)

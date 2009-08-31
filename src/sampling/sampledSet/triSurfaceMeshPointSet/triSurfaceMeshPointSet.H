@@ -23,83 +23,88 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::faceMesh
+    Foam::triSurfaceMeshPointSet
 
 Description
-    Storage for surface mesh i.e. points and faces.
+    sampleSet from all points of a triSurfaceMesh.
 
 SourceFiles
+    triSurfaceMeshPointSet.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef faceMesh_H
-#define faceMesh_H
+#ifndef triSurfaceMeshPointSet_H
+#define triSurfaceMeshPointSet_H
 
-#include "PrimitivePatch.H"
-#include "faceList.H"
+#include "sampledSet.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 
+// Forward declaration of classes
+
 /*---------------------------------------------------------------------------*\
-                           Class faceMesh Declaration
+                           Class triSurfaceMeshPointSet Declaration
 \*---------------------------------------------------------------------------*/
 
-class faceMesh
+class triSurfaceMeshPointSet
 :
-    public PrimitivePatch<face, List, pointField>
+    public sampledSet
 {
-    // Private member functions
+    // Private data
 
-        PrimitivePatch<face, List, pointField> read(Istream& is)
-        {
-            pointField points(is);
-            faceList faces(is);
-            return PrimitivePatch<face, Foam::List, pointField>(faces, points);
-        }
+        //- Name of triSurfaceMesh
+        const word surface_;
 
+
+        //- Sampling points
+        List<point> sampleCoords_;
+
+
+    // Private Member Functions
+
+        //- Samples all points in sampleCoords.
+        void calcSamples
+        (
+            DynamicList<point>& samplingPts,
+            DynamicList<label>& samplingCells,
+            DynamicList<label>& samplingFaces,
+            DynamicList<label>& samplingSegments,
+            DynamicList<scalar>& samplingCurveDist
+        ) const;
+
+        //- Uses calcSamples to obtain samples. Copies them into *this.
+        void genSamples();
 
 public:
 
+    //- Runtime type information
+    TypeName("triSurfaceMeshPointSet");
+
+
     // Constructors
 
-        //- Construct from components
-        faceMesh(const faceList& faces, const pointField& points)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(faces, points)
-        {}
+        //- Construct from dictionary
+        triSurfaceMeshPointSet
+        (
+            const word& name,
+            const polyMesh& mesh,
+            meshSearch& searchEngine,
+            const dictionary& dict
+        );
 
-        //- Construct from Istream
-        faceMesh(Istream& is)
-        :
-            PrimitivePatch<face, Foam::List, pointField>(read(is))
-        {}
+
+    // Destructor
+
+        virtual ~triSurfaceMeshPointSet();
 
 
     // Member Functions
 
-        void flip()
-        {
-            forAll(*this, i)
-            {
-                face& f = operator[](i);
-                f = f.reverseFace();
-            }
-            clearOut();
-        }
-
-    // IOstream Operators
-
-        friend Ostream& operator<<(Ostream& os, const faceMesh& fm)
-        {
-            return os
-                << fm.points()
-                << token::NL
-                << static_cast<PrimitivePatch<face, Foam::List, pointField> >
-                   (fm);
-        }
+        //- Get reference point
+        virtual point getRefPoint(const List<point>&) const;
 };
 
 

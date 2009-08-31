@@ -31,7 +31,7 @@ License
 
 #include "fvc.H"
 #include "radiationModel.H"
-#include "radiationConstants.H"
+#include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -79,7 +79,7 @@ MarshakRadiationFixedTMixedFvPatchScalarField
     Trad_("Trad", dict, p.size()),
     emissivity_(readScalar(dict.lookup("emissivity")))
 {
-    refValue() = 4.0*radiation::sigmaSB.value()*pow4(Trad_);
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
     refGrad() = 0.0;
 
     if (dict.found("value"))
@@ -156,7 +156,7 @@ void Foam::MarshakRadiationFixedTMixedFvPatchScalarField::updateCoeffs()
     }
 
     // Re-calc reference value
-    refValue() = 4.0*radiation::sigmaSB.value()*pow4(Trad_);
+    refValue() = 4.0*constant::physicoChemical::sigma.value()*pow4(Trad_);
 
     // Diffusion coefficient - created by radiation model's ::updateCoeffs()
     const scalarField& gamma =

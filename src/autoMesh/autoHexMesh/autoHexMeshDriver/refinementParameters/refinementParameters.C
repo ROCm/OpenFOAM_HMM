@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "refinementParameters.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "polyMesh.H"
 #include "globalIndex.H"
 
@@ -63,7 +63,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     }
     else
     {
-        curvature_ = Foam::cos(featAngle*mathematicalConstant::pi/180.0);
+        curvature_ = Foam::cos(featAngle*constant::math::pi/180.0);
     }
 }
 

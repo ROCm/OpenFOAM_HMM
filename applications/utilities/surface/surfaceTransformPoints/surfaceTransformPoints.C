@@ -43,9 +43,10 @@ Description
 #include "transformField.H"
 #include "Pair.H"
 #include "quaternion.H"
+#include "mathConstants.H"
 
 using namespace Foam;
-using namespace Foam::mathematicalConstant;
+using namespace Foam::constant::math;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

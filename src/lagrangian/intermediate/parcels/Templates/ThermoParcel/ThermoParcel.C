@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ThermoParcel.H"
+#include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
@@ -188,7 +189,7 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     {
         const scalarField& G =
             td.cloud().mesh().objectRegistry::lookupObject<volScalarField>("G");
-        const scalar sigma = radiation::sigmaSB.value();
+        const scalar sigma = constant::physicoChemical::sigma.value();
         const scalar epsilon = td.constProps().epsilon0();
 
         ap =

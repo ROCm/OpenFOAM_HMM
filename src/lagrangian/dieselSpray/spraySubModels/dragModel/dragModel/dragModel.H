@@ -77,15 +77,11 @@ public:
     // Constructors
 
         //- Construct from components
-        dragModel
-        (
-            const dictionary& dict
-        );
+        dragModel(const dictionary& dict);
 
 
-    // Destructor
-
-        virtual ~dragModel();
+    //- Destructor
+    virtual ~dragModel();
 
 
     // Selector

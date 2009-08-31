@@ -24,12 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "blobsSheetAtomization.H"
 #include "addToRunTimeSelectionTable.H"
 #include "basicMultiComponentMixture.H"
-
+#include "mathConstants.H"
 #include "RosinRammler.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -81,17 +79,15 @@ void blobsSheetAtomization::atomizeParcel
     const liquidMixture& fuels
 ) const
 {
-
     const PtrList<volScalarField>& Y = spray_.composition().Y();
 
-    label Ns = Y.size();
     label cellI = p.cell();
     scalar pressure = spray_.p()[cellI];
     scalar temperature = spray_.T()[cellI];
     scalar Taverage = p.T() + (temperature - p.T())/3.0;
 
     scalar Winv = 0.0;
-    for(label i=0; i<Ns; i++)
+    forAll(Y, i)
     {
         Winv += Y[i][cellI]/spray_.gasProperties()[i].W();
     }
@@ -101,9 +97,8 @@ void blobsSheetAtomization::atomizeParcel
     scalar rhoAverage = pressure/R/Taverage;
     scalar sigma = fuels.sigma(pressure, p.T(), p.X());
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-    //     The We and Re numbers are to be evaluated using the 1/3 rule.
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    //  The We and Re numbers are to be evaluated using the 1/3 rule.
 
     scalar rhoFuel = fuels.rho(1.0e+5, p.T(), p.X());
 
@@ -116,7 +111,7 @@ void blobsSheetAtomization::atomizeParcel
     label nHoles = it.nHoles();
     if (nHoles > 1)
     {
-        for(label i=0; i<nHoles;i++)
+        for (label i=0; i<nHoles;i++)
         {
             itPosition += it.position(i);
         }
@@ -129,15 +124,16 @@ void blobsSheetAtomization::atomizeParcel
 //    const vector itPosition = it.position();
 
 
-    scalar lBU = B_ * sqrt
-    (
-        rhoFuel * sigma * p.d() * cos(angle_*mathematicalConstant::pi/360.0)
-      / sqr(rhoAverage*U)
-    );
+    scalar lBU =
+        B_*sqrt
+        (
+            rhoFuel*sigma*p.d()*cos(angle_*constant::math::pi/360.0)
+           /sqr(rhoAverage*U)
+        );
 
     scalar pWalk = mag(p.position() - itPosition);
 
-    if(pWalk > lBU && p.liquidCore() == 1.0)
+    if (pWalk > lBU && p.liquidCore() == 1.0)
     {
         p.liquidCore() = 0.0;
     }

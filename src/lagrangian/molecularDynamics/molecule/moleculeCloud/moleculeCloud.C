@@ -26,6 +26,7 @@ License
 
 #include "moleculeCloud.H"
 #include "fvMesh.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -623,20 +624,11 @@ void Foam::moleculeCloud::initialiseMolecules
                     zoneDict.lookup("orientationAngles")
                 );
 
-                scalar phi
-                (
-                    orientationAngles.x()*mathematicalConstant::pi/180.0
-                );
+                scalar phi(orientationAngles.x()*constant::math::pi/180.0);
 
-                scalar theta
-                (
-                    orientationAngles.y()*mathematicalConstant::pi/180.0
-                );
+                scalar theta(orientationAngles.y()*constant::math::pi/180.0);
 
-                scalar psi
-                (
-                    orientationAngles.z()*mathematicalConstant::pi/180.0
-                );
+                scalar psi(orientationAngles.z()*constant::math::pi/180.0);
 
                 const tensor R
                 (
@@ -1002,11 +994,11 @@ void Foam::moleculeCloud::createMolecule
     {
         pi = equipartitionAngularMomentum(temperature, cP);
 
-        scalar phi(rndGen_.scalar01()*mathematicalConstant::twoPi);
+        scalar phi(rndGen_.scalar01()*constant::math::twoPi);
 
-        scalar theta(rndGen_.scalar01()*mathematicalConstant::twoPi);
+        scalar theta(rndGen_.scalar01()*constant::math::twoPi);
 
-        scalar psi(rndGen_.scalar01()*mathematicalConstant::twoPi);
+        scalar psi(rndGen_.scalar01()*constant::math::twoPi);
 
         Q = tensor
         (

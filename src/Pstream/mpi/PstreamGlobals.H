@@ -22,29 +22,45 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InNamespace
-    Foam::radiation
+Namespace
+    Foam::PstreamGlobals
 
 Description
-    Constants used in radiation modelling
+    Global functions and variables for working with parallel streams,
+    but principally for gamma/mpi
+
+SourceFiles
+    PstreamGlobals.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationConstants_H
-#define radiationConstants_H
+#ifndef PstreamGlobals_H
+#define PstreamGlobals_H
 
-#include "dimensionedScalar.H"
+#include "mpi.h"
+
+#include "DynamicList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace radiation
+
+/*---------------------------------------------------------------------------*\
+                           Class PstreamGlobals Declaration
+\*---------------------------------------------------------------------------*/
+
+namespace PstreamGlobals
 {
-    //- Stefan-Boltzmann constant [J/(K4 m2 s)]
-    extern const dimensionedScalar sigmaSB;
-}
-}
+
+extern DynamicList<MPI_Request> outstandingRequests_;
+
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

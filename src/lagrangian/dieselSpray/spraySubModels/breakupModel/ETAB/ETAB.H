@@ -87,6 +87,7 @@ private:
         scalar WeTransition_;
         scalar AWe_;
 
+
 public:
 
 
@@ -97,16 +98,11 @@ public:
     // Constructors
 
         //- Construct from components
-        ETAB
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        ETAB(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~ETAB();
+    //- Destructor
+    virtual ~ETAB();
 
 
     // Member Functions
@@ -118,7 +114,6 @@ public:
             const vector& Ug,
             const liquidMixture& fuels
         ) const;
-
 };
 
 

@@ -40,6 +40,7 @@ SourceFiles
 #define dimensionedConstants_H
 
 #include "dictionary.H"
+#include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -50,20 +51,42 @@ namespace Foam
 
 dictionary& dimensionedConstants();
 
+
+dimensionedScalar dimensionedConstant(const word& group, const word& varName);
+
+
 template<class T>
 T dimensionedConstant
 (
-    const char* switchName,
-    const T defaultValue
+    const word& group,
+    const word& varName,
+    const T& defaultValue
 )
 {
-    if (dimensionedConstants().found(switchName))
+    dictionary& dict = dimensionedConstants();
+
+    const word unitSet(dict.lookup("unitSet"));
+
+    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
+
+    if (unitDict.found(group))
     {
-        return pTraits<T>(dimensionedConstants().lookup(switchName));
+        dictionary& groupDict = unitDict.subDict(group);
+        if (groupDict.found(varName))
+        {
+            return pTraits<T>(groupDict.lookup(varName));
+        }
+        else
+        {
+            groupDict.add(varName, defaultValue);
+            return defaultValue;
+        }
     }
     else
     {
-        dimensionedConstants().add(switchName, defaultValue);
+        unitDict.add(group, dictionary::null);
+        unitDict.subDict(group).add(varName, defaultValue);
+
         return defaultValue;
     }
 }

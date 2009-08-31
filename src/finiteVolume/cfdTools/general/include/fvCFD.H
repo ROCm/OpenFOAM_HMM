@@ -14,7 +14,7 @@
 #include "fixedValueFvPatchFields.H"
 #include "adjustPhi.H"
 #include "findRefCell.H"
-#include "mathematicalConstants.H"
+#include "constants.H"
 
 #include "OSspecific.H"
 #include "argList.H"

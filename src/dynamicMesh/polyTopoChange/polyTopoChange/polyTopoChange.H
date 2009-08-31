@@ -585,7 +585,7 @@ public:
             (
                 autoPtr<fvMesh>& newMesh,
                 const IOobject& io,
-                const fvMesh& mesh,
+                const polyMesh& mesh,
                 const bool syncParallel = true,
                 const bool orderCells = false,
                 const bool orderPoints = false

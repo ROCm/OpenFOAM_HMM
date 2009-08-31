@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class injector Declaration
+                          Class injector Declaration
 \*---------------------------------------------------------------------------*/
 
 class injector
@@ -62,7 +62,7 @@ class injector
 public:
 
     // Constructors
-    
+
         //- Constructor from Istream
         injector(const Time& t, Istream& is);
 

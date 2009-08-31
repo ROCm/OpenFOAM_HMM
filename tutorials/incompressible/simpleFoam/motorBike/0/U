@@ -15,7 +15,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include        "initialConditions"
+#include        "include/initialConditions"
 
 dimensions      [0 1 -1 0 0 0 0];
 
@@ -23,7 +23,7 @@ internalField   uniform $flowVelocity;
 
 boundaryField
 {
-    #include "fixedInlet"
+    #include "include/fixedInlet"
 
     outlet
     {
@@ -44,7 +44,7 @@ boundaryField
         value           uniform (0 0 0);
     }
 
-    #include "frontBackUpperPatches"
+    #include "include/frontBackUpperPatches"
 }
 
 

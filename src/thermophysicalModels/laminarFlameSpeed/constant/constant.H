@@ -84,9 +84,8 @@ public:
         );
 
 
-    // Destructor
-
-        ~constant();
+    //- Destructor
+    virtual ~constant();
 
 
     // Member functions

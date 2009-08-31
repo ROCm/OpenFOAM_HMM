@@ -28,7 +28,7 @@ Class
 Description
     The velocity is perturbed in random direction, with a
     Gaussian random number distribution with variance sigma.
-    where sigma is defined below 
+    where sigma is defined below
 
 \*---------------------------------------------------------------------------*/
 
@@ -43,7 +43,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class stochasticDispersionRAS Declaration
+                 Class stochasticDispersionRAS Declaration
 \*---------------------------------------------------------------------------*/
 
 class stochasticDispersionRAS
@@ -60,21 +60,16 @@ public:
     // Constructors
 
         //- Construct from components
-        stochasticDispersionRAS
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        stochasticDispersionRAS(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~stochasticDispersionRAS();
+    //- Destructor
+    virtual ~stochasticDispersionRAS();
 
 
     // Member Functions
 
-    void disperseParcels() const;
+        void disperseParcels() const;
 };
 
 

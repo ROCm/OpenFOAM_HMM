@@ -38,8 +38,7 @@ SourceFiles
 #define meshSearch_H
 
 #include "pointIndexHit.H"
-#include "Cloud.H"
-#include "passiveParticle.H"
+#include "passiveParticleCloud.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,7 +67,7 @@ class meshSearch
         const bool faceDecomp_;
 
         //- Dummy cloud to put particles on for tracking.
-        Cloud<passiveParticle> cloud_;
+        passiveParticleCloud cloud_;
 
         //- demand driven octrees
 

@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactingMultiphaseParcel.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -442,7 +443,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         }
         else
         {
-            this->d_ = cbrt(mass1/this->rho_*6.0/mathematicalConstant::pi);
+            this->d_ = cbrt(mass1/this->rho_*6.0/constant::math::pi);
         }
     }
 }

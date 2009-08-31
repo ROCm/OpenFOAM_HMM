@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "spray.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -106,7 +106,7 @@ scalar spray::liquidMass() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());
@@ -137,7 +137,7 @@ scalar spray::liquidEnthalpy() const
         {
             label k = liquidToGasIndex_[j];
 
-            hg += 
+            hg +=
                 gasProperties()[k].H(T)*gasProperties()[k].W()*elmnt().X()[j]
                /Wl;
         }
@@ -148,7 +148,7 @@ scalar spray::liquidEnthalpy() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());
@@ -180,7 +180,7 @@ scalar spray::liquidTotalEnthalpy() const
         for(label j=0; j<Nf; j++)
         {
             label k = liquidToGasIndex_[j];
-            hg += 
+            hg +=
                 gasProperties()[k].H(T)*gasProperties()[k].W()*elmnt().X()[j]
                /Wl;
         }
@@ -193,7 +193,7 @@ scalar spray::liquidTotalEnthalpy() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());
@@ -218,7 +218,7 @@ scalar spray::liquidKineticEnergy() const
 
     if (twoD())
     {
-        sum *= 2.0*mathematicalConstant::pi/angleOfWedge();
+        sum *= constant::math::twoPi/angleOfWedge();
     }
 
     reduce(sum, sumOp<scalar>());
@@ -267,7 +267,7 @@ scalar spray::liquidPenetration
     scalar mTot = 0.0;
 
     label Np = size();
-    
+
     // arrays containing the parcels mass and
     // distance from injector in ascending order
     scalarField m(Np);
@@ -276,7 +276,6 @@ scalar spray::liquidPenetration
 
     if (Np > 1)
     {
-        // NN.
         // first arrange the parcels in ascending order
         // the first parcel is closest to injector
         // and the last one is most far away.
@@ -303,8 +302,8 @@ scalar spray::liquidPenetration
             bool found = false;
 
             // insert the parcel in the correct place
-            // and move the others 
-            while ( ( i < n-1 ) && ( !found ) ) 
+            // and move the others
+            while ( ( i < n-1 ) && ( !found ) )
             {
                 if (de < dist[i])
                 {

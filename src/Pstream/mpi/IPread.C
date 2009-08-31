@@ -30,6 +30,7 @@ Description
 #include "mpi.h"
 
 #include "IPstream.H"
+#include "PstreamGlobals.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -37,7 +38,7 @@ Description
 
 // Outstanding non-blocking operations.
 //! @cond fileScope
-Foam::DynamicList<MPI_Request> IPstream_outstandingRequests_;
+//Foam::DynamicList<MPI_Request> IPstream_outstandingRequests_;
 //! @endcond fileScope
 
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
@@ -185,7 +186,7 @@ Foam::label Foam::IPstream::read
             return 0;
         }
 
-        IPstream_outstandingRequests_.append(request);
+        PstreamGlobals::outstandingRequests_.append(request);
 
         // Assume the message is completely received.
         return bufSize;
@@ -201,52 +202,6 @@ Foam::label Foam::IPstream::read
 
         return 0;
     }
-}
-
-
-void Foam::IPstream::waitRequests()
-{
-    if (IPstream_outstandingRequests_.size())
-    {
-        if
-        (
-            MPI_Waitall
-            (
-                IPstream_outstandingRequests_.size(),
-                IPstream_outstandingRequests_.begin(),
-                MPI_STATUSES_IGNORE
-            )
-        )
-        {
-            FatalErrorIn
-            (
-                "IPstream::waitRequests()"
-            )   << "MPI_Waitall returned with error" << endl;
-        }
-
-        IPstream_outstandingRequests_.clear();
-    }
-}
-
-
-bool Foam::IPstream::finishedRequest(const label i)
-{
-    if (i >= IPstream_outstandingRequests_.size())
-    {
-        FatalErrorIn
-        (
-            "IPstream::finishedRequest(const label)"
-        )   << "There are " << IPstream_outstandingRequests_.size()
-            << " outstanding send requests and you are asking for i=" << i
-            << nl
-            << "Maybe you are mixing blocking/non-blocking comms?"
-            << Foam::abort(FatalError);
-    }
-
-    int flag;
-    MPI_Test(&IPstream_outstandingRequests_[i], &flag, MPI_STATUS_IGNORE);
-
-    return flag != 0;
 }
 
 

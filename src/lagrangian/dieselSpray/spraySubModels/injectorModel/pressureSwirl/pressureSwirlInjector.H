@@ -61,44 +61,41 @@ private:
         scalarList coneAngle_;
         scalarList coneInterval_;
         scalarList maxKv_;
-        
-    // The initial spray angle for the parcels    
+
+        //- Initial spray angle for the parcels
         mutable scalar angle_;
-        
-    // The initial velocity for the parcels           
+
+        //- Initial velocity for the parcels
         mutable scalar u_;
 
+
     // private member functions
-        
+
         scalar kv
         (
-            const label inj, 
+            const label inj,
             const scalar massFlow,
             const scalar dPressure
         ) const;
-        
+
         scalar deltaPressureInj(const scalar time, const label inj) const;
         scalar averagePressure(const label inj) const;
+
 
 public:
 
     //- Runtime type information
-        TypeName("pressureSwirlInjector");
+    TypeName("pressureSwirlInjector");
 
 
     // Constructors
 
         //- Construct from components
-        pressureSwirlInjector
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        pressureSwirlInjector(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~pressureSwirlInjector();
+    //- Destructor
+    virtual ~pressureSwirlInjector();
 
 
     // Member Functions
@@ -110,23 +107,14 @@ public:
         vector direction
         (
             const label injector,
-            const label hole, 
+            const label hole,
             const scalar time,
             const scalar d
         ) const;
-    
-        scalar velocity
-        (
-            const label i,
-            const scalar time
-        ) const;
-        
-        scalar averageVelocity
-        (
-            const label i
-        ) const;
-        
 
+        scalar velocity(const label i, const scalar time) const;
+
+        scalar averageVelocity(const label i) const;
 };
 
 

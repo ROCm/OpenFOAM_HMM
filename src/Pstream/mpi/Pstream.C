@@ -29,6 +29,7 @@ License
 #include "Pstream.H"
 #include "PstreamReduceOps.H"
 #include "OSspecific.H"
+#include "PstreamGlobals.H"
 
 #include <cstring>
 #include <cstdlib>
@@ -129,6 +130,19 @@ void Foam::Pstream::exit(int errnum)
     MPI_Buffer_detach(&buff, &size);
     delete[] buff;
 #   endif
+
+    if (PstreamGlobals::outstandingRequests_.size())
+    {
+        label n = PstreamGlobals::outstandingRequests_.size();
+        PstreamGlobals::outstandingRequests_.clear();
+
+        WarningIn("Pstream::exit(int)")
+            << "There are still " << n << " outstanding MPI_Requests." << endl
+            << "This means that your code exited before doing a"
+            << " Pstream::waitRequests()." << endl
+            << "This should not happen for a normal code exit."
+            << endl;
+    }
 
     if (errnum == 0)
     {
@@ -419,6 +433,57 @@ void Foam::reduce(scalar& Value, const sumOp<scalar>& bop)
         }
         */
     }
+}
+
+
+void Foam::Pstream::waitRequests()
+{
+    if (PstreamGlobals::outstandingRequests_.size())
+    {
+        if
+        (
+            MPI_Waitall
+            (
+                PstreamGlobals::outstandingRequests_.size(),
+                PstreamGlobals::outstandingRequests_.begin(),
+                MPI_STATUSES_IGNORE
+            )
+        )
+        {
+            FatalErrorIn
+            (
+                "Pstream::waitRequests()"
+            )   << "MPI_Waitall returned with error" << Foam::endl;
+        }
+
+        PstreamGlobals::outstandingRequests_.clear();
+    }
+}
+
+
+bool Foam::Pstream::finishedRequest(const label i)
+{
+    if (i >= PstreamGlobals::outstandingRequests_.size())
+    {
+        FatalErrorIn
+        (
+            "Pstream::finishedRequest(const label)"
+        )   << "There are " << PstreamGlobals::outstandingRequests_.size()
+            << " outstanding send requests and you are asking for i=" << i
+            << nl
+            << "Maybe you are mixing blocking/non-blocking comms?"
+            << Foam::abort(FatalError);
+    }
+
+    int flag;
+    MPI_Test
+    (
+       &PstreamGlobals::outstandingRequests_[i],
+       &flag,
+        MPI_STATUS_IGNORE
+    );
+
+    return flag != 0;
 }
 
 

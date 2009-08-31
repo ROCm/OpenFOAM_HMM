@@ -22,27 +22,34 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Typedef
+    Foam::streamLineFunctionObject
+
+Description
+    FunctionObject wrapper around streamLines to allow them to be created via
+    the functions list within controlDict.
+
+SourceFiles
+    streamLineFunctionObject.C
+
 \*---------------------------------------------------------------------------*/
 
-#include "radiationConstants.H"
-#include "dimensionedConstants.H"
+#ifndef streamLineFunctionObject_H
+#define streamLineFunctionObject_H
+
+#include "streamLine.H"
+#include "OutputFilterFunctionObject.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-//- Stefan-Boltzmann constant (default in [J/(K4 m2 s)])
-const Foam::dimensionedScalar Foam::radiation::sigmaSB
-(
-    Foam::dimensionedConstant
-    (
-        "sigmaSB",
-        dimensionedScalar
-        (
-            "sigmaSB",
-            dimensionSet(1, 0, -3, -4, 0, 0, 0),
-            5.670E-08
-        )
-    )
-);
+namespace Foam
+{
+    typedef OutputFilterFunctionObject<streamLine>
+        streamLineFunctionObject;
+}
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

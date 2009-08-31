@@ -73,9 +73,9 @@ private:
 
         dictionary coeffsDict_;
 
-    // inverse function approximation
-    // of the Rossin-Rammler Distribution
-    // used when calculating the droplet size after breakup
+        // inverse function approximation
+        // of the Rossin-Rammler Distribution
+        // used when calculating the droplet size after breakup
         scalar rrd_[100];
 
         // model constants
@@ -83,6 +83,7 @@ private:
         scalar Cmu_;
         scalar Comega_;
         scalar WeCrit_;
+
 
 public:
 
@@ -94,16 +95,11 @@ public:
     // Constructors
 
         //- Construct from components
-        TAB
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        TAB(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~TAB();
+    //- Destructor
+    virtual ~TAB();
 
 
     // Member Functions
@@ -115,7 +111,6 @@ public:
             const vector& Ug,
             const liquidMixture& fuels
         ) const;
-
 };
 
 

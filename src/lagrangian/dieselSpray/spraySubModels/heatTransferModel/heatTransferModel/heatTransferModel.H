@@ -43,23 +43,23 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class heatTransferModel Declaration
+                       Class heatTransferModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class heatTransferModel
-
 {
 
 protected:
 
     // Protected data
 
-    const dictionary& dict_;
+        const dictionary& dict_;
+
 
 public:
 
     //- Runtime type information
-        TypeName("heatTransferModel");
+    TypeName("heatTransferModel");
 
 
     // Declare runtime constructor selection table
@@ -79,15 +79,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        heatTransferModel
-        (
-            const dictionary& dict
-        );
+        heatTransferModel(const dictionary& dict);
 
 
-    // Destructor
-
-        virtual ~heatTransferModel();
+    //- Destructor
+    virtual ~heatTransferModel();
 
 
     // Selector
@@ -123,7 +119,6 @@ public:
 
         //- Return the correction function f...
         virtual scalar fCorrection(const scalar z) const = 0;
-
 };
 
 

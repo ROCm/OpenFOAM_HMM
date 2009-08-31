@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ORourkeCollisionModel Declaration
+                   Class ORourkeCollisionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class ORourkeCollisionModel
@@ -53,11 +53,15 @@ class ORourkeCollisionModel
 {
 
 private:
-    // Reference to the cell volumes
-    const scalarField& vols_;
 
-    dictionary coeffsDict_;
-    Switch coalescence_;
+    // Private data
+
+        // Reference to the cell volumes
+        const scalarField& vols_;
+
+        dictionary coeffsDict_;
+        Switch coalescence_;
+
 
 public:
 
@@ -75,9 +79,9 @@ public:
             Random& rndGen
         );
 
-    // Destructor
 
-        ~ORourkeCollisionModel();
+    //- Destructor
+    virtual ~ORourkeCollisionModel();
 
 
     // Member Functions

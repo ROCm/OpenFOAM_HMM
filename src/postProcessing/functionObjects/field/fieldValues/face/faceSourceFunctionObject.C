@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,40 +22,26 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
-    Foam::mathematicalConstant
-
-Description
-    Mathematical constants such as pi, e.
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef mathematicalConstants_H
-#define mathematicalConstants_H
+#include "faceSourceFunctionObject.H"
 
-#include "scalar.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineNamedTemplateTypeNameAndDebug
+    (
+        faceSourceFunctionObject,
+        0
+    );
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace mathematicalConstant
-{
-    const scalar e(M_E);
-    const scalar pi(M_PI);
-    const scalar twoPi(2*pi);
-    const scalar piByTwo(0.5*pi);
+    addToRunTimeSelectionTable
+    (
+        functionObject,
+        faceSourceFunctionObject,
+        dictionary
+    );
 }
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

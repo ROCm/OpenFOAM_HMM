@@ -300,8 +300,7 @@ evaluate()
         // Block for any outstanding requests
         if (Pstream::defaultCommsType == Pstream::nonBlocking)
         {
-            IPstream::waitRequests();
-            OPstream::waitRequests();
+            Pstream::waitRequests();
         }
 
         forAll(*this, patchi)

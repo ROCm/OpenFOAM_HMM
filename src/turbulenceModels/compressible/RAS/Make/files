@@ -15,6 +15,7 @@ wallFunctions = derivedFvPatchFields/wallFunctions
 
 alphatWallFunctions = $(wallFunctions)/alphatWallFunctions
 $(alphatWallFunctions)/alphatWallFunction/alphatWallFunctionFvPatchScalarField.C
+$(alphatWallFunctions)/alphatJayatillekeWallFunction/alphatJayatillekeWallFunctionFvPatchScalarField.C
 
 mutWallFunctions = $(wallFunctions)/mutWallFunctions
 $(mutWallFunctions)/mutkRoughWallFunction/mutkRoughWallFunctionFvPatchScalarField.C

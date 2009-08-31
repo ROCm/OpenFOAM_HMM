@@ -45,7 +45,7 @@ Foam::linearUpwind<Type>::correction
         (
             IOobject
             (
-                "linearUpwindCorrection(" + vf.name() + ')',
+                "linearUpwind::correction(" + vf.name() + ')',
                 mesh.time().timeName(),
                 mesh,
                 IOobject::NO_READ,
