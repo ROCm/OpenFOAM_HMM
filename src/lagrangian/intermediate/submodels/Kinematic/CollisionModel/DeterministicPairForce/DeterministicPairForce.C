@@ -43,6 +43,7 @@ void Foam::DeterministicPairForce<CloudType>::buildCellOccupancy()
         cellOccupancy_[iter().cell()].append(&iter());
     }
 
+    il_.ril().referParticles(cellOccupancy_);
 }
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
@@ -139,6 +140,8 @@ void Foam::DeterministicPairForce<CloudType>::collide()
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;
 
+    // real-real interactions
+
     forAll(dil, d)
     {
         // Loop over all Parcels in cell A (a)
@@ -174,6 +177,48 @@ void Foam::DeterministicPairForce<CloudType>::collide()
             }
         }
     }
+
+    // real-referred interactions
+
+    // const referredCellList<typename CloudType::parcelType>& ril(il_.ril());
+
+    // // Loop over all referred cells
+    // forAll(ril, refCellI)
+    // {
+    //     const referredCell<typename CloudType::parcelType>& refCell =
+    //         ril[refCellI];
+
+    //     const List<label>& realCells = refCell.realCellsForInteraction();
+
+    //     // Loop over all referred parcels in the referred cell
+
+    //     forAllIter
+    //     (
+    //         typename IDLList<typename CloudType::parcelType>,
+    //         refCell,
+    //         iter
+    //     )
+    //     {
+    //         pB_ptr = &referredParcel();
+
+    //         // Loop over all real cells in that the referred cell is
+    //         // to supply interactions to
+
+    //         forAll(realCells, realCellI)
+    //         {
+    //             List<typename CloudType::parcelType*> realCellParcels =
+    //                 cellOccupancy_[realCells[realCellI]];
+
+    //             forAll(realCellParcels, realParcelI)
+    //             {
+    //                 pA_ptr = realCellParcels[realParcelI];
+
+    //                 evaluatePair(*pA_ptr, *pB_ptr);
+    //             }
+    //         }
+    //     }
+    // }
+
 
     Info<< "ADD COLLISIONS WITH WALLS HERE, DOES NOT NEED TO BE A TRACKING "
         << "OPERATION.  CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY "

@@ -60,6 +60,9 @@ class referredCellList
 
         const interactionLists<ParticleType>& il_;
 
+        //- Dummy cloud to give to particles
+        Cloud<ParticleType> cloud_;
+
 
     // Private Member Functions
 
@@ -83,7 +86,6 @@ public:
         //- Construct from file
         referredCellList (interactionLists<ParticleType>& il);
 
-    referredCellList();
 
     // Destructor
 

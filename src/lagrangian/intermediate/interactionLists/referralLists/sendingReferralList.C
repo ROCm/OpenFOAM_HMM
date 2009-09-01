@@ -84,61 +84,7 @@ void Foam::sendingReferralList::operator=(const sendingReferralList& rhs)
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-bool operator==
-(
-    const Foam::sendingReferralList& a,
-    const Foam::sendingReferralList& b
-)
-{
-    // Trivial reject: lists are different size
-    if (a.size() != b.size())
-    {
-        return false;
-    }
-
-    // Or if source processors are not the same.
-    if (a.destinationProc() != b.destinationProc())
-    {
-        return false;
-    }
-
-    Foam::List<bool> fnd(a.size(), false);
-
-    forAll (b, bI)
-    {
-        Foam::label curLabel = b[bI];
-
-        bool found = false;
-
-        forAll (a, aI)
-        {
-            if (a[aI] == curLabel)
-            {
-                found = true;
-                fnd[aI] = true;
-                break;
-            }
-        }
-
-        if (!found)
-        {
-            return false;
-        }
-    }
-
-    // check if all labels on a were marked
-    bool result = true;
-
-    forAll (fnd, aI)
-    {
-        result = (result && fnd[aI]);
-    }
-
-    return result;
-}
-
+// * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * * //
 
 Foam::Istream& Foam::operator>>
 (

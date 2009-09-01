@@ -32,16 +32,4 @@ inline Foam::label Foam::sendingReferralList::destinationProc() const
 }
 
 
-// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
-
-inline bool operator!=
-(
-    const Foam::sendingReferralList& a,
-    const Foam::sendingReferralList& b
-)
-{
-    return (!(a == b));
-}
-
-
 // ************************************************************************* //

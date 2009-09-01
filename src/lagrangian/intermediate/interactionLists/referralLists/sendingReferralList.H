@@ -92,21 +92,6 @@ public:
         void operator=(const sendingReferralList&);
 
 
-    // Friend Operators
-
-        friend bool operator==
-        (
-            const sendingReferralList& a,
-            const sendingReferralList& b
-        );
-
-        inline friend bool operator!=
-        (
-            const sendingReferralList& a,
-            const sendingReferralList& b
-        );
-
-
     // IOstream Operators
 
         friend Istream& operator>>

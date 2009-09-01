@@ -392,14 +392,40 @@ Foam::vectorList Foam::referredCell<ParticleType>::rotateVectors
 template<class ParticleType>
 void Foam::referredCell<ParticleType>::referInParticles
 (
-    const IDLList<ParticleType>& incomingParticles)
+    const IDLList<ParticleType>& incomingParticles
+)
 {
-    this->clear();
+    // this->clear();
 
-    forAll(incomingParticles, iM)
-    {
-        this->append(iM);
-    }
+    // Try using this = incomingParticles then transform positions
+
+    // forAllConstIter
+    // (
+    //     typename IDLList<ParticleType>,
+    //     incomingParticles,
+    //     incomingParticle
+    // )
+    // {
+    //     // this->append(incomingParticle);
+    // }
+
+    // Info<< "NEED TO REFER POSITIONS ON ARRIVAL" << endl;
+}
+
+
+template<class ParticleType>
+void Foam::referredCell<ParticleType>::referInParticle
+(
+    const ParticleType& incomingParticle
+)
+{
+    // Pout<< "Referring in " << incomingParticle << endl;
+
+    // Try using this = incomingParticles then transform positions
+
+    //     // this->append(incomingParticle);
+
+    // Info<< "NEED TO REFER POSITIONS ON ARRIVAL" << endl;
 }
 
 

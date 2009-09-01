@@ -360,7 +360,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
 
     label iterationNo = 0;
 
-    while (cellsReferredThisIteration)
+    while (cellsReferredThisIteration > 0)
     {
         label refIntListStartSize = referredInteractionList.size();
 
@@ -431,8 +431,8 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                                 << patch.name()
                                 << " do not give the same referring "
                                 << " transformations to within tolerance of "
-                                << interactionLists<ParticleType>::transTol << nl
-                                << " Referring offsets:" << refOff << nl
+                                << interactionLists<ParticleType>::transTol
+                                << nl << " Referring offsets:" << refOff << nl
                                 << " Average sum of mag difference: "
                                 << sum(mag(refOff - refOff[0]))/refOff.size()
                                 << nl
@@ -1433,7 +1433,9 @@ Foam::referredCellList<ParticleType>::referredCellList
 )
 :
     List<referredCell<ParticleType> >(),
-    il_(il)
+    il_(il),
+    cloud_(il_.mesh(), "referredCellListDummyCloud", IDLList<ParticleType>())
+
 {
     buildReferredCellList(pointPointListBuild);
 }
@@ -1446,7 +1448,8 @@ Foam::referredCellList<ParticleType>::referredCellList
 )
 :
     List<referredCell<ParticleType> >(),
-    il_(il)
+    il_(il),
+    cloud_(il_.mesh(), IDLList<ParticleType>())
 {
     Info<< "Read referredCellList from disk not implemented" << endl;
 }
@@ -1467,6 +1470,15 @@ void Foam::referredCellList<ParticleType>::referParticles
     const List<DynamicList<ParticleType*> >& cellOccupancy
 )
 {
+    // Clear all existing referred particles
+
+    forAll(*this, i)
+    {
+        (*this)[i].clear();
+    }
+
+    cloud_.clear();
+
     // Create referred particles for sending using cell occupancy and
     // cellSendingReferralLists
 
@@ -1477,7 +1489,9 @@ void Foam::referredCellList<ParticleType>::referParticles
             il_.cellSendingReferralLists()[cSRL]
         );
 
-        List<IDLList<ParticleType> > particlesToReferOut(sRL.size());
+        IDLList<ParticleType> particlesToReferOut;
+
+        DynamicList<label> destinationReferredCell;
 
         forAll(sRL, sRLI)
         {
@@ -1487,10 +1501,10 @@ void Foam::referredCellList<ParticleType>::referParticles
             {
                 const ParticleType& particle = *realParticles[rM];
 
-                particlesToReferOut[sRLI].append(particle.clone());
-            }
+                particlesToReferOut.append(particle.clone().ptr());
 
-            particlesToReferOut[sRLI].shrink();
+                destinationReferredCell.append(sRLI);
+            }
         }
 
         // Send lists of referred particles to other processors
@@ -1505,7 +1519,9 @@ void Foam::referredCellList<ParticleType>::referParticles
                     sRL.destinationProc()
                 );
 
-                toInteractingProc << particlesToReferOut;
+                toInteractingProc
+                    << destinationReferredCell
+                    << particlesToReferOut;
             }
         }
         else
@@ -1518,24 +1534,59 @@ void Foam::referredCellList<ParticleType>::referParticles
                 il_.cellReceivingReferralLists()[cSRL]
             );
 
-            forAll(rRL, rRLI)
+            // forAll(rRL, rRLI)
+            // {
+            //     forAll(rRL[rRLI], rC)
+            //     {
+            //         // referredCell<ParticleType>& refCellToRefParticlesTo =
+            //         //     (*this)[rRL[rRLI][rC]];
+
+            //         // refCellToRefParticlesTo.referInParticles
+            //         // (
+            //         //     particlesToReferOut[rRLI]
+            //         // );
+            //     }
+            // }
+
+            forAllConstIter
+            (
+                typename IDLList<ParticleType>,
+                particlesToReferOut,
+                iter
+            )
             {
-                forAll(rRL[rRLI], rC)
+                cloud_.addParticle(iter().clone().ptr());
+            }
+
+            label particleI = 0;
+
+            forAllIter
+            (
+                typename IDLList<ParticleType>,
+                particlesToReferOut,
+                iter
+            )
+            {
+                ParticleType& p = iter();
+
+                labelList refCellsToReferTo =
+                    rRL[destinationReferredCell[particleI]];
+
+                forAll(refCellsToReferTo, refCellI)
                 {
                     referredCell<ParticleType>& refCellToRefParticlesTo =
-                        (*this)[rRL[rRLI][rC]];
+                        (*this)[refCellsToReferTo[refCellI]];
 
-                    refCellToRefParticlesTo.referInParticles
-                    (
-                        particlesToReferOut[rRLI]
-                    );
+                    refCellToRefParticlesTo.referInParticle(p);
                 }
+
+                particleI++;
             }
         }
     }
 
     // Receive referred particle lists to and distribute to referredCells
-    // according tocellReceivingReferralLists, referredCells deal with the
+    // according to cellReceivingReferralLists, referredCells deal with the
     // transformations themselves
 
     forAll(il_.cellReceivingReferralLists(), cRRL)
@@ -1545,7 +1596,9 @@ void Foam::referredCellList<ParticleType>::referParticles
             il_.cellReceivingReferralLists()[cRRL]
         );
 
-        List<IDLList<ParticleType> > particlesToReferIn(rRL.size());
+        IDLList<ParticleType> particlesToReferIn;
+
+        List<label> destinationReferredCell;
 
         if (rRL.sourceProc() != Pstream::myProcNo())
         {
@@ -1557,23 +1610,70 @@ void Foam::referredCellList<ParticleType>::referParticles
                     rRL.sourceProc()
                 );
 
-                fromInteractingProc >> particlesToReferIn;
-            }
+                fromInteractingProc
+                    >> destinationReferredCell;
 
-            forAll(rRL, rRLI)
-            {
-                forAll(rRL[rRLI], rC)
+                particlesToReferIn = IDLList<ParticleType>
+                (
+                    fromInteractingProc,
+                    typename ParticleType::iNew(cloud_)
+                );
+
+                forAllConstIter
+                (
+                    typename IDLList<ParticleType>,
+                    particlesToReferIn,
+                    iter
+                )
                 {
-                    referredCell<ParticleType>& refCellToRefParticlesTo =
-                        (*this)[rRL[rRLI][rC]];
-
-                    refCellToRefParticlesTo.referInParticles
-                    (
-                        particlesToReferIn[rRLI]
-                    );
+                    cloud_.addParticle(iter().clone().ptr());
                 }
             }
+
+            // forAll(rRL, rRLI)
+            // {
+            //     forAll(rRL[rRLI], rC)
+            //     {
+            //         referredCell<ParticleType>& refCellToRefParticlesTo =
+            //             (*this)[rRL[rRLI][rC]];
+
+            //         refCellToRefParticlesTo.referInParticles
+            //         (
+            //             particlesToReferIn[rRLI]
+            //         );
+            //     }
+            // }
+
+            label particleI = 0;
+
+            forAllIter
+            (
+                typename IDLList<ParticleType>,
+                particlesToReferIn,
+                iter
+            )
+            {
+                ParticleType& p = iter();
+
+                labelList refCellsToReferTo =
+                    rRL[destinationReferredCell[particleI]];
+
+                forAll(refCellsToReferTo, refCellI)
+                {
+                    referredCell<ParticleType>& refCellToRefParticlesTo =
+                        (*this)[refCellsToReferTo[refCellI]];
+
+                    refCellToRefParticlesTo.referInParticle(p);
+                }
+
+                particleI++;
+            }
         }
+    }
+
+    if (il_.mesh().time().outputTime())
+    {
+        Particle<ParticleType>::writeFields(cloud_);
     }
 }
 
