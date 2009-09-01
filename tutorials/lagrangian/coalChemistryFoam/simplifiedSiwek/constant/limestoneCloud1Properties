@@ -45,6 +45,7 @@ constantProperties
     cp0             cp0 [ 0 2 -2 -1 0 ] 900;
     epsilon0        epsilon0 [ 0 0 0 0 0 ] 1;
     f0              f0 [ 0 0 0 0 0 ] 0.5;
+    Pr              Pr [ 0 0 0 0 0 ] 1.0;
 }
 
 interpolationSchemes
