@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noEvaporation Declaration
+                       Class noEvaporation Declaration
 \*---------------------------------------------------------------------------*/
 
 class noEvaporation
@@ -59,15 +59,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        noEvaporation
-        (
-            const dictionary& dict
-        );
+        noEvaporation(const dictionary& dict);
 
 
-    // Destructor
-
-        ~noEvaporation();
+    //- Destructor
+    virtual ~noEvaporation();
 
 
     // Member Functions

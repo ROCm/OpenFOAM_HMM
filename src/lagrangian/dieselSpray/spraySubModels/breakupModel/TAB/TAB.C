@@ -26,7 +26,7 @@ License
 
 #include "TAB.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -62,9 +62,10 @@ TAB::TAB
 
     // calculate the inverse function of the Rossin-Rammler Distribution
     const scalar xx0 = 12.0;
-    const scalar rrd100 = 1.0/(1.0-exp(-xx0)*(1+xx0+pow(xx0, 2)/2+pow(xx0, 3)/6));
+    const scalar rrd100 =
+        1.0/(1.0 - exp(-xx0)*(1 + xx0 + sqr(xx0)/2 + pow3(xx0)/6));
 
-    for(label n=0; n<100; n++)
+    for (label n=0; n<100; n++)
     {
         scalar xx = 0.12*(n+1);
         rrd_[n] = (1-exp(-xx)*(1 + xx + pow(xx, 2)/2 + pow(xx, 3)/6))*rrd100;
@@ -88,7 +89,6 @@ void TAB::breakupParcel
     const liquidMixture& fuels
 ) const
 {
-
     scalar T = p.T();
     scalar pc = spray_.p()[p.cell()];
     scalar r = 0.5*p.d();
@@ -101,7 +101,7 @@ void TAB::breakupParcel
 
     // inverse of characteristic viscous damping time
     scalar rtd = 0.5*Cmu_*mu/(rho*r2);
-    
+
     // oscillation frequency (squared)
     scalar omega2 = Comega_*sigma/(rho*r3) - rtd*rtd;
 
@@ -118,7 +118,7 @@ void TAB::breakupParcel
         scalar a = sqrt(y1*y1 + y2*y2);
 
         // scotty we may have break-up
-        if (a+Wetmp > 1.0)
+        if (a + Wetmp > 1.0)
         {
             scalar phic = y1/a;
 
@@ -130,34 +130,30 @@ void TAB::breakupParcel
             scalar quad = -y2/a;
             if (quad < 0)
             {
-                phi = 2*mathematicalConstant::pi - phit;
+                phi = constant::math::twoPi - phit;
             }
-            
+
             scalar tb = 0;
-            
+
             if (mag(p.dev()) < 1.0)
             {
                 scalar coste = 1.0;
-                if
-                (
-                    (Wetmp - a < -1)
-                 && (p.ddev() < 0)
-                )
+                if ((Wetmp - a < -1) && (p.ddev() < 0))
                 {
                     coste = -1.0;
                 }
-                
+
                 scalar theta = acos((coste-Wetmp)/a);
-                
+
                 if (theta < phi)
                 {
-                    if (2*mathematicalConstant::pi-theta >= phi)
+                    if (constant::math::twoPi - theta >= phi)
                     {
                         theta = -theta;
                     }
-                    theta += 2*mathematicalConstant::pi;
+                    theta += constant::math::twoPi;
                 }
-                tb = (theta-phi)/omega;
+                tb = (theta - phi)/omega;
 
                 // breakup occurs
                 if (deltaT > tb)
@@ -171,19 +167,20 @@ void TAB::breakupParcel
             // update droplet size
             if (deltaT > tb)
             {
-                scalar rs = r/
-                (
-                    1 
-                  + (4.0/3.0)*pow(p.dev(), 2)
-                  + rho*r3/(8*sigma)*pow(p.ddev(), 2)
-                );
-                
+                scalar rs =
+                    r
+                   /(
+                        1
+                      + (4.0/3.0)*sqr(p.dev())
+                      + rho*r3/(8*sigma)*sqr(p.ddev())
+                    );
+
                 label n = 0;
                 bool found = false;
                 scalar random = rndGen_.scalar01();
                 while (!found && (n<99))
                 {
-                    if (rrd_[n]>random)
+                    if (rrd_[n] > random)
                     {
                         found = true;
                     }
@@ -197,11 +194,9 @@ void TAB::breakupParcel
                     p.dev() = 0;
                     p.ddev() = 0;
                 }
-
             }
-
         }
-       
+
     }
     else
     {
@@ -209,8 +204,8 @@ void TAB::breakupParcel
         p.dev() = 0;
         p.ddev() = 0;
     }
-
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

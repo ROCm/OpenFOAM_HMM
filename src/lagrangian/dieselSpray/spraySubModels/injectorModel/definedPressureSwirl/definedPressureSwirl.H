@@ -26,7 +26,7 @@ Class
     Foam::definedPressureSwirlInjector
 
 Description
-    Pressure swirl injector model with user-defined 
+    Pressure swirl injector model with user-defined
     cone-angle/interval vs. time
 
 \*---------------------------------------------------------------------------*/
@@ -44,7 +44,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                           Class definedPressureSwirlInjector Declaration
+                  Class definedPressureSwirlInjector Declaration
 \*---------------------------------------------------------------------------*/
 
 class definedPressureSwirlInjector
@@ -65,11 +65,12 @@ private:
 
         List<pair>  maxKv_;
 
-    // The initial spray angle for the parcels
+        //- Initial spray angle for the parcels
         mutable scalar angle_;
 
-    // The initial velocity for the parcels
+        //- Initial velocity for the parcels
         mutable scalar u_;
+
 
     // private member functions
 
@@ -84,25 +85,21 @@ private:
         scalar deltaPressureInj(const scalar time, const label inj) const;
         scalar averagePressure(const label inj) const;
 
+
 public:
 
     //- Runtime type information
-        TypeName("definedPressureSwirlInjector");
+    TypeName("definedPressureSwirlInjector");
 
 
     // Constructors
 
         //- Construct from components
-        definedPressureSwirlInjector
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        definedPressureSwirlInjector(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~definedPressureSwirlInjector();
+    //- Destructor
+    virtual ~definedPressureSwirlInjector();
 
 
     // Member Functions
@@ -119,18 +116,9 @@ public:
             const scalar d
         ) const;
 
-        scalar velocity
-        (
-            const label i,
-            const scalar time
-        ) const;
+        scalar velocity(const label i, const scalar time) const;
 
-        scalar averageVelocity
-        (
-            const label i
-        ) const;
-
-
+        scalar averageVelocity(const label i) const;
 };
 
 

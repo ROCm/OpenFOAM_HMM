@@ -54,8 +54,9 @@ Description
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
-                           Class blobsSwirlInjector Declaration
+                     Class blobsSwirlInjector Declaration
 \*---------------------------------------------------------------------------*/
 
 class blobsSwirlInjector
@@ -76,26 +77,22 @@ private:
         scalarList cTau_;
         scalarList A_;
 
-    // The initial spray angle for the parcels
+        //- Initial spray angle for the parcels
         mutable scalar angle_;
 
-    // The initial velocity for the parcels
+        //- Initial velocity for the parcels
         mutable scalar u_;
 
-    // The orifice-air cone area ratio
-
+        //- Orifice-air cone area ratio
         mutable scalar x_;
 
-    // The initial sheet tickness
-
+        //- Initial sheet tickness
         mutable scalar h_;
+
 
     // private member functions
 
-        scalar kv
-        (
-            const label inj
-        ) const;
+        scalar kv(const label inj) const;
 
         scalar deltaPressureInj(const scalar time, const label inj) const;
         scalar averagePressure(const label inj) const;
@@ -108,25 +105,21 @@ private:
             const scalar time
         ) const;
 
+
 public:
 
     //- Runtime type information
-        TypeName("blobsSwirlInjector");
+    TypeName("blobsSwirlInjector");
 
 
     // Constructors
 
         //- Construct from components
-        blobsSwirlInjector
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        blobsSwirlInjector(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~blobsSwirlInjector();
+    //- Destructor
+    virtual ~blobsSwirlInjector();
 
 
     // Member Functions
@@ -153,8 +146,6 @@ public:
         (
             const label i
         ) const;
-
-
 };
 
 

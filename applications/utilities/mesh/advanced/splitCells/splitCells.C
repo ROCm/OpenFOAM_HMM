@@ -49,7 +49,7 @@ Description
 #include "cellSet.H"
 #include "cellModeller.H"
 #include "meshCutter.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "geomCellLooper.H"
 #include "plane.H"
 #include "edgeVertex.H"
@@ -539,7 +539,7 @@ int main(int argc, char *argv[])
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
-    scalar radAngle = featureAngle * mathematicalConstant::pi/180.0;
+    scalar radAngle = featureAngle*constant::math::pi/180.0;
     scalar minCos = Foam::cos(radAngle);
     scalar minSin = Foam::sin(radAngle);
 

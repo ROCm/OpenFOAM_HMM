@@ -28,6 +28,12 @@ Class
 Description
     secondary breakup model for the spray
 
+    Default model coefficients:
+        Cbag = 6.0;
+        Cb = 0.785;
+        Cstrip = 0.5;
+        Cs = 10.0;
+
 \*---------------------------------------------------------------------------*/
 
 #ifndef reitzDiwakar_H
@@ -41,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class reitzDiwakar Declaration
+                        Class reitzDiwakar Declaration
 \*---------------------------------------------------------------------------*/
 
 class reitzDiwakar
@@ -58,6 +64,7 @@ private:
         scalar Cstrip_;
         scalar Cs_;
 
+
 public:
 
     //- Runtime type information
@@ -67,16 +74,11 @@ public:
     // Constructors
 
         //- Construct from components
-        reitzDiwakar
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        reitzDiwakar(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~reitzDiwakar();
+    //- Destructor
+    virtual ~reitzDiwakar();
 
 
     // Member Operators
@@ -88,8 +90,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const;
-
-
 };
 
 

@@ -24,11 +24,9 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "noRadiation.H"
 #include "addToRunTimeSelectionTable.H"
-#include "radiationConstants.H"
+#include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -94,7 +92,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::noRadiation::Rp() const
             dimensionedScalar
             (
                 "Rp",
-                radiation::sigmaSB.dimensions()/dimLength,
+                constant::physicoChemical::sigma.dimensions()/dimLength,
                 0.0
             )
         )

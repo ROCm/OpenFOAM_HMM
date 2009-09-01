@@ -64,16 +64,11 @@ public:
     // Constructors
 
         //- Construct from components
-        dispersionRASModel
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        dispersionRASModel(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        virtual ~dispersionRASModel();
+    //- Destructor
+    virtual ~dispersionRASModel();
 
 
     // Member Functions

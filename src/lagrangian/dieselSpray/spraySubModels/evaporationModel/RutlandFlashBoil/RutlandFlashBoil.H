@@ -51,7 +51,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class RutlandFlashBoil Declaration
+                      Class RutlandFlashBoil Declaration
 \*---------------------------------------------------------------------------*/
 
 class RutlandFlashBoil
@@ -75,21 +75,17 @@ private:
 public:
 
     //- Runtime type information
-        TypeName("RutlandFlashBoil");
+    TypeName("RutlandFlashBoil");
 
 
     // Constructors
 
         //- Construct from dictionary
-        RutlandFlashBoil
-        (
-            const dictionary& dict
-        );
+        RutlandFlashBoil(const dictionary& dict);
 
 
-    // Destructor
-
-        ~RutlandFlashBoil();
+    //- Destructor
+    virtual ~RutlandFlashBoil();
 
 
     // Member Functions

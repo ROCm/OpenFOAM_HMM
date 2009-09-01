@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "COxidationMurphyShaddix.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -133,7 +134,7 @@ Foam::scalar Foam::COxidationMurphyShaddix<CloudType>::calculate
     }
 
     // Particle surface area [m^2]
-    const scalar Ap = mathematicalConstant::pi*sqr(d);
+    const scalar Ap = constant::math::pi*sqr(d);
 
     // Calculate diffision constant at continuous phase temperature
     // and density [m^2/s]

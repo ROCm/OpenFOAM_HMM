@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class atomizationModel Declaration
+                      Class atomizationModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class atomizationModel
@@ -58,10 +58,11 @@ protected:
         spray& spray_;
         Random& rndGen_;
 
+
 public:
 
     //- Runtime type information
-        TypeName("atomizationModel");
+    TypeName("atomizationModel");
 
     // Declare runtime constructor selection table
 
@@ -81,16 +82,11 @@ public:
     // Constructors
 
         //- Construct from components
-        atomizationModel
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        atomizationModel(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        virtual ~atomizationModel();
+    //- Destructor
+    virtual ~atomizationModel();
 
 
     // Selector
@@ -111,7 +107,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const = 0;
-
 };
 
 

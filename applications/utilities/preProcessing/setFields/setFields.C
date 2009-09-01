@@ -37,14 +37,22 @@ Description
 
 using namespace Foam;
 
-template<class GeoField>
-void setFieldType
+template<class Type>
+bool setFieldType
 (
+    const word& fieldTypeDesc,
     const fvMesh& mesh,
     const labelList& selectedCells,
     Istream& fieldValueStream
 )
 {
+    typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
+
+    if (fieldTypeDesc != fieldType::typeName + "Value")
+    {
+        return false;
+    }
+
     word fieldName(fieldValueStream);
 
     IOobject fieldHeader
@@ -61,15 +69,9 @@ void setFieldType
         Info<< "    Setting " << fieldHeader.headerClassName()
             << " " << fieldName << endl;
 
-        GeoField field(fieldHeader, mesh);
+        fieldType field(fieldHeader, mesh);
 
-        typename GeoField::value_type value
-        (
-            static_cast<const typename GeoField::value_type&>
-            (
-                pTraits<typename GeoField::value_type>(fieldValueStream)
-            )
-        );
+        const Type& value = pTraits<Type>(fieldValueStream);
 
         if (selectedCells.size() == field.size())
         {
@@ -100,6 +102,8 @@ void setFieldType
             "Istream& fieldValueStream)"
         ) << "Field " << fieldName << " not found" << endl;
     }
+
+    return true;
 }
 
 
@@ -133,32 +137,21 @@ public:
         {
             word fieldType(fieldValues);
 
-            if (fieldType == "volScalarFieldValue")
-            {
-                setFieldType<volScalarField>
-                    (mesh_, selectedCells_, fieldValues);
-            }
-            else if (fieldType == "volVectorFieldValue")
-            {
-                setFieldType<volVectorField>
-                    (mesh_, selectedCells_, fieldValues);
-            }
-            else if (fieldType == "volSphericalTensorFieldValue")
-            {
-                setFieldType<volSphericalTensorField>
-                    (mesh_, selectedCells_, fieldValues);
-            }
-            else if (fieldType == "volSymmTensorFieldValue")
-            {
-                setFieldType<volSymmTensorField>
-                    (mesh_, selectedCells_, fieldValues);
-            }
-            else if (fieldType == "volTensorFieldValue")
-            {
-                setFieldType<volTensorField>
-                    (mesh_, selectedCells_, fieldValues);
-            }
-            else
+            if
+            (
+               !(
+                    setFieldType<scalar>
+                        (fieldType, mesh_, selectedCells_, fieldValues)
+                 || setFieldType<vector>
+                        (fieldType, mesh_, selectedCells_, fieldValues)
+                 || setFieldType<sphericalTensor>
+                        (fieldType, mesh_, selectedCells_, fieldValues)
+                 || setFieldType<symmTensor>
+                        (fieldType, mesh_, selectedCells_, fieldValues)
+                 || setFieldType<tensor>
+                        (fieldType, mesh_, selectedCells_, fieldValues)
+                )
+            )
             {
                 WarningIn("setField::iNew::operator()(Istream& is)")
                     << "field type " << fieldType << " not currently supported"

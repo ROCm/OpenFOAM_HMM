@@ -42,26 +42,21 @@ autoPtr<wallModel> wallModel::New
     spray& sm
 )
 {
-    word wallModelType
-    (
-        dict.lookup("wallModel")
-    );
+    word wallModelType(dict.lookup("wallModel"));
 
-    Info<< "Selecting wallModel "
-         << wallModelType << endl;
+    Info<< "Selecting wallModel " << wallModelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(wallModelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "wallModel::New(const dictionary&, const spray&) : " << endl
-            << "    unknown wallModelType type "
-            << wallModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid wallModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn("wallModel::New(const dictionary&, const spray&)")
+            << "Unknown wallModelType type " << wallModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid wallModel types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<wallModel>(cstrIter()(dict, U, sm));

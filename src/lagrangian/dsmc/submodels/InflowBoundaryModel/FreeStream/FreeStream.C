@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FreeStream.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -130,7 +131,7 @@ void Foam::FreeStream<CloudType>::inflow()
 
     Random& rndGen(cloud.rndGen());
 
-    scalar sqrtPi = sqrt(mathematicalConstant::pi);
+    scalar sqrtPi = sqrt(constant::math::pi);
 
     label particlesInserted = 0;
 

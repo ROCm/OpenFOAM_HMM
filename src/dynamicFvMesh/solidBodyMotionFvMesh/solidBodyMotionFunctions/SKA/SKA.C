@@ -29,9 +29,9 @@ License
 #include "Tuple2.H"
 #include "IFstream.H"
 #include "interpolateXY.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
-using namespace Foam::mathematicalConstant;
+using namespace Foam::constant::math;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

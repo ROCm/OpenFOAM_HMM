@@ -34,7 +34,6 @@ License
 namespace Foam
 {
 
-
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 defineTypeNameAndDebug(dragModel, 0);
@@ -44,18 +43,17 @@ defineRunTimeSelectionTable(dragModel, dictionary);
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-dragModel::dragModel
-(
-    const dictionary& dict
-)
+dragModel::dragModel(const dictionary& dict)
 :
     dict_(dict)
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 dragModel::~dragModel()
 {}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

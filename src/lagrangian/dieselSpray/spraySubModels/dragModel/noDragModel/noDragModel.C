@@ -48,13 +48,11 @@ addToRunTimeSelectionTable
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-noDragModel::noDragModel
-(
-    const dictionary& dict
-)
+noDragModel::noDragModel(const dictionary& dict)
 :
     dragModel(dict)
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -86,6 +84,7 @@ scalar noDragModel::relaxationTime
 {
     return GREAT;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

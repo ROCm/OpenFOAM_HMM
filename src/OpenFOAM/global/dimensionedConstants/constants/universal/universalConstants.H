@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,16 +22,16 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-InNamespace
-    Foam::radiation
+Namespace
+    Foam::constant::uni
 
 Description
-    Constants used in radiation modelling
+    Universal constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef radiationConstants_H
-#define radiationConstants_H
+#ifndef universalConstants_H
+#define universalConstants_H
 
 #include "dimensionedScalar.H"
 
@@ -39,15 +39,28 @@ Description
 
 namespace Foam
 {
-namespace radiation
+namespace constant
 {
-    //- Stefan-Boltzmann constant [J/(K4 m2 s)]
-    extern const dimensionedScalar sigmaSB;
-}
-}
+namespace universal
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    //- Group name for universal constants
+    extern const char* group;
+
+    //- Reduced Planck constant: default SI units: [J/s]
+    extern const dimensionedScalar hr;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace universal
+} // End namespace constant
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
 // ************************************************************************* //
+

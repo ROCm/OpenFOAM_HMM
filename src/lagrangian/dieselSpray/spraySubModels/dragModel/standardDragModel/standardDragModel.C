@@ -48,10 +48,7 @@ addToRunTimeSelectionTable
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-standardDragModel::standardDragModel
-(
-    const dictionary& dict
-)
+standardDragModel::standardDragModel(const dictionary& dict)
 :
     dragModel(dict),
     dragDict_(dict.subDict(typeName + "Coeffs")),
@@ -61,6 +58,7 @@ standardDragModel::standardDragModel
     CdLimiter_(readScalar(dragDict_.lookup("CdLimiter"))),
     Cdistort_(readScalar(dragDict_.lookup("Cdistort")))
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -87,7 +85,6 @@ scalar standardDragModel::Cd
     drag *= (1.0 + Cdistort_*dev);
 
     return drag;
-
 }
 
 
@@ -101,16 +98,12 @@ scalar standardDragModel::relaxationTime
     const scalar dev
 ) const
 {
-
     scalar time = GREAT;
     scalar Re = mag(URel)*diameter/nu;
 
     if (Re > 0.1)
     {
-        time = 4.0*liquidDensity*diameter /
-        (
-            3.0*rho*Cd(Re, dev)*mag(URel)
-        );
+        time = 4.0*liquidDensity*diameter/(3.0*rho*Cd(Re, dev)*mag(URel));
     }
     else
     {
@@ -118,10 +111,13 @@ scalar standardDragModel::relaxationTime
         // the nominator and denominator
         // use Cd = 24/Re and remove the SMALL/SMALL
         // expression for the velocities
-        time = liquidDensity*diameter*diameter/(18*rho*nu*(1.0 + Cdistort_*dev));
+        time =
+            liquidDensity*diameter*diameter/(18*rho*nu*(1.0 + Cdistort_*dev));
     }
+
     return time;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

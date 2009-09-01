@@ -58,16 +58,16 @@ protected:
 
         spray& spray_;
         Random& rndGen_;
-        
+
         Switch includeOscillation_;
-        
+
         dictionary TABcoeffsDict_;
         scalar y0_;
         scalar yDot0_;
         scalar TABComega_;
         scalar TABCmu_;
         scalar TABWeCrit_;
-        
+
 
 public:
 
@@ -92,16 +92,11 @@ public:
     // Constructors
 
         //- Construct from components
-        breakupModel
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        breakupModel(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        virtual ~breakupModel();
+    //- Destructor
+    virtual ~breakupModel();
 
 
     // Selector
@@ -142,7 +137,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const = 0;
-        
 };
 
 
