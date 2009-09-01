@@ -238,6 +238,8 @@ protected:
             TrackData& td,
             const scalar dt,           // timestep
             const label cellI,         // owner cell
+            const scalar Re,           // Reynolds number
+            const scalar mu,           // local carrier viscosity
             const scalar d,            // diameter
             const vector& U,           // velocity
             const scalar rho,          // density
@@ -386,6 +388,14 @@ public:
 
             //- Surface area for given diameter
             inline scalar areaS(const scalar d) const;
+
+            //- Reynolds number - particle properties input
+            inline scalar Re
+            (
+                const vector& U,
+                const scalar d,
+                const scalar mu
+            ) const;
 
 
         // Main calculation loop

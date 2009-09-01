@@ -385,4 +385,17 @@ Foam::KinematicParcel<ParcelType>::areaS(const scalar d) const
 }
 
 
+template <class ParcelType>
+inline Foam::scalar
+Foam::KinematicParcel<ParcelType>::Re
+(
+    const vector& U,
+    const scalar d,
+    const scalar mu
+) const
+{
+    return rhoc_*mag(U - Uc_)*d/mu;
+}
+
+
 // ************************************************************************* //

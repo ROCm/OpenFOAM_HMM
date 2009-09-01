@@ -24,65 +24,32 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "HeatTransferModel.H"
+#include "RanzMarshallBirdCorrection.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
-:
-    dict_(dictionary::null),
-    owner_(owner),
-    coeffDict_(dictionary::null)
-{}
-
-
-template<class CloudType>
-Foam::HeatTransferModel<CloudType>::HeatTransferModel
+template <class CloudType>
+Foam::RanzMarshallBirdCorrection<CloudType>::RanzMarshallBirdCorrection
 (
     const dictionary& dict,
-    CloudType& owner,
-    const word& type
+    CloudType& cloud
 )
 :
-    dict_(dict),
-    owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    RanzMarshall<CloudType>(dict, cloud)
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-template<class CloudType>
-Foam::HeatTransferModel<CloudType>::~HeatTransferModel()
+template <class CloudType>
+Foam::RanzMarshallBirdCorrection<CloudType>::~RanzMarshallBirdCorrection()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-const CloudType& Foam::HeatTransferModel<CloudType>::owner() const
-{
-    return owner_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::HeatTransferModel<CloudType>::dict() const
-{
-    return dict_;
-}
-
-
-template<class CloudType>
-const Foam::dictionary& Foam::HeatTransferModel<CloudType>::coeffDict() const
-{
-    return coeffDict_;
-}
-
-
-template<class CloudType>
-Foam::scalar Foam::HeatTransferModel<CloudType>::htc
+Foam::scalar Foam::RanzMarshallBirdCorrection<CloudType>::htc
 (
     const scalar dp,
     const scalar Re,
@@ -91,16 +58,22 @@ Foam::scalar Foam::HeatTransferModel<CloudType>::htc
     const scalar NCpW
 ) const
 {
-    const scalar Nu = this->Nu(Re, Pr);
+    scalar htc = RanzMarshall<CloudType>::htc(dp, Re, Pr, kappa, NCpW);
 
-    return Nu*kappa/dp;
+    // Bird correction
+    if (mag(htc) > ROOTVSMALL && mag(NCpW) > ROOTVSMALL)
+    {
+        const scalar phit = min(NCpW/htc, 50);
+        scalar fBird = 1.0;
+        if (phit > 0.001)
+        {
+            fBird = phit/(exp(phit) - 1.0);
+        }
+        htc *= fBird;
+    }
+
+    return htc;
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "NewHeatTransferModel.C"
-
-
 // ************************************************************************* //
-

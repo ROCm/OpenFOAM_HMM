@@ -138,27 +138,13 @@ public:
         virtual scalar Pr() const = 0;
 
         //- Return heat transfer coefficient
-        virtual scalar h
+        virtual scalar htc
         (
             const scalar dp,
-            const vector& Ur,
-            const scalar rhoc,
-            const scalar rhop,
-            const scalar cpc,
-            const scalar cpp,
-            const scalar muc
-        ) const;
-
-        //- Return linearised coefficient for temperature equation
-        virtual scalar Cu
-        (
-            const scalar dp,
-            const vector& Ur,
-            const scalar rhoc,
-            const scalar rhop,
-            const scalar cpc,
-            const scalar cpp,
-            const scalar muc
+            const scalar Re,
+            const scalar Pr,
+            const scalar kappa,
+            const scalar NCpW
         ) const;
 };
 

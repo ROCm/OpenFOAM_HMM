@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,69 +23,43 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::LiquidEvaporation
+    Foam::RanzMarshallBirdCorrection
 
 Description
-    Liquid evaporation model
-    - uses ideal gas assumption
+    The Ranz-Marshall correlation for heat transfer with the Bird correction
+    to account for the local shielding effect due to emitted species.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef LiquidEvaporation_H
-#define LiquidEvaporation_H
+#ifndef RanzMarshallBirdCorrection_H
+#define RanzMarshallBirdCorrection_H
 
-#include "PhaseChangeModel.H"
-#include "liquidMixture.H"
+#include "RanzMarshall.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                     Class LiquidEvaporation Declaration
+                 Class RanzMarshallBirdCorrection Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class LiquidEvaporation
+template <class CloudType>
+class RanzMarshallBirdCorrection
 :
-    public PhaseChangeModel<CloudType>
+    public RanzMarshall<CloudType>
 {
-protected:
-
-    // Protected data
-
-        //- Global liquid properties data
-        autoPtr<liquidMixture> liquids_;
-
-        //- List of active liquid names
-        List<word> activeLiquids_;
-
-        //- Mapping between liquid and carrier species
-        List<label> liqToCarrierMap_;
-
-        //- Mapping between local and global liquid species
-        List<label> liqToLiqMap_;
-
-
-    // Protected member functions
-
-        //- Sherwood number as a function of Reynolds and Schmidt numbers
-        scalar Sh(const scalar Re, const scalar Sc) const;
-
-        //- Calculate the carrier phase component volume fractions at cellI
-        scalarField calcXc(const label cellI) const;
-
 
 public:
 
     //- Runtime type information
-    TypeName("LiquidEvaporation");
+    TypeName("RanzMarshallBirdCorrection");
 
 
     // Constructors
 
         //- Construct from dictionary
-        LiquidEvaporation
+        RanzMarshallBirdCorrection
         (
             const dictionary& dict,
             CloudType& cloud
@@ -93,26 +67,19 @@ public:
 
 
     //- Destructor
-    virtual ~LiquidEvaporation();
+    virtual ~RanzMarshallBirdCorrection();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates phase change model
-        virtual bool active() const;
-
-        //- Update model
-        virtual void calculate
+        //- Return heat transfer coefficient
+        virtual scalar htc
         (
-            const scalar dt,
-            const label cellI,
+            const scalar dp,
             const scalar Re,
-            const scalar d,
-            const scalar nu,
-            const scalar T,
-            const scalar Ts,
-            const scalar pc,
-            scalarField& dMassPC
+            const scalar Pr,
+            const scalar kappa,
+            const scalar NCpW
         ) const;
 };
 
@@ -124,7 +91,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "LiquidEvaporation.C"
+#   include "RanzMarshallBirdCorrection.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
