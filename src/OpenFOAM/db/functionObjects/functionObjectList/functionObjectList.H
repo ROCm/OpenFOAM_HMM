@@ -120,9 +120,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~functionObjectList();
+    //- Destructor
+    virtual ~functionObjectList();
 
 
     // Member Functions
@@ -139,6 +138,8 @@ public:
         //- Clear the list of function objects
         virtual void clear();
 
+        //- Find the ID of a given function object by name
+        virtual label findObjectID(const word& name) const;
 
         //- Switch the function objects on
         virtual void on();
@@ -161,7 +162,6 @@ public:
 
         //- Read and set the function objects if their data have changed
         virtual bool read();
-
 };
 
 
