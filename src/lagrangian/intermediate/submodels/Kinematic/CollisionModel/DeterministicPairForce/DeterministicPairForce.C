@@ -63,7 +63,7 @@ void Foam::DeterministicPairForce<CloudType>::evaluatePair
     {
         //Particles in collision
 
-        vector n = deltaP/mag(deltaP);
+        vector n = deltaP/(mag(deltaP) + VSMALL);
 
         vector Urel = pA.U() - pB.U();
 
@@ -73,7 +73,7 @@ void Foam::DeterministicPairForce<CloudType>::evaluatePair
         // Effective mass
         scalar M = pA.mass()*pB.mass()/(pA.mass() + pB.mass());
 
-        scalar E = 5e5;
+        scalar E = 2e3;
         scalar sigma = 0.25;
         scalar alpha = 0.2;
         scalar b = 1.0;
@@ -180,44 +180,44 @@ void Foam::DeterministicPairForce<CloudType>::collide()
 
     // real-referred interactions
 
-    // const referredCellList<typename CloudType::parcelType>& ril(il_.ril());
+    referredCellList<typename CloudType::parcelType>& ril(il_.ril());
 
-    // // Loop over all referred cells
-    // forAll(ril, refCellI)
-    // {
-    //     const referredCell<typename CloudType::parcelType>& refCell =
-    //         ril[refCellI];
+    // Loop over all referred cells
+    forAll(ril, refCellI)
+    {
+        referredCell<typename CloudType::parcelType>& refCell =
+            ril[refCellI];
 
-    //     const List<label>& realCells = refCell.realCellsForInteraction();
+        const labelList& realCells = refCell.realCellsForInteraction();
 
-    //     // Loop over all referred parcels in the referred cell
+        // Loop over all referred parcels in the referred cell
 
-    //     forAllIter
-    //     (
-    //         typename IDLList<typename CloudType::parcelType>,
-    //         refCell,
-    //         iter
-    //     )
-    //     {
-    //         pB_ptr = &referredParcel();
+        forAllIter
+        (
+            typename IDLList<typename CloudType::parcelType>,
+            refCell,
+            referredParcel
+        )
+        {
+            // Loop over all real cells in that the referred cell is
+            // to supply interactions to
 
-    //         // Loop over all real cells in that the referred cell is
-    //         // to supply interactions to
+            forAll(realCells, realCellI)
+            {
+                List<typename CloudType::parcelType*> realCellParcels =
+                    cellOccupancy_[realCells[realCellI]];
 
-    //         forAll(realCells, realCellI)
-    //         {
-    //             List<typename CloudType::parcelType*> realCellParcels =
-    //                 cellOccupancy_[realCells[realCellI]];
-
-    //             forAll(realCellParcels, realParcelI)
-    //             {
-    //                 pA_ptr = realCellParcels[realParcelI];
-
-    //                 evaluatePair(*pA_ptr, *pB_ptr);
-    //             }
-    //         }
-    //     }
-    // }
+                forAll(realCellParcels, realParcelI)
+                {
+                    evaluatePair
+                    (
+                        *realCellParcels[realParcelI],
+                        referredParcel()
+                    );
+                }
+            }
+        }
+    }
 
 
     Info<< "ADD COLLISIONS WITH WALLS HERE, DOES NOT NEED TO BE A TRACKING "

@@ -229,10 +229,9 @@ public:
         // list of vectors
         vectorList rotateVectors(const vectorList& vectorsToRotate) const;
 
-        //- referInParticle(s) takes a referred particle from a source
+        //- referInParticle takes a referred particle from a source
         //  processor, transforming its position and properties
-        void referInParticles(const IDLList<ParticleType>& incomingParticles);
-        void referInParticle(const ParticleType& incomingParticle);
+        void referInParticle(ParticleType* incomingParticlePtr);
 
         //- duplicate() function to test whether a referred or real cell
         //  supplied by arguement is a duplicate of this referredCell.

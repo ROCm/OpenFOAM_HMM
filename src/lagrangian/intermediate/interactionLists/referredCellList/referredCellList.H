@@ -37,6 +37,8 @@ SourceFiles
 #define referredCellList_H
 
 #include "referredCell.H"
+#include "sendingReferralList.H"
+#include "receivingReferralList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -69,6 +71,14 @@ class referredCellList
         void buildReferredCellList
         (
             bool pointPointListBuild
+        );
+
+        //- Store the referred particles in the referred cells
+        void storeParticles
+        (
+            const receivingReferralList& rRL,
+            const labelList& destinationReferredCell,
+            IDLList<ParticleType>& particlesToReferIn
         );
 
 
