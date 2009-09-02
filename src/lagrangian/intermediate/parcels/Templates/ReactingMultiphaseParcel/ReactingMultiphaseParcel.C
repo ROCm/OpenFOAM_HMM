@@ -27,6 +27,8 @@ License
 #include "ReactingMultiphaseParcel.H"
 #include "mathConstants.H"
 
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -214,7 +216,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, mus);
+    scalar Re = this->Re(U0, d0, rhos, mus);
 
 
     // Sources
@@ -495,7 +497,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calc
         }
         else
         {
-            this->d_ = cbrt(mass1/this->rho_*6.0/constant::math::pi);
+            this->d_ = cbrt(mass1/this->rho_*6.0/math::pi);
         }
     }
 }
@@ -642,7 +644,7 @@ void Foam::ReactingMultiphaseParcel<ParcelType>::calcSurfaceReactions
     const scalar hRetentionCoeffMod =
         (1.0 - xsi*xsi)*td.constProps().hRetentionCoeff();
 
-    Sh += hRetentionCoeffMod *hReaction/dt;
+    Sh += hRetentionCoeffMod*hReaction/dt;
 
     dhsTrans += (1.0 - hRetentionCoeffMod)*hReaction;
 }

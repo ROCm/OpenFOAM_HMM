@@ -159,7 +159,7 @@ void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
     rhos = 0;
     mus = 0;
     kappa = 0;
-    scalar cps = 0.0;
+    scalar cps = 0;
     scalar sumYiSqrtW = 0;
     scalar sumYiCbrtW = 0;
 
@@ -233,11 +233,10 @@ void Foam::ReactingParcel<ParcelType>::calc
     // Calc surface values
     // ~~~~~~~~~~~~~~~~~~~
     scalar Ts, rhos, mus, Pr, kappa;
-    ThermoParcel<ParcelType>::
-        calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
+    this->calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, mus);
+    scalar Re = this->Re(U0, d0, rhos, mus);
 
 
     // Sources

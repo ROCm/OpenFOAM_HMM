@@ -28,6 +28,8 @@ License
 #include "specie.H"
 #include "mathConstants.H"
 
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
@@ -148,7 +150,7 @@ void Foam::LiquidEvaporation<CloudType>::calculate
     scalarField Xc = calcXc(cellI);
 
     // droplet surface area
-    scalar A = constant::math::pi*sqr(d);
+    scalar A = math::pi*sqr(d);
 
     // calculate mass transfer of each specie in liquid
     forAll(activeLiquids_, i)

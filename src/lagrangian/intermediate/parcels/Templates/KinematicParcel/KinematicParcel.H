@@ -389,12 +389,13 @@ public:
             //- Surface area for given diameter
             inline scalar areaS(const scalar d) const;
 
-            //- Reynolds number - particle properties input
+            //- Reynolds number
             inline scalar Re
             (
-                const vector& U,
-                const scalar d,
-                const scalar mu
+                const vector& U,        // particle velocity
+                const scalar d,         // particle diameter
+                const scalar rhoc,      // carrier density
+                const scalar muc        // carrier dynamic viscosity
             ) const;
 
 

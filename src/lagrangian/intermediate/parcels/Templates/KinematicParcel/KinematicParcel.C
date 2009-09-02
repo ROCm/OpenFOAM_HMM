@@ -102,7 +102,7 @@ void Foam::KinematicParcel<ParcelType>::calc
     const scalar mass0 = mass();
 
     // Reynolds number
-    const scalar Re = this->Re(U0, d0, muc_);
+    const scalar Re = this->Re(U0, d0, rhoc_, muc_);
 
 
     // Sources

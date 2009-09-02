@@ -133,7 +133,7 @@ void Foam::ThermoParcel<ParcelType>::calc
     calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
 
     // Reynolds number
-    scalar Re = this->Re(U0, d0, mus);
+    scalar Re = this->Re(U0, d0, rhos, mus);
 
 
     // Sources
@@ -231,37 +231,26 @@ Foam::scalar Foam::ThermoParcel<ParcelType>::calcHeatTransfer
     // Calc heat transfer coefficient
     scalar htc = td.cloud().heatTransfer().htc(d, Re, Pr, kappa, NCpW);
 
-    const scalar As = this->areaS(d);
-
     if (mag(htc) < ROOTVSMALL && !td.cloud().radiation())
     {
         return  T + dt*Sh/(this->volume(d)*rho*cp);
     }
 
-    scalar ap;
-    scalar bp;
-
+    const scalar As = this->areaS(d);
+    scalar ap = Tc_ + Sh/As/htc;
+    scalar bp = 6.0*(Sh/As + htc*(Tc_ - T));
     if (td.cloud().radiation())
     {
         const scalarField& G =
             td.cloud().mesh().objectRegistry::lookupObject<volScalarField>("G");
+        const scalar Gc = G[cellI];
         const scalar sigma = physicoChemical::sigma.value();
         const scalar epsilon = td.constProps().epsilon0();
 
-        ap =
-            (Sh/As + htc*Tc_ + epsilon*G[cellI]/4.0)
-           /(htc + epsilon*sigma*pow3(T));
-
-        bp =
-            6.0
-           *(Sh/As + htc*(Tc_ - T) + epsilon*(G[cellI]/4.0 - sigma*pow4(T)))
-           /(rho*d*cp*(ap - T));
+        ap = (ap + epsilon*Gc/(4.0*htc))/(1.0 + epsilon*sigma*pow3(T)/htc);
+        bp += 6.0*(epsilon*(Gc/4.0 - sigma*pow4(T)));
     }
-    else
-    {
-        ap = Tc_ + Sh/As/htc;
-        bp = 6.0*(Sh/As + htc*(Tc_ - T))/(rho*d*cp*(ap - T));
-    }
+    bp /= rho*d*cp*(ap - T);
 
     // Integrate to find the new parcel temperature
     IntegrationScheme<scalar>::integrationResult Tres =
