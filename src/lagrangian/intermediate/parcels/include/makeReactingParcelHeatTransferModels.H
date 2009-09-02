@@ -34,7 +34,6 @@ License
 
 #include "NoHeatTransfer.H"
 #include "RanzMarshall.H"
-#include "RanzMarshallBirdCorrection.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -71,13 +70,6 @@ License
     makeHeatTransferModelThermoType                                           \
     (                                                                         \
         RanzMarshall,                                                         \
-        ThermoCloud,                                                          \
-        ParcelType,                                                           \
-        ThermoType                                                            \
-    );                                                                        \
-    makeHeatTransferModelThermoType                                           \
-    (                                                                         \
-        RanzMarshallBirdCorrection,                                           \
         ThermoCloud,                                                          \
         ParcelType,                                                           \
         ThermoType                                                            \

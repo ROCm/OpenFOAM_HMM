@@ -64,6 +64,9 @@ class HeatTransferModel
         //- The coefficients dictionary
         const dictionary coeffDict_;
 
+        //- Apply Bird's correction to the htc
+        const Switch BirdCorrection_;
+
 
 public:
 
@@ -110,6 +113,8 @@ public:
     );
 
 
+    // Member Functions
+
     // Access
 
         //- Return the cloud dictionary
@@ -121,11 +126,14 @@ public:
         //- Return the owner cloud object
         const CloudType& owner() const;
 
-
-    // Member Functions
+        //- Return the Bird htc correction flag
+        const Switch& BirdCorrection() const;
 
         //- Flag to indicate whether model activates heat transfer model
         virtual bool active() const = 0;
+
+
+    // Evaluation
 
         //- Nusselt number
         virtual scalar Nu
@@ -133,9 +141,6 @@ public:
             const scalar Re,
             const scalar Pr
         ) const = 0;
-
-        //- Prandtl number
-        virtual scalar Pr() const = 0;
 
         //- Return heat transfer coefficient
         virtual scalar htc

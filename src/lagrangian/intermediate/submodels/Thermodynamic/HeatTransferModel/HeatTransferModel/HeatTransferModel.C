@@ -33,7 +33,8 @@ Foam::HeatTransferModel<CloudType>::HeatTransferModel(CloudType& owner)
 :
     dict_(dictionary::null),
     owner_(owner),
-    coeffDict_(dictionary::null)
+    coeffDict_(dictionary::null),
+    BirdCorrection_(false)
 {}
 
 
@@ -47,7 +48,8 @@ Foam::HeatTransferModel<CloudType>::HeatTransferModel
 :
     dict_(dict),
     owner_(owner),
-    coeffDict_(dict.subDict(type + "Coeffs"))
+    coeffDict_(dict.subDict(type + "Coeffs")),
+    BirdCorrection_(coeffDict_.lookup("BirdCorrection"))
 {}
 
 
@@ -82,6 +84,13 @@ const Foam::dictionary& Foam::HeatTransferModel<CloudType>::coeffDict() const
 
 
 template<class CloudType>
+const Foam::Switch& Foam::HeatTransferModel<CloudType>::BirdCorrection() const
+{
+    return BirdCorrection_;
+}
+
+
+template<class CloudType>
 Foam::scalar Foam::HeatTransferModel<CloudType>::htc
 (
     const scalar dp,
@@ -93,7 +102,18 @@ Foam::scalar Foam::HeatTransferModel<CloudType>::htc
 {
     const scalar Nu = this->Nu(Re, Pr);
 
-    return Nu*kappa/dp;
+    scalar htc = Nu*kappa/dp;
+
+    if (BirdCorrection_ && (mag(htc) > ROOTVSMALL) && (mag(NCpW) > ROOTVSMALL))
+    {
+        const scalar phit = min(NCpW/htc, 50);
+        if (phit > 0.001)
+        {
+            htc *= phit/(exp(phit) - 1.0);
+        }
+    }
+
+    return htc;
 }
 
 
