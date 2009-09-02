@@ -628,7 +628,7 @@ void Foam::addPatchCellLayer::setRefinement
     DynamicList<label> ef;
 
     // Precalculate mesh edges for pp.edges.
-    labelList meshEdges(calcMeshEdges(mesh_, pp));
+    const labelList meshEdges(pp.meshEdges(mesh_.edges(), mesh_.pointEdges()));
 
     if (debug)
     {
@@ -1544,32 +1544,6 @@ void Foam::addPatchCellLayer::updateMesh
         }
         layerFaces_.transfer(newLayerFaces);
     }
-}
-
-
-Foam::labelList Foam::addPatchCellLayer::calcMeshEdges
-(
-    const primitiveMesh& mesh,
-    const indirectPrimitivePatch& pp
-)
-{
-    labelList meshEdges(pp.nEdges());
-
-    forAll(meshEdges, patchEdgeI)
-    {
-        const edge& e = pp.edges()[patchEdgeI];
-
-        label v0 = pp.meshPoints()[e[0]];
-        label v1 = pp.meshPoints()[e[1]];
-        meshEdges[patchEdgeI] = meshTools::findEdge
-        (
-            mesh.edges(),
-            mesh.pointEdges()[v0],
-            v0,
-            v1
-        );
-    }
-    return meshEdges;
 }
 
 
