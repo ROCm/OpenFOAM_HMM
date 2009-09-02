@@ -24,13 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "directInteractionList.H"
-#include "interactionLists.H"
+#include "DirectInteractionList.H"
+#include "InteractionLists.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
+void Foam::DirectInteractionList<ParticleType>::buildDirectInteractionList
 (
     bool pointPointListBuild
 )
@@ -39,7 +39,7 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
 
     const polyMesh& mesh(il_.mesh());
 
-    List<DynamicList<label> > directInteractionList(mesh.nCells());
+    List<DynamicList<label> > DirectInteractionList(mesh.nCells());
 
     if (pointPointListBuild)
     {
@@ -82,13 +82,13 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                                 (
                                     findIndex
                                     (
-                                        directInteractionList[cellI],
+                                        DirectInteractionList[cellI],
                                         cellJ
                                     )
                                  == -1
                                 )
                                 {
-                                    directInteractionList[cellI].append(cellJ);
+                                    DirectInteractionList[cellI].append(cellJ);
                                 }
                             }
 
@@ -98,14 +98,14 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                                 (
                                     findIndex
                                     (
-                                        directInteractionList[cellJ],
+                                        DirectInteractionList[cellJ],
                                         cellI
                                     )
                                  ==
                                     -1
                                 )
                                 {
-                                    directInteractionList[cellJ].append(cellI);
+                                    DirectInteractionList[cellJ].append(cellI);
                                 }
                             }
                         }
@@ -141,14 +141,14 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                             (
                                 findIndex
                                 (
-                                    directInteractionList[cellI],
+                                    DirectInteractionList[cellI],
                                     cellO
                                 )
                              ==
                                 -1
                             )
                             {
-                                directInteractionList[cellI].append(cellO);
+                                DirectInteractionList[cellI].append(cellO);
                             }
                         }
 
@@ -158,14 +158,14 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                             (
                                 findIndex
                                 (
-                                    directInteractionList[cellO],
+                                    DirectInteractionList[cellO],
                                     cellI
                                 )
                              ==
                                 -1
                             )
                             {
-                                directInteractionList[cellO].append(cellI);
+                                DirectInteractionList[cellO].append(cellI);
                             }
                         }
 
@@ -182,14 +182,14 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                                 (
                                     findIndex
                                     (
-                                        directInteractionList[cellI],
+                                        DirectInteractionList[cellI],
                                         cellN
                                     )
                                  ==
                                     -1
                                 )
                                 {
-                                    directInteractionList[cellI].append(cellN);
+                                    DirectInteractionList[cellI].append(cellN);
                                 }
                             }
 
@@ -199,14 +199,14 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                                 (
                                     findIndex
                                     (
-                                        directInteractionList[cellN],
+                                        DirectInteractionList[cellN],
                                         cellI
                                     )
                                  ==
                                     -1
                                 )
                                 {
-                                    directInteractionList[cellN].append(cellI);
+                                    DirectInteractionList[cellN].append(cellI);
                                 }
                             }
                         }
@@ -250,14 +250,14 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                                 (
                                     findIndex
                                     (
-                                        directInteractionList[cellI],
+                                        DirectInteractionList[cellI],
                                         cellJ
                                     )
                                  ==
                                     -1
                                 )
                                 {
-                                    directInteractionList[cellI].append(cellJ);
+                                    DirectInteractionList[cellI].append(cellJ);
                                 }
                             }
 
@@ -267,14 +267,14 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
                                 (
                                     findIndex
                                     (
-                                        directInteractionList[cellJ],
+                                        DirectInteractionList[cellJ],
                                         cellI
                                     )
                                  ==
                                     -1
                                 )
                                 {
-                                    directInteractionList[cellJ].append(cellI);
+                                    DirectInteractionList[cellJ].append(cellI);
                                 }
                             }
                         }
@@ -284,11 +284,11 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
         }
     }
 
-    forAll(directInteractionList, transDIL)
+    forAll(DirectInteractionList, transDIL)
     {
         (*this)[transDIL].transfer
         (
-            directInteractionList[transDIL].shrink()
+            DirectInteractionList[transDIL].shrink()
         );
     }
 
@@ -304,9 +304,9 @@ void Foam::directInteractionList<ParticleType>::buildDirectInteractionList
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::directInteractionList<ParticleType>::directInteractionList
+Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 (
-    const interactionLists<ParticleType>& il,
+    const InteractionLists<ParticleType>& il,
     bool pointPointListBuild
 )
 :
@@ -329,22 +329,22 @@ Foam::directInteractionList<ParticleType>::directInteractionList
 
 
 template<class ParticleType>
-Foam::directInteractionList<ParticleType>::directInteractionList
+Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 (
-    const interactionLists<ParticleType>& il
+    const InteractionLists<ParticleType>& il
 )
 :
     labelListList(il.mesh().nCells()),
     il_(il)
 {
-    Info<< "Read directInteractionList from disk not implemented" << endl;
+    Info<< "Read DirectInteractionList from disk not implemented" << endl;
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::directInteractionList<ParticleType>::~directInteractionList()
+Foam::DirectInteractionList<ParticleType>::~DirectInteractionList()
 {}
 
 

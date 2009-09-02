@@ -24,30 +24,30 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "interactionLists.H"
+#include "InteractionLists.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::scalar Foam::interactionLists<ParticleType>::transTol = 1e-12;
+Foam::scalar Foam::InteractionLists<ParticleType>::transTol = 1e-12;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::interactionLists<ParticleType>::buildCellReferralLists()
+void Foam::InteractionLists<ParticleType>::buildCellReferralLists()
 {
     Info<< nl << "Determining particle referring schedule" << endl;
 
-    const referredCellList<ParticleType>& refIntL(ril());
+    const ReferredCellList<ParticleType>& refIntL(ril());
 
     DynamicList<label> referralProcs;
 
-    // Run through all referredCells to build list of interacting processors
+    // Run through all ReferredCells to build list of interacting processors
 
     forAll(refIntL, rIL)
     {
-        const referredCell<ParticleType>& rC(refIntL[rIL]);
+        const ReferredCell<ParticleType>& rC(refIntL[rIL]);
 
         if (findIndex(referralProcs, rC.sourceProc()) == -1)
         {
@@ -64,11 +64,11 @@ void Foam::interactionLists<ParticleType>::buildCellReferralLists()
     List<DynamicList<DynamicList<label> > >
         cellReceivingReferralLists(referralProcs.size());
 
-    // Run through all referredCells again building up send and receive info
+    // Run through all ReferredCells again building up send and receive info
 
     forAll(refIntL, rIL)
     {
-        const referredCell<ParticleType>& rC(refIntL[rIL]);
+        const ReferredCell<ParticleType>& rC(refIntL[rIL]);
 
         label rPI = findIndex(referralProcs, rC.sourceProc());
 
@@ -197,7 +197,7 @@ void Foam::interactionLists<ParticleType>::buildCellReferralLists()
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::interactionLists<ParticleType>::interactionLists
+Foam::InteractionLists<ParticleType>::InteractionLists
 (
     const polyMesh& mesh,
     scalar maxDistanceSqr,
@@ -216,7 +216,7 @@ Foam::interactionLists<ParticleType>::interactionLists
 
 
 template<class ParticleType>
-Foam::interactionLists<ParticleType>::interactionLists(const polyMesh& mesh)
+Foam::InteractionLists<ParticleType>::InteractionLists(const polyMesh& mesh)
 :
     mesh_(mesh),
     dil_(*this),
@@ -227,14 +227,14 @@ Foam::interactionLists<ParticleType>::interactionLists(const polyMesh& mesh)
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::interactionLists<ParticleType>::~interactionLists()
+Foam::InteractionLists<ParticleType>::~InteractionLists()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testPointPointDistance
+bool Foam::InteractionLists<ParticleType>::testPointPointDistance
 (
     const label ptI,
     const label ptJ
@@ -245,7 +245,7 @@ bool Foam::interactionLists<ParticleType>::testPointPointDistance
 
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testEdgeEdgeDistance
+bool Foam::InteractionLists<ParticleType>::testEdgeEdgeDistance
 (
     const edge& eI,
     const edge& eJ
@@ -259,7 +259,7 @@ bool Foam::interactionLists<ParticleType>::testEdgeEdgeDistance
 
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testPointFaceDistance
+bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 (
     const label p,
     const label faceNo
@@ -272,10 +272,10 @@ bool Foam::interactionLists<ParticleType>::testPointFaceDistance
 
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testPointFaceDistance
+bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 (
     const label p,
-    const referredCell<ParticleType>& refCell
+    const ReferredCell<ParticleType>& refCell
 ) const
 {
     const vector& pointPosition(mesh_.points()[p]);
@@ -303,7 +303,7 @@ bool Foam::interactionLists<ParticleType>::testPointFaceDistance
 
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testPointFaceDistance
+bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 (
     const vectorList& pointsToTest,
     const label faceNo
@@ -328,7 +328,7 @@ bool Foam::interactionLists<ParticleType>::testPointFaceDistance
 
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testPointFaceDistance
+bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 (
     const vector& p,
     const label faceNo
@@ -354,7 +354,7 @@ bool Foam::interactionLists<ParticleType>::testPointFaceDistance
 
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testPointFaceDistance
+bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 (
     const vector& p,
     const labelList& faceToTest,
@@ -461,7 +461,7 @@ bool Foam::interactionLists<ParticleType>::testPointFaceDistance
     // if the algorithm hasn't returned anything by now then something has
     // gone wrong.
 
-    FatalErrorIn("interactionLists.C") << nl
+    FatalErrorIn("InteractionLists.C") << nl
         << "point " << p << " to face " << faceToTest
         << " comparison did not find a nearest point"
         << " to be inside or outside face."
@@ -472,7 +472,7 @@ bool Foam::interactionLists<ParticleType>::testPointFaceDistance
 
 
 template<class ParticleType>
-bool Foam::interactionLists<ParticleType>::testEdgeEdgeDistance
+bool Foam::InteractionLists<ParticleType>::testEdgeEdgeDistance
 (
     const edge& eI,
     const vector& eJs,
@@ -517,7 +517,7 @@ bool Foam::interactionLists<ParticleType>::testEdgeEdgeDistance
 
 template<class ParticleType>
 const Foam::labelList
-Foam::interactionLists<ParticleType>::realCellsInRangeOfSegment
+Foam::InteractionLists<ParticleType>::realCellsInRangeOfSegment
 (
     const labelList& segmentFaces,
     const labelList& segmentEdges,
@@ -610,15 +610,15 @@ Foam::interactionLists<ParticleType>::realCellsInRangeOfSegment
 
 template<class ParticleType>
 const Foam::labelList
-Foam::interactionLists<ParticleType>::referredCellsInRangeOfSegment
+Foam::InteractionLists<ParticleType>::ReferredCellsInRangeOfSegment
 (
-    const List<referredCell<ParticleType> >& referredInteractionList,
+    const List<ReferredCell<ParticleType> >& referredInteractionList,
     const labelList& segmentFaces,
     const labelList& segmentEdges,
     const labelList& segmentPoints
 ) const
 {
-    DynamicList<label> referredCellsFoundInRange;
+    DynamicList<label> ReferredCellsFoundInRange;
 
     forAll(segmentFaces, sF)
     {
@@ -631,9 +631,9 @@ Foam::interactionLists<ParticleType>::referredCellsInRangeOfSegment
 
             if (testPointFaceDistance(refCellPoints, f))
             {
-                if (findIndex(referredCellsFoundInRange, rIL) == -1)
+                if (findIndex(ReferredCellsFoundInRange, rIL) == -1)
                 {
-                    referredCellsFoundInRange.append(rIL);
+                    ReferredCellsFoundInRange.append(rIL);
                 }
             }
         }
@@ -645,14 +645,14 @@ Foam::interactionLists<ParticleType>::referredCellsInRangeOfSegment
 
         forAll(referredInteractionList, rIL)
         {
-            const referredCell<ParticleType>&
+            const ReferredCell<ParticleType>&
                 refCell(referredInteractionList[rIL]);
 
             if (testPointFaceDistance(p, refCell))
             {
-                if (findIndex(referredCellsFoundInRange, rIL) == -1)
+                if (findIndex(ReferredCellsFoundInRange, rIL) == -1)
                 {
-                    referredCellsFoundInRange.append(rIL);
+                    ReferredCellsFoundInRange.append(rIL);
                 }
             }
         }
@@ -684,16 +684,16 @@ Foam::interactionLists<ParticleType>::referredCellsInRangeOfSegment
                     )
                 )
                 {
-                    if(findIndex(referredCellsFoundInRange, rIL) == -1)
+                    if(findIndex(ReferredCellsFoundInRange, rIL) == -1)
                     {
-                        referredCellsFoundInRange.append(rIL);
+                        ReferredCellsFoundInRange.append(rIL);
                     }
                 }
             }
         }
     }
 
-    return referredCellsFoundInRange.shrink();
+    return ReferredCellsFoundInRange.shrink();
 }
 
 

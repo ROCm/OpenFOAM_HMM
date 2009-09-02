@@ -1,9 +1,11 @@
-Cloud = Cloud
-particle = particle
 passiveParticle = passiveParticle
 indexedParticle = indexedParticle
+referralLists = InteractionLists/referralLists
 
 $(passiveParticle)/passiveParticleCloud.C
 $(indexedParticle)/indexedParticleCloud.C
+
+$(referralLists)/sendingReferralList.C
+$(referralLists)/receivingReferralList.C
 
 LIB = $(FOAM_LIBBIN)/liblagrangian

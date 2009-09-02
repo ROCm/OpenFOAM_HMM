@@ -24,13 +24,13 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "referredCell.H"
-#include "interactionLists.H"
+#include "ReferredCell.H"
+#include "InteractionLists.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::referredCell<ParticleType>::setConstructionData
+void Foam::ReferredCell<ParticleType>::setConstructionData
 (
     const polyMesh& mesh,
     const label sourceCell
@@ -92,7 +92,7 @@ void Foam::referredCell<ParticleType>::setConstructionData
 
 
 template<class ParticleType>
-void Foam::referredCell<ParticleType>::locallyMapEdgeList
+void Foam::ReferredCell<ParticleType>::locallyMapEdgeList
 (
     const labelList& points,
     const edgeList& sourceCellEdges
@@ -114,7 +114,7 @@ void Foam::referredCell<ParticleType>::locallyMapEdgeList
          || edges_[sCE].end() == -1
         )
         {
-            FatalErrorIn("Foam::referredCell::locallyMapEdgeList")
+            FatalErrorIn("Foam::ReferredCell::locallyMapEdgeList")
                 << "edgeList and points labelList for "
                 << "referred cell do not match: "
                 << nl << "points: " << points
@@ -126,7 +126,7 @@ void Foam::referredCell<ParticleType>::locallyMapEdgeList
 
 
 template<class ParticleType>
-void Foam::referredCell<ParticleType>::locallyMapFaceList
+void Foam::ReferredCell<ParticleType>::locallyMapFaceList
 (
     const labelList& points,
     const labelListList& sourceCellFaces
@@ -148,7 +148,7 @@ void Foam::referredCell<ParticleType>::locallyMapFaceList
 
             if (localFace[p] == -1)
             {
-                FatalErrorIn("Foam::referredCell::locallyMapEdgeList")
+                FatalErrorIn("Foam::ReferredCell::locallyMapEdgeList")
                     << "edgeList and points labelList for "
                     << "referred cell do not match: "
                     << nl << "points: " << points
@@ -161,7 +161,7 @@ void Foam::referredCell<ParticleType>::locallyMapFaceList
 
 
 template<class ParticleType>
-Foam::vector Foam::referredCell<ParticleType>::referPosition
+Foam::vector Foam::ReferredCell<ParticleType>::referPosition
 (
     const vector& positionToRefer
 )
@@ -172,7 +172,7 @@ Foam::vector Foam::referredCell<ParticleType>::referPosition
 
 template<class ParticleType>
 Foam::vectorList
-Foam::referredCell<ParticleType>::referPositions
+Foam::ReferredCell<ParticleType>::referPositions
 (
     const vectorList& positionsToRefer
 )
@@ -183,7 +183,7 @@ Foam::referredCell<ParticleType>::referPositions
 
 template<class ParticleType>
 Foam::vector
-Foam::referredCell<ParticleType>::rotateVector(const vector& vectorToRotate)
+Foam::ReferredCell<ParticleType>::rotateVector(const vector& vectorToRotate)
 {
     return rotation_ & vectorToRotate;
 }
@@ -191,7 +191,7 @@ Foam::referredCell<ParticleType>::rotateVector(const vector& vectorToRotate)
 
 template<class ParticleType>
 Foam::vectorList
-Foam::referredCell<ParticleType>::rotateVectors
+Foam::ReferredCell<ParticleType>::rotateVectors
 (
     const vectorList& vectorsToRotate
 )
@@ -203,7 +203,7 @@ Foam::referredCell<ParticleType>::rotateVectors
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::referredCell<ParticleType>::referredCell()
+Foam::ReferredCell<ParticleType>::ReferredCell()
 :
     IDLList<ParticleType>(),
     sourceProc_(-1),
@@ -216,7 +216,7 @@ Foam::referredCell<ParticleType>::referredCell()
 
 
 template<class ParticleType>
-Foam::referredCell<ParticleType>::referredCell
+Foam::ReferredCell<ParticleType>::ReferredCell
 (
     const polyMesh& mesh,
     const label sourceProc,
@@ -236,7 +236,7 @@ Foam::referredCell<ParticleType>::referredCell
 
 
 template<class ParticleType>
-Foam::referredCell<ParticleType>::referredCell
+Foam::ReferredCell<ParticleType>::ReferredCell
 (
     const label sourceProc,
     const label sourceCell,
@@ -270,7 +270,7 @@ Foam::referredCell<ParticleType>::referredCell
 
 
 template<class ParticleType>
-Foam::referredCell<ParticleType>::referredCell
+Foam::ReferredCell<ParticleType>::ReferredCell
 (
     const polyMesh& mesh,
     const label sourceProc,
@@ -295,7 +295,7 @@ Foam::referredCell<ParticleType>::referredCell
 
     offset_ = cD - (rotation_ & cS);
 
-    // Allow sourceCell = -1 to create a dummy referredCell
+    // Allow sourceCell = -1 to create a dummy ReferredCell
     // to obtain the transformation
 
     if(sourceCell >= 0)
@@ -308,14 +308,14 @@ Foam::referredCell<ParticleType>::referredCell
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::referredCell<ParticleType>::~referredCell()
+Foam::ReferredCell<ParticleType>::~ReferredCell()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::referredCell<ParticleType> Foam::referredCell<ParticleType>::reRefer
+Foam::ReferredCell<ParticleType> Foam::ReferredCell<ParticleType>::reRefer
 (
     const vector& cS,
     const vector& cD,
@@ -334,7 +334,7 @@ Foam::referredCell<ParticleType> Foam::referredCell<ParticleType>::reRefer
 
     vector reReferredOffset = newOffset + (newRotation & offset_);
 
-    return referredCell
+    return ReferredCell
     (
         sourceProc_,
         sourceCell_,
@@ -350,7 +350,7 @@ Foam::referredCell<ParticleType> Foam::referredCell<ParticleType>::reRefer
 
 
 template<class ParticleType>
-Foam::vector Foam::referredCell<ParticleType>::referPosition
+Foam::vector Foam::ReferredCell<ParticleType>::referPosition
 (
     const vector& positionToRefer
 ) const
@@ -360,7 +360,7 @@ Foam::vector Foam::referredCell<ParticleType>::referPosition
 
 
 template<class ParticleType>
-Foam::vectorList Foam::referredCell<ParticleType>::referPosition
+Foam::vectorList Foam::ReferredCell<ParticleType>::referPosition
 (
     const vectorList& positionsToRefer
 ) const
@@ -370,7 +370,7 @@ Foam::vectorList Foam::referredCell<ParticleType>::referPosition
 
 
 template<class ParticleType>
-Foam::vector Foam::referredCell<ParticleType>::rotateVector
+Foam::vector Foam::ReferredCell<ParticleType>::rotateVector
 (
     const vector& vectorToRotate
 ) const
@@ -380,7 +380,7 @@ Foam::vector Foam::referredCell<ParticleType>::rotateVector
 
 
 template<class ParticleType>
-Foam::vectorList Foam::referredCell<ParticleType>::rotateVectors
+Foam::vectorList Foam::ReferredCell<ParticleType>::rotateVectors
 (
     const vectorList& vectorsToRotate
 ) const
@@ -390,7 +390,7 @@ Foam::vectorList Foam::referredCell<ParticleType>::rotateVectors
 
 
 template<class ParticleType>
-void Foam::referredCell<ParticleType>::referInParticle
+void Foam::ReferredCell<ParticleType>::referInParticle
 (
     ParticleType* incomingParticlePtr
 )
@@ -409,9 +409,9 @@ void Foam::referredCell<ParticleType>::referInParticle
 
 
 template<class ParticleType>
-bool Foam::referredCell<ParticleType>::duplicate
+bool Foam::ReferredCell<ParticleType>::duplicate
 (
-    const referredCell<ParticleType>& refCellDupl
+    const ReferredCell<ParticleType>& refCellDupl
 ) const
 {
     return
@@ -419,13 +419,13 @@ bool Foam::referredCell<ParticleType>::duplicate
         sourceProc_ == refCellDupl.sourceProc()
      && sourceCell_ == refCellDupl.sourceCell()
      && mag(offset_ - refCellDupl.offset())
-      < interactionLists<ParticleType>::transTol
+      < InteractionLists<ParticleType>::transTol
     );
 }
 
 
 template<class ParticleType>
-bool Foam::referredCell<ParticleType>::duplicate
+bool Foam::ReferredCell<ParticleType>::duplicate
 (
     const label procNo,
     const label nCells
@@ -436,7 +436,7 @@ bool Foam::referredCell<ParticleType>::duplicate
         sourceProc_ == procNo
      && sourceCell_ < nCells
      && mag(offset_)
-      < interactionLists<ParticleType>::transTol
+      < InteractionLists<ParticleType>::transTol
     );
 }
 
@@ -446,13 +446,13 @@ bool Foam::referredCell<ParticleType>::duplicate
 template<class ParticleType>
 bool Foam::operator==
 (
-    const referredCell<ParticleType>& a,
-    const referredCell<ParticleType>& b
+    const ReferredCell<ParticleType>& a,
+    const ReferredCell<ParticleType>& b
 )
 {
-    return const_cast<referredCell<ParticleType>&>(a).duplicate
+    return const_cast<ReferredCell<ParticleType>&>(a).duplicate
     (
-        const_cast<const referredCell<ParticleType>&>(b)
+        const_cast<const ReferredCell<ParticleType>&>(b)
     );
 }
 
@@ -460,8 +460,8 @@ bool Foam::operator==
 template<class ParticleType>
 bool Foam::operator!=
 (
-    const referredCell<ParticleType>& a,
-    const referredCell<ParticleType>& b
+    const ReferredCell<ParticleType>& a,
+    const ReferredCell<ParticleType>& b
 )
 {
     return !(a == b);
@@ -469,7 +469,7 @@ bool Foam::operator!=
 
 
 template<class ParticleType>
-Foam::Istream& Foam::operator>>(Istream& is, referredCell<ParticleType>& rC)
+Foam::Istream& Foam::operator>>(Istream& is, ReferredCell<ParticleType>& rC)
 {
 
     is  >> rC.sourceProc_
@@ -484,7 +484,7 @@ Foam::Istream& Foam::operator>>(Istream& is, referredCell<ParticleType>& rC)
 
     is.check
     (
-        "Istream& operator<<(Istream& f, const referredCell<ParticleType>& rC"
+        "Istream& operator<<(Istream& f, const ReferredCell<ParticleType>& rC"
     );
 
     return is;
@@ -495,7 +495,7 @@ template<class ParticleType>
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const referredCell<ParticleType>& rC
+    const ReferredCell<ParticleType>& rC
 )
 {
 
@@ -511,7 +511,7 @@ Foam::Ostream& Foam::operator<<
 
     os.check
     (
-        "Ostream& operator<<(Ostream& f, const referredCell<ParticleType>& rC"
+        "Ostream& operator<<(Ostream& f, const ReferredCell<ParticleType>& rC"
     );
 
     return os;

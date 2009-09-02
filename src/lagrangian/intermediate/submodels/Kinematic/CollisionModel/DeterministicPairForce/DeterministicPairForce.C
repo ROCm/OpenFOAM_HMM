@@ -135,7 +135,7 @@ void Foam::DeterministicPairForce<CloudType>::collide()
 
     buildCellOccupancy();
 
-    const directInteractionList<typename CloudType::parcelType>& dil(il_.dil());
+    const DirectInteractionList<typename CloudType::parcelType>& dil(il_.dil());
 
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;
@@ -180,12 +180,12 @@ void Foam::DeterministicPairForce<CloudType>::collide()
 
     // real-referred interactions
 
-    referredCellList<typename CloudType::parcelType>& ril(il_.ril());
+    ReferredCellList<typename CloudType::parcelType>& ril(il_.ril());
 
     // Loop over all referred cells
     forAll(ril, refCellI)
     {
-        referredCell<typename CloudType::parcelType>& refCell =
+        ReferredCell<typename CloudType::parcelType>& refCell =
             ril[refCellI];
 
         const labelList& realCells = refCell.realCellsForInteraction();

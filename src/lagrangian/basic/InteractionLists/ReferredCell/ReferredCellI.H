@@ -27,28 +27,28 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-inline Foam::label Foam::referredCell<ParticleType>::sourceProc() const
+inline Foam::label Foam::ReferredCell<ParticleType>::sourceProc() const
 {
     return sourceProc_;
 }
 
 
 template<class ParticleType>
-inline Foam::label Foam::referredCell<ParticleType>::sourceCell() const
+inline Foam::label Foam::ReferredCell<ParticleType>::sourceCell() const
 {
     return sourceCell_;
 }
 
 
 template<class ParticleType>
-inline const Foam::vector& Foam::referredCell<ParticleType>::offset() const
+inline const Foam::vector& Foam::ReferredCell<ParticleType>::offset() const
 {
     return offset_;
 }
 
 
 template<class ParticleType>
-inline const Foam::tensor& Foam::referredCell<ParticleType>::rotation() const
+inline const Foam::tensor& Foam::ReferredCell<ParticleType>::rotation() const
 {
     return rotation_;
 }
@@ -56,14 +56,14 @@ inline const Foam::tensor& Foam::referredCell<ParticleType>::rotation() const
 
 template<class ParticleType>
 inline const Foam::vectorList&
-Foam::referredCell<ParticleType>::vertexPositions() const
+Foam::ReferredCell<ParticleType>::vertexPositions() const
 {
     return vertexPositions_;
 }
 
 
 template<class ParticleType>
-inline const Foam::edgeList& Foam::referredCell<ParticleType>::edges() const
+inline const Foam::edgeList& Foam::ReferredCell<ParticleType>::edges() const
 {
     return edges_;
 }
@@ -71,7 +71,7 @@ inline const Foam::edgeList& Foam::referredCell<ParticleType>::edges() const
 
 template<class ParticleType>
 inline const Foam::labelListList&
-Foam::referredCell<ParticleType>::faces() const
+Foam::ReferredCell<ParticleType>::faces() const
 {
     return faces_;
 }
@@ -79,7 +79,7 @@ Foam::referredCell<ParticleType>::faces() const
 
 template<class ParticleType>
 inline const Foam::vectorList&
-Foam::referredCell<ParticleType>::faceCentres() const
+Foam::ReferredCell<ParticleType>::faceCentres() const
 {
     return faceCentres_;
 }
@@ -87,14 +87,14 @@ Foam::referredCell<ParticleType>::faceCentres() const
 
 template<class ParticleType>
 inline const Foam::vectorList&
-Foam::referredCell<ParticleType>::faceAreas() const
+Foam::ReferredCell<ParticleType>::faceAreas() const
 {
     return faceAreas_;
 }
 
 
 template<class ParticleType>
-inline Foam::labelList& Foam::referredCell<ParticleType>::realCells()
+inline Foam::labelList& Foam::ReferredCell<ParticleType>::realCells()
 {
     return realCellsForInteraction_;
 }
@@ -102,7 +102,7 @@ inline Foam::labelList& Foam::referredCell<ParticleType>::realCells()
 
 template<class ParticleType>
 inline const Foam::labelList&
-Foam::referredCell<ParticleType>::realCellsForInteraction() const
+Foam::ReferredCell<ParticleType>::realCellsForInteraction() const
 {
     return realCellsForInteraction_;
 }

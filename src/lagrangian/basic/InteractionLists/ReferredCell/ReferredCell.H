@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::referredCell
+    Foam::ReferredCell
 
 Description
 
 SourceFiles
-    referredCellI.H
-    referredCell.C
+    ReferredCellI.H
+    ReferredCell.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef referredCell_H
-#define referredCell_H
+#ifndef ReferredCell_H
+#define ReferredCell_H
 
 #include "vector.H"
 #include "vectorList.H"
@@ -54,43 +54,43 @@ namespace Foam
 // Forward declaration of friend functions and operators
 
 template<class ParticleType>
-class referredCell;
+class ReferredCell;
 
 template<class ParticleType>
 bool operator==
 (
-    const referredCell<ParticleType>& a,
-    const referredCell<ParticleType>& b
+    const ReferredCell<ParticleType>& a,
+    const ReferredCell<ParticleType>& b
 );
 
 template<class ParticleType>
 bool operator!=
 (
-    const referredCell<ParticleType>& a,
-    const referredCell<ParticleType>& b
+    const ReferredCell<ParticleType>& a,
+    const ReferredCell<ParticleType>& b
 );
 
 template<class ParticleType>
 Istream& operator>>
 (
     Istream&,
-    referredCell<ParticleType>&
+    ReferredCell<ParticleType>&
 );
 
 template<class ParticleType>
 Ostream& operator<<
 (
     Ostream&,
-    const referredCell<ParticleType>&
+    const ReferredCell<ParticleType>&
 );
 
 
 /*---------------------------------------------------------------------------*\
-                          Class referredCell Declaration
+                          Class ReferredCell Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParticleType>
-class referredCell
+class ReferredCell
 :
     public IDLList<ParticleType>
 {
@@ -153,10 +153,10 @@ public:
 
         //- Construct null
 
-        referredCell();
+        ReferredCell();
 
         //- Construct from components with external edge information
-        referredCell
+        ReferredCell
         (
             const polyMesh& mesh,
             const label sourceProc,
@@ -166,7 +166,7 @@ public:
         );
 
         //- Construct from components with existing local edge information
-        referredCell
+        ReferredCell
         (
             const label sourceProc,
             const label sourceCell,
@@ -185,7 +185,7 @@ public:
         //  Order of vectors important (S = source, D = Destination).
         //  External edge information.
 
-        referredCell
+        ReferredCell
         (
             const polyMesh& mesh,
             const label sourceProc,
@@ -199,14 +199,14 @@ public:
 
     // Destructor
 
-        virtual ~referredCell();
+        virtual ~ReferredCell();
 
 
     // Member Functions
 
-        //- Take this referredCell object that has already had it's transform
+        //- Take this ReferredCell object that has already had it's transform
         //  calculated and refer it on again, retaining same source info.
-        referredCell reRefer
+        ReferredCell reRefer
         (
             const vector& cS,
             const vector& cD,
@@ -234,16 +234,16 @@ public:
         void referInParticle(ParticleType* incomingParticlePtr);
 
         //- duplicate() function to test whether a referred or real cell
-        //  supplied by arguement is a duplicate of this referredCell.
+        //  supplied by arguement is a duplicate of this ReferredCell.
         //  Can be used bi-directionally - i.e. can be called on an existing
-        //  referred cell with a proposed referredCell as argument,
-        //  or vice versa.  Can only be called by a proposed referredCell with
+        //  referred cell with a proposed ReferredCell as argument,
+        //  or vice versa.  Can only be called by a proposed ReferredCell with
         //  a real cell index as arguement to test to see if the proposed
-        //  referredCell is a duplicate.
+        //  ReferredCell is a duplicate.
         //  A duplicate cell is defined as one which has the same source
         //  processor, source cell, and an equal offset. Real cells have zero
         //  offset by definition.
-        bool duplicate(const referredCell& refCellDupl) const;
+        bool duplicate(const ReferredCell& refCellDupl) const;
 
         bool duplicate(const label procNo, const label nCells) const;
 
@@ -277,14 +277,14 @@ public:
 
         friend bool operator== <ParticleType>
         (
-            const referredCell<ParticleType>& a,
-            const referredCell<ParticleType>& b
+            const ReferredCell<ParticleType>& a,
+            const ReferredCell<ParticleType>& b
         );
 
         friend bool operator!= <ParticleType>
         (
-            const referredCell<ParticleType>& a,
-            const referredCell<ParticleType>& b
+            const ReferredCell<ParticleType>& a,
+            const ReferredCell<ParticleType>& b
         );
 
 
@@ -293,13 +293,13 @@ public:
         friend Istream& operator>> <ParticleType>
         (
             Istream&,
-            referredCell<ParticleType>&
+            ReferredCell<ParticleType>&
         );
 
         friend Ostream& operator<< <ParticleType>
         (
             Ostream&,
-            const referredCell<ParticleType>&
+            const ReferredCell<ParticleType>&
         );
 };
 
@@ -310,12 +310,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "referredCellI.H"
+#include "ReferredCellI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "referredCell.C"
+#   include "ReferredCell.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

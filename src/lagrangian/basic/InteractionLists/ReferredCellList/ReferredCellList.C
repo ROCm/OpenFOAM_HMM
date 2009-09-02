@@ -24,8 +24,8 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "referredCellList.H"
-#include "interactionLists.H"
+#include "ReferredCellList.H"
+#include "InteractionLists.H"
 #include "polyBoundaryMeshEntries.H"
 #include "PstreamCombineReduceOps.H"
 #include "Time.H"
@@ -36,7 +36,7 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::referredCellList<ParticleType>::buildReferredCellList
+void Foam::ReferredCellList<ParticleType>::buildReferredCellList
 (
     bool pointPointListBuild
 )
@@ -45,7 +45,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
 
     const polyMesh& mesh(il_.mesh());
 
-    DynamicList<referredCell<ParticleType> > referredInteractionList;
+    DynamicList<ReferredCell<ParticleType> > referredInteractionList;
 
     // realCellsWithinRangeOfAnyReferringPatch
     DynamicList<label> rCellsWRRP;
@@ -122,7 +122,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
         }
         else
         {
-            FatalErrorIn ("referredCellList.C")
+            FatalErrorIn ("ReferredCellList.C")
                 << nl << "unable to read undecomposed boundary file from "
                 << "constant/polyMesh" << nl
                 << abort(FatalError);
@@ -302,7 +302,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                 {
                     if (processorPatchSegmentMapping[pP][faceI] == nUP)
                     {
-                        referredCell<ParticleType> testRefCell
+                        ReferredCell<ParticleType> testRefCell
                         (
                             mesh,
                             -1,
@@ -329,18 +329,18 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                     if
                     (
                         sum(mag(refOff-refOff[0]))/refOff.size()
-                            > interactionLists<ParticleType>::transTol
+                            > InteractionLists<ParticleType>::transTol
                      || sum(mag(refTrans-refTrans[0]))/refTrans.size()
-                            > interactionLists<ParticleType>::transTol
+                            > InteractionLists<ParticleType>::transTol
                     )
                     {
-                        FatalErrorIn ("referredCellList.C")
+                        FatalErrorIn ("ReferredCellList.C")
                             << nl << "Face pairs on patch "
                             << patch.name()
                             << ", segment " << patchNames[nUP]
                             << " do not give the same referring "
                             << " transformations to within tolerance of "
-                            << interactionLists<ParticleType>::transTol << nl
+                            << InteractionLists<ParticleType>::transTol << nl
                             << " Referring offsets:" << refOff << nl
                             << " Average sum of mag difference: "
                             << sum(mag(refOff-refOff[0]))/refOff.size() << nl
@@ -400,7 +400,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                             faceL++, faceM++
                         )
                         {
-                            referredCell<ParticleType> testRefCell
+                            ReferredCell<ParticleType> testRefCell
                             (
                                 mesh,
                                 -1,
@@ -419,17 +419,17 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                         if
                         (
                             sum(mag(refOff - refOff[0]))/(patch.size()/2)
-                                > interactionLists<ParticleType>::transTol
+                                > InteractionLists<ParticleType>::transTol
                          || sum(mag(refTrans - refTrans[0]))/(patch.size()/2)
-                                > interactionLists<ParticleType>::transTol
+                                > InteractionLists<ParticleType>::transTol
                         )
                         {
-                            FatalErrorIn ("referredCellList.C")
+                            FatalErrorIn ("ReferredCellList.C")
                                 << nl << "Face pairs on patch "
                                 << patch.name()
                                 << " do not give the same referring "
                                 << " transformations to within tolerance of "
-                                << interactionLists<ParticleType>::transTol
+                                << InteractionLists<ParticleType>::transTol
                                 << nl << " Referring offsets:" << refOff << nl
                                 << " Average sum of mag difference: "
                                 << sum(mag(refOff - refOff[0]))/refOff.size()
@@ -534,7 +534,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                         {
                             const label realCell = realCellsFoundInRange[cFIR];
 
-                            referredCell<ParticleType> cellToRefer
+                            ReferredCell<ParticleType> cellToRefer
                             (
                                 mesh,
                                 Pstream::myProcNo(),
@@ -601,9 +601,9 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
 
                     referredInteractionList.shrink();
 
-                    labelList referredCellsFoundInRange
+                    labelList ReferredCellsFoundInRange
                     (
-                        il_.referredCellsInRangeOfSegment
+                        il_.ReferredCellsInRangeOfSegment
                         (
                             referredInteractionList,
                             meshFacesOnThisSegment,
@@ -612,15 +612,15 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                         )
                     );
 
-                    forAll(referredCellsFoundInRange,cFIR)
+                    forAll(ReferredCellsFoundInRange,cFIR)
                     {
-                        referredCell<ParticleType>& existingRefCell =
+                        ReferredCell<ParticleType>& existingRefCell =
                             referredInteractionList
                             [
-                                referredCellsFoundInRange[cFIR]
+                                ReferredCellsFoundInRange[cFIR]
                             ];
 
-                        referredCell<ParticleType> cellToReRefer =
+                        ReferredCell<ParticleType> cellToReRefer =
                             existingRefCell.reRefer
                             (
                                 patch.faceCentres()[0],
@@ -766,7 +766,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                         {
                             const label realCell = realCellsFoundInRange[cFIR];
 
-                            referredCell<ParticleType> cellToRefer
+                            ReferredCell<ParticleType> cellToRefer
                             (
                                 mesh,
                                 Pstream::myProcNo(),
@@ -833,8 +833,8 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
 
                     referredInteractionList.shrink();
 
-                    referredCellsFoundInRange =
-                        il_.referredCellsInRangeOfSegment
+                    ReferredCellsFoundInRange =
+                        il_.ReferredCellsInRangeOfSegment
                         (
                             referredInteractionList,
                             meshFacesOnThisSegment,
@@ -842,15 +842,15 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                             meshPointsOnThisSegment
                         );
 
-                    forAll(referredCellsFoundInRange,cFIR)
+                    forAll(ReferredCellsFoundInRange,cFIR)
                     {
-                        referredCell<ParticleType>& existingRefCell =
+                        ReferredCell<ParticleType>& existingRefCell =
                             referredInteractionList
                             [
-                                referredCellsFoundInRange[cFIR]
+                                ReferredCellsFoundInRange[cFIR]
                             ];
 
-                        referredCell<ParticleType> cellToReRefer =
+                        ReferredCell<ParticleType> cellToReRefer =
                             existingRefCell.reRefer
                             (
                                 patch.faceCentres()[patch.size()/2],
@@ -919,7 +919,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                         mesh.boundaryMesh()[procPatches[pP]]
                     );
 
-                DynamicList<referredCell<ParticleType> > referredCellsToTransfer;
+                DynamicList<ReferredCell<ParticleType> > ReferredCellsToTransfer;
 
                 const vectorList& neighbFaceCentres =
                     allNeighbourFaceCentres[pP];
@@ -1023,7 +1023,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                     {
                         if (faceT == -1)
                         {
-                            FatalErrorIn ("referredCellList.C")
+                            FatalErrorIn ("ReferredCellList.C")
                                 << nl << "faceT == -1 encountered but "
                                 << meshFacesOnThisSegment.size()
                                 << " faces found on patch segment."
@@ -1051,7 +1051,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                                 const label realCell =
                                     realCellsFoundInRange[cFIR];
 
-                                referredCell<ParticleType> cellToRefer
+                                ReferredCell<ParticleType> cellToRefer
                                 (
                                     mesh,
                                     Pstream::myProcNo(),
@@ -1063,7 +1063,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                                    /(mag(neighbFaceAreas[faceT]) + VSMALL)
                                 );
 
-                                referredCellsToTransfer.append(cellToRefer);
+                                ReferredCellsToTransfer.append(cellToRefer);
 
                                 // add real cells found in range of processor
                                 // patch to whole mesh list
@@ -1077,9 +1077,9 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
 
                         referredInteractionList.shrink();
 
-                        labelList referredCellsFoundInRange
+                        labelList ReferredCellsFoundInRange
                         (
-                            il_.referredCellsInRangeOfSegment
+                            il_.ReferredCellsInRangeOfSegment
                             (
                                 referredInteractionList,
                                 meshFacesOnThisSegment,
@@ -1088,15 +1088,15 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                             )
                         );
 
-                        forAll(referredCellsFoundInRange,cFIR)
+                        forAll(ReferredCellsFoundInRange,cFIR)
                         {
-                            referredCell<ParticleType>& existingRefCell =
+                            ReferredCell<ParticleType>& existingRefCell =
                                 referredInteractionList
                                 [
-                                    referredCellsFoundInRange[cFIR]
+                                    ReferredCellsFoundInRange[cFIR]
                                 ];
 
-                            referredCell<ParticleType> cellToReRefer =
+                            ReferredCell<ParticleType> cellToReRefer =
                                 existingRefCell.reRefer
                                 (
                                     patch.faceCentres()[faceT],
@@ -1106,12 +1106,12 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                                    /(mag(neighbFaceAreas[faceT]) + VSMALL)
                                 );
 
-                            referredCellsToTransfer.append(cellToReRefer);
+                            ReferredCellsToTransfer.append(cellToReRefer);
                         }
                     }
                 }
 
-                referredCellsToTransfer.shrink();
+                ReferredCellsToTransfer.shrink();
 
                 // Send these cells to the neighbouring processor.
 
@@ -1122,7 +1122,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                         patch.neighbProcNo()
                     );
 
-                    toNeighbProc << referredCellsToTransfer;
+                    toNeighbProc << ReferredCellsToTransfer;
                 }
             }
 
@@ -1136,8 +1136,8 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
 
                 // Receive the cells from neighbour
 
-                List<referredCell<ParticleType> >
-                    referredCellsFromNeighbour(patch.size());
+                List<ReferredCell<ParticleType> >
+                    ReferredCellsFromNeighbour(patch.size());
 
                 {
                     IPstream fromNeighbProc
@@ -1146,16 +1146,16 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
                         patch.neighbProcNo()
                     );
 
-                    fromNeighbProc >> referredCellsFromNeighbour;
+                    fromNeighbProc >> ReferredCellsFromNeighbour;
                 }
 
                 // Check to see if they are duplicates, if not append
                 // them to the referredInteractionList
 
-                forAll(referredCellsFromNeighbour,rCFN)
+                forAll(ReferredCellsFromNeighbour,rCFN)
                 {
-                    referredCell<ParticleType>& cellToRefer =
-                        referredCellsFromNeighbour[rCFN];
+                    ReferredCell<ParticleType>& cellToRefer =
+                        ReferredCellsFromNeighbour[rCFN];
 
                     // Test all existing referred and real cells to check
                     // duplicates are not being made or cells aren't being
@@ -1294,7 +1294,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
     {
         const polyMesh& mesh(il_.mesh());
 
-        referredCell<ParticleType>& refCell = (*this)[rC];
+        ReferredCell<ParticleType>& refCell = (*this)[rC];
 
         DynamicList<label> realCellsFoundInRange;
 
@@ -1422,7 +1422,7 @@ void Foam::referredCellList<ParticleType>::buildReferredCellList
 
 
 template<class ParticleType>
-void Foam::referredCellList<ParticleType>::storeParticles
+void Foam::ReferredCellList<ParticleType>::storeParticles
 (
     const receivingReferralList& rRL,
     const labelList& destinationReferredCell,
@@ -1445,7 +1445,7 @@ void Foam::referredCellList<ParticleType>::storeParticles
 
         forAll(refCellsToReferTo, refCellI)
         {
-            referredCell<ParticleType>& refCellToRefParticlesTo =
+            ReferredCell<ParticleType>& refCellToRefParticlesTo =
                 (*this)[refCellsToReferTo[refCellI]];
 
             refCellToRefParticlesTo.referInParticle
@@ -1462,13 +1462,13 @@ void Foam::referredCellList<ParticleType>::storeParticles
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::referredCellList<ParticleType>::referredCellList
+Foam::ReferredCellList<ParticleType>::ReferredCellList
 (
-    interactionLists<ParticleType>& il,
+    InteractionLists<ParticleType>& il,
     bool pointPointListBuild
 )
 :
-    List<referredCell<ParticleType> >(),
+    List<ReferredCell<ParticleType> >(),
     il_(il),
     cloud_(il_.mesh(), "referredParticleCloud", IDLList<ParticleType>())
 
@@ -1478,30 +1478,30 @@ Foam::referredCellList<ParticleType>::referredCellList
 
 
 template<class ParticleType>
-Foam::referredCellList<ParticleType>::referredCellList
+Foam::ReferredCellList<ParticleType>::ReferredCellList
 (
-    interactionLists<ParticleType>& il
+    InteractionLists<ParticleType>& il
 )
 :
-    List<referredCell<ParticleType> >(),
+    List<ReferredCell<ParticleType> >(),
     il_(il),
     cloud_(il_.mesh(), IDLList<ParticleType>())
 {
-    Info<< "Read referredCellList from disk not implemented" << endl;
+    Info<< "Read ReferredCellList from disk not implemented" << endl;
 }
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class ParticleType>
-Foam::referredCellList<ParticleType>::~referredCellList()
+Foam::ReferredCellList<ParticleType>::~ReferredCellList()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-void Foam::referredCellList<ParticleType>::referParticles
+void Foam::ReferredCellList<ParticleType>::referParticles
 (
     const List<DynamicList<ParticleType*> >& cellOccupancy
 )
@@ -1572,8 +1572,8 @@ void Foam::referredCellList<ParticleType>::referParticles
         }
     }
 
-    // Receive referred particle lists to and distribute to referredCells
-    // according to cellReceivingReferralLists, referredCells deal with the
+    // Receive referred particle lists to and distribute to ReferredCells
+    // according to cellReceivingReferralLists, ReferredCells deal with the
     // transformations themselves
 
     forAll(il_.cellReceivingReferralLists(), cRRL)
@@ -1619,7 +1619,7 @@ void Foam::referredCellList<ParticleType>::referParticles
 
         forAll(*this, refCellI)
         {
-            referredCell<ParticleType>& refCell = (*this)[refCellI];
+            ReferredCell<ParticleType>& refCell = (*this)[refCellI];
 
             forAllIter
             (

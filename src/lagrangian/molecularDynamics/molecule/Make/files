@@ -2,11 +2,8 @@ interactionLists = interactionLists
 referredMolecule = $(interactionLists)/referredMolecule
 referredCellList = $(interactionLists)/referredCellList
 referredCell = $(interactionLists)/referredCell
-referralLists = $(interactionLists)/referralLists
 directInteractionList = $(interactionLists)/directInteractionList
 
-$(referralLists)/sendingReferralList.C
-$(referralLists)/receivingReferralList.C
 $(referredCellList)/referredCellList.C
 $(referredCell)/referredCell.C
 $(referredMolecule)/referredMolecule.C

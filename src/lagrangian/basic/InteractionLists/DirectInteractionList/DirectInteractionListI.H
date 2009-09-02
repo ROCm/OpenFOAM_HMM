@@ -24,62 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-const Foam::polyMesh& Foam::interactionLists<ParticleType>::mesh() const
+inline const Foam::InteractionLists<ParticleType>&
+Foam::DirectInteractionList<ParticleType>::il() const
 {
-    return mesh_;
-}
-
-
-template<class ParticleType>
-const Foam::directInteractionList<ParticleType>&
-Foam::interactionLists<ParticleType>::dil() const
-{
-    return dil_;
-}
-
-
-template<class ParticleType>
-inline const Foam::referredCellList<ParticleType>&
-Foam::interactionLists<ParticleType>::ril() const
-{
-    return ril_;
-}
-
-
-template<class ParticleType>
-inline Foam::referredCellList<ParticleType>&
-Foam::interactionLists<ParticleType>::ril()
-{
-    return ril_;
-}
-
-
-template<class ParticleType>
-inline const Foam::List<Foam::sendingReferralList>&
-Foam::interactionLists<ParticleType>::cellSendingReferralLists() const
-{
-    return cellSendingReferralLists_;
-}
-
-
-template<class ParticleType>
-inline const Foam::List<Foam::receivingReferralList>&
-Foam::interactionLists<ParticleType>::cellReceivingReferralLists() const
-{
-    return cellReceivingReferralLists_;
-}
-
-
-template<class ParticleType>
-inline Foam::label
-Foam::interactionLists<ParticleType>::nInteractingProcs() const
-{
-    return cellReceivingReferralLists_.size();
+    return il_;
 }
 
 

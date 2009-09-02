@@ -23,20 +23,20 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::referredCellList
+    Foam::ReferredCellList
 
 Description
 
 SourceFiles
-    referredCellListI.H
-    referredCellList.C
+    ReferredCellListI.H
+    ReferredCellList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef referredCellList_H
-#define referredCellList_H
+#ifndef ReferredCellList_H
+#define ReferredCellList_H
 
-#include "referredCell.H"
+#include "ReferredCell.H"
 #include "sendingReferralList.H"
 #include "receivingReferralList.H"
 
@@ -47,20 +47,20 @@ namespace Foam
 
 // Forward declaration of classes
 template<class ParticleType>
-class interactionLists;
+class InteractionLists;
 
 /*---------------------------------------------------------------------------*\
-                      Class referredCellList Declaration
+                      Class ReferredCellList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParticleType>
-class referredCellList
+class ReferredCellList
 :
-    public List<referredCell<ParticleType> >
+    public List<ReferredCell<ParticleType> >
 {
     // Private data
 
-        const interactionLists<ParticleType>& il_;
+        const InteractionLists<ParticleType>& il_;
 
         //- Dummy cloud to give to particles
         Cloud<ParticleType> cloud_;
@@ -87,19 +87,19 @@ public:
     // Constructors
 
         //- Construct lists by searching the mesh
-        referredCellList
+        ReferredCellList
         (
-            interactionLists<ParticleType>& il,
+            InteractionLists<ParticleType>& il,
             bool pointPointListBuild
         );
 
         //- Construct from file
-        referredCellList (interactionLists<ParticleType>& il);
+        ReferredCellList (InteractionLists<ParticleType>& il);
 
 
     // Destructor
 
-        ~referredCellList();
+        ~ReferredCellList();
 
 
     // Member Functions
@@ -109,7 +109,7 @@ public:
             const List<DynamicList<ParticleType*> >& cellOccupancy
         );
 
-        inline const interactionLists<ParticleType>& il() const;
+        inline const InteractionLists<ParticleType>& il() const;
 };
 
 
@@ -119,12 +119,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "referredCellListI.H"
+#include "ReferredCellListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "referredCellList.C"
+#   include "ReferredCellList.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

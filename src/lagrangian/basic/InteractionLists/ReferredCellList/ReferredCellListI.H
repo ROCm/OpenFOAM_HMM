@@ -24,11 +24,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
 template<class ParticleType>
-inline const Foam::interactionLists<ParticleType>&
-Foam::directInteractionList<ParticleType>::il() const
+inline const Foam::InteractionLists<ParticleType>&
+Foam::ReferredCellList<ParticleType>::il() const
 {
     return il_;
 }

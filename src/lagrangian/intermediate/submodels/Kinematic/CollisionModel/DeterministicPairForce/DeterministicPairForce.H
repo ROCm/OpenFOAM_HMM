@@ -36,7 +36,7 @@ SourceFiles
 #define DeterministicPairForce_H
 
 #include "CollisionModel.H"
-#include "interactionLists.H"
+#include "InteractionLists.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -59,7 +59,7 @@ class DeterministicPairForce
 
         //- Interactions lists determining which cells are in
         //  interaction range of each other
-        interactionLists<typename CloudType::parcelType> il_;
+        InteractionLists<typename CloudType::parcelType> il_;
 
 
     // Private member functions

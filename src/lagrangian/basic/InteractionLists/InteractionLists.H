@@ -23,25 +23,25 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::interactionLists
+    Foam::InteractionLists
 
 Description
 
 SourceFiles
-    interactionListsI.H
-    interactionLists.C
-    interactionListsIO.C
+    InteractionListsI.H
+    InteractionLists.C
+    InteractionListsIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef interactionLists_H
-#define interactionLists_H
+#ifndef InteractionLists_H
+#define InteractionLists_H
 
 #include "polyMesh.H"
 #include "vector2D.H"
-#include "directInteractionList.H"
-#include "referredCell.H"
-#include "referredCellList.H"
+#include "DirectInteractionList.H"
+#include "ReferredCell.H"
+#include "ReferredCellList.H"
 #include "sendingReferralList.H"
 #include "receivingReferralList.H"
 
@@ -52,11 +52,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class interactionLists Declaration
+                       Class InteractionLists Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParticleType>
-class interactionLists
+class InteractionLists
 {
     // Private data
 
@@ -64,9 +64,9 @@ class interactionLists
 
         scalar maxDistanceSqr_;
 
-        directInteractionList<ParticleType> dil_;
+        DirectInteractionList<ParticleType> dil_;
 
-        referredCellList<ParticleType> ril_;
+        ReferredCellList<ParticleType> ril_;
 
         List<sendingReferralList> cellSendingReferralLists_;
 
@@ -76,14 +76,14 @@ class interactionLists
     // Private Member Functions
 
         //- Build referralLists which define how to send information
-        // to referredCells to source cells
+        // to ReferredCells to source cells
         void buildCellReferralLists();
 
         //- Disallow default bitwise copy construct
-        interactionLists(const interactionLists&);
+        InteractionLists(const InteractionLists&);
 
         //- Disallow default bitwise assignment
-        void operator=(const interactionLists&);
+        void operator=(const InteractionLists&);
 
 
 public:
@@ -97,7 +97,7 @@ public:
     // Constructors
 
         //- Construct and create all information from the mesh
-        interactionLists
+        InteractionLists
         (
             const polyMesh& mesh,
             scalar maxDistanceSqr,
@@ -105,12 +105,12 @@ public:
         );
 
         //- Construct from file
-        interactionLists(const polyMesh& mesh);
+        InteractionLists(const polyMesh& mesh);
 
 
     // Destructor
 
-        ~interactionLists();
+        ~InteractionLists();
 
 
     // Member Functions
@@ -130,7 +130,7 @@ public:
             bool testPointFaceDistance
             (
                 const label p,
-                const referredCell<ParticleType>& refCell
+                const ReferredCell<ParticleType>& refCell
             ) const;
 
             bool testPointFaceDistance
@@ -174,9 +174,9 @@ public:
                 const labelList& segmentPoints
             ) const;
 
-            const labelList referredCellsInRangeOfSegment
+            const labelList ReferredCellsInRangeOfSegment
             (
-                const List<referredCell<ParticleType> >&
+                const List<ReferredCell<ParticleType> >&
                     referredInteractionList,
                 const labelList& segmentFaces,
                 const labelList& segmentEdges,
@@ -188,10 +188,10 @@ public:
 
             inline const polyMesh& mesh() const;
 
-            inline const directInteractionList<ParticleType>& dil() const;
+            inline const DirectInteractionList<ParticleType>& dil() const;
 
-            inline const referredCellList<ParticleType>& ril() const;
-            inline referredCellList<ParticleType>& ril();
+            inline const ReferredCellList<ParticleType>& ril() const;
+            inline ReferredCellList<ParticleType>& ril();
 
             inline const List<sendingReferralList>&
                 cellSendingReferralLists() const;
@@ -209,12 +209,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "interactionListsI.H"
+#include "InteractionListsI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "interactionLists.C"
+#   include "InteractionLists.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::directInteractionList
+    Foam::DirectInteractionList
 
 Description
 
 SourceFiles
-    directInteractionListI.H
-    directInteractionList.C
+    DirectInteractionListI.H
+    DirectInteractionList.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directInteractionList_H
-#define directInteractionList_H
+#ifndef DirectInteractionList_H
+#define DirectInteractionList_H
 
 #include "polyMesh.H"
 #include "List.H"
@@ -46,20 +46,20 @@ namespace Foam
 
 // Forward declaration of classes
 template<class ParticleType>
-class interactionLists;
+class InteractionLists;
 
 /*---------------------------------------------------------------------------*\
-                           Class directInteractionList Declaration
+                           Class DirectInteractionList Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class ParticleType>
-class directInteractionList
+class DirectInteractionList
 :
     public labelListList
 {
     // Private data
 
-        const interactionLists<ParticleType>& il_;
+        const InteractionLists<ParticleType>& il_;
 
 
     // Private Member Functions
@@ -70,10 +70,10 @@ class directInteractionList
         );
 
         //- Disallow default bitwise copy construct
-        directInteractionList(const directInteractionList&);
+        DirectInteractionList(const DirectInteractionList&);
 
         //- Disallow default bitwise assignment
-        void operator=(const directInteractionList&);
+        void operator=(const DirectInteractionList&);
 
 
 public:
@@ -81,29 +81,29 @@ public:
     // Constructors
 
         //- Construct lists by searching the mesh
-        directInteractionList
+        DirectInteractionList
         (
-            const interactionLists<ParticleType>& il,
+            const InteractionLists<ParticleType>& il,
             bool pointPointListBuild
         );
 
         //- Construct from file
-        directInteractionList
+        DirectInteractionList
         (
-            const interactionLists<ParticleType>& il
+            const InteractionLists<ParticleType>& il
         );
 
 
     // Destructor
 
-        ~directInteractionList();
+        ~DirectInteractionList();
 
 
     // Member Functions
 
         // Access
 
-        inline const interactionLists<ParticleType>& il() const;
+        inline const InteractionLists<ParticleType>& il() const;
 };
 
 
@@ -113,12 +113,12 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "directInteractionListI.H"
+#include "DirectInteractionListI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "directInteractionList.C"
+#   include "DirectInteractionList.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
