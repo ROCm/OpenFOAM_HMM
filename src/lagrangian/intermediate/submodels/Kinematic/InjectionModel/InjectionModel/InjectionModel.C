@@ -28,6 +28,8 @@ License
 #include "mathConstants.H"
 #include "meshTools.H"
 
+using namespace Foam::constant;
+
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -195,9 +197,10 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
     {
         case pbMass:
         {
-            nP = volume/volumeTotal_
-                *massTotal_/rho
-               /(parcels*constant::math::pi/6.0*pow3(diameter));
+            nP =
+                volume/volumeTotal_
+               *massTotal_/rho
+               /(parcels*math::pi/6.0*pow3(diameter));
             break;
         }
         case pbNumber:

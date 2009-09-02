@@ -26,6 +26,9 @@ License
 
 #include "ReactingParcel.H"
 #include "mathConstants.H"
+#include "specie.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
@@ -99,6 +102,92 @@ void Foam::ReactingParcel<ParcelType>::cellValueSourceCorrection
 
 
 template<class ParcelType>
+template<class TrackData>
+void Foam::ReactingParcel<ParcelType>::correctSurfaceValues
+(
+    TrackData& td,
+    const label cellI,
+    const scalar T,
+    const scalarField& Cs,
+    scalar& rhos,
+    scalar& mus,
+    scalar& Pr,
+    scalar& kappa
+)
+{
+    // No correction if total concentration of emitted species is small
+    if (sum(Cs) < SMALL)
+    {
+        return;
+    }
+
+    // Far field gas molar fractions
+    scalarField Xinf(Y_.size());
+
+    forAll(Xinf, i)
+    {
+        Xinf[i] =
+            td.cloud().mcCarrierThermo().Y(i)[cellI]
+           /td.cloud().mcCarrierThermo().speciesData()[i].W();
+    }
+    Xinf /= sum(Xinf);
+
+    // Molar fraction of far field species at particle surface
+    const scalar Xsff = 1.0 - min(sum(Cs)*specie::RR*this->T_/pc_, 1.0);
+
+    // Surface gas total molar concentration
+    const scalar CsTot = pc_/(specie::RR*this->T_);
+
+    // Surface carrier composition (molar fraction)
+    scalarField Xs(Xinf.size());
+
+    // Surface carrier composition (mass fraction)
+    scalarField Ys(Xinf.size());
+
+    forAll(Xs, i)
+    {
+        // Molar concentration of species at particle surface
+        const scalar Csi = Cs[i] + Xsff*Xinf[i]*CsTot;
+
+        Xs[i] = (2.0*Csi + Xinf[i]*CsTot)/3.0;
+        Ys[i] = Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].W();
+    }
+    Xs /= sum(Xs);
+    Ys /= sum(Ys);
+
+
+    rhos = 0;
+    mus = 0;
+    kappa = 0;
+    scalar cps = 0;
+    scalar sumYiSqrtW = 0;
+    scalar sumYiCbrtW = 0;
+
+    forAll(Ys, i)
+    {
+        const scalar sqrtW =
+            sqrt(td.cloud().mcCarrierThermo().speciesData()[i].W());
+        const scalar cbrtW =
+            cbrt(td.cloud().mcCarrierThermo().speciesData()[i].W());
+
+        rhos += Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].W();
+        cps += Xs[i]*td.cloud().mcCarrierThermo().speciesData()[i].Cp(T);
+        mus += Ys[i]*sqrtW*td.cloud().mcCarrierThermo().speciesData()[i].mu(T);
+        kappa +=
+            Ys[i]*cbrtW*td.cloud().mcCarrierThermo().speciesData()[i].kappa(T);
+
+        sumYiSqrtW += Ys[i]*sqrtW;
+        sumYiCbrtW += Ys[i]*cbrtW;
+    }
+
+    rhos *= pc_/(specie::RR*T);
+    mus /= sumYiSqrtW;
+    kappa /= sumYiCbrtW;
+    Pr = cps*mus/kappa;
+}
+
+
+template<class ParcelType>
 Foam::scalar Foam::ReactingParcel<ParcelType>::updateMassFraction
 (
     const scalar mass0,
@@ -140,6 +229,19 @@ void Foam::ReactingParcel<ParcelType>::calc
     const scalar cp0 = this->cp_;
     const scalar mass0 = this->mass();
 
+
+    // Calc surface values
+    // ~~~~~~~~~~~~~~~~~~~
+    scalar Ts, rhos, mus, Pr, kappa;
+    this->calcSurfaceValues(td, cellI, T0, Ts, rhos, mus, Pr, kappa);
+
+    // Reynolds number
+    scalar Re = this->Re(U0, d0, rhos, mus);
+
+
+    // Sources
+    //~~~~~~~~
+
     // Explicit momentum source for particle
     vector Su = vector::zero;
 
@@ -159,23 +261,40 @@ void Foam::ReactingParcel<ParcelType>::calc
     // Mass transfer due to phase change
     scalarField dMassPC(Y_.size(), 0.0);
 
+    // Molar flux of species emitted from the particle (kmol/m^2/s)
+    scalar Ne = 0.0;
+
+    // Sum Ni*Cpi*Wi of emission species
+    scalar NCpW = 0.0;
+
+    // Surface concentrations of emitted species
+    scalarField Cs(td.cloud().mcCarrierThermo().species().size(), 0.0);
+
     // Calc mass and enthalpy transfer due to phase change
     calcPhaseChange
     (
         td,
         dt,
         cellI,
+        Ts,
+        mus/rhos,
+        Re,
         d0,
         T0,
-        U0,
         mass0,
         0,
         1.0,
         Y_,
         dMassPC,
         Sh,
-        dhsTrans
+        dhsTrans,
+        Ne,
+        NCpW,
+        Cs
     );
+
+    // Correct surface values due to emitted species
+    correctSurfaceValues(td, cellI, Ts, Cs, rhos, mus, Pr, kappa);
 
     // Update particle component mass and mass fractions
     scalar mass1 = updateMassFraction(mass0, dMassPC, Y_);
@@ -186,14 +305,30 @@ void Foam::ReactingParcel<ParcelType>::calc
 
     // Calculate new particle temperature
     scalar T1 =
-        calcHeatTransfer(td, dt, cellI, d0, U0, rho0, T0, cp0, Sh, dhsTrans);
+        calcHeatTransfer
+        (
+            td,
+            dt,
+            cellI,
+            Re,
+            Pr,
+            kappa,
+            d0,
+            rho0,
+            T0,
+            cp0,
+            NCpW,
+            Sh,
+            dhsTrans
+        );
 
 
     // Motion
     // ~~~~~~
 
     // Calculate new particle velocity
-    vector U1 = calcVelocity(td, dt, cellI, d0, U0, rho0, mass0, Su, dUTrans);
+    vector U1 =
+        calcVelocity(td, dt, cellI, Re, mus, d0, U0, rho0, mass0, Su, dUTrans);
 
     dUTrans += 0.5*(mass0 - mass1)*(U0 + U1);
 
@@ -258,7 +393,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         }
         else
         {
-            this->d_ = cbrt(mass1/this->rho_*6.0/constant::math::pi);
+            this->d_ = cbrt(mass1/this->rho_*6.0/math::pi);
         }
     }
 }
@@ -271,16 +406,21 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     TrackData& td,
     const scalar dt,
     const label cellI,
+    const scalar Re,
+    const scalar Ts,
+    const scalar nus,
     const scalar d,
     const scalar T,
-    const vector& U,
     const scalar mass,
     const label idPhase,
     const scalar YPhase,
     const scalarField& YComponents,
     scalarField& dMassPC,
     scalar& Sh,
-    scalar& dhsTrans
+    scalar& dhsTrans,
+    scalar& N,
+    scalar& NCpW,
+    scalarField& Cs
 )
 {
     if
@@ -298,12 +438,12 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     (
         dt,
         cellI,
+        Re,
         d,
-        min(T, td.constProps().Tbp()), // Limit to boiling temperature
+        nus,
+        T,
+        Ts,
         pc_,
-        this->Tc_,
-        this->muc_/(this->rhoc_ + ROOTVSMALL),
-        U - this->Uc_,
         dMassPC
     );
 
@@ -315,18 +455,38 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     // Add to cumulative phase change mass
     td.cloud().addToMassPhaseChange(this->nParticle_*dMassTot);
 
-    // Enthalphy transfer to carrier phase
-    label id;
+    // Average molecular weight of carrier mix - assumes perfect gas
+    scalar Wc = this->rhoc_*specie::RR*this->Tc_/this->pc_;
+
     forAll(YComponents, i)
     {
-        id = td.cloud().composition().localToGlobalCarrierId(idPhase, i);
-        const scalar hv = td.cloud().mcCarrierThermo().speciesData()[id].H(T);
+        const label idc =
+            td.cloud().composition().localToGlobalCarrierId(idPhase, i);
+        const scalar hv = td.cloud().mcCarrierThermo().speciesData()[idc].H(T);
 
-        id = td.cloud().composition().globalIds(idPhase)[i];
+        const label idl = td.cloud().composition().globalIds(idPhase)[i];
         const scalar hl =
-            td.cloud().composition().liquids().properties()[id].h(pc_, T);
+            td.cloud().composition().liquids().properties()[idl].h(pc_, T);
 
+        // Enthalphy transfer to carrier phase
         Sh += dMassPC[i]*(hl - hv)/dt;
+
+        const scalar Dab =
+            td.cloud().composition().liquids().properties()[idl].D(pc_, Ts, Wc);
+
+        const scalar Cp =
+            td.cloud().mcCarrierThermo().speciesData()[idc].Cp(Ts);
+        const scalar W = td.cloud().mcCarrierThermo().speciesData()[idc].W();
+        const scalar Ni = dMassPC[i]/(this->areaS(d)*dt*W);
+
+        // Molar flux of species coming from the particle (kmol/m^2/s)
+        N += Ni;
+
+        // Sum of Ni*Cpi*Wi of emission species
+        NCpW += Ni*Cp*W;
+
+        // Concentrations of emission species
+        Cs[idc] += Ni*d/(2.0*Dab);
     }
 }
 
