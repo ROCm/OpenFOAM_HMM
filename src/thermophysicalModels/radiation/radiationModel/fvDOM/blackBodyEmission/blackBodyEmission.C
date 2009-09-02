@@ -25,7 +25,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "blackBodyEmission.H"
-#include "dimensionedConstants.H"
+#include "physicoChemicalConstants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -171,7 +173,7 @@ Foam::radiation::blackBodyEmission::blackBodyEmission
                     IOobject::NO_READ,
                     IOobject::NO_WRITE
                 ),
-                radiation::sigmaSB*pow4(T)
+                physicoChemical::sigma*pow4(T)
             )
         );
 
@@ -215,7 +217,7 @@ Foam::radiation::blackBodyEmission::EbDeltaLambdaT
                 IOobject::NO_READ,
                 IOobject::NO_WRITE
             ),
-            radiation::sigmaSB*pow4(T)
+            physicoChemical::sigma*pow4(T)
         )
     );
 

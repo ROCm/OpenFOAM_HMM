@@ -75,6 +75,7 @@ private:
         scalar Q_;
         scalar J_;
 
+
 public:
 
     //- Runtime type information
@@ -84,16 +85,11 @@ public:
     // Constructors
 
         //- Construct from components
-        LISA
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        LISA(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~LISA();
+    //- Destructor
+    virtual ~LISA();
 
 
     // Member Operators
@@ -105,8 +101,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const;
-
-
 };
 
 

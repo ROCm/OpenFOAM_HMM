@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "SchnerrSauer.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -77,7 +77,7 @@ Foam::phaseChangeTwoPhaseMixtures::SchnerrSauer::rRb
 {
     return pow
     (
-        ((4*mathematicalConstant::pi*n_)/3)
+        ((4*constant::math::pi*n_)/3)
        *limitedAlpha1/(1.0 + alphaNuc() - limitedAlpha1),
         1.0/3.0
     );
@@ -87,7 +87,7 @@ Foam::phaseChangeTwoPhaseMixtures::SchnerrSauer::rRb
 Foam::dimensionedScalar
 Foam::phaseChangeTwoPhaseMixtures::SchnerrSauer::alphaNuc() const
 {
-    dimensionedScalar Vnuc = n_*mathematicalConstant::pi*pow3(dNuc_)/6;
+    dimensionedScalar Vnuc = n_*constant::math::pi*pow3(dNuc_)/6;
     return Vnuc/(1 + Vnuc);
 }
 

@@ -26,7 +26,7 @@ License
 
 #include "interfaceProperties.H"
 #include "alphaContactAngleFvPatchScalarField.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "surfaceInterpolate.H"
 #include "fvcDiv.H"
 #include "fvcGrad.H"
@@ -35,7 +35,7 @@ License
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
 
 const Foam::scalar Foam::interfaceProperties::convertToRad =
-    Foam::mathematicalConstant::pi/180.0;
+    Foam::constant::math::pi/180.0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

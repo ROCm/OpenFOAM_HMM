@@ -35,6 +35,7 @@ License
 #include "refinementSurfaces.H"
 #include "shellSurfaces.H"
 #include "mapDistributePolyMesh.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -678,8 +679,8 @@ void Foam::autoRefineDriver::mergePatchFaces
 
     meshRefiner_.mergePatchFaces
     (
-        Foam::cos(45*mathematicalConstant::pi/180.0),
-        Foam::cos(45*mathematicalConstant::pi/180.0),
+        Foam::cos(45*constant::math::pi/180.0),
+        Foam::cos(45*constant::math::pi/180.0),
         meshRefiner_.meshedPatches()
     );
 
@@ -688,7 +689,7 @@ void Foam::autoRefineDriver::mergePatchFaces
         meshRefiner_.checkData();
     }
 
-    meshRefiner_.mergeEdges(Foam::cos(45*mathematicalConstant::pi/180.0));
+    meshRefiner_.mergeEdges(Foam::cos(45*constant::math::pi/180.0));
 
     if (debug)
     {

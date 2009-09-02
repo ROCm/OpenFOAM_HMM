@@ -44,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class dispersionModel Declaration
+                        Class dispersionModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class dispersionModel
@@ -82,16 +82,11 @@ public:
     // Constructors
 
         //- Construct from components
-        dispersionModel
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        dispersionModel(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        virtual ~dispersionModel();
+    //- Destructor
+    virtual ~dispersionModel();
 
 
     // Selector

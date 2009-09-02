@@ -26,14 +26,13 @@ License
 
 #include "primitiveMeshGeometry.H"
 #include "pyramidPointFaceRef.H"
-
-namespace Foam
-{
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(primitiveMeshGeometry, 0);
-
+namespace Foam
+{
+    defineTypeNameAndDebug(primitiveMeshGeometry, 0);
 }
 
 
@@ -273,7 +272,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
 
     // Severe nonorthogonality threshold
     const scalar severeNonorthogonalityThreshold =
-        ::cos(orthWarn/180.0*mathematicalConstant::pi);
+        ::cos(orthWarn/180.0*constant::math::pi);
 
     scalar minDDotS = GREAT;
 
@@ -305,7 +304,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
                             << " between cells " << own[faceI]
                             << " and " << nei[faceI]
                             << ": Angle = "
-                            << ::acos(dDotS)/mathematicalConstant::pi*180.0
+                            << ::acos(dDotS)/constant::math::pi*180.0
                             << " deg." << endl;
                     }
 
@@ -331,7 +330,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
                             << " between cells " << own[faceI] << " and "
                             << nei[faceI]
                             << ": Angle = "
-                            << ::acos(dDotS)/mathematicalConstant::pi*180.0
+                            << ::acos(dDotS)/constant::math::pi*180.0
                             << " deg." << endl;
                     }
 
@@ -377,9 +376,9 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
         if (neiSize > 0)
         {
             Info<< "Mesh non-orthogonality Max: "
-                << ::acos(minDDotS)/mathematicalConstant::pi*180.0
+                << ::acos(minDDotS)/constant::math::pi*180.0
                 << " average: " <<
-                   ::acos(sumDDotS/neiSize)/mathematicalConstant::pi*180.0
+                   ::acos(sumDDotS/neiSize)/constant::math::pi*180.0
                 << endl;
         }
     }
@@ -561,7 +560,7 @@ bool Foam::primitiveMeshGeometry::checkFaceSkewness
                 cellCentres[own[faceI]]*dNei/(dOwn+dNei)
               + cellCentres[nei[faceI]]*dOwn/(dOwn+dNei);
 
-            scalar skewness = 
+            scalar skewness =
                 mag(faceCentres[faceI] - faceIntersection)
               / (
                     mag(cellCentres[nei[faceI]]-cellCentres[own[faceI]])
@@ -781,7 +780,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
             << abort(FatalError);
     }
 
-    const scalar maxSin = Foam::sin(maxDeg/180.0*mathematicalConstant::pi);
+    const scalar maxSin = Foam::sin(maxDeg/180.0*constant::math::pi);
 
     const faceList& fcs = mesh.faces();
 
@@ -862,7 +861,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
         {
             scalar maxConcaveDegr =
                 Foam::asin(Foam::min(1.0, maxEdgeSin))
-             * 180.0/mathematicalConstant::pi;
+              *180.0/constant::math::pi;
 
             Info<< "There are " << nConcave
                 << " faces with concave angles between consecutive"
@@ -1248,7 +1247,7 @@ bool Foam::primitiveMeshGeometry::checkCellDeterminant
         forAll(cFaces, cFaceI)
         {
             label faceI = cFaces[cFaceI];
-    
+
             scalar magArea = mag(faceAreas[faceI]);
 
             magAreaSum += magArea;
@@ -1275,7 +1274,7 @@ bool Foam::primitiveMeshGeometry::checkCellDeterminant
             nWarnDet++;
         }
     }
-    
+
     reduce(minDet, minOp<scalar>());
     reduce(sumDet, sumOp<scalar>());
     reduce(nSumDet, sumOp<label>());

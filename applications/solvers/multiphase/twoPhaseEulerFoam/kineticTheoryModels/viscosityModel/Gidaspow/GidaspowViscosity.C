@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "GidaspowViscosity.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -70,7 +70,7 @@ Foam::kineticTheoryModels::GidaspowViscosity::mua
     const dimensionedScalar& e
 ) const
 {
-    const scalar sqrtPi = sqrt(mathematicalConstant::pi);
+    const scalar sqrtPi = sqrt(constant::math::pi);
 
     return rhoa*da*sqrt(Theta)*
     (

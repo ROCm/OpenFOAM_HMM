@@ -44,6 +44,25 @@ dictionary& dimensionedConstants()
     );
 }
 
+
+dimensionedScalar dimensionedConstant
+(
+    const word& group,
+    const word& varName
+)
+{
+    dictionary& dict = dimensionedConstants();
+
+    const word unitSet(dict.lookup("unitSet"));
+
+    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
+
+    dictionary& groupDict = unitDict.subDict(group);
+
+    return dimensionedScalar(groupDict.lookup(varName));
+}
+
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam

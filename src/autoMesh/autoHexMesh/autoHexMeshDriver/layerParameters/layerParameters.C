@@ -26,7 +26,7 @@ License
 
 #include "layerParameters.H"
 #include "polyBoundaryMesh.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "refinementSurfaces.H"
 #include "searchableSurfaces.H"
 #include "regExp.H"
@@ -192,12 +192,7 @@ Foam::layerParameters::layerParameters
     ),
     layerTerminationCos_
     (
-        Foam::cos
-        (
-            0.5
-          * featureAngle_
-          * mathematicalConstant::pi/180.
-        )
+        Foam::cos(0.5*featureAngle_*constant::math::pi/180.0)
     ),
     maxThicknessToMedialRatio_
     (
@@ -206,7 +201,7 @@ Foam::layerParameters::layerParameters
     minMedianAxisAngleCos_
     (
         Foam::cos(readScalar(dict.lookup("minMedianAxisAngle")))
-      * mathematicalConstant::pi/180.
+       *constant::math::pi/180.0
     ),
     nBufferCellsNoExtrude_
     (
@@ -274,12 +269,7 @@ Foam::layerParameters::layerParameters
     ),
     layerTerminationCos_
     (
-        Foam::cos
-        (
-            0.5
-          * featureAngle_
-          * mathematicalConstant::pi/180.
-        )
+        Foam::cos(0.5*featureAngle_*constant::math::pi/180.0)
     ),
     maxThicknessToMedialRatio_
     (
@@ -288,7 +278,7 @@ Foam::layerParameters::layerParameters
     minMedianAxisAngleCos_
     (
         Foam::cos(readScalar(dict.lookup("minMedianAxisAngle")))
-      * mathematicalConstant::pi/180.
+       *constant::math::pi/180.0
     ),
     nBufferCellsNoExtrude_
     (

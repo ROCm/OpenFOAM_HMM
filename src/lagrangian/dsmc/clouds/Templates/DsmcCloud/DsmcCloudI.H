@@ -24,6 +24,8 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "mathConstants.H"
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -312,7 +314,7 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
     scalar mass
 ) const
 {
-    return 2.0*sqrt(2.0*kb*temperature/(mathematicalConstant::pi*mass));
+    return 2.0*sqrt(2.0*kb*temperature/(constant::math::pi*mass));
 }
 
 
@@ -323,7 +325,7 @@ inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
     scalar mass
 ) const
 {
-    return 2.0*sqrt(2.0*kb*temperature/(mathematicalConstant::pi*mass));
+    return 2.0*sqrt(2.0*kb*temperature/(constant::math::pi*mass));
 }
 
 

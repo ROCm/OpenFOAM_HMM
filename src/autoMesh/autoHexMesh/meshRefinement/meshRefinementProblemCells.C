@@ -37,6 +37,7 @@ License
 #include "searchableSurfaces.H"
 #include "polyMeshGeometry.H"
 #include "IOmanip.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -246,10 +247,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
             nearestRegion[i]
         );
 
-        scalar angle =
-            perpendicularAngle[region]
-          / 180.0
-          * mathematicalConstant::pi;
+        scalar angle = perpendicularAngle[region]/180.0*constant::math::pi;
 
         if (angle >= 0)
         {
@@ -306,7 +304,7 @@ bool Foam::meshRefinement::isCollapsedFace
         vector d = ownCc - mesh_.cellCentres()[nei];
 
         scalar dDotS = (d & s)/(mag(d)*magS + VSMALL);
-        
+
         if (dDotS < maxNonOrtho)
         {
             return true;

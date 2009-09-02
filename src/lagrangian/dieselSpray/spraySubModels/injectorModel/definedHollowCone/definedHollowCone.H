@@ -46,7 +46,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                           Class definedHollowConeInjector Declaration
+                  Class definedHollowConeInjector Declaration
 \*---------------------------------------------------------------------------*/
 
 class definedHollowConeInjector
@@ -63,10 +63,11 @@ private:
         dictionary definedHollowConeDict_;
         autoPtr<pdf> dropletPDF_;
 
-        // inner and outer cone angle time histories 
+        // inner and outer cone angle time histories
         // 2 column vectors = (time, coneAngle)
         List<pair> innerConeAngle_;
         List<pair> outerConeAngle_;
+
 
 public:
 
@@ -77,16 +78,11 @@ public:
     // Constructors
 
         //- Construct from components
-        definedHollowConeInjector
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        definedHollowConeInjector(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~definedHollowConeInjector();
+    //- Destructor
+    virtual ~definedHollowConeInjector();
 
 
     // Member Functions
@@ -103,17 +99,9 @@ public:
             const scalar d
         ) const;
 
-        scalar velocity
-        (
-            const label i,
-            const scalar time
-        ) const;
-        
-        scalar averageVelocity
-        (
-            const label i
-        ) const;
+        scalar velocity(const label i, const scalar time) const;
 
+        scalar averageVelocity( const label i) const;
 };
 
 

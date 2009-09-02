@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "LarsenBorgnakkeVariableHardSphere.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -156,7 +157,7 @@ Foam::scalar Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::sigmaTcR
 
     // calculating cross section = pi*dPQ^2, where dPQ is from Bird, eq. 4.79
     scalar sigmaTPQ =
-        mathematicalConstant::pi*dPQ*dPQ
+        constant::math::pi*dPQ*dPQ
        *pow(2.0*CloudType::kb*Tref_/(mR*cR*cR), omegaPQ - 0.5)
        /exp(Foam::lgamma(2.5 - omegaPQ));
 
@@ -252,7 +253,7 @@ void Foam::LarsenBorgnakkeVariableHardSphere<CloudType>::collide
 
     scalar sinTheta = sqrt(1.0 - cosTheta*cosTheta);
 
-    scalar phi = 2.0*mathematicalConstant::pi*rndGen.scalar01();
+    scalar phi = constant::math::twoPi*rndGen.scalar01();
 
     vector postCollisionRelU =
         cR

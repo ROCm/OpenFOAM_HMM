@@ -40,7 +40,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                           Class RanzMarshall Declaration
+                        Class RanzMarshall Declaration
 \*---------------------------------------------------------------------------*/
 
 class RanzMarshall
@@ -56,6 +56,7 @@ private:
         scalar ReExponent_;
         scalar PrExponent_;
 
+
 public:
 
     //- Runtime type information
@@ -65,15 +66,11 @@ public:
     // Constructors
 
         //- Construct from dictionary
-        RanzMarshall
-        (
-            const dictionary& dict
-        );
+        RanzMarshall(const dictionary& dict);
 
 
-    // Destructor
-
-        ~RanzMarshall();
+    //- Destructor
+    virtual ~RanzMarshall();
 
 
     // Member Functions
@@ -98,7 +95,6 @@ public:
         ) const;
 
         scalar fCorrection(const scalar z) const;
-
 };
 
 

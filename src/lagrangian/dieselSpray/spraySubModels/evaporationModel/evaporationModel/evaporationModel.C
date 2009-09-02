@@ -41,10 +41,7 @@ defineRunTimeSelectionTable(evaporationModel, dictionary);
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from dictionary
-evaporationModel::evaporationModel
-(
-    const dictionary& dict
-)
+evaporationModel::evaporationModel(const dictionary& dict)
 :
     dict_(dict)
 {}
@@ -53,6 +50,9 @@ evaporationModel::evaporationModel
 
 evaporationModel::~evaporationModel()
 {}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 

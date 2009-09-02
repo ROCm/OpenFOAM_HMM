@@ -30,8 +30,9 @@ License
 
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
-#include "mathematicalConstants.H"
-#include "radiationConstants.H"
+#include "constants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -160,7 +161,7 @@ void Foam::radiation::P1::calculate()
         fvm::laplacian(gamma, G_)
       - fvm::Sp(a_, G_)
      ==
-      - 4.0*(e_*radiation::sigmaSB*pow4(T_) + E_)
+      - 4.0*(e_*physicoChemical::sigma*pow4(T_) + E_)
     );
 }
 
@@ -180,7 +181,7 @@ Foam::tmp<Foam::volScalarField> Foam::radiation::P1::Rp() const
                 IOobject::NO_WRITE,
                 false
             ),
-            4.0*absorptionEmission_->eCont()*radiation::sigmaSB
+            4.0*absorptionEmission_->eCont()*physicoChemical::sigma
         )
     );
 }

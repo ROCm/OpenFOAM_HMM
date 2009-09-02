@@ -60,24 +60,21 @@ private:
         scalar CdLimiter_;
         scalar Cdistort_;
 
+
 public:
 
     //- Runtime type information
-        TypeName("standardDragModel");
+    TypeName("standardDragModel");
 
 
     // Constructors
 
         //- Construct from components
-        standardDragModel
-        (
-            const dictionary& dict
-        );
+        standardDragModel(const dictionary& dict);
 
 
-    // Destructor
-
-        ~standardDragModel();
+    //- Destructor
+    virtual ~standardDragModel();
 
 
     // Member Functions
@@ -97,7 +94,6 @@ public:
             const scalar nu,
             const scalar deviation
         ) const;
-
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

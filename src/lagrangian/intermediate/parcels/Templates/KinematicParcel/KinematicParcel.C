@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "KinematicParcel.H"
-#include "dimensionedConstants.H"
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 

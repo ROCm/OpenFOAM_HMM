@@ -1,6 +1,3 @@
-/* Radiation constants */
-radiationConstants/radiationConstants.C
-
 /* Radiation model */
 radiationModel/radiationModel/radiationModel.C
 radiationModel/radiationModel/newRadiationModel.C

@@ -121,9 +121,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~laminarFlameSpeed();
+    //- Destructor
+    virtual ~laminarFlameSpeed();
 
 
     // Member functions

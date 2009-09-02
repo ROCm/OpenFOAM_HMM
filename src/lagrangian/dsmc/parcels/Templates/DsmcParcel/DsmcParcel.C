@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DsmcParcel.H"
-#include "dimensionedConstants.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
