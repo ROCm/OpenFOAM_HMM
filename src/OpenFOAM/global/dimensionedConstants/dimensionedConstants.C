@@ -53,9 +53,24 @@ dimensionedScalar dimensionedConstant
 {
     dictionary& dict = dimensionedConstants();
 
-    const word unitSet(dict.lookup("unitSet"));
+    // Check that the entries exist.
+    // Note: should make FatalError robust instead!
 
-    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
+    if (!dict.found("unitSet"))
+    {
+        std::cerr<< "Cannot find unitSet in dictionary " << dict.name()
+            << std::endl;
+    }
+
+    const word unitSetCoeffs(word(dict.lookup("unitSet")) + "Coeffs");
+
+    if (!dict.found(unitSetCoeffs))
+    {
+        std::cerr<< "Cannot find " << unitSetCoeffs << " in dictionary "
+            << dict.name() << std::endl;
+    }
+
+    dictionary& unitDict = dict.subDict(unitSetCoeffs);
 
     dictionary& groupDict = unitDict.subDict(group);
 
