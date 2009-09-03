@@ -46,14 +46,15 @@ Foam::exponential::exponential(const dictionary& dict, Random& rndGen)
     maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
     lambda_(pdfDict_.lookup("lambda")),
     ls_(lambda_),
-    range_(maxValue_-minValue_)
+    range_(maxValue_ - minValue_)
 {
     if (minValue_<0)
     {
         FatalErrorIn
         (
             "exponential::exponential(const dictionary& dict)"
-        ) << " minValue = " << minValue_ << ", it must be >0." << abort(FatalError);
+        )   << " minValue = " << minValue_ << ", it must be >0." << nl
+            << abort(FatalError);
     }
 
     scalar sMax = 0;
@@ -73,7 +74,7 @@ Foam::exponential::exponential(const dictionary& dict, Random& rndGen)
         sMax = max(sMax, s);
     }
 
-    for(label i=0; i<n; i++)
+    for (label i=0; i<n; i++)
     {
         ls_[i] /= sMax;
     }
@@ -90,27 +91,21 @@ Foam::exponential::~exponential()
 
 Foam::scalar Foam::exponential::sample() const
 {
-    scalar y = 0;
-    scalar x = 0;
-    label n = lambda_.size();
-    bool success = false;
+    scalar y = 0.0;
+    scalar x = 0.0;
+    scalar p = 0.0;
 
-    while (!success)
+    do
     {
         x = minValue_ + range_*rndGen_.scalar01();
         y = rndGen_.scalar01();
-        scalar p = 0.0;
+        p = 0.0;
 
-        for(label i=0; i<n; i++)
+        forAll(lambda_, i)
         {
             p += ls_[i]*exp(-lambda_[i]*x);
         }
-
-        if (y<p)
-        {
-            success = true;
-        }
-    }
+    } while(p>y);
 
     return x;
 }

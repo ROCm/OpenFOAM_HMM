@@ -45,7 +45,7 @@ Foam::general::general(const dictionary& dict, Random& rndGen)
     nEntries_(xy_.size()),
     minValue_(xy_[0][0]),
     maxValue_(xy_[nEntries_-1][0]),
-    range_(maxValue_-minValue_)
+    range_(maxValue_ - minValue_)
 {
     // normalize the pdf
     scalar yMax = 0;
@@ -72,12 +72,11 @@ Foam::general::~general()
 
 Foam::scalar Foam::general::sample() const
 {
-    scalar y = 0;
-    scalar x = 0;
+    scalar x = 0.0;
+    scalar y = 0.0;
+    scalar p = 0.0;
 
-    bool success = false;
-
-    while (!success)
+    do
     {
         x = minValue_ + range_*rndGen_.scalar01();
         y = rndGen_.scalar01();
@@ -87,23 +86,17 @@ Foam::scalar Foam::general::sample() const
         while (!intervalFound)
         {
             i++;
-            if ( (x>xy_[i][0]) && (x<xy_[i+1][0]) )
+            if ((x>xy_[i][0]) && (x<xy_[i+1][0]))
             {
                 intervalFound = true;
             }
         }
 
-        scalar p =
-            xy_[i][1]
-          + (x-xy_[i][0])
-           *(xy_[i+1][1]-xy_[i][1])
-           /(xy_[i+1][0]-xy_[i][0]);
-
-        if (y<p)
-        {
-            success = true;
-        }
-    }
+        p = xy_[i][1]
+          + (x - xy_[i][0])
+           *(xy_[i+1][1] - xy_[i][1])
+           /(xy_[i+1][0] - xy_[i][0]);
+    } while(p>y);
 
     return x;
 }
