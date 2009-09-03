@@ -37,7 +37,7 @@ Foam::scalar Foam::InteractionLists<ParticleType>::transTol = 1e-12;
 template<class ParticleType>
 void Foam::InteractionLists<ParticleType>::buildCellReferralLists()
 {
-    Info<< nl << "Determining particle referring schedule" << endl;
+    Info<< "    Determining particle referring schedule" << endl;
 
     const ReferredCellList<ParticleType>& refIntL(ril());
 

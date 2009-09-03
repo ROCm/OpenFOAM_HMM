@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,78 +22,46 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::NoCollision
-
-Description
-
-SourceFiles
-    NoCollision.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoCollision_H
-#define NoCollision_H
-
-#include "CollisionModel.H"
+#include "PairFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-/*---------------------------------------------------------------------------*\
-                        Class NoCollision Declaration
-\*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoCollision
-:
-    public CollisionModel<CloudType>
+Foam::autoPtr<Foam::PairFunction<CloudType> >
+Foam::PairFunction<CloudType>::New
+(
+    const dictionary& dict,
+    CloudType& owner
+)
 {
+    word PairFunctionType(dict.lookup("PairFunction"));
 
-public:
+    Info<< "Selecting PairFunction " << PairFunctionType
+        << endl;
 
-    //- Runtime type information
-    TypeName("NoCollision");
+    typename dictionaryConstructorTable::iterator cstrIter =
+        dictionaryConstructorTablePtr_->find(PairFunctionType);
 
-
-    // Constructors
-
-        //- Construct from dictionary
-        NoCollision
+    if (cstrIter == dictionaryConstructorTablePtr_->end())
+    {
+        FatalErrorIn
         (
-            const dictionary& dict,
-            CloudType& owner
-        );
+            "PairFunction<CloudType>::New"
+            "("
+                "const dictionary&, "
+                "CloudType&"
+            ")"
+        )   << "Unknown PairFunctionType type "
+            << PairFunctionType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid PairFunction types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
+    }
 
+    return autoPtr<PairFunction<CloudType> >(cstrIter()(dict, owner));
+}
 
-    //- Destructor
-    virtual ~NoCollision();
-
-
-    // Member Functions
-
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
-
-        // Collision function
-        virtual void collide();
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "NoCollision.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

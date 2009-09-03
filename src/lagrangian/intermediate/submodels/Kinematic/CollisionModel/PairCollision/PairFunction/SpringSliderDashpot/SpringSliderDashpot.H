@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,62 +23,75 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::NoCollision
+    Foam::SpringSliderDashpot
 
 Description
-
-SourceFiles
-    NoCollision.C
+    Pair forces between particles colliding with a spring, slider, damper model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoCollision_H
-#define NoCollision_H
+#ifndef SpringSliderDashpot_H
+#define SpringSliderDashpot_H
 
-#include "CollisionModel.H"
+#include "PairFunction.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
 /*---------------------------------------------------------------------------*\
-                        Class NoCollision Declaration
+                      Class SpringSliderDashpot Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class NoCollision
+class SpringSliderDashpot
 :
-    public CollisionModel<CloudType>
+    public PairFunction<CloudType>
 {
+    // Private data
+
+        //- Effective Young's modulus value, assuming both particles have
+        //  the same E value
+        scalar Estar_;
+
+        //- Effective shear modulus value, assuming both particles have
+        //  the same Poisson's ratio and Young's modulus
+        scalar Gstar_;
+
+        //- Poisson's ratio of both particles
+        scalar sigma_;
+
+        //- alpha-coefficient, related to coefficient of restitution
+        scalar alpha_;
+
+        //- Spring power (b = 1 for linear, b = 3/2 for Hertzian)
+        scalar b_;
+
 
 public:
 
     //- Runtime type information
-    TypeName("NoCollision");
+    TypeName("SpringSliderDashpot");
 
 
     // Constructors
 
         //- Construct from dictionary
-        NoCollision
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+        SpringSliderDashpot(const dictionary& dict, CloudType& cloud);
 
 
     //- Destructor
-    virtual ~NoCollision();
+    virtual ~SpringSliderDashpot();
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
-
-        // Collision function
-        virtual void collide();
+        //- Calculate the pair interaction between parcels
+        virtual void evaluatePair
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const;
 };
 
 
@@ -89,7 +102,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "NoCollision.C"
+#   include "SpringSliderDashpot.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

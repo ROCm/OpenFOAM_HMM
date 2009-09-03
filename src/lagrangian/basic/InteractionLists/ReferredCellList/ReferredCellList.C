@@ -41,7 +41,7 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
     bool pointPointListBuild
 )
 {
-    Info << nl << "Building list of referred interaction neighbours" << endl;
+    Info<< "    Building list of referred interaction neighbours" << endl;
 
     const polyMesh& mesh(il_.mesh());
 
@@ -1272,7 +1272,7 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
 
         reduce(cellsReferredThisIteration, sumOp<label>());
 
-        Info<< tab << "Cells added this iteration: "
+        Info<< "        Cells added this iteration: "
             << cellsReferredThisIteration << endl;
     }
 
@@ -1288,7 +1288,7 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
         (*this)[rIL] = referredInteractionList[rIL];
     }
 
-    Info<< nl << "Finding real cells in range of referred cells" << endl;
+    Info<< "    Finding real cells in range of referred cells" << endl;
 
     forAll(*this, rC)
     {
@@ -1487,7 +1487,7 @@ Foam::ReferredCellList<ParticleType>::ReferredCellList
     il_(il),
     cloud_(il_.mesh(), IDLList<ParticleType>())
 {
-    Info<< "Read ReferredCellList from disk not implemented" << endl;
+    Info<< "    Read ReferredCellList from disk not implemented" << endl;
 }
 
 

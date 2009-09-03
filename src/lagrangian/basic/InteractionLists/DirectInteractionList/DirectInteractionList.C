@@ -35,7 +35,7 @@ void Foam::DirectInteractionList<ParticleType>::buildDirectInteractionList
     bool pointPointListBuild
 )
 {
-    Info<< nl << "Building list of direct interaction neighbours" << endl;
+    Info<< "    Building list of direct interaction neighbours" << endl;
 
     const polyMesh& mesh(il_.mesh());
 
@@ -43,7 +43,7 @@ void Foam::DirectInteractionList<ParticleType>::buildDirectInteractionList
 
     if (pointPointListBuild)
     {
-        Info<< tab << "Point-Point direct interaction list build." << endl;
+        Info<< "        Point-Point direct interaction list build." << endl;
 
         label pointJIndex;
 
@@ -116,7 +116,7 @@ void Foam::DirectInteractionList<ParticleType>::buildDirectInteractionList
     }
     else
     {
-        Info<< tab << "Point-Face, Edge-Edge direct interaction list build."
+        Info<< "        Point-Face, Edge-Edge direct interaction list build."
             << endl;
 
         forAll(mesh.points(), p)
@@ -319,8 +319,7 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
     }
     else if ((*this).size() == 1)
     {
-        Info<< nl
-            << "Single cell mesh, no direct interaction lists required."
+        Info<< "    Single cell mesh, no direct interaction lists required."
             << endl;
 
         (*this)[0].setSize(0);
@@ -337,7 +336,7 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
     labelListList(il.mesh().nCells()),
     il_(il)
 {
-    Info<< "Read DirectInteractionList from disk not implemented" << endl;
+    Info<< "    Read DirectInteractionList from disk not implemented" << endl;
 }
 
 

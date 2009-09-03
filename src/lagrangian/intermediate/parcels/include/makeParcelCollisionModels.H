@@ -32,7 +32,9 @@ License
 #include "InteractingKinematicCloud.H"
 
 #include "NoCollision.H"
-#include "DeterministicPairForce.H"
+#include "PairCollision.H"
+
+#include "SpringSliderDashpot.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,10 +51,20 @@ License
                                                                               \
     makeCollisionModelType                                                    \
     (                                                                         \
-        DeterministicPairForce,                                               \
+        PairCollision,                                                        \
         InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );                                                                        \
+                                                                              \
+    makePairFunction(InteractingKinematicCloud<ParcelType>);                  \
+                                                                              \
+    makePairFunctionType                                                      \
+    (                                                                         \
+        SpringSliderDashpot,                                                  \
+        InteractingKinematicCloud,                                            \
+        ParcelType                                                            \
+    );
+
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

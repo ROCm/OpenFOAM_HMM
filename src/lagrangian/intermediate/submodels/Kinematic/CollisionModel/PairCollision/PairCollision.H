@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::DeterministicPairForce
+    Foam::PairCollision
 
 Description
 
 SourceFiles
-    DeterministicPairForce.C
+    PairCollision.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef DeterministicPairForce_H
-#define DeterministicPairForce_H
+#ifndef PairCollision_H
+#define PairCollision_H
 
 #include "CollisionModel.H"
 #include "InteractionLists.H"
@@ -43,12 +43,18 @@ SourceFiles
 namespace Foam
 {
 
+// Forward declaration of classes
+
+template<class CloudType>
+class PairFunction;
+
+
 /*---------------------------------------------------------------------------*\
-                     Class DeterministicPairForce Declaration
+                     Class PairCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class DeterministicPairForce
+class PairCollision
 :
     public CollisionModel<CloudType>
 {
@@ -56,6 +62,9 @@ class DeterministicPairForce
 
         //- Cell occupancy information for each parcel
         List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
+
+        // //- PairFunction to calculate the interaction between two parcels
+        autoPtr<PairFunction<CloudType> > pairFunction_;
 
         //- Interactions lists determining which cells are in
         //  interaction range of each other
@@ -67,13 +76,8 @@ class DeterministicPairForce
         //- Build the cell occupancy information for each parcel
         void buildCellOccupancy();
 
-
-protected:
-
-    // Protected member functions
-
         //- Calculate the pair force between parcels
-        virtual void evaluatePair
+        void evaluatePair
         (
             typename CloudType::parcelType& pA,
             typename CloudType::parcelType& pB
@@ -83,13 +87,13 @@ protected:
 public:
 
     //- Runtime type information
-    TypeName("DeterministicPairForce");
+    TypeName("PairCollision");
 
 
     // Constructors
 
         //- Construct from dictionary
-        DeterministicPairForce
+        PairCollision
         (
             const dictionary& dict,
             CloudType& owner
@@ -97,7 +101,7 @@ public:
 
 
     //- Destructor
-    virtual ~DeterministicPairForce();
+    virtual ~PairCollision();
 
 
     // Member Functions
@@ -117,7 +121,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "DeterministicPairForce.C"
+#   include "PairCollision.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

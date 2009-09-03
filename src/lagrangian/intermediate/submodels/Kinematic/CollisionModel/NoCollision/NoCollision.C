@@ -26,18 +26,6 @@ License
 
 #include "NoCollision.H"
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
-
-template<class CloudType>
-void Foam::NoCollision<CloudType>::evaluatePair
-(
-    typename CloudType::parcelType& pA,
-    typename CloudType::parcelType& pB
-) const
-{
-
-}
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -69,9 +57,7 @@ bool Foam::NoCollision<CloudType>::active() const
 
 template<class CloudType>
 void Foam::NoCollision<CloudType>::collide()
-{
-
-}
+{}
 
 
 // ************************************************************************* //

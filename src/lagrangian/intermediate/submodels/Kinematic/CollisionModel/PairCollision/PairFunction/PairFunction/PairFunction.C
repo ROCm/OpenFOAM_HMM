@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,78 +22,60 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::NoCollision
-
-Description
-
-SourceFiles
-    NoCollision.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef NoCollision_H
-#define NoCollision_H
+#include "PairFunction.H"
 
-#include "CollisionModel.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-/*---------------------------------------------------------------------------*\
-                        Class NoCollision Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-class NoCollision
+Foam::PairFunction<CloudType>::PairFunction
+(
+    const dictionary& dict,
+    CloudType& owner,
+    const word& type
+)
 :
-    public CollisionModel<CloudType>
+    dict_(dict),
+    owner_(owner),
+    coeffDict_(dict.subDict(type + "Coeffs"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::PairFunction<CloudType>::~PairFunction()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+const CloudType&
+Foam::PairFunction<CloudType>::owner() const
 {
-
-public:
-
-    //- Runtime type information
-    TypeName("NoCollision");
+    return owner_;
+}
 
 
-    // Constructors
-
-        //- Construct from dictionary
-        NoCollision
-        (
-            const dictionary& dict,
-            CloudType& owner
-        );
+template<class CloudType>
+const Foam::dictionary& Foam::PairFunction<CloudType>::dict() const
+{
+    return dict_;
+}
 
 
-    //- Destructor
-    virtual ~NoCollision();
-
-
-    // Member Functions
-
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const;
-
-        // Collision function
-        virtual void collide();
-};
+template<class CloudType>
+const Foam::dictionary&
+Foam::PairFunction<CloudType>::coeffDict() const
+{
+    return coeffDict_;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "NoCollision.C"
-#endif
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
+#include "NewPairFunction.C"
 
 // ************************************************************************* //

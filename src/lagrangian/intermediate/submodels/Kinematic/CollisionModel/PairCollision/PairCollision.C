@@ -24,12 +24,13 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "DeterministicPairForce.H"
+#include "PairCollision.H"
+#include "PairFunction.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::DeterministicPairForce<CloudType>::buildCellOccupancy()
+void Foam::PairCollision<CloudType>::buildCellOccupancy()
 {
     Info<< "Build cell occupancy" << endl;
 
@@ -46,53 +47,21 @@ void Foam::DeterministicPairForce<CloudType>::buildCellOccupancy()
     il_.ril().referParticles(cellOccupancy_);
 }
 
-// * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::DeterministicPairForce<CloudType>::evaluatePair
+void Foam::PairCollision<CloudType>::evaluatePair
 (
     typename CloudType::parcelType& pA,
     typename CloudType::parcelType& pB
 ) const
 {
-    vector deltaP = (pB.position() - pA.position());
-
-    scalar deltaN = 0.5*(pA.d() + pB.d()) - mag(deltaP);
-
-    if (deltaN > 0)
-    {
-        //Particles in collision
-
-        vector n = deltaP/(mag(deltaP) + VSMALL);
-
-        vector Urel = pA.U() - pB.U();
-
-        // Effective radius
-        scalar R = 0.5*pA.d()*pB.d()/(pA.d() + pB.d());
-
-        // Effective mass
-        scalar M = pA.mass()*pB.mass()/(pA.mass() + pB.mass());
-
-        scalar E = 2e3;
-        scalar sigma = 0.25;
-        scalar alpha = 0.2;
-        scalar b = 1.0;
-
-        scalar Estar = E/(2.0*(1-sqr(sigma)));
-        scalar kN = (4.0/3.0)*sqrt(R)*Estar;
-        scalar etaN = alpha*sqrt(M*kN)*pow(deltaN, 0.25);
-
-        vector normalForce = -(kN*pow(deltaN, b) + etaN*(Urel & n))*n;
-
-        pA.f() += normalForce;
-        pB.f() -= normalForce;
-    }
+    pairFunction_->evaluatePair(pA, pB);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::DeterministicPairForce<CloudType>::DeterministicPairForce
+Foam::PairCollision<CloudType>::PairCollision
 (
     const dictionary& dict,
     CloudType& owner
@@ -100,6 +69,14 @@ Foam::DeterministicPairForce<CloudType>::DeterministicPairForce
 :
     CollisionModel<CloudType>(dict, owner, typeName),
     cellOccupancy_(owner.mesh().nCells()),
+    pairFunction_
+    (
+        PairFunction<CloudType>::New
+        (
+            this->coeffDict(),
+            this->owner()
+        )
+    ),
     il_(owner.mesh(), 2.6e-5, true)
 {
     Info<< "SEARCH DISTANCE SQR HARD CODED" << endl;
@@ -109,21 +86,21 @@ Foam::DeterministicPairForce<CloudType>::DeterministicPairForce
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::DeterministicPairForce<CloudType>::~DeterministicPairForce()
+Foam::PairCollision<CloudType>::~PairCollision()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::DeterministicPairForce<CloudType>::active() const
+bool Foam::PairCollision<CloudType>::active() const
 {
     return true;
 }
 
 
 template<class CloudType>
-void Foam::DeterministicPairForce<CloudType>::collide()
+void Foam::PairCollision<CloudType>::collide()
 {
     Info<< "Calculating collisions" << endl;
 
@@ -218,7 +195,6 @@ void Foam::DeterministicPairForce<CloudType>::collide()
             }
         }
     }
-
 
     Info<< "ADD COLLISIONS WITH WALLS HERE, DOES NOT NEED TO BE A TRACKING "
         << "OPERATION.  CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY "

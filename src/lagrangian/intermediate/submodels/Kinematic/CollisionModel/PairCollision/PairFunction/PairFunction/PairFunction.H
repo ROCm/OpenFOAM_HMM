@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::CollisionModel
+    Foam::PairFunction
 
 Description
-    Templated collision model class.
+    Templated pair interaction class
 
 SourceFiles
-    CollisionModel.C
-    NewCollisionModel.C
+    PairFunction.C
+    NewPairFunction.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef CollisionModel_H
-#define CollisionModel_H
+#ifndef PairFunction_H
+#define PairFunction_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -47,11 +47,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class CollisionModel Declaration
+                   Class PairFunction Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class CollisionModel
+class PairFunction
 {
     // Private data
 
@@ -65,24 +65,16 @@ class CollisionModel
         const dictionary coeffDict_;
 
 
-protected:
-
-    // Protected data
-
-        //- Convenience typedef for parcel type
-        typedef typename CloudType::parcelType parcelType;
-
-
 public:
 
     //- Runtime type information
-    TypeName("CollisionModel");
+    TypeName("PairFunction");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        CollisionModel,
+        PairFunction,
         dictionary,
         (
             const dictionary& dict,
@@ -94,11 +86,8 @@ public:
 
     // Constructors
 
-        //- Construct null from owner
-        CollisionModel(CloudType& owner);
-
-        //- Construct from dictionary
-        CollisionModel
+        //- Construct from components
+        PairFunction
         (
             const dictionary& dict,
             CloudType& owner,
@@ -107,11 +96,11 @@ public:
 
 
     //- Destructor
-    virtual ~CollisionModel();
+    virtual ~PairFunction();
 
 
     //- Selector
-    static autoPtr<CollisionModel<CloudType> > New
+    static autoPtr<PairFunction<CloudType> > New
     (
         const dictionary& dict,
         CloudType& owner
@@ -120,26 +109,24 @@ public:
 
     // Access
 
-        //- Return the owner cloud dictionary
-        inline const dictionary& dict() const;
+        //- Return the owner cloud object
+        const CloudType& owner() const;
 
-        //- Return const access the owner cloud object
-        inline const CloudType& owner() const;
-
-        //- Return non-const access the owner cloud object for manipulation
-        inline CloudType& owner();
+        //- Return the dictionary
+        const dictionary& dict() const;
 
         //- Return the coefficients dictionary
-        inline const dictionary& coeffDict() const;
+        const dictionary& coeffDict() const;
 
 
     // Member Functions
 
-        //- Flag to indicate whether model activates injection model
-        virtual bool active() const = 0;
-
-        // Collision function
-        virtual void collide() = 0;
+        //- Calculate the pair interaction between parcels
+        virtual void evaluatePair
+        (
+            typename CloudType::parcelType& pA,
+            typename CloudType::parcelType& pB
+        ) const = 0;
 };
 
 
@@ -149,23 +136,27 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makeCollisionModel(CloudType)                                         \
+#define makePairFunction(CloudType)                                           \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(CollisionModel<CloudType>, 0);        \
+    defineNamedTemplateTypeNameAndDebug(PairFunction<CloudType>, 0);          \
                                                                               \
-    defineTemplateRunTimeSelectionTable(CollisionModel<CloudType>, dictionary);
+    defineTemplateRunTimeSelectionTable                                       \
+    (                                                                         \
+        PairFunction<CloudType>,                                              \
+        dictionary                                                            \
+    );
 
 
-#define makeCollisionModelType(SS, CloudType, ParcelType)                     \
+#define makePairFunctionType(SS, CloudType, ParcelType)                       \
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    CollisionModel<CloudType<ParcelType> >::                                  \
+    PairFunction<CloudType<ParcelType> >::                                    \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
-#define makeCollisionModelThermoType(SS, CloudType, ParcelType, ThermoType)   \
+#define makePairFunctionThermoType(SS, CloudType, ParcelType, ThermoType)     \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
@@ -173,21 +164,16 @@ public:
         0                                                                     \
     );                                                                        \
                                                                               \
-    CollisionModel<CloudType<ParcelType<ThermoType> > >::                     \
+    PairFunction<CloudType<ParcelType<ThermoType> > >::                       \
         adddictionaryConstructorToTable                                       \
-        <SS<CloudType<ParcelType<ThermoType> > > >                            \
+            <SS<CloudType<ParcelType<ThermoType> > > >                        \
             add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
 
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#include "CollisionModelI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "CollisionModel.C"
+#   include "PairFunction.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
