@@ -24,6 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "mathConstants.H"
+
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class ParcelType>
@@ -374,7 +378,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::InteractingKinematicParcel<ParcelType>::volume(const scalar d) const
 {
-    return constant::math::pi/6.0*pow3(d);
+    return math::pi/6.0*pow3(d);
 }
 
 
@@ -404,7 +408,21 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::InteractingKinematicParcel<ParcelType>::areaS(const scalar d) const
 {
-    return constant::math::pi*d*d;
+    return math::pi*d*d;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::InteractingKinematicParcel<ParcelType>::Re
+(
+    const vector& U,
+    const scalar d,
+    const scalar rhoc,
+    const scalar muc
+) const
+{
+    return rhoc*mag(U - Uc_)*d/muc;
 }
 
 
