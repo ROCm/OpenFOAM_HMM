@@ -157,7 +157,7 @@ void Foam::ReactingParcel<ParcelType>::writeFields
 {
     ThermoParcel<ParcelType>::writeFields(c);
 
-    const label np =  c.size();
+    const label np = c.size();
 
     if (np > 0)
     {

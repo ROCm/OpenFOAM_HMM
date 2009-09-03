@@ -115,42 +115,42 @@ public:
 
     // Member Functions
 
-    // Access
+        // Access
 
-        //- Return the cloud dictionary
-        const dictionary& dict() const;
+            //- Return the cloud dictionary
+            const dictionary& dict() const;
 
-        //- Return the coefficients dictionary
-        const dictionary& coeffDict() const;
+            //- Return the coefficients dictionary
+            const dictionary& coeffDict() const;
 
-        //- Return the owner cloud object
-        const CloudType& owner() const;
+            //- Return the owner cloud object
+            const CloudType& owner() const;
 
-        //- Return the Bird htc correction flag
-        const Switch& BirdCorrection() const;
+            //- Return the Bird htc correction flag
+            const Switch& BirdCorrection() const;
 
-        //- Flag to indicate whether model activates heat transfer model
-        virtual bool active() const = 0;
+            //- Flag to indicate whether model activates heat transfer model
+            virtual bool active() const = 0;
 
 
-    // Evaluation
+        // Evaluation
 
-        //- Nusselt number
-        virtual scalar Nu
-        (
-            const scalar Re,
-            const scalar Pr
-        ) const = 0;
+            //- Nusselt number
+            virtual scalar Nu
+            (
+                const scalar Re,
+                const scalar Pr
+            ) const = 0;
 
-        //- Return heat transfer coefficient
-        virtual scalar htc
-        (
-            const scalar dp,
-            const scalar Re,
-            const scalar Pr,
-            const scalar kappa,
-            const scalar NCpW
-        ) const;
+            //- Return heat transfer coefficient
+            virtual scalar htc
+            (
+                const scalar dp,
+                const scalar Re,
+                const scalar Pr,
+                const scalar kappa,
+                const scalar NCpW
+            ) const;
 };
 
 
