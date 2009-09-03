@@ -40,7 +40,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                           Class RanzMarshall Declaration
+                         Class RanzMarshall Declaration
 \*---------------------------------------------------------------------------*/
 
 template <class CloudType>
@@ -48,11 +48,6 @@ class RanzMarshall
 :
     public HeatTransferModel<CloudType>
 {
-    // Private data
-
-        // Prandtl number
-        const scalar Pr_;
-
 
 public:
 
@@ -76,18 +71,23 @@ public:
 
     // Member Functions
 
-        //- Flag to indicate whether model activates heat transfer model
-        virtual bool active() const;
+        // Access
 
-        //- Nusselt number
-        virtual scalar Nu
-        (
-            const scalar Re,
-            const scalar Pr
-        ) const;
+            //- Flag to indicate whether model activates heat transfer model
+            virtual bool active() const;
 
-        //- Prandtl number
-        virtual scalar Pr() const;
+            //- Return the Bird correction flag
+            const Switch& BirdCorrection() const;
+
+
+        // Evaluation
+
+            //- Nusselt number
+            virtual scalar Nu
+            (
+                const scalar Re,
+                const scalar Pr
+            ) const;
 };
 
 

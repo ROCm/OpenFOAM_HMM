@@ -28,6 +28,8 @@ License
 #include "volFields.H"
 #include "mathConstants.H"
 
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
@@ -128,9 +130,7 @@ Foam::FieldActivatedInjection<CloudType>::FieldActivatedInjection
 
     // Determine total volume of particles to inject
     this->volumeTotal_ =
-         nParcelsPerInjector_
-        *sum(pow3(diameters_))
-        *constant::math::pi/6.0;
+        nParcelsPerInjector_*sum(pow3(diameters_))*math::pi/6.0;
 
     // Set/cache the injector cells
     forAll(positions_, i)

@@ -354,15 +354,6 @@ public:
                 const labelList& faceMap,   // new to old patch faces
                 const labelList& pointMap   // new to old patch points
             );
-
-        // Helper
-
-            //- Per patch edge the corresponding mesh edge
-            static labelList calcMeshEdges
-            (
-                const primitiveMesh& mesh,
-                const indirectPrimitivePatch&
-            );
 };
 
 
