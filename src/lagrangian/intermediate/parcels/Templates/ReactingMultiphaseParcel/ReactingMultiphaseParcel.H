@@ -399,13 +399,10 @@ public:
         // I-O
 
             //- Read
-            static void readFields(ReactingMultiphaseCloud<ParcelType>& c);
+            static void readFields(Cloud<ParcelType>& c);
 
             //- Write
-            static void writeFields
-            (
-                const ReactingMultiphaseCloud<ParcelType>& c
-            );
+            static void writeFields(const Cloud<ParcelType>& c);
 
 
     // Ostream Operator

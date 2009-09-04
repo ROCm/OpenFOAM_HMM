@@ -171,12 +171,6 @@ class DsmcCloud
 
 public:
 
-    // Static data members
-
-        //- Boltzmann constant
-        static scalar kb;
-
-
     // Constructors
 
         //- Construct given name and mesh, will read Parcels from file
@@ -184,7 +178,8 @@ public:
         (
             const word& cloudName,
             const volScalarField& T,
-            const volVectorField& U
+            const volVectorField& U,
+            bool readFields = true
         );
 
         //- Construct given name and mesh.  Used to initialise.
@@ -338,6 +333,7 @@ public:
                     scalar mass
                 ) const;
 
+
             // Sub-models
 
                 //- Return reference to binary elastic collision model
@@ -429,11 +425,8 @@ public:
             //- Evolve the cloud (move, collide)
             void evolve();
 
-
             //- Clear the Cloud
             inline void clear();
-
-
 };
 
 

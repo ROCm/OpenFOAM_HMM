@@ -39,7 +39,8 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
     const volScalarField& rho,
     const volVectorField& U,
     const dimensionedVector& g,
-    basicThermo& thermo
+    basicThermo& thermo,
+    bool readFields
 )
 :
     KinematicCloud<ParcelType>
@@ -48,7 +49,8 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         rho,
         U,
         thermo.mu(),
-        g
+        g,
+        false
     ),
     thermoCloud(),
     constProps_(this->particleProperties()),
@@ -98,7 +100,12 @@ Foam::ThermoCloud<ParcelType>::ThermoCloud
         this->mesh(),
         dimensionedScalar("zero", dimensionSet(1, 2, -2, 0, 0), 0.0)
     )
-{}
+{
+    if (readFields)
+    {
+        ParcelType::readFields(*this);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //

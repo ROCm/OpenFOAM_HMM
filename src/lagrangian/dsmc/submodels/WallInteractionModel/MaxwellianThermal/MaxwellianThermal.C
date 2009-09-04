@@ -25,6 +25,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "MaxwellianThermal.H"
+#include "constants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -108,7 +111,7 @@ void Foam::MaxwellianThermal<CloudType>::correct
     scalar iDof = cloud.constProps(typeId).internalDegreesOfFreedom();
 
     U =
-        sqrt(CloudType::kb*T/mass)
+        sqrt(physicoChemical::k.value()*T/mass)
        *(
             rndGen.GaussNormal()*tw1
           + rndGen.GaussNormal()*tw2

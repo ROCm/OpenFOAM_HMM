@@ -26,15 +26,11 @@ License
 
 #include "streamLineParticleCloud.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-defineTemplateTypeNameAndDebug(Cloud<streamLineParticle>, 0);
-
+    defineTemplateTypeNameAndDebug(Cloud<streamLineParticle>, 0);
 };
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -42,12 +38,16 @@ defineTemplateTypeNameAndDebug(Cloud<streamLineParticle>, 0);
 Foam::streamLineParticleCloud::streamLineParticleCloud
 (
     const polyMesh& mesh,
-    const word& cloudName
+    const word& cloudName,
+    bool readFields
 )
 :
     Cloud<streamLineParticle>(mesh, cloudName, false)
 {
-    readFields();
+    if (readFields)
+    {
+        streamLineParticle::readFields(*this);
+    }
 }
 
 
@@ -60,20 +60,6 @@ Foam::streamLineParticleCloud::streamLineParticleCloud
 :
     Cloud<streamLineParticle>(mesh, cloudName, particles)
 {}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::streamLineParticleCloud::readFields()
-{
-    streamLineParticle::readFields(*this);
-}
-
-
-void Foam::streamLineParticleCloud::writeFields() const
-{
-    streamLineParticle::writeFields(*this);
-}
 
 
 // ************************************************************************* //

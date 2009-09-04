@@ -103,10 +103,7 @@ Foam::KinematicParcel<ParcelType>::KinematicParcel
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::readFields
-(
-    KinematicCloud<ParcelType>& c
-)
+void Foam::KinematicParcel<ParcelType>::readFields(Cloud<ParcelType>& c)
 {
     if (!c.size())
     {
@@ -153,10 +150,7 @@ void Foam::KinematicParcel<ParcelType>::readFields
 
 
 template<class ParcelType>
-void Foam::KinematicParcel<ParcelType>::writeFields
-(
-    const KinematicCloud<ParcelType>& c
-)
+void Foam::KinematicParcel<ParcelType>::writeFields(const Cloud<ParcelType>& c)
 {
     Particle<ParcelType>::writeFields(c);
 

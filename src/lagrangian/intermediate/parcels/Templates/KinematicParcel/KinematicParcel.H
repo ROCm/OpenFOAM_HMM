@@ -520,10 +520,10 @@ public:
         // I-O
 
             //- Read
-            static void readFields(KinematicCloud<ParcelType>& c);
+            static void readFields(Cloud<ParcelType>& c);
 
             //- Write
-            static void writeFields(const KinematicCloud<ParcelType>& c);
+            static void writeFields(const Cloud<ParcelType>& c);
 
 
     // Ostream Operator
