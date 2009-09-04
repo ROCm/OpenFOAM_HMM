@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class streamLineCloud Declaration
+                      Class streamLineCloud Declaration
 \*---------------------------------------------------------------------------*/
 
 class streamLineParticleCloud
@@ -72,7 +72,8 @@ public:
         streamLineParticleCloud
         (
             const polyMesh&,
-            const word& cloudName = "defaultCloud"
+            const word& cloudName = "defaultCloud",
+            bool readFields = true
         );
 
         //- Construct from mesh, cloud name, and a list of particles
@@ -82,15 +83,6 @@ public:
             const word& cloudName,
             const IDLList<streamLineParticle>& particles
         );
-
-
-    // Member Functions
-
-        //- Read fields
-        virtual void readFields();
-
-        //- Write fields
-        virtual void writeFields() const;
 };
 
 

@@ -387,10 +387,7 @@ void Foam::streamLineParticle::hitPatch
 {}
 
 
-void Foam::streamLineParticle::readFields
-(
-    Cloud<streamLineParticle>& c
-)
+void Foam::streamLineParticle::readFields(Cloud<streamLineParticle>& c)
 {
     if (!c.size())
     {
@@ -426,10 +423,7 @@ void Foam::streamLineParticle::readFields
 }
 
 
-void Foam::streamLineParticle::writeFields
-(
-    const Cloud<streamLineParticle>& c
-)
+void Foam::streamLineParticle::writeFields(const Cloud<streamLineParticle>& c)
 {
     Particle<streamLineParticle>::writeFields(c);
 

@@ -18,13 +18,6 @@ $(BASECLOUDS)/reactingCloud/reactingCloud.C
 $(BASECLOUDS)/reactingMultiphaseCloud/reactingMultiphaseCloud.C
 
 
-/* Cloud container/injection mechanisms */
-$(DERIVEDCLOUDS)/basicKinematicCloud/basicKinematicCloud.C
-$(DERIVEDCLOUDS)/basicThermoCloud/basicThermoCloud.C
-$(DERIVEDCLOUDS)/BasicReactingCloud/defineBasicReactingCloud.C
-$(DERIVEDCLOUDS)/BasicReactingMultiphaseCloud/defineBasicReactingMultiphaseCloud.C
-
-
 /* kinematic parcel sub-models */
 KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
 $(KINEMATICPARCEL)/basicKinematicParcel.C
