@@ -46,7 +46,7 @@ Foam::normal::normal(const dictionary& dict, Random& rndGen)
     expectation_(pdfDict_.lookup("expectation")),
     variance_(pdfDict_.lookup("variance")),
     strength_(pdfDict_.lookup("strength")),
-    range_(maxValue_-minValue_)
+    range_(maxValue_ - minValue_)
 {
     scalar sMax = 0;
     label n = strength_.size();
@@ -84,31 +84,26 @@ Foam::normal::~normal()
 
 Foam::scalar Foam::normal::sample() const
 {
-    scalar y = 0;
-    scalar x = 0;
-    label n = expectation_.size();
+    scalar x = 0.0;
+    scalar y = 0.0;
+    scalar p = 0.0;
     bool success = false;
 
-    while (!success)
+    do
     {
         x = minValue_ + range_*rndGen_.scalar01();
         y = rndGen_.scalar01();
-        scalar p = 0.0;
+        p = 0.0;
 
-        for (label i=0; i<n; i++)
+        forAll(expectation_, i)
         {
             scalar nu = expectation_[i];
             scalar sigma = variance_[i];
             scalar s = strength_[i];
-            scalar v = (x-nu)/sigma;
+            scalar v = (x - nu)/sigma;
             p += s*exp(-0.5*v*v);
         }
-
-        if (y<p)
-        {
-            success = true;
-        }
-    }
+    } while (p>y);
 
     return x;
 }

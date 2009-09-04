@@ -39,6 +39,7 @@ Description
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
                          Class RanzMarshall Declaration
 \*---------------------------------------------------------------------------*/
@@ -75,9 +76,6 @@ public:
 
             //- Flag to indicate whether model activates heat transfer model
             virtual bool active() const;
-
-            //- Return the Bird correction flag
-            const Switch& BirdCorrection() const;
 
 
         // Evaluation
