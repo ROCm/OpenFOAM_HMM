@@ -320,8 +320,9 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                 FatalErrorIn
                 (
                     "Particle::trackToFace(const vector&, TrackData&)"
-                )<< "addressing failure" << nl
-                 << abort(FatalError);
+                )
+                    << "addressing failure" << nl
+                    << abort(FatalError);
             }
         }
         else
@@ -380,6 +381,7 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
                     p.hitPatch(patch, td);
                 }
             }
+
         }
     }
 

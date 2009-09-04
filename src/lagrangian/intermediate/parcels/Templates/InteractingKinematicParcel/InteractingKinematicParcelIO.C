@@ -58,6 +58,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     nParticle_(0.0),
     d_(0.0),
     U_(vector::zero),
+    f_(vector::zero),
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),

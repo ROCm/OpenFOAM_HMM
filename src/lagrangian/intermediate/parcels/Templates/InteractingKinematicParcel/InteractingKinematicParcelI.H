@@ -330,7 +330,12 @@ Foam::InteractingKinematicParcel<ParcelType>::wallImpactDistance
     const vector&
 ) const
 {
-    return 0.5*d_;
+    // To make sure that the particles jump cyclic, wedge and
+    // processor patches in the correct location, this must be zero,
+    // or the calculation of lambda must be revised
+
+    return 0.0;
+    // return 0.5*d_;
 }
 
 
