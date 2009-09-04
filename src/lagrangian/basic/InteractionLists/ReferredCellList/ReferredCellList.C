@@ -1588,9 +1588,11 @@ void Foam::ReferredCellList<ParticleType>::storeParticles
 
             refCellToRefParticlesTo.referInParticle
             (
-                particlesToReferIn.remove(&p)
+                p.clone().ptr()
             );
         }
+
+        particlesToReferIn.remove(&p);
 
         particleI++;
     }
@@ -1647,6 +1649,8 @@ void Foam::ReferredCellList<ParticleType>::referParticles
     const List<DynamicList<ParticleType*> >& cellOccupancy
 )
 {
+    Info<< "Refer particles" << endl;
+
     // Clear all existing referred particles
 
     forAll(*this, i)
