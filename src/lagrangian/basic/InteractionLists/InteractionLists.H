@@ -42,9 +42,6 @@ SourceFiles
 #include "DirectInteractionList.H"
 #include "ReferredCell.H"
 #include "ReferredCellList.H"
-#include "sendingReferralList.H"
-#include "receivingReferralList.H"
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -68,16 +65,7 @@ class InteractionLists
 
         ReferredCellList<ParticleType> ril_;
 
-        List<sendingReferralList> cellSendingReferralLists_;
-
-        List<receivingReferralList> cellReceivingReferralLists_;
-
-
     // Private Member Functions
-
-        //- Build referralLists which define how to send information
-        // to ReferredCells to source cells
-        void buildCellReferralLists();
 
         //- Disallow default bitwise copy construct
         InteractionLists(const InteractionLists&);
@@ -191,15 +179,8 @@ public:
             inline const DirectInteractionList<ParticleType>& dil() const;
 
             inline const ReferredCellList<ParticleType>& ril() const;
+
             inline ReferredCellList<ParticleType>& ril();
-
-            inline const List<sendingReferralList>&
-                cellSendingReferralLists() const;
-
-            inline const List<receivingReferralList>&
-                cellReceivingReferralLists() const;
-
-            inline label nInteractingProcs() const;
 };
 
 

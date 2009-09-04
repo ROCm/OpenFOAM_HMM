@@ -919,7 +919,8 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
                         mesh.boundaryMesh()[procPatches[pP]]
                     );
 
-                DynamicList<ReferredCell<ParticleType> > ReferredCellsToTransfer;
+                DynamicList<ReferredCell<ParticleType> >
+                    ReferredCellsToTransfer;
 
                 const vectorList& neighbFaceCentres =
                     allNeighbourFaceCentres[pP];
@@ -1422,10 +1423,147 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
 
 
 template<class ParticleType>
+void Foam::ReferredCellList<ParticleType>::buildCellReferralLists()
+{
+    Info<< "    Determining particle referring schedule" << endl;
+
+    DynamicList<label> referralProcs;
+
+    // Run through all ReferredCells to build list of interacting processors
+
+    forAll(*this, refCellI)
+    {
+        const ReferredCell<ParticleType>& refCell((*this)[refCellI]);
+
+        if (findIndex(referralProcs, refCell.sourceProc()) == -1)
+        {
+            referralProcs.append(refCell.sourceProc());
+        }
+    }
+
+    List<DynamicList<label> > cellSendingReferralLists(referralProcs.size());
+
+    List<DynamicList<DynamicList<label> > >
+        cellReceivingReferralLists(referralProcs.size());
+
+    // Run through all ReferredCells again building up send and receive info
+
+    forAll(*this, refCellI)
+    {
+        const ReferredCell<ParticleType>& rC((*this)[refCellI]);
+
+        label rPI = findIndex(referralProcs, rC.sourceProc());
+
+        DynamicList<DynamicList<label> >& rRL(cellReceivingReferralLists[rPI]);
+
+        DynamicList<label>& sRL(cellSendingReferralLists[rPI]);
+
+        label existingSource = findIndex(sRL, rC.sourceCell());
+
+        // Check to see if this source cell has already been allocated to
+        // come to this processor.  If not, add the source cell to the sending
+        // list and add the current referred cell to the receiving list.
+
+        // It shouldn't be possible for the sending and receiving lists to be
+        // different lengths, because their append operations happen at the
+        // same time.
+
+        if (existingSource == -1)
+        {
+            sRL.append(rC.sourceCell());
+
+            rRL.append(DynamicList<label>(labelList(1, refCellI)));
+        }
+        else
+        {
+            rRL[existingSource].append(refCellI);
+        }
+    }
+
+    // It is assumed that cell exchange is reciprocal, if proc A has cells to
+    // send to proc B, then proc B must have some to send to proc A.
+
+    cellReceivingReferralLists_.setSize(referralProcs.size());
+
+    cellSendingReferralLists_.setSize(referralProcs.size());
+
+    forAll(referralProcs, rPI)
+    {
+        DynamicList<DynamicList<label> >& rRL(cellReceivingReferralLists[rPI]);
+
+        labelListList translLL(rRL.size());
+
+        forAll(rRL, rRLI)
+        {
+            translLL[rRLI] = rRL[rRLI];
+        }
+
+        cellReceivingReferralLists_[rPI] = receivingReferralList
+        (
+            referralProcs[rPI],
+            translLL
+        );
+    }
+
+    // Send sendingReferralLists to each interacting processor.
+
+    forAll(referralProcs, rPI)
+    {
+        DynamicList<label>& sRL(cellSendingReferralLists[rPI]);
+
+        if (referralProcs[rPI] != Pstream::myProcNo())
+        {
+            if (Pstream::parRun())
+            {
+                OPstream toInteractingProc
+                (
+                    Pstream::blocking,
+                    referralProcs[rPI]
+                );
+
+                toInteractingProc << sendingReferralList
+                (
+                    Pstream::myProcNo(),
+                    sRL
+                );
+            }
+        }
+    }
+
+    // Receive sendingReferralLists from each interacting processor.
+
+    forAll(referralProcs, rPI)
+    {
+        if (referralProcs[rPI] != Pstream::myProcNo())
+        {
+            if (Pstream::parRun())
+            {
+                IPstream fromInteractingProc
+                (
+                    Pstream::blocking,
+                    referralProcs[rPI]
+                );
+
+                fromInteractingProc >> cellSendingReferralLists_[rPI];
+            }
+        }
+        else
+        {
+            cellSendingReferralLists_[rPI] = sendingReferralList
+            (
+                Pstream::myProcNo(),
+                cellSendingReferralLists[rPI]
+            );
+        }
+    }
+}
+
+
+template<class ParticleType>
 void Foam::ReferredCellList<ParticleType>::storeParticles
 (
     const receivingReferralList& rRL,
-    const labelList& destinationReferredCell,
+    const labelList& sourceReferredCell,
     IDLList<ParticleType>& particlesToReferIn
 )
 {
@@ -1441,7 +1579,7 @@ void Foam::ReferredCellList<ParticleType>::storeParticles
         ParticleType& p = referInIter();
 
         labelList refCellsToReferTo =
-            rRL[destinationReferredCell[particleI]];
+            rRL[sourceReferredCell[particleI]];
 
         forAll(refCellsToReferTo, refCellI)
         {
@@ -1470,10 +1608,13 @@ Foam::ReferredCellList<ParticleType>::ReferredCellList
 :
     List<ReferredCell<ParticleType> >(),
     il_(il),
-    cloud_(il_.mesh(), "referredParticleCloud", IDLList<ParticleType>())
-
+    cloud_(il_.mesh(), "referredParticleCloud", IDLList<ParticleType>()),
+    cellSendingReferralLists_(),
+    cellReceivingReferralLists_()
 {
     buildReferredCellList(pointPointListBuild);
+
+    buildCellReferralLists();
 }
 
 
@@ -1516,11 +1657,11 @@ void Foam::ReferredCellList<ParticleType>::referParticles
     // Create referred particles for sending using cell occupancy and
     // cellSendingReferralLists
 
-    forAll(il_.cellSendingReferralLists(), cSRL)
+    forAll(cellSendingReferralLists_, cSRL)
     {
         const sendingReferralList& sRL
         (
-            il_.cellSendingReferralLists()[cSRL]
+            cellSendingReferralLists_[cSRL]
         );
 
         IDLList<ParticleType> particlesToReferOut;
@@ -1565,7 +1706,7 @@ void Foam::ReferredCellList<ParticleType>::referParticles
 
             const receivingReferralList& rRL
             (
-                il_.cellReceivingReferralLists()[cSRL]
+                cellReceivingReferralLists_[cSRL]
             );
 
             storeParticles(rRL, destinationReferredCell, particlesToReferOut);
@@ -1576,16 +1717,16 @@ void Foam::ReferredCellList<ParticleType>::referParticles
     // according to cellReceivingReferralLists, ReferredCells deal with the
     // transformations themselves
 
-    forAll(il_.cellReceivingReferralLists(), cRRL)
+    forAll(cellReceivingReferralLists_, cRRL)
     {
         const receivingReferralList& rRL
         (
-            il_.cellReceivingReferralLists()[cRRL]
+            cellReceivingReferralLists_[cRRL]
         );
 
         IDLList<ParticleType> particlesToReferIn;
 
-        labelList destinationReferredCell;
+        labelList sourceReferredCell;
 
         if (rRL.sourceProc() != Pstream::myProcNo())
         {
@@ -1598,7 +1739,7 @@ void Foam::ReferredCellList<ParticleType>::referParticles
                 );
 
                 fromInteractingProc
-                    >> destinationReferredCell;
+                    >> sourceReferredCell;
 
                 particlesToReferIn = IDLList<ParticleType>
                 (
@@ -1607,7 +1748,7 @@ void Foam::ReferredCellList<ParticleType>::referParticles
                 );
             }
 
-            storeParticles(rRL, destinationReferredCell, particlesToReferIn);
+            storeParticles(rRL, sourceReferredCell, particlesToReferIn);
         }
     }
 

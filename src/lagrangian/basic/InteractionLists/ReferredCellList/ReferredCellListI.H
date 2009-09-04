@@ -34,4 +34,12 @@ Foam::ReferredCellList<ParticleType>::il() const
 }
 
 
+template<class ParticleType>
+inline Foam::label
+Foam::ReferredCellList<ParticleType>::nInteractingProcs() const
+{
+    return cellReceivingReferralLists_.size();
+}
+
+
 // ************************************************************************* //

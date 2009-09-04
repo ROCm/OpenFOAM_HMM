@@ -65,13 +65,23 @@ class ReferredCellList
         //- Dummy cloud to give to particles
         Cloud<ParticleType> cloud_;
 
+        List<sendingReferralList> cellSendingReferralLists_;
+
+        List<receivingReferralList> cellReceivingReferralLists_;
+
+
 
     // Private Member Functions
 
+        //- Refer and rerefer cells to construct referred interactions
         void buildReferredCellList
         (
             bool pointPointListBuild
         );
+
+        //- Build referralLists which define how to send information
+        //  to ReferredCells to source cells
+        void buildCellReferralLists();
 
         //- Store the referred particles in the referred cells
         void storeParticles
@@ -110,6 +120,8 @@ public:
         );
 
         inline const InteractionLists<ParticleType>& il() const;
+
+        inline label nInteractingProcs() const;
 };
 
 

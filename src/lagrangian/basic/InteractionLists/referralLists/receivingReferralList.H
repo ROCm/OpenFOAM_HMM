@@ -26,6 +26,11 @@ Class
     Foam::receivingReferralList
 
 Description
+    Contains an outer list which has entries corresponding to the
+    incoming particles sent by the sendingReferralList on the source
+    processor.  The inner list has the indices of the referred cells
+    on the current processor to refer the particles to, as a real cell
+    may be referred multiple times.
 
 SourceFiles
     receivingReferralListI.H

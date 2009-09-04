@@ -59,28 +59,4 @@ Foam::InteractionLists<ParticleType>::ril()
 }
 
 
-template<class ParticleType>
-inline const Foam::List<Foam::sendingReferralList>&
-Foam::InteractionLists<ParticleType>::cellSendingReferralLists() const
-{
-    return cellSendingReferralLists_;
-}
-
-
-template<class ParticleType>
-inline const Foam::List<Foam::receivingReferralList>&
-Foam::InteractionLists<ParticleType>::cellReceivingReferralLists() const
-{
-    return cellReceivingReferralLists_;
-}
-
-
-template<class ParticleType>
-inline Foam::label
-Foam::InteractionLists<ParticleType>::nInteractingProcs() const
-{
-    return cellReceivingReferralLists_.size();
-}
-
-
 // ************************************************************************* //

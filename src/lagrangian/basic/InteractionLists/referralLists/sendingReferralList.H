@@ -26,6 +26,8 @@ Class
     Foam::sendingReferralList
 
 Description
+    Contains the list of the real cells on the current processor to be
+    referred to the destination processor
 
 SourceFiles
     sendingReferralListI.H
