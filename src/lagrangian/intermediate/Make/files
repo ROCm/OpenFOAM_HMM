@@ -18,8 +18,6 @@ $(BASECLOUDS)/reactingCloud/reactingCloud.C
 $(BASECLOUDS)/reactingMultiphaseCloud/reactingMultiphaseCloud.C
 
 
-$(DERIVEDCLOUDS)/basicInteractingKinematicCloud/basicInteractingKinematicCloud.C
-
 /* kinematic parcel sub-models */
 // KINEMATICPARCEL=$(DERIVEDPARCELS)/basicKinematicParcel
 // $(KINEMATICPARCEL)/basicKinematicParcel.C

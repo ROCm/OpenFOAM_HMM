@@ -106,7 +106,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
 template<class ParcelType>
 void Foam::InteractingKinematicParcel<ParcelType>::readFields
 (
-    InteractingKinematicCloud<ParcelType>& c
+    Cloud<ParcelType>& c
 )
 {
     if (!c.size())
@@ -156,7 +156,7 @@ void Foam::InteractingKinematicParcel<ParcelType>::readFields
 template<class ParcelType>
 void Foam::InteractingKinematicParcel<ParcelType>::writeFields
 (
-    const InteractingKinematicCloud<ParcelType>& c
+    const Cloud<ParcelType>& c
 )
 {
     Particle<ParcelType>::writeFields(c);

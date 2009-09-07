@@ -26,7 +26,7 @@ Class
     Foam::basicInteractingKinematicCloud
 
 Description
-    Cloud class to introduce interactingKinematic parcels
+    Cloud class to introduce interacting kinematic parcels
 
 SourceFiles
     basicInteractingKinematicCloud.C
@@ -43,56 +43,9 @@ SourceFiles
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                Class basicInteractingKinematicCloud Declaration
-\*---------------------------------------------------------------------------*/
-
-class basicInteractingKinematicCloud
-:
-    public InteractingKinematicCloud<basicInteractingKinematicParcel>
-{
-    // Private member functions
-
-        //- Disallow default bitwise copy construct
-        basicInteractingKinematicCloud(const basicInteractingKinematicCloud&);
-
-        //- Disallow default bitwise assignment
-        void operator=(const basicInteractingKinematicCloud&);
-
-
-public:
-
-    //- Runtime type information
-    TypeName("basicInteractingKinematicCloud");
-
-
-    // Constructors
-
-        //- Construct from components
-        basicInteractingKinematicCloud
-        (
-            const word& cloudName,
-            const volScalarField& rho,
-            const volVectorField& U,
-            const volScalarField& mu,
-            const dimensionedVector& g
-        );
-
-
-    //- Destructor
-    ~basicInteractingKinematicCloud();
-
-
-    // Member functions
-
-        //- Write fields
-        virtual void writeFields() const;
-};
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
+    typedef InteractingKinematicCloud<basicInteractingKinematicParcel>
+        basicInteractingKinematicCloud;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
