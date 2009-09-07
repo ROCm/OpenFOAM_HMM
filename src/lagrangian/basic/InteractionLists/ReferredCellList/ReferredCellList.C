@@ -1592,10 +1592,10 @@ void Foam::ReferredCellList<ParticleType>::storeParticles
             );
         }
 
-        particlesToReferIn.remove(&p);
-
         particleI++;
     }
+
+    particlesToReferIn.clear();
 }
 
 
@@ -1702,6 +1702,9 @@ void Foam::ReferredCellList<ParticleType>::referParticles
                     << destinationReferredCell
                     << particlesToReferOut;
             }
+
+            // Remove particles after transfer
+            particlesToReferOut.clear();
         }
         else
         {
@@ -1715,6 +1718,7 @@ void Foam::ReferredCellList<ParticleType>::referParticles
 
             storeParticles(rRL, destinationReferredCell, particlesToReferOut);
         }
+
     }
 
     // Receive referred particle lists to and distribute to ReferredCells
