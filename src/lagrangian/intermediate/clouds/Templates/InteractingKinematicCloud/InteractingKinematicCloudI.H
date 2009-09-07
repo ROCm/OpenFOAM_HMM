@@ -222,6 +222,40 @@ Foam::InteractingKinematicCloud<ParcelType>::massInSystem() const
 
 
 template<class ParcelType>
+inline Foam::vector
+Foam::InteractingKinematicCloud<ParcelType>::linearMomentumOfSystem() const
+{
+    vector linearMomentum(vector::zero);
+
+    forAllConstIter(typename InteractingKinematicCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        linearMomentum += p.mass()*p.U();
+    }
+
+    return linearMomentum;
+}
+
+
+template<class ParcelType>
+inline Foam::scalar
+Foam::InteractingKinematicCloud<ParcelType>::linearKineticEnergyOfSystem() const
+{
+    scalar linearKineticEnergy = 0.0;
+
+    forAllConstIter(typename InteractingKinematicCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        linearKineticEnergy += 0.5*p.mass()*(p.U() & p.U());
+    }
+
+    return linearKineticEnergy;
+}
+
+
+template<class ParcelType>
 inline Foam::Random& Foam::InteractingKinematicCloud<ParcelType>::rndGen()
 {
     return rndGen_;

@@ -259,6 +259,12 @@ void Foam::InteractingKinematicCloud<ParcelType>::evolve()
 template<class ParcelType>
 void Foam::InteractingKinematicCloud<ParcelType>::info() const
 {
+    vector linearMomentum = linearMomentumOfSystem();
+    reduce(linearMomentum, sumOp<vector>());
+
+    scalar linearKineticEnergy = linearKineticEnergyOfSystem();
+    reduce(linearKineticEnergy, sumOp<scalar>());
+
     Info<< "Cloud: " << this->name() << nl
         << "    Total number of parcels added   = "
         << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
@@ -269,7 +275,13 @@ void Foam::InteractingKinematicCloud<ParcelType>::info() const
         << "    Current number of parcels       = "
         << returnReduce(this->size(), sumOp<label>()) << nl
         << "    Current mass in system          = "
-        << returnReduce(massInSystem(), sumOp<scalar>()) << nl;
+        << returnReduce(massInSystem(), sumOp<scalar>()) << nl
+        << "    Linear momentum                 = "
+        << linearMomentum << nl
+        << "   |Linear momentum|                = "
+        << mag(linearMomentum) << nl
+        << "    Linear kinetic energy           = "
+        << linearKineticEnergy << nl;
 }
 
 
