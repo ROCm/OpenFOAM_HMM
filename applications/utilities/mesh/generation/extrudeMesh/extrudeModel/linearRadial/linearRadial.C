@@ -67,8 +67,7 @@ point linearRadial::operator()
     scalar rs = mag(surfacePoint);
     vector rsHat = surfacePoint/rs;
 
-    scalar delta = (R_ - rs)/nLayers_;
-    scalar r = rs + layer*delta;
+    scalar r = rs + (R_ - rs)*sumThickness(layer);
     return r*rsHat;
 }
 

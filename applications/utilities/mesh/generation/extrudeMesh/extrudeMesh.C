@@ -36,13 +36,14 @@ Description
 #include "Time.H"
 #include "dimensionedTypes.H"
 #include "IFstream.H"
-#include "faceMesh.H"
 #include "polyTopoChange.H"
 #include "polyTopoChanger.H"
 #include "edgeCollapser.H"
-#include "mathematicalConstants.H"
 #include "globalMeshData.H"
 #include "perfectInterface.H"
+#include "addPatchCellLayer.H"
+#include "fvMesh.H"
+#include "MeshedSurfaces.H"
 
 #include "extrudedMesh.H"
 #include "extrudeModel.H"
@@ -50,14 +51,148 @@ Description
 using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+enum ExtrudeMode
+{
+    MESH,
+    PATCH,
+    SURFACE
+};
+
+template<>
+const char* NamedEnum<ExtrudeMode, 3>::names[] =
+{
+    "mesh",
+    "patch",
+    "surface"
+};
+static const NamedEnum<ExtrudeMode, 3> ExtrudeModeNames;
+
+
+void createDummyFvMeshFiles(const polyMesh& mesh, const word& regionName)
+{
+    // Create dummy system/fv*
+    {
+        IOobject io
+        (
+            "fvSchemes",
+            mesh.time().system(),
+            regionName,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        Info<< "Testing:" << io.objectPath() << endl;
+
+        if (!io.headerOk())
+        {
+            Info<< "Writing dummy " << regionName/io.name() << endl;
+            dictionary dummyDict;
+            dictionary divDict;
+            dummyDict.add("divSchemes", divDict);
+            dictionary gradDict;
+            dummyDict.add("gradSchemes", gradDict);
+            dictionary laplDict;
+            dummyDict.add("laplacianSchemes", laplDict);
+
+            IOdictionary(io, dummyDict).regIOobject::write();
+        }
+    }
+    {
+        IOobject io
+        (
+            "fvSolution",
+            mesh.time().system(),
+            regionName,
+            mesh,
+            IOobject::NO_READ,
+            IOobject::NO_WRITE,
+            false
+        );
+
+        if (!io.headerOk())
+        {
+            Info<< "Writing dummy " << regionName/io.name() << endl;
+            dictionary dummyDict;
+            IOdictionary(io, dummyDict).regIOobject::write();
+        }
+    }
+}
+
+
+label findPatchID(const polyBoundaryMesh& patches, const word& name)
+{
+    label patchID = patches.findPatchID(name);
+
+    if (patchID == -1)
+    {
+        FatalErrorIn("findPatchID(const polyBoundaryMesh&, const word&)")
+            << "Cannot find patch " << name
+            << " in the source mesh.\n"
+            << "Valid patch names are " << patches.names()
+            << exit(FatalError);
+    }
+    return patchID;
+}
+
+
+labelList patchFaces(const polyBoundaryMesh& patches, const word& name)
+{
+    label patchID = findPatchID(patches, name);
+    const polyPatch& pp = patches[patchID];
+
+    return identity(pp.size()) + pp.start();
+}
+
+
+void updateFaceLabels(const mapPolyMesh& map, labelList& faceLabels)
+{
+    const labelList& reverseMap = map.reverseFaceMap();
+
+    labelList newFaceLabels(faceLabels.size());
+    label newI = 0;
+
+    forAll(faceLabels, i)
+    {
+        label oldFaceI = faceLabels[i];
+
+        if (reverseMap[oldFaceI] >= 0)
+        {
+            newFaceLabels[newI++] = reverseMap[oldFaceI];
+        }
+    }
+    newFaceLabels.setSize(newI);
+    faceLabels.transfer(newFaceLabels);
+}
+
+
+
 // Main program:
 
 int main(int argc, char *argv[])
 {
+    #include "addRegionOption.H"
     #include "setRootCase.H"
     #include "createTimeExtruded.H"
 
-    autoPtr<extrudedMesh> meshPtr(NULL);
+    // Get optional regionName
+    word regionName;
+    word regionDir;
+    if (args.optionReadIfPresent("region", regionName))
+    {
+        regionDir = regionName;
+        Info<< "Create mesh " << regionName << " for time = "
+            << runTimeExtruded.timeName() << nl << endl;
+    }
+    else
+    {
+        regionName = fvMesh::defaultRegion;
+        Info<< "Create mesh for time = "
+            << runTimeExtruded.timeName() << nl << endl;
+    }
+
 
     IOdictionary dict
     (
@@ -65,26 +200,44 @@ int main(int argc, char *argv[])
         (
             "extrudeProperties",
             runTimeExtruded.constant(),
+            regionDir,
             runTimeExtruded,
             IOobject::MUST_READ
         )
     );
 
+    // Point generator
     autoPtr<extrudeModel> model(extrudeModel::New(dict));
 
-    const word sourceType(dict.lookup("constructFrom"));
+    // Whether to flip normals
+    const Switch flipNormals(dict.lookup("flipNormals"));
 
-    autoPtr<faceMesh> fMesh;
+    // What to extrude
+    const ExtrudeMode mode = ExtrudeModeNames.read
+    (
+        dict.lookup("constructFrom")
+    );
 
-    if (sourceType == "patch")
+
+    // Generated mesh (one of either)
+    autoPtr<fvMesh> meshFromMesh;
+    autoPtr<polyMesh> meshFromSurface;
+
+    // Faces on front and back for stitching (in case of mergeFaces)
+    word frontPatchName;
+    labelList frontPatchFaces;
+    word backPatchName;
+    labelList backPatchFaces;
+
+    if (mode == PATCH || mode == MESH)
     {
         fileName sourceCasePath(dict.lookup("sourceCase"));
         sourceCasePath.expand();
         fileName sourceRootDir = sourceCasePath.path();
         fileName sourceCaseDir = sourceCasePath.name();
-        word patchName(dict.lookup("sourcePatch"));
+        dict.lookup("sourcePatch") >> frontPatchName;
 
-        Info<< "Extruding patch " << patchName
+        Info<< "Extruding patch " << frontPatchName
             << " on mesh " << sourceCasePath << nl
             << endl;
 
@@ -94,31 +247,183 @@ int main(int argc, char *argv[])
             sourceRootDir,
             sourceCaseDir
         );
-        #include "createPolyMesh.H"
+        #include "createMesh.H"
 
-        label patchID = mesh.boundaryMesh().findPatchID(patchName);
+        const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
-        if (patchID == -1)
+
+        // Topo change container. Either copy an existing mesh or start
+        // with empty storage (number of patches only needed for checking)
+        autoPtr<polyTopoChange> meshMod
+        (
+            (
+                mode == MESH
+              ? new polyTopoChange(mesh)
+              : new polyTopoChange(patches.size())
+            )
+        );
+
+        // Extrusion engine. Either adding to existing mesh or
+        // creating separate mesh.
+        addPatchCellLayer layerExtrude(mesh, (mode == MESH));
+
+        indirectPrimitivePatch extrudePatch
+        (
+            IndirectList<face>
+            (
+                mesh.faces(),
+                patchFaces(patches, frontPatchName)
+            ),
+            mesh.points()
+        );
+
+        // Only used for addPatchCellLayer into new mesh
+        labelList exposedPatchIDs;
+        if (mode == PATCH)
         {
-            FatalErrorIn(args.executable())
-                << "Cannot find patch " << patchName
-                << " in the source mesh.\n"
-                << "Valid patch names are " << mesh.boundaryMesh().names()
-                << exit(FatalError);
+            dict.lookup("exposedPatchName") >> backPatchName;
+            exposedPatchIDs.setSize
+            (
+                extrudePatch.size(),
+                findPatchID(patches, backPatchName)
+            );
         }
 
-        const polyPatch& pp = mesh.boundaryMesh()[patchID];
-        fMesh.reset(new faceMesh(pp.localFaces(), pp.localPoints()));
 
+        pointField layer0Points(extrudePatch.nPoints());
+        pointField displacement(extrudePatch.nPoints());
+        forAll(displacement, pointI)
         {
-            fileName surfName(runTime.path()/patchName + ".sMesh");
-            Info<< "Writing patch as surfaceMesh to "
-                << surfName << nl << endl;
-            OFstream os(surfName);
-            os << fMesh() << nl;
+            const vector& patchNormal = extrudePatch.pointNormals()[pointI];
+
+            // layer0 point
+            layer0Points[pointI] = model()
+            (
+                extrudePatch.localPoints()[pointI],
+                patchNormal,
+                0
+            );
+            // layerN point
+            point extrudePt = model()
+            (
+                extrudePatch.localPoints()[pointI],
+                patchNormal,
+                model().nLayers()
+            );
+            displacement[pointI] = extrudePt - layer0Points[pointI];
         }
+
+        if (flipNormals)
+        {
+            Info<< "Flipping faces." << nl << endl;
+            displacement = -displacement;
+        }
+
+        // Check if wedge (has layer0 different from original patch points)
+        // If so move the mesh to starting position.
+        if (gMax(mag(layer0Points-extrudePatch.localPoints())) > SMALL)
+        {
+            Info<< "Moving mesh to layer0 points since differ from original"
+                << " points - this can happen for wedge extrusions." << nl
+                << endl;
+
+            pointField newPoints(mesh.points());
+            forAll(extrudePatch.meshPoints(), i)
+            {
+                newPoints[extrudePatch.meshPoints()[i]] = layer0Points[i];
+            }
+            mesh.movePoints(newPoints);
+        }
+
+
+        // Layers per face
+        labelList nFaceLayers(extrudePatch.size(), model().nLayers());
+        // Layers per point
+        labelList nPointLayers(extrudePatch.nPoints(), model().nLayers());
+        // Displacement for first layer
+        vectorField firstLayerDisp = displacement*model().sumThickness(1);
+        // Expansion ratio not used.
+        scalarField ratio(extrudePatch.nPoints(), 1.0);
+
+        layerExtrude.setRefinement
+        (
+            ratio,              // expansion ratio
+            extrudePatch,       // patch faces to extrude
+            exposedPatchIDs,    // if new mesh: patches for exposed faces
+            nFaceLayers,
+            nPointLayers,
+            firstLayerDisp,
+            meshMod()
+        );
+
+        // Reset points according to extrusion model
+        forAll(layerExtrude.addedPoints(), pointI)
+        {
+            const labelList& pPoints = layerExtrude.addedPoints()[pointI];
+            forAll(pPoints, pPointI)
+            {
+                label meshPointI = pPoints[pPointI];
+
+                point modelPt
+                (
+                    model()
+                    (
+                        extrudePatch.localPoints()[pointI],
+                        extrudePatch.pointNormals()[pointI],
+                        pPointI+1       // layer
+                    )
+                );
+
+                const_cast<DynamicList<point>&>
+                (
+                    meshMod().points()
+                )[meshPointI] = modelPt;
+            }
+        }
+
+        // Store faces on front and exposed patch (if mode=patch there are
+        // only added faces so cannot used map to old faces)
+        const labelListList& layerFaces = layerExtrude.layerFaces();
+        backPatchFaces.setSize(layerFaces.size());
+        frontPatchFaces.setSize(layerFaces.size());
+        forAll(backPatchFaces, i)
+        {
+            backPatchFaces[i] = layerFaces[i][0];
+            frontPatchFaces[i] = layerFaces[i][layerFaces[i].size()-1];
+        }
+
+        // Create dummy fvSchemes, fvSolution
+        createDummyFvMeshFiles(mesh, regionDir);
+
+        // Create actual mesh from polyTopoChange container
+        autoPtr<mapPolyMesh> map = meshMod().makeMesh
+        (
+            meshFromMesh,
+            IOobject
+            (
+                regionName,
+                runTimeExtruded.constant(),
+                runTimeExtruded,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE,
+                false
+            ),
+            mesh
+        );
+
+        // Calculate face labels for front and back.
+        frontPatchFaces = renumber
+        (
+            map().reverseFaceMap(),
+            frontPatchFaces
+        );
+        backPatchFaces = renumber
+        (
+            map().reverseFaceMap(),
+            backPatchFaces
+        );
     }
-    else if (sourceType == "surface")
+    else
     {
         // Read from surface
         fileName surfName(dict.lookup("surface"));
@@ -126,52 +431,62 @@ int main(int argc, char *argv[])
         Info<< "Extruding surfaceMesh read from file " << surfName << nl
             << endl;
 
-        IFstream is(surfName);
+        MeshedSurface<face> fMesh(surfName);
 
-        fMesh.reset(new faceMesh(is));
-
-        Info<< "Read patch from file " << surfName << nl
-            << endl;
-    }
-    else
-    {
-        FatalErrorIn(args.executable())
-            << "Illegal 'constructFrom' specification. Should either be "
-            << "patch or surface." << exit(FatalError);
-    }
-
-    Switch flipNormals(dict.lookup("flipNormals"));
-
-    if (flipNormals)
-    {
-        Info<< "Flipping faces." << nl << endl;
-
-        faceList faces(fMesh().size());
-        forAll(faces, i)
+        if (flipNormals)
         {
-            faces[i] = fMesh()[i].reverseFace();
+            Info<< "Flipping faces." << nl << endl;
+            faceList& faces = const_cast<faceList&>(fMesh.faces());
+            forAll(faces, i)
+            {
+                faces[i] = fMesh[i].reverseFace();
+            }
         }
-        fMesh.reset(new faceMesh(faces, fMesh().localPoints()));
+
+        Info<< "Extruding surface with :" << nl
+                << "    points     : " << fMesh.points().size() << nl
+                << "    faces      : " << fMesh.size() << nl
+                << "    normals[0] : " << fMesh.faceNormals()[0]
+                << nl
+                << endl;
+
+        meshFromSurface.reset
+        (
+            new extrudedMesh
+            (
+                IOobject
+                (
+                    extrudedMesh::defaultRegion,
+                    runTimeExtruded.constant(),
+                    runTimeExtruded
+                ),
+                fMesh,
+                model()
+            )
+        );
+
+
+        // Get the faces on front and back
+        frontPatchName = "originalPatch";
+        frontPatchFaces = patchFaces
+        (
+            meshFromSurface().boundaryMesh(),
+            frontPatchName
+        );
+        backPatchName = "otherSide";
+        backPatchFaces = patchFaces
+        (
+            meshFromSurface().boundaryMesh(),
+            backPatchName
+        );
     }
 
 
-    Info<< "Extruding patch with :" << nl
-            << "    points     : " << fMesh().points().size() << nl
-            << "    faces      : " << fMesh().size() << nl
-            << "    normals[0] : " << fMesh().faceNormals()[0]
-            << nl
-            << endl;
-
-    extrudedMesh mesh
+    polyMesh& mesh =
     (
-        IOobject
-        (
-            extrudedMesh::defaultRegion,
-            runTimeExtruded.constant(),
-            runTimeExtruded
-        ),
-        fMesh(),
-        model()
+        meshFromMesh.valid()
+      ? meshFromMesh()
+      : meshFromSurface()
     );
 
 
@@ -184,17 +499,6 @@ int main(int argc, char *argv[])
         << "Merge distance    : " << mergeDim << nl
         << endl;
 
-    const polyBoundaryMesh& patches = mesh.boundaryMesh();
-
-    const label origPatchID = patches.findPatchID("originalPatch");
-    const label otherPatchID = patches.findPatchID("otherSide");
-
-    if (origPatchID == -1 || otherPatchID == -1)
-    {
-        FatalErrorIn(args.executable())
-            << "Cannot find patch originalPatch or otherSide." << nl
-            << "Valid patches are " << patches.names() << exit(FatalError);
-    }
 
     // Collapse edges
     // ~~~~~~~~~~~~~~
@@ -237,6 +541,10 @@ int main(int argc, char *argv[])
             // Update fields
             mesh.updateMesh(map);
 
+            // Update stored data
+            updateFaceLabels(map(), frontPatchFaces);
+            updateFaceLabels(map(), backPatchFaces);
+
             // Move mesh (if inflation used)
             if (map().hasMotionPoints())
             {
@@ -252,21 +560,32 @@ int main(int argc, char *argv[])
     Switch mergeFaces(dict.lookup("mergeFaces"));
     if (mergeFaces)
     {
+        if (mode == MESH)
+        {
+            FatalErrorIn(args.executable())
+                << "Cannot stitch front and back of extrusion since"
+                << " in 'mesh' mode (extrusion appended to mesh)."
+                << exit(FatalError);
+        }
+
         Info<< "Assuming full 360 degree axisymmetric case;"
             << " stitching faces on patches "
-            << patches[origPatchID].name() << " and "
-            << patches[otherPatchID].name() << " together ..." << nl << endl;
+            << frontPatchName << " and "
+            << backPatchName << " together ..." << nl << endl;
+
+        if (frontPatchFaces.size() != backPatchFaces.size())
+        {
+            FatalErrorIn(args.executable())
+                << "Differing number of faces on front ("
+                << frontPatchFaces.size() << ") and back ("
+                << backPatchFaces.size() << ")"
+                << exit(FatalError);
+        }
+
+
 
         polyTopoChanger stitcher(mesh);
         stitcher.setSize(1);
-
-        // Make list of masterPatch faces
-        labelList isf(patches[origPatchID].size());
-
-        forAll (isf, i)
-        {
-            isf[i] = patches[origPatchID].start() + i;
-        }
 
         const word cutZoneName("originalCutFaceZone");
 
@@ -276,8 +595,8 @@ int main(int argc, char *argv[])
             new faceZone
             (
                 cutZoneName,
-                isf,
-                boolList(isf.size(), false),
+                frontPatchFaces,
+                boolList(frontPatchFaces.size(), false),
                 0,
                 mesh.faceZones()
             )
@@ -286,25 +605,57 @@ int main(int argc, char *argv[])
         mesh.addZones(List<pointZone*>(0), fz, List<cellZone*>(0));
 
         // Add the perfect interface mesh modifier
-        stitcher.set
+        perfectInterface perfectStitcher
         (
+            "couple",
             0,
-            new perfectInterface
-            (
-                "couple",
-                0,
-                stitcher,
-                cutZoneName,
-                patches[origPatchID].name(),
-                patches[otherPatchID].name()
-            )
+            stitcher,
+            cutZoneName,
+            word::null,         // dummy patch name
+            word::null          // dummy patch name
         );
 
-        // Execute all polyMeshModifiers
-        autoPtr<mapPolyMesh> morphMap = stitcher.changeMesh(true);
+        // Topo change container
+        polyTopoChange meshMod(mesh);
 
-        mesh.movePoints(morphMap->preMotionPoints());
+        perfectStitcher.setRefinement
+        (
+            indirectPrimitivePatch
+            (
+                IndirectList<face>
+                (
+                    mesh.faces(),
+                    frontPatchFaces
+                ),
+                mesh.points()
+            ),
+            indirectPrimitivePatch
+            (
+                IndirectList<face>
+                (
+                    mesh.faces(),
+                    backPatchFaces
+                ),
+                mesh.points()
+            ),
+            meshMod
+        );
+
+        // Construct new mesh from polyTopoChange.
+        autoPtr<mapPolyMesh> map = meshMod.changeMesh(mesh, false);
+
+        // Update fields
+        mesh.updateMesh(map);
+
+        // Move mesh (if inflation used)
+        if (map().hasMotionPoints())
+        {
+            mesh.movePoints(map().preMotionPoints());
+        }
     }
+
+    mesh.setInstance(runTimeExtruded.constant());
+    Info<< "Writing mesh to " << mesh.objectPath() << nl << endl;
 
     if (!mesh.write())
     {

@@ -208,8 +208,8 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
             // Dump halves
             {
                 OFstream str(prefix+cycPatch.name()+"_half0.obj");
-                Pout<< "Dumping cycPatch.name() half0 faces to " << str.name()
-                    << endl;
+                Pout<< "Dumping " << cycPatch.name()
+                    << " half0 faces to " << str.name() << endl;
                 meshTools::writeOBJ
                 (
                     str,
@@ -226,8 +226,8 @@ void dumpCyclicMatch(const fileName& prefix, const polyMesh& mesh)
             }
             {
                 OFstream str(prefix+cycPatch.name()+"_half1.obj");
-                Pout<< "Dumping cycPatch.name() half1 faces to " << str.name()
-                    << endl;
+                Pout<< "Dumping " << cycPatch.name()
+                    << " half1 faces to " << str.name() << endl;
                 meshTools::writeOBJ
                 (
                     str,
@@ -516,11 +516,13 @@ void syncPoints
 
 int main(int argc, char *argv[])
 {
+#   include "addRegionOption.H"
     argList::validOptions.insert("overwrite", "");
 
 #   include "setRootCase.H"
 #   include "createTime.H"
     runTime.functionObjects().off();
+#   include "createNamedPolyMesh.H"
 
     const bool overwrite = args.optionFound("overwrite");
 
@@ -532,6 +534,11 @@ int main(int argc, char *argv[])
         (
             "createPatchDict",
             runTime.system(),
+            (
+                regionName != polyMesh::defaultRegion
+              ? regionName
+              : word::null
+            ),
             runTime,
             IOobject::MUST_READ,
             IOobject::NO_WRITE,
@@ -551,7 +558,6 @@ int main(int argc, char *argv[])
     coupledPolyPatch::matchTol = tol;
 
 
-#   include "createPolyMesh.H"
     const word oldInstance = mesh.pointsInstance();
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
@@ -563,7 +569,7 @@ int main(int argc, char *argv[])
     dumpCyclicMatch("initial_", mesh);
 
     // Read patch construct info from dictionary
-    PtrList<dictionary> patchSources(dict.lookup("patches"));
+    PtrList<dictionary> patchSources(dict.lookup("patchInfo"));
 
 
 

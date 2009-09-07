@@ -115,7 +115,14 @@ void Foam::Time::setControls()
         {
             if (timeDirs.size())
             {
-                startTime_ = timeDirs[0].value();
+                if (timeDirs[0].name() == constant() && timeDirs.size() >= 2)
+                {
+                    startTime_ = timeDirs[1].value();
+                }
+                else
+                {
+                    startTime_ = timeDirs[0].value();
+                }
             }
         }
         else if (startFrom == "latestTime")

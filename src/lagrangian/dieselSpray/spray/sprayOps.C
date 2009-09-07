@@ -31,7 +31,6 @@ License
 #include "dispersionModel.H"
 #include "interpolationCellPoint.H"
 #include "processorPolyPatch.H"
-#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

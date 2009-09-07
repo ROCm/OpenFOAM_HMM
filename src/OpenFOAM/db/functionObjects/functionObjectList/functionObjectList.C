@@ -106,6 +106,20 @@ void Foam::functionObjectList::clear()
 }
 
 
+Foam::label Foam::functionObjectList::findObjectID(const word& name) const
+{
+    forAll(*this, objectI)
+    {
+        if (operator[](objectI).name() == name)
+        {
+            return objectI;
+        }
+    }
+
+    return -1;
+}
+
+
 void Foam::functionObjectList::on()
 {
     execution_ = true;
@@ -142,14 +156,9 @@ bool Foam::functionObjectList::execute()
             read();
         }
 
-        forAllIter
-        (
-            PtrList<functionObject>,
-            static_cast<PtrList<functionObject>&>(*this),
-            iter
-        )
+        forAll(*this, objectI)
         {
-            ok = iter().execute() && ok;
+            ok = operator[](objectI).execute() && ok;
         }
     }
 
@@ -168,14 +177,9 @@ bool Foam::functionObjectList::end()
             read();
         }
 
-        forAllIter
-        (
-            PtrList<functionObject>,
-            static_cast<PtrList<functionObject>&>(*this),
-            iter
-        )
+        forAll(*this, objectI)
         {
-            ok = iter().end() && ok;
+            ok = operator[](objectI).end() && ok;
         }
     }
 

@@ -30,9 +30,9 @@ License
 #include "volFields.H"
 
 #include "fvDOM.H"
-#include "radiationConstants.H"
-#include "mathematicalConstants.H"
+#include "constants.H"
 
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -84,8 +84,7 @@ greyDiffusiveRadiationMixedFvPatchScalarField
         patch().lookupPatchField<volScalarField, scalar>(TName_);
 
     refValue() =
-        emissivity_*4.0*radiation::sigmaSB.value()*pow4(Tp)
-       /Foam::mathematicalConstant::pi;
+        emissivity_*4.0*physicoChemical::sigma.value()*pow4(Tp)/math::pi;
 
     refGrad() = 0.0;
 
@@ -199,9 +198,9 @@ updateCoeffs()
             refValue()[faceI] =
                 (
                     Ir*(1.0 - emissivity_)
-                  + emissivity_*radiation::sigmaSB.value()*pow4(Tp[faceI])
+                  + emissivity_*physicoChemical::sigma.value()*pow4(Tp[faceI])
                 )
-               /mathematicalConstant::pi;
+               /constant::math::pi;
 
         }
         else

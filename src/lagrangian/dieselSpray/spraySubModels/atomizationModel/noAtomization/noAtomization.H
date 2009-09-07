@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noAtomization Declaration
+                        Class noAtomization Declaration
 \*---------------------------------------------------------------------------*/
 
 class noAtomization
@@ -58,16 +58,11 @@ public:
     // Constructors
 
         //- Construct from components
-        noAtomization
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        noAtomization(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~noAtomization();
+    //- Destructor
+    virtual ~noAtomization();
 
 
     // Member Operators
@@ -79,8 +74,6 @@ public:
             const vector& vel,
             const liquidMixture& fuels
         ) const;
-
-
 };
 
 

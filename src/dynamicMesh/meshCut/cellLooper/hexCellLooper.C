@@ -28,7 +28,6 @@ License
 #include "cellFeatures.H"
 #include "polyMesh.H"
 #include "cellModeller.H"
-#include "mathematicalConstants.H"
 #include "plane.H"
 #include "ListOps.H"
 #include "meshTools.H"
@@ -36,18 +35,12 @@ License
 
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
 defineTypeNameAndDebug(hexCellLooper, 0);
-
 addToRunTimeSelectionTable(cellLooper, hexCellLooper, word);
-
-
 }
 
 

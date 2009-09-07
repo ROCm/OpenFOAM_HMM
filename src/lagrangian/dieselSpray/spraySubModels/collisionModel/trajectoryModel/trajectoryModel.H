@@ -55,12 +55,16 @@ class trajectoryCollisionModel
 {
 
 private:
-    // Reference to the cell volumes
+
+    // Private data
+
+        // Reference to the cell volumes
         dictionary coeffsDict_;
 
         scalar cSpace_;
         scalar cTime_;
         Switch coalescence_;
+
 
 public:
 
@@ -78,9 +82,9 @@ public:
             Random& rndGen
         );
 
-    // Destructor
 
-        ~trajectoryCollisionModel();
+    //- Destructor
+    virtual ~trajectoryCollisionModel();
 
 
     // Member Functions

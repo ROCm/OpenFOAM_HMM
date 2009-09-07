@@ -27,16 +27,16 @@
                         )
                     );
 
-                    Ak = sphereFraction*4.0*mathematicalConstant::pi
+                    Ak = sphereFraction*4.0*constant::math::pi
                        *pow
                         (
                             3.0*Vk
-                           /(sphereFraction*4.0*mathematicalConstant::pi),
+                           /(sphereFraction*4.0*constant::math::pi),
                             2.0/3.0
                         );
                 }
                 break;
-            
+
                 case 2:
                 {
                     // Assume it is part-circular
@@ -56,11 +56,11 @@
                         )
                     );
 
-                    Ak = circleFraction*mathematicalConstant::pi*thickness
+                    Ak = circleFraction*constant::math::pi*thickness
                        *sqrt
                         (
                             4.0*Vk
-                           /(circleFraction*thickness*mathematicalConstant::pi)
+                           /(circleFraction*thickness*constant::math::pi)
                         );
                 }
                 break;

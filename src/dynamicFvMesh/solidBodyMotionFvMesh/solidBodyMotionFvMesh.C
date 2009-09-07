@@ -27,10 +27,7 @@ License
 #include "solidBodyMotionFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
-#include "mathematicalConstants.H"
 #include "transformField.H"
-
-using namespace Foam::mathematicalConstant;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

@@ -459,7 +459,6 @@ void Foam::parcel::updateParcelProperties
 
     scalar Tnew = T();
 
-    // NN.
     // first calculate the new temperature and droplet mass,
     // then calculate the energy source and correct the
     // gaseous temperature, Tg, and mass fraction, Yfg,

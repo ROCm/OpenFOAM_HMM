@@ -45,7 +45,7 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                           Class hollowConeInjector Declaration
+                     Class hollowConeInjector Declaration
 \*---------------------------------------------------------------------------*/
 
 class hollowConeInjector
@@ -63,25 +63,21 @@ private:
         scalarList innerAngle_;
         scalarList outerAngle_;
 
+
 public:
 
     //- Runtime type information
-        TypeName("hollowConeInjector");
+    TypeName("hollowConeInjector");
 
 
     // Constructors
 
         //- Construct from components
-        hollowConeInjector
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        hollowConeInjector(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~hollowConeInjector();
+    //- Destructor
+    virtual ~hollowConeInjector();
 
 
     // Member Functions
@@ -97,17 +93,10 @@ public:
             const scalar time,
             const scalar d
         ) const;
-    
-        scalar velocity
-        (
-            const label i,
-            const scalar time
-        ) const;
-        
-        scalar averageVelocity
-        (
-            const label i
-        ) const;
+
+        scalar velocity(const label i, const scalar time) const;
+
+        scalar averageVelocity(const label i) const;
 };
 
 

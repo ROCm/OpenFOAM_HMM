@@ -30,10 +30,8 @@ License
 
 namespace Foam
 {
-
-defineTypeNameAndDebug(injectorType, 0);
-defineRunTimeSelectionTable(injectorType, dictionary);
-
+    defineTypeNameAndDebug(injectorType, 0);
+    defineRunTimeSelectionTable(injectorType, dictionary);
 }
 
 
@@ -47,6 +45,7 @@ Foam::injectorType::injectorType
 )
 {}
 
+
 // * * * * * * * * * * * * * * * * Selectors * * * * * * * * * * * * * * * * //
 
 Foam::autoPtr<Foam::injectorType> Foam::injectorType::New
@@ -55,30 +54,25 @@ Foam::autoPtr<Foam::injectorType> Foam::injectorType::New
     const dictionary& dict
 )
 {
-    word injectorTypeName
-    (
-        dict.lookup("injectorType")
-    );
+    word injectorTypeName(dict.lookup("injectorType"));
 
-    Info<< "Selecting injectorType "
-         << injectorTypeName << endl;
+    Info<< "Selecting injectorType " << injectorTypeName << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(injectorTypeName);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "injectorType::New(const dictionary&) : " << endl
-            << "    unknown injectorType type "
+        FatalErrorIn("injectorType::New(const dictionary&)")
+            << "Unknown injectorType type "
             << injectorTypeName
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid injector types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid injector types are:" << nl
+            << dictionaryConstructorTablePtr_->sortedToc()
+            << abort(FatalError);
     }
 
     return autoPtr<injectorType>(cstrIter()(t, dict));
-
 }
 
 
@@ -86,6 +80,7 @@ Foam::autoPtr<Foam::injectorType> Foam::injectorType::New
 
 Foam::injectorType::~injectorType()
 {}
+
 
 Foam::scalar Foam::injectorType::getTableValue
 (
@@ -120,11 +115,12 @@ Foam::scalar Foam::injectorType::getTableValue
             i++;
         }
         // value sits bewteen table[i][0] and table[i+1][0]
-        return table[i][1] 
+        return table[i][1]
                + (value-table[i][0])/(table[i+1][0]-table[i][0])
                * (table[i+1][1]-table[i][1]);
     }
 }
+
 
 Foam::scalar Foam::injectorType::integrateTable
 (
@@ -162,6 +158,7 @@ Foam::scalar Foam::injectorType::integrateTable
     return sum;
 }
 
+
 Foam::scalar Foam::injectorType::integrateTable
 (
     const List<pair>& table
@@ -177,5 +174,6 @@ Foam::scalar Foam::injectorType::integrateTable
 
     return integratedTable;
 }
+
 
 // ************************************************************************* //

@@ -28,7 +28,7 @@ Class
 
 Description
     The injectormodel is used to set initial droplet size and the
-    velocity direction 
+    velocity direction
 
 \*---------------------------------------------------------------------------*/
 
@@ -49,7 +49,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class injectorModel Declaration
+                        Class injectorModel Declaration
 \*---------------------------------------------------------------------------*/
 
 class injectorModel
@@ -62,13 +62,14 @@ protected:
         const dictionary& dict_;
         spray& sm_;
 
-        const PtrList<injector>& injectors_;    
+        const PtrList<injector>& injectors_;
         Random& rndGen_;
+
 
 public:
 
     //-Runtime type information
-        TypeName("injectorModel");
+    TypeName("injectorModel");
 
     // Declare runtime constructor selection table
 
@@ -88,16 +89,11 @@ public:
     // Constructors
 
         //- Construct from components
-        injectorModel
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        injectorModel(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        virtual ~injectorModel();
+    //- Destructor
+    virtual ~injectorModel();
 
 
     // Selector
@@ -117,22 +113,15 @@ public:
         //- Return the spray angle of the injector
         virtual vector direction
         (
-            const label injector, 
+            const label injector,
             const label hole,
             const scalar time,
             const scalar d
         ) const = 0;
 
-        virtual scalar velocity
-        (
-            const label i,
-            const scalar time
-        ) const = 0;
-        
-        virtual scalar averageVelocity
-        (
-            const label i
-        ) const = 0;
+        virtual scalar velocity(const label i, const scalar time) const = 0;
+
+        virtual scalar averageVelocity(const label i) const = 0;
 };
 
 

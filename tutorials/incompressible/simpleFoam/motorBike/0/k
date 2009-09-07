@@ -14,7 +14,7 @@ FoamFile
 }
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include        "initialConditions"
+#include        "include/initialConditions"
 
 dimensions      [0 2 -2 0 0 0 0];
 
@@ -22,7 +22,7 @@ internalField   uniform $turbulentKE;
 
 boundaryField
 {
-    #include "fixedInlet"
+    #include "include/fixedInlet"
 
     outlet
     {
@@ -41,7 +41,7 @@ boundaryField
         type            kqRWallFunction;
     }
 
-    #include "frontBackUpperPatches"
+    #include "include/frontBackUpperPatches"
 }
 
 

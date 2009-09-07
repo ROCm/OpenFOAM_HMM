@@ -61,7 +61,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from dictionary
         linearRadial(const dictionary& dict);
 
 

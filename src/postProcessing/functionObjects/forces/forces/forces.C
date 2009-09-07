@@ -190,6 +190,7 @@ Foam::forces::forces
     directForceDensity_(false),
     fDName_(""),
     rhoRef_(VGREAT),
+    pRef_(0),
     CofR_(vector::zero),
     forcesFilePtr_(NULL)
 {
@@ -211,12 +212,6 @@ Foam::forces::forces
     }
 
     read(dict);
-
-    if (active_)
-    {
-        // Create the forces file if not already created
-        makeFile();
-    }
 }
 
 
@@ -288,13 +283,15 @@ void Foam::forces::read(const dictionary& dict)
                     Info<< " or " << rhoName_;
                 }
 
-                Info<< " in database." << nl
-                    << "    De-activating forces."
+                Info<< " in database." << nl << "    De-activating forces."
                     << endl;
             }
 
             // Reference density needed for incompressible calculations
             rhoRef_ = readScalar(dict.lookup("rhoInf"));
+
+            // Reference pressure, 0 by default
+            pRef_ = dict.lookupOrDefault<scalar>("pRef", 0.0);
         }
 
         // Centre of rotation for moment calculations
@@ -317,16 +314,18 @@ void Foam::forces::makeFile()
         if (Pstream::master())
         {
             fileName forcesDir;
+            word startTimeName =
+                obr_.time().timeName(obr_.time().startTime().value());
+
             if (Pstream::parRun())
             {
                 // Put in undecomposed case (Note: gives problems for
                 // distributed data running)
-                forcesDir =
-                obr_.time().path()/".."/name_/obr_.time().timeName();
+                forcesDir = obr_.time().path()/".."/name_/startTimeName;
             }
             else
             {
-                forcesDir = obr_.time().path()/name_/obr_.time().timeName();
+                forcesDir = obr_.time().path()/name_/startTimeName;
             }
 
             // Create directory if does not exist.
@@ -447,13 +446,16 @@ Foam::forces::forcesMoments Foam::forces::calcForcesMoment() const
         const volSymmTensorField::GeometricBoundaryField& devRhoReffb
             = tdevRhoReff().boundaryField();
 
+        // Scale pRef by density for incompressible simulations
+        scalar pRef = pRef_/rho(p);
+
         forAllConstIter(labelHashSet, patchSet_, iter)
         {
             label patchi = iter.key();
 
             vectorField Md = mesh.C().boundaryField()[patchi] - CofR_;
 
-            vectorField pf = Sfb[patchi]*p.boundaryField()[patchi];
+            vectorField pf = Sfb[patchi]*(p.boundaryField()[patchi] - pRef);
 
             fm.first().first() += rho(p)*sum(pf);
             fm.second().first() += rho(p)*sum(Md ^ pf);

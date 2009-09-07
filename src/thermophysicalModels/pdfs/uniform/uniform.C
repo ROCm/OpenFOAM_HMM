@@ -43,7 +43,7 @@ Foam::uniform::uniform(const dictionary& dict, Random& rndGen)
     pdfDict_(dict.subDict(typeName + "PDF")),
     minValue_(readScalar(pdfDict_.lookup("minValue"))),
     maxValue_(readScalar(pdfDict_.lookup("maxValue"))),
-    range_(maxValue_-minValue_)
+    range_(maxValue_ - minValue_)
 {}
 
 

@@ -26,7 +26,8 @@ Class
     Foam::addPatchCellLayer
 
 Description
-    Adds layers of cells to outside of polyPatch.
+    Adds layers of cells to outside of polyPatch. Can optionally create
+    stand-alone extruded mesh (addToMesh=false).
 
     Call setRefinement with offset vector for every patch point and number
     of layers per patch face and number of layers per patch point.
@@ -164,6 +165,9 @@ class addPatchCellLayer
         //- Reference to mesh
         const polyMesh& mesh_;
 
+        //- Add layers to existing mesh or create new mesh
+        const bool addToMesh_;
+
         //- For all patchpoints: list of added points (size 0 or nLayers)
         //  First point in list is one nearest to original point in patch,
         //  last one is the new point on the surface.
@@ -253,7 +257,7 @@ public:
     // Constructors
 
         //- Construct from mesh.
-        addPatchCellLayer(const polyMesh& mesh);
+        addPatchCellLayer(const polyMesh& mesh, const bool addToMesh = true);
 
 
     // Member Functions
@@ -291,8 +295,10 @@ public:
             //- Play commands into polyTopoChange to create layers on top
             //  of indirectPrimitivePatch (have to be outside faces).
             //  Gets displacement per patch point.
-            //  - nPointLayers : number of layers per (patch)point
-            //  - nFaceLayers : number of layers per (patch) face
+            //  - exposedPatchID : only used if creating a new mesh (addToMesh=false)
+            //    gives per pp face the patch the exposed face should get.
+            //  - nPointLayers : number of layers per (patch)point.
+            //  - nFaceLayers : number of layers per (patch) face.
             //  - firstDisplacement : displacement per point for first
             //    layer of points (i.e. nearest to original mesh). If zero
             //    do not add point.
@@ -305,14 +311,15 @@ public:
             //        get a cell should firstDisplacement be <> 0
             //  Note: cells get added from owner cells of patch faces
             //        (instead of e.g. from patch faces)
-           void setRefinement
-           (
-               const scalarField& expansionRatio,
-               const indirectPrimitivePatch& pp,
-               const labelList& nFaceLayers,
-               const labelList& nPointLayers,
-               const vectorField& firstLayerDisp,
-               polyTopoChange& meshMod
+            void setRefinement
+            (
+                const scalarField& expansionRatio,
+                const indirectPrimitivePatch& pp,
+                const labelList& exposedPatchID,
+                const labelList& nFaceLayers,
+                const labelList& nPointLayers,
+                const vectorField& firstLayerDisp,
+                polyTopoChange& meshMod
             );
 
 
@@ -329,6 +336,7 @@ public:
                 (
                     scalarField(pp.nPoints(), 1.0), // expansion ration
                     pp,
+                    labelList(0),
                     labelList(pp.size(), nLayers),
                     labelList(pp.nPoints(), nLayers),
                     overallDisplacement / nLayers,
@@ -345,15 +353,6 @@ public:
                 const mapPolyMesh&,
                 const labelList& faceMap,   // new to old patch faces
                 const labelList& pointMap   // new to old patch points
-            );
-
-        // Helper
-
-            //- Per patch edge the corresponding mesh edge
-            static labelList calcMeshEdges
-            (
-                const primitiveMesh& mesh,
-                const indirectPrimitivePatch&
             );
 };
 

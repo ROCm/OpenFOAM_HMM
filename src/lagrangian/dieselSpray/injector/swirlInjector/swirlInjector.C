@@ -27,7 +27,7 @@ License
 #include "swirlInjector.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Random.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -83,13 +83,18 @@ Foam::swirlInjector::swirlInjector
     }
 
     // check if time entries match
-    if (mag(massFlowRateProfile_[0][0]-injectionPressureProfile_[0][0]) > SMALL)
+    if
+    (
+        mag(massFlowRateProfile_[0][0] - injectionPressureProfile_[0][0])
+      > SMALL
+    )
     {
         FatalErrorIn
         (
-            "swirlInjector::swirlInjector(const time& t, const dictionary dict)"
+            "swirlInjector::swirlInjector"
+            "(const time& t, const dictionary dict)"
         )   << "Start-times do not match for "
-               "injectionPressureProfile and massFlowRateProfile."
+            << "injectionPressureProfile and massFlowRateProfile."
             << abort(FatalError);
     }
 
@@ -105,9 +110,10 @@ Foam::swirlInjector::swirlInjector
     {
         FatalErrorIn
         (
-            "swirlInjector::swirlInjector(const time& t, const dictionary dict)"
+            "swirlInjector::swirlInjector"
+            "(const time& t, const dictionary dict)"
         )   << "End-times do not match for "
-               "injectionPressureProfile and massFlowRateProfile."
+            << "injectionPressureProfile and massFlowRateProfile."
             << abort(FatalError);
     }
 
@@ -152,7 +158,8 @@ Foam::swirlInjector::swirlInjector
     {
         WarningIn
         (
-            "swirlInjector::swirlInjector(const time& t, const dictionary dict)"
+            "swirlInjector::swirlInjector"
+            "(const time& t, const dictionary dict)"
         )   << "X does not add up to 1.0, correcting molar fractions." << endl;
 
         forAll(X_, i)
@@ -186,8 +193,9 @@ void Foam::swirlInjector::setTangentialVectors()
     }
 
     tangentialInjectionVector1_ = tangent/magV;
-    tangentialInjectionVector2_ = direction_ ^ tangentialInjectionVector1_;
+    tangentialInjectionVector2_ = direction_^tangentialInjectionVector1_;
 }
+
 
 Foam::label Foam::swirlInjector::nParcelsToInject
 (
@@ -196,16 +204,19 @@ Foam::label Foam::swirlInjector::nParcelsToInject
 ) const
 {
 
-    scalar mInj = mass_*(fractionOfInjection(time1)-fractionOfInjection(time0));
+    scalar mInj =
+        mass_*(fractionOfInjection(time1) - fractionOfInjection(time0));
     label nParcels = label(mInj/averageParcelMass_ + 0.49);
 
     return nParcels;
 }
 
+
 const Foam::vector Foam::swirlInjector::position(const label n) const
 {
     return position_;
 }
+
 
 Foam::vector Foam::swirlInjector::position
 (
@@ -235,7 +246,7 @@ Foam::vector Foam::swirlInjector::position
     {
         // otherwise, disc injection
         scalar iRadius = d_*rndGen.scalar01();
-        scalar iAngle = 2.0*mathematicalConstant::pi*rndGen.scalar01();
+        scalar iAngle = constant::math::twoPi*rndGen.scalar01();
 
         return
         (
@@ -252,15 +263,18 @@ Foam::vector Foam::swirlInjector::position
     return position_;
 }
 
+
 Foam::label Foam::swirlInjector::nHoles() const
 {
     return 1;
 }
 
+
 Foam::scalar Foam::swirlInjector::d() const
 {
     return d_;
 }
+
 
 const Foam::vector& Foam::swirlInjector::direction
 (
@@ -271,6 +285,7 @@ const Foam::vector& Foam::swirlInjector::direction
     return direction_;
 }
 
+
 Foam::scalar Foam::swirlInjector::mass
 (
     const scalar time0,
@@ -279,21 +294,24 @@ Foam::scalar Foam::swirlInjector::mass
     const scalar angleOfWedge
 ) const
 {
-    scalar mInj = mass_*(fractionOfInjection(time1)-fractionOfInjection(time0));
+    scalar mInj =
+        mass_*(fractionOfInjection(time1) - fractionOfInjection(time0));
 
     // correct mass if calculation is 2D
     if (twoD)
     {
-        mInj *= 0.5*angleOfWedge/mathematicalConstant::pi;
+        mInj *= 0.5*angleOfWedge/constant::math::pi;
     }
 
     return mInj;
 }
 
+
 Foam::scalar Foam::swirlInjector::mass() const
 {
     return mass_;
 }
+
 
 Foam::List<Foam::swirlInjector::pair>
 Foam::swirlInjector::massFlowRateProfile() const
@@ -301,10 +319,12 @@ Foam::swirlInjector::massFlowRateProfile() const
     return massFlowRateProfile_;
 }
 
+
 Foam::scalar Foam::swirlInjector::massFlowRate(const scalar time) const
 {
     return getTableValue(massFlowRateProfile_, time);
 }
+
 
 Foam::List<Foam::swirlInjector::pair>
 Foam::swirlInjector::injectionPressureProfile() const
@@ -312,10 +332,12 @@ Foam::swirlInjector::injectionPressureProfile() const
     return injectionPressureProfile_;
 }
 
+
 Foam::scalar Foam::swirlInjector::injectionPressure(const scalar time) const
 {
     return getTableValue(injectionPressureProfile_, time);
 }
+
 
 Foam::List<Foam::swirlInjector::pair>
 Foam::swirlInjector::velocityProfile() const
@@ -323,50 +345,60 @@ Foam::swirlInjector::velocityProfile() const
     return velocityProfile_;
 }
 
+
 Foam::scalar Foam::swirlInjector::velocity(const scalar time) const
 {
     return getTableValue(velocityProfile_, time);
 }
+
 
 Foam::List<Foam::swirlInjector::pair> Foam::swirlInjector::CdProfile() const
 {
     return CdProfile_;
 }
 
+
 Foam::scalar Foam::swirlInjector::Cd(const scalar time) const
 {
     return getTableValue(CdProfile_, time);
 }
+
 
 const Foam::scalarField& Foam::swirlInjector::X() const
 {
     return X_;
 }
 
+
 Foam::List<Foam::swirlInjector::pair> Foam::swirlInjector::T() const
 {
     return TProfile_;
 }
+
 
 Foam::scalar Foam::swirlInjector::T(const scalar time) const
 {
     return T_;
 }
 
+
 Foam::scalar Foam::swirlInjector::tsoi() const
 {
     return massFlowRateProfile_[0][0];
 }
+
 
 Foam::scalar Foam::swirlInjector::teoi() const
 {
     return massFlowRateProfile_[massFlowRateProfile_.size()-1][0];
 }
 
+
 Foam::scalar Foam::swirlInjector::fractionOfInjection(const scalar time) const
 {
     return integrateTable(massFlowRateProfile_, time)/mass_;
 }
+
 
 Foam::scalar Foam::swirlInjector::injectedMass
 (
@@ -376,14 +408,14 @@ Foam::scalar Foam::swirlInjector::injectedMass
     return mass_*fractionOfInjection(t);
 }
 
+
 void Foam::swirlInjector::correctProfiles
 (
     const liquidMixture& fuel,
     const scalar referencePressure
 )
 {
-
-    scalar A = 0.25*mathematicalConstant::pi*pow(d_, 2.0);
+    scalar A = 0.25*constant::math::pi*sqr(d_);
     scalar pDummy = 1.0e+5;
     scalar rho = fuel.rho(pDummy, T_, X_);
 
@@ -401,10 +433,12 @@ void Foam::swirlInjector::correctProfiles
     }
 }
 
+
 Foam::vector Foam::swirlInjector::tan1(const label n) const
 {
     return tangentialInjectionVector1_;
 }
+
 
 Foam::vector Foam::swirlInjector::tan2(const label n) const
 {

@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noCollision Declaration
+                        Class noCollision Declaration
 \*---------------------------------------------------------------------------*/
 
 class noCollision
@@ -66,9 +66,8 @@ public:
             Random& rndGen
         );
 
-    // Destructor
-
-        ~noCollision();
+    //- Destructor
+    virtual ~noCollision();
 
 
     // Member Functions

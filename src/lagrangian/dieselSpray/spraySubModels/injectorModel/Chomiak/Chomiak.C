@@ -26,7 +26,7 @@ License
 
 #include "Chomiak.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -96,7 +96,7 @@ ChomiakInjector::~ChomiakInjector()
 
 scalar ChomiakInjector::d0
 (
-    const label, 
+    const label,
     const scalar
 ) const
 {
@@ -115,46 +115,52 @@ vector ChomiakInjector::direction
     scalar dMin = dropletPDF_->minValue();
     scalar dMax = dropletPDF_->maxValue();
 
-    scalar angle = (d-dMax)*maxSprayAngle_[n]/(dMin-dMax)*mathematicalConstant::pi/360.0;
+    scalar angle =
+        (d - dMax)*maxSprayAngle_[n]
+       /(dMin - dMax)
+       *constant::math::pi/360.0;
     scalar alpha = sin(angle);
     scalar dcorr = cos(angle);
 
-    scalar beta = 2.0*mathematicalConstant::pi*rndGen_.scalar01();
+    scalar beta = constant::math::twoPi*rndGen_.scalar01();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
-    
+
     if (sm_.twoD())
     {
         scalar reduce = 0.01;
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
-        beta *= (1.0-2.0*reduce)*0.5*sm_.angleOfWedge()/mathematicalConstant::pi;
+        beta *= (1.0-2.0*reduce)*0.5*sm_.angleOfWedge()/constant::math::pi;
         beta += reduce*sm_.angleOfWedge();
 
-        normal = alpha*
-        (
-            sm_.axisOfWedge()*cos(beta) +
-            sm_.axisOfWedgeNormal()*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                sm_.axisOfWedge()*cos(beta)
+              + sm_.axisOfWedgeNormal()*sin(beta)
+            );
 
     }
     else
     {
-        normal = alpha*
-        (
-            injectors_[n].properties()->tan1(hole)*cos(beta) +
-            injectors_[n].properties()->tan2(hole)*sin(beta)
-        );
+        normal =
+            alpha
+           *(
+                injectors_[n].properties()->tan1(hole)*cos(beta)
+              + injectors_[n].properties()->tan2(hole)*sin(beta)
+            );
     }
-    
+
     // set the direction of injection by adding the normal vector
-    vector dir = dcorr*injectors_[n].properties()->direction(hole, time) + normal;
+    vector dir =
+        dcorr*injectors_[n].properties()->direction(hole, time) + normal;
     dir /= mag(dir);
 
     return dir;
-
 }
+
 
 scalar ChomiakInjector::velocity
 (
@@ -177,15 +183,16 @@ scalar ChomiakInjector::velocity
     }
 }
 
-scalar ChomiakInjector::averageVelocity
-(
-    const label i
-) const
-{    
+
+scalar ChomiakInjector::averageVelocity(const label i) const
+{
     const injectorType& it = sm_.injectors()[i].properties();
     scalar dt = it.teoi() - it.tsoi();
     return it.integrateTable(it.velocityProfile())/dt;
 }
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
 

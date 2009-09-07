@@ -113,12 +113,12 @@ void Foam::MixedDiffuseSpecular<CloudType>::correct
         scalar iDof = cloud.constProps(typeId).internalDegreesOfFreedom();
 
         U =
-        sqrt(CloudType::kb*T/mass)
-       *(
-            rndGen.GaussNormal()*tw1
-          + rndGen.GaussNormal()*tw2
-          - sqrt(-2.0*log(max(1 - rndGen.scalar01(), VSMALL)))*nw
-        );
+            sqrt(physicoChemical::k.value()*T/mass)
+           *(
+                rndGen.GaussNormal()*tw1
+              + rndGen.GaussNormal()*tw2
+              - sqrt(-2.0*log(max(1 - rndGen.scalar01(), VSMALL)))*nw
+            );
 
         U += cloud.boundaryU().boundaryField()[wppIndex][wppLocalFace];
 

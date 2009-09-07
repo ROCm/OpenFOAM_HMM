@@ -47,14 +47,15 @@ Foam::RosinRammler::RosinRammler(const dictionary& dict, Random& rndGen)
     d_(pdfDict_.lookup("d")),
     n_(pdfDict_.lookup("n")),
     ls_(d_),
-    range_(maxValue_-minValue_)
+    range_(maxValue_ - minValue_)
 {
     if (minValue_<0)
     {
         FatalErrorIn
         (
             "RosinRammler::RosinRammler(const dictionary& dict)"
-        ) << " minValue = " << minValue_ << ", it must be >0." << abort(FatalError);
+        )   << " minValue = " << minValue_ << ", it must be >0." << nl
+            << abort(FatalError);
     }
 
     if (maxValue_<minValue_)
@@ -62,7 +63,8 @@ Foam::RosinRammler::RosinRammler(const dictionary& dict, Random& rndGen)
         FatalErrorIn
         (
             "RosinRammler::RosinRammler(const dictionary& dict)"
-        ) << " maxValue is smaller than minValue." << abort(FatalError);
+        )   << " maxValue is smaller than minValue." << nl
+            << abort(FatalError);
     }
 
     // find max value so that it can be normalized to 1.0
@@ -103,26 +105,20 @@ Foam::scalar Foam::RosinRammler::sample() const
 {
     scalar y = 0;
     scalar x = 0;
-    label n = d_.size();
-    bool success = false;
+    scalar p = 0.0;
 
-    while (!success)
+    do
     {
         x = minValue_ + range_*rndGen_.scalar01();
         y = rndGen_.scalar01();
-        scalar p = 0.0;
+        p = 0.0;
 
-        for (label i=0; i<n; i++)
+        forAll(d_, i)
         {
             scalar xx = pow(x/d_[i], n_[i]);
             p += ls_[i]*xx*exp(-xx);
         }
-
-        if (y<p)
-        {
-            success = true;
-        }
-    }
+    } while(y>p);
 
     return x;
 }

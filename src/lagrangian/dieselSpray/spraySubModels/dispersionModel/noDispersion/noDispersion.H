@@ -41,7 +41,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noDispersion Declaration
+                       Class noDispersion Declaration
 \*---------------------------------------------------------------------------*/
 
 class noDispersion
@@ -58,21 +58,16 @@ public:
     // Constructors
 
         //- Construct from components
-        noDispersion
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        noDispersion(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~noDispersion();
+    //- Destructor
+    virtual ~noDispersion();
 
 
     // Member Functions
 
-    void disperseParcels() const;
+        void disperseParcels() const;
 };
 
 
