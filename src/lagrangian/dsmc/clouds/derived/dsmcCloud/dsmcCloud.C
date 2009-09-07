@@ -65,11 +65,4 @@ Foam::dsmcCloud::~dsmcCloud()
 {}
 
 
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::dsmcCloud::writeFields() const
-{
-    dsmcParcel::writeFields(*this);
-}
-
 // ************************************************************************* //

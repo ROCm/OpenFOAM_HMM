@@ -359,10 +359,10 @@ public:
         // I-O
 
             //- Read
-            static void readFields(ThermoCloud<ParcelType>& c);
+            static void readFields(Cloud<ParcelType>& c);
 
             //- Write
-            static void writeFields(const ThermoCloud<ParcelType>& c);
+            static void writeFields(const Cloud<ParcelType>& c);
 
 
     // Ostream Operator

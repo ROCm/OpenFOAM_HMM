@@ -58,7 +58,7 @@ Foam::scalar Foam::LiquidEvaporation<CloudType>::Sh
     const scalar Sc
 ) const
 {
-    return 2.0 + 0.6*Foam::sqrt(Re)*pow(Sc, 0.333);
+    return 2.0 + 0.6*Foam::sqrt(Re)*cbrt(Sc);
 }
 
 

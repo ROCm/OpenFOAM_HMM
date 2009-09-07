@@ -24,6 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "constants.H"
+
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline void Foam::moleculeCloud::evaluatePair
@@ -576,7 +580,7 @@ inline Foam::vector Foam::moleculeCloud::equipartitionLinearVelocity
     scalar mass
 )
 {
-    return sqrt(kb*temperature/mass)*vector
+    return sqrt(physicoChemical::k.value()*temperature/mass)*vector
     (
         rndGen_.GaussNormal(),
         rndGen_.GaussNormal(),
@@ -591,7 +595,7 @@ inline Foam::vector Foam::moleculeCloud::equipartitionAngularMomentum
     const molecule::constantProperties& cP
 )
 {
-    scalar sqrtKbT = sqrt(kb*temperature);
+    scalar sqrtKbT = sqrt(physicoChemical::k.value()*temperature);
 
     if (cP.linearMolecule())
     {
