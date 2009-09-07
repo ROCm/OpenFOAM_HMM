@@ -35,7 +35,7 @@ Foam::NoCollision<CloudType>::NoCollision
     CloudType& owner
 )
 :
-    CollisionModel<CloudType>(dict, owner, typeName)
+    CollisionModel<CloudType>(owner)
 {}
 
 

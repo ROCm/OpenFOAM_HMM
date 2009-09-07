@@ -26,6 +26,7 @@ Class
     Foam::NoCollision
 
 Description
+    Place holder for 'none' option
 
 SourceFiles
     NoCollision.C
@@ -55,7 +56,7 @@ class NoCollision
 public:
 
     //- Runtime type information
-    TypeName("NoCollision");
+    TypeName("none");
 
 
     // Constructors
