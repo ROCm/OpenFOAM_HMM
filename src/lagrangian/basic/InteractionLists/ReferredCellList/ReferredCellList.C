@@ -1386,37 +1386,6 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
             }
         }
 
-//         scalar rCutMaxSqr = molCloud_.rCutMax()*molCloud_.rCutMax();
-//
-//         forAll (molCloud_.mesh().points(), pointIIndex)
-//         {
-//             const point& ptI
-//             (
-//                 molCloud_.mesh().points()[pointIIndex]
-//             );
-//
-//             forAll(refCellPoints, rCP)
-//             {
-//                 if (magSqr(ptI - refCellPoints[rCP]) <= rCutMaxSqr)
-//                 {
-//                     const labelList& ptICells
-//                     (
-//                         molCloud_.mesh().pointCells()[pointIIndex]
-//                     );
-//
-//                     forAll(ptICells, pIC)
-//                     {
-//                         const label cellI(ptICells[pIC]);
-//
-//                         if (findIndex(realCellsFoundInRange, cellI) == -1)
-//                         {
-//                             realCellsFoundInRange.append(cellI);
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-
         refCell.realCells() = realCellsFoundInRange.shrink();
     }
 }
@@ -1617,6 +1586,8 @@ Foam::ReferredCellList<ParticleType>::ReferredCellList
     buildReferredCellList(pointPointListBuild);
 
     buildCellReferralLists();
+
+    writeReferredCells();
 }
 
 
@@ -1787,5 +1758,51 @@ void Foam::ReferredCellList<ParticleType>::referParticles
     }
 }
 
+
+template<class ParticleType>
+void Foam::ReferredCellList<ParticleType>::writeReferredCells() const
+{
+    fileName fName = il_.mesh().time().path()/"referredCells.obj";
+
+    Info<< "    Writing " << fName.name() << endl;
+
+    OFstream file(fName);
+
+    label vertexOffset = 1;
+
+    forAll(*this, refCellI)
+    {
+        const ReferredCell<ParticleType>& refCell = (*this)[refCellI];
+
+        const vectorList& refCellPts = refCell.vertexPositions();
+
+        const labelListList& refCellFaces = refCell.faces();
+
+        forAll(refCellPts, ptI)
+        {
+            file<< "v "
+                << refCellPts[ptI].x() << " "
+                << refCellPts[ptI].y() << " "
+                << refCellPts[ptI].z()
+                << nl;
+        }
+
+        forAll(refCellFaces, faceI)
+        {
+            file<< "f ";
+
+            forAll(refCellFaces[faceI], fPtI)
+            {
+                file<< " " << refCellFaces[faceI][fPtI] + vertexOffset;
+            }
+
+            file<< nl;
+        }
+
+        vertexOffset += refCellPts.size();
+    }
+
+    file.flush();
+}
 
 // ************************************************************************* //

@@ -70,7 +70,6 @@ class ReferredCellList
         List<receivingReferralList> cellReceivingReferralLists_;
 
 
-
     // Private Member Functions
 
         //- Refer and rerefer cells to construct referred interactions
@@ -122,6 +121,9 @@ public:
         inline const InteractionLists<ParticleType>& il() const;
 
         inline label nInteractingProcs() const;
+
+        //- Write the referredCell structure to an obj file
+        void writeReferredCells() const;
 };
 
 
