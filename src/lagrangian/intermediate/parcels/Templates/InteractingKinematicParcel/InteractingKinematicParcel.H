@@ -125,6 +125,18 @@ public:
     :
         public Particle<ParcelType>::trackData
     {
+    public:
+
+        enum trackPart
+        {
+            LEAPFROG_VELOCITY_STEP,
+            LINEAR_TRACK,
+            ROTATIONAL_TRACK
+        };
+
+
+    private:
+
         // Private data
 
             //- Reference to the cloud containing this particle
@@ -132,7 +144,6 @@ public:
 
             //- Particle constant properties
             const constantProperties& constProps_;
-
 
             // Interpolators for continuous phase fields
 
@@ -148,6 +159,10 @@ public:
             //- Local gravitational or other body-force acceleration
             const vector& g_;
 
+            // label specifying which part of the integration
+            // algorithm is taking place
+            trackPart part_;
+
 
    public:
 
@@ -161,7 +176,8 @@ public:
                 const interpolation<scalar>& rhoInterp,
                 const interpolation<vector>& UInterp,
                 const interpolation<scalar>& muInterp,
-                const vector& g
+                const vector& g,
+                trackPart part = LINEAR_TRACK
             );
 
 
@@ -185,8 +201,14 @@ public:
             //  phase dynamic viscosity field
             inline const interpolation<scalar>& muInterp() const;
 
-            // Return const access to the gravitational acceleration vector
+            //- Return const access to the gravitational acceleration vector
             inline const vector& g() const;
+
+            //- Return the part of the tracking operation taking place
+            inline trackPart part() const;
+
+            //- Return access to the part of the tracking operation taking place
+            inline trackPart& part();
     };
 
 

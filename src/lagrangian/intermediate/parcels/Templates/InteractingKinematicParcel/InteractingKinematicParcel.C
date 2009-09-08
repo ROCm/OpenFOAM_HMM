@@ -229,47 +229,72 @@ bool Foam::InteractingKinematicParcel<ParcelType>::move(TrackData& td)
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
     const scalar deltaT = mesh.time().deltaT().value();
-    scalar tEnd = (1.0 - p.stepFraction())*deltaT;
-    const scalar dtMax = tEnd;
 
-    while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+    if (td.part() == TrackData::LEAPFROG_VELOCITY_STEP)
     {
-        // Apply correction to position for reduced-D cases
-        meshTools::constrainToMeshCentre(mesh, p.position());
+        // First and last leapfrog velocity adjust part, required
+        // before and after tracking and force calculation
 
-        // Set the Lagrangian time-step
-        scalar dt = min(dtMax, tEnd);
+        p.U() += 0.5*deltaT*p.f()/p.mass();
+    }
+    else if (td.part() == TrackData::LINEAR_TRACK)
+    {
+        scalar tEnd = (1.0 - p.stepFraction())*deltaT;
+        const scalar dtMax = tEnd;
 
-        // Remember which cell the Parcel is in since this will change if a
-        // face is hit
-        label cellI = p.cell();
-
-        dt *= p.trackToFace(p.position() + dt*U_, td);
-
-        tEnd -= dt;
-        p.stepFraction() = 1.0 - tEnd/deltaT;
-
-        // Avoid problems with extremely small timesteps
-        if (dt > ROOTVSMALL)
+        while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
         {
-            // Update cell based properties
-            p.setCellValues(td, dt, cellI);
+            // Apply correction to position for reduced-D cases
+            meshTools::constrainToMeshCentre(mesh, p.position());
 
-            if (td.cloud().cellValueSourceCorrection())
+            // Set the Lagrangian time-step
+            scalar dt = min(dtMax, tEnd);
+
+            // Remember which cell the Parcel is in since this will change if a
+            // face is hit
+            label cellI = p.cell();
+
+            dt *= p.trackToFace(p.position() + dt*U_, td);
+
+            tEnd -= dt;
+            p.stepFraction() = 1.0 - tEnd/deltaT;
+
+            // Avoid problems with extremely small timesteps
+            if (dt > ROOTVSMALL)
             {
-                p.cellValueSourceCorrection(td, dt, cellI);
+                // Update cell based properties
+                p.setCellValues(td, dt, cellI);
+
+                if (td.cloud().cellValueSourceCorrection())
+                {
+                    p.cellValueSourceCorrection(td, dt, cellI);
+                }
+
+                p.calc(td, dt, cellI);
             }
 
-            p.calc(td, dt, cellI);
-        }
-
-        if (p.onBoundary() && td.keepParticle)
-        {
-            if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
+            if (p.onBoundary() && td.keepParticle)
             {
-                td.switchProcessor = true;
+                if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
+                {
+                    td.switchProcessor = true;
+                }
             }
         }
+    }
+    else if (td.part() == TrackData::ROTATIONAL_TRACK)
+    {
+        Info<< "No rotational tracking implementation" << endl;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "InteractingKinematicParcel<ParcelType>::move(TrackData& td)"
+        )
+            << td.part()
+            << " is an invalid part of the tracking method."
+            << abort(FatalError);
     }
 
     return td.keepParticle;

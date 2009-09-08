@@ -32,7 +32,7 @@ License
 template<class CloudType>
 void Foam::PairCollision<CloudType>::buildCellOccupancy()
 {
-    Info<< "Build cell occupancy" << endl;
+    Info<< "    Build cell occupancy" << endl;
 
     forAll(cellOccupancy_, cO)
     {

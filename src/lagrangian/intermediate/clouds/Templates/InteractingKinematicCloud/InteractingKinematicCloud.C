@@ -254,23 +254,25 @@ void Foam::InteractingKinematicCloud<ParcelType>::evolve()
         resetSourceTerms();
     }
 
-    const scalar deltaT = mesh_.time().deltaT().value();
+    // Sympletic leapfrog integration of particle forces:
+    // + apply half deltaV with stored force
+    // + move positions with new velocity
+    // + calculate forces in new position
+    // + apply half deltaV with new force
 
-    forAllIter(typename InteractingKinematicCloud<ParcelType>, *this, iter)
-    {
-        ParcelType& p = iter();
-        p.U() += 0.5*deltaT*p.f()/p.mass();
-    }
-
+    td.part() = ParcelType::trackData::LEAPFROG_VELOCITY_STEP;
     Cloud<ParcelType>::move(td);
+
+    td.part() = ParcelType::trackData::LINEAR_TRACK;
+    Cloud<ParcelType>::move(td);
+
+    // td.part() = ParcelType::trackData::ROTATIONAL_TRACK;
+    // Cloud<ParcelType>::move(td);
 
     this->collision().collide();
 
-    forAllIter(typename InteractingKinematicCloud<ParcelType>, *this, iter)
-    {
-        ParcelType& p = iter();
-        p.U() += 0.5*deltaT*p.f()/p.mass();
-    }
+    td.part() = ParcelType::trackData::LEAPFROG_VELOCITY_STEP;
+    Cloud<ParcelType>::move(td);
 
     postEvolve();
 }

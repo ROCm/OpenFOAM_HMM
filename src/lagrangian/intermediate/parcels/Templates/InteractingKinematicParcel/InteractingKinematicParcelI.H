@@ -55,7 +55,8 @@ inline Foam::InteractingKinematicParcel<ParcelType>::trackData::trackData
     const interpolation<scalar>& rhoInterp,
     const interpolation<vector>& UInterp,
     const interpolation<scalar>& muInterp,
-    const vector& g
+    const vector& g,
+    trackPart part
 )
 :
     Particle<ParcelType>::trackData(cloud),
@@ -64,7 +65,8 @@ inline Foam::InteractingKinematicParcel<ParcelType>::trackData::trackData
     rhoInterp_(rhoInterp),
     UInterp_(UInterp),
     muInterp_(muInterp),
-    g_(g)
+    g_(g),
+    part_(part)
 {}
 
 
@@ -202,6 +204,24 @@ inline const Foam::vector&
 Foam::InteractingKinematicParcel<ParcelType>::trackData::g() const
 {
     return g_;
+}
+
+
+template<class ParcelType>
+inline
+typename Foam::InteractingKinematicParcel<ParcelType>::trackData::trackPart
+Foam::InteractingKinematicParcel<ParcelType>::trackData::part() const
+{
+    return part_;
+}
+
+
+template<class ParcelType>
+inline
+typename Foam::InteractingKinematicParcel<ParcelType>::trackData::trackPart&
+Foam::InteractingKinematicParcel<ParcelType>::trackData::part()
+{
+    return part_;
 }
 
 

@@ -1620,7 +1620,7 @@ void Foam::ReferredCellList<ParticleType>::referParticles
     const List<DynamicList<ParticleType*> >& cellOccupancy
 )
 {
-    Info<< "Refer particles" << endl;
+    Info<< "    Refer particles" << endl;
 
     // Clear all existing referred particles
 
