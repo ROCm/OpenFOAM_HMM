@@ -44,7 +44,8 @@ Foam::InteractingKinematicCloud<ParcelType>::InteractingKinematicCloud
     const volScalarField& rho,
     const volVectorField& U,
     const volScalarField& mu,
-    const dimensionedVector& g
+    const dimensionedVector& g,
+    bool readFields
 )
 :
     Cloud<ParcelType>(rho.mesh(), cloudName, false),
@@ -145,7 +146,12 @@ Foam::InteractingKinematicCloud<ParcelType>::InteractingKinematicCloud
         mesh_,
         dimensionedVector("zero", dimMass*dimVelocity, vector::zero)
     )
-{}
+{
+    if (readFields)
+    {
+        ParcelType::readFields(*this);
+    }
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
