@@ -167,14 +167,13 @@ const Foam::vector Foam::InteractingKinematicParcel<ParcelType>::calcVelocity
         mass*td.cloud().forces().calcCoupled(cellI, dt, rhoc_, rho, Uc_, U);
     const vector FNonCoupled =
         mass*td.cloud().forces().calcNonCoupled(cellI, dt, rhoc_, rho, Uc_, U);
-    const vector& FCollision = f();
 
     // New particle velocity
     //~~~~~~~~~~~~~~~~~~~~~~
 
     // Update velocity - treat as 3-D
     const scalar As = this->areaS(d);
-    const vector ap = Uc_ + (FCoupled + FNonCoupled + FCollision + Su)/(utc*As);
+    const vector ap = Uc_ + (FCoupled + FNonCoupled + Su)/(utc*As);
     const scalar bp = 6.0*utc/(rho*d);
 
     IntegrationScheme<vector>::integrationResult Ures =

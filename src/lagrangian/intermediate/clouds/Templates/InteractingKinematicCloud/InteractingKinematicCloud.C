@@ -254,9 +254,23 @@ void Foam::InteractingKinematicCloud<ParcelType>::evolve()
         resetSourceTerms();
     }
 
-    this->collision().collide();
+    const scalar deltaT = mesh_.time().deltaT().value();
+
+    forAllIter(typename InteractingKinematicCloud<ParcelType>, *this, iter)
+    {
+        ParcelType& p = iter();
+        p.U() += 0.5*deltaT*p.f()/p.mass();
+    }
 
     Cloud<ParcelType>::move(td);
+
+    this->collision().collide();
+
+    forAllIter(typename InteractingKinematicCloud<ParcelType>, *this, iter)
+    {
+        ParcelType& p = iter();
+        p.U() += 0.5*deltaT*p.f()/p.mass();
+    }
 
     postEvolve();
 }
