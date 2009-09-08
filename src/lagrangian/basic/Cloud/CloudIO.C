@@ -139,7 +139,13 @@ void Foam::Cloud<ParticleType>::readFields()
 
 template<class ParticleType>
 void Foam::Cloud<ParticleType>::writeFields() const
-{}
+{
+    if (this->size())
+    {
+        const ParticleType& p = *this->first();
+        ParticleType::writeFields(p.cloud());
+    }
+}
 
 
 template<class ParticleType>

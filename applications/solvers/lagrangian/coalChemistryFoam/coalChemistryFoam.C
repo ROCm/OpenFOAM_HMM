@@ -38,7 +38,6 @@ Description
 #include "CoalCloud.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
-#include "thermoPhysicsTypes.H"
 #include "timeActivatedExplicitCellSource.H"
 #include "radiationModel.H"
 

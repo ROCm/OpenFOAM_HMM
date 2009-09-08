@@ -25,7 +25,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "FreeStream.H"
-#include "mathConstants.H"
+#include "constants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -131,7 +133,7 @@ void Foam::FreeStream<CloudType>::inflow()
 
     Random& rndGen(cloud.rndGen());
 
-    scalar sqrtPi = sqrt(constant::math::pi);
+    scalar sqrtPi = sqrt(math::pi);
 
     label particlesInserted = 0;
 
@@ -370,7 +372,7 @@ void Foam::FreeStream<CloudType>::inflow()
                     } while (P < rndGen.scalar01());
 
                     vector U =
-                        sqrt(CloudType::kb*faceTemperature/mass)
+                        sqrt(physicoChemical::k.value()*faceTemperature/mass)
                        *(
                             rndGen.GaussNormal()*t1
                           + rndGen.GaussNormal()*t2

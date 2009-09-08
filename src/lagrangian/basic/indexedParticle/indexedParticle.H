@@ -47,7 +47,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class indexedParticle Declaration
+                      Class indexedParticle Declaration
 \*---------------------------------------------------------------------------*/
 
 class indexedParticle

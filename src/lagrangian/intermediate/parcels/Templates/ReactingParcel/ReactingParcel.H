@@ -348,10 +348,10 @@ public:
         // I-O
 
             //- Read
-            static void readFields(ReactingCloud<ParcelType>& c);
+            static void readFields(Cloud<ParcelType>& c);
 
             //- Write
-            static void writeFields(const ReactingCloud<ParcelType>& c);
+            static void writeFields(const Cloud<ParcelType>& c);
 
 
     // Ostream Operator

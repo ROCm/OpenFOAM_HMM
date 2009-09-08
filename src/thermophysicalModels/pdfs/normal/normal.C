@@ -87,7 +87,6 @@ Foam::scalar Foam::normal::sample() const
     scalar x = 0.0;
     scalar y = 0.0;
     scalar p = 0.0;
-    bool success = false;
 
     do
     {

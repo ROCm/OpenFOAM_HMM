@@ -25,7 +25,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "VariableHardSphere.H"
-#include "mathConstants.H"
+#include "constants.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -91,8 +93,8 @@ Foam::scalar Foam::VariableHardSphere<CloudType>::sigmaTcR
 
     // calculating cross section = pi*dPQ^2, where dPQ is from Bird, eq. 4.79
     scalar sigmaTPQ =
-        constant::math::pi*dPQ*dPQ
-       *pow(2.0*CloudType::kb*Tref_/(mR*cR*cR), omegaPQ - 0.5)
+        math::pi*dPQ*dPQ
+       *pow(2.0*physicoChemical::k.value()*Tref_/(mR*cR*cR), omegaPQ - 0.5)
        /exp(Foam::lgamma(2.5 - omegaPQ));
 
     return sigmaTPQ*cR;
@@ -126,7 +128,7 @@ void Foam::VariableHardSphere<CloudType>::collide
 
     scalar sinTheta = sqrt(1.0 - cosTheta*cosTheta);
 
-    scalar phi = constant::math::twoPi*rndGen.scalar01();
+    scalar phi = math::twoPi*rndGen.scalar01();
 
     vector postCollisionRelU =
         cR

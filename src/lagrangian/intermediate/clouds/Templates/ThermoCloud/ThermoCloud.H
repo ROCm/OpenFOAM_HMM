@@ -140,7 +140,8 @@ public:
             const volScalarField& rho,
             const volVectorField& U,
             const dimensionedVector& g,
-            basicThermo& thermo
+            basicThermo& thermo,
+            bool readFields = true
         );
 
 

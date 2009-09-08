@@ -44,9 +44,7 @@ Foam::dsmcCloud::dsmcCloud
 )
 :
     DsmcCloud<dsmcParcel>(cloudName, T, U)
-{
-    dsmcParcel::readFields(*this);
-}
+{}
 
 
 Foam::dsmcCloud::dsmcCloud
@@ -64,12 +62,5 @@ Foam::dsmcCloud::dsmcCloud
 Foam::dsmcCloud::~dsmcCloud()
 {}
 
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-void Foam::dsmcCloud::writeFields() const
-{
-    dsmcParcel::writeFields(*this);
-}
 
 // ************************************************************************* //
