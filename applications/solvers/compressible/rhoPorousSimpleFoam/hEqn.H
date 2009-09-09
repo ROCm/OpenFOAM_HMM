@@ -9,6 +9,8 @@
       - p*fvc::div(phi/fvc::interpolate(rho))
     );
 
+    pZones.addEnthalpySource(thermo, hEqn);
+
     hEqn.relax();
 
     eqnResidual = hEqn.solve().initialResidual();

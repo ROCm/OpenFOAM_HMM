@@ -24,77 +24,57 @@ License
 
 \*----------------------------------------------------------------------------*/
 
-#include "porousZones.H"
-#include "volFields.H"
-#include "fvMatrix.H"
-#include "fvm.H"
+#include "porousZone.H"
+#include "fvMesh.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-template<class Type>
-void Foam::porousZones::modifyDdt(fvMatrix<Type>& m) const
+template<class RhoFieldType>
+void Foam::porousZone::addPowerLawResistance
+(
+    scalarField& Udiag,
+    const labelList& cells,
+    const scalarField& V,
+    const RhoFieldType& rho,
+    const vectorField& U
+) const
 {
-    forAll(*this, i)
+    const scalar C0 = C0_;
+    const scalar C1m1b2 = (C1_ - 1.0)/2.0;
+
+    forAll (cells, i)
     {
-        operator[](i).modifyDdt(m);
+        Udiag[cells[i]] +=
+            V[cells[i]]*rho[cells[i]]*C0*pow(magSqr(U[cells[i]]), C1m1b2);
     }
 }
 
 
-// * * * * * * * * * * * * * * *  Member Functions * * * * * * * * * * * * * //
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> >
-Foam::porousZones::ddt
+template<class RhoFieldType>
+void Foam::porousZone::addViscousInertialResistance
 (
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
+    scalarField& Udiag,
+    vectorField& Usource,
+    const labelList& cells,
+    const scalarField& V,
+    const RhoFieldType& rho,
+    const scalarField& mu,
+    const vectorField& U
+) const
 {
-    tmp<fvMatrix<Type> > tres = fvm::ddt(vf);
-    modifyDdt(tres());
-    return tres;
+    const tensor& D = D_.value();
+    const tensor& F = F_.value();
+
+    forAll (cells, i)
+    {
+        tensor dragCoeff = mu[cells[i]]*D + (rho[cells[i]]*mag(U[cells[i]]))*F;
+        scalar isoDragCoeff = tr(dragCoeff);
+
+        Udiag[cells[i]] += V[cells[i]]*isoDragCoeff;
+        Usource[cells[i]] -=
+            V[cells[i]]*((dragCoeff - I*isoDragCoeff) & U[cells[i]]);
+    }
 }
 
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> >
-Foam::porousZones::ddt
-(
-    const oneField&,
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<fvMatrix<Type> > tres = fvm::ddt(vf);
-    modifyDdt(tres());
-    return tres;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> >
-Foam::porousZones::ddt
-(
-    const dimensionedScalar& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<fvMatrix<Type> > tres = fvm::ddt(rho,vf);
-    modifyDdt(tres());
-    return tres;
-}
-
-
-template<class Type>
-Foam::tmp<Foam::fvMatrix<Type> >
-Foam::porousZones::ddt
-(
-    const volScalarField& rho,
-    GeometricField<Type, fvPatchField, volMesh>& vf
-)
-{
-    tmp<fvMatrix<Type> > tres = fvm::ddt(rho,vf);
-    modifyDdt(tres());
-    return tres;
-}
 
 // ************************************************************************* //

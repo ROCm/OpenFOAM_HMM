@@ -22,26 +22,42 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Typedef
-    Foam::porousZones
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef porousZones_H
-#define porousZones_H
+#include "thermalPorousZones.H"
+#include "volFields.H"
 
-#include "PorousZones.H"
-#include "porousZone.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
-    typedef PorousZones<porousZone> porousZones;
+    defineTemplateTypeNameAndDebug(IOPtrList<thermalPorousZone>, 0);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-#endif
+Foam::thermalPorousZones::thermalPorousZones
+(
+    const fvMesh& mesh
+)
+:
+    PorousZones<thermalPorousZone>(mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::thermalPorousZones::addEnthalpySource
+(
+    const basicThermo& thermo,
+    fvScalarMatrix& hEqn
+) const
+{
+    forAll(*this, i)
+    {
+        operator[](i).addEnthalpySource(thermo, hEqn);
+    }
+}
+
 
 // ************************************************************************* //
