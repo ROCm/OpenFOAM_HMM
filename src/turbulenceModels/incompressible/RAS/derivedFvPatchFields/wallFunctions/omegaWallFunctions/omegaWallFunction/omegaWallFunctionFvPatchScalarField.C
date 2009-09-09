@@ -186,7 +186,7 @@ void omegaWallFunctionFvPatchScalarField::updateCoeffs()
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
     const scalarField& y = rasModel.y()[patchI];
 
-    const scalar Cmu25 = pow(Cmu_, 0.25);
+    const scalar Cmu25 = pow025(Cmu_);
 
     volScalarField& G =
         const_cast<volScalarField&>(db().lookupObject<volScalarField>(GName_));

@@ -188,7 +188,7 @@ void epsilonWallFunctionFvPatchScalarField::updateCoeffs()
 
     const RASModel& rasModel = db().lookupObject<RASModel>("RASProperties");
 
-    const scalar Cmu25 = pow(Cmu_, 0.25);
+    const scalar Cmu25 = pow025(Cmu_);
     const scalar Cmu75 = pow(Cmu_, 0.75);
 
     const scalarField& y = rasModel.y()[patchI];
