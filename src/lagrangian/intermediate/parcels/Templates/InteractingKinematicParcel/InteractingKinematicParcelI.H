@@ -446,6 +446,13 @@ Foam::InteractingKinematicParcel<ParcelType>::omega() const
 
 
 template <class ParcelType>
+inline Foam::scalar Foam::InteractingKinematicParcel<ParcelType>::r() const
+{
+    return 0.5*d_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::InteractingKinematicParcel<ParcelType>::volume() const
 {
     return volume(d_);

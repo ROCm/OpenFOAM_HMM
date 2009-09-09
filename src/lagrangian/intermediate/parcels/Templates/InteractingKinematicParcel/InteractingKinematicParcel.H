@@ -438,6 +438,9 @@ public:
             //- Particle angular velocity
             inline vector omega() const;
 
+            //- Particle radius
+            inline scalar r() const;
+
             //- Particle volume
             inline scalar volume() const;
 
