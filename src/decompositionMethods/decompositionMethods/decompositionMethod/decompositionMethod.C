@@ -141,9 +141,18 @@ Foam::labelList Foam::decompositionMethod::decompose
     const pointField& coarsePoints
 )
 {
-    scalarField coarseWeights(0);
+    // Decompose based on agglomerated points
+    labelList coarseDistribution(decompose(coarsePoints));
 
-    return decompose(fineToCoarse, coarsePoints, coarseWeights);
+    // Rework back into decomposition for original mesh_
+    labelList fineDistribution(fineToCoarse.size());
+
+    forAll(fineDistribution, i)
+    {
+        fineDistribution[i] = coarseDistribution[fineToCoarse[i]];
+    }
+
+    return fineDistribution;
 }
 
 
