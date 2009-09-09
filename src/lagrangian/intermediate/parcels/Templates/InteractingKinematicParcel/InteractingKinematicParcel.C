@@ -205,6 +205,8 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     d_(p.d_),
     U_(p.U_),
     f_(p.f_),
+    pi_(p.pi_),
+    tau_(p.tau_),
     rho_(p.rho_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),

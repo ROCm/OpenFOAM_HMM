@@ -84,6 +84,8 @@ inline Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     d_(0.0),
     U_(vector::zero),
     f_(vector::zero),
+    pi_(vector::zero),
+    tau_(vector::zero),
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -103,6 +105,9 @@ inline Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     const scalar nParticle0,
     const scalar d0,
     const vector& U0,
+    const vector& f0,
+    const vector& pi0,
+    const vector& tau0,
     const constantProperties& constProps
 )
 :
@@ -111,7 +116,9 @@ inline Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     nParticle_(nParticle0),
     d_(d0),
     U_(U0),
-    f_(vector::zero),
+    f_(f0),
+    pi_(pi0),
+    tau_(tau0),
     rho_(constProps.rho0()),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -266,6 +273,22 @@ Foam::InteractingKinematicParcel<ParcelType>::f() const
 
 
 template <class ParcelType>
+inline const Foam::vector&
+Foam::InteractingKinematicParcel<ParcelType>::pi() const
+{
+    return pi_;
+}
+
+
+template <class ParcelType>
+inline const Foam::vector&
+Foam::InteractingKinematicParcel<ParcelType>::tau() const
+{
+    return tau_;
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::InteractingKinematicParcel<ParcelType>::rho() const
 {
     return rho_;
@@ -319,6 +342,20 @@ template <class ParcelType>
 inline Foam::vector& Foam::InteractingKinematicParcel<ParcelType>::f()
 {
     return f_;
+}
+
+
+template <class ParcelType>
+inline Foam::vector& Foam::InteractingKinematicParcel<ParcelType>::pi()
+{
+    return pi_;
+}
+
+
+template <class ParcelType>
+inline Foam::vector& Foam::InteractingKinematicParcel<ParcelType>::tau()
+{
+    return tau_;
 }
 
 
@@ -389,6 +426,14 @@ template <class ParcelType>
 inline Foam::scalar Foam::InteractingKinematicParcel<ParcelType>::mass() const
 {
     return rho_*volume();
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::InteractingKinematicParcel<ParcelType>::momentOfInertia() const
+{
+    return 0.1*mass()*sqr(d_);
 }
 
 

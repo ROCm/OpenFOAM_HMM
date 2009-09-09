@@ -39,6 +39,8 @@ Foam::string Foam::InteractingKinematicParcel<ParcelType>::propHeader =
   + " d"
   + " (Ux Uy Uz)"
   + " (fx fy fz)"
+  + " (pix piy piz)"
+  + " (taux tauy tauz)"
   + " rho"
   + " tTurb"
   + " UTurb";
@@ -60,6 +62,8 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     d_(0.0),
     U_(vector::zero),
     f_(vector::zero),
+    pi_(vector::zero),
+    tau_(vector::zero),
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
@@ -76,6 +80,8 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
             d_ = readScalar(is);
             is >> U_;
             is >> f_;
+            is >> pi_;
+            is >> tau_;
             rho_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
@@ -90,6 +96,8 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
               + sizeof(d_)
               + sizeof(U_)
               + sizeof(f_)
+              + sizeof(pi_)
+              + sizeof(tau_)
               + sizeof(rho_)
               + sizeof(tTurb_)
               + sizeof(UTurb_)
@@ -133,6 +141,12 @@ void Foam::InteractingKinematicParcel<ParcelType>::readFields
     IOField<vector> f(c.fieldIOobject("f", IOobject::MUST_READ));
     c.checkFieldIOobject(c, f);
 
+    IOField<vector> pi(c.fieldIOobject("pi", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, pi);
+
+    IOField<vector> tau(c.fieldIOobject("tau", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, tau);
+
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
 
@@ -152,6 +166,7 @@ void Foam::InteractingKinematicParcel<ParcelType>::readFields
         p.d_ = d[i];
         p.U_ = U[i];
         p.f_ = f[i];
+        p.pi_ = pi[i];
         p.rho_ = rho[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
@@ -179,6 +194,8 @@ void Foam::InteractingKinematicParcel<ParcelType>::writeFields
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
     IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
+    IOField<vector> pi(c.fieldIOobject("pi", IOobject::NO_READ), np);
+    IOField<vector> tau(c.fieldIOobject("tau", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
@@ -193,6 +210,8 @@ void Foam::InteractingKinematicParcel<ParcelType>::writeFields
         d[i] = p.d();
         U[i] = p.U();
         f[i] = p.f();
+        pi[i] = p.pi();
+        tau[i] = p.tau();
         rho[i] = p.rho();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
@@ -204,6 +223,8 @@ void Foam::InteractingKinematicParcel<ParcelType>::writeFields
     d.write();
     U.write();
     f.write();
+    pi.write();
+    tau.write();
     rho.write();
     tTurb.write();
     UTurb.write();
@@ -227,6 +248,8 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.d()
             << token::SPACE << p.U()
             << token::SPACE << p.f()
+            << token::SPACE << p.pi()
+            << token::SPACE << p.tau()
             << token::SPACE << p.rho()
             << token::SPACE << p.tTurb()
             << token::SPACE << p.UTurb();
@@ -242,6 +265,8 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.d())
           + sizeof(p.U())
           + sizeof(p.f())
+          + sizeof(p.pi())
+          + sizeof(p.tau())
           + sizeof(p.rho())
           + sizeof(p.tTurb())
           + sizeof(p.UTurb())

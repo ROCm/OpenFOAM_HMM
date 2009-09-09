@@ -63,6 +63,9 @@ Foam::basicInteractingKinematicParcel::basicInteractingKinematicParcel
     const scalar nParticle0,
     const scalar d0,
     const vector& U0,
+    const vector& f0,
+    const vector& pi0,
+    const vector& tau0,
     const constantProperties& constProps
 )
 :
@@ -75,6 +78,9 @@ Foam::basicInteractingKinematicParcel::basicInteractingKinematicParcel
         nParticle0,
         d0,
         U0,
+        f0,
+        pi0,
+        tau0,
         constProps
     )
 {}

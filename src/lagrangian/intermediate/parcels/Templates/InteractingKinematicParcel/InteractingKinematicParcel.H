@@ -233,6 +233,14 @@ protected:
             //- Force on particle due to collisions [N]
             vector f_;
 
+            //- Angular momentum of Parcel in global reference frame
+            // [kg m^2 s-1]
+            vector pi_;
+
+            //- Torque on particle due to collisions in global
+            //  reference frame [Nm]
+            vector tau_;
+
             //- Density [kg/m3]
             scalar rho_;
 
@@ -310,6 +318,9 @@ public:
             const scalar nParticle0,
             const scalar d0,
             const vector& U0,
+            const vector& f0,
+            const vector& pi0,
+            const vector& tau0,
             const constantProperties& constProps
         );
 
@@ -353,6 +364,12 @@ public:
             //- Return const access to force
             inline const vector& f() const;
 
+            //- Return const access to angular momentum
+            inline const vector& pi() const;
+
+            //- Return const access to torque
+            inline const vector& tau() const;
+
             //- Return const access to density
             inline scalar rho() const;
 
@@ -380,6 +397,12 @@ public:
             //- Return access to force
             inline vector& f();
 
+            //- Return access to angular momentum
+            inline vector& pi();
+
+            //- Return access to torque
+            inline vector& tau();
+
             //- Return access to density
             inline scalar& rho();
 
@@ -405,6 +428,9 @@ public:
 
             //- Particle mass
             inline scalar mass() const;
+
+            //- Particle moment of inertia around diameter axis
+            inline scalar momentOfInertia() const;
 
             //- Particle volume
             inline scalar volume() const;
