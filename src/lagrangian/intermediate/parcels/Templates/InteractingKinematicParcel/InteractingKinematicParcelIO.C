@@ -38,6 +38,7 @@ Foam::string Foam::InteractingKinematicParcel<ParcelType>::propHeader =
   + " nParticle"
   + " d"
   + " (Ux Uy Uz)"
+  + " (fx fy fz)"
   + " rho"
   + " tTurb"
   + " UTurb";
@@ -74,6 +75,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
             nParticle_ = readScalar(is);
             d_ = readScalar(is);
             is >> U_;
+            is >> f_;
             rho_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
@@ -87,6 +89,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
               + sizeof(nParticle_)
               + sizeof(d_)
               + sizeof(U_)
+              + sizeof(f_)
               + sizeof(rho_)
               + sizeof(tTurb_)
               + sizeof(UTurb_)
@@ -127,6 +130,9 @@ void Foam::InteractingKinematicParcel<ParcelType>::readFields
     IOField<vector> U(c.fieldIOobject("U", IOobject::MUST_READ));
     c.checkFieldIOobject(c, U);
 
+    IOField<vector> f(c.fieldIOobject("f", IOobject::MUST_READ));
+    c.checkFieldIOobject(c, f);
+
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::MUST_READ));
     c.checkFieldIOobject(c, rho);
 
@@ -145,6 +151,7 @@ void Foam::InteractingKinematicParcel<ParcelType>::readFields
         p.nParticle_ = nParticle[i];
         p.d_ = d[i];
         p.U_ = U[i];
+        p.f_ = f[i];
         p.rho_ = rho[i];
         p.tTurb_ = tTurb[i];
         p.UTurb_ = UTurb[i];
@@ -171,6 +178,7 @@ void Foam::InteractingKinematicParcel<ParcelType>::writeFields
     );
     IOField<scalar> d(c.fieldIOobject("d", IOobject::NO_READ), np);
     IOField<vector> U(c.fieldIOobject("U", IOobject::NO_READ), np);
+    IOField<vector> f(c.fieldIOobject("f", IOobject::NO_READ), np);
     IOField<scalar> rho(c.fieldIOobject("rho", IOobject::NO_READ), np);
     IOField<scalar> tTurb(c.fieldIOobject("tTurb", IOobject::NO_READ), np);
     IOField<vector> UTurb(c.fieldIOobject("UTurb", IOobject::NO_READ), np);
@@ -184,6 +192,7 @@ void Foam::InteractingKinematicParcel<ParcelType>::writeFields
         nParticle[i] = p.nParticle();
         d[i] = p.d();
         U[i] = p.U();
+        f[i] = p.f();
         rho[i] = p.rho();
         tTurb[i] = p.tTurb();
         UTurb[i] = p.UTurb();
@@ -194,6 +203,7 @@ void Foam::InteractingKinematicParcel<ParcelType>::writeFields
     nParticle.write();
     d.write();
     U.write();
+    f.write();
     rho.write();
     tTurb.write();
     UTurb.write();
@@ -216,6 +226,7 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.nParticle()
             << token::SPACE << p.d()
             << token::SPACE << p.U()
+            << token::SPACE << p.f()
             << token::SPACE << p.rho()
             << token::SPACE << p.tTurb()
             << token::SPACE << p.UTurb();
@@ -230,6 +241,7 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.nParticle())
           + sizeof(p.d())
           + sizeof(p.U())
+          + sizeof(p.f())
           + sizeof(p.rho())
           + sizeof(p.tTurb())
           + sizeof(p.UTurb())
