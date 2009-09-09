@@ -68,17 +68,17 @@ void Foam::SpringSliderDashpot<CloudType>::evaluatePair
     typename CloudType::parcelType& pB
 ) const
 {
-    vector deltaP = (pB.position() - pA.position());
+    vector r_AB = (pA.position() - pB.position());
 
-    scalar deltaN = 0.5*(pA.d() + pB.d()) - mag(deltaP);
+    scalar normalOverlap = 0.5*(pA.d() + pB.d()) - mag(r_AB);
 
-    if (deltaN > 0)
+    if (normalOverlap > 0)
     {
         //Particles in collision
 
-        vector n = deltaP/(mag(deltaP) + VSMALL);
+        vector rHat_AB = r_AB/(mag(r_AB) + VSMALL);
 
-        vector Urel = pA.U() - pB.U();
+        vector U_AB = pA.U() - pB.U();
 
         // Effective radius
         scalar R = 0.5*pA.d()*pB.d()/(pA.d() + pB.d());
@@ -88,12 +88,14 @@ void Foam::SpringSliderDashpot<CloudType>::evaluatePair
 
         scalar kN = (4.0/3.0)*sqrt(R)*Estar_;
 
-        scalar etaN = alpha_*sqrt(M*kN)*pow(deltaN, 0.25);
+        scalar etaN = alpha_*sqrt(M*kN)*sqrt(sqrt(normalOverlap));
 
-        vector normalForce = -(kN*pow(deltaN, b_) + etaN*(Urel & n))*n;
+        vector f_AB =
+            rHat_AB
+           *(kN*pow(normalOverlap, b_) - etaN*(U_AB & rHat_AB));
 
-        pA.f() += normalForce;
-        pB.f() -= normalForce;
+        pA.f() += f_AB;
+        pB.f() += -f_AB;
     }
 }
 
