@@ -230,71 +230,82 @@ bool Foam::InteractingKinematicParcel<ParcelType>::move(TrackData& td)
 
     const scalar deltaT = mesh.time().deltaT().value();
 
-    if (td.part() == TrackData::LEAPFROG_VELOCITY_STEP)
+    switch (td.part())
     {
-        // First and last leapfrog velocity adjust part, required
-        // before and after tracking and force calculation
-
-        p.U() += 0.5*deltaT*p.f()/p.mass();
-    }
-    else if (td.part() == TrackData::LINEAR_TRACK)
-    {
-        scalar tEnd = (1.0 - p.stepFraction())*deltaT;
-        const scalar dtMax = tEnd;
-
-        while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+        case TrackData::tpVelocityHalfStep:
         {
-            // Apply correction to position for reduced-D cases
-            meshTools::constrainToMeshCentre(mesh, p.position());
+            // First and last leapfrog velocity adjust part, required
+            // before and after tracking and force calculation
 
-            // Set the Lagrangian time-step
-            scalar dt = min(dtMax, tEnd);
+            p.U() += 0.5*deltaT*p.f()/p.mass();
 
-            // Remember which cell the Parcel is in since this will change if a
-            // face is hit
-            label cellI = p.cell();
-
-            dt *= p.trackToFace(p.position() + dt*U_, td);
-
-            tEnd -= dt;
-            p.stepFraction() = 1.0 - tEnd/deltaT;
-
-            // Avoid problems with extremely small timesteps
-            if (dt > ROOTVSMALL)
-            {
-                // Update cell based properties
-                p.setCellValues(td, dt, cellI);
-
-                if (td.cloud().cellValueSourceCorrection())
-                {
-                    p.cellValueSourceCorrection(td, dt, cellI);
-                }
-
-                p.calc(td, dt, cellI);
-            }
-
-            if (p.onBoundary() && td.keepParticle)
-            {
-                if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
-                {
-                    td.switchProcessor = true;
-                }
-            }
+            break;
         }
-    }
-    else if (td.part() == TrackData::ROTATIONAL_TRACK)
-    {
-        Info<< "No rotational tracking implementation" << endl;
-    }
-    else
-    {
-        FatalErrorIn
-        (
-            "InteractingKinematicParcel<ParcelType>::move(TrackData& td)"
-        )
-            << td.part()
-            << " is an invalid part of the tracking method."
-            << abort(FatalError);
+
+        case TrackData::tpLinearTrack:
+        {
+            scalar tEnd = (1.0 - p.stepFraction())*deltaT;
+            const scalar dtMax = tEnd;
+
+            while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
+            {
+                // Apply correction to position for reduced-D cases
+                meshTools::constrainToMeshCentre(mesh, p.position());
+
+                // Set the Lagrangian time-step
+                scalar dt = min(dtMax, tEnd);
+
+                // Remember which cell the Parcel is in since this
+                // will change if a face is hit
+                label cellI = p.cell();
+
+                dt *= p.trackToFace(p.position() + dt*U_, td);
+
+                tEnd -= dt;
+                p.stepFraction() = 1.0 - tEnd/deltaT;
+
+                // Avoid problems with extremely small timesteps
+                if (dt > ROOTVSMALL)
+                {
+                    // Update cell based properties
+                    p.setCellValues(td, dt, cellI);
+
+                    if (td.cloud().cellValueSourceCorrection())
+                    {
+                        p.cellValueSourceCorrection(td, dt, cellI);
+                    }
+
+                    p.calc(td, dt, cellI);
+                }
+
+                if (p.onBoundary() && td.keepParticle)
+                {
+                    if (isType<processorPolyPatch>(pbMesh[p.patch(p.face())]))
+                    {
+                        td.switchProcessor = true;
+                    }
+                }
+            }
+
+            break;
+        }
+
+        case TrackData::tpRotationalTrack:
+        {
+            Info<< "No rotational tracking implementation" << endl;
+
+            break;
+        }
+
+        default:
+        {
+            FatalErrorIn
+            (
+                "InteractingKinematicParcel<ParcelType>::move(TrackData& td)"
+            )   << td.part()
+                << " is an invalid part of the tracking method."
+                << abort(FatalError);
+        }
     }
 
     return td.keepParticle;

@@ -129,9 +129,9 @@ public:
 
         enum trackPart
         {
-            LEAPFROG_VELOCITY_STEP,
-            LINEAR_TRACK,
-            ROTATIONAL_TRACK
+            tpVelocityHalfStep,
+            tpLinearTrack,
+            tpRotationalTrack
         };
 
 
@@ -177,7 +177,7 @@ public:
                 const interpolation<vector>& UInterp,
                 const interpolation<scalar>& muInterp,
                 const vector& g,
-                trackPart part = LINEAR_TRACK
+                trackPart part = tpLinearTrack
             );
 
 

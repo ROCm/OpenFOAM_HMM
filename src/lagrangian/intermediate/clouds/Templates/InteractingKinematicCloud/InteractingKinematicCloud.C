@@ -260,18 +260,18 @@ void Foam::InteractingKinematicCloud<ParcelType>::evolve()
     // + calculate forces in new position
     // + apply half deltaV with new force
 
-    td.part() = ParcelType::trackData::LEAPFROG_VELOCITY_STEP;
+    td.part() = ParcelType::trackData::tpVelocityHalfStep;
     Cloud<ParcelType>::move(td);
 
-    td.part() = ParcelType::trackData::LINEAR_TRACK;
+    td.part() = ParcelType::trackData::tpLinearTrack;
     Cloud<ParcelType>::move(td);
 
-    // td.part() = ParcelType::trackData::ROTATIONAL_TRACK;
+    // td.part() = ParcelType::trackData::tpRotationalTrack;
     // Cloud<ParcelType>::move(td);
 
     this->collision().collide();
 
-    td.part() = ParcelType::trackData::LEAPFROG_VELOCITY_STEP;
+    td.part() = ParcelType::trackData::tpVelocityHalfStep;
     Cloud<ParcelType>::move(td);
 
     postEvolve();
