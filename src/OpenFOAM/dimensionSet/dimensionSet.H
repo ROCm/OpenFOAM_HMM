@@ -70,6 +70,7 @@ dimensionSet pow3(const dimensionSet&);
 dimensionSet pow4(const dimensionSet&);
 dimensionSet pow5(const dimensionSet&);
 dimensionSet pow6(const dimensionSet&);
+dimensionSet pow025(const dimensionSet&);
 
 dimensionSet sqrt(const dimensionSet&);
 dimensionSet magSqr(const dimensionSet&);
@@ -226,6 +227,7 @@ public:
         friend dimensionSet pow4(const dimensionSet&);
         friend dimensionSet pow5(const dimensionSet&);
         friend dimensionSet pow6(const dimensionSet&);
+        friend dimensionSet pow025(const dimensionSet&);
 
         friend dimensionSet sqrt(const dimensionSet&);
         friend dimensionSet magSqr(const dimensionSet&);

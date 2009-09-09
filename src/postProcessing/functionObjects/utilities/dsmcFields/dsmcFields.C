@@ -29,6 +29,10 @@ License
 #include "dictionary.H"
 #include "dsmcCloud.H"
 
+#include "constants.H"
+
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -164,7 +168,7 @@ void Foam::dsmcFields::write()
                     obr_,
                     IOobject::NO_READ
                 ),
-                2.0/(3.0*dsmcCloud::kb*rhoNMean)
+                2.0/(3.0*physicoChemical::k.value()*rhoNMean)
                 *(linearKEMean - 0.5*rhoMMean*(UMean & UMean))
             );
 
@@ -178,7 +182,7 @@ void Foam::dsmcFields::write()
                     obr_,
                     IOobject::NO_READ
                 ),
-                2.0/(dsmcCloud::kb*iDofMean)*internalEMean
+                2.0/(physicoChemical::k.value()*iDofMean)*internalEMean
             );
 
             Info<< "    Calculating overallT field." << endl;
@@ -191,7 +195,7 @@ void Foam::dsmcFields::write()
                     obr_,
                     IOobject::NO_READ
                 ),
-                2.0/(dsmcCloud::kb*(3.0*rhoNMean + iDofMean))
+                2.0/(physicoChemical::k.value()*(3.0*rhoNMean + iDofMean))
                 *(linearKEMean - 0.5*rhoMMean*(UMean & UMean) + internalEMean)
             );
 

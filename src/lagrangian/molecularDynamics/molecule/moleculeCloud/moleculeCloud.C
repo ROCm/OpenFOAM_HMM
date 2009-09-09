@@ -28,6 +28,8 @@ License
 #include "fvMesh.H"
 #include "mathConstants.H"
 
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
@@ -35,13 +37,6 @@ namespace Foam
     defineParticleTypeNameAndDebug(molecule, 0);
     defineTemplateTypeNameAndDebug(Cloud<molecule>, 0);
 };
-
-Foam::scalar Foam::moleculeCloud::kb = 1.380650277e-23;
-
-Foam::scalar Foam::moleculeCloud::elementaryCharge = 1.602176487e-19;
-
-Foam::scalar Foam::moleculeCloud::vacuumPermittivity = 8.854187817e-12;
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -103,9 +98,7 @@ void Foam::moleculeCloud::buildConstProps()
 
 void Foam::moleculeCloud::setSiteSizesAndPositions()
 {
-    iterator mol(this->begin());
-
-    for (mol = this->begin(); mol != this->end(); ++mol)
+    forAllIter(moleculeCloud, *this, mol)
     {
         const molecule::constantProperties& cP = constProps(mol().id());
 
@@ -123,14 +116,7 @@ void Foam::moleculeCloud::buildCellOccupancy()
         cellOccupancy_[cO].clear();
     }
 
-    iterator mol(this->begin());
-
-    for
-    (
-        mol = this->begin();
-        mol != this->end();
-        ++mol
-    )
+    forAllIter(moleculeCloud, *this, mol)
     {
         cellOccupancy_[mol().cell()].append(&mol());
     }
@@ -225,9 +211,7 @@ void Foam::moleculeCloud::calculateTetherForce()
 {
     const tetherPotentialList& tetherPot(pot_.tetherPotentials());
 
-    iterator mol(this->begin());
-
-    for (mol = this->begin(); mol != this->end(); ++mol)
+    forAllIter(moleculeCloud, *this, mol)
     {
         if (mol().tethered())
         {
@@ -252,9 +236,7 @@ void Foam::moleculeCloud::calculateTetherForce()
 
 void Foam::moleculeCloud::calculateExternalForce()
 {
-    iterator mol(this->begin());
-
-    for (mol = this->begin(); mol != this->end(); ++mol)
+    forAllIter(moleculeCloud, *this, mol)
     {
         mol().a() += pot_.gravity();
     }
@@ -624,11 +606,11 @@ void Foam::moleculeCloud::initialiseMolecules
                     zoneDict.lookup("orientationAngles")
                 );
 
-                scalar phi(orientationAngles.x()*constant::math::pi/180.0);
+                scalar phi(orientationAngles.x()*math::pi/180.0);
 
-                scalar theta(orientationAngles.y()*constant::math::pi/180.0);
+                scalar theta(orientationAngles.y()*math::pi/180.0);
 
-                scalar psi(orientationAngles.z()*constant::math::pi/180.0);
+                scalar psi(orientationAngles.z()*math::pi/180.0);
 
                 const tensor R
                 (
@@ -994,11 +976,11 @@ void Foam::moleculeCloud::createMolecule
     {
         pi = equipartitionAngularMomentum(temperature, cP);
 
-        scalar phi(rndGen_.scalar01()*constant::math::twoPi);
+        scalar phi(rndGen_.scalar01()*math::twoPi);
 
-        scalar theta(rndGen_.scalar01()*constant::math::twoPi);
+        scalar theta(rndGen_.scalar01()*math::twoPi);
 
-        scalar psi(rndGen_.scalar01()*constant::math::twoPi);
+        scalar psi(rndGen_.scalar01()*math::twoPi);
 
         Q = tensor
         (
@@ -1039,9 +1021,7 @@ Foam::label Foam::moleculeCloud::nSites() const
 {
     label n = 0;
 
-    const_iterator mol(this->begin());
-
-    for (mol = this->begin(); mol != this->end(); ++mol)
+    forAllConstIter(moleculeCloud, *this, mol)
     {
         n += constProps(mol().id()).nSites();
     }
@@ -1055,7 +1035,8 @@ Foam::label Foam::moleculeCloud::nSites() const
 Foam::moleculeCloud::moleculeCloud
 (
     const polyMesh& mesh,
-    const potential& pot
+    const potential& pot,
+    bool readFields
 )
 :
     Cloud<molecule>(mesh, "moleculeCloud", false),
@@ -1066,7 +1047,10 @@ Foam::moleculeCloud::moleculeCloud
     constPropList_(),
     rndGen_(clock::getTime())
 {
-    molecule::readFields(*this);
+    if (readFields)
+    {
+        molecule::readFields(*this);
+    }
 
     buildConstProps();
 
@@ -1082,9 +1066,10 @@ Foam::moleculeCloud::moleculeCloud
 (
     const polyMesh& mesh,
     const potential& pot,
-    const IOdictionary& mdInitialiseDict
+    const IOdictionary& mdInitialiseDict,
+    bool readFields
 )
-    :
+:
     Cloud<molecule>(mesh, "moleculeCloud", false),
     mesh_(mesh),
     pot_(pot),
@@ -1092,7 +1077,10 @@ Foam::moleculeCloud::moleculeCloud
     constPropList_(),
     rndGen_(clock::getTime())
 {
-    molecule::readFields(*this);
+    if (readFields)
+    {
+        molecule::readFields(*this);
+    }
 
     clear();
 
@@ -1126,10 +1114,8 @@ void Foam::moleculeCloud::calculateForce()
 {
     buildCellOccupancy();
 
-    iterator mol(this->begin());
-
     // Set accumulated quantities to zero
-    for (mol = this->begin(); mol != this->end(); ++mol)
+    forAllIter(moleculeCloud, *this, mol)
     {
         mol().siteForces() = vector::zero;
 
@@ -1166,20 +1152,12 @@ void Foam::moleculeCloud::applyConstraintsAndThermostats
         << "----------------------------------------"
         << endl;
 
-    iterator mol(this->begin());
-
-    for (mol = this->begin(); mol != this->end(); ++mol)
+    forAllIter(moleculeCloud, *this, mol)
     {
         mol().v() *= temperatureCorrectionFactor;
 
         mol().pi() *= temperatureCorrectionFactor;
     }
-}
-
-
-void Foam::moleculeCloud::writeFields() const
-{
-    molecule::writeFields(*this);
 }
 
 
@@ -1189,9 +1167,7 @@ void Foam::moleculeCloud::writeXYZ(const fileName& fName) const
 
     str << nSites() << nl << "moleculeCloud site positions in angstroms" << nl;
 
-    const_iterator mol(this->begin());
-
-    for (mol = this->begin(); mol != this->end(); ++mol)
+    forAllConstIter(moleculeCloud, *this, mol)
     {
         const molecule::constantProperties& cP = constProps(mol().id());
 
