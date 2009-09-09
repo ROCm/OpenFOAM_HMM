@@ -34,6 +34,9 @@ Description
     - turbulent dispersion
     - wall interactions
 
+    Includes many-body collisions and rotational motion.  Only
+    spherical particles currently supported.
+
 SourceFiles
     InteractingKinematicParcelI.H
     InteractingKinematicParcel.C
@@ -431,6 +434,9 @@ public:
 
             //- Particle moment of inertia around diameter axis
             inline scalar momentOfInertia() const;
+
+            //- Particle angular velocity
+            inline vector omega() const;
 
             //- Particle volume
             inline scalar volume() const;

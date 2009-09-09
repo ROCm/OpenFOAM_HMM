@@ -241,6 +241,8 @@ bool Foam::InteractingKinematicParcel<ParcelType>::move(TrackData& td)
 
             p.U() += 0.5*deltaT*p.f()/p.mass();
 
+            pi_ += 0.5*deltaT*tau_;
+
             break;
         }
 

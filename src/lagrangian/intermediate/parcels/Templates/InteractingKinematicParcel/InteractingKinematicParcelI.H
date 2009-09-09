@@ -438,6 +438,14 @@ Foam::InteractingKinematicParcel<ParcelType>::momentOfInertia() const
 
 
 template <class ParcelType>
+inline Foam::vector
+Foam::InteractingKinematicParcel<ParcelType>::omega() const
+{
+    return pi_/momentOfInertia();
+}
+
+
+template <class ParcelType>
 inline Foam::scalar Foam::InteractingKinematicParcel<ParcelType>::volume() const
 {
     return volume(d_);
