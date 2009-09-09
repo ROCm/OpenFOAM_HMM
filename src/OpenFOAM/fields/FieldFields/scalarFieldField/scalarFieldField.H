@@ -57,12 +57,14 @@ void stabilise
     const scalar s
 );
 
+
 template<template<class> class Field>
 tmp<FieldField<Field, scalar> > stabilise
 (
     const FieldField<Field, scalar>&,
     const scalar s
 );
+
 
 template<template<class> class Field>
 tmp<FieldField<Field, scalar> > stabilise
@@ -95,6 +97,7 @@ UNARY_FUNCTION(scalar, scalar, pow3)
 UNARY_FUNCTION(scalar, scalar, pow4)
 UNARY_FUNCTION(scalar, scalar, pow5)
 UNARY_FUNCTION(scalar, scalar, pow6)
+UNARY_FUNCTION(scalar, scalar, pow025)
 UNARY_FUNCTION(scalar, scalar, sqrt)
 UNARY_FUNCTION(scalar, scalar, sign)
 UNARY_FUNCTION(scalar, scalar, pos)

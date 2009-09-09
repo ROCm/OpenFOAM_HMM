@@ -90,55 +90,66 @@ inline Scalar& setComponent(Scalar& s, const direction)
     return s;
 }
 
+
 inline Scalar component(const Scalar s, const direction)
 {
     return s;
 }
+
 
 inline Scalar sign(const Scalar s)
 {
     return (s >= 0)? 1: -1;
 }
 
+
 inline Scalar pos(const Scalar s)
 {
     return (s >= 0)? 1: 0;
 }
+
 
 inline Scalar neg(const Scalar s)
 {
     return (s < 0)? 1: 0;
 }
 
+
 inline bool equal(const Scalar& s1, const Scalar& s2)
 {
     return mag(s1 - s2) <= ScalarVSMALL;
 }
+
 
 inline bool notEqual(const Scalar s1, const Scalar s2)
 {
     return mag(s1 - s2) > ScalarVSMALL;
 }
 
+
 inline Scalar limit(const Scalar s1, const Scalar s2)
 {
     return (mag(s1) < mag(s2)) ? s1: 0.0;
 }
+
 
 inline Scalar minMod(const Scalar s1, const Scalar s2)
 {
     return (mag(s1) < mag(s2)) ? s1: s2;
 }
 
+
 inline Scalar magSqr(const Scalar s)
 {
     return s*s;
 }
 
+
 inline Scalar sqr(const Scalar s)
 {
     return s*s;
 }
+
 
 inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
 {
@@ -155,60 +166,78 @@ inline Scalar sqrtSumSqr(const Scalar a, const Scalar b)
     }
 }
 
+
 inline Scalar pow3(const Scalar s)
 {
     return s*sqr(s);
 }
+
 
 inline Scalar pow4(const Scalar s)
 {
     return sqr(sqr(s));
 }
 
+
 inline Scalar pow5(const Scalar s)
 {
     return s*pow4(s);
 }
+
 
 inline Scalar pow6(const Scalar s)
 {
     return pow3(sqr(s));
 }
 
+
+inline Scalar pow025(const Scalar s)
+{
+    return sqrt(sqrt(s));
+}
+
+
 inline Scalar inv(const Scalar s)
 {
     return 1.0/s;
 }
+
 
 inline Scalar dot(const Scalar s1, const Scalar s2)
 {
     return s1*s2;
 }
 
+
 inline Scalar cmptMultiply(const Scalar s1, const Scalar s2)
 {
     return s1*s2;
 }
+
 
 inline Scalar cmptDivide(const Scalar s1, const Scalar s2)
 {
     return s1/s2;
 }
 
+
 inline Scalar cmptMax(const Scalar s)
 {
     return s;
 }
+
 
 inline Scalar cmptMin(const Scalar s)
 {
     return s;
 }
 
+
 inline Scalar cmptAv(const Scalar s)
 {
     return s;
 }
+
 
 inline Scalar cmptMag(const Scalar s)
 {
