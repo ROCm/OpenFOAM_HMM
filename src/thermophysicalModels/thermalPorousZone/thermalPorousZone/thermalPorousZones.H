@@ -92,6 +92,7 @@ public:
         void addEnthalpySource
         (
             const basicThermo& thermo,
+            const volScalarField& rho,
             fvScalarMatrix& hEqn
         ) const;
 };
