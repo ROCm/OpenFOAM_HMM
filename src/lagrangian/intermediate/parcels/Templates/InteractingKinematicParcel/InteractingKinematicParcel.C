@@ -210,6 +210,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     rho_(p.rho_),
     tTurb_(p.tTurb_),
     UTurb_(p.UTurb_),
+    collisionRecords_(p.collisionRecords_),
     rhoc_(p.rhoc_),
     Uc_(p.Uc_),
     muc_(p.muc_)

@@ -89,6 +89,7 @@ inline Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
+    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -122,6 +123,7 @@ inline Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     rho_(constProps.rho0()),
     tTurb_(0.0),
     UTurb_(vector::zero),
+    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -311,6 +313,14 @@ Foam::InteractingKinematicParcel<ParcelType>::UTurb() const
 
 
 template <class ParcelType>
+inline const Foam::collisionRecordList&
+Foam::InteractingKinematicParcel<ParcelType>::collisionRecords() const
+{
+    return collisionRecords_;
+}
+
+
+template <class ParcelType>
 inline Foam::label Foam::InteractingKinematicParcel<ParcelType>::typeId()
 {
     return typeId_;
@@ -377,6 +387,14 @@ template <class ParcelType>
 inline Foam::vector& Foam::InteractingKinematicParcel<ParcelType>::UTurb()
 {
     return UTurb_;
+}
+
+
+template <class ParcelType>
+inline Foam::collisionRecordList&
+Foam::InteractingKinematicParcel<ParcelType>::collisionRecords()
+{
+    return collisionRecords_;
 }
 
 

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -23,91 +23,74 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SpringSliderDashpot
+    Foam::collisionRecordList
 
 Description
-    Pair forces between particles colliding with a spring, slider, damper model
+
+SourceFiles
+    collisionRecordListI.H
+    collisionRecordList.C
+    collisionRecordListIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpringSliderDashpot_H
-#define SpringSliderDashpot_H
+#ifndef collisionRecordList_H
+#define collisionRecordList_H
 
-#include "PairFunction.H"
+#include "DynamicList.H"
 #include "collisionRecord.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+
 /*---------------------------------------------------------------------------*\
-                      Class SpringSliderDashpot Declaration
+                     Class collisionRecordList Declaration
 \*---------------------------------------------------------------------------*/
 
-template<class CloudType>
-class SpringSliderDashpot
+class collisionRecordList
 :
-    public PairFunction<CloudType>
+    public DynamicList<collisionRecord>
 {
-    // Private data
-
-        //- Effective Young's modulus value, assuming both particles have
-        //  the same E value
-        scalar Estar_;
-
-        //- Effective shear modulus value, assuming both particles have
-        //  the same Poisson's ratio and Young's modulus
-        scalar Gstar_;
-
-        //- Poisson's ratio of both particles
-        scalar sigma_;
-
-        //- alpha-coefficient, related to coefficient of restitution
-        scalar alpha_;
-
-        //- Spring power (b = 1 for linear, b = 3/2 for Hertzian)
-        scalar b_;
-
-        //- Coefficient of friction in for tangential sliding
-        scalar mu_;
-
 
 public:
 
-    //- Runtime type information
-    TypeName("SpringSliderDashpot");
-
-
     // Constructors
 
-        //- Construct from dictionary
-        SpringSliderDashpot(const dictionary& dict, CloudType& cloud);
+        //- Construct null
+        collisionRecordList();
+
+        //- Construct from Istream
+        collisionRecordList(Istream&);
 
 
     //- Destructor
-    virtual ~SpringSliderDashpot();
+    ~collisionRecordList();
 
 
     // Member Functions
 
-        //- Calculate the pair interaction between parcels
-        virtual void evaluatePair
+        //- Enquires if the proc and id pair of the other particle are
+        //  present in the records.  If so, return access to the
+        //  collisionData and mark the collisionRecord as accessed this
+        //  step, if not, create the record and return access to it.
+        collisionRecord& matchRecord
         (
-            typename CloudType::parcelType& pA,
-            typename CloudType::parcelType& pB
-        ) const;
+            label origProcOfOther,
+            label origIdOfOther
+        );
+
+        //- Update the collision records, deleting any records not
+        //  marked as having been accessed, then mark all records as
+        //  not accessed ready for the next evaluation
+        void update();
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#ifdef NoRepository
-#   include "SpringSliderDashpot.C"
-#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

@@ -67,6 +67,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
     rho_(0.0),
     tTurb_(0.0),
     UTurb_(vector::zero),
+    collisionRecords_(),
     rhoc_(0.0),
     Uc_(vector::zero),
     muc_(0.0)
@@ -85,6 +86,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
             rho_ = readScalar(is);
             tTurb_ = readScalar(is);
             is >> UTurb_;
+            is >> collisionRecords_;
         }
         else
         {
@@ -102,6 +104,7 @@ Foam::InteractingKinematicParcel<ParcelType>::InteractingKinematicParcel
               + sizeof(tTurb_)
               + sizeof(UTurb_)
             );
+            is  >> collisionRecords_;
         }
     }
 
@@ -252,7 +255,8 @@ Foam::Ostream& Foam::operator<<
             << token::SPACE << p.tau()
             << token::SPACE << p.rho()
             << token::SPACE << p.tTurb()
-            << token::SPACE << p.UTurb();
+            << token::SPACE << p.UTurb()
+            << token::SPACE << p.collisionRecords();
     }
     else
     {
@@ -271,12 +275,13 @@ Foam::Ostream& Foam::operator<<
           + sizeof(p.tTurb())
           + sizeof(p.UTurb())
         );
+        os  << p.collisionRecords();
     }
 
     // Check state of Ostream
     os.check
     (
-        "Ostream& operator<< " \
+        "Ostream& operator<< "
         "(Ostream&, const InteractingKinematicParcel<ParcelType>&)"
     );
 

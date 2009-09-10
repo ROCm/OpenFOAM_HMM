@@ -54,6 +54,7 @@ SourceFiles
 #include "contiguous.H"
 
 #include "InteractingKinematicCloud.H"
+#include "collisionRecordList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -253,6 +254,9 @@ protected:
             //- Turbulent velocity fluctuation [m/s]
             vector UTurb_;
 
+            //- Particle collision records
+            collisionRecordList collisionRecords_;
+
 
         // Cell-based quantities
 
@@ -382,6 +386,9 @@ public:
             //- Return const access to turbulent velocity fluctuation
             inline const vector& UTurb() const;
 
+            //- Return const access to the collision records
+            inline const collisionRecordList& collisionRecords() const;
+
 
         // Edit
 
@@ -414,6 +421,9 @@ public:
 
             //- Return access to turbulent velocity fluctuation
             inline vector& UTurb();
+
+            //- Return access to collision records
+            inline collisionRecordList& collisionRecords();
 
 
         // Helper functions

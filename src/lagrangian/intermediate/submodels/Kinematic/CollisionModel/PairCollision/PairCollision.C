@@ -203,6 +203,17 @@ void Foam::PairCollision<CloudType>::collide()
     Info<< "ADD COLLISIONS WITH WALLS HERE, DOES NOT NEED TO BE A TRACKING "
         << "OPERATION.  CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY "
         << "WALL FORCE MODEL" << endl;
+
+    // Delete any collision records where no collision occurred this step
+
+    Info<< "    Update collision records" << endl;
+
+    forAllIter(typename CloudType, this->owner(), iter)
+    {
+        typename CloudType::parcelType& p = iter();
+
+        p.collisionRecords().update();
+    }
 }
 
 

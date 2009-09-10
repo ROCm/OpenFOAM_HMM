@@ -99,17 +99,31 @@ void Foam::SpringSliderDashpot<CloudType>::evaluatePair
         pA.f() += fN_AB;
         pB.f() += -fN_AB;
 
-        vector Uslip_AB =
+        vector USlip_AB =
             U_AB - (U_AB & rHat_AB)*rHat_AB
           + (pA.omega() ^ (pA.r()*-rHat_AB))
           - (pB.omega() ^ (pB.r()*rHat_AB));
 
         scalar deltaT = this->owner().mesh().time().deltaT().value();
 
-        // TODO retrieve tangentialOverlap from previous collision
-        vector tangentialOverlap_AB = vector::zero;
+        vector& tangentialOverlap_AB =
+            pA.collisionRecords().matchRecord
+            (
+                pB.origProc(),
+                pB.origId()
+            ).collisionData();
 
-        tangentialOverlap_AB += Uslip_AB * deltaT;
+        vector& tangentialOverlap_BA =
+            pB.collisionRecords().matchRecord
+            (
+                pA.origProc(),
+                pA.origId()
+            ).collisionData();
+
+        vector deltaTangentialOverlap_AB = USlip_AB * deltaT;
+
+        tangentialOverlap_AB += deltaTangentialOverlap_AB;
+        tangentialOverlap_BA += -deltaTangentialOverlap_AB;
 
         scalar kT = 8.0*sqrt(R*normalOverlapMag)*Gstar_;
 
@@ -119,7 +133,7 @@ void Foam::SpringSliderDashpot<CloudType>::evaluatePair
         vector fT_AB =
             -min(kT*mag(tangentialOverlap_AB), mu_*mag(fN_AB))
            *tangentialOverlap_AB/mag(tangentialOverlap_AB)
-          - etaT*Uslip_AB;
+          - etaT*USlip_AB;
 
         pA.f() += fT_AB;
         pB.f() += -fT_AB;

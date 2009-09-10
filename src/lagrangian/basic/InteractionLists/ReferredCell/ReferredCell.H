@@ -287,9 +287,6 @@ public:
             const ReferredCell<ParticleType>& b
         );
 
-
-    // IOstream Operators
-
         friend Istream& operator>> <ParticleType>
         (
             Istream&,

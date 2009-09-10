@@ -441,7 +441,7 @@ bool Foam::ReferredCell<ParticleType>::duplicate
 }
 
 
-// * * * * * * * * * * * * * * * Friend Functions  * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Friend Operators  * * * * * * * * * * * * * //
 
 template<class ParticleType>
 bool Foam::operator==
@@ -482,10 +482,7 @@ Foam::Istream& Foam::operator>>(Istream& is, ReferredCell<ParticleType>& rC)
         >> rC.offset_
         >> rC.rotation_;
 
-    is.check
-    (
-        "Istream& operator<<(Istream& f, const ReferredCell<ParticleType>& rC"
-    );
+    is.check("Istream& operator>>(Istream& f, ReferredCell<ParticleType>& rC");
 
     return is;
 }

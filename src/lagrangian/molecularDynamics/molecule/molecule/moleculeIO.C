@@ -61,12 +61,12 @@ Foam::molecule::molecule
             is  >> pi_;
             is  >> tau_;
             is  >> siteForces_;
-            is  >> sitePositions_;
-            is  >> specialPosition_;
             potentialEnergy_ = readScalar(is);
             is  >> rf_;
             special_ = readLabel(is);
             id_ = readLabel(is);
+            is  >> sitePositions_;
+            is  >> specialPosition_;
         }
         else
         {
