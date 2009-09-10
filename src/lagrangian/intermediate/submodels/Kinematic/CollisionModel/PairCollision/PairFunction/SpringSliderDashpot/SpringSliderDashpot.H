@@ -67,6 +67,9 @@ class SpringSliderDashpot
         //- Spring power (b = 1 for linear, b = 3/2 for Hertzian)
         scalar b_;
 
+        //- Coefficient of friction in for tangential sliding
+        scalar mu_;
+
 
 public:
 

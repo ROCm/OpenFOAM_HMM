@@ -104,10 +104,14 @@ void Foam::PairCollision<CloudType>::collide()
 {
     Info<< "Calculating collisions" << endl;
 
+    // Set accumulated quantities to zero
     forAllIter(typename CloudType, this->owner(), iter)
     {
         typename CloudType::parcelType& p = iter();
+
         p.f() = vector::zero;
+
+        p.tau() = vector::zero;
     }
 
     buildCellOccupancy();

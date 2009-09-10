@@ -256,6 +256,25 @@ Foam::InteractingKinematicCloud<ParcelType>::linearKineticEnergyOfSystem() const
 
 
 template<class ParcelType>
+inline Foam::scalar
+Foam::InteractingKinematicCloud<ParcelType>::
+rotationalKineticEnergyOfSystem() const
+{
+    scalar rotationalKineticEnergy = 0.0;
+
+    forAllConstIter(typename InteractingKinematicCloud<ParcelType>, *this, iter)
+    {
+        const ParcelType& p = iter();
+
+        rotationalKineticEnergy +=
+            0.5*p.momentOfInertia()*(p.omega() & p.omega());
+    }
+
+    return rotationalKineticEnergy;
+}
+
+
+template<class ParcelType>
 inline Foam::Random& Foam::InteractingKinematicCloud<ParcelType>::rndGen()
 {
     return rndGen_;

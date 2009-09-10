@@ -368,6 +368,9 @@ public:
             //- Total linear kinetic energy in the system
             inline scalar linearKineticEnergyOfSystem() const;
 
+            //- Total rotational kinetic energy in the system
+            inline scalar rotationalKineticEnergyOfSystem() const;
+
             //- Print cloud information
             void info() const;
 

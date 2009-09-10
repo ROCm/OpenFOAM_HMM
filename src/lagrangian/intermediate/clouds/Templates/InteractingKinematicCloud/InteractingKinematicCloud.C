@@ -287,6 +287,9 @@ void Foam::InteractingKinematicCloud<ParcelType>::info() const
     scalar linearKineticEnergy = linearKineticEnergyOfSystem();
     reduce(linearKineticEnergy, sumOp<scalar>());
 
+    scalar rotationalKineticEnergy = rotationalKineticEnergyOfSystem();
+    reduce(rotationalKineticEnergy, sumOp<scalar>());
+
     Info<< "Cloud: " << this->name() << nl
         << "    Total number of parcels added   = "
         << returnReduce(this->injection().parcelsAddedTotal(), sumOp<label>())
@@ -303,7 +306,9 @@ void Foam::InteractingKinematicCloud<ParcelType>::info() const
         << "   |Linear momentum|                = "
         << mag(linearMomentum) << nl
         << "    Linear kinetic energy           = "
-        << linearKineticEnergy << nl;
+        << linearKineticEnergy << nl
+        << "    Rotational kinetic energy       = "
+        << rotationalKineticEnergy << nl;
 }
 
 

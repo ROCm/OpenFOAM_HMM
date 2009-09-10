@@ -40,7 +40,8 @@ Foam::SpringSliderDashpot<CloudType>::SpringSliderDashpot
     Gstar_(),
     sigma_(dimensionedScalar(this->coeffDict().lookup("sigma")).value()),
     alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),
-    b_(dimensionedScalar(this->coeffDict().lookup("b")).value())
+    b_(dimensionedScalar(this->coeffDict().lookup("b")).value()),
+    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value())
 {
     scalar E = dimensionedScalar(this->coeffDict().lookup("E")).value();
 
@@ -99,58 +100,34 @@ void Foam::SpringSliderDashpot<CloudType>::evaluatePair
         pB.f() += -fN_AB;
 
         vector Uslip_AB =
-            U_AB
-          - (U_AB & rHat_AB)*rHat_AB
-          - (pA.omega() ^ (pA.r()*rHat_AB))
+            U_AB - (U_AB & rHat_AB)*rHat_AB
+          + (pA.omega() ^ (pA.r()*-rHat_AB))
           - (pB.omega() ^ (pB.r()*rHat_AB));
 
-        const scalar deltaT = this->owner().mesh().time().deltaT().value();
+        scalar deltaT = this->owner().mesh().time().deltaT().value();
 
         // TODO retrieve tangentialOverlap from previous collision
-        vector tangentialOverlap = vector::zero;
+        vector tangentialOverlap_AB = vector::zero;
 
-        tangentialOverlap += Uslip_AB * deltaT;
+        tangentialOverlap_AB += Uslip_AB * deltaT;
 
-        // const scalar& etaT = etaN;
+        scalar kT = 8.0*sqrt(R*normalOverlapMag)*Gstar_;
+
+        scalar& etaT = etaN;
 
         // Tangential force
-        // fT_AB =
+        vector fT_AB =
+            -min(kT*mag(tangentialOverlap_AB), mu_*mag(fN_AB))
+           *tangentialOverlap_AB/mag(tangentialOverlap_AB)
+          - etaT*Uslip_AB;
+
+        pA.f() += fT_AB;
+        pB.f() += -fT_AB;
+
+        pA.tau() += (pA.r()*-rHat_AB) ^ fT_AB;
+        pB.tau() += (pB.r()*rHat_AB) ^ -fT_AB;
     }
 }
 
-// + Add this force to the sum of forces for this particle, + If
-// normalOverlap < 0 then there is no collision between this pair and
-// any record of collision in the previous timestep and the
-// accumulated value of tangentialOverlap are removed.
-
-// + If normalOverlap > 0 then a check is made to see if these
-//   particles were colliding in the previous step, if so, retrieve
-//   the previous value of tangentialOverlap, if not, create a
-//   collision record with tangentialOverlap = 0.
-
-// + Calculate Delta(tangentialOverlap):
-//       Delta(tangentialOverlap) = vSlip * dt
-//   where dt is the current timestep and vSlip:
-//       vSlip = vRel - (vRel & n)n - omega1 ^ r1*n - omega2 ^ r2*n
-//   adding Delta(tangentialOverlap) to the current value of tangentialOverlap
-//   for this collision pair.
-
-// + Using the current value of tangentialOverlap for the pair,
-//   calculate the tangential component of force on this particle, Ft:
-//   Ft = -min(kT*mag(tangentialOverlap), mu*mag(Fn))
-//      *tangentialOverlap/mag(tangentialOverlap) - etaT*vSlip
-//   Where mu is the coefficient of friction (values f in table 1?),
-//   kT is a function of normalOverlap, r1, r2, E1, E2, sigma1 and
-//   sigma2, and etaT = etaN.
-
-// + Add Ft and its torque to the particle, and the corresponding
-//   parts to the other particle.
-//   Corresponding torque
-//       ((r1*-n) ^ Fn)
-//   ^ is the cross product, the point of application of the
-//   force relative to the particle's position (assumed to be its centre of
-//   mass) is (r1*-n).
-//   The other particle receives the negative of this force value and
-//   calculates its torque contribution as ((r2*n) ^ -Fn).
 
 // ************************************************************************* //
