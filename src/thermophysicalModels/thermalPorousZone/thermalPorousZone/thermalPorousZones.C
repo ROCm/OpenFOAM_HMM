@@ -22,50 +22,40 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Global
-    wallNonlinearViscosity
-
-Description
-    Calculate wall viscosity for non-linear models
-
 \*---------------------------------------------------------------------------*/
 
+#include "thermalPorousZones.H"
+#include "volFields.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    const fvPatchList& patches = mesh_.boundary();
+    defineTemplateTypeNameAndDebug(IOPtrList<thermalPorousZone>, 0);
+}
 
-    const scalar yPlusLam = this->yPlusLam(kappa_.value(), E_.value());
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-    forAll(patches, patchi)
+Foam::thermalPorousZones::thermalPorousZones
+(
+    const fvMesh& mesh
+)
+:
+    PorousZones<thermalPorousZone>(mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::thermalPorousZones::addEnthalpySource
+(
+    const basicThermo& thermo,
+    fvScalarMatrix& hEqn
+) const
+{
+    forAll(*this, i)
     {
-        const fvPatch& curPatch = patches[patchi];
-
-        if (isType<wallFvPatch>(curPatch))
-        {
-            const scalarField& nuw = nu().boundaryField()[patchi];
-            scalarField& nutw = nut_.boundaryField()[patchi];
-
-            forAll(curPatch, facei)
-            {
-                label faceCelli = curPatch.faceCells()[facei];
-
-                //- Using local Cmu
-                scalar Cmu25 = pow025(Cmu_[faceCelli]);
-
-                scalar yPlus =
-                    Cmu25*y_[patchi][facei]*sqrt(k_[faceCelli])/nuw[facei];
-
-                if (yPlus > yPlusLam)
-                {
-                    nutw[facei] =
-                        nuw[facei]
-                       *(yPlus*kappa_.value()/log(E_.value()*yPlus) - 1);
-                }
-                else
-                {
-                    nutw[facei] = 0.0;
-                }
-            }
-        }
+        operator[](i).addEnthalpySource(thermo, hEqn);
     }
 }
 

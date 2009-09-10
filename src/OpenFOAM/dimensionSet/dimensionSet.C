@@ -110,6 +110,7 @@ Foam::scalar Foam::dimensionSet::operator[](const dimensionType type) const
     return exponents_[type];
 }
 
+
 Foam::scalar& Foam::dimensionSet::operator[](const dimensionType type)
 {
     return exponents_[type];
@@ -129,6 +130,7 @@ bool Foam::dimensionSet::operator==(const dimensionSet& ds) const
 
     return equall;
 }
+
 
 bool Foam::dimensionSet::operator!=(const dimensionSet& ds) const
 {
@@ -163,6 +165,7 @@ bool Foam::dimensionSet::operator+=(const dimensionSet& ds) const
     return true;
 }
 
+
 bool Foam::dimensionSet::operator-=(const dimensionSet& ds) const
 {
     if (dimensionSet::debug && *this != ds)
@@ -176,12 +179,14 @@ bool Foam::dimensionSet::operator-=(const dimensionSet& ds) const
     return true;
 }
 
+
 bool Foam::dimensionSet::operator*=(const dimensionSet& ds)
 {
     reset((*this)*ds);
 
     return true;
 }
+
 
 bool Foam::dimensionSet::operator/=(const dimensionSet& ds)
 {
@@ -205,6 +210,7 @@ Foam::dimensionSet Foam::max(const dimensionSet& ds1, const dimensionSet& ds2)
 
     return ds1;
 }
+
 
 Foam::dimensionSet Foam::min(const dimensionSet& ds1, const dimensionSet& ds2)
 {
@@ -256,6 +262,7 @@ Foam::dimensionSet Foam::pow(const dimensionSet& ds, const scalar p)
     return dimPow;
 }
 
+
 Foam::dimensionSet Foam::pow
 (
     const dimensionSet& ds,
@@ -283,6 +290,7 @@ Foam::dimensionSet Foam::pow
     return dimPow;
 }
 
+
 Foam::dimensionSet Foam::pow
 (
     const dimensionedScalar& dS,
@@ -309,60 +317,78 @@ Foam::dimensionSet Foam::sqr(const dimensionSet& ds)
     return pow(ds, 2);
 }
 
+
 Foam::dimensionSet Foam::pow3(const dimensionSet& ds)
 {
     return pow(ds, 3);
 }
+
 
 Foam::dimensionSet Foam::pow4(const dimensionSet& ds)
 {
     return pow(ds, 4);
 }
 
+
 Foam::dimensionSet Foam::pow5(const dimensionSet& ds)
 {
     return pow(ds, 5);
 }
+
 
 Foam::dimensionSet Foam::pow6(const dimensionSet& ds)
 {
     return pow(ds, 6);
 }
 
+
+Foam::dimensionSet Foam::pow025(const dimensionSet& ds)
+{
+    return sqrt(sqrt(ds));
+}
+
+
 Foam::dimensionSet Foam::sqrt(const dimensionSet& ds)
 {
     return pow(ds, 0.5);
 }
+
 
 Foam::dimensionSet Foam::magSqr(const dimensionSet& ds)
 {
     return pow(ds, 2);
 }
 
+
 Foam::dimensionSet Foam::mag(const dimensionSet& ds)
 {
     return ds;
 }
+
 
 Foam::dimensionSet Foam::sign(const dimensionSet&)
 {
     return dimless;
 }
 
+
 Foam::dimensionSet Foam::pos(const dimensionSet&)
 {
     return dimless;
 }
+
 
 Foam::dimensionSet Foam::neg(const dimensionSet&)
 {
     return dimless;
 }
 
+
 Foam::dimensionSet Foam::inv(const dimensionSet& ds)
 {
     return dimless/ds;
 }
+
 
 Foam::dimensionSet Foam::trans(const dimensionSet& ds)
 {
@@ -376,6 +402,7 @@ Foam::dimensionSet Foam::trans(const dimensionSet& ds)
     return ds;
 }
 
+
 Foam::dimensionSet Foam::transform(const dimensionSet& ds)
 {
     return ds;
@@ -388,6 +415,7 @@ Foam::dimensionSet Foam::operator-(const dimensionSet& ds)
 {
     return ds;
 }
+
 
 Foam::dimensionSet Foam::operator+
 (
@@ -409,6 +437,7 @@ Foam::dimensionSet Foam::operator+
     return dimSum;
 }
 
+
 Foam::dimensionSet Foam::operator-
 (
     const dimensionSet& ds1,
@@ -429,6 +458,7 @@ Foam::dimensionSet Foam::operator-
     return dimDifference;
 }
 
+
 Foam::dimensionSet Foam::operator*
 (
     const dimensionSet& ds1,
@@ -444,6 +474,7 @@ Foam::dimensionSet Foam::operator*
 
     return dimProduct;
 }
+
 
 Foam::dimensionSet Foam::operator/
 (
@@ -471,6 +502,7 @@ Foam::dimensionSet Foam::operator&
     return ds1*ds2;
 }
 
+
 Foam::dimensionSet Foam::operator^
 (
     const dimensionSet& ds1,
@@ -479,6 +511,7 @@ Foam::dimensionSet Foam::operator^
 {
     return ds1*ds2;
 }
+
 
 Foam::dimensionSet Foam::operator&&
 (

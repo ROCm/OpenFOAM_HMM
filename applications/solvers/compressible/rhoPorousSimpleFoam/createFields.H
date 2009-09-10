@@ -64,7 +64,7 @@
 
     dimensionedScalar initialMass = fvc::domainIntegrate(rho);
 
-    porousZones pZones(mesh);
+    thermalPorousZones pZones(mesh);
     Switch pressureImplicitPorosity(false);
 
     int nUCorr = 0;
@@ -84,4 +84,3 @@
             pressureImplicitPorosity = true;
         }
     }
-

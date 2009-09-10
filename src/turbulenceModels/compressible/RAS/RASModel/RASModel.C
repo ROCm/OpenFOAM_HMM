@@ -176,7 +176,7 @@ tmp<scalarField> RASModel::yPlus(const label patchNo, const scalar Cmu) const
 
     if (isType<wallFvPatch>(curPatch))
     {
-        Yp = pow(Cmu, 0.25)
+        Yp = pow025(Cmu)
             *y_[patchNo]
             *sqrt(k()().boundaryField()[patchNo].patchInternalField())
            /(

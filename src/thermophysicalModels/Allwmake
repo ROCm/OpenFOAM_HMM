@@ -16,5 +16,6 @@ wmake libso chemistryModel
 wmake libso pdfs
 wmake libso radiation
 wmake libso barotropicCompressibilityModel
+wmake libso thermalPorousZone
 
 # ----------------------------------------------------------------- end-of-file
