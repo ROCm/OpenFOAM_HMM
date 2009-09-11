@@ -34,7 +34,7 @@ Description
 #define SpringSliderDashpot_H
 
 #include "PairFunction.H"
-#include "collisionRecord.H"
+#include "CollisionRecord.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

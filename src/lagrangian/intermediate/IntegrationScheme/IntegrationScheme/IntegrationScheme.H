@@ -195,7 +195,7 @@ public:
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        IntegrationScheme<Type>,                                               \
+        IntegrationScheme<Type>,                                              \
         dictionary                                                            \
     );
 
@@ -219,4 +219,3 @@ public:
 #endif
 
 // ************************************************************************* //
-

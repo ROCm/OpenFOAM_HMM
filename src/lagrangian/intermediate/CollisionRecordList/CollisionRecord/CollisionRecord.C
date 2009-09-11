@@ -24,23 +24,25 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "collisionRecord.H"
+#include "CollisionRecord.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::collisionRecord::collisionRecord()
+template<class Type>
+Foam::CollisionRecord<Type>::CollisionRecord()
 :
     origProcOfOther_(-VGREAT),
     origIdOfOther_(-VGREAT),
-    data_(vector::zero)
+    data_(pTraits<Type>::zero)
 {}
 
 
-Foam::collisionRecord::collisionRecord
+template<class Type>
+Foam::CollisionRecord<Type>::CollisionRecord
 (
     label origProcOfOther,
     label origIdOfOther,
-    const vector& data
+    const Type& data
 )
 :
     origProcOfOther_(origProcOfOther + 1),
@@ -49,7 +51,8 @@ Foam::collisionRecord::collisionRecord
 {}
 
 
-Foam::collisionRecord::collisionRecord(const collisionRecord& cR)
+template<class Type>
+Foam::CollisionRecord<Type>::CollisionRecord(const CollisionRecord<Type>& cR)
 :
     origProcOfOther_(cR.origProcOfOther() + 1),
     origIdOfOther_(cR.origIdOfOther_),
@@ -59,20 +62,23 @@ Foam::collisionRecord::collisionRecord(const collisionRecord& cR)
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::collisionRecord::~collisionRecord()
+template<class Type>
+Foam::CollisionRecord<Type>::~CollisionRecord()
 {}
 
 
 // * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * * //
 
-void Foam::collisionRecord::operator=(const collisionRecord& rhs)
+template<class Type>
+void Foam::CollisionRecord<Type>::operator=(const CollisionRecord<Type>& rhs)
 {
     // Check for assignment to self
     if (this == &rhs)
     {
         FatalErrorIn
         (
-            "Foam::collisionRecord::operator=(const Foam::collisionRecord&)"
+            "Foam::CollisionRecord<Type>::operator="
+            "(const Foam::CollisionRecord<Type>&)"
         )
             << "Attempted assignment to self"
             << abort(FatalError);
@@ -84,23 +90,9 @@ void Foam::collisionRecord::operator=(const collisionRecord& rhs)
 }
 
 
-// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * *  IOStream operators * * * * * * * * * * * * * //
 
-inline bool Foam::operator==(const collisionRecord& a, const collisionRecord& b)
-{
-    return
-    (
-        a.origProcOfOther_ == b.origProcOfOther_
-     && a.origIdOfOther_ == b.origIdOfOther_
-     && (mag(a.data_ - b.data_) < VSMALL)
-    );
-}
-
-
-inline bool Foam::operator!=(const collisionRecord& a, const collisionRecord& b)
-{
-    return !(a == b);
-}
+#include "CollisionRecordIO.C"
 
 
 // ************************************************************************* //

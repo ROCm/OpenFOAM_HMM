@@ -23,22 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::collisionRecordList
+    Foam::CollisionRecordList
 
 Description
 
 SourceFiles
-    collisionRecordListI.H
-    collisionRecordList.C
-    collisionRecordListIO.C
+    CollisionRecordListI.H
+    CollisionRecordList.C
+    CollisionRecordListIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef collisionRecordList_H
-#define collisionRecordList_H
+#ifndef CollisionRecordList_H
+#define CollisionRecordList_H
 
 #include "DynamicList.H"
-#include "collisionRecord.H"
+#include "CollisionRecord.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -46,12 +46,13 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class collisionRecordList Declaration
+                     Class CollisionRecordList Declaration
 \*---------------------------------------------------------------------------*/
 
-class collisionRecordList
+template<class Type>
+class CollisionRecordList
 :
-    public DynamicList<collisionRecord>
+    public DynamicList<CollisionRecord<Type> >
 {
 
 public:
@@ -59,23 +60,23 @@ public:
     // Constructors
 
         //- Construct null
-        collisionRecordList();
+        CollisionRecordList();
 
         //- Construct from Istream
-        collisionRecordList(Istream&);
+        CollisionRecordList(Istream&);
 
 
     //- Destructor
-    ~collisionRecordList();
+    ~CollisionRecordList();
 
 
     // Member Functions
 
         //- Enquires if the proc and id pair of the other particle are
         //  present in the records.  If so, return access to the
-        //  collisionData and mark the collisionRecord as accessed this
+        //  collisionData and mark the CollisionRecord as accessed this
         //  step, if not, create the record and return access to it.
-        collisionRecord& matchRecord
+        CollisionRecord<Type>& matchRecord
         (
             label origProcOfOther,
             label origIdOfOther
@@ -91,6 +92,12 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "CollisionRecordList.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

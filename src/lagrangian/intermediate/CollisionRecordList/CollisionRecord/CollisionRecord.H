@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::collisionRecord
+    Foam::CollisionRecord
 
 Description
 
@@ -36,14 +36,14 @@ Description
     positive means that it has.
 
 SourceFiles
-    collisionRecordI.H
-    collisionRecord.C
-    collisionRecordIO.C
+    CollisionRecordI.H
+    CollisionRecord.C
+    CollisionRecordIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef collisionRecord_H
-#define collisionRecord_H
+#ifndef CollisionRecord_H
+#define CollisionRecord_H
 
 #include "label.H"
 #include "vector.H"
@@ -54,16 +54,36 @@ namespace Foam
 {
 
 // Forward declaration of friend functions and operators
-class collisionRecord;
-Istream& operator>>(Istream&, collisionRecord&);
-Ostream& operator<<(Ostream&, const collisionRecord&);
+template<class Type>
+class CollisionRecord;
+
+template<class Type>
+inline bool operator==
+(
+    const CollisionRecord<Type>&,
+    const CollisionRecord<Type>&
+);
+
+template<class Type>
+inline bool operator!=
+(
+    const CollisionRecord<Type>&,
+    const CollisionRecord<Type>&
+);
+
+template<class Type>
+Istream& operator>>(Istream&, CollisionRecord<Type>&);
+
+template<class Type>
+Ostream& operator<<(Ostream&, const CollisionRecord<Type>&);
 
 
 /*---------------------------------------------------------------------------*\
-                         Class collisionRecord Declaration
+                         Class CollisionRecord Declaration
 \*---------------------------------------------------------------------------*/
 
-class collisionRecord
+template<class Type>
+class CollisionRecord
 {
     // Private data
 
@@ -76,7 +96,7 @@ class collisionRecord
 
         //- Collision data, stored as if the storing particle was the
         //  first particle (particle A) in the collision.
-        vector data_;
+        Type data_;
 
 
 public:
@@ -84,28 +104,29 @@ public:
     // Constructors
 
         //- Construct null
-        collisionRecord();
+        CollisionRecord();
 
         //- Construct from components
-        collisionRecord
+        CollisionRecord
         (
             label origProcOfOther,
             label origIdOfOther,
-            const vector& data = vector::zero
+            const Type& data = pTraits<Type>::zero
         );
 
         //- Construct from Istream
-        collisionRecord(Istream&);
+        CollisionRecord(Istream&);
 
         //- Construct as copy
-        collisionRecord(const collisionRecord&);
+        CollisionRecord(const CollisionRecord&);
 
 
     //- Destructor
-    ~collisionRecord();
+    ~CollisionRecord();
 
 
     // Member Functions
+
 
         // Access
 
@@ -116,10 +137,10 @@ public:
             inline label origIdOfOther() const;
 
             //- Return access to the collision data
-            inline const vector& collisionData() const;
+            inline const Type& collisionData() const;
 
             //- Return access to the collision data
-            inline vector& collisionData();
+            inline Type& collisionData();
 
 
         // Check
@@ -145,19 +166,37 @@ public:
 
     // Member Operators
 
-        void operator=(const collisionRecord&);
+        void operator=(const CollisionRecord&);
 
 
     // Friend Operators
 
-        friend bool operator==(const collisionRecord&, const collisionRecord&);
-        friend bool operator!=(const collisionRecord&, const collisionRecord&);
+        friend bool operator== <Type>
+        (
+            const CollisionRecord<Type>&,
+            const CollisionRecord<Type>&
+        );
+
+        friend bool operator!= <Type>
+        (
+            const CollisionRecord<Type>&,
+            const CollisionRecord<Type>&
+        );
 
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, collisionRecord&);
-        friend Ostream& operator<<(Ostream&, const collisionRecord&);
+        friend Istream& operator>> <Type>
+        (
+            Istream&,
+            CollisionRecord<Type>&
+        );
+
+        friend Ostream& operator<< <Type>
+        (
+            Ostream&,
+            const CollisionRecord<Type>&
+        );
 };
 
 
@@ -167,7 +206,13 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "collisionRecordI.H"
+#include "CollisionRecordI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#ifdef NoRepository
+#   include "CollisionRecord.C"
+#endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

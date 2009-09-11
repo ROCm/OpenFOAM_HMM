@@ -24,17 +24,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "collisionRecordList.H"
+#include "CollisionRecord.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::collisionRecordList::collisionRecordList(Istream& is)
+template<class Type>
+Foam::CollisionRecord<Type>::CollisionRecord(Istream& is)
 :
-    DynamicList<collisionRecord>(is)
+    origProcOfOther_(readLabel(is)),
+    origIdOfOther_(readLabel(is)),
+    data_(is)
 {
     // Check state of Istream
-    is.check("Foam::collisionRecordList::collisionRecordList(Foam::Istream&)");
+    is.check("Foam::CollisionRecord<Type>::CollisionRecord(Foam::Istream&)");
+}
+
+
+// * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
+
+template<class Type>
+Foam::Istream& Foam::operator>>(Istream& is, CollisionRecord<Type>& cR)
+{
+    is  >> cR.origProcOfOther_ >> cR.origIdOfOther_ >> cR.data_;
+
+    // Check state of Istream
+    is.check
+    (
+        "Foam::Istream&"
+        "Foam::operator>>(Foam::Istream&, Foam::CollisionRecord<Type>&)"
+    );
+
+    return is;
+}
+
+
+template<class Type>
+Foam::Ostream& Foam::operator<<(Ostream& os, const CollisionRecord<Type>& cR)
+{
+    os  << cR.origProcOfOther_
+        << token::SPACE << cR.origIdOfOther_
+        << token::SPACE << cR.data_;
+
+    // Check state of Ostream
+    os.check
+    (
+        "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
+        "const Foam::CollisionRecord<Type>&)"
+    );
+
+    return os;
 }
 
 

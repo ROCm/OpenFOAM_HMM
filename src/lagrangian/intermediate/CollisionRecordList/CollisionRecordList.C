@@ -24,24 +24,42 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "collisionRecordList.H"
+#include "CollisionRecordList.H"
+#include "IOstreams.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::collisionRecordList::collisionRecordList()
+template<class Type>
+Foam::CollisionRecordList<Type>::CollisionRecordList()
 :
-    DynamicList<collisionRecord>()
+    DynamicList<CollisionRecord<Type> >()
 {}
+
+
+template<class Type>
+Foam::CollisionRecordList<Type>::CollisionRecordList(Istream& is)
+:
+    DynamicList<CollisionRecord<Type> >(is)
+{
+    // Check state of Istream
+    is.check
+    (
+        "Foam::CollisionRecordList<Type>::CollisionRecordList(Foam::Istream&)"
+    );
+}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * /
 
-Foam::collisionRecordList::~collisionRecordList()
+template<class Type>
+Foam::CollisionRecordList<Type>::~CollisionRecordList()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::collisionRecord& Foam::collisionRecordList::matchRecord
+template<class Type>
+Foam::CollisionRecord<Type>& Foam::CollisionRecordList<Type>::matchRecord
 (
     label origProcOfOther,
     label origIdOfOther
@@ -53,7 +71,7 @@ Foam::collisionRecord& Foam::collisionRecordList::matchRecord
 
     forAll(*this, i)
     {
-        collisionRecord& cR = (*this)[i];
+        CollisionRecord<Type>& cR = (*this)[i];
 
         if (cR.match(origProcOfOther, origIdOfOther))
         {
@@ -67,20 +85,16 @@ Foam::collisionRecord& Foam::collisionRecordList::matchRecord
     // member of the list.  The status of the record will be accessed
     // by construction.
 
-    append(collisionRecord(origProcOfOther, origIdOfOther));
+    append(CollisionRecord<Type>(origProcOfOther, origIdOfOther));
 
-    return (*this)[size() - 1];
+    return (*this)[this->size() - 1];
 }
 
 
-void Foam::collisionRecordList::update()
+template<class Type>
+void Foam::CollisionRecordList<Type>::update()
 {
-    // if (size())
-    // {
-    //     Info<< nl << nl << "Before update " << (*this) << endl;
-    // }
-
-    DynamicList<collisionRecord> updatedRecords;
+    DynamicList<CollisionRecord<Type> > updatedRecords;
 
     forAll(*this, i)
     {
@@ -92,12 +106,7 @@ void Foam::collisionRecordList::update()
         }
     }
 
-    DynamicList<collisionRecord>::operator=(updatedRecords);
-
-    // if (size())
-    // {
-    //     Info<< "After update " << (*this) << endl;
-    // }
+    DynamicList<CollisionRecord<Type> >::operator=(updatedRecords);
 }
 
 // ************************************************************************* //

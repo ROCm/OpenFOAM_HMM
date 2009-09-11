@@ -76,11 +76,4 @@ phaseProperties/phaseProperties/phasePropertiesIO.C
 phaseProperties/phasePropertiesList/phasePropertiesList.C
 
 
-/* collision records */
-collisionRecordList/collisionRecordList.C
-collisionRecordList/collisionRecordListIO.C
-collisionRecordList/collisionRecord/collisionRecord.C
-collisionRecordList/collisionRecord/collisionRecordIO.C
-
-
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate

@@ -313,7 +313,7 @@ Foam::InteractingKinematicParcel<ParcelType>::UTurb() const
 
 
 template <class ParcelType>
-inline const Foam::collisionRecordList&
+inline const Foam::CollisionRecordList<Foam::vector>&
 Foam::InteractingKinematicParcel<ParcelType>::collisionRecords() const
 {
     return collisionRecords_;
@@ -391,7 +391,7 @@ inline Foam::vector& Foam::InteractingKinematicParcel<ParcelType>::UTurb()
 
 
 template <class ParcelType>
-inline Foam::collisionRecordList&
+inline Foam::CollisionRecordList<Foam::vector>&
 Foam::InteractingKinematicParcel<ParcelType>::collisionRecords()
 {
     return collisionRecords_;

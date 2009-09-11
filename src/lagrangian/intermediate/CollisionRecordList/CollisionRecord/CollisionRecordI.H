@@ -26,7 +26,8 @@ License
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-inline bool Foam::collisionRecord::match
+template<class Type>
+inline bool Foam::CollisionRecord<Type>::match
 (
     label queryOrigProcOfOther,
     label queryOrigIdOfOther
@@ -40,45 +41,81 @@ inline bool Foam::collisionRecord::match
 }
 
 
-inline Foam::label Foam::collisionRecord::origProcOfOther() const
+template<class Type>
+inline Foam::label Foam::CollisionRecord<Type>::origProcOfOther() const
 {
     return mag(origProcOfOther_) - 1;
 }
 
 
-inline Foam::label Foam::collisionRecord::origIdOfOther() const
+template<class Type>
+inline Foam::label Foam::CollisionRecord<Type>::origIdOfOther() const
 {
     return origIdOfOther_;
 }
 
 
-inline const Foam::vector& Foam::collisionRecord::collisionData() const
+template<class Type>
+inline const Type&
+Foam::CollisionRecord<Type>::collisionData() const
 {
     return data_;
 }
 
 
-inline Foam::vector& Foam::collisionRecord::collisionData()
+template<class Type>
+inline Type& Foam::CollisionRecord<Type>::collisionData()
 {
     return data_;
 }
 
 
-inline bool Foam::collisionRecord::accessed() const
+template<class Type>
+inline bool Foam::CollisionRecord<Type>::accessed() const
 {
     return pos(origProcOfOther_);
 }
 
 
-inline void Foam::collisionRecord::setAccessed()
+template<class Type>
+inline void Foam::CollisionRecord<Type>::setAccessed()
 {
     origProcOfOther_ = origProcOfOther() + 1;
 }
 
 
-inline void Foam::collisionRecord::setUnaccessed()
+template<class Type>
+inline void Foam::CollisionRecord<Type>::setUnaccessed()
 {
     origProcOfOther_ = -(origProcOfOther() + 1);
+}
+
+
+// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+
+template<class Type>
+inline bool Foam::operator==
+(
+    const CollisionRecord<Type>& a,
+    const CollisionRecord<Type>& b
+)
+{
+    return
+    (
+        a.origProcOfOther_ == b.origProcOfOther_
+     && a.origIdOfOther_ == b.origIdOfOther_
+     && a.data_ == b.data_
+    );
+}
+
+template<class Type>
+inline bool Foam::operator!=
+(
+    const CollisionRecord<Type>& a,
+    const CollisionRecord<Type>& b
+)
+{
+    return !(a == b);
 }
 
 
