@@ -77,10 +77,13 @@ Foam::PairCollision<CloudType>::PairCollision
             this->owner()
         )
     ),
-    il_(owner.mesh(), 2.6e-5, true)
-{
-    Info<< "SEARCH DISTANCE SQR HARD CODED" << endl;
-}
+    il_
+    (
+        owner.mesh(),
+        sqr(readScalar(this->coeffDict().lookup("maxInteractionDistance"))),
+        true
+    )
+{}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
