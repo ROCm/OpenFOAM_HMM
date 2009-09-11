@@ -231,6 +231,13 @@ int main(int argc, char *argv[])
 
     if (mode == PATCH || mode == MESH)
     {
+        if (flipNormals)
+        {
+            FatalErrorIn(args.executable())
+                << "Flipping normals not supported for extrusions from patch."
+                << exit(FatalError);
+        }
+
         fileName sourceCasePath(dict.lookup("sourceCase"));
         sourceCasePath.expand();
         fileName sourceRootDir = sourceCasePath.path();
