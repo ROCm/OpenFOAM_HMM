@@ -50,12 +50,13 @@ Foam::thermalPorousZones::thermalPorousZones
 void Foam::thermalPorousZones::addEnthalpySource
 (
     const basicThermo& thermo,
+    const volScalarField& rho,
     fvScalarMatrix& hEqn
 ) const
 {
     forAll(*this, i)
     {
-        operator[](i).addEnthalpySource(thermo, hEqn);
+        operator[](i).addEnthalpySource(thermo, rho, hEqn);
     }
 }
 
