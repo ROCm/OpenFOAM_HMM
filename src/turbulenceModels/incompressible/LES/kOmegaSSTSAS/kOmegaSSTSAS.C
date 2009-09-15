@@ -346,7 +346,7 @@ void kOmegaSSTSAS::correct(const tmp<volTensorField>& gradU)
 
     volVectorField gradK = fvc::grad(k_);
     volVectorField gradOmega = fvc::grad(omega_);
-    volScalarField L = sqrt(k_)/(pow(Cmu_, 0.25)*(omega_ + omegaSmall_));
+    volScalarField L = sqrt(k_)/(pow025(Cmu_)*(omega_ + omegaSmall_));
     volScalarField CDkOmega =
         (2.0*alphaOmega2_)*(gradK & gradOmega)/(omega_ + omegaSmall_);
     volScalarField F1 = this->F1(CDkOmega);

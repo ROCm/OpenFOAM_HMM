@@ -23,21 +23,46 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::directMappedWallPointPatch
+    Foam::thermalPorousZones
 
 Description
-    DirectMapped patch.
+    A centralized thermalPorousZone collection.
+
+    Container class for a set of thermalPorousZones with the thermalPorousZone
+    member functions implemented to loop over the functions for each
+    thermalPorousZone.
+
+    The input file @c constant/thermalPorousZone is implemented as
+    IOPtrList\<thermalPorousZone\> and contains the following type of data:
+
+    @verbatim
+    1
+    (
+    cat1
+    {
+        coordinateSystem    system_10;
+        porosity    0.781;
+        Darcy
+        {
+            d   d [0 -2 0 0 0]  (-1000 -1000 0.50753e+08);
+            f   f [0 -1 0 0 0]  (-1000 -1000 12.83);
+        }
+        Temperature [0 0 1 0 0] 600;
+    }
+    )
+    @endverbatim
 
 SourceFiles
-    directMappedWallPointPatch.C
+    thermalPorousZones.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedWallPointPatch_H
-#define directMappedWallPointPatch_H
+#ifndef thermalPorousZones_H
+#define thermalPorousZones_H
 
-#include "wallPointPatch.H"
-#include "directMappedWallPolyPatch.H"
+#include "PorousZones.H"
+#include "thermalPorousZone.H"
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,31 +70,31 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class directMappedWallPointPatch Declaration
+                           Class thermalPorousZones Declaration
 \*---------------------------------------------------------------------------*/
 
-class directMappedWallPointPatch
+class thermalPorousZones
 :
-    public wallPointPatch
+    public PorousZones<thermalPorousZone>
 {
 
 public:
 
-    //- Runtime type information
-    TypeName(directMappedWallPolyPatch::typeName_());
-
-
     // Constructors
 
-        //- Construct from polyPatch
-        directMappedWallPointPatch
+        //- Construct from fvMesh
+        thermalPorousZones(const fvMesh&);
+
+
+    // Member Functions
+
+        //- Add the thermal source to the enthalpy equation
+        void addEnthalpySource
         (
-            const polyPatch& patch,
-            const pointBoundaryMesh& bm
-        )
-        :
-            wallPointPatch(patch, bm)
-        {}
+            const basicThermo& thermo,
+            const volScalarField& rho,
+            fvScalarMatrix& hEqn
+        ) const;
 };
 
 
