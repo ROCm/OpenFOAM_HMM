@@ -24,49 +24,45 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "reflectionVectors.H"
-#include "wallFvPatch.H"
-#include "surfaceFields.H"
+#include "regionProperties.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-Foam::reflectionVectors::reflectionVectors(const Foam::fvMesh& mesh)
+Foam::regionProperties::regionProperties(const Time& runTime)
 :
-    n_
+    IOdictionary
     (
         IOobject
         (
-            "reflectionVectors",
-            mesh.time().timeName(),
-            mesh
-        ),
-        mesh,
-        dimensionedVector("n", dimless, vector::zero)
-    )
-{
-    correct();
-}
+            "regionProperties",
+            runTime.time().constant(),
+            runTime.db(),
+            IOobject::MUST_READ,
+            IOobject::NO_WRITE
+        )
+    ),
+    fluidRegionNames_(lookup("fluidRegionNames")),
+    solidRegionNames_(lookup("solidRegionNames"))
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::regionProperties::~regionProperties()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-
-void Foam::reflectionVectors::correct()
+const Foam::List<Foam::word>& Foam::regionProperties::fluidRegionNames() const
 {
-    const fvMesh& mesh = n_.mesh();
-    const fvPatchList& patches = mesh.boundary();
+    return fluidRegionNames_;
+}
 
-    forAll(patches, patchi)
-    {
-        // find the nearest face for every cell
-        if (isA<wallFvPatch>(patches[patchi]))
-        {
-            n_.boundaryField()[patchi] =
-                mesh.Sf().boundaryField()[patchi]
-               /mesh.magSf().boundaryField()[patchi];
-        }
-    }
+
+const Foam::List<Foam::word>& Foam::regionProperties::solidRegionNames() const
+{
+    return solidRegionNames_;
 }
 
 
