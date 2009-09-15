@@ -89,7 +89,7 @@ void Foam::SpringSliderDashpot<CloudType>::evaluatePair
 
         scalar kN = (4.0/3.0)*sqrt(R)*Estar_;
 
-        scalar etaN = alpha_*sqrt(M*kN)*sqrt(sqrt(normalOverlapMag));
+        scalar etaN = alpha_*sqrt(M*kN)*pow025(normalOverlapMag);
 
         // Normal force
         vector fN_AB =
