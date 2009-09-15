@@ -287,8 +287,7 @@ void Foam::mapDistribute::distribute
 
 
             // Wait till all finished
-            IPstream::waitRequests();
-            OPstream::waitRequests();
+            Pstream::waitRequests();
 
             // Consume
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -413,8 +412,7 @@ void Foam::mapDistribute::distribute
 
             // Wait for all to finish
 
-            OPstream::waitRequests();
-            IPstream::waitRequests();
+            Pstream::waitRequests();
 
             // Collect neighbour fields
 
@@ -717,8 +715,7 @@ void Foam::mapDistribute::distribute
 
 
             // Wait till all finished
-            IPstream::waitRequests();
-            OPstream::waitRequests();
+            Pstream::waitRequests();
 
             // Consume
             for (label domain = 0; domain < Pstream::nProcs(); domain++)
@@ -842,8 +839,7 @@ void Foam::mapDistribute::distribute
 
             // Wait for all to finish
 
-            OPstream::waitRequests();
-            IPstream::waitRequests();
+            Pstream::waitRequests();
 
             // Collect neighbour fields
 

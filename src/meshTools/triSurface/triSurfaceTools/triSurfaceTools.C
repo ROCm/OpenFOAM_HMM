@@ -2586,7 +2586,7 @@ Foam::triSurface Foam::triSurfaceTools::delaunay2D(const List<vector2D>& pts)
 
     // Triangulate
     int nTris = 0;
-    dtris2
+    int err = dtris2
     (
         pts.size(),
         geompackVertices.begin(),
@@ -2594,6 +2594,13 @@ Foam::triSurface Foam::triSurfaceTools::delaunay2D(const List<vector2D>& pts)
         triangle_node.begin(),
         triangle_neighbor.begin()
     );
+
+    if (err != 0)
+    {
+        FatalErrorIn("triSurfaceTools::delaunay2D(const List<vector2D>&)")
+            << "Failed dtris2 with vertices:" << pts.size()
+            << abort(FatalError);
+    }
 
     // Trim
     triangle_node.setSize(3*nTris);

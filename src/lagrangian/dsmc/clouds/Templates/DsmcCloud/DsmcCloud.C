@@ -28,11 +28,9 @@ License
 #include "BinaryCollisionModel.H"
 #include "WallInteractionModel.H"
 #include "InflowBoundaryModel.H"
+#include "constants.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-template<class ParcelType>
-Foam::scalar Foam::DsmcCloud<ParcelType>::kb = 1.380650277e-23;
+using namespace Foam::constant;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -526,7 +524,8 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
 (
     const word& cloudName,
     const volScalarField& T,
-    const volVectorField& U
+    const volVectorField& U,
+    bool readFields
 )
 :
     Cloud<ParcelType>(T.mesh(), cloudName, false),
@@ -629,6 +628,11 @@ Foam::DsmcCloud<ParcelType>::DsmcCloud
     forAll(collisionSelectionRemainder_, i)
     {
         collisionSelectionRemainder_[i] = rndGen_.scalar01();
+    }
+
+    if (readFields)
+    {
+        ParcelType::readFields(*this);
     }
 }
 
@@ -853,7 +857,7 @@ Foam::vector Foam::DsmcCloud<ParcelType>::equipartitionLinearVelocity
 )
 {
     return
-        sqrt(kb*temperature/mass)
+        sqrt(physicoChemical::k.value()*temperature/mass)
        *vector
         (
             rndGen_.GaussNormal(),
@@ -879,7 +883,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
     else if (iDof < 2.0 + SMALL && iDof > 2.0 - SMALL)
     {
         // Special case for iDof = 2, i.e. diatomics;
-        Ei = -log(rndGen_.scalar01())*kb*temperature;
+        Ei = -log(rndGen_.scalar01())*physicoChemical::k.value()*temperature;
     }
     else
     {
@@ -897,7 +901,7 @@ Foam::scalar Foam::DsmcCloud<ParcelType>::equipartitionInternalEnergy
 
         } while (P < rndGen_.scalar01());
 
-        Ei = energyRatio*kb*temperature;
+        Ei = energyRatio*physicoChemical::k.value()*temperature;
     }
 
     return Ei;

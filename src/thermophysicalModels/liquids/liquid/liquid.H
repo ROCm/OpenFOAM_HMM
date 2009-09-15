@@ -243,6 +243,9 @@ public:
             //- Vapour diffussivity [m2/s]
             virtual scalar D(scalar p, scalar T) const = 0;
 
+            //- Vapour diffussivity [m2/s] with specified binary pair
+            virtual scalar D(scalar p, scalar T, scalar Wb) const = 0;
+
 
     // I-O
 

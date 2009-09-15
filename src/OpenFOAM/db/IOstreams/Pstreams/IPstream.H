@@ -117,12 +117,6 @@ public:
                 const std::streamsize bufSize
             );
 
-            //- Non-blocking receives: wait until all have finished.
-            static void waitRequests();
-
-            //- Non-blocking receives: has request i finished?
-            static bool finishedRequest(const label i);
-
             //- Return next token from stream
             Istream& read(token&);
 

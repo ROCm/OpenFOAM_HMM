@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "noHeatTransfer.H"
 #include "addToRunTimeSelectionTable.H"
 
@@ -45,16 +43,15 @@ addToRunTimeSelectionTable
     dictionary
 );
 
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-noHeatTransfer::noHeatTransfer
-(
-    const dictionary& dict
-)
+noHeatTransfer::noHeatTransfer(const dictionary& dict)
 :
     heatTransferModel(dict)
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -69,14 +66,12 @@ bool noHeatTransfer::heatTransfer() const
     return false;
 }
 
-scalar noHeatTransfer::Nu
-(
-    const scalar,
-    const scalar
-) const
+
+scalar noHeatTransfer::Nu(const scalar, const scalar) const
 {
     return 0.0;
 }
+
 
 scalar noHeatTransfer::relaxationTime
 (
@@ -91,10 +86,12 @@ scalar noHeatTransfer::relaxationTime
     return GREAT;
 }
 
+
 scalar noHeatTransfer::fCorrection(const scalar) const
 {
     return 1.0;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

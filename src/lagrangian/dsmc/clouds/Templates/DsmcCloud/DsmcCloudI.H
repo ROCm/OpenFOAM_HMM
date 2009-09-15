@@ -24,6 +24,10 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "constants.H"
+
+using namespace Foam::constant;
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParcelType>
@@ -312,7 +316,8 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
     scalar mass
 ) const
 {
-    return 2.0*sqrt(2.0*kb*temperature/(mathematicalConstant::pi*mass));
+    return
+        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(math::pi*mass));
 }
 
 
@@ -323,7 +328,8 @@ inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
     scalar mass
 ) const
 {
-    return 2.0*sqrt(2.0*kb*temperature/(mathematicalConstant::pi*mass));
+    return
+        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(math::pi*mass));
 }
 
 
@@ -334,7 +340,7 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianRMSSpeed
     scalar mass
 ) const
 {
-    return sqrt(3.0*kb*temperature/mass);
+    return sqrt(3.0*physicoChemical::k.value()*temperature/mass);
 }
 
 
@@ -345,7 +351,7 @@ inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianRMSSpeed
     scalar mass
 ) const
 {
-    return sqrt(3.0*kb*temperature/mass);
+    return sqrt(3.0*physicoChemical::k.value()*temperature/mass);
 }
 
 
@@ -357,7 +363,7 @@ Foam::DsmcCloud<ParcelType>::maxwellianMostProbableSpeed
     scalar mass
 ) const
 {
-    return sqrt(2.0*kb*temperature/mass);
+    return sqrt(2.0*physicoChemical::k.value()*temperature/mass);
 }
 
 
@@ -369,7 +375,7 @@ Foam::DsmcCloud<ParcelType>::maxwellianMostProbableSpeed
     scalar mass
 ) const
 {
-    return sqrt(2.0*kb*temperature/mass);
+    return sqrt(2.0*physicoChemical::k.value()*temperature/mass);
 }
 
 

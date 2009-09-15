@@ -37,7 +37,6 @@ Description
 #include "BasicReactingCloud.H"
 #include "psiChemistryModel.H"
 #include "chemistrySolver.H"
-#include "thermoPhysicsTypes.H"
 #include "radiationModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

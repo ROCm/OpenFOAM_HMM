@@ -92,12 +92,11 @@ bool reflectParcel::wallTreatment
         {
             // static mesh
             scalar Un = p.U() & Sf;
-            
+
             if (Un > 0)
             {
                 p.U() -= (1.0 + elasticity_)*Un*Sf;
             }
-
         }
         else
         {
@@ -127,7 +126,7 @@ bool reflectParcel::wallTreatment
             scalar magSfDiff = mag(Sf - Sf0);
 
             vector Ub = Ub0 + p.stepFraction()*(Ub1 - Ub0);
-                
+
             if (magSfDiff > SMALL)
             {
                 // rotation + translation
@@ -136,17 +135,17 @@ bool reflectParcel::wallTreatment
                 vector omega = Sf0 ^ Sf;
                 scalar magOmega = mag(omega);
                 omega /= magOmega+SMALL;
-                    
+
                 scalar phiVel = ::asin(magOmega)/dt;
-                    
+
                 scalar dist = (p.position() - Cf) & Sfp;
                 vector pos = p.position() - dist*Sfp;
                 vector vrot = phiVel*(omega ^ (pos - Cf));
 
                 vector v = Ub + vrot;
-                
+
                 scalar Un = ((p.U() - v) & Sfp);
-                
+
                 if (Un > 0.0)
                 {
                     p.U() -= (1.0 + elasticity_)*Un*Sfp;
@@ -179,15 +178,14 @@ bool reflectParcel::wallTreatment
     }
     else
     {
-        FatalError
-            << "bool reflectParcel::wallTreatment(parcel& parcel) const "
-                << " parcel has hit a boundary " 
-                << mesh_.boundary()[patchi].type()
-                << " which not yet has been implemented."
+        FatalErrorIn("bool reflectParcel::wallTreatment(parcel& parcel) const")
+            << " parcel has hit a boundary " << mesh_.boundary()[patchi].type()
+            << " which not yet has been implemented." << nl
             << abort(FatalError);
     }
     return true;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

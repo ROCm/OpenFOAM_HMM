@@ -46,7 +46,6 @@ Description
 #include "BasicReactingCloud.H"
 #include "rhoChemistryModel.H"
 #include "chemistrySolver.H"
-#include "thermoPhysicsTypes.H"
 #include "radiationModel.H"
 #include "porousZones.H"
 #include "timeActivatedExplicitMulticomponentPointSource.H"

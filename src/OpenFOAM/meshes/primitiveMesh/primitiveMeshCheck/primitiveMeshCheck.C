@@ -27,7 +27,7 @@ License
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
 #include "ListOps.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "SortableList.H"
 
 
@@ -410,7 +410,7 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
 
     // Severe nonorthogonality threshold
     const scalar severeNonorthogonalityThreshold =
-        ::cos(nonOrthThreshold_/180.0*mathematicalConstant::pi);
+        ::cos(nonOrthThreshold_/180.0*constant::math::pi);
 
     scalar minDDotS = GREAT;
 
@@ -472,9 +472,9 @@ bool Foam::primitiveMesh::checkFaceOrthogonality
             if (debug || report)
             {
                 Info<< "    Mesh non-orthogonality Max: "
-                    << ::acos(minDDotS)/mathematicalConstant::pi*180.0
+                    << ::acos(minDDotS)/constant::math::pi*180.0
                     << " average: " <<
-                    ::acos(sumDDotS/neiSize)/mathematicalConstant::pi*180.0
+                    ::acos(sumDDotS/neiSize)/constant::math::pi*180.0
                     << endl;
             }
         }
@@ -840,7 +840,7 @@ bool Foam::primitiveMesh::checkFaceAngles
             << exit(FatalError);
     }
 
-    const scalar maxSin = Foam::sin(maxDeg/180.0*mathematicalConstant::pi);
+    const scalar maxSin = Foam::sin(maxDeg/180.0*constant::math::pi);
 
     const pointField& p = points();
     const faceList& fcs = faces();
@@ -917,7 +917,7 @@ bool Foam::primitiveMesh::checkFaceAngles
     {
         scalar maxConcaveDegr =
             Foam::asin(Foam::min(1.0, maxEdgeSin))
-           *180.0/mathematicalConstant::pi;
+           *180.0/constant::math::pi;
 
         if (debug || report)
         {

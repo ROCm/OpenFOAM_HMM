@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "oscillatingFixedValueFvPatchField.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -39,8 +39,8 @@ scalar oscillatingFixedValueFvPatchField<Type>::currentScale() const
 {
     return
         1.0
-      + amplitude_*
-        sin(2*mathematicalConstant::pi*frequency_*this->db().time().value());
+      + amplitude_
+       *sin(constant::math::twoPi*frequency_*this->db().time().value());
 }
 
 

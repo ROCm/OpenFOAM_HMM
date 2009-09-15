@@ -50,7 +50,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class ChomiakInjector Declaration
+                       Class ChomiakInjector Declaration
 \*---------------------------------------------------------------------------*/
 
 class ChomiakInjector
@@ -67,25 +67,21 @@ private:
         autoPtr<pdf> dropletPDF_;
         scalarList maxSprayAngle_;
 
+
 public:
 
     //- Runtime type information
-        TypeName("ChomiakInjector");
+    TypeName("ChomiakInjector");
 
 
     // Constructors
 
         //- Construct from components
-        ChomiakInjector
-        (
-            const dictionary& dict,
-            spray& sm
-        );
+        ChomiakInjector(const dictionary& dict, spray& sm);
 
 
-    // Destructor
-
-        ~ChomiakInjector();
+    //- Destructor
+    virtual ~ChomiakInjector();
 
 
     // Member Functions
@@ -97,17 +93,17 @@ public:
         vector direction
         (
             const label injector,
-            const label hole, 
+            const label hole,
             const scalar time,
             const scalar d
         ) const;
-    
+
         scalar velocity
         (
             const label i,
             const scalar time
         ) const;
-        
+
         scalar averageVelocity
         (
             const label i

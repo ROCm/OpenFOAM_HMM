@@ -25,8 +25,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "InjectionModel.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "meshTools.H"
+
+using namespace Foam::constant;
 
 // * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * * //
 
@@ -195,9 +197,10 @@ Foam::scalar Foam::InjectionModel<CloudType>::setNumberOfParticles
     {
         case pbMass:
         {
-            nP = volume/volumeTotal_
-                *massTotal_/rho
-               /(parcels*mathematicalConstant::pi/6.0*pow3(diameter));
+            nP =
+                volume/volumeTotal_
+               *massTotal_/rho
+               /(parcels*math::pi/6.0*pow3(diameter));
             break;
         }
         case pbNumber:

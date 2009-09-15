@@ -43,26 +43,20 @@ autoPtr<breakupModel> breakupModel::New
     spray& sm
 )
 {
-    word breakupModelType
-    (
-        dict.lookup("breakupModel")
-    );
+    word breakupModelType(dict.lookup("breakupModel"));
 
-    Info<< "Selecting breakupModel "
-         << breakupModelType << endl;
+    Info<< "Selecting breakupModel " << breakupModelType << endl;
 
     dictionaryConstructorTable::iterator cstrIter =
         dictionaryConstructorTablePtr_->find(breakupModelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
-        FatalError
-            << "breakupModel::New(const dictionary&, const spray&) : " << endl
-            << "    unknown breakupModelType type "
-            << breakupModelType
-            << ", constructor not in hash table" << endl << endl
-            << "    Valid breakupModel types are :" << endl;
-        Info<< dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
+        FatalErrorIn("breakupModel::New(const dictionary&, const spray&)")
+            << "    unknown breakupModelType type " << breakupModelType
+            << ", constructor not in hash table" << nl << nl
+            << "    Valid breakupModel types are :" << nl
+            << dictionaryConstructorTablePtr_->sortedToc() << abort(FatalError);
     }
 
     return autoPtr<breakupModel>(cstrIter()(dict, sm));

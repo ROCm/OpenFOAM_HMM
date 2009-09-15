@@ -94,9 +94,8 @@ public:
         );
 
 
-    // Destructor
-
-        virtual ~collisionModel();
+    //- Destructor
+    virtual ~collisionModel();
 
 
     // Selector

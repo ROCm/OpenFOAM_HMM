@@ -198,9 +198,7 @@ void Foam::hierarchGeomDecomp::findBinary
     label high = values.size();
 
     // Safeguards to avoid infinite loop.
-    label lowPrev = -1;
-    label midPrev = -1;
-    label highPrev = -1;
+    scalar midValuePrev = VGREAT;
 
     while (true)
     {
@@ -208,10 +206,10 @@ void Foam::hierarchGeomDecomp::findBinary
 
         if (debug)
         {
-            Pout<< "low:" << low << " lowValue:" << lowValue
+            Pout<< "    low:" << low << " lowValue:" << lowValue
                 << " high:" << high << " highValue:" << highValue
-                << " mid:" << mid << " midValue:" << midValue << nl
-                << "globalSize:" << size << " wantedSize:" << wantedSize
+                << " mid:" << mid << " midValue:" << midValue << endl
+                << "    globalSize:" << size << " wantedSize:" << wantedSize
                 << " sizeTol:" << sizeTol << endl;
         }
 
@@ -235,10 +233,7 @@ void Foam::hierarchGeomDecomp::findBinary
         mid = findLower(values, midValue, low, high);
 
         // Safeguard if same as previous.
-        bool hasNotChanged =
-            (mid == midPrev)
-         && (low == lowPrev)
-         && (high == highPrev);
+        bool hasNotChanged = (mag(midValue-midValuePrev) < SMALL);
 
         if (returnReduce(hasNotChanged, andOp<bool>()))
         {
@@ -248,9 +243,7 @@ void Foam::hierarchGeomDecomp::findBinary
             break;
         }
 
-        midPrev = mid;
-        lowPrev = low;
-        highPrev = high;
+        midValuePrev = midValue;
     }
 }
 
@@ -280,9 +273,7 @@ void Foam::hierarchGeomDecomp::findBinary
     label high = values.size();
 
     // Safeguards to avoid infinite loop.
-    label lowPrev = -1;
-    label midPrev = -1;
-    label highPrev = -1;
+    scalar midValuePrev = VGREAT;
 
     while (true)
     {
@@ -294,10 +285,10 @@ void Foam::hierarchGeomDecomp::findBinary
 
         if (debug)
         {
-            Pout<< "low:" << low << " lowValue:" << lowValue
+            Pout<< "    low:" << low << " lowValue:" << lowValue
                 << " high:" << high << " highValue:" << highValue
-                << " mid:" << mid << " midValue:" << midValue << nl
-                << "globalSize:" << weightedSize 
+                << " mid:" << mid << " midValue:" << midValue << endl
+                << "    globalSize:" << weightedSize 
                 << " wantedSize:" << wantedSize
                 << " sizeTol:" << sizeTol << endl;
         }
@@ -322,10 +313,7 @@ void Foam::hierarchGeomDecomp::findBinary
         mid = findLower(values, midValue, low, high);
 
         // Safeguard if same as previous.
-        bool hasNotChanged =
-            (mid == midPrev)
-         && (low == lowPrev)
-         && (high == highPrev);
+        bool hasNotChanged = (mag(midValue-midValuePrev) < SMALL);
 
         if (returnReduce(hasNotChanged, andOp<bool>()))
         {
@@ -335,9 +323,7 @@ void Foam::hierarchGeomDecomp::findBinary
             break;
         }
 
-        midPrev = mid;
-        lowPrev = low;
-        highPrev = high;
+        midValuePrev = midValue;
     }
 }
 
@@ -460,11 +446,11 @@ void Foam::hierarchGeomDecomp::sortComponent
         if (debug)
         {
             Pout<< "For component " << compI << ", bin " << bin
-                << " copying" << nl
+                << " copying" << endl
                 << "from " << leftCoord << " at local index "
-                << leftIndex << nl
+                << leftIndex << endl
                 << "to " << rightCoord << " localSize:"
-                << localSize << nl
+                << localSize << endl
                 << endl;
         }
 
@@ -643,11 +629,11 @@ void Foam::hierarchGeomDecomp::sortComponent
         if (debug)
         {
             Pout<< "For component " << compI << ", bin " << bin
-                << " copying" << nl
+                << " copying" << endl
                 << "from " << leftCoord << " at local index "
-                << leftIndex << nl
+                << leftIndex << endl
                 << "to " << rightCoord << " localSize:"
-                << localSize << nl
+                << localSize << endl
                 << endl;
         }
 
@@ -787,7 +773,6 @@ Foam::labelList Foam::hierarchGeomDecomp::decompose
     }
 
     pointField rotatedPoints = rotDelta_ & points;
-
 
     // Calculate tolerance of cell distribution. For large cases finding
     // distibution to the cell exact would cause too many iterations so allow

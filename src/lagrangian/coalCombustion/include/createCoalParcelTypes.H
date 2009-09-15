@@ -92,8 +92,7 @@ License
     (                                                                         \
         ReactingMultiphaseCloud<ParcelType##ThermoType>,                      \
         0                                                                     \
-    );                                                                        \
-    defineParcelTypeNameAndDebug(CoalCloud<ParcelType##ThermoType>, 0);
+    );
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

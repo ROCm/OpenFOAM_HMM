@@ -26,7 +26,7 @@ License
 
 #include "wedge.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ wedge::wedge(const dictionary& dict)
     angle_
     (
         readScalar(coeffDict_.lookup("angle"))
-       *mathematicalConstant::pi/180.0
+       *constant::math::pi/180.0
     )
 {}
 
@@ -88,8 +88,8 @@ point wedge::operator()
     }
     else
     {
-        //sliceAngle = angle_*(layer + 1)/nLayers_;
-        sliceAngle = angle_*layer/nLayers_;
+        //sliceAngle = angle_*layer/nLayers_;
+        sliceAngle = angle_*sumThickness(layer);
     }
 
     // Find projection onto axis (or rather decompose surfacePoint

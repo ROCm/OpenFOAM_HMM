@@ -26,7 +26,7 @@ License
 
 #include "ETAB.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -64,7 +64,7 @@ ETAB::ETAB
     AWe_(0.0)
 {
     scalar k21 = k2_/k1_;
-    AWe_ = (k21*sqrt(WeTransition_) - 1.0)/pow(WeTransition_, 4.0);
+    AWe_ = (k21*sqrt(WeTransition_) - 1.0)/pow4(WeTransition_);
 }
 
 
@@ -85,15 +85,15 @@ void ETAB::breakupParcel
 ) const
 {
 
-    scalar T  = p.T();
-    scalar pc  = spray_.p()[p.cell()];
-    scalar r  = 0.5*p.d();
+    scalar T = p.T();
+    scalar pc = spray_.p()[p.cell()];
+    scalar r = 0.5*p.d();
     scalar r2 = r*r;
     scalar r3 = r*r2;
 
-    scalar rho   = fuels.rho(pc, T, p.X());
+    scalar rho = fuels.rho(pc, T, p.X());
     scalar sigma = fuels.sigma(pc, T, p.X());
-    scalar mu    = fuels.mu(pc, T, p.X());
+    scalar mu = fuels.mu(pc, T, p.X());
 
     // inverse of characteristic viscous damping time
     scalar rtd = 0.5*Cmu_*mu/(rho*r2);
@@ -116,7 +116,7 @@ void ETAB::breakupParcel
         scalar a = sqrt(y1*y1 + y2*y2);
 
         // scotty we may have break-up
-        if (a+Wetmp > 1.0)
+        if (a + Wetmp > 1.0)
         {
             scalar phic = y1/a;
 
@@ -128,7 +128,7 @@ void ETAB::breakupParcel
             scalar quad = -y2/a;
             if (quad < 0)
             {
-                phi = 2*mathematicalConstant::pi - phit;
+                phi = constant::math::twoPi - phit;
             }
 
             scalar tb = 0;
@@ -139,11 +139,11 @@ void ETAB::breakupParcel
 
                 if (theta < phi)
                 {
-                    if (2*mathematicalConstant::pi-theta >= phi)
+                    if (constant::math::twoPi - theta >= phi)
                     {
                         theta = -theta;
                     }
-                    theta += 2*mathematicalConstant::pi;
+                    theta += constant::math::twoPi;
                 }
                 tb = (theta-phi)*romega;
 
@@ -158,17 +158,17 @@ void ETAB::breakupParcel
             // update droplet size
             if (deltaT > tb)
             {
-                scalar sqrtWe = AWe_*pow(We, 4.0) + 1.0;
+                scalar sqrtWe = AWe_*pow4(We) + 1.0;
                 scalar Kbr = k1_*omega*sqrtWe;
 
                 if (We > WeTransition_)
                 {
                     sqrtWe = sqrt(We);
-                    Kbr =k2_*omega*sqrtWe;
+                    Kbr = k2_*omega*sqrtWe;
                 }
 
                 scalar rWetmp = 1.0/Wetmp;
-                scalar cosdtbu = max(-1.0, min(1.0, 1.0-rWetmp));
+                scalar cosdtbu = max(-1.0, min(1.0, 1.0 - rWetmp));
                 scalar dtbu = romega*acos(cosdtbu);
                 scalar decay = exp(-Kbr*dtbu);
 
@@ -189,6 +189,7 @@ void ETAB::breakupParcel
         p.ddev() = 0;
     }
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

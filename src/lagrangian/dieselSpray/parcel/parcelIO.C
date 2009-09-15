@@ -96,10 +96,7 @@ Foam::parcel::parcel
 }
 
 
-void Foam::parcel::readFields
-(
-    Cloud<parcel>& c
-)
+void Foam::parcel::readFields(Cloud<parcel>& c)
 {
     if (!c.size())
     {
@@ -195,10 +192,7 @@ void Foam::parcel::readFields
 }
 
 
-void Foam::parcel::writeFields
-(
-    const Cloud<parcel>& c
-)
+void Foam::parcel::writeFields(const Cloud<parcel>& c)
 {
     Particle<parcel>::writeFields(c);
 

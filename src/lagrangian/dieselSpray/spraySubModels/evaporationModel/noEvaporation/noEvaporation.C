@@ -48,13 +48,11 @@ addToRunTimeSelectionTable
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from dictionary
-noEvaporation::noEvaporation
-(
-    const dictionary& dict
-)
+noEvaporation::noEvaporation( const dictionary& dict)
 :
     evaporationModel(dict)
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -69,6 +67,7 @@ bool noEvaporation::evaporation() const
     return false;
 }
 
+
 scalar noEvaporation::Sh
 (
     const scalar,
@@ -77,6 +76,7 @@ scalar noEvaporation::Sh
 {
     return 0.0;
 }
+
 
 scalar noEvaporation::relaxationTime
 (
@@ -120,10 +120,12 @@ scalar noEvaporation::boilingTime
     return GREAT;
 }
 
+
 inline label noEvaporation::nEvapIter() const
 {
     return 0;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

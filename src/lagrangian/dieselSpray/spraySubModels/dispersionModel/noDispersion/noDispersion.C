@@ -49,11 +49,7 @@ addToRunTimeSelectionTable
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-noDispersion::noDispersion
-(
-    const dictionary& dict,
-    spray& sm
-)
+noDispersion::noDispersion(const dictionary& dict, spray& sm)
 :
     dispersionModel(dict, sm)
 {}

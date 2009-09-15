@@ -24,8 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-
 #include "heatTransferModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -42,16 +40,15 @@ defineRunTimeSelectionTable(heatTransferModel, dictionary);
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from dictionary
-heatTransferModel::heatTransferModel
-(
-    const dictionary& dict
-)
+heatTransferModel::heatTransferModel(const dictionary& dict)
 :
     dict_(dict)
 {}
 
+
 heatTransferModel::~heatTransferModel()
 {}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

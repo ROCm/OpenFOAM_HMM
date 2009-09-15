@@ -86,12 +86,6 @@ public:
 
     //- Destructor
     ~dsmcCloud();
-
-
-    // Member functions
-
-        //- Write fields
-        virtual void writeFields() const;
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

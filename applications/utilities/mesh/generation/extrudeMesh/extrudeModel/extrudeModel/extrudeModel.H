@@ -58,6 +58,8 @@ protected:
 
         const label nLayers_;
 
+        const scalar expansionRatio_;
+
         const dictionary& dict_;
 
         const dictionary& coeffDict_;
@@ -113,8 +115,14 @@ public:
 
             label nLayers() const;
 
+            scalar expansionRatio() const;
+
 
     // Member Operators
+
+        //- Helper: calculate cumulative relative thickness for layer.
+        //  (layer=0 -> 0; layer=nLayers -> 1)
+        scalar sumThickness(const label layer) const;
 
         virtual point operator()
         (

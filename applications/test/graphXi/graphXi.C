@@ -32,7 +32,7 @@ Description
 
 #include "graph.H"
 #include "OFstream.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 
 using namespace Foam;
 
@@ -50,7 +50,7 @@ int main()
 
     scalarField b = 0.5*(1.0 + erf(x));
     scalarField c = 1.0 - b;
-    scalarField gradb = (1/::sqrt(mathematicalConstant::pi))*exp(-sqr(x));
+    scalarField gradb = (1/::sqrt(constant::math::pi))*exp(-sqr(x));
     scalarField lapb = -2*x*gradb;
 
     r = lapb*b*c/(gradb*gradb);

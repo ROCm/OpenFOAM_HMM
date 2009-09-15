@@ -77,7 +77,7 @@ public:
 
     // Constructors
 
-        //- Construct from components
+        //- Construct from dictionary
         wedge(const dictionary& dict);
 
 

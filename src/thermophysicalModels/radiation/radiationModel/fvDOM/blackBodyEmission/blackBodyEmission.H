@@ -41,8 +41,6 @@ SourceFiles
 
 #include "volFields.H"
 #include "dimensionedScalar.H"
-#include "mathematicalConstants.H"
-#include "radiationConstants.H"
 #include "interpolationTable.H"
 #include "Vector2D.H"
 

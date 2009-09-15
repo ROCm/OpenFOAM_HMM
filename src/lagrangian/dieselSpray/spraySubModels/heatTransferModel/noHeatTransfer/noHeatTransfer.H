@@ -42,7 +42,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class noHeatTransfer Declaration
+                      Class noHeatTransfer Declaration
 \*---------------------------------------------------------------------------*/
 
 class noHeatTransfer
@@ -53,21 +53,17 @@ class noHeatTransfer
 public:
 
     //- Runtime type information
-        TypeName("off");
+    TypeName("off");
 
 
     // Constructors
 
         //- Construct from dictionary
-        noHeatTransfer
-        (
-            const dictionary& dict
-        );
+        noHeatTransfer(const dictionary& dict);
 
 
-    // Destructor
-
-        ~noHeatTransfer();
+    //- Destructor
+    virtual ~noHeatTransfer();
 
 
     // Member Functions
@@ -92,7 +88,6 @@ public:
         ) const;
 
         scalar fCorrection(const scalar z) const;
-
 };
 
 

@@ -48,10 +48,7 @@ addToRunTimeSelectionTable
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 // Construct from components
-RanzMarshall::RanzMarshall
-(
-    const dictionary& dict
-)
+RanzMarshall::RanzMarshall(const dictionary& dict)
 :
     heatTransferModel(dict),
     heatDict_(dict.subDict(typeName + "Coeffs")),
@@ -59,6 +56,7 @@ RanzMarshall::RanzMarshall
     ReExponent_(readScalar(heatDict_.lookup("ReExponent"))),
     PrExponent_(readScalar(heatDict_.lookup("PrExponent")))
 {}
+
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
@@ -73,14 +71,20 @@ bool RanzMarshall::heatTransfer() const
     return true;
 }
 
+
 scalar RanzMarshall::Nu
 (
     const scalar ReynoldsNumber,
     const scalar PrandtlNumber
 ) const
 {
-    return 2.0 + preRePrFactor_ * pow(ReynoldsNumber, ReExponent_) * pow(PrandtlNumber, PrExponent_);
+    return
+        2.0
+      + preRePrFactor_
+       *pow(ReynoldsNumber, ReExponent_)
+       *pow(PrandtlNumber, PrExponent_);
 }
+
 
 scalar RanzMarshall::relaxationTime
 (
@@ -92,12 +96,17 @@ scalar RanzMarshall::relaxationTime
     const scalar PrandtlNumber
 ) const
 {
-    scalar time = liquidDensity*pow(diameter, 2.0)*liquidcL/(6.0*kappa*Nu(ReynoldsNumber, PrandtlNumber));
+    scalar time =
+        liquidDensity
+       *sqr(diameter)
+       *liquidcL
+       /(6.0*kappa*Nu(ReynoldsNumber, PrandtlNumber));
 
     time = max(SMALL, time);
 
     return time;
 }
+
 
 scalar RanzMarshall::fCorrection(const scalar z) const
 {
@@ -112,7 +121,6 @@ scalar RanzMarshall::fCorrection(const scalar z) const
         {
             correct = SMALL;
         }
-
     }
     else
     {
@@ -122,6 +130,7 @@ scalar RanzMarshall::fCorrection(const scalar z) const
 
     return correct;
 }
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

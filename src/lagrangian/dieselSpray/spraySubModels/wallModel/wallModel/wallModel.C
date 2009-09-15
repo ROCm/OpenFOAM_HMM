@@ -24,7 +24,6 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
 #include "wallModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -40,9 +39,6 @@ defineRunTimeSelectionTable(wallModel, dictionary);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-
-// Construct from components
 
 wallModel::wallModel
 (
@@ -61,6 +57,7 @@ wallModel::wallModel
 
 wallModel::~wallModel()
 {}
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

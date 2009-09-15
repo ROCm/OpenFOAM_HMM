@@ -131,9 +131,12 @@ public:
                 (
                     IOobject
                     (
-                        vf.name(),
+                        "cubic::correction(" + vf.name() +')',
                         mesh.time().timeName(),
-                        mesh
+                        mesh,
+                        IOobject::NO_READ,
+                        IOobject::NO_WRITE,
+                        false
                     ),
                     surfaceInterpolationScheme<Type>::interpolate(vf, kSc, -kSc)
                 )
