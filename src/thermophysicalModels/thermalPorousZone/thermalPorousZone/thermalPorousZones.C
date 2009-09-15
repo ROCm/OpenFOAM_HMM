@@ -22,63 +22,43 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::directMappedWallPointPatch
-
-Description
-    DirectMapped patch.
-
-SourceFiles
-    directMappedWallPointPatch.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedWallPointPatch_H
-#define directMappedWallPointPatch_H
+#include "thermalPorousZones.H"
+#include "volFields.H"
 
-#include "wallPointPatch.H"
-#include "directMappedWallPolyPatch.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 namespace Foam
 {
+    defineTemplateTypeNameAndDebug(IOPtrList<thermalPorousZone>, 0);
+}
 
-/*---------------------------------------------------------------------------*\
-                       Class directMappedWallPointPatch Declaration
-\*---------------------------------------------------------------------------*/
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-class directMappedWallPointPatch
+Foam::thermalPorousZones::thermalPorousZones
+(
+    const fvMesh& mesh
+)
 :
-    public wallPointPatch
+    PorousZones<thermalPorousZone>(mesh)
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::thermalPorousZones::addEnthalpySource
+(
+    const basicThermo& thermo,
+    const volScalarField& rho,
+    fvScalarMatrix& hEqn
+) const
 {
+    forAll(*this, i)
+    {
+        operator[](i).addEnthalpySource(thermo, rho, hEqn);
+    }
+}
 
-public:
-
-    //- Runtime type information
-    TypeName(directMappedWallPolyPatch::typeName_());
-
-
-    // Constructors
-
-        //- Construct from polyPatch
-        directMappedWallPointPatch
-        (
-            const polyPatch& patch,
-            const pointBoundaryMesh& bm
-        )
-        :
-            wallPointPatch(patch, bm)
-        {}
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

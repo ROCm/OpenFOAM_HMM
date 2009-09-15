@@ -1,0 +1,4 @@
+thermalPorousZone/thermalPorousZone.C
+thermalPorousZone/thermalPorousZones.C
+
+LIB = $(FOAM_LIBBIN)/libthermalPorousZone
