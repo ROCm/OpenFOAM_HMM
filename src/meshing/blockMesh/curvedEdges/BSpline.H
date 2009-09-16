@@ -26,7 +26,7 @@ Class
     Foam::BSpline
 
 Description
-    BSpline : cubic spline going through all the knots
+    A cubic spline going through all the knots
 
 SourceFiles
     BSpline.C

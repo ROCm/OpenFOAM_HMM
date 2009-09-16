@@ -26,8 +26,8 @@ Class
     Foam::polyLineEdge
 
 Description
-    polyLineEdge class : defines a curvedEdge in terms of a series of straight
-    line segments. This is the public face of polyLine
+    Defines a curvedEdge in terms of a series of straight line segments.
+    This is the public face of polyLine
 
 SourceFiles
     polyLineEdge.C
@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class polyLineEdge Declaration
+                       Class polyLineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyLineEdge

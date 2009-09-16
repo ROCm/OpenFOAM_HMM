@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
-
 \*---------------------------------------------------------------------------*/
 
 #include "blockMesh.H"
@@ -34,9 +31,9 @@ Description
 Foam::faceList Foam::blockMesh::createPatchFaces
 (
     const polyPatch& patchTopologyFaces
-)
+) const
 {
-    blockMesh& blocks = *this;
+    const blockMesh& blocks = *this;
 
     labelList blockLabels = patchTopologyFaces.polyPatch::faceCells();
 
@@ -152,9 +149,9 @@ Foam::faceList Foam::blockMesh::createPatchFaces
 }
 
 
-Foam::faceListList Foam::blockMesh::createPatches()
+Foam::faceListList Foam::blockMesh::createPatches() const
 {
-    Info<< "\nCreating patches\n";
+    Info<< "Creating patches" << endl;
 
     const polyPatchList& patchTopologies = topology().boundaryMesh();
     faceListList patches(patchTopologies.size());

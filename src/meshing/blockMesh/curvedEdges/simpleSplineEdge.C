@@ -22,29 +22,24 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    simpleSplineEdge : the actual access class for Bspline
-
 \*---------------------------------------------------------------------------*/
 
 #include "simpleSplineEdge.H"
 #include "addToRunTimeSelectionTable.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(simpleSplineEdge, 0);
-addToRunTimeSelectionTable(curvedEdge, simpleSplineEdge, Istream);
+namespace Foam
+{
+    defineTypeNameAndDebug(simpleSplineEdge, 0);
+    addToRunTimeSelectionTable(curvedEdge, simpleSplineEdge, Istream);
+}
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-simpleSplineEdge::simpleSplineEdge
+Foam::simpleSplineEdge::simpleSplineEdge
 (
     const pointField& points,
     const label start,
@@ -57,8 +52,7 @@ simpleSplineEdge::simpleSplineEdge
 {}
 
 
-// Construct from components
-simpleSplineEdge::simpleSplineEdge
+Foam::simpleSplineEdge::simpleSplineEdge
 (
     const pointField& points,
     const label start,
@@ -73,8 +67,7 @@ simpleSplineEdge::simpleSplineEdge
 {}
 
 
-// Construct from Istream
-simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
+Foam::simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
 :
     curvedEdge(points, is),
     BSpline(knotlist(points, start_, end_, pointField(is)))
@@ -83,24 +76,17 @@ simpleSplineEdge::simpleSplineEdge(const pointField& points, Istream& is)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return the position of a point on the simple spline curve given by
-//  the parameter 0 <= lambda <= 1
-vector simpleSplineEdge::position(const scalar mu) const
+Foam::vector Foam::simpleSplineEdge::position(const scalar mu) const
 {
     return BSpline::position(mu);
 }
 
 
-//- Return the length of the simple spline curve
-scalar simpleSplineEdge::length() const
+Foam::scalar Foam::simpleSplineEdge::length() const
 {
     notImplemented("simpleSplineEdge::length() const");
     return 1.0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

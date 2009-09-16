@@ -33,8 +33,6 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(polySplineEdge, 0);
-
-    // Add the curvedEdge constructor functions to the hash tables
     addToRunTimeSelectionTable(curvedEdge, polySplineEdge, Istream);
 }
 

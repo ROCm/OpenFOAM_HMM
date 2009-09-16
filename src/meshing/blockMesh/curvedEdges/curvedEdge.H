@@ -26,9 +26,8 @@ Class
     Foam::curvedEdge
 
 Description
-    curvedEdges : library functions that will define a curvedEdge in space
-    parameterised for 0<lambda<1 from the beginning point to the end point.
-    This file contains the abstract base class curvedEdge.
+    Define a curved edge in space that is parameterised for
+    0<lambda<1 from the beginning to the end point.
 
 SourceFiles
     curvedEdge.C
@@ -49,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class curvedEdge Declaration
+                         Class curvedEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 class curvedEdge
@@ -59,7 +58,8 @@ protected:
     // Protected data
 
         const pointField& points_;
-        const label start_, end_;
+        const label start_;
+        const label end_;
 
 public:
 
@@ -124,14 +124,24 @@ public:
             return end_;
         }
 
-        //- Compare the given start and end points with those of this curve
-        bool compare(const label start, const label end) const
+        //- Compare the given start and end points with this curve
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        int compare(const label start, const label end) const
         {
-            return
-            (
-                (start_ == start && end_ == end)
-             || (start_ == end && end_ == start)
-            );
+            if (start_ == start && end_ == end)
+            {
+                return 1;
+            }
+            else if (start_ == end && end_ == start)
+            {
+                return -1;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
         //- Return the position of a point on the curve given by

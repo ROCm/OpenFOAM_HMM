@@ -22,96 +22,72 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    spline class : define a basic spline on nKnots knots - this
-    does not go anywhere near these knots (will act as a base type for
-    various splines that will have real uses)
-
 \*---------------------------------------------------------------------------*/
 
 #include "spline.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-spline::spline(const pointField& a)
+Foam::spline::spline(const pointField& knotPoints)
 :
-    knots_(a)
+    knots_(knotPoints)
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// function B : this is the blending function for constructing the
-// spline
-
-scalar spline::B(const scalar& tau) const
+Foam::scalar Foam::spline::B(const scalar& tau) const
 {
-    scalar value = 0.0;
-
-    if (tau>=2.0 || tau<=-2.0)
+    if (tau <= -2.0 || tau >= 2.0)
     {
-        value = 0.0;
+        return 0.0;
     }
-    else if (tau<=-1.0)
+    else if (tau <= -1.0)
     {
-        value = pow((2.0 + tau),3.0)/6.0;
+        return pow((2.0 + tau),3.0)/6.0;
     }
-    else if (tau<=0.0)
+    else if (tau <= 0.0)
     {
-        value = (4.0 - 6.0*tau*tau - 3.0*tau*tau*tau)/6.0;
+        return (4.0 - 6.0*tau*tau - 3.0*tau*tau*tau)/6.0;
     }
-    else if (tau<=1.0)
+    else if (tau <= 1.0)
     {
-        value = (4.0 - 6.0*tau*tau + 3.0*tau*tau*tau)/6.0;
+        return (4.0 - 6.0*tau*tau + 3.0*tau*tau*tau)/6.0;
     }
-    else if (tau<=2.0)
+    else if (tau <= 2.0)
     {
-        value = pow((2.0 - tau),3.0)/6.0;
+        return pow((2.0 - tau),3.0)/6.0;
     }
     else
     {
         FatalErrorIn("spline::B(const scalar&)")
-            << "How the hell did we get here???, "
+            << "Programming error???, "
             << "tau = " << tau
             << abort(FatalError);
     }
 
-    return value;
+    return 0.0;
 }
 
 
-// position : returns the position along the spline corresponding to the
-// variable mu1
-
-vector spline::position(const scalar mu1) const
+Foam::vector Foam::spline::position(const scalar mu1) const
 {
-    vector tmp(vector::zero);
+    vector loc(vector::zero);
 
     for (register label i=0; i<knots_.size(); i++)
     {
-        tmp += B((knots_.size() - 1)*mu1 - i)*knots_[i];
+        loc += B((knots_.size() - 1)*mu1 - i)*knots_[i];
     }
 
-    return tmp;
+    return loc;
 }
 
 
-//- Return the length of the spline curve
-scalar spline::length() const
+Foam::scalar Foam::spline::length() const
 {
     notImplemented("spline::length() const");
     return 1.0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

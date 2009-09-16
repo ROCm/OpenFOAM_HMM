@@ -26,7 +26,7 @@ Class
     Foam::polySplineEdge
 
 Description
-    polySplineEdge class : representation of a spline via a polyLine
+    A spline representation via a polyLine
 
 SourceFiles
     polySplineEdge.C
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class polySplineEdge Declaration
+                      Class polySplineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 class polySplineEdge
@@ -63,7 +63,7 @@ class polySplineEdge
         pointField intervening
         (
             const pointField& otherknots,
-             const label nbetweenKnots,
+            const label nbetweenKnots,
             const vector&, const vector&
         );
 
@@ -84,7 +84,7 @@ public:
         //- Construct from components
         polySplineEdge
         (
-            const pointField& ps,
+            const pointField& points,
             const label start,
             const label end,
             const pointField& otherknots,

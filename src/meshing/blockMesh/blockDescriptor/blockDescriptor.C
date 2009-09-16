@@ -22,63 +22,29 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "blockDescriptor.H"
-#include "scalarList.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
-
-// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
-
-void blockDescriptor::makeBlockEdges()
-{
-    // for all edges check the list of curved edges. If the edge is curved,
-    // add it to the list. If the edge is not found, create is as a line
-
-    setEdge(0, 0, 1, n_.x());
-    setEdge(1, 3, 2, n_.x());
-    setEdge(2, 7, 6, n_.x());
-    setEdge(3, 4, 5, n_.x());
-
-    setEdge(4, 0, 3, n_.y());
-    setEdge(5, 1, 2, n_.y());
-    setEdge(6, 5, 6, n_.y());
-    setEdge(7, 4, 7, n_.y());
-
-    setEdge(8, 0, 4, n_.z());
-    setEdge(9, 1, 5, n_.z());
-    setEdge(10, 2, 6, n_.z());
-    setEdge(11, 3, 7, n_.z());
-}
-
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// from components
-blockDescriptor::blockDescriptor
+Foam::blockDescriptor::blockDescriptor
 (
     const cellShape& bshape,
     const pointField& blockMeshPoints,
     const curvedEdgeList& edges,
-    const Vector<label>& n,
-    const scalarList& expand,
+    const Vector<label>& meshDensity,
+    const UList<scalar>& expand,
     const word& zoneName
 )
 :
     blockMeshPoints_(blockMeshPoints),
-    blockShape_(bshape),
     curvedEdges_(edges),
+    blockShape_(bshape),
+    meshDensity_(meshDensity),
     edgePoints_(12),
     edgeWeights_(12),
-    n_(n),
     expand_(expand),
     zoneName_(zoneName)
 {
@@ -87,19 +53,19 @@ blockDescriptor::blockDescriptor
         FatalErrorIn
         (
             "blockDescriptor::blockDescriptor"
-            "(const cellShape& bshape, const pointField& blockMeshPoints, "
-            "const curvedEdgeList& edges, label xnum, label ynum, label znum, "
+            "(const cellShape&, const pointField& blockMeshPoints, "
+            "const curvedEdgeList&, const Vector<label>& meshDensity, "
             "const scalarList& expand, const word& zoneName)"
         )   << "Unknown definition of expansion ratios"
             << exit(FatalError);
     }
 
+    // create a list of edges
     makeBlockEdges();
 }
 
 
-// from Istream
-blockDescriptor::blockDescriptor
+Foam::blockDescriptor::blockDescriptor
 (
     const pointField& blockMeshPoints,
     const curvedEdgeList& edges,
@@ -107,43 +73,40 @@ blockDescriptor::blockDescriptor
 )
 :
     blockMeshPoints_(blockMeshPoints),
-    blockShape_(is),
     curvedEdges_(edges),
+    blockShape_(is),
+    meshDensity_(),
     edgePoints_(12),
     edgeWeights_(12),
-    n_(),
     expand_(12),
     zoneName_()
 {
-    // Look at first token
+    // Examine next token
     token t(is);
-    is.putBack(t);
 
     // Optional zone name
     if (t.isWord())
     {
         zoneName_ = t.wordToken();
 
-        // Consume zoneName token
+        // Get the next token
         is >> t;
-
-        // New look-ahead
-        is >> t;
-        is.putBack(t);
     }
+    is.putBack(t);
 
     if (t.isPunctuation())
     {
+        // new-style: read a list of 3 values
         if (t.pToken() == token::BEGIN_LIST)
         {
-            is >> n_;
+            is >> meshDensity_;
         }
         else
         {
             FatalIOErrorIn
             (
                 "blockDescriptor::blockDescriptor"
-                "(const pointField&, const curvedEdgeList&, Istream& is)",
+                "(const pointField&, const curvedEdgeList&, Istream&)",
                 is
             )   << "incorrect token while reading n, expected '(', found "
                 << t.info()
@@ -152,7 +115,10 @@ blockDescriptor::blockDescriptor
     }
     else
     {
-        is >> n_.x() >> n_.y() >> n_.z();
+        // old-style: read three labels
+        is  >> meshDensity_.x()
+            >> meshDensity_.y()
+            >> meshDensity_.z();
     }
 
     is >> t;
@@ -165,18 +131,21 @@ blockDescriptor::blockDescriptor
 
     if (expRatios.size() == 3)
     {
-        expand_[0] = expRatios[0];
-        expand_[1] = expRatios[0];
-        expand_[2] = expRatios[0];
-        expand_[3] = expRatios[0];
+        // x-direction
+        expand_[0]  = expRatios[0];
+        expand_[1]  = expRatios[0];
+        expand_[2]  = expRatios[0];
+        expand_[3]  = expRatios[0];
 
-        expand_[4] = expRatios[1];
-        expand_[5] = expRatios[1];
-        expand_[6] = expRatios[1];
-        expand_[7] = expRatios[1];
+        // y-direction
+        expand_[4]  = expRatios[1];
+        expand_[5]  = expRatios[1];
+        expand_[6]  = expRatios[1];
+        expand_[7]  = expRatios[1];
 
-        expand_[8] = expRatios[2];
-        expand_[9] = expRatios[2];
+        // z-direction
+        expand_[8]  = expRatios[2];
+        expand_[9]  = expRatios[2];
         expand_[10] = expRatios[2];
         expand_[11] = expRatios[2];
     }
@@ -189,8 +158,7 @@ blockDescriptor::blockDescriptor
         FatalErrorIn
         (
             "blockDescriptor::blockDescriptor"
-            "(const pointField& blockMeshPoints, const curvedEdgeList& edges,"
-            "Istream& is)"
+            "(const pointField&, const curvedEdgeList&, Istream&)"
         )   << "Unknown definition of expansion ratios"
             << exit(FatalError);
     }
@@ -202,47 +170,144 @@ blockDescriptor::blockDescriptor
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const pointField& blockDescriptor::points() const
+const Foam::pointField& Foam::blockDescriptor::blockPointField() const
 {
     return blockMeshPoints_;
 }
 
-const cellShape& blockDescriptor::blockShape() const
+
+const Foam::cellShape& Foam::blockDescriptor::blockShape() const
 {
     return blockShape_;
 }
 
-const List<List<point> >& blockDescriptor::blockEdgePoints() const
+
+const Foam::List< Foam::List< Foam::point > >&
+Foam::blockDescriptor::blockEdgePoints() const
 {
     return edgePoints_;
 }
 
-const scalarListList& blockDescriptor::blockEdgeWeights() const
+
+const Foam::scalarListList& Foam::blockDescriptor::blockEdgeWeights() const
 {
     return edgeWeights_;
 }
 
-const Vector<label>& blockDescriptor::n() const
+
+const Foam::Vector<Foam::label>& Foam::blockDescriptor::meshDensity() const
 {
-    return n_;
+    return meshDensity_;
 }
 
-const word& blockDescriptor::zoneName() const
+
+const Foam::word& Foam::blockDescriptor::zoneName() const
 {
     return zoneName_;
 }
 
 
-// * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
-
-void blockDescriptor::operator=(const blockDescriptor&)
+Foam::label Foam::blockDescriptor::nPoints() const
 {
-    notImplemented("void blockDescriptor::operator=(const blockDescriptor&)");
+    return
+    (
+        (meshDensity_.x() + 1)
+      * (meshDensity_.y() + 1)
+      * (meshDensity_.z() + 1)
+    );
 }
 
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+Foam::label Foam::blockDescriptor::nCells() const
+{
+    return
+    (
+        meshDensity_.x()
+      * meshDensity_.y()
+      * meshDensity_.z()
+    );
+}
 
-} // End namespace Foam
+
+const Foam::point& Foam::blockDescriptor::blockPoint(const label i) const
+{
+    return blockMeshPoints_[blockShape_[i]];
+}
+
+
+
+// * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //
+
+Foam::Ostream& Foam::operator<<(Ostream& os, const blockDescriptor& bd)
+{
+    const cellShape& bshape = bd.blockShape();
+    const labelList& blockLabels = bshape;
+
+    os  << bshape.model().name() << " (";
+
+    forAll(blockLabels, labelI)
+    {
+        if (labelI)
+        {
+            os  << ' ';
+        }
+        os  << blockLabels[labelI];
+    }
+    os  << ')';
+
+    if (bd.zoneName().size())
+    {
+        os  << ' ' << bd.zoneName();
+    }
+
+    os  << ' '  << bd.meshDensity()
+        << " simpleGrading (";
+
+
+    const scalarList& expand = bd.expand_;
+
+    // can we use a compact notation?
+    if
+    (
+        // x-direction
+        (
+            expand[0] == expand[1]
+         && expand[0] == expand[2]
+         && expand[0] == expand[3]
+        )
+     && // y-direction
+        (
+            expand[4] == expand[5]
+         && expand[4] == expand[6]
+         && expand[4] == expand[7]
+        )
+     && // z-direction
+        (
+            expand[8] == expand[9]
+         && expand[8] == expand[10]
+         && expand[8] == expand[11]
+        )
+    )
+    {
+        os  << expand[0] << ' ' << expand[4] << ' ' << expand[8];
+    }
+    else
+    {
+        forAll(expand, edgeI)
+        {
+            if (edgeI)
+            {
+                os  << ' ';
+            }
+            os  << expand[edgeI];
+        }
+    }
+
+
+    os  << ")";
+
+    return os;
+}
+
 
 // ************************************************************************* //

@@ -26,8 +26,7 @@ Class
     Foam::arcEdge
 
 Description
-    arcEdge class : defines the arcEdge of a circle in terms of 3 points on its
-    circumference
+    Defines the arcEdge of a circle in terms of 3 points on its circumference
 
 SourceFiles
     arcEdge.C

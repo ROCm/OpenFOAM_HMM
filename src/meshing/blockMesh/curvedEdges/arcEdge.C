@@ -22,10 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    arcEdge class : defines the arcEdge of a circle in terms of 3 points on its
-    circumference
-
 \*---------------------------------------------------------------------------*/
 
 #include "arcEdge.H"
@@ -37,8 +33,6 @@ Description
 namespace Foam
 {
     defineTypeNameAndDebug(arcEdge, 0);
-
-    // Add the curvedEdge constructor functions to the hash tables
     addToRunTimeSelectionTable(curvedEdge, arcEdge, Istream);
 }
 
@@ -81,15 +75,21 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
     angle_ = acos(tmp)*180.0/mathematicalConstant::pi;
 
     // check if the vectors define an exterior or an interior arcEdge
-    if (((r1  ^ r2)&(r1 ^ r3)) < 0.0) angle_ = 360 - angle_;
+    if (((r1  ^ r2)&(r1 ^ r3)) < 0.0)
+    {
+        angle_ = 360 - angle_;
+    }
 
-    vector tempAxis(0.0,0.0,0.0);
+    vector tempAxis;
 
     if (angle_ <= 180.0)
     {
         tempAxis = r1 ^ r3;
 
-        if (mag(tempAxis)/(mag(r1)*mag(r3)) < 0.001) tempAxis = r1 ^ r2;
+        if (mag(tempAxis)/(mag(r1)*mag(r3)) < 0.001)
+        {
+            tempAxis = r1 ^ r2;
+        }
     }
     else
     {
@@ -105,7 +105,6 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
 Foam::arcEdge::arcEdge
 (
     const pointField& points,
@@ -122,7 +121,6 @@ Foam::arcEdge::arcEdge
 {}
 
 
-// Construct from Istream
 Foam::arcEdge::arcEdge(const pointField& points, Istream& is)
 :
     curvedEdge(points, is),
@@ -159,13 +157,10 @@ Foam::vector Foam::arcEdge::position(const scalar lambda) const
 }
 
 
-//- Return the length of the curve
 Foam::scalar Foam::arcEdge::length() const
 {
     return angle_*radius_*mathematicalConstant::pi/180.0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 // ************************************************************************* //

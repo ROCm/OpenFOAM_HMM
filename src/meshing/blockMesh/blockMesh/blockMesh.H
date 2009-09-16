@@ -29,6 +29,13 @@ Description
 
 SourceFiles
     blockMesh.C
+    blockMeshCells.C
+    blockMeshCheck.C
+    blockMeshMergeList.C
+    blockMeshOffsets.C
+    blockMeshPatches.C
+    blockMeshPoints.C
+    blockMeshTopology.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -77,26 +84,26 @@ class blockMesh
             const label blockLabel,
             const pointField& points,
             const cellShape& blockShape
-        );
+        ) const;
 
         bool patchLabelsOK
         (
             const label patchLabel,
             const pointField& points,
             const faceList& patchShapes
-        );
+        ) const;
 
         polyMesh* createTopology(IOdictionary&);
-        void checkBlockMesh(const polyMesh&);
+        void checkBlockMesh(const polyMesh&) const;
 
         labelList createBlockOffsets();
         labelList createMergeList();
 
-        pointField createPoints(const dictionary&);
-        cellShapeList createCells();
+        pointField createPoints(const dictionary&) const;
+        cellShapeList createCells() const;
 
-        faceList createPatchFaces(const polyPatch& patchTopologyFaces);
-        faceListList createPatches();
+        faceList createPatchFaces(const polyPatch& patchTopologyFaces) const;
+        faceListList createPatches() const;
 
         //- as copy (not implemented)
         blockMesh(const blockMesh&);

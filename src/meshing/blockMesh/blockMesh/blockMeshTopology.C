@@ -29,98 +29,6 @@ License
 #include "preservePatchTypes.H"
 #include "emptyPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-bool Foam::blockMesh::blockLabelsOK
-(
-    const label blockLabel,
-    const pointField& points,
-    const cellShape& blockShape
-)
-{
-    bool ok = true;
-
-    forAll(blockShape, blockI)
-    {
-        if (blockShape[blockI] < 0)
-        {
-            ok = false;
-
-            WarningIn
-            (
-                "bool Foam::blockMesh::blockLabelsOK"
-                "(const label blockLabel, const pointField& points, "
-                "const cellShape& blockShape)"
-            )   << "block " << blockLabel
-                << " point label " << blockShape[blockI]
-                << " less than zero" << endl;
-        }
-        else if (blockShape[blockI] >= points.size())
-        {
-            ok = false;
-
-            WarningIn
-            (
-                "bool Foam::blockMesh::blockLabelsOK"
-                "(const label blockLabel, const pointField& points, "
-                "const cellShape& blockShape)"
-            )   << "block " << blockLabel
-                << " point label " << blockShape[blockI]
-                << " larger than " << points.size() - 1
-                << " the largest defined point label" << endl;
-        }
-    }
-
-    return ok;
-}
-
-
-bool Foam::blockMesh::patchLabelsOK
-(
-    const label patchLabel,
-    const pointField& points,
-    const faceList& patchFaces
-)
-{
-    bool ok = true;
-
-    forAll(patchFaces, faceI)
-    {
-        const labelList& f = patchFaces[faceI];
-
-        forAll(f, fp)
-        {
-            if (f[fp] < 0)
-            {
-                ok = false;
-
-                WarningIn
-                (
-                    "bool Foam::blockMesh::patchLabelsOK(...)"
-                )   << "patch " << patchLabel
-                    << " face " << faceI
-                    << " point label " << f[fp]
-                    << " less than zero" << endl;
-            }
-            else if (f[fp] >= points.size())
-            {
-                ok = false;
-
-                WarningIn
-                (
-                    "bool Foam::blockMesh::patchLabelsOK(...)"
-                )   << "patch " << patchLabel
-                    << " face " << faceI
-                    << " point label " << f[fp]
-                    << " larger than " << points.size() - 1
-                    << " the largest defined point label" << endl;
-            }
-        }
-    }
-
-    return ok;
-}
-
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -142,7 +50,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         dictPtr->readIfPresent("type", defaultPatchType);
     }
 
-    Info<< nl << "Creating blockCorners" << endl;
+    Info<< "Creating block corners" << endl;
 
     // create blockCorners
     pointField tmpBlockPoints(meshDescription.lookup("vertices"));
@@ -150,13 +58,13 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
     if (meshDescription.found("edges"))
     {
         // read number of non-linear edges in mesh
-        Info<< nl << "Creating curved edges" << endl;
+        Info<< "Creating curved edges" << endl;
 
-        ITstream& edgesStream(meshDescription.lookup("edges"));
+        ITstream& is(meshDescription.lookup("edges"));
 
         label nEdges = 0;
 
-        token firstToken(edgesStream);
+        token firstToken(is);
 
         if (firstToken.isLabel())
         {
@@ -165,15 +73,15 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         }
         else
         {
-            edgesStream.putBack(firstToken);
+            is.putBack(firstToken);
         }
 
         // Read beginning of edges
-        edgesStream.readBegin("edges");
+        is.readBegin("edges");
 
         nEdges = 0;
 
-        token lastToken(edgesStream);
+        token lastToken(is);
         while
         (
             !(
@@ -187,37 +95,37 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
                 edges_.setSize(nEdges + 1);
             }
 
-            edgesStream.putBack(lastToken);
+            is.putBack(lastToken);
 
             edges_.set
             (
                 nEdges,
-                curvedEdge::New(tmpBlockPoints, edgesStream)
+                curvedEdge::New(tmpBlockPoints, is)
             );
 
             nEdges++;
 
-            edgesStream >> lastToken;
+            is >> lastToken;
         }
-        edgesStream.putBack(lastToken);
+        is.putBack(lastToken);
 
         // Read end of edges
-        edgesStream.readEnd("edges");
+        is.readEnd("edges");
     }
     else
     {
-        Info<< nl << "There are no non-linear edges" << endl;
+        Info<< "No non-linear edges" << endl;
     }
 
 
-    Info<< nl << "Creating blocks" << endl;
+    Info<< "Creating blocks" << endl;
     {
-        ITstream& blockDescriptorStream(meshDescription.lookup("blocks"));
+        ITstream& is(meshDescription.lookup("blocks"));
 
         // read number of blocks in mesh
         label nBlocks = 0;
 
-        token firstToken(blockDescriptorStream);
+        token firstToken(is);
 
         if (firstToken.isLabel())
         {
@@ -226,15 +134,15 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         }
         else
         {
-            blockDescriptorStream.putBack(firstToken);
+            is.putBack(firstToken);
         }
 
         // Read beginning of blocks
-        blockDescriptorStream.readBegin("blocks");
+        is.readBegin("blocks");
 
         nBlocks = 0;
 
-        token lastToken(blockDescriptorStream);
+        token lastToken(is);
         while
         (
             !(
@@ -248,19 +156,16 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
                 blocks.setSize(nBlocks + 1);
             }
 
-            blockDescriptorStream.putBack(lastToken);
+            is.putBack(lastToken);
 
             blocks.set
             (
                 nBlocks,
                 new block
                 (
-                    blockDescriptor
-                    (
-                        tmpBlockPoints,
-                        edges_,
-                        blockDescriptorStream
-                    )
+                    tmpBlockPoints,
+                    edges_,
+                    is
                 )
             );
 
@@ -273,28 +178,28 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 
             nBlocks++;
 
-            blockDescriptorStream >> lastToken;
+            is >> lastToken;
         }
-        blockDescriptorStream.putBack(lastToken);
+        is.putBack(lastToken);
 
         // Read end of blocks
-        blockDescriptorStream.readEnd("blocks");
+        is.readEnd("blocks");
     }
 
 
-    Info<< nl << "Creating patches" << endl;
+    Info<< "Creating patches" << endl;
 
     faceListList tmpBlocksPatches;
     wordList patchNames;
     wordList patchTypes;
 
     {
-        ITstream& patchStream(meshDescription.lookup("patches"));
+        ITstream& is(meshDescription.lookup("patches"));
 
         // read number of patches in mesh
         label nPatches = 0;
 
-        token firstToken(patchStream);
+        token firstToken(is);
 
         if (firstToken.isLabel())
         {
@@ -306,15 +211,15 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         }
         else
         {
-            patchStream.putBack(firstToken);
+            is.putBack(firstToken);
         }
 
         // Read beginning of blocks
-        patchStream.readBegin("patches");
+        is.readBegin("patches");
 
         nPatches = 0;
 
-        token lastToken(patchStream);
+        token lastToken(is);
         while
         (
             !(
@@ -330,9 +235,9 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
                 patchTypes.setSize(nPatches + 1);
             }
 
-            patchStream.putBack(lastToken);
+            is.putBack(lastToken);
 
-            patchStream
+            is
                 >> patchTypes[nPatches]
                 >> patchNames[nPatches]
                 >> tmpBlocksPatches[nPatches];
@@ -347,7 +252,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
                     (
                         "blockMesh::createTopology(IOdictionary&)"
                     )   << "Duplicate patch " << patchNames[nPatches]
-                        << " at line " << patchStream.lineNumber()
+                        << " at line " << is.lineNumber()
                         << ". Exiting !" << nl
                         << exit(FatalError);
                 }
@@ -362,12 +267,12 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 
             nPatches++;
 
-            patchStream >> lastToken;
+            is >> lastToken;
         }
-        patchStream.putBack(lastToken);
+        is.putBack(lastToken);
 
         // Read end of blocks
-        patchStream.readEnd("patches");
+        is.readEnd("patches");
     }
 
 
@@ -379,23 +284,23 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
     }
 
 
-    Info<< nl << "Creating block mesh topology" << endl;
+    Info<< "Creating topology" << endl;
 
-    PtrList<cellShape> tmpBlockCells(blocks.size());
-    forAll(blocks, blockLabel)
+    PtrList<cellShape> tmpBlockShapes(blocks.size());
+    forAll(blocks, blockI)
     {
-        tmpBlockCells.set
+        tmpBlockShapes.set
         (
-            blockLabel,
-            new cellShape(blocks[blockLabel].blockDef().blockShape())
+            blockI,
+            new cellShape(blocks[blockI].blockDef().blockShape())
         );
 
-        if (tmpBlockCells[blockLabel].mag(tmpBlockPoints) < 0.0)
+        if (tmpBlockShapes[blockI].mag(tmpBlockPoints) < 0.0)
         {
             WarningIn
             (
                 "blockMesh::createTopology(IOdictionary&)"
-            )   << "negative volume block : " << blockLabel
+            )   << "negative volume block : " << blockI
                 << ", probably defined inside-out" << endl;
         }
     }
@@ -426,7 +331,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             false
         ),
         xferMove(tmpBlockPoints),
-        tmpBlockCells,
+        tmpBlockShapes,
         tmpBlocksPatches,
         patchNames,
         patchTypes,

@@ -26,9 +26,9 @@ Class
     Foam::spline
 
 Description
-    spline class : define a basic spline on nKnots knots - this
-    does not go anywhere near these knots (will act as a base type for
-    various splines that will have real uses)
+    Define a basic spline on nKnots knots.
+    The spline does not go anywhere near these knots
+    (will act as a base type for various splines that will have real uses)
 
 SourceFiles
     spline.C
@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class spline Declaration
+                          Class spline Declaration
 \*---------------------------------------------------------------------------*/
 
 class spline

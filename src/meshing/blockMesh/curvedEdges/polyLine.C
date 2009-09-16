@@ -22,27 +22,17 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    polyLineEdge class : defines a curvedEdge in terms of a series of
-    straight line segments
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "polyLine.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // calcDistances generates the distances_ lookup table (cumulative
 // distance along the line) from the individual vectors to the points
 
-void polyLine::calcDistances()
+void Foam::polyLine::calcDistances()
 {
     distances_[0] = 0.0;
 
@@ -64,7 +54,7 @@ void polyLine::calcDistances()
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-polyLine::polyLine(const pointField& ps)
+Foam::polyLine::polyLine(const pointField& ps)
 :
     controlPoints_(ps),
     distances_(ps.size())
@@ -78,7 +68,7 @@ polyLine::polyLine(const pointField& ps)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-vector polyLine::position(const scalar lambda) const
+Foam::vector Foam::polyLine::position(const scalar lambda) const
 {
     // check range of lambda
 
@@ -124,14 +114,10 @@ vector polyLine::position(const scalar lambda) const
 }
 
 
-scalar polyLine::length() const
+Foam::scalar Foam::polyLine::length() const
 {
     return lineLength_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

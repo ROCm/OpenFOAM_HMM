@@ -25,43 +25,42 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "blockMesh.H"
 #include "cellModeller.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::cellShapeList Foam::blockMesh::createCells()
+Foam::cellShapeList Foam::blockMesh::createCells() const
 {
-    Info<< nl << "Creating cells" << endl;
+    Info<< "Creating cells" << endl;
 
     PtrList<cellShape> cells(nCells_);
 
-    blockMesh& blocks = *this;
+    const blockMesh& blocks = *this;
 
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
     label cellLabel = 0;
 
-    forAll(blocks, blockLabel)
+    forAll(blocks, blockI)
     {
-        const labelListList& blockCells = blocks[blockLabel].cells();
+        const labelListList& blockCells = blocks[blockI].cells();
 
-        forAll(blockCells, blockCellLabel)
+        forAll(blockCells, blockCellI)
         {
-            labelList cellPoints(blockCells[blockCellLabel].size());
+            labelList cellPoints(blockCells[blockCellI].size());
 
-            forAll(cellPoints, cellPointLabel)
+            forAll(cellPoints, cellPointI)
             {
-                cellPoints[cellPointLabel] =
+                cellPoints[cellPointI] =
                     mergeList_
                     [
-                        blockCells[blockCellLabel][cellPointLabel]
-                      + blockOffsets_[blockLabel]
+                        blockCells[blockCellI][cellPointI]
+                      + blockOffsets_[blockI]
                     ];
             }
 
-            // Construct collapsed cell and all to list
+            // Construct collapsed cell and add to list
             cells.set(cellLabel, new cellShape(hex, cellPoints, true));
 
             cellLabel++;

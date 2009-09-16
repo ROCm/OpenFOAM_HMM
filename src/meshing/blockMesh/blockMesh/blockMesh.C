@@ -22,12 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    blockMesh
-
-Description
-    Mesh generator
-
 \*---------------------------------------------------------------------------*/
 
 #include "blockMesh.H"
@@ -35,7 +29,6 @@ Description
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from IOdictionary
 Foam::blockMesh::blockMesh(IOdictionary& meshDescription)
 :
     topologyPtr_(createTopology(meshDescription)),
@@ -75,7 +68,7 @@ Foam::wordList Foam::blockMesh::patchNames() const
     const polyPatchList& patchTopologies = topology().boundaryMesh();
     wordList names(patchTopologies.size());
 
-    forAll (names, patchI)
+    forAll(names, patchI)
     {
         names[patchI] = patchTopologies[patchI].name();
     }
@@ -89,7 +82,7 @@ Foam::wordList Foam::blockMesh::patchTypes() const
     const polyPatchList& patchTopologies = topology().boundaryMesh();
     wordList types(patchTopologies.size());
 
-    forAll (types, patchI)
+    forAll(types, patchI)
     {
         types[patchI] = patchTopologies[patchI].type();
     }
@@ -103,7 +96,7 @@ Foam::wordList Foam::blockMesh::patchPhysicalTypes() const
     const polyPatchList& patchTopologies = topology().boundaryMesh();
     wordList physicalTypes(patchTopologies.size());
 
-    forAll (physicalTypes, patchI)
+    forAll(physicalTypes, patchI)
     {
         physicalTypes[patchI] = patchTopologies[patchI].physicalType();
     }

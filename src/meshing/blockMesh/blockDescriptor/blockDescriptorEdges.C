@@ -22,15 +22,9 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    from the list of curved edges creates a list
-    of edges that are not curved. It is assumed
-    that all other edges are straight lines
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-
 #include "blockDescriptor.H"
 #include "lineEdge.H"
 #include "lineDivide.H"
@@ -39,68 +33,91 @@ Description
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-scalar calcGexp(const scalar expRatio, const label dim)
-{
-    if (dim == 1)
+    //! @cond fileScope
+    //  Calculate the geometric expension factor from the expansion ratio
+    inline scalar calcGexp(const scalar expRatio, const label dim)
     {
-        return 0.0;
+        return dim > 1 ? pow(expRatio, 1.0/(dim - 1)) : 0.0;
     }
-    else
-    {
-        return pow(expRatio, 1.0/(dim - 1));
-    }
-}
+    //! @endcond fileScope
+
+} // End namespace Foam
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void blockDescriptor::setEdge(label edgeI, label start, label end, label dim)
+void Foam::blockDescriptor::makeBlockEdges()
 {
-    // for all edges check the list of curved edges. If the edge is curved,
-    // add it to the list. If the edge is not found, create is as a line
+    const label ni = meshDensity_.x();
+    const label nj = meshDensity_.y();
+    const label nk = meshDensity_.z();
 
-    bool found = false;
+    // these edges correspond to the "hex" cellModel
 
+    // x-direction
+    setEdge(0,  0, 1, ni);
+    setEdge(1,  3, 2, ni);
+    setEdge(2,  7, 6, ni);
+    setEdge(3,  4, 5, ni);
+
+    // y-direction
+    setEdge(4,  0, 3, nj);
+    setEdge(5,  1, 2, nj);
+    setEdge(6,  5, 6, nj);
+    setEdge(7,  4, 7, nj);
+
+    // z-direction
+    setEdge(8,  0, 4, nk);
+    setEdge(9,  1, 5, nk);
+    setEdge(10, 2, 6, nk);
+    setEdge(11, 3, 7, nk);
+}
+
+
+void Foam::blockDescriptor::setEdge
+(
+    label edgeI,
+    label start,
+    label end,
+    label dim
+)
+{
     // set reference to the list of labels defining the block
     const labelList& blockLabels = blockShape_;
 
     // set reference to global list of points
     const pointField blockPoints = blockShape_.points(blockMeshPoints_);
 
-    // x1
-    found = false;
+    // Set the edge points/weights
+    // The edge is a straight-line if it is not in the list of curvedEdges
 
-    forAll (curvedEdges_, nCEI)
+    // calc geometric expension factor from the expansion ratio
+    const scalar gExp = calcGexp(expand_[edgeI], dim);
+
+    forAll(curvedEdges_, cedgeI)
     {
-        if (curvedEdges_[nCEI].compare(blockLabels[start], blockLabels[end]))
-        {
-            found = true;
+        const curvedEdge& cedge = curvedEdges_[cedgeI];
 
-            // check the orientation:
-            // if the starting point of the curve is the same as the starting
-            // point of the edge, do the parametrisation and pick up the points
-            if (blockLabels[start] == curvedEdges_[nCEI].start())
+        int cmp = cedge.compare(blockLabels[start], blockLabels[end]);
+
+        if (cmp)
+        {
+            if (cmp > 0)
             {
-                // calculate the geometric expension factor out of the
-                // expansion ratio
-                scalar gExp = calcGexp(expand_[edgeI], dim);
+                // curve has the same orientation
 
                 // divide the line
-                lineDivide divEdge(curvedEdges_[nCEI], dim, gExp);
+                lineDivide divEdge(cedge, dim, gExp);
 
-                edgePoints_[edgeI] = divEdge.points();
+                edgePoints_[edgeI]  = divEdge.points();
                 edgeWeights_[edgeI] = divEdge.lambdaDivisions();
             }
             else
             {
-                // the curve has got the opposite orientation
-                scalar gExp = calcGexp(expand_[edgeI], dim);
+                // curve has the opposite orientation
 
                 // divide the line
-                lineDivide divEdge(curvedEdges_[nCEI], dim, 1.0/(gExp+SMALL));
+                lineDivide divEdge(cedge, dim, 1.0/(gExp+SMALL));
 
                 pointField p = divEdge.points();
                 scalarList d = divEdge.lambdaDivisions();
@@ -109,38 +126,32 @@ void blockDescriptor::setEdge(label edgeI, label start, label end, label dim)
                 edgeWeights_[edgeI].setSize(d.size());
 
                 label pMax = p.size() - 1;
-                forAll (p, pI)
+                forAll(p, pI)
                 {
-                    edgePoints_[edgeI][pI] = p[pMax - pI];
+                    edgePoints_[edgeI][pI]  = p[pMax - pI];
                     edgeWeights_[edgeI][pI] = 1.0 - d[pMax - pI];
                 }
+
             }
 
-            break;
+            // found curved-edge: done
+            return;
         }
     }
 
-    if (!found)
-    {
-        // edge is a straight line
-        scalar gExp = calcGexp(expand_[edgeI], dim);
 
-        // divide the line
-        lineDivide divEdge
-        (
-            lineEdge(blockPoints, start, end),
-            dim,
-            gExp
-        );
+    // not found: divide the edge as a straight line
 
-        edgePoints_[edgeI] = divEdge.points();
-        edgeWeights_[edgeI] = divEdge.lambdaDivisions();
-    }
+    lineDivide divEdge
+    (
+        lineEdge(blockPoints, start, end),
+        dim,
+        gExp
+    );
+
+    edgePoints_[edgeI]  = divEdge.points();
+    edgeWeights_[edgeI] = divEdge.lambdaDivisions();
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

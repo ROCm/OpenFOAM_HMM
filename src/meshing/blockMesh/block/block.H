@@ -26,11 +26,12 @@ Class
     Foam::block
 
 Description
-    creates a single block of cells from point coordinates,
-    numbers of cells in each direction and expansion ratio
+    Creates a single block of cells from point coordinates, numbers of
+    cells in each direction and an expansion ratio.
 
 SourceFiles
     block.C
+    blockCreate.C
 
 \*---------------------------------------------------------------------------*/
 
@@ -58,35 +59,55 @@ class block
 {
     // Private data
 
-        //- block definition
+        //- Block definition
         blockDescriptor blockDef_;
 
-        //- list of vertices
+        //- List of vertices
         pointField vertices_;
 
-        //- list of cells
+        //- List of cells
         labelListList cells_;
 
-        //- boundary patches
+        //- Boundary patches
         labelListListList boundaryPatches_;
 
 
-    // private member functions
+    // Private Member Functions
 
-        label vtxLabel(label i, label j, label k);
+        //- Vertex label offset for a particular i,j,k position
+        label vtxLabel(label i, label j, label k) const;
 
-        void blockPoints();
+        //- Creates vertices for cells filling the block.
+        void createPoints();
 
-        void blockCells();
+        //- Creates cells for the block.
+        void createCells();
 
-        void blockBoundary();
+        //- Creates boundary patches for the block
+        void createBoundary();
 
+        //- Creates vertices, cells, boundary patches for the block
+        void createPrimitives();
+
+        //- Disallow default bitwise copy construct
+        block(const block&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const block&);
 
 public:
 
     // Constructors
 
-        //- Construct from the block definition
+        //- Construct from components with Istream
+        block
+        (
+            const pointField& blockMeshPoints,
+            const curvedEdgeList&,
+            Istream&
+        );
+
+        //- Construct from a block definition
         block(const blockDescriptor&);
 
         //- Clone
@@ -101,9 +122,16 @@ public:
 
         // Access
 
-            const blockDescriptor& blockDef() const;
+            //- Return the block definition
+            inline const blockDescriptor& blockDef() const
+            {
+                return blockDef_;
+            }
+
             const pointField& points() const;
+
             const labelListList& cells() const;
+
             const labelListListList& boundaryPatches() const;
 
 
@@ -111,14 +139,6 @@ public:
 
         friend Ostream& operator<<(Ostream&, const block&);
 };
-
-
-inline Istream& operator>>(Istream& is, block*)
-{
-    notImplemented("Istream& operator>>(Istream& is, block*)");
-    return is;
-}
-
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

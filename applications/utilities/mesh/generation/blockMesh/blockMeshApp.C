@@ -146,8 +146,8 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< nl << "Creating block mesh from\n    "
-        << meshDictIoPtr->objectPath() << nl << endl;
+    Info<< "Creating block mesh from\n    "
+        << meshDictIoPtr->objectPath() << endl;
 
     IOdictionary meshDict(meshDictIoPtr());
     blockMesh blocks(meshDict);
@@ -195,8 +195,7 @@ int main(int argc, char *argv[])
     }
 
 
-
-    Info<< nl << "Creating mesh from block mesh" << endl;
+    Info<< nl << "Creating polyMesh from blockMesh" << endl;
 
     wordList patchNames = blocks.patchNames();
     wordList patchTypes = blocks.patchTypes();

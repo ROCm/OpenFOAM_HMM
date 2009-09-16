@@ -22,44 +22,36 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    private member of block. Creates cells for the block.
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
-#include "block.H"
+#include "blockMesh.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::block::blockCells()
+Foam::labelList Foam::blockMesh::createBlockOffsets()
 {
-    label ni = blockDef_.n().x();
-    label nj = blockDef_.n().y();
-    label nk = blockDef_.n().z();
+    Info<< "Creating block offsets" << endl;
 
-    label cellNo = 0;
+    const blockMesh& blocks = *this;
 
-    for (label k = 0; k <= nk - 1; k++)
+    labelList BlockOffsets(blocks.size());
+
+    BlockOffsets[0] = 0;
+    nPoints_ = blocks[0].points().size();
+    nCells_  = blocks[0].cells().size();
+
+    for (label blockI=1; blockI < blocks.size(); blockI++)
     {
-        for (label j = 0; j <= nj - 1; j++)
-        {
-            for (label i = 0; i <= ni - 1; i++)
-            {
-                cells_[cellNo].setSize(8);
+        BlockOffsets[blockI]
+            = BlockOffsets[blockI-1]
+            + blocks[blockI-1].points().size();
 
-                cells_[cellNo][0] =  vtxLabel(i, j, k);
-                cells_[cellNo][1] =  vtxLabel(i+1, j, k);
-                cells_[cellNo][2] =  vtxLabel(i+1, j+1, k);
-                cells_[cellNo][3] =  vtxLabel(i, j+1, k);
-                cells_[cellNo][4] =  vtxLabel(i, j, k+1);
-                cells_[cellNo][5] =  vtxLabel(i+1, j, k+1);
-                cells_[cellNo][6] =  vtxLabel(i+1, j+1, k+1);
-                cells_[cellNo][7] =  vtxLabel(i, j+1, k+1);
-                cellNo++;
-            }
-        }
+        nPoints_ += blocks[blockI].points().size();
+        nCells_  += blocks[blockI].cells().size();
     }
+
+    return BlockOffsets;
 }
 
 // ************************************************************************* //

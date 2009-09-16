@@ -26,8 +26,7 @@ Class
     Foam::lineEdge
 
 Description
-    lineEdge class : defines a straight line between the start point and the
-    end point
+    Defines a straight line between the start point and the end point.
 
 SourceFiles
     lineEdge.C
@@ -45,7 +44,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class lineEdge Declaration
+                          Class lineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 

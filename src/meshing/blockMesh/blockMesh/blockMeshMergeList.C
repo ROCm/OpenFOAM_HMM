@@ -30,11 +30,11 @@ License
 
 Foam::labelList Foam::blockMesh::createMergeList()
 {
-    Info<< nl << "Creating merge list " << flush;
+    Info<< "Creating merge list " << flush;
 
     labelList MergeList(nPoints_, -1);
 
-    blockMesh& blocks = *this;
+    const blockMesh& blocks = *this;
 
     const pointField& blockPoints = topology().points();
     const cellList& blockCells = topology().cells();
@@ -386,7 +386,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
                 }
             }
         }
-        Info << "." << flush;
+        Info<< "." << flush;
 
         if (nPasses > 100)
         {
@@ -396,7 +396,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
         }
     }
     while (changedPointMerge);
-    Info << endl;
+    Info<< endl;
 
     forAll(blockInternalFaces, blockFaceLabel)
     {

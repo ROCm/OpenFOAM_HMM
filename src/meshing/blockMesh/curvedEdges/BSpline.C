@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    BSpline : cubic spline going through all the knots
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -34,10 +31,7 @@ Description
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
-pointField BSpline::findKnots
+Foam::pointField Foam::BSpline::findKnots
 (
     const pointField& allknots,
     const vector& fstend,
@@ -106,15 +100,13 @@ pointField BSpline::findKnots
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-BSpline::BSpline(const pointField& Knots)
+Foam::BSpline::BSpline(const pointField& Knots)
 :
     spline(findKnots(Knots))
 {}
 
 
-// Construct from components
-BSpline::BSpline
+Foam::BSpline::BSpline
 (
     const pointField& Knots,
     const vector& fstend,
@@ -127,32 +119,23 @@ BSpline::BSpline
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-//- Return the real position of a point on the curve given by
-//  the parameter 0 <= lambda <= 1
-vector BSpline::realPosition(scalar mu)
+Foam::vector Foam::BSpline::realPosition(scalar mu)
 {
     return spline::position(mu);
 }
 
 
-//- Return the position of a point on the curve given by
-//  the parameter 0 <= lambda <= 1
-vector BSpline::position(const scalar mu) const
+Foam::vector Foam::BSpline::position(const scalar mu) const
 {
     return spline::position((1.0/(nKnots() - 1))*(1.0 + mu*(nKnots() - 3)));
 }
 
 
-//- Return the length of the curve
-scalar BSpline::length() const
+Foam::scalar Foam::BSpline::length() const
 {
     notImplemented("BSpline::length() const");
     return 1.0;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -22,8 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -31,30 +29,40 @@ Description
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::labelList Foam::blockMesh::createBlockOffsets()
+Foam::pointField Foam::blockMesh::createPoints(const dictionary& dict) const
 {
-    Info<< nl << "Creating block offsets" << endl;
+    const blockMesh& blocks = *this;
 
-    blockMesh& blocks = *this;
+    scalar scaleFactor = 1.0;
 
-    nPoints_ = blocks[0].points().size();
-    nCells_ = blocks[0].cells().size();
-
-    labelList BlockOffsets(blocks.size());
-    BlockOffsets[0] = 0;
-
-    label blockLabel;
-    for (blockLabel=1; blockLabel<blocks.size(); blockLabel++)
+    // optional 'convertToMeters' (or 'scale'?)
+    if (!dict.readIfPresent("convertToMeters", scaleFactor))
     {
-        nPoints_ += blocks[blockLabel].points().size();
-        nCells_ += blocks[blockLabel].cells().size();
-
-        BlockOffsets[blockLabel]
-            = BlockOffsets[blockLabel-1]
-            + blocks[blockLabel-1].points().size();
+        dict.readIfPresent("scale", scaleFactor);
     }
 
-    return BlockOffsets;
+    Info<< "Creating points with scale " << scaleFactor << endl;
+
+    pointField points(nPoints_);
+
+    forAll(blocks, blockI)
+    {
+        const pointField& blockPoints = blocks[blockI].points();
+
+        forAll(blockPoints, blockPointLabel)
+        {
+            points
+            [
+                mergeList_
+                [
+                    blockPointLabel
+                  + blockOffsets_[blockI]
+                ]
+            ] = scaleFactor * blockPoints[blockPointLabel];
+        }
+    }
+
+    return points;
 }
 
 // ************************************************************************* //

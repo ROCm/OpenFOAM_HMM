@@ -22,32 +22,42 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    private member of block. Creates vertices for cells filling the block.
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
 #include "block.H"
 
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::block::blockPoints()
+Foam::label Foam::block::vtxLabel(label i, label j, label k) const
+{
+    return
+    (
+        i
+      + j*(blockDef_.meshDensity().x() + 1)
+      + k*(blockDef_.meshDensity().x() + 1) * (blockDef_.meshDensity().y() + 1)
+    );
+}
+
+
+void Foam::block::createPoints()
 {
     // set local variables for mesh specification
-    const label ni = blockDef_.n().x();
-    const label nj = blockDef_.n().y();
-    const label nk = blockDef_.n().z();
+    const label ni = blockDef_.meshDensity().x();
+    const label nj = blockDef_.meshDensity().y();
+    const label nk = blockDef_.meshDensity().z();
 
-    const point p000 = blockDef_.points()[blockDef_.blockShape()[0]];
-    const point p100 = blockDef_.points()[blockDef_.blockShape()[1]];
-    const point p110 = blockDef_.points()[blockDef_.blockShape()[2]];
-    const point p010 = blockDef_.points()[blockDef_.blockShape()[3]];
+    const point& p000 = blockDef_.blockPoint(0);
+    const point& p100 = blockDef_.blockPoint(1);
+    const point& p110 = blockDef_.blockPoint(2);
+    const point& p010 = blockDef_.blockPoint(3);
 
-    const point p001 = blockDef_.points()[blockDef_.blockShape()[4]];
-    const point p101 = blockDef_.points()[blockDef_.blockShape()[5]];
-    const point p111 = blockDef_.points()[blockDef_.blockShape()[6]];
-    const point p011 = blockDef_.points()[blockDef_.blockShape()[7]];
+    const point& p001 = blockDef_.blockPoint(4);
+    const point& p101 = blockDef_.blockPoint(5);
+    const point& p111 = blockDef_.blockPoint(6);
+    const point& p011 = blockDef_.blockPoint(7);
+
 
     // list of edge point and weighting factors
     const List<List<point> >& p = blockDef_.blockEdgePoints();
@@ -80,7 +90,8 @@ void Foam::block::blockPoints()
                 vector edgez4 = p010 + (p011 - p010)*w[11][k];
 
                 // calculate the importance factors for all edges
-                // x - direction
+
+                // x-direction
                 scalar impx1 =
                 (
                     (1.0 - w[0][i])*(1.0 - w[4][j])*(1.0 - w[8][k])
@@ -113,7 +124,7 @@ void Foam::block::blockPoints()
                 impx4 /= magImpx;
 
 
-                // y - direction
+                // y-direction
                 scalar impy1 =
                 (
                     (1.0 - w[4][j])*(1.0 - w[0][i])*(1.0 - w[8][k])
@@ -145,7 +156,7 @@ void Foam::block::blockPoints()
                 impy4 /= magImpy;
 
 
-                // z - direction
+                // z-direction
                 scalar impz1 =
                 (
                     (1.0 - w[8][k])*(1.0 - w[0][i])*(1.0 - w[4][j])
@@ -195,19 +206,19 @@ void Foam::block::blockPoints()
 
                 // multiply by the importance factor
 
-                // x - direction
+                // x-direction
                 edgex1 *= impx1;
                 edgex2 *= impx2;
                 edgex3 *= impx3;
                 edgex4 *= impx4;
 
-                // y - direction
+                // y-direction
                 edgey1 *= impy1;
                 edgey2 *= impy2;
                 edgey3 *= impy3;
                 edgey4 *= impy4;
 
-                // z - direction
+                // z-direction
                 edgez1 *= impz1;
                 edgez2 *= impz2;
                 edgez3 *= impz3;
@@ -228,5 +239,224 @@ void Foam::block::blockPoints()
         }
     }
 }
+
+
+void Foam::block::createCells()
+{
+    const label ni = blockDef_.meshDensity().x();
+    const label nj = blockDef_.meshDensity().y();
+    const label nk = blockDef_.meshDensity().z();
+
+    label cellNo = 0;
+
+    for (label k = 0; k <= nk - 1; k++)
+    {
+        for (label j = 0; j <= nj - 1; j++)
+        {
+            for (label i = 0; i <= ni - 1; i++)
+            {
+                cells_[cellNo].setSize(8);
+
+                cells_[cellNo][0] =  vtxLabel(i, j, k);
+                cells_[cellNo][1] =  vtxLabel(i+1, j, k);
+                cells_[cellNo][2] =  vtxLabel(i+1, j+1, k);
+                cells_[cellNo][3] =  vtxLabel(i, j+1, k);
+                cells_[cellNo][4] =  vtxLabel(i, j, k+1);
+                cells_[cellNo][5] =  vtxLabel(i+1, j, k+1);
+                cells_[cellNo][6] =  vtxLabel(i+1, j+1, k+1);
+                cells_[cellNo][7] =  vtxLabel(i, j+1, k+1);
+                cellNo++;
+            }
+        }
+    }
+}
+
+
+void Foam::block::createBoundary()
+{
+    const label ni = blockDef_.meshDensity().x();
+    const label nj = blockDef_.meshDensity().y();
+    const label nk = blockDef_.meshDensity().z();
+
+    // x-direction
+
+    label wallLabel = 0;
+    label wallCellLabel = 0;
+
+    // x-min
+    boundaryPatches_[wallLabel].setSize(nj*nk);
+    for (label k = 0; k <= nk - 1; k++)
+    {
+        for (label j = 0; j <= nj - 1; j++)
+        {
+            boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
+
+            // set the points
+            boundaryPatches_[wallLabel][wallCellLabel][0] =
+                vtxLabel(0, j, k);
+            boundaryPatches_[wallLabel][wallCellLabel][1] =
+                vtxLabel(0, j, k + 1);
+            boundaryPatches_[wallLabel][wallCellLabel][2] =
+                vtxLabel(0, j + 1, k + 1);
+            boundaryPatches_[wallLabel][wallCellLabel][3] =
+                vtxLabel(0, j + 1, k);
+
+            // update the counter
+            wallCellLabel++;
+        }
+    }
+
+    // x-max
+    wallLabel++;
+    wallCellLabel = 0;
+
+    boundaryPatches_[wallLabel].setSize(nj*nk);
+
+    for (label k = 0; k <= nk - 1; k++)
+    {
+        for (label j = 0; j <= nj - 1; j++)
+        {
+            boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
+
+            // set the points
+            boundaryPatches_[wallLabel][wallCellLabel][0] =
+                vtxLabel(ni, j, k);
+            boundaryPatches_[wallLabel][wallCellLabel][1] =
+                vtxLabel(ni, j+1, k);
+            boundaryPatches_[wallLabel][wallCellLabel][2] =
+                vtxLabel(ni, j+1, k+1);
+            boundaryPatches_[wallLabel][wallCellLabel][3] =
+                vtxLabel(ni, j, k+1);
+
+            // update the counter
+            wallCellLabel++;
+        }
+    }
+
+    // y-direction
+
+    // y-min
+    wallLabel++;
+    wallCellLabel = 0;
+
+    boundaryPatches_[wallLabel].setSize(ni*nk);
+    for (label i = 0; i <= ni - 1; i++)
+    {
+        for (label k = 0; k <= nk - 1; k++)
+        {
+            boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
+
+            // set the points
+            boundaryPatches_[wallLabel][wallCellLabel][0] =
+                vtxLabel(i, 0, k);
+            boundaryPatches_[wallLabel][wallCellLabel][1] =
+                vtxLabel(i + 1, 0, k);
+            boundaryPatches_[wallLabel][wallCellLabel][2] =
+                vtxLabel(i + 1, 0, k + 1);
+            boundaryPatches_[wallLabel][wallCellLabel][3] =
+                vtxLabel(i, 0, k + 1);
+
+            // update the counter
+            wallCellLabel++;
+        }
+    }
+
+    // y-max
+    wallLabel++;
+    wallCellLabel = 0;
+
+    boundaryPatches_[wallLabel].setSize(ni*nk);
+
+    for (label i = 0; i <= ni - 1; i++)
+    {
+        for (label k = 0; k <= nk - 1; k++)
+        {
+            boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
+
+            // set the points
+            boundaryPatches_[wallLabel][wallCellLabel][0] =
+                vtxLabel(i, nj, k);
+            boundaryPatches_[wallLabel][wallCellLabel][1] =
+                vtxLabel(i, nj, k + 1);
+            boundaryPatches_[wallLabel][wallCellLabel][2] =
+                vtxLabel(i + 1, nj, k + 1);
+            boundaryPatches_[wallLabel][wallCellLabel][3] =
+                vtxLabel(i + 1, nj, k);
+
+            // update the counter
+            wallCellLabel++;
+        }
+    }
+
+    // z-direction
+
+    // z-min
+    wallLabel++;
+    wallCellLabel = 0;
+
+    boundaryPatches_[wallLabel].setSize(ni*nj);
+
+    for (label i = 0; i <= ni - 1; i++)
+    {
+        for (label j = 0; j <= nj - 1; j++)
+        {
+            boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
+
+            // set the points
+            boundaryPatches_[wallLabel][wallCellLabel][0] =
+                vtxLabel(i, j, 0);
+            boundaryPatches_[wallLabel][wallCellLabel][1] =
+                vtxLabel(i, j + 1, 0);
+            boundaryPatches_[wallLabel][wallCellLabel][2] =
+                vtxLabel(i + 1, j + 1, 0);
+            boundaryPatches_[wallLabel][wallCellLabel][3] =
+                vtxLabel(i + 1, j, 0);
+
+            // update the counter
+            wallCellLabel++;
+        }
+    }
+
+    // z-max
+    wallLabel++;
+    wallCellLabel = 0;
+
+    boundaryPatches_[wallLabel].setSize(ni*nj);
+
+    for (label i = 0; i <= ni - 1; i++)
+    {
+        for (label j = 0; j <= nj - 1; j++)
+        {
+            boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
+
+            // set the points
+            boundaryPatches_[wallLabel][wallCellLabel][0] =
+                vtxLabel(i, j, nk);
+            boundaryPatches_[wallLabel][wallCellLabel][1] =
+                vtxLabel(i + 1, j, nk);
+            boundaryPatches_[wallLabel][wallCellLabel][2] =
+                vtxLabel(i + 1, j + 1, nk);
+            boundaryPatches_[wallLabel][wallCellLabel][3] =
+                vtxLabel(i, j + 1, nk);
+
+            // update the counter
+            wallCellLabel++;
+        }
+    }
+}
+
+
+void Foam::block::createPrimitives()
+{
+    // create points
+    createPoints();
+
+    // generate internal cells
+    createCells();
+
+    // generate boundary patches
+    createBoundary();
+}
+
 
 // ************************************************************************* //

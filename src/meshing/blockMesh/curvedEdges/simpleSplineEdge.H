@@ -26,7 +26,7 @@ Class
     Foam::simpleSplineEdge
 
 Description
-    simpleSplineEdge : the actual access class for Bspline
+    The actual access class for Bspline
 
 SourceFiles
     simpleSplineEdge.C
@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class simpleSplineEdge Declaration
+                     Class simpleSplineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 class simpleSplineEdge
@@ -65,7 +65,7 @@ public:
         //- Construct from components
         simpleSplineEdge
         (
-            const pointField& ps,
+            const pointField& points,
             const label start,
             const label end,
             const pointField& otherknots
@@ -88,7 +88,8 @@ public:
 
     // Destructor
 
-        virtual ~simpleSplineEdge(){}
+        virtual ~simpleSplineEdge()
+        {}
 
 
     // Member Functions

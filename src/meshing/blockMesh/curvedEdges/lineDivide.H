@@ -26,7 +26,7 @@ Class
     Foam::lineDivide
 
 Description
-    lineDivide class : divides a line into segments
+    Divides a line into segments
 
 SourceFiles
     lineDivide.C
@@ -47,7 +47,7 @@ namespace Foam
 class curvedEdge;
 
 /*---------------------------------------------------------------------------*\
-                           Class lineDivide Declaration
+                         Class lineDivide Declaration
 \*---------------------------------------------------------------------------*/
 
 class lineDivide

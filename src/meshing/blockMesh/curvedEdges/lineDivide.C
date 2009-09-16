@@ -22,9 +22,6 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    lineDivide class : divides a line into segments
-
 \*---------------------------------------------------------------------------*/
 
 #include "error.H"
@@ -32,15 +29,15 @@ Description
 #include "lineDivide.H"
 #include "curvedEdge.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-namespace Foam
-{
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from components
-lineDivide::lineDivide(const curvedEdge& bc, const label n, const scalar xratio)
+Foam::lineDivide::lineDivide
+(
+    const curvedEdge& bc,
+    const label n,
+    const scalar xratio
+)
 :
     points_(n + 1),
     divisions_(n + 1),
@@ -78,20 +75,16 @@ lineDivide::lineDivide(const curvedEdge& bc, const label n, const scalar xratio)
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const pointField& lineDivide::points() const
+const Foam::pointField& Foam::lineDivide::points() const
 {
     return points_;
 }
 
 
-const scalarList& lineDivide::lambdaDivisions() const
+const Foam::scalarList& Foam::lineDivide::lambdaDivisions() const
 {
     return divisions_;
 }
 
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
 
 // ************************************************************************* //

@@ -26,9 +26,10 @@ Class
     Foam::polyLine
 
 Description
-    polyLine class : defines a curvedEdge in terms of a series of straight
-    line segments. This is the basic polyLine class which implements
-   just the line (no topology : its not derived from curvedEdge)
+    Defines a curvedEdge in terms of a series of straight line segments.
+
+    This is the basic polyLine class which implements just the line
+    (no topology - it is not derived from curvedEdge)
 
 SourceFiles
     polyLine.C
@@ -47,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                           Class polyLine Declaration
+                         Class polyLine Declaration
 \*---------------------------------------------------------------------------*/
 
 
