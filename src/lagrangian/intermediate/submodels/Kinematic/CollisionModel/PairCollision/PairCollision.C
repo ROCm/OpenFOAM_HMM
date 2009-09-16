@@ -96,6 +96,20 @@ Foam::PairCollision<CloudType>::~PairCollision()
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
+Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
+{
+    if (pairFunction_->controlsTimestep())
+    {
+        return pairFunction_->nSubCycles();
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+
+template<class CloudType>
 bool Foam::PairCollision<CloudType>::active() const
 {
     return true;
@@ -203,9 +217,10 @@ void Foam::PairCollision<CloudType>::collide()
         }
     }
 
-    Info<< "ADD COLLISIONS WITH WALLS HERE, DOES NOT NEED TO BE A TRACKING "
-        << "OPERATION.  CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY "
-        << "WALL FORCE MODEL" << endl;
+    Info<< "    ADD COLLISIONS WITH WALLS HERE" << endl;
+    //     << " DOES NOT NEED TO BE A TRACKING OPERATION."
+    //     << " CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY "
+    //     << "WALL FORCE MODEL" << endl;
 
     // Delete any collision records where no collision occurred this step
 

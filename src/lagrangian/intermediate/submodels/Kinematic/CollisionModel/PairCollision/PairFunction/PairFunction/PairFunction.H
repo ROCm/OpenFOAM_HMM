@@ -121,6 +121,15 @@ public:
 
     // Member Functions
 
+        //- Whether the PairFunction has a timestep limit that will
+        //  require subCycling
+        virtual bool controlsTimestep() const = 0;
+
+        //- For PairFunctions that control the timestep, calculate the
+        //  number of subCycles needed to satisfy the minimum
+        //  allowable timestep
+        virtual label nSubCycles() const = 0;
+
         //- Calculate the pair interaction between parcels
         virtual void evaluatePair
         (

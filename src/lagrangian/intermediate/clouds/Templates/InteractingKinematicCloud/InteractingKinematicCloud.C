@@ -27,6 +27,7 @@ License
 #include "InteractingKinematicCloud.H"
 #include "IntegrationScheme.H"
 #include "interpolation.H"
+#include "subCycleTime.H"
 
 #include "DispersionModel.H"
 #include "DragModel.H"
@@ -260,6 +261,42 @@ void Foam::InteractingKinematicCloud<ParcelType>::evolve()
     // + calculate forces in new position
     // + apply half deltaV with new force
 
+    label nSubCycles = collision().nSubCycles();
+
+    if (nSubCycles > 1)
+    {
+        Info<< nSubCycles << " move-collide subCycles" << endl;
+
+        subCycleTime moveCollideSubCycle
+        (
+            const_cast<Time&>(this->db().time()),
+            nSubCycles
+        );
+
+        while(!(++moveCollideSubCycle).end())
+        {
+            Info<< "subCycle time = " << this->db().time().timeName() << endl;
+
+            moveCollide(td);
+        }
+
+        moveCollideSubCycle.endSubCycle();
+    }
+    else
+    {
+        moveCollide(td);
+    }
+
+    postEvolve();
+}
+
+
+template<class ParcelType>
+void  Foam::InteractingKinematicCloud<ParcelType>::moveCollide
+(
+    typename ParcelType::trackData& td
+)
+{
     td.part() = ParcelType::trackData::tpVelocityHalfStep;
     Cloud<ParcelType>::move(td);
 
@@ -273,8 +310,6 @@ void Foam::InteractingKinematicCloud<ParcelType>::evolve()
 
     td.part() = ParcelType::trackData::tpVelocityHalfStep;
     Cloud<ParcelType>::move(td);
-
-    postEvolve();
 }
 
 

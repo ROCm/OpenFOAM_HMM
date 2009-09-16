@@ -71,6 +71,10 @@ class SpringSliderDashpot
         //- Coefficient of friction in for tangential sliding
         scalar mu_;
 
+        //- The number of steps over which to resolve the minimum
+        //  harmonic approximation of the collision period
+        scalar collisionResolutionSteps_;
+
 
 public:
 
@@ -89,6 +93,15 @@ public:
 
 
     // Member Functions
+
+        //- Whether the PairFunction has a timestep limit that will
+        //  require subCycling
+        virtual bool controlsTimestep() const;
+
+        //- For PairFunctions that control the timestep, calculate the
+        //  number of subCycles needed to satisfy the minimum
+        //  allowable timestep
+        virtual label nSubCycles() const;
 
         //- Calculate the pair interaction between parcels
         virtual void evaluatePair

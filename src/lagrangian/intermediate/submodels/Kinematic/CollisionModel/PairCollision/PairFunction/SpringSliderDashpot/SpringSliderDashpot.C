@@ -41,7 +41,14 @@ Foam::SpringSliderDashpot<CloudType>::SpringSliderDashpot
     sigma_(dimensionedScalar(this->coeffDict().lookup("sigma")).value()),
     alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),
     b_(dimensionedScalar(this->coeffDict().lookup("b")).value()),
-    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value())
+    mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value()),
+    collisionResolutionSteps_
+    (
+        readScalar
+        (
+            this->coeffDict().lookup("collisionResolutionSteps")
+        )
+    )
 {
     scalar E = dimensionedScalar(this->coeffDict().lookup("E")).value();
 
@@ -61,6 +68,33 @@ Foam::SpringSliderDashpot<CloudType>::~SpringSliderDashpot()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+bool Foam::SpringSliderDashpot<CloudType>::controlsTimestep() const
+{
+    return true;
+}
+
+
+template<class CloudType>
+Foam::label Foam::SpringSliderDashpot<CloudType>::nSubCycles() const
+{
+    scalar rMin = 0.000921;
+    scalar rhoMax = 2500;
+    scalar EstarMax = 1e4;
+    scalar vMax = 2.0;
+
+    // Note:  pi^(7/5)*(5/4)^(2/5) = 5.429675
+
+    scalar minCollisionDeltaT =
+        5.429675
+       *rMin
+       *pow(rhoMax/EstarMax/sqrt(vMax), 0.4)
+       /collisionResolutionSteps_;
+
+    return ceil(this->owner().time().deltaT().value()/minCollisionDeltaT);
+}
+
 
 template<class CloudType>
 void Foam::SpringSliderDashpot<CloudType>::evaluatePair

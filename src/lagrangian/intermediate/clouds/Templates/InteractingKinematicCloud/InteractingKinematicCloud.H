@@ -204,6 +204,9 @@ protected:
             //- Pre-evolve
             void preEvolve();
 
+            //- Move-collide
+            void moveCollide(typename ParcelType::trackData& td);
+
             //- Post-evolve
             void postEvolve();
 

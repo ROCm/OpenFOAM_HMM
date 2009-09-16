@@ -135,6 +135,10 @@ public:
 
     // Member Functions
 
+        //- Return the number of times to subcycle the current
+        //  timestep to meet the criteria of the collision model
+        virtual label nSubCycles() const = 0;
+
         //- Flag to indicate whether model activates injection model
         virtual bool active() const = 0;
 
