@@ -44,6 +44,7 @@ SourceFiles
 #include "labelList.H"
 #include "edgeList.H"
 #include "polyMesh.H"
+#include "faceList.H"
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -96,25 +97,40 @@ class ReferredCell
 {
     // Private data
 
+        //- The source processor of this referred cell
         label sourceProc_;
 
+        //- The cell on the source processor that this cell is referring
         label sourceCell_;
 
-        //- Referred vertex positions
+        //- Referred cell vertex positions
         vectorList vertexPositions_;
 
+        //- The edge structure of this referred cell, indices of the
+        //  vertexPositions_ list
         edgeList edges_;
 
-        labelListList faces_;
+        //- The face structure of this referred cell, indices of the
+        //  vertexPositions_ list
+        faceList faces_;
 
+        // Which of the faces represent wall faces on their source processor
+        labelList wallFaces_;
+
+        //- The face centre data for the cell in the referred position
         vectorList faceCentres_;
 
+        //- The face area data for the cell in the referred position
         vectorList faceAreas_;
 
+        //- Which cells on the processor hosting this referred cell
+        //  require interactions from it
         labelList realCellsForInteraction_;
 
+        //- Vector (shift) part of the transformation from the original cell
         vector offset_;
 
+        //- Tensor (rotate) part of the transformation from the original cell
         tensor rotation_;
 
 
@@ -172,7 +188,8 @@ public:
             const label sourceCell,
             const vectorList& vertexPositions,
             const edgeList& localEdges,
-            const labelListList& localFaces,
+            const faceList& localFaces,
+            const labelList& wallFaces,
             const vectorList& faceCentres,
             const vectorList& faceAreas,
             const vector& offset,
@@ -184,7 +201,6 @@ public:
         //  reverse one direction)
         //  Order of vectors important (S = source, D = Destination).
         //  External edge information.
-
         ReferredCell
         (
             const polyMesh& mesh,
@@ -262,7 +278,9 @@ public:
 
             inline const edgeList& edges() const;
 
-            inline const labelListList& faces() const;
+            inline const faceList& faces() const;
+
+            inline const labelList& wallFaces() const;
 
             inline const vectorList& faceCentres() const;
 

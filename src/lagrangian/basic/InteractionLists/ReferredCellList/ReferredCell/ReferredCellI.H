@@ -70,10 +70,18 @@ inline const Foam::edgeList& Foam::ReferredCell<ParticleType>::edges() const
 
 
 template<class ParticleType>
-inline const Foam::labelListList&
+inline const Foam::faceList&
 Foam::ReferredCell<ParticleType>::faces() const
 {
     return faces_;
+}
+
+
+template<class ParticleType>
+inline const Foam::labelList&
+Foam::ReferredCell<ParticleType>::wallFaces() const
+{
+    return wallFaces_;
 }
 
 

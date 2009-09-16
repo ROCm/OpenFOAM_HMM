@@ -74,14 +74,32 @@ void Foam::ReferredCell<ParticleType>::setConstructionData
 
     labelListList sourceCellFaces(faces.size());
 
+    DynamicList<label> wallFaces;
+
     forAll(faces, f)
     {
-        sourceCellFaces[f] = mesh.faces()[faces[f]];
+        label faceI = faces[f];
 
-        sourceCellFaceCentres[f] = mesh.faceCentres()[faces[f]];
+        sourceCellFaces[f] = mesh.faces()[faceI];
 
-        sourceCellFaceAreas[f] = mesh.faceAreas()[faces[f]];
+        sourceCellFaceCentres[f] = mesh.faceCentres()[faceI];
+
+        sourceCellFaceAreas[f] = mesh.faceAreas()[faceI];
+
+        if (!mesh.isInternalFace(faceI))
+        {
+            label patchI =  mesh.boundaryMesh().whichPatch(faceI);
+            const polyPatch& patch = mesh.boundaryMesh()[patchI];
+
+            // move reference point for wall
+            if (isA<wallPolyPatch>(patch))
+            {
+                wallFaces.append(f);
+            }
+        }
     }
+
+    wallFaces_.transfer(wallFaces);
 
     locallyMapFaceList(points, sourceCellFaces);
 
@@ -209,6 +227,12 @@ Foam::ReferredCell<ParticleType>::ReferredCell()
     sourceProc_(-1),
     sourceCell_(-1),
     vertexPositions_(),
+    edges_(),
+    faces_(),
+    wallFaces_(),
+    faceCentres_(),
+    faceAreas_(),
+    realCellsForInteraction_(),
     offset_(vector::zero),
     rotation_(I)
 {}
@@ -228,6 +252,12 @@ Foam::ReferredCell<ParticleType>::ReferredCell
     IDLList<ParticleType>(),
     sourceProc_(sourceProc),
     sourceCell_(sourceCell),
+    edges_(),
+    faces_(),
+    wallFaces_(),
+    faceCentres_(),
+    faceAreas_(),
+    realCellsForInteraction_(),
     offset_(offset),
     rotation_(rotation)
 {
@@ -242,7 +272,8 @@ Foam::ReferredCell<ParticleType>::ReferredCell
     const label sourceCell,
     const vectorList& vertexPositions,
     const edgeList& localEdges,
-    const labelListList& localFaces,
+    const faceList& localFaces,
+    const labelList& wallFaces,
     const vectorList& faceCentres,
     const vectorList& faceAreas,
     const vector& offset,
@@ -254,6 +285,10 @@ Foam::ReferredCell<ParticleType>::ReferredCell
     sourceCell_(sourceCell),
     edges_(localEdges),
     faces_(localFaces),
+    wallFaces_(wallFaces),
+    faceCentres_(),
+    faceAreas_(),
+    realCellsForInteraction_(),
     offset_(offset),
     rotation_(rotation)
 {
@@ -341,6 +376,7 @@ Foam::ReferredCell<ParticleType> Foam::ReferredCell<ParticleType>::reRefer
         rotation_.T() & (vertexPositions_ - offset_),
         edges_,
         faces_,
+        wallFaces_,
         rotation_.T() & (faceCentres_ - offset_),
         rotation_.T() & (faceAreas_),
         reReferredOffset,
@@ -477,6 +513,7 @@ Foam::Istream& Foam::operator>>(Istream& is, ReferredCell<ParticleType>& rC)
         >> rC.vertexPositions_
         >> rC.edges_
         >> rC.faces_
+        >> rC.wallFaces_
         >> rC.faceCentres_
         >> rC.faceAreas_
         >> rC.offset_
@@ -501,6 +538,7 @@ Foam::Ostream& Foam::operator<<
         << token::SPACE << rC.vertexPositions()
         << token::SPACE << rC.edges()
         << token::SPACE << rC.faces()
+        << token::SPACE << rC.wallFaces()
         << token::SPACE << rC.faceCentres()
         << token::SPACE << rC.faceAreas()
         << token::SPACE << rC.offset()

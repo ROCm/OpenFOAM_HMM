@@ -1766,7 +1766,7 @@ void Foam::ReferredCellList<ParticleType>::writeReferredCells() const
 
     Info<< "    Writing " << fName.name() << endl;
 
-    OFstream file(fName);
+    OFstream referredCellsFile(fName);
 
     label vertexOffset = 1;
 
@@ -1776,11 +1776,12 @@ void Foam::ReferredCellList<ParticleType>::writeReferredCells() const
 
         const vectorList& refCellPts = refCell.vertexPositions();
 
-        const labelListList& refCellFaces = refCell.faces();
+        const faceList& refCellFaces = refCell.faces();
 
         forAll(refCellPts, ptI)
         {
-            file<< "v "
+            referredCellsFile
+                << "v "
                 << refCellPts[ptI].x() << " "
                 << refCellPts[ptI].y() << " "
                 << refCellPts[ptI].z()
@@ -1789,20 +1790,69 @@ void Foam::ReferredCellList<ParticleType>::writeReferredCells() const
 
         forAll(refCellFaces, faceI)
         {
-            file<< "f ";
+            referredCellsFile<< "f";
 
             forAll(refCellFaces[faceI], fPtI)
             {
-                file<< " " << refCellFaces[faceI][fPtI] + vertexOffset;
+                referredCellsFile
+                    << " "
+                    << refCellFaces[faceI][fPtI] + vertexOffset;
             }
 
-            file<< nl;
+            referredCellsFile<< nl;
         }
 
         vertexOffset += refCellPts.size();
     }
 
-    file.flush();
+    referredCellsFile.flush();
+
+    fName = il_.mesh().time().path()/"referredWallFaces.obj";
+
+    Info<< "    Writing " << fName.name() << endl;
+
+    OFstream referredWallFacesFile(fName);
+
+    vertexOffset = 1;
+
+    forAll(*this, refCellI)
+    {
+        const ReferredCell<ParticleType>& refCell = (*this)[refCellI];
+
+        const vectorList& refCellPts = refCell.vertexPositions();
+
+        const faceList& refCellFaces = refCell.faces();
+
+        const labelList& wallFaces = refCell.wallFaces();
+
+        forAll(wallFaces, wFI)
+        {
+            const face& f = refCellFaces[wallFaces[wFI]];
+
+            forAll(f, fPtI)
+            {
+                referredWallFacesFile
+                    << "v "
+                    << refCellPts[f[fPtI]].x() << " "
+                    << refCellPts[f[fPtI]].y() << " "
+                    << refCellPts[f[fPtI]].z()
+                    << nl;
+            }
+
+            referredWallFacesFile<< "f";
+
+            forAll(f, fPtI)
+            {
+                referredWallFacesFile << " " << fPtI + vertexOffset;
+            }
+
+            referredWallFacesFile<< nl;
+
+            vertexOffset += f.size();
+        }
+    }
+
+    referredWallFacesFile.flush();
 }
 
 // ************************************************************************* //
