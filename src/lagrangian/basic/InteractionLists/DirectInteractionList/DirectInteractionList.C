@@ -37,7 +37,7 @@ void Foam::DirectInteractionList<ParticleType>::buildDirectInteractionList
 {
     Info<< "    Building list of direct interaction neighbours" << endl;
 
-    const polyMesh& mesh(il_.mesh());
+    const polyMesh& mesh = il_.mesh();
 
     List<DynamicList<label> > DirectInteractionList(mesh.nCells());
 
@@ -294,9 +294,94 @@ void Foam::DirectInteractionList<ParticleType>::buildDirectInteractionList
 
     // sorting DILs
 
-    forAll((*this), dIL)
+    forAll((*this), dilI)
     {
-        sort((*this)[dIL]);
+        sort((*this)[dilI]);
+    }
+}
+
+
+template<class ParticleType>
+void Foam::DirectInteractionList<ParticleType>::buildWallFaces()
+{
+    Info<< "    Building list of wall faces in range of cells" << endl;
+
+    const polyMesh& mesh = il_.mesh();
+
+    // DynamicLists for data gathering
+    DynamicList<label> thisCellOnlyWallFaces;
+    DynamicList<label> otherCellOnlyWallFaces;
+
+    forAll(wallFaces_, thisCellI)
+    {
+        // Find all of the wall faces for the current cell
+
+        const labelList& thisCellFaces = mesh.cells()[thisCellI];
+
+        labelList& thisCellWallFaces = wallFaces_[thisCellI];
+
+        thisCellOnlyWallFaces.clear();
+
+        forAll(thisCellFaces, tCFI)
+        {
+            label faceI = thisCellFaces[tCFI];
+
+            if (!mesh.isInternalFace(faceI))
+            {
+                label patchI =  mesh.boundaryMesh().whichPatch(faceI);
+                const polyPatch& patch = mesh.boundaryMesh()[patchI];
+
+                // move reference point for wall
+                if (isA<wallPolyPatch>(patch))
+                {
+                    thisCellOnlyWallFaces.append(faceI);
+                }
+            }
+        }
+
+        // Add all the found wall faces to this cell's list, and
+        // retain the wall faces for this cell only to add to other
+        // cells.
+        thisCellWallFaces.append(thisCellOnlyWallFaces);
+
+        // Loop over all of the cells in the DIL for this cell, adding
+        // the wallFaces for this cell to the other cell's wallFace
+        // list, and all of the wallFaces for the other cell to this
+        // cell's list
+
+        const labelList& dil = (*this)[thisCellI];
+
+        forAll(dil, i)
+        {
+            label otherCellI = dil[i];
+
+            const labelList& otherCellFaces = mesh.cells()[otherCellI];
+
+            labelList& otherCellWallFaces = wallFaces_[otherCellI];
+
+            otherCellOnlyWallFaces.clear();
+
+            forAll(otherCellFaces, oCFI)
+            {
+                label faceI = otherCellFaces[oCFI];
+
+                if (!mesh.isInternalFace(faceI))
+                {
+                    label patchI =  mesh.boundaryMesh().whichPatch(faceI);
+                    const polyPatch& patch = mesh.boundaryMesh()[patchI];
+
+                    // move reference point for wall
+                    if (isA<wallPolyPatch>(patch))
+                    {
+                        otherCellOnlyWallFaces.append(faceI);
+                    }
+                }
+            }
+
+            thisCellWallFaces.append(otherCellOnlyWallFaces);
+
+            otherCellWallFaces.append(thisCellOnlyWallFaces);
+        }
     }
 }
 
@@ -311,7 +396,8 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 )
 :
     labelListList(il.mesh().nCells()),
-    il_(il)
+    il_(il),
+    wallFaces_(il.mesh().nCells())
 {
     if ((*this).size() > 1)
     {
@@ -324,6 +410,8 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 
         (*this)[0].setSize(0);
     }
+
+    buildWallFaces();
 }
 
 
@@ -334,7 +422,8 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 )
 :
     labelListList(il.mesh().nCells()),
-    il_(il)
+    il_(il),
+    wallFaces_(il.mesh().nCells())
 {
     Info<< "    Read DirectInteractionList from disk not implemented" << endl;
 }

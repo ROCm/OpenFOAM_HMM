@@ -59,7 +59,12 @@ class DirectInteractionList
 {
     // Private data
 
+        //- A reference to the InteractionLists object holding this object
         const InteractionLists<ParticleType>& il_;
+
+        //- Data specifying which patch faces of type "wall" are in range
+        //  of each cell
+        labelListList wallFaces_;
 
 
     // Private Member Functions
@@ -68,6 +73,8 @@ class DirectInteractionList
         (
             bool pointPointListBuild
         );
+
+        void buildWallFaces();
 
         //- Disallow default bitwise copy construct
         DirectInteractionList(const DirectInteractionList&);
@@ -102,6 +109,8 @@ public:
     // Member Functions
 
         // Access
+
+        inline const labelListList& wallFaces() const;
 
         inline const InteractionLists<ParticleType>& il() const;
 };

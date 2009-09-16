@@ -27,6 +27,14 @@ License
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class ParticleType>
+inline const Foam::labelListList&
+Foam::DirectInteractionList<ParticleType>::wallFaces() const
+{
+    return wallFaces_;
+}
+
+
+template<class ParticleType>
 inline const Foam::InteractionLists<ParticleType>&
 Foam::DirectInteractionList<ParticleType>::il() const
 {

@@ -156,7 +156,7 @@ void Foam::ReferredCell<ParticleType>::locallyMapFaceList
     {
         const labelList& sourceCellFace(sourceCellFaces[sCF]);
 
-        labelList& localFace(faces_[sCF]);
+        face& localFace(faces_[sCF]);
 
         localFace.setSize(sourceCellFace.size());
 
