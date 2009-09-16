@@ -56,11 +56,10 @@ class Ostream;
 \*---------------------------------------------------------------------------*/
 
 class block
+:
+    public blockDescriptor
 {
     // Private data
-
-        //- Block definition
-        blockDescriptor blockDef_;
 
         //- List of vertices
         pointField vertices_;
@@ -125,7 +124,7 @@ public:
             //- Return the block definition
             inline const blockDescriptor& blockDef() const
             {
-                return blockDef_;
+                return *this;
             }
 
             const pointField& points() const;

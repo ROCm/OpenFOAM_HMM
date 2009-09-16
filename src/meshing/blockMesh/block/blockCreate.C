@@ -35,8 +35,8 @@ Foam::label Foam::block::vtxLabel(label i, label j, label k) const
     return
     (
         i
-      + j*(blockDef_.meshDensity().x() + 1)
-      + k*(blockDef_.meshDensity().x() + 1) * (blockDef_.meshDensity().y() + 1)
+      + j * (meshDensity().x() + 1)
+      + k * (meshDensity().x() + 1) * (meshDensity().y() + 1)
     );
 }
 
@@ -44,24 +44,24 @@ Foam::label Foam::block::vtxLabel(label i, label j, label k) const
 void Foam::block::createPoints()
 {
     // set local variables for mesh specification
-    const label ni = blockDef_.meshDensity().x();
-    const label nj = blockDef_.meshDensity().y();
-    const label nk = blockDef_.meshDensity().z();
+    const label ni = meshDensity().x();
+    const label nj = meshDensity().y();
+    const label nk = meshDensity().z();
 
-    const point& p000 = blockDef_.blockPoint(0);
-    const point& p100 = blockDef_.blockPoint(1);
-    const point& p110 = blockDef_.blockPoint(2);
-    const point& p010 = blockDef_.blockPoint(3);
+    const point& p000 = blockPoint(0);
+    const point& p100 = blockPoint(1);
+    const point& p110 = blockPoint(2);
+    const point& p010 = blockPoint(3);
 
-    const point& p001 = blockDef_.blockPoint(4);
-    const point& p101 = blockDef_.blockPoint(5);
-    const point& p111 = blockDef_.blockPoint(6);
-    const point& p011 = blockDef_.blockPoint(7);
+    const point& p001 = blockPoint(4);
+    const point& p101 = blockPoint(5);
+    const point& p111 = blockPoint(6);
+    const point& p011 = blockPoint(7);
 
 
     // list of edge point and weighting factors
-    const List<List<point> >& p = blockDef_.blockEdgePoints();
-    const scalarListList& w = blockDef_.blockEdgeWeights();
+    const List< List<point> >& p = blockEdgePoints();
+    const scalarListList& w = blockEdgeWeights();
 
     // generate vertices
 
@@ -243,9 +243,9 @@ void Foam::block::createPoints()
 
 void Foam::block::createCells()
 {
-    const label ni = blockDef_.meshDensity().x();
-    const label nj = blockDef_.meshDensity().y();
-    const label nk = blockDef_.meshDensity().z();
+    const label ni = meshDensity().x();
+    const label nj = meshDensity().y();
+    const label nk = meshDensity().z();
 
     label cellNo = 0;
 
@@ -274,9 +274,9 @@ void Foam::block::createCells()
 
 void Foam::block::createBoundary()
 {
-    const label ni = blockDef_.meshDensity().x();
-    const label nj = blockDef_.meshDensity().y();
-    const label nk = blockDef_.meshDensity().z();
+    const label ni = meshDensity().x();
+    const label nj = meshDensity().y();
+    const label nk = meshDensity().z();
 
     // x-direction
 

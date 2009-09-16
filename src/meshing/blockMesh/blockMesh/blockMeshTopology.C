@@ -173,7 +173,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             (
                 nBlocks,
                 tmpBlockPoints,
-                blocks[nBlocks].blockDef().blockShape()
+                blocks[nBlocks].blockShape()
             );
 
             nBlocks++;
@@ -292,7 +292,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         tmpBlockShapes.set
         (
             blockI,
-            new cellShape(blocks[blockI].blockDef().blockShape())
+            new cellShape(blocks[blockI].blockShape())
         );
 
         if (tmpBlockShapes[blockI].mag(tmpBlockPoints) < 0.0)

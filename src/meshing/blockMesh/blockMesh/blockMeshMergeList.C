@@ -327,6 +327,8 @@ Foam::labelList Foam::blockMesh::createMergeList()
                 }
             }
 
+// FIXME? - there seems to be some logic missing here
+
             foundFace = false;
             label blockNfaceLabel;
             for
@@ -346,6 +348,9 @@ Foam::labelList Foam::blockMesh::createMergeList()
                     break;
                 }
             }
+
+// FIXME? - there seems to be some logic missing here
+
 
             const labelListList& blockPfaceFaces =
                 blocks[blockPlabel].boundaryPatches()[blockPfaceLabel];

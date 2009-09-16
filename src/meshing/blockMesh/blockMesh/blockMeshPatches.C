@@ -41,12 +41,9 @@ Foam::faceList Foam::blockMesh::createPatchFaces
 
     forAll(patchTopologyFaces, patchTopologyFaceLabel)
     {
-        label blockLabel = blockLabels[patchTopologyFaceLabel];
+        const label blockI = blockLabels[patchTopologyFaceLabel];
 
-        faceList blockFaces
-        (
-            blocks[blockLabel].blockDef().blockShape().faces()
-        );
+        faceList blockFaces = blocks[blockI].blockShape().faces();
 
         forAll(blockFaces, blockFaceLabel)
         {
@@ -57,7 +54,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
             )
             {
                 nFaces +=
-                    blocks[blockLabel].boundaryPatches()[blockFaceLabel].size();
+                    blocks[blockI].boundaryPatches()[blockFaceLabel].size();
             }
         }
     }
@@ -69,12 +66,9 @@ Foam::faceList Foam::blockMesh::createPatchFaces
 
     forAll(patchTopologyFaces, patchTopologyFaceLabel)
     {
-        label blockLabel = blockLabels[patchTopologyFaceLabel];
+        const label blockI = blockLabels[patchTopologyFaceLabel];
 
-        faceList blockFaces
-        (
-            blocks[blockLabel].blockDef().blockShape().faces()
-        );
+        faceList blockFaces = blocks[blockI].blockShape().faces();
 
         forAll(blockFaces, blockFaceLabel)
         {
@@ -85,7 +79,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
             )
             {
                 const labelListList& blockPatchFaces =
-                    blocks[blockLabel].boundaryPatches()[blockFaceLabel];
+                    blocks[blockI].boundaryPatches()[blockFaceLabel];
 
                 forAll(blockPatchFaces, blockFaceLabel)
                 {
@@ -96,7 +90,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
                         mergeList_
                         [
                             blockPatchFaces[blockFaceLabel][0]
-                          + blockOffsets_[blockLabel]
+                          + blockOffsets_[blockI]
                         ];
 
                     label nUnique = 1;
@@ -112,7 +106,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
                             mergeList_
                             [
                                 blockPatchFaces[blockFaceLabel][facePointLabel]
-                              + blockOffsets_[blockLabel]
+                              + blockOffsets_[blockI]
                             ];
 
                         if (quadFace[nUnique] != quadFace[nUnique-1])

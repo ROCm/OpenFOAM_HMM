@@ -37,9 +37,9 @@ Foam::block::block
     Istream& is
 )
 :
-    blockDef_(blockMeshPoints, edges, is),
-    vertices_(blockDef_.nPoints()),
-    cells_(blockDef_.nCells()),
+    blockDescriptor(blockMeshPoints, edges, is),
+    vertices_(nPoints()),
+    cells_(nCells()),
     boundaryPatches_(6)
 {
     createPrimitives();
@@ -48,9 +48,9 @@ Foam::block::block
 
 Foam::block::block(const blockDescriptor& definition)
 :
-    blockDef_(definition),
-    vertices_(blockDef_.nPoints()),
-    cells_(blockDef_.nCells()),
+    blockDescriptor(definition),
+    vertices_(nPoints()),
+    cells_(nCells()),
     boundaryPatches_(6)
 {
     createPrimitives();
