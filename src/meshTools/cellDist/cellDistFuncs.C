@@ -104,27 +104,6 @@ Foam::labelHashSet Foam::cellDistFuncs::getPatchIDs
 }
 
 
-// Get patch ids of patches of certain type (e.g. 'polyProcessorPatch')
-Foam::labelHashSet Foam::cellDistFuncs::getPatchIDs(const word& wantedType)
- const
-{
-    const polyBoundaryMesh& bMesh = mesh().boundaryMesh();
-
-    labelHashSet patchIDs(bMesh.size());
-
-    forAll(bMesh, patchI)
-    {
-        const polyPatch& patch = bMesh[patchI];
-
-        if (patch.type() == wantedType)
-        {
-            patchIDs.insert(patchI);
-        }
-    }
-    return patchIDs;
-}
-
-
 // Return smallest true distance from p to any of wallFaces.
 // Note that even if normal hits face we still check other faces.
 // Note that wallFaces is untruncated and we explicitly pass in size.

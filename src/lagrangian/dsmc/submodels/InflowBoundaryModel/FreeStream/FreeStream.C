@@ -52,7 +52,7 @@ Foam::FreeStream<CloudType>::FreeStream
     {
         const polyPatch& patch = cloud.mesh().boundaryMesh()[p];
 
-        if (patch.type() == polyPatch::typeName)
+        if (isType<polyPatch>(patch))
         {
             patches.append(p);
         }

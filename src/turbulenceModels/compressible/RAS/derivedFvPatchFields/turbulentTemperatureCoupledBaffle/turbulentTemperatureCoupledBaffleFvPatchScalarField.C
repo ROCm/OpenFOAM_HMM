@@ -24,70 +24,87 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "solidWallMixedTemperatureCoupledFvPatchScalarField.H"
+#include "turbulentTemperatureCoupledBaffleFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "directMappedPatchBase.H"
 #include "regionProperties.H"
+#include "basicThermo.H"
+#include "RASModel.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::interfaceOwner
+bool Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::interfaceOwner
 (
-    const polyMesh& nbrRegion
+    const polyMesh& nbrRegion,
+    const polyPatch& nbrPatch
 ) const
 {
     const fvMesh& myRegion = patch().boundaryMesh().mesh();
 
-    const regionProperties& props =
-        myRegion.objectRegistry::parent().lookupObject<regionProperties>
-        (
-            "regionProperties"
-        );
-
-    label myIndex = findIndex(props.fluidRegionNames(), myRegion.name());
-    if (myIndex == -1)
+    if (nbrRegion.name() == myRegion.name())
     {
-        label i = findIndex(props.solidRegionNames(), myRegion.name());
-
-        if (i == -1)
-        {
-            FatalErrorIn
+        return patch().index() < nbrPatch.index();
+    }
+    else
+    {
+        const regionProperties& props =
+            myRegion.objectRegistry::parent().lookupObject<regionProperties>
             (
-                "solidWallMixedTemperatureCoupledFvPatchScalarField"
-                "::interfaceOwner(const polyMesh&) const"
-            )   << "Cannot find region " << myRegion.name()
-                << " neither in fluids " << props.fluidRegionNames()
-                << " nor in solids " << props.solidRegionNames()
-                << exit(FatalError);
-        }
-        myIndex = props.fluidRegionNames().size() + i;
-    }
-    label nbrIndex = findIndex(props.fluidRegionNames(), nbrRegion.name());
-    if (nbrIndex == -1)
-    {
-        label i = findIndex(props.solidRegionNames(), nbrRegion.name());
+                "regionProperties"
+            );
 
-        if (i == -1)
+        label myIndex = findIndex(props.fluidRegionNames(), myRegion.name());
+        if (myIndex == -1)
         {
-            FatalErrorIn("coupleManager::interfaceOwner(const polyMesh&) const")
-                << "Cannot find region " << nbrRegion.name()
-                << " neither in fluids " << props.fluidRegionNames()
-                << " nor in solids " << props.solidRegionNames()
-                << exit(FatalError);
-        }
-        nbrIndex = props.fluidRegionNames().size() + i;
-    }
+            label i = findIndex(props.solidRegionNames(), myRegion.name());
 
-    return myIndex < nbrIndex;
+            if (i == -1)
+            {
+                FatalErrorIn
+                (
+                    "turbulentTemperatureCoupledBaffleFvPatchScalarField"
+                    "::interfaceOwner(const polyMesh&"
+                    ", const polyPatch&)const"
+                )   << "Cannot find region " << myRegion.name()
+                    << " neither in fluids " << props.fluidRegionNames()
+                    << " nor in solids " << props.solidRegionNames()
+                    << exit(FatalError);
+            }
+            myIndex = props.fluidRegionNames().size() + i;
+        }
+        label nbrIndex = findIndex
+        (
+            props.fluidRegionNames(),
+            nbrRegion.name()
+        );
+        if (nbrIndex == -1)
+        {
+            label i = findIndex(props.solidRegionNames(), nbrRegion.name());
+
+            if (i == -1)
+            {
+                FatalErrorIn
+                (
+                    "coupleManager::interfaceOwner"
+                    "(const polyMesh&, const polyPatch&) const"
+                )   << "Cannot find region " << nbrRegion.name()
+                    << " neither in fluids " << props.fluidRegionNames()
+                    << " nor in solids " << props.solidRegionNames()
+                    << exit(FatalError);
+            }
+            nbrIndex = props.fluidRegionNames().size() + i;
+        }
+        return myIndex < nbrIndex;
+    }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::
-solidWallMixedTemperatureCoupledFvPatchScalarField
+Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF
@@ -104,10 +121,10 @@ solidWallMixedTemperatureCoupledFvPatchScalarField
 }
 
 
-Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::
-solidWallMixedTemperatureCoupledFvPatchScalarField
+Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
-    const solidWallMixedTemperatureCoupledFvPatchScalarField& ptf,
+    const turbulentTemperatureCoupledBaffleFvPatchScalarField& ptf,
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
     const fvPatchFieldMapper& mapper
@@ -120,8 +137,8 @@ solidWallMixedTemperatureCoupledFvPatchScalarField
 {}
 
 
-Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::
-solidWallMixedTemperatureCoupledFvPatchScalarField
+Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
     const fvPatch& p,
     const DimensionedField<scalar, volMesh>& iF,
@@ -136,8 +153,8 @@ solidWallMixedTemperatureCoupledFvPatchScalarField
     {
         FatalErrorIn
         (
-            "solidWallMixedTemperatureCoupledFvPatchScalarField::"
-            "solidWallMixedTemperatureCoupledFvPatchScalarField\n"
+            "turbulentTemperatureCoupledBaffleFvPatchScalarField::"
+            "turbulentTemperatureCoupledBaffleFvPatchScalarField\n"
             "(\n"
             "    const fvPatch& p,\n"
             "    const DimensionedField<scalar, volMesh>& iF,\n"
@@ -172,10 +189,10 @@ solidWallMixedTemperatureCoupledFvPatchScalarField
 }
 
 
-Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::
-solidWallMixedTemperatureCoupledFvPatchScalarField
+Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
-    const solidWallMixedTemperatureCoupledFvPatchScalarField& wtcsf,
+    const turbulentTemperatureCoupledBaffleFvPatchScalarField& wtcsf,
     const DimensionedField<scalar, volMesh>& iF
 )
 :
@@ -188,14 +205,32 @@ solidWallMixedTemperatureCoupledFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-const Foam::fvPatchScalarField&
-Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::K() const
+Foam::tmp<Foam::scalarField>
+Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
 {
-    return this->patch().lookupPatchField<volScalarField, scalar>(KName_);
+    if (KName_ == "none")
+    {
+        const compressible::RASModel& model =
+            db().lookupObject<compressible::RASModel>("RASProperties");
+
+        tmp<volScalarField> talpha = model.alphaEff();
+
+        const basicThermo& thermo =
+            db().lookupObject<basicThermo>("thermophysicalProperties");
+
+        return
+            talpha().boundaryField()[patch().index()]
+           *thermo.rho()().boundaryField()[patch().index()]
+           *thermo.Cp()().boundaryField()[patch().index()];
+    }
+    else
+    {
+        return patch().lookupPatchField<volScalarField, scalar>(KName_);
+    }
 }
 
 
-void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
+void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -208,29 +243,29 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
         patch().patch()
     );
     const polyMesh& nbrMesh = mpp.sampleMesh();
+    const fvPatch& nbrPatch = refCast<const fvMesh>
+    (
+        nbrMesh
+    ).boundary()[mpp.samplePolyPatch().index()];
+
     // Force recalculation of mapping and schedule
     const mapDistribute& distMap = mpp.map();
     (void)distMap.schedule();
 
     tmp<scalarField> intFld = patchInternalField();
 
-    if (interfaceOwner(nbrMesh))
+    if (interfaceOwner(nbrMesh, nbrPatch.patch()))
     {
         // Note: other side information could be cached - it only needs
         // to be updated the first time round the iteration (i.e. when
         // switching regions) but unfortunately we don't have this information.
 
-        const fvPatch& nbrPatch = refCast<const fvMesh>
-        (
-            nbrMesh
-        ).boundary()[mpp.samplePolyPatch().index()];
-
 
         // Calculate the temperature by harmonic averaging
         // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-        const solidWallMixedTemperatureCoupledFvPatchScalarField& nbrField =
-        refCast<const solidWallMixedTemperatureCoupledFvPatchScalarField>
+        const turbulentTemperatureCoupledBaffleFvPatchScalarField& nbrField =
+        refCast<const turbulentTemperatureCoupledBaffleFvPatchScalarField>
         (
             nbrPatch.lookupPatchField<volScalarField, scalar>
             (
@@ -262,7 +297,6 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
             nbrKDelta
         );
 
-
         tmp<scalarField> myKDelta = K()*patch().deltaCoeffs();
 
         // Calculate common wall temperature. Reuse *this to store common value.
@@ -283,7 +317,7 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
             distMap.subMap(),
             Twall
         );
-        const_cast<solidWallMixedTemperatureCoupledFvPatchScalarField&>
+        const_cast<turbulentTemperatureCoupledBaffleFvPatchScalarField&>
         (
             nbrField
         ).fvPatchScalarField::operator=(Twall);
@@ -302,7 +336,7 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
     {
         scalar Q = gSum(K()*patch().magSf()*normalGradient());
 
-        Info<< "solidWallMixedTemperatureCoupledFvPatchScalarField::"
+        Info<< "turbulentTemperatureCoupledBaffleFvPatchScalarField::"
             << "updateCoeffs() :"
             << " patch:" << patch().name()
             << " heatFlux:" << Q
@@ -339,7 +373,7 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
     {
         label nTotSize = returnReduce(this->size(), sumOp<label>());
 
-        Info<< "solidWallMixedTemperatureCoupledFvPatchScalarField::"
+        Info<< "turbulentTemperatureCoupledBaffleFvPatchScalarField::"
             << "updateCoeffs() :"
             << " patch:" << patch().name()
             << " out of:" << nTotSize
@@ -351,7 +385,7 @@ void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::solidWallMixedTemperatureCoupledFvPatchScalarField::write
+void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::write
 (
     Ostream& os
 ) const
@@ -372,7 +406,7 @@ namespace Foam
 makePatchTypeField
 (
     fvPatchScalarField,
-    solidWallMixedTemperatureCoupledFvPatchScalarField
+    turbulentTemperatureCoupledBaffleFvPatchScalarField
 );
 
 } // End namespace Foam

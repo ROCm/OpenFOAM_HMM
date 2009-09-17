@@ -23,11 +23,12 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    solidWallMixedTemperatureCoupledFvPatchScalarField
+    turbulentTemperatureCoupledBaffleFvPatchScalarField
 
 Description
-    Mixed boundary condition for temperature, to be used by the
-    conjugate heat transfer solver.
+    Mixed boundary condition for temperature, to be used for heat-transfer
+    on back-to-back baffles.
+
     If my temperature is T1, neighbour is T2:
 
     T1 > T2: my side becomes fixedValue T2 bc, other side becomes fixedGradient.
@@ -36,13 +37,16 @@ Description
     Example usage:
         myInterfacePatchName
         {
-            type                solidWallMixedTemperatureCoupled;
+            type                turbulentTemperatureCoupledBaffle;
             neighbourFieldName  T;
-            K                   K;
+            K                   K; // or none 
             value               uniform 300;
         }
 
     Needs to be on underlying directMapped(Wall)FvPatch.
+
+    Note: if K is "none" looks up RASModel and basicThermo, otherwise expects
+    the solver to calculate a 'K' field.
 
     Note: runs in parallel with arbitrary decomposition. Uses directMapped
     functionality to calculate exchange.
@@ -54,12 +58,12 @@ Description
     this for last outer iteration but don't have access to this.
 
 SourceFiles
-    solidWallMixedTemperatureCoupledFvPatchScalarField.C
+    turbulentTemperatureCoupledBaffleFvPatchScalarField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef solidWallMixedTemperatureCoupledFvPatchScalarField_H
-#define solidWallMixedTemperatureCoupledFvPatchScalarField_H
+#ifndef turbulentTemperatureCoupledBaffleFvPatchScalarField_H
+#define turbulentTemperatureCoupledBaffleFvPatchScalarField_H
 
 #include "fvPatchFields.H"
 #include "mixedFvPatchFields.H"
@@ -71,10 +75,10 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class solidWallMixedTemperatureCoupledFvPatchScalarField Declaration
+        Class turbulentTemperatureCoupledBaffleFvPatchScalarField Declaration
 \*---------------------------------------------------------------------------*/
 
-class solidWallMixedTemperatureCoupledFvPatchScalarField
+class turbulentTemperatureCoupledBaffleFvPatchScalarField
 :
     public mixedFvPatchScalarField
 {
@@ -92,26 +96,26 @@ class solidWallMixedTemperatureCoupledFvPatchScalarField
     // Private Member Functions
 
         //- Am I or neighbour owner of interface
-        bool interfaceOwner(const polyMesh& nbrRegion) const;
+        bool interfaceOwner(const polyMesh&, const polyPatch&) const;
 
 
 public:
 
     //- Runtime type information
-    TypeName("solidWallMixedTemperatureCoupled");
+    TypeName("turbulentTemperatureCoupledBaffle");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        solidWallMixedTemperatureCoupledFvPatchScalarField
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        solidWallMixedTemperatureCoupledFvPatchScalarField
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
@@ -119,10 +123,10 @@ public:
         );
 
         //- Construct by mapping given
-        //  solidWallMixedTemperatureCoupledFvPatchScalarField onto a new patch
-        solidWallMixedTemperatureCoupledFvPatchScalarField
+        //  turbulentTemperatureCoupledBaffleFvPatchScalarField onto a new patch
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
-            const solidWallMixedTemperatureCoupledFvPatchScalarField&,
+            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
             const fvPatch&,
             const DimensionedField<scalar, volMesh>&,
             const fvPatchFieldMapper&
@@ -133,14 +137,14 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new solidWallMixedTemperatureCoupledFvPatchScalarField(*this)
+                new turbulentTemperatureCoupledBaffleFvPatchScalarField(*this)
             );
         }
 
         //- Construct as copy setting internal field reference
-        solidWallMixedTemperatureCoupledFvPatchScalarField
+        turbulentTemperatureCoupledBaffleFvPatchScalarField
         (
-            const solidWallMixedTemperatureCoupledFvPatchScalarField&,
+            const turbulentTemperatureCoupledBaffleFvPatchScalarField&,
             const DimensionedField<scalar, volMesh>&
         );
 
@@ -152,7 +156,7 @@ public:
         {
             return tmp<fvPatchScalarField>
             (
-                new solidWallMixedTemperatureCoupledFvPatchScalarField
+                new turbulentTemperatureCoupledBaffleFvPatchScalarField
                 (
                     *this,
                     iF
@@ -164,7 +168,7 @@ public:
     // Member functions
 
         //- Get corresponding K field
-        const fvPatchScalarField& K() const;
+        tmp<scalarField> K() const;
 
         //- Return true if this patch field fixes a value.
         //  Needed to check if a level has to be specified while solving

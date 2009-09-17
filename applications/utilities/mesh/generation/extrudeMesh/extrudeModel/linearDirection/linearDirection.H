@@ -22,73 +22,78 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Application
-    setHotRoom
+Class
+    Foam::extrudeModels::linearDirection
 
 Description
-    Set the initial field of T for the hot room problem.
+    Extrudes by transforming points in a specified direction by a given distance
 
 \*---------------------------------------------------------------------------*/
 
-#include "fvCFD.H"
-#include "OSspecific.H"
-#include "fixedValueFvPatchFields.H"
+#ifndef linearDirection_H
+#define linearDirection_H
+
+#include "point.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-int main(int argc, char *argv[])
+namespace Foam
+{
+namespace extrudeModels
 {
 
-#   include "setRootCase.H"
+/*---------------------------------------------------------------------------*\
+                    Class linearDirection Declaration
+\*---------------------------------------------------------------------------*/
 
-#   include "createTime.H"
-#   include "createMesh.H"
-#   include "createFields.H"
+class linearDirection
+:
+    public extrudeModel
+{
+    // Private data
+
+        //- Extrude direction
+        vector direction_;
+
+        //- layer thickness
+        scalar thickness_;
+
+
+public:
+
+    //- Runtime type information
+    TypeName("linearDirection");
+
+    // Constructors
+
+        //- Construct from dictionary
+        linearDirection(const dictionary& dict);
+
+
+    //- Destructor
+    ~linearDirection();
+
+
+    // Member Operators
+
+        point operator()
+        (
+            const point& surfacePoint,
+            const vector& surfaceNormal,
+            const label layer
+        ) const;
+};
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-volScalarField::GeometricBoundaryField& Tpatches = T.boundaryField();
+} // End namespace extrudeModels
+} // End namespace Foam
 
-forAll(Tpatches, patchI)
-{
-    if
-    (
-        isA<fixedValueFvPatchScalarField>(Tpatches[patchI])
-     && mesh.boundaryMesh()[patchI].name() == "floor"
-    )
-    {
-        fixedValueFvPatchScalarField& Tpatch =
-            refCast<fixedValueFvPatchScalarField>(Tpatches[patchI]);
-        
-        const vectorField& faceCentres = 
-            mesh.Cf().boundaryField()[patchI];
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-        forAll(faceCentres, facei)
-        {
-            if 
-            (
-                (faceCentres[facei].x() > 4.5) && 
-                (faceCentres[facei].x() < 5.5) && 
-                (faceCentres[facei].z() > 4.5) && 
-                (faceCentres[facei].z() < 5.5) 
-            )
-            {
-                Tpatch[facei] = 600;
-            }
-            else
-            {
-                Tpatch[facei] = 300;
-            }
-        }
-    };
+#endif
 
-    Info<< "Writing modified field T\n" << endl;
-    T.write();
-
-    Info<< "End\n" << endl;
-
-    return 0;
-}
-
-}
 // ************************************************************************* //
+

@@ -138,12 +138,29 @@ label findPatchID(const polyBoundaryMesh& patches, const word& name)
 }
 
 
-labelList patchFaces(const polyBoundaryMesh& patches, const word& name)
+labelList patchFaces(const polyBoundaryMesh& patches, const wordList& names)
 {
-    label patchID = findPatchID(patches, name);
-    const polyPatch& pp = patches[patchID];
+    label n = 0;
 
-    return identity(pp.size()) + pp.start();
+    forAll(names, i)
+    {
+        const polyPatch& pp = patches[findPatchID(patches, names[i])];
+
+        n += pp.size();
+    }
+    labelList faceLabels(n);
+    n = 0;
+    forAll(names, i)
+    {
+        const polyPatch& pp = patches[findPatchID(patches, names[i])];
+
+        forAll(pp, j)
+        {
+            faceLabels[n++] = pp.start()+j;
+        }
+    }
+
+    return faceLabels;
 }
 
 
@@ -242,9 +259,15 @@ int main(int argc, char *argv[])
         sourceCasePath.expand();
         fileName sourceRootDir = sourceCasePath.path();
         fileName sourceCaseDir = sourceCasePath.name();
-        dict.lookup("sourcePatch") >> frontPatchName;
+        wordList sourcePatches;
+        dict.lookup("sourcePatches") >> sourcePatches;
 
-        Info<< "Extruding patch " << frontPatchName
+        if (sourcePatches.size() == 1)
+        {
+            frontPatchName = sourcePatches[0];
+        }
+
+        Info<< "Extruding patches " << sourcePatches
             << " on mesh " << sourceCasePath << nl
             << endl;
 
@@ -279,7 +302,7 @@ int main(int argc, char *argv[])
             IndirectList<face>
             (
                 mesh.faces(),
-                patchFaces(patches, frontPatchName)
+                patchFaces(patches, sourcePatches)
             ),
             mesh.points()
         );
@@ -478,13 +501,13 @@ int main(int argc, char *argv[])
         frontPatchFaces = patchFaces
         (
             meshFromSurface().boundaryMesh(),
-            frontPatchName
+            wordList(1, frontPatchName)
         );
         backPatchName = "otherSide";
         backPatchFaces = patchFaces
         (
             meshFromSurface().boundaryMesh(),
-            backPatchName
+            wordList(1, backPatchName)
         );
     }
 
