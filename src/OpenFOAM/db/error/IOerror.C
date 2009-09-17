@@ -249,6 +249,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const IOerror& ioErr)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error definitions
 
-Foam::IOerror Foam::FatalIOError("--> FOAM FATAL IO ERROR : ");
+Foam::IOerror Foam::FatalIOError("--> FOAM FATAL IO ERROR: ");
 
 // ************************************************************************* //

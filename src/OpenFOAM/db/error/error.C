@@ -274,6 +274,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const error& fErr)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error definitions
 
-Foam::error Foam::FatalError("--> FOAM FATAL ERROR : ");
+Foam::error Foam::FatalError("--> FOAM FATAL ERROR: ");
 
 // ************************************************************************* //
