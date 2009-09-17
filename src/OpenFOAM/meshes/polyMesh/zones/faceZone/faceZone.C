@@ -42,6 +42,8 @@ namespace Foam
     addToRunTimeSelectionTable(faceZone, faceZone, dictionary);
 }
 
+const char* const Foam::faceZone::labelsName = "faceLabels";
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::faceZone::calcFaceZonePatch() const
@@ -218,7 +220,7 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    zone("face", name, dict, index),
+    zone(name, dict, this->labelsName, index),
     flipMap_(dict.lookup("flipMap")),
     zoneMesh_(zm),
     patchPtr_(NULL),
@@ -531,7 +533,7 @@ void Foam::faceZone::writeDict(Ostream& os) const
     os  << nl << name() << nl << token::BEGIN_BLOCK << nl
         << "    type " << type() << token::END_STATEMENT << nl;
 
-    writeEntry("faceLabels", os);
+    writeEntry(this->labelsName, os);
     flipMap().writeEntry("flipMap", os);
 
     os  << token::END_BLOCK << endl;
@@ -540,10 +542,10 @@ void Foam::faceZone::writeDict(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& fz)
+Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& zn)
 {
-    fz.write(os);
-    os.check("Ostream& operator<<(Ostream& os, const faceZone& fz");
+    zn.write(os);
+    os.check("Ostream& operator<<(Ostream&, const faceZone&");
     return os;
 }
 

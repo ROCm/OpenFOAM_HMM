@@ -58,7 +58,7 @@ Ostream& operator<<(Ostream&, const pointZone&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class pointZone Declaration
+                          Class pointZone Declaration
 \*---------------------------------------------------------------------------*/
 
 class pointZone
@@ -68,19 +68,23 @@ class pointZone
 
 protected:
 
-    // Private data
+    // Protected data
 
         //- Reference to zone list
         const pointZoneMesh& zoneMesh_;
-
 
     // Private Member Functions
 
         //- Disallow default bitwise copy construct
         pointZone(const pointZone&);
 
-
 public:
+
+    // Static data members
+
+        //- The name associated with the zone-labels dictionary entry
+        static const char * const labelsName;
+
 
     //- Runtime type information
     TypeName("pointZone");

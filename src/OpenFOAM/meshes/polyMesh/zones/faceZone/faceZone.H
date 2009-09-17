@@ -60,13 +60,17 @@ Ostream& operator<<(Ostream&, const faceZone&);
 
 
 /*---------------------------------------------------------------------------*\
-                           Class faceZone Declaration
+                          Class faceZone Declaration
 \*---------------------------------------------------------------------------*/
 
 class faceZone
 :
     public zone
 {
+    // Private data
+
+        //- The name associated with the zone-labels dictionary entry
+        static const word labelsName_;
 
 protected:
 
@@ -117,6 +121,12 @@ protected:
 
 
 public:
+
+    // Static data members
+
+        //- The name associated with the zone-labels dictionary entry
+        static const char * const labelsName;
+
 
     //- Runtime type information
     TypeName("faceZone");
@@ -283,14 +293,13 @@ public:
         virtual void movePoints(const pointField&);
 
         //- Update for changes in topology
-        virtual void updateMesh(const mapPolyMesh& mpm);
+        virtual void updateMesh(const mapPolyMesh&);
 
         //- Write
         virtual void write(Ostream&) const;
 
         //- Write dictionary
         virtual void writeDict(Ostream&) const;
-
 
     // I-O
 

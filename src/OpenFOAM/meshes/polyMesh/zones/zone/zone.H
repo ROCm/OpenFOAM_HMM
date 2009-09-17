@@ -117,9 +117,9 @@ public:
         //- Construct from dictionary
         zone
         (
-            const word& zoneType,
             const word& name,
             const dictionary&,
+            const word& labelsName,
             const label index
         );
 

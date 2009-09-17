@@ -115,13 +115,13 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const word& zoneType,
     const word& name,
     const dictionary& dict,
+    const word& labelsName,
     const label index
 )
 :
-    labelList(dict.lookup(zoneType + "Labels")),
+    labelList(dict.lookup(labelsName)),
     name_(name),
     index_(index),
     lookupMapPtr_(NULL)
