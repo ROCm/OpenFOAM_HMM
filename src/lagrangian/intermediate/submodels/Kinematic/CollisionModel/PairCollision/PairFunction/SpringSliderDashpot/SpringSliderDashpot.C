@@ -26,6 +26,48 @@ License
 
 #include "SpringSliderDashpot.H"
 
+// * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+template <class CloudType>
+void Foam::SpringSliderDashpot<CloudType>::findMinMaxProperties
+(
+    scalar& RMin,
+    scalar& rhoMax,
+    scalar& UMagMax
+) const
+{
+    RMin = VGREAT;
+    rhoMax = -VGREAT;
+    UMagMax = -VGREAT;
+
+    forAllConstIter(typename CloudType, this->owner(), iter)
+    {
+        const typename CloudType::parcelType& p = iter();
+
+        // Finding minimum diameter to avoid excessive arithmetic
+        RMin = min(p.d(), RMin);
+
+        rhoMax = max(p.rho(), rhoMax);
+
+        UMagMax = max
+        (
+            mag(p.U()) + mag(p.omega())*p.r(),
+            UMagMax
+        );
+    }
+
+    // Transform the minimum diameter into minimum radius
+    //     rMin = dMin/2
+    // then rMin into minimum R,
+    //     1/RMin = 1/rMin + 1/rMin,
+    //     RMin = rMin/2 = dMin/4
+    RMin /= 4.0;
+
+    // Multiply by two to create the worst-case relative velocity
+    UMagMax = 2*UMagMax;
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
@@ -38,7 +80,6 @@ Foam::SpringSliderDashpot<CloudType>::SpringSliderDashpot
     PairFunction<CloudType>(dict, cloud, typeName),
     Estar_(),
     Gstar_(),
-    sigma_(dimensionedScalar(this->coeffDict().lookup("sigma")).value()),
     alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),
     b_(dimensionedScalar(this->coeffDict().lookup("b")).value()),
     mu_(dimensionedScalar(this->coeffDict().lookup("mu")).value()),
@@ -50,13 +91,15 @@ Foam::SpringSliderDashpot<CloudType>::SpringSliderDashpot
         )
     )
 {
-    scalar E = dimensionedScalar(this->coeffDict().lookup("E")).value();
+    scalar nu = this->owner().constProps().poissonsRatio();
 
-    Estar_ = E/(2.0*(1.0 - sqr(sigma_)));
+    scalar E = this->owner().constProps().youngsModulus();
 
-    scalar G = E/(2.0*(1.0 + sigma_));
+    Estar_ = E/(2.0*(1.0 - sqr(nu)));
 
-    Gstar_ = G/(2.0*(2.0 - sigma_));
+    scalar G = E/(2.0*(1.0 + nu));
+
+    Gstar_ = G/(2.0*(2.0 - nu));
 }
 
 
@@ -79,17 +122,18 @@ bool Foam::SpringSliderDashpot<CloudType>::controlsTimestep() const
 template<class CloudType>
 Foam::label Foam::SpringSliderDashpot<CloudType>::nSubCycles() const
 {
-    scalar rMin = 0.000921;
-    scalar rhoMax = 2500;
-    scalar EstarMax = 1e4;
-    scalar vMax = 2.0;
+    scalar RMin;
+    scalar rhoMax;
+    scalar UMagMax;
+
+    findMinMaxProperties(RMin, rhoMax, UMagMax);
 
     // Note:  pi^(7/5)*(5/4)^(2/5) = 5.429675
 
     scalar minCollisionDeltaT =
         5.429675
-       *rMin
-       *pow(rhoMax/EstarMax/sqrt(vMax), 0.4)
+       *RMin
+       *pow(rhoMax/Estar_/sqrt(UMagMax), 0.4)
        /collisionResolutionSteps_;
 
     return ceil(this->owner().time().deltaT().value()/minCollisionDeltaT);

@@ -76,6 +76,17 @@ class SpringSliderDashpot
         scalar collisionResolutionSteps_;
 
 
+    // Private Member Functions
+
+        //- Find the appropriate properties for determining the minimum
+        //- allowable timestep
+        void findMinMaxProperties
+        (
+            scalar& RMin,
+            scalar& rhoMax,
+            scalar& vMagMax
+        ) const;
+
 public:
 
     //- Runtime type information

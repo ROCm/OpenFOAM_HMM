@@ -101,6 +101,12 @@ public:
             //- Minimum particle mass [kg]
             const scalar minParticleMass_;
 
+            //- Young's modulus [N/m2]
+            const scalar youngsModulus_;
+
+            //- Poisson's ratio
+            const scalar poissonsRatio_;
+
 
     public:
 
@@ -120,6 +126,12 @@ public:
 
             //- Return const access to the minimum particle mass
             inline scalar minParticleMass() const;
+
+            //- Return const access to Young's Modulus
+            inline scalar youngsModulus() const;
+
+            //- Return const access to Poisson's ratio
+            inline scalar poissonsRatio() const;
     };
 
 
@@ -238,7 +250,7 @@ protected:
             vector f_;
 
             //- Angular momentum of Parcel in global reference frame
-            // [kg m^2 s-1]
+            // [kg m2 s-1]
             vector pi_;
 
             //- Torque on particle due to collisions in global

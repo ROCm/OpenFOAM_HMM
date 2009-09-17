@@ -43,6 +43,14 @@ constantProperties::constantProperties
     minParticleMass_
     (
         dimensionedScalar(dict_.lookup("minParticleMass")).value()
+    ),
+    youngsModulus_
+    (
+        dimensionedScalar(dict_.lookup("youngsModulus")).value()
+    ),
+    poissonsRatio_
+    (
+        dimensionedScalar(dict_.lookup("poissonsRatio")).value()
     )
 {}
 
@@ -162,6 +170,24 @@ Foam::InteractingKinematicParcel<ParcelType>::
 constantProperties::minParticleMass() const
 {
     return minParticleMass_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::InteractingKinematicParcel<ParcelType>::
+constantProperties::youngsModulus() const
+{
+    return youngsModulus_;
+}
+
+
+template <class ParcelType>
+inline Foam::scalar
+Foam::InteractingKinematicParcel<ParcelType>::
+constantProperties::poissonsRatio() const
+{
+    return poissonsRatio_;
 }
 
 
