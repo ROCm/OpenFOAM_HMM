@@ -240,7 +240,7 @@ void Foam::error::abort()
             // Rewind the message buffer for the next error message
             messageStreamPtr_->rewind();
 
-            throw *this;
+            throw errorException;
         }
         else
         {
