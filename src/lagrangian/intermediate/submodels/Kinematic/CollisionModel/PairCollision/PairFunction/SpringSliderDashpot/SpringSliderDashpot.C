@@ -122,6 +122,11 @@ bool Foam::SpringSliderDashpot<CloudType>::controlsTimestep() const
 template<class CloudType>
 Foam::label Foam::SpringSliderDashpot<CloudType>::nSubCycles() const
 {
+    if (!(this->owner().size()))
+    {
+        return 1;
+    }
+
     scalar RMin;
     scalar rhoMax;
     scalar UMagMax;
@@ -129,11 +134,10 @@ Foam::label Foam::SpringSliderDashpot<CloudType>::nSubCycles() const
     findMinMaxProperties(RMin, rhoMax, UMagMax);
 
     // Note:  pi^(7/5)*(5/4)^(2/5) = 5.429675
-
     scalar minCollisionDeltaT =
         5.429675
        *RMin
-       *pow(rhoMax/Estar_/sqrt(UMagMax), 0.4)
+       *pow(rhoMax/(Estar_*sqrt(UMagMax) + VSMALL), 0.4)
        /collisionResolutionSteps_;
 
     return ceil(this->owner().time().deltaT().value()/minCollisionDeltaT);

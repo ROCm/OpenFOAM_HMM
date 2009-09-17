@@ -105,7 +105,10 @@ Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
             pairFunction_->nSubCycles(), maxOp<label>()
         );
 
-        Info<< nSubCycles << " move-collide subCycles" << endl;
+        if(nSubCycles > 1)
+        {
+            Info<< nSubCycles << " move-collide subCycles" << endl;
+        }
 
         return nSubCycles;
     }
