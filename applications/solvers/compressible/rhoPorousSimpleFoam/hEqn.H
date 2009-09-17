@@ -9,7 +9,7 @@
       - p*fvc::div(phi/fvc::interpolate(rho))
     );
 
-    pZones.addEnthalpySource(thermo, hEqn);
+    pZones.addEnthalpySource(thermo, rho, hEqn);
 
     hEqn.relax();
 

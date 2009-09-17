@@ -73,6 +73,7 @@ Foam::thermalPorousZone::thermalPorousZone
 void Foam::thermalPorousZone::addEnthalpySource
 (
     const basicThermo& thermo,
+    const volScalarField& rho,
     fvScalarMatrix& hEqn
 ) const
 {
@@ -85,7 +86,6 @@ void Foam::thermalPorousZone::addEnthalpySource
     const scalarField& V = mesh().V();
     scalarField& hDiag = hEqn.diag();
     scalarField& hSource = hEqn.source();
-    const scalarField& rho = thermo.rho();
 
     scalarField hZone = thermo.h(scalarField(cells.size(), T_.value()), cells);
     scalar rate = 1e6;

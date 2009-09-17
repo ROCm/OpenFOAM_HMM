@@ -71,7 +71,7 @@ dictionaryReplacement
 
             heater_to_bottomAir
             {
-                type            solidWallMixedTemperatureCoupled;
+                type            turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
@@ -79,21 +79,21 @@ dictionaryReplacement
             }
             heater_to_leftSolid
             {
-                type            solidWallMixedTemperatureCoupled;
+                type            turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
             }
             heater_to_rightSolid
             {
-                type            solidWallMixedTemperatureCoupled;
+                type            turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
             }
             heater_to_topAir
             {
-                type            solidWallMixedTemperatureCoupled;
+                type            turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;

@@ -22,63 +22,69 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::directMappedWallPointPatch
-
-Description
-    DirectMapped patch.
-
-SourceFiles
-    directMappedWallPointPatch.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedWallPointPatch_H
-#define directMappedWallPointPatch_H
-
-#include "wallPointPatch.H"
-#include "directMappedWallPolyPatch.H"
+#include "linearDirection.H"
+#include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-/*---------------------------------------------------------------------------*\
-                       Class directMappedWallPointPatch Declaration
-\*---------------------------------------------------------------------------*/
-
-class directMappedWallPointPatch
-:
-    public wallPointPatch
+namespace extrudeModels
 {
 
-public:
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-    //- Runtime type information
-    TypeName(directMappedWallPolyPatch::typeName_());
+defineTypeNameAndDebug(linearDirection, 0);
+
+addToRunTimeSelectionTable(extrudeModel, linearDirection, dictionary);
 
 
-    // Constructors
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-        //- Construct from polyPatch
-        directMappedWallPointPatch
-        (
-            const polyPatch& patch,
-            const pointBoundaryMesh& bm
-        )
-        :
-            wallPointPatch(patch, bm)
-        {}
-};
+linearDirection::linearDirection(const dictionary& dict)
+:
+    extrudeModel(typeName, dict),
+    direction_(coeffDict_.lookup("direction")),
+    thickness_(readScalar(coeffDict_.lookup("thickness")))
+{
+    direction_ /= mag(direction_);
+
+    if (thickness_ <= 0)
+    {
+        FatalErrorIn("linearDirection(const dictionary&)")
+            << "thickness should be positive : " << thickness_
+            << exit(FatalError);
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+linearDirection::~linearDirection()
+{}
+
+
+// * * * * * * * * * * * * * * * * Operators * * * * * * * * * * * * * * * * //
+
+point linearDirection::operator()
+(
+    const point& surfacePoint,
+    const vector& surfaceNormal,
+    const label layer
+) const
+{
+    //scalar d = thickness_*layer/nLayers_;
+    scalar d = thickness_*sumThickness(layer);
+    return surfacePoint + d*direction_;
+}
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
-
 // ************************************************************************* //
+

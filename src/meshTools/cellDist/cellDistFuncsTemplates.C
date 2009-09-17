@@ -22,63 +22,31 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Class
-    Foam::directMappedWallPointPatch
-
-Description
-    DirectMapped patch.
-
-SourceFiles
-    directMappedWallPointPatch.C
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedWallPointPatch_H
-#define directMappedWallPointPatch_H
+#include "cellDistFuncs.H"
+#include "polyMesh.H"
+#include "polyBoundaryMesh.H"
 
-#include "wallPointPatch.H"
-#include "directMappedWallPolyPatch.H"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-namespace Foam
+template<class Type>
+Foam::labelHashSet Foam::cellDistFuncs::getPatchIDs() const
 {
+    const polyBoundaryMesh& bMesh = mesh().boundaryMesh();
 
-/*---------------------------------------------------------------------------*\
-                       Class directMappedWallPointPatch Declaration
-\*---------------------------------------------------------------------------*/
+    labelHashSet patchIDs(bMesh.size());
 
-class directMappedWallPointPatch
-:
-    public wallPointPatch
-{
+    forAll(bMesh, patchI)
+    {
+        if (isA<Type>(bMesh[patchI]))
+        {
+            patchIDs.insert(patchI);
+        }
+    }
+    return patchIDs;
+}
 
-public:
-
-    //- Runtime type information
-    TypeName(directMappedWallPolyPatch::typeName_());
-
-
-    // Constructors
-
-        //- Construct from polyPatch
-        directMappedWallPointPatch
-        (
-            const polyPatch& patch,
-            const pointBoundaryMesh& bm
-        )
-        :
-            wallPointPatch(patch, bm)
-        {}
-};
-
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

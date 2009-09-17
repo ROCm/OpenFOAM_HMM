@@ -23,58 +23,72 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::directMappedWallPointPatch
+    Foam::extrudeModels::linearDirection
 
 Description
-    DirectMapped patch.
-
-SourceFiles
-    directMappedWallPointPatch.C
+    Extrudes by transforming points in a specified direction by a given distance
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef directMappedWallPointPatch_H
-#define directMappedWallPointPatch_H
+#ifndef linearDirection_H
+#define linearDirection_H
 
-#include "wallPointPatch.H"
-#include "directMappedWallPolyPatch.H"
+#include "point.H"
+#include "extrudeModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
+namespace extrudeModels
+{
 
 /*---------------------------------------------------------------------------*\
-                       Class directMappedWallPointPatch Declaration
+                    Class linearDirection Declaration
 \*---------------------------------------------------------------------------*/
 
-class directMappedWallPointPatch
+class linearDirection
 :
-    public wallPointPatch
+    public extrudeModel
 {
+    // Private data
+
+        //- Extrude direction
+        vector direction_;
+
+        //- layer thickness
+        scalar thickness_;
+
 
 public:
 
     //- Runtime type information
-    TypeName(directMappedWallPolyPatch::typeName_());
-
+    TypeName("linearDirection");
 
     // Constructors
 
-        //- Construct from polyPatch
-        directMappedWallPointPatch
+        //- Construct from dictionary
+        linearDirection(const dictionary& dict);
+
+
+    //- Destructor
+    ~linearDirection();
+
+
+    // Member Operators
+
+        point operator()
         (
-            const polyPatch& patch,
-            const pointBoundaryMesh& bm
-        )
-        :
-            wallPointPatch(patch, bm)
-        {}
+            const point& surfacePoint,
+            const vector& surfaceNormal,
+            const label layer
+        ) const;
 };
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace extrudeModels
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -82,3 +96,4 @@ public:
 #endif
 
 // ************************************************************************* //
+
