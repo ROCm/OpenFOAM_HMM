@@ -24,9 +24,83 @@ License
 
 \*---------------------------------------------------------------------------*/
 
+#include "error.H"
 #include "blockMesh.H"
+#include "cellModeller.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
+
+void Foam::blockMesh::createPoints() const
+{
+    const blockMesh& blocks = *this;
+
+    Info<< "Creating points with scale " << scaleFactor_ << endl;
+
+    //
+    // generate points
+    //
+    points_.clear();
+    points_.setSize(nPoints_);
+
+    forAll(blocks, blockI)
+    {
+        const pointField& blockPoints = blocks[blockI].points();
+
+        forAll(blockPoints, blockPointI)
+        {
+            points_
+            [
+                mergeList_
+                [
+                    blockOffsets_[blockI] + blockPointI
+                ]
+            ] = scaleFactor_ * blockPoints[blockPointI];
+        }
+    }
+}
+
+
+void Foam::blockMesh::createCells() const
+{
+    const blockMesh& blocks = *this;
+    const cellModel& hex = *(cellModeller::lookup("hex"));
+
+    Info<< "Creating cells" << endl;
+
+    //
+    // generate cells
+    //
+    cells_.clear();
+    cells_.setSize(nCells_);
+
+    label cellLabel = 0;
+
+    forAll(blocks, blockI)
+    {
+        const labelListList& blockCells = blocks[blockI].cells();
+
+        forAll(blockCells, blockCellI)
+        {
+            labelList cellPoints(blockCells[blockCellI].size());
+
+            forAll(cellPoints, cellPointI)
+            {
+                cellPoints[cellPointI] =
+                    mergeList_
+                    [
+                        blockCells[blockCellI][cellPointI]
+                      + blockOffsets_[blockI]
+                    ];
+            }
+
+            // Construct collapsed cell and add to list
+            cells_[cellLabel] = cellShape(hex, cellPoints, true);
+
+            cellLabel++;
+        }
+    }
+}
+
 
 Foam::faceList Foam::blockMesh::createPatchFaces
 (
@@ -37,7 +111,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
 
     labelList blockLabels = patchTopologyFaces.polyPatch::faceCells();
 
-    label nFaces=0;
+    label nFaces = 0;
 
     forAll(patchTopologyFaces, patchTopologyFaceLabel)
     {
@@ -143,20 +217,24 @@ Foam::faceList Foam::blockMesh::createPatchFaces
 }
 
 
-Foam::faceListList Foam::blockMesh::createPatches() const
+void Foam::blockMesh::createPatches() const
 {
+    const polyPatchList& topoPatches = topology().boundaryMesh();
+
     Info<< "Creating patches" << endl;
 
-    const polyPatchList& patchTopologies = topology().boundaryMesh();
-    faceListList patches(patchTopologies.size());
+    //
+    // generate points
+    //
 
-    forAll(patchTopologies, patchLabel)
+    patches_.clear();
+    patches_.setSize(topoPatches.size());
+
+    forAll(topoPatches, patchI)
     {
-        patches[patchLabel] =
-            createPatchFaces(patchTopologies[patchLabel]);
+        patches_[patchI] = createPatchFaces(topoPatches[patchI]);
     }
 
-    return patches;
 }
 
 // ************************************************************************* //

@@ -26,18 +26,16 @@ License
 
 #include "blockMesh.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::blockMesh::blockMesh(IOdictionary& meshDescription)
+Foam::blockMesh::blockMesh(IOdictionary& dict)
 :
-    topologyPtr_(createTopology(meshDescription)),
-    blockOffsets_(createBlockOffsets()),
-    mergeList_(createMergeList()),
-    points_(createPoints(meshDescription)),
-    cells_(createCells()),
-    patches_(createPatches())
-{}
+    blockPointField_(dict.lookup("vertices")),
+    scaleFactor_(1.0),
+    topologyPtr_(createTopology(dict))
+{
+    calcMergeInfo();
+}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
@@ -63,45 +61,54 @@ const Foam::polyMesh& Foam::blockMesh::topology() const
 }
 
 
-Foam::wordList Foam::blockMesh::patchNames() const
+const Foam::pointField& Foam::blockMesh::points() const
 {
-    const polyPatchList& patchTopologies = topology().boundaryMesh();
-    wordList names(patchTopologies.size());
-
-    forAll(names, patchI)
+    if (points_.empty())
     {
-        names[patchI] = patchTopologies[patchI].name();
+        createPoints();
     }
 
-    return names;
+    return points_;
+}
+
+
+const Foam::cellShapeList& Foam::blockMesh::cells() const
+{
+    if (cells_.empty())
+    {
+        createCells();
+    }
+
+    return cells_;
+}
+
+
+const Foam::faceListList& Foam::blockMesh::patches() const
+{
+    if (patches_.empty())
+    {
+        createPatches();
+    }
+
+    return patches_;
+}
+
+
+Foam::wordList Foam::blockMesh::patchNames() const
+{
+    return topology().boundaryMesh().names();
 }
 
 
 Foam::wordList Foam::blockMesh::patchTypes() const
 {
-    const polyPatchList& patchTopologies = topology().boundaryMesh();
-    wordList types(patchTopologies.size());
-
-    forAll(types, patchI)
-    {
-        types[patchI] = patchTopologies[patchI].type();
-    }
-
-    return types;
+    return topology().boundaryMesh().types();
 }
 
 
 Foam::wordList Foam::blockMesh::patchPhysicalTypes() const
 {
-    const polyPatchList& patchTopologies = topology().boundaryMesh();
-    wordList physicalTypes(patchTopologies.size());
-
-    forAll(physicalTypes, patchI)
-    {
-        physicalTypes[patchI] = patchTopologies[patchI].physicalType();
-    }
-
-    return physicalTypes;
+    return topology().boundaryMesh().physicalTypes();
 }
 
 

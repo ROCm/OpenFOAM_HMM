@@ -26,6 +26,7 @@ License
 
 #include "error.H"
 #include "blockDescriptor.H"
+
 #include "lineEdge.H"
 #include "lineDivide.H"
 
@@ -86,7 +87,7 @@ void Foam::blockDescriptor::setEdge
     const labelList& blockLabels = blockShape_;
 
     // set reference to global list of points
-    const pointField blockPoints = blockShape_.points(blockMeshPoints_);
+    const pointField blockPoints = blockShape_.points(blockPointField_);
 
     // Set the edge points/weights
     // The edge is a straight-line if it is not in the list of curvedEdges

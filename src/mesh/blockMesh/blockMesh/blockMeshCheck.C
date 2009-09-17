@@ -31,7 +31,7 @@ License
 // Check the blockMesh topology
 void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
 {
-    Info<< nl << "Check blockMesh topology" << endl;
+    Info<< nl << "Check topology" << endl;
 
     bool ok = true;
 
@@ -55,19 +55,19 @@ void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
     }
 
 
-    Info<< nl << tab << "Basic statistics" << endl;
+    Info<< nl << tab << "Basic statistics" << nl;
 
     Info<< tab << tab << "Number of internal faces : "
-        << bm.nInternalFaces() << endl;
+        << bm.nInternalFaces() << nl;
 
     Info<< tab << tab << "Number of boundary faces : "
-        << nBoundaryFaces << endl;
+        << nBoundaryFaces << nl;
 
     Info<< tab << tab << "Number of defined boundary faces : "
-        << nDefinedBoundaryFaces << endl;
+        << nDefinedBoundaryFaces << nl;
 
     Info<< tab << tab << "Number of undefined boundary faces : "
-        << nBoundaryFaces - nDefinedBoundaryFaces << endl;
+        << nBoundaryFaces - nDefinedBoundaryFaces << nl;
 
     if ((nBoundaryFaces - nDefinedBoundaryFaces) > 0)
     {
@@ -76,7 +76,7 @@ void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
             << "of 2D planar geometries!)" << endl;
     }
 
-    Info<< nl << tab << "Checking patch -> block consistency" << endl;
+    Info<< tab << "Checking patch -> block consistency" << endl;
 
 
     forAll(patches, patchi)

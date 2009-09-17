@@ -29,6 +29,9 @@ Description
     Creates a single block of cells from point coordinates, numbers of
     cells in each direction and an expansion ratio.
 
+Note
+    The vertices and cells for filling the block are demand-driven.
+
 SourceFiles
     block.C
     blockCreate.C
@@ -51,6 +54,10 @@ namespace Foam
 class Istream;
 class Ostream;
 
+// Forward declaration of friend functions and operators
+class block;
+Ostream& operator<<(Ostream&, const block&);
+
 /*---------------------------------------------------------------------------*\
                            Class block Declaration
 \*---------------------------------------------------------------------------*/
@@ -62,13 +69,13 @@ class block
     // Private data
 
         //- List of vertices
-        pointField vertices_;
+        mutable pointField vertices_;
 
         //- List of cells
-        labelListList cells_;
+        mutable labelListList cells_;
 
         //- Boundary patches
-        labelListListList boundaryPatches_;
+        mutable labelListListList boundaryPatches_;
 
 
     // Private Member Functions
@@ -76,17 +83,14 @@ class block
         //- Vertex label offset for a particular i,j,k position
         label vtxLabel(label i, label j, label k) const;
 
-        //- Creates vertices for cells filling the block.
-        void createPoints();
+        //- Creates vertices for cells filling the block
+        void createPoints() const;
 
-        //- Creates cells for the block.
-        void createCells();
+        //- Creates cells for filling the block
+        void createCells() const;
 
-        //- Creates boundary patches for the block
-        void createBoundary();
-
-        //- Creates vertices, cells, boundary patches for the block
-        void createPrimitives();
+        //- Creates boundary patch faces for the block
+        void createBoundary() const;
 
         //- Disallow default bitwise copy construct
         block(const block&);
@@ -101,7 +105,7 @@ public:
         //- Construct from components with Istream
         block
         (
-            const pointField& blockMeshPoints,
+            const pointField& blockPointField,
             const curvedEdgeList&,
             Istream&
         );
@@ -117,6 +121,11 @@ public:
         }
 
 
+    //- Destructor
+
+        ~block();
+
+
     // Member Functions
 
         // Access
@@ -127,11 +136,18 @@ public:
                 return *this;
             }
 
+            //- Return the points for filling the block
             const pointField& points() const;
 
+            //- Return the cells for filling the block
             const labelListList& cells() const;
 
+            //- Return the boundary patch faces for the block
             const labelListListList& boundaryPatches() const;
+
+
+            //- Clear geometry
+            void clearGeom();
 
 
     // Ostream Operator

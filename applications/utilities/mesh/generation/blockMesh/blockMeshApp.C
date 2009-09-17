@@ -203,6 +203,7 @@ int main(int argc, char *argv[])
     word defaultFacesType = emptyPolyPatch::typeName;
     wordList patchPhysicalTypes = blocks.patchPhysicalTypes();
 
+
     preservePatchTypes
     (
         runTime,
@@ -338,13 +339,45 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << nl << "Writing polyMesh" << endl;
+    Info<< nl << "Writing polyMesh" << endl;
     mesh.removeFiles();
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
             << "Failed writing polyMesh."
             << exit(FatalError);
+    }
+
+
+    //
+    // write some information
+    //
+    {
+        const polyPatchList& patches = mesh.boundaryMesh();
+
+        Info<< "----------------" << nl
+            << "Mesh Information" << nl
+            << "----------------" << nl
+            << "  " << "boundingBox: " << boundBox(mesh.points()) << nl
+            << "  " << "nPoints: " << mesh.nPoints() << nl
+            << "  " << "nCells: " << mesh.nCells() << nl
+            << "  " << "nFaces: " << mesh.nFaces() << nl
+            << "  " << "nInternalFaces: " << mesh.nInternalFaces() << nl;
+
+        Info<< "----------------" << nl
+            << "Patches" << nl
+            << "----------------" << nl;
+
+        forAll(patches, patchI)
+        {
+            const polyPatch& p = patches[patchI];
+
+            Info<< "  " << "patch " << patchI
+                << " (start: " << p.start()
+                << " size: " << p.size()
+                << ") name: " << p.name()
+                << nl;
+        }
     }
 
     Info<< nl << "End" << endl;

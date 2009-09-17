@@ -32,14 +32,14 @@ License
 Foam::blockDescriptor::blockDescriptor
 (
     const cellShape& bshape,
-    const pointField& blockMeshPoints,
+    const pointField& blockPointField,
     const curvedEdgeList& edges,
     const Vector<label>& meshDensity,
     const UList<scalar>& expand,
     const word& zoneName
 )
 :
-    blockMeshPoints_(blockMeshPoints),
+    blockPointField_(blockPointField),
     curvedEdges_(edges),
     blockShape_(bshape),
     meshDensity_(meshDensity),
@@ -53,7 +53,7 @@ Foam::blockDescriptor::blockDescriptor
         FatalErrorIn
         (
             "blockDescriptor::blockDescriptor"
-            "(const cellShape&, const pointField& blockMeshPoints, "
+            "(const cellShape&, const pointField& blockPointField, "
             "const curvedEdgeList&, const Vector<label>& meshDensity, "
             "const scalarList& expand, const word& zoneName)"
         )   << "Unknown definition of expansion ratios"
@@ -67,12 +67,12 @@ Foam::blockDescriptor::blockDescriptor
 
 Foam::blockDescriptor::blockDescriptor
 (
-    const pointField& blockMeshPoints,
+    const pointField& blockPointField,
     const curvedEdgeList& edges,
     Istream& is
 )
 :
-    blockMeshPoints_(blockMeshPoints),
+    blockPointField_(blockPointField),
     curvedEdges_(edges),
     blockShape_(is),
     meshDensity_(),
@@ -168,11 +168,17 @@ Foam::blockDescriptor::blockDescriptor
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::blockDescriptor::~blockDescriptor()
+{}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::pointField& Foam::blockDescriptor::blockPointField() const
 {
-    return blockMeshPoints_;
+    return blockPointField_;
 }
 
 
@@ -231,9 +237,8 @@ Foam::label Foam::blockDescriptor::nCells() const
 
 const Foam::point& Foam::blockDescriptor::blockPoint(const label i) const
 {
-    return blockMeshPoints_[blockShape_[i]];
+    return blockPointField_[blockShape_[i]];
 }
-
 
 
 // * * * * * * * * * * * * * * Friend Operators * * * * * * * * * * * * * * //

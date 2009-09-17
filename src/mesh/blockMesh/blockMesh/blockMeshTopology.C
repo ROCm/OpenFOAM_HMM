@@ -32,7 +32,7 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
+Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
 {
     bool topologyOK = true;
 
@@ -44,24 +44,29 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
     // get names/types for the unassigned patch faces
     // this is a bit heavy handed (and ugly), but there is currently
     // no easy way to rename polyMesh patches subsequently
-    if (const dictionary* dictPtr = meshDescription.subDictPtr("defaultPatch"))
+    if (const dictionary* dictPtr = dict.subDictPtr("defaultPatch"))
     {
         dictPtr->readIfPresent("name", defaultPatchName);
         dictPtr->readIfPresent("type", defaultPatchType);
     }
 
-    Info<< "Creating block corners" << endl;
-
-    // create blockCorners
-    pointField tmpBlockPoints(meshDescription.lookup("vertices"));
-
-    if (meshDescription.found("edges"))
+    // optional 'convertToMeters' or 'scale'  scaling factor
+    if (!dict.readIfPresent("convertToMeters", scaleFactor_))
     {
-        // read number of non-linear edges in mesh
+        dict.readIfPresent("scale", scaleFactor_);
+    }
+
+
+    //
+    // get the non-linear edges in mesh
+    //
+    if (dict.found("edges"))
+    {
         Info<< "Creating curved edges" << endl;
 
-        ITstream& is(meshDescription.lookup("edges"));
+        ITstream& is(dict.lookup("edges"));
 
+        // read number of edges in mesh
         label nEdges = 0;
 
         token firstToken(is);
@@ -84,9 +89,9 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         token lastToken(is);
         while
         (
-            !(
-                lastToken.isPunctuation()
-                && lastToken.pToken() == token::END_LIST
+           !(
+                 lastToken.isPunctuation()
+              && lastToken.pToken() == token::END_LIST
             )
         )
         {
@@ -100,7 +105,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             edges_.set
             (
                 nEdges,
-                curvedEdge::New(tmpBlockPoints, is)
+                curvedEdge::New(blockPointField_, is)
             );
 
             nEdges++;
@@ -114,13 +119,16 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
     }
     else
     {
-        Info<< "No non-linear edges" << endl;
+        Info<< "No non-linear edges defined" << endl;
     }
 
 
-    Info<< "Creating blocks" << endl;
+    //
+    // Create the blocks
+    //
+    Info<< "Creating topology blocks" << endl;
     {
-        ITstream& is(meshDescription.lookup("blocks"));
+        ITstream& is(dict.lookup("blocks"));
 
         // read number of blocks in mesh
         label nBlocks = 0;
@@ -145,9 +153,9 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         token lastToken(is);
         while
         (
-            !(
-                lastToken.isPunctuation()
-                && lastToken.pToken() == token::END_LIST
+           !(
+                 lastToken.isPunctuation()
+              && lastToken.pToken() == token::END_LIST
             )
         )
         {
@@ -163,7 +171,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
                 nBlocks,
                 new block
                 (
-                    tmpBlockPoints,
+                    blockPointField_,
                     edges_,
                     is
                 )
@@ -172,7 +180,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             topologyOK = topologyOK && blockLabelsOK
             (
                 nBlocks,
-                tmpBlockPoints,
+                blockPointField_,
                 blocks[nBlocks].blockShape()
             );
 
@@ -187,14 +195,17 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
     }
 
 
-    Info<< "Creating patches" << endl;
+    //
+    // Create the patches
+    //
+    Info<< "Creating topology patches" << endl;
 
     faceListList tmpBlocksPatches;
     wordList patchNames;
     wordList patchTypes;
 
     {
-        ITstream& is(meshDescription.lookup("patches"));
+        ITstream& is(dict.lookup("patches"));
 
         // read number of patches in mesh
         label nPatches = 0;
@@ -223,9 +234,9 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         while
         (
             !(
-                lastToken.isPunctuation()
-                && lastToken.pToken() == token::END_LIST
-            )
+                 lastToken.isPunctuation()
+              && lastToken.pToken() == token::END_LIST
+             )
         )
         {
             if (tmpBlocksPatches.size() <= nPatches)
@@ -261,7 +272,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             topologyOK = topologyOK && patchLabelsOK
             (
                 nPatches,
-                tmpBlockPoints,
+                blockPointField_,
                 tmpBlocksPatches[nPatches]
             );
 
@@ -284,7 +295,10 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
     }
 
 
-    Info<< "Creating topology" << endl;
+    //
+    // Create the topology
+    //
+    Info<< "Creating topology mesh" << endl;
 
     PtrList<cellShape> tmpBlockShapes(blocks.size());
     forAll(blocks, blockI)
@@ -295,7 +309,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
             new cellShape(blocks[blockI].blockShape())
         );
 
-        if (tmpBlockShapes[blockI].mag(tmpBlockPoints) < 0.0)
+        if (tmpBlockShapes[blockI].mag(blockPointField_) < 0.0)
         {
             WarningIn
             (
@@ -309,8 +323,8 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
 
     preservePatchTypes
     (
-        meshDescription.time(),
-        meshDescription.time().constant(),
+        dict.time(),
+        dict.time().constant(),
         polyMesh::meshSubDir,
         patchNames,
         patchTypes,
@@ -319,18 +333,20 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& meshDescription)
         patchPhysicalTypes
     );
 
+
+    // construct the topology as its own mesh
     polyMesh* blockMeshPtr = new polyMesh
     (
         IOobject
         (
             "blockMesh",
-            meshDescription.time().constant(),
-            meshDescription.time(),
+            dict.time().constant(),
+            dict.time(),
             IOobject::NO_READ,
             IOobject::NO_WRITE,
             false
         ),
-        xferMove(tmpBlockPoints),
+        xferCopy(blockPointField_),   // copy these points, do NOT move
         tmpBlockShapes,
         tmpBlocksPatches,
         patchNames,

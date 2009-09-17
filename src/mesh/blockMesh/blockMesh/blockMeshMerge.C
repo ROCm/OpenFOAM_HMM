@@ -28,13 +28,32 @@ License
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-Foam::labelList Foam::blockMesh::createMergeList()
+void Foam::blockMesh::calcMergeInfo()
 {
+    const blockMesh& blocks = *this;
+
+    Info<< "Creating block offsets" << endl;
+
+    blockOffsets_.setSize(blocks.size());
+
+    nPoints_ = 0;
+    nCells_  = 0;
+
+    forAll(blocks, blockI)
+    {
+        blockOffsets_[blockI] = nPoints_;
+
+        nPoints_ += blocks[blockI].nPoints();
+        nCells_  += blocks[blockI].nCells();
+    }
+
+
     Info<< "Creating merge list " << flush;
 
-    labelList MergeList(nPoints_, -1);
+    // set unused to -1
+    mergeList_.setSize(nPoints_);
+    mergeList_ = -1;
 
-    const blockMesh& blocks = *this;
 
     const pointField& blockPoints = topology().points();
     const cellList& blockCells = topology().cells();
@@ -45,6 +64,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
     labelListListList glueMergePairs(blockFaces.size());
 
     const labelList& faceNeighbourBlocks = topology().faceNeighbour();
+
 
     forAll(blockFaces, blockFaceLabel)
     {
@@ -74,7 +94,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
         if (!foundFace)
         {
-            FatalErrorIn("blockMesh::createMergeList()")
+            FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockPlabel
                 << exit(FatalError);
         };
@@ -130,17 +150,17 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
                             label minPP2 = min(PpointLabel, PpointLabel2);
 
-                            if (MergeList[PpointLabel] != -1)
+                            if (mergeList_[PpointLabel] != -1)
                             {
-                                minPP2 = min(minPP2, MergeList[PpointLabel]);
+                                minPP2 = min(minPP2, mergeList_[PpointLabel]);
                             }
 
-                            if (MergeList[PpointLabel2] != -1)
+                            if (mergeList_[PpointLabel2] != -1)
                             {
-                                minPP2 = min(minPP2, MergeList[PpointLabel2]);
+                                minPP2 = min(minPP2, mergeList_[PpointLabel2]);
                             }
 
-                            MergeList[PpointLabel] = MergeList[PpointLabel2]
+                            mergeList_[PpointLabel] = mergeList_[PpointLabel2]
                                 = minPP2;
                         }
                         else
@@ -183,7 +203,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
         if (!foundFace)
         {
-            FatalErrorIn("blockMesh::createMergeList()")
+            FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockNlabel
                 << exit(FatalError);
         };
@@ -193,7 +213,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
         if (blockPfaceFaces.size() != blockNfaceFaces.size())
         {
-            FatalErrorIn("blockMesh::createMergeList()")
+            FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Inconsistent number of faces between block pair "
                 << blockPlabel << " and " << blockNlabel
                 << exit(FatalError);
@@ -251,17 +271,17 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
                             label minPN = min(PpointLabel, NpointLabel);
 
-                            if (MergeList[PpointLabel] != -1)
+                            if (mergeList_[PpointLabel] != -1)
                             {
-                                minPN = min(minPN, MergeList[PpointLabel]);
+                                minPN = min(minPN, mergeList_[PpointLabel]);
                             }
 
-                            if (MergeList[NpointLabel] != -1)
+                            if (mergeList_[NpointLabel] != -1)
                             {
-                                minPN = min(minPN, MergeList[NpointLabel]);
+                                minPN = min(minPN, mergeList_[NpointLabel]);
                             }
 
-                            MergeList[PpointLabel] = MergeList[NpointLabel]
+                            mergeList_[PpointLabel] = mergeList_[NpointLabel]
                                 = minPN;
                         }
                     }
@@ -271,7 +291,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
             {
                 if (cp[blockPfaceFacePointLabel] == -1)
                 {
-                    FatalErrorIn("blockMesh::createMergeList()")
+                    FatalErrorIn("blockMesh::calcMergeInfo()")
                         << "Inconsistent point locations between block pair "
                         << blockPlabel << " and " << blockNlabel << nl
                         << "    probably due to inconsistent grading."
@@ -374,18 +394,18 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
                     if
                     (
-                        MergeList[PpointLabel]
-                     != MergeList[NpointLabel]
+                        mergeList_[PpointLabel]
+                     != mergeList_[NpointLabel]
                     )
                     {
                         changedPointMerge = true;
 
-                        MergeList[PpointLabel]
-                      = MergeList[NpointLabel]
+                        mergeList_[PpointLabel]
+                      = mergeList_[NpointLabel]
                       = min
                         (
-                            MergeList[PpointLabel],
-                            MergeList[NpointLabel]
+                            mergeList_[PpointLabel],
+                            mergeList_[NpointLabel]
                         );
                     }
                 }
@@ -395,7 +415,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
         if (nPasses > 100)
         {
-            FatalErrorIn("blockMesh::createMergeList()")
+            FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Point merging failed after max number of passes."
                 << abort(FatalError);
         }
@@ -436,7 +456,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
         if (!foundFace)
         {
-            FatalErrorIn("blockMesh::createMergeList()")
+            FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockPlabel
                 << exit(FatalError);
         };
@@ -463,7 +483,7 @@ Foam::labelList Foam::blockMesh::createMergeList()
 
         if (!foundFace)
         {
-            FatalErrorIn("blockMesh::createMergeList()")
+            FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "Cannot find merge face for block " << blockNlabel
                 << exit(FatalError);
         };
@@ -485,9 +505,9 @@ Foam::labelList Foam::blockMesh::createMergeList()
                     blockPfaceFacePoints[blockPfaceFacePointLabel]
                   + blockOffsets_[blockPlabel];
 
-                if (MergeList[PpointLabel] == -1)
+                if (mergeList_[PpointLabel] == -1)
                 {
-                    FatalErrorIn("blockMesh::createMergeList()")
+                    FatalErrorIn("blockMesh::calcMergeInfo()")
                         << "Unable to merge point "
                         << blockPfaceFacePointLabel
                         << ' ' << blockPpoints[blockPfaceFacePointLabel]
@@ -511,9 +531,9 @@ Foam::labelList Foam::blockMesh::createMergeList()
                     blockNfaceFacePoints[blockNfaceFacePointLabel]
                   + blockOffsets_[blockNlabel];
 
-                if (MergeList[NpointLabel] == -1)
+                if (mergeList_[NpointLabel] == -1)
                 {
-                    FatalErrorIn("blockMesh::createMergeList()")
+                    FatalErrorIn("blockMesh::calcMergeInfo()")
                         << "unable to merge point "
                         << blockNfaceFacePointLabel
                         << ' ' << blockNpoints[blockNfaceFacePointLabel]
@@ -532,33 +552,31 @@ Foam::labelList Foam::blockMesh::createMergeList()
     // given old point label
     label newPointLabel = 0;
 
-    forAll(MergeList, pointLabel)
+    forAll(mergeList_, pointLabel)
     {
-        if (MergeList[pointLabel] > pointLabel)
+        if (mergeList_[pointLabel] > pointLabel)
         {
-            FatalErrorIn("blockMesh::createMergeList()")
+            FatalErrorIn("blockMesh::calcMergeInfo()")
                 << "ouch" << exit(FatalError);
         }
 
         if
         (
-            (MergeList[pointLabel] == -1)
-         || MergeList[pointLabel] == pointLabel
+            mergeList_[pointLabel] == -1
+         || mergeList_[pointLabel] == pointLabel
         )
         {
-            MergeList[pointLabel] = newPointLabel;
+            mergeList_[pointLabel] = newPointLabel;
             newPointLabel++;
         }
         else
         {
-            MergeList[pointLabel] = MergeList[MergeList[pointLabel]];
+            mergeList_[pointLabel] = mergeList_[mergeList_[pointLabel]];
         }
     }
 
     nPoints_ = newPointLabel;
 
-
-    return MergeList;
 }
 
 // ************************************************************************* //

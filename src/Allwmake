@@ -51,6 +51,7 @@ lagrangian/Allwmake
 postProcessing/Allwmake
 conversion/Allwmake
 
+mesh/Allwmake
 wmake libso autoMesh
 wmake libso errorEstimation
 

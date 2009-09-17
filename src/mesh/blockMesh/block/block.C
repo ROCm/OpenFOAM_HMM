@@ -27,52 +27,68 @@ License
 #include "error.H"
 #include "block.H"
 
-
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::block::block
 (
-    const pointField& blockMeshPoints,
+    const pointField& blockPointField,
     const curvedEdgeList& edges,
     Istream& is
 )
 :
-    blockDescriptor(blockMeshPoints, edges, is),
-    vertices_(nPoints()),
-    cells_(nCells()),
-    boundaryPatches_(6)
-{
-    createPrimitives();
-}
+    blockDescriptor(blockPointField, edges, is),
+    vertices_(0),
+    cells_(0),
+    boundaryPatches_(0)
+{}
 
 
-Foam::block::block(const blockDescriptor& definition)
+Foam::block::block(const blockDescriptor& blockDesc)
 :
-    blockDescriptor(definition),
-    vertices_(nPoints()),
-    cells_(nCells()),
-    boundaryPatches_(6)
-{
-    createPrimitives();
-}
+    blockDescriptor(blockDesc),
+    vertices_(0),
+    cells_(0),
+    boundaryPatches_(0)
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+Foam::block::~block()
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 const Foam::pointField& Foam::block::points() const
 {
+    if (vertices_.empty())
+    {
+        createPoints();
+    }
+
     return vertices_;
 }
 
 
 const Foam::labelListList& Foam::block::cells() const
 {
+    if (cells_.empty())
+    {
+        createCells();
+    }
+
     return cells_;
 }
 
 
 const Foam::labelListListList& Foam::block::boundaryPatches() const
 {
+    if (boundaryPatches_.empty())
+    {
+        createBoundary();
+    }
+
     return boundaryPatches_;
 }
 

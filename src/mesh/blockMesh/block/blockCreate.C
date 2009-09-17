@@ -27,7 +27,6 @@ License
 #include "error.H"
 #include "block.H"
 
-
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 Foam::label Foam::block::vtxLabel(label i, label j, label k) const
@@ -41,7 +40,7 @@ Foam::label Foam::block::vtxLabel(label i, label j, label k) const
 }
 
 
-void Foam::block::createPoints()
+void Foam::block::createPoints() const
 {
     // set local variables for mesh specification
     const label ni = meshDensity().x();
@@ -63,7 +62,11 @@ void Foam::block::createPoints()
     const List< List<point> >& p = blockEdgePoints();
     const scalarListList& w = blockEdgeWeights();
 
+    //
     // generate vertices
+    //
+    vertices_.clear();
+    vertices_.setSize(nPoints());
 
     for (label k = 0; k <= nk; k++)
     {
@@ -71,7 +74,7 @@ void Foam::block::createPoints()
         {
             for (label i = 0; i <= ni; i++)
             {
-                label vertexNo = vtxLabel(i, j, k);
+                const label vertexNo = vtxLabel(i, j, k);
 
                 // points on edges
                 vector edgex1 = p000 + (p100 - p000)*w[0][i];
@@ -88,6 +91,7 @@ void Foam::block::createPoints()
                 vector edgez2 = p100 + (p101 - p100)*w[9][k];
                 vector edgez3 = p110 + (p111 - p110)*w[10][k];
                 vector edgez4 = p010 + (p011 - p010)*w[11][k];
+
 
                 // calculate the importance factors for all edges
 
@@ -109,7 +113,6 @@ void Foam::block::createPoints()
                      (1.0 - w[2][i])*w[7][j]*w[11][k]
                    + w[2][i]*w[6][j]*w[10][k]
                 );
-
 
                 scalar impx4 =
                 (
@@ -187,6 +190,7 @@ void Foam::block::createPoints()
                 impz3 /= magImpz;
                 impz4 /= magImpz;
 
+
                 // calculate the correction vectors
                 vector corx1 = impx1*(p[0][i] - edgex1);
                 vector corx2 = impx2*(p[1][i] - edgex2);
@@ -226,34 +230,44 @@ void Foam::block::createPoints()
 
 
                 // add the contributions
-                vertices_[vertexNo] = edgex1 + edgex2 + edgex3 + edgex4;
-                vertices_[vertexNo] += edgey1 + edgey2 + edgey3 + edgey4;
-                vertices_[vertexNo] += edgez1 + edgez2 + edgez3 + edgez4;
+                vertices_[vertexNo] =
+                (
+                    edgex1 + edgex2 + edgex3 + edgex4
+                  + edgey1 + edgey2 + edgey3 + edgey4
+                  + edgez1 + edgez2 + edgez3 + edgez4
+                ) / 3.0;
 
-                vertices_[vertexNo] /= 3.0;
-
-                vertices_[vertexNo] += corx1 + corx2 + corx3 + corx4;
-                vertices_[vertexNo] += cory1 + cory2 + cory3 + cory4;
-                vertices_[vertexNo] += corz1 + corz2 + corz3 + corz4;
+                vertices_[vertexNo] +=
+                (
+                    corx1 + corx2 + corx3 + corx4
+                  + cory1 + cory2 + cory3 + cory4
+                  + corz1 + corz2 + corz3 + corz4
+                );
             }
         }
     }
 }
 
 
-void Foam::block::createCells()
+void Foam::block::createCells() const
 {
     const label ni = meshDensity().x();
     const label nj = meshDensity().y();
     const label nk = meshDensity().z();
 
+    //
+    // generate cells
+    //
+    cells_.clear();
+    cells_.setSize(nCells());
+
     label cellNo = 0;
 
-    for (label k = 0; k <= nk - 1; k++)
+    for (label k = 0; k < nk; k++)
     {
-        for (label j = 0; j <= nj - 1; j++)
+        for (label j = 0; j < nj; j++)
         {
-            for (label i = 0; i <= ni - 1; i++)
+            for (label i = 0; i < ni; i++)
             {
                 cells_[cellNo].setSize(8);
 
@@ -272,11 +286,18 @@ void Foam::block::createCells()
 }
 
 
-void Foam::block::createBoundary()
+void Foam::block::createBoundary() const
 {
     const label ni = meshDensity().x();
     const label nj = meshDensity().y();
     const label nk = meshDensity().z();
+
+    //
+    // generate boundaries on each side of the hex
+    //
+    boundaryPatches_.clear();
+    boundaryPatches_.setSize(6);
+
 
     // x-direction
 
@@ -285,9 +306,9 @@ void Foam::block::createBoundary()
 
     // x-min
     boundaryPatches_[wallLabel].setSize(nj*nk);
-    for (label k = 0; k <= nk - 1; k++)
+    for (label k = 0; k < nk; k++)
     {
-        for (label j = 0; j <= nj - 1; j++)
+        for (label j = 0; j < nj; j++)
         {
             boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
 
@@ -312,9 +333,9 @@ void Foam::block::createBoundary()
 
     boundaryPatches_[wallLabel].setSize(nj*nk);
 
-    for (label k = 0; k <= nk - 1; k++)
+    for (label k = 0; k < nk; k++)
     {
-        for (label j = 0; j <= nj - 1; j++)
+        for (label j = 0; j < nj; j++)
         {
             boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
 
@@ -340,9 +361,9 @@ void Foam::block::createBoundary()
     wallCellLabel = 0;
 
     boundaryPatches_[wallLabel].setSize(ni*nk);
-    for (label i = 0; i <= ni - 1; i++)
+    for (label i = 0; i < ni; i++)
     {
-        for (label k = 0; k <= nk - 1; k++)
+        for (label k = 0; k < nk; k++)
         {
             boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
 
@@ -367,9 +388,9 @@ void Foam::block::createBoundary()
 
     boundaryPatches_[wallLabel].setSize(ni*nk);
 
-    for (label i = 0; i <= ni - 1; i++)
+    for (label i = 0; i < ni; i++)
     {
-        for (label k = 0; k <= nk - 1; k++)
+        for (label k = 0; k < nk; k++)
         {
             boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
 
@@ -396,9 +417,9 @@ void Foam::block::createBoundary()
 
     boundaryPatches_[wallLabel].setSize(ni*nj);
 
-    for (label i = 0; i <= ni - 1; i++)
+    for (label i = 0; i < ni; i++)
     {
-        for (label j = 0; j <= nj - 1; j++)
+        for (label j = 0; j < nj; j++)
         {
             boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
 
@@ -423,9 +444,9 @@ void Foam::block::createBoundary()
 
     boundaryPatches_[wallLabel].setSize(ni*nj);
 
-    for (label i = 0; i <= ni - 1; i++)
+    for (label i = 0; i < ni; i++)
     {
-        for (label j = 0; j <= nj - 1; j++)
+        for (label j = 0; j < nj; j++)
         {
             boundaryPatches_[wallLabel][wallCellLabel].setSize(4);
 
@@ -446,16 +467,11 @@ void Foam::block::createBoundary()
 }
 
 
-void Foam::block::createPrimitives()
+void Foam::block::clearGeom()
 {
-    // create points
-    createPoints();
-
-    // generate internal cells
-    createCells();
-
-    // generate boundary patches
-    createBoundary();
+    vertices_.clear();
+    cells_.clear();
+    boundaryPatches_.clear();
 }
 
 

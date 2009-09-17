@@ -26,15 +26,16 @@ Class
     Foam::blockMesh
 
 Description
+    A multi-block mesh generator
+
+Note
+    The vertices, cells and patches for filling the blocks are demand-driven.
 
 SourceFiles
     blockMesh.C
-    blockMeshCells.C
     blockMeshCheck.C
-    blockMeshMergeList.C
-    blockMeshOffsets.C
-    blockMeshPatches.C
-    blockMeshPoints.C
+    blockMeshCreate.C
+    blockMeshMerge.C
     blockMeshTopology.C
 
 \*---------------------------------------------------------------------------*/
@@ -62,19 +63,34 @@ class blockMesh
 {
     // Private data
 
-        label nPoints_;
-        label nCells_;
+        //- Point field defining the block mesh (corners)
+        pointField blockPointField_;
 
+        //- The list of curved edges
         curvedEdgeList edges_;
 
+        //- The scaling factor to convert to meters
+        scalar scaleFactor_;
+
+        //- The blocks themselves (the topology) as a polyMesh
         polyMesh* topologyPtr_;
 
+        label nPoints_;
+
+        //- The sum of all cells in each block
+        label nCells_;
+
+        //- The point offset added to each block
         labelList blockOffsets_;
+
+        //- The merge points information
         labelList mergeList_;
 
-        pointField points_;
-        cellShapeList cells_;
-        faceListList patches_;
+        mutable pointField points_;
+
+        mutable cellShapeList cells_;
+
+        mutable faceListList patches_;
 
 
     // Private Member Functions
@@ -96,14 +112,14 @@ class blockMesh
         polyMesh* createTopology(IOdictionary&);
         void checkBlockMesh(const polyMesh&) const;
 
-        labelList createBlockOffsets();
-        labelList createMergeList();
-
-        pointField createPoints(const dictionary&) const;
-        cellShapeList createCells() const;
+        //- Determine the merge info and the final number of cells/points
+        void calcMergeInfo();
 
         faceList createPatchFaces(const polyPatch& patchTopologyFaces) const;
-        faceListList createPatches() const;
+
+        void createPoints() const;
+        void createCells() const;
+        void createPatches() const;
 
         //- as copy (not implemented)
         blockMesh(const blockMesh&);
@@ -133,20 +149,11 @@ public:
                 return edges_;
             }
 
-            const pointField& points() const
-            {
-                return points_;
-            }
+            const pointField& points() const;
 
-            const cellShapeList& cells() const
-            {
-                return cells_;
-            }
+            const cellShapeList& cells() const;
 
-            const faceListList& patches() const
-            {
-                return patches_;
-            }
+            const faceListList& patches() const;
 
             wordList patchNames() const;
 

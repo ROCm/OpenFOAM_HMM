@@ -38,8 +38,8 @@ SourceFiles
 #ifndef blockDescriptor_H
 #define blockDescriptor_H
 
-#include "point.H"
 #include "cellShape.H"
+#include "pointField.H"
 #include "scalarList.H"
 #include "curvedEdgeList.H"
 
@@ -51,6 +51,11 @@ namespace Foam
 class Istream;
 class Ostream;
 
+// Forward declaration of friend functions and operators
+class blockMesh;
+class blockDescriptor;
+Ostream& operator<<(Ostream&, const blockDescriptor&);
+
 /*---------------------------------------------------------------------------*\
                        Class blockDescriptor Declaration
 \*---------------------------------------------------------------------------*/
@@ -60,7 +65,7 @@ class blockDescriptor
     // Private data
 
         //- Reference to point field defining the block mesh
-        const pointField& blockMeshPoints_;
+        const pointField& blockPointField_;
 
         //- Reference to a list of curved edges
         const curvedEdgeList& curvedEdges_;
@@ -106,7 +111,7 @@ public:
         blockDescriptor
         (
             const cellShape&,
-            const pointField& blockMeshPoints,
+            const pointField& blockPointField,
             const curvedEdgeList&,
             const Vector<label>& meshDensity,
             const UList<scalar>& expand,
@@ -116,7 +121,7 @@ public:
         //- Construct from Istream
         blockDescriptor
         (
-            const pointField& blockMeshPoints,
+            const pointField& blockPointField,
             const curvedEdgeList&,
             Istream&
         );
@@ -127,6 +132,11 @@ public:
             notImplemented("blockDescriptor::clone()");
             return autoPtr<blockDescriptor>(NULL);
         }
+
+
+    // Destructor
+
+        ~blockDescriptor();
 
 
     // Member Functions
