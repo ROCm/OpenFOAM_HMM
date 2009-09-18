@@ -224,10 +224,7 @@ void Foam::SpringSliderDashpot<CloudType>::evaluatePair
         {
             // Tangential force greater than sliding friction, particle slips
 
-            fT_AB =
-               -mu_*mag(fN_AB)
-               *tangentialOverlap_AB/mag(tangentialOverlap_AB)
-              - etaT*USlip_AB;
+            fT_AB = -mu_*mag(fN_AB)*USlip_AB/mag(USlip_AB);
 
             tangentialOverlap_AB = vector::zero;
             tangentialOverlap_BA = vector::zero;

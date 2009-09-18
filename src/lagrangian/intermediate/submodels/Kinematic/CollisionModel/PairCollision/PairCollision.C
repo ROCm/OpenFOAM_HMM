@@ -193,8 +193,7 @@ void Foam::PairCollision<CloudType>::collide()
     // Loop over all referred cells
     forAll(ril, refCellI)
     {
-        ReferredCell<typename CloudType::parcelType>& refCell =
-            ril[refCellI];
+        ReferredCell<typename CloudType::parcelType>& refCell = ril[refCellI];
 
         const labelList& realCells = refCell.realCellsForInteraction();
 
