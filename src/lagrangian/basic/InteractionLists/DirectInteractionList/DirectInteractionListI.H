@@ -35,6 +35,14 @@ Foam::DirectInteractionList<ParticleType>::wallFaces() const
 
 
 template<class ParticleType>
+inline const Foam::labelListList&
+Foam::DirectInteractionList<ParticleType>::referredCellsForInteraction() const
+{
+    return referredCellsForInteraction_;
+}
+
+
+template<class ParticleType>
 inline const Foam::InteractionLists<ParticleType>&
 Foam::DirectInteractionList<ParticleType>::il() const
 {

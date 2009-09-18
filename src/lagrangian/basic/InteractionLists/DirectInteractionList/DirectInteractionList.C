@@ -26,6 +26,7 @@ License
 
 #include "DirectInteractionList.H"
 #include "InteractionLists.H"
+#include "ReferredCellList.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -397,7 +398,8 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 :
     labelListList(il.mesh().nCells()),
     il_(il),
-    wallFaces_(il.mesh().nCells())
+    wallFaces_(il.mesh().nCells()),
+    referredCellsForInteraction_(il.mesh().nCells())
 {
     if ((*this).size() > 1)
     {
@@ -423,7 +425,8 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 :
     labelListList(il.mesh().nCells()),
     il_(il),
-    wallFaces_(il.mesh().nCells())
+    wallFaces_(il.mesh().nCells()),
+    referredCellsForInteraction_(il.mesh().nCells())
 {
     Info<< "    Read DirectInteractionList from disk not implemented" << endl;
 }
@@ -434,6 +437,113 @@ Foam::DirectInteractionList<ParticleType>::DirectInteractionList
 template<class ParticleType>
 Foam::DirectInteractionList<ParticleType>::~DirectInteractionList()
 {}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParticleType>
+void Foam::DirectInteractionList<ParticleType>::buildInverseAddressing()
+{
+    const ReferredCellList<ParticleType>& ril(il_.ril());
+
+    // Temporary Dynamic lists for accumulation
+    List<DynamicList<label> > referredCellsForInteraction
+    (
+        referredCellsForInteraction_.size()
+    );
+
+     // Loop over all referred cells
+    forAll(ril, refCellI)
+    {
+        const ReferredCell<ParticleType>& refCell = ril[refCellI];
+
+        const labelList& realCells = refCell.realCellsForInteraction();
+
+        // Loop over all real cells in that the referred cell is to
+        // supply interactions to and record the index of this
+        // referred cell in the cells entry in
+        // referredCellsForInteraction_
+
+        forAll(realCells, realCellI)
+        {
+            referredCellsForInteraction[realCells[realCellI]].append(refCellI);
+        }
+    }
+
+    forAll(referredCellsForInteraction_, cellI)
+    {
+        referredCellsForInteraction_[cellI].transfer
+        (
+            referredCellsForInteraction[cellI]
+        );
+    }
+}
+
+
+template<class ParticleType>
+void Foam::DirectInteractionList<ParticleType>::
+writeReferredCellsForInteraction() const
+{
+    const ReferredCellList<ParticleType>& ril(il_.ril());
+
+    forAll(*this, cellI)
+    {
+        const labelList& refCells = referredCellsForInteraction_[cellI];
+
+        if (!refCells.size())
+        {
+            continue;
+        }
+
+        fileName fName =
+            il_.mesh().time().path()
+           /"referredCellsForInteraction_" + name(cellI) + ".obj";
+
+        Info<< "    Writing " << fName.name() << endl;
+
+        OFstream referredCellsFile(fName);
+
+        label vertexOffset = 1;
+
+        forAll(refCells, refCellForInteractionI)
+        {
+            const ReferredCell<ParticleType>& refCell =
+                ril[refCells[refCellForInteractionI]];
+
+            const vectorList& refCellPts = refCell.vertexPositions();
+
+            const faceList& refCellFaces = refCell.faces();
+
+            forAll(refCellPts, ptI)
+            {
+                referredCellsFile
+                << "v "
+                    << refCellPts[ptI].x() << " "
+                    << refCellPts[ptI].y() << " "
+                    << refCellPts[ptI].z()
+                    << nl;
+            }
+
+            forAll(refCellFaces, faceI)
+            {
+                referredCellsFile<< "f";
+
+                forAll(refCellFaces[faceI], fPtI)
+                {
+                    referredCellsFile
+                    << " "
+                        << refCellFaces[faceI][fPtI] + vertexOffset;
+                }
+
+                referredCellsFile<< nl;
+            }
+
+            vertexOffset += refCellPts.size();
+        }
+
+        referredCellsFile.flush();
+    }
+}
 
 
 // ************************************************************************* //

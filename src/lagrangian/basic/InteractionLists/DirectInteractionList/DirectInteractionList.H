@@ -26,6 +26,8 @@ Class
     Foam::DirectInteractionList
 
 Description
+    Data stored that specifies what a "real" cell (one on the current
+    processor) interacts with.
 
 SourceFiles
     DirectInteractionListI.H
@@ -65,6 +67,10 @@ class DirectInteractionList
         //- Data specifying which patch faces of type "wall" are in range
         //  of each cell
         labelListList wallFaces_;
+
+        //- Data specifying which referred cells are in range of each
+        //  cell, Inverse data of ReferredCell's realCellsForInteraction
+        labelListList referredCellsForInteraction_;
 
 
     // Private Member Functions
@@ -108,11 +114,26 @@ public:
 
     // Member Functions
 
+        //- Build referredCellsForInteraction by interrogating the
+        //- ReferredCellList of the InteractionLists object that owns
+        //- this object.
+        void buildInverseAddressing();
+
+
         // Access
 
-        inline const labelListList& wallFaces() const;
+            inline const labelListList& wallFaces() const;
 
-        inline const InteractionLists<ParticleType>& il() const;
+            inline const labelListList& referredCellsForInteraction() const;
+
+            inline const InteractionLists<ParticleType>& il() const;
+
+
+        // Write
+
+            //- Write the referred cells in range of each real cell
+            void writeReferredCellsForInteraction() const;
+
 };
 
 

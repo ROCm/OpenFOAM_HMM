@@ -46,7 +46,9 @@ Foam::InteractionLists<ParticleType>::InteractionLists
     maxDistanceSqr_(maxDistanceSqr),
     dil_(*this, pointPointListBuild),
     ril_(*this, pointPointListBuild)
-{}
+{
+    dil_.buildInverseAddressing();
+}
 
 
 template<class ParticleType>
