@@ -24,43 +24,43 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PairFunction.H"
+#include "PairModel.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::autoPtr<Foam::PairFunction<CloudType> >
-Foam::PairFunction<CloudType>::New
+Foam::autoPtr<Foam::PairModel<CloudType> >
+Foam::PairModel<CloudType>::New
 (
     const dictionary& dict,
     CloudType& owner
 )
 {
-    word PairFunctionType(dict.lookup("PairFunction"));
+    word PairModelType(dict.lookup("PairModel"));
 
-    Info<< "Selecting PairFunction " << PairFunctionType
+    Info<< "Selecting PairModel " << PairModelType
         << endl;
 
     typename dictionaryConstructorTable::iterator cstrIter =
-        dictionaryConstructorTablePtr_->find(PairFunctionType);
+        dictionaryConstructorTablePtr_->find(PairModelType);
 
     if (cstrIter == dictionaryConstructorTablePtr_->end())
     {
         FatalErrorIn
         (
-            "PairFunction<CloudType>::New"
+            "PairModel<CloudType>::New"
             "("
                 "const dictionary&, "
                 "CloudType&"
             ")"
-        )   << "Unknown PairFunctionType type "
-            << PairFunctionType
+        )   << "Unknown PairModelType type "
+            << PairModelType
             << ", constructor not in hash table" << nl << nl
-            << "    Valid PairFunction types are:" << nl
+            << "    Valid PairModel types are:" << nl
             << dictionaryConstructorTablePtr_->sortedToc() << exit(FatalError);
     }
 
-    return autoPtr<PairFunction<CloudType> >(cstrIter()(dict, owner));
+    return autoPtr<PairModel<CloudType> >(cstrIter()(dict, owner));
 }
 
 

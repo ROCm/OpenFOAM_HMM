@@ -124,7 +124,7 @@ bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
             (
                 pointPosition,
                 refCell.faces()[rCF],
-                refCell.vertexPositions(),
+                refCell.points(),
                 refCell.faceCentres()[rCF],
                 refCell.faceAreas()[rCF]
             )
@@ -141,7 +141,7 @@ bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 template<class ParticleType>
 bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 (
-    const vectorList& pointsToTest,
+    const pointField& pointsToTest,
     const label faceNo
 ) const
 {
@@ -176,7 +176,7 @@ bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 
     const vector& faceA(mesh_.faceAreas()[faceNo]);
 
-    const vectorList& points(mesh_.points());
+    const pointField& points(mesh_.points());
 
     return testPointFaceDistance
     (
@@ -194,7 +194,7 @@ bool Foam::InteractionLists<ParticleType>::testPointFaceDistance
 (
     const vector& p,
     const labelList& faceToTest,
-    const vectorList& points,
+    const pointField& points,
     const vector& faceC,
     const vector& faceA
 ) const
@@ -462,8 +462,8 @@ Foam::InteractionLists<ParticleType>::ReferredCellsInRangeOfSegment
 
         forAll(referredInteractionList, rIL)
         {
-            const vectorList& refCellPoints
-                = referredInteractionList[rIL].vertexPositions();
+            const pointField& refCellPoints
+                = referredInteractionList[rIL].points();
 
             if (testPointFaceDistance(refCellPoints, f))
             {
@@ -500,8 +500,8 @@ Foam::InteractionLists<ParticleType>::ReferredCellsInRangeOfSegment
 
         forAll(referredInteractionList, rIL)
         {
-            const vectorList& refCellPoints
-                = referredInteractionList[rIL].vertexPositions();
+            const pointField& refCellPoints
+                = referredInteractionList[rIL].points();
 
             const edgeList& refCellEdges
                 = referredInteractionList[rIL].edges();

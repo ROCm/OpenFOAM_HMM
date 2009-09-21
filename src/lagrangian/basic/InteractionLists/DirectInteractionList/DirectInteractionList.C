@@ -444,7 +444,7 @@ Foam::DirectInteractionList<ParticleType>::~DirectInteractionList()
 template<class ParticleType>
 void Foam::DirectInteractionList<ParticleType>::buildInverseAddressing()
 {
-    const ReferredCellList<ParticleType>& ril(il_.ril());
+    const ReferredCellList<ParticleType>& ril = il_.ril();
 
     // Temporary Dynamic lists for accumulation
     List<DynamicList<label> > referredCellsForInteraction
@@ -484,7 +484,7 @@ template<class ParticleType>
 void Foam::DirectInteractionList<ParticleType>::
 writeReferredCellsForInteraction() const
 {
-    const ReferredCellList<ParticleType>& ril(il_.ril());
+    const ReferredCellList<ParticleType>& ril = il_.ril();
 
     forAll(*this, cellI)
     {
@@ -510,14 +510,14 @@ writeReferredCellsForInteraction() const
             const ReferredCell<ParticleType>& refCell =
                 ril[refCells[refCellForInteractionI]];
 
-            const vectorList& refCellPts = refCell.vertexPositions();
+            const pointField& refCellPts = refCell.points();
 
             const faceList& refCellFaces = refCell.faces();
 
             forAll(refCellPts, ptI)
             {
                 referredCellsFile
-                << "v "
+                    << "v "
                     << refCellPts[ptI].x() << " "
                     << refCellPts[ptI].y() << " "
                     << refCellPts[ptI].z()
@@ -526,16 +526,15 @@ writeReferredCellsForInteraction() const
 
             forAll(refCellFaces, faceI)
             {
-                referredCellsFile<< "f";
+                referredCellsFile << "f";
 
                 forAll(refCellFaces[faceI], fPtI)
                 {
                     referredCellsFile
-                    << " "
-                        << refCellFaces[faceI][fPtI] + vertexOffset;
+                        << " " << refCellFaces[faceI][fPtI] + vertexOffset;
                 }
 
-                referredCellsFile<< nl;
+                referredCellsFile << nl;
             }
 
             vertexOffset += refCellPts.size();

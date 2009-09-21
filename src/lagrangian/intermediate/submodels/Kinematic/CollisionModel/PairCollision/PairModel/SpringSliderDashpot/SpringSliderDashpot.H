@@ -33,7 +33,7 @@ Description
 #ifndef SpringSliderDashpot_H
 #define SpringSliderDashpot_H
 
-#include "PairFunction.H"
+#include "PairModel.H"
 #include "CollisionRecord.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,7 +47,7 @@ namespace Foam
 template<class CloudType>
 class SpringSliderDashpot
 :
-    public PairFunction<CloudType>
+    public PairModel<CloudType>
 {
     // Private data
 
@@ -105,11 +105,11 @@ public:
 
     // Member Functions
 
-        //- Whether the PairFunction has a timestep limit that will
+        //- Whether the PairModel has a timestep limit that will
         //  require subCycling
         virtual bool controlsTimestep() const;
 
-        //- For PairFunctions that control the timestep, calculate the
+        //- For PairModels that control the timestep, calculate the
         //  number of subCycles needed to satisfy the minimum
         //  allowable timestep
         virtual label nSubCycles() const;

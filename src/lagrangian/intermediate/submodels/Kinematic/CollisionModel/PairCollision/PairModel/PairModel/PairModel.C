@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "PairFunction.H"
+#include "PairModel.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PairFunction<CloudType>::PairFunction
+Foam::PairModel<CloudType>::PairModel
 (
     const dictionary& dict,
     CloudType& owner,
@@ -45,7 +45,7 @@ Foam::PairFunction<CloudType>::PairFunction
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::PairFunction<CloudType>::~PairFunction()
+Foam::PairModel<CloudType>::~PairModel()
 {}
 
 
@@ -53,14 +53,14 @@ Foam::PairFunction<CloudType>::~PairFunction()
 
 template<class CloudType>
 const CloudType&
-Foam::PairFunction<CloudType>::owner() const
+Foam::PairModel<CloudType>::owner() const
 {
     return owner_;
 }
 
 
 template<class CloudType>
-const Foam::dictionary& Foam::PairFunction<CloudType>::dict() const
+const Foam::dictionary& Foam::PairModel<CloudType>::dict() const
 {
     return dict_;
 }
@@ -68,7 +68,7 @@ const Foam::dictionary& Foam::PairFunction<CloudType>::dict() const
 
 template<class CloudType>
 const Foam::dictionary&
-Foam::PairFunction<CloudType>::coeffDict() const
+Foam::PairModel<CloudType>::coeffDict() const
 {
     return coeffDict_;
 }
@@ -76,6 +76,6 @@ Foam::PairFunction<CloudType>::coeffDict() const
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "NewPairFunction.C"
+#include "NewPairModel.C"
 
 // ************************************************************************* //

@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "PairCollision.H"
-#include "PairFunction.H"
+#include "PairModel.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -55,7 +55,7 @@ void Foam::PairCollision<CloudType>::evaluatePair
     typename CloudType::parcelType& pB
 ) const
 {
-    pairFunction_->evaluatePair(pA, pB);
+    pairModel_->evaluatePair(pA, pB);
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -69,9 +69,9 @@ Foam::PairCollision<CloudType>::PairCollision
 :
     CollisionModel<CloudType>(dict, owner, typeName),
     cellOccupancy_(owner.mesh().nCells()),
-    pairFunction_
+    pairModel_
     (
-        PairFunction<CloudType>::New
+        PairModel<CloudType>::New
         (
             this->coeffDict(),
             this->owner()
@@ -98,11 +98,11 @@ Foam::PairCollision<CloudType>::~PairCollision()
 template<class CloudType>
 Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
 {
-    if (pairFunction_->controlsTimestep())
+    if (pairModel_->controlsTimestep())
     {
         label nSubCycles = returnReduce
         (
-            pairFunction_->nSubCycles(), maxOp<label>()
+            pairModel_->nSubCycles(), maxOp<label>()
         );
 
         if(nSubCycles > 1)
@@ -143,24 +143,27 @@ void Foam::PairCollision<CloudType>::collide()
 
     buildCellOccupancy();
 
-    const DirectInteractionList<typename CloudType::parcelType>& dil(il_.dil());
+    const DirectInteractionList<typename CloudType::parcelType>& dil =
+        il_.dil();
+
+    const polyMesh& mesh = this->owner().mesh();
 
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;
 
     // real-real interactions
 
-    forAll(dil, d)
+    forAll(dil, realCellI)
     {
         // Loop over all Parcels in cell A (a)
-        forAll(cellOccupancy_[d], a)
+        forAll(cellOccupancy_[realCellI], a)
         {
-            pA_ptr = cellOccupancy_[d][a];
+            pA_ptr = cellOccupancy_[realCellI][a];
 
-            forAll(dil[d], interactingCells)
+            forAll(dil[realCellI], interactingCells)
             {
                 List<typename CloudType::parcelType*> cellBParcels =
-                    cellOccupancy_[dil[d][interactingCells]];
+                    cellOccupancy_[dil[realCellI][interactingCells]];
 
                 // Loop over all Parcels in cell B (b)
                 forAll(cellBParcels, b)
@@ -172,9 +175,9 @@ void Foam::PairCollision<CloudType>::collide()
             }
 
             // Loop over the other Parcels in cell A (aO)
-            forAll(cellOccupancy_[d], aO)
+            forAll(cellOccupancy_[realCellI], aO)
             {
-                pB_ptr = cellOccupancy_[d][aO];
+                pB_ptr = cellOccupancy_[realCellI][aO];
 
                 // Do not double-evaluate, compare pointers, arbitrary
                 // order
@@ -188,7 +191,7 @@ void Foam::PairCollision<CloudType>::collide()
 
     // real-referred interactions
 
-    ReferredCellList<typename CloudType::parcelType>& ril(il_.ril());
+    ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
 
     // Loop over all referred cells
     forAll(ril, refCellI)

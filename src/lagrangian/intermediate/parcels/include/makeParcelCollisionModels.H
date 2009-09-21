@@ -56,9 +56,9 @@ License
         ParcelType                                                            \
     );                                                                        \
                                                                               \
-    makePairFunction(InteractingKinematicCloud<ParcelType>);                  \
+    makePairModel(InteractingKinematicCloud<ParcelType>);                     \
                                                                               \
-    makePairFunctionType                                                      \
+    makePairModelType                                                         \
     (                                                                         \
         SpringSliderDashpot,                                                  \
         InteractingKinematicCloud,                                            \

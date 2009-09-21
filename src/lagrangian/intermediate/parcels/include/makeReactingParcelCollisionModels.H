@@ -80,9 +80,9 @@ License
         ThermoType                                                            \
     );                                                                        \
                                                                               \
-    makePairFunction(InteractingKinematicCloud<ParcelType<ThermoType> >);     \
+    makePairModel(InteractingKinematicCloud<ParcelType<ThermoType> >);        \
                                                                               \
-    makePairFunctionThermoType                                                \
+    makePairModelThermoType                                                   \
     (                                                                         \
         SpringSliderDashpot,                                                  \
         InteractingKinematicCloud,                                            \

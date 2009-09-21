@@ -37,7 +37,6 @@ SourceFiles
 #define ReferredCell_H
 
 #include "vector.H"
-#include "vectorList.H"
 #include "tensor.H"
 #include "transform.H"
 #include "IDLList.H"
@@ -104,7 +103,7 @@ class ReferredCell
         label sourceCell_;
 
         //- Referred cell vertex positions
-        vectorList vertexPositions_;
+        pointField vertexPositions_;
 
         //- The edge structure of this referred cell, indices of the
         //  vertexPositions_ list
@@ -118,10 +117,10 @@ class ReferredCell
         labelList wallFaces_;
 
         //- The face centre data for the cell in the referred position
-        vectorList faceCentres_;
+        pointField faceCentres_;
 
         //- The face area data for the cell in the referred position
-        vectorList faceAreas_;
+        vectorField faceAreas_;
 
         //- Which cells on the processor hosting this referred cell
         //  require interactions from it
@@ -156,11 +155,11 @@ class ReferredCell
 
         vector referPosition(const vector& positionToRefer);
 
-        vectorList referPositions(const vectorList& positionsToRefer);
+        pointField referPositions(const pointField& positionsToRefer);
 
         vector rotateVector(const vector& vectorToRotate);
 
-        vectorList rotateVectors(const vectorList& vectorsToRotate);
+        vectorField rotateVectors(const vectorField& vectorsToRotate);
 
 
 public:
@@ -186,12 +185,12 @@ public:
         (
             const label sourceProc,
             const label sourceCell,
-            const vectorList& vertexPositions,
+            const pointField& vertexPositions,
             const edgeList& localEdges,
             const faceList& localFaces,
             const labelList& wallFaces,
-            const vectorList& faceCentres,
-            const vectorList& faceAreas,
+            const pointField& faceCentres,
+            const vectorField& faceAreas,
             const vector& offset,
             const tensor& rotation
         );
@@ -236,14 +235,14 @@ public:
 
         //- Use internal transformatation values to transform the given
         //  list of postions to their new locations.
-        vectorList referPosition(const vectorList& positionsToRefer) const;
+        pointField referPosition(const pointField& positionsToRefer) const;
 
         //- Use internal transformatation values to rotate the given vector
         vector rotateVector(const vector& vectorToRotate) const;
 
         //- Use internal transformatation values to rotate the given
         // list of vectors
-        vectorList rotateVectors(const vectorList& vectorsToRotate) const;
+        vectorField rotateVectors(const vectorField& vectorsToRotate) const;
 
         //- referInParticle takes a referred particle from a source
         //  processor, transforming its position and properties
@@ -274,7 +273,7 @@ public:
 
             inline const tensor& rotation() const;
 
-            inline const vectorList& vertexPositions() const;
+            inline const pointField& points() const;
 
             inline const edgeList& edges() const;
 
@@ -282,9 +281,9 @@ public:
 
             inline const labelList& wallFaces() const;
 
-            inline const vectorList& faceCentres() const;
+            inline const pointField& faceCentres() const;
 
-            inline const vectorList& faceAreas() const;
+            inline const vectorField& faceAreas() const;
 
             inline labelList& realCells();
 

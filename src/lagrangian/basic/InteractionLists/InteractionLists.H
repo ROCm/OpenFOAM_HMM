@@ -123,7 +123,7 @@ public:
 
             bool testPointFaceDistance
             (
-                const vectorList& pointsToTest,
+                const pointField& pointsToTest,
                 const label faceNo
             ) const;
 
@@ -137,7 +137,7 @@ public:
             (
                 const vector& p,
                 const labelList& faceToTest,
-                const vectorList& points,
+                const pointField& points,
                 const vector& faceC,
                 const vector& faceA
             ) const;

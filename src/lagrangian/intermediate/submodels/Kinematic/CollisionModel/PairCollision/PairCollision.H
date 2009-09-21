@@ -46,7 +46,7 @@ namespace Foam
 // Forward declaration of classes
 
 template<class CloudType>
-class PairFunction;
+class PairModel;
 
 
 /*---------------------------------------------------------------------------*\
@@ -63,8 +63,8 @@ class PairCollision
         //- Cell occupancy information for each parcel
         List<DynamicList<typename CloudType::parcelType*> > cellOccupancy_;
 
-        // //- PairFunction to calculate the interaction between two parcels
-        autoPtr<PairFunction<CloudType> > pairFunction_;
+        //- PairModel to calculate the interaction between two parcels
+        autoPtr<PairModel<CloudType> > pairModel_;
 
         //- Interactions lists determining which cells are in
         //  interaction range of each other

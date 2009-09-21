@@ -40,7 +40,7 @@ void Foam::ReferredCell<ParticleType>::setConstructionData
 
     const labelList& points = mesh.cellPoints()[sourceCell];
 
-    vectorList sourceCellVertices(points.size());
+    pointField sourceCellVertices(points.size());
 
     forAll(sourceCellVertices, sCV)
     {
@@ -68,9 +68,9 @@ void Foam::ReferredCell<ParticleType>::setConstructionData
 
     labelList faces(mesh.cells()[sourceCell]);
 
-    vectorList sourceCellFaceCentres(faces.size());
+    pointField sourceCellFaceCentres(faces.size());
 
-    vectorList sourceCellFaceAreas(faces.size());
+    vectorField sourceCellFaceAreas(faces.size());
 
     labelListList sourceCellFaces(faces.size());
 
@@ -189,10 +189,10 @@ Foam::vector Foam::ReferredCell<ParticleType>::referPosition
 
 
 template<class ParticleType>
-Foam::vectorList
+Foam::pointField
 Foam::ReferredCell<ParticleType>::referPositions
 (
-    const vectorList& positionsToRefer
+    const pointField& positionsToRefer
 )
 {
     return offset_ + (rotation_ & positionsToRefer);
@@ -208,10 +208,10 @@ Foam::ReferredCell<ParticleType>::rotateVector(const vector& vectorToRotate)
 
 
 template<class ParticleType>
-Foam::vectorList
+Foam::vectorField
 Foam::ReferredCell<ParticleType>::rotateVectors
 (
-    const vectorList& vectorsToRotate
+    const vectorField& vectorsToRotate
 )
 {
     return rotation_ & vectorsToRotate;
@@ -270,12 +270,12 @@ Foam::ReferredCell<ParticleType>::ReferredCell
 (
     const label sourceProc,
     const label sourceCell,
-    const vectorList& vertexPositions,
+    const pointField& vertexPositions,
     const edgeList& localEdges,
     const faceList& localFaces,
     const labelList& wallFaces,
-    const vectorList& faceCentres,
-    const vectorList& faceAreas,
+    const pointField& faceCentres,
+    const vectorField& faceAreas,
     const vector& offset,
     const tensor& rotation
 )
@@ -396,9 +396,9 @@ Foam::vector Foam::ReferredCell<ParticleType>::referPosition
 
 
 template<class ParticleType>
-Foam::vectorList Foam::ReferredCell<ParticleType>::referPosition
+Foam::pointField Foam::ReferredCell<ParticleType>::referPosition
 (
-    const vectorList& positionsToRefer
+    const pointField& positionsToRefer
 ) const
 {
     return offset_ + (rotation_ & positionsToRefer);
@@ -416,9 +416,9 @@ Foam::vector Foam::ReferredCell<ParticleType>::rotateVector
 
 
 template<class ParticleType>
-Foam::vectorList Foam::ReferredCell<ParticleType>::rotateVectors
+Foam::vectorField Foam::ReferredCell<ParticleType>::rotateVectors
 (
-    const vectorList& vectorsToRotate
+    const vectorField& vectorsToRotate
 ) const
 {
     return rotation_ & vectorsToRotate;
@@ -535,7 +535,7 @@ Foam::Ostream& Foam::operator<<
 
     os  << rC.sourceProc()
         << token::SPACE << rC.sourceCell()
-        << token::SPACE << rC.vertexPositions()
+        << token::SPACE << rC.points()
         << token::SPACE << rC.edges()
         << token::SPACE << rC.faces()
         << token::SPACE << rC.wallFaces()

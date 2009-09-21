@@ -55,8 +55,8 @@ inline const Foam::tensor& Foam::ReferredCell<ParticleType>::rotation() const
 
 
 template<class ParticleType>
-inline const Foam::vectorList&
-Foam::ReferredCell<ParticleType>::vertexPositions() const
+inline const Foam::pointField&
+Foam::ReferredCell<ParticleType>::points() const
 {
     return vertexPositions_;
 }
@@ -86,7 +86,7 @@ Foam::ReferredCell<ParticleType>::wallFaces() const
 
 
 template<class ParticleType>
-inline const Foam::vectorList&
+inline const Foam::pointField&
 Foam::ReferredCell<ParticleType>::faceCentres() const
 {
     return faceCentres_;
@@ -94,7 +94,7 @@ Foam::ReferredCell<ParticleType>::faceCentres() const
 
 
 template<class ParticleType>
-inline const Foam::vectorList&
+inline const Foam::vectorField&
 Foam::ReferredCell<ParticleType>::faceAreas() const
 {
     return faceAreas_;

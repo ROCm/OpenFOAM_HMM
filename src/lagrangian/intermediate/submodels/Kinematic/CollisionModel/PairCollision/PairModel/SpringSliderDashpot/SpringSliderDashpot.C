@@ -77,7 +77,7 @@ Foam::SpringSliderDashpot<CloudType>::SpringSliderDashpot
     CloudType& cloud
 )
 :
-    PairFunction<CloudType>(dict, cloud, typeName),
+    PairModel<CloudType>(dict, cloud, typeName),
     Estar_(),
     Gstar_(),
     alpha_(dimensionedScalar(this->coeffDict().lookup("alpha")).value()),

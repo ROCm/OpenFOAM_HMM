@@ -23,19 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::PairFunction
+    Foam::PairModel
 
 Description
     Templated pair interaction class
 
 SourceFiles
-    PairFunction.C
-    NewPairFunction.C
+    PairModel.C
+    NewPairModel.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef PairFunction_H
-#define PairFunction_H
+#ifndef PairModel_H
+#define PairModel_H
 
 #include "IOdictionary.H"
 #include "autoPtr.H"
@@ -47,11 +47,11 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                   Class PairFunction Declaration
+                          Class PairModel Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class PairFunction
+class PairModel
 {
     // Private data
 
@@ -68,13 +68,13 @@ class PairFunction
 public:
 
     //- Runtime type information
-    TypeName("PairFunction");
+    TypeName("PairModel");
 
     //- Declare runtime constructor selection table
     declareRunTimeSelectionTable
     (
         autoPtr,
-        PairFunction,
+        PairModel,
         dictionary,
         (
             const dictionary& dict,
@@ -87,7 +87,7 @@ public:
     // Constructors
 
         //- Construct from components
-        PairFunction
+        PairModel
         (
             const dictionary& dict,
             CloudType& owner,
@@ -96,11 +96,11 @@ public:
 
 
     //- Destructor
-    virtual ~PairFunction();
+    virtual ~PairModel();
 
 
     //- Selector
-    static autoPtr<PairFunction<CloudType> > New
+    static autoPtr<PairModel<CloudType> > New
     (
         const dictionary& dict,
         CloudType& owner
@@ -121,11 +121,11 @@ public:
 
     // Member Functions
 
-        //- Whether the PairFunction has a timestep limit that will
+        //- Whether the PairModel has a timestep limit that will
         //  require subCycling
         virtual bool controlsTimestep() const = 0;
 
-        //- For PairFunctions that control the timestep, calculate the
+        //- For PairModels that control the timestep, calculate the
         //  number of subCycles needed to satisfy the minimum
         //  allowable timestep
         virtual label nSubCycles() const = 0;
@@ -145,27 +145,27 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#define makePairFunction(CloudType)                                           \
+#define makePairModel(CloudType)                                              \
                                                                               \
-    defineNamedTemplateTypeNameAndDebug(PairFunction<CloudType>, 0);          \
+    defineNamedTemplateTypeNameAndDebug(PairModel<CloudType>, 0);             \
                                                                               \
     defineTemplateRunTimeSelectionTable                                       \
     (                                                                         \
-        PairFunction<CloudType>,                                              \
+        PairModel<CloudType>,                                                 \
         dictionary                                                            \
     );
 
 
-#define makePairFunctionType(SS, CloudType, ParcelType)                       \
+#define makePairModelType(SS, CloudType, ParcelType)                          \
                                                                               \
     defineNamedTemplateTypeNameAndDebug(SS<CloudType<ParcelType> >, 0);       \
                                                                               \
-    PairFunction<CloudType<ParcelType> >::                                    \
+    PairModel<CloudType<ParcelType> >::                                       \
         adddictionaryConstructorToTable<SS<CloudType<ParcelType> > >          \
             add##SS##CloudType##ParcelType##ConstructorToTable_;
 
 
-#define makePairFunctionThermoType(SS, CloudType, ParcelType, ThermoType)     \
+#define makePairModelThermoType(SS, CloudType, ParcelType, ThermoType)        \
                                                                               \
     defineNamedTemplateTypeNameAndDebug                                       \
     (                                                                         \
@@ -173,7 +173,7 @@ public:
         0                                                                     \
     );                                                                        \
                                                                               \
-    PairFunction<CloudType<ParcelType<ThermoType> > >::                       \
+    PairModel<CloudType<ParcelType<ThermoType> > >::                          \
         adddictionaryConstructorToTable                                       \
             <SS<CloudType<ParcelType<ThermoType> > > >                        \
             add##SS##CloudType##ParcelType##ThermoType##ConstructorToTable_;
@@ -182,7 +182,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "PairFunction.C"
+#   include "PairModel.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

@@ -64,12 +64,12 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
         mesh.globalData().processorPatches().size()
     );
 
-    List<vectorList> allNeighbourFaceCentres
+    List<pointField> allNeighbourFaceCentres
     (
         mesh.globalData().processorPatches().size()
     );
 
-    List<vectorList> allNeighbourFaceAreas
+    List<vectorField> allNeighbourFaceAreas
     (
         mesh.globalData().processorPatches().size()
     );
@@ -249,11 +249,11 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
                 mesh.boundaryMesh()[procPatches[pP]]
             );
 
-            vectorList& neighbFaceCentres = allNeighbourFaceCentres[pP];
+            pointField& neighbFaceCentres = allNeighbourFaceCentres[pP];
 
             neighbFaceCentres.setSize(patch.size());
 
-            vectorList& neighbFaceAreas = allNeighbourFaceAreas[pP];
+            vectorField& neighbFaceAreas = allNeighbourFaceAreas[pP];
 
             neighbFaceAreas.setSize(patch.size());
 
@@ -281,9 +281,9 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
                 mesh.boundaryMesh()[procPatches[pP]]
             );
 
-            const vectorList& neighbFaceCentres = allNeighbourFaceCentres[pP];
+            const pointField& neighbFaceCentres = allNeighbourFaceCentres[pP];
 
-            const vectorList& neighbFaceAreas = allNeighbourFaceAreas[pP];
+            const vectorField& neighbFaceAreas = allNeighbourFaceAreas[pP];
 
             label nUP;
 
@@ -389,7 +389,7 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
                         // Face corresponding to faceL in the 2nd half of the
                         // patch. Assumes correct face ordering.
 
-                        vectorList refOff(patch.size()/2);
+                        vectorField refOff(patch.size()/2);
 
                         List<tensor> refTrans(patch.size()/2);
 
@@ -922,10 +922,10 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
                 DynamicList<ReferredCell<ParticleType> >
                     ReferredCellsToTransfer;
 
-                const vectorList& neighbFaceCentres =
+                const pointField& neighbFaceCentres =
                     allNeighbourFaceCentres[pP];
 
-                const vectorList& neighbFaceAreas = allNeighbourFaceAreas[pP];
+                const vectorField& neighbFaceAreas = allNeighbourFaceAreas[pP];
 
                 label nUP;
 
@@ -1299,7 +1299,7 @@ void Foam::ReferredCellList<ParticleType>::buildReferredCellList
 
         DynamicList<label> realCellsFoundInRange;
 
-        const vectorList& refCellPoints = refCell.vertexPositions();
+        const pointField& refCellPoints = refCell.points();
 
         forAll(rFacesWRRP, rCF)
         {
@@ -1774,7 +1774,7 @@ void Foam::ReferredCellList<ParticleType>::writeReferredCells() const
     {
         const ReferredCell<ParticleType>& refCell = (*this)[refCellI];
 
-        const vectorList& refCellPts = refCell.vertexPositions();
+        const pointField& refCellPts = refCell.points();
 
         const faceList& refCellFaces = refCell.faces();
 
@@ -1819,7 +1819,7 @@ void Foam::ReferredCellList<ParticleType>::writeReferredCells() const
     {
         const ReferredCell<ParticleType>& refCell = (*this)[refCellI];
 
-        const vectorList& refCellPts = refCell.vertexPositions();
+        const pointField& refCellPts = refCell.points();
 
         const faceList& refCellFaces = refCell.faces();
 
