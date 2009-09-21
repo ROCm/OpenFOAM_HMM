@@ -107,7 +107,7 @@ Foam::cvControls::cvControls
     cosAlignmentAcceptanceAngle_ = cos
     (
         readScalar(motionDict.lookup("alignmentAcceptanceAngle"))
-       *mathematicalConstant::pi/180
+       *constant::math::pi/180
     );
 
     // Point removal criteria
@@ -130,7 +130,7 @@ Foam::cvControls::cvControls
     cosInsertionAcceptanceAngle_ = cos
     (
         readScalar(insertionDict.lookup("acceptanceAngle"))
-       *mathematicalConstant::pi/180
+       *constant::math::pi/180
     );
 
     // Point removal criteria

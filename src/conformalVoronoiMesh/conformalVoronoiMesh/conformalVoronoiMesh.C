@@ -177,8 +177,8 @@ Foam::tensor Foam::conformalVoronoiMesh::requiredAlignment
     {
         vector spoke
         (
-            Foam::cos(i*mathematicalConstant::twoPi/s),
-            Foam::sin(i*mathematicalConstant::twoPi/s),
+            Foam::cos(i*constant::math::twoPi/s),
+            Foam::sin(i*constant::math::twoPi/s),
             0
         );
 
@@ -471,8 +471,8 @@ void Foam::conformalVoronoiMesh::insertInternalEdgePointGroup
     point reflectedB = reflMasterPt - 2*ppDist*nB;
 
     scalar totalAngle =
-        180*(mathematicalConstant::pi + acos(mag(nA & nB)))
-       /mathematicalConstant::pi;
+        180*(constant::math::pi + acos(mag(nA & nB)))
+       /constant::math::pi;
 
     // Number of quadrants the angle should be split into
     int nQuads = int(totalAngle/cvMeshControls().maxQuadAngle()) + 1;

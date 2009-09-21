@@ -47,7 +47,7 @@ defineTypeNameAndDebug(featureEdgeMesh, 0);
 
 Foam::scalar Foam::featureEdgeMesh::cosNormalAngleTol_ = Foam::cos
 (
-    0.1*mathematicalConstant::pi/180.0
+    0.1*constant::math::pi/180.0
 );
 
 

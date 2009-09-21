@@ -57,7 +57,7 @@ SourceFiles
 #include "triSurfaceTools.H"
 #include "indexedOctree.H"
 #include "treeDataPoint.H"
-#include "mathematicalConstants.H"
+#include "mathConstants.H"
 #include "transform.H"
 #include "volFields.H"
 #include "fvMesh.H"
