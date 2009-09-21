@@ -229,10 +229,134 @@ void Foam::PairCollision<CloudType>::collide()
         }
     }
 
-    Info<< "    ADD COLLISIONS WITH WALLS HERE" << endl;
-    //     << " DOES NOT NEED TO BE A TRACKING OPERATION."
-    //     << " CALCULATE DISTANCE TO SURFACES OF WALL TYPE AND APPLY "
-    //     << "WALL FORCE MODEL" << endl;
+    DynamicList<point> allWallInteractionSites;
+    DynamicList<point> flatWallInteractionSites;
+    DynamicList<point> sharpWallInteractionSites;
+
+    forAll(dil, realCellI)
+    {
+        // The real wall faces in range of this real cell
+        const labelList& realWallFaces = dil.wallFaces()[realCellI];
+
+        // The labels of referred cells in range of this real cell
+        const labelList& referredCellsInRange =
+            dil.referredCellsForInteraction()[realCellI];
+
+        // Loop over all Parcels in cell
+        forAll(cellOccupancy_[realCellI], cellParticleI)
+        {
+            allWallInteractionSites.clear();
+            flatWallInteractionSites.clear();
+            sharpWallInteractionSites.clear();
+
+            typename CloudType::parcelType& p =
+                *cellOccupancy_[realCellI][cellParticleI];
+
+            const point& pt = p.position();
+
+            // real wallFace interactions
+
+            forAll(realWallFaces, realWallFaceI)
+            {
+                label realFaceI = realWallFaces[realWallFaceI];
+
+                pointHit nearest = mesh.faces()[realFaceI].nearestPoint
+                (
+                    pt,
+                    mesh.points()
+                );
+
+                if (nearest.distance() < p.r())
+                {
+                    vector normal = mesh.faceAreas()[realFaceI];
+
+                    normal /= mag(normal);
+
+                    vector pW = nearest.rawPoint() - pt;
+
+                    scalar normalAlignment = normal & pW/mag(pW);
+
+                    allWallInteractionSites.append(nearest.rawPoint());
+
+                    if (normalAlignment > 1 - SMALL)
+                    {
+                        flatWallInteractionSites.append(nearest.rawPoint());
+                    }
+                }
+            }
+
+            // referred wallFace interactions
+
+            forAll(referredCellsInRange, refCellInRangeI)
+            {
+                ReferredCell<typename CloudType::parcelType>& refCell =
+                    ril[referredCellsInRange[refCellInRangeI]];
+
+                const labelList& refWallFaces = refCell.wallFaces();
+
+                forAll(refWallFaces, refWallFaceI)
+                {
+                    label refFaceI = refWallFaces[refWallFaceI];
+
+                    pointHit nearest = refCell.faces()[refFaceI].nearestPoint
+                    (
+                        pt,
+                        refCell.points()
+                    );
+
+                    if (nearest.distance() < p.r())
+                    {
+                        vector normal = refCell.faceAreas()[refFaceI];
+
+                        normal /= mag(normal);
+
+                        vector pW = nearest.rawPoint() - pt;
+
+                        scalar normalAlignment = normal & pW/mag(pW);
+
+                        allWallInteractionSites.append(nearest.rawPoint());
+
+                        if (normalAlignment > 1 - SMALL)
+                        {
+                            flatWallInteractionSites.append(nearest.rawPoint());
+                        }
+                    }
+                }
+            }
+
+            Pout<< flatWallInteractionSites << endl;
+
+            forAll(flatWallInteractionSites, siteI)
+            {
+
+                scalar nu = this->owner().constProps().poissonsRatio();
+
+                scalar E = this->owner().constProps().youngsModulus();
+
+                scalar b = 1.5;
+
+                scalar alpha = 0.52;
+
+                vector r_PW = pt - flatWallInteractionSites[siteI];
+
+                scalar normalOverlapMag = p.r() - mag(r_PW);
+
+                vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
+
+                scalar kN = (4.0/3.0)*sqrt(p.r())*E/(2.0*(1.0 - sqr(nu)));
+
+                scalar etaN = alpha*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
+
+                vector fN_PW =
+                    rHat_PW
+                   *(kN*pow(normalOverlapMag, b) - etaN*(p.U() & rHat_PW));
+
+                p.f() += fN_PW;
+
+                Pout<< "Wall force " << fN_PW << endl;
+            }
+        }
+    }
 
     // Delete any collision records where no collision occurred this step
 
