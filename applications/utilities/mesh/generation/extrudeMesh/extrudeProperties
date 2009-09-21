@@ -25,7 +25,7 @@ constructFrom patch;
 
 // If construct from patch/mesh:
 sourceCase "../cavity";
-sourcePatch movingWall;
+sourcePatches (movingWall);
 // If construct from patch: patch to use for back (can be same as sourcePatch)
 exposedPatchName movingWall;
 // If construct from surface:
@@ -40,6 +40,9 @@ flipNormals false;
 
 //- Linear extrusion in point-normal direction
 //extrudeModel        linearNormal;
+
+//- Linear extrusion in specified direction
+//extrudeModel        linearDirection;
 
 //- Wedge extrusion. If nLayers is 1 assumes symmetry around plane.
 extrudeModel        wedge;
@@ -64,6 +67,11 @@ wedgeCoeffs
 linearNormalCoeffs
 {
     thickness       0.05;
+}
+
+linearDirectionCoeffs
+{
+    direction       (0 0 1);
 }
 
 linearRadialCoeffs

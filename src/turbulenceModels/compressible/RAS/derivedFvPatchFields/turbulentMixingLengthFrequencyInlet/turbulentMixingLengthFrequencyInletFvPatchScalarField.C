@@ -27,7 +27,6 @@ License
 #include "turbulentMixingLengthFrequencyInletFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
-#include "surfaceFields.H"
 #include "volFields.H"
 #include "RASModel.H"
 

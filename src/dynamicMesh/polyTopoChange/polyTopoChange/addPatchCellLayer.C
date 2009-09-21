@@ -774,7 +774,7 @@ void Foam::addPatchCellLayer::setRefinement
                         ", polyTopoChange&)"
                     )   << "boundary-edge-to-be-extruded:"
                         << pp.points()[meshPoints[e[0]]]
-                        << pp.points()[meshPoints[e[0]]]
+                        << pp.points()[meshPoints[e[1]]]
                         << " has more than two faces using it:" << eFaces
                         << abort(FatalError);
                 }
@@ -816,7 +816,7 @@ void Foam::addPatchCellLayer::setRefinement
                                     ", polyTopoChange&)"
                                 )   << "boundary-edge-to-be-extruded:"
                                     << pp.points()[meshPoints[e[0]]]
-                                    << pp.points()[meshPoints[e[0]]]
+                                    << pp.points()[meshPoints[e[1]]]
                                     << " has more than two boundary faces"
                                     << " using it:"
                                     << bFaceI << " fc:"

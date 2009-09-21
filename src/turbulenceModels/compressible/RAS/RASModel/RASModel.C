@@ -174,7 +174,7 @@ tmp<scalarField> RASModel::yPlus(const label patchNo, const scalar Cmu) const
     tmp<scalarField> tYp(new scalarField(curPatch.size()));
     scalarField& Yp = tYp();
 
-    if (isType<wallFvPatch>(curPatch))
+    if (isA<wallFvPatch>(curPatch))
     {
         Yp = pow025(Cmu)
             *y_[patchNo]

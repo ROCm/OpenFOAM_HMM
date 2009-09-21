@@ -30,7 +30,8 @@ Description
     type in the field and polyMesh/boundary files.
 
     Reads dictionaries (fields) and entries to change from a dictionary.
-    E.g. to make the @em movingWall a @em fixedValue for @em p, the
+    E.g. to make the @em movingWall a @em fixedValue for @em p but all other
+    @em Walls a zeroGradient boundary condition, the
     @c system/changeDictionaryDict would contain the following:
     @verbatim
     dictionaryReplacement
@@ -39,6 +40,10 @@ Description
         {
             boundaryField
             {
+                ".*Wall"            // entry to change
+                {
+                    type            zeroGradient;
+                }
                 movingWall          // entry to change
                 {
                     type            fixedValue;
@@ -49,6 +54,13 @@ Description
     }
     @endverbatim
 
+Usage
+
+    - changeDictionary [OPTION]
+
+    @param -literalRE \n
+    Do not interpret regular expressions; treat them as any other keyword.
+
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,6 +68,7 @@ Description
 #include "IOobjectList.H"
 #include "IOPtrList.H"
 #include "volFields.H"
+#include "stringListOps.H"
 
 using namespace Foam;
 
@@ -68,16 +81,188 @@ namespace Foam
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+bool merge(dictionary&, const dictionary&, const bool);
+
+
+// Add thisEntry to dictionary thisDict.
+bool addEntry
+(
+    dictionary& thisDict,
+    entry& thisEntry,
+    const entry& mergeEntry,
+    const bool literalRE
+)
+{
+    bool changed = false;
+
+    // Recursively merge sub-dictionaries
+    // TODO: merge without copying
+    if (thisEntry.isDict() && mergeEntry.isDict())
+    {
+        if
+        (
+            merge
+            (
+                const_cast<dictionary&>(thisEntry.dict()),
+                mergeEntry.dict(),
+                literalRE
+            )
+        )
+        {
+            changed = true;
+        }
+    }
+    else
+    {
+        // Should use in-place modification instead of adding
+        thisDict.add(mergeEntry.clone(thisDict).ptr(), true);
+        changed = true;
+    }
+
+    return changed;
+}
+
+
+// Dictionary merging/editing.
+// literalRE:
+// - true: behave like dictionary::merge, i.e. add regexps just like
+//   any other key.
+// - false : interpret wildcard as a rule for items to be matched.
+bool merge
+(
+    dictionary& thisDict,
+    const dictionary& mergeDict,
+    const bool literalRE
+)
+{
+    bool changed = false;
+
+    // Save current (non-wildcard) keys before adding items.
+    HashSet<word> thisKeysSet;
+    {
+        List<keyType> keys = thisDict.keys(false);
+        forAll(keys, i)
+        {
+            thisKeysSet.insert(keys[i]);
+        }
+    }
+
+    // Pass 1. All literal matches
+
+    forAllConstIter(IDLList<entry>, mergeDict, mergeIter)
+    {
+        const keyType& key = mergeIter().keyword();
+
+        if (literalRE || !key.isPattern())
+        {
+            entry* entryPtr = thisDict.lookupEntryPtr
+            (
+                key,
+                false,              // recursive
+                false               // patternMatch
+            );
+
+            if (entryPtr)
+            {
+
+                // Mark thisDict entry as having been match for wildcard
+                // handling later on.
+                thisKeysSet.erase(entryPtr->keyword());
+
+                if
+                (
+                    addEntry
+                    (
+                        thisDict,
+                       *entryPtr,
+                        mergeIter(),
+                        literalRE
+                    )
+                )
+                {
+                    changed = true;
+                }
+            }
+            else
+            {
+                // not found - just add
+                thisDict.add(mergeIter().clone(thisDict).ptr());
+                changed = true;
+            }
+        }
+    }
+
+
+    // Pass 2. Wildcard matches (if any) on any non-match keys.
+
+    if (!literalRE && thisKeysSet.size() > 0)
+    {
+        wordList thisKeys(thisKeysSet.toc());
+
+        forAllConstIter(IDLList<entry>, mergeDict, mergeIter)
+        {
+            const keyType& key = mergeIter().keyword();
+
+            if (key.isPattern())
+            {
+                // Find all matching entries in the original thisDict
+
+                labelList matches = findStrings(key, thisKeys);
+
+                forAll(matches, i)
+                {
+                    label matchI = matches[i];
+
+                    entry& thisEntry = const_cast<entry&>
+                    (
+                        thisDict.lookupEntry(thisKeys[matchI], false, false)
+                    );
+
+                    if
+                    (
+                        addEntry
+                        (
+                            thisDict,
+                            thisEntry,
+                            mergeIter(),
+                            literalRE
+                        )
+                    )
+                    {
+                        changed = true;
+                    }
+                }
+            }
+        }
+    }
+
+    return changed;
+}
+
+
 // Main program:
 
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("instance", "instance");
+    argList::validOptions.insert("literalRE", "");
     #include "addRegionOption.H"
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
+
+    bool literalRE = args.optionFound("literalRE");
+
+    if (literalRE)
+    {
+        Info<< "Not interpreting any regular expressions (RE)"
+            << " in the changeDictionaryDict." << endl
+            << "Instead they are handled as any other entry, i.e. added if"
+            << " not present." << endl;
+    }
+
 
     fileName regionPrefix = "";
     if (regionName != fvMesh::defaultRegion)
@@ -163,7 +348,7 @@ int main(int argc, char *argv[])
             Info<< "Merging entries from " << replaceDict.toc() << endl;
 
             // Merge the replacements in
-            fieldDict.merge(replaceDict);
+            merge(fieldDict, replaceDict, literalRE);
 
             Info<< "fieldDict:" << fieldDict << endl;
 
@@ -229,7 +414,7 @@ int main(int argc, char *argv[])
             Info<< "Merging entries from " << replaceDict.toc() << endl;
 
             // Merge the replacements in
-            fieldDict.merge(replaceDict);
+            merge(fieldDict, replaceDict, literalRE);
 
             Info<< "Writing modified fieldDict " << fieldName << endl;
             fieldDict.regIOobject::write();

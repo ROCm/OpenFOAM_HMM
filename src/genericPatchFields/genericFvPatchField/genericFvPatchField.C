@@ -367,7 +367,7 @@ Foam::genericFvPatchField<Type>::genericFvPatchField
                             new scalarField
                             (
                                 this->size(),
-                                fieldToken.scalarToken()
+                                fieldToken.number()
                             )
                         );
                     }
