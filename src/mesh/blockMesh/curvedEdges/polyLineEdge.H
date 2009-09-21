@@ -46,7 +46,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                       Class polyLineEdge Declaration
+                        Class polyLineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 class polyLineEdge
@@ -66,14 +66,14 @@ public:
         //- Construct from components
         polyLineEdge
         (
-            const pointField& ps,
+            const pointField&,
             const label start,
             const label end,
-            const pointField& otherpoints
+            const pointField& otherPoints
         );
 
         //- Construct from Istream
-        polyLineEdge(const pointField& ps, Istream&);
+        polyLineEdge(const pointField&, Istream&);
 
 
     // Destructor

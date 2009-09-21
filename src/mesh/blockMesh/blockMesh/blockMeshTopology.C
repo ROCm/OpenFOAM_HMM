@@ -36,7 +36,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
 {
     bool topologyOK = true;
 
-    blockMesh& blocks = *this;
+    blockList& blocks = *this;
 
     word defaultPatchName = "defaultFaces";
     word defaultPatchType = emptyPolyPatch::typeName;

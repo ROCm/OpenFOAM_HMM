@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                      Class polySplineEdge Declaration
+                       Class polySplineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 class polySplineEdge
@@ -62,14 +62,15 @@ class polySplineEdge
 
         pointField intervening
         (
-            const pointField& otherknots,
-            const label nbetweenKnots,
-            const vector&, const vector&
+            const pointField& otherKnots,
+            const label nBetweenKnots,
+            const vector&,
+            const vector&
         );
 
-        label nsize(const label otherknotsSize, const label nbetweenKnots)
+        label nsize(const label otherKnotsSize, const label nBetweenKnots)
         {
-            return otherknotsSize*(1 + nbetweenKnots) + nbetweenKnots + 2;
+            return otherKnotsSize*(1 + nBetweenKnots) + nBetweenKnots + 2;
         }
 
 
@@ -84,15 +85,15 @@ public:
         //- Construct from components
         polySplineEdge
         (
-            const pointField& points,
+            const pointField&,
             const label start,
             const label end,
-            const pointField& otherknots,
+            const pointField& otherKnots,
             const label nInterKnots = 20
         );
 
         //- Construct from Istream setting pointsList
-        polySplineEdge(const pointField& points, Istream& is);
+        polySplineEdge(const pointField&, Istream&);
 
 
     // Destructor

@@ -45,7 +45,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                     Class simpleSplineEdge Declaration
+                      Class simpleSplineEdge Declaration
 \*---------------------------------------------------------------------------*/
 
 class simpleSplineEdge
@@ -65,19 +65,19 @@ public:
         //- Construct from components
         simpleSplineEdge
         (
-            const pointField& points,
+            const pointField&,
             const label start,
             const label end,
-            const pointField& otherknots
+            const pointField& otherKnots
         );
 
         //- Construct from components
         simpleSplineEdge
         (
-            const pointField& points,
+            const pointField&,
             const label start,
             const label end,
-            const pointField& otherknots,
+            const pointField& otherKnots,
             const vector& fstend,
             const vector& sndend
         );

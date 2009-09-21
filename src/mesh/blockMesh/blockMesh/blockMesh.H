@@ -165,6 +165,11 @@ public:
             label numZonedBlocks() const;
 
 
+        // Edit
+
+            //- Clear geometry (internal points, cells, boundaryPatches)
+            void clearGeom();
+
         // Write
 
             //- Writes edges of blockMesh in OBJ format.

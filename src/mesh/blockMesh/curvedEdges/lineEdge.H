@@ -54,8 +54,11 @@ class lineEdge
 {
     // Private data
 
-        vector startPoint_;
-        vector direction_;
+        //- Avoid repetitive calculation of the start point
+        const vector startPoint_;
+
+        //- Avoid repetitive calculation of the direction (end - start)
+        const vector direction_;
 
 
 public:
@@ -66,10 +69,10 @@ public:
     // Constructors
 
         //- Construct from components
-        lineEdge(const pointField& points, const label start, const label end);
+        lineEdge(const pointField&, const label start, const label end);
 
         //- Construct from Istream setting pointsList
-        lineEdge(const pointField& points, Istream&);
+        lineEdge(const pointField&, Istream&);
 
 
     // Destructor

@@ -32,7 +32,7 @@ License
 
 void Foam::blockMesh::createPoints() const
 {
-    const blockMesh& blocks = *this;
+    const blockList& blocks = *this;
 
     Info<< "Creating points with scale " << scaleFactor_ << endl;
 
@@ -62,7 +62,7 @@ void Foam::blockMesh::createPoints() const
 
 void Foam::blockMesh::createCells() const
 {
-    const blockMesh& blocks = *this;
+    const blockList& blocks = *this;
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
     Info<< "Creating cells" << endl;
@@ -107,7 +107,7 @@ Foam::faceList Foam::blockMesh::createPatchFaces
     const polyPatch& patchTopologyFaces
 ) const
 {
-    const blockMesh& blocks = *this;
+    const blockList& blocks = *this;
 
     labelList blockLabels = patchTopologyFaces.polyPatch::faceCells();
 
@@ -235,6 +235,17 @@ void Foam::blockMesh::createPatches() const
         patches_[patchI] = createPatchFaces(topoPatches[patchI]);
     }
 
+}
+
+
+void Foam::blockMesh::clearGeom()
+{
+    blockList& blocks = *this;
+
+    forAll(blocks, blockI)
+    {
+        blocks[blockI].clearGeom();
+    }
 }
 
 // ************************************************************************* //

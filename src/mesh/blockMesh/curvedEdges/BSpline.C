@@ -119,7 +119,7 @@ Foam::BSpline::BSpline
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::BSpline::realPosition(scalar mu)
+Foam::vector Foam::BSpline::realPosition(const scalar mu) const
 {
     return spline::position(mu);
 }

@@ -108,7 +108,7 @@ Foam::autoPtr<Foam::curvedEdge> Foam::curvedEdge::New
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::pointField Foam::knotlist
+Foam::pointField Foam::curvedEdge::knotlist
 (
     const pointField& points,
     const label start,
@@ -116,19 +116,19 @@ Foam::pointField Foam::knotlist
     const pointField& otherknots
 )
 {
-    label listsize(otherknots.size() + 2);
-    pointField tmp(listsize);
+    pointField newPoints(otherknots.size() + 2);
 
-    tmp[0] = points[start];
+    // start/end knots
+    newPoints[0] = points[start];
+    newPoints[otherknots.size() + 1] = points[end];
 
-    for (register label i=1; i<listsize-1; i++)
+    // intermediate knots
+    forAll(otherknots, knotI)
     {
-        tmp[i] = otherknots[i-1];
+        newPoints[knotI+1] = otherknots[knotI];
     }
 
-    tmp[listsize-1] = points[end];
-
-    return tmp;
+    return newPoints;
 }
 
 

@@ -146,7 +146,9 @@ public:
             const labelListListList& boundaryPatches() const;
 
 
-            //- Clear geometry
+        // Edit
+
+            //- Clear geometry (internal points, cells, boundaryPatches)
             void clearGeom();
 
 

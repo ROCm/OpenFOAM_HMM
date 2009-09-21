@@ -30,7 +30,7 @@ License
 
 void Foam::blockMesh::calcMergeInfo()
 {
-    const blockMesh& blocks = *this;
+    const blockList& blocks = *this;
 
     Info<< "Creating block offsets" << endl;
 

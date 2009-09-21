@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -24,53 +24,55 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "error.H"
-#include "polyLineEdge.H"
-#include "addToRunTimeSelectionTable.H"
-
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
-
-namespace Foam
-{
-    defineTypeNameAndDebug(polyLineEdge, 0);
-    addToRunTimeSelectionTable(curvedEdge, polyLineEdge, Istream);
-}
-
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-Foam::polyLineEdge::polyLineEdge
-(
-    const pointField& ps,
-    const label start,
-    const label end,
-    const pointField& otherpoints
-)
-:
-    curvedEdge(ps, start, end),
-    polyLine(knotlist(ps, start, end, otherpoints))
-{}
-
-
-Foam::polyLineEdge::polyLineEdge(const pointField& ps, Istream& is)
-:
-    curvedEdge(ps, is),
-    polyLine(knotlist(ps, start_, end_, pointField(is)))
-{}
-
-
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::vector Foam::polyLineEdge::position(const scalar lambda) const
+inline Foam::label Foam::curvedEdge::start() const
 {
-    return polyLine::position(lambda);
+    return start_;
 }
 
 
-Foam::scalar Foam::polyLineEdge::length() const
+inline Foam::label Foam::curvedEdge::end() const
 {
-    return polyLine::lineLength_;
+    return end_;
 }
+
+
+inline int Foam::curvedEdge::compare(const curvedEdge& ce) const
+{
+    if (start_ == ce.start_ && end_ == ce.end_)
+    {
+        return 1;
+    }
+    else if (start_ == ce.end_ && end_ == ce.start_)
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+inline int Foam::curvedEdge::compare(const label start, const label end) const
+{
+    if (start_ == start && end_ == end)
+    {
+        return 1;
+    }
+    else if (start_ == end && end_ == start)
+    {
+        return -1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 
 // ************************************************************************* //

@@ -48,7 +48,7 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-                         Class polyLine Declaration
+                          Class polyLine Declaration
 \*---------------------------------------------------------------------------*/
 
 
@@ -73,7 +73,7 @@ public:
     // Constructors
 
         //- Construct from components
-        polyLine(const pointField& ps);
+        polyLine(const pointField&);
 
 
     // Member Functions

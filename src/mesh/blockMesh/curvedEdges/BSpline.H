@@ -83,7 +83,7 @@ public:
 
         //- Return the real position of a point on the curve given by
         //  the parameter 0 <= lambda <= 1
-        vector realPosition(scalar lambda);
+        vector realPosition(const scalar lambda) const;
 
         //- Return the position of a point on the curve given by
         //  the parameter 0 <= lambda <= 1

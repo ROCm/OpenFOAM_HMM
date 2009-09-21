@@ -48,8 +48,8 @@ Foam::lineDivide::lineDivide
 
     if (xratio == 1.0)
     {
-        scalar y(1.0/np);
-        for (label i=0; i<=noPoints_; i++)
+        const scalar y(1.0/np);
+        for (label i=0; i <= noPoints_; i++)
         {
             lambda = scalar(i)/np;
             points_[i] = bc.position(lambda);
@@ -62,7 +62,7 @@ Foam::lineDivide::lineDivide
         divisions_[0] = 0.0;
         scalar xrpower = 1.0;
 
-        for (label i=1; i<=noPoints_; i++)
+        for (label i=1; i <= noPoints_; i++)
         {
             lambda = (1.0 - pow(xratio, i))/(1.0 - pow(xratio, np));
             points_[i] = bc.position(lambda);

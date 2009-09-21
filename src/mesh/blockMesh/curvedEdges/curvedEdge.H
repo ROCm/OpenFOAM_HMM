@@ -66,7 +66,6 @@ public:
     //- Runtime type information
     TypeName("curvedEdge");
 
-
     // Declare run-time constructor selection tables
 
         declareRunTimeSelectionTable
@@ -113,36 +112,22 @@ public:
     // Member Functions
 
         //- Return label of start point
-        label start() const
-        {
-            return start_;
-        }
+        inline label start() const;
 
         //- Return label of end point
-        label end() const
-        {
-            return end_;
-        }
+        inline label end() const;
 
         //- Compare the given start and end points with this curve
         //  -  0: different
         //  - +1: identical
         //  - -1: same edge, but different orientation
-        int compare(const label start, const label end) const
-        {
-            if (start_ == start && end_ == end)
-            {
-                return 1;
-            }
-            else if (start_ == end && end_ == start)
-            {
-                return -1;
-            }
-            else
-            {
-                return 0;
-            }
-        }
+        inline int compare(const curvedEdge&) const;
+
+        //- Compare the given start and end points with this curve
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        inline int compare(const label start, const label end) const;
 
         //- Return the position of a point on the curve given by
         //  the parameter 0 <= lambda <= 1
@@ -150,6 +135,17 @@ public:
 
         //- Return the length of the curve
         virtual scalar length() const = 0;
+
+        //- Return a complete knotList by adding the start/end points
+        //  to the given list
+        static pointField knotlist
+        (
+            const pointField&,
+            const label start,
+            const label end,
+            const pointField& otherknots
+        );
+
 
     // Member operators
 
@@ -161,20 +157,13 @@ public:
 };
 
 
-//- Return the complete knotList by adding the start and end points to the
-//  given list
-pointField knotlist
-(
-    const pointField& points,
-    const label start,
-    const label end,
-    const pointField& otherknots
-);
-
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "curvedEdgeI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
