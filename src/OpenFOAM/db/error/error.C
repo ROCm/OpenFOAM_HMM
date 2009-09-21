@@ -240,7 +240,7 @@ void Foam::error::abort()
             // Rewind the message buffer for the next error message
             messageStreamPtr_->rewind();
 
-            throw *this;
+            throw errorException;
         }
         else
         {
@@ -274,6 +274,6 @@ Foam::Ostream& Foam::operator<<(Ostream& os, const error& fErr)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 // Global error definitions
 
-Foam::error Foam::FatalError("--> FOAM FATAL ERROR : ");
+Foam::error Foam::FatalError("--> FOAM FATAL ERROR: ");
 
 // ************************************************************************* //

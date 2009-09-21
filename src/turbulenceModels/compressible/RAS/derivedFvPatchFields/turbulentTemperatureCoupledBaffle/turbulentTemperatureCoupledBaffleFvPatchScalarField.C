@@ -33,9 +33,16 @@ License
 #include "basicThermo.H"
 #include "RASModel.H"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+namespace compressible
+{
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-bool Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::interfaceOwner
+bool turbulentTemperatureCoupledBaffleFvPatchScalarField::interfaceOwner
 (
     const polyMesh& nbrRegion,
     const polyPatch& nbrPatch
@@ -103,7 +110,7 @@ bool Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::interfaceOwner
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField::
 turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
     const fvPatch& p,
@@ -121,7 +128,7 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 }
 
 
-Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField::
 turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
     const turbulentTemperatureCoupledBaffleFvPatchScalarField& ptf,
@@ -137,7 +144,7 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 {}
 
 
-Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField::
 turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
     const fvPatch& p,
@@ -189,7 +196,7 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 }
 
 
-Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::
+turbulentTemperatureCoupledBaffleFvPatchScalarField::
 turbulentTemperatureCoupledBaffleFvPatchScalarField
 (
     const turbulentTemperatureCoupledBaffleFvPatchScalarField& wtcsf,
@@ -205,8 +212,8 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-Foam::tmp<Foam::scalarField>
-Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
+tmp<scalarField>
+turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
 {
     if (KName_ == "none")
     {
@@ -230,7 +237,7 @@ Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
 }
 
 
-void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
+void turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
 {
     if (updated())
     {
@@ -336,9 +343,12 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
     {
         scalar Q = gSum(K()*patch().magSf()*normalGradient());
 
-        Info<< "turbulentTemperatureCoupledBaffleFvPatchScalarField::"
-            << "updateCoeffs() :"
-            << " patch:" << patch().name()
+        Info<< patch().boundaryMesh().mesh().name() << ':'
+            << patch().name() << ':'
+            << this->dimensionedInternalField().name() << " -> "
+            << nbrMesh.name() << ':'
+            << nbrPatch.name() << ':'
+            << this->dimensionedInternalField().name() << " :"
             << " heatFlux:" << Q
             << " walltemperature "
             << " min:" << gMin(*this)
@@ -373,8 +383,12 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
     {
         label nTotSize = returnReduce(this->size(), sumOp<label>());
 
-        Info<< "turbulentTemperatureCoupledBaffleFvPatchScalarField::"
-            << "updateCoeffs() :"
+        Info<< patch().boundaryMesh().mesh().name() << ':'
+            << patch().name() << ':'
+            << this->dimensionedInternalField().name() << " -> "
+            << nbrMesh.name() << ':'
+            << nbrPatch.name() << ':'
+            << this->dimensionedInternalField().name() << " :"
             << " patch:" << patch().name()
             << " out of:" << nTotSize
             << " fixedBC:" << nFixed
@@ -385,7 +399,7 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::updateCoeffs()
 }
 
 
-void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::write
+void turbulentTemperatureCoupledBaffleFvPatchScalarField::write
 (
     Ostream& os
 ) const
@@ -400,15 +414,17 @@ void Foam::turbulentTemperatureCoupledBaffleFvPatchScalarField::write
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-
 makePatchTypeField
 (
     fvPatchScalarField,
     turbulentTemperatureCoupledBaffleFvPatchScalarField
 );
 
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace compressible
 } // End namespace Foam
+
 
 // ************************************************************************* //

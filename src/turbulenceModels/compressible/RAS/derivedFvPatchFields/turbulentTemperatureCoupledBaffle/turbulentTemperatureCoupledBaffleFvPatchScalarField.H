@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    turbulentTemperatureCoupledBaffleFvPatchScalarField
+    Foam::compressible::turbulentTemperatureCoupledBaffleFvPatchScalarField
 
 Description
     Mixed boundary condition for temperature, to be used for heat-transfer
@@ -65,13 +65,15 @@ SourceFiles
 #ifndef turbulentTemperatureCoupledBaffleFvPatchScalarField_H
 #define turbulentTemperatureCoupledBaffleFvPatchScalarField_H
 
-#include "fvPatchFields.H"
+//#include "fvPatchFields.H"
 #include "mixedFvPatchFields.H"
-#include "fvPatch.H"
+//#include "fvPatch.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
+{
+namespace compressible
 {
 
 /*---------------------------------------------------------------------------*\
@@ -102,7 +104,7 @@ class turbulentTemperatureCoupledBaffleFvPatchScalarField
 public:
 
     //- Runtime type information
-    TypeName("turbulentTemperatureCoupledBaffle");
+    TypeName("compressible::turbulentTemperatureCoupledBaffle");
 
 
     // Constructors
@@ -188,6 +190,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace compressible
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

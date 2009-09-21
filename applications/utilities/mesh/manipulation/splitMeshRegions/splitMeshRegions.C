@@ -586,12 +586,12 @@ void getInterfaceSizes
         {
             // Send to master
             {
-                OPstream toMaster(Pstream::blocking, Pstream::master());
+                OPstream toMaster(Pstream::blocking, Pstream::masterNo());
                 toMaster << interfaceSizes;
             }
             // Receive from master
             {
-                IPstream fromMaster(Pstream::blocking, Pstream::master());
+                IPstream fromMaster(Pstream::blocking, Pstream::masterNo());
                 fromMaster >> interfaceSizes;
             }
         }
