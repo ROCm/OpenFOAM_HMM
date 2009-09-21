@@ -54,6 +54,13 @@ Description
     }
     @endverbatim
 
+Usage
+
+    - changeDictionary [OPTION]
+
+    @param -literalRE \n
+    Do not interpret regular expressions; treat them as any other keyword.
+
 
 \*---------------------------------------------------------------------------*/
 
@@ -84,7 +91,7 @@ bool addEntry
     dictionary& thisDict,
     entry& thisEntry,
     const entry& mergeEntry,
-    const bool literalWildcards
+    const bool literalRE
 )
 {
     bool changed = false;
@@ -99,7 +106,7 @@ bool addEntry
             (
                 const_cast<dictionary&>(thisEntry.dict()),
                 mergeEntry.dict(),
-                literalWildcards
+                literalRE
             )
         )
         {
@@ -118,15 +125,15 @@ bool addEntry
 
 
 // Dictionary merging/editing.
-// literalWildcards:
-// - true: behave like dictionary::merge, i.e. add wildcards just like
+// literalRE:
+// - true: behave like dictionary::merge, i.e. add regexps just like
 //   any other key.
 // - false : interpret wildcard as a rule for items to be matched.
 bool merge
 (
     dictionary& thisDict,
     const dictionary& mergeDict,
-    const bool literalWildcards
+    const bool literalRE
 )
 {
     bool changed = false;
@@ -147,7 +154,7 @@ bool merge
     {
         const keyType& key = mergeIter().keyword();
 
-        if (literalWildcards || !key.isPattern())
+        if (literalRE || !key.isPattern())
         {
             entry* entryPtr = thisDict.lookupEntryPtr
             (
@@ -170,7 +177,7 @@ bool merge
                         thisDict,
                        *entryPtr,
                         mergeIter(),
-                        literalWildcards
+                        literalRE
                     )
                 )
                 {
@@ -189,7 +196,7 @@ bool merge
 
     // Pass 2. Wildcard matches (if any) on any non-match keys.
 
-    if (!literalWildcards && thisKeysSet.size() > 0)
+    if (!literalRE && thisKeysSet.size() > 0)
     {
         wordList thisKeys(thisKeysSet.toc());
 
@@ -219,7 +226,7 @@ bool merge
                             thisDict,
                             thisEntry,
                             mergeIter(),
-                            literalWildcards
+                            literalRE
                         )
                     )
                     {
@@ -239,19 +246,19 @@ bool merge
 int main(int argc, char *argv[])
 {
     argList::validOptions.insert("instance", "instance");
-    argList::validOptions.insert("literalWildcards", "");
+    argList::validOptions.insert("literalRE", "");
     #include "addRegionOption.H"
 
     #include "setRootCase.H"
     #include "createTime.H"
     #include "createNamedMesh.H"
 
-    bool literalWildcards = args.optionFound("literalWildcards");
+    bool literalRE = args.optionFound("literalRE");
 
-    if (literalWildcards)
+    if (literalRE)
     {
-        Info<< "Not interpreting any wildcards in the changeDictionaryDict."
-            << endl
+        Info<< "Not interpreting any regular expressions (RE)"
+            << " in the changeDictionaryDict." << endl
             << "Instead they are handled as any other entry, i.e. added if"
             << " not present." << endl;
     }
@@ -341,7 +348,7 @@ int main(int argc, char *argv[])
             Info<< "Merging entries from " << replaceDict.toc() << endl;
 
             // Merge the replacements in
-            merge(fieldDict, replaceDict, literalWildcards);
+            merge(fieldDict, replaceDict, literalRE);
 
             Info<< "fieldDict:" << fieldDict << endl;
 
@@ -407,7 +414,7 @@ int main(int argc, char *argv[])
             Info<< "Merging entries from " << replaceDict.toc() << endl;
 
             // Merge the replacements in
-            merge(fieldDict, replaceDict, literalWildcards);
+            merge(fieldDict, replaceDict, literalRE);
 
             Info<< "Writing modified fieldDict " << fieldName << endl;
             fieldDict.regIOobject::write();
