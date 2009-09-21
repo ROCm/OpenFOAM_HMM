@@ -73,6 +73,21 @@ class PairCollision
 
     // Private member functions
 
+        //- Pre collision tasks
+        void preInteraction();
+
+        //- Interactions between real (on-processor) particles
+        void realRealInteraction();
+
+        //- Interactions between real and referred (off processor) particles
+        void realReferredInteraction();
+
+        //- Interactions with walls
+        void wallInteraction();
+
+        //- Post collision tasks
+        void postInteraction();
+
         //- Build the cell occupancy information for each parcel
         void buildCellOccupancy();
 

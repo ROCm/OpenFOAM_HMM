@@ -30,107 +30,8 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template<class CloudType>
-void Foam::PairCollision<CloudType>::buildCellOccupancy()
+void Foam::PairCollision<CloudType>::preInteraction()
 {
-    Info<< "    Build cell occupancy" << endl;
-
-    forAll(cellOccupancy_, cO)
-    {
-        cellOccupancy_[cO].clear();
-    }
-
-    forAllIter(typename CloudType, this->owner(), iter)
-    {
-        cellOccupancy_[iter().cell()].append(&iter());
-    }
-
-    il_.ril().referParticles(cellOccupancy_);
-}
-
-
-template<class CloudType>
-void Foam::PairCollision<CloudType>::evaluatePair
-(
-    typename CloudType::parcelType& pA,
-    typename CloudType::parcelType& pB
-) const
-{
-    pairModel_->evaluatePair(pA, pB);
-}
-
-// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PairCollision<CloudType>::PairCollision
-(
-    const dictionary& dict,
-    CloudType& owner
-)
-:
-    CollisionModel<CloudType>(dict, owner, typeName),
-    cellOccupancy_(owner.mesh().nCells()),
-    pairModel_
-    (
-        PairModel<CloudType>::New
-        (
-            this->coeffDict(),
-            this->owner()
-        )
-    ),
-    il_
-    (
-        owner.mesh(),
-        sqr(readScalar(this->coeffDict().lookup("maxInteractionDistance"))),
-        true
-    )
-{}
-
-
-// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::PairCollision<CloudType>::~PairCollision()
-{}
-
-
-// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
-
-template<class CloudType>
-Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
-{
-    if (pairModel_->controlsTimestep())
-    {
-        label nSubCycles = returnReduce
-        (
-            pairModel_->nSubCycles(), maxOp<label>()
-        );
-
-        if(nSubCycles > 1)
-        {
-            Info<< nSubCycles << " move-collide subCycles" << endl;
-        }
-
-        return nSubCycles;
-    }
-    else
-    {
-        return 1;
-    }
-}
-
-
-template<class CloudType>
-bool Foam::PairCollision<CloudType>::active() const
-{
-    return true;
-}
-
-
-template<class CloudType>
-void Foam::PairCollision<CloudType>::collide()
-{
-    Info<< "Calculating collisions" << endl;
-
     // Set accumulated quantities to zero
     forAllIter(typename CloudType, this->owner(), iter)
     {
@@ -142,16 +43,17 @@ void Foam::PairCollision<CloudType>::collide()
     }
 
     buildCellOccupancy();
+}
 
+
+template<class CloudType>
+void Foam::PairCollision<CloudType>::realRealInteraction()
+{
     const DirectInteractionList<typename CloudType::parcelType>& dil =
         il_.dil();
 
-    const polyMesh& mesh = this->owner().mesh();
-
     typename CloudType::parcelType* pA_ptr = NULL;
     typename CloudType::parcelType* pB_ptr = NULL;
-
-    // real-real interactions
 
     forAll(dil, realCellI)
     {
@@ -188,9 +90,12 @@ void Foam::PairCollision<CloudType>::collide()
             }
         }
     }
+}
 
-    // real-referred interactions
 
+template<class CloudType>
+void Foam::PairCollision<CloudType>::realReferredInteraction()
+{
     ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
 
     // Loop over all referred cells
@@ -228,6 +133,18 @@ void Foam::PairCollision<CloudType>::collide()
             }
         }
     }
+}
+
+
+template<class CloudType>
+void Foam::PairCollision<CloudType>::wallInteraction()
+{
+    const polyMesh& mesh = this->owner().mesh();
+
+    const DirectInteractionList<typename CloudType::parcelType>& dil =
+        il_.dil();
+
+    ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
 
     DynamicList<point> allWallInteractionSites;
     DynamicList<point> flatWallInteractionSites;
@@ -240,7 +157,7 @@ void Foam::PairCollision<CloudType>::collide()
 
         // The labels of referred cells in range of this real cell
         const labelList& referredCellsInRange =
-            dil.referredCellsForInteraction()[realCellI];
+        dil.referredCellsForInteraction()[realCellI];
 
         // Loop over all Parcels in cell
         forAll(cellOccupancy_[realCellI], cellParticleI)
@@ -357,7 +274,12 @@ void Foam::PairCollision<CloudType>::collide()
             }
         }
     }
+}
 
+
+template<class CloudType>
+void Foam::PairCollision<CloudType>::postInteraction()
+{
     // Delete any collision records where no collision occurred this step
 
     Info<< "    Update collision records" << endl;
@@ -368,6 +290,121 @@ void Foam::PairCollision<CloudType>::collide()
 
         p.collisionRecords().update();
     }
+}
+
+
+template<class CloudType>
+void Foam::PairCollision<CloudType>::buildCellOccupancy()
+{
+    Info<< "    Build cell occupancy" << endl;
+
+    forAll(cellOccupancy_, cO)
+    {
+        cellOccupancy_[cO].clear();
+    }
+
+    forAllIter(typename CloudType, this->owner(), iter)
+    {
+        cellOccupancy_[iter().cell()].append(&iter());
+    }
+
+    il_.ril().referParticles(cellOccupancy_);
+}
+
+
+template<class CloudType>
+void Foam::PairCollision<CloudType>::evaluatePair
+(
+    typename CloudType::parcelType& pA,
+    typename CloudType::parcelType& pB
+) const
+{
+    pairModel_->evaluatePair(pA, pB);
+}
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::PairCollision<CloudType>::PairCollision
+(
+    const dictionary& dict,
+    CloudType& owner
+)
+:
+    CollisionModel<CloudType>(dict, owner, typeName),
+    cellOccupancy_(owner.mesh().nCells()),
+    pairModel_
+    (
+        PairModel<CloudType>::New
+        (
+            this->coeffDict(),
+            this->owner()
+        )
+    ),
+    il_
+    (
+        owner.mesh(),
+        sqr(readScalar(this->coeffDict().lookup("maxInteractionDistance"))),
+        true
+    )
+{}
+
+
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::PairCollision<CloudType>::~PairCollision()
+{}
+
+
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::label Foam::PairCollision<CloudType>::nSubCycles() const
+{
+    if (pairModel_->controlsTimestep())
+    {
+        label nSubCycles = returnReduce
+        (
+            pairModel_->nSubCycles(), maxOp<label>()
+        );
+
+        if(nSubCycles > 1)
+        {
+            Info<< nSubCycles << " move-collide subCycles" << endl;
+        }
+
+        return nSubCycles;
+    }
+    else
+    {
+        return 1;
+    }
+}
+
+
+template<class CloudType>
+bool Foam::PairCollision<CloudType>::active() const
+{
+    return true;
+}
+
+
+template<class CloudType>
+void Foam::PairCollision<CloudType>::collide()
+{
+    Info<< "Calculating collisions" << endl;
+
+    preInteraction();
+
+    realRealInteraction();
+
+    realReferredInteraction();
+
+    wallInteraction();
+
+    postInteraction();
 }
 
 
