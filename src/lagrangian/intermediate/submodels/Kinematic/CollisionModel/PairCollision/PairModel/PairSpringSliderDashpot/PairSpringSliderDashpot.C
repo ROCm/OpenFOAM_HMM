@@ -210,41 +210,41 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
         tangentialOverlap_AB += deltaTangentialOverlap_AB;
         tangentialOverlap_BA += -deltaTangentialOverlap_AB;
 
-        scalar kT = 8.0*sqrt(R*normalOverlapMag)*Gstar_;
+        scalar tangentialOverlapMag = mag(tangentialOverlap_AB);
 
-        scalar& etaT = etaN;
-
-        // // Tangential force
-        // vector fT_AB =
-        //     -min(kT*mag(tangentialOverlap_AB), mu_*mag(fN_AB))
-        //    *tangentialOverlap_AB/mag(tangentialOverlap_AB)
-        //   - etaT*USlip_AB;
-
-        // Tangential force
-        vector fT_AB;
-
-        if (kT*mag(tangentialOverlap_AB) > mu_*mag(fN_AB))
+        if (tangentialOverlapMag > VSMALL)
         {
-            // Tangential force greater than sliding friction, particle slips
+            scalar kT = 8.0*sqrt(R*normalOverlapMag)*Gstar_;
 
-            fT_AB = -mu_*mag(fN_AB)*USlip_AB/mag(USlip_AB);
+            scalar& etaT = etaN;
 
-            tangentialOverlap_AB = vector::zero;
-            tangentialOverlap_BA = vector::zero;
-        }
-        else
-        {
-            fT_AB =
-               -kT*mag(tangentialOverlap_AB)
-               *tangentialOverlap_AB/mag(tangentialOverlap_AB)
+            // Tangential force
+            vector fT_AB;
+
+            if (kT*tangentialOverlapMag > mu_*mag(fN_AB))
+            {
+                // Tangential force greater than sliding friction,
+                // particle slips
+
+                fT_AB = -mu_*mag(fN_AB)*USlip_AB/mag(USlip_AB);
+
+                tangentialOverlap_AB = vector::zero;
+                tangentialOverlap_BA = vector::zero;
+            }
+            else
+            {
+                fT_AB =
+                -kT*tangentialOverlapMag
+               *tangentialOverlap_AB/tangentialOverlapMag
               - etaT*USlip_AB;
+            }
+
+            pA.f() += fT_AB;
+            pB.f() += -fT_AB;
+
+            pA.tau() += (pA.r()*-rHat_AB) ^ fT_AB;
+            pB.tau() += (pB.r()*rHat_AB) ^ -fT_AB;
         }
-
-        pA.f() += fT_AB;
-        pB.f() += -fT_AB;
-
-        pA.tau() += (pA.r()*-rHat_AB) ^ fT_AB;
-        pB.tau() += (pB.r()*rHat_AB) ^ -fT_AB;
     }
 }
 
