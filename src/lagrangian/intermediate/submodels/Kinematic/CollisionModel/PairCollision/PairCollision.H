@@ -48,6 +48,9 @@ namespace Foam
 template<class CloudType>
 class PairModel;
 
+template<class CloudType>
+class WallModel;
+
 
 /*---------------------------------------------------------------------------*\
                      Class PairCollision Declaration
@@ -58,6 +61,19 @@ class PairCollision
 :
     public CollisionModel<CloudType>
 {
+    // Static data
+
+        //- Tolerance to determine flat wall interactions
+        static scalar cosPhiMinFlatWall;
+
+        //- Distance to multiply the distance to a wall with within
+        //  which a duplicate flat wall interaction is defined.  If
+        //  cosPhiFlatWall = 1 - e, this = sqrt(2e - e^2) < sqrt(3e)
+        //  for all e < 1, giving a safe tolerance (i.e. no double
+        //  interactions next to each other.)
+        static scalar flatWallDuplicateExclusion;
+
+
     // Private data
 
         //- Cell occupancy information for each parcel
@@ -65,6 +81,9 @@ class PairCollision
 
         //- PairModel to calculate the interaction between two parcels
         autoPtr<PairModel<CloudType> > pairModel_;
+
+        //- WallModel to calculate the interaction between the parcel and walls
+        autoPtr<WallModel<CloudType> > wallModel_;
 
         //- Interactions lists determining which cells are in
         //  interaction range of each other
@@ -85,6 +104,20 @@ class PairCollision
         //- Interactions with walls
         void wallInteraction();
 
+        bool duplicatePointInList
+        (
+            const DynamicList<point>& existingPoints,
+            const point& pointToTest,
+            scalar duplicateRangeSqr
+        ) const;
+
+        bool duplicatePointInList
+        (
+            const DynamicList<point>& existingPoints,
+            const point& pointToTest,
+            const scalarList& duplicateRangeSqr
+        ) const;
+
         //- Post collision tasks
         void postInteraction();
 
@@ -96,6 +129,14 @@ class PairCollision
         (
             typename CloudType::parcelType& pA,
             typename CloudType::parcelType& pB
+        ) const;
+
+        //- Calculate the wall forces on a parcel
+        void evaluateWall
+        (
+            typename CloudType::parcelType& p,
+            const List<point>& flatSites,
+            const List<point>& sharpSites
         ) const;
 
 

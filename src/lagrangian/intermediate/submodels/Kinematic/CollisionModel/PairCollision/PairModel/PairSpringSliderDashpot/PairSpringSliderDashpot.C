@@ -24,12 +24,12 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SpringSliderDashpot.H"
+#include "PairSpringSliderDashpot.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 template <class CloudType>
-void Foam::SpringSliderDashpot<CloudType>::findMinMaxProperties
+void Foam::PairSpringSliderDashpot<CloudType>::findMinMaxProperties
 (
     scalar& RMin,
     scalar& rhoMax,
@@ -45,6 +45,7 @@ void Foam::SpringSliderDashpot<CloudType>::findMinMaxProperties
         const typename CloudType::parcelType& p = iter();
 
         // Finding minimum diameter to avoid excessive arithmetic
+
         RMin = min(p.d(), RMin);
 
         rhoMax = max(p.rho(), rhoMax);
@@ -61,9 +62,11 @@ void Foam::SpringSliderDashpot<CloudType>::findMinMaxProperties
     // then rMin into minimum R,
     //     1/RMin = 1/rMin + 1/rMin,
     //     RMin = rMin/2 = dMin/4
+
     RMin /= 4.0;
 
     // Multiply by two to create the worst-case relative velocity
+
     UMagMax = 2*UMagMax;
 }
 
@@ -71,7 +74,7 @@ void Foam::SpringSliderDashpot<CloudType>::findMinMaxProperties
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::SpringSliderDashpot<CloudType>::SpringSliderDashpot
+Foam::PairSpringSliderDashpot<CloudType>::PairSpringSliderDashpot
 (
     const dictionary& dict,
     CloudType& cloud
@@ -106,21 +109,21 @@ Foam::SpringSliderDashpot<CloudType>::SpringSliderDashpot
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 template <class CloudType>
-Foam::SpringSliderDashpot<CloudType>::~SpringSliderDashpot()
+Foam::PairSpringSliderDashpot<CloudType>::~PairSpringSliderDashpot()
 {}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
 template<class CloudType>
-bool Foam::SpringSliderDashpot<CloudType>::controlsTimestep() const
+bool Foam::PairSpringSliderDashpot<CloudType>::controlsTimestep() const
 {
     return true;
 }
 
 
 template<class CloudType>
-Foam::label Foam::SpringSliderDashpot<CloudType>::nSubCycles() const
+Foam::label Foam::PairSpringSliderDashpot<CloudType>::nSubCycles() const
 {
     if (!(this->owner().size()))
     {
@@ -145,7 +148,7 @@ Foam::label Foam::SpringSliderDashpot<CloudType>::nSubCycles() const
 
 
 template<class CloudType>
-void Foam::SpringSliderDashpot<CloudType>::evaluatePair
+void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
 (
     typename CloudType::parcelType& pA,
     typename CloudType::parcelType& pB

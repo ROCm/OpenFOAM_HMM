@@ -26,6 +26,17 @@ License
 
 #include "PairCollision.H"
 #include "PairModel.H"
+#include "WallModel.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class CloudType>
+Foam::scalar Foam::PairCollision<CloudType>::cosPhiMinFlatWall = 1 - 1e-6;
+
+template<class CloudType>
+Foam::scalar Foam::PairCollision<CloudType>::flatWallDuplicateExclusion =
+    sqrt(3e-6);
+
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -144,11 +155,15 @@ void Foam::PairCollision<CloudType>::wallInteraction()
     const DirectInteractionList<typename CloudType::parcelType>& dil =
         il_.dil();
 
-    ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
+    const ReferredCellList<typename CloudType::parcelType>& ril = il_.ril();
 
-    DynamicList<point> allWallInteractionSites;
-    DynamicList<point> flatWallInteractionSites;
-    DynamicList<point> sharpWallInteractionSites;
+    // Storage for the wall interaction sites
+    DynamicList<point> flatSites;
+    DynamicList<scalar> flatSiteExclusionDistancesSqr;
+    DynamicList<point> otherSites;
+    DynamicList<scalar> otherSiteDistances;
+    DynamicList<point> sharpSites;
+    DynamicList<scalar> sharpSiteExclusionDistancesSqr;
 
     forAll(dil, realCellI)
     {
@@ -162,14 +177,17 @@ void Foam::PairCollision<CloudType>::wallInteraction()
         // Loop over all Parcels in cell
         forAll(cellOccupancy_[realCellI], cellParticleI)
         {
-            allWallInteractionSites.clear();
-            flatWallInteractionSites.clear();
-            sharpWallInteractionSites.clear();
+            flatSites.clear();
+            flatSiteExclusionDistancesSqr.clear();
+            otherSites.clear();
+            otherSiteDistances.clear();
+            sharpSites.clear();
+            sharpSiteExclusionDistancesSqr.clear();
 
             typename CloudType::parcelType& p =
                 *cellOccupancy_[realCellI][cellParticleI];
 
-            const point& pt = p.position();
+            const point& pos = p.position();
 
             // real wallFace interactions
 
@@ -179,7 +197,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                 pointHit nearest = mesh.faces()[realFaceI].nearestPoint
                 (
-                    pt,
+                    pos,
                     mesh.points()
                 );
 
@@ -189,15 +207,41 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                     normal /= mag(normal);
 
-                    vector pW = nearest.rawPoint() - pt;
+                    const vector& nearPt = nearest.rawPoint();
+
+                    vector pW = nearPt - pos;
 
                     scalar normalAlignment = normal & pW/mag(pW);
 
-                    allWallInteractionSites.append(nearest.rawPoint());
-
-                    if (normalAlignment > 1 - SMALL)
+                    if (normalAlignment > cosPhiMinFlatWall)
                     {
-                        flatWallInteractionSites.append(nearest.rawPoint());
+                        // Guard against a flat interaction being
+                        // present on the boundary of two or more
+                        // faces, which would create duplicate contact
+                        // points. Duplicates are discarded.
+                        if
+                        (
+                            !duplicatePointInList
+                            (
+                                flatSites,
+                                nearPt,
+                                sqr(p.r()*flatWallDuplicateExclusion)
+                            )
+                        )
+                        {
+                            flatSites.append(nearPt);
+
+                            flatSiteExclusionDistancesSqr.append
+                            (
+                                sqr(p.r()) - sqr(nearest.distance())
+                            );
+                        }
+                    }
+                    else
+                    {
+                        otherSites.append(nearPt);
+
+                        otherSiteDistances.append(nearest.distance());
                     }
                 }
             }
@@ -206,7 +250,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
             forAll(referredCellsInRange, refCellInRangeI)
             {
-                ReferredCell<typename CloudType::parcelType>& refCell =
+                const ReferredCell<typename CloudType::parcelType>& refCell =
                     ril[referredCellsInRange[refCellInRangeI]];
 
                 const labelList& refWallFaces = refCell.wallFaces();
@@ -217,7 +261,7 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                     pointHit nearest = refCell.faces()[refFaceI].nearestPoint
                     (
-                        pt,
+                        pos,
                         refCell.points()
                     );
 
@@ -227,53 +271,141 @@ void Foam::PairCollision<CloudType>::wallInteraction()
 
                         normal /= mag(normal);
 
-                        vector pW = nearest.rawPoint() - pt;
+                        const vector& nearPt = nearest.rawPoint();
+
+                        vector pW = nearPt - pos;
 
                         scalar normalAlignment = normal & pW/mag(pW);
 
-                        allWallInteractionSites.append(nearest.rawPoint());
-
-                        if (normalAlignment > 1 - SMALL)
+                        if (normalAlignment > cosPhiMinFlatWall)
                         {
-                            flatWallInteractionSites.append(nearest.rawPoint());
+                            // Guard against a flat interaction being
+                            // present on the boundary of two or more
+                            // faces, which would create duplicate contact
+                            // points. Duplicates are discarded.
+                            if
+                            (
+                                !duplicatePointInList
+                                (
+                                    flatSites,
+                                    nearPt,
+                                    sqr(p.r()*flatWallDuplicateExclusion)
+                                )
+                            )
+                            {
+                                flatSites.append(nearPt);
+
+                                flatSiteExclusionDistancesSqr.append
+                                (
+                                    sqr(p.r()) - sqr(nearest.distance())
+                                );
+                            }
+                        }
+                        else
+                        {
+                            otherSites.append(nearPt);
+
+                            otherSiteDistances.append(nearest.distance());
                         }
                     }
                 }
             }
 
-            Pout<< flatWallInteractionSites << endl;
+            // All flat interaction sites found, now classify the
+            // other sites as being in range of a flat interaction, or
+            // a sharp interaction, being aware of not duplicating the
+            // sharp interaction sites.
 
-            forAll(flatWallInteractionSites, siteI)
+            // The "other" sites need to evaluated in order of
+            // ascending distance to their nearest point so that
+            // grouping occurs around the closest in any group
+
+            labelList sortedOtherSiteIndices;
+
+            sortedOrder(otherSiteDistances, sortedOtherSiteIndices);
+
+            forAll(sortedOtherSiteIndices, siteI)
             {
+                label orderedIndex = sortedOtherSiteIndices[siteI];
 
-                scalar nu = this->owner().constProps().poissonsRatio();
+                const point& otherPt = otherSites[orderedIndex];
 
-                scalar E = this->owner().constProps().youngsModulus();
+                if
+                (
+                    !duplicatePointInList
+                    (
+                        flatSites,
+                        otherPt,
+                        flatSiteExclusionDistancesSqr
+                    )
+                )
+                {
+                    // Not in range of a flat interaction, must be a
+                    // sharp interaction.
 
-                scalar b = 1.5;
+                    if
+                    (
+                        !duplicatePointInList
+                        (
+                            sharpSites,
+                            otherPt,
+                            sharpSiteExclusionDistancesSqr
+                        )
+                    )
+                    {
+                        sharpSites.append(otherPt);
 
-                scalar alpha = 0.52;
-
-                vector r_PW = pt - flatWallInteractionSites[siteI];
-
-                scalar normalOverlapMag = p.r() - mag(r_PW);
-
-                vector rHat_PW = r_PW/(mag(r_PW) + VSMALL);
-
-                scalar kN = (4.0/3.0)*sqrt(p.r())*E/(2.0*(1.0 - sqr(nu)));
-
-                scalar etaN = alpha*sqrt(p.mass()*kN)*pow025(normalOverlapMag);
-
-                vector fN_PW =
-                    rHat_PW
-                   *(kN*pow(normalOverlapMag, b) - etaN*(p.U() & rHat_PW));
-
-                p.f() += fN_PW;
-
-                Pout<< "Wall force " << fN_PW << endl;
+                        sharpSiteExclusionDistancesSqr.append
+                        (
+                            sqr(p.r()) - sqr(otherSiteDistances[orderedIndex])
+                        );
+                    }
+                }
             }
+
+            evaluateWall(p, flatSites, sharpSites);
         }
     }
+}
+
+
+template<class CloudType>
+bool Foam::PairCollision<CloudType>::duplicatePointInList
+(
+    const DynamicList<point>& existingPoints,
+    const point& pointToTest,
+    scalar duplicateRangeSqr
+) const
+{
+    forAll(existingPoints, i)
+    {
+        if (magSqr(existingPoints[i] - pointToTest) < duplicateRangeSqr)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+template<class CloudType>
+bool Foam::PairCollision<CloudType>::duplicatePointInList
+(
+    const DynamicList<point>& existingPoints,
+    const point& pointToTest,
+    const scalarList& duplicateRangeSqr
+) const
+{
+    forAll(existingPoints, i)
+    {
+        if (magSqr(existingPoints[i] - pointToTest) < duplicateRangeSqr[i])
+        {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 
@@ -323,6 +455,18 @@ void Foam::PairCollision<CloudType>::evaluatePair
 }
 
 
+template<class CloudType>
+void Foam::PairCollision<CloudType>::evaluateWall
+(
+    typename CloudType::parcelType& p,
+    const List<point>& flatSites,
+    const List<point>& sharpSites
+) const
+{
+    wallModel_->evaluateWall(p, flatSites, sharpSites);
+}
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 template<class CloudType>
@@ -337,6 +481,14 @@ Foam::PairCollision<CloudType>::PairCollision
     pairModel_
     (
         PairModel<CloudType>::New
+        (
+            this->coeffDict(),
+            this->owner()
+        )
+    ),
+    wallModel_
+    (
+        WallModel<CloudType>::New
         (
             this->coeffDict(),
             this->owner()

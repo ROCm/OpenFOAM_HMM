@@ -34,7 +34,9 @@ License
 #include "NoCollision.H"
 #include "PairCollision.H"
 
-#include "SpringSliderDashpot.H"
+#include "PairSpringSliderDashpot.H"
+
+#include "WallSpringSliderDashpot.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -60,7 +62,16 @@ License
                                                                               \
     makePairModelType                                                         \
     (                                                                         \
-        SpringSliderDashpot,                                                  \
+        PairSpringSliderDashpot,                                              \
+        InteractingKinematicCloud,                                            \
+        ParcelType                                                            \
+    );                                                                        \
+                                                                              \
+    makeWallModel(InteractingKinematicCloud<ParcelType>);                     \
+                                                                              \
+    makeWallModelType                                                         \
+    (                                                                         \
+        WallSpringSliderDashpot,                                              \
         InteractingKinematicCloud,                                            \
         ParcelType                                                            \
     );

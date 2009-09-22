@@ -23,15 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::SpringSliderDashpot
+    Foam::PairSpringSliderDashpot
 
 Description
     Pair forces between particles colliding with a spring, slider, damper model
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SpringSliderDashpot_H
-#define SpringSliderDashpot_H
+#ifndef PairSpringSliderDashpot_H
+#define PairSpringSliderDashpot_H
 
 #include "PairModel.H"
 #include "CollisionRecord.H"
@@ -41,11 +41,11 @@ Description
 namespace Foam
 {
 /*---------------------------------------------------------------------------*\
-                      Class SpringSliderDashpot Declaration
+                    Class PairSpringSliderDashpot Declaration
 \*---------------------------------------------------------------------------*/
 
 template<class CloudType>
-class SpringSliderDashpot
+class PairSpringSliderDashpot
 :
     public PairModel<CloudType>
 {
@@ -90,17 +90,17 @@ class SpringSliderDashpot
 public:
 
     //- Runtime type information
-    TypeName("SpringSliderDashpot");
+    TypeName("PairSpringSliderDashpot");
 
 
     // Constructors
 
         //- Construct from dictionary
-        SpringSliderDashpot(const dictionary& dict, CloudType& cloud);
+        PairSpringSliderDashpot(const dictionary& dict, CloudType& cloud);
 
 
     //- Destructor
-    virtual ~SpringSliderDashpot();
+    virtual ~PairSpringSliderDashpot();
 
 
     // Member Functions
@@ -130,7 +130,7 @@ public:
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #ifdef NoRepository
-#   include "SpringSliderDashpot.C"
+#   include "PairSpringSliderDashpot.C"
 #endif
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
