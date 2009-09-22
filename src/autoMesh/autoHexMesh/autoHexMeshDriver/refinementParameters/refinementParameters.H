@@ -73,6 +73,9 @@ class refinementParameters
         //- Areas to keep
         const pointField keepPoints_;
 
+        //- Allowed load unbalance
+        scalar maxLoadUnbalance_;
+
 
     // Private Member Functions
 
@@ -132,6 +135,12 @@ public:
             const pointField& keepPoints() const
             {
                 return keepPoints_;
+            }
+
+            //- Allowed load unbalance
+            scalar maxLoadUnbalance() const
+            {
+                return maxLoadUnbalance_;
             }
 
 
