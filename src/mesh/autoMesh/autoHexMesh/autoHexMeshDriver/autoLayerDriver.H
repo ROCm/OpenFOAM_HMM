@@ -523,8 +523,8 @@ public:
             (
                 const layerParameters& layerParams,
                 const dictionary& motionDict,
+                const labelList& patchIDs,
                 const label nAllowableErrors,
-                motionSmoother& meshMover,
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor
             );
