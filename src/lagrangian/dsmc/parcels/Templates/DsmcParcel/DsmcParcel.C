@@ -25,7 +25,6 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DsmcParcel.H"
-#include "meshTools.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -48,18 +47,8 @@ bool Foam::DsmcParcel<ParcelType>::move
     scalar tEnd = (1.0 - p.stepFraction())*deltaT;
     const scalar dtMax = tEnd;
 
-    // Save the velocity to re-apply it after tracking
-    vector U_save = U_;
-
-    // Apply correction to velocity to constrain tracking for
-    // reduced-D cases
-    meshTools::constrainDirection(mesh, mesh.solutionD(), U_);
-
     while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
     {
-        // Apply correction to position for reduced-D cases
-        meshTools::constrainToMeshCentre(mesh, p.position());
-
         // Set the Lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
@@ -77,9 +66,6 @@ bool Foam::DsmcParcel<ParcelType>::move
             }
         }
     }
-
-    // Restore the correct value of velocity
-    U_ = U_save;
 
     return td.keepParticle;
 }
