@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Description
-    Manipulate a cell/face/point set interactively.
+    Manipulate a cell/face/point/ set or zone interactively.
 
 \*---------------------------------------------------------------------------*/
 
@@ -82,6 +82,7 @@ Istream& selectStream(Istream* is0Ptr, Istream* is1Ptr)
 // Copy set
 void backup
 (
+    const word& setType,
     const polyMesh& mesh,
     const word& fromName,
     const topoSet& fromSet,
@@ -92,9 +93,7 @@ void backup
     {
         Pout<< "    Backing up " << fromName << " into " << toName << endl;
 
-        topoSet backupSet(mesh, toName, fromSet);
-
-        backupSet.write();
+        topoSet::New(setType, mesh, toName, fromSet)().write();
     }
 }
 
@@ -102,14 +101,21 @@ void backup
 // Read and copy set
 void backup
 (
+    const word& setType,
     const polyMesh& mesh,
     const word& fromName,
     const word& toName
 )
 {
-    topoSet fromSet(mesh, fromName, IOobject::READ_IF_PRESENT);
+    autoPtr<topoSet> fromSet = topoSet::New
+    (
+        setType,
+        mesh,
+        fromName,
+        IOobject::READ_IF_PRESENT
+    );
 
-    backup(mesh, fromName, fromSet, toName);
+    backup(setType, mesh, fromName, fromSet(), toName);
 }
 
 
@@ -241,7 +247,8 @@ void printHelp(Ostream& os)
         << "A set command should be of the following form" << endl
         << endl
         << "    cellSet|faceSet|pointSet <setName> <action> <source>"
-        << endl << endl
+        << endl
+        << endl
         << "The <action> is one of" << endl
         << "    list            - prints the contents of the set" << endl
         << "    clear           - clears the set" << endl
@@ -270,6 +277,10 @@ void printHelp(Ostream& os)
         << "    cellSet c0 add pointToCell p0 any" << endl
         << "List set:" << endl
         << "    cellSet c0 list" << endl
+        << endl
+        << "Zones can be set from corresponding sets:" << endl
+        << "    faceZone f0Zone new setToZone f0" << endl 
+        << "    cellZone c0Zone new setToZone c0" << endl
         << endl;
 }
 
@@ -366,7 +377,7 @@ bool doCommand
         {
             r = IOobject::NO_READ;
 
-            //backup(mesh, setName, setName + "_old");
+            //backup(setType, mesh, setName, setName + "_old");
 
             currentSetPtr = topoSet::New(setType, mesh, setName, typSize);
         }
@@ -401,7 +412,7 @@ bool doCommand
             //if ((r == IOobject::MUST_READ) && (action != topoSetSource::LIST))
             //{
             //    // currentSet has been read so can make copy.
-            //    backup(mesh, setName, currentSet, setName + "_old");
+            //    backup(setType, mesh, setName, currentSet, setName + "_old");
             //}
 
             switch (action)
@@ -437,15 +448,18 @@ bool doCommand
                         );
 
                         // Backup current set.
-                        topoSet oldSet
+                        autoPtr<topoSet> oldSet
                         (
-                            mesh,
-                            currentSet.name() + "_old2",
-                            currentSet
+                            topoSet::New
+                            (
+                                setType,
+                                mesh,
+                                currentSet.name() + "_old2",
+                                currentSet
+                            )
                         );
 
                         currentSet.clear();
-                        currentSet.resize(oldSet.size());
                         setSource().applyToSet(topoSetSource::NEW, currentSet);
 
                         // Combine new value of currentSet with old one.
@@ -547,7 +561,8 @@ enum commandStatus
 {
     QUIT,           // quit program
     INVALID,        // token is not a valid set manipulation command
-    VALID           // ,,    is a valid     ,,
+    VALIDSETCMD,    // ,,    is a valid     ,,
+    VALIDZONECMD    // ,,    is a valid     zone      ,,
 };
 
 
@@ -654,7 +669,16 @@ commandStatus parseType
      || setType == "pointSet"
     )
     {
-        return VALID;
+        return VALIDSETCMD;
+    }
+    else if
+    (
+        setType == "cellZoneSet"
+     || setType == "faceZoneSet"
+     || setType == "pointZoneSet"
+    )
+    {
+        return VALIDZONECMD;
     }
     else
     {
@@ -664,7 +688,7 @@ commandStatus parseType
             ", IStringStream&)"
         )   << "Illegal command " << setType << endl
             << "Should be one of 'help', 'list', 'time' or a set type :"
-            << " 'cellSet', 'faceSet', 'pointSet'"
+            << " 'cellSet', 'faceSet', 'pointSet', 'faceZoneSet'"
             << endl;
 
         return INVALID;
@@ -682,7 +706,7 @@ commandStatus parseAction(const word& actionName)
         {
             (void)topoSetSource::toAction(actionName);
 
-            stat = VALID;
+            stat = VALIDSETCMD;
         }
         catch (Foam::IOerror& fIOErr)
         {
@@ -816,12 +840,12 @@ int main(int argc, char *argv[])
 
         IStringStream is(rawLine + ' ');
 
-        // Type: cellSet, faceSet, pointSet
+        // Type: cellSet, faceSet, pointSet, faceZoneSet
         is >> setType;
 
         stat = parseType(runTime, mesh, setType, is);
 
-        if (stat == VALID)
+        if (stat == VALIDSETCMD || stat == VALIDZONECMD)
         {
             if (is >> setName)
             {
@@ -831,14 +855,13 @@ int main(int argc, char *argv[])
                 }
             }
         }
-
         ok = true;
 
         if (stat == QUIT)
         {
             break;
         }
-        else if (stat == VALID)
+        else if (stat == VALIDSETCMD || stat == VALIDZONECMD)
         {
             ok = doCommand(mesh, setType, setName, actionName, writeVTK, is);
         }

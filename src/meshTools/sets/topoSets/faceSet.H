@@ -83,6 +83,15 @@ public:
             writeOption w=NO_WRITE
         );
 
+        //- Construct from existing set
+        faceSet
+        (
+            const polyMesh& mesh,
+            const word& name,
+            const topoSet&,
+            writeOption w=NO_WRITE
+        );
+
         //- Construct from additional labelHashSet
         faceSet
         (
