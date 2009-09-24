@@ -61,6 +61,7 @@ dimensionedScalar pow3(const dimensionedScalar&);
 dimensionedScalar pow4(const dimensionedScalar&);
 dimensionedScalar pow5(const dimensionedScalar&);
 dimensionedScalar pow6(const dimensionedScalar&);
+dimensionedScalar pow025(const dimensionedScalar&);
 
 dimensionedScalar sqrt(const dimensionedScalar&);
 dimensionedScalar cbrt(const dimensionedScalar&);

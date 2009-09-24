@@ -39,7 +39,7 @@ Description
     {
         const fvPatch& curPatch = patches[patchi];
 
-        if (isType<wallFvPatch>(curPatch))
+        if (isA<wallFvPatch>(curPatch))
         {
             const scalarField& nuw = nu().boundaryField()[patchi];
             scalarField& nutw = nut_.boundaryField()[patchi];
@@ -49,7 +49,7 @@ Description
                 label faceCelli = curPatch.faceCells()[facei];
 
                 //- Using local Cmu
-                scalar Cmu25 = pow(Cmu_[faceCelli], 0.25);
+                scalar Cmu25 = pow025(Cmu_[faceCelli]);
 
                 scalar yPlus =
                     Cmu25*y_[patchi][facei]*sqrt(k_[faceCelli])/nuw[facei];

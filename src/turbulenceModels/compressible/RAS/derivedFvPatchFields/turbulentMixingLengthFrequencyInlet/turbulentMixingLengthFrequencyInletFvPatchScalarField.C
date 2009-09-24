@@ -27,7 +27,6 @@ License
 #include "turbulentMixingLengthFrequencyInletFvPatchScalarField.H"
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
-#include "surfaceFields.H"
 #include "volFields.H"
 #include "RASModel.H"
 
@@ -118,7 +117,7 @@ void turbulentMixingLengthFrequencyInletFvPatchScalarField::updateCoeffs()
     const scalar Cmu =
         rasModel.coeffDict().lookupOrDefault<scalar>("Cmu", 0.09);
 
-    const scalar Cmu25 = pow(Cmu, 0.25);
+    const scalar Cmu25 = pow025(Cmu);
 
     const fvPatchField<scalar>& kp =
         patch().lookupPatchField<volScalarField, scalar>(kName_);

@@ -43,7 +43,7 @@ Description
     {
         const fvPatch& curPatch = patches[patchi];
 
-        if (isType<wallFvPatch>(curPatch))
+        if (isA<wallFvPatch>(curPatch))
         {
             forAll(curPatch, facei)
             {
@@ -61,7 +61,7 @@ Description
     {
         const fvPatch& curPatch = patches[patchi];
 
-        if (isType<wallFvPatch>(curPatch))
+        if (isA<wallFvPatch>(curPatch))
         {
             #include "checkPatchFieldTypes.H"
 
@@ -75,7 +75,7 @@ Description
                 label faceCelli = curPatch.faceCells()[facei];
 
                 //- using local Cmu !
-                scalar Cmu25 = pow(Cmu_[faceCelli], 0.25);
+                scalar Cmu25 = pow025(Cmu_[faceCelli]);
                 scalar Cmu75 = pow(Cmu_[faceCelli], 0.75);
 
                 scalar yPlus =
@@ -112,7 +112,7 @@ Description
     {
         const fvPatch& curPatch = patches[patchi];
 
-        if (isType<wallFvPatch>(curPatch))
+        if (isA<wallFvPatch>(curPatch))
         {
             forAll(curPatch, facei)
             {
