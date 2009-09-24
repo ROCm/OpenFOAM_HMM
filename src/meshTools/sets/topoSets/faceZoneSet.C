@@ -356,6 +356,8 @@ bool faceZoneSet::writeObject
     {
         faceZones[zoneID].resetAddressing(addressing_, flipMap_);
     }
+    faceZones.clearAddressing();
+
     return ok && faceZones.write();
 }
 

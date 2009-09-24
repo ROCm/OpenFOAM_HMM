@@ -42,6 +42,9 @@ Description
 #include "writePatch.H"
 #include "writePointSet.H"
 #include "IOobjectList.H"
+#include "cellZoneSet.H"
+#include "faceZoneSet.H"
+#include "pointZoneSet.H"
 
 #include <stdio.h>
 
@@ -253,6 +256,7 @@ void printHelp(Ostream& os)
         << "    list            - prints the contents of the set" << endl
         << "    clear           - clears the set" << endl
         << "    invert          - inverts the set" << endl
+        << "    remove          - remove the set" << endl
         << "    new <source>    - sets to set to the source set" << endl
         << "    add <source>    - adds all elements from the source set" << endl
         << "    delete <source> - deletes      ,," << endl
@@ -278,9 +282,19 @@ void printHelp(Ostream& os)
         << "List set:" << endl
         << "    cellSet c0 list" << endl
         << endl
-        << "Zones can be set from corresponding sets:" << endl
-        << "    faceZone f0Zone new setToZone f0" << endl 
-        << "    cellZone c0Zone new setToZone c0" << endl
+        << "Zones can be set using zoneSets from corresponding sets:" << endl
+        << "    cellZoneSet c0Zone new setToZone c0" << endl
+        << "    faceZoneSet f0Zone new setToZone f0" << endl 
+        << endl
+        << "or if orientation is important:" << endl
+        << "    faceZoneSet f0Zone new setsToZone f0 c0" << endl 
+        << endl
+        << "ZoneSets can be manipulated using the general actions:" << endl
+        << "    list            - prints the contents of the set" << endl
+        << "    clear           - clears the set" << endl
+        << "    invert          - inverts the set (undefined orientation)"
+        << endl
+        << "    remove          - remove the set" << endl
         << endl;
 }
 
@@ -323,7 +337,123 @@ void printAllSets(const polyMesh& mesh, Ostream& os)
             os  << '\t' << set.name() << "\tsize:" << set.size() << endl;
         }
     }
+
+    const cellZoneMesh& cellZones = mesh.cellZones();
+    if (cellZones.size())
+    {
+        os  << "cellZones:" << endl;
+        forAll(cellZones, i)
+        {
+            const cellZone& zone = cellZones[i];
+            os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
+        }
+    }
+    const faceZoneMesh& faceZones = mesh.faceZones();
+    if (faceZones.size())
+    {
+        os  << "faceZones:" << endl;
+        forAll(faceZones, i)
+        {
+            const faceZone& zone = faceZones[i];
+            os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
+        }
+    }
+    const pointZoneMesh& pointZones = mesh.pointZones();
+    if (pointZones.size())
+    {
+        os  << "pointZones:" << endl;
+        forAll(pointZones, i)
+        {
+            const pointZone& zone = pointZones[i];
+            os  << '\t' << zone.name() << "\tsize:" << zone.size() << endl;
+        }
+    }
+
     os  << endl;
+}
+
+
+template<class ZoneType>
+void removeZone
+(
+    ZoneMesh<ZoneType, polyMesh>& zones,
+    const word& setName
+)
+{
+    label zoneID = zones.findZoneID(setName);
+
+    if (zoneID != -1)
+    {
+        Info<< "Removing zone " << setName << " at index " << zoneID << endl;
+        // Shuffle to last position
+        labelList oldToNew(zones.size());
+        label newI = 0;
+        forAll(oldToNew, i)
+        {
+            if (i != zoneID)
+            {
+                oldToNew[i] = newI++;
+            }
+        }
+        oldToNew[zoneID] = newI;
+        zones.reorder(oldToNew);
+        // Remove last element
+        zones.setSize(zones.size()-1);
+        zones.clearAddressing();
+        zones.write();
+    }
+}
+
+
+// Physically remove a set
+void removeSet
+(
+    const polyMesh& mesh,
+    const word& setType,
+    const word& setName
+)
+{
+    // Remove the file
+    IOobjectList objects
+    (
+        mesh,
+        mesh.pointsInstance(),
+        polyMesh::meshSubDir/"sets"
+    );
+
+    if (objects.found(setName))
+    {
+        // Remove file
+        fileName object = objects[setName]->objectPath();
+        Info<< "Removing file " << object << endl;
+        rm(object);
+    }
+
+    // See if zone
+    if (setType == cellZoneSet::typeName)
+    {
+        removeZone
+        (
+            const_cast<cellZoneMesh&>(mesh.cellZones()),
+            setName
+        );
+    }
+    else if (setType == faceZoneSet::typeName)
+    {
+        removeZone
+        (
+            const_cast<faceZoneMesh&>(mesh.faceZones()),
+            setName
+        );
+    }
+    else if (setType == pointZoneSet::typeName)
+    {
+        removeZone
+        (
+            const_cast<pointZoneMesh&>(mesh.pointZones()),
+            setName
+        );
+    }
 }
 
 
@@ -369,38 +499,29 @@ bool doCommand
 
         IOobject::readOption r;
 
-        if
+        if (action == topoSetSource::REMOVE)
+        {
+            removeSet(mesh, setType, setName);
+        }
+        else if
         (
             (action == topoSetSource::NEW)
          || (action == topoSetSource::CLEAR)
         )
         {
             r = IOobject::NO_READ;
-
-            //backup(setType, mesh, setName, setName + "_old");
-
             currentSetPtr = topoSet::New(setType, mesh, setName, typSize);
         }
         else
         {
             r = IOobject::MUST_READ;
-
             currentSetPtr = topoSet::New(setType, mesh, setName, r);
-
             topoSet& currentSet = currentSetPtr();
-
             // Presize it according to current mesh data.
             currentSet.resize(max(currentSet.size(), typSize));
         }
 
-        if (currentSetPtr.empty())
-        {
-            Pout<< "    Cannot construct/load set "
-                << topoSet::localPath(mesh, setName) << endl;
-
-            ok = false;
-        }
-        else
+        if (currentSetPtr.valid())
         {
             topoSet& currentSet = currentSetPtr();
 
@@ -408,12 +529,6 @@ bool doCommand
                 << "  Size:" << currentSet.size()
                 << "  Action:" << actionName
                 << endl;
-
-            //if ((r == IOobject::MUST_READ) && (action != topoSetSource::LIST))
-            //{
-            //    // currentSet has been read so can make copy.
-            //    backup(setType, mesh, setName, currentSet, setName + "_old");
-            //}
 
             switch (action)
             {
@@ -748,6 +863,10 @@ int main(int argc, char *argv[])
     // Print some mesh info
     printMesh(runTime, mesh);
 
+    // Print current sets
+    printAllSets(mesh, Pout);
+
+
 
     std::ifstream* fileStreamPtr(NULL);
 
@@ -769,10 +888,9 @@ int main(int argc, char *argv[])
 #if READLINE != 0
     else if (!read_history(historyFile))
     {
-        Info<< "Successfully read history from " << historyFile << endl;
+        Pout<< "Successfully read history from " << historyFile << endl;
     }
 #endif
-
 
     Pout<< "Please type 'help', 'quit' or a set command after prompt." << endl;
 
