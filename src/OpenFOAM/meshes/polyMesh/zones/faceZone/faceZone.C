@@ -436,7 +436,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
     const polyMesh& mesh = zoneMesh().mesh();
     const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
-    bool boundaryError = false;
+    bool hasError = false;
 
 
     // Check that zone faces are synced
@@ -473,7 +473,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                 // Check face in zone on both sides
                 if (myZoneFace[bFaceI] != neiZoneFace[bFaceI])
                 {
-                    boundaryError = true;
+                    hasError = true;
 
                     if (report)
                     {
@@ -485,12 +485,17 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                             << " is not consistent with its coupled neighbour."
                             << endl;
                     }
+                    else
+                    {
+                        // w/o report - can stop checking now
+                        break;
+                    }
                 }
 
                 // Flip state should be opposite.
                 if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
                 {
-                    boundaryError = true;
+                    hasError = true;
 
                     if (report)
                     {
@@ -503,12 +508,17 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                             << " across coupled faces."
                             << endl;
                     }
+                    else
+                    {
+                        // w/o report - can stop checking now
+                        break;
+                    }
                 }
             }
         }
     }
 
-    return returnReduce(boundaryError, orOp<bool>());
+    return returnReduce(hasError, orOp<bool>());
 }
 
 
