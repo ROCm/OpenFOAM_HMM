@@ -31,11 +31,11 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class CloudType>
-Foam::scalar Foam::PairCollision<CloudType>::cosPhiMinFlatWall = 1 - 1e-6;
+Foam::scalar Foam::PairCollision<CloudType>::cosPhiMinFlatWall = 1 - SMALL;
 
 template<class CloudType>
 Foam::scalar Foam::PairCollision<CloudType>::flatWallDuplicateExclusion =
-    sqrt(3e-6);
+    sqrt(3*SMALL);
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
@@ -498,7 +498,7 @@ Foam::PairCollision<CloudType>::PairCollision
     (
         owner.mesh(),
         sqr(readScalar(this->coeffDict().lookup("maxInteractionDistance"))),
-        true
+        false
     )
 {}
 
