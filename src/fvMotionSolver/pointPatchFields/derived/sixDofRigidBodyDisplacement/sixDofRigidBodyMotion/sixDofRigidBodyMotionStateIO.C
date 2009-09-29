@@ -24,38 +24,47 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDofRigidBodyMotion.H"
+#include "sixDofRigidBodyMotionState.H"
 #include "IOstreams.H"
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDofRigidBodyMotion::write(Ostream& os) const
+void Foam::sixDofRigidBodyMotionState::write(Ostream& os) const
 {
-    motionState_.write(os);
-
-    os.writeKeyword("refCentreOfMass")
-        << refCentreOfMass_ << token::END_STATEMENT << nl;
-    os.writeKeyword("momentOfInertia")
-        << momentOfInertia_ << token::END_STATEMENT << nl;
-    os.writeKeyword("mass")
-        << mass_ << token::END_STATEMENT << nl;
+    os.writeKeyword("centreOfMass")
+        << centreOfMass_ << token::END_STATEMENT << nl;
+    os.writeKeyword("Q")
+        << Q_ << token::END_STATEMENT << nl;
+    os.writeKeyword("v")
+        << v_ << token::END_STATEMENT << nl;
+    os.writeKeyword("a")
+        << a_ << token::END_STATEMENT << nl;
+    os.writeKeyword("pi")
+        << pi_ << token::END_STATEMENT << nl;
+    os.writeKeyword("tau")
+        << tau_ << token::END_STATEMENT << nl;
 }
 
 
 // * * * * * * * * * * * * * * * IOstream Operators  * * * * * * * * * * * * //
 
-Foam::Istream& Foam::operator>>(Istream& is, sixDofRigidBodyMotion& sDofRBM)
+Foam::Istream& Foam::operator>>
+(
+    Istream& is, sixDofRigidBodyMotionState& sDofRBMS
+)
 {
-    is  >> sDofRBM.motionState_
-        >> sDofRBM.refCentreOfMass_
-        >> sDofRBM.momentOfInertia_
-        >> sDofRBM.mass_;
+    is  >> sDofRBMS.centreOfMass_
+        >> sDofRBMS.Q_
+        >> sDofRBMS.v_
+        >> sDofRBMS.a_
+        >> sDofRBMS.pi_
+        >> sDofRBMS.tau_;
 
     // Check state of Istream
     is.check
     (
         "Foam::Istream& Foam::operator>>"
-        "(Foam::Istream&, Foam::sixDofRigidBodyMotion&)"
+        "(Foam::Istream&, Foam::sixDofRigidBodyMotionState&)"
     );
 
     return is;
@@ -65,19 +74,21 @@ Foam::Istream& Foam::operator>>(Istream& is, sixDofRigidBodyMotion& sDofRBM)
 Foam::Ostream& Foam::operator<<
 (
     Ostream& os,
-    const sixDofRigidBodyMotion& sDofRBM
+    const sixDofRigidBodyMotionState& sDofRBMS
 )
 {
-    os  << sDofRBM.motionState()
-        << token::SPACE << sDofRBM.refCentreOfMass()
-        << token::SPACE << sDofRBM.momentOfInertia()
-        << token::SPACE << sDofRBM.mass() ;
+    os  << token::SPACE << sDofRBMS.centreOfMass()
+        << token::SPACE << sDofRBMS.Q()
+        << token::SPACE << sDofRBMS.v()
+        << token::SPACE << sDofRBMS.a()
+        << token::SPACE << sDofRBMS.pi()
+        << token::SPACE << sDofRBMS.tau();
 
     // Check state of Ostream
     os.check
     (
         "Foam::Ostream& Foam::operator<<(Foam::Ostream&, "
-        "const Foam::sixDofRigidBodyMotion&)"
+        "const Foam::sixDofRigidBodyMotionState&)"
     );
 
     return os;

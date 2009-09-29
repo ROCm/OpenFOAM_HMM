@@ -64,9 +64,16 @@ Foam::sixDofRigidBodyMotion::rotationTensorZ(scalar phi) const
 }
 
 
+inline const Foam::sixDofRigidBodyMotionState&
+Foam::sixDofRigidBodyMotion::motionState() const
+{
+    return motionState_;
+}
+
+
 inline const Foam::point& Foam::sixDofRigidBodyMotion::centreOfMass() const
 {
-    return centreOfMass_;
+    return motionState_.centreOfMass();
 }
 
 
@@ -91,37 +98,37 @@ inline Foam::scalar Foam::sixDofRigidBodyMotion::mass() const
 
 inline const Foam::tensor& Foam::sixDofRigidBodyMotion::Q() const
 {
-    return Q_;
+    return motionState_.Q();
 }
 
 
 inline const Foam::vector& Foam::sixDofRigidBodyMotion::v() const
 {
-    return v_;
+    return motionState_.v();
 }
 
 
 inline const Foam::vector& Foam::sixDofRigidBodyMotion::a() const
 {
-    return a_;
+    return motionState_.a();
 }
 
 
 inline const Foam::vector& Foam::sixDofRigidBodyMotion::pi() const
 {
-    return pi_;
+    return motionState_.pi();
 }
 
 
 inline const Foam::vector& Foam::sixDofRigidBodyMotion::tau() const
 {
-    return tau_;
+    return motionState_.tau();
 }
 
 
 inline Foam::point& Foam::sixDofRigidBodyMotion::centreOfMass()
 {
-    return centreOfMass_;
+    return motionState_.centreOfMass();
 }
 
 
@@ -145,31 +152,31 @@ inline Foam::scalar& Foam::sixDofRigidBodyMotion::mass()
 
 inline Foam::tensor& Foam::sixDofRigidBodyMotion::Q()
 {
-    return Q_;
+    return motionState_.Q();
 }
 
 
 inline Foam::vector& Foam::sixDofRigidBodyMotion::v()
 {
-    return v_;
+    return motionState_.v();
 }
 
 
 inline Foam::vector& Foam::sixDofRigidBodyMotion::a()
 {
-    return a_;
+    return motionState_.a();
 }
 
 
 inline Foam::vector& Foam::sixDofRigidBodyMotion::pi()
 {
-    return pi_;
+    return motionState_.pi();
 }
 
 
 inline Foam::vector& Foam::sixDofRigidBodyMotion::tau()
 {
-    return tau_;
+    return motionState_.tau();
 }
 
 

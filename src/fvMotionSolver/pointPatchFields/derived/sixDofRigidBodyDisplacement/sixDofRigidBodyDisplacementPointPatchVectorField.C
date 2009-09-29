@@ -130,7 +130,7 @@ void sixDofRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
     dictionary forcesDict;
 
     forcesDict.add("patches", wordList(1, ptPatch.name()));
-    forcesDict.add("rhoInf", 0.0);
+    forcesDict.add("rhoInf", 1.0);
     forcesDict.add("CofR", motion_.centreOfMass());
 
     forces f("forces", db(), forcesDict);
@@ -148,22 +148,6 @@ void sixDofRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 
         gravity = g.value();
     }
-    else
-    {
-        uniformDimensionedVectorField g
-        (
-            IOobject
-            (
-                "g",
-                db().time().constant(),
-                db(),
-                IOobject::READ_IF_PRESENT,
-                IOobject::NO_WRITE
-            )
-        );
-
-        gravity = g.value();
-    }
 
     motion_.updateForce
     (
@@ -171,15 +155,6 @@ void sixDofRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
         fm.second().first() + fm.second().second(),
         t.deltaT().value()
     );
-
-    // motion_.updateForce
-    // (
-    //     vector::zero,
-    //     vector::zero,
-    //     t.deltaT().value()
-    // );
-
-    Info<< motion_ << endl;
 
     Field<vector>::operator=(motion_.generatePositions(p0_) - p0_);
 

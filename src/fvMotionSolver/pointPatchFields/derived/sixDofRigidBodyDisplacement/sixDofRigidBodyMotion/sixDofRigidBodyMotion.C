@@ -30,54 +30,47 @@ License
 
 Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion()
 :
-    centreOfMass_(vector::zero),
+    motionState_(),
     refCentreOfMass_(vector::zero),
     momentOfInertia_(diagTensor::one*VSMALL),
-    mass_(VSMALL),
-    Q_(I),
-    v_(vector::zero),
-    a_(vector::zero),
-    pi_(vector::zero),
-    tau_(vector::zero)
+    mass_(VSMALL)
 {}
 
 
 Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion
 (
     const point& centreOfMass,
-    const point& refCentreOfMass,
-    const diagTensor& momentOfInertia,
-    scalar mass,
     const tensor& Q,
     const vector& v,
     const vector& a,
     const vector& pi,
-    const vector& tau
+    const vector& tau,
+    scalar mass,
+    const point& refCentreOfMass,
+    const diagTensor& momentOfInertia
 )
 :
-    centreOfMass_(centreOfMass),
+    motionState_
+    (
+        centreOfMass,
+        Q,
+        v,
+        a,
+        pi,
+        tau
+    ),
     refCentreOfMass_(refCentreOfMass),
     momentOfInertia_(momentOfInertia),
-    mass_(mass),
-    Q_(Q),
-    v_(v),
-    a_(a),
-    pi_(pi),
-    tau_(tau)
+    mass_(mass)
 {}
 
 
 Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion(const dictionary& dict)
 :
-    centreOfMass_(dict.lookup("centreOfMass")),
-    refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass_)),
+    motionState_(dict),
+    refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass())),
     momentOfInertia_(dict.lookup("momentOfInertia")),
-    mass_(readScalar(dict.lookup("mass"))),
-    Q_(dict.lookupOrDefault("Q", tensor(I))),
-    v_(dict.lookupOrDefault("v", vector::zero)),
-    a_(dict.lookupOrDefault("a", vector::zero)),
-    pi_(dict.lookupOrDefault("pi", vector::zero)),
-    tau_(dict.lookupOrDefault("tau", vector::zero))
+    mass_(readScalar(dict.lookup("mass")))
 {}
 
 
@@ -86,15 +79,10 @@ Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion
     const sixDofRigidBodyMotion& sDofRBM
 )
 :
-    centreOfMass_(sDofRBM.centreOfMass()),
+    motionState_(sDofRBM.motionState()),
     refCentreOfMass_(sDofRBM.refCentreOfMass()),
     momentOfInertia_(sDofRBM.momentOfInertia()),
-    mass_(sDofRBM.mass()),
-    Q_(sDofRBM.Q()),
-    v_(sDofRBM.v()),
-    a_(sDofRBM.a()),
-    pi_(sDofRBM.pi()),
-    tau_(sDofRBM.tau())
+    mass_(sDofRBM.mass())
 {}
 
 
@@ -114,36 +102,42 @@ void Foam::sixDofRigidBodyMotion::updatePosition
     // First leapfrog velocity adjust and motion part, required before
     // force calculation
 
-    v_ += 0.5*deltaT*a_;
+    if (Pstream::master())
+    {
+        v() += 0.5*deltaT*a();
 
-    pi_ += 0.5*deltaT*tau_;
+        pi() += 0.5*deltaT*tau();
 
-    // Leapfrog move part
-    centreOfMass_ += deltaT*v_;
+        // Leapfrog move part
+        centreOfMass() += deltaT*v();
 
-    // Leapfrog orientation adjustment
+        // Leapfrog orientation adjustment
 
-    tensor R;
+        tensor R;
 
-    R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia_.xx());
-    pi_ = pi_ & R;
-    Q_ = Q_ & R;
+        R = rotationTensorX(0.5*deltaT*pi().x()/momentOfInertia_.xx());
+        pi() = pi() & R;
+        Q() = Q() & R;
 
-    R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia_.yy());
-    pi_ = pi_ & R;
-    Q_ = Q_ & R;
+        R = rotationTensorY(0.5*deltaT*pi().y()/momentOfInertia_.yy());
+        pi() = pi() & R;
+        Q() = Q() & R;
 
-    R = rotationTensorZ(deltaT*pi_.z()/momentOfInertia_.zz());
-    pi_ = pi_ & R;
-    Q_ = Q_ & R;
+        R = rotationTensorZ(deltaT*pi().z()/momentOfInertia_.zz());
+        pi() = pi() & R;
+        Q() = Q() & R;
 
-    R = rotationTensorY(0.5*deltaT*pi_.y()/momentOfInertia_.yy());
-    pi_ = pi_ & R;
-    Q_ = Q_ & R;
+        R = rotationTensorY(0.5*deltaT*pi().y()/momentOfInertia_.yy());
+        pi() = pi() & R;
+        Q() = Q() & R;
 
-    R = rotationTensorX(0.5*deltaT*pi_.x()/momentOfInertia_.xx());
-    pi_ = pi_ & R;
-    Q_ = Q_ & R;
+        R = rotationTensorX(0.5*deltaT*pi().x()/momentOfInertia_.xx());
+        pi() = pi() & R;
+        Q() = Q() & R;
+
+    }
+
+    Pstream::scatter(motionState_);
 }
 
 
@@ -157,14 +151,18 @@ void Foam::sixDofRigidBodyMotion::updateForce
     // Second leapfrog velocity adjust part, required after motion and
     // force calculation part
 
-    a_ = fGlobal/mass_;
+    if (Pstream::master())
+    {
+        a() = fGlobal/mass_;
 
-    tau_ = (Q_.T() & tauGlobal);
+        tau() = (Q().T() & tauGlobal);
 
-    v_ += 0.5*deltaT*a_;
+        v() += 0.5*deltaT*a();
 
-    pi_ += 0.5*deltaT*tau_;
+        pi() += 0.5*deltaT*tau();
+    }
 
+    Pstream::scatter(motionState_);
 }
 
 
@@ -178,30 +176,34 @@ void Foam::sixDofRigidBodyMotion::updateForce
     // Second leapfrog velocity adjust part, required after motion and
     // force calculation part
 
-    a_ = vector::zero;
-
-    tau_ = vector::zero;
-
-    forAll(positions, i)
+    if (Pstream::master())
     {
-        const vector& f = forces[i];
+        a() = vector::zero;
 
-        a_ += f/mass_;
+        tau() = vector::zero;
 
-        tau_ += (positions[i] ^ (Q_.T() & f));
+        forAll(positions, i)
+        {
+            const vector& f = forces[i];
+
+            a() += f/mass_;
+
+            tau() += (positions[i] ^ (Q().T() & f));
+        }
+
+        v() += 0.5*deltaT*a();
+
+        pi() += 0.5*deltaT*tau();
     }
 
-    v_ += 0.5*deltaT*a_;
-
-    pi_ += 0.5*deltaT*tau_;
-
+    Pstream::scatter(motionState_);
 }
 
 
 Foam::tmp<Foam::pointField>
 Foam::sixDofRigidBodyMotion::generatePositions(const pointField& pts) const
 {
-    return (centreOfMass_ + (Q_ & (pts - refCentreOfMass_)));
+    return (centreOfMass() + (Q() & (pts - refCentreOfMass_)));
 }
 
 

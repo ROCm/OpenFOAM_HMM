@@ -53,8 +53,7 @@ SourceFiles
 #ifndef sixDofRigidBodyMotion_H
 #define sixDofRigidBodyMotion_H
 
-#include "vector.H"
-#include "diagTensor.H"
+#include "sixDofRigidBodyMotionState.H"
 #include "pointField.H"
 #include "mathConstants.H"
 
@@ -81,8 +80,8 @@ class sixDofRigidBodyMotion
 {
     // Private data
 
-        //- Current position of the centre of mass of the body
-        point centreOfMass_;
+        // state data object
+        sixDofRigidBodyMotionState motionState_;
 
         //- Centre of mass of reference state
         point refCentreOfMass_;
@@ -93,23 +92,6 @@ class sixDofRigidBodyMotion
         //- Mass of the body
         scalar mass_;
 
-        //- Orientation, stored as the rotation tensor to transform
-        //  from the body to the global reference frame, i.e.:
-        //  globalVector = Q_ & bodyLocalVector
-        //  bodyLocalVector = Q_.T() & globalVector
-        tensor Q_;
-
-        // Linear velocity of body
-        vector v_;
-
-        // Total linear acceleration of body
-        vector a_;
-
-        //- Angular momentum of body, in body local reference frame
-        vector pi_;
-
-        //- Total torque on body, in body local reference frame
-        vector tau_;
 
     // Private Member Functions
 
@@ -137,14 +119,14 @@ public:
         sixDofRigidBodyMotion
         (
             const point& centreOfMass,
-            const point& refCentreOfMass,
-            const diagTensor& momentOfInertia,
-            scalar mass,
             const tensor& Q,
             const vector& v,
             const vector& a,
-            const vector&  pi,
-            const vector& tau
+            const vector& pi,
+            const vector& tau,
+            scalar mass,
+            const point& refCentreOfMass,
+            const diagTensor& momentOfInertia
         );
 
         //- Construct from dictionary
@@ -182,6 +164,9 @@ public:
         tmp<pointField> generatePositions(const pointField& pts) const;
 
         // Access
+
+            //- Return access to the motion state
+            inline const sixDofRigidBodyMotionState& motionState() const;
 
             //- Return access to the centre of mass
             inline const point& centreOfMass() const;
