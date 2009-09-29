@@ -50,6 +50,11 @@ addToRunTimeSelectionTable(topoSet, faceZoneSet, set);
 
 void faceZoneSet::updateSet()
 {
+    labelList order;
+    sortedOrder(addressing_, order);
+    inplaceReorder(order, addressing_);
+    inplaceReorder(order, flipMap_);
+
     faceSet::clearStorage();
     faceSet::resize(2*addressing_.size());
     forAll(addressing_, i)
@@ -145,7 +150,7 @@ void faceZoneSet::invert(const label maxLen)
         if (!found(faceI))
         {
             addressing_[n] = faceI;
-            flipMap_[n] = true;         //? or false?
+            flipMap_[n] = false;         //? or true?
             n++;
         }
     }

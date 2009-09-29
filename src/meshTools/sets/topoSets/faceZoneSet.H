@@ -129,7 +129,7 @@ public:
         }
 
 
-        //- Make faceSet part consistent with addressing
+        //- Sort addressing and make faceSet part consistent with addressing
         void updateSet();
 
         //- Invert contents. (insert all members 0..maxLen-1 which were not in

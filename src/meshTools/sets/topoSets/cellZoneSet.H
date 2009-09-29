@@ -58,9 +58,6 @@ class cellZoneSet
 
         labelList addressing_;
 
-   // Private Member Functions
-
-
 public:
 
     //- Runtime type information
@@ -115,7 +112,7 @@ public:
             return addressing_;
         }
 
-        //- Make cellSet part consistent with addressing
+        //- Sort addressing and make cellSet part consistent with addressing
         void updateSet();
 
         //- Invert contents. (insert all members 0..maxLen-1 which were not in
