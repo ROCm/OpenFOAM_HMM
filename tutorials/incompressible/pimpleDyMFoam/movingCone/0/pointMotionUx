@@ -50,7 +50,7 @@ boundaryField
         projectDirection (0 1 0);
 
         //- -1 or component to knock out before doing projection
-        wedgePlane      -1;
+        //wedgePlane      -1;
 
         //- Points that should remain fixed
         //frozenPointsZone fixedPointsZone;
