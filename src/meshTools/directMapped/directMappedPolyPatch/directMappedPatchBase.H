@@ -163,6 +163,14 @@ public:
         //- Construct as copy, resetting patch
         directMappedPatchBase(const polyPatch&, const directMappedPatchBase&);
 
+        //- Construct as copy, resetting patch, map original data
+        directMappedPatchBase
+        (
+            const polyPatch&,
+            const directMappedPatchBase&,
+            const unallocLabelList& mapAddressing
+        );
+
 
     //- Destructor
     virtual ~directMappedPatchBase();

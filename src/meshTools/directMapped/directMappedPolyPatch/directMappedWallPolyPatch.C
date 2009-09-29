@@ -125,6 +125,20 @@ Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 {}
 
 
+Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
+(
+    const directMappedWallPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    wallPolyPatch(pp, bm, index, mapAddressing, newStart),
+    directMappedPatchBase(*this, pp, mapAddressing)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::directMappedWallPolyPatch::~directMappedWallPolyPatch()

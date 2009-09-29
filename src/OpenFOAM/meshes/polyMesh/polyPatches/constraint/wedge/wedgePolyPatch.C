@@ -157,4 +157,19 @@ Foam::wedgePolyPatch::wedgePolyPatch
 }
 
 
+Foam::wedgePolyPatch::wedgePolyPatch
+(
+    const wedgePolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    polyPatch(pp, bm, index, mapAddressing, newStart)
+{
+    initTransforms();
+}
+
+
 // ************************************************************************* //

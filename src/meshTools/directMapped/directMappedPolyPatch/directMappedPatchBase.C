@@ -676,6 +676,25 @@ Foam::directMappedPatchBase::directMappedPatchBase
 {}
 
 
+Foam::directMappedPatchBase::directMappedPatchBase
+(
+    const polyPatch& pp,
+    const directMappedPatchBase& dmp,
+    const unallocLabelList& mapAddressing
+)
+:
+    patch_(pp),
+    sampleRegion_(dmp.sampleRegion_),
+    mode_(dmp.mode_),
+    samplePatch_(dmp.samplePatch_),
+    uniformOffset_(dmp.uniformOffset_),
+    offset_(dmp.offset_),
+    offsets_(dmp.offsets_, mapAddressing),
+    sameRegion_(dmp.sameRegion_),
+    mapPtr_(NULL)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::directMappedPatchBase::~directMappedPatchBase()

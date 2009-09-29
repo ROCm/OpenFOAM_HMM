@@ -120,6 +120,20 @@ Foam::directMappedPolyPatch::directMappedPolyPatch
 {}
 
 
+Foam::directMappedPolyPatch::directMappedPolyPatch
+(
+    const directMappedPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    polyPatch(pp, bm, index, mapAddressing, newStart),
+    directMappedPatchBase(*this, pp, mapAddressing)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::directMappedPolyPatch::~directMappedPolyPatch()
