@@ -60,6 +60,10 @@ class sixDofRigidBodyDisplacementPointPatchVectorField
         //- Reference positions of points on the patch
         pointField p0_;
 
+        //- Reference density required by the forces object for
+        //  incompressible calculations
+        scalar rhoInf_;
+
 
 public:
 
