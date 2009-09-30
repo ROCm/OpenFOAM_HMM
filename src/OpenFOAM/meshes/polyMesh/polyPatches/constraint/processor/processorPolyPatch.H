@@ -158,6 +158,16 @@ public:
             const label newStart
         );
 
+        //- Construct given the original patch and a map
+        processorPolyPatch
+        (
+            const processorPolyPatch& pp,
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        );
+
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
@@ -178,10 +188,33 @@ public:
             (
                 new processorPolyPatch
                 (
-                    refCast<const processorPolyPatch>(*this),
+                    *this,
                     bm,
                     index,
                     newSize,
+                    newStart
+                )
+            );
+        }
+
+        //- Construct and return a clone, resetting the face list
+        //  and boundary mesh
+        virtual autoPtr<polyPatch> clone
+        (
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        ) const
+        {
+            return autoPtr<polyPatch>
+            (
+                new processorPolyPatch
+                (
+                    *this,
+                    bm,
+                    index,
+                    mapAddressing,
                     newStart
                 )
             );

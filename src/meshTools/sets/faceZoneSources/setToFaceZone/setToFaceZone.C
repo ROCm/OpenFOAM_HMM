@@ -136,7 +136,7 @@ void Foam::setToFaceZone::applyToSet
                 if (!fzSet.found(faceI))
                 {
                     newAddressing.append(faceI);
-                    newFlipMap.append(true);
+                    newFlipMap.append(false);
                 }
             }
 

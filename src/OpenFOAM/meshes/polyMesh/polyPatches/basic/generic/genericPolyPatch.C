@@ -94,6 +94,21 @@ Foam::genericPolyPatch::genericPolyPatch
 {}
 
 
+Foam::genericPolyPatch::genericPolyPatch
+(
+    const genericPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    polyPatch(pp, bm, index, mapAddressing, newStart),
+    actualTypeName_(pp.actualTypeName_),
+    dict_(pp.dict_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::genericPolyPatch::~genericPolyPatch()

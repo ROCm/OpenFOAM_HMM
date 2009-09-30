@@ -50,6 +50,10 @@ addToRunTimeSelectionTable(topoSet, cellZoneSet, set);
 
 void cellZoneSet::updateSet()
 {
+    labelList order;
+    sortedOrder(addressing_, order);
+    inplaceReorder(order, addressing_);
+
     cellSet::clearStorage();
     cellSet::resize(2*addressing_.size());
     forAll(addressing_, i)
