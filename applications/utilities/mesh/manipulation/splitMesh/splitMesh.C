@@ -270,6 +270,10 @@ int main(int argc, char *argv[])
     {
         mesh.setInstance(oldInstance);
     }
+    else
+    {
+        mesh.setInstance(runTime.timeName());
+    }
 
     Info<< "Writing mesh to " << runTime.timeName() << endl;
     if (!mesh.write())

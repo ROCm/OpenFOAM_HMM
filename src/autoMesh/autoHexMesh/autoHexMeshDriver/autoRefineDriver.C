@@ -35,7 +35,6 @@ License
 #include "refinementSurfaces.H"
 #include "shellSurfaces.H"
 #include "mapDistributePolyMesh.H"
-#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -210,7 +209,8 @@ Foam::label Foam::autoRefineDriver::featureEdgeRefine
                 "feature refinement iteration " + name(iter),
                 decomposer_,
                 distributor_,
-                cellsToRefine
+                cellsToRefine,
+                refineParams.maxLoadUnbalance()
             );
         }
     }
@@ -310,7 +310,8 @@ Foam::label Foam::autoRefineDriver::surfaceOnlyRefine
             "surface refinement iteration " + name(iter),
             decomposer_,
             distributor_,
-            cellsToRefine
+            cellsToRefine,
+            refineParams.maxLoadUnbalance()
         );
     }
     return iter;
@@ -492,7 +493,8 @@ Foam::label Foam::autoRefineDriver::shellRefine
             "shell refinement iteration " + name(iter),
             decomposer_,
             distributor_,
-            cellsToRefine
+            cellsToRefine,
+            refineParams.maxLoadUnbalance()
         );
     }
     meshRefiner_.userFaceData().clear();
@@ -776,11 +778,14 @@ void Foam::autoRefineDriver::doRefine
             const_cast<Time&>(mesh.time())++;
         }
 
-        // Do final balancing. Keep zoned faces on one processor.
+        // Do final balancing. Keep zoned faces on one processor since the
+        // snap phase will convert them to baffles and this only works for
+        // internal faces.
         meshRefiner_.balance
         (
             true,
             false,
+            scalarField(mesh.nCells(), 1), // dummy weights
             decomposer_,
             distributor_
         );

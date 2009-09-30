@@ -101,6 +101,20 @@ public:
             const polyBoundaryMesh& bm
         );
 
+        //- Construct from components
+        directMappedPolyPatch
+        (
+            const word& name,
+            const label size,
+            const label start,
+            const label index,
+            const word& sampleRegion,
+            const directMappedPatchBase::sampleMode mode,
+            const word& samplePatch,
+            const vectorField& offset,
+            const polyBoundaryMesh& bm
+        );
+
         //- Construct from dictionary
         directMappedPolyPatch
         (
@@ -128,6 +142,16 @@ public:
             const label newStart
         );
 
+        //- Construct given the original patch and a map
+        directMappedPolyPatch
+        (
+            const directMappedPolyPatch& pp,
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        );
+
         //- Construct and return a clone, resetting the boundary mesh
         virtual autoPtr<polyPatch> clone(const polyBoundaryMesh& bm) const
         {
@@ -147,6 +171,29 @@ public:
             return autoPtr<polyPatch>
             (
                 new directMappedPolyPatch(*this, bm, index, newSize, newStart)
+            );
+        }
+
+        //- Construct and return a clone, resetting the face list
+        //  and boundary mesh
+        virtual autoPtr<polyPatch> clone
+        (
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        ) const
+        {
+            return autoPtr<polyPatch>
+            (
+                new directMappedPolyPatch
+                (
+                    *this,
+                    bm,
+                    index,
+                    mapAddressing,
+                    newStart
+                )
             );
         }
 
