@@ -221,6 +221,16 @@ public:
             const label newStart
         );
 
+        //- Construct given the original patch and a map
+        coupledPolyPatch
+        (
+            const coupledPolyPatch& pp,
+            const polyBoundaryMesh& bm,
+            const label index,
+            const unallocLabelList& mapAddressing,
+            const label newStart
+        );
+
 
     // Destructor
 

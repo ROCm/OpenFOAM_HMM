@@ -39,6 +39,7 @@ namespace Foam
 defineTypeNameAndDebug(topoSet, 0);
 defineRunTimeSelectionTable(topoSet, word);
 defineRunTimeSelectionTable(topoSet, size);
+defineRunTimeSelectionTable(topoSet, set);
 
 
 // Construct named object from existing set.
@@ -100,6 +101,37 @@ autoPtr<topoSet> topoSet::New
     }
 
     return autoPtr<topoSet>(cstrIter()(mesh, name, size, w));
+}
+
+
+// Construct named object from existing set.
+autoPtr<topoSet> topoSet::New
+(
+    const word& setType,
+    const polyMesh& mesh,
+    const word& name,
+    const topoSet& set,
+    writeOption w
+)
+{
+    setConstructorTable::iterator cstrIter =
+        setConstructorTablePtr_
+            ->find(setType);
+
+    if (cstrIter == setConstructorTablePtr_->end())
+    {
+        FatalErrorIn
+        (
+            "topoSet::New(const word&, "
+            "const polyMesh&, const word&, const topoSet&, writeOption)"
+        )   << "Unknown set type " << setType
+            << endl << endl
+            << "Valid set types : " << endl
+            << setConstructorTablePtr_->sortedToc()
+            << exit(FatalError);
+    }
+
+    return autoPtr<topoSet>(cstrIter()(mesh, name, set, w));
 }
 
 
@@ -255,9 +287,9 @@ void topoSet::writeDebug
 ) const
 {
     // Bounding box of contents.
-    boundBox bb(pointField(coords, toc()));
+    boundBox bb(pointField(coords, toc()), true);
 
-    Pout<< "Set bounding box: min = "
+    os  << "Set bounding box: min = "
         << bb.min() << "    max = " << bb.max() << " meters. " << endl << endl;
 
     label n = 0;
@@ -538,18 +570,18 @@ void topoSet::writeDebug(Ostream& os, const label maxLen) const
 }
 
 
-void topoSet::writeDebug
-(
-    Ostream&,
-    const primitiveMesh&,
-    const label
-) const
-{
-    notImplemented
-    (
-        "topoSet::writeDebug(Ostream&, const primitiveMesh&, const label)"
-    );
-}
+//void topoSet::writeDebug
+//(
+//    Ostream&,
+//    const primitiveMesh&,
+//    const label
+//) const
+//{
+//    notImplemented
+//    (
+//        "topoSet::writeDebug(Ostream&, const primitiveMesh&, const label)"
+//    );
+//}
 
 
 bool topoSet::writeData(Ostream& os) const
@@ -564,13 +596,13 @@ void topoSet::updateMesh(const mapPolyMesh&)
 }
 
 
-//- Return max index+1.
-label topoSet::maxSize(const polyMesh&) const
-{
-    notImplemented("topoSet::maxSize(const polyMesh&)");
-
-    return -1;
-}
+////- Return max index+1.
+//label topoSet::maxSize(const polyMesh&) const
+//{
+//    notImplemented("topoSet::maxSize(const polyMesh&)");
+//
+//    return -1;
+//}
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 

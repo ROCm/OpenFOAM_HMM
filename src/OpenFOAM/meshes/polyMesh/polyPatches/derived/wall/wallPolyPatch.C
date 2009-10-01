@@ -87,4 +87,17 @@ Foam::wallPolyPatch::wallPolyPatch
 {}
 
 
+Foam::wallPolyPatch::wallPolyPatch
+(
+    const wallPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    polyPatch(pp, bm, index, mapAddressing, newStart)
+{}
+
+
 // ************************************************************************* //

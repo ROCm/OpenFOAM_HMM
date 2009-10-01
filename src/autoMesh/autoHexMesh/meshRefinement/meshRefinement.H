@@ -214,9 +214,11 @@ private:
                 const globalIndex& globalCells,
                 const labelList& globalRegion,
                 const Map<label>& coupledRegionToMaster,
+                const scalarField& cellWeights,
 
                 Map<label>& globalToLocalRegion,
-                pointField& localPoints
+                pointField& localPoints,
+                scalarField& localWeights
             ) const;
 
             //- Convert region into global index.
@@ -574,6 +576,7 @@ public:
             //  (e.g. to keep baffles together)
             labelList decomposeCombineRegions
             (
+                const scalarField& cellWeights,
                 const boolList& blockedFace,
                 const List<labelPair>& explicitConnections,
                 decompositionMethod&
@@ -587,6 +590,7 @@ public:
             (
                 const bool keepZoneFaces,
                 const bool keepBaffles,
+                const scalarField& cellWeights,
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor
             );
@@ -648,7 +652,8 @@ public:
                 const string& msg,
                 decompositionMethod& decomposer,
                 fvMeshDistribute& distributor,
-                const labelList& cellsToRefine
+                const labelList& cellsToRefine,
+                const scalar maxLoadUnbalance
             );
 
 

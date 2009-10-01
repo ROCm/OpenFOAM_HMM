@@ -37,37 +37,6 @@ using namespace Foam;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Copy set
-void backup
-(
-    const polyMesh& mesh,
-    const word& fromName,
-    const topoSet& fromSet,
-    const word& toName
-)
-{
-    Info<< "Backing up " << fromName << " into " << toName << endl;
-
-    topoSet backupSet(mesh, toName, fromSet);
-
-    backupSet.write();
-}
-
-
-// Read and copy set
-void backup
-(
-    const polyMesh& mesh,
-    const word& fromName,
-    const word& toName
-)
-{
-    topoSet fromSet(mesh, fromName, IOobject::READ_IF_PRESENT);
-
-    backup(mesh, fromName, fromSet, toName);
-}
-
-
 // Main program:
 
 int main(int argc, char *argv[])
@@ -114,8 +83,6 @@ int main(int argc, char *argv[])
     {
         r = IOobject::NO_READ;
 
-        backup(mesh, setName, setName + "_old");
-
         currentSetPtr.reset
         (
             new cellSet
@@ -151,7 +118,7 @@ int main(int argc, char *argv[])
     if ((r == IOobject::MUST_READ) && (action != topoSetSource::LIST))
     {
         // currentSet has been read so can make copy.
-        backup(mesh, setName, currentSet, setName + "_old");
+        //backup(mesh, setName, currentSet, setName + "_old");
     }
 
     if (action == topoSetSource::CLEAR)
@@ -173,7 +140,16 @@ int main(int argc, char *argv[])
         forAll(topoSetSources, topoSetSourceI)
         {
             // Backup current set.
-            topoSet oldSet(mesh, currentSet.name() + "_old2", currentSet);
+            autoPtr<topoSet> oldSet
+            (
+                topoSet::New
+                (
+                    currentSet.type(),
+                    mesh,
+                    currentSet.name() + "_old2",
+                    currentSet
+                )
+            );
 
             currentSet.clear();
 
