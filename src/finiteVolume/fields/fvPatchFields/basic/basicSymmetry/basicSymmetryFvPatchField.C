@@ -95,11 +95,11 @@ basicSymmetryFvPatchField<Type>::basicSymmetryFvPatchField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-// return gradient at boundary
 template<class Type>
 tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGrad() const
 {
     vectorField nHat = this->patch().nf();
+
     return
     (
         transform(I - 2.0*sqr(nHat), this->patchInternalField())
@@ -108,7 +108,6 @@ tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGrad() const
 }
 
 
-// Evaluate the field on the patch
 template<class Type>
 void basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 {
@@ -118,6 +117,7 @@ void basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
     }
 
     vectorField nHat = this->patch().nf();
+
     Field<Type>::operator=
     (
         (
@@ -130,11 +130,11 @@ void basicSymmetryFvPatchField<Type>::evaluate(const Pstream::commsTypes)
 }
 
 
-// Return defining fields
 template<class Type>
 tmp<Field<Type> > basicSymmetryFvPatchField<Type>::snGradTransformDiag() const
 {
     vectorField nHat = this->patch().nf();
+
     vectorField diag(nHat.size());
 
     diag.replace(vector::X, mag(nHat.component(vector::X)));
