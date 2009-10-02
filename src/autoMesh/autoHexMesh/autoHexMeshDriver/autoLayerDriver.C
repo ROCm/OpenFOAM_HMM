@@ -2546,6 +2546,11 @@ void Foam::autoLayerDriver::addLayers
     );
 
 
+    // Undistorted edge length
+    const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
+    const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
+
+
     // Point-wise extrusion data
     // ~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -2559,93 +2564,90 @@ void Foam::autoLayerDriver::addLayers
     // Whether to add edge for all pp.localPoints.
     List<extrudeMode> extrudeStatus(pp().nPoints(), EXTRUDE);
 
-
-    // Get number of layer per point from number of layers per patch
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    setNumLayers
-    (
-        layerParams.numLayers(),    // per patch the num layers
-        meshMover().adaptPatchIDs(),// patches that are being moved
-        pp,                         // indirectpatch for all faces moving
-
-        patchDisp,
-        patchNLayers,
-        extrudeStatus
-    );
-
-    // Precalculate mesh edge labels for patch edges
-    labelList meshEdges(pp().meshEdges(mesh.edges(), mesh.pointEdges()));
-
-    // Disable extrusion on non-manifold points
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    handleNonManifolds
-    (
-        pp,
-        meshEdges,
-
-        patchDisp,
-        patchNLayers,
-        extrudeStatus
-    );
-
-    // Disable extrusion on feature angles
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    handleFeatureAngle
-    (
-        pp,
-        meshEdges,
-    layerParams.featureAngle()*constant::math::pi/180.0,
-
-        patchDisp,
-        patchNLayers,
-        extrudeStatus
-    );
-
-    // Disable extrusion on warped faces
-    // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-    // Undistorted edge length
-    const scalar edge0Len = meshRefiner_.meshCutter().level0EdgeLength();
-    const labelList& cellLevel = meshRefiner_.meshCutter().cellLevel();
-
-    handleWarpedFaces
-    (
-        pp,
-        layerParams.maxFaceThicknessRatio(),
-        edge0Len,
-        cellLevel,
-
-        patchDisp,
-        patchNLayers,
-        extrudeStatus
-    );
-
-    //// Disable extrusion on cells with multiple patch faces
-    //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    //
-    //handleMultiplePatchFaces
-    //(
-    //    pp,
-    //
-    //    patchDisp,
-    //    patchNLayers,
-    //    extrudeStatus
-    //);
-
-
-    // Grow out region of non-extrusion
-    for (label i = 0; i < layerParams.nGrow(); i++)
     {
-        growNoExtrusion
+        // Get number of layer per point from number of layers per patch
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        setNumLayers
         (
-            pp,
+            layerParams.numLayers(),    // per patch the num layers
+            meshMover().adaptPatchIDs(),// patches that are being moved
+            pp,                         // indirectpatch for all faces moving
+
             patchDisp,
             patchNLayers,
             extrudeStatus
         );
+
+        // Precalculate mesh edge labels for patch edges
+        labelList meshEdges(pp().meshEdges(mesh.edges(), mesh.pointEdges()));
+
+        // Disable extrusion on non-manifold points
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        handleNonManifolds
+        (
+            pp,
+            meshEdges,
+
+            patchDisp,
+            patchNLayers,
+            extrudeStatus
+        );
+
+        // Disable extrusion on feature angles
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        handleFeatureAngle
+        (
+            pp,
+            meshEdges,
+            layerParams.featureAngle()*constant::math::pi/180.0,
+
+            patchDisp,
+            patchNLayers,
+            extrudeStatus
+        );
+
+        // Disable extrusion on warped faces
+        // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+        handleWarpedFaces
+        (
+            pp,
+            layerParams.maxFaceThicknessRatio(),
+            edge0Len,
+            cellLevel,
+
+            patchDisp,
+            patchNLayers,
+            extrudeStatus
+        );
+
+        //// Disable extrusion on cells with multiple patch faces
+        //// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        //
+        //handleMultiplePatchFaces
+        //(
+        //    pp,
+        //
+        //    patchDisp,
+        //    patchNLayers,
+        //    extrudeStatus
+        //);
+
+
+        // Grow out region of non-extrusion
+        for (label i = 0; i < layerParams.nGrow(); i++)
+        {
+            growNoExtrusion
+            (
+                pp,
+                patchDisp,
+                patchNLayers,
+                extrudeStatus
+            );
+        }
     }
 
 

@@ -215,6 +215,8 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField
 tmp<scalarField>
 turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
 {
+    const fvMesh& mesh = patch().boundaryMesh().mesh();
+
     if (KName_ == "none")
     {
         const compressible::RASModel& model =
@@ -230,9 +232,31 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
            *thermo.rho()().boundaryField()[patch().index()]
            *thermo.Cp()().boundaryField()[patch().index()];
     }
-    else
+    else if (mesh.objectRegistry::foundObject<volScalarField>(KName_))
     {
         return patch().lookupPatchField<volScalarField, scalar>(KName_);
+    }
+    else if (mesh.objectRegistry::foundObject<volSymmTensorField>(KName_))
+    {
+        const symmTensorField& KWall =
+            patch().lookupPatchField<volSymmTensorField, scalar>(KName_);
+
+        vectorField n = patch().nf();
+
+        return n & KWall & n;
+    }
+    else
+    {
+        FatalErrorIn
+        (
+            "turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const"
+        )   << "Did not find field " << KName_
+            << " on mesh " << mesh.name() << " patch " << patch().name()
+            << endl
+            << "Please set 'K' to 'none', a valid volScalarField"
+            << " or a valid volSymmTensorField." << exit(FatalError);
+
+        return scalarField(0);
     }
 }
 

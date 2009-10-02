@@ -65,6 +65,31 @@ Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 (
     const word& name,
+    const label size,
+    const label start,
+    const label index,
+    const word& sampleRegion,
+    const directMappedPatchBase::sampleMode mode,
+    const word& samplePatch,
+    const vectorField& offset,
+    const polyBoundaryMesh& bm
+)
+:
+    wallPolyPatch(name, size, start, index, bm),
+    directMappedPatchBase
+    (
+        static_cast<const polyPatch&>(*this),
+        sampleRegion,
+        mode,
+        samplePatch,
+        offset
+    )
+{}
+
+
+Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
+(
+    const word& name,
     const dictionary& dict,
     const label index,
     const polyBoundaryMesh& bm
@@ -97,6 +122,20 @@ Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
 :
     wallPolyPatch(pp, bm, index, newSize, newStart),
     directMappedPatchBase(*this, pp)
+{}
+
+
+Foam::directMappedWallPolyPatch::directMappedWallPolyPatch
+(
+    const directMappedWallPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    wallPolyPatch(pp, bm, index, mapAddressing, newStart),
+    directMappedPatchBase(*this, pp, mapAddressing)
 {}
 
 
