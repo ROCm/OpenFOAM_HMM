@@ -62,7 +62,10 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
     //
     if (dict.found("edges"))
     {
-        Info<< "Creating curved edges" << endl;
+        if (verboseOutput)
+        {
+            Info<< "Creating curved edges" << endl;
+        }
 
         ITstream& is(dict.lookup("edges"));
 
@@ -117,7 +120,7 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
         // Read end of edges
         is.readEnd("edges");
     }
-    else
+    else if (verboseOutput)
     {
         Info<< "No non-linear edges defined" << endl;
     }
@@ -126,7 +129,11 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
     //
     // Create the blocks
     //
-    Info<< "Creating topology blocks" << endl;
+    if (verboseOutput)
+    {
+        Info<< "Creating topology blocks" << endl;
+    }
+
     {
         ITstream& is(dict.lookup("blocks"));
 
@@ -198,7 +205,10 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
     //
     // Create the patches
     //
-    Info<< "Creating topology patches" << endl;
+    if (verboseOutput)
+    {
+        Info<< "Creating topology patches" << endl;
+    }
 
     faceListList tmpBlocksPatches;
     wordList patchNames;
@@ -298,7 +308,10 @@ Foam::polyMesh* Foam::blockMesh::createTopology(IOdictionary& dict)
     //
     // Create the topology
     //
-    Info<< "Creating topology mesh" << endl;
+    if (verboseOutput)
+    {
+        Info<< "Creating topology mesh" << endl;
+    }
 
     PtrList<cellShape> tmpBlockShapes(blocks.size());
     forAll(blocks, blockI)

@@ -78,7 +78,7 @@ Foam::blockDescriptor::blockDescriptor
     meshDensity_(),
     edgePoints_(12),
     edgeWeights_(12),
-    expand_(12),
+    expand_(12, 1.0),
     zoneName_()
 {
     // Examine next token
@@ -159,7 +159,7 @@ Foam::blockDescriptor::blockDescriptor
         (
             "blockDescriptor::blockDescriptor"
             "(const pointField&, const curvedEdgeList&, Istream&)"
-        )   << "Unknown definition of expansion ratios"
+        )   << "Unknown definition of expansion ratios: " << expRatios
             << exit(FatalError);
     }
 

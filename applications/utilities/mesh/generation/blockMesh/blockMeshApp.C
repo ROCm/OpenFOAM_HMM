@@ -149,6 +149,8 @@ int main(int argc, char *argv[])
     Info<< "Creating block mesh from\n    "
         << meshDictIoPtr->objectPath() << endl;
 
+    blockMesh::verbose(true);
+
     IOdictionary meshDict(meshDictIoPtr());
     blockMesh blocks(meshDict);
 

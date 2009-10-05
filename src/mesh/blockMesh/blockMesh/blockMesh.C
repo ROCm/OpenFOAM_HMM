@@ -26,6 +26,11 @@ License
 
 #include "blockMesh.H"
 
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+bool Foam::blockMesh::blockMesh::verboseOutput(false);
+
+
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 Foam::blockMesh::blockMesh(IOdictionary& dict)
@@ -47,6 +52,18 @@ Foam::blockMesh::~blockMesh()
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+void Foam::blockMesh::verbose(const bool on)
+{
+    verboseOutput = on;
+}
+
+
+const Foam::pointField& Foam::blockMesh::blockPointField() const
+{
+    return blockPointField_;
+}
+
 
 const Foam::polyMesh& Foam::blockMesh::topology() const
 {

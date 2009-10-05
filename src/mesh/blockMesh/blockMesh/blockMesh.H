@@ -62,6 +62,7 @@ class blockMesh
     public blockList
 {
     // Private data
+        static bool verboseOutput;
 
         //- Point field defining the block mesh (corners)
         pointField blockPointField_;
@@ -142,6 +143,9 @@ public:
 
         // Access
 
+            //- Reference to point field defining the block mesh
+            const pointField& blockPointField() const;
+
             const polyMesh& topology() const;
 
             const curvedEdgeList& edges() const
@@ -169,6 +173,9 @@ public:
 
             //- Clear geometry (internal points, cells, boundaryPatches)
             void clearGeom();
+
+            //- Enable/disable verbose information about the progress
+            static void verbose(const bool on=true);
 
         // Write
 

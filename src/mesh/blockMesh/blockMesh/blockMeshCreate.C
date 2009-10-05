@@ -34,7 +34,10 @@ void Foam::blockMesh::createPoints() const
 {
     const blockList& blocks = *this;
 
-    Info<< "Creating points with scale " << scaleFactor_ << endl;
+    if (verboseOutput)
+    {
+        Info<< "Creating points with scale " << scaleFactor_ << endl;
+    }
 
     //
     // generate points
@@ -65,7 +68,10 @@ void Foam::blockMesh::createCells() const
     const blockList& blocks = *this;
     const cellModel& hex = *(cellModeller::lookup("hex"));
 
-    Info<< "Creating cells" << endl;
+    if (verboseOutput)
+    {
+        Info<< "Creating cells" << endl;
+    }
 
     //
     // generate cells
@@ -221,7 +227,10 @@ void Foam::blockMesh::createPatches() const
 {
     const polyPatchList& topoPatches = topology().boundaryMesh();
 
-    Info<< "Creating patches" << endl;
+    if (verboseOutput)
+    {
+        Info<< "Creating patches" << endl;
+    }
 
     //
     // generate points

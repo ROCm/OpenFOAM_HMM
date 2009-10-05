@@ -31,7 +31,10 @@ License
 // Check the blockMesh topology
 void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
 {
-    Info<< nl << "Check topology" << endl;
+    if (verboseOutput)
+    {
+        Info<< nl << "Check topology" << endl;
+    }
 
     bool ok = true;
 
@@ -55,28 +58,27 @@ void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
     }
 
 
-    Info<< nl << tab << "Basic statistics" << nl;
-
-    Info<< tab << tab << "Number of internal faces : "
-        << bm.nInternalFaces() << nl;
-
-    Info<< tab << tab << "Number of boundary faces : "
-        << nBoundaryFaces << nl;
-
-    Info<< tab << tab << "Number of defined boundary faces : "
-        << nDefinedBoundaryFaces << nl;
-
-    Info<< tab << tab << "Number of undefined boundary faces : "
-        << nBoundaryFaces - nDefinedBoundaryFaces << nl;
-
-    if ((nBoundaryFaces - nDefinedBoundaryFaces) > 0)
+    if (verboseOutput)
     {
-        Info<< tab << tab << tab
-            << "(Warning : only leave undefined the front and back planes "
-            << "of 2D planar geometries!)" << endl;
-    }
+        Info<< nl << tab << "Basic statistics" << nl
+            << tab << tab << "Number of internal faces : "
+            << bm.nInternalFaces() << nl
+            << tab << tab << "Number of boundary faces : "
+            << nBoundaryFaces << nl
+            << tab << tab << "Number of defined boundary faces : "
+            << nDefinedBoundaryFaces << nl
+            << tab << tab << "Number of undefined boundary faces : "
+            << nBoundaryFaces - nDefinedBoundaryFaces << nl;
 
-    Info<< tab << "Checking patch -> block consistency" << endl;
+        if ((nBoundaryFaces - nDefinedBoundaryFaces) > 0)
+        {
+            Info<< tab << tab << tab
+                << "(Warning : only leave undefined the front and back planes "
+                << "of 2D planar geometries!)" << endl;
+        }
+
+        Info<< tab << "Checking patch -> block consistency" << endl;
+    }
 
 
     forAll(patches, patchi)
@@ -132,7 +134,10 @@ void Foam::blockMesh::checkBlockMesh(const polyMesh& bm) const
         }
     }
 
-    Info<< endl;
+    if (verboseOutput)
+    {
+        Info<< endl;
+    }
 
     if (!ok)
     {

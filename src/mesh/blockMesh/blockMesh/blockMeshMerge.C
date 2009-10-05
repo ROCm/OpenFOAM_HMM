@@ -32,7 +32,10 @@ void Foam::blockMesh::calcMergeInfo()
 {
     const blockList& blocks = *this;
 
-    Info<< "Creating block offsets" << endl;
+    if (verboseOutput)
+    {
+        Info<< "Creating block offsets" << endl;
+    }
 
     blockOffsets_.setSize(blocks.size());
 
@@ -48,7 +51,10 @@ void Foam::blockMesh::calcMergeInfo()
     }
 
 
-    Info<< "Creating merge list " << flush;
+    if (verboseOutput)
+    {
+        Info<< "Creating merge list " << flush;
+    }
 
     // set unused to -1
     mergeList_.setSize(nPoints_);
@@ -411,7 +417,10 @@ void Foam::blockMesh::calcMergeInfo()
                 }
             }
         }
-        Info<< "." << flush;
+        if (verboseOutput)
+        {
+            Info<< "." << flush;
+        }
 
         if (nPasses > 100)
         {
@@ -421,7 +430,11 @@ void Foam::blockMesh::calcMergeInfo()
         }
     }
     while (changedPointMerge);
-    Info<< endl;
+
+    if (verboseOutput)
+    {
+        Info<< endl;
+    }
 
     forAll(blockInternalFaces, blockFaceLabel)
     {
