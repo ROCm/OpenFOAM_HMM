@@ -85,7 +85,6 @@ inline void Foam::OPstream::writeToBuffer
 }
 
 
-
 // * * * * * * * * * * * * * * * * Constructor * * * * * * * * * * * * * * * //
 
 Foam::OPstream::OPstream

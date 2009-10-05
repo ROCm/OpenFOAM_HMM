@@ -229,7 +229,6 @@ turbulentTemperatureCoupledBaffleFvPatchScalarField::K() const
 
         return
             talpha().boundaryField()[patch().index()]
-           *thermo.rho()().boundaryField()[patch().index()]
            *thermo.Cp()().boundaryField()[patch().index()];
     }
     else if (mesh.objectRegistry::foundObject<volScalarField>(KName_))

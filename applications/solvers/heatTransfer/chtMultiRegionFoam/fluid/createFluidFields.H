@@ -41,24 +41,6 @@
             )
         );
 
-        Info<< "    Adding to KFluid\n" << endl;
-        KFluid.set
-        (
-            i,
-            new volScalarField
-            (
-                IOobject
-                (
-                    "K",
-                    runTime.timeName(),
-                    fluidRegions[i],
-                    IOobject::NO_READ,
-                    IOobject::NO_WRITE
-                ),
-                thermoFluid[i].Cp()*thermoFluid[i].alpha()
-            )
-        );
-
         Info<< "    Adding to UFluid\n" << endl;
         UFluid.set
         (
@@ -127,6 +109,24 @@
                     thermoFluid[i]
                 )
             ).ptr()
+        );
+
+        Info<< "    Adding to KFluid\n" << endl;
+        KFluid.set
+        (
+            i,
+            new volScalarField
+            (
+                IOobject
+                (
+                    "K",
+                    runTime.timeName(),
+                    fluidRegions[i],
+                    IOobject::NO_READ,
+                    IOobject::NO_WRITE
+                ),
+                thermoFluid[i].Cp()*turbulence[i].alphaEff()
+            )
         );
 
         Info<< "    Adding to DpDtFluid\n" << endl;
