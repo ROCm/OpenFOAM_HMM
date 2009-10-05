@@ -31,7 +31,7 @@ Description
 // Foam includes
 #include "faceSet.H"
 #include "pointSet.H"
-#include "vtkPV3FoamPoints.H"
+#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkPoints.h"
@@ -75,7 +75,7 @@ vtkPolyData* Foam::vtkPV3Foam::faceSetVTKMesh
     vtkpoints->Allocate( points.size() );
     forAll(points, i)
     {
-        vtkPV3FoamInsertNextPoint(vtkpoints, points[i]);
+        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
     }
     vtkmesh->SetPoints(vtkpoints);
     vtkpoints->Delete();
@@ -132,7 +132,7 @@ vtkPolyData* Foam::vtkPV3Foam::pointSetVTKMesh
 
     forAllConstIter(pointSet, pSet, iter)
     {
-        vtkPV3FoamInsertNextPoint(vtkpoints, meshPoints[iter.key()]);
+        vtkInsertNextOpenFOAMPoint(vtkpoints, meshPoints[iter.key()]);
     }
 
     vtkmesh->SetPoints(vtkpoints);

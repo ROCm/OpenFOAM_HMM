@@ -174,11 +174,8 @@ private:
     //- Disallow default bitwise assignment
     void operator=(const vtkPV3FoamReader&);
 
-    //- Add patch names to the view
-    void addPatchNamesToView();
-
-    //- Remove patch names from the view
-    void removePatchNamesFromView();
+    //- Add/remove patch names to/from the view
+    void updatePatchNamesView(const bool show);
 
     int TimeStepRange[2];
     int CacheMesh;

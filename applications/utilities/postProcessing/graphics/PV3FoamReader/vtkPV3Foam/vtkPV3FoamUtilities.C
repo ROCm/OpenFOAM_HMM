@@ -41,6 +41,34 @@ Description
 #include "vtkMultiBlockDataSet.h"
 #include "vtkInformation.h"
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    //! @cond fileScope
+    //  Extract up to the first non-word characters
+    inline word getFirstWord(const char* str)
+    {
+        if (str)
+        {
+            label n = 0;
+            while (str[n] && word::valid(str[n]))
+            {
+                ++n;
+            }
+            return word(str, n, true);
+        }
+        else
+        {
+            return word::null;
+        }
+
+    }
+    //! @endcond fileScope
+
+} // End namespace Foam
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::vtkPV3Foam::AddToBlock
