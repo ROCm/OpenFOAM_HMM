@@ -173,6 +173,23 @@ protected:
             DynamicList<label>& faceList
         ) const;
 
+        //- Track to cell face using face decomposition, used for
+        //  concave cells.
+        void trackToFaceByDecomposition
+        (
+            scalar& trackFraction,
+            const vector& endPosition
+        );
+
+        //- Track to cell face using the infinite planes of the faces.
+        //  The cell *must* be convex.
+        void trackToFaceByPlanes
+        (
+            scalar& trackFraction,
+            const vector& endPosition
+        );
+
+
 
     // Patch interactions
 

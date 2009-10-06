@@ -48,67 +48,10 @@ void Foam::Particle<ParticleType>::findFaces
 
     faceList.clear();
 
-    // forAll(faces, i)
-    // {
-    //     label facei = faces[i];
-    //     scalar lam = lambda(C, position, facei);
-
-    //     if ((lam > 0) && (lam < 1.0))
-    //     {
-    //         faceList.append(facei);
-    //     }
-    // }
-
-    vector deltaPosition = position - C;
-    scalar deltaPositionMag = mag(deltaPosition);
-    scalar lam;
-
     forAll(faces, i)
     {
         label facei = faces[i];
-
-        lam = GREAT;
-
-        if (cloud_.concaveCheck_)
-        {
-            // Check for intruding face
-            // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-            label isOwner = (celli_ == mesh.faceOwner()[facei]);
-
-            if
-            (
-                (isOwner && cloud_.intrudesIntoOwner()[facei])
-             || (!isOwner && cloud_.intrudesIntoNeighbour()[facei])
-            )
-            {
-                // Concave face. Use exact intersection.
-
-                pointHit inter = mesh.faces()[facei].intersection
-                (
-                    position_,
-                    deltaPosition,
-                    mesh.faceCentres()[facei],
-                    mesh.points(),
-                    intersection::HALF_RAY,
-                    Cloud<ParticleType>::intersectionTolerance
-                );
-
-                if (inter.hit())
-                {
-                    lam = inter.distance()/deltaPositionMag;
-                }
-            }
-            else
-            {
-                // Convex face. Can use lambda.
-                lam = lambda(C, position, facei);
-            }
-        }
-        else
-        {
-            lam = lambda(C, position, facei);
-        }
+        scalar lam = lambda(C, position, facei);
 
         if ((lam > 0) && (lam < 1.0))
         {
@@ -140,6 +83,163 @@ void Foam::Particle<ParticleType>::findFaces
         if ((lam > 0) && (lam < 1.0))
         {
             faceList.append(facei);
+        }
+    }
+}
+
+
+template<class ParticleType>
+void Foam::Particle<ParticleType>::trackToFaceByDecomposition
+(
+    scalar& trackFraction,
+    const vector& endPosition
+)
+{
+    const polyMesh& mesh = cloud_.polyMesh_;
+    const labelList& faces = mesh.cells()[celli_];
+
+    vector deltaPosition = endPosition - position_;
+
+    scalar lambdaMin = GREAT;
+    label workingFace = -1;
+    scalar hitLambda = GREAT;
+
+    forAll(faces, i)
+    {
+        label facei = faces[i];
+
+        pointHit inter = mesh.faces()[facei].intersection
+        (
+            position_,
+            deltaPosition,
+            mesh.faceCentres()[facei],
+            mesh.points(),
+            intersection::HALF_RAY,
+            Cloud<ParticleType>::intersectionTolerance
+        );
+
+        if (inter.hit())
+        {
+            hitLambda = inter.distance();
+
+            // There is a problem if the particle is essentially on
+            // the face, it will flip.
+
+            if (hitLambda <= 1.0 && hitLambda < lambdaMin)
+            {
+                Info<< origProc_ << " "
+                    << origId_ << " "
+                    << position_ << " "
+                    << endPosition << " "
+                    << trackFraction << " "
+                    << stepFraction_ << " "
+                    << hitLambda << " "
+                    << inter.hitPoint() << " "
+                    << celli_ << " "
+                    << facei << endl;
+
+                lambdaMin = hitLambda;
+                workingFace = facei;
+            }
+        }
+    }
+
+    if (workingFace == -1)
+    {
+        // inside cell
+
+        facei_ = workingFace;
+        trackFraction = 1.0;
+        position_ = endPosition;
+    }
+    else
+    {
+        if (lambdaMin < 0.0)
+        {
+            FatalErrorIn("Particle::trackToFaceByDecomposition")
+                << "Decomposed tracking failure, lambdaMin = " << lambdaMin
+                << nl << abort(FatalError);
+        }
+
+        trackFraction = lambdaMin;
+
+        position_ += trackFraction*deltaPosition;
+
+        // What about softImpact?
+    }
+}
+
+
+template<class ParticleType>
+void Foam::Particle<ParticleType>::trackToFaceByPlanes
+(
+    scalar& trackFraction,
+    const vector& endPosition
+)
+{
+    facei_ = -1;
+
+    DynamicList<label>& faces = cloud_.labels_;
+    findFaces(endPosition, faces);
+
+    if (faces.empty())
+    {
+        // inside cell
+
+        trackFraction = 1.0;
+        position_ = endPosition;
+    }
+    else
+    {
+        // hit face
+
+        scalar lambdaMin = GREAT;
+
+        if (faces.size() == 1)
+        {
+            lambdaMin = lambda(position_, endPosition, faces[0], stepFraction_);
+            facei_ = faces[0];
+        }
+        else
+        {
+            forAll(faces, i)
+            {
+                scalar lam =
+                    lambda(position_, endPosition, faces[i], stepFraction_);
+
+                if (lam < lambdaMin)
+                {
+                    lambdaMin = lam;
+                    facei_ = faces[i];
+                }
+            }
+        }
+
+        // For warped faces the particle can be 'outside' the cell.
+        // This will yield a lambda larger than 1, or smaller than 0
+        // For values < 0, the particle travels away from the cell
+        // and we don't move the particle, only change cell.
+        // For values larger than 1, we move the particle to endPosition only.
+        if (lambdaMin > 0.0)
+        {
+            if (lambdaMin <= 1.0)
+            {
+                trackFraction = lambdaMin;
+                position_ += trackFraction*(endPosition - position_);
+            }
+            else
+            {
+                trackFraction = 1.0;
+                position_ = endPosition;
+            }
+        }
+        else if (static_cast<ParticleType&>(*this).softImpact())
+        {
+            // Soft-sphere particles can travel outside the domain
+            // but we don't use lambda since this the particle
+            // is going away from face
+            trackFraction = 1.0;
+            position_ = endPosition;
         }
     }
 }
@@ -275,13 +375,13 @@ Foam::label Foam::Particle<ParticleType>::track
 }
 
 
-
 template<class ParticleType>
 Foam::label Foam::Particle<ParticleType>::track(const vector& endPosition)
 {
     int dummyTd;
     return track(endPosition, dummyTd);
 }
+
 
 template<class ParticleType>
 template<class TrackData>
@@ -293,154 +393,25 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 {
     const polyMesh& mesh = cloud_.polyMesh_;
 
-    DynamicList<label>& faces = cloud_.labels_;
-    findFaces(endPosition, faces);
-
-    facei_ = -1;
     scalar trackFraction = 0.0;
 
-    scalar lambdaMin = GREAT;
-
-    // Temporary addition to report on infinite loops ->
-    List<scalar> lambdas(faces.size());
-
-    forAll(faces, i)
+    if (cloud_.concaveCell()[celli_])
     {
-        lambdas[i] = lambda(position_, endPosition, faces[i], stepFraction_);
+        trackToFaceByDecomposition(trackFraction, endPosition);
     }
-    // <- Temporary addition to report on infinite loops
-
-    if (faces.empty())  // inside cell
+    else
     {
-        trackFraction = 1.0;
-        position_ = endPosition;
+        trackToFaceByPlanes(trackFraction, endPosition);
     }
-    else // hit face
+
+    if (facei_ > -1)
     {
-        // scalar lambdaMin = GREAT;
+        // A face was hit
 
-        if (faces.size() == 1)
+        if (cloud_.internalFace(facei_))
         {
-            lambdaMin = lambda(position_, endPosition, faces[0], stepFraction_);
-            facei_ = faces[0];
-        }
-        else
-        {
-            // // If the particle has to cross more than one cell to reach the
-            // // endPosition, we check which way to go.
-            // // If one of the faces is a boundary face and the particle is
-            // // outside, we choose the boundary face.
-            // The particle is outside if one of the lambda's is > 1 or < 0
+            // Internal face, change cell
 
-            scalar fallBackLambdaMin = GREAT;
-            label fallBackFacei = -1;
-
-            vector deltaPosition = endPosition - position_;
-            scalar deltaPositionMag = mag(deltaPosition);
-            scalar hitLambda = GREAT;
-
-            forAll(faces, i)
-            {
-                scalar lam =
-                    lambda(position_, endPosition, faces[i], stepFraction_);
-
-                // Calculate fallback
-                if (lam < fallBackLambdaMin)
-                {
-                    fallBackLambdaMin = lam;
-                    fallBackFacei = faces[i];
-                }
-
-                if (cloud_.concaveCheck_)
-                {
-                    // Check for intruding face
-                    // ~~~~~~~~~~~~~~~~~~~~~~~~
-
-                    label isOwner = (celli_ == mesh.faceOwner()[faces[i]]);
-
-                    if
-                    (
-                        (isOwner && cloud_.intrudesIntoOwner()[faces[i]])
-                     || (!isOwner && cloud_.intrudesIntoNeighbour()[faces[i]])
-                    )
-                    {
-                        // Concave face. Use exact intersection.
-
-                        pointHit inter = mesh.faces()[faces[i]].intersection
-                        (
-                            position_,
-                            deltaPosition,
-                            mesh.faceCentres()[faces[i]],
-                            mesh.points(),
-                            intersection::HALF_RAY,
-                            Cloud<ParticleType>::intersectionTolerance
-                        );
-
-                        if (inter.hit())
-                        {
-                            hitLambda = inter.distance()/deltaPositionMag;
-
-                            if (hitLambda < lambdaMin)
-                            {
-                                lambdaMin = hitLambda;
-                                facei_ = faces[i];
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // Convex face. Can use lambda.
-
-                        if (lam < lambdaMin)
-                        {
-                            lambdaMin = lam;
-                            facei_ = faces[i];
-                        }
-                    }
-                }
-            }
-
-            // Fall back to the original algorithm if no
-            // intersection was found
-            if (facei_ == -1)
-            {
-                lambdaMin = fallBackLambdaMin;
-                facei_ = fallBackFacei;
-            }
-        }
-
-        bool internalFace = cloud_.internalFace(facei_);
-
-        // For warped faces the particle can be 'outside' the cell.
-        // This will yield a lambda larger than 1, or smaller than 0
-        // For values < 0, the particle travels away from the cell
-        // and we don't move the particle, only change cell.
-        // For values larger than 1, we move the particle to endPosition only.
-        if (lambdaMin > 0.0)
-        {
-            if (lambdaMin <= 1.0)
-            {
-                trackFraction = lambdaMin;
-                position_ += trackFraction*(endPosition - position_);
-            }
-            else
-            {
-                trackFraction = 1.0;
-                position_ = endPosition;
-            }
-        }
-        else if (static_cast<ParticleType&>(*this).softImpact())
-        {
-            // Soft-sphere particles can travel outside the domain
-            // but we don't use lambda since this the particle
-            // is going away from face
-            trackFraction = 1.0;
-            position_ = endPosition;
-        }
-
-        // change cell
-        if (internalFace) // Internal face
-        {
             if (celli_ == mesh.faceOwner()[facei_])
             {
                 celli_ = mesh.faceNeighbour()[facei_];
@@ -451,11 +422,9 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
             }
             else
             {
-                FatalErrorIn
-                (
-                    "Particle::trackToFace(const vector&, TrackData&)"
-                )<< "addressing failure" << nl
-                 << abort(FatalError);
+                FatalErrorIn("Particle::trackToFace(const vector&, TrackData&)")
+                    << "addressing failure" << nl
+                    << abort(FatalError);
             }
         }
         else
@@ -526,31 +495,17 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
 
     if (trackFraction < Cloud<ParticleType>::minValidTrackFraction)
     {
-        Pout<< "tracking error "
-            << origId_ << " "
-            << origProc_ << " "
-            << position_ << " "
-            << endPosition << " "
-            << position_ + 1000*(endPosition - position_) << " "
-            << position_ - 1000*(endPosition - position_) << " "
-            << lambdaMin << " "
-            << trackFraction << " "
-            << stepFraction_ << " "
-            << celli_ << " "
-            << facei_ << " "
-            << cloud_.intrudesIntoOwner()[facei_] << " "
-            << cloud_.intrudesIntoNeighbour()[facei_] << " "
-            << faces << " "
-            << lambdas
-            << endl;
-
-        // if (stepFraction_  < SMALL)
-        // {
-        //     Pout<< "Intervene to mark face" << endl;
-
-        //     cloud_.intrudesIntoOwnerPtr_()[facei_] = 1;
-        //     cloud_.intrudesIntoNeighbourPtr_()[facei_] = 1;
-        // }
+        // Pout<< "tracking error "
+        //     << origId_ << " "
+        //     << origProc_ << " "
+        //     << position_ << " "
+        //     << endPosition << " "
+        //     << trackFraction << " "
+        //     << stepFraction_ << " "
+        //     << celli_ << " "
+        //     << facei_ << " "
+        //     << cloud_.concaveCell()[celli_]
+        //     << endl;
 
         const point& cc = mesh.cellCentres()[celli_];
         position_ +=

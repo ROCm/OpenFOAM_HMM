@@ -78,10 +78,8 @@ class Cloud
 
         const bool concaveCheck_;
 
-        //- Does face intrude into owner cell
-        mutable autoPtr<PackedBoolList> intrudesIntoOwnerPtr_;
-        //- Does face intrude into neighbour cell
-        mutable autoPtr<PackedBoolList> intrudesIntoNeighbourPtr_;
+        //- Is the cell concave
+        mutable autoPtr<PackedBoolList> concaveCellPtr_;
 
         //- Overall count of particles ever created. Never decreases.
         mutable label particleCount_;
@@ -92,20 +90,11 @@ class Cloud
 
     // Private member functions
 
-        //- Helper: is face f1 on wrong side of f0 (both faces are on same cell)
-        //  0 : convex
-        //  1 : planar to within planarCosAngle
-        //  2 : concave
-        label isIntrudingFace
-        (
-            const label cellI,
-            const label f0,
-            const label f1
-        ) const;
+        //- Determine if a particular cell is concave
+        bool isConcaveCell(const label cellI) const;
 
         //- Analyse mesh for faces not being convex.
-        //  Sets intrudesIntoOwner_,intrudesIntoNeighbour_.
-        void calcIntrudingFaces() const;
+        void calcConcaveCells() const;
 
         //- Initialise cloud on IO constructor
         void initCloud(const bool checkClass);
@@ -229,12 +218,8 @@ public:
                 return IDLList<ParticleType>::size();
             };
 
-            //- Per face whether it intrudes into the owner cell.(demand driven)
-            const PackedBoolList& intrudesIntoOwner() const;
-
-            //- Per face whether it intrudes into the neighbour cell. (demand
-            //  driven.
-            const PackedBoolList& intrudesIntoNeighbour() const;
+            //- Whether each cell is concave (demand driven data)
+            const PackedBoolList& concaveCell() const;
 
 
             // Iterators

@@ -90,11 +90,6 @@ Foam::Cloud<ParticleType>::Cloud
     particleCount_(0)
 {
     initCloud(checkClass);
-
-    // if (concaveCheck_)
-    // {
-    //     intrudesIntoOwner();
-    // }
 }
 
 
