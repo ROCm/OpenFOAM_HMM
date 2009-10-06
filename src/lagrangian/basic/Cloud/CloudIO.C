@@ -62,11 +62,13 @@ template<class ParticleType>
 Foam::Cloud<ParticleType>::Cloud
 (
     const polyMesh& pMesh,
-    const bool checkClass
+    const bool checkClass,
+    const bool concaveCheck
 )
 :
     cloud(pMesh),
     polyMesh_(pMesh),
+    concaveCheck_(concaveCheck),
     particleCount_(0)
 {
     initCloud(checkClass);
@@ -78,14 +80,21 @@ Foam::Cloud<ParticleType>::Cloud
 (
     const polyMesh& pMesh,
     const word& cloudName,
-    const bool checkClass
+    const bool checkClass,
+    const bool concaveCheck
 )
 :
     cloud(pMesh, cloudName),
     polyMesh_(pMesh),
+    concaveCheck_(concaveCheck),
     particleCount_(0)
 {
     initCloud(checkClass);
+
+    // if (concaveCheck_)
+    // {
+    //     intrudesIntoOwner();
+    // }
 }
 
 

@@ -31,6 +31,250 @@ License
 #include "mapPolyMesh.H"
 #include "Time.H"
 #include "OFstream.H"
+#include "triPointRef.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::minValidTrackFraction = 1e-10;
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-3;
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = 1e-6;
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::planarCosAngle = (1 - 1e-6);
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+// Calculate using face properties only
+template<class ParticleType>
+Foam::label Foam::Cloud<ParticleType>::isIntrudingFace
+(
+    const label cellI,
+    const label f0I,
+    const label f1I
+) const
+{
+    const vectorField& fAreas = pMesh().faceAreas();
+    const pointField& fCentres = pMesh().faceCentres();
+    const labelList& fOwner = pMesh().faceOwner();
+    const pointField& points = pMesh().points();
+
+    // Get f0 centre
+    const point& fc0 = fCentres[f0I];
+
+    const face& f0 = pMesh().faces()[f0I];
+
+    const face& f1 = pMesh().faces()[f1I];
+
+    vector fn0 = fAreas[f0I];
+    fn0 /= (mag(fn0) + VSMALL);
+
+    // Flip normal if required so that it is always pointing out of
+    // the cell
+    if (fOwner[f0I] != cellI)
+    {
+        fn0 *= -1;
+    }
+
+    // Is any vertex of f1 on wrong side of the plane of f0?
+
+    forAll(f1, f1pI)
+    {
+        label ptI = f1[f1pI];
+
+        // Skip points that are shared between f1 and f0
+        if (findIndex(f0, ptI) > -1)
+        {
+            continue;
+        }
+
+        const point& pt = points[ptI];
+
+        // Normal distance from fc0 to pt
+        scalar d = ((fc0 - pt) & fn0);
+
+        if (d < 0)
+        {
+            // Proper concave: f1 on wrong side of f0
+            return 2;
+        }
+    }
+
+    // Could be a convex cell, but check angle for planar faces.
+
+    vector fn1 = fAreas[f1I];
+    fn1 /= (mag(fn1) + VSMALL);
+
+    // Flip normal if required so that it is always pointing out of
+    // the cell
+    if (fOwner[f1I] != cellI)
+    {
+        fn1 *= -1;
+    }
+
+    if ((fn0 & fn1) > planarCosAngle)
+    {
+        // Planar face
+        return 1;
+    }
+
+    return 0;
+}
+
+
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::calcIntrudingFaces() const
+{
+    const labelList& fOwner = pMesh().faceOwner();
+    const cellList& cells = pMesh().cells();
+
+    intrudesIntoOwnerPtr_.reset(new PackedBoolList(pMesh().nFaces()));
+    PackedBoolList& intrudesIntoOwner = intrudesIntoOwnerPtr_();
+    intrudesIntoNeighbourPtr_.reset(new PackedBoolList(pMesh().nFaces()));
+    PackedBoolList& intrudesIntoNeighbour = intrudesIntoNeighbourPtr_();
+
+    PackedBoolList cellsWithProblemFaces(cells.size());
+    DynamicList<label> planarFaces;
+    DynamicList<label> intrudingFaces;
+
+
+    label nIntruded = 0;
+    label nPlanar = 0;
+
+    forAll(cells, cellI)
+    {
+        const cell& cFaces = cells[cellI];
+
+        forAll(cFaces, i)
+        {
+            label f0 = cFaces[i];
+
+            bool own0 = (fOwner[f0] == cellI);
+
+            // Now check that all other faces of the cell are on the 'inside'
+            // of the face.
+
+            bool intrudes = false;
+
+            forAll(cFaces, j)
+            {
+                if (j != i)
+                {
+                    label state = isIntrudingFace
+                    (
+                        cellI,
+                        f0,
+                        cFaces[j]
+                    );
+
+                    if (state == 1)
+                    {
+                        // planar
+                        planarFaces.append(f0);
+
+                        intrudes = true;
+                        nPlanar++;
+                        break;
+                    }
+                    else if (state == 2)
+                    {
+                        // concave
+                        intrudingFaces.append(f0);
+
+                        intrudes = true;
+                        nIntruded++;
+                        break;
+                    }
+                }
+            }
+
+            if (intrudes)
+            {
+                cellsWithProblemFaces[cellI] = 1;
+
+                if (own0)
+                {
+                    intrudesIntoOwner[f0] = 1;
+                }
+                else
+                {
+                    intrudesIntoNeighbour[f0] = 1;
+                }
+            }
+
+            // intrudesIntoOwner[f0] = 1;
+            // intrudesIntoNeighbour[f0] = 1;
+        }
+    }
+
+    // if (debug)
+    {
+        Pout<< "Cloud<ParticleType>::calcIntrudingFaces() :"
+            << " overall faces in mesh : "
+            << pMesh().nFaces() << nl
+            << "    of these planar : "
+            << nPlanar << nl
+            << "    of these intruding into their cell (concave) : "
+            << nIntruded << endl;
+
+        // Info<< "Hard coded picking up every face." << endl;
+
+        // Write the faces and cells that are a problem to file to be
+        // compared and made into sets
+
+        {
+            DynamicList<label> cellsWithIntrudingFaces;
+
+            forAll(cells, cellI)
+            {
+                if (cellsWithProblemFaces[cellI])
+                {
+                    cellsWithIntrudingFaces.append(cellI);
+                }
+            }
+
+            fileName fName = pMesh().time().path()/"cellsWithProblemFaces";
+
+            Pout<< "    Writing " << fName.name() << endl;
+
+            OFstream file(fName);
+
+            file << cellsWithIntrudingFaces;
+
+            file.flush();
+        }
+
+        {
+            fileName fName = pMesh().time().path()/"planarFaces";
+
+            Pout<< "    Writing " << fName.name() << endl;
+
+            OFstream file(fName);
+
+            file << planarFaces;
+
+            file.flush();
+        }
+
+        {
+            fileName fName = pMesh().time().path()/"intrudingFaces";
+
+            Pout<< "    Writing " << fName.name() << endl;
+
+            OFstream file(fName);
+
+            file << intrudingFaces;
+
+            file.flush();
+        }
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -38,12 +282,14 @@ template<class ParticleType>
 Foam::Cloud<ParticleType>::Cloud
 (
     const polyMesh& pMesh,
-    const IDLList<ParticleType>& particles
+    const IDLList<ParticleType>& particles,
+    const bool concaveCheck
 )
 :
     cloud(pMesh),
     IDLList<ParticleType>(),
     polyMesh_(pMesh),
+    concaveCheck_(concaveCheck),
     particleCount_(0)
 {
     IDLList<ParticleType>::operator=(particles);
@@ -55,19 +301,54 @@ Foam::Cloud<ParticleType>::Cloud
 (
     const polyMesh& pMesh,
     const word& cloudName,
-    const IDLList<ParticleType>& particles
+    const IDLList<ParticleType>& particles,
+    const bool concaveCheck
 )
 :
     cloud(pMesh, cloudName),
     IDLList<ParticleType>(),
     polyMesh_(pMesh),
+    concaveCheck_(concaveCheck),
     particleCount_(0)
 {
     IDLList<ParticleType>::operator=(particles);
 }
 
 
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::clearOut()
+{
+    intrudesIntoOwnerPtr_.clear();
+    intrudesIntoNeighbourPtr_.clear();
+    labels_.clearStorage();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParticleType>
+const Foam::PackedBoolList& Foam::Cloud<ParticleType>::intrudesIntoOwner()
+const
+{
+    if (!intrudesIntoOwnerPtr_.valid())
+    {
+        calcIntrudingFaces();
+    }
+    return intrudesIntoOwnerPtr_();
+}
+
+
+template<class ParticleType>
+const Foam::PackedBoolList& Foam::Cloud<ParticleType>::intrudesIntoNeighbour()
+const
+{
+    if (!intrudesIntoNeighbourPtr_.valid())
+    {
+        calcIntrudingFaces();
+    }
+    return intrudesIntoNeighbourPtr_();
+}
+
 
 template<class ParticleType>
 Foam::label Foam::Cloud<ParticleType>::getNewParticleID() const

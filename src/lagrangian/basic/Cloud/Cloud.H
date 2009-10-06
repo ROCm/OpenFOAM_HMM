@@ -40,6 +40,7 @@ SourceFiles
 #include "IDLList.H"
 #include "IOField.H"
 #include "polyMesh.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,6 +76,13 @@ class Cloud
 
         const polyMesh& polyMesh_;
 
+        const bool concaveCheck_;
+
+        //- Does face intrude into owner cell
+        mutable autoPtr<PackedBoolList> intrudesIntoOwnerPtr_;
+        //- Does face intrude into neighbour cell
+        mutable autoPtr<PackedBoolList> intrudesIntoNeighbourPtr_;
+
         //- Overall count of particles ever created. Never decreases.
         mutable label particleCount_;
 
@@ -83,6 +91,21 @@ class Cloud
 
 
     // Private member functions
+
+        //- Helper: is face f1 on wrong side of f0 (both faces are on same cell)
+        //  0 : convex
+        //  1 : planar to within planarCosAngle
+        //  2 : concave
+        label isIntrudingFace
+        (
+            const label cellI,
+            const label f0,
+            const label f1
+        ) const;
+
+        //- Analyse mesh for faces not being convex.
+        //  Sets intrudesIntoOwner_,intrudesIntoNeighbour_.
+        void calcIntrudingFaces() const;
 
         //- Initialise cloud on IO constructor
         void initCloud(const bool checkClass);
@@ -104,13 +127,31 @@ public:
     TypeName("Cloud");
 
 
+    // Static data members
+
+        //- The smallest allowable trackFraction in trackToFace before
+        //  an intervention is required
+        static const scalar minValidTrackFraction;
+
+        //- Fraction of distance to cell centre to move a particle to
+        //  'rescue' it from a tracking problem
+        static const scalar trackingRescueTolerance;
+
+        //- Overlap tolerance for face intersections.
+        static const scalar intersectionTolerance;
+
+        //- cosine of angle for faces to be planar.
+        static const scalar planarCosAngle;
+
+
     // Constructors
 
         //- Construct from mesh and a list of particles
         Cloud
         (
             const polyMesh& mesh,
-            const IDLList<ParticleType>& particles
+            const IDLList<ParticleType>& particles,
+            const bool concaveCheck = true
         );
 
         //- Construct from mesh, cloud name, and a list of particles
@@ -118,7 +159,8 @@ public:
         (
             const polyMesh& mesh,
             const word& cloudName,
-            const IDLList<ParticleType>& particles
+            const IDLList<ParticleType>& particles,
+            const bool concaveCheck = true
         );
 
         //- Construct from mesh by reading from file
@@ -126,7 +168,8 @@ public:
         Cloud
         (
             const polyMesh& mesh,
-            const bool checkClass = true
+            const bool checkClass = true,
+            const bool concaveCheck = true
         );
 
 
@@ -136,8 +179,15 @@ public:
         (
             const polyMesh& pMesh,
             const word& cloudName,
-            const bool checkClass = true
+            const bool checkClass = true,
+            const bool concaveCheck = true
         );
+
+
+    // Destructor
+
+        //- Destroy any demand-driven data
+        void clearOut();
 
 
     // Member Functions
@@ -178,6 +228,13 @@ public:
             {
                 return IDLList<ParticleType>::size();
             };
+
+            //- Per face whether it intrudes into the owner cell.(demand driven)
+            const PackedBoolList& intrudesIntoOwner() const;
+
+            //- Per face whether it intrudes into the neighbour cell. (demand
+            //  driven.
+            const PackedBoolList& intrudesIntoNeighbour() const;
 
 
             // Iterators
