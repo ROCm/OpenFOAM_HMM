@@ -163,7 +163,7 @@ private:
         static bool parRun_;
 
         static List<int> procIDs_;
-        static const int msgType_;
+        static int msgType_;
 
         static List<commsStruct> linearCommunication_;
         static List<commsStruct> treeCommunication_;
@@ -337,10 +337,11 @@ public:
         }
 
         //- Message tag of standard messages
-        static int msgType()
+        static int& msgType()
         {
             return msgType_;
         }
+
 
             //- Get the communications type of the stream
             commsTypes commsType() const
