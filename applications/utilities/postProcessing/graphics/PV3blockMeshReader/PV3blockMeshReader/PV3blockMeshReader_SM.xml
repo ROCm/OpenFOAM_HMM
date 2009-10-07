@@ -1,8 +1,8 @@
 <ServerManagerConfiguration>
   <ProxyGroup name="sources">
   <SourceProxy
-    name="PV3FoamBlockMeshReader"
-    class="vtkPV3FoamBlockMeshReader">
+    name="PV3blockMeshReader"
+    class="vtkPV3blockMeshReader">
 
     <!-- File name - compulsory -->
     <StringVectorProperty
@@ -55,7 +55,7 @@
     </StringVectorProperty>
     <StringVectorProperty
       name="PartStatus"
-      label="block numbers"
+      label="Blocks"
       command="SetPartArrayStatus"
       number_of_elements="0"
       repeat_command="1"
@@ -66,6 +66,29 @@
       <ArraySelectionDomain name="array_list">
         <RequiredProperties>
           <Property name="PartArrayInfo" function="ArrayList"/>
+        </RequiredProperties>
+      </ArraySelectionDomain>
+    </StringVectorProperty>
+
+    <!-- Available Parts (blocks) array -->
+    <StringVectorProperty
+      name="CurvedEdgesArrayInfo"
+      information_only="1">
+      <ArraySelectionInformationHelper attribute_name="CurvedEdges"/>
+    </StringVectorProperty>
+    <StringVectorProperty
+      name="CurvedEdgesStatus"
+      label="Curved Edges"
+      command="SetCurvedEdgesArrayStatus"
+      number_of_elements="0"
+      repeat_command="1"
+      number_of_elements_per_command="2"
+      element_types="2 0"
+      information_property="CurvedEdgesArrayInfo"
+      animateable="0">
+      <ArraySelectionDomain name="array_list">
+        <RequiredProperties>
+          <Property name="CurvedEdgesArrayInfo" function="ArrayList"/>
         </RequiredProperties>
       </ArraySelectionDomain>
     </StringVectorProperty>

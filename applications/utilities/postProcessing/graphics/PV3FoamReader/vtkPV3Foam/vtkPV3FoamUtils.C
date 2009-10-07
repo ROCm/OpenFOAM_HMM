@@ -77,7 +77,7 @@ void Foam::vtkPV3Foam::AddToBlock
     vtkDataSet* dataset,
     const partInfo& selector,
     const label datasetNo,
-    const string& datasetName
+    const std::string& datasetName
 )
 {
     const int blockNo = selector.block();

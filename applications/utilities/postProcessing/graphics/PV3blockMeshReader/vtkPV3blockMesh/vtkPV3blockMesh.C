@@ -24,13 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "vtkPV3FoamBlockMesh.H"
-#include "vtkPV3FoamBlockMeshReader.h"
+#include "vtkPV3blockMesh.H"
+#include "vtkPV3blockMeshReader.h"
 
 // Foam includes
 #include "blockMesh.H"
 #include "Time.H"
 #include "patchZones.H"
+#include "OStringStream.H"
 
 // VTK includes
 #include "vtkDataArraySelection.h"
@@ -41,82 +42,46 @@ License
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
-defineTypeNameAndDebug(Foam::vtkPV3FoamBlockMesh, 0);
+defineTypeNameAndDebug(Foam::vtkPV3blockMesh, 0);
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::vtkPV3FoamBlockMesh::resetCounters()
+void Foam::vtkPV3blockMesh::resetCounters()
 {
     // Reset mesh part ids and sizes
     partInfoBlocks_.reset();
+    partInfoEdges_.reset();
     partInfoCorners_.reset();
 }
 
 
-void Foam::vtkPV3FoamBlockMesh::updateMeshPartsStatus()
+void Foam::vtkPV3blockMesh::updateInfoBlocks()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3FoamBlockMesh::updateMeshPartsStatus" << endl;
-    }
-
-    vtkDataArraySelection* selection = reader_->GetPartSelection();
-    label nElem = selection->GetNumberOfArrays();
-
-    if (partStatus_.size() != nElem)
-    {
-        partStatus_.setSize(nElem);
-        partStatus_ = false;
-    }
-
-    // this needs fixing if we wish to re-use the datasets
-    partDataset_.setSize(nElem);
-    partDataset_ = -1;
-
-    // Read the selected mesh parts (blocks only) and add to list
-    forAll(partStatus_, partId)
-    {
-        const int setting = selection->GetArraySetting(partId);
-
-        if (partStatus_[partId] != setting)
-        {
-            partStatus_[partId] = setting;
-        }
-
-        if (debug)
-        {
-            Info<< "  part[" << partId << "] = "
-                << partStatus_[partId]
-                << " : " << selection->GetArrayName(partId) << endl;
-        }
-    }
-    if (debug)
-    {
-        Info<< "<end> Foam::vtkPV3FoamBlockMesh::updateMeshPartsStatus" << endl;
-    }
-}
-
-
-void Foam::vtkPV3FoamBlockMesh::updateInfoBlocks()
-{
-    if (debug)
-    {
-        Info<< "<beg> Foam::vtkPV3FoamBlockMesh::updateInfoBlocks"
+        Info<< "<beg> Foam::vtkPV3blockMesh::updateInfoBlocks"
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
     }
 
-    vtkDataArraySelection* partSelection = reader_->GetPartSelection();
-    partInfoBlocks_ = partSelection->GetNumberOfArrays();
+    vtkDataArraySelection* selection = reader_->GetPartSelection();
+    partInfoBlocks_ = selection->GetNumberOfArrays();
 
-    int nBlocks = meshPtr_->size();
-
+    const blockMesh& blkMesh = *meshPtr_;
+    const int nBlocks = blkMesh.size();
     for (int blockI = 0; blockI < nBlocks; ++blockI)
     {
-        // Add blockId to GUI list
-        partSelection->AddArray
-        (
-            Foam::name(blockI).c_str()
-        );
+        const blockDescriptor& blockDef = blkMesh[blockI].blockDef();
+
+        word partName = Foam::name(blockI);
+
+        // append the (optional) zone name
+        if (!blockDef.zoneName().empty())
+        {
+            partName += " - " + blockDef.zoneName();
+        }
+
+        // Add blockId and zoneName to GUI list
+        selection->AddArray(partName.c_str());
     }
 
     partInfoBlocks_ += nBlocks;
@@ -124,30 +89,69 @@ void Foam::vtkPV3FoamBlockMesh::updateInfoBlocks()
     if (debug)
     {
         // just for debug info
-        getSelectedArrayEntries(partSelection);
+        getSelectedArrayEntries(selection);
 
-        Info<< "<end> Foam::vtkPV3FoamBlockMesh::updateInfoBlocks" << endl;
+        Info<< "<end> Foam::vtkPV3blockMesh::updateInfoBlocks" << endl;
+    }
+}
+
+
+void Foam::vtkPV3blockMesh::updateInfoEdges()
+{
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3blockMesh::updateInfoEdges"
+            << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "]" << endl;
+    }
+
+    vtkDataArraySelection* selection = reader_->GetCurvedEdgesSelection();
+    partInfoEdges_ = selection->GetNumberOfArrays();
+
+    const blockMesh& blkMesh = *meshPtr_;
+    const curvedEdgeList& edges = blkMesh.edges();
+
+    const int nEdges = edges.size();
+    forAll(edges, edgeI)
+    {
+        OStringStream ostr;
+
+        ostr<< edges[edgeI].start() << ":" << edges[edgeI].end() << " - "
+            << edges[edgeI].type();
+
+        // Add "beg:end - type" to GUI list
+        selection->AddArray(ostr.str().c_str());
+    }
+
+    partInfoEdges_ += nEdges;
+
+    if (debug)
+    {
+        // just for debug info
+        getSelectedArrayEntries(selection);
+
+        Info<< "<end> Foam::vtkPV3blockMesh::updateInfoEdges" << endl;
     }
 }
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::vtkPV3FoamBlockMesh::vtkPV3FoamBlockMesh
+Foam::vtkPV3blockMesh::vtkPV3blockMesh
 (
     const char* const FileName,
-    vtkPV3FoamBlockMeshReader* reader
+    vtkPV3blockMeshReader* reader
 )
 :
     reader_(reader),
     dbPtr_(NULL),
     meshPtr_(NULL),
     partInfoBlocks_("block"),
+    partInfoEdges_("edges"),
     partInfoCorners_("corners")
 {
     if (debug)
     {
-        Info<< "Foam::vtkPV3FoamBlockMesh::vtkPV3FoamBlockMesh - "
+        Info<< "Foam::vtkPV3blockMesh::vtkPV3blockMesh - "
             << FileName << endl;
     }
 
@@ -208,11 +212,11 @@ Foam::vtkPV3FoamBlockMesh::vtkPV3FoamBlockMesh
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::vtkPV3FoamBlockMesh::~vtkPV3FoamBlockMesh()
+Foam::vtkPV3blockMesh::~vtkPV3blockMesh()
 {
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3FoamBlockMesh::~vtkPV3FoamBlockMesh" << endl;
+        Info<< "<end> Foam::vtkPV3blockMesh::~vtkPV3blockMesh" << endl;
     }
 
     delete meshPtr_;
@@ -221,21 +225,23 @@ Foam::vtkPV3FoamBlockMesh::~vtkPV3FoamBlockMesh()
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void Foam::vtkPV3FoamBlockMesh::updateInfo()
+void Foam::vtkPV3blockMesh::updateInfo()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3FoamBlockMesh::updateInfo"
+        Info<< "<beg> Foam::vtkPV3blockMesh::updateInfo"
             << " [meshPtr=" << (meshPtr_ ? "set" : "NULL") << "] " << endl;
     }
 
     resetCounters();
 
     vtkDataArraySelection* partSelection = reader_->GetPartSelection();
+    vtkDataArraySelection* edgeSelection = reader_->GetCurvedEdgesSelection();
 
     // enable 'internalMesh' on the first call
     // or preserve the enabled selections
-    stringList enabledEntries;
+    stringList enabledParts;
+    stringList enabledEdges;
     bool firstTime = false;
     if (!partSelection->GetNumberOfArrays() && !meshPtr_)
     {
@@ -243,37 +249,42 @@ void Foam::vtkPV3FoamBlockMesh::updateInfo()
     }
     else
     {
-        enabledEntries = getSelectedArrayEntries(partSelection);
+        enabledParts = getSelectedArrayEntries(partSelection);
+        enabledEdges = getSelectedArrayEntries(edgeSelection);
     }
 
     // Clear current mesh parts list
     partSelection->RemoveAllArrays();
+    edgeSelection->RemoveAllArrays();
 
     // need a blockMesh
     updateFoamMesh();
 
-    // Update mesh parts list - add corrner points at the bottom
+    // Update mesh parts list
     updateInfoBlocks();
+
+    // Update curved edges list
+    updateInfoEdges();
 
     // restore the enabled selections
     if (!firstTime)
     {
-        setSelectedArrayEntries(partSelection, enabledEntries);
+        setSelectedArrayEntries(partSelection, enabledParts);
+        setSelectedArrayEntries(edgeSelection, enabledEdges);
     }
-
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3FoamBlockMesh::updateInfo" << endl;
+        Info<< "<end> Foam::vtkPV3blockMesh::updateInfo" << endl;
     }
 }
 
 
-void Foam::vtkPV3FoamBlockMesh::updateFoamMesh()
+void Foam::vtkPV3blockMesh::updateFoamMesh()
 {
     if (debug)
     {
-        Info<< "<beg> Foam::vtkPV3FoamBlockMesh::updateFoamMesh" << endl;
+        Info<< "<beg> Foam::vtkPV3blockMesh::updateFoamMesh" << endl;
     }
 
     // Check to see if the FOAM mesh has been created
@@ -305,12 +316,12 @@ void Foam::vtkPV3FoamBlockMesh::updateFoamMesh()
 
     if (debug)
     {
-        Info<< "<end> Foam::vtkPV3FoamBlockMesh::updateFoamMesh" << endl;
+        Info<< "<end> Foam::vtkPV3blockMesh::updateFoamMesh" << endl;
     }
 }
 
 
-void Foam::vtkPV3FoamBlockMesh::Update
+void Foam::vtkPV3blockMesh::Update
 (
     vtkMultiBlockDataSet* output
 )
@@ -318,7 +329,10 @@ void Foam::vtkPV3FoamBlockMesh::Update
     reader_->UpdateProgress(0.1);
 
     // Set up mesh parts selection(s)
-    updateMeshPartsStatus();
+    updateBoolListStatus(partStatus_, reader_->GetPartSelection());
+
+    // Set up curved edges selection(s)
+    updateBoolListStatus(edgeStatus_, reader_->GetCurvedEdgesSelection());
 
     reader_->UpdateProgress(0.2);
 
@@ -326,24 +340,25 @@ void Foam::vtkPV3FoamBlockMesh::Update
     updateFoamMesh();
     reader_->UpdateProgress(0.5);
 
-    // Convert meshes - start port0 at block=0
+    // Convert mesh elemente
     int blockNo = 0;
 
-    convertMeshBlocks(output, blockNo);
     convertMeshCorners(output, blockNo);
+    convertMeshBlocks(output, blockNo);
+    convertMeshEdges(output, blockNo);
 
     reader_->UpdateProgress(0.8);
 
 }
 
 
-void Foam::vtkPV3FoamBlockMesh::CleanUp()
+void Foam::vtkPV3blockMesh::CleanUp()
 {
     reader_->UpdateProgress(1.0);
 }
 
 
-void Foam::vtkPV3FoamBlockMesh::renderPointNumbers
+void Foam::vtkPV3blockMesh::renderPointNumbers
 (
     vtkRenderer* renderer,
     const bool show
@@ -375,8 +390,8 @@ void Foam::vtkPV3FoamBlockMesh::renderPointNumbers
             tprop->BoldOn();
             tprop->ShadowOff();
             tprop->SetLineSpacing(1.0);
-            tprop->SetFontSize(12);
-            tprop->SetColor(1.0, 0.0, 0.0);
+            tprop->SetFontSize(14);
+            tprop->SetColor(1.0, 0.0, 1.0);
             tprop->SetJustificationToCentered();
 
             // Set text to use 3-D world co-ordinates
@@ -401,7 +416,7 @@ void Foam::vtkPV3FoamBlockMesh::renderPointNumbers
 
 
 
-void Foam::vtkPV3FoamBlockMesh::PrintSelf(ostream& os, vtkIndent indent) const
+void Foam::vtkPV3blockMesh::PrintSelf(ostream& os, vtkIndent indent) const
 {
 #if 0
     os  << indent << "Number of nodes: "

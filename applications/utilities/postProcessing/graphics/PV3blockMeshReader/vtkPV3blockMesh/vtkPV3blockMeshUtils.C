@@ -27,8 +27,8 @@ Description
 
 \*---------------------------------------------------------------------------*/
 
-#include "vtkPV3FoamBlockMesh.H"
-#include "vtkPV3FoamBlockMeshReader.h"
+#include "vtkPV3blockMesh.H"
+#include "vtkPV3blockMeshReader.h"
 
 // VTK includes
 #include "vtkDataArraySelection.h"
@@ -67,13 +67,13 @@ namespace Foam
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
-void Foam::vtkPV3FoamBlockMesh::AddToBlock
+void Foam::vtkPV3blockMesh::AddToBlock
 (
     vtkMultiBlockDataSet* output,
     vtkDataSet* dataset,
     const partInfo& selector,
     const label datasetNo,
-    const string& datasetName
+    const std::string& datasetName
 )
 {
     const int blockNo = selector.block();
@@ -85,7 +85,7 @@ void Foam::vtkPV3FoamBlockMesh::AddToBlock
     {
         if (blockDO)
         {
-            FatalErrorIn("Foam::vtkPV3FoamBlockMesh::AddToBlock")
+            FatalErrorIn("Foam::vtkPV3blockMesh::AddToBlock")
                 << "Block already has a vtkDataSet assigned to it"
                 << endl;
             return;
@@ -127,7 +127,7 @@ void Foam::vtkPV3FoamBlockMesh::AddToBlock
 }
 
 
-vtkDataSet* Foam::vtkPV3FoamBlockMesh::GetDataSetFromBlock
+vtkDataSet* Foam::vtkPV3blockMesh::GetDataSetFromBlock
 (
     vtkMultiBlockDataSet* output,
     const partInfo& selector,
@@ -149,7 +149,7 @@ vtkDataSet* Foam::vtkPV3FoamBlockMesh::GetDataSetFromBlock
 
 
 // ununsed at the moment
-Foam::label Foam::vtkPV3FoamBlockMesh::GetNumberOfDataSets
+Foam::label Foam::vtkPV3blockMesh::GetNumberOfDataSets
 (
     vtkMultiBlockDataSet* output,
     const partInfo& selector
@@ -168,7 +168,7 @@ Foam::label Foam::vtkPV3FoamBlockMesh::GetNumberOfDataSets
 }
 
 
-Foam::wordHashSet Foam::vtkPV3FoamBlockMesh::getSelected
+Foam::wordHashSet Foam::vtkPV3blockMesh::getSelected
 (
     vtkDataArraySelection* select
 )
@@ -188,7 +188,7 @@ Foam::wordHashSet Foam::vtkPV3FoamBlockMesh::getSelected
 }
 
 
-Foam::wordHashSet Foam::vtkPV3FoamBlockMesh::getSelected
+Foam::wordHashSet Foam::vtkPV3blockMesh::getSelected
 (
     vtkDataArraySelection* select,
     const partInfo& selector
@@ -209,7 +209,7 @@ Foam::wordHashSet Foam::vtkPV3FoamBlockMesh::getSelected
 }
 
 
-Foam::stringList Foam::vtkPV3FoamBlockMesh::getSelectedArrayEntries
+Foam::stringList Foam::vtkPV3blockMesh::getSelectedArrayEntries
 (
     vtkDataArraySelection* select
 )
@@ -248,7 +248,7 @@ Foam::stringList Foam::vtkPV3FoamBlockMesh::getSelectedArrayEntries
 }
 
 
-Foam::stringList Foam::vtkPV3FoamBlockMesh::getSelectedArrayEntries
+Foam::stringList Foam::vtkPV3blockMesh::getSelectedArrayEntries
 (
     vtkDataArraySelection* select,
     const partInfo& selector
@@ -287,7 +287,7 @@ Foam::stringList Foam::vtkPV3FoamBlockMesh::getSelectedArrayEntries
 }
 
 
-void Foam::vtkPV3FoamBlockMesh::setSelectedArrayEntries
+void Foam::vtkPV3blockMesh::setSelectedArrayEntries
 (
     vtkDataArraySelection* select,
     const stringList& selections
@@ -311,6 +311,45 @@ void Foam::vtkPV3FoamBlockMesh::setSelectedArrayEntries
         }
     }
 }
+
+
+void Foam::vtkPV3blockMesh::updateBoolListStatus
+(
+    boolList& status,
+    vtkDataArraySelection* selection
+)
+{
+    if (debug)
+    {
+        Info<< "<beg> Foam::vtkPV3blockMesh::updateBoolListStatus" << endl;
+    }
+
+    const label nElem = selection->GetNumberOfArrays();
+    if (status.size() != nElem)
+    {
+        status.setSize(nElem);
+        status = false;
+    }
+
+    forAll(status, elemI)
+    {
+        const int setting = selection->GetArraySetting(elemI);
+
+        status[elemI] = setting;
+
+        if (debug)
+        {
+            Info<< "  part[" << elemI << "] = "
+                << status[elemI]
+                << " : " << selection->GetArrayName(elemI) << endl;
+        }
+    }
+    if (debug)
+    {
+        Info<< "<end> Foam::vtkPV3blockMesh::updateBoolListStatus" << endl;
+    }
+}
+
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //

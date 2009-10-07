@@ -19,7 +19,7 @@ LINK_DIRECTORIES(
 INCLUDE_DIRECTORIES(
     $ENV{WM_PROJECT_DIR}/src/OpenFOAM/lnInclude
     $ENV{WM_PROJECT_DIR}/src/meshing/blockMesh/lnInclude
-    ${PROJECT_SOURCE_DIR}/../vtkPV3FoamBlockMesh
+    ${PROJECT_SOURCE_DIR}/../vtkPV3blockMesh
 )
 
 ADD_DEFINITIONS(
@@ -35,22 +35,22 @@ SET(
 
 # Build the server-side plugin
 ADD_PARAVIEW_PLUGIN(
-    PV3FoamBlockMeshReader_SM "1.0"
-    SERVER_MANAGER_XML PV3FoamBlockMeshReader_SM.xml
-    SERVER_MANAGER_SOURCES vtkPV3FoamBlockMeshReader.cxx
+    PV3blockMeshReader_SM "1.0"
+    SERVER_MANAGER_XML PV3blockMeshReader_SM.xml
+    SERVER_MANAGER_SOURCES vtkPV3blockMeshReader.cxx
 )
 
 # Build the client-side plugin
 ADD_PARAVIEW_PLUGIN(
-    PV3FoamBlockMeshReader
+    PV3blockMeshReader
     "1.0"
-    GUI_RESOURCES PV3FoamBlockMeshReader.qrc
+    GUI_RESOURCES PV3blockMeshReader.qrc
 )
 
 TARGET_LINK_LIBRARIES(
-    PV3FoamBlockMeshReader_SM
+    PV3blockMeshReader_SM
     OpenFOAM
     blockMesh
-    vtkPV3FoamBlockMesh
+    vtkPV3blockMesh
 )
 #-----------------------------------------------------------------------------

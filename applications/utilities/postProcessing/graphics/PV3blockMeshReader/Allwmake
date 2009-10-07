@@ -6,9 +6,9 @@ if [ -d "$ParaView_DIR" -a -r "$ParaView_DIR" ]
 then
    case "$ParaView_VERSION" in
    3*)
-      wmake libso vtkPV3FoamBlockMesh
+      wmake libso vtkPV3blockMesh
       (
-         cd PV3FoamBlockMeshReader
+         cd PV3blockMeshReader
          mkdir -p Make/$WM_OPTIONS > /dev/null 2>&1
          cd Make/$WM_OPTIONS
          cmake ../..

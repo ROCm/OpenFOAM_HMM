@@ -7,7 +7,7 @@ EXE_INC = \
     -I$(ParaView_INST_DIR)/VTK/Common \
     -I$(ParaView_INST_DIR)/VTK/Filtering \
     -I$(ParaView_INST_DIR)/VTK/Rendering \
-    -I../PV3FoamBlockMeshReader
+    -I../PV3blockMeshReader
 
 LIB_LIBS = \
     -lmeshTools \

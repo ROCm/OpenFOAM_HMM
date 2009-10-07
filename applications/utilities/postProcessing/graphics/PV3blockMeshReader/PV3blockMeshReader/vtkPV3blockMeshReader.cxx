@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    $RCSfile: vtkPV3FoamBlockMeshReader.cxx,v $
+  Module:    $RCSfile: vtkPV3blockMeshReader.cxx,v $
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -13,7 +13,7 @@
 
 =========================================================================*/
 
-#include "vtkPV3FoamBlockMeshReader.h"
+#include "vtkPV3blockMeshReader.h"
 
 #include "pqApplicationCore.h"
 #include "pqRenderView.h"
@@ -31,12 +31,12 @@
 #include "vtkStringArray.h"
 
 // Foam includes
-#include "vtkPV3FoamBlockMesh.H"
+#include "vtkPV3blockMesh.H"
 
-vtkCxxRevisionMacro(vtkPV3FoamBlockMeshReader, "$Revision: 1.5$");
-vtkStandardNewMacro(vtkPV3FoamBlockMeshReader);
+vtkCxxRevisionMacro(vtkPV3blockMeshReader, "$Revision: 1.5$");
+vtkStandardNewMacro(vtkPV3blockMeshReader);
 
-vtkPV3FoamBlockMeshReader::vtkPV3FoamBlockMeshReader()
+vtkPV3blockMeshReader::vtkPV3blockMeshReader()
 {
     Debug = 0;
     vtkDebugMacro(<<"Constructor");
@@ -50,17 +50,25 @@ vtkPV3FoamBlockMeshReader::vtkPV3FoamBlockMeshReader()
     UpdateGUI = 0;
 
     PartSelection = vtkDataArraySelection::New();
+    CurvedEdgesSelection = vtkDataArraySelection::New();
 
     // Setup the selection callback to modify this object when an array
     // selection is changed.
     SelectionObserver = vtkCallbackCommand::New();
     SelectionObserver->SetCallback
     (
-        &vtkPV3FoamBlockMeshReader::SelectionModifiedCallback
+        &vtkPV3blockMeshReader::SelectionModifiedCallback
     );
     SelectionObserver->SetClientData(this);
 
+
     PartSelection->AddObserver
+    (
+        vtkCommand::ModifiedEvent,
+        this->SelectionObserver
+    );
+
+    CurvedEdgesSelection->AddObserver
     (
         vtkCommand::ModifiedEvent,
         this->SelectionObserver
@@ -68,7 +76,7 @@ vtkPV3FoamBlockMeshReader::vtkPV3FoamBlockMeshReader()
 }
 
 
-vtkPV3FoamBlockMeshReader::~vtkPV3FoamBlockMeshReader()
+vtkPV3blockMeshReader::~vtkPV3blockMeshReader()
 {
     vtkDebugMacro(<<"Deconstructor");
 
@@ -80,15 +88,15 @@ vtkPV3FoamBlockMeshReader::~vtkPV3FoamBlockMeshReader()
     }
 
     PartSelection->RemoveObserver(this->SelectionObserver);
+    CurvedEdgesSelection->RemoveObserver(this->SelectionObserver);
 
     SelectionObserver->Delete();
-
     PartSelection->Delete();
 }
 
 
 // Do everything except set the output info
-int vtkPV3FoamBlockMeshReader::RequestInformation
+int vtkPV3blockMeshReader::RequestInformation
 (
     vtkInformation* vtkNotUsed(request),
     vtkInformationVector** vtkNotUsed(inputVector),
@@ -97,7 +105,7 @@ int vtkPV3FoamBlockMeshReader::RequestInformation
 {
     vtkDebugMacro(<<"RequestInformation");
 
-    if (Foam::vtkPV3FoamBlockMesh::debug)
+    if (Foam::vtkPV3blockMesh::debug)
     {
         cout<<"REQUEST_INFORMATION\n";
     }
@@ -110,7 +118,7 @@ int vtkPV3FoamBlockMeshReader::RequestInformation
 
     int nInfo = outputVector->GetNumberOfInformationObjects();
 
-    if (Foam::vtkPV3FoamBlockMesh::debug)
+    if (Foam::vtkPV3blockMesh::debug)
     {
         cout<<"RequestInformation with " << nInfo << " item(s)\n";
         for (int infoI = 0; infoI < nInfo; ++infoI)
@@ -121,7 +129,7 @@ int vtkPV3FoamBlockMeshReader::RequestInformation
 
     if (!foamData_)
     {
-        foamData_ = new Foam::vtkPV3FoamBlockMesh(FileName, this);
+        foamData_ = new Foam::vtkPV3blockMesh(FileName, this);
     }
     else
     {
@@ -145,7 +153,7 @@ int vtkPV3FoamBlockMeshReader::RequestInformation
 
 
 // Set the output info
-int vtkPV3FoamBlockMeshReader::RequestData
+int vtkPV3blockMeshReader::RequestData
 (
     vtkInformation* vtkNotUsed(request),
     vtkInformationVector** vtkNotUsed(inputVector),
@@ -169,7 +177,7 @@ int vtkPV3FoamBlockMeshReader::RequestData
 
     int nInfo = outputVector->GetNumberOfInformationObjects();
 
-    if (Foam::vtkPV3FoamBlockMesh::debug)
+    if (Foam::vtkPV3blockMesh::debug)
     {
         cout<<"RequestData with " << nInfo << " item(s)\n";
         for (int infoI = 0; infoI < nInfo; ++infoI)
@@ -186,7 +194,7 @@ int vtkPV3FoamBlockMeshReader::RequestData
         )
     );
 
-    if (Foam::vtkPV3FoamBlockMesh::debug)
+    if (Foam::vtkPV3blockMesh::debug)
     {
         cout<< "update output with "
             << output->GetNumberOfBlocks() << " blocks\n";
@@ -203,7 +211,7 @@ int vtkPV3FoamBlockMeshReader::RequestData
 }
 
 
-void vtkPV3FoamBlockMeshReader::updatePointNumbersView(const bool show)
+void vtkPV3blockMeshReader::updatePointNumbersView(const bool show)
 {
     pqApplicationCore* appCore = pqApplicationCore::instance();
 
@@ -224,7 +232,7 @@ void vtkPV3FoamBlockMeshReader::updatePointNumbersView(const bool show)
 }
 
 
-void vtkPV3FoamBlockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
+void vtkPV3blockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
 {
     vtkDebugMacro(<<"PrintSelf");
 
@@ -239,35 +247,39 @@ void vtkPV3FoamBlockMeshReader::PrintSelf(ostream& os, vtkIndent indent)
 // ----------------------------------------------------------------------
 // Parts selection list control
 
-vtkDataArraySelection* vtkPV3FoamBlockMeshReader::GetPartSelection()
+vtkDataArraySelection* vtkPV3blockMeshReader::GetPartSelection()
 {
     vtkDebugMacro(<<"GetPartSelection");
     return PartSelection;
 }
 
 
-int vtkPV3FoamBlockMeshReader::GetNumberOfPartArrays()
+int vtkPV3blockMeshReader::GetNumberOfPartArrays()
 {
     vtkDebugMacro(<<"GetNumberOfPartArrays");
     return PartSelection->GetNumberOfArrays();
 }
 
 
-const char* vtkPV3FoamBlockMeshReader::GetPartArrayName(int index)
+const char* vtkPV3blockMeshReader::GetPartArrayName(int index)
 {
     vtkDebugMacro(<<"GetPartArrayName");
     return PartSelection->GetArrayName(index);
 }
 
 
-int vtkPV3FoamBlockMeshReader::GetPartArrayStatus(const char* name)
+int vtkPV3blockMeshReader::GetPartArrayStatus(const char* name)
 {
     vtkDebugMacro(<<"GetPartArrayStatus");
     return PartSelection->ArrayIsEnabled(name);
 }
 
 
-void vtkPV3FoamBlockMeshReader::SetPartArrayStatus(const char* name, int status)
+void vtkPV3blockMeshReader::SetPartArrayStatus
+(
+    const char* name,
+    int status
+)
 {
     vtkDebugMacro(<<"SetPartArrayStatus");
     if (status)
@@ -282,8 +294,57 @@ void vtkPV3FoamBlockMeshReader::SetPartArrayStatus(const char* name, int status)
 
 
 // ----------------------------------------------------------------------
+// CurvedEdges selection list control
 
-void vtkPV3FoamBlockMeshReader::SelectionModifiedCallback
+vtkDataArraySelection* vtkPV3blockMeshReader::GetCurvedEdgesSelection()
+{
+    vtkDebugMacro(<<"GetCurvedEdgesSelection");
+    return CurvedEdgesSelection;
+}
+
+
+int vtkPV3blockMeshReader::GetNumberOfCurvedEdgesArrays()
+{
+    vtkDebugMacro(<<"GetNumberOfCurvedEdgesArrays");
+    return CurvedEdgesSelection->GetNumberOfArrays();
+}
+
+
+const char* vtkPV3blockMeshReader::GetCurvedEdgesArrayName(int index)
+{
+    vtkDebugMacro(<<"GetCurvedEdgesArrayName");
+    return CurvedEdgesSelection->GetArrayName(index);
+}
+
+
+int vtkPV3blockMeshReader::GetCurvedEdgesArrayStatus(const char* name)
+{
+    vtkDebugMacro(<<"GetCurvedEdgesArrayStatus");
+    return CurvedEdgesSelection->ArrayIsEnabled(name);
+}
+
+
+void vtkPV3blockMeshReader::SetCurvedEdgesArrayStatus
+(
+    const char* name,
+    int status
+)
+{
+    vtkDebugMacro(<<"SetCurvedEdgesArrayStatus");
+    if (status)
+    {
+        CurvedEdgesSelection->EnableArray(name);
+    }
+    else
+    {
+        CurvedEdgesSelection->DisableArray(name);
+    }
+}
+
+
+// ----------------------------------------------------------------------
+
+void vtkPV3blockMeshReader::SelectionModifiedCallback
 (
     vtkObject*,
     unsigned long,
@@ -291,18 +352,18 @@ void vtkPV3FoamBlockMeshReader::SelectionModifiedCallback
     void*
 )
 {
-    static_cast<vtkPV3FoamBlockMeshReader*>(clientdata)->SelectionModified();
+    static_cast<vtkPV3blockMeshReader*>(clientdata)->SelectionModified();
 }
 
 
-void vtkPV3FoamBlockMeshReader::SelectionModified()
+void vtkPV3blockMeshReader::SelectionModified()
 {
     vtkDebugMacro(<<"SelectionModified");
     Modified();
 }
 
 
-int vtkPV3FoamBlockMeshReader::FillOutputPortInformation
+int vtkPV3blockMeshReader::FillOutputPortInformation
 (
     int port,
     vtkInformation* info

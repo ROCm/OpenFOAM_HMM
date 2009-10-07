@@ -1,5 +1,0 @@
-vtkPV3FoamBlockMesh.C
-vtkPV3FoamBlockMeshConvert.C
-vtkPV3FoamBlockMeshUtils.C
-
-LIB = $(FOAM_LIBBIN)/libvtkPV3FoamBlockMesh

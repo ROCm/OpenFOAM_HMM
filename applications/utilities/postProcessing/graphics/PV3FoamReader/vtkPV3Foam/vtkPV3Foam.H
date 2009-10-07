@@ -45,7 +45,7 @@ SourceFiles
     vtkPV3FoamPoints.H
     vtkPV3FoamUpdateInfo.C
     vtkPV3FoamUpdateInfoFields.H
-    vtkPV3FoamUtilities.C
+    vtkPV3FoamUtils.C
     vtkPV3FoamVolFields.H
     vtkPV3FoamAddToSelection.H
 
@@ -315,7 +315,7 @@ class vtkPV3Foam
             vtkDataSet* dataset,
             const partInfo&,
             const label datasetNo,
-            const string& datasetName
+            const std::string& datasetName
         );
 
         // Convenience method use to convert the readers from VTK 5

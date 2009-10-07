@@ -1,7 +1,7 @@
 /*=========================================================================
 
   Program:   Visualization Toolkit
-  Module:    $RCSfile: vtkPV3FoamBlockMeshReader.h,v $
+  Module:    $RCSfile: vtkPV3blockMeshReader.h,v $
 
   Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
   All rights reserved.
@@ -12,18 +12,18 @@
      PURPOSE.  See the above copyright notice for more information.
 
 =========================================================================*/
-// .NAME vtkPV3FoamBlockMeshReader - reads a dataset in OpenFOAM bockMesh format
+// .NAME vtkPV3blockMeshReader - reads a dataset in OpenFOAM bockMesh format
 // .SECTION Description
-// vtkPV3FoamBlockMeshReader creates an multiblock dataset.
+// vtkPV3blockMeshReader creates an multiblock dataset.
 // It uses the OpenFOAM infrastructure (blockMesh).
 
-#ifndef __vtkPV3FoamBlockMeshReader_h
-#define __vtkPV3FoamBlockMeshReader_h
+#ifndef __vtkPV3blockMeshReader_h
+#define __vtkPV3blockMeshReader_h
 
 // Foam forward declarations
 namespace Foam
 {
-    class vtkPV3FoamBlockMesh;
+    class vtkPV3blockMesh;
 }
 
 // VTK includes
@@ -34,15 +34,15 @@ class vtkDataArraySelection;
 class vtkCallbackCommand;
 
 
-class VTK_IO_EXPORT vtkPV3FoamBlockMeshReader
+class VTK_IO_EXPORT vtkPV3blockMeshReader
 :
     public vtkMultiBlockDataSetAlgorithm
 {
 public:
-    vtkTypeRevisionMacro(vtkPV3FoamBlockMeshReader,vtkMultiBlockDataSetAlgorithm);
+    vtkTypeRevisionMacro(vtkPV3blockMeshReader,vtkMultiBlockDataSetAlgorithm);
     void PrintSelf(ostream&, vtkIndent);
 
-    static vtkPV3FoamBlockMeshReader* New();
+    static vtkPV3blockMeshReader* New();
 
     // Description:
     // Set/Get the filename.
@@ -63,9 +63,17 @@ public:
     // Parts (blocks) selection list control
     vtkDataArraySelection* GetPartSelection();
     int  GetNumberOfPartArrays();
-    int  GetPartArrayStatus(const char* name);
-    void SetPartArrayStatus(const char* name, int status);
+    int  GetPartArrayStatus(const char*);
+    void SetPartArrayStatus(const char*, int status);
     const char* GetPartArrayName(int index);
+
+    // Description:
+    // Parts (blocks) selection list control
+    vtkDataArraySelection* GetCurvedEdgesSelection();
+    int  GetNumberOfCurvedEdgesArrays();
+    int  GetCurvedEdgesArrayStatus(const char*);
+    void SetCurvedEdgesArrayStatus(const char*, int status);
+    const char* GetCurvedEdgesArrayName(int index);
 
     // Description:
     // Callback registered with the SelectionObserver
@@ -84,10 +92,10 @@ public:
 protected:
 
     //- Construct null
-    vtkPV3FoamBlockMeshReader();
+    vtkPV3blockMeshReader();
 
     //- Destructor
-    ~vtkPV3FoamBlockMeshReader();
+    ~vtkPV3blockMeshReader();
 
     //- Return information about mesh, times, etc without loading anything
     virtual int RequestInformation
@@ -116,10 +124,10 @@ protected:
 private:
 
     //- Disallow default bitwise copy construct
-    vtkPV3FoamBlockMeshReader(const vtkPV3FoamBlockMeshReader&);
+    vtkPV3blockMeshReader(const vtkPV3blockMeshReader&);
 
     //- Disallow default bitwise assignment
-    void operator=(const vtkPV3FoamBlockMeshReader&);
+    void operator=(const vtkPV3blockMeshReader&);
 
     //- Add/remove point numbers to/from the view
     void updatePointNumbersView(const bool show);
@@ -131,8 +139,10 @@ private:
 
     vtkDataArraySelection* PartSelection;
 
+    vtkDataArraySelection* CurvedEdgesSelection;
+
     //BTX
-    Foam::vtkPV3FoamBlockMesh* foamData_;
+    Foam::vtkPV3blockMesh* foamData_;
     //ETX
 };
 

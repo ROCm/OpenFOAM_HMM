@@ -2,7 +2,7 @@
 cd ${0%/*} || exit 1    # run from this directory
 set -x
 
-rm -rf PV3FoamBlockMeshReader/Make
-wclean libso vtkPV3FoamBlockMesh
+rm -rf PV3blockMeshReader/Make
+wclean libso vtkPV3blockMesh
 
 # ----------------------------------------------------------------- end-of-file

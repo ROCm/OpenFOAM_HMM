@@ -23,24 +23,24 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::vtkPV3FoamBlockMesh
+    Foam::vtkPV3blockMesh
 
 Description
     Provides a reader interface for OpenFOAM blockMesh to VTK interaction
 
 SourceFiles
-    vtkPV3FoamBlockMesh.C
-    vtkPV3FoamBlockMeshConvert.C
-    vtkPV3FoamBlockMeshUpdate.C
-    vtkPV3FoamBlockMeshUtils.C
+    vtkPV3blockMesh.C
+    vtkPV3blockMeshConvert.C
+    vtkPV3blockMeshUpdate.C
+    vtkPV3blockMeshUtils.C
 
     // Needed by VTK:
     vtkDataArrayTemplateImplicit.txx
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef vtkPV3FoamBlockMesh_H
-#define vtkPV3FoamBlockMesh_H
+#ifndef vtkPV3blockMesh_H
+#define vtkPV3blockMesh_H
 
 // do not include legacy strstream headers
 #ifndef  VTK_EXCLUDE_STRSTREAM_HEADERS
@@ -59,7 +59,7 @@ SourceFiles
 class vtkDataArraySelection;
 class vtkDataSet;
 class vtkPoints;
-class vtkPV3FoamBlockMeshReader;
+class vtkPV3blockMeshReader;
 class vtkRenderer;
 class vtkTextActor;
 class vtkMultiBlockDataSet;
@@ -80,10 +80,10 @@ class blockMesh;
 template<class Type> class List;
 
 /*---------------------------------------------------------------------------*\
-                     Class vtkPV3FoamBlockMesh Declaration
+                     Class vtkPV3blockMesh Declaration
 \*---------------------------------------------------------------------------*/
 
-class vtkPV3FoamBlockMesh
+class vtkPV3blockMesh
 {
     // Private classes
 
@@ -167,8 +167,8 @@ class vtkPV3FoamBlockMesh
 
     // Private Data
 
-        //- Access to the controlling vtkPV3FoamBlockMeshReader
-        vtkPV3FoamBlockMeshReader* reader_;
+        //- Access to the controlling vtkPV3blockMeshReader
+        vtkPV3blockMeshReader* reader_;
 
         //- Foam time control
         autoPtr<Time> dbPtr_;
@@ -179,13 +179,16 @@ class vtkPV3FoamBlockMesh
         //- Selected geometrical parts
         boolList partStatus_;
 
-        //- Datasets corresponding to selected geometrical pieces
-        //  a negative number indicates that no vtkmesh exists for this piece
-        labelList partDataset_;
+        //- Selected curved edges
+        boolList edgeStatus_;
 
         //- First instance and size of bleckMesh blocks
-        //  used to index into partStatus_ and partDataset_
+        //  used to index into partStatus_
         partInfo partInfoBlocks_;
+
+        //- First instance and size of CurvedEdges
+        //  only partially used
+        partInfo partInfoEdges_;
 
         //- First instance and size of block corners
         //  only partially used
@@ -204,7 +207,7 @@ class vtkPV3FoamBlockMesh
             vtkDataSet* dataset,
             const partInfo&,
             const label datasetNo,
-            const string& datasetName
+            const std::string& datasetName
         );
 
         // Convenience method use to convert the readers from VTK 5
@@ -224,16 +227,23 @@ class vtkPV3FoamBlockMesh
             const partInfo&
         );
 
+        //- Update boolList from GUI selection
+        static void updateBoolListStatus
+        (
+            boolList&,
+            vtkDataArraySelection*
+        );
+
         //- Reset data counters
         void resetCounters();
 
         // Update information helper functions
 
-            //- Update the mesh parts selected in the GUI
-            void updateMeshPartsStatus();
-
-            //- Internal mesh info
+            //- Internal block info
             void updateInfoBlocks();
+
+            //- block curved edges info
+            void updateInfoEdges();
 
         // Update helper functions
 
@@ -244,6 +254,9 @@ class vtkPV3FoamBlockMesh
 
             //- mesh blocks
             void convertMeshBlocks(vtkMultiBlockDataSet*, int& blockNo);
+
+            //- mesh curved edges
+            void convertMeshEdges(vtkMultiBlockDataSet*, int& blockNo);
 
             //- mesh corners
             void convertMeshCorners(vtkMultiBlockDataSet*, int& blockNo);
@@ -280,32 +293,32 @@ class vtkPV3FoamBlockMesh
 
 
         //- Disallow default bitwise copy construct
-        vtkPV3FoamBlockMesh(const vtkPV3FoamBlockMesh&);
+        vtkPV3blockMesh(const vtkPV3blockMesh&);
 
         //- Disallow default bitwise assignment
-        void operator=(const vtkPV3FoamBlockMesh&);
+        void operator=(const vtkPV3blockMesh&);
 
 
 public:
 
     //- Static data members
 
-        ClassName("vtkPV3FoamBlockMesh");
+        ClassName("vtkPV3blockMesh");
 
 
     // Constructors
 
         //- Construct from components
-        vtkPV3FoamBlockMesh
+        vtkPV3blockMesh
         (
             const char* const FileName,
-            vtkPV3FoamBlockMeshReader* reader
+            vtkPV3blockMeshReader* reader
         );
 
 
     //- Destructor
 
-        ~vtkPV3FoamBlockMesh();
+        ~vtkPV3blockMesh();
 
 
     // Member Functions
