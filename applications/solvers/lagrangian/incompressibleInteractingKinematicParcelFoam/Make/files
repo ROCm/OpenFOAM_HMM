@@ -1,0 +1,3 @@
+incompressibleInteractingKinematicParcelFoam.C
+
+EXE = $(FOAM_APPBIN)/incompressibleInteractingKinematicParcelFoam
