@@ -68,12 +68,6 @@ class polySplineEdge
             const vector&
         );
 
-        label nsize(const label otherKnotsSize, const label nBetweenKnots)
-        {
-            return otherKnotsSize*(1 + nBetweenKnots) + nBetweenKnots + 2;
-        }
-
-
 public:
 
     //- Runtime type information

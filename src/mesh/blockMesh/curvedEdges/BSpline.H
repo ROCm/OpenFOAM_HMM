@@ -51,9 +51,7 @@ class BSpline
 :
     public spline
 {
-    // Private member functions
-
-        scalar remap(const scalar&);
+    // Private Member Functions
 
         pointField findKnots
         (
@@ -61,6 +59,12 @@ class BSpline
             const vector& fstend = vector::zero,
             const vector& sndend = vector::zero
         );
+
+        //- Disallow default bitwise copy construct
+        BSpline(const BSpline&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const BSpline&);
 
 
 public:

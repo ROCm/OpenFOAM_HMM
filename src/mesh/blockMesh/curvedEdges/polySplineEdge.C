@@ -37,10 +37,23 @@ namespace Foam
 }
 
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+    //! @cond fileScope
+    inline label nsize(const label otherKnotsSize, const label nBetweenKnots)
+    {
+        return otherKnotsSize*(1 + nBetweenKnots) + nBetweenKnots + 2;
+    }
+    //! @endcond fileScope
+}
+
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 // intervening : returns a list of the points making up the polyLineEdge
-// which describes the spline. nbetweenKnots is the number of points
+// which describes the spline. nBetweenKnots is the number of points
 // placed between each knot : this ensures that the knot locations
 // are retained as a subset of the polyLine points.
 
@@ -50,14 +63,14 @@ namespace Foam
 Foam::pointField Foam::polySplineEdge::intervening
 (
     const pointField& otherknots,
-    const label nbetweenKnots,
+    const label nBetweenKnots,
     const vector& fstend,
     const vector& sndend
 )
 {
     BSpline spl(knotlist(points_, start_, end_, otherknots), fstend, sndend);
 
-    label nSize(nsize(otherknots.size(), nbetweenKnots));
+    label nSize(nsize(otherknots.size(), nBetweenKnots));
 
     pointField ans(nSize);
 
@@ -65,7 +78,7 @@ Foam::pointField Foam::polySplineEdge::intervening
     scalar init = 1.0/(N - 1);
     scalar interval = (N - scalar(3))/N;
     interval /= otherknots.size() + 1;
-    interval /= nbetweenKnots + 1;
+    interval /= nBetweenKnots + 1;
 
     ans[0] = points_[start_];
 
@@ -123,11 +136,16 @@ Foam::polySplineEdge::polySplineEdge
     vector sndend(is);
 
     controlPoints_.setSize(nsize(otherKnots_.size(), nInterKnots));
+    // why does this need to be here (to avoid a crash)?
+    // 'intervening' uses BSpline to solve the new points
+    // it seems to be going badly there
     distances_.setSize(controlPoints_.size());
 
     controlPoints_ = intervening(otherKnots_, nInterKnots, fstend, sndend);
     calcDistances();
-    Info<< polyLine::controlPoints_ << endl;
+
+    // Info<< "polyLine[" << start_ << " " << end_
+    //     << "] controlPoints " << controlPoints_ << endl;
 }
 
 

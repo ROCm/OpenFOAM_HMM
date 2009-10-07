@@ -53,6 +53,14 @@ class simpleSplineEdge
     public curvedEdge,
     public BSpline
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        simpleSplineEdge(const simpleSplineEdge&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const simpleSplineEdge&);
+
 
 public:
 

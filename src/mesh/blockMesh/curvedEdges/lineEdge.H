@@ -60,6 +60,14 @@ class lineEdge
         //- Avoid repetitive calculation of the direction (end - start)
         const vector direction_;
 
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        lineEdge(const lineEdge&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const lineEdge&);
+
 
 public:
 

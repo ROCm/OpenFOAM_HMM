@@ -110,12 +110,12 @@ Foam::arcEdge::arcEdge
     const pointField& points,
     const label start,
     const label end,
-    const vector& P2
+    const vector& pMid
 )
 :
     curvedEdge(points, start, end),
     p1_(points_[start_]),
-    p2_(P2),
+    p2_(pMid),
     p3_(points_[end_]),
     cs_(calcAngle())
 {}

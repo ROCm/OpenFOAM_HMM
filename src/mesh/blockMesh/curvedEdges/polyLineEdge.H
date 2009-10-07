@@ -54,6 +54,14 @@ class polyLineEdge
     public curvedEdge,
     public polyLine
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        polyLineEdge(const polyLineEdge&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const polyLineEdge&);
+
 
 public:
 

@@ -34,22 +34,31 @@ License
 
 void Foam::polyLine::calcDistances()
 {
-    distances_[0] = 0.0;
+    distances_.setSize(controlPoints_.size());
 
-    for (label i=1; i<distances_.size(); i++)
+    if (distances_.size())
     {
-        distances_[i] =
-            mag(controlPoints_[i] - controlPoints_[i-1])
-          + distances_[i-1];
+        distances_[0] = 0.0;
+
+        for (label i=1; i<distances_.size(); i++)
+        {
+            distances_[i] = distances_[i-1] +
+                mag(controlPoints_[i] - controlPoints_[i-1]);
+        }
+
+        // normalize
+        lineLength_ = distances_[distances_.size()-1];
+        for (label i=1; i<distances_.size(); i++)
+        {
+            distances_[i] /= lineLength_;
+        }
     }
-
-    lineLength_ = distances_[distances_.size()-1];
-
-    for (label i=1; i<distances_.size(); i++)
+    else
     {
-        distances_[i] /= lineLength_;
+        lineLength_ = 0.0;
     }
 }
+
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -57,12 +66,10 @@ void Foam::polyLine::calcDistances()
 Foam::polyLine::polyLine(const pointField& ps)
 :
     controlPoints_(ps),
-    distances_(ps.size())
+    distances_(0),
+    lineLength_(0.0)
 {
-    if (ps.size())
-    {
-        calcDistances();
-    }
+    calcDistances();
 }
 
 

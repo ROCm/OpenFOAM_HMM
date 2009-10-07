@@ -56,15 +56,19 @@ class lineDivide
 
         pointField points_;
         scalarList divisions_;
-        label noPoints_;
-
 
 public:
 
     // Constructors
 
         //- Construct from components
-        lineDivide(const curvedEdge&, const label, const scalar = 1.0);
+        //  discretization and expansion ration
+        lineDivide
+        (
+            const curvedEdge&,
+            const label ndiv,
+            const scalar& xratio = 1.0
+        );
 
 
     // Member Functions

@@ -61,6 +61,14 @@ class arcEdge
 
         cylindricalCS calcAngle();
 
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        arcEdge(const arcEdge&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const arcEdge&);
+
 public:
 
     //- Runtime type information
@@ -74,7 +82,7 @@ public:
         (
             const pointField& points,
             const label start, const label end,
-            const vector&
+            const vector& pMid
         );
 
         //- Construct from Istream setting pointsList

@@ -34,41 +34,37 @@ License
 
 Foam::lineDivide::lineDivide
 (
-    const curvedEdge& bc,
-    const label n,
-    const scalar xratio
+    const curvedEdge& cedge,
+    const label ndiv,
+    const scalar& xratio
 )
 :
-    points_(n + 1),
-    divisions_(n + 1),
-    noPoints_(n)
+    points_(ndiv + 1),
+    divisions_(ndiv + 1)
 {
-    scalar np(n);
-    scalar lambda(0.0);
+    divisions_[0]    = 0.0;
+    divisions_[ndiv] = 1.0;
 
+    // calculate the spacing
     if (xratio == 1.0)
     {
-        const scalar y(1.0/np);
-        for (label i=0; i <= noPoints_; i++)
+        for (label i=1; i < ndiv; i++)
         {
-            lambda = scalar(i)/np;
-            points_[i] = bc.position(lambda);
-            divisions_[i] = y*i;
+            divisions_[i] = scalar(i)/ndiv;
         }
     }
     else
     {
-        points_[0] = bc.position(0.0);
-        divisions_[0] = 0.0;
-        scalar xrpower = 1.0;
-
-        for (label i=1; i <= noPoints_; i++)
+        for (label i=1; i < ndiv; i++)
         {
-            lambda = (1.0 - pow(xratio, i))/(1.0 - pow(xratio, np));
-            points_[i] = bc.position(lambda);
-            divisions_[i] = lambda;
-            xrpower *= xratio;
+            divisions_[i] = (1.0 - pow(xratio, i))/(1.0 - pow(xratio, ndiv));
         }
+    }
+
+    // calculate the points
+    for (label i=0; i <= ndiv; i++)
+    {
+        points_[i] = cedge.position(divisions_[i]);
     }
 }
 

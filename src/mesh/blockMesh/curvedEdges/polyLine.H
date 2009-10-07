@@ -54,6 +54,13 @@ namespace Foam
 
 class polyLine
 {
+    // Private Member Functions
+
+        //- Disallow default bitwise copy construct
+        polyLine(const polyLine&);
+
+        //- Disallow default bitwise assignment
+        void operator=(const polyLine&);
 
 protected:
 
