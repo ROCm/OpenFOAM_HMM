@@ -38,23 +38,6 @@ inline Foam::label Foam::curvedEdge::end() const
 }
 
 
-inline int Foam::curvedEdge::compare(const curvedEdge& ce) const
-{
-    if (start_ == ce.start_ && end_ == ce.end_)
-    {
-        return 1;
-    }
-    else if (start_ == ce.end_ && end_ == ce.start_)
-    {
-        return -1;
-    }
-    else
-    {
-        return 0;
-    }
-}
-
-
 inline int Foam::curvedEdge::compare(const label start, const label end) const
 {
     if (start_ == start && end_ == end)
@@ -69,6 +52,18 @@ inline int Foam::curvedEdge::compare(const label start, const label end) const
     {
         return 0;
     }
+}
+
+
+inline int Foam::curvedEdge::compare(const curvedEdge& e) const
+{
+    return Foam::curvedEdge::compare(e.start(), e.end());
+}
+
+
+inline int Foam::curvedEdge::compare(const edge& e) const
+{
+    return Foam::curvedEdge::compare(e.start(), e.end());
 }
 
 

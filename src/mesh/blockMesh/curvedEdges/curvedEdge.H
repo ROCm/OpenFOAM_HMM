@@ -37,6 +37,7 @@ SourceFiles
 #ifndef curvedEdges_H
 #define curvedEdges_H
 
+#include "edge.H"
 #include "pointField.H"
 #include "typeInfo.H"
 #include "HashTable.H"
@@ -122,6 +123,12 @@ public:
         //  - +1: identical
         //  - -1: same edge, but different orientation
         inline int compare(const curvedEdge&) const;
+
+        //- Compare the given start and end points with this curve
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        inline int compare(const edge&) const;
 
         //- Compare the given start and end points with this curve
         //  -  0: different
