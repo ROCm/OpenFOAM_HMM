@@ -24,58 +24,56 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "removeEntry.H"
-#include "dictionary.H"
-#include "stringListOps.H"
-#include "IStringStream.H"
-#include "OStringStream.H"
-#include "addToMemberFunctionSelectionTable.H"
 
-// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-const Foam::word Foam::functionEntries::removeEntry::typeName
+inline Foam::wordReListMatcher::wordReListMatcher
 (
-    Foam::functionEntries::removeEntry::typeName_()
-);
-
-// Don't lookup the debug switch here as the debug switch dictionary
-// might include removeEntry
-int Foam::functionEntries::removeEntry::debug(0);
-
-namespace Foam
-{
-namespace functionEntries
-{
-    addToMemberFunctionSelectionTable
-    (
-        functionEntry,
-        removeEntry,
-        execute,
-        dictionaryIstream
-    );
-}
-}
+    const UList<wordRe>& lst
+)
+:
+    reList_(lst)
+{}
 
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-bool Foam::functionEntries::removeEntry::execute
-(
-    dictionary& parentDict,
-    Istream& is
-)
+inline Foam::label Foam::wordReListMatcher::size() const
 {
-    wordList dictKeys = parentDict.toc();
-    wordReList patterns(is);
+    return reList_.size();
+}
 
-    labelList indices = findStrings(patterns, dictKeys);
 
-    forAll(indices, indexI)
+inline bool Foam::wordReListMatcher::empty() const
+{
+    return reList_.empty();
+}
+
+
+inline const Foam::UList<Foam::wordRe>&
+Foam::wordReListMatcher::operator()() const
+{
+    return reList_;
+}
+
+
+inline bool Foam::wordReListMatcher::match
+(
+    const string& str,
+    bool literalMatch
+) const
+{
+    const label nElem = reList_.size();
+    for (label elemI = 0; elemI < nElem; ++elemI)
     {
-        parentDict.remove(dictKeys[indices[indexI]]);
+        if (reList_[elemI].match(str, literalMatch))
+        {
+            return true;
+        }
     }
 
-    return true;
+    return false;
 }
+
 
 // ************************************************************************* //

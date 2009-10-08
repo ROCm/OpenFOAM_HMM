@@ -170,7 +170,7 @@ public:
 
         //- Smart match as regular expression or as a string
         //  Optionally specify a literal match only
-        inline bool match(const string&, bool literalMatch=false) const;
+        inline bool match(const std::string&, bool literalMatch=false) const;
 
     //- Miscellaneous
 

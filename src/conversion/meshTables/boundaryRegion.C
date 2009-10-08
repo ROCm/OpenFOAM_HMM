@@ -97,7 +97,7 @@ Foam::Map<Foam::word> Foam::boundaryRegion::names() const
 
 Foam::Map<Foam::word> Foam::boundaryRegion::names
 (
-    const List<wordRe>& patterns
+    const UList<wordRe>& patterns
 ) const
 {
     Map<word> lookup;
