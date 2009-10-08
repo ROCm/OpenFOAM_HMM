@@ -8,14 +8,14 @@ DERIVEDCLOUDS=$(CLOUDS)/derived
 
 
 /* Parcels */
-$(BASEPARCELS)/reactingParcel/reactingParcel.C
+// $(BASEPARCELS)/reactingParcel/reactingParcel.C
 
 
 /* Cloud base classes */
 $(BASECLOUDS)/kinematicCloud/kinematicCloud.C
-$(BASECLOUDS)/thermoCloud/thermoCloud.C
-$(BASECLOUDS)/reactingCloud/reactingCloud.C
-$(BASECLOUDS)/reactingMultiphaseCloud/reactingMultiphaseCloud.C
+// $(BASECLOUDS)/thermoCloud/thermoCloud.C
+// $(BASECLOUDS)/reactingCloud/reactingCloud.C
+// $(BASECLOUDS)/reactingMultiphaseCloud/reactingMultiphaseCloud.C
 
 
 /* kinematic parcel sub-models */
@@ -33,27 +33,27 @@ $(INTERACTINGKINEMATICPARCEL)/makeBasicInteractingKinematicParcelSubmodels.C
 
 
 /* thermo parcel sub-models */
-THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel
-$(THERMOPARCEL)/basicThermoParcel.C
-$(THERMOPARCEL)/defineBasicThermoParcel.C
-$(THERMOPARCEL)/makeBasicThermoParcelSubmodels.C
+// THERMOPARCEL=$(DERIVEDPARCELS)/basicThermoParcel
+// $(THERMOPARCEL)/basicThermoParcel.C
+// $(THERMOPARCEL)/defineBasicThermoParcel.C
+// $(THERMOPARCEL)/makeBasicThermoParcelSubmodels.C
 
 
 /* reacting parcel sub-models */
-REACTINGPARCEL=$(DERIVEDPARCELS)/BasicReactingParcel
-$(REACTINGPARCEL)/defineBasicReactingParcel.C
-$(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
+// REACTINGPARCEL=$(DERIVEDPARCELS)/BasicReactingParcel
+// $(REACTINGPARCEL)/defineBasicReactingParcel.C
+// $(REACTINGPARCEL)/makeBasicReactingParcelSubmodels.C
 
 
 /* reacting multiphase parcel sub-models */
-REACTINGMPPARCEL=$(DERIVEDPARCELS)/BasicReactingMultiphaseParcel
-$(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
-$(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
+// REACTINGMPPARCEL=$(DERIVEDPARCELS)/BasicReactingMultiphaseParcel
+// $(REACTINGMPPARCEL)/defineBasicReactingMultiphaseParcel.C
+// $(REACTINGMPPARCEL)/makeBasicReactingMultiphaseParcelSubmodels.C
 
 
 /* bolt-on models */
-submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
-submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
+// submodels/addOns/radiation/absorptionEmission/cloudAbsorptionEmission/cloudAbsorptionEmission.C
+// submodels/addOns/radiation/scatter/cloudScatter/cloudScatter.C
 
 
 /* data entries */
@@ -71,9 +71,9 @@ particleForces/particleForces.C
 
 
 /* phase properties */
-phaseProperties/phaseProperties/phaseProperties.C
-phaseProperties/phaseProperties/phasePropertiesIO.C
-phaseProperties/phasePropertiesList/phasePropertiesList.C
+// phaseProperties/phaseProperties/phaseProperties.C
+// phaseProperties/phaseProperties/phasePropertiesIO.C
+// phaseProperties/phasePropertiesList/phasePropertiesList.C
 
 
 LIB = $(FOAM_LIBBIN)/liblagrangianIntermediate
