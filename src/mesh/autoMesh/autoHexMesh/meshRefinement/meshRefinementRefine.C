@@ -37,7 +37,7 @@ License
 #include "mapDistributePolyMesh.H"
 #include "featureEdgeMesh.H"
 #include "Cloud.H"
-#include "globalIndex.H"
+//#include "globalIndex.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

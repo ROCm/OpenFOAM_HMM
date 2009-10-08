@@ -51,6 +51,16 @@ _foamAddLib()
     done
 }
 
+# prefix to MANPATH
+_foamAddManPath()
+{
+    while [ $# -ge 1 ]
+    do
+        export MANPATH=$1:$MANPATH
+        shift
+    done
+}
+
 
 # location of the jobControl directory
 export FOAM_JOB_DIR=$WM_PROJECT_INST_DIR/jobControl
@@ -90,7 +100,7 @@ _foamAddLib  $FOAM_LIBBIN $FOAM_SITE_LIBBIN $FOAM_USER_LIBBIN
 
 # Compiler settings
 # ~~~~~~~~~~~~~~~~~
-unset compilerBin compilerLib
+unset compilerBin compilerLib compilerMan
 
 # Select compiler installation
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -133,16 +143,18 @@ OpenFOAM)
 
     compilerBin=$WM_COMPILER_DIR/bin
     compilerLib=$WM_COMPILER_DIR/lib$WM_COMPILER_LIB_ARCH:$WM_COMPILER_DIR/lib
+    compilerMan=$WM_COMPILER_DIR/man
     ;;
 esac
 
 if [ -d "$compilerBin" ]
 then
-    _foamAddPath $compilerBin
-    _foamAddLib  $compilerLib
+    _foamAddPath    $compilerBin
+    _foamAddLib     $compilerLib
+    _foamAddManPath $compilerMan
 fi
 
-unset compilerBin compilerLib compilerInstall
+unset compilerBin compilerLib compilerMan compilerInstall
 
 # Communications library
 # ~~~~~~~~~~~~~~~~~~~~~~
@@ -158,21 +170,22 @@ OPENMPI)
     # Tell OpenMPI where to find its install directory
     export OPAL_PREFIX=$MPI_ARCH_PATH
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    _foamAddManPath $MPI_ARCH_PATH/man
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
     ;;
 
 MPICH)
-    mpi_version=mpich-1.2.4
+    mpi_version=mpich2-1.1.1p1
     export MPI_HOME=$WM_THIRD_PARTY_DIR/$mpi_version
     export MPI_ARCH_PATH=$MPI_HOME/platforms/$WM_OPTIONS
-    export MPICH_ROOT=$MPI_ARCH_PATH
 
-    _foamAddPath $MPI_ARCH_PATH/bin
-    _foamAddLib  $MPI_ARCH_PATH/lib
+    _foamAddPath    $MPI_ARCH_PATH/bin
+    _foamAddLib     $MPI_ARCH_PATH/lib
+    _foamAddManPath $MPI_ARCH_PATH/share/man
 
     export FOAM_MPI_LIBBIN=$FOAM_LIBBIN/$mpi_version
     unset mpi_version
@@ -181,7 +194,6 @@ MPICH)
 MPICH-GM)
     export MPI_ARCH_PATH=/opt/mpi
     export MPICH_PATH=$MPI_ARCH_PATH
-    export MPICH_ROOT=$MPI_ARCH_PATH
     export GM_LIB_PATH=/opt/gm/lib64
 
     _foamAddPath $MPI_ARCH_PATH/bin
@@ -194,7 +206,6 @@ MPICH-GM)
 HPMPI)
     export MPI_HOME=/opt/hpmpi
     export MPI_ARCH_PATH=$MPI_HOME
-    export MPICH_ROOT=$MPI_ARCH_PATH
 
     _foamAddPath $MPI_ARCH_PATH/bin
 

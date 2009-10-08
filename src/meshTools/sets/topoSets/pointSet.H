@@ -88,6 +88,15 @@ public:
         (
             const polyMesh& mesh,
             const word& name,
+            const topoSet&,
+            writeOption w=NO_WRITE
+        );
+
+        //- Construct from additional labelHashSet
+        pointSet
+        (
+            const polyMesh& mesh,
+            const word& name,
             const labelHashSet&,
             writeOption w=NO_WRITE
         );

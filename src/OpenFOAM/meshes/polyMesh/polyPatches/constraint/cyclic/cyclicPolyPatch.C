@@ -826,6 +826,26 @@ Foam::cyclicPolyPatch::cyclicPolyPatch
 {}
 
 
+Foam::cyclicPolyPatch::cyclicPolyPatch
+(
+    const cyclicPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+    const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
+    coupledPointsPtr_(NULL),
+    coupledEdgesPtr_(NULL),
+    featureCos_(pp.featureCos_),
+    transform_(pp.transform_),
+    rotationAxis_(pp.rotationAxis_),
+    rotationCentre_(pp.rotationCentre_),
+    separationVector_(pp.separationVector_)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::cyclicPolyPatch::~cyclicPolyPatch()
