@@ -124,6 +124,26 @@ Foam::processorPolyPatch::processorPolyPatch
 {}
 
 
+Foam::processorPolyPatch::processorPolyPatch
+(
+    const processorPolyPatch& pp,
+    const polyBoundaryMesh& bm,
+    const label index,
+     const unallocLabelList& mapAddressing,
+    const label newStart
+)
+:
+    coupledPolyPatch(pp, bm, index, mapAddressing, newStart),
+    myProcNo_(pp.myProcNo_),
+    neighbProcNo_(pp.neighbProcNo_),
+    neighbFaceCentres_(),
+    neighbFaceAreas_(),
+    neighbFaceCellCentres_(),
+    neighbPointsPtr_(NULL),
+    neighbEdgesPtr_(NULL)
+{}
+
+
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
 Foam::processorPolyPatch::~processorPolyPatch()

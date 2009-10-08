@@ -101,7 +101,7 @@ autoPtr<topoSetSource> topoSetSource::New
 Foam::HashTable<Foam::string>* Foam::topoSetSource::usageTablePtr_ = NULL;
 
 template<>
-const char* Foam::NamedEnum<Foam::topoSetSource::setAction, 7>::names[] =
+const char* Foam::NamedEnum<Foam::topoSetSource::setAction, 8>::names[] =
 {
     "clear",
     "new",
@@ -109,11 +109,12 @@ const char* Foam::NamedEnum<Foam::topoSetSource::setAction, 7>::names[] =
     "add",
     "delete",
     "subset",
-    "list"
+    "list",
+    "remove"
 };
 
 
-const Foam::NamedEnum<Foam::topoSetSource::setAction, 7>
+const Foam::NamedEnum<Foam::topoSetSource::setAction, 8>
     Foam::topoSetSource::actionNames_;
 
 
