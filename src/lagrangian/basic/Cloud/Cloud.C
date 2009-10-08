@@ -42,7 +42,7 @@ template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-3;
 
 template<class ParticleType>
-const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = 1e-9;
+const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = SMALL;
 
 template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::planarCosAngle = (1 - 1e-6);
@@ -59,13 +59,43 @@ bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
     const labelList& fOwner = pMesh().faceOwner();
     const vectorField& fAreas = pMesh().faceAreas();
     const pointField& fCentres = pMesh().faceCentres();
+    const pointField& cCentres = pMesh().cellCentres();
     const pointField& points = pMesh().points();
 
+    PackedBoolList& intrudesIntoOwner = intrudesIntoOwnerPtr_();
+    PackedBoolList& intrudesIntoNeighbour = intrudesIntoNeighbourPtr_();
+
     const cell& cFaces = cells[cellI];
+
+    bool concave = false;
 
     forAll(cFaces, i)
     {
         label f0I = cFaces[i];
+
+        // Get f0 centre
+        const point& fc0 = fCentres[f0I];
+
+        const face& f0 = pMesh().faces()[f0I];
+
+        vector fn0 = fAreas[f0I];
+        fn0 /= (mag(fn0) + VSMALL);
+
+        // Flip normal if required so that it is always pointing out of
+        // the cell
+        if (fOwner[f0I] != cellI)
+        {
+            fn0 *= -1;
+        }
+
+        // Check if the cell centre is visible from the plane of the face
+
+        if (((fc0 - cCentres[cellI]) & fn0) < 0)
+        {
+            Pout<< "Face " << f0I
+                << " is not visible from the centre of cell " << cellI
+                << endl;
+        }
 
         forAll(cFaces, j)
         {
@@ -73,22 +103,7 @@ bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
             {
                 label f1I = cFaces[j];
 
-                // Get f0 centre
-                const point& fc0 = fCentres[f0I];
-
-                const face& f0 = pMesh().faces()[f0I];
-
                 const face& f1 = pMesh().faces()[f1I];
-
-                vector fn0 = fAreas[f0I];
-                fn0 /= (mag(fn0) + VSMALL);
-
-                // Flip normal if required so that it is always pointing out of
-                // the cell
-                if (fOwner[f0I] != cellI)
-                {
-                    fn0 *= -1;
-                }
 
                 // Is any vertex of f1 on wrong side of the plane of f0?
 
@@ -114,7 +129,17 @@ bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
 
                     if (d < 0)
                     {
-                        return true;
+                        // Concave face
+                        if (fOwner[f0I] == cellI)
+                        {
+                            intrudesIntoOwner[f0I] = 1;
+                        }
+                        else
+                        {
+                            intrudesIntoNeighbour[f0I] = 1;
+                        }
+
+                        concave = true;
                     }
                 }
 
@@ -134,13 +159,22 @@ bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
                 if ((fn0 & fn1) > planarCosAngle)
                 {
                     // Planar face
-                    return true;
+                    if (fOwner[f0I] == cellI)
+                    {
+                        intrudesIntoOwner[f0I] = 1;
+                    }
+                    else
+                    {
+                        intrudesIntoNeighbour[f0I] = 1;
+                    }
+
+                    concave = true;
                 }
             }
         }
     }
 
-    return false;
+    return concave;
 }
 
 
@@ -152,15 +186,16 @@ void Foam::Cloud<ParticleType>::calcConcaveCells() const
     concaveCellPtr_.reset(new PackedBoolList(pMesh().nCells()));
     PackedBoolList& concaveCell = concaveCellPtr_();
 
+    intrudesIntoOwnerPtr_.reset(new PackedBoolList(pMesh().nFaces()));
+    intrudesIntoNeighbourPtr_.reset(new PackedBoolList(pMesh().nFaces()));
+
+
     forAll(cells, cellI)
     {
         if (isConcaveCell(cellI))
         {
             concaveCell[cellI] = 1;
         }
-
-        // Force all cells to be decomposed
-        concaveCell[cellI] = 1;
     }
 
     {
@@ -236,6 +271,8 @@ template<class ParticleType>
 void Foam::Cloud<ParticleType>::clearOut()
 {
     concaveCellPtr_.clear();
+    intrudesIntoOwnerPtr_.clear();
+    intrudesIntoNeighbourPtr_.clear();
     labels_.clearStorage();
 }
 
@@ -252,6 +289,30 @@ const
     }
 
     return concaveCellPtr_();
+}
+
+
+template<class ParticleType>
+const Foam::PackedBoolList& Foam::Cloud<ParticleType>::intrudesIntoOwner()
+const
+{
+    if (!intrudesIntoOwnerPtr_.valid())
+    {
+        calcConcaveCells();
+    }
+    return intrudesIntoOwnerPtr_();
+}
+
+
+template<class ParticleType>
+const Foam::PackedBoolList& Foam::Cloud<ParticleType>::intrudesIntoNeighbour()
+const
+{
+    if (!intrudesIntoNeighbourPtr_.valid())
+    {
+        calcConcaveCells();
+    }
+    return intrudesIntoNeighbourPtr_();
 }
 
 

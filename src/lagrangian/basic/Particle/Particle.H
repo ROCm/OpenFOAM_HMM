@@ -157,17 +157,17 @@ protected:
             const label facei
         ) const;
 
-        //- Find the faces between position and cell centre
+        //- Find the faces between endPosition and cell centre
         void findFaces
         (
-            const vector& position,
+            const vector& endPosition,
             DynamicList<label>& faceList
         ) const;
 
-        //- Find the faces between position and cell centre
+        //- Find the faces between endPosition and cell centre
         void findFaces
         (
-            const vector& position,
+            const vector& endPosition,
             const label celli,
             const scalar stepFraction,
             DynamicList<label>& faceList
@@ -175,20 +175,32 @@ protected:
 
         //- Track to cell face using face decomposition, used for
         //  concave cells.
-        void trackToFaceByDecomposition
+        template<class TrackData>
+        void trackToFaceConcave
         (
             scalar& trackFraction,
-            const vector& endPosition
+            const vector& endPosition,
+            TrackData& td
         );
 
         //- Track to cell face using the infinite planes of the faces.
         //  The cell *must* be convex.
-        void trackToFaceByPlanes
+        template<class TrackData>
+        void trackToFaceConvex
         (
             scalar& trackFraction,
-            const vector& endPosition
+            const vector& endPosition,
+            TrackData& td
         );
 
+        //- Change cell or interact with a patch as required
+        template<class TrackData>
+        void faceAction
+        (
+            scalar& trackFraction,
+            const vector& endPosition,
+            TrackData& td
+        );
 
 
     // Patch interactions

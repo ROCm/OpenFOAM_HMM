@@ -38,7 +38,7 @@ License
 template<class ParticleType>
 void Foam::Particle<ParticleType>::findFaces
 (
-    const vector& position,
+    const vector& endPosition,
     DynamicList<label>& faceList
 ) const
 {
@@ -51,7 +51,7 @@ void Foam::Particle<ParticleType>::findFaces
     forAll(faces, i)
     {
         label facei = faces[i];
-        scalar lam = lambda(C, position, facei);
+        scalar lam = lambda(C, endPosition, facei);
 
         if ((lam > 0) && (lam < 1.0))
         {
@@ -64,7 +64,7 @@ void Foam::Particle<ParticleType>::findFaces
 template<class ParticleType>
 void Foam::Particle<ParticleType>::findFaces
 (
-    const vector& position,
+    const vector& endPosition,
     const label celli,
     const scalar stepFraction,
     DynamicList<label>& faceList
@@ -78,7 +78,7 @@ void Foam::Particle<ParticleType>::findFaces
     forAll(faces, i)
     {
         label facei = faces[i];
-        scalar lam = lambda(C, position, facei, stepFraction);
+        scalar lam = lambda(C, endPosition, facei, stepFraction);
 
         if ((lam > 0) && (lam < 1.0))
         {
@@ -89,24 +89,139 @@ void Foam::Particle<ParticleType>::findFaces
 
 
 template<class ParticleType>
-void Foam::Particle<ParticleType>::trackToFaceByDecomposition
+template<class TrackData>
+void Foam::Particle<ParticleType>::trackToFaceConcave
 (
     scalar& trackFraction,
-    const vector& endPosition
+    const vector& endPosition,
+    TrackData& td
 )
 {
-    const polyMesh& mesh = cloud_.polyMesh_;
+    facei_ = -1;
+
+    const polyMesh& mesh = cloud_.pMesh();
     const labelList& faces = mesh.cells()[celli_];
+    const vector& C = mesh.cellCentres()[celli_];
 
-    vector deltaPosition = endPosition - position_;
+    DynamicList<label>& potentiallyCrossedFaces = cloud_.labels_;
+    findFaces(endPosition, potentiallyCrossedFaces);
 
-    scalar lambdaMin = GREAT;
-    label workingFace = -1;
-    scalar hitLambda = GREAT;
+    // Check all possible face crossings to see if they are actually
+    // crossed, determining if endPosition is outside the current cell.
+
+    if (potentiallyCrossedFaces.empty())
+    {
+        // endPosition is inside the cell
+
+        position_ = endPosition;
+        trackFraction = 1.0;
+        return;
+    }
+
+    label nFaceCrossings = 0;
+
+    forAll (potentiallyCrossedFaces, pCFI)
+    {
+        label facei = potentiallyCrossedFaces[pCFI];
+
+        pointHit inter = mesh.faces()[facei].intersection
+        (
+            C,
+            endPosition - C,
+            mesh.faceCentres()[facei],
+            mesh.points(),
+            intersection::HALF_RAY,
+            Cloud<ParticleType>::intersectionTolerance
+        );
+
+        if (inter.hit())
+        {
+            if (inter.distance() < 1.0)
+            {
+                // This face was actually crossed.
+
+                nFaceCrossings++;
+
+                if (inter.distance() < 0.0)
+                {
+                    FatalErrorIn("Particle::trackToFaceConcave")
+                        << "Negative lambda " << inter.distance()
+                        << "in potentiallyCrossedFaces test"
+                        << nl << abort(FatalError);
+                }
+            }
+        }
+    }
+
+    if (nFaceCrossings > 1)
+    {
+        Pout<< "In cell " << celli_ << " there were " << nFaceCrossings
+            << " face crossings detected tracking from cell centre to "
+            << " endPosition"
+            << endl;
+    }
+
+    if (nFaceCrossings % 2 == 0)
+    {
+        // Even number of face crossings, so the particle must end up
+        // still in the cell.
+
+        position_ = endPosition;
+        trackFraction = 1.0;
+        return;
+    }
+
+    // The particle *must* have left the cell.
+
+    // a) It may have crossed a face not yet identified by findFaces using the
+    //    cell centre to endPosition line, so the potentially crossed faces of
+    //    the position to endPosition line must be assessed.
+
+    // b) It may have been outside the cell in the first place, and, despite
+    //    trying to pick up more faces using a) the correct face to be crossed
+    //    is not knowable.  A best guess will be used, with the expectation that
+    //    the tracking in the destination cell will be able to recover form a
+    //    bad guess.
+
+    // For all face assessments, a full intersection test is required,
+    // as nothing can be assumed about the order of crossing the
+    // planes of faces.
 
     forAll(faces, i)
     {
         label facei = faces[i];
+
+        scalar lam = lambda(position_, endPosition, facei);
+
+        if ((lam > 0) && (lam < 1.0))
+        {
+            if (findIndex(potentiallyCrossedFaces, facei) == -1)
+            {
+                // A new potential face crossing, previously missed,
+                // has been found
+
+                Pout<< "New face crossing " << facei
+                    << " of cell " << celli_ << " found"
+                    << endl;
+
+                potentiallyCrossedFaces.append(facei);
+            }
+        }
+    }
+
+    vector deltaPosition = endPosition - position_;
+
+    scalar tmpLambda = GREAT;
+    scalar correctLambda = GREAT;
+
+    forAll(potentiallyCrossedFaces, pCFI)
+    {
+        label facei = potentiallyCrossedFaces[pCFI];
+
+        // Use exact intersection.
+
+        // TODO: A correction is required for moving meshes to
+        // calculate the correct lambda value.
 
         pointHit inter = mesh.faces()[facei].intersection
         (
@@ -120,61 +235,130 @@ void Foam::Particle<ParticleType>::trackToFaceByDecomposition
 
         if (inter.hit())
         {
-            hitLambda = inter.distance();
+            tmpLambda = inter.distance();
 
-            // There is a problem if the particle is essentially on
-            // the face, it will flip.
-
-            if (hitLambda <= 1.0 && hitLambda < lambdaMin)
+            if
+            (
+                tmpLambda < 1.0
+             && tmpLambda < correctLambda
+            )
             {
-                Info<< origProc_ << " "
-                    << origId_ << " "
-                    << position_ << " "
-                    << endPosition << " "
-                    << trackFraction << " "
-                    << stepFraction_ << " "
-                    << hitLambda << " "
-                    << inter.hitPoint() << " "
-                    << celli_ << " "
-                    << facei << endl;
+                // This face is crossed before any other that has
+                // been found so far
 
-                lambdaMin = hitLambda;
-                workingFace = facei;
+                correctLambda = tmpLambda;
+                facei_ = facei;
             }
         }
     }
 
-    if (workingFace == -1)
+    if (facei_ > -1)
     {
-        // inside cell
-
-        facei_ = workingFace;
-        trackFraction = 1.0;
-        position_ = endPosition;
+        trackFraction = correctLambda;
+        position_ += trackFraction*(endPosition - position_);
     }
     else
     {
-        if (lambdaMin < 0.0)
+        // No face has been identified to be crossed yet, but the cell
+        // must have been left, so the best guess of which face to
+        // cross is required.  This face will not be one of those
+        // faces already tested, and could be any other face of the
+        // cell.
+
+        DynamicList<scalar> tmpLambdas;
+        DynamicList<label> tmpLambdaFaceIs;
+
+        forAll(faces, i)
         {
-            FatalErrorIn("Particle::trackToFaceByDecomposition")
-                << "Decomposed tracking failure, lambdaMin = " << lambdaMin
-                << nl << abort(FatalError);
+            label facei = faces[i];
+
+            if (findIndex(potentiallyCrossedFaces, facei) == -1)
+            {
+                // This face has not been assessed yet.
+
+                // Use exact FULL_RAY intersection to allow negative
+                // values
+
+                // TODO: A correction is required for moving meshes to
+                // calculate the correct lambda value.
+
+                pointHit inter = mesh.faces()[facei].intersection
+                (
+                    position_,
+                    deltaPosition,
+                    mesh.faceCentres()[facei],
+                    mesh.points(),
+                    intersection::FULL_RAY,
+                    Cloud<ParticleType>::intersectionTolerance
+                );
+
+                if (inter.hit())
+                {
+                    tmpLambdas.append(inter.distance());
+                    tmpLambdaFaceIs.append(facei);
+                }
+            }
         }
 
-        trackFraction = lambdaMin;
+        // The closest lambda value (less than zero) or (greater than or
+        // equal to one), and corresponding face.
+        scalar closestLambda = GREAT;
+        scalar closestLambdaDifference = GREAT;
+        label closestLambdaDifferenceFaceI = -1;
 
-        position_ += trackFraction*deltaPosition;
+        forAll(tmpLambdaFaceIs, i)
+        {
+            label facei = tmpLambdaFaceIs[i];
+            scalar tmpLambda = tmpLambdas[i];
 
-        // What about softImpact?
+            if (tmpLambda < 0)
+            {
+                if (mag(tmpLambda) < closestLambdaDifference)
+                {
+                    closestLambdaDifference = mag(tmpLambda);
+                    closestLambda = tmpLambda;
+                    closestLambdaDifferenceFaceI = facei;
+                }
+            }
+            else if (tmpLambda >= 1.0)
+            {
+                if ((tmpLambda - 1.0) < closestLambdaDifference)
+                {
+                    closestLambdaDifference = tmpLambda - 1.0;
+                    closestLambda = tmpLambda;
+                    closestLambdaDifferenceFaceI = facei;
+                }
+            }
+        }
+
+        if (closestLambdaDifferenceFaceI > -1)
+        {
+            // A face has been found to cross.  Not moving the
+            // particle at all, but the option is there to decide do
+            // it, as the sign of closestLambda is available to tell
+            // if the particle is heading towards, or away from the
+            // face.
+
+            facei_ = closestLambdaDifferenceFaceI;
+        }
+        else
+        {
+            Pout<< "Tracking failure in concave cell - didn't find a "
+                << "best guess face" << endl;
+        }
     }
+
+    faceAction(trackFraction, endPosition, td);
 }
 
 
 template<class ParticleType>
-void Foam::Particle<ParticleType>::trackToFaceByPlanes
+template<class TrackData>
+void Foam::Particle<ParticleType>::trackToFaceConvex
 (
     scalar& trackFraction,
-    const vector& endPosition
+    const vector& endPosition,
+    TrackData& td
 )
 {
     facei_ = -1;
@@ -184,66 +368,204 @@ void Foam::Particle<ParticleType>::trackToFaceByPlanes
 
     if (faces.empty())
     {
-        // inside cell
+        // endPosition is inside the cell
+
+        position_ = endPosition;
+        trackFraction = 1.0;
+        return;
+    }
+
+    // A face has been hit
+
+    scalar lambdaMin = GREAT;
+
+    if (faces.size() == 1)
+    {
+        lambdaMin = lambda(position_, endPosition, faces[0], stepFraction_);
+        facei_ = faces[0];
+    }
+    else
+    {
+        forAll(faces, i)
+        {
+            scalar lam =
+                lambda(position_, endPosition, faces[i], stepFraction_);
+
+            if (lam < lambdaMin)
+            {
+                lambdaMin = lam;
+                facei_ = faces[i];
+            }
+        }
+    }
+
+    // For warped faces the particle can be 'outside' the cell.
+    // This will yield a lambda larger than 1, or smaller than 0.
+
+    // For values < 0, the particle travels away from the cell and we
+    // don't move the particle (except by a small value to move it off
+    // the face), only change cell.
+
+    if (static_cast<ParticleType&>(*this).softImpact())
+    {
+        // Soft-sphere particles can travel outside the domain
+        // but we don't use lambda since this the particle
+        // is going away from face
 
         trackFraction = 1.0;
         position_ = endPosition;
     }
+    else if (lambdaMin <= 0.0)
+    {
+        Pout<< "convex tracking recovery "
+            << origId_ << " "
+            << origProc_ << " "
+            << position_ << " "
+            << endPosition << " "
+            << stepFraction_ << " "
+            << lambdaMin << " "
+            << celli_ << " "
+            << facei_ << " "
+            << endl;
+
+        trackFraction = Cloud<ParticleType>::minValidTrackFraction;
+        position_ += trackFraction*(endPosition - position_);
+    }
     else
     {
-        // hit face
-
-        scalar lambdaMin = GREAT;
-
-        if (faces.size() == 1)
+        if (lambdaMin <= 1.0)
         {
-            lambdaMin = lambda(position_, endPosition, faces[0], stepFraction_);
-            facei_ = faces[0];
+            trackFraction = lambdaMin;
+            position_ += trackFraction*(endPosition - position_);
         }
         else
         {
-            forAll(faces, i)
-            {
-                scalar lam =
-                    lambda(position_, endPosition, faces[i], stepFraction_);
-
-                if (lam < lambdaMin)
-                {
-                    lambdaMin = lam;
-                    facei_ = faces[i];
-                }
-            }
-        }
-
-        // For warped faces the particle can be 'outside' the cell.
-        // This will yield a lambda larger than 1, or smaller than 0
-        // For values < 0, the particle travels away from the cell
-        // and we don't move the particle, only change cell.
-        // For values larger than 1, we move the particle to endPosition only.
-        if (lambdaMin > 0.0)
-        {
-            if (lambdaMin <= 1.0)
-            {
-                trackFraction = lambdaMin;
-                position_ += trackFraction*(endPosition - position_);
-            }
-            else
-            {
-                trackFraction = 1.0;
-                position_ = endPosition;
-            }
-        }
-        else if (static_cast<ParticleType&>(*this).softImpact())
-        {
-            // Soft-sphere particles can travel outside the domain
-            // but we don't use lambda since this the particle
-            // is going away from face
+            // For values larger than 1, we move the particle to endPosition
+            // only.
             trackFraction = 1.0;
             position_ = endPosition;
         }
     }
+
+    faceAction(trackFraction, endPosition, td);
+
+    // If the trackFraction = 0 something went wrong.
+    // Either the particle is flipping back and forth across a face perhaps
+    // due to velocity interpolation errors or it is in a "hole" in the mesh
+    // caused by face warpage.
+    // In both cases resolve the positional ambiguity by moving the particle
+    // slightly towards the cell-centre.
+
+    if (trackFraction < Cloud<ParticleType>::minValidTrackFraction)
+    {
+        Pout<< "convex tracking error "
+            << origId_ << " "
+            << origProc_ << " "
+            << position_ << " "
+            << endPosition << " "
+            << trackFraction << " "
+            << stepFraction_ << " "
+            << lambdaMin << " "
+            << celli_ << " "
+            << facei_ << " "
+            << endl;
+
+        const polyMesh& mesh = cloud_.pMesh();
+
+        const point& cc = mesh.cellCentres()[celli_];
+        position_ +=
+            Cloud<ParticleType>::trackingRescueTolerance*(cc - position_);
+    }
 }
 
+template<class ParticleType>
+template<class TrackData>
+void Foam::Particle<ParticleType>::faceAction
+(
+    scalar& trackFraction,
+    const vector& endPosition,
+    TrackData& td
+)
+{
+    const polyMesh& mesh = cloud_.pMesh();
+
+    if (cloud_.internalFace(facei_))
+    {
+        // Internal face, change cell
+
+        if (celli_ == mesh.faceOwner()[facei_])
+        {
+            celli_ = mesh.faceNeighbour()[facei_];
+        }
+        else if (celli_ == mesh.faceNeighbour()[facei_])
+        {
+            celli_ = mesh.faceOwner()[facei_];
+        }
+        else
+        {
+            FatalErrorIn("Particle::trackToFace(const vector&, TrackData&)")
+            << "addressing failure" << nl
+                << abort(FatalError);
+        }
+    }
+    else
+    {
+        ParticleType& p = static_cast<ParticleType&>(*this);
+
+        // Soft-sphere algorithm ignores the boundary
+        if (p.softImpact())
+        {
+            trackFraction = 1.0;
+            position_ = endPosition;
+        }
+
+        label patchi = patch(facei_);
+        const polyPatch& patch = mesh.boundaryMesh()[patchi];
+
+        if (!p.hitPatch(patch, td, patchi))
+        {
+            if (isA<wedgePolyPatch>(patch))
+            {
+                p.hitWedgePatch
+                (
+                    static_cast<const wedgePolyPatch&>(patch), td
+                );
+            }
+            else if (isA<symmetryPolyPatch>(patch))
+            {
+                p.hitSymmetryPatch
+                (
+                    static_cast<const symmetryPolyPatch&>(patch), td
+                );
+            }
+            else if (isA<cyclicPolyPatch>(patch))
+            {
+                p.hitCyclicPatch
+                (
+                    static_cast<const cyclicPolyPatch&>(patch), td
+                );
+            }
+            else if (isA<processorPolyPatch>(patch))
+            {
+                p.hitProcessorPatch
+                (
+                    static_cast<const processorPolyPatch&>(patch), td
+                );
+            }
+            else if (isA<wallPolyPatch>(patch))
+            {
+                p.hitWallPatch
+                (
+                    static_cast<const wallPolyPatch&>(patch), td
+                );
+            }
+            else
+            {
+                p.hitPatch(patch, td);
+            }
+        }
+    }
+}
 
 template<class ParticleType>
 template<class TrackData>
@@ -391,125 +713,20 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
     TrackData& td
 )
 {
-    const polyMesh& mesh = cloud_.polyMesh_;
-
     scalar trackFraction = 0.0;
 
-    if (cloud_.concaveCell()[celli_])
+    if (cloud_.concaveCheck_)
     {
-        trackToFaceByDecomposition(trackFraction, endPosition);
+        if (cloud_.concaveCell()[celli_])
+        {
+            // Use a more careful tracking algorithm if the cell is concave
+            trackToFaceConcave(trackFraction, endPosition, td);
+        }
     }
     else
     {
-        trackToFaceByPlanes(trackFraction, endPosition);
-    }
-
-    if (facei_ > -1)
-    {
-        // A face was hit
-
-        if (cloud_.internalFace(facei_))
-        {
-            // Internal face, change cell
-
-            if (celli_ == mesh.faceOwner()[facei_])
-            {
-                celli_ = mesh.faceNeighbour()[facei_];
-            }
-            else if (celli_ == mesh.faceNeighbour()[facei_])
-            {
-                celli_ = mesh.faceOwner()[facei_];
-            }
-            else
-            {
-                FatalErrorIn("Particle::trackToFace(const vector&, TrackData&)")
-                    << "addressing failure" << nl
-                    << abort(FatalError);
-            }
-        }
-        else
-        {
-            ParticleType& p = static_cast<ParticleType&>(*this);
-
-            // Soft-sphere algorithm ignores the boundary
-            if (p.softImpact())
-            {
-                trackFraction = 1.0;
-                position_ = endPosition;
-            }
-
-            label patchi = patch(facei_);
-            const polyPatch& patch = mesh.boundaryMesh()[patchi];
-
-            if (!p.hitPatch(patch, td, patchi))
-            {
-                if (isA<wedgePolyPatch>(patch))
-                {
-                    p.hitWedgePatch
-                    (
-                        static_cast<const wedgePolyPatch&>(patch), td
-                    );
-                }
-                else if (isA<symmetryPolyPatch>(patch))
-                {
-                    p.hitSymmetryPatch
-                    (
-                        static_cast<const symmetryPolyPatch&>(patch), td
-                    );
-                }
-                else if (isA<cyclicPolyPatch>(patch))
-                {
-                    p.hitCyclicPatch
-                    (
-                        static_cast<const cyclicPolyPatch&>(patch), td
-                    );
-                }
-                else if (isA<processorPolyPatch>(patch))
-                {
-                    p.hitProcessorPatch
-                    (
-                        static_cast<const processorPolyPatch&>(patch), td
-                    );
-                }
-                else if (isA<wallPolyPatch>(patch))
-                {
-                    p.hitWallPatch
-                    (
-                        static_cast<const wallPolyPatch&>(patch), td
-                    );
-                }
-                else
-                {
-                    p.hitPatch(patch, td);
-                }
-            }
-        }
-    }
-
-    // If the trackFraction = 0 something went wrong.
-    // Either the particle is flipping back and forth across a face perhaps
-    // due to velocity interpolation errors or it is in a "hole" in the mesh
-    // caused by face warpage.
-    // In both cases resolve the positional ambiguity by moving the particle
-    // slightly towards the cell-centre.
-
-    if (trackFraction < Cloud<ParticleType>::minValidTrackFraction)
-    {
-        // Pout<< "tracking error "
-        //     << origId_ << " "
-        //     << origProc_ << " "
-        //     << position_ << " "
-        //     << endPosition << " "
-        //     << trackFraction << " "
-        //     << stepFraction_ << " "
-        //     << celli_ << " "
-        //     << facei_ << " "
-        //     << cloud_.concaveCell()[celli_]
-        //     << endl;
-
-        const point& cc = mesh.cellCentres()[celli_];
-        position_ +=
-            Cloud<ParticleType>::trackingRescueTolerance*(cc - position_);
+        // Use the original tracking algorithm if the cell is convex
+        trackToFaceConvex(trackFraction, endPosition, td);
     }
 
     return trackFraction;
