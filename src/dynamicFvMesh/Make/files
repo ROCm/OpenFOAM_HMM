@@ -11,5 +11,8 @@ $(solidBodyMotionFunctions)/solidBodyMotionFunction/solidBodyMotionFunction.C
 $(solidBodyMotionFunctions)/solidBodyMotionFunction/newSolidBodyMotionFunction.C
 $(solidBodyMotionFunctions)/SDA/SDA.C
 $(solidBodyMotionFunctions)/SKA/SKA.C
+$(solidBodyMotionFunctions)/linearMotion/linearMotion.C
+$(solidBodyMotionFunctions)/rotationMotion/rotationMotion.C
+$(solidBodyMotionFunctions)/multiMotion/multiMotion.C
 
 LIB = $(FOAM_LIBBIN)/libdynamicFvMesh
