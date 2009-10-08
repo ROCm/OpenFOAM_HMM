@@ -39,10 +39,10 @@ template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::minValidTrackFraction = 1e-10;
 
 template<class ParticleType>
-const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-3;
+const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-6;
 
 template<class ParticleType>
-const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = SMALL;
+const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = 1e-3;
 
 template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::planarCosAngle = (1 - 1e-6);
@@ -189,13 +189,14 @@ void Foam::Cloud<ParticleType>::calcConcaveCells() const
     intrudesIntoOwnerPtr_.reset(new PackedBoolList(pMesh().nFaces()));
     intrudesIntoNeighbourPtr_.reset(new PackedBoolList(pMesh().nFaces()));
 
-
     forAll(cells, cellI)
     {
-        if (isConcaveCell(cellI))
-        {
-            concaveCell[cellI] = 1;
-        }
+        // if (isConcaveCell(cellI))
+        // {
+        //     concaveCell[cellI] = 1;
+        // }
+
+        concaveCell[cellI] = 1;
     }
 
     {

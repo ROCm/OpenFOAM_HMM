@@ -118,6 +118,14 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         return;
     }
 
+    Pout<< nl << origProc_ << " "
+        << origId_ << " "
+        << position_ << " "
+        << endPosition << " "
+        << celli_ << nl
+        << potentiallyCrossedFaces
+        << endl;
+
     label nFaceCrossings = 0;
 
     forAll (potentiallyCrossedFaces, pCFI)
@@ -156,10 +164,12 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
     if (nFaceCrossings > 1)
     {
         Pout<< "In cell " << celli_ << " there were " << nFaceCrossings
-            << " face crossings detected tracking from cell centre to "
+            << " face crossings detected tracking from concave cell centre to "
             << " endPosition"
             << endl;
     }
+
+    Pout<< nFaceCrossings << " " << (nFaceCrossings % 2) << endl;
 
     if (nFaceCrossings % 2 == 0)
     {
@@ -201,13 +211,15 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                 // has been found
 
                 Pout<< "New face crossing " << facei
-                    << " of cell " << celli_ << " found"
+                    << " of concave cell " << celli_ << " found"
                     << endl;
 
                 potentiallyCrossedFaces.append(facei);
             }
         }
     }
+
+    Pout<< potentiallyCrossedFaces << endl;
 
     vector deltaPosition = endPosition - position_;
 
@@ -261,9 +273,19 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
     {
         // No face has been identified to be crossed yet, but the cell
         // must have been left, so the best guess of which face to
-        // cross is required.  This face will not be one of those
-        // faces already tested, and could be any other face of the
-        // cell.
+        // cross is required.
+
+        vector delta =
+            mag(mesh.cellCentres()[celli_] - position_)
+           *deltaPosition/mag(deltaPosition);
+
+        Pout<< "Need a best guess " << nl
+            << position_ << nl
+            << position_ + delta << nl
+            << position_ - delta
+            << endl;
+
+        // ---- Best guess by projection --
 
         DynamicList<scalar> tmpLambdas;
         DynamicList<label> tmpLambdaFaceIs;
@@ -272,33 +294,58 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         {
             label facei = faces[i];
 
-            if (findIndex(potentiallyCrossedFaces, facei) == -1)
+            // Use exact FULL_RAY intersection to allow negative
+            // values
+
+            // TODO: A correction is required for moving meshes to
+            // calculate the correct lambda value.
+
+            pointHit inter = mesh.faces()[facei].intersection
+            (
+                position_,
+                deltaPosition,
+                mesh.faceCentres()[facei],
+                mesh.points(),
+                intersection::FULL_RAY,
+                Cloud<ParticleType>::intersectionTolerance
+            );
+
+            if (inter.hit())
             {
-                // This face has not been assessed yet.
-
-                // Use exact FULL_RAY intersection to allow negative
-                // values
-
-                // TODO: A correction is required for moving meshes to
-                // calculate the correct lambda value.
-
-                pointHit inter = mesh.faces()[facei].intersection
-                (
-                    position_,
-                    deltaPosition,
-                    mesh.faceCentres()[facei],
-                    mesh.points(),
-                    intersection::FULL_RAY,
-                    Cloud<ParticleType>::intersectionTolerance
-                );
-
-                if (inter.hit())
-                {
-                    tmpLambdas.append(inter.distance());
-                    tmpLambdaFaceIs.append(facei);
-                }
+                tmpLambdas.append(inter.distance());
+                tmpLambdaFaceIs.append(facei);
             }
+
+            inter = mesh.faces()[facei].intersection
+            (
+                position_,
+                deltaPosition,
+                mesh.faceCentres()[facei],
+                mesh.points(),
+                intersection::HALF_RAY,
+                Cloud<ParticleType>::intersectionTolerance
+            );
+
+            Pout<< "Test repeat HALF "
+                << facei << " " << inter.distance() << endl;
+
+            inter = mesh.faces()[facei].intersection
+            (
+                position_,
+                deltaPosition,
+                mesh.faceCentres()[facei],
+                mesh.points(),
+                intersection::FULL_RAY,
+                Cloud<ParticleType>::intersectionTolerance
+            );
+
+            Pout<< "Test repeat FULL "
+                << facei << " " << inter.distance() << nl
+                << (inter.distance()*deltaPosition) + position_
+                << endl;
         }
+
+        Pout<< tmpLambdaFaceIs << " " << tmpLambdas << endl;
 
         // The closest lambda value (less than zero) or (greater than or
         // equal to one), and corresponding face.
@@ -343,12 +390,48 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         }
         else
         {
-            Pout<< "Tracking failure in concave cell - didn't find a "
-                << "best guess face" << endl;
+            Pout<< "Tracking in concave cell - didn't find a "
+                << "best guess face" << nl
+                << origId_ << " "
+                << origProc_ << " "
+                << position_ << " "
+                << endPosition << " "
+                << stepFraction_ << " "
+                << celli_ << " "
+                << endl;
+
+            // ---- Best guess by nearest ----
+            scalar minDistance = GREAT;
+
+            forAll(faces, i)
+            {
+                label facei = faces[i];
+
+                if (cloud_.internalFace(facei))
+                {
+                    pointHit nearest = mesh.faces()[facei].nearestPoint
+                    (
+                        position_,
+                        mesh.points()
+                    );
+
+                    if (nearest.distance() < minDistance)
+                    {
+                        minDistance = nearest.distance();
+                        facei_ = facei;
+                    }
+                }
+            }
+
+            // ---- End of best guess by nearest ----
         }
     }
 
+    Pout<< facei_ << " " << celli_ << endl;
+
     faceAction(trackFraction, endPosition, td);
+
+    Pout<< facei_ << " " << celli_ << endl;
 }
 
 
@@ -721,6 +804,11 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         {
             // Use a more careful tracking algorithm if the cell is concave
             trackToFaceConcave(trackFraction, endPosition, td);
+        }
+        else
+        {
+            // Use a more careful tracking algorithm if the cell is concave
+            trackToFaceConvex(trackFraction, endPosition, td);
         }
     }
     else
