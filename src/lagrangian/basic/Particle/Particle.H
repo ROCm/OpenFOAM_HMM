@@ -173,6 +173,15 @@ protected:
             DynamicList<label>& faceList
         ) const;
 
+        //- Determine if the testPt is inside the cell by an exact
+        //  intersection test
+        bool insideCellExact
+        (
+            const vector& testPt,
+            const label celli,
+            bool includeOnFace
+        ) const;
+
         //- Track to cell face using face decomposition, used for
         //  concave cells.
         template<class TrackData>

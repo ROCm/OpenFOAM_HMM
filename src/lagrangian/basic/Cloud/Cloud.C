@@ -42,7 +42,7 @@ template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-6;
 
 template<class ParticleType>
-const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = SMALL;
+const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = 0;
 
 template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::planarCosAngle = (1 - 1e-6);
