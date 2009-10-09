@@ -326,11 +326,11 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                 //    *(cc - position_);
 
                 // Pout<< "Ambiguous face crossing. " << endl;
-                correctLambda += Cloud<ParticleType>::minValidTrackFraction;
 
                 facei_ = -1;
             }
 
+            correctLambda += Cloud<ParticleType>::minValidTrackFraction;
             trackFraction = correctLambda;
             position_ += trackFraction*(endPosition - position_);
         }
