@@ -36,7 +36,7 @@ License
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
 template<class ParticleType>
-const Foam::scalar Foam::Cloud<ParticleType>::minValidTrackFraction = 1e-10;
+const Foam::scalar Foam::Cloud<ParticleType>::minValidTrackFraction = 1e-6;
 
 template<class ParticleType>
 const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-6;

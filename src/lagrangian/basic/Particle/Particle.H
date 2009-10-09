@@ -179,7 +179,7 @@ protected:
         (
             const vector& testPt,
             const label celli,
-            bool includeOnFace
+            bool beingOnAFaceMeansOutside
         ) const;
 
         //- Track to cell face using face decomposition, used for

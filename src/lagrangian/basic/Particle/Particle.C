@@ -93,7 +93,7 @@ bool Foam::Particle<ParticleType>::insideCellExact
 (
     const vector& testPt,
     const label celli,
-    bool includeOnFace
+    bool beingOnAFaceMeansOutside
 ) const
 {
     const polyMesh& mesh = cloud_.pMesh();
@@ -121,10 +121,11 @@ bool Foam::Particle<ParticleType>::insideCellExact
 
         if (inter.hit())
         {
-            // Pout<< "insideCellExact " << facei << " "
+            // Pout<< "insideCellExact cell " << celli
+            //     << " face " << facei << " "
             //     << inter.distance() << endl;
 
-            if (includeOnFace)
+            if (beingOnAFaceMeansOutside)
             {
                 if (inter.distance() <= 1.0)
                 {
@@ -178,7 +179,6 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
 
     const polyMesh& mesh = cloud_.pMesh();
     const labelList& faces = mesh.cells()[celli_];
-    // const vector& C = mesh.cellCentres()[celli_];
 
     // Check all possible face crossings to see if they are actually
     // crossed, determining if endPosition is outside the current
@@ -349,166 +349,58 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
     {
         Pout<< "The particle started outside of the cell" << endl;
 
-        // No face has been identified to be crossed yet, but the cell
-        // must have been left, so the best guess of which face to
-        // cross is required.
+        // Find which cell the particle should be in.
 
-        Pout<< "Need a best guess " << nl
-            << position_ << nl
-            << stepFraction_ << nl
-            << position_ + deltaTrack << nl
-            << position_ - deltaTrack
-            << endl;
+        const labelList& cPts = mesh.cellPoints(celli_);
 
-        // Best guess by projection
+        DynamicList<label> checkedCells;
 
-        DynamicList<scalar> tmpLambdas;
-        DynamicList<label> tmpLambdaFaceIs;
+        bool found = false;
 
-        forAll(faces, i)
+        forAll(cPts, cPtI)
         {
-            label facei = faces[i];
+            label ptI = cPts[cPtI];
 
-            // Use exact FULL_RAY intersection to allow negative
-            // values
+            const labelList& pCs = mesh.pointCells(ptI);
 
-            // TODO: A correction is required for moving meshes to
-            // calculate the correct lambda value.
-
-            pointHit inter = mesh.faces()[facei].intersection
-            (
-                position_,
-                deltaPosition,
-                mesh.faceCentres()[facei],
-                mesh.points(),
-                intersection::FULL_RAY,
-                Cloud<ParticleType>::intersectionTolerance
-            );
-
-            if (inter.hit())
+            forAll(pCs, pCI)
             {
-                tmpLambdas.append(inter.distance());
-                tmpLambdaFaceIs.append(facei);
+                label cellI = pCs[pCI];
+
+                if (findIndex(checkedCells, cellI) == -1)
+                {
+                    checkedCells.append(cellI);
+
+                    if (insideCellExact(position_, cellI, false))
+                    {
+                        found = true;
+
+                        celli_ = cellI;
+
+                        break;
+                    }
+                }
             }
-        }
 
-        Pout<< tmpLambdaFaceIs << " " << tmpLambdas << endl;
-
-        scalar closestLambda = GREAT;
-        label closestLambdaFaceI = -1;
-
-        // Is there a face crossing that has been missed?
-        forAll(tmpLambdaFaceIs, i)
-        {
-            label facei = tmpLambdaFaceIs[i];
-            scalar tmpLambda = tmpLambdas[i];
-
-            if (!cloud_.internalFace(facei))
+            if (found)
             {
-                // Boundary faces trump internal faces
-                closestLambda = tmpLambda;
-                closestLambdaFaceI = facei;
-
                 break;
             }
-            else if
-            (
-                tmpLambda >= 0.0
-             && tmpLambda <= 1.0
-             && tmpLambda < closestLambda
-            )
-            {
-                closestLambda = tmpLambda;
-                closestLambdaFaceI = facei;
-            }
         }
 
-        // Find the closest lambda by projection.
-        if (closestLambdaFaceI == -1)
+        if (!found)
         {
-            Pout<< "Test by projection" << endl;
+            Pout<< "Didn't find a new cell after searching "
+                << checkedCells << endl;
 
-            // The closest lambda value (less than zero) or (greater than or
-            // equal to one), and corresponding face.
-
-            // Limit how far away from the track a projected face can be
-            scalar closestLambdaDifference = 100.0;
-
-            forAll(tmpLambdaFaceIs, i)
-            {
-                label facei = tmpLambdaFaceIs[i];
-                scalar tmpLambda = tmpLambdas[i];
-
-                if (tmpLambda < 0)
-                {
-                    if (mag(tmpLambda) < closestLambdaDifference)
-                    {
-                        closestLambdaDifference = mag(tmpLambda);
-                        closestLambda = tmpLambda;
-                        closestLambdaFaceI = facei;
-                    }
-                }
-                else if (tmpLambda >= 1.0)
-                {
-                    if ((tmpLambda - 1.0) < closestLambdaDifference)
-                    {
-                        closestLambdaDifference = tmpLambda - 1.0;
-                        closestLambda = tmpLambda;
-                        closestLambdaFaceI = facei;
-                    }
-                }
-            }
-        }
-
-        if (closestLambdaFaceI > -1)
-        {
-            // A face has been found to cross.  Not moving the
-            // particle at all, but the option is there to decide do
-            // it, as the sign of closestLambda is available to tell
-            // if the particle is heading towards, or away from the
-            // face.
-
-            facei_ = closestLambdaFaceI;
-
-            trackFraction = Cloud<ParticleType>::minValidTrackFraction;
-            position_ += trackFraction*(endPosition - position_);
+            const point& cc = mesh.cellCentres()[celli_];
+            position_ += 1e-2*(cc - position_);
         }
         else
         {
-            Pout<< "Tracking in concave cell - didn't find a "
-                << "best guess face" << nl
-                << origId_ << " "
-                << origProc_ << " "
-                << position_ << " "
-                << endPosition << " "
-                << stepFraction_ << " "
-                << celli_ << " "
+            Pout<< "Found new cell " << celli_
+                << " by searching " << checkedCells
                 << endl;
-
-            scalar minDistance = GREAT;
-
-            forAll(faces, i)
-            {
-                label facei = faces[i];
-
-                if (cloud_.internalFace(facei))
-                {
-                    pointHit nearest = mesh.faces()[facei].nearestPoint
-                    (
-                        position_,
-                        mesh.points()
-                    );
-
-                    if (nearest.distance() < minDistance)
-                    {
-                        minDistance = nearest.distance();
-                        facei_ = facei;
-                    }
-                }
-            }
-
-            trackFraction = Cloud<ParticleType>::minValidTrackFraction;
-            position_ += trackFraction*(endPosition - position_);
         }
     }
 
@@ -599,7 +491,7 @@ void Foam::Particle<ParticleType>::trackToFaceConvex
             << facei_ << " "
             << endl;
 
-        trackFraction = Cloud<ParticleType>::minValidTrackFraction;
+        trackFraction = Cloud<ParticleType>::trackingRescueTolerance;
         position_ += trackFraction*(endPosition - position_);
     }
     else
