@@ -320,13 +320,13 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                 // Pout<< "Ambiguous face crossing, correcting towards cell "
                 //     << "centre and not crossing face" << endl;
 
-                const point& cc = mesh.cellCentres()[celli_];
-                position_ +=
-                    Cloud<ParticleType>::trackingRescueTolerance
-                   *(cc - position_);
+                // const point& cc = mesh.cellCentres()[celli_];
+                // position_ +=
+                //     Cloud<ParticleType>::trackingRescueTolerance
+                //    *(cc - position_);
 
                 // Pout<< "Ambiguous face crossing. " << endl;
-                // correctLambda += Cloud<ParticleType>::minValidTrackFraction;
+                correctLambda += Cloud<ParticleType>::minValidTrackFraction;
 
                 facei_ = -1;
             }
