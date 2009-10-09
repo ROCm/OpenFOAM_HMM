@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "rockingMotion.H"
+#include "rotatingMotion.H"
 #include "addToRunTimeSelectionTable.H"
 #include "mathConstants.H"
 
@@ -36,11 +36,11 @@ namespace Foam
 {
 namespace solidBodyMotionFunctions
 {
-    defineTypeNameAndDebug(rockingMotion, 0);
+    defineTypeNameAndDebug(rotatingMotion, 0);
     addToRunTimeSelectionTable
     (
         solidBodyMotionFunction,
-        rockingMotion,
+        rotatingMotion,
         dictionary
     );
 };
@@ -49,7 +49,7 @@ namespace solidBodyMotionFunctions
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFunctions::rockingMotion::rockingMotion
+Foam::solidBodyMotionFunctions::rotatingMotion::rotatingMotion
 (
     const dictionary& SBMFCoeffs,
     const Time& runTime
@@ -63,18 +63,21 @@ Foam::solidBodyMotionFunctions::rockingMotion::rockingMotion
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFunctions::rockingMotion::~rockingMotion()
+Foam::solidBodyMotionFunctions::rotatingMotion::~rotatingMotion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 Foam::septernion
-Foam::solidBodyMotionFunctions::rockingMotion::transformation() const
+Foam::solidBodyMotionFunctions::rotatingMotion::transformation() const
 {
     scalar t = time_.value();
 
-    vector eulerAngles = amplitude_*sin(omega_*t);
+    // Motion around a centre of gravity
+
+    // Rotation around centre of gravity (in degrees)
+    vector eulerAngles = radialVelocity_*t;
 
     // Convert the rotational motion from deg to rad
     eulerAngles *= pi/180.0;
@@ -82,14 +85,14 @@ Foam::solidBodyMotionFunctions::rockingMotion::transformation() const
     quaternion R(eulerAngles.x(), eulerAngles.y(), eulerAngles.z());
     septernion TR(septernion(CofG_)*R*septernion(-CofG_));
 
-    Info<< "solidBodyMotionFunctions::rockingMotion::transformation(): "
+    Info<< "solidBodyMotionFunctions::rotatingMotion::transformation(): "
         << "Time = " << t << " transformation: " << TR << endl;
 
     return TR;
 }
 
 
-bool Foam::solidBodyMotionFunctions::rockingMotion::read
+bool Foam::solidBodyMotionFunctions::rotatingMotion::read
 (
     const dictionary& SBMFCoeffs
 )
@@ -97,8 +100,7 @@ bool Foam::solidBodyMotionFunctions::rockingMotion::read
     solidBodyMotionFunction::read(SBMFCoeffs);
 
     SBMFCoeffs_.lookup("CofG") >> CofG_;
-    SBMFCoeffs_.lookup("amplitude") >> amplitude_;
-    SBMFCoeffs_.lookup("omega") >> omega_;
+    SBMFCoeffs_.lookup("radialVelocity") >> radialVelocity_;
 
     return true;
 }

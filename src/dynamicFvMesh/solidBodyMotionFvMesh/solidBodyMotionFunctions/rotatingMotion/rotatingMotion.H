@@ -23,18 +23,19 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::solidBodyMotionFunctions::oscillatingMotion
+    Foam::solidBodyMotionFunctions::rotatingMotion
 
 Description
-    SolidBodyMotionFvMesh 6DoF motion function. Oscillating displacement.
+    SolidBodyMotionFvMesh 6DoF motion function. Constant
+    velocity rotation around CoG.
 
 SourceFiles
-    oscillatingMotion.C
+    rotatingMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef oscillatingMotion_H
-#define oscillatingMotion_H
+#ifndef rotatingMotion_H
+#define rotatingMotion_H
 
 #include "solidBodyMotionFunction.H"
 #include "primitiveFields.H"
@@ -48,41 +49,41 @@ namespace solidBodyMotionFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class oscillatingMotion Declaration
+                          Class rotatingMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class oscillatingMotion
+class rotatingMotion
 :
     public solidBodyMotionFunction
 {
     // Private data
 
-        //- Amplitude
-        vector amplitude_;
+        //- Centre of gravity
+        point CofG_;
 
-        //- Radial velocity
-        scalar omega_;
+        //- Rotational velocity (deg/s)
+        vector radialVelocity_;
 
 
     // Private Member Functions
 
         //- Disallow copy construct
-        oscillatingMotion(const oscillatingMotion&);
+        rotatingMotion(const rotatingMotion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const oscillatingMotion&);
+        void operator=(const rotatingMotion&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("oscillatingMotion");
+    TypeName("rotatingMotion");
 
 
     // Constructors
 
         //- Construct from components
-        oscillatingMotion
+        rotatingMotion
         (
             const dictionary& SBMFCoeffs,
             const Time& runTime
@@ -91,7 +92,7 @@ public:
 
     // Destructor
 
-        virtual ~oscillatingMotion();
+        virtual ~rotatingMotion();
 
 
     // Member Functions

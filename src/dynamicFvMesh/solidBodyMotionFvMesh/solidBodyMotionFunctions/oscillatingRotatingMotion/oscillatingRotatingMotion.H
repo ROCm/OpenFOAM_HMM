@@ -23,19 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::solidBodyMotionFunctions::rotationMotion
+    Foam::solidBodyMotionFunctions::oscillatingRotatingMotion
 
 Description
-    SolidBodyMotionFvMesh 6DoF motion function. Constant
-    velocity rotation around CoG.
+    SolidBodyMotionFvMesh 6DoF motion function. Oscillating rotation.
 
 SourceFiles
-    rotationMotion.C
+    oscillatingRotatingMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rotationMotion_H
-#define rotationMotion_H
+#ifndef oscillatingRotatingMotion_H
+#define oscillatingRotatingMotion_H
 
 #include "solidBodyMotionFunction.H"
 #include "primitiveFields.H"
@@ -49,10 +48,10 @@ namespace solidBodyMotionFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class rotationMotion Declaration
+                          Class oscillatingRotatingMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class rotationMotion
+class oscillatingRotatingMotion
 :
     public solidBodyMotionFunction
 {
@@ -61,29 +60,32 @@ class rotationMotion
         //- Centre of gravity
         point CofG_;
 
-        //- Rotational velocity (deg/s)
-        vector radialVelocity_;
+        //- Amplitude
+        vector amplitude_;
+
+        //- Radial velocity
+        scalar omega_;
 
 
     // Private Member Functions
 
         //- Disallow copy construct
-        rotationMotion(const rotationMotion&);
+        oscillatingRotatingMotion(const oscillatingRotatingMotion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const rotationMotion&);
+        void operator=(const oscillatingRotatingMotion&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("rotationMotion");
+    TypeName("oscillatingRotatingMotion");
 
 
     // Constructors
 
         //- Construct from components
-        rotationMotion
+        oscillatingRotatingMotion
         (
             const dictionary& SBMFCoeffs,
             const Time& runTime
@@ -92,7 +94,7 @@ public:
 
     // Destructor
 
-        virtual ~rotationMotion();
+        virtual ~oscillatingRotatingMotion();
 
 
     // Member Functions

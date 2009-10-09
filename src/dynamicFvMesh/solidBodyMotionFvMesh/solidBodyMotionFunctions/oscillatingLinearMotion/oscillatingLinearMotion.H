@@ -23,18 +23,18 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::solidBodyMotionFunctions::rockingMotion
+    Foam::solidBodyMotionFunctions::oscillatingLinearMotion
 
 Description
-    SolidBodyMotionFvMesh 6DoF motion function. Oscillating rotation.
+    SolidBodyMotionFvMesh 6DoF motion function. Oscillating displacement.
 
 SourceFiles
-    rockingMotion.C
+    oscillatingLinearMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rockingMotion_H
-#define rockingMotion_H
+#ifndef oscillatingLinearMotion_H
+#define oscillatingLinearMotion_H
 
 #include "solidBodyMotionFunction.H"
 #include "primitiveFields.H"
@@ -48,17 +48,14 @@ namespace solidBodyMotionFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class rockingMotion Declaration
+                          Class oscillatingLinearMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class rockingMotion
+class oscillatingLinearMotion
 :
     public solidBodyMotionFunction
 {
     // Private data
-
-        //- Centre of gravity
-        point CofG_;
 
         //- Amplitude
         vector amplitude_;
@@ -70,22 +67,22 @@ class rockingMotion
     // Private Member Functions
 
         //- Disallow copy construct
-        rockingMotion(const rockingMotion&);
+        oscillatingLinearMotion(const oscillatingLinearMotion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const rockingMotion&);
+        void operator=(const oscillatingLinearMotion&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("rockingMotion");
+    TypeName("oscillatingLinearMotion");
 
 
     // Constructors
 
         //- Construct from components
-        rockingMotion
+        oscillatingLinearMotion
         (
             const dictionary& SBMFCoeffs,
             const Time& runTime
@@ -94,7 +91,7 @@ public:
 
     // Destructor
 
-        virtual ~rockingMotion();
+        virtual ~oscillatingLinearMotion();
 
 
     // Member Functions
