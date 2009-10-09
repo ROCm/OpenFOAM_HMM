@@ -26,8 +26,8 @@ solidBodyMotionFvMeshCoeffs
         // Table rotating in z axis
         rotatingTable
         {
-            solidBodyMotionFunction rotationMotion;
-            rotationMotionCoeffs
+            solidBodyMotionFunction rotatingMotion;
+            rotatingMotionCoeffs
             {
                 CofG            (0 0.1 0);
                 radialVelocity  (0 0 360);    // degrees/s
@@ -37,18 +37,18 @@ solidBodyMotionFvMeshCoeffs
         //// Box rotates on rotating table
         //rotatingBox
         //{
-        //    solidBodyMotionFunction rotationMotion;
-        //    rotationMotionCoeffs
+        //    solidBodyMotionFunction rotatingMotion;
+        //    rotatingMotionCoeffs
         //    {
         //        CofG            (0 0 0);
         //        radialVelocity  (720 0 0);    // degrees/s
         //    }
         //}
-        // Box rocking on rotating table
+        // Tube rocking on rotating table
         rotatingBox
         {
-            solidBodyMotionFunction rockingMotion;
-            rockingMotionCoeffs
+            solidBodyMotionFunction oscillatingRotatingMotion;
+            oscillatingRotatingMotionCoeffs
             {
                 CofG            (0 0 0);
                 omega           40;         // rad/s
