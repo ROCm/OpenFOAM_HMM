@@ -281,6 +281,7 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
 
         Pout<< "Need a best guess " << nl
             << position_ << nl
+            << stepFraction_ << nl
             << position_ + delta << nl
             << position_ - delta
             << endl;
@@ -315,34 +316,6 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                 tmpLambdas.append(inter.distance());
                 tmpLambdaFaceIs.append(facei);
             }
-
-            inter = mesh.faces()[facei].intersection
-            (
-                position_,
-                deltaPosition,
-                mesh.faceCentres()[facei],
-                mesh.points(),
-                intersection::HALF_RAY,
-                Cloud<ParticleType>::intersectionTolerance
-            );
-
-            Pout<< "Test repeat HALF "
-                << facei << " " << inter.distance() << endl;
-
-            inter = mesh.faces()[facei].intersection
-            (
-                position_,
-                deltaPosition,
-                mesh.faceCentres()[facei],
-                mesh.points(),
-                intersection::FULL_RAY,
-                Cloud<ParticleType>::intersectionTolerance
-            );
-
-            Pout<< "Test repeat FULL "
-                << facei << " " << inter.distance() << nl
-                << (inter.distance()*deltaPosition) + position_
-                << endl;
         }
 
         Pout<< tmpLambdaFaceIs << " " << tmpLambdas << endl;
