@@ -198,13 +198,13 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         return;
     }
 
-    Pout<< nl << origProc_ << " "
-        << origId_ << " "
-        << position_ << " "
-        << endPosition << " "
-        << stepFraction_ << " "
-        << celli_
-        << endl;
+    // Pout<< nl << origProc_ << " "
+    //     << origId_ << " "
+    //     << position_ << " "
+    //     << endPosition << " "
+    //     << stepFraction_ << " "
+    //     << celli_
+    //     << endl;
 
     // The particle *must* have left the cell.
 
@@ -232,9 +232,9 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
 
     if (insideCellExact(position_, celli_, false))
     {
-        Pout<< "The particle starts inside the cell and ends up outside of it"
-            << nl << position_ << " " << position_ + deltaTrack
-            << endl;
+        // Pout<< "The particle starts inside the cell and ends up outside of it"
+        //     << nl << position_ << " " << position_ + deltaTrack
+        //     << endl;
 
         // The particle started inside the cell and finished outside
         // of it, find which face to cross
@@ -265,7 +265,7 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
             {
                 tmpLambda = inter.distance();
 
-                Pout<< facei << " " << tmpLambda << endl;
+                // Pout<< facei << " " << tmpLambda << endl;
 
                 if
                 (
@@ -300,8 +300,8 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                         // Do not trigger a face hit and move the position
                         // towards the cell centre
 
-                        Pout<< "Hit a wall face heading the wrong way"
-                            << endl;
+                        // Pout<< "Hit a wall face heading the wrong way"
+                        //     << endl;
 
                         const point& cc = mesh.cellCentres()[celli_];
                         position_ += 1e-2*(cc - position_);
@@ -317,8 +317,8 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                 // little without crossing the face to resolve the
                 // ambiguity.
 
-                Pout<< "Ambiguous face crossing, correcting towards cell "
-                    << "centre and not crossing face" << endl;
+                // Pout<< "Ambiguous face crossing, correcting towards cell "
+                //     << "centre and not crossing face" << endl;
 
                 const point& cc = mesh.cellCentres()[celli_];
                 position_ +=
@@ -336,10 +336,10 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         }
         else
         {
-            Pout<< "Particle " << origProc_ << " " << origId_
-                << " started inside cell " << celli_ << " and finished outside"
-                << " of it, but did not find a face to cross"
-                << endl;
+            // Pout<< "Particle " << origProc_ << " " << origId_
+            //     << " started inside cell " << celli_ << " and finished outside"
+            //     << " of it, but did not find a face to cross"
+            //     << endl;
 
             const point& cc = mesh.cellCentres()[celli_];
             position_ += 1e-2*(cc - position_);
@@ -347,7 +347,7 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
     }
     else
     {
-        Pout<< "The particle started outside of the cell" << endl;
+        // Pout<< "The particle started outside of the cell" << endl;
 
         // Find which cell the particle should be in.
 
@@ -390,28 +390,28 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
 
         if (!found)
         {
-            Pout<< "Didn't find a new cell after searching "
-                << checkedCells << endl;
+            // Pout<< "Didn't find a new cell after searching "
+            //     << checkedCells << endl;
 
             const point& cc = mesh.cellCentres()[celli_];
             position_ += 1e-2*(cc - position_);
         }
-        else
-        {
-            Pout<< "Found new cell " << celli_
-                << " by searching " << checkedCells
-                << endl;
-        }
+        // else
+        // {
+        //     Pout<< "Found new cell " << celli_
+        //         << " by searching " << checkedCells
+        //         << endl;
+        // }
     }
 
-    Pout<< facei_ << " " << celli_ << endl;
+    // Pout<< facei_ << " " << celli_ << endl;
 
     if (facei_ > -1)
     {
         faceAction(trackFraction, endPosition, td);
     }
 
-    Pout<< facei_ << " " << celli_ << endl;
+    // Pout<< facei_ << " " << celli_ << endl;
 }
 
 
@@ -480,16 +480,16 @@ void Foam::Particle<ParticleType>::trackToFaceConvex
     }
     else if (lambdaMin <= 0.0)
     {
-        Pout<< "convex tracking recovery "
-            << origId_ << " "
-            << origProc_ << " "
-            << position_ << " "
-            << endPosition << " "
-            << stepFraction_ << " "
-            << lambdaMin << " "
-            << celli_ << " "
-            << facei_ << " "
-            << endl;
+        // Pout<< "convex tracking recovery "
+        //     << origId_ << " "
+        //     << origProc_ << " "
+        //     << position_ << " "
+        //     << endPosition << " "
+        //     << stepFraction_ << " "
+        //     << lambdaMin << " "
+        //     << celli_ << " "
+        //     << facei_ << " "
+        //     << endl;
 
         trackFraction = Cloud<ParticleType>::trackingRescueTolerance;
         position_ += trackFraction*(endPosition - position_);
@@ -521,17 +521,17 @@ void Foam::Particle<ParticleType>::trackToFaceConvex
 
     if (trackFraction < Cloud<ParticleType>::minValidTrackFraction)
     {
-        Pout<< "convex tracking error "
-            << origId_ << " "
-            << origProc_ << " "
-            << position_ << " "
-            << endPosition << " "
-            << trackFraction << " "
-            << stepFraction_ << " "
-            << lambdaMin << " "
-            << celli_ << " "
-            << facei_ << " "
-            << endl;
+        // Pout<< "convex tracking error "
+        //     << origId_ << " "
+        //     << origProc_ << " "
+        //     << position_ << " "
+        //     << endPosition << " "
+        //     << trackFraction << " "
+        //     << stepFraction_ << " "
+        //     << lambdaMin << " "
+        //     << celli_ << " "
+        //     << facei_ << " "
+        //     << endl;
 
         const polyMesh& mesh = cloud_.pMesh();
 
