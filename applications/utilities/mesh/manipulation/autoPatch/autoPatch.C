@@ -33,7 +33,7 @@ Description
 #include "Time.H"
 #include "boundaryMesh.H"
 #include "repatchPolyTopoChanger.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "OFstream.H"
 #include "ListOps.H"
 
@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
     bool overwrite = args.optionFound("overwrite");
 
-    scalar minCos = Foam::cos(featureAngle*constant::math::pi/180.0);
+    scalar minCos = Foam::cos(featureAngle*constant::mathematical::pi/180.0);
 
     Info<< "Feature:" << featureAngle << endl
         << "minCos :" << minCos << endl

@@ -34,6 +34,7 @@ License
 #include "constants.H"
 
 using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -85,7 +86,7 @@ wideBandDiffusiveRadiationMixedFvPatchScalarField
         patch().lookupPatchField<volScalarField, scalar>(TName_);
 
     refValue() =
-        emissivity_*4.0*physicoChemical::sigma.value()*pow4(Tp)/math::pi;
+        emissivity_*4.0*physicoChemical::sigma.value()*pow4(Tp)/pi;
     refGrad() = 0.0;
 
     if (dict.found("value"))
@@ -197,8 +198,7 @@ updateCoeffs()
                 (
                     Ir*(1.0 - emissivity_)
                   + emissivity_*Eb[faceI]
-                )
-               /math::pi;
+                )/pi;
         }
         else
         {

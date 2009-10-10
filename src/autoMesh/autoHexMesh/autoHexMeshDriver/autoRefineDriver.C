@@ -681,8 +681,8 @@ void Foam::autoRefineDriver::mergePatchFaces
 
     meshRefiner_.mergePatchFaces
     (
-        Foam::cos(45*constant::math::pi/180.0),
-        Foam::cos(45*constant::math::pi/180.0),
+        Foam::cos(45*constant::mathematical::pi/180.0),
+        Foam::cos(45*constant::mathematical::pi/180.0),
         meshRefiner_.meshedPatches()
     );
 
@@ -691,7 +691,7 @@ void Foam::autoRefineDriver::mergePatchFaces
         meshRefiner_.checkData();
     }
 
-    meshRefiner_.mergeEdges(Foam::cos(45*constant::math::pi/180.0));
+    meshRefiner_.mergeEdges(Foam::cos(45*constant::mathematical::pi/180.0));
 
     if (debug)
     {

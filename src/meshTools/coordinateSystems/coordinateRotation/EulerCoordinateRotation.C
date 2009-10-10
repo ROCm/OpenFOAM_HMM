@@ -27,7 +27,7 @@ License
 #include "EulerCoordinateRotation.H"
 
 #include "Switch.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -59,9 +59,9 @@ void Foam::EulerCoordinateRotation::calcTransform
 
     if (inDegrees)
     {
-        phi   *= constant::math::pi/180.0;
-        theta *= constant::math::pi/180.0;
-        psi   *= constant::math::pi/180.0;
+        phi   *= constant::mathematical::pi/180.0;
+        theta *= constant::mathematical::pi/180.0;
+        psi   *= constant::mathematical::pi/180.0;
     }
 
     tensor::operator=

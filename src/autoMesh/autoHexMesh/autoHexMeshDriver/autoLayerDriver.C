@@ -34,7 +34,7 @@ Description
 #include "removePoints.H"
 #include "pointFields.H"
 #include "motionSmoother.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"
@@ -2480,10 +2480,10 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
 )
 {
     scalar minCos =
-        Foam::cos(layerParams.featureAngle()*constant::math::pi/180.0);
+        Foam::cos(layerParams.featureAngle()*constant::mathematical::pi/180.0);
 
     scalar concaveCos =
-        Foam::cos(layerParams.concaveAngle()*constant::math::pi/180.0);
+        Foam::cos(layerParams.concaveAngle()*constant::mathematical::pi/180.0);
 
     Info<< nl
         << "Merging all faces of a cell" << nl
@@ -2602,7 +2602,7 @@ void Foam::autoLayerDriver::addLayers
         (
             pp,
             meshEdges,
-            layerParams.featureAngle()*constant::math::pi/180.0,
+            layerParams.featureAngle()*constant::mathematical::pi/180.0,
 
             patchDisp,
             patchNLayers,

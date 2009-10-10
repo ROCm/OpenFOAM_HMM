@@ -31,7 +31,7 @@ Description
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
 #include "cell.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -200,7 +200,7 @@ bool Foam::primitiveMesh::checkMeshMotion
                 )   << "Severe non-orthogonality in mesh motion for face "
                     << faceI
                     << " between cells " << own[faceI] << " and " << nei[faceI]
-                    << ": Angle = " << ::acos(dDotS)/constant::math::pi*180.0
+                    << ": Angle = " << ::acos(dDotS)/constant::mathematical::pi*180.0
                     << " deg." << endl;
 
                 nDotProductErrors++;

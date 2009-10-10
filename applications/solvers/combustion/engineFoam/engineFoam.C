@@ -58,7 +58,7 @@ Description
 #include "ignition.H"
 #include "Switch.H"
 #include "OFstream.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

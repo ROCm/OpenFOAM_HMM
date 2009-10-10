@@ -29,7 +29,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "arcEdge.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -78,7 +78,7 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
 
     // find angles
     scalar tmp = (r3&r1)/(mag(r3)*mag(r1));
-    angle_ = acos(tmp)*180.0/constant::math::pi;
+    angle_ = acos(tmp)*180.0/constant::mathematical::pi;
 
     // check if the vectors define an exterior or an interior arcEdge
     if (((r1  ^ r2)&(r1 ^ r3)) < 0.0) angle_ = 360 - angle_;
@@ -162,7 +162,7 @@ Foam::vector Foam::arcEdge::position(const scalar lambda) const
 //- Return the length of the curve
 Foam::scalar Foam::arcEdge::length() const
 {
-    return angle_*radius_*constant::math::pi/180.0;
+    return angle_*radius_*constant::mathematical::pi/180.0;
 }
 
 

@@ -29,12 +29,12 @@ License
 #include "Time.H"
 #include "subCycle.H"
 #include "fvCFD.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * //
 
 const scalar Foam::multiphaseMixture::convertToRad =
-    Foam::constant::math::pi/180.0;
+    Foam::constant::mathematical::pi/180.0;
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

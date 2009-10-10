@@ -20,7 +20,7 @@
 
     if (dieselSpray.twoD())
     {
-        gasMass *= constant::math::twoPi/dieselSpray.angleOfWedge();
+        gasMass *= constant::mathematical::twoPi/dieselSpray.angleOfWedge();
     }
 
     scalar addedMass = gasMass - gasMass0;

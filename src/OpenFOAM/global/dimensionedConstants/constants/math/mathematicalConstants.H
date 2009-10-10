@@ -23,15 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::math
+    Foam::constant::mathematical
 
 Description
     mathematical constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mathConstants_H
-#define mathConstants_H
+#ifndef mathematicalConstants_H
+#define mathematicalConstants_H
 
 #include "scalar.H"
 
@@ -41,12 +41,12 @@ namespace Foam
 {
 namespace constant
 {
-namespace math
+namespace mathematical
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    static word group = "math";
+    static word group = "mathematical";
 
     const scalar e(M_E);
     const scalar pi(M_PI);
@@ -55,7 +55,7 @@ namespace math
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace math
+} // End namespace mathematical
 } // end namespace constant
 } // End namespace Foam
 
@@ -64,6 +64,3 @@ namespace math
 #endif
 
 // ************************************************************************* //
-
-
-
