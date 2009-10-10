@@ -286,6 +286,9 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         {
             if (!cloud_.internalFace(facei_))
             {
+                // For a patch face, allow a small value of lambda to
+                // ensure patch interactions occur.
+
                 label patchi = patch(facei_);
                 const polyPatch& patch = mesh.boundaryMesh()[patchi];
 
@@ -312,27 +315,37 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                     }
                 }
             }
-            else if (correctLambda < Cloud<ParticleType>::minValidTrackFraction)
+            else
             {
-                // The particle is not far enough away from the face
-                // to decide if it is valid crossing. Let it move a
-                // little without crossing the face to resolve the
-                // ambiguity.
+                if (correctLambda < Cloud<ParticleType>::minValidTrackFraction)
+                {
+                    // The particle is not far enough away from the face
+                    // to decide if it is valid crossing. Let it move a
+                    // little without crossing the face to resolve the
+                    // ambiguity.
 
-                // Pout<< "Ambiguous face crossing, correcting towards cell "
-                //     << "centre and not crossing face" << endl;
+                    // Pout<< "Ambiguous face crossing, correcting towards cell "
+                    //     << "centre and not crossing face" << endl;
 
-                // const point& cc = mesh.cellCentres()[celli_];
-                // position_ +=
-                //     Cloud<ParticleType>::trackingRescueTolerance
-                //    *(cc - position_);
+                    // const point& cc = mesh.cellCentres()[celli_];
+                    // position_ +=
+                    //     Cloud<ParticleType>::trackingRescueTolerance
+                    //    *(cc - position_);
 
-                // Pout<< "Ambiguous face crossing. " << endl;
+                    // Pout<< "Ambiguous face crossing. " << endl;
 
-                facei_ = -1;
+                    facei_ = -1;
+                }
+
+                // If the face hit was not on a wall, add a small
+                // amount to the track to move it off the face, If it
+                // was not an ambiguous face crossing, this makes sure
+                // the face is not ambiguous next tracking step.  If
+                // it was ambiguous, this should resolve it.
+
+                correctLambda += Cloud<ParticleType>::minValidTrackFraction;
             }
 
-            correctLambda += Cloud<ParticleType>::minValidTrackFraction;
             trackFraction = correctLambda;
             position_ += trackFraction*(endPosition - position_);
         }
