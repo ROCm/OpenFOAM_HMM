@@ -304,7 +304,9 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                         //     << endl;
 
                         const point& cc = mesh.cellCentres()[celli_];
-                        position_ += 1e-2*(cc - position_);
+                        position_ +=
+                            Cloud<ParticleType>::trackingRescueTolerance
+                           *(cc - position_);
 
                         facei_ = -1;
                     }
@@ -342,7 +344,8 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
             //     << endl;
 
             const point& cc = mesh.cellCentres()[celli_];
-            position_ += 1e-2*(cc - position_);
+            position_ +=
+                Cloud<ParticleType>::trackingRescueTolerance*(cc - position_);
         }
     }
     else
@@ -394,7 +397,8 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
             //     << checkedCells << endl;
 
             const point& cc = mesh.cellCentres()[celli_];
-            position_ += 1e-2*(cc - position_);
+            position_ +=
+                Cloud<ParticleType>::trackingRescueTolerance*(cc - position_);
         }
         // else
         // {
