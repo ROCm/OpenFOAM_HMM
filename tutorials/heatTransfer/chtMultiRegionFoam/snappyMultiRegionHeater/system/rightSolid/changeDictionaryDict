@@ -61,21 +61,21 @@ dictionaryReplacement
             }
             rightSolid_to_heater
             {
-                type            turbulentTemperatureCoupledBaffle;
+                type            compressible::turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
             }
             rightSolid_to_bottomAir
             {
-                type            turbulentTemperatureCoupledBaffle;
+                type            compressible::turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
             }
             rightSolid_to_topAir
             {
-                type            turbulentTemperatureCoupledBaffle;
+                type            compressible::turbulentTemperatureCoupledBaffle;
                 neighbourFieldName T;
                 K               K;
                 value           uniform 300;
