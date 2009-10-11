@@ -25,6 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "DsmcParcel.H"
+#include "meshTools.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -47,12 +48,27 @@ bool Foam::DsmcParcel<ParcelType>::move
     scalar tEnd = (1.0 - p.stepFraction())*deltaT;
     const scalar dtMax = tEnd;
 
+    // For reduced-D cases, the velocity used to track needs to be
+    // constrained, but the actual U_ of the parcel must not be
+    // altered or used, as it is altered by patch interactions an
+    // needs to retain its 3D value for collision purposes.
+    vector Utracking = U_;
+
     while (td.keepParticle && !td.switchProcessor && tEnd > ROOTVSMALL)
     {
+        // Apply correction to position for reduced-D cases
+        meshTools::constrainToMeshCentre(mesh, p.position());
+
+        Utracking = U_;
+
+        // Apply correction to velocity to constrain tracking for
+        // reduced-D cases
+        meshTools::constrainDirection(mesh, mesh.solutionD(), Utracking);
+
         // Set the Lagrangian time-step
         scalar dt = min(dtMax, tEnd);
 
-        dt *= p.trackToFace(p.position() + dt*U_, td);
+        dt *= p.trackToFace(p.position() + dt*Utracking, td);
 
         tEnd -= dt;
 
@@ -256,4 +272,3 @@ void Foam::DsmcParcel<ParcelType>::transformProperties
 #include "DsmcParcelIO.C"
 
 // ************************************************************************* //
-
