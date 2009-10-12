@@ -26,7 +26,6 @@ License
 
 #include "fvDOM.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvm.H"
 
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
@@ -65,7 +64,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh_,
         dimensionedScalar("G", dimMass/pow3(dimTime), 0.0)
@@ -347,7 +346,7 @@ Foam::radiation::fvDOM::Ru() const
     const DimensionedField<scalar, volMesh> a =
         a_.dimensionedInternalField(); //absorptionEmission_->aCont()()
 
-    return  a*G - 4.0*E;
+    return  a*G - E;
 }
 
 

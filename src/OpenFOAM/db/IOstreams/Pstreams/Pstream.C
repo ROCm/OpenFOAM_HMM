@@ -217,7 +217,7 @@ bool Foam::Pstream::parRun_(false);
 Foam::List<int> Foam::Pstream::procIDs_(1, 0);
 
 // Standard transfer message type
-const int Foam::Pstream::msgType_(1);
+int Foam::Pstream::msgType_(1);
 
 // Linear communication schedule
 Foam::List<Foam::Pstream::commsStruct> Foam::Pstream::linearCommunication_(0);
