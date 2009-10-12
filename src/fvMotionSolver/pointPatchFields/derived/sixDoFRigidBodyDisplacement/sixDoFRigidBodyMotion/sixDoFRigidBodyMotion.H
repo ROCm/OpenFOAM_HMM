@@ -55,7 +55,6 @@ SourceFiles
 
 #include "sixDoFRigidBodyMotionState.H"
 #include "pointField.H"
-#include "mathConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
