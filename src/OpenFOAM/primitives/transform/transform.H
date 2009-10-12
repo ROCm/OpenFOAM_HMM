@@ -34,7 +34,7 @@ Description
 #define transform_H
 
 #include "tensor.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -205,11 +205,11 @@ inline scalar pseudoAngle
 
     if (sin < -SMALL)
     {
-        return (3.0 + cos)*constant::math::piByTwo;
+        return (3.0 + cos)*constant::mathematical::piByTwo;
     }
     else
     {
-        return (1.0 - cos)*constant::math::piByTwo;
+        return (1.0 - cos)*constant::mathematical::piByTwo;
     }
 }
 

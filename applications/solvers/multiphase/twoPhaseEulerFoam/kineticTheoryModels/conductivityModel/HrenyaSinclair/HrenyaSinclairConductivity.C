@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "HrenyaSinclairConductivity.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -74,7 +74,7 @@ Foam::tmp<Foam::volScalarField> Foam::HrenyaSinclairConductivity::kappa
     const dimensionedScalar& e
 ) const
 {
-    const scalar sqrtPi = sqrt(constant::math::pi);
+    const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
     volScalarField lamda =
         scalar(1) + da/(6.0*sqrt(2.0)*(alpha + scalar(1.0e-5)))/L_;

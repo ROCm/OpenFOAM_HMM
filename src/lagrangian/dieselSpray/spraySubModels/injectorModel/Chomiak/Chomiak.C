@@ -26,7 +26,7 @@ License
 
 #include "Chomiak.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -118,11 +118,11 @@ vector ChomiakInjector::direction
     scalar angle =
         (d - dMax)*maxSprayAngle_[n]
        /(dMin - dMax)
-       *constant::math::pi/360.0;
+       *constant::mathematical::pi/360.0;
     scalar alpha = sin(angle);
     scalar dcorr = cos(angle);
 
-    scalar beta = constant::math::twoPi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
@@ -132,7 +132,7 @@ vector ChomiakInjector::direction
         scalar reduce = 0.01;
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
-        beta *= (1.0-2.0*reduce)*0.5*sm_.angleOfWedge()/constant::math::pi;
+        beta *= (1.0-2.0*reduce)*0.5*sm_.angleOfWedge()/constant::mathematical::pi;
         beta += reduce*sm_.angleOfWedge();
 
         normal =

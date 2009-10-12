@@ -23,25 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::solidBodyMotionFunctions::SKA
+    Foam::solidBodyMotionFunctions::tabulated6DoFMotion
 
 Description
-    Sea Keeping Analysis (SKA) 6DoF motion function.
+    Tabulated 6DoF motion function.
 
     Obtained by interpolating tabulated data for surge (x-translation),
     sway (y-translation), heave (z-translation), roll (rotation about x),
     pitch (rotation about y) and yaw (rotation about z).
 
-See Also
-    SDA (Ship design analysis) for 3DoF motion.
-
 SourceFiles
-    SKA.C
+    tabulated6DoFMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SKA_H
-#define SKA_H
+#ifndef tabulated6DoFMotion_H
+#define tabulated6DoFMotion_H
 
 #include "solidBodyMotionFunction.H"
 #include "primitiveFields.H"
@@ -55,10 +52,10 @@ namespace solidBodyMotionFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class SKA Declaration
+                          Class tabulated6DoFMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class SKA
+class tabulated6DoFMotion
 :
     public solidBodyMotionFunction
 {
@@ -83,22 +80,22 @@ class SKA
     // Private Member Functions
 
         //- Disallow copy construct
-        SKA(const SKA&);
+        tabulated6DoFMotion(const tabulated6DoFMotion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const SKA&);
+        void operator=(const tabulated6DoFMotion&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("SKA");
+    TypeName("tabulated6DoFMotion");
 
 
     // Constructors
 
         //- Construct from components
-        SKA
+        tabulated6DoFMotion
         (
             const dictionary& SBMFCoeffs,
             const Time& runTime
@@ -107,7 +104,7 @@ public:
 
     // Destructor
 
-        virtual ~SKA();
+        virtual ~tabulated6DoFMotion();
 
 
     // Member Functions

@@ -27,7 +27,7 @@ License
 #include "dynamicInkJetFvMesh.H"
 #include "addToRunTimeSelectionTable.H"
 #include "volFields.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -90,7 +90,7 @@ Foam::dynamicInkJetFvMesh::~dynamicInkJetFvMesh()
 bool Foam::dynamicInkJetFvMesh::update()
 {
     scalar scalingFunction =
-        0.5*(::cos(constant::math::twoPi*frequency_*time().value()) - 1.0);
+        0.5*(::cos(constant::mathematical::twoPi*frequency_*time().value()) - 1.0);
 
     Info<< "Mesh scaling. Time = " << time().value() << " scaling: "
         << scalingFunction << endl;

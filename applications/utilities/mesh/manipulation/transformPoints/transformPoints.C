@@ -67,10 +67,10 @@ Usage
 #include "transformField.H"
 #include "transformGeometricField.H"
 #include "IStringStream.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 using namespace Foam;
-using namespace Foam::constant::math;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

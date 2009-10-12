@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "universalConstants.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 #include "dimensionedConstants.H"
 
@@ -43,7 +43,7 @@ const Foam::dimensionedScalar Foam::constant::universal::hr
         dimensionedScalar
         (
             "hr",
-            h/(dimensionedScalar("C", dimless, constant::math::twoPi))
+            h/(dimensionedScalar("C", dimless, constant::mathematical::twoPi))
         )
     )
 );

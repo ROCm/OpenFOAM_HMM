@@ -32,7 +32,7 @@ Description
 #include "surfaceFields.H"
 #include "demandDrivenData.H"
 #include "coupledFvPatch.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -353,7 +353,7 @@ void surfaceInterpolation::makeCorrectionVectors() const
                     (sum(magSf*mag(corrVecs))/sum(magSf)).value(),
                     1.0
                 )
-            )*180.0/constant::math::pi;
+            )*180.0/constant::mathematical::pi;
     }
 
     if (debug)

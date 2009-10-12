@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "universalConstants.H"
 #include "electromagneticConstants.H"
 #include "atomicConstants.H"
@@ -46,7 +46,7 @@ const Foam::dimensionedScalar Foam::constant::electromagnetic::mu0
         (
             "mu0",
             dimless,
-            4.0*constant::math::pi*1e-07
+            4.0*constant::mathematical::pi*1e-07
         )
     )
 );
@@ -92,7 +92,7 @@ const Foam::dimensionedScalar Foam::constant::electromagnetic::kappa
         dimensionedScalar
         (
             "kappa",
-            dimensionedScalar("C", dimless, 1.0/(4.0*constant::math::pi))
+            dimensionedScalar("C", dimless, 1.0/(4.0*constant::mathematical::pi))
            /epsilon0
         )
     )

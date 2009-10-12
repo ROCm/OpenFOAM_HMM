@@ -26,7 +26,7 @@ License
 
 #include "TAB.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -130,7 +130,7 @@ void TAB::breakupParcel
             scalar quad = -y2/a;
             if (quad < 0)
             {
-                phi = constant::math::twoPi - phit;
+                phi = constant::mathematical::twoPi - phit;
             }
 
             scalar tb = 0;
@@ -147,11 +147,11 @@ void TAB::breakupParcel
 
                 if (theta < phi)
                 {
-                    if (constant::math::twoPi - theta >= phi)
+                    if (constant::mathematical::twoPi - theta >= phi)
                     {
                         theta = -theta;
                     }
-                    theta += constant::math::twoPi;
+                    theta += constant::mathematical::twoPi;
                 }
                 tb = (theta - phi)/omega;
 

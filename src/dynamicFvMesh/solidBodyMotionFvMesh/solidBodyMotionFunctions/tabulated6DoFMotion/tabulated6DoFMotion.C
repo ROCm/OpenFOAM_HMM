@@ -24,14 +24,14 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "SKA.H"
+#include "tabulated6DoFMotion.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Tuple2.H"
 #include "IFstream.H"
 #include "interpolateXY.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
-using namespace Foam::constant::math;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -39,15 +39,20 @@ namespace Foam
 {
 namespace solidBodyMotionFunctions
 {
-    defineTypeNameAndDebug(SKA, 0);
-    addToRunTimeSelectionTable(solidBodyMotionFunction, SKA, dictionary);
+    defineTypeNameAndDebug(tabulated6DoFMotion, 0);
+    addToRunTimeSelectionTable
+    (
+        solidBodyMotionFunction,
+        tabulated6DoFMotion,
+        dictionary
+    );
 };
 };
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFunctions::SKA::SKA
+Foam::solidBodyMotionFunctions::tabulated6DoFMotion::tabulated6DoFMotion
 (
     const dictionary& SBMFCoeffs,
     const Time& runTime
@@ -61,13 +66,14 @@ Foam::solidBodyMotionFunctions::SKA::SKA
 
 // * * * * * * * * * * * * * * * * Destructors * * * * * * * * * * * * * * * //
 
-Foam::solidBodyMotionFunctions::SKA::~SKA()
+Foam::solidBodyMotionFunctions::tabulated6DoFMotion::~tabulated6DoFMotion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-Foam::septernion Foam::solidBodyMotionFunctions::SKA::transformation() const
+Foam::septernion
+Foam::solidBodyMotionFunctions::tabulated6DoFMotion::transformation() const
 {
     scalar t = time_.value();
 
@@ -75,7 +81,7 @@ Foam::septernion Foam::solidBodyMotionFunctions::SKA::transformation() const
     {
         FatalErrorIn
         (
-            "solidBodyMotionFunctions::SKA::transformation()"
+            "solidBodyMotionFunctions::tabulated6DoFMotion::transformation()"
         )   << "current time (" << t
             << ") is less than the minimum in the data table ("
             << times_[0] << ')'
@@ -86,7 +92,7 @@ Foam::septernion Foam::solidBodyMotionFunctions::SKA::transformation() const
     {
         FatalErrorIn
         (
-            "solidBodyMotionFunctions::SKA::transformation()"
+            "solidBodyMotionFunctions::tabulated6DoFMotion::transformation()"
         )   << "current time (" << t
             << ") is greater than the maximum in the data table ("
             << times_[times_.size()-1] << ')'
@@ -106,14 +112,17 @@ Foam::septernion Foam::solidBodyMotionFunctions::SKA::transformation() const
     quaternion R(TRV[1].x(), TRV[1].y(), TRV[1].z());
     septernion TR(septernion(CofG_ + TRV[0])*R*septernion(-CofG_));
 
-    Info<< "solidBodyMotionFunctions::SKA::transformation(): "
+    Info<< "solidBodyMotionFunctions::tabulated6DoFMotion::transformation(): "
         << "Time = " << t << " transformation: " << TR << endl;
 
     return TR;
 }
 
 
-bool Foam::solidBodyMotionFunctions::SKA::read(const dictionary& SBMFCoeffs)
+bool Foam::solidBodyMotionFunctions::tabulated6DoFMotion::read
+(
+    const dictionary& SBMFCoeffs
+)
 {
     solidBodyMotionFunction::read(SBMFCoeffs);
 
@@ -147,7 +156,8 @@ bool Foam::solidBodyMotionFunctions::SKA::read(const dictionary& SBMFCoeffs)
         {
             FatalErrorIn
             (
-                "solidBodyMotionFunctions::SKA::read(const dictionary&)"
+                "solidBodyMotionFunctions::tabulated6DoFMotion::read"
+                "(const dictionary&)"
             )   << "Cannot open time data file " << timeDataFileName_
                 << exit(FatalError);
         }

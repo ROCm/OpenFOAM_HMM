@@ -434,7 +434,7 @@ if (pFaces[WEDGE].size() && pFaces[WEDGE][0].size())
     {
         // Distribute the points to be +/- 2.5deg from the x-z plane
 
-        scalar tanTheta = Foam::tan(2.5*constant::math::pi/180.0);
+        scalar tanTheta = Foam::tan(2.5*constant::mathematical::pi/180.0);
 
         SLList<face>::iterator iterf = pFaces[WEDGE][0].begin();
         SLList<face>::iterator iterb = pFaces[WEDGE][1].begin();
