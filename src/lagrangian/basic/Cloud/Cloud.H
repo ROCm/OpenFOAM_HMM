@@ -81,12 +81,6 @@ class Cloud
         //- Is the cell concave
         mutable autoPtr<PackedBoolList> concaveCellPtr_;
 
-        //- Does face intrude into owner cell
-        mutable autoPtr<PackedBoolList> intrudesIntoOwnerPtr_;
-
-        //- Does face intrude into neighbour cell
-        mutable autoPtr<PackedBoolList> intrudesIntoNeighbourPtr_;
-
         //- Overall count of particles ever created. Never decreases.
         mutable label particleCount_;
 
@@ -226,13 +220,6 @@ public:
 
             //- Whether each cell is concave (demand driven data)
             const PackedBoolList& concaveCell() const;
-
-            //- Per face whether it intrudes into the owner cell.(demand driven)
-            const PackedBoolList& intrudesIntoOwner() const;
-
-            //- Per face whether it intrudes into the neighbour cell. (demand
-            //  driven.
-            const PackedBoolList& intrudesIntoNeighbour() const;
 
 
             // Iterators

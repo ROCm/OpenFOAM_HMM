@@ -62,9 +62,6 @@ bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
     const pointField& cCentres = pMesh().cellCentres();
     const pointField& points = pMesh().points();
 
-    PackedBoolList& intrudesIntoOwner = intrudesIntoOwnerPtr_();
-    PackedBoolList& intrudesIntoNeighbour = intrudesIntoNeighbourPtr_();
-
     const cell& cFaces = cells[cellI];
 
     bool concave = false;
@@ -130,14 +127,6 @@ bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
                     if (d < 0)
                     {
                         // Concave face
-                        if (fOwner[f0I] == cellI)
-                        {
-                            intrudesIntoOwner[f0I] = 1;
-                        }
-                        else
-                        {
-                            intrudesIntoNeighbour[f0I] = 1;
-                        }
 
                         concave = true;
                     }
@@ -159,14 +148,6 @@ bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
                 if ((fn0 & fn1) > planarCosAngle)
                 {
                     // Planar face
-                    if (fOwner[f0I] == cellI)
-                    {
-                        intrudesIntoOwner[f0I] = 1;
-                    }
-                    else
-                    {
-                        intrudesIntoNeighbour[f0I] = 1;
-                    }
 
                     concave = true;
                 }
@@ -185,9 +166,6 @@ void Foam::Cloud<ParticleType>::calcConcaveCells() const
 
     concaveCellPtr_.reset(new PackedBoolList(pMesh().nCells()));
     PackedBoolList& concaveCell = concaveCellPtr_();
-
-    intrudesIntoOwnerPtr_.reset(new PackedBoolList(pMesh().nFaces()));
-    intrudesIntoNeighbourPtr_.reset(new PackedBoolList(pMesh().nFaces()));
 
     forAll(cells, cellI)
     {
@@ -272,8 +250,6 @@ template<class ParticleType>
 void Foam::Cloud<ParticleType>::clearOut()
 {
     concaveCellPtr_.clear();
-    intrudesIntoOwnerPtr_.clear();
-    intrudesIntoNeighbourPtr_.clear();
     labels_.clearStorage();
 }
 
@@ -290,30 +266,6 @@ const
     }
 
     return concaveCellPtr_();
-}
-
-
-template<class ParticleType>
-const Foam::PackedBoolList& Foam::Cloud<ParticleType>::intrudesIntoOwner()
-const
-{
-    if (!intrudesIntoOwnerPtr_.valid())
-    {
-        calcConcaveCells();
-    }
-    return intrudesIntoOwnerPtr_();
-}
-
-
-template<class ParticleType>
-const Foam::PackedBoolList& Foam::Cloud<ParticleType>::intrudesIntoNeighbour()
-const
-{
-    if (!intrudesIntoNeighbourPtr_.valid())
-    {
-        calcConcaveCells();
-    }
-    return intrudesIntoNeighbourPtr_();
 }
 
 
