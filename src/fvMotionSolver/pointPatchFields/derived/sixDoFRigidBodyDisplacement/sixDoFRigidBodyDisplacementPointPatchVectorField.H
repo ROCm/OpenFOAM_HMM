@@ -23,21 +23,21 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sixDofRigidBodyDisplacementPointPatchVectorField
+    Foam::sixDoFRigidBodyDisplacementPointPatchVectorField
 
 Description
-    Foam::sixDofRigidBodyDisplacementPointPatchVectorField
+    Foam::sixDoFRigidBodyDisplacementPointPatchVectorField
 
 SourceFiles
-    sixDofRigidBodyDisplacementPointPatchVectorField.C
+    sixDoFRigidBodyDisplacementPointPatchVectorField.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sixDofRigidBodyDisplacementPointPatchVectorField_H
-#define sixDofRigidBodyDisplacementPointPatchVectorField_H
+#ifndef sixDoFRigidBodyDisplacementPointPatchVectorField_H
+#define sixDoFRigidBodyDisplacementPointPatchVectorField_H
 
 #include "fixedValuePointPatchField.H"
-#include "sixDofRigidBodyMotion.H"
+#include "sixDoFRigidBodyMotion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,17 +45,17 @@ namespace Foam
 {
 
 /*---------------------------------------------------------------------------*\
-        Class sixDofRigidBodyDisplacementPointPatchVectorField Declaration
+        Class sixDoFRigidBodyDisplacementPointPatchVectorField Declaration
 \*---------------------------------------------------------------------------*/
 
-class sixDofRigidBodyDisplacementPointPatchVectorField
+class sixDoFRigidBodyDisplacementPointPatchVectorField
 :
     public fixedValuePointPatchField<vector>
 {
     // Private data
 
         //- Six dof motion object
-        sixDofRigidBodyMotion motion_;
+        sixDoFRigidBodyMotion motion_;
 
         //- Reference positions of points on the patch
         pointField p0_;
@@ -68,20 +68,20 @@ class sixDofRigidBodyDisplacementPointPatchVectorField
 public:
 
     //- Runtime type information
-    TypeName("sixDofRigidBodyDisplacement");
+    TypeName("sixDoFRigidBodyDisplacement");
 
 
     // Constructors
 
         //- Construct from patch and internal field
-        sixDofRigidBodyDisplacementPointPatchVectorField
+        sixDoFRigidBodyDisplacementPointPatchVectorField
         (
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&
         );
 
         //- Construct from patch, internal field and dictionary
-        sixDofRigidBodyDisplacementPointPatchVectorField
+        sixDoFRigidBodyDisplacementPointPatchVectorField
         (
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&,
@@ -89,9 +89,9 @@ public:
         );
 
         //- Construct by mapping given patchField<vector> onto a new patch
-        sixDofRigidBodyDisplacementPointPatchVectorField
+        sixDoFRigidBodyDisplacementPointPatchVectorField
         (
-            const sixDofRigidBodyDisplacementPointPatchVectorField&,
+            const sixDoFRigidBodyDisplacementPointPatchVectorField&,
             const pointPatch&,
             const DimensionedField<vector, pointMesh>&,
             const pointPatchFieldMapper&
@@ -102,7 +102,7 @@ public:
         {
             return autoPtr<pointPatchField<vector> >
             (
-                new sixDofRigidBodyDisplacementPointPatchVectorField
+                new sixDoFRigidBodyDisplacementPointPatchVectorField
                 (
                     *this
                 )
@@ -110,9 +110,9 @@ public:
         }
 
         //- Construct as copy setting internal field reference
-        sixDofRigidBodyDisplacementPointPatchVectorField
+        sixDoFRigidBodyDisplacementPointPatchVectorField
         (
-            const sixDofRigidBodyDisplacementPointPatchVectorField&,
+            const sixDoFRigidBodyDisplacementPointPatchVectorField&,
             const DimensionedField<vector, pointMesh>&
         );
 
@@ -124,7 +124,7 @@ public:
         {
             return autoPtr<pointPatchField<vector> >
             (
-                new sixDofRigidBodyDisplacementPointPatchVectorField
+                new sixDoFRigidBodyDisplacementPointPatchVectorField
                 (
                     *this,
                     iF

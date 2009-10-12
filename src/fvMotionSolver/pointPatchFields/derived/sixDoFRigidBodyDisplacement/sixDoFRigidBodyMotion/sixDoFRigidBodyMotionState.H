@@ -23,22 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sixDofRigidBodyMotionState
+    Foam::sixDoFRigidBodyMotionState
 
 Description
-    Holds the motion state of sixDof object.  Wrapped up together
+    Holds the motion state of sixDoF object.  Wrapped up together
     to allow rapid scatter to other processors.  The processors must all
     maintain exactly the same state data to avoid any drift or inconsistency.
 
 SourceFiles
-    sixDofRigidBodyMotionStateI.H
-    sixDofRigidBodyMotionState.C
-    sixDofRigidBodyMotionStateIO.C
+    sixDoFRigidBodyMotionStateI.H
+    sixDoFRigidBodyMotionState.C
+    sixDoFRigidBodyMotionStateIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sixDofRigidBodyMotionState_H
-#define sixDofRigidBodyMotionState_H
+#ifndef sixDoFRigidBodyMotionState_H
+#define sixDoFRigidBodyMotionState_H
 
 #include "vector.H"
 #include "point.H"
@@ -56,16 +56,16 @@ class Istream;
 class Ostream;
 
 // Forward declaration of friend functions and operators
-class sixDofRigidBodyMotionState;
-Istream& operator>>(Istream&, sixDofRigidBodyMotionState&);
-Ostream& operator<<(Ostream&, const sixDofRigidBodyMotionState&);
+class sixDoFRigidBodyMotionState;
+Istream& operator>>(Istream&, sixDoFRigidBodyMotionState&);
+Ostream& operator<<(Ostream&, const sixDoFRigidBodyMotionState&);
 
 
 /*---------------------------------------------------------------------------*\
-                  Class sixDofRigidBodyMotionState Declaration
+                  Class sixDoFRigidBodyMotionState Declaration
 \*---------------------------------------------------------------------------*/
 
-class sixDofRigidBodyMotionState
+class sixDoFRigidBodyMotionState
 {
     // Private data
 
@@ -96,10 +96,10 @@ public:
     // Constructors
 
         //- Construct null
-        sixDofRigidBodyMotionState();
+        sixDoFRigidBodyMotionState();
 
         //- Construct from components
-        sixDofRigidBodyMotionState
+        sixDoFRigidBodyMotionState
         (
             const point& centreOfMass,
             const tensor& Q,
@@ -110,14 +110,14 @@ public:
         );
 
         //- Construct from dictionary
-        sixDofRigidBodyMotionState(const dictionary& dict);
+        sixDoFRigidBodyMotionState(const dictionary& dict);
 
         //- Construct as copy
-        sixDofRigidBodyMotionState(const sixDofRigidBodyMotionState&);
+        sixDoFRigidBodyMotionState(const sixDoFRigidBodyMotionState&);
 
 
     //- Destructor
-    ~sixDofRigidBodyMotionState();
+    ~sixDoFRigidBodyMotionState();
 
 
     // Member Functions
@@ -174,8 +174,8 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, sixDofRigidBodyMotionState&);
-        friend Ostream& operator<<(Ostream&, const sixDofRigidBodyMotionState&);
+        friend Istream& operator>>(Istream&, sixDoFRigidBodyMotionState&);
+        friend Ostream& operator<<(Ostream&, const sixDoFRigidBodyMotionState&);
 };
 
 
@@ -185,7 +185,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "sixDofRigidBodyMotionStateI.H"
+#include "sixDoFRigidBodyMotionStateI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

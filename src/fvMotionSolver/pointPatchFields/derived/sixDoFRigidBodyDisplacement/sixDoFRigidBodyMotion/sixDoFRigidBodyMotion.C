@@ -24,11 +24,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDofRigidBodyMotion.H"
+#include "sixDoFRigidBodyMotion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion()
+Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion()
 :
     motionState_(),
     refCentreOfMass_(vector::zero),
@@ -37,7 +37,7 @@ Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion()
 {}
 
 
-Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion
+Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
 (
     const point& centreOfMass,
     const tensor& Q,
@@ -65,7 +65,7 @@ Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion
 {}
 
 
-Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion(const dictionary& dict)
+Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion(const dictionary& dict)
 :
     motionState_(dict),
     refCentreOfMass_(dict.lookupOrDefault("refCentreOfMass", centreOfMass())),
@@ -74,27 +74,27 @@ Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion(const dictionary& dict)
 {}
 
 
-Foam::sixDofRigidBodyMotion::sixDofRigidBodyMotion
+Foam::sixDoFRigidBodyMotion::sixDoFRigidBodyMotion
 (
-    const sixDofRigidBodyMotion& sDofRBM
+    const sixDoFRigidBodyMotion& sDoFRBM
 )
 :
-    motionState_(sDofRBM.motionState()),
-    refCentreOfMass_(sDofRBM.refCentreOfMass()),
-    momentOfInertia_(sDofRBM.momentOfInertia()),
-    mass_(sDofRBM.mass())
+    motionState_(sDoFRBM.motionState()),
+    refCentreOfMass_(sDoFRBM.refCentreOfMass()),
+    momentOfInertia_(sDoFRBM.momentOfInertia()),
+    mass_(sDoFRBM.mass())
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::sixDofRigidBodyMotion::~sixDofRigidBodyMotion()
+Foam::sixDoFRigidBodyMotion::~sixDoFRigidBodyMotion()
 {}
 
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
-void Foam::sixDofRigidBodyMotion::updatePosition
+void Foam::sixDoFRigidBodyMotion::updatePosition
 (
     scalar deltaT
 )
@@ -141,7 +141,7 @@ void Foam::sixDofRigidBodyMotion::updatePosition
 }
 
 
-void Foam::sixDofRigidBodyMotion::updateForce
+void Foam::sixDoFRigidBodyMotion::updateForce
 (
     const vector& fGlobal,
     const vector& tauGlobal,
@@ -166,7 +166,7 @@ void Foam::sixDofRigidBodyMotion::updateForce
 }
 
 
-void Foam::sixDofRigidBodyMotion::updateForce
+void Foam::sixDoFRigidBodyMotion::updateForce
 (
     const pointField& positions,
     const vectorField& forces,
@@ -201,7 +201,7 @@ void Foam::sixDofRigidBodyMotion::updateForce
 
 
 Foam::tmp<Foam::pointField>
-Foam::sixDofRigidBodyMotion::generatePositions(const pointField& pts) const
+Foam::sixDoFRigidBodyMotion::generatePositions(const pointField& pts) const
 {
     return (centreOfMass() + (Q() & (pts - refCentreOfMass_)));
 }

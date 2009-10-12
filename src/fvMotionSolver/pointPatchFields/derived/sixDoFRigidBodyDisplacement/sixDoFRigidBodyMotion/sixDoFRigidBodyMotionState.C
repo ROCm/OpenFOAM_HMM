@@ -24,11 +24,11 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDofRigidBodyMotionState.H"
+#include "sixDoFRigidBodyMotionState.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-Foam::sixDofRigidBodyMotionState::sixDofRigidBodyMotionState()
+Foam::sixDoFRigidBodyMotionState::sixDoFRigidBodyMotionState()
 :
     centreOfMass_(vector::zero),
     Q_(I),
@@ -39,7 +39,7 @@ Foam::sixDofRigidBodyMotionState::sixDofRigidBodyMotionState()
 {}
 
 
-Foam::sixDofRigidBodyMotionState::sixDofRigidBodyMotionState
+Foam::sixDoFRigidBodyMotionState::sixDoFRigidBodyMotionState
 (
     const point& centreOfMass,
     const tensor& Q,
@@ -58,7 +58,7 @@ Foam::sixDofRigidBodyMotionState::sixDofRigidBodyMotionState
 {}
 
 
-Foam::sixDofRigidBodyMotionState::sixDofRigidBodyMotionState
+Foam::sixDoFRigidBodyMotionState::sixDoFRigidBodyMotionState
 (
     const dictionary& dict
 )
@@ -72,23 +72,23 @@ Foam::sixDofRigidBodyMotionState::sixDofRigidBodyMotionState
 {}
 
 
-Foam::sixDofRigidBodyMotionState::sixDofRigidBodyMotionState
+Foam::sixDoFRigidBodyMotionState::sixDoFRigidBodyMotionState
 (
-    const sixDofRigidBodyMotionState& sDofRBMS
+    const sixDoFRigidBodyMotionState& sDoFRBMS
 )
 :
-    centreOfMass_(sDofRBMS.centreOfMass()),
-    Q_(sDofRBMS.Q()),
-    v_(sDofRBMS.v()),
-    a_(sDofRBMS.a()),
-    pi_(sDofRBMS.pi()),
-    tau_(sDofRBMS.tau())
+    centreOfMass_(sDoFRBMS.centreOfMass()),
+    Q_(sDoFRBMS.Q()),
+    v_(sDoFRBMS.v()),
+    a_(sDoFRBMS.a()),
+    pi_(sDoFRBMS.pi()),
+    tau_(sDoFRBMS.tau())
 {}
 
 
 // * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
 
-Foam::sixDofRigidBodyMotionState::~sixDofRigidBodyMotionState()
+Foam::sixDoFRigidBodyMotionState::~sixDoFRigidBodyMotionState()
 {}
 
 

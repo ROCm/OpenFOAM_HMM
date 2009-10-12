@@ -29,7 +29,7 @@ License
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 inline Foam::tensor
-Foam::sixDofRigidBodyMotion::rotationTensorX(scalar phi) const
+Foam::sixDoFRigidBodyMotion::rotationTensorX(scalar phi) const
 {
     return tensor
     (
@@ -41,7 +41,7 @@ Foam::sixDofRigidBodyMotion::rotationTensorX(scalar phi) const
 
 
 inline Foam::tensor
-Foam::sixDofRigidBodyMotion::rotationTensorY(scalar phi) const
+Foam::sixDoFRigidBodyMotion::rotationTensorY(scalar phi) const
 {
     return tensor
     (
@@ -53,7 +53,7 @@ Foam::sixDofRigidBodyMotion::rotationTensorY(scalar phi) const
 
 
 inline Foam::tensor
-Foam::sixDofRigidBodyMotion::rotationTensorZ(scalar phi) const
+Foam::sixDoFRigidBodyMotion::rotationTensorZ(scalar phi) const
 {
     return tensor
     (
@@ -64,117 +64,117 @@ Foam::sixDofRigidBodyMotion::rotationTensorZ(scalar phi) const
 }
 
 
-inline const Foam::sixDofRigidBodyMotionState&
-Foam::sixDofRigidBodyMotion::motionState() const
+inline const Foam::sixDoFRigidBodyMotionState&
+Foam::sixDoFRigidBodyMotion::motionState() const
 {
     return motionState_;
 }
 
 
-inline const Foam::point& Foam::sixDofRigidBodyMotion::centreOfMass() const
+inline const Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass() const
 {
     return motionState_.centreOfMass();
 }
 
 
-inline const Foam::point& Foam::sixDofRigidBodyMotion::refCentreOfMass() const
+inline const Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass() const
 {
     return refCentreOfMass_;
 }
 
 
 inline const Foam::diagTensor&
-Foam::sixDofRigidBodyMotion::momentOfInertia() const
+Foam::sixDoFRigidBodyMotion::momentOfInertia() const
 {
     return momentOfInertia_;
 }
 
 
-inline Foam::scalar Foam::sixDofRigidBodyMotion::mass() const
+inline Foam::scalar Foam::sixDoFRigidBodyMotion::mass() const
 {
     return mass_;
 }
 
 
-inline const Foam::tensor& Foam::sixDofRigidBodyMotion::Q() const
+inline const Foam::tensor& Foam::sixDoFRigidBodyMotion::Q() const
 {
     return motionState_.Q();
 }
 
 
-inline const Foam::vector& Foam::sixDofRigidBodyMotion::v() const
+inline const Foam::vector& Foam::sixDoFRigidBodyMotion::v() const
 {
     return motionState_.v();
 }
 
 
-inline const Foam::vector& Foam::sixDofRigidBodyMotion::a() const
+inline const Foam::vector& Foam::sixDoFRigidBodyMotion::a() const
 {
     return motionState_.a();
 }
 
 
-inline const Foam::vector& Foam::sixDofRigidBodyMotion::pi() const
+inline const Foam::vector& Foam::sixDoFRigidBodyMotion::pi() const
 {
     return motionState_.pi();
 }
 
 
-inline const Foam::vector& Foam::sixDofRigidBodyMotion::tau() const
+inline const Foam::vector& Foam::sixDoFRigidBodyMotion::tau() const
 {
     return motionState_.tau();
 }
 
 
-inline Foam::point& Foam::sixDofRigidBodyMotion::centreOfMass()
+inline Foam::point& Foam::sixDoFRigidBodyMotion::centreOfMass()
 {
     return motionState_.centreOfMass();
 }
 
 
-inline Foam::point& Foam::sixDofRigidBodyMotion::refCentreOfMass()
+inline Foam::point& Foam::sixDoFRigidBodyMotion::refCentreOfMass()
 {
     return refCentreOfMass_;
 }
 
 
-inline Foam::diagTensor& Foam::sixDofRigidBodyMotion::momentOfInertia()
+inline Foam::diagTensor& Foam::sixDoFRigidBodyMotion::momentOfInertia()
 {
     return momentOfInertia_;
 }
 
 
-inline Foam::scalar& Foam::sixDofRigidBodyMotion::mass()
+inline Foam::scalar& Foam::sixDoFRigidBodyMotion::mass()
 {
     return mass_;
 }
 
 
-inline Foam::tensor& Foam::sixDofRigidBodyMotion::Q()
+inline Foam::tensor& Foam::sixDoFRigidBodyMotion::Q()
 {
     return motionState_.Q();
 }
 
 
-inline Foam::vector& Foam::sixDofRigidBodyMotion::v()
+inline Foam::vector& Foam::sixDoFRigidBodyMotion::v()
 {
     return motionState_.v();
 }
 
 
-inline Foam::vector& Foam::sixDofRigidBodyMotion::a()
+inline Foam::vector& Foam::sixDoFRigidBodyMotion::a()
 {
     return motionState_.a();
 }
 
 
-inline Foam::vector& Foam::sixDofRigidBodyMotion::pi()
+inline Foam::vector& Foam::sixDoFRigidBodyMotion::pi()
 {
     return motionState_.pi();
 }
 
 
-inline Foam::vector& Foam::sixDofRigidBodyMotion::tau()
+inline Foam::vector& Foam::sixDoFRigidBodyMotion::tau()
 {
     return motionState_.tau();
 }

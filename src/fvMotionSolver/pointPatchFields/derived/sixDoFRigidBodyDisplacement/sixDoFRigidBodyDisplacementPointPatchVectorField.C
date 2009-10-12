@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "sixDofRigidBodyDisplacementPointPatchVectorField.H"
+#include "sixDoFRigidBodyDisplacementPointPatchVectorField.H"
 #include "pointPatchFields.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Time.H"
@@ -40,8 +40,8 @@ namespace Foam
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-sixDofRigidBodyDisplacementPointPatchVectorField::
-sixDofRigidBodyDisplacementPointPatchVectorField
+sixDoFRigidBodyDisplacementPointPatchVectorField::
+sixDoFRigidBodyDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF
@@ -54,8 +54,8 @@ sixDofRigidBodyDisplacementPointPatchVectorField
 {}
 
 
-sixDofRigidBodyDisplacementPointPatchVectorField::
-sixDofRigidBodyDisplacementPointPatchVectorField
+sixDoFRigidBodyDisplacementPointPatchVectorField::
+sixDoFRigidBodyDisplacementPointPatchVectorField
 (
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
@@ -82,10 +82,10 @@ sixDofRigidBodyDisplacementPointPatchVectorField
 }
 
 
-sixDofRigidBodyDisplacementPointPatchVectorField::
-sixDofRigidBodyDisplacementPointPatchVectorField
+sixDoFRigidBodyDisplacementPointPatchVectorField::
+sixDoFRigidBodyDisplacementPointPatchVectorField
 (
-    const sixDofRigidBodyDisplacementPointPatchVectorField& ptf,
+    const sixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
     const pointPatch& p,
     const DimensionedField<vector, pointMesh>& iF,
     const pointPatchFieldMapper& mapper
@@ -98,10 +98,10 @@ sixDofRigidBodyDisplacementPointPatchVectorField
 {}
 
 
-sixDofRigidBodyDisplacementPointPatchVectorField::
-sixDofRigidBodyDisplacementPointPatchVectorField
+sixDoFRigidBodyDisplacementPointPatchVectorField::
+sixDoFRigidBodyDisplacementPointPatchVectorField
 (
-    const sixDofRigidBodyDisplacementPointPatchVectorField& ptf,
+    const sixDoFRigidBodyDisplacementPointPatchVectorField& ptf,
     const DimensionedField<vector, pointMesh>& iF
 )
 :
@@ -114,7 +114,7 @@ sixDofRigidBodyDisplacementPointPatchVectorField
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
-void sixDofRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
+void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 {
     if (this->updated())
     {
@@ -166,7 +166,7 @@ void sixDofRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
 }
 
 
-void sixDofRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
+void sixDoFRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 {
     pointPatchField<vector>::write(os);
     motion_.write(os);
@@ -182,7 +182,7 @@ void sixDofRigidBodyDisplacementPointPatchVectorField::write(Ostream& os) const
 makePointPatchTypeField
 (
     pointPatchVectorField,
-    sixDofRigidBodyDisplacementPointPatchVectorField
+    sixDoFRigidBodyDisplacementPointPatchVectorField
 );
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

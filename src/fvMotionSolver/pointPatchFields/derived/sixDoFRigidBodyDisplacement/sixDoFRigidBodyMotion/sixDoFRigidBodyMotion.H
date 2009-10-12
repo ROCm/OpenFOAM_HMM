@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::sixDofRigidBodyMotion
+    Foam::sixDoFRigidBodyMotion
 
 Description
     Six degree of freedom motion for a rigid body.  Angular momentum stored in
@@ -44,16 +44,16 @@ Description
     doi = {10.1063/1.474310}
 
 SourceFiles
-    sixDofRigidBodyMotionI.H
-    sixDofRigidBodyMotion.C
-    sixDofRigidBodyMotionIO.C
+    sixDoFRigidBodyMotionI.H
+    sixDoFRigidBodyMotion.C
+    sixDoFRigidBodyMotionIO.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef sixDofRigidBodyMotion_H
-#define sixDofRigidBodyMotion_H
+#ifndef sixDoFRigidBodyMotion_H
+#define sixDoFRigidBodyMotion_H
 
-#include "sixDofRigidBodyMotionState.H"
+#include "sixDoFRigidBodyMotionState.H"
 #include "pointField.H"
 #include "mathConstants.H"
 
@@ -67,21 +67,21 @@ class Istream;
 class Ostream;
 
 // Forward declaration of friend functions and operators
-class sixDofRigidBodyMotion;
-Istream& operator>>(Istream&, sixDofRigidBodyMotion&);
-Ostream& operator<<(Ostream&, const sixDofRigidBodyMotion&);
+class sixDoFRigidBodyMotion;
+Istream& operator>>(Istream&, sixDoFRigidBodyMotion&);
+Ostream& operator<<(Ostream&, const sixDoFRigidBodyMotion&);
 
 
 /*---------------------------------------------------------------------------*\
-                      Class sixDofRigidBodyMotion Declaration
+                      Class sixDoFRigidBodyMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class sixDofRigidBodyMotion
+class sixDoFRigidBodyMotion
 {
     // Private data
 
         // state data object
-        sixDofRigidBodyMotionState motionState_;
+        sixDoFRigidBodyMotionState motionState_;
 
         //- Centre of mass of reference state
         point refCentreOfMass_;
@@ -113,10 +113,10 @@ public:
     // Constructors
 
         //- Construct null
-        sixDofRigidBodyMotion();
+        sixDoFRigidBodyMotion();
 
         //- Construct from components
-        sixDofRigidBodyMotion
+        sixDoFRigidBodyMotion
         (
             const point& centreOfMass,
             const tensor& Q,
@@ -130,14 +130,14 @@ public:
         );
 
         //- Construct from dictionary
-        sixDofRigidBodyMotion(const dictionary& dict);
+        sixDoFRigidBodyMotion(const dictionary& dict);
 
         //- Construct as copy
-        sixDofRigidBodyMotion(const sixDofRigidBodyMotion&);
+        sixDoFRigidBodyMotion(const sixDoFRigidBodyMotion&);
 
 
     //- Destructor
-    ~sixDofRigidBodyMotion();
+    ~sixDoFRigidBodyMotion();
 
 
     // Member Functions
@@ -166,7 +166,7 @@ public:
         // Access
 
             //- Return access to the motion state
-            inline const sixDofRigidBodyMotionState& motionState() const;
+            inline const sixDoFRigidBodyMotionState& motionState() const;
 
             //- Return access to the centre of mass
             inline const point& centreOfMass() const;
@@ -232,8 +232,8 @@ public:
 
     // IOstream Operators
 
-        friend Istream& operator>>(Istream&, sixDofRigidBodyMotion&);
-        friend Ostream& operator<<(Ostream&, const sixDofRigidBodyMotion&);
+        friend Istream& operator>>(Istream&, sixDoFRigidBodyMotion&);
+        friend Ostream& operator<<(Ostream&, const sixDoFRigidBodyMotion&);
 };
 
 
@@ -243,7 +243,7 @@ public:
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-#include "sixDofRigidBodyMotionI.H"
+#include "sixDoFRigidBodyMotionI.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
