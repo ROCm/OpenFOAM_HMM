@@ -40,6 +40,7 @@ SourceFiles
 #include "IDLList.H"
 #include "IOField.H"
 #include "polyMesh.H"
+#include "PackedBoolList.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -75,6 +76,11 @@ class Cloud
 
         const polyMesh& polyMesh_;
 
+        const bool concaveCheck_;
+
+        //- Is the cell concave
+        mutable autoPtr<PackedBoolList> concaveCellPtr_;
+
         //- Overall count of particles ever created. Never decreases.
         mutable label particleCount_;
 
@@ -83,6 +89,12 @@ class Cloud
 
 
     // Private member functions
+
+        //- Determine if a particular cell is concave
+        bool isConcaveCell(const label cellI) const;
+
+        //- Analyse mesh for faces not being convex.
+        void calcConcaveCells() const;
 
         //- Initialise cloud on IO constructor
         void initCloud(const bool checkClass);
@@ -104,13 +116,31 @@ public:
     TypeName("Cloud");
 
 
+    // Static data members
+
+        //- The smallest allowable trackFraction in trackToFace before
+        //  an intervention is required
+        static const scalar minValidTrackFraction;
+
+        //- Fraction of distance to cell centre to move a particle to
+        //  'rescue' it from a tracking problem
+        static const scalar trackingRescueTolerance;
+
+        //- Overlap tolerance for face intersections.
+        static const scalar intersectionTolerance;
+
+        //- cosine of angle for faces to be planar.
+        static const scalar planarCosAngle;
+
+
     // Constructors
 
         //- Construct from mesh and a list of particles
         Cloud
         (
             const polyMesh& mesh,
-            const IDLList<ParticleType>& particles
+            const IDLList<ParticleType>& particles,
+            const bool concaveCheck = true
         );
 
         //- Construct from mesh, cloud name, and a list of particles
@@ -118,7 +148,8 @@ public:
         (
             const polyMesh& mesh,
             const word& cloudName,
-            const IDLList<ParticleType>& particles
+            const IDLList<ParticleType>& particles,
+            const bool concaveCheck = true
         );
 
         //- Construct from mesh by reading from file
@@ -126,7 +157,8 @@ public:
         Cloud
         (
             const polyMesh& mesh,
-            const bool checkClass = true
+            const bool checkClass = true,
+            const bool concaveCheck = true
         );
 
 
@@ -136,8 +168,15 @@ public:
         (
             const polyMesh& pMesh,
             const word& cloudName,
-            const bool checkClass = true
+            const bool checkClass = true,
+            const bool concaveCheck = true
         );
+
+
+    // Destructor
+
+        //- Destroy any demand-driven data
+        void clearOut();
 
 
     // Member Functions
@@ -178,6 +217,9 @@ public:
             {
                 return IDLList<ParticleType>::size();
             };
+
+            //- Whether each cell is concave (demand driven data)
+            const PackedBoolList& concaveCell() const;
 
 
             // Iterators

@@ -31,6 +31,181 @@ License
 #include "mapPolyMesh.H"
 #include "Time.H"
 #include "OFstream.H"
+#include "triPointRef.H"
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::minValidTrackFraction = 1e-6;
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::trackingRescueTolerance = 1e-4;
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::intersectionTolerance = 0;
+
+template<class ParticleType>
+const Foam::scalar Foam::Cloud<ParticleType>::planarCosAngle = (1 - 1e-6);
+
+
+// * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * * //
+
+// Calculate using face properties only
+template<class ParticleType>
+bool Foam::Cloud<ParticleType>::isConcaveCell(const label cellI) const
+{
+    const cellList& cells = pMesh().cells();
+
+    const labelList& fOwner = pMesh().faceOwner();
+    const vectorField& fAreas = pMesh().faceAreas();
+    const pointField& fCentres = pMesh().faceCentres();
+    const pointField& cCentres = pMesh().cellCentres();
+    const pointField& points = pMesh().points();
+
+    const cell& cFaces = cells[cellI];
+
+    bool concave = false;
+
+    forAll(cFaces, i)
+    {
+        label f0I = cFaces[i];
+
+        // Get f0 centre
+        const point& fc0 = fCentres[f0I];
+
+        const face& f0 = pMesh().faces()[f0I];
+
+        vector fn0 = fAreas[f0I];
+        fn0 /= (mag(fn0) + VSMALL);
+
+        // Flip normal if required so that it is always pointing out of
+        // the cell
+        if (fOwner[f0I] != cellI)
+        {
+            fn0 *= -1;
+        }
+
+        // Check if the cell centre is visible from the plane of the face
+
+        if (((fc0 - cCentres[cellI]) & fn0) < 0)
+        {
+            Pout<< "Face " << f0I
+                << " is not visible from the centre of cell " << cellI
+                << endl;
+        }
+
+        forAll(cFaces, j)
+        {
+            if (j != i)
+            {
+                label f1I = cFaces[j];
+
+                const face& f1 = pMesh().faces()[f1I];
+
+                // Is any vertex of f1 on wrong side of the plane of f0?
+
+                forAll(f1, f1pI)
+                {
+                    label ptI = f1[f1pI];
+
+                    // Skip points that are shared between f1 and f0
+                    if (findIndex(f0, ptI) > -1)
+                    {
+                        continue;
+                    }
+
+                    const point& pt = points[ptI];
+
+                    // If the cell is concave, the point on f1 will be
+                    // on the outside of the plane of f0, defined by
+                    // its centre and normal, and the angle between
+                    // (fc0 -pt) and fn0 will be greater than 90
+                    // degrees, so the dot product will be negative.
+
+                    scalar d = ((fc0 - pt) & fn0);
+
+                    if (d < 0)
+                    {
+                        // Concave face
+
+                        concave = true;
+                    }
+                }
+
+                // Check for co-planar faces, which are also treated
+                // as concave, as they are not strictly convex.
+
+                vector fn1 = fAreas[f1I];
+                fn1 /= (mag(fn1) + VSMALL);
+
+                // Flip normal if required so that it is always pointing out of
+                // the cell
+                if (fOwner[f1I] != cellI)
+                {
+                    fn1 *= -1;
+                }
+
+                if ((fn0 & fn1) > planarCosAngle)
+                {
+                    // Planar face
+
+                    concave = true;
+                }
+            }
+        }
+    }
+
+    return concave;
+}
+
+
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::calcConcaveCells() const
+{
+    const cellList& cells = pMesh().cells();
+
+    concaveCellPtr_.reset(new PackedBoolList(pMesh().nCells()));
+    PackedBoolList& concaveCell = concaveCellPtr_();
+
+    forAll(cells, cellI)
+    {
+        // if (isConcaveCell(cellI))
+        // {
+        //     concaveCell[cellI] = 1;
+        // }
+
+        concaveCell[cellI] = 1;
+    }
+
+    {
+        // Write cells that are a problem to file
+
+        DynamicList<label> tmpConcaveCells;
+
+        forAll(cells, cellI)
+        {
+            if (concaveCell[cellI])
+            {
+                tmpConcaveCells.append(cellI);
+            }
+        }
+
+        Pout<< "Cloud<ParticleType>::calcConcaveCells() :"
+            << " overall cells in mesh : " << pMesh().nCells() << nl
+            << "    of these concave : " << tmpConcaveCells.size() << endl;
+
+        fileName fName = pMesh().time().path()/"concaveCells";
+
+        Pout<< "    Writing " << fName.name() << endl;
+
+        OFstream file(fName);
+
+        file << tmpConcaveCells;
+
+        file.flush();
+    }
+}
+
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -38,12 +213,14 @@ template<class ParticleType>
 Foam::Cloud<ParticleType>::Cloud
 (
     const polyMesh& pMesh,
-    const IDLList<ParticleType>& particles
+    const IDLList<ParticleType>& particles,
+    const bool concaveCheck
 )
 :
     cloud(pMesh),
     IDLList<ParticleType>(),
     polyMesh_(pMesh),
+    concaveCheck_(concaveCheck),
     particleCount_(0)
 {
     IDLList<ParticleType>::operator=(particles);
@@ -55,19 +232,42 @@ Foam::Cloud<ParticleType>::Cloud
 (
     const polyMesh& pMesh,
     const word& cloudName,
-    const IDLList<ParticleType>& particles
+    const IDLList<ParticleType>& particles,
+    const bool concaveCheck
 )
 :
     cloud(pMesh, cloudName),
     IDLList<ParticleType>(),
     polyMesh_(pMesh),
+    concaveCheck_(concaveCheck),
     particleCount_(0)
 {
     IDLList<ParticleType>::operator=(particles);
 }
 
 
+template<class ParticleType>
+void Foam::Cloud<ParticleType>::clearOut()
+{
+    concaveCellPtr_.clear();
+    labels_.clearStorage();
+}
+
+
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+
+template<class ParticleType>
+const Foam::PackedBoolList& Foam::Cloud<ParticleType>::concaveCell()
+const
+{
+    if (!concaveCellPtr_.valid())
+    {
+        calcConcaveCells();
+    }
+
+    return concaveCellPtr_();
+}
+
 
 template<class ParticleType>
 Foam::label Foam::Cloud<ParticleType>::getNewParticleID() const
