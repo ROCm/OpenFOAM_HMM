@@ -24,126 +24,73 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "labelList.H"
-#include "regExp.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-
-template<class StringType>
-Foam::labelList Foam::findStrings
+template<class Matcher, class StringType>
+Foam::labelList Foam::findMatchingStrings
 (
-    const char* pattern,
-    const UList<StringType>& lst
+    const Matcher& matcher,
+    const UList<StringType>& lst,
+    const bool invert
 )
 {
-    regExp re(pattern);
-    labelList matched(lst.size());
+    labelList indices(lst.size());
 
-    label matchI = 0;
+    label nElem = 0;
     forAll(lst, elemI)
     {
-        if (re.match(lst[elemI]))
+        if (matcher.match(lst[elemI]) ? !invert : invert)
         {
-            matched[matchI++] = elemI;
+            indices[nElem++] = elemI;
         }
     }
-    matched.setSize(matchI);
+    indices.setSize(nElem);
 
-    return matched;
+    return indices;
 }
 
 
-template<class StringType>
-Foam::labelList Foam::findStrings
+template<class Matcher, class StringListType>
+StringListType Foam::subsetMatchingStrings
 (
-    const std::string& pattern,
-    const UList<StringType>& lst
+    const Matcher& matcher,
+    const StringListType& lst,
+    const bool invert
 )
 {
-    regExp re(pattern);
-    labelList matched(lst.size());
+    StringListType newLst(lst.size());
 
-    label matchI = 0;
+    label nElem = 0;
     forAll(lst, elemI)
     {
-        if (re.match(lst[elemI]))
+        if (matcher.match(lst[elemI]) ? !invert : invert)
         {
-            matched[matchI++] = elemI;
+            newLst[nElem++] = lst[elemI];
         }
     }
-    matched.setSize(matchI);
+    newLst.setSize(nElem);
 
-    return matched;
+    return newLst;
 }
 
 
-template<class StringType>
-Foam::labelList Foam::findStrings
+template<class Matcher, class StringListType>
+void Foam::inplaceSubsetMatchingStrings
 (
-    const wordRe& wre,
-    const UList<StringType>& lst
+    const Matcher& matcher,
+    StringListType& lst,
+    const bool invert
 )
 {
-    labelList matched(lst.size());
-
-    label matchI = 0;
+    label nElem = 0;
     forAll(lst, elemI)
     {
-        if (wre.match(lst[elemI]))
+        if (matcher.match(lst[elemI]) ? !invert : invert)
         {
-            matched[matchI++] = elemI;
+            lst[nElem++] = lst[elemI];
         }
     }
-    matched.setSize(matchI);
-
-    return matched;
-}
-
-
-template<class StringType>
-Foam::labelList Foam::findStrings
-(
-    const UList<wordRe>& wreLst,
-    const UList<StringType>& lst
-)
-{
-    labelList matched(lst.size());
-
-    label matchI = 0;
-    forAll(lst, elemI)
-    {
-        forAll(wreLst, reI)
-        {
-            if (wreLst[reI].match(lst[elemI]))
-            {
-                matched[matchI++] = elemI;
-                break;
-            }
-        }
-    }
-    matched.setSize(matchI);
-
-    return matched;
-}
-
-
-template<class StringType>
-bool Foam::findStrings
-(
-    const UList<wordRe>& wreLst,
-    const StringType& str
-)
-{
-    forAll(wreLst, reI)
-    {
-        if (wreLst[reI].match(str))
-        {
-            return true;
-        }
-    }
-
-    return false;
+    lst.setSize(nElem);
 }
 
 

@@ -42,6 +42,8 @@ namespace Foam
     addToRunTimeSelectionTable(faceZone, faceZone, dictionary);
 }
 
+const char* const Foam::faceZone::labelsName = "faceLabels";
+
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
 void Foam::faceZone::calcFaceZonePatch() const
@@ -226,7 +228,7 @@ Foam::faceZone::faceZone
     const faceZoneMesh& zm
 )
 :
-    zone("face", name, dict, index),
+    zone(name, dict, this->labelsName, index),
     flipMap_(dict.lookup("flipMap")),
     zoneMesh_(zm),
     patchPtr_(NULL),
@@ -442,7 +444,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
     const polyMesh& mesh = zoneMesh().mesh();
     const polyBoundaryMesh& bm = mesh.boundaryMesh();
 
-    bool boundaryError = false;
+    bool hasError = false;
 
 
     // Check that zone faces are synced
@@ -479,7 +481,7 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                 // Check face in zone on both sides
                 if (myZoneFace[bFaceI] != neiZoneFace[bFaceI])
                 {
-                    boundaryError = true;
+                    hasError = true;
 
                     if (report)
                     {
@@ -491,12 +493,17 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                             << " is not consistent with its coupled neighbour."
                             << endl;
                     }
+                    else
+                    {
+                        // w/o report - can stop checking now
+                        break;
+                    }
                 }
 
                 // Flip state should be opposite.
                 if (myZoneFlip[bFaceI] == neiZoneFlip[bFaceI])
                 {
-                    boundaryError = true;
+                    hasError = true;
 
                     if (report)
                     {
@@ -509,12 +516,17 @@ bool Foam::faceZone::checkParallelSync(const bool report) const
                             << " across coupled faces."
                             << endl;
                     }
+                    else
+                    {
+                        // w/o report - can stop checking now
+                        break;
+                    }
                 }
             }
         }
     }
 
-    return returnReduce(boundaryError, orOp<bool>());
+    return returnReduce(hasError, orOp<bool>());
 }
 
 
@@ -539,7 +551,7 @@ void Foam::faceZone::writeDict(Ostream& os) const
     os  << nl << name() << nl << token::BEGIN_BLOCK << nl
         << "    type " << type() << token::END_STATEMENT << nl;
 
-    writeEntry("faceLabels", os);
+    writeEntry(this->labelsName, os);
     flipMap().writeEntry("flipMap", os);
 
     os  << token::END_BLOCK << endl;
@@ -548,10 +560,10 @@ void Foam::faceZone::writeDict(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& fz)
+Foam::Ostream& Foam::operator<<(Ostream& os, const faceZone& zn)
 {
-    fz.write(os);
-    os.check("Ostream& operator<<(Ostream& os, const faceZone& fz");
+    zn.write(os);
+    os.check("Ostream& operator<<(Ostream&, const faceZone&");
     return os;
 }
 

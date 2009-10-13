@@ -81,6 +81,12 @@ protected:
 
 public:
 
+    // Static data members
+
+        //- The name associated with the zone-labels dictionary entry
+        static const char * const labelsName;
+
+
     //- Runtime type information
     TypeName("cellZone");
 

@@ -113,13 +113,8 @@ int main(int argc, char *argv[])
     }
 
     // control for renumbering iterations
-    bool optIndex = false;
     label indexingNumber = 0;
-    if (args.optionFound("index"))
-    {
-        optIndex = true;
-        indexingNumber = args.optionRead<label>("index");
-    }
+    bool optIndex = args.optionReadIfPresent("index", indexingNumber);
 
     // always write the geometry, unless the -noMesh option is specified
     bool optNoMesh = args.optionFound("noMesh");
@@ -134,7 +129,7 @@ int main(int argc, char *argv[])
     // or a particular time interval
     if (isDir(ensightDir))
     {
-        Info<<"Warning: reusing existing directory" << nl
+        Info<<"Warning: re-using existing directory" << nl
             << "    " << ensightDir << endl;
     }
     mkDir(ensightDir);
