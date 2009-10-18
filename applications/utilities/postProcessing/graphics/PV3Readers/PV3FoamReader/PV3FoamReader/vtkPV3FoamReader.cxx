@@ -405,8 +405,19 @@ void vtkPV3FoamReader::updatePatchNamesView(const bool show)
 {
     pqApplicationCore* appCore = pqApplicationCore::instance();
 
+    // need to check this, since our destructor calls this
+    if (!appCore)
+    {
+        return;
+    }
+
     // Server manager model for querying items in the server manager
     pqServerManagerModel* smModel = appCore->getServerManagerModel();
+
+    if (!smModel)
+    {
+        return;
+    }
 
     // Get all the pqRenderView instances
     QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();

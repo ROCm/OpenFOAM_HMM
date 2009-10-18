@@ -384,6 +384,7 @@ void Foam::vtkPV3blockMesh::renderPointNumbers
     if (show && meshPtr_)
     {
         const pointField& cornerPts = meshPtr_->blockPointField();
+        const scalar scaleFactor = meshPtr_->scaleFactor();
 
         pointNumberTextActorsPtrs_.setSize(cornerPts.size());
         forAll(cornerPts, pointI)
@@ -407,9 +408,9 @@ void Foam::vtkPV3blockMesh::renderPointNumbers
 
             txt->GetPositionCoordinate()->SetValue
             (
-                cornerPts[pointI].x(),
-                cornerPts[pointI].y(),
-                cornerPts[pointI].z()
+                cornerPts[pointI].x()*scaleFactor,
+                cornerPts[pointI].y()*scaleFactor,
+                cornerPts[pointI].z()*scaleFactor
             );
 
             // Add text to each renderer

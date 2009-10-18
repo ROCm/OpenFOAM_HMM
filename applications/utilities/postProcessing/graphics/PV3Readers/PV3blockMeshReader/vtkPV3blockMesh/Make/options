@@ -7,9 +7,11 @@ EXE_INC = \
     -I$(ParaView_INST_DIR)/VTK/Common \
     -I$(ParaView_INST_DIR)/VTK/Filtering \
     -I$(ParaView_INST_DIR)/VTK/Rendering \
+    -I../../vtkPV3Readers/lnInclude \
     -I../PV3blockMeshReader
 
 LIB_LIBS = \
+    -lvtkPV3Readers \
     -lmeshTools \
     -lblockMesh \
     $(GLIBS)

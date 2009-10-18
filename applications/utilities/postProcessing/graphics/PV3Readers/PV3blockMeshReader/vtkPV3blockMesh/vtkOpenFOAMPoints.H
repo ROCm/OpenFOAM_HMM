@@ -44,6 +44,21 @@ inline void vtkInsertNextOpenFOAMPoint
     points->InsertNextPoint(p.x(), p.y(), p.z());
 }
 
+inline void vtkInsertNextOpenFOAMPoint
+(
+    vtkPoints *points,
+    const Foam::point& p,
+    const Foam::scalar scaleFactor
+)
+{
+    points->InsertNextPoint
+    (
+        p.x()*scaleFactor,
+        p.y()*scaleFactor,
+        p.z()*scaleFactor
+    );
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif

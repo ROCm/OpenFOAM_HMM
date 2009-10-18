@@ -66,6 +66,7 @@ void Foam::vtkPV3blockMesh::convertMeshBlocks
     }
 
     int blockI = 0;
+    const scalar scaleFactor = blkMesh.scaleFactor();
 
     for
     (
@@ -103,7 +104,8 @@ void Foam::vtkPV3blockMesh::convertMeshBlocks
             vtkInsertNextOpenFOAMPoint
             (
                 vtkpoints,
-                blockPoints[blockLabels[ptI]]
+                blockPoints[blockLabels[ptI]],
+                scaleFactor
             );
 
             nodeIds[ptI] = ptI;
@@ -159,6 +161,7 @@ void Foam::vtkPV3blockMesh::convertMeshEdges
     const curvedEdgeList& edges = blkMesh.edges();
 
     int edgeI = 0;
+    const scalar scaleFactor = blkMesh.scaleFactor();
 
     for
     (
@@ -212,7 +215,12 @@ void Foam::vtkPV3blockMesh::convertMeshEdges
                 vtkIdType pointIds[edgePoints.size()];
                 forAll(edgePoints, ptI)
                 {
-                    vtkInsertNextOpenFOAMPoint(vtkpoints, edgePoints[ptI]);
+                    vtkInsertNextOpenFOAMPoint
+                    (
+                        vtkpoints,
+                        edgePoints[ptI],
+                        scaleFactor
+                    );
                     pointIds[ptI] = ptI;
                 }
 
@@ -266,6 +274,7 @@ void Foam::vtkPV3blockMesh::convertMeshCorners
     label datasetNo = 0;       // restart at dataset 0
 
     const pointField& blockPoints = meshPtr_->blockPointField();
+    const scalar& scaleFactor = meshPtr_->scaleFactor();
 
     if (debug)
     {
@@ -284,7 +293,12 @@ void Foam::vtkPV3blockMesh::convertMeshCorners
         vtkIdType pointId = 0;
         forAll(blockPoints, ptI)
         {
-            vtkInsertNextOpenFOAMPoint(vtkpoints, blockPoints[ptI]);
+            vtkInsertNextOpenFOAMPoint
+            (
+                vtkpoints,
+                blockPoints[ptI],
+                scaleFactor
+            );
 
             vtkcells->InsertNextCell(1, &pointId);
             pointId++;
