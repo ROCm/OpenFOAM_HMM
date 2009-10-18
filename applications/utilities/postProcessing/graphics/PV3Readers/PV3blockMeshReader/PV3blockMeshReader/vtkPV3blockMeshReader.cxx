@@ -80,7 +80,12 @@ vtkPV3blockMeshReader::~vtkPV3blockMeshReader()
 {
     vtkDebugMacro(<<"Deconstructor");
 
-    delete foamData_;
+    if (foamData_)
+    {
+        // remove point numbers
+        updatePointNumbersView(false);
+        delete foamData_;
+    }
 
     if (FileName)
     {

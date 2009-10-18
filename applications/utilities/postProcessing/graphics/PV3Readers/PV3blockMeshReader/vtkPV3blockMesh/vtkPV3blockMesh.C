@@ -219,6 +219,14 @@ Foam::vtkPV3blockMesh::~vtkPV3blockMesh()
         Info<< "<end> Foam::vtkPV3blockMesh::~vtkPV3blockMesh" << endl;
     }
 
+    // Hmm. pointNumberTextActors are not getting removed
+    //
+    forAll(pointNumberTextActorsPtrs_, pointI)
+    {
+        pointNumberTextActorsPtrs_[pointI]->Delete();
+    }
+    pointNumberTextActorsPtrs_.clear();
+
     delete meshPtr_;
 }
 

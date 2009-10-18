@@ -113,7 +113,12 @@ vtkPV3FoamReader::~vtkPV3FoamReader()
 {
     vtkDebugMacro(<<"Deconstructor");
 
-    delete foamData_;
+    if (foamData_)
+    {
+        // remove patch names
+        updatePatchNamesView(false);
+        delete foamData_;
+    }
 
     if (FileName)
     {

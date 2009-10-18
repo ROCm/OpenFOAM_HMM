@@ -7,7 +7,7 @@
 # the pqReader.xml file contains xml defining readers with their
 # file extensions and descriptions.
 
-cmake_minimum_required(VERSION 2.4)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 FIND_PACKAGE(ParaView REQUIRED)
 INCLUDE(${PARAVIEW_USE_FILE})
@@ -33,19 +33,45 @@ SET(
     "Single output directory for building all libraries."
 )
 
-# Build the server-side plugin
+
+#
+# Defined combined plugin
+#
+
+# Extend the auto-generated panel
+QT4_WRAP_CPP(MOC_SRCS pqPV3FoamReaderPanel.h)
+
+ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
+  CLASS_NAME pqPV3FoamReaderPanel
+  XML_NAME PV3FoamReader # name of SourceProxy in *SM.xml
+  XML_GROUP sources
+)
+
 ADD_PARAVIEW_PLUGIN(
     PV3FoamReader_SM "1.0"
     SERVER_MANAGER_XML PV3FoamReader_SM.xml
     SERVER_MANAGER_SOURCES vtkPV3FoamReader.cxx
+    GUI_INTERFACES ${IFACES}
+    GUI_SOURCES ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
+    GUI_RESOURCE_FILES PV3FoamReader.xml
 )
 
-# Build the client-side plugin
-ADD_PARAVIEW_PLUGIN(
-    PV3FoamReader
-    "1.0"
-    GUI_RESOURCES PV3FoamReader.qrc
-)
+# #
+# # Define the server-side portion of the reader plugin
+# #
+# ADD_PARAVIEW_PLUGIN(
+#     PV3FoamReader_SM "1.0"
+#     SERVER_MANAGER_XML PV3FoamReader_SM.xml
+#     SERVER_MANAGER_SOURCES vtkPV3FoamReader.cxx
+# )
+# #
+# # Define the client-side portion of the reader plugin
+# #
+# ADD_PARAVIEW_PLUGIN(
+#     PV3FoamReader "1.0"
+#     GUI_RESOURCES PV3FoamReader.qrc
+# )
+#
 
 TARGET_LINK_LIBRARIES(
     PV3FoamReader_SM
