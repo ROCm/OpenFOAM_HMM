@@ -159,9 +159,9 @@ Foam::pointHit Foam::face::intersection
 
         if (curHit.hit())
         {
-            if (Foam::mag(curHit.distance()) < nearestHitDist)
+            if (Foam::mag(curHit.distance()) < Foam::mag(nearestHitDist))
             {
-                nearestHitDist = Foam::mag(curHit.distance());
+                nearestHitDist = curHit.distance();
                 nearest.setHit();
                 nearest.setPoint(curHit.hitPoint());
             }
