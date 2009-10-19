@@ -26,7 +26,7 @@ Namespace
     Foam::constant::mathematical
 
 Description
-    mathematical constants
+    mathematical constants and conversion functions
 
 \*---------------------------------------------------------------------------*/
 
@@ -56,7 +56,20 @@ namespace mathematical
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace mathematical
-} // end namespace constant
+} // End namespace constant
+
+    //- Conversion from degrees to radians
+    inline scalar degToRad(const scalar& deg)
+    {
+        return (deg * constant::mathematical::pi/180.0);
+    }
+
+    //- Conversion from radians to degrees
+    inline scalar radToDeg(const scalar& rad)
+    {
+        return (rad * 180.0/constant::mathematical::pi);
+    }
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

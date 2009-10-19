@@ -123,12 +123,6 @@ bool Foam::engineTime::read()
 }
 
 
-Foam::scalar Foam::engineTime::degToRad(const scalar deg) const
-{
-    return constant::mathematical::pi*deg/180.0;
-}
-
-
 Foam::scalar Foam::engineTime::degToTime(const scalar theta) const
 {
     // 6 * rpm => deg/s

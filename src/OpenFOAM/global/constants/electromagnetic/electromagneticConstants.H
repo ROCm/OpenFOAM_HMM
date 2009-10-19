@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::em
+    Foam::constant::electromagnetic
 
 Description
     Electromagnetic constants
@@ -77,7 +77,7 @@ namespace electromagnetic
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace electromagnetic
-} // end namespace constant
+} // End namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
