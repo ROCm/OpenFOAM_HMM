@@ -271,8 +271,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
     const labelList& nei = mesh.faceNeighbour();
 
     // Severe nonorthogonality threshold
-    const scalar severeNonorthogonalityThreshold =
-        ::cos(orthWarn/180.0*constant::mathematical::pi);
+    const scalar severeNonorthogonalityThreshold = ::cos(degToRad(orthWarn));
 
     scalar minDDotS = GREAT;
 
@@ -303,8 +302,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
                         Pout<< "Severe non-orthogonality for face " << faceI
                             << " between cells " << own[faceI]
                             << " and " << nei[faceI]
-                            << ": Angle = "
-                            << ::acos(dDotS)/constant::mathematical::pi*180.0
+                            << ": Angle = " << radToDeg(::acos(dDotS))
                             << " deg." << endl;
                     }
 
@@ -329,8 +327,7 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
                             << faceI
                             << " between cells " << own[faceI] << " and "
                             << nei[faceI]
-                            << ": Angle = "
-                            << ::acos(dDotS)/constant::mathematical::pi*180.0
+                            << ": Angle = " << radToDeg(::acos(dDotS))
                             << " deg." << endl;
                     }
 
@@ -376,9 +373,8 @@ bool Foam::primitiveMeshGeometry::checkFaceDotProduct
         if (neiSize > 0)
         {
             Info<< "Mesh non-orthogonality Max: "
-                << ::acos(minDDotS)/constant::mathematical::pi*180.0
-                << " average: " <<
-                   ::acos(sumDDotS/neiSize)/constant::mathematical::pi*180.0
+                << radToDeg(::acos(minDDotS))
+                << " average: " << radToDeg(::acos(sumDDotS/neiSize))
                 << endl;
         }
     }
@@ -780,7 +776,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
             << abort(FatalError);
     }
 
-    const scalar maxSin = Foam::sin(maxDeg/180.0*constant::mathematical::pi);
+    const scalar maxSin = Foam::sin(degToRad(maxDeg));
 
     const faceList& fcs = mesh.faces();
 
@@ -860,8 +856,7 @@ bool Foam::primitiveMeshGeometry::checkFaceAngles
         if (maxEdgeSin > SMALL)
         {
             scalar maxConcaveDegr =
-                Foam::asin(Foam::min(1.0, maxEdgeSin))
-              *180.0/constant::mathematical::pi;
+                radToDeg(Foam::asin(Foam::min(1.0, maxEdgeSin)));
 
             Info<< "There are " << nConcave
                 << " faces with concave angles between consecutive"

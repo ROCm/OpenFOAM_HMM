@@ -247,7 +247,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
             nearestRegion[i]
         );
 
-        scalar angle = perpendicularAngle[region]/180.0*constant::mathematical::pi;
+        scalar angle = degToRad(perpendicularAngle[region]);
 
         if (angle >= 0)
         {
