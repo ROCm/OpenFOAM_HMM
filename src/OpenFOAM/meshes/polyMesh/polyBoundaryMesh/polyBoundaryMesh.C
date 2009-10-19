@@ -450,7 +450,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
 
     const polyBoundaryMesh& bm = *this;
 
-    bool boundaryError = false;
+    bool hasError = false;
 
     // Collect non-proc patches and check proc patches are last.
     wordList names(bm.size());
@@ -464,8 +464,8 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
         {
             if (nonProcI != patchI)
             {
-                // There is processor patch inbetween normal patches.
-                boundaryError = true;
+                // There is processor patch in between normal patches.
+                hasError = true;
 
                 if (debug || report)
                 {
@@ -508,7 +508,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
          || (allTypes[procI] != allTypes[0])
         )
         {
-            boundaryError = true;
+            hasError = true;
 
             if (debug || (report && Pstream::master()))
             {
@@ -523,7 +523,7 @@ bool Foam::polyBoundaryMesh::checkParallelSync(const bool report) const
         }
     }
 
-    return boundaryError;
+    return hasError;
 }
 
 
@@ -532,13 +532,13 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
     label nextPatchStart = mesh().nInternalFaces();
     const polyBoundaryMesh& bm = *this;
 
-    bool boundaryError = false;
+    bool hasError = false;
 
     forAll (bm, patchI)
     {
-        if (bm[patchI].start() != nextPatchStart && !boundaryError)
+        if (bm[patchI].start() != nextPatchStart && !hasError)
         {
-            boundaryError = true;
+            hasError = true;
 
             Info<< " ****Problem with boundary patch " << patchI
                 << " named " << bm[patchI].name()
@@ -553,26 +553,21 @@ bool Foam::polyBoundaryMesh::checkDefinition(const bool report) const
         nextPatchStart += bm[patchI].size();
     }
 
-    reduce(boundaryError, orOp<bool>());
+    reduce(hasError, orOp<bool>());
 
-    if (boundaryError)
+    if (debug || report)
     {
-        if (debug || report)
+        if (hasError)
         {
             Pout << " ***Boundary definition is in error." << endl;
         }
-
-        return true;
-    }
-    else
-    {
-        if (debug || report)
+        else
         {
             Info << "    Boundary definition OK." << endl;
         }
-
-        return false;
     }
+
+    return hasError;
 }
 
 

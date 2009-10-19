@@ -26,7 +26,7 @@ License
 
 #include "IOstreams.H"
 #include "pointHit.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -307,7 +307,7 @@ inline scalar triangle<Point, PointRef>::quality() const
     return
         mag()
       / (
-            constant::math::pi
+            constant::mathematical::pi
            *Foam::sqr(circumRadius())
            *0.413497
           + VSMALL

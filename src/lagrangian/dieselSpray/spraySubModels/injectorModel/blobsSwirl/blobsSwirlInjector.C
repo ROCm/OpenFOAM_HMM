@@ -26,7 +26,7 @@ License
 
 #include "blobsSwirlInjector.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -112,7 +112,7 @@ scalar blobsSwirlInjector::d0
 
     angle_ = coneAngle_[n]/2.0 + c*coneInterval_[n];
 
-    angle_ *= constant::math::pi/180.0;
+    angle_ *= constant::mathematical::pi/180.0;
 
     scalar injectedMassFlow = it.massFlowRate(t);
 
@@ -144,7 +144,7 @@ vector blobsSwirlInjector::direction
 {
     scalar alpha = sin(angle_);
     scalar dcorr = cos(angle_);
-    scalar beta = constant::math::twoPi*rndGen_.scalar01();
+    scalar beta = constant::mathematical::twoPi*rndGen_.scalar01();
 
     // randomly distributed vector normal to the injection vector
     vector normal = vector::zero;
@@ -155,7 +155,7 @@ vector blobsSwirlInjector::direction
         // correct beta if this is a 2D run
         // map it onto the 'angleOfWedge'
 
-        beta *= (1.0 - 2.0*reduce)*sm_.angleOfWedge()/(constant::math::twoPi);
+        beta *= (1.0 - 2.0*reduce)*sm_.angleOfWedge()/(constant::mathematical::twoPi);
         beta += reduce*sm_.angleOfWedge();
         normal =
             alpha
@@ -240,7 +240,7 @@ void blobsSwirlInjector::calculateHX
         (
             (A_[inj]*cTau_[inj]*muFuel*massFlow*(1.0 + x_))
            /(
-                constant::math::pi
+                constant::mathematical::pi
                *injectorDiameter
                *rhoFuel
                *dPressure
@@ -260,7 +260,7 @@ void blobsSwirlInjector::calculateHX
             (
                 (A_[inj]*cTau_[inj]*muFuel*massFlow*(1.0 + x_))
                /(
-                    constant::math::pi
+                    constant::mathematical::pi
                    *injectorDiameter
                    *rhoFuel
                    *dPressure

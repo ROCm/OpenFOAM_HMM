@@ -1,0 +1,179 @@
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
+
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
+
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
+
+Class
+    Foam::curvedEdge
+
+Description
+    Define a curved edge in space that is parameterised for
+    0<lambda<1 from the beginning to the end point.
+
+SourceFiles
+    curvedEdge.C
+
+\*---------------------------------------------------------------------------*/
+
+#ifndef curvedEdges_H
+#define curvedEdges_H
+
+#include "edge.H"
+#include "pointField.H"
+#include "typeInfo.H"
+#include "HashTable.H"
+#include "autoPtr.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
+{
+
+/*---------------------------------------------------------------------------*\
+                         Class curvedEdge Declaration
+\*---------------------------------------------------------------------------*/
+
+class curvedEdge
+{
+protected:
+
+    // Protected data
+
+        const pointField& points_;
+        const label start_;
+        const label end_;
+
+public:
+
+    //- Runtime type information
+    TypeName("curvedEdge");
+
+    // Declare run-time constructor selection tables
+
+        declareRunTimeSelectionTable
+        (
+            autoPtr,
+            curvedEdge,
+            Istream,
+            (
+                const pointField& points,
+                Istream& is
+            ),
+            (points, is)
+        );
+
+
+    // Constructors
+
+        //- Construct from components
+        curvedEdge
+        (
+            const pointField& points,
+            const label start,
+            const label end
+        );
+
+        //- Construct from Istream setting pointsList
+        curvedEdge(const pointField&, Istream&);
+
+        //- Copy construct
+        curvedEdge(const curvedEdge&);
+
+        //- Clone function
+        virtual autoPtr<curvedEdge> clone() const;
+
+        //- New function which constructs and returns pointer to a curvedEdge
+        static autoPtr<curvedEdge> New(const pointField&, Istream&);
+
+
+    // Destructor
+
+        virtual ~curvedEdge(){}
+
+
+    // Member Functions
+
+        //- Return label of start point
+        inline label start() const;
+
+        //- Return label of end point
+        inline label end() const;
+
+        //- Compare the given start and end points with this curve
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        inline int compare(const curvedEdge&) const;
+
+        //- Compare the given start and end points with this curve
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        inline int compare(const edge&) const;
+
+        //- Compare the given start and end points with this curve
+        //  -  0: different
+        //  - +1: identical
+        //  - -1: same edge, but different orientation
+        inline int compare(const label start, const label end) const;
+
+        //- Return the position of a point on the curve given by
+        //  the parameter 0 <= lambda <= 1
+        virtual vector position(const scalar) const = 0;
+
+        //- Return the length of the curve
+        virtual scalar length() const = 0;
+
+        //- Return a complete knotList by adding the start/end points
+        //  to the given list
+        static pointField knotlist
+        (
+            const pointField&,
+            const label start,
+            const label end,
+            const pointField& otherknots
+        );
+
+
+    // Member operators
+
+        void operator=(const curvedEdge&);
+
+    // Ostream operator
+
+        friend Ostream& operator<<(Ostream&, const curvedEdge&);
+};
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#include "curvedEdgeI.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
+
+// ************************************************************************* //

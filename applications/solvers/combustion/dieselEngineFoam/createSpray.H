@@ -30,7 +30,7 @@ scalar gasMass0 = fvc::domainIntegrate(rho).value();
 
 if (dieselSpray.twoD())
 {
-    gasMass0 *= constant::math::twoPi/dieselSpray.angleOfWedge();
+    gasMass0 *= constant::mathematical::twoPi/dieselSpray.angleOfWedge();
 }
 
 gasMass0 -=

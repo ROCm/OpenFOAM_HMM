@@ -33,7 +33,7 @@ Description
 #include "fvMesh.H"
 #include "IOobjectList.H"
 #include "passiveParticle.H"
-#include "vtkPV3FoamPoints.H"
+#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkCellArray.h"
@@ -86,7 +86,7 @@ vtkPolyData* Foam::vtkPV3Foam::lagrangianVTKMesh
         vtkIdType particleId = 0;
         forAllConstIter(Cloud<passiveParticle>, parcels, iter)
         {
-            vtkPV3FoamInsertNextPoint(vtkpoints, iter().position());
+            vtkInsertNextOpenFOAMPoint(vtkpoints, iter().position());
 
             vtkcells->InsertNextCell(1, &particleId);
             particleId++;

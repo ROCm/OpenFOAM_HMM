@@ -27,11 +27,11 @@
                         )
                     );
 
-                    Ak = sphereFraction*4.0*constant::math::pi
+                    Ak = sphereFraction*4.0*constant::mathematical::pi
                        *pow
                         (
                             3.0*Vk
-                           /(sphereFraction*4.0*constant::math::pi),
+                           /(sphereFraction*4.0*constant::mathematical::pi),
                             2.0/3.0
                         );
                 }
@@ -56,11 +56,11 @@
                         )
                     );
 
-                    Ak = circleFraction*constant::math::pi*thickness
+                    Ak = circleFraction*constant::mathematical::pi*thickness
                        *sqrt
                         (
                             4.0*Vk
-                           /(circleFraction*thickness*constant::math::pi)
+                           /(circleFraction*thickness*constant::mathematical::pi)
                         );
                 }
                 break;

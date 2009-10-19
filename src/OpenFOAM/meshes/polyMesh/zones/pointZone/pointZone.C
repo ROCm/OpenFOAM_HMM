@@ -40,6 +40,7 @@ namespace Foam
     addToRunTimeSelectionTable(pointZone, pointZone, dictionary);
 }
 
+const char* const Foam::pointZone::labelsName = "pointLabels";
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -77,7 +78,7 @@ Foam::pointZone::pointZone
     const pointZoneMesh& zm
 )
 :
-    zone("point", name, dict, index),
+    zone(name, dict, this->labelsName, index),
     zoneMesh_(zm)
 {}
 
@@ -139,7 +140,7 @@ void Foam::pointZone::writeDict(Ostream& os) const
     os  << nl << name_ << nl << token::BEGIN_BLOCK << nl
         << "    type " << type() << token::END_STATEMENT << nl;
 
-    writeEntry("pointLabels", os);
+    writeEntry(this->labelsName, os);
 
     os  << token::END_BLOCK << endl;
 }
@@ -147,10 +148,10 @@ void Foam::pointZone::writeDict(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::pointZone::operator=(const pointZone& pz)
+void Foam::pointZone::operator=(const pointZone& zn)
 {
     clearAddressing();
-    labelList::operator=(pz);
+    labelList::operator=(zn);
 }
 
 
@@ -163,10 +164,10 @@ void Foam::pointZone::operator=(const labelList& addr)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const pointZone& pz)
+Foam::Ostream& Foam::operator<<(Ostream& os, const pointZone& zn)
 {
-    pz.write(os);
-    os.check("Ostream& operator<<(Ostream& os, const pointZone& pz");
+    zn.write(os);
+    os.check("Ostream& operator<<(Ostream&, const pointZone&");
     return os;
 }
 

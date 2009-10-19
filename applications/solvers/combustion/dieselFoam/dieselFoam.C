@@ -41,7 +41,7 @@ Description
 #include "IFstream.H"
 #include "OFstream.H"
 #include "Switch.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

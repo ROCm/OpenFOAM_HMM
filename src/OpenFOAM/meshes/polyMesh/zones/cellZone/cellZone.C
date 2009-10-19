@@ -37,11 +37,11 @@ License
 namespace Foam
 {
     defineTypeNameAndDebug(cellZone, 0);
-
     defineRunTimeSelectionTable(cellZone, dictionary);
     addToRunTimeSelectionTable(cellZone, cellZone, dictionary);
 }
 
+const char * const Foam::cellZone::labelsName = "cellLabels";
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -79,7 +79,7 @@ Foam::cellZone::cellZone
     const cellZoneMesh& zm
 )
 :
-    zone("cell", name, dict, index),
+    zone(name, dict, this->labelsName, index),
     zoneMesh_(zm)
 {}
 
@@ -140,7 +140,7 @@ void Foam::cellZone::writeDict(Ostream& os) const
     os  << nl << name() << nl << token::BEGIN_BLOCK << nl
         << "    type " << type() << token::END_STATEMENT << nl;
 
-    writeEntry("cellLabels", os);
+    writeEntry(this->labelsName, os);
 
     os  << token::END_BLOCK << endl;
 }
@@ -148,10 +148,10 @@ void Foam::cellZone::writeDict(Ostream& os) const
 
 // * * * * * * * * * * * * * * * Member Operators  * * * * * * * * * * * * * //
 
-void Foam::cellZone::operator=(const cellZone& cz)
+void Foam::cellZone::operator=(const cellZone& zn)
 {
     clearAddressing();
-    labelList::operator=(cz);
+    labelList::operator=(zn);
 }
 
 
@@ -164,10 +164,10 @@ void Foam::cellZone::operator=(const labelList& addr)
 
 // * * * * * * * * * * * * * * * Ostream Operator  * * * * * * * * * * * * * //
 
-Foam::Ostream& Foam::operator<<(Ostream& os, const cellZone& cz)
+Foam::Ostream& Foam::operator<<(Ostream& os, const cellZone& zn)
 {
-    cz.write(os);
-    os.check("Ostream& operator<<(Ostream& os, const cellZone& cz");
+    zn.write(os);
+    os.check("Ostream& operator<<(Ostream&, const cellZone&");
     return os;
 }
 

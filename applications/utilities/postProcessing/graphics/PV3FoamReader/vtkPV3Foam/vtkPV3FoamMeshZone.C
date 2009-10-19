@@ -29,7 +29,7 @@ Description
 #include "vtkPV3Foam.H"
 
 // Foam includes
-#include "vtkPV3FoamPoints.H"
+#include "vtkOpenFOAMPoints.H"
 
 // VTK includes
 #include "vtkPoints.h"
@@ -72,7 +72,7 @@ vtkPolyData* Foam::vtkPV3Foam::faceZoneVTKMesh
     vtkpoints->Allocate( points.size() );
     forAll(points, i)
     {
-        vtkPV3FoamInsertNextPoint(vtkpoints, points[i]);
+        vtkInsertNextOpenFOAMPoint(vtkpoints, points[i]);
     }
 
     vtkmesh->SetPoints(vtkpoints);
@@ -131,7 +131,7 @@ vtkPolyData* Foam::vtkPV3Foam::pointZoneVTKMesh
 
     forAll(pointLabels, pointI)
     {
-        vtkPV3FoamInsertNextPoint(vtkpoints, meshPoints[pointLabels[pointI]]);
+        vtkInsertNextOpenFOAMPoint(vtkpoints, meshPoints[pointLabels[pointI]]);
     }
 
     vtkmesh->SetPoints(vtkpoints);

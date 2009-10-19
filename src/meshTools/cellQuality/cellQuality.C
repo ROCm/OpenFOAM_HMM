@@ -26,7 +26,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellQuality.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -67,7 +67,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
 
         scalar cosDDotS =
             Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-            *180.0/constant::math::pi;
+            *180.0/constant::mathematical::pi;
 
         result[own[faceI]] = max(cosDDotS, result[own[faceI]]);
 
@@ -93,7 +93,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::nonOrthogonality() const
 
             scalar cosDDotS =
                 Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-               *180.0/constant::math::pi;
+               *180.0/constant::mathematical::pi;
 
             result[faceCells[faceI]] = max(cosDDotS, result[faceCells[faceI]]);
         }
@@ -208,7 +208,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
 
         scalar cosDDotS =
             Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-            *180.0/constant::math::pi;
+            *180.0/constant::mathematical::pi;
 
         result[faceI] = cosDDotS;
     }
@@ -234,7 +234,7 @@ Foam::tmp<Foam::scalarField> Foam::cellQuality::faceNonOrthogonality() const
 
             scalar cosDDotS =
                 Foam::acos(min(1.0, (d & s)/(mag(d)*magS + VSMALL)))
-               *180.0/constant::math::pi;
+               *180.0/constant::mathematical::pi;
 
             result[globalFaceI++] = cosDDotS;
         }

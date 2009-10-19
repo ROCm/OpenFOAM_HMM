@@ -146,8 +146,10 @@ int main(int argc, char *argv[])
             << exit(FatalError);
     }
 
-    Info<< nl << "Creating block mesh from\n    "
-        << meshDictIoPtr->objectPath() << nl << endl;
+    Info<< "Creating block mesh from\n    "
+        << meshDictIoPtr->objectPath() << endl;
+
+    blockMesh::verbose(true);
 
     IOdictionary meshDict(meshDictIoPtr());
     blockMesh blocks(meshDict);
@@ -195,14 +197,14 @@ int main(int argc, char *argv[])
     }
 
 
-
-    Info<< nl << "Creating mesh from block mesh" << endl;
+    Info<< nl << "Creating polyMesh from blockMesh" << endl;
 
     wordList patchNames = blocks.patchNames();
     wordList patchTypes = blocks.patchTypes();
     word defaultFacesName = "defaultFaces";
     word defaultFacesType = emptyPolyPatch::typeName;
     wordList patchPhysicalTypes = blocks.patchPhysicalTypes();
+
 
     preservePatchTypes
     (
@@ -339,13 +341,45 @@ int main(int argc, char *argv[])
     // Set the precision of the points data to 10
     IOstream::defaultPrecision(10);
 
-    Info << nl << "Writing polyMesh" << endl;
+    Info<< nl << "Writing polyMesh" << endl;
     mesh.removeFiles();
     if (!mesh.write())
     {
         FatalErrorIn(args.executable())
             << "Failed writing polyMesh."
             << exit(FatalError);
+    }
+
+
+    //
+    // write some information
+    //
+    {
+        const polyPatchList& patches = mesh.boundaryMesh();
+
+        Info<< "----------------" << nl
+            << "Mesh Information" << nl
+            << "----------------" << nl
+            << "  " << "boundingBox: " << boundBox(mesh.points()) << nl
+            << "  " << "nPoints: " << mesh.nPoints() << nl
+            << "  " << "nCells: " << mesh.nCells() << nl
+            << "  " << "nFaces: " << mesh.nFaces() << nl
+            << "  " << "nInternalFaces: " << mesh.nInternalFaces() << nl;
+
+        Info<< "----------------" << nl
+            << "Patches" << nl
+            << "----------------" << nl;
+
+        forAll(patches, patchI)
+        {
+            const polyPatch& p = patches[patchI];
+
+            Info<< "  " << "patch " << patchI
+                << " (start: " << p.start()
+                << " size: " << p.size()
+                << ") name: " << p.name()
+                << nl;
+        }
     }
 
     Info<< nl << "End" << endl;
