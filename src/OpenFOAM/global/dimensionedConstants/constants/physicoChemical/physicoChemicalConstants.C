@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "universalConstants.H"
 #include "electromagneticConstants.H"
 #include "physicoChemicalConstants.H"
@@ -75,7 +75,7 @@ const Foam::dimensionedScalar Foam::constant::physicoChemical::sigma
         dimensionedScalar
         (
             "sigma",
-            dimensionedScalar("C", dimless, sqr(constant::math::pi)/60.0)
+            dimensionedScalar("C", dimless, sqr(constant::mathematical::pi)/60.0)
            *pow4(k)/(pow3(constant::universal::hr)*sqr(constant::universal::c))
         )
     )
@@ -107,7 +107,7 @@ const Foam::dimensionedScalar Foam::constant::physicoChemical::c1
         dimensionedScalar
         (
             "c1",
-            dimensionedScalar("C", dimless, constant::math::twoPi)
+            dimensionedScalar("C", dimless, constant::mathematical::twoPi)
            *constant::universal::h*sqr(constant::universal::c)
         )
     )

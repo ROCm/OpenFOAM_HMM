@@ -28,7 +28,7 @@ Description
 
 #include "maxwellSlipUFvPatchVectorField.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
 #include "surfaceFields.H"
@@ -147,7 +147,7 @@ void maxwellSlipUFvPatchVectorField::updateCoeffs()
     const fvPatchField<scalar>& ppsi =
         patch().lookupPatchField<volScalarField, scalar>("psi");
 
-    Field<scalar> C1 = sqrt(ppsi*constant::math::piByTwo)
+    Field<scalar> C1 = sqrt(ppsi*constant::mathematical::piByTwo)
         *(2.0 - accommodationCoeff_)/accommodationCoeff_;
 
     Field<scalar> pnu = pmu/prho;

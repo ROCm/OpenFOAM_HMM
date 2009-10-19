@@ -38,7 +38,7 @@ Description
 // Dimensionless coefficents
 
 // Mathematical constants
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 
 // Dimensioned constants

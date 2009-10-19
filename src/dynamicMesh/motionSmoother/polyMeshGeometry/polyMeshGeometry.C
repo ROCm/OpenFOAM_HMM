@@ -27,7 +27,7 @@ License
 #include "polyMeshGeometry.H"
 #include "pyramidPointFaceRef.H"
 #include "syncTools.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 namespace Foam
 {
@@ -248,7 +248,7 @@ Foam::scalar Foam::polyMeshGeometry::checkNonOrtho
                     << " between cells " << mesh.faceOwner()[faceI]
                     << " and " << nei
                     << ": Angle = "
-                    << ::acos(dDotS)/constant::math::pi*180.0
+                    << ::acos(dDotS)/constant::mathematical::pi*180.0
                     << " deg." << endl;
             }
 
@@ -269,7 +269,7 @@ Foam::scalar Foam::polyMeshGeometry::checkNonOrtho
                     << " between cells " << mesh.faceOwner()[faceI]
                     << " and " << nei
                     << ": Angle = "
-                    << ::acos(dDotS)/constant::math::pi*180.0
+                    << ::acos(dDotS)/constant::mathematical::pi*180.0
                     << " deg." << endl;
             }
 
@@ -369,7 +369,7 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
 
     // Severe nonorthogonality threshold
     const scalar severeNonorthogonalityThreshold =
-        ::cos(orthWarn/180.0*constant::math::pi);
+        ::cos(orthWarn/180.0*constant::mathematical::pi);
 
 
     // Calculate coupled cell centre
@@ -504,9 +504,9 @@ bool Foam::polyMeshGeometry::checkFaceDotProduct
         if (nDDotS > 0)
         {
             Info<< "Mesh non-orthogonality Max: "
-                << ::acos(minDDotS)/constant::math::pi*180.0
+                << ::acos(minDDotS)/constant::mathematical::pi*180.0
                 << " average: " <<
-                   ::acos(sumDDotS/nDDotS)/constant::math::pi*180.0
+                   ::acos(sumDDotS/nDDotS)/constant::mathematical::pi*180.0
                 << endl;
         }
     }
@@ -1258,7 +1258,7 @@ bool Foam::polyMeshGeometry::checkFaceAngles
             << abort(FatalError);
     }
 
-    const scalar maxSin = Foam::sin(maxDeg/180.0*constant::math::pi);
+    const scalar maxSin = Foam::sin(maxDeg/180.0*constant::mathematical::pi);
 
     const faceList& fcs = mesh.faces();
 
@@ -1339,7 +1339,7 @@ bool Foam::polyMeshGeometry::checkFaceAngles
         {
             scalar maxConcaveDegr =
                 Foam::asin(Foam::min(1.0, maxEdgeSin))
-              *180.0/constant::math::pi;
+              *180.0/constant::mathematical::pi;
 
             Info<< "There are " << nConcave
                 << " faces with concave angles between consecutive"

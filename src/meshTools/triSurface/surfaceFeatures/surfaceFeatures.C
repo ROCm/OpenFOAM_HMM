@@ -33,7 +33,7 @@ License
 #include "linePointRef.H"
 #include "OFstream.H"
 #include "IFstream.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -491,7 +491,7 @@ Foam::labelList Foam::surfaceFeatures::selectFeatureEdges
 void Foam::surfaceFeatures::findFeatures(const scalar includedAngle)
 {
     scalar minCos =
-        Foam::cos((180.0 - includedAngle)*constant::math::pi/180.0);
+        Foam::cos((180.0 - includedAngle)*constant::mathematical::pi/180.0);
 
     const labelListList& edgeFaces = surf_.edgeFaces();
     const vectorField& faceNormals = surf_.faceNormals();

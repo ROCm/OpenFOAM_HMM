@@ -26,7 +26,7 @@ License
 
 #include "wedge.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -52,7 +52,7 @@ wedge::wedge(const dictionary& dict)
     angle_
     (
         readScalar(coeffDict_.lookup("angle"))
-       *constant::math::pi/180.0
+       *constant::mathematical::pi/180.0
     )
 {}
 
