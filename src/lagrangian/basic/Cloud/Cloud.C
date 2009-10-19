@@ -172,13 +172,21 @@ void Foam::Cloud<ParticleType>::calcConcaveCells() const
         // if (isConcaveCell(cellI))
         // {
         //     concaveCell[cellI] = 1;
+
+        //     // TODO: extend selection to include any point connected
+        //     // cell if there are conflicts between cells using the two
+        //     // different methods
         // }
 
+        // Force all cells to be treated exactly
         concaveCell[cellI] = 1;
+
+        // Force all cells to be treated by planes
+        // concaveCell[cellI] = 0;
     }
 
     {
-        // Write cells that are a problem to file
+        // Write cells that are concave to file
 
         DynamicList<label> tmpConcaveCells;
 

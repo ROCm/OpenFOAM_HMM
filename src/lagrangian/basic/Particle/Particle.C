@@ -121,10 +121,6 @@ bool Foam::Particle<ParticleType>::insideCellExact
 
         if (inter.hit())
         {
-            // Pout<< "insideCellExact cell " << celli
-            //     << " face " << facei << " "
-            //     << inter.distance() << endl;
-
             if (beingOnAFaceMeansOutside)
             {
                 if (inter.distance() <= 1.0)
@@ -168,7 +164,7 @@ bool Foam::Particle<ParticleType>::insideCellExact
 
 template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::trackToFaceConcave
+void Foam::Particle<ParticleType>::trackToFaceExact
 (
     scalar& trackFraction,
     const vector& endPosition,
@@ -186,8 +182,6 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
     // cell to start with and enters the cell at the end of the track
     // to be identified.
 
-    // Pout<< nl << "Outside test:" << endl;
-
     if (insideCellExact(endPosition, celli_, false))
     {
         // Even number of face crossings, so the particle must end up
@@ -197,14 +191,6 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         trackFraction = 1.0;
         return;
     }
-
-    // Pout<< nl << origProc_ << " "
-    //     << origId_ << " "
-    //     << position_ << " "
-    //     << endPosition << " "
-    //     << stepFraction_ << " "
-    //     << celli_
-    //     << endl;
 
     // The particle *must* have left the cell.
 
@@ -228,14 +214,8 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         mag(mesh.cellCentres()[celli_] - position_)
        *deltaPosition/(mag(deltaPosition) + VSMALL);
 
-    // Pout<< "Inside test:" << endl;
-
     if (insideCellExact(position_, celli_, false))
     {
-        // Pout<< "The particle starts inside the cell and ends up outside of it"
-        //     << nl << position_ << " " << position_ + deltaTrack
-        //     << endl;
-
         // The particle started inside the cell and finished outside
         // of it, find which face to cross
 
@@ -265,8 +245,6 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
             {
                 tmpLambda = inter.distance();
 
-                // Pout<< facei << " " << tmpLambda << endl;
-
                 if
                 (
                     tmpLambda <= 1.0
@@ -284,7 +262,7 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
 
         if (facei_ > -1)
         {
-            if (!cloud_.internalFace(facei_))
+            if (cloud_.boundaryFace(facei_))
             {
                 // For a patch face, allow a small value of lambda to
                 // ensure patch interactions occur.
@@ -302,9 +280,6 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
 
                         // Do not trigger a face hit and move the position
                         // towards the cell centre
-
-                        // Pout<< "Hit a wall face heading the wrong way"
-                        //     << endl;
 
                         const point& cc = mesh.cellCentres()[celli_];
                         position_ +=
@@ -324,20 +299,10 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
                     // little without crossing the face to resolve the
                     // ambiguity.
 
-                    // Pout<< "Ambiguous face crossing, correcting towards cell "
-                    //     << "centre and not crossing face" << endl;
-
-                    // const point& cc = mesh.cellCentres()[celli_];
-                    // position_ +=
-                    //     Cloud<ParticleType>::trackingRescueTolerance
-                    //    *(cc - position_);
-
-                    // Pout<< "Ambiguous face crossing. " << endl;
-
                     facei_ = -1;
                 }
 
-                // If the face hit was not on a wall, add a small
+                // If the face hit was not on a patch, add a small
                 // amount to the track to move it off the face, If it
                 // was not an ambiguous face crossing, this makes sure
                 // the face is not ambiguous next tracking step.  If
@@ -351,10 +316,9 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
         }
         else
         {
-            // Pout<< "Particle " << origProc_ << " " << origId_
-            //     << " started inside cell " << celli_ << " and finished outside"
-            //     << " of it, but did not find a face to cross"
-            //     << endl;
+            // The particle started inside of the cell and finished
+            // outside of it, but did not find a face to cross.
+            // Applying a rescuing correction.
 
             const point& cc = mesh.cellCentres()[celli_];
             position_ +=
@@ -363,9 +327,8 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
     }
     else
     {
-        // Pout<< "The particle started outside of the cell" << endl;
-
-        // Find which cell the particle should be in.
+        // The particle started outside of the cell.  Find which cell
+        // it should be in.
 
         const labelList& cPts = mesh.cellPoints(celli_);
 
@@ -406,35 +369,25 @@ void Foam::Particle<ParticleType>::trackToFaceConcave
 
         if (!found)
         {
-            // Pout<< "Didn't find a new cell after searching "
-            //     << checkedCells << endl;
+            // Didn't find a new cell after searching point connected
+            // cells.  Applying a rescuing correction.
 
             const point& cc = mesh.cellCentres()[celli_];
             position_ +=
                 Cloud<ParticleType>::trackingRescueTolerance*(cc - position_);
         }
-        // else
-        // {
-        //     Pout<< "Found new cell " << celli_
-        //         << " by searching " << checkedCells
-        //         << endl;
-        // }
     }
-
-    // Pout<< facei_ << " " << celli_ << endl;
 
     if (facei_ > -1)
     {
         faceAction(trackFraction, endPosition, td);
     }
-
-    // Pout<< facei_ << " " << celli_ << endl;
 }
 
 
 template<class ParticleType>
 template<class TrackData>
-void Foam::Particle<ParticleType>::trackToFaceConvex
+void Foam::Particle<ParticleType>::trackToFacePlanes
 (
     scalar& trackFraction,
     const vector& endPosition,
@@ -497,17 +450,6 @@ void Foam::Particle<ParticleType>::trackToFaceConvex
     }
     else if (lambdaMin <= 0.0)
     {
-        // Pout<< "convex tracking recovery "
-        //     << origId_ << " "
-        //     << origProc_ << " "
-        //     << position_ << " "
-        //     << endPosition << " "
-        //     << stepFraction_ << " "
-        //     << lambdaMin << " "
-        //     << celli_ << " "
-        //     << facei_ << " "
-        //     << endl;
-
         trackFraction = Cloud<ParticleType>::trackingRescueTolerance;
         position_ += trackFraction*(endPosition - position_);
     }
@@ -538,18 +480,6 @@ void Foam::Particle<ParticleType>::trackToFaceConvex
 
     if (trackFraction < Cloud<ParticleType>::minValidTrackFraction)
     {
-        // Pout<< "convex tracking error "
-        //     << origId_ << " "
-        //     << origProc_ << " "
-        //     << position_ << " "
-        //     << endPosition << " "
-        //     << trackFraction << " "
-        //     << stepFraction_ << " "
-        //     << lambdaMin << " "
-        //     << celli_ << " "
-        //     << facei_ << " "
-        //     << endl;
-
         const polyMesh& mesh = cloud_.pMesh();
 
         const point& cc = mesh.cellCentres()[celli_];
@@ -583,8 +513,8 @@ void Foam::Particle<ParticleType>::faceAction
         }
         else
         {
-            FatalErrorIn("Particle::trackToFace(const vector&, TrackData&)")
-            << "addressing failure" << nl
+            FatalErrorIn("Particle::faceAction")
+                << "face-cell addressing failure" << nl
                 << abort(FatalError);
         }
     }
@@ -800,18 +730,17 @@ Foam::scalar Foam::Particle<ParticleType>::trackToFace
         if (cloud_.concaveCell()[celli_])
         {
             // Use a more careful tracking algorithm if the cell is concave
-            trackToFaceConcave(trackFraction, endPosition, td);
+            trackToFaceExact(trackFraction, endPosition, td);
         }
         else
         {
-            // Use a more careful tracking algorithm if the cell is concave
-            trackToFaceConvex(trackFraction, endPosition, td);
+            // Use the original tracking algorithm if the cell is convex
+            trackToFacePlanes(trackFraction, endPosition, td);
         }
     }
     else
     {
-        // Use the original tracking algorithm if the cell is convex
-        trackToFaceConvex(trackFraction, endPosition, td);
+        trackToFacePlanes(trackFraction, endPosition, td);
     }
 
     return trackFraction;

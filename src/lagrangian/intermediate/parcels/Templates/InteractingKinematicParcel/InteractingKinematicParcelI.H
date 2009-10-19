@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 using namespace Foam::constant;
 
@@ -503,7 +503,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::InteractingKinematicParcel<ParcelType>::volume(const scalar d) const
 {
-    return math::pi/6.0*pow3(d);
+    return mathematical::pi/6.0*pow3(d);
 }
 
 
@@ -533,7 +533,7 @@ template <class ParcelType>
 inline Foam::scalar
 Foam::InteractingKinematicParcel<ParcelType>::areaS(const scalar d) const
 {
-    return math::pi*d*d;
+    return mathematical::pi*d*d;
 }
 
 

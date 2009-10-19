@@ -48,7 +48,7 @@ inline Foam::scalar Foam::Particle<ParticleType>::lambda
         vector Cf = mesh.faceCentres()[facei];
 
         // patch interaction
-        if (!cloud_.internalFace(facei))
+        if (cloud_.boundaryFace(facei))
         {
             label patchi = patch(facei);
             const polyPatch& patch = mesh.boundaryMesh()[patchi];
@@ -196,7 +196,7 @@ inline Foam::scalar Foam::Particle<ParticleType>::lambda
     vector Cf = mesh.faceCentres()[facei];
 
     // patch interaction
-    if (!cloud_.internalFace(facei))
+    if (cloud_.boundaryFace(facei))
     {
         label patchi = patch(facei);
         const polyPatch& patch = mesh.boundaryMesh()[patchi];

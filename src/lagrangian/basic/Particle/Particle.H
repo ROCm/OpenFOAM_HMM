@@ -185,7 +185,7 @@ protected:
         //- Track to cell face using face decomposition, used for
         //  concave cells.
         template<class TrackData>
-        void trackToFaceConcave
+        void trackToFaceExact
         (
             scalar& trackFraction,
             const vector& endPosition,
@@ -195,7 +195,7 @@ protected:
         //- Track to cell face using the infinite planes of the faces.
         //  The cell *must* be convex.
         template<class TrackData>
-        void trackToFaceConvex
+        void trackToFacePlanes
         (
             scalar& trackFraction,
             const vector& endPosition,
