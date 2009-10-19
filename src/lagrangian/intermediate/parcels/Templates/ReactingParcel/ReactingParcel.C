@@ -25,10 +25,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ReactingParcel.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "specie.H"
 
-using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * *  Protected Member Functions * * * * * * * * * * * * //
 
@@ -393,7 +393,7 @@ void Foam::ReactingParcel<ParcelType>::calc
         }
         else
         {
-            this->d_ = cbrt(mass1/this->rho_*6.0/math::pi);
+            this->d_ = cbrt(mass1/this->rho_*6.0/pi);
         }
     }
 }

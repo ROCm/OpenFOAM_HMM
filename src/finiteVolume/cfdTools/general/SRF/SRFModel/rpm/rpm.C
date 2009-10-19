@@ -26,7 +26,7 @@ License
 
 #include "rpm.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -56,7 +56,7 @@ Foam::SRF::rpm::rpm
     rpm_(readScalar(SRFModelCoeffs_.lookup("rpm")))
 {
     // Initialise the angular velocity
-    omega_.value() = axis_*rpm_*constant::math::twoPi/60.0;
+    omega_.value() = axis_*rpm_*constant::mathematical::twoPi/60.0;
 }
 
 
@@ -76,7 +76,7 @@ bool Foam::SRF::rpm::read()
         SRFModelCoeffs_.lookup("rpm") >> rpm_;
 
         // Update angular velocity
-        omega_.value() = axis_*rpm_*(constant::math::twoPi/60.0);
+        omega_.value() = axis_*rpm_*(constant::mathematical::twoPi/60.0);
 
         return true;
     }

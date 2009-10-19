@@ -23,29 +23,22 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::solidBodyMotionFunctions::SKA
+    Foam::solidBodyMotionFunctions::oscillatingRotatingMotion
 
 Description
-    Sea Keeping Analysis (SKA) 6DoF motion function.
-
-    Obtained by interpolating tabulated data for surge (x-translation),
-    sway (y-translation), heave (z-translation), roll (rotation about x),
-    pitch (rotation about y) and yaw (rotation about z).
-
-See Also
-    SDA (Ship design analysis) for 3DoF motion.
+    SolidBodyMotionFvMesh 6DoF motion function. Oscillating rotation.
 
 SourceFiles
-    SKA.C
+    oscillatingRotatingMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef SKA_H
-#define SKA_H
+#ifndef oscillatingRotatingMotion_H
+#define oscillatingRotatingMotion_H
 
 #include "solidBodyMotionFunction.H"
 #include "primitiveFields.H"
-#include "Vector2D.H"
+#include "point.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -55,50 +48,44 @@ namespace solidBodyMotionFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class SKA Declaration
+                          Class oscillatingRotatingMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class SKA
+class oscillatingRotatingMotion
 :
     public solidBodyMotionFunction
 {
     // Private data
 
-        //- Time data file name read from dictionary
-        fileName timeDataFileName_;
+        //- Centre of gravity
+        point CofG_;
 
-        //- Center of gravity read from dictionary
-        vector CofG_;
+        //- Amplitude
+        vector amplitude_;
 
-        //- Type used to read in the translation and rotation "vectors"
-        typedef Vector2D<vector> translationRotationVectors;
-
-        //- Field of times
-        scalarField times_;
-
-        //- Field of translation and rotation "vectors"
-        Field<translationRotationVectors> values_;
+        //- Radial velocity
+        scalar omega_;
 
 
     // Private Member Functions
 
         //- Disallow copy construct
-        SKA(const SKA&);
+        oscillatingRotatingMotion(const oscillatingRotatingMotion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const SKA&);
+        void operator=(const oscillatingRotatingMotion&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("SKA");
+    TypeName("oscillatingRotatingMotion");
 
 
     // Constructors
 
         //- Construct from components
-        SKA
+        oscillatingRotatingMotion
         (
             const dictionary& SBMFCoeffs,
             const Time& runTime
@@ -107,7 +94,7 @@ public:
 
     // Destructor
 
-        virtual ~SKA();
+        virtual ~oscillatingRotatingMotion();
 
 
     // Member Functions

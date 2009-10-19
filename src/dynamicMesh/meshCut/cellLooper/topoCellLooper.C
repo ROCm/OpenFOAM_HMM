@@ -27,7 +27,7 @@ License
 #include "topoCellLooper.H"
 #include "cellFeatures.H"
 #include "polyMesh.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "DynamicList.H"
 #include "ListOps.H"
 #include "meshTools.H"
@@ -44,8 +44,7 @@ namespace Foam
 }
 
 // Angle for polys to be considered splitHexes.
-const Foam::scalar Foam::topoCellLooper::featureCos =
-    Foam::cos(10.0*constant::math::pi/180.0);
+const Foam::scalar Foam::topoCellLooper::featureCos = Foam::cos(degToRad(10.0));
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

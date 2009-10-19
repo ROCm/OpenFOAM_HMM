@@ -23,34 +23,54 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant
+    Foam::constant::mathematical
 
 Description
-    Collection of constants
+    mathematical constants and conversion functions
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef constants_H
-#define constants_H
+#ifndef mathematicalConstants_H
+#define mathematicalConstants_H
+
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Dimensionless coefficents
+namespace Foam
+{
+namespace constant
+{
+namespace mathematical
+{
 
-// Mathematical constants
-#include "mathConstants.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    static word group = "mathematical";
 
-// Dimensioned constants
+    const scalar e(M_E);
+    const scalar pi(M_PI);
+    const scalar twoPi(2*pi);
+    const scalar piByTwo(0.5*pi);
 
-// Fundamental constants
-#include "fundamentalConstants.H"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Derived constants
-#include "universalConstants.H"
-#include "electromagneticConstants.H"
-#include "atomicConstants.H"
-#include "physicoChemicalConstants.H"
+} // End namespace mathematical
+} // End namespace constant
+
+    //- Conversion from degrees to radians
+    inline scalar degToRad(const scalar& deg)
+    {
+        return (deg * constant::mathematical::pi/180.0);
+    }
+
+    //- Conversion from radians to degrees
+    inline scalar radToDeg(const scalar& rad)
+    {
+        return (rad * 180.0/constant::mathematical::pi);
+    }
+
+} // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

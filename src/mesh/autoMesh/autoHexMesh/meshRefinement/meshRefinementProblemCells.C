@@ -37,7 +37,7 @@ License
 #include "searchableSurfaces.H"
 #include "polyMeshGeometry.H"
 #include "IOmanip.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -247,7 +247,7 @@ Foam::Map<Foam::label> Foam::meshRefinement::findEdgeConnectedProblemCells
             nearestRegion[i]
         );
 
-        scalar angle = perpendicularAngle[region]/180.0*constant::math::pi;
+        scalar angle = degToRad(perpendicularAngle[region]);
 
         if (angle >= 0)
         {

@@ -34,7 +34,7 @@ Description
 #include "removePoints.H"
 #include "pointFields.H"
 #include "motionSmoother.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"
@@ -2480,10 +2480,10 @@ void Foam::autoLayerDriver::mergePatchFacesUndo
 )
 {
     scalar minCos =
-        Foam::cos(layerParams.featureAngle()*constant::math::pi/180.0);
+        Foam::cos(degToRad(layerParams.featureAngle()));
 
     scalar concaveCos =
-        Foam::cos(layerParams.concaveAngle()*constant::math::pi/180.0);
+        Foam::cos(degToRad(layerParams.concaveAngle()));
 
     Info<< nl
         << "Merging all faces of a cell" << nl
@@ -2602,7 +2602,7 @@ void Foam::autoLayerDriver::addLayers
         (
             pp,
             meshEdges,
-            layerParams.featureAngle()*constant::math::pi/180.0,
+            degToRad(layerParams.featureAngle()),
 
             patchDisp,
             patchNLayers,
@@ -2688,7 +2688,7 @@ void Foam::autoLayerDriver::addLayers
             maxPatchNameLen = max(maxPatchNameLen, label(patchName.size()));
         }
 
-        Info<< nl 
+        Info<< nl
             << setf(ios_base::left) << setw(maxPatchNameLen) << "patch"
             << setw(0) << " faces    layers avg thickness[m]" << nl
             << setf(ios_base::left) << setw(maxPatchNameLen) << " "
@@ -3289,7 +3289,7 @@ void Foam::autoLayerDriver::doLayers
                 << "Doing initial balancing" << nl
                 << "-----------------------" << nl
                 << endl;
-        
+
             scalarField cellWeights(mesh.nCells(), 1);
             forAll(numLayers, patchI)
             {
@@ -3302,7 +3302,7 @@ void Foam::autoLayerDriver::doLayers
                     }
                 }
             }
-        
+
             // Balance mesh (and meshRefinement). No restriction on face zones
             // and baffles.
             autoPtr<mapDistributePolyMesh> map = meshRefiner_.balance
@@ -3313,7 +3313,7 @@ void Foam::autoLayerDriver::doLayers
                 decomposer,
                 distributor
             );
-        
+
             //{
             //    globalIndex globalCells(mesh.nCells());
             //

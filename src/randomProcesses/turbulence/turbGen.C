@@ -29,7 +29,7 @@ License
 #include "Kmesh.H"
 #include "primitiveFields.H"
 #include "Ek.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -70,8 +70,8 @@ vectorField turbGen::U()
     complexVectorField up =
         fft::reverseTransform
         (
-            ComplexField(cos(constant::math::twoPi*rndPhases)*s,
-            sin(constant::math::twoPi*rndPhases)*s),
+            ComplexField(cos(constant::mathematical::twoPi*rndPhases)*s,
+            sin(constant::mathematical::twoPi*rndPhases)*s),
             K.nn()
         );
 

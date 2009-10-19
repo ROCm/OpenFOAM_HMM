@@ -28,7 +28,7 @@ License
 #include "IFstream.H"
 #include "DynamicList.H"
 #include "fft.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "SubField.H"
 
 // * * * * * * * * * * * * * * Static Member Data  * * * * * * * * * * * * * //
@@ -170,7 +170,7 @@ Foam::tmp<Foam::scalarField> Foam::noiseFFT::Hanning(const label N) const
 
     scalar T = N*deltat_;
 
-    return 2*(0.5 - 0.5*cos(constant::math::twoPi*t/T));
+    return 2*(0.5 - 0.5*cos(constant::mathematical::twoPi*t/T));
 }
 
 

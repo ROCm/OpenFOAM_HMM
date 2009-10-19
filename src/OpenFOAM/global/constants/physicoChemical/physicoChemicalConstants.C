@@ -24,109 +24,109 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "universalConstants.H"
 #include "electromagneticConstants.H"
-#include "atomicConstants.H"
+#include "physicoChemicalConstants.H"
 
 #include "dimensionedConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* Foam::constant::atomic::group = "atomic";
+const char* Foam::constant::physicoChemical::group = "physicoChemical";
 
 
-const Foam::dimensionedScalar Foam::constant::atomic::alpha
+const Foam::dimensionedScalar Foam::constant::physicoChemical::R
 (
     dimensionedConstant
     (
         group,
-        "alpha",
+        "R",
         dimensionedScalar
         (
-            "alpha",
-            sqr(constant::electromagnetic::e)
-           /(
-                dimensionedScalar("C", dimless, 2.0)
-               *constant::electromagnetic::epsilon0
-               *constant::universal::h
-               *constant::universal::c
-            )
+            "R",
+            NA*k
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::atomic::Rinf
+const Foam::dimensionedScalar Foam::constant::physicoChemical::F
 (
     dimensionedConstant
     (
         group,
-        "Rinf",
+        "F",
         dimensionedScalar
         (
-            "Rinf",
-            sqr(alpha)*me*constant::universal::c
-           /(dimensionedScalar("C", dimless, 2.0)*constant::universal::h)
+            "F",
+            NA*constant::electromagnetic::e
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::atomic::a0
+const Foam::dimensionedScalar Foam::constant::physicoChemical::sigma
 (
     dimensionedConstant
     (
         group,
-        "a0",
+        "sigma",
         dimensionedScalar
         (
-            "a0",
-            alpha
-           /(dimensionedScalar("C", dimless, 4.0*constant::math::pi)*Rinf)
+            "sigma",
+            dimensionedScalar("C", dimless, sqr(constant::mathematical::pi)/60.0)
+           *pow4(k)/(pow3(constant::universal::hr)*sqr(constant::universal::c))
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::atomic::re
+const Foam::dimensionedScalar Foam::constant::physicoChemical::b
 (
     dimensionedConstant
     (
         group,
-        "re",
+        "b",
         dimensionedScalar
         (
-            "re",
-            sqr(constant::electromagnetic::e)
-           /(
-                dimensionedScalar("C", dimless, 4.0*constant::math::pi)
-               *constant::electromagnetic::epsilon0
-               *me
-               *sqr(constant::universal::c)
-            )
+            "b",
+            (constant::universal::h*constant::universal::c/k)
+           /dimensionedScalar("C", dimless, 4.965114231)
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::atomic::Eh
+const Foam::dimensionedScalar Foam::constant::physicoChemical::c1
 (
     dimensionedConstant
     (
         group,
-        "Eh",
+        "c1",
         dimensionedScalar
         (
-            "Eh",
-            dimensionedScalar("C", dimless, 2.0)
-           *Rinf*constant::universal::h*constant::universal::c
+            "c1",
+            dimensionedScalar("C", dimless, constant::mathematical::twoPi)
+           *constant::universal::h*sqr(constant::universal::c)
+        )
+    )
+);
+
+
+const Foam::dimensionedScalar Foam::constant::physicoChemical::c2
+(
+    dimensionedConstant
+    (
+        group,
+        "c2",
+        dimensionedScalar
+        (
+            "c2",
+            constant::universal::h*constant::universal::c/k
         )
     )
 );
 
 
 // ************************************************************************* //
-
-
-

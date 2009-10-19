@@ -23,47 +23,37 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::math
+    Foam::constant
 
 Description
-    mathematical constants
+    Collection of constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mathConstants_H
-#define mathConstants_H
-
-#include "scalar.H"
+#ifndef constants_H
+#define constants_H
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace constant
-{
-namespace math
-{
+// Dimensionless coefficents
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Mathematical constants
+#include "mathematicalConstants.H"
 
-    static word group = "math";
 
-    const scalar e(M_E);
-    const scalar pi(M_PI);
-    const scalar twoPi(2*pi);
-    const scalar piByTwo(0.5*pi);
+// Dimensioned constants
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Fundamental constants
+#include "fundamentalConstants.H"
 
-} // End namespace math
-} // end namespace constant
-} // End namespace Foam
+// Derived constants
+#include "universalConstants.H"
+#include "electromagneticConstants.H"
+#include "atomicConstants.H"
+#include "physicoChemicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 #endif
 
 // ************************************************************************* //
-
-
-

@@ -22,45 +22,18 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
-    Foam::constant::uni
-
-Description
-    Universal constants
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef universalConstants_H
-#define universalConstants_H
-
-#include "dimensionedScalar.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace constant
-{
-namespace universal
-{
+// Constants supplied in the main controlDict
+#include "fundamentalConstants.C"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Derived constants
+#include "universalConstants.C"
+#include "electromagneticConstants.C"
+#include "atomicConstants.C"
+#include "physicoChemicalConstants.C"
 
-    //- Group name for universal constants
-    extern const char* group;
-
-    //- Reduced Planck constant: default SI units: [J/s]
-    extern const dimensionedScalar hr;
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace universal
-} // End namespace constant
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //
-

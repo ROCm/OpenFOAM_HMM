@@ -24,7 +24,7 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "universalConstants.H"
 #include "electromagneticConstants.H"
 #include "atomicConstants.H"
@@ -33,132 +33,100 @@ License
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* Foam::constant::electromagnetic::group = "electromagnetic";
+const char* Foam::constant::atomic::group = "atomic";
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::mu0
+const Foam::dimensionedScalar Foam::constant::atomic::alpha
 (
     dimensionedConstant
     (
         group,
-        "mu0",
+        "alpha",
         dimensionedScalar
         (
-            "mu0",
-            dimless,
-            4.0*constant::math::pi*1e-07
+            "alpha",
+            sqr(constant::electromagnetic::e)
+           /(
+                dimensionedScalar("C", dimless, 2.0)
+               *constant::electromagnetic::epsilon0
+               *constant::universal::h
+               *constant::universal::c
+            )
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::epsilon0
+const Foam::dimensionedScalar Foam::constant::atomic::Rinf
 (
     dimensionedConstant
     (
         group,
-        "epsilon0",
+        "Rinf",
         dimensionedScalar
         (
-            "epsilon0",
-            dimensionedScalar("C", dimless, 1.0)
-           /(mu0*sqr(constant::universal::c))
+            "Rinf",
+            sqr(alpha)*me*constant::universal::c
+           /(dimensionedScalar("C", dimless, 2.0)*constant::universal::h)
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::Z0
+const Foam::dimensionedScalar Foam::constant::atomic::a0
 (
     dimensionedConstant
     (
         group,
-        "Z0",
+        "a0",
         dimensionedScalar
         (
-            "Z0",
-            mu0*constant::universal::c
+            "a0",
+            alpha
+           /(dimensionedScalar("C", dimless, 4.0*constant::mathematical::pi)*Rinf)
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::kappa
+const Foam::dimensionedScalar Foam::constant::atomic::re
 (
     dimensionedConstant
     (
         group,
-        "kappa",
+        "re",
         dimensionedScalar
         (
-            "kappa",
-            dimensionedScalar("C", dimless, 1.0/(4.0*constant::math::pi))
-           /epsilon0
+            "re",
+            sqr(constant::electromagnetic::e)
+           /(
+                dimensionedScalar("C", dimless, 4.0*constant::mathematical::pi)
+               *constant::electromagnetic::epsilon0
+               *me
+               *sqr(constant::universal::c)
+            )
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::electromagnetic::G0
+const Foam::dimensionedScalar Foam::constant::atomic::Eh
 (
     dimensionedConstant
     (
         group,
-        "G0",
+        "Eh",
         dimensionedScalar
         (
-            "G0",
-            dimensionedScalar("C", dimless, 2)*sqr(e)/constant::universal::h
-        )
-    )
-);
-
-
-const Foam::dimensionedScalar Foam::constant::electromagnetic::KJ
-(
-    dimensionedConstant
-    (
-        group,
-        "KJ",
-        dimensionedScalar
-        (
-            "KJ",
-            dimensionedScalar("C", dimless, 2)*e/constant::universal::h
-        )
-    )
-);
-
-
-const Foam::dimensionedScalar Foam::constant::electromagnetic::phi0
-(
-    dimensionedConstant
-    (
-        group,
-        "phi0",
-        dimensionedScalar
-        (
-            "phi0",
-            constant::universal::h/(dimensionedScalar("C", dimless, 2)*e)
-        )
-    )
-);
-
-
-const Foam::dimensionedScalar Foam::constant::electromagnetic::RK
-(
-    dimensionedConstant
-    (
-        group,
-        "RK",
-        dimensionedScalar
-        (
-            "RK",
-            constant::universal::h/sqr(e)
+            "Eh",
+            dimensionedScalar("C", dimless, 2.0)
+           *Rinf*constant::universal::h*constant::universal::c
         )
     )
 );
 
 
 // ************************************************************************* //
+
 
 

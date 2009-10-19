@@ -22,32 +22,45 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Namespace
+    Foam::constant::universal
+
+Description
+    Universal constants
+
 \*---------------------------------------------------------------------------*/
 
-#include "universalConstants.H"
-#include "mathConstants.H"
+#ifndef universalConstants_H
+#define universalConstants_H
 
-#include "dimensionedConstants.H"
+#include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* Foam::constant::universal::group = "universal";
+namespace Foam
+{
+namespace constant
+{
+namespace universal
+{
 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const Foam::dimensionedScalar Foam::constant::universal::hr
-(
-    dimensionedConstant
-    (
-        group,
-        "hr",
-        dimensionedScalar
-        (
-            "hr",
-            h/(dimensionedScalar("C", dimless, constant::math::twoPi))
-        )
-    )
-);
+    //- Group name for universal constants
+    extern const char* group;
 
+    //- Reduced Planck constant: default SI units: [J/s]
+    extern const dimensionedScalar hr;
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace universal
+} // End namespace constant
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
 

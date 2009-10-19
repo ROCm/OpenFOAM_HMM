@@ -27,7 +27,7 @@ License
 #include "Kmesh.H"
 #include "polyMesh.H"
 #include "volFields.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,15 +89,15 @@ Foam::Kmesh::Kmesh(const fvMesh& mesh)
 
     for (i=0; i<NN[0]; i++)
     {
-        scalar k1 = (i - NN[0]/2)*constant::math::twoPi/L[0];
+        scalar k1 = (i - NN[0]/2)*constant::mathematical::twoPi/L[0];
 
         for (label j=0; j<NN[1]; j++)
         {
-            scalar k2 = (j - NN[1]/2)*constant::math::twoPi/L[1];
+            scalar k2 = (j - NN[1]/2)*constant::mathematical::twoPi/L[1];
 
             for (label k=0; k<NN[2]; k++)
             {
-                scalar k3 = (k - NN[2]/2)*constant::math::twoPi/L[2];
+                scalar k3 = (k - NN[2]/2)*constant::mathematical::twoPi/L[2];
 
                 (*this)[rep(i, j, k, NN)] = vector(k1, k2, k3);
             }

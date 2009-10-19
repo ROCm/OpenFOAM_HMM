@@ -24,109 +24,141 @@ License
 
 \*---------------------------------------------------------------------------*/
 
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "universalConstants.H"
 #include "electromagneticConstants.H"
-#include "physicoChemicalConstants.H"
+#include "atomicConstants.H"
 
 #include "dimensionedConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-const char* Foam::constant::physicoChemical::group = "physicoChemical";
+const char* Foam::constant::electromagnetic::group = "electromagnetic";
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::R
+const Foam::dimensionedScalar Foam::constant::electromagnetic::mu0
 (
     dimensionedConstant
     (
         group,
-        "R",
+        "mu0",
         dimensionedScalar
         (
-            "R",
-            NA*k
+            "mu0",
+            dimless,
+            4.0*constant::mathematical::pi*1e-07
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::F
+const Foam::dimensionedScalar Foam::constant::electromagnetic::epsilon0
 (
     dimensionedConstant
     (
         group,
-        "F",
+        "epsilon0",
         dimensionedScalar
         (
-            "F",
-            NA*constant::electromagnetic::e
+            "epsilon0",
+            dimensionedScalar("C", dimless, 1.0)
+           /(mu0*sqr(constant::universal::c))
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::sigma
+const Foam::dimensionedScalar Foam::constant::electromagnetic::Z0
 (
     dimensionedConstant
     (
         group,
-        "sigma",
+        "Z0",
         dimensionedScalar
         (
-            "sigma",
-            dimensionedScalar("C", dimless, sqr(constant::math::pi)/60.0)
-           *pow4(k)/(pow3(constant::universal::hr)*sqr(constant::universal::c))
+            "Z0",
+            mu0*constant::universal::c
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::b
+const Foam::dimensionedScalar Foam::constant::electromagnetic::kappa
 (
     dimensionedConstant
     (
         group,
-        "b",
+        "kappa",
         dimensionedScalar
         (
-            "b",
-            (constant::universal::h*constant::universal::c/k)
-           /dimensionedScalar("C", dimless, 4.965114231)
+            "kappa",
+            dimensionedScalar("C", dimless, 1.0/(4.0*constant::mathematical::pi))
+           /epsilon0
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::c1
+const Foam::dimensionedScalar Foam::constant::electromagnetic::G0
 (
     dimensionedConstant
     (
         group,
-        "c1",
+        "G0",
         dimensionedScalar
         (
-            "c1",
-            dimensionedScalar("C", dimless, constant::math::twoPi)
-           *constant::universal::h*sqr(constant::universal::c)
+            "G0",
+            dimensionedScalar("C", dimless, 2)*sqr(e)/constant::universal::h
         )
     )
 );
 
 
-const Foam::dimensionedScalar Foam::constant::physicoChemical::c2
+const Foam::dimensionedScalar Foam::constant::electromagnetic::KJ
 (
     dimensionedConstant
     (
         group,
-        "c2",
+        "KJ",
         dimensionedScalar
         (
-            "c2",
-            constant::universal::h*constant::universal::c/k
+            "KJ",
+            dimensionedScalar("C", dimless, 2)*e/constant::universal::h
+        )
+    )
+);
+
+
+const Foam::dimensionedScalar Foam::constant::electromagnetic::phi0
+(
+    dimensionedConstant
+    (
+        group,
+        "phi0",
+        dimensionedScalar
+        (
+            "phi0",
+            constant::universal::h/(dimensionedScalar("C", dimless, 2)*e)
+        )
+    )
+);
+
+
+const Foam::dimensionedScalar Foam::constant::electromagnetic::RK
+(
+    dimensionedConstant
+    (
+        group,
+        "RK",
+        dimensionedScalar
+        (
+            "RK",
+            constant::universal::h/sqr(e)
         )
     )
 );
 
 
 // ************************************************************************* //
+
+

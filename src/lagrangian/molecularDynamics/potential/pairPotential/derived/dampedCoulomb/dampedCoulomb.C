@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "dampedCoulomb.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -47,7 +47,7 @@ addToRunTimeSelectionTable
 );
 
 scalar dampedCoulomb::oneOverFourPiEps0 =
-    1.0/(4.0*constant::math::pi*8.854187817e-12);
+    1.0/(4.0*constant::mathematical::pi*8.854187817e-12);
 
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //

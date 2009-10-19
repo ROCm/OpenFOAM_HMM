@@ -23,23 +23,26 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Class
-    Foam::solidBodyMotionFunctions::rotationMotion
+    Foam::solidBodyMotionFunctions::tabulated6DoFMotion
 
 Description
-    SolidBodyMotionFvMesh 6DoF motion function. Constant
-    velocity rotation around CoG.
+    Tabulated 6DoF motion function.
+
+    Obtained by interpolating tabulated data for surge (x-translation),
+    sway (y-translation), heave (z-translation), roll (rotation about x),
+    pitch (rotation about y) and yaw (rotation about z).
 
 SourceFiles
-    rotationMotion.C
+    tabulated6DoFMotion.C
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef rotationMotion_H
-#define rotationMotion_H
+#ifndef tabulated6DoFMotion_H
+#define tabulated6DoFMotion_H
 
 #include "solidBodyMotionFunction.H"
 #include "primitiveFields.H"
-#include "point.H"
+#include "Vector2D.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -49,41 +52,50 @@ namespace solidBodyMotionFunctions
 {
 
 /*---------------------------------------------------------------------------*\
-                          Class rotationMotion Declaration
+                          Class tabulated6DoFMotion Declaration
 \*---------------------------------------------------------------------------*/
 
-class rotationMotion
+class tabulated6DoFMotion
 :
     public solidBodyMotionFunction
 {
     // Private data
 
-        //- Centre of gravity
-        point CofG_;
+        //- Time data file name read from dictionary
+        fileName timeDataFileName_;
 
-        //- Rotational velocity (deg/s)
-        vector radialVelocity_;
+        //- Center of gravity read from dictionary
+        vector CofG_;
+
+        //- Type used to read in the translation and rotation "vectors"
+        typedef Vector2D<vector> translationRotationVectors;
+
+        //- Field of times
+        scalarField times_;
+
+        //- Field of translation and rotation "vectors"
+        Field<translationRotationVectors> values_;
 
 
     // Private Member Functions
 
         //- Disallow copy construct
-        rotationMotion(const rotationMotion&);
+        tabulated6DoFMotion(const tabulated6DoFMotion&);
 
         //- Disallow default bitwise assignment
-        void operator=(const rotationMotion&);
+        void operator=(const tabulated6DoFMotion&);
 
 
 public:
 
     //- Runtime type information
-    TypeName("rotationMotion");
+    TypeName("tabulated6DoFMotion");
 
 
     // Constructors
 
         //- Construct from components
-        rotationMotion
+        tabulated6DoFMotion
         (
             const dictionary& SBMFCoeffs,
             const Time& runTime
@@ -92,7 +104,7 @@ public:
 
     // Destructor
 
-        virtual ~rotationMotion();
+        virtual ~tabulated6DoFMotion();
 
 
     // Member Functions

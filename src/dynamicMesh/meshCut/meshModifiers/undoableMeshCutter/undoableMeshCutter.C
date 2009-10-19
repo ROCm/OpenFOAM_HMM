@@ -32,7 +32,7 @@ License
 #include "cellCuts.H"
 #include "splitCell.H"
 #include "mapPolyMesh.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "meshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -192,7 +192,7 @@ Foam::undoableMeshCutter::undoableMeshCutter
     faceRemover_
     (
         mesh,
-        Foam::cos(30.0/180.0*constant::math::pi)
+        Foam::cos(degToRad(30.0))
     )
 {}
 

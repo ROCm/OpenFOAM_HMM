@@ -1,6 +1,6 @@
 global/global.Cver
-global/dimensionedConstants/dimensionedConstants.C
-global/dimensionedConstants/constants/constants.C
+global/constants/constants.C
+global/constants/dimensionedConstants.C
 global/argList/argList.C
 global/clock/clock.C
 

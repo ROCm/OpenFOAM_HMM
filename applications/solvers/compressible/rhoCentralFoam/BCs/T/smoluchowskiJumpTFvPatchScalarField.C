@@ -28,7 +28,7 @@ License
 #include "addToRunTimeSelectionTable.H"
 #include "fvPatchFieldMapper.H"
 #include "volFields.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -182,7 +182,7 @@ void smoluchowskiJumpTFvPatchScalarField::updateCoeffs()
     }
 
     Field<scalar> C2 = pmu/prho
-        *sqrt(ppsi*constant::math::piByTwo)
+        *sqrt(ppsi*constant::mathematical::piByTwo)
         *2.0*gamma_/Pr.value()/(gamma_ + 1.0)
         *(2.0 - accommodationCoeff_)/accommodationCoeff_;
 

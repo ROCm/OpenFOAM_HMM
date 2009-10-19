@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "arcEdge.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "addToRunTimeSelectionTable.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
@@ -72,12 +72,12 @@ Foam::cylindricalCS Foam::arcEdge::calcAngle()
 
     // find angles
     scalar tmp = (r3&r1)/(mag(r3)*mag(r1));
-    angle_ = acos(tmp)*180.0/constant::math::pi;
+    angle_ = radToDeg(acos(tmp));
 
     // check if the vectors define an exterior or an interior arcEdge
     if (((r1  ^ r2)&(r1 ^ r3)) < 0.0)
     {
-        angle_ = 360 - angle_;
+        angle_ = 360.0 - angle_;
     }
 
     vector tempAxis;
@@ -159,7 +159,7 @@ Foam::vector Foam::arcEdge::position(const scalar lambda) const
 
 Foam::scalar Foam::arcEdge::length() const
 {
-    return angle_*radius_*constant::math::pi/180.0;
+    return degToRad(angle_*radius_);
 }
 
 

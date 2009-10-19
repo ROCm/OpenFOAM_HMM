@@ -32,7 +32,7 @@ Description
 #include "surfaceFields.H"
 #include "demandDrivenData.H"
 #include "coupledFvPatch.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -345,7 +345,8 @@ void surfaceInterpolation::makeCorrectionVectors() const
     // Calculate the non-orthogonality for meshes with 1 face or more
     if (returnReduce(magSf.size(), sumOp<label>()) > 0)
     {
-        NonOrthogCoeff =
+        NonOrthogCoeff = radToDeg
+        (
             asin
             (
                 min
@@ -353,7 +354,8 @@ void surfaceInterpolation::makeCorrectionVectors() const
                     (sum(magSf*mag(corrVecs))/sum(magSf)).value(),
                     1.0
                 )
-            )*180.0/constant::math::pi;
+            )
+        );
     }
 
     if (debug)
