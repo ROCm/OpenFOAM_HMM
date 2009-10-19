@@ -43,7 +43,7 @@ Description
 #include "OFstream.H"
 #include "volPointInterpolation.H"
 #include "thermoPhysicsTypes.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

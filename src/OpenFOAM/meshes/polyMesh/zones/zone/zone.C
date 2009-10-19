@@ -115,13 +115,13 @@ Foam::zone::zone
 
 Foam::zone::zone
 (
-    const word& zoneType,
     const word& name,
     const dictionary& dict,
+    const word& labelsName,
     const label index
 )
 :
-    labelList(dict.lookup(zoneType + "Labels")),
+    labelList(dict.lookup(labelsName)),
     name_(name),
     index_(index),
     lookupMapPtr_(NULL)
@@ -193,13 +193,13 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
 {
     const labelList& addr = *this;
 
-    bool boundaryError = false;
+    bool hasError = false;
 
     forAll(addr, i)
     {
         if (addr[i] < 0 || addr[i] >= maxSize)
         {
-            boundaryError = true;
+            hasError = true;
 
             if (report)
             {
@@ -212,10 +212,15 @@ bool Foam::zone::checkDefinition(const label maxSize, const bool report) const
                     << "Valid index labels are 0.."
                     << maxSize-1 << endl;
             }
+            else
+            {
+                // w/o report - can stop checking now
+                break;
+            }
         }
     }
 
-    return boundaryError;
+    return hasError;
 }
 
 

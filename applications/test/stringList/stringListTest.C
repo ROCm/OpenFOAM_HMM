@@ -27,6 +27,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "stringListOps.H"
+#include "IStringStream.H"
 #include "IOstreams.H"
 
 using namespace Foam;
@@ -36,21 +37,59 @@ using namespace Foam;
 
 int main(int argc, char *argv[])
 {
-    stringList sl(3);
-    sl[0] = "hello";
-    sl[1] = "heello";
-    sl[2] = "heeello";
+    stringList strLst
+    (
+        IStringStream
+        (
+            "("
+            "\"hello\""
+            "\"heello\""
+            "\"heeello\""
+            "\"bye\""
+            "\"bbye\""
+            "\"bbbye\""
+            "\"okey\""
+            "\"okkey\""
+            "\"okkkey\""
+            ")"
+        )()
+    );
 
-    labelList matches = findStrings(".*ee.*", sl);
+    wordReList reLst(IStringStream("( okey \"[hy]e+.*\" )")());
 
-    Info<< "matches found for regexp .*ee.* : ";
+    Info<< "stringList " << strLst << nl;
+
+    labelList matches = findStrings(".*ee.*", strLst);
+
+    Info<< "matches found for regexp .*ee.* :" << nl << matches << nl;
     forAll(matches, i)
     {
-        Info<< " " << sl[matches[i]];
+        Info<< " -> " << strLst[matches[i]] << nl;
     }
     Info<< endl;
 
-    Info << "End\n" << endl;
+    matches = findStrings(reLst, strLst);
+
+    Info<< "matches found for " << reLst << nl << matches << nl;
+    forAll(matches, i)
+    {
+        Info<< " -> " << strLst[matches[i]] << nl;
+    }
+    Info<< endl;
+
+    stringList subLst = subsetStrings(".*ee.*", strLst);
+    Info<< "subset stringList: " << subLst << nl;
+
+    subLst = subsetStrings(reLst, strLst);
+    Info<< "subset stringList: " << subLst << nl;
+
+    inplaceSubsetStrings(reLst, strLst);
+    Info<< "subsetted stringList: " << strLst << nl;
+
+    inplaceSubsetStrings(".*l.*", strLst);
+    Info<< "subsetted stringList: " << strLst << nl;
+
+    Info<< "\nEnd\n" << endl;
 
     return 0;
 }

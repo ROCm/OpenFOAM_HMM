@@ -26,13 +26,13 @@ License
 
 #include "fvDOM.H"
 #include "addToRunTimeSelectionTable.H"
-#include "fvm.H"
 
 #include "absorptionEmissionModel.H"
 #include "scatterModel.H"
 #include "constants.H"
 
 using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -65,7 +65,7 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
             mesh_.time().timeName(),
             mesh_,
             IOobject::NO_READ,
-            IOobject::NO_WRITE
+            IOobject::AUTO_WRITE
         ),
         mesh_,
         dimensionedScalar("G", dimMass/pow3(dimTime), 0.0)
@@ -136,8 +136,8 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     {
         nRay_ = 4*nPhi_*nTheta_;
         IRay_.setSize(nRay_);
-        scalar deltaPhi = math::pi/(2.0*nPhi_);
-        scalar deltaTheta = math::pi/nTheta_;
+        scalar deltaPhi = pi/(2.0*nPhi_);
+        scalar deltaTheta = pi/nTheta_;
         label i = 0;
         for (label n = 1; n <= nTheta_; n++)
         {
@@ -169,11 +169,11 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
     {
         if (mesh_.nSolutionD() == 2)    //2D (X & Y)
         {
-            scalar thetai = math::piByTwo;
-            scalar deltaTheta = math::pi;
+            scalar thetai = piByTwo;
+            scalar deltaTheta = pi;
             nRay_ = 4*nPhi_;
             IRay_.setSize(nRay_);
-            scalar deltaPhi = math::pi/(2.0*nPhi_);
+            scalar deltaPhi = pi/(2.0*nPhi_);
             label i = 0;
             for (label m = 1; m <= 4*nPhi_; m++)
             {
@@ -199,11 +199,11 @@ Foam::radiation::fvDOM::fvDOM(const volScalarField& T)
         }
         else    //1D (X)
         {
-            scalar thetai = math::piByTwo;
-            scalar deltaTheta = math::pi;
+            scalar thetai = piByTwo;
+            scalar deltaTheta = pi;
             nRay_ = 2;
             IRay_.setSize(nRay_);
-            scalar deltaPhi = math::pi;
+            scalar deltaPhi = pi;
             label i = 0;
             for (label m = 1; m <= 2; m++)
             {
@@ -347,7 +347,7 @@ Foam::radiation::fvDOM::Ru() const
     const DimensionedField<scalar, volMesh> a =
         a_.dimensionedInternalField(); //absorptionEmission_->aCont()()
 
-    return  a*G - 4.0*E;
+    return  a*G - E;
 }
 
 

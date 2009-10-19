@@ -112,7 +112,7 @@ public:
         Map<word> names() const;
 
         //- Return a Map of (id => names) selected by patterns
-        Map<word> names(const List<wordRe>& patterns) const;
+        Map<word> names(const UList<wordRe>& patterns) const;
 
         //- Return a Map of (id => type)
         Map<word> boundaryTypes() const;

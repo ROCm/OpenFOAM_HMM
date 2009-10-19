@@ -39,8 +39,6 @@ wmake libso sampling
 wmake libso dynamicMesh
 wmake libso dynamicFvMesh
 wmake libso topoChangerFvMesh
-wmake libso fvMotionSolver
-wmake libso engine
 
 wmake libso ODE
 wmake libso randomProcesses
@@ -51,12 +49,15 @@ turbulenceModels/Allwmake
 lagrangian/Allwmake
 postProcessing/Allwmake
 conversion/Allwmake
+mesh/Allwmake
 
-wmake libso autoMesh
 wmake libso errorEstimation
 
 wmake libso conformalVoronoiMesh
 
 fvAgglomerationMethods/Allwmake
+
+wmake libso fvMotionSolver
+wmake libso engine
 
 # ----------------------------------------------------------------- end-of-file

@@ -26,6 +26,7 @@ License
 
 #include "basicSymmetryPointPatchField.H"
 #include "transformField.H"
+#include "symmTransformField.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -89,7 +90,12 @@ void basicSymmetryPointPatchField<Type>::evaluate(const Pstream::commsTypes)
     const vectorField& nHat = this->patch().pointNormals();
 
     tmp<Field<Type> > tvalues =
-        transform(I - nHat*nHat, this->patchInternalField());
+    (
+        (
+            this->patchInternalField()
+          + transform(I - 2.0*sqr(nHat), this->patchInternalField())
+        )/2.0
+    );
 
     // Get internal field to insert values into
     Field<Type>& iF = const_cast<Field<Type>&>(this->internalField());

@@ -121,9 +121,6 @@ public:
 
         // Conversion
 
-            //- Convert degrees to radians
-            scalar degToRad(const scalar rad) const;
-
             //- Convert degrees to seconds (for given engine speed in RPM)
             scalar degToTime(const scalar theta) const;
 

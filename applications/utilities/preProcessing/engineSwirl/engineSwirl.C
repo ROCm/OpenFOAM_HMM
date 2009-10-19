@@ -31,7 +31,7 @@ Description
 \*---------------------------------------------------------------------------*/
 
 #include "fvCFD.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    scalar Vphi = (constant::math::pi*swirlRPMRatio*rpm/30).value();
+    scalar Vphi = (constant::mathematical::pi*swirlRPMRatio*rpm/30).value();
     scalar b1 = j1(swirlProfile).value();
     scalar b2 = 2.0*b1/swirlProfile.value() - j0(swirlProfile).value();
 

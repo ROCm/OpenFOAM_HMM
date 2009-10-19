@@ -25,9 +25,9 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "ManualInjection.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
-using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * Protected Member Functions  * * * * * * * * * * * //
 
@@ -108,7 +108,7 @@ Foam::ManualInjection<CloudType>::ManualInjection
     }
 
     // Determine volume of particles to inject
-    this->volumeTotal_ = sum(pow3(diameters_))*math::pi/6.0;
+    this->volumeTotal_ = sum(pow3(diameters_))*pi/6.0;
 }
 
 

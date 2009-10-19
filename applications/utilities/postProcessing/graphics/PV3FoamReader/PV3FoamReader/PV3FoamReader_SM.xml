@@ -106,7 +106,7 @@
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
-        A simple way cause a reader GUI modification.
+        A simple way to cause a reader GUI modification.
       </Documentation>
     </IntVectorProperty>
 

@@ -385,14 +385,7 @@ int vtkPV3FoamReader::RequestData
     foamData_->Update(output, output);
 #endif
 
-    if (ShowPatchNames)
-    {
-        addPatchNamesToView();
-    }
-    else
-    {
-        removePatchNamesFromView();
-    }
+    updatePatchNamesView(ShowPatchNames);
 
 #endif
 
@@ -403,7 +396,7 @@ int vtkPV3FoamReader::RequestData
 }
 
 
-void vtkPV3FoamReader::addPatchNamesToView()
+void vtkPV3FoamReader::updatePatchNamesView(const bool show)
 {
     pqApplicationCore* appCore = pqApplicationCore::instance();
 
@@ -415,29 +408,10 @@ void vtkPV3FoamReader::addPatchNamesToView()
 
     for (int viewI=0; viewI<renderViews.size(); viewI++)
     {
-        foamData_->addPatchNames
+        foamData_->renderPatchNames
         (
-            renderViews[viewI]->getRenderViewProxy()->GetRenderer()
-        );
-    }
-}
-
-
-void vtkPV3FoamReader::removePatchNamesFromView()
-{
-    pqApplicationCore* appCore = pqApplicationCore::instance();
-
-    // Server manager model for querying items in the server manager
-    pqServerManagerModel* smModel = appCore->getServerManagerModel();
-
-    // Get all the pqRenderView instances
-    QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
-
-    for (int viewI=0; viewI<renderViews.size(); viewI++)
-    {
-        foamData_->removePatchNames
-        (
-            renderViews[viewI]->getRenderViewProxy()->GetRenderer()
+            renderViews[viewI]->getRenderViewProxy()->GetRenderer(),
+            show
         );
     }
 }
