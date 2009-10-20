@@ -609,10 +609,7 @@ void Foam::conformationSurfaces::findEdgeNearestByType
 }
 
 
-void Foam::conformationSurfaces::writeFeatureObj
-(
-    const fileName& prefix
-) const
+void Foam::conformationSurfaces::writeFeatureObj(const fileName& prefix) const
 {
     OFstream ftStr(prefix + "_allFeatures.obj");
     Pout<< nl << "Writing all features to " << ftStr.name() << endl;
@@ -665,7 +662,37 @@ Foam::label Foam::conformationSurfaces::findPatch
 
     return
         surfLocalRegion[0] + patchOffsets_[allGeometryToSurfaces_[hitSurface]];
+}
 
+
+Foam::label Foam::conformationSurfaces::findPatch(const point& pt) const
+{
+    pointIndexHit surfHit;
+    label hitSurface;
+
+    findSurfaceNearest
+    (
+        pt,
+        cvMesh_.cvMeshControls().spanSqr(),
+        surfHit,
+        hitSurface
+    );
+
+    if (!surfHit.hit())
+    {
+        return -1;
+    }
+
+    labelList surfLocalRegion;
+
+    allGeometry_[hitSurface].getRegion
+    (
+        List<pointIndexHit>(1, surfHit),
+        surfLocalRegion
+    );
+
+    return
+        surfLocalRegion[0] + patchOffsets_[allGeometryToSurfaces_[hitSurface]];
 }
 
 

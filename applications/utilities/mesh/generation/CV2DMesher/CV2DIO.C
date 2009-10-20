@@ -80,7 +80,7 @@ void Foam::CV2D::writeTriangles(const fileName& fName, bool internalOnly) const
     {
         if
         (
-            !internalOnly 
+            !internalOnly
          || (
                 fit->vertex(0)->internalOrBoundaryPoint()
              || fit->vertex(1)->internalOrBoundaryPoint()

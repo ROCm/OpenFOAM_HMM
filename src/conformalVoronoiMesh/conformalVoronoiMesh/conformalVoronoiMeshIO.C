@@ -132,35 +132,98 @@ void Foam::conformalVoronoiMesh::writeInternalDelaunayVertices
 
 void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
 {
-    pointField points(0);
-    faceList faces(0);
-    labelList owner(0);
-    labelList neighbour(0);
-    wordList patchNames(0);
-    labelList patchSizes(0);
-    labelList patchStarts(0);
-
     writeInternalDelaunayVertices(writeToConstant);
 
-    calcDualMesh
-    (
-        points,
-        faces,
-        owner,
-        neighbour,
-        patchNames,
-        patchSizes,
-        patchStarts
-    );
+    // {
+    //     pointField points;
+    //     faceList faces;
+    //     labelList owner;
+    //     labelList neighbour;
+    //     wordList patchNames;
+    //     labelList patchSizes;
+    //     labelList patchStarts;
 
+    //     calcTetMesh
+    //     (
+    //         points,
+    //         faces,
+    //         owner,
+    //         neighbour,
+    //         patchNames,
+    //         patchSizes,
+    //         patchStarts
+    //     );
+
+    //     writeMesh
+    //     (
+    //         "tetDualMesh",
+    //         writeToConstant,
+    //         points,
+    //         faces,
+    //         owner,
+    //         neighbour,
+    //         patchNames,
+    //         patchSizes,
+    //         patchStarts
+    //     );
+    // }
+
+    {
+        pointField points;
+        faceList faces;
+        labelList owner;
+        labelList neighbour;
+        wordList patchNames;
+        labelList patchSizes;
+        labelList patchStarts;
+
+        calcDualMesh
+        (
+            points,
+            faces,
+            owner,
+            neighbour,
+            patchNames,
+            patchSizes,
+            patchStarts
+        );
+
+        writeMesh
+        (
+            Foam::polyMesh::defaultRegion,
+            writeToConstant,
+            points,
+            faces,
+            owner,
+            neighbour,
+            patchNames,
+            patchSizes,
+            patchStarts
+        );
+    }
+}
+
+void Foam::conformalVoronoiMesh::writeMesh
+(
+    const word& meshName,
+    bool writeToConstant,
+    pointField& points,
+    faceList& faces,
+    labelList& owner,
+    labelList& neighbour,
+    wordList& patchNames,
+    labelList& patchSizes,
+    labelList& patchStarts
+) const
+{
     if(cvMeshControls().objOutput())
     {
-        writeDual(points, faces, "dualMesh.obj");
+        writeObjMesh(points, faces, word(meshName + ".obj"));
     }
 
     IOobject io
     (
-        Foam::polyMesh::defaultRegion,
+        meshName,
         runTime_.timeName(),
         runTime_,
         IOobject::NO_READ,
@@ -169,11 +232,11 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
 
     if (writeToConstant)
     {
-        Info<< nl << "    Writing polyMesh to constant." << endl;
+        Info<< nl << "    Writing mesh to constant." << endl;
 
         io = IOobject
         (
-            Foam::polyMesh::defaultRegion,
+            meshName,
             runTime_.constant(),
             runTime_,
             IOobject::NO_READ,
@@ -182,7 +245,7 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
     }
     else
     {
-        Info<< nl << "    Writing polyMesh to time directory "
+        Info<< nl << "    Writing mesh to time directory "
             << runTime_.timeName() << endl;
     }
 
@@ -213,21 +276,21 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
 
     if (!pMesh.write())
     {
-        FatalErrorIn("Foam::conformalVoronoiMesh::writeMesh()")
-        << "Failed writing polyMesh."
+        FatalErrorIn("Foam::conformalVoronoiMesh::writeMesh")
+            << "Failed writing polyMesh."
             << exit(FatalError);
     }
 }
 
 
-void Foam::conformalVoronoiMesh::writeDual
+void Foam::conformalVoronoiMesh::writeObjMesh
 (
     const pointField& points,
     const faceList& faces,
     const fileName& fName
 ) const
 {
-    Info<< nl << "    Writing dual points and faces to " << fName << endl;
+    Info<< nl << "    Writing points and faces to " << fName << endl;
 
     OFstream str(fName);
 

@@ -1782,7 +1782,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    label dualVerti = 0;
+    label dualVertI = 0;
 
     // Scanning by number of short (dual) edges (nSE) attached to the
     // circumcentre of each Delaunay tet.  A Delaunay tet may only have four
@@ -1824,11 +1824,11 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                     if
                     (
                         cit->vertex(vertex_triple_index(f, 0))->
-                        internalOrBoundaryPoint()
-                        || cit->vertex(vertex_triple_index(f, 1))->
-                        internalOrBoundaryPoint()
-                        || cit->vertex(vertex_triple_index(f, 2))->
-                        internalOrBoundaryPoint()
+                            internalOrBoundaryPoint()
+                     || cit->vertex(vertex_triple_index(f, 1))->
+                            internalOrBoundaryPoint()
+                     || cit->vertex(vertex_triple_index(f, 2))->
+                            internalOrBoundaryPoint()
                     )
                     {
                         point neighDualVertex;
@@ -1874,9 +1874,9 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                      || cit->vertex(3)->internalOrBoundaryPoint()
                     )
                     {
-                        cit->cellIndex() = dualVerti;
-                        points[dualVerti] = dualVertex;
-                        dualVerti++;
+                        cit->cellIndex() = dualVertI;
+                        points[dualVertI] = dualVertex;
+                        dualVertI++;
                     }
                 }
                 else if
@@ -1958,22 +1958,22 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                         {
                             if (edgeIsShort[f] && !neighbourAlreadyIndexed[f])
                             {
-                                cit->neighbor(f)->cellIndex() = dualVerti;
+                                cit->neighbor(f)->cellIndex() = dualVertI;
                             }
                         }
 
-                        cit->cellIndex() = dualVerti;
+                        cit->cellIndex() = dualVertI;
 
-                        points[dualVerti] = dualVertex;
+                        points[dualVertI] = dualVertex;
 
-                        dualVerti++;
+                        dualVertI++;
                     }
                 }
             }
         }
     }
 
-    points.setSize(dualVerti);
+    points.setSize(dualVertI);
 
     // ~~~~~~~~~~~~~~~~~~~~~~~~~ dual cell indexing ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     // assigns an index to the Delaunay vertices which will be the dual cell
@@ -2028,7 +2028,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     neighbour.setSize(number_of_edges());
 
-    label dualFacei = 0;
+    label dualFaceI = 0;
 
     for
     (
@@ -2174,13 +2174,13 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                         reverse(newDualFace);
                     }
 
-                    faces[dualFacei] = newDualFace;
+                    faces[dualFaceI] = newDualFace;
 
-                    owner[dualFacei] = dcOwn;
+                    owner[dualFaceI] = dcOwn;
 
-                    neighbour[dualFacei] = dcNei;
+                    neighbour[dualFaceI] = dcNei;
 
-                    dualFacei++;
+                    dualFaceI++;
                 }
             }
             // else
@@ -2191,7 +2191,7 @@ void Foam::conformalVoronoiMesh::calcDualMesh
         }
     }
 
-    label nInternalFaces = dualFacei;
+    label nInternalFaces = dualFaceI;
 
     faces.setSize(nInternalFaces);
 
@@ -2345,11 +2345,355 @@ void Foam::conformalVoronoiMesh::calcDualMesh
     {
         forAll(patchFaces[p], f)
         {
-            faces[dualFacei] = patchFaces[p][f];
+            faces[dualFaceI] = patchFaces[p][f];
 
-            owner[dualFacei] = patchOwners[p][f];
+            owner[dualFaceI] = patchOwners[p][f];
 
-            dualFacei++;
+            dualFaceI++;
+        }
+    }
+}
+
+
+void Foam::conformalVoronoiMesh::calcTetMesh
+(
+    pointField& points,
+    faceList& faces,
+    labelList& owner,
+    labelList& neighbour,
+    wordList& patchNames,
+    labelList& patchSizes,
+    labelList& patchStarts
+)
+{
+    labelList vertexMap(number_of_vertices());
+
+    label vertI = 0;
+
+    points.setSize(number_of_vertices());
+
+    for
+    (
+        Triangulation::Finite_vertices_iterator vit = finite_vertices_begin();
+        vit != finite_vertices_end();
+        ++vit
+    )
+    {
+        if (vit->internalPoint() || vit->pairPoint())
+        {
+            vertexMap[vit->index()] = vertI;
+            points[vertI] =  topoint(vit->point());
+            vertI++;
+        }
+    }
+
+    points.setSize(vertI);
+
+    label cellI = 0;
+
+    for
+    (
+        Triangulation::Finite_cells_iterator cit = finite_cells_begin();
+        cit != finite_cells_end();
+        ++cit
+    )
+    {
+        if
+        (
+            cit->vertex(0)->internalOrBoundaryPoint()
+         || cit->vertex(1)->internalOrBoundaryPoint()
+         || cit->vertex(2)->internalOrBoundaryPoint()
+         || cit->vertex(3)->internalOrBoundaryPoint()
+        )
+        {
+             cit->cellIndex() = cellI++;
+        }
+        else
+        {
+            cit->cellIndex() = -1;
+        }
+    }
+
+    patchNames = geometryToConformTo_.patchNames();
+
+    patchNames.setSize(patchNames.size() + 1);
+
+    patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
+
+    label nPatches = patchNames.size();
+
+    patchSizes.setSize(nPatches);
+
+    patchStarts.setSize(nPatches);
+
+    List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
+
+    List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
+
+    faces.setSize(number_of_facets());
+
+    owner.setSize(number_of_facets());
+
+    neighbour.setSize(number_of_facets());
+
+    label faceI = 0;
+
+    labelList verticesOnTriFace(3, -1);
+    face newFace(verticesOnTriFace);
+
+    for
+    (
+        Triangulation::Finite_facets_iterator fit = finite_facets_begin();
+        fit != finite_facets_end();
+        ++fit
+    )
+    {
+        const Cell_handle c1(fit->first);
+        const int oppositeVertex = fit->second;
+        const Cell_handle c2(c1->neighbor(oppositeVertex));
+
+        label c1Index = c1->cellIndex();
+        label c2Index = c2->cellIndex();
+
+        label ownerCell = -1;
+        label neighbourCell = -1;
+
+        if (c1Index == -1 && c2Index == -1)
+        {
+            // Both tets are outside, skip
+            continue;
+        }
+
+        for (label i = 0; i < 3; i++)
+        {
+            verticesOnTriFace[i] = vertexMap
+            [
+                c1->vertex(vertex_triple_index(oppositeVertex, i))->index()
+            ];
+        }
+
+        newFace = face(verticesOnTriFace);
+
+        if (c1Index == -1 || c2Index == -1)
+        {
+            // Boundary face...
+            if (c1Index == -1)
+            {
+                //... with c1 outside
+                ownerCell = c2Index;
+            }
+            else
+            {
+                // ... with c2 outside
+                ownerCell = c1Index;
+
+                reverse(newFace);
+            }
+
+            label patchIndex = geometryToConformTo_.findPatch
+            (
+                newFace.centre(points)
+            );
+
+            if (patchIndex == -1)
+            {
+                patchIndex = patchNames.size() - 1;
+
+                WarningIn("Foam::conformalVoronoiMesh::calcTetMesh")
+                    << "Tet face centre at  " << nl
+                    << "    " << newFace.centre(points) << nl
+                    << "    did not find a surface patch. Adding to "
+                    << patchNames[patchIndex]
+                    << endl;
+            }
+
+            patchFaces[patchIndex].append(newFace);
+            patchOwners[patchIndex].append(ownerCell);
+        }
+        else
+        {
+            // Internal face...
+            if (c1Index < c2Index)
+            {
+                // ...with c1 as the ownerCell
+                ownerCell = c1Index;
+                neighbourCell = c2Index;
+
+                reverse(newFace);
+            }
+            else
+            {
+                // ...with c2 as the ownerCell
+                ownerCell = c2Index;
+                neighbourCell = c1Index;
+            }
+
+            faces[faceI] = newFace;
+            owner[faceI] = ownerCell;
+            neighbour[faceI] = neighbourCell;
+            faceI++;
+        }
+    }
+
+    label nInternalFaces = faceI;
+
+    faces.setSize(nInternalFaces);
+
+    owner.setSize(nInternalFaces);
+
+    neighbour.setSize(nInternalFaces);
+
+    // ~~~~~~~~ sort owner, reordinging neighbour and faces to match ~~~~~~~~~~~
+    // two stage sort for upper triangular order:  sort by owner first, then for
+    // each block of owners sort by neighbour
+
+    labelList sortingIndices;
+
+    // Stage 1
+
+    {
+        SortableList<label> sortedOwner(owner);
+
+        sortingIndices = sortedOwner.indices();
+    }
+
+    {
+        labelList copyOwner(owner.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyOwner[sI] = owner[sortingIndices[sI]];
+        }
+
+        owner = copyOwner;
+    }
+
+    {
+        labelList copyNeighbour(neighbour.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyNeighbour[sI] = neighbour[sortingIndices[sI]];
+        }
+
+        neighbour = copyNeighbour;
+    }
+
+    {
+        faceList copyFaces(faces.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyFaces[sI] = faces[sortingIndices[sI]];
+        }
+
+        faces = copyFaces;
+    }
+
+    // Stage 2
+
+    sortingIndices = -1;
+
+    DynamicList<label> ownerCellJumps;
+
+    // Force first owner entry to be a jump
+    ownerCellJumps.append(0);
+
+    for (label o = 1; o < owner.size(); o++)
+    {
+        if (owner[o] > owner[o-1])
+        {
+            ownerCellJumps.append(o);
+        }
+    }
+
+    forAll(ownerCellJumps, oCJ)
+    {
+        label start = ownerCellJumps[oCJ];
+
+        label length;
+
+        if (oCJ == ownerCellJumps.size() - 1)
+        {
+            length = owner.size() - start;
+        }
+        else
+        {
+            length = ownerCellJumps[oCJ + 1] - start;
+        }
+
+        SubList<label> neighbourBlock(neighbour, length, start);
+
+        SortableList<label> sortedNeighbourBlock(neighbourBlock);
+
+        forAll(sortedNeighbourBlock, sNB)
+        {
+            sortingIndices[start + sNB] =
+            sortedNeighbourBlock.indices()[sNB] + start;
+        }
+    }
+
+    // Perform sort
+
+    {
+        labelList copyOwner(owner.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyOwner[sI] = owner[sortingIndices[sI]];
+        }
+
+        owner = copyOwner;
+    }
+
+    {
+        labelList copyNeighbour(neighbour.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyNeighbour[sI] = neighbour[sortingIndices[sI]];
+        }
+
+        neighbour = copyNeighbour;
+    }
+
+    {
+        faceList copyFaces(faces.size());
+
+        forAll(sortingIndices, sI)
+        {
+            copyFaces[sI] = faces[sortingIndices[sI]];
+        }
+
+        faces = copyFaces;
+    }
+
+    // ~~~~~~~~ add patch information ~~~~~~~~~~~
+
+    label nBoundaryFaces = 0;
+
+    forAll(patchFaces, p)
+    {
+        patchSizes[p] = patchFaces[p].size();
+
+        patchStarts[p] = nInternalFaces + nBoundaryFaces;
+
+        nBoundaryFaces += patchSizes[p];
+    }
+
+    faces.setSize(nInternalFaces + nBoundaryFaces);
+
+    owner.setSize(nInternalFaces + nBoundaryFaces);
+
+    forAll(patchFaces, p)
+    {
+        forAll(patchFaces[p], f)
+        {
+            faces[faceI] = patchFaces[p][f];
+
+            owner[faceI] = patchOwners[p][f];
+
+            faceI++;
         }
     }
 }
@@ -2368,7 +2712,7 @@ void Foam::conformalVoronoiMesh::move()
 
     pointField dualVertices(number_of_cells());
 
-    label dualVerti = 0;
+    label dualVertI = 0;
 
     // Find the dual point of each tetrahedron and assign it an index.
     for
@@ -2388,15 +2732,15 @@ void Foam::conformalVoronoiMesh::move()
          || cit->vertex(3)->internalOrBoundaryPoint()
         )
         {
-            cit->cellIndex() = dualVerti;
+            cit->cellIndex() = dualVertI;
 
-            dualVertices[dualVerti] = topoint(dual(cit));
+            dualVertices[dualVertI] = topoint(dual(cit));
 
-            dualVerti++;
+            dualVertI++;
         }
     }
 
-    dualVertices.setSize(dualVerti);
+    dualVertices.setSize(dualVertI);
 
     timeCheck();
 

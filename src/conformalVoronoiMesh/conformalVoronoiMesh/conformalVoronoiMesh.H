@@ -413,6 +413,18 @@ private:
             labelList& patchStarts
         );
 
+        //- Tet mesh calculation
+        void calcTetMesh
+        (
+            pointField& points,
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour,
+            wordList& patchNames,
+            labelList& patchSizes,
+            labelList& patchStarts
+        );
+
         //- Disallow default bitwise copy construct
         conformalVoronoiMesh(const conformalVoronoiMesh&);
 
@@ -493,11 +505,26 @@ public:
             //  pointField that may be used to restart the meshing process
             void writeInternalDelaunayVertices(bool writeToConstant) const;
 
-            //- Write polyMesh
+            //- Prepare data and call writeMesh for polyMesh and
+            //  tetDualMesh
             void writeMesh(bool writeToConstant = true);
 
-            //- Write dual points and faces as .obj file
-            void writeDual
+            //- Write mesh to disk
+            void writeMesh
+            (
+                const word& meshName,
+                bool writeToConstant,
+                pointField& points,
+                faceList& faces,
+                labelList& owner,
+                labelList& neighbour,
+                wordList& patchNames,
+                labelList& patchSizes,
+                labelList& patchStarts
+            ) const;
+
+            //- Write points and faces as .obj file
+            void writeObjMesh
             (
                 const pointField& points,
                 const faceList& faces,

@@ -255,7 +255,11 @@ public:
 
             //- Find which patch is intersected by the line from one point to
             //  another
-            label findPatch(const point& dVA, const point& dVB) const;
+            label findPatch(const point& ptA, const point& ptB) const;
+
+            //- Find which patch is closest to the point
+            label findPatch(const point& pt) const;
+
 
         // Write
 
