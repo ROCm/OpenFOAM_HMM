@@ -2523,8 +2523,18 @@ void Foam::conformalVoronoiMesh::move()
                   > cvMeshControls().cosAlignmentAcceptanceAngle()
                 )
                 {
+                    // Arithmetic mean
+                    // scalar targetCellSize =
+                    //     0.5*(vA->targetCellSize() + vB->targetCellSize());
+
+                    // Geometric mean
                     scalar targetCellSize =
-                        0.5*(vA->targetCellSize() + vB->targetCellSize());
+                        sqrt(vA->targetCellSize()*vB->targetCellSize());
+
+                    // Harmonic mean
+                    // scalar targetCellSize =
+                    //     2.0*(vA->targetCellSize()*vB->targetCellSize())
+                    //    /(vA->targetCellSize() + vB->targetCellSize());
 
                     scalar targetFaceArea = sqr(targetCellSize);
 
@@ -2712,4 +2722,3 @@ void Foam::conformalVoronoiMesh::move()
 
 
 // ************************************************************************* //
-
