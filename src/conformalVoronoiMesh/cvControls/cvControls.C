@@ -49,7 +49,7 @@ Foam::cvControls::cvControls
 
     spanSqr_ = sqr(span_);
 
-    timeChecks_ = false;
+    timeChecks_ = true;
 
     // Surface conformation controls
 
