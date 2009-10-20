@@ -22,45 +22,18 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Namespace
-    Foam::constant::mathematical
-
-Description
-    mathematical constants
-
 \*---------------------------------------------------------------------------*/
 
-#ifndef mathematicalConstants_H
-#define mathematicalConstants_H
-
-#include "scalar.H"
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-namespace Foam
-{
-namespace constant
-{
-namespace mathematical
-{
+// Constants supplied in the main controlDict
+#include "fundamentalConstants.C"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+// Derived constants
+#include "universalConstants.C"
+#include "electromagneticConstants.C"
+#include "atomicConstants.C"
+#include "physicoChemicalConstants.C"
 
-    static word group = "mathematical";
-
-    const scalar e(M_E);
-    const scalar pi(M_PI);
-    const scalar twoPi(2*pi);
-    const scalar piByTwo(0.5*pi);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace mathematical
-} // end namespace constant
-} // End namespace Foam
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#endif
 
 // ************************************************************************* //

@@ -23,15 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::phys
+    Foam::constant::universal
 
 Description
-    Physico-chemical constants
+    Universal constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef physicoChemicalConstants_H
-#define physicoChemicalConstants_H
+#ifndef universalConstants_H
+#define universalConstants_H
 
 #include "dimensionedScalar.H"
 
@@ -41,37 +41,21 @@ namespace Foam
 {
 namespace constant
 {
-namespace physicoChemical
+namespace universal
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    //- Group name for physico-chemical constants
+    //- Group name for universal constants
     extern const char* group;
 
-    //- Universal gas constant: default SI units: [J/mol/K]
-    extern const dimensionedScalar R;
-
-    //- Faraday constant: default SI units: [C/mol]
-    extern const dimensionedScalar F;
-
-    //- Stefan-Boltzmann constant: default SI units: [W/m2/K4]
-    extern const dimensionedScalar sigma;
-
-    //- Wien displacement law constant: default SI units: [m.K]
-    extern const dimensionedScalar b;
-
-    //- First radiation constant: default SI units: [W/m2]
-    extern const dimensionedScalar c1;
-
-    //- Second radiation constant: default SI units: [m.K]
-    extern const dimensionedScalar c2;
-
+    //- Reduced Planck constant: default SI units: [J/s]
+    extern const dimensionedScalar hr;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace physicoChemical
-} // end namespace constant
+} // End namespace universal
+} // End namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -79,7 +63,4 @@ namespace physicoChemical
 #endif
 
 // ************************************************************************* //
-
-
-
 

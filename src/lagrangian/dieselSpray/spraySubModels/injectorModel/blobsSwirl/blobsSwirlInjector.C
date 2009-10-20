@@ -110,9 +110,7 @@ scalar blobsSwirlInjector::d0
 
     scalar c = rndGen_.scalar01();
 
-    angle_ = coneAngle_[n]/2.0 + c*coneInterval_[n];
-
-    angle_ *= constant::mathematical::pi/180.0;
+    angle_ = degToRad(coneAngle_[n]/2.0 + c*coneInterval_[n]);
 
     scalar injectedMassFlow = it.massFlowRate(t);
 

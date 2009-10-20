@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,78 +22,56 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Global
-    dimensionedConstants
+Namespace
+    Foam::constant::physicoChemical
 
 Description
-    Dictionary reading and supplying the dimensioned constants used within
-    OpenFOAM particularly for thermodynamics.  The values are read from the
-    OpenFOAM controlDict and should be changed to run with a different set of
-    units from the default SI units.
-
-SourceFiles
-    dimensionedConstants.C
+    Physico-chemical constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef dimensionedConstants_H
-#define dimensionedConstants_H
+#ifndef physicoChemicalConstants_H
+#define physicoChemicalConstants_H
 
-#include "dictionary.H"
 #include "dimensionedScalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-dictionary& dimensionedConstants();
-
-
-dimensionedScalar dimensionedConstant(const word& group, const word& varName);
-
-
-template<class T>
-T dimensionedConstant
-(
-    const word& group,
-    const word& varName,
-    const T& defaultValue
-)
+namespace constant
 {
-    dictionary& dict = dimensionedConstants();
+namespace physicoChemical
+{
 
-    const word unitSet(dict.lookup("unitSet"));
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    dictionary& unitDict(dict.subDict(unitSet + "Coeffs"));
+    //- Group name for physico-chemical constants
+    extern const char* group;
 
-    if (unitDict.found(group))
-    {
-        dictionary& groupDict = unitDict.subDict(group);
-        if (groupDict.found(varName))
-        {
-            return pTraits<T>(groupDict.lookup(varName));
-        }
-        else
-        {
-            groupDict.add(varName, defaultValue);
-            return defaultValue;
-        }
-    }
-    else
-    {
-        unitDict.add(group, dictionary::null);
-        unitDict.subDict(group).add(varName, defaultValue);
+    //- Universal gas constant: default SI units: [J/mol/K]
+    extern const dimensionedScalar R;
 
-        return defaultValue;
-    }
-}
+    //- Faraday constant: default SI units: [C/mol]
+    extern const dimensionedScalar F;
+
+    //- Stefan-Boltzmann constant: default SI units: [W/m2/K4]
+    extern const dimensionedScalar sigma;
+
+    //- Wien displacement law constant: default SI units: [m.K]
+    extern const dimensionedScalar b;
+
+    //- First radiation constant: default SI units: [W/m2]
+    extern const dimensionedScalar c1;
+
+    //- Second radiation constant: default SI units: [m.K]
+    extern const dimensionedScalar c2;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+} // End namespace physicoChemical
+} // End namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -101,3 +79,7 @@ T dimensionedConstant
 #endif
 
 // ************************************************************************* //
+
+
+
+

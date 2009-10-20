@@ -445,12 +445,12 @@ int main(int argc, char *argv[])
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
-    scalar minCos = Foam::cos(featureAngle*constant::mathematical::pi/180.0);
+    scalar minCos = Foam::cos(degToRad(featureAngle));
 
     scalar concaveAngle = defaultConcaveAngle;
     args.optionReadIfPresent("concaveAngle", concaveAngle);
 
-    scalar concaveSin = Foam::sin(concaveAngle*constant::mathematical::pi/180.0);
+    scalar concaveSin = Foam::sin(degToRad(concaveAngle));
 
     bool snapMeshDict = args.optionFound("snapMesh");
     bool overwrite = args.optionFound("overwrite");

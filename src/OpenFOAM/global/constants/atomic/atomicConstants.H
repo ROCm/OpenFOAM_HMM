@@ -23,7 +23,7 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::atom
+    Foam::constant::atomic
 
 Description
     Atomic constants
@@ -68,7 +68,7 @@ namespace atomic
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 } // End namespace atomic
-} // end namespace constant
+} // End namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

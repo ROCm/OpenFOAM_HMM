@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::em
+    Foam::constant::mathematical
 
 Description
-    Electromagnetic constants
+    mathematical constants and conversion functions
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef electromagneticConstants_H
-#define electromagneticConstants_H
+#ifndef mathematicalConstants_H
+#define mathematicalConstants_H
 
-#include "dimensionedScalar.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,43 +41,39 @@ namespace Foam
 {
 namespace constant
 {
-namespace electromagnetic
+namespace mathematical
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    //- Group name for electromagnetic constants
-    extern const char* group;
+    static word group = "mathematical";
 
-    //- Magnetic constant/permeability of free space: default SI units: [H/m]
-    extern const dimensionedScalar mu0;
-
-    //- Electric constant: default SI units: [F/m]
-    extern const dimensionedScalar epsilon0;
-
-    //- Characteristic impedance of a vacuum: default SI units: [ohm]
-    extern const dimensionedScalar Z0;
-
-    //- Coulomb constant: default SI units: [N.m2/C2]
-    extern const dimensionedScalar kappa;
-
-    //- Conductance quantum: default SI units: [S]
-    extern const dimensionedScalar G0;
-
-    //- Josephson constant: default SI units: [Hz/V]
-    extern const dimensionedScalar KJ;
-
-    //- Magnetic flux quantum: default SI units: [Wb]
-    extern const dimensionedScalar phi0;
-
-    //- von Klitzing constant: default SI units: [ohm]
-    extern const dimensionedScalar RK;
-
+    const scalar e(M_E);
+    const scalar pi(M_PI);
+    const scalar twoPi(2*pi);
+    const scalar piByTwo(0.5*pi);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace electromagnetic
-} // end namespace constant
+} // End namespace mathematical
+} // End namespace constant
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+//- Conversion from degrees to radians
+inline scalar degToRad(const scalar& deg)
+{
+    return (deg*constant::mathematical::pi/180.0);
+}
+
+//- Conversion from radians to degrees
+inline scalar radToDeg(const scalar& rad)
+{
+    return (rad*180.0/constant::mathematical::pi);
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -85,5 +81,3 @@ namespace electromagnetic
 #endif
 
 // ************************************************************************* //
-
-

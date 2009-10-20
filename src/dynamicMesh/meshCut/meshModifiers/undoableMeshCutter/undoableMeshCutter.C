@@ -192,7 +192,7 @@ Foam::undoableMeshCutter::undoableMeshCutter
     faceRemover_
     (
         mesh,
-        Foam::cos(30.0/180.0*constant::mathematical::pi)
+        Foam::cos(degToRad(30.0))
     )
 {}
 
