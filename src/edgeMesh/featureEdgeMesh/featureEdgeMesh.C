@@ -45,10 +45,8 @@ defineTypeNameAndDebug(featureEdgeMesh, 0);
 }
 
 
-Foam::scalar Foam::featureEdgeMesh::cosNormalAngleTol_ = Foam::cos
-(
-    0.1*constant::math::pi/180.0
-);
+Foam::scalar Foam::featureEdgeMesh::cosNormalAngleTol_ =
+    Foam::cos(degToRad(0.1));
 
 
 Foam::label Foam::featureEdgeMesh::convexStart_ = 0;
