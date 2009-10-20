@@ -72,8 +72,8 @@ Foam::vector Foam::toroidalCS::localToGlobal
 ) const
 {
     // Notation: r = local.x()
-    scalar theta = local.y()*constant::mathematical::pi/180.0;
-    scalar phi = local.z()*constant::mathematical::pi/180.0;
+    scalar theta = degToRad(local.y());
+    scalar phi = degToRad(local.z());
 
     scalar rprime = radius_ + local.x()*sin(phi);
 

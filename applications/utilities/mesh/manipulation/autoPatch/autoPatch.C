@@ -93,7 +93,7 @@ int main(int argc, char *argv[])
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
     bool overwrite = args.optionFound("overwrite");
 
-    scalar minCos = Foam::cos(featureAngle*constant::mathematical::pi/180.0);
+    scalar minCos = Foam::cos(degToRad(featureAngle));
 
     Info<< "Feature:" << featureAngle << endl
         << "minCos :" << minCos << endl

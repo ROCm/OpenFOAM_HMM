@@ -65,7 +65,7 @@ Foam::refinementParameters::refinementParameters(const dictionary& dict)
     }
     else
     {
-        curvature_ = Foam::cos(featAngle*constant::mathematical::pi/180.0);
+        curvature_ = Foam::cos(degToRad(featAngle));
     }
 }
 

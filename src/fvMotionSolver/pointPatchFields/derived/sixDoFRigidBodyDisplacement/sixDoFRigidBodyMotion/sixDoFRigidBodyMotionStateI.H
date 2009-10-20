@@ -22,21 +22,81 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Description
-    Collection of dimensioned constants
-
 \*---------------------------------------------------------------------------*/
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Constants supplied in the main controlDict
-#include "fundamentalConstants.C"
+// * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
+inline const Foam::point& Foam::sixDoFRigidBodyMotionState::centreOfMass() const
+{
+    return centreOfMass_;
+}
 
-// Derived constants
-#include "universalConstants.C"
-#include "electromagneticConstants.C"
-#include "atomicConstants.C"
-#include "physicoChemicalConstants.C"
+
+inline const Foam::tensor& Foam::sixDoFRigidBodyMotionState::Q() const
+{
+    return Q_;
+}
+
+
+inline const Foam::vector& Foam::sixDoFRigidBodyMotionState::v() const
+{
+    return v_;
+}
+
+
+inline const Foam::vector& Foam::sixDoFRigidBodyMotionState::a() const
+{
+    return a_;
+}
+
+
+inline const Foam::vector& Foam::sixDoFRigidBodyMotionState::pi() const
+{
+    return pi_;
+}
+
+
+inline const Foam::vector& Foam::sixDoFRigidBodyMotionState::tau() const
+{
+    return tau_;
+}
+
+
+inline Foam::point& Foam::sixDoFRigidBodyMotionState::centreOfMass()
+{
+    return centreOfMass_;
+}
+
+
+inline Foam::tensor& Foam::sixDoFRigidBodyMotionState::Q()
+{
+    return Q_;
+}
+
+
+inline Foam::vector& Foam::sixDoFRigidBodyMotionState::v()
+{
+    return v_;
+}
+
+
+inline Foam::vector& Foam::sixDoFRigidBodyMotionState::a()
+{
+    return a_;
+}
+
+
+inline Foam::vector& Foam::sixDoFRigidBodyMotionState::pi()
+{
+    return pi_;
+}
+
+
+inline Foam::vector& Foam::sixDoFRigidBodyMotionState::tau()
+{
+    return tau_;
+}
 
 
 // ************************************************************************* //

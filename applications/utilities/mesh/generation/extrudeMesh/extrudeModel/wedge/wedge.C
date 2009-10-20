@@ -51,8 +51,7 @@ wedge::wedge(const dictionary& dict)
     axis_(coeffDict_.lookup("axis")),
     angle_
     (
-        readScalar(coeffDict_.lookup("angle"))
-       *constant::mathematical::pi/180.0
+        degToRad(readScalar(coeffDict_.lookup("angle")))
     )
 {}
 

@@ -43,8 +43,7 @@ License
 
 defineTypeNameAndDebug(Foam::edgeIntersections, 0);
 
-Foam::scalar Foam::edgeIntersections::alignedCos_ =
-    Foam::cos(89.0*Foam::constant::mathematical::pi/180.0);
+Foam::scalar Foam::edgeIntersections::alignedCos_ = Foam::cos(degToRad(89.0));
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
