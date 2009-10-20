@@ -154,19 +154,38 @@ public:
             //- Event number at last update.
             inline label& eventNo();
 
-            //- Am I uptodate with respect to other regIOobjects
-            bool upToDate(const word&) const;
-            bool upToDate(const word&, const word&) const;
-            bool upToDate(const word&, const word&, const word&) const;
+            //- Return true if up-to-date with respect to given object
+            //  otherwise false
+            bool upToDate(const regIOobject&) const;
+
+            //- Return true if up-to-date with respect to given objects
+            //  otherwise false
             bool upToDate
             (
-                const word&,
-                const word&,
-                const word&,
-                const word&
+                const regIOobject&,
+                const regIOobject&
             ) const;
 
-            //- Flag me as up to date
+            //- Return true if up-to-date with respect to given objects
+            //  otherwise false
+            bool upToDate
+            (
+                const regIOobject&,
+                const regIOobject&,
+                const regIOobject&
+            ) const;
+
+            //- Return true if up-to-date with respect to given objects
+            //  otherwise false
+            bool upToDate
+            (
+                const regIOobject&,
+                const regIOobject&,
+                const regIOobject&,
+                const regIOobject&
+            ) const;
+
+            //- Set up to date (obviously)
             void setUpToDate();
 
 
