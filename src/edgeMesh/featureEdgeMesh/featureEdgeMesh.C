@@ -464,7 +464,7 @@ Foam::featureEdgeMesh::featureEdgeMesh
                         if
                         (
                             (normals_[ptEdNorms[k]] & normals_[tmpFtPtNorms[q]])
-                            > cosNormalAngleTol_
+                          > cosNormalAngleTol_
                         )
                         {
                             // Parallel to an existing normal, do not add
