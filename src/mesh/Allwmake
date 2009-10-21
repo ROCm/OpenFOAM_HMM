@@ -4,5 +4,6 @@ set -x
 
 wmake libso autoMesh
 wmake libso blockMesh
+wmake libso conformalVoronoiMesh
 
 # ----------------------------------------------------------------- end-of-file

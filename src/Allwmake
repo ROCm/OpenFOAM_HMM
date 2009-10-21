@@ -53,8 +53,6 @@ mesh/Allwmake
 
 wmake libso errorEstimation
 
-wmake libso conformalVoronoiMesh
-
 fvAgglomerationMethods/Allwmake
 
 wmake libso fvMotionSolver

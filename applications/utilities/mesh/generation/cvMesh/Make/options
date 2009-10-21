@@ -9,7 +9,7 @@ EXE_INC = \
     ${EXE_NDEBUG} \
     ${CGAL_INC} \
     -I$(WM_THIRD_PARTY_DIR)/mpfr-2.4.1 \
-    -I$(LIB_SRC)/conformalVoronoiMesh/lnInclude \
+    -I$(LIB_SRC)/mesh/conformalVoronoiMesh/lnInclude \
     -I$(LIB_SRC)/finiteVolume/lnInclude \
     -I$(LIB_SRC)/meshTools/lnInclude \
     -I$(LIB_SRC)/edgeMesh/lnInclude \
