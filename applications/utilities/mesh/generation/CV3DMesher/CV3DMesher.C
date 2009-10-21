@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
         /max
         (
             (runTime.endTime().value() - runTime.timeOutputValue())
-            /runTime.deltaT().value(),
+            /runTime.deltaTValue(),
             1
         );
 
