@@ -42,10 +42,10 @@ if (mesh.nInternalFaces())
        *mag(phi)/fvc::interpolate(h);
 
     CoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaT().value();
+        .value()*runTime.deltaTValue();
 
     meanCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaT().value();
+        .value()*runTime.deltaTValue();
 
     // Gravity wave Courant number
     waveCoNum =
@@ -53,7 +53,7 @@ if (mesh.nInternalFaces())
         (
             mesh.surfaceInterpolation::deltaCoeffs()
            *sqrt(fvc::interpolate(h))
-        ).value()*sqrt(magg).value()*runTime.deltaT().value();
+        ).value()*sqrt(magg).value()*runTime.deltaTValue();
 }
 
 Info<< "Courant number mean: " << meanCoNum

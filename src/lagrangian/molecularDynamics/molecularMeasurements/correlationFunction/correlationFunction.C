@@ -41,9 +41,9 @@ void Foam::correlationFunction<Type>::setTimesAndSizes
     const label tZeroBufferSize
 )
 {
-    sampleSteps_  = ceil(sampleInterval_/mesh_.time().deltaT().value());
+    sampleSteps_  = ceil(sampleInterval_/mesh_.time().deltaTValue());
 
-    sampleInterval_ = sampleSteps_*mesh_.time().deltaT().value();
+    sampleInterval_ = sampleSteps_*mesh_.time().deltaTValue();
 
     label bufferLength(ceil(duration_/sampleInterval_));
 

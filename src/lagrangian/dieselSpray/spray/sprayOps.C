@@ -58,7 +58,7 @@ void spray::evolve()
 
     calculateAmbientPressure();
     calculateAmbientTemperature();
-    collisions().collideParcels(runTime_.deltaT().value());
+    collisions().collideParcels(runTime_.deltaTValue());
     move();
     dispersion().disperseParcels();
     inject();
@@ -103,7 +103,7 @@ void spray::breakupLoop()
             breakup().updateParcelProperties
             (
                 elmnt(),
-                runTime_.deltaT().value(),
+                runTime_.deltaTValue(),
                 velocity,
                 fuels_
             );
@@ -111,7 +111,7 @@ void spray::breakupLoop()
             breakup().breakupParcel
             (
                 elmnt(),
-                runTime_.deltaT().value(),
+                runTime_.deltaTValue(),
                 velocity,
                 fuels_
             );
@@ -137,7 +137,7 @@ void spray::atomizationLoop()
             atomization().atomizeParcel
             (
                 elmnt(),
-                runTime_.deltaT().value(),
+                runTime_.deltaTValue(),
                 velocity,
                 fuels_
             );

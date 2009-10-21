@@ -226,7 +226,7 @@ bool Foam::KinematicParcel<ParcelType>::move(TrackData& td)
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    const scalar deltaT = mesh.time().deltaT().value();
+    const scalar deltaT = mesh.time().deltaTValue();
     scalar tEnd = (1.0 - p.stepFraction())*deltaT;
     const scalar dtMax = tEnd;
 

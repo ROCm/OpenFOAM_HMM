@@ -142,7 +142,7 @@ Foam::velocityComponentLaplacianFvMotionSolver::curPoints() const
     (
         cmpt_,
         tcurPoints().component(cmpt_)
-      + fvMesh_.time().deltaT().value()*pointMotionU_.internalField()
+      + fvMesh_.time().deltaTValue()*pointMotionU_.internalField()
     );
 
     twoDCorrectPoints(tcurPoints());

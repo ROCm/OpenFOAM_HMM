@@ -88,7 +88,7 @@ bool Foam::molecule::move(molecule::trackData& td)
 
     const constantProperties& constProps(td.molCloud().constProps(id_));
 
-    scalar deltaT = cloud().pMesh().time().deltaT().value();
+    scalar deltaT = cloud().pMesh().time().deltaTValue();
 
     if (td.part() == 0)
     {

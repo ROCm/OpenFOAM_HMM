@@ -349,7 +349,7 @@ bool Foam::mixerFvMesh::update()
         csPtr_->globalPosition
         (
             csPtr_->localPosition(points())
-          + vector(0, rpm_*360.0*time().deltaT().value()/60.0, 0)
+          + vector(0, rpm_*360.0*time().deltaTValue()/60.0, 0)
             *movingPointsMask()
         )
     );
@@ -372,7 +372,7 @@ bool Foam::mixerFvMesh::update()
         csPtr_->globalPosition
         (
             csPtr_->localPosition(oldPoints())
-          + vector(0, rpm_*360.0*time().deltaT().value()/60.0, 0)
+          + vector(0, rpm_*360.0*time().deltaTValue()/60.0, 0)
             *movingPointsMask()
         )
     );
