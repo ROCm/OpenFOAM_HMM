@@ -26,7 +26,7 @@ License
 
 #include "layerParameters.H"
 #include "polyBoundaryMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "refinementSurfaces.H"
 #include "searchableSurfaces.H"
 #include "regExp.H"

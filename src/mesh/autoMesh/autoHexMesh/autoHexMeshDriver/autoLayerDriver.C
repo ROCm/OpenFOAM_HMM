@@ -34,7 +34,7 @@ Description
 #include "removePoints.H"
 #include "pointFields.H"
 #include "motionSmoother.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "pointSet.H"
 #include "faceSet.H"
 #include "cellSet.H"

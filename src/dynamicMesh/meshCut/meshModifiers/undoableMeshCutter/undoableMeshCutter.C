@@ -32,7 +32,7 @@ License
 #include "cellCuts.H"
 #include "splitCell.H"
 #include "mapPolyMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "meshTools.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //

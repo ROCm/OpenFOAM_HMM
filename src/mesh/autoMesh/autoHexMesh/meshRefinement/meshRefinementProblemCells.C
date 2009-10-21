@@ -37,7 +37,7 @@ License
 #include "searchableSurfaces.H"
 #include "polyMeshGeometry.H"
 #include "IOmanip.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
