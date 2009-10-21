@@ -136,39 +136,39 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
 {
     writeInternalDelaunayVertices(writeToConstant);
 
-    {
-        pointField points;
-        faceList faces;
-        labelList owner;
-        labelList neighbour;
-        wordList patchNames;
-        labelList patchSizes;
-        labelList patchStarts;
+    // {
+    //     pointField points;
+    //     faceList faces;
+    //     labelList owner;
+    //     labelList neighbour;
+    //     wordList patchNames;
+    //     labelList patchSizes;
+    //     labelList patchStarts;
 
-        calcTetMesh
-        (
-            points,
-            faces,
-            owner,
-            neighbour,
-            patchNames,
-            patchSizes,
-            patchStarts
-        );
+    //     calcTetMesh
+    //     (
+    //         points,
+    //         faces,
+    //         owner,
+    //         neighbour,
+    //         patchNames,
+    //         patchSizes,
+    //         patchStarts
+    //     );
 
-        writeMesh
-        (
-            "tetDualMesh",
-            writeToConstant,
-            points,
-            faces,
-            owner,
-            neighbour,
-            patchNames,
-            patchSizes,
-            patchStarts
-        );
-    }
+    //     writeMesh
+    //     (
+    //         "tetDualMesh",
+    //         writeToConstant,
+    //         points,
+    //         faces,
+    //         owner,
+    //         neighbour,
+    //         patchNames,
+    //         patchSizes,
+    //         patchStarts
+    //     );
+    // }
 
     {
         pointField points;
@@ -364,47 +364,46 @@ void Foam::conformalVoronoiMesh::writeTargetCellSize() const
         targetCellSize.write();
     }
 
-    {
-        polyMesh tetMesh
-        (
-            IOobject
-            (
-                "tetDualMesh",
-                runTime_.constant(),
-                runTime_,
-                IOobject::MUST_READ
-            )
-        );
+    // {
+    //     polyMesh tetMesh
+    //     (
+    //         IOobject
+    //         (
+    //             "tetDualMesh",
+    //             runTime_.constant(),
+    //             runTime_,
+    //             IOobject::MUST_READ
+    //         )
+    //     );
 
-        pointMesh ptMesh(tetMesh);
+    //     pointMesh ptMesh(tetMesh);
 
-        pointScalarField ptTargetCellSize
-        (
-            IOobject
-            (
-                "ptTargetCellSize",
-                runTime_.timeName(),
-                tetMesh,
-                IOobject::NO_READ,
-                IOobject::AUTO_WRITE
-            ),
-            ptMesh,
-            dimensionedScalar("ptTargetCellSize", dimLength, 0),
-            pointPatchVectorField::calculatedType()
-        );
+    //     pointScalarField ptTargetCellSize
+    //     (
+    //         IOobject
+    //         (
+    //             "ptTargetCellSize",
+    //             runTime_.timeName(),
+    //             tetMesh,
+    //             IOobject::NO_READ,
+    //             IOobject::AUTO_WRITE
+    //         ),
+    //         ptMesh,
+    //         dimensionedScalar("ptTargetCellSize", dimLength, 0),
+    //         pointPatchVectorField::calculatedType()
+    //     );
 
-        scalarField& cellSize = ptTargetCellSize.internalField();
+    //     scalarField& cellSize = ptTargetCellSize.internalField();
 
-        const vectorField& P = tetMesh.points();
+    //     const vectorField& P = tetMesh.points();
 
-        forAll(cellSize, i)
-        {
-            cellSize[i] = cellSizeControl().cellSize(P[i]);
-        }
+    //     forAll(cellSize, i)
+    //     {
+    //         cellSize[i] = cellSizeControl().cellSize(P[i]);
+    //     }
 
-        ptTargetCellSize.write();
-    }
-
+    //     ptTargetCellSize.write();
+    // }
 }
 
 
