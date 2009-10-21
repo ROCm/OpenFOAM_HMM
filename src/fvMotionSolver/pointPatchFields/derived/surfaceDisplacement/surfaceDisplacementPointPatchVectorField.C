@@ -64,7 +64,7 @@ void surfaceDisplacementPointPatchVectorField::calcProjection
     const pointField& localPoints = patch().localPoints();
     const labelList& meshPoints = patch().meshPoints();
 
-    //const scalar deltaT = mesh.time().deltaT().value();
+    //const scalar deltaT = mesh.time().deltaTValue();
 
     // Construct large enough vector in direction of projectDir so
     // we're guaranteed to hit something.
@@ -451,7 +451,7 @@ void surfaceDisplacementPointPatchVectorField::updateCoeffs()
 
     // Clip offset to maximum displacement possible: velocity*timestep
 
-    const scalar deltaT = mesh.time().deltaT().value();
+    const scalar deltaT = mesh.time().deltaTValue();
     const vector clipVelocity = velocity_*deltaT;
 
     forAll(displacement, i)

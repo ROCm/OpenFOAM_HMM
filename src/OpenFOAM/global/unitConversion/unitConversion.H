@@ -23,39 +23,41 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::uni
+    Foam
 
 Description
-    Universal constants
+    Unit conversion functions
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef universalConstants_H
-#define universalConstants_H
+#ifndef unitConversion_H
+#define unitConversion_H
 
-#include "dimensionedScalar.H"
+#include "mathematicalConstants.H"
+
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace constant
-{
-namespace universal
-{
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    //- Group name for universal constants
-    extern const char* group;
+//- Conversion from degrees to radians
+inline scalar degToRad(const scalar& deg)
+{
+    return (deg*pi/180.0);
+}
 
-    //- Reduced Planck constant: default SI units: [J/s]
-    extern const dimensionedScalar hr;
+//- Conversion from radians to degrees
+inline scalar radToDeg(const scalar& rad)
+{
+    return (rad*180.0/pi);
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace universal
-} // End namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -63,4 +65,3 @@ namespace universal
 #endif
 
 // ************************************************************************* //
-

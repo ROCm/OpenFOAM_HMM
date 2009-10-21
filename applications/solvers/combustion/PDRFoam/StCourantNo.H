@@ -41,11 +41,11 @@ Description
 
         StCoNum =
             max(SfUfbyDelta/mesh.magSf()).value()
-           *runTime.deltaT().value();
+           *runTime.deltaTValue();
 
         meanStCoNum =
             (sum(SfUfbyDelta)/sum(mesh.magSf())).value()
-        *runTime.deltaT().value();
+        *runTime.deltaTValue();
     }
 
     Info<< "St courant Number mean: " << meanStCoNum

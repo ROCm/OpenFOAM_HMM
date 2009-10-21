@@ -23,15 +23,15 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::atom
+    Foam::constant::physicoChemical
 
 Description
-    Atomic constants
+    Physico-chemical constants
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef atomicConstants_H
-#define atomicConstants_H
+#ifndef physicoChemicalConstants_H
+#define physicoChemicalConstants_H
 
 #include "dimensionedScalar.H"
 
@@ -41,34 +41,37 @@ namespace Foam
 {
 namespace constant
 {
-namespace atomic
+namespace physicoChemical
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    //- Group name for atomic constants
+    //- Group name for physico-chemical constants
     extern const char* group;
 
-    //- Fine-structure constant: default SI units: []
-    extern const dimensionedScalar alpha;
+    //- Universal gas constant: default SI units: [J/mol/K]
+    extern const dimensionedScalar R;
 
-    //- Rydberg constant: default SI units: [1/m]
-    extern const dimensionedScalar Rinf;
+    //- Faraday constant: default SI units: [C/mol]
+    extern const dimensionedScalar F;
 
-    //- Bohr radius: default SI units: [m]
-    extern const dimensionedScalar a0;
+    //- Stefan-Boltzmann constant: default SI units: [W/m2/K4]
+    extern const dimensionedScalar sigma;
 
-    //- Classical electron radius: default SI units: [m]
-    extern const dimensionedScalar re;
+    //- Wien displacement law constant: default SI units: [m.K]
+    extern const dimensionedScalar b;
 
-    //- Hartree energy: default SI units: [J]
-    extern const dimensionedScalar Eh;
+    //- First radiation constant: default SI units: [W/m2]
+    extern const dimensionedScalar c1;
+
+    //- Second radiation constant: default SI units: [m.K]
+    extern const dimensionedScalar c2;
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace atomic
-} // end namespace constant
+} // End namespace physicoChemical
+} // End namespace constant
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -76,6 +79,7 @@ namespace atomic
 #endif
 
 // ************************************************************************* //
+
 
 
 

@@ -100,7 +100,7 @@ bool Foam::parcel::move(spray& sDB)
 
     const liquidMixture& fuels = sDB.fuels();
 
-    scalar deltaT = sDB.runTime().deltaT().value();
+    scalar deltaT = sDB.runTime().deltaTValue();
     label Nf = fuels.components().size();
     label Ns = sDB.composition().Y().size();
 

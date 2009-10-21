@@ -150,7 +150,7 @@ const
 {
     typedef GeometricField<Type, fvPatchField, volMesh> fieldType;
 
-    const scalar dt = obr_.time().deltaT().value();
+    const scalar dt = obr_.time().deltaTValue();
 
     forAll(faItems_, i)
     {
@@ -193,7 +193,7 @@ void Foam::fieldAverage::calculatePrime2MeanFields
     typedef GeometricField<Type1, fvPatchField, volMesh> fieldType1;
     typedef GeometricField<Type2, fvPatchField, volMesh> fieldType2;
 
-    const scalar dt = obr_.time().deltaT().value();
+    const scalar dt = obr_.time().deltaTValue();
 
     forAll(faItems_, i)
     {

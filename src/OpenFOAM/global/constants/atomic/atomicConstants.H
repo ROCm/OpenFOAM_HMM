@@ -22,21 +22,60 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
+Namespace
+    Foam::constant::atomic
+
 Description
-    Collection of dimensioned constants
+    Atomic constants
 
 \*---------------------------------------------------------------------------*/
 
+#ifndef atomicConstants_H
+#define atomicConstants_H
+
+#include "dimensionedScalar.H"
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-// Constants supplied in the main controlDict
-#include "fundamentalConstants.C"
+namespace Foam
+{
+namespace constant
+{
+namespace atomic
+{
 
-// Derived constants
-#include "universalConstants.C"
-#include "electromagneticConstants.C"
-#include "atomicConstants.C"
-#include "physicoChemicalConstants.C"
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
+    //- Group name for atomic constants
+    extern const char* group;
+
+    //- Fine-structure constant: default SI units: []
+    extern const dimensionedScalar alpha;
+
+    //- Rydberg constant: default SI units: [1/m]
+    extern const dimensionedScalar Rinf;
+
+    //- Bohr radius: default SI units: [m]
+    extern const dimensionedScalar a0;
+
+    //- Classical electron radius: default SI units: [m]
+    extern const dimensionedScalar re;
+
+    //- Hartree energy: default SI units: [J]
+    extern const dimensionedScalar Eh;
+
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace atomic
+} // End namespace constant
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //
+
+
+

@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "engineTime.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -123,12 +123,6 @@ bool Foam::engineTime::read()
 }
 
 
-Foam::scalar Foam::engineTime::degToRad(const scalar deg) const
-{
-    return constant::mathematical::pi*deg/180.0;
-}
-
-
 Foam::scalar Foam::engineTime::degToTime(const scalar theta) const
 {
     // 6 * rpm => deg/s
@@ -171,7 +165,7 @@ Foam::scalar Foam::engineTime::thetaRevolution() const
 
 Foam::scalar Foam::engineTime::deltaTheta() const
 {
-    return timeToDeg(deltaT().value());
+    return timeToDeg(deltaTValue());
 }
 
 
@@ -222,7 +216,7 @@ Foam::dimensionedScalar Foam::engineTime::pistonSpeed() const
     (
         "pistonSpeed",
         dimVelocity,
-        pistonDisplacement().value()/(deltaT().value() + VSMALL)
+        pistonDisplacement().value()/(deltaTValue() + VSMALL)
     );
 }
 

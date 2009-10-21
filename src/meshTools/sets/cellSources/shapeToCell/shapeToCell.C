@@ -26,7 +26,7 @@ License
 
 #include "shapeToCell.H"
 #include "polyMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "hexMatcher.H"
 #include "cellFeatures.H"
 
@@ -56,8 +56,7 @@ Foam::topoSetSource::addToUsageTable Foam::shapeToCell::usage_
 
 
 // Angle for polys to be considered splitHexes.
-Foam::scalar Foam::shapeToCell::featureCos =
-    Foam::cos(10.0*Foam::constant::mathematical::pi/180.0);
+Foam::scalar Foam::shapeToCell::featureCos = Foam::cos(degToRad(10.0));
 
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //

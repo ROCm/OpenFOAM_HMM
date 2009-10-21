@@ -43,7 +43,7 @@ Description
 #include "cellShape.H"
 #include "cellModeller.H"
 #include "mergePoints.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 using namespace Foam;
 
@@ -128,7 +128,7 @@ int main(int argc, char *argv[])
     fileName pointsFile(runTime.constantPath()/"points.tmp");
     OFstream pFile(pointsFile);
 
-    scalar a(0.1*constant::mathematical::pi/180.0);
+    scalar a(degToRad(0.1));
     tensor rotateZ =
         tensor
         (

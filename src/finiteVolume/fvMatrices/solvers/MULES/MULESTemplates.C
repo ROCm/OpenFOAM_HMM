@@ -99,7 +99,7 @@ void Foam::MULES::explicitSolve
 
     scalarField& psiIf = psi;
     const scalarField& psi0 = psi.oldTime();
-    const scalar deltaT = mesh.time().deltaT().value();
+    const scalar deltaT = mesh.time().deltaTValue();
 
     psiIf = 0.0;
     fvc::surfaceIntegrate(psiIf, phiPsi);
@@ -328,7 +328,7 @@ void Foam::MULES::limiter
     const unallocLabelList& owner = mesh.owner();
     const unallocLabelList& neighb = mesh.neighbour();
     const scalarField& V = mesh.V();
-    const scalar deltaT = mesh.time().deltaT().value();
+    const scalar deltaT = mesh.time().deltaTValue();
 
     const scalarField& phiBDIf = phiBD;
     const surfaceScalarField::GeometricBoundaryField& phiBDBf =

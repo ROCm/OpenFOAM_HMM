@@ -112,7 +112,7 @@ void movingWallVelocityFvPatchVectorField::updateCoeffs()
         oldFc[i] = pp[i].centre(oldPoints);
     }
 
-    vectorField Up = (pp.faceCentres() - oldFc)/mesh.time().deltaT().value();
+    vectorField Up = (pp.faceCentres() - oldFc)/mesh.time().deltaTValue();
 
     const volVectorField& U = db().lookupObject<volVectorField>("U");
     scalarField phip =

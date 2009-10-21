@@ -41,7 +41,7 @@ License
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
 
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 
@@ -293,7 +293,7 @@ Foam::spray::spray
         angleOfWedge_ = constant::mathematical::pi - acos(arcCos);
 
         Info<< "Calculated angle of wedge is "
-            << angleOfWedge_*180/constant::mathematical::pi << " deg."
+            << radToDeg(angleOfWedge_) << " deg."
             << endl;
     }
     else

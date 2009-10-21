@@ -59,7 +59,7 @@ Usage
 #include "Time.H"
 #include "timeSelector.H"
 #include "fvMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "polyTopoChange.H"
 #include "mapPolyMesh.H"
 #include "PackedBoolList.H"
@@ -91,7 +91,7 @@ void simpleMarkFeatures
     labelList& multiCellFeaturePoints
 )
 {
-    scalar minCos = Foam::cos(featureAngle*constant::mathematical::pi/180.0);
+    scalar minCos = Foam::cos(degToRad(featureAngle));
 
     const polyBoundaryMesh& patches = mesh.boundaryMesh();
 
@@ -387,7 +387,7 @@ int main(int argc, char *argv[])
 
     scalar featureAngle(readScalar(IStringStream(args.additionalArgs()[0])()));
 
-    scalar minCos = Foam::cos(featureAngle*constant::mathematical::pi/180.0);
+    scalar minCos = Foam::cos(degToRad(featureAngle));
 
     Info<< "Feature:" << featureAngle << endl
         << "minCos :" << minCos << endl

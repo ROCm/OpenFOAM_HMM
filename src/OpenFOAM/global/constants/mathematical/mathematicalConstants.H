@@ -23,17 +23,17 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::phys
+    Foam::constant::mathematical
 
 Description
-    Physico-chemical constants
+    mathematical constants.
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef physicoChemicalConstants_H
-#define physicoChemicalConstants_H
+#ifndef mathematicalConstants_H
+#define mathematicalConstants_H
 
-#include "dimensionedScalar.H"
+#include "scalar.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
@@ -41,37 +41,25 @@ namespace Foam
 {
 namespace constant
 {
-namespace physicoChemical
+namespace mathematical
 {
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-    //- Group name for physico-chemical constants
-    extern const char* group;
+    static word group = "mathematical";
 
-    //- Universal gas constant: default SI units: [J/mol/K]
-    extern const dimensionedScalar R;
-
-    //- Faraday constant: default SI units: [C/mol]
-    extern const dimensionedScalar F;
-
-    //- Stefan-Boltzmann constant: default SI units: [W/m2/K4]
-    extern const dimensionedScalar sigma;
-
-    //- Wien displacement law constant: default SI units: [m.K]
-    extern const dimensionedScalar b;
-
-    //- First radiation constant: default SI units: [W/m2]
-    extern const dimensionedScalar c1;
-
-    //- Second radiation constant: default SI units: [m.K]
-    extern const dimensionedScalar c2;
-
+    const scalar e(M_E);
+    const scalar pi(M_PI);
+    const scalar twoPi(2*pi);
+    const scalar piByTwo(0.5*pi);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
-} // End namespace physicoChemical
-} // end namespace constant
+} // End namespace mathematical
+} // End namespace constant
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
@@ -79,7 +67,3 @@ namespace physicoChemical
 #endif
 
 // ************************************************************************* //
-
-
-
-

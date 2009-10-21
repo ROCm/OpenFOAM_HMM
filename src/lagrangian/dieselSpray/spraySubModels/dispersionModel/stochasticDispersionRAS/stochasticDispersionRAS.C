@@ -73,7 +73,7 @@ void stochasticDispersionRAS::disperseParcels() const
     const scalar cps = 0.16432;
     const vector one(1.0, 1.0, 1.0);
 
-    scalar dt = spray_.runTime().deltaT().value();
+    scalar dt = spray_.runTime().deltaTValue();
     const volScalarField& k = turbulence().k();
     //volVectorField gradk = fvc::grad(k);
     const volScalarField& epsilon = turbulence().epsilon();
