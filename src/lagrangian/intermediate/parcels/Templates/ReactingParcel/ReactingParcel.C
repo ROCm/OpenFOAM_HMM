@@ -462,15 +462,21 @@ void Foam::ReactingParcel<ParcelType>::calcPhaseChange
     {
         const label idc =
             td.cloud().composition().localToGlobalCarrierId(idPhase, i);
-        const scalar hv = td.cloud().mcCarrierThermo().speciesData()[idc].H(T);
-
         const label idl = td.cloud().composition().globalIds(idPhase)[i];
-        const scalar hl =
-            td.cloud().composition().liquids().properties()[idl].h(pc_, T);
 
-        // Enthalphy transfer to carrier phase
+        const scalar hv = td.cloud().mcCarrierThermo().speciesData()[idc].H(Ts);
+        const scalar hl =
+            td.cloud().composition().liquids().properties()[idl].h(pc_, Ts);
+
+        // Enthalphy transfer to carrier phase - method 1 using enthalpy diff
         Sh += dMassPC[i]*(hl - hv)/dt;
 
+        // Enthalphy transfer to carrier phase - method 2 using latent heat
+//        const scalar hl =
+//            td.cloud().composition().liquids().properties()[idl].hl(pc_, Ts);
+//        Sh -= dMassPC[i]*hl/dt;
+
+        // Update particle surface thermo properties
         const scalar Dab =
             td.cloud().composition().liquids().properties()[idl].D(pc_, Ts, Wc);
 
