@@ -143,7 +143,7 @@ Foam::label Foam::PairSpringSliderDashpot<CloudType>::nSubCycles() const
        *pow(rhoMax/(Estar_*sqrt(UMagMax) + VSMALL), 0.4)
        /collisionResolutionSteps_;
 
-    return ceil(this->owner().time().deltaT().value()/minCollisionDeltaT);
+    return ceil(this->owner().time().deltaTValue()/minCollisionDeltaT);
 }
 
 
@@ -189,7 +189,7 @@ void Foam::PairSpringSliderDashpot<CloudType>::evaluatePair
           + (pA.omega() ^ (pA.r()*-rHat_AB))
           - (pB.omega() ^ (pB.r()*rHat_AB));
 
-        scalar deltaT = this->owner().mesh().time().deltaT().value();
+        scalar deltaT = this->owner().mesh().time().deltaTValue();
 
         vector& tangentialOverlap_AB =
             pA.collisionRecords().matchRecord

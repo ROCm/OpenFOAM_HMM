@@ -128,7 +128,7 @@ Foam::label Foam::WallSpringSliderDashpot<CloudType>::nSubCycles() const
     //    *pow(rhoMax/(Estar_*sqrt(UMagMax) + VSMALL), 0.4)
     //    /collisionResolutionSteps_;
 
-    // return ceil(this->owner().time().deltaT().value()/minCollisionDeltaT);
+    // return ceil(this->owner().time().deltaTValue()/minCollisionDeltaT);
 
     return 1;
 }
