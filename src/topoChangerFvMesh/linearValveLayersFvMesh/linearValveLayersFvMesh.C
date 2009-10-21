@@ -330,7 +330,7 @@ Foam::tmp<Foam::pointField> Foam::linearValveLayersFvMesh::newPoints() const
 
     forAll (patchPoints, ppI)
     {
-        np[patchPoints[ppI]] += vel*time().deltaT().value();
+        np[patchPoints[ppI]] += vel*time().deltaTValue();
     }
 
     return tnewPoints;

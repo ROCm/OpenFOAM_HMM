@@ -70,7 +70,7 @@ void Foam::fieldAverage::initialize()
     totalIter_.setSize(faItems_.size(), 1);
 
     totalTime_.clear();
-    totalTime_.setSize(faItems_.size(), obr_.time().deltaT().value());
+    totalTime_.setSize(faItems_.size(), obr_.time().deltaTValue());
 
 
     // Add mean fields to the field lists
@@ -170,7 +170,7 @@ void Foam::fieldAverage::calcAverages()
     forAll(faItems_, fieldI)
     {
         totalIter_[fieldI]++;
-        totalTime_[fieldI] += obr_.time().deltaT().value();
+        totalTime_[fieldI] += obr_.time().deltaTValue();
     }
 
     addMeanSqrToPrime2Mean<scalar, scalar>

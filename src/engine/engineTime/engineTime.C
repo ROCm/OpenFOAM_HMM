@@ -165,7 +165,7 @@ Foam::scalar Foam::engineTime::thetaRevolution() const
 
 Foam::scalar Foam::engineTime::deltaTheta() const
 {
-    return timeToDeg(deltaT().value());
+    return timeToDeg(deltaTValue());
 }
 
 
@@ -216,7 +216,7 @@ Foam::dimensionedScalar Foam::engineTime::pistonSpeed() const
     (
         "pistonSpeed",
         dimVelocity,
-        pistonDisplacement().value()/(deltaT().value() + VSMALL)
+        pistonDisplacement().value()/(deltaTValue() + VSMALL)
     );
 }
 

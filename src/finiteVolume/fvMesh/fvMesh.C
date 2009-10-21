@@ -576,7 +576,7 @@ Foam::tmp<Foam::scalarField> Foam::fvMesh::movePoints(const pointField& p)
 
     // Move the polyMesh and set the mesh motion fluxes to the swept-volumes
 
-    scalar rDeltaT = 1.0/time().deltaT().value();
+    scalar rDeltaT = 1.0/time().deltaTValue();
 
     tmp<scalarField> tsweptVols = polyMesh::movePoints(p);
     scalarField& sweptVols = tsweptVols();
