@@ -27,6 +27,7 @@ License
 #include "constants.H"
 
 using namespace Foam::constant;
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -355,7 +356,7 @@ inline Foam::scalar Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
 ) const
 {
     return
-        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(math::pi*mass));
+        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(pi*mass));
 }
 
 
@@ -367,7 +368,7 @@ inline Foam::scalarField Foam::DsmcCloud<ParcelType>::maxwellianAverageSpeed
 ) const
 {
     return
-        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(math::pi*mass));
+        2.0*sqrt(2.0*physicoChemical::k.value()*temperature/(pi*mass));
 }
 
 

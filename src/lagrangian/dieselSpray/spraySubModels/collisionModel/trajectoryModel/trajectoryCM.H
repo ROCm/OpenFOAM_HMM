@@ -129,7 +129,7 @@ if (vAlign > 0)
                     pMax().d() =
                         pow
                         (
-                            6.0*newMaxMass/(rhoMax*constant::math::pi*nMax),
+                            6.0*newMaxMass/(rhoMax*constant::mathematical::pi*nMax),
                             1.0/3.0
                         );
 

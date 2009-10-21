@@ -31,7 +31,6 @@ Description
 SourceFiles
     vtkPV3Foam.C
     vtkPV3Foam.H
-    vtkPV3FoamI.H
     vtkPV3FoamFields.C
     vtkPV3FoamMesh.C
     vtkPV3FoamMeshLagrangian.C
@@ -46,7 +45,7 @@ SourceFiles
     vtkPV3FoamPoints.H
     vtkPV3FoamUpdateInfo.C
     vtkPV3FoamUpdateInfoFields.H
-    vtkPV3FoamUtilities.C
+    vtkPV3FoamUtils.C
     vtkPV3FoamVolFields.H
     vtkPV3FoamAddToSelection.H
 
@@ -316,7 +315,7 @@ class vtkPV3Foam
             vtkDataSet* dataset,
             const partInfo&,
             const label datasetNo,
-            const string& datasetName
+            const std::string& datasetName
         );
 
         // Convenience method use to convert the readers from VTK 5
@@ -627,9 +626,6 @@ class vtkPV3Foam
 
        // GUI selection helper functions
 
-            //- Extract up to the first non-word characters
-            inline static word getFirstWord(const char*);
-
             //- Only keep what is listed in hashSet
             static void pruneObjectList
             (
@@ -715,11 +711,8 @@ public:
         //  returns the count via the parameter
         double* findTimes(int& nTimeSteps);
 
-        //- Add patch names to the display
-        void addPatchNames(vtkRenderer* renderer);
-
-        //- Remove patch names from the display
-        void removePatchNames(vtkRenderer* renderer);
+        //- Add/remove patch names to/from the view
+        void renderPatchNames(vtkRenderer*, const bool show);
 
         //- set the runTime to the first plausible request time,
         //  returns the timeIndex
@@ -750,8 +743,6 @@ public:
 } // End namespace Foam
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-#    include "vtkPV3FoamI.H"
 
 #endif
 

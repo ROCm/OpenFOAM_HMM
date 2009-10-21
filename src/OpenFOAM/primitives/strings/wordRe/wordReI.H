@@ -176,12 +176,12 @@ inline void Foam::wordRe::clear()
 }
 
 
-inline bool Foam::wordRe::match(const string& str, bool literalMatch) const
+inline bool Foam::wordRe::match(const std::string& str, bool literalMatch) const
 {
     if (literalMatch || !re_.exists())
     {
         // check as string
-        return (*this == str);
+        return (str == *this);
     }
     else
     {

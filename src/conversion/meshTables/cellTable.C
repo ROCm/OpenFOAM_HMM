@@ -169,7 +169,7 @@ Foam::Map<Foam::word> Foam::cellTable::names() const
 
 Foam::Map<Foam::word> Foam::cellTable::names
 (
-    const List<wordRe>& patterns
+    const UList<wordRe>& patterns
 ) const
 {
     Map<word> lookup;

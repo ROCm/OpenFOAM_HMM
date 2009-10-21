@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "engineTime.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -120,12 +120,6 @@ bool Foam::engineTime::read()
     {
         return false;
     }
-}
-
-
-Foam::scalar Foam::engineTime::degToRad(const scalar deg) const
-{
-    return constant::math::pi*deg/180.0;
 }
 
 

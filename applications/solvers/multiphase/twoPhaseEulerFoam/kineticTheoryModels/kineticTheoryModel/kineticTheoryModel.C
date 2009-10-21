@@ -26,7 +26,7 @@ License
 
 #include "kineticTheoryModel.H"
 #include "surfaceInterpolate.H"
-#include "mathConstants.H"
+#include "mathematicalConstants.H"
 #include "fvCFD.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -204,7 +204,7 @@ void Foam::kineticTheoryModel::solve()
 
     volScalarField alpha = alpha_;
     alpha.max(1.0e-6);
-    const scalar sqrtPi = sqrt(constant::math::pi);
+    const scalar sqrtPi = sqrt(constant::mathematical::pi);
 
     surfaceScalarField phi = 1.5*rhoa_*phia_*fvc::interpolate(alpha_);
 

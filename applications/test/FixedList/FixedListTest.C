@@ -78,10 +78,7 @@ int main(int argc, char *argv[])
             Serr<< "slave sending to master "
                 << Pstream::masterNo() << endl;
 
-            OPstream toMaster
-            (
-                Pstream::blocking, Pstream::masterNo(), IOstream::ASCII
-            );
+            OPstream toMaster(Pstream::blocking, Pstream::masterNo());
 
             FixedList<label, 2> list3;
             list3[0] = 0;
@@ -98,10 +95,7 @@ int main(int argc, char *argv[])
             )
             {
                 Serr << "master receiving from slave " << slave << endl;
-                IPstream fromSlave
-                (
-                    Pstream::blocking, slave, IOstream::ASCII
-                );
+                IPstream fromSlave(Pstream::blocking, slave);
                 FixedList<label, 2> list3(fromSlave);
 
                 Serr<< list3 << endl;

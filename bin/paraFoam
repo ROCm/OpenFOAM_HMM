@@ -29,6 +29,8 @@
 # Description
 #     start paraview with the OpenFOAM libraries
 #
+# Note
+#     combining -block and -region options yields undefined behaviour
 #------------------------------------------------------------------------------
 usage() {
     while [ "$#" -ge 1 ]; do echo "$1"; shift; done
@@ -38,6 +40,7 @@ usage: ${0##*/} [OPTION]
 options:
   -case   dir    specify alternative case directory
   -region name   specify mesh region name
+  -block         use blockMesh reader (and .blockMesh file)
   -touch         only create the .OpenFOAM file
 
 * start paraview $ParaView_VERSION with the OpenFOAM libraries
@@ -48,12 +51,19 @@ USAGE
 
 unset regionName touchOnly
 
+# reader extension
+reader=OpenFOAM
+
 # parse options
 while [ "$#" -gt 0 ]
 do
     case "$1" in
     -h | -help)
         usage
+        ;;
+    -block | -blockMesh)
+        reader=blockMesh
+        shift
         ;;
     -case)
         [ "$#" -ge 2 ] || usage "'$1' option requires an argument"
@@ -75,14 +85,14 @@ do
     esac
 done
 
-# get a sensible caseName
+# get a sensible caseName from the directory name
 caseName=${PWD##*/}
-caseFile="$caseName.OpenFOAM"
+caseFile="$caseName.$reader"
 fvControls="system"
 
 if [ -n "$regionName" ]
 then
-    caseFile="$caseName{$regionName}.OpenFOAM"
+    caseFile="$caseName{$regionName}.$reader"
     fvControls="$fvControls/$regionName"
 fi
 
@@ -99,12 +109,25 @@ case "$caseName" in
     *)          parentDir="."  ;;
 esac
 
-# check existence of essential files
-for check in system/controlDict $fvControls/fvSchemes $fvControls/fvSolution
-do
-    [ -s "$parentDir/$check" ] || usage "file does not exist:  '$parentDir/$check'"
-done
 
+#
+# check existence of essential files
+#
+case $reader in
+blockMesh)
+    for check in system/controlDict constant/polyMesh/blockMeshDict
+    do
+        [ -s "$parentDir/$check" ] || usage "file does not exist:  '$parentDir/$check'"
+    done
+    ;;
+
+OpenFOAM)
+    for check in system/controlDict $fvControls/fvSchemes $fvControls/fvSolution
+    do
+        [ -s "$parentDir/$check" ] || usage "file does not exist:  '$parentDir/$check'"
+    done
+    ;;
+esac
 
 case "$ParaView_VERSION" in
 2*)
