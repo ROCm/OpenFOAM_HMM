@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
         (
             mesh.surfaceInterpolation::deltaCoeffs()
            *mag(phiv)/mesh.magSf()
-        ).value()*runTime.deltaT().value();
+        ).value()*runTime.deltaTValue();
 
         Info<< "\nMax Courant Number = " << CoNum << endl;
 

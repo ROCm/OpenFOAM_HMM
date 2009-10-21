@@ -373,7 +373,7 @@ inline Foam::scalar Foam::Particle<ParticleType>::currentTime() const
 {
     return
         cloud_.pMesh().time().value()
-      + stepFraction_*cloud_.pMesh().time().deltaT().value();
+      + stepFraction_*cloud_.pMesh().time().deltaTValue();
 }
 
 

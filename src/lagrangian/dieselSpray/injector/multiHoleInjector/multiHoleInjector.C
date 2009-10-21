@@ -27,7 +27,7 @@ License
 #include "multiHoleInjector.H"
 #include "addToRunTimeSelectionTable.H"
 #include "Random.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 namespace Foam

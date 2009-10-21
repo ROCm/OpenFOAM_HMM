@@ -49,7 +49,7 @@ Description
 #include "cellSet.H"
 #include "cellModeller.H"
 #include "meshCutter.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "geomCellLooper.H"
 #include "plane.H"
 #include "edgeVertex.H"

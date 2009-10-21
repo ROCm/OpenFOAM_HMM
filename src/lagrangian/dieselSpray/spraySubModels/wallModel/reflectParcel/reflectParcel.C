@@ -104,7 +104,7 @@ bool reflectParcel::wallTreatment
             vector Ub1 = U_.boundaryField()[patchi][facei];
             vector Ub0 = U_.oldTime().boundaryField()[patchi][facei];
 
-            scalar dt = spray_.runTime().deltaT().value();
+            scalar dt = spray_.runTime().deltaTValue();
             const vectorField& oldPoints = mesh.oldPoints();
 
             const vector& Cf1 = mesh.faceCentres()[globalFacei];

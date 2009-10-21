@@ -164,7 +164,7 @@ bool Foam::streamLineParticle::move(streamLineParticle::trackData& td)
     td.switchProcessor = false;
     td.keepParticle = true;
 
-    scalar deltaT = GREAT;  //cloud().pMesh().time().deltaT().value();
+    scalar deltaT = GREAT;  //cloud().pMesh().time().deltaTValue();
     scalar tEnd = (1.0 - stepFraction())*deltaT;
     scalar dtMax = tEnd;
 

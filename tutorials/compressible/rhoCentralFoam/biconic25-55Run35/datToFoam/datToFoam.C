@@ -43,7 +43,7 @@ Description
 #include "cellShape.H"
 #include "cellModeller.H"
 #include "mergePoints.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 using namespace Foam;
 

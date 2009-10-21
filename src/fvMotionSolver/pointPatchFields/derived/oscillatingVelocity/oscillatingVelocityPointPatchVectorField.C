@@ -125,7 +125,7 @@ void oscillatingVelocityPointPatchVectorField::updateCoeffs()
     Field<vector>::operator=
     (
         (p0_ + amplitude_*sin(omega_*t.value()) - p.localPoints())
-       /t.deltaT().value()
+       /t.deltaTValue()
     );
 
     fixedValuePointPatchField<vector>::updateCoeffs();
