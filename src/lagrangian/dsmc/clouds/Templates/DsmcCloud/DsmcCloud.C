@@ -297,7 +297,7 @@ void Foam::DsmcCloud<ParcelType>::collisions()
     // Temporary storage for subCells
     List<DynamicList<label> > subCells(8);
 
-    scalar deltaT = cachedDeltaT();
+    scalar deltaT = mesh().time().deltaTValue();
 
     label collisionCandidates = 0;
 
@@ -1042,9 +1042,6 @@ Foam::DsmcCloud<ParcelType>::~DsmcCloud()
 template<class ParcelType>
 void Foam::DsmcCloud<ParcelType>::evolve()
 {
-    // cache the value of deltaT for this timestep
-    storeDeltaT();
-
     typename ParcelType::trackData td(*this);
 
     // Reset the data collection fields

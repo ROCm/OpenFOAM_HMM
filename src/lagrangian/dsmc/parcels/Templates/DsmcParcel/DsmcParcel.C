@@ -44,7 +44,7 @@ bool Foam::DsmcParcel<ParcelType>::move
     const polyMesh& mesh = td.cloud().pMesh();
     const polyBoundaryMesh& pbMesh = mesh.boundaryMesh();
 
-    const scalar deltaT = td.cloud().cachedDeltaT();
+    const scalar deltaT = mesh.time().deltaTValue();
     scalar tEnd = (1.0 - p.stepFraction())*deltaT;
     const scalar dtMax = tEnd;
 
@@ -135,7 +135,7 @@ void Foam::DsmcParcel<ParcelType>::hitWallPatch
 
     const scalar fA = mag(wpp.faceAreas()[wppLocalFace]);
 
-    const scalar deltaT = td.cloud().cachedDeltaT();
+    const scalar deltaT = td.cloud().pMesh().time().deltaTValue();
 
     const constantProperties& constProps(td.cloud().constProps(typeId_));
 

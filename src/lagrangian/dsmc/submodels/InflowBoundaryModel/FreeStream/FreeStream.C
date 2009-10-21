@@ -129,7 +129,7 @@ void Foam::FreeStream<CloudType>::inflow()
 
     const polyMesh& mesh(cloud.mesh());
 
-    const scalar deltaT = cloud.cachedDeltaT();
+    const scalar deltaT = mesh.time().deltaTValue();
 
     Random& rndGen(cloud.rndGen());
 
