@@ -52,7 +52,6 @@ void Foam::fvSchemes::clear()
     defaultLaplacianScheme_.clear();
     fluxRequired_.clear();
     defaultFluxRequired_ = false;
-    cacheFields_.clear();
 }
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
@@ -169,15 +168,7 @@ Foam::fvSchemes::fvSchemes(const objectRegistry& obr)
             tokenList()
         )()
     ),
-    defaultFluxRequired_(false),
-    cacheFields_
-    (
-        ITstream
-        (
-            objectPath() + "::cacheFields",
-            tokenList()
-        )()
-    )
+    defaultFluxRequired_(false)
 {
     read();
 }
@@ -381,11 +372,6 @@ bool Foam::fvSchemes::read()
             }
         }
 
-        if (dict.found("cacheFields"))
-        {
-            cacheFields_ = dict.subDict("cacheFields");
-        }
-
         return true;
     }
     else
@@ -559,24 +545,6 @@ bool Foam::fvSchemes::fluxRequired(const word& name) const
     else
     {
         return defaultFluxRequired_;
-    }
-}
-
-
-bool Foam::fvSchemes::cache(const word& name) const
-{
-    if (debug)
-    {
-        Info<< "Lookup cache for " << name << endl;
-    }
-
-    if (cacheFields_.found(name))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
     }
 }
 

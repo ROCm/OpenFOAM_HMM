@@ -53,7 +53,7 @@ Description
 #include "removePoints.H"
 #include "polyMesh.H"
 #include "mapPolyMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 using namespace Foam;
 

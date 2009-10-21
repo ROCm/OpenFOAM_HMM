@@ -27,7 +27,7 @@ License
 #include "polyMeshGeometry.H"
 #include "pyramidPointFaceRef.H"
 #include "syncTools.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 namespace Foam
 {

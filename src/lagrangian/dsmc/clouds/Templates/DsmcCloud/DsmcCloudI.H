@@ -128,7 +128,7 @@ inline Foam::Random& Foam::DsmcCloud<ParcelType>::rndGen()
 template<class ParcelType>
 inline void Foam::DsmcCloud<ParcelType>::storeDeltaT()
 {
-    cachedDeltaT_ = mesh().time().deltaT().value();
+    cachedDeltaT_ = mesh().time().deltaTValue();
 }
 
 

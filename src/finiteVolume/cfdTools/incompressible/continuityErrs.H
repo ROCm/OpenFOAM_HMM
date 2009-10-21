@@ -33,10 +33,10 @@ Description
 {
     volScalarField contErr = fvc::div(phi);
 
-    scalar sumLocalContErr = runTime.deltaT().value()*
+    scalar sumLocalContErr = runTime.deltaTValue()*
         mag(contErr)().weightedAverage(mesh.V()).value();
 
-    scalar globalContErr = runTime.deltaT().value()*
+    scalar globalContErr = runTime.deltaTValue()*
         contErr.weightedAverage(mesh.V()).value();
     cumulativeContErr += globalContErr;
 

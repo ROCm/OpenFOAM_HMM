@@ -119,7 +119,7 @@ void fvMotionSolverEngineMesh::move()
 
 
     pistonPosition_.value() += deltaZ;
-    scalar pistonSpeed = deltaZ/engineDB_.deltaT().value();
+    scalar pistonSpeed = deltaZ/engineDB_.deltaTValue();
 
     Info<< "clearance: " << deckHeight_.value() - pistonPosition_.value() << nl
         << "Piston speed = " << pistonSpeed << " m/s" << endl;

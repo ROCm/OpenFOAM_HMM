@@ -26,7 +26,7 @@ License
 
 #include "wedge.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
