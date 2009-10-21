@@ -26,7 +26,7 @@ License
 
 #include "shapeToCell.H"
 #include "polyMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "hexMatcher.H"
 #include "cellFeatures.H"
 

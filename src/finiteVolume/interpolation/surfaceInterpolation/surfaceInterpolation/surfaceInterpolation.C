@@ -32,7 +32,7 @@ Description
 #include "surfaceFields.H"
 #include "demandDrivenData.H"
 #include "coupledFvPatch.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

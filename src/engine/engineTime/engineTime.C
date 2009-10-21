@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "engineTime.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 

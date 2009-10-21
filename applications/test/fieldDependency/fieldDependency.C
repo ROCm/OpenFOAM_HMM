@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
 
     Info<< "p.eventNo:" << p.eventNo() << endl;
-    Info<< "p.uptodate:" << p.upToDate("T")<< endl;
+    Info<< "p.uptodate:" << p.upToDate(T)<< endl;
 
     // Change T and mark as uptodate.
     Info<< "Changing T" << endl;
@@ -84,12 +84,12 @@ int main(int argc, char *argv[])
     Info<< "T.eventNo:" << T.eventNo() << endl;
 
     // Check p dependency:
-    Info<< "p.uptodate:" << p.upToDate("T")<< endl;
+    Info<< "p.uptodate:" << p.upToDate(T)<< endl;
 
     // Change p and mark as uptodate.
     Info<< "Changing p." << endl;
     p.setUpToDate();
-    Info<< "p.uptodate:" << p.upToDate("T")<< endl;
+    Info<< "p.uptodate:" << p.upToDate(T)<< endl;
     Info<< "p.eventNo:" << p.eventNo() << endl;
 
 

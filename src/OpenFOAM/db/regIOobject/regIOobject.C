@@ -173,9 +173,9 @@ bool Foam::regIOobject::checkOut()
 }
 
 
-bool Foam::regIOobject::upToDate(const word& a) const
+bool Foam::regIOobject::upToDate(const regIOobject& a) const
 {
-    if (db().lookupObject<regIOobject>(a).eventNo() >= eventNo_)
+    if (a.eventNo() >= eventNo_)
     {
         return false;
     }
@@ -186,12 +186,16 @@ bool Foam::regIOobject::upToDate(const word& a) const
 }
 
 
-bool Foam::regIOobject::upToDate(const word& a, const word& b) const
+bool Foam::regIOobject::upToDate
+(
+    const regIOobject& a,
+    const regIOobject& b
+) const
 {
     if
     (
-        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
-     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
+        a.eventNo() >= eventNo_
+     || b.eventNo() >= eventNo_
     )
     {
         return false;
@@ -205,16 +209,16 @@ bool Foam::regIOobject::upToDate(const word& a, const word& b) const
 
 bool Foam::regIOobject::upToDate
 (
-    const word& a,
-    const word& b,
-    const word& c
+    const regIOobject& a,
+    const regIOobject& b,
+    const regIOobject& c
 ) const
 {
     if
     (
-        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
-     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
-     || db().lookupObject<regIOobject>(c).eventNo() >= eventNo_
+        a.eventNo() >= eventNo_
+     || b.eventNo() >= eventNo_
+     || c.eventNo() >= eventNo_
     )
     {
         return false;
@@ -228,18 +232,18 @@ bool Foam::regIOobject::upToDate
 
 bool Foam::regIOobject::upToDate
 (
-    const word& a,
-    const word& b,
-    const word& c,
-    const word& d
+    const regIOobject& a,
+    const regIOobject& b,
+    const regIOobject& c,
+    const regIOobject& d
 ) const
 {
     if
     (
-        db().lookupObject<regIOobject>(a).eventNo() >= eventNo_
-     || db().lookupObject<regIOobject>(b).eventNo() >= eventNo_
-     || db().lookupObject<regIOobject>(c).eventNo() >= eventNo_
-     || db().lookupObject<regIOobject>(d).eventNo() >= eventNo_
+        a.eventNo() >= eventNo_
+     || b.eventNo() >= eventNo_
+     || c.eventNo() >= eventNo_
+     || d.eventNo() >= eventNo_
     )
     {
         return false;

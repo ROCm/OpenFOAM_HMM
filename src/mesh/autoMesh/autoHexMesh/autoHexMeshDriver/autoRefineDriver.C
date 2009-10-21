@@ -35,6 +35,7 @@ License
 #include "refinementSurfaces.H"
 #include "shellSurfaces.H"
 #include "mapDistributePolyMesh.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

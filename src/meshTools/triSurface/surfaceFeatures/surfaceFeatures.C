@@ -33,7 +33,7 @@ License
 #include "linePointRef.H"
 #include "OFstream.H"
 #include "IFstream.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

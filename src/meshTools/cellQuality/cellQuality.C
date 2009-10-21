@@ -26,11 +26,10 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "cellQuality.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
-// Construct from mesh
 Foam::cellQuality::cellQuality(const polyMesh& mesh)
 :
     mesh_(mesh)

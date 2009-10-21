@@ -25,7 +25,7 @@ License
 \*---------------------------------------------------------------------------*/
 
 #include "refinementParameters.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "polyMesh.H"
 #include "globalIndex.H"
 

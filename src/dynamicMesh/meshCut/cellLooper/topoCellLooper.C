@@ -27,7 +27,7 @@ License
 #include "topoCellLooper.H"
 #include "cellFeatures.H"
 #include "polyMesh.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 #include "DynamicList.H"
 #include "ListOps.H"
 #include "meshTools.H"
