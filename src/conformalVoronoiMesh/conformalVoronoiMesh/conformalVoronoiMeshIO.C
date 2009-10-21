@@ -28,6 +28,8 @@ License
 #include "IOstreams.H"
 #include "OFstream.H"
 #include "zeroGradientPointPatchField.H"
+#include "pointMesh.H"
+#include "pointFields.H"
 
 // * * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * //
 
@@ -134,39 +136,39 @@ void Foam::conformalVoronoiMesh::writeMesh(bool writeToConstant)
 {
     writeInternalDelaunayVertices(writeToConstant);
 
-    // {
-    //     pointField points;
-    //     faceList faces;
-    //     labelList owner;
-    //     labelList neighbour;
-    //     wordList patchNames;
-    //     labelList patchSizes;
-    //     labelList patchStarts;
+    {
+        pointField points;
+        faceList faces;
+        labelList owner;
+        labelList neighbour;
+        wordList patchNames;
+        labelList patchSizes;
+        labelList patchStarts;
 
-    //     calcTetMesh
-    //     (
-    //         points,
-    //         faces,
-    //         owner,
-    //         neighbour,
-    //         patchNames,
-    //         patchSizes,
-    //         patchStarts
-    //     );
+        calcTetMesh
+        (
+            points,
+            faces,
+            owner,
+            neighbour,
+            patchNames,
+            patchSizes,
+            patchStarts
+        );
 
-    //     writeMesh
-    //     (
-    //         "tetDualMesh",
-    //         writeToConstant,
-    //         points,
-    //         faces,
-    //         owner,
-    //         neighbour,
-    //         patchNames,
-    //         patchSizes,
-    //         patchStarts
-    //     );
-    // }
+        writeMesh
+        (
+            "tetDualMesh",
+            writeToConstant,
+            points,
+            faces,
+            owner,
+            neighbour,
+            patchNames,
+            patchSizes,
+            patchStarts
+        );
+    }
 
     {
         pointField points;
@@ -317,48 +319,92 @@ void Foam::conformalVoronoiMesh::writeObjMesh
 
 void Foam::conformalVoronoiMesh::writeTargetCellSize() const
 {
-    Info<< nl << "Create fvMesh" << endl;
-
-    fvMesh fMesh
-    (
-        IOobject
-        (
-            Foam::polyMesh::defaultRegion,
-            runTime_.constant(),
-            runTime_,
-            IOobject::MUST_READ
-        )
-    );
-
-    timeCheck();
-
-    Info<< nl << "Create targetCellSize volScalarField" << endl;
-
-    volScalarField targetCellSize
-    (
-        IOobject
-        (
-            "targetCellSize",
-            runTime_.timeName(),
-            runTime_,
-            IOobject::NO_READ,
-            IOobject::AUTO_WRITE
-        ),
-        fMesh,
-        dimensionedScalar("cellSize", dimLength, 0),
-        zeroGradientPointPatchField<scalar>::typeName
-    );
-
-    scalarField& cellSize = targetCellSize.internalField();
-
-    const vectorField& C = fMesh.cellCentres();
-
-    forAll(cellSize, i)
     {
-        cellSize[i] = cellSizeControl().cellSize(C[i]);
+        Info<< nl << "Create fvMesh" << endl;
+
+        fvMesh fMesh
+        (
+            IOobject
+            (
+                Foam::polyMesh::defaultRegion,
+                runTime_.constant(),
+                runTime_,
+                IOobject::MUST_READ
+            )
+        );
+
+        timeCheck();
+
+        Info<< nl << "Create targetCellSize volScalarField" << endl;
+
+        volScalarField targetCellSize
+        (
+            IOobject
+            (
+                "targetCellSize",
+                runTime_.timeName(),
+                runTime_,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            fMesh,
+            dimensionedScalar("cellSize", dimLength, 0),
+            zeroGradientPointPatchField<scalar>::typeName
+        );
+
+        scalarField& cellSize = targetCellSize.internalField();
+
+        const vectorField& C = fMesh.cellCentres();
+
+        forAll(cellSize, i)
+        {
+            cellSize[i] = cellSizeControl().cellSize(C[i]);
+        }
+
+        targetCellSize.write();
     }
 
-    targetCellSize.write();
+    {
+        polyMesh tetMesh
+        (
+            IOobject
+            (
+                "tetDualMesh",
+                runTime_.constant(),
+                runTime_,
+                IOobject::MUST_READ
+            )
+        );
+
+        pointMesh ptMesh(tetMesh);
+
+        pointScalarField ptTargetCellSize
+        (
+            IOobject
+            (
+                "ptTargetCellSize",
+                runTime_.timeName(),
+                tetMesh,
+                IOobject::NO_READ,
+                IOobject::AUTO_WRITE
+            ),
+            ptMesh,
+            dimensionedScalar("ptTargetCellSize", dimLength, 0),
+            pointPatchVectorField::calculatedType()
+        );
+
+        scalarField& cellSize = ptTargetCellSize.internalField();
+
+        const vectorField& P = tetMesh.points();
+
+        forAll(cellSize, i)
+        {
+            cellSize[i] = cellSizeControl().cellSize(P[i]);
+        }
+
+        ptTargetCellSize.write();
+    }
+
 }
 
 
