@@ -751,8 +751,7 @@ void Foam::CV3D::insertEdgePointGroups
             reflMasterPt + 2*((edgePt - reflMasterPt) & nB)*nB;
 
             scalar totalAngle =
-            180*(mathematicalConstant::pi + acos(mag(nA & nB)))
-            /mathematicalConstant::pi;
+                radToDeg(constant::mathematical::pi + acos(mag(nA & nB)));
 
             // Number of quadrants the angle should be split into
             int nQuads = int(totalAngle/controls_.maxQuadAngle) + 1;

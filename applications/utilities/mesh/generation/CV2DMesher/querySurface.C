@@ -25,7 +25,7 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "querySurface.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
@@ -58,7 +58,7 @@ Foam::labelList Foam::querySurface::extractFeatures2D
     const scalar featAngle
 ) const
 {
-    scalar featCos = cos(mathematicalConstant::pi*featAngle/180.0);
+    scalar featCos = cos(degToRad(featAngle));
 
     const labelListList& edgeFaces = this->edgeFaces();
     const pointField& localPoints = this->localPoints();

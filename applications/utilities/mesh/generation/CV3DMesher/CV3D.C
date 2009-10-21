@@ -116,8 +116,8 @@ void Foam::CV3D::setVertexAlignmentDirections()
                 {
                     vector spoke
                     (
-                        Foam::cos(i*mathematicalConstant::twoPi/s),
-                        Foam::sin(i*mathematicalConstant::twoPi/s),
+                        Foam::cos(i*constant::mathematical::twoPi/s),
+                        Foam::sin(i*constant::mathematical::twoPi/s),
                         0
                     );
 

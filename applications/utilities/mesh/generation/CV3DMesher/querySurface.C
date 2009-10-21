@@ -25,7 +25,7 @@ License
 \*----------------------------------------------------------------------------*/
 
 #include "querySurface.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 

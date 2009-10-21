@@ -40,8 +40,7 @@ void Foam::CV3D::insertFeaturePoints()
 
     scalar planeErrorAngle = 0.1*(180.0 - controls_.includedAngle);
 
-    scalar planeErrorAngleCos =
-    cos(mathematicalConstant::pi*planeErrorAngle/180.0);
+    scalar planeErrorAngleCos = cos(degToRad(planeErrorAngle));
 
     forAll(featPoints, i)
     {
@@ -372,9 +371,9 @@ void Foam::CV3D::insertFeaturePoints()
 
                 insertPoint(concaveEdgeExternalPt, internalPtAI);
 
-                scalar totalAngle = 180/mathematicalConstant::pi *
+                scalar totalAngle = radToDeg
                 (
-                    mathematicalConstant::pi +
+                    constant::mathematical::pi +
                     acos(mag(concaveEdgePlaneANormal & concaveEdgePlaneBNormal))
                 );
 

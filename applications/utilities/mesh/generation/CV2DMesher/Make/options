@@ -22,5 +22,5 @@ EXE_LIBS = \
     -lmeshTools \
     -ltriSurface \
     -ldynamicMesh \
-    -lboost_thread-${BOOST_COMPILER}-mt-${BOOST_LIB_VERSION} \
+    -lboost_thread \
     -lmpfr

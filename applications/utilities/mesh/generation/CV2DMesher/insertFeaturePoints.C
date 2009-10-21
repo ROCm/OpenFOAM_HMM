@@ -27,7 +27,7 @@ License
 #include "CV2D.H"
 #include "plane.H"
 #include "triSurfaceTools.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
@@ -98,20 +98,15 @@ void Foam::CV2D::insertFeaturePoints()
             point2D reflMasterPt = refPt + 2*(featPt - refPt);
 
             // Reflect refPt in both faces.
-            point2D reflectedA = 
+            point2D reflectedA =
                 reflMasterPt + 2*((featPt - reflMasterPt) & nA)*nA;
 
             point2D reflectedB =
                 reflMasterPt + 2*((featPt - reflMasterPt) & nB)*nB;
 
             // Total angle around the concave feature
-//             scalar totalAngle = 
-//                 180*(2.0*mathematicalConstant::pi - acos(mag(nA & nB)))
-//                /mathematicalConstant::pi;
-
-            scalar totalAngle = 
-                180*(mathematicalConstant::pi + acos(mag(nA & nB)))
-               /mathematicalConstant::pi;
+            scalar totalAngle =
+                radToDeg(constant::mathematical::pi + acos(mag(nA & nB)));
 
             // Number of quadrants the angle should be split into
             int nQuads = int(totalAngle/controls_.maxQuadAngle) + 1;
