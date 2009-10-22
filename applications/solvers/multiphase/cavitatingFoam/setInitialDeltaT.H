@@ -44,7 +44,7 @@ if (adjustTimeStep)
         (
             min
             (
-                maxDeltaTFact*runTime.deltaT().value(),
+                maxDeltaTFact*runTime.deltaTValue(),
                 maxDeltaT
             )
         );

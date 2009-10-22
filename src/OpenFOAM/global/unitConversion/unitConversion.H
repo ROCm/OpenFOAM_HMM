@@ -23,53 +23,37 @@ License
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
 Namespace
-    Foam::constant::mathematical
+    Foam
 
 Description
-    mathematical constants and conversion functions
+    Unit conversion functions
 
 \*---------------------------------------------------------------------------*/
 
-#ifndef mathematicalConstants_H
-#define mathematicalConstants_H
+#ifndef unitConversion_H
+#define unitConversion_H
 
-#include "scalar.H"
+#include "mathematicalConstants.H"
+
+using namespace Foam::constant::mathematical;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 namespace Foam
 {
-namespace constant
-{
-namespace mathematical
-{
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-    static word group = "mathematical";
-
-    const scalar e(M_E);
-    const scalar pi(M_PI);
-    const scalar twoPi(2*pi);
-    const scalar piByTwo(0.5*pi);
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
-} // End namespace mathematical
-} // End namespace constant
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 
 //- Conversion from degrees to radians
 inline scalar degToRad(const scalar& deg)
 {
-    return (deg*constant::mathematical::pi/180.0);
+    return (deg*pi/180.0);
 }
 
 //- Conversion from radians to degrees
 inline scalar radToDeg(const scalar& rad)
 {
-    return (rad*180.0/constant::mathematical::pi);
+    return (rad*180.0/pi);
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //

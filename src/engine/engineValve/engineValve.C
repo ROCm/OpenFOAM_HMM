@@ -208,7 +208,7 @@ Foam::scalar Foam::engineValve::curVelocity() const
                  lift(engineDB_.theta() - engineDB_.deltaTheta()),
                  minLift_
              )
-        )/(engineDB_.deltaT().value() + VSMALL);
+        )/(engineDB_.deltaTValue() + VSMALL);
 }
 
 

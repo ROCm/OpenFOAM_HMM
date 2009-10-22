@@ -106,7 +106,7 @@ const labelList& ignitionSite::cells() const
 bool ignitionSite::igniting() const
 {
     scalar curTime = db_.value();
-    scalar deltaT = db_.deltaT().value();
+    scalar deltaT = db_.deltaTValue();
 
     return
     (
@@ -120,7 +120,7 @@ bool ignitionSite::igniting() const
 bool ignitionSite::ignited() const
 {
     scalar curTime = db_.value();
-    scalar deltaT = db_.deltaT().value();
+    scalar deltaT = db_.deltaTValue();
 
     return(curTime - deltaT >= time_);
 }

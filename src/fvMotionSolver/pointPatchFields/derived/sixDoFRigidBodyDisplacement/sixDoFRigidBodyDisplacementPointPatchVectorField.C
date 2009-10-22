@@ -129,7 +129,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
     // calculate the forces on the motion object from this data, then
     // update the positions
 
-    motion_.updatePosition(t.deltaT().value());
+    motion_.updatePosition(t.deltaTValue());
 
     dictionary forcesDict;
 
@@ -157,7 +157,7 @@ void sixDoFRigidBodyDisplacementPointPatchVectorField::updateCoeffs()
     (
         fm.first().first() + fm.first().second() + gravity*motion_.mass(),
         fm.second().first() + fm.second().second(),
-        t.deltaT().value()
+        t.deltaTValue()
     );
 
     Field<vector>::operator=(motion_.generatePositions(p0_) - p0_);

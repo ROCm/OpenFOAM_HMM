@@ -180,7 +180,7 @@ Foam::timeActivatedExplicitMulticomponentPointSource::Su
         DimensionedField<scalar, volMesh>& sourceField = tSource();
 
         const scalarField& V = mesh_.V();
-        const scalar dt = runTime_.deltaT().value();
+        const scalar dt = runTime_.deltaTValue();
 
         forAll(pointSources_, sourceI)
         {
@@ -240,7 +240,7 @@ Foam::timeActivatedExplicitMulticomponentPointSource::Su()
         DimensionedField<scalar, volMesh>& sourceField = tSource();
 
         const scalarField& V = mesh_.V();
-        const scalar dt = runTime_.deltaT().value();
+        const scalar dt = runTime_.deltaTValue();
 
         forAll(pointSources_, sourceI)
         {

@@ -2,7 +2,7 @@
   =========                 |
   \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
    \\    /   O peration     |
-    \\  /    A nd           | Copyright (C) 1991-2009 OpenCFD Ltd.
+    \\  /    A nd           | Copyright (C) 2009-2009 OpenCFD Ltd.
      \\/     M anipulation  |
 -------------------------------------------------------------------------------
 License
@@ -22,28 +22,48 @@ License
     along with OpenFOAM; if not, write to the Free Software Foundation,
     Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-Global
-    setInitialDeltaT
+Namespace
+    Foam::constant::mathematical
 
 Description
-    Set the initial timestep corresponding to the timestep adjustment
-    algorithm in setDeltaT
+    mathematical constants.
 
 \*---------------------------------------------------------------------------*/
 
-if (adjustTimeStep)
+#ifndef mathematicalConstants_H
+#define mathematicalConstants_H
+
+#include "scalar.H"
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+namespace Foam
 {
-    if ((runTime.timeIndex() == 0) && (CoNum > SMALL))
-    {
-        runTime.setDeltaT
-        (
-            min
-            (
-                maxCo*runTime.deltaTValue()/CoNum,
-                maxDeltaT
-            )
-        );
-    }
-}
+namespace constant
+{
+namespace mathematical
+{
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+    static word group = "mathematical";
+
+    const scalar e(M_E);
+    const scalar pi(M_PI);
+    const scalar twoPi(2*pi);
+    const scalar piByTwo(0.5*pi);
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace mathematical
+} // End namespace constant
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+} // End namespace Foam
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+#endif
 
 // ************************************************************************* //

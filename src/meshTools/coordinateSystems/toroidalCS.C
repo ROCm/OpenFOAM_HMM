@@ -26,7 +26,7 @@ License
 
 #include "toroidalCS.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

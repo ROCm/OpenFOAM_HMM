@@ -26,7 +26,7 @@ License
 
 #include "blobsSwirlInjector.H"
 #include "addToRunTimeSelectionTable.H"
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
 

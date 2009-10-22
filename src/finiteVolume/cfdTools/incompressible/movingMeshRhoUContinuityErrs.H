@@ -32,11 +32,11 @@ Description
 
 if (mesh.moving())
 {
-    scalar sumLocalContErr = runTime.deltaT().value()*
+    scalar sumLocalContErr = runTime.deltaTValue()*
         mag(fvc::div(phi + fvc::meshPhi(rho, U)))()
        .weightedAverage(mesh.V()).value();
 
-    scalar globalContErr = runTime.deltaT().value()*
+    scalar globalContErr = runTime.deltaTValue()*
         fvc::div(phi + fvc::meshPhi(rho, U))()
        .weightedAverage(mesh.V()).value();
 

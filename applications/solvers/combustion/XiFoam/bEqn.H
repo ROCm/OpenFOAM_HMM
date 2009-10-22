@@ -40,7 +40,7 @@ if (ign.ignited())
     (
         mesh.surfaceInterpolation::deltaCoeffs()
        *mag(phiSt)/(fvc::interpolate(rho)*mesh.magSf())
-    ).value()*runTime.deltaT().value();
+    ).value()*runTime.deltaTValue();
 
     Info<< "Max St-Courant Number = " << StCoNum << endl;
 

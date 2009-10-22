@@ -39,10 +39,10 @@ if (mesh.nInternalFaces())
         mesh.surfaceInterpolation::deltaCoeffs()*mag(mesh.phi());
 
     meshCoNum = max(SfUfbyDelta/mesh.magSf())
-        .value()*runTime.deltaT().value();
+        .value()*runTime.deltaTValue();
 
     meanMeshCoNum = (sum(SfUfbyDelta)/sum(mesh.magSf()))
-        .value()*runTime.deltaT().value();
+        .value()*runTime.deltaTValue();
 }
 
 Info<< "Mesh Courant Number mean: " << meanMeshCoNum

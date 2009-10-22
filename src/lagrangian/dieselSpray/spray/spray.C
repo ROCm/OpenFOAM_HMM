@@ -41,7 +41,7 @@ License
 #include "symmetryPolyPatch.H"
 #include "wedgePolyPatch.H"
 
-#include "mathematicalConstants.H"
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
 

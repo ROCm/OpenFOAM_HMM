@@ -31,10 +31,7 @@ Description
 #include "primitiveMesh.H"
 #include "pyramidPointFaceRef.H"
 #include "cell.H"
-#include "mathematicalConstants.H"
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
-
+#include "unitConversion.H"
 
 // * * * * * * * * * * * * * Private Member Functions  * * * * * * * * * * * //
 
