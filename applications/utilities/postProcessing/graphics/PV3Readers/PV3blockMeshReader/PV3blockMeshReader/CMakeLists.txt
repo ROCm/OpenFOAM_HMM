@@ -41,16 +41,17 @@ QT4_WRAP_CPP(MOC_SRCS pqPV3blockMeshReaderPanel.h)
 
 ADD_PARAVIEW_OBJECT_PANEL(IFACES IFACE_SRCS
   CLASS_NAME pqPV3blockMeshReaderPanel
-  XML_NAME PV3blockMeshReader # name of SourceProxy in *SM.xml
+  XML_NAME  PV3blockMeshReader # name of SourceProxy in *SM.xml
   XML_GROUP sources
 )
 
 ADD_PARAVIEW_PLUGIN(
     PV3blockMeshReader_SM "1.0"
     SERVER_MANAGER_XML PV3blockMeshReader_SM.xml
-    SERVER_MANAGER_SOURCES vtkPV3blockMeshReader.cxx
+    SERVER_MANAGER_SOURCES  vtkPV3blockMeshReader.cxx
     GUI_INTERFACES ${IFACES}
-    GUI_SOURCES ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
+    GUI_SOURCES pqPV3blockMeshReaderPanel.cxx
+        ${MOC_SRCS} ${UI_SRCS} ${IFACE_SRCS}
     GUI_RESOURCE_FILES PV3blockMeshReader.xml
 )
 

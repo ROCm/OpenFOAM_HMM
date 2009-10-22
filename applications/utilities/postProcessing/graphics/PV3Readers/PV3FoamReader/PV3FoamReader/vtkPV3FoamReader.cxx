@@ -1,18 +1,28 @@
-/*=========================================================================
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
 
-  Program:   Visualization Toolkit
-  Module:    $RCSfile: vtkPV3FoamReader.cxx,v $
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-=========================================================================*/
-
+\*---------------------------------------------------------------------------*/
 #include "vtkPV3FoamReader.h"
 
 #include "pqApplicationCore.h"
@@ -33,10 +43,15 @@
 // Foam includes
 #include "vtkPV3Foam.H"
 
+#undef EXPERIMENTAL_TIME_CACHING
+
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
 vtkCxxRevisionMacro(vtkPV3FoamReader, "$Revision: 1.5$");
 vtkStandardNewMacro(vtkPV3FoamReader);
 
-#undef EXPERIMENTAL_TIME_CACHING
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 vtkPV3FoamReader::vtkPV3FoamReader()
 {
@@ -109,6 +124,8 @@ vtkPV3FoamReader::vtkPV3FoamReader()
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 vtkPV3FoamReader::~vtkPV3FoamReader()
 {
     vtkDebugMacro(<<"Deconstructor");
@@ -144,6 +161,8 @@ vtkPV3FoamReader::~vtkPV3FoamReader()
     LagrangianFieldSelection->Delete();
 }
 
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 // Do everything except set the output info
 int vtkPV3FoamReader::RequestInformation
@@ -401,6 +420,17 @@ int vtkPV3FoamReader::RequestData
 }
 
 
+void vtkPV3FoamReader::SetShowPatchNames(const int val)
+{
+    if (ShowPatchNames != val)
+    {
+        ShowPatchNames = val;
+        updatePatchNamesView(ShowPatchNames);
+    }
+}
+
+
+
 void vtkPV3FoamReader::updatePatchNamesView(const bool show)
 {
     pqApplicationCore* appCore = pqApplicationCore::instance();
@@ -414,7 +444,7 @@ void vtkPV3FoamReader::updatePatchNamesView(const bool show)
     // Server manager model for querying items in the server manager
     pqServerManagerModel* smModel = appCore->getServerManagerModel();
 
-    if (!smModel)
+    if (!smModel || !foamData_)
     {
         return;
     }
@@ -430,6 +460,8 @@ void vtkPV3FoamReader::updatePatchNamesView(const bool show)
             show
         );
     }
+
+    // use refresh here?
 }
 
 

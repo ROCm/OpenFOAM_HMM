@@ -1,18 +1,28 @@
-/*=========================================================================
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
 
-  Program:   Visualization Toolkit
-  Module:    $RCSfile: vtkPV3blockMeshReader.cxx,v $
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-=========================================================================*/
-
+\*---------------------------------------------------------------------------*/
 #include "vtkPV3blockMeshReader.h"
 
 #include "pqApplicationCore.h"
@@ -33,8 +43,13 @@
 // Foam includes
 #include "vtkPV3blockMesh.H"
 
-vtkCxxRevisionMacro(vtkPV3blockMeshReader, "$Revision: 1.5$");
+// * * * * * * * * * * * * * * Static Data Members * * * * * * * * * * * * * //
+
+vtkCxxRevisionMacro(vtkPV3blockMeshReader, "$Revision:$");
 vtkStandardNewMacro(vtkPV3blockMeshReader);
+
+
+// * * * * * * * * * * * * * * * * Constructors  * * * * * * * * * * * * * * //
 
 vtkPV3blockMeshReader::vtkPV3blockMeshReader()
 {
@@ -76,6 +91,8 @@ vtkPV3blockMeshReader::vtkPV3blockMeshReader()
 }
 
 
+// * * * * * * * * * * * * * * * * Destructor  * * * * * * * * * * * * * * * //
+
 vtkPV3blockMeshReader::~vtkPV3blockMeshReader()
 {
     vtkDebugMacro(<<"Deconstructor");
@@ -99,6 +116,8 @@ vtkPV3blockMeshReader::~vtkPV3blockMeshReader()
     PartSelection->Delete();
 }
 
+
+// * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 
 // Do everything except set the output info
 int vtkPV3blockMeshReader::RequestInformation
@@ -216,6 +235,17 @@ int vtkPV3blockMeshReader::RequestData
 }
 
 
+
+void vtkPV3blockMeshReader::SetShowPointNumbers(const int val)
+{
+    if (ShowPointNumbers != val)
+    {
+        ShowPointNumbers = val;
+        updatePointNumbersView(ShowPointNumbers);
+    }
+}
+
+
 void vtkPV3blockMeshReader::updatePointNumbersView(const bool show)
 {
     pqApplicationCore* appCore = pqApplicationCore::instance();
@@ -228,14 +258,14 @@ void vtkPV3blockMeshReader::updatePointNumbersView(const bool show)
 
     // Server manager model for querying items in the server manager
     pqServerManagerModel* smModel = appCore->getServerManagerModel();
-    if (!smModel)
+    if (!smModel || !foamData_)
     {
         return;
     }
 
+
     // Get all the pqRenderView instances
     QList<pqRenderView*> renderViews = smModel->findItems<pqRenderView*>();
-
     for (int viewI=0; viewI<renderViews.size(); ++viewI)
     {
         foamData_->renderPointNumbers
@@ -244,6 +274,8 @@ void vtkPV3blockMeshReader::updatePointNumbersView(const bool show)
             show
         );
     }
+
+    // use refresh here?
 }
 
 

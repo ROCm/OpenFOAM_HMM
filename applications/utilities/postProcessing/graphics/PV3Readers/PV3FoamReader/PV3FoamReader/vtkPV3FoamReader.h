@@ -1,25 +1,52 @@
-/*=========================================================================
+/*---------------------------------------------------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     |
+    \\  /    A nd           | Copyright (C) 2008-2009 OpenCFD Ltd.
+     \\/     M anipulation  |
+-------------------------------------------------------------------------------
+License
+    This file is part of OpenFOAM.
 
-  Program:   Visualization Toolkit
-  Module:    $RCSfile: vtkPV3FoamReader.h,v $
+    OpenFOAM is free software; you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the
+    Free Software Foundation; either version 2 of the License, or (at your
+    option) any later version.
 
-  Copyright (c) Ken Martin, Will Schroeder, Bill Lorensen
-  All rights reserved.
-  See Copyright.txt or http://www.kitware.com/Copyright.htm for details.
+    OpenFOAM is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
 
-     This software is distributed WITHOUT ANY WARRANTY; without even
-     the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR
-     PURPOSE.  See the above copyright notice for more information.
+    You should have received a copy of the GNU General Public License
+    along with OpenFOAM; if not, write to the Free Software Foundation,
+    Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
 
-=========================================================================*/
-// .NAME vtkPV3FoamReader - reads a dataset in OpenFOAM format
-// .SECTION Description
-// vtkPV3FoamReader creates an multiblock dataset.
-// It uses the OpenFOAM infrastructure (fvMesh, etc) to
-// handle mesh and field data.
+Class
+    vtkPV3FoamReader
 
-#ifndef __vtkPV3FoamReader_h
-#define __vtkPV3FoamReader_h
+Description
+    reads a dataset in OpenFOAM format
+
+    vtkPV3blockMeshReader creates an multiblock dataset.
+    It uses the OpenFOAM infrastructure (fvMesh, etc) to handle mesh and
+    field data.
+
+SourceFiles
+    vtkPV3blockMeshReader.cxx
+
+\*---------------------------------------------------------------------------*/
+#ifndef vtkPV3FoamReader_h
+#define vtkPV3FoamReader_h
+
+// VTK includes
+#include "vtkMultiBlockDataSetAlgorithm.h"
+
+// * * * * * * * * * * * * * Forward Declarations  * * * * * * * * * * * * * //
+
+// VTK forward declarations
+class vtkDataArraySelection;
+class vtkCallbackCommand;
 
 // Foam forward declarations
 namespace Foam
@@ -27,13 +54,10 @@ namespace Foam
     class vtkPV3Foam;
 }
 
-// VTK includes
-#include "vtkMultiBlockDataSetAlgorithm.h"
 
-// VTK forward declarations
-class vtkDataArraySelection;
-class vtkCallbackCommand;
-
+/*---------------------------------------------------------------------------*\
+                      Class vtkPV3FoamReader Declaration
+\*---------------------------------------------------------------------------*/
 
 class VTK_IO_EXPORT vtkPV3FoamReader
 :
@@ -55,14 +79,14 @@ public:
     vtkGetStringMacro(FileName);
 
     // Description:
-    // GUI update control
-    vtkSetMacro(UpdateGUI, int);
-    vtkGetMacro(UpdateGUI, int);
-
-    // Description:
     // FOAM mesh caching control
     vtkSetMacro(CacheMesh, int);
     vtkGetMacro(CacheMesh, int);
+
+    // Description:
+    // GUI update control
+    vtkSetMacro(UpdateGUI, int);
+    vtkGetMacro(UpdateGUI, int);
 
     // Description:
     // FOAM extrapolate internal values onto the patches
@@ -80,7 +104,7 @@ public:
 
     // Description:
     // FOAM display patch names control
-    vtkSetMacro(ShowPatchNames, int);
+    virtual void SetShowPatchNames(int);
     vtkGetMacro(ShowPatchNames, int);
 
     // Description:

@@ -16,6 +16,21 @@
       </Documentation>
     </StringVectorProperty>
 
+    <!-- Cache Mesh check-box -->
+    <IntVectorProperty
+      name="UiCacheMesh"
+      command="SetCacheMesh"
+      number_of_elements="1"
+      is_internal="1"
+      default_values="1"
+      animateable="0">
+      <BooleanDomain name="bool"/>
+      <Documentation>
+        Cache the fvMesh in memory.
+      </Documentation>
+    </IntVectorProperty>
+
+
     <!-- Send discrete time info to the animation panel -->
     <DoubleVectorProperty
       name="TimestepValues"
@@ -72,10 +87,11 @@
 
     <!-- Show Patch Names check-box -->
     <IntVectorProperty
-      name="ShowPatchNames"
+      name="UiShowPatchNames"
       command="SetShowPatchNames"
       number_of_elements="1"
       default_values="0"
+      is_internal="1"
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
@@ -83,21 +99,7 @@
       </Documentation>
     </IntVectorProperty>
 
-    <!-- Cache Mesh check-box -->
-    <IntVectorProperty
-      name="CacheMesh"
-      command="SetCacheMesh"
-      number_of_elements="1"
-      default_values="1"
-      animateable="0">
-      <BooleanDomain name="bool"/>
-      <Documentation>
-        Cache the fvMesh in memory.
-      </Documentation>
-    </IntVectorProperty>
-
-
-    <!-- Update GUI check box -->
+    <!-- Force GUI update check box -->
     <IntVectorProperty
       name="UpdateGUI"
       command="SetUpdateGUI"
@@ -204,6 +206,14 @@
         </RequiredProperties>
       </ArraySelectionDomain>
     </StringVectorProperty>
+
+  <Hints>
+    <Property name="FileName" show="0"/>
+    <Property name="UiCacheMesh" show="0"/>
+    <Property name="UiShowPatchNames" show="0"/>
+  </Hints>
+
+
   </SourceProxy>
   </ProxyGroup>
 </ServerManagerConfiguration>

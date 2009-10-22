@@ -16,14 +16,13 @@
       </Documentation>
     </StringVectorProperty>
 
-    <!-- Global settings -->
-
     <!-- Show Point Numbers check-box -->
     <IntVectorProperty
-      name="ShowPointNumbers"
+      name="UiShowPointNumbers"
       command="SetShowPointNumbers"
       number_of_elements="1"
       default_values="1"
+      is_internal="1"
       animateable="0">
       <BooleanDomain name="bool"/>
       <Documentation>
@@ -43,7 +42,6 @@
         A simple way to cause a reader GUI modification.
       </Documentation>
     </IntVectorProperty>
-
 
     <!-- Selections -->
 
@@ -92,6 +90,11 @@
         </RequiredProperties>
       </ArraySelectionDomain>
     </StringVectorProperty>
+
+  <Hints>
+    <Property name="FileName" show="0"/>
+    <Property name="UiShowPointNumbers" show="0"/>
+  </Hints>
 
   </SourceProxy>
   </ProxyGroup>
