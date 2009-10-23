@@ -2014,10 +2014,6 @@ void Foam::conformalVoronoiMesh::calcDualMesh
 
     label nPatches = patchNames.size();
 
-    patchSizes.setSize(nPatches);
-
-    patchStarts.setSize(nPatches);
-
     List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
 
     List<DynamicList<label> > patchOwners(nPatches, DynamicList<label>(0));
@@ -2183,175 +2179,29 @@ void Foam::conformalVoronoiMesh::calcDualMesh
                     dualFaceI++;
                 }
             }
-            // else
-            // {
-            //     Info<< verticesOnFace.size()
-            //         << " size face not created." << endl;
-            // }
         }
     }
 
     label nInternalFaces = dualFaceI;
 
     faces.setSize(nInternalFaces);
-
     owner.setSize(nInternalFaces);
-
     neighbour.setSize(nInternalFaces);
 
-    // ~~~~~~~~ sort owner, reordinging neighbour and faces to match ~~~~~~~~~~~
-    // two stage sort for upper triangular order:  sort by owner first, then for
-    // each block of owners sort by neighbour
+    sortFaces(faces, owner, neighbour);
 
-    labelList sortingIndices;
-
-    // Stage 1
-
-    {
-        SortableList<label> sortedOwner(owner);
-
-        sortingIndices = sortedOwner.indices();
-    }
-
-    {
-        labelList copyOwner(owner.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyOwner[sI] = owner[sortingIndices[sI]];
-        }
-
-        owner = copyOwner;
-    }
-
-    {
-        labelList copyNeighbour(neighbour.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyNeighbour[sI] = neighbour[sortingIndices[sI]];
-        }
-
-        neighbour = copyNeighbour;
-    }
-
-    {
-        faceList copyFaces(faces.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyFaces[sI] = faces[sortingIndices[sI]];
-        }
-
-        faces = copyFaces;
-    }
-
-    // Stage 2
-
-    sortingIndices = -1;
-
-    DynamicList<label> ownerCellJumps;
-
-    // Force first owner entry to be a jump
-    ownerCellJumps.append(0);
-
-    for (label o = 1; o < owner.size(); o++)
-    {
-        if (owner[o] > owner[o-1])
-        {
-            ownerCellJumps.append(o);
-        }
-    }
-
-    forAll(ownerCellJumps, oCJ)
-    {
-        label start = ownerCellJumps[oCJ];
-
-        label length;
-
-        if (oCJ == ownerCellJumps.size() - 1)
-        {
-            length = owner.size() - start;
-        }
-        else
-        {
-            length = ownerCellJumps[oCJ + 1] - start;
-        }
-
-        SubList<label> neighbourBlock(neighbour, length, start);
-
-        SortableList<label> sortedNeighbourBlock(neighbourBlock);
-
-        forAll(sortedNeighbourBlock, sNB)
-        {
-            sortingIndices[start + sNB] =
-            sortedNeighbourBlock.indices()[sNB] + start;
-        }
-    }
-
-    // Perform sort
-
-    {
-        labelList copyOwner(owner.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyOwner[sI] = owner[sortingIndices[sI]];
-        }
-
-        owner = copyOwner;
-    }
-
-    {
-        labelList copyNeighbour(neighbour.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyNeighbour[sI] = neighbour[sortingIndices[sI]];
-        }
-
-        neighbour = copyNeighbour;
-    }
-
-    {
-        faceList copyFaces(faces.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyFaces[sI] = faces[sortingIndices[sI]];
-        }
-
-        faces = copyFaces;
-    }
-
-    // ~~~~~~~~ add patch information ~~~~~~~~~~~
-
-    label nBoundaryFaces = 0;
-
-    forAll(patchFaces, p)
-    {
-        patchSizes[p] = patchFaces[p].size();
-
-        patchStarts[p] = nInternalFaces + nBoundaryFaces;
-
-        nBoundaryFaces += patchSizes[p];
-    }
-
-    faces.setSize(nInternalFaces + nBoundaryFaces);
-
-    owner.setSize(nInternalFaces + nBoundaryFaces);
-
-    forAll(patchFaces, p)
-    {
-        forAll(patchFaces[p], f)
-        {
-            faces[dualFaceI] = patchFaces[p][f];
-
-            owner[dualFaceI] = patchOwners[p][f];
-
-            dualFaceI++;
-        }
-    }
+    addPatches
+    (
+        nInternalFaces,
+        faces,
+        owner,
+        patchNames,
+        patchSizes,
+        patchStarts,
+        patchFaces,
+        patchOwners,
+        false
+    );
 }
 
 
@@ -2421,10 +2271,6 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     patchNames[patchNames.size() - 1] = "cvMesh_defaultPatch";
 
     label nPatches = patchNames.size();
-
-    patchSizes.setSize(nPatches);
-
-    patchStarts.setSize(nPatches);
 
     List<DynamicList<face> > patchFaces(nPatches, DynamicList<face>(0));
 
@@ -2538,167 +2384,206 @@ void Foam::conformalVoronoiMesh::calcTetMesh
     label nInternalFaces = faceI;
 
     faces.setSize(nInternalFaces);
-
     owner.setSize(nInternalFaces);
-
     neighbour.setSize(nInternalFaces);
 
-    // ~~~~~~~~ sort owner, reordinging neighbour and faces to match ~~~~~~~~~~~
-    // two stage sort for upper triangular order:  sort by owner first, then for
-    // each block of owners sort by neighbour
+    sortFaces(faces, owner, neighbour);
 
-    labelList sortingIndices;
+    addPatches
+    (
+        nInternalFaces,
+        faces,
+        owner,
+        patchNames,
+        patchSizes,
+        patchStarts,
+        patchFaces,
+        patchOwners,
+        false
+    );
+}
 
-    // Stage 1
 
-    {
-        SortableList<label> sortedOwner(owner);
+void Foam::conformalVoronoiMesh::sortFaces
+(
+    faceList& faces,
+    labelList& owner,
+    labelList& neighbour
+) const
+{
+    // Upper triangular order:
+    // + owner is sorted in ascending cell order
+    // + within each block of equal value for owner, neighbour is sorted in
+    //   ascending cell order.
+    // + faces sorted to correspond
+    // i.e:
+    // owner | neighbour
+    // 0     | 2
+    // 0     | 23
+    // 0     | 71
+    // 1     | 23
+    // 1     | 24
+    // 1     | 91
 
-        sortingIndices = sortedOwner.indices();
-    }
+    // Two stage sort:
+    // 1) sort by owner
 
-    {
-        labelList copyOwner(owner.size());
+    labelList oldToNew;
 
-        forAll(sortingIndices, sI)
-        {
-            copyOwner[sI] = owner[sortingIndices[sI]];
-        }
+    sortedOrder(owner, oldToNew);
 
-        owner = copyOwner;
-    }
+    oldToNew = invert(oldToNew.size(), oldToNew);
 
-    {
-        labelList copyNeighbour(neighbour.size());
+    inplaceReorder(oldToNew, faces);
+    inplaceReorder(oldToNew, owner);
+    inplaceReorder(oldToNew, neighbour);
 
-        forAll(sortingIndices, sI)
-        {
-            copyNeighbour[sI] = neighbour[sortingIndices[sI]];
-        }
+    // 2) in each block of owners sort by neighbour
 
-        neighbour = copyNeighbour;
-    }
+    // Reset map.  Elements that are not sorted will retain their -1
+    // value, which will mean that they are ignored by inplaceReorder
 
-    {
-        faceList copyFaces(faces.size());
+    oldToNew = -1;
 
-        forAll(sortingIndices, sI)
-        {
-            copyFaces[sI] = faces[sortingIndices[sI]];
-        }
-
-        faces = copyFaces;
-    }
-
-    // Stage 2
-
-    sortingIndices = -1;
-
-    DynamicList<label> ownerCellJumps;
-
-    // Force first owner entry to be a jump
-    ownerCellJumps.append(0);
+    label ownerBlockStart = 0;
 
     for (label o = 1; o < owner.size(); o++)
     {
+         label blockLength = -1;
+
         if (owner[o] > owner[o-1])
         {
-            ownerCellJumps.append(o);
+            blockLength = o - ownerBlockStart;
+        }
+        else if (o == owner.size() - 1)
+        {
+            // If the last element is not a jump in owner, then it
+            // needs to trigger a sort of the last block, but with a
+            // block length that is one element longer so that it
+            // sorts itself.
+
+            // If it is a jump in owner, then it will form a block of
+            // length one, and so will not need sorted.
+
+            blockLength = o - ownerBlockStart + 1;
+        }
+
+        if (blockLength > 1)
+        {
+            labelList blockIndices =
+                identity(blockLength) + ownerBlockStart;
+
+            SubList<label> neighbourBlock
+            (
+                neighbour,
+                blockLength,
+                ownerBlockStart
+            );
+
+            sortedOrder(neighbourBlock, blockIndices);
+
+            blockIndices = invert(blockIndices.size(), blockIndices);
+
+            forAll(blockIndices, b)
+            {
+                oldToNew[ownerBlockStart + b] =
+                blockIndices[b] + ownerBlockStart;
+            }
+
+            ownerBlockStart = o;
         }
     }
 
-    forAll(ownerCellJumps, oCJ)
-    {
-        label start = ownerCellJumps[oCJ];
+    // owner does not need re-sorted
+    inplaceReorder(oldToNew, faces);
+    inplaceReorder(oldToNew, neighbour);
+}
 
-        label length;
 
-        if (oCJ == ownerCellJumps.size() - 1)
-        {
-            length = owner.size() - start;
-        }
-        else
-        {
-            length = ownerCellJumps[oCJ + 1] - start;
-        }
+void Foam::conformalVoronoiMesh::addPatches
+(
+    const label nInternalFaces,
+    faceList& faces,
+    labelList& owner,
+    wordList& patchNames,
+    labelList& patchSizes,
+    labelList& patchStarts,
+    List<DynamicList<face> >& patchFaces,
+    List<DynamicList<label> >& patchOwners,
+    bool includeEmptyPatches
+) const
+{
+    label nTotalPatches = patchNames.size();
 
-        SubList<label> neighbourBlock(neighbour, length, start);
+    label nValidPatches = 0;
 
-        SortableList<label> sortedNeighbourBlock(neighbourBlock);
+    PackedBoolList validPatch(nTotalPatches, false);
 
-        forAll(sortedNeighbourBlock, sNB)
-        {
-            sortingIndices[start + sNB] =
-            sortedNeighbourBlock.indices()[sNB] + start;
-        }
-    }
+    wordList allPatchNames = patchNames;
 
-    // Perform sort
-
-    {
-        labelList copyOwner(owner.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyOwner[sI] = owner[sortingIndices[sI]];
-        }
-
-        owner = copyOwner;
-    }
-
-    {
-        labelList copyNeighbour(neighbour.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyNeighbour[sI] = neighbour[sortingIndices[sI]];
-        }
-
-        neighbour = copyNeighbour;
-    }
-
-    {
-        faceList copyFaces(faces.size());
-
-        forAll(sortingIndices, sI)
-        {
-            copyFaces[sI] = faces[sortingIndices[sI]];
-        }
-
-        faces = copyFaces;
-    }
-
-    // ~~~~~~~~ add patch information ~~~~~~~~~~~
+    patchSizes.setSize(nTotalPatches);
+    patchStarts.setSize(nTotalPatches);
 
     label nBoundaryFaces = 0;
 
     forAll(patchFaces, p)
     {
-        patchSizes[p] = patchFaces[p].size();
+        // Check if the patch has any faces.  Never create an empty
+        // default patch.
 
-        patchStarts[p] = nInternalFaces + nBoundaryFaces;
+        if
+        (
+            patchFaces[p].size()
+         || (includeEmptyPatches && (p != nTotalPatches - 1))
+        )
+        {
+            patchNames[nValidPatches] = allPatchNames[p];
+            patchSizes[nValidPatches] = patchFaces[p].size();
+            patchStarts[nValidPatches] = nInternalFaces + nBoundaryFaces;
 
-        nBoundaryFaces += patchSizes[p];
+            nBoundaryFaces += patchSizes[p];
+
+            nValidPatches++;
+
+            validPatch[p] = 1;
+        }
+        else
+        {
+            // Warn if a patch is empty and includeEmptyPatches is
+            // false, unless it is the default patch.
+
+            if (p != nTotalPatches - 1)
+            {
+                WarningIn("void addPatches")
+                    << "Patch " << patchNames[p]
+                    << " has no faces, not creating." << endl;
+            }
+        }
     }
 
-    faces.setSize(nInternalFaces + nBoundaryFaces);
+    patchNames.setSize(nValidPatches);
+    patchSizes.setSize(nValidPatches);
+    patchStarts.setSize(nValidPatches);
 
+    faces.setSize(nInternalFaces + nBoundaryFaces);
     owner.setSize(nInternalFaces + nBoundaryFaces);
+
+    label faceI = nInternalFaces;
 
     forAll(patchFaces, p)
     {
-        forAll(patchFaces[p], f)
+        if (validPatch[p])
         {
-            faces[faceI] = patchFaces[p][f];
+            forAll(patchFaces[p], f)
+            {
+                faces[faceI] = patchFaces[p][f];
+                owner[faceI] = patchOwners[p][f];
 
-            owner[faceI] = patchOwners[p][f];
-
-            faceI++;
+                faceI++;
+            }
         }
     }
 }
-
-
 
 // * * * * * * * * * * * * * * Member Functions  * * * * * * * * * * * * * * //
 

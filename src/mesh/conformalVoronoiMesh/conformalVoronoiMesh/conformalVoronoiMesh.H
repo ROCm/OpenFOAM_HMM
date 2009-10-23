@@ -425,6 +425,31 @@ private:
             labelList& patchStarts
         );
 
+        //- Sort the faces, owner and neighbour lists into
+        //  upper-triangular order.  For internal faces only, use
+        //  before adding patch faces.
+        void sortFaces
+        (
+            faceList& faces,
+            labelList& owner,
+            labelList& neighbour
+        ) const;
+
+        //- Add the faces and owner information for the patches,
+        //  optionally removing any zero-size patches
+        void addPatches
+        (
+            const label nInternalFaces,
+            faceList& faces,
+            labelList& owner,
+            wordList& patchNames,
+            labelList& patchSizes,
+            labelList& patchStarts,
+            List<DynamicList<face> >& patchFaces,
+            List<DynamicList<label> >& patchOwners,
+            bool includeEmptyPatches
+        ) const;
+
         //- Disallow default bitwise copy construct
         conformalVoronoiMesh(const conformalVoronoiMesh&);
 
