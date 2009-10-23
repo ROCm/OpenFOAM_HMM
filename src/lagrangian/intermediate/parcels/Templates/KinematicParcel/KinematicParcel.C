@@ -286,7 +286,13 @@ bool Foam::KinematicParcel<ParcelType>::hitPatch
     ParcelType& p = static_cast<ParcelType&>(*this);
     td.cloud().postProcessing().postPatch(p, patchI);
 
-    return td.cloud().patchInteraction().correct(pp, this->face(), U_);
+    return td.cloud().patchInteraction().correct
+    (
+        pp,
+        this->face(),
+        td.keepParticle,
+        U_
+    );
 }
 
 
